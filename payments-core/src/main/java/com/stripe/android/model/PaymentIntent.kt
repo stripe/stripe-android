@@ -174,6 +174,9 @@ constructor(
             is StripeIntent.NextActionData.DisplayBoletoDetails -> {
                 StripeIntent.NextActionType.DisplayBoletoDetails
             }
+            is StripeIntent.NextActionData.DisplayPayNowDetails -> {
+                StripeIntent.NextActionType.DisplayPayNowDetails
+            }
             is StripeIntent.NextActionData.DisplayKonbiniDetails -> {
                 StripeIntent.NextActionType.DisplayKonbiniDetails
             }

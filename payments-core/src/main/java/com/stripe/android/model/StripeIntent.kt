@@ -97,6 +97,7 @@ sealed interface StripeIntent : StripeModel {
         UpiAwaitNotification("upi_await_notification"),
         CashAppRedirect("cashapp_handle_redirect_or_display_qr_code"),
         DisplayBoletoDetails("boleto_display_details"),
+        DisplayPayNowDetails("promptpay_display_qr_code"),
         DisplayKonbiniDetails("konbini_display_details"),
         DisplayMultibancoDetails("multibanco_display_details"),
         SwishRedirect("swish_handle_redirect_or_display_qr_code");
@@ -199,6 +200,15 @@ sealed interface StripeIntent : StripeModel {
         @Parcelize
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         data class DisplayBoletoDetails(
+            /**
+             * URL of a webpage containing the voucher for this payment.
+             */
+            override val hostedVoucherUrl: String? = null,
+        ) : NextActionData(), DisplayVoucherDetails
+
+        @Parcelize
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        data class DisplayPayNowDetails(
             /**
              * URL of a webpage containing the voucher for this payment.
              */

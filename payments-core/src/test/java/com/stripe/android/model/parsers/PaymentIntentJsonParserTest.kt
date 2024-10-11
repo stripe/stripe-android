@@ -7,6 +7,7 @@ import com.stripe.android.model.MicrodepositType
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentIntentFixtures.BOLETO_REQUIRES_ACTION
+import com.stripe.android.model.PaymentIntentFixtures.PAY_NOW_REQUIRES_ACTION
 import com.stripe.android.model.StripeIntent
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -74,6 +75,17 @@ class PaymentIntentJsonParserTest {
             .isEqualTo(
                 StripeIntent.NextActionData.DisplayBoletoDetails(
                     hostedVoucherUrl = "https://payments.stripe.com/boleto/voucher/test_YWNjdF8xTm5pZllBQVlObzc4dXh0LF9PYk81bUhVTGNSZGNIeHlyckJ4djBFQ3lkNkswS1lt0100qH3SxPW7"
+                )
+            )
+    }
+
+    @Test
+    fun parse_withPayNow_shouldCreateExpectedNextActionData() {
+        val paymentIntent = PAY_NOW_REQUIRES_ACTION
+        assertThat(paymentIntent.nextActionData)
+            .isEqualTo(
+                StripeIntent.NextActionData.DisplayPayNowDetails(
+                    hostedVoucherUrl = "https://payments.stripe.com/promptpay/instructions/testdata"
                 )
             )
     }

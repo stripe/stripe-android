@@ -24,7 +24,7 @@ import javax.inject.Singleton
  * Provides mappings between [NextActionData] and [PaymentNextActionHandler] provided by payment SDK.
  */
 @Module
-@SuppressWarnings("UnnecessaryAbstractClass")
+@SuppressWarnings("UnnecessaryAbstractClass", "TooManyFunctions")
 internal abstract class NextActionHandlerModule {
     @IntentAuthenticatorMap
     @Binds
@@ -79,6 +79,14 @@ internal abstract class NextActionHandlerModule {
     @IntoMap
     @IntentAuthenticatorKey(NextActionData.DisplayBoletoDetails::class)
     abstract fun bindsBoletoNextActionHandler(
+        voucherNextActionHandler: VoucherNextActionHandler
+    ): PaymentNextActionHandler<StripeIntent>
+
+    @IntentAuthenticatorMap
+    @Binds
+    @IntoMap
+    @IntentAuthenticatorKey(NextActionData.DisplayPayNowDetails::class)
+    abstract fun bindsPayNowNextActionHandler(
         voucherNextActionHandler: VoucherNextActionHandler
     ): PaymentNextActionHandler<StripeIntent>
 

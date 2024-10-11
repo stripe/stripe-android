@@ -34,6 +34,7 @@
     <string name="stripe_paymentsheet_payment_method_twint">TWINT</string>
     <string name="stripe_paymentsheet_payment_method_wechat">WeChat Pay</string>
     <string name="stripe_paymentsheet_payment_method_multibanco">Multibanco</string>
+    <string name="stripe_paymentsheet_payment_method_promptpay">PromptPay</string>
     <!--    <string name="paymentsheet_payment_method_item_card_number">····%1$s</string>-->
 
     <!--    &lt;!&ndash; Label indicating the payment intent is in testmode &ndash;&gt;-->
