@@ -19,14 +19,10 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
-import com.stripe.android.model.PaymentMethod.Type.Link
-import com.stripe.android.model.PaymentMethod.Type.USBankAccount
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
-import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountForm
-import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.image.StripeImageLoader
 import java.util.UUID
@@ -39,7 +35,6 @@ internal fun PaymentElement(
     formElements: List<FormElement>,
     onItemSelectedListener: (SupportedPaymentMethod) -> Unit,
     formArguments: FormArguments,
-    usBankAccountFormArguments: USBankAccountFormArguments,
     onFormFieldValuesChanged: (FormFieldValues?) -> Unit,
     modifier: Modifier = Modifier,
     onInteractionEvent: () -> Unit = {},
@@ -56,9 +51,6 @@ internal fun PaymentElement(
     val selectedIndex = remember(selectedItemCode, supportedPaymentMethods) {
         supportedPaymentMethods.map { it.code }.indexOf(selectedItemCode)
     }
-    val selectedItem = remember(selectedIndex, supportedPaymentMethods) {
-        supportedPaymentMethods[selectedIndex]
-    }
 
     Column(modifier = modifier.fillMaxWidth()) {
         if (supportedPaymentMethods.size > 1) {
@@ -74,10 +66,8 @@ internal fun PaymentElement(
 
         FormElement(
             enabled = enabled,
-            selectedPaymentMethodCode = selectedItem.code,
             formElements = formElements,
             formArguments = formArguments,
-            usBankAccountFormArguments = usBankAccountFormArguments,
             horizontalPadding = horizontalPadding,
             onFormFieldValuesChanged = onFormFieldValuesChanged,
             onInteractionEvent = onInteractionEvent,
@@ -88,10 +78,8 @@ internal fun PaymentElement(
 @Composable
 internal fun FormElement(
     enabled: Boolean,
-    selectedPaymentMethodCode: PaymentMethodCode,
     formElements: List<FormElement>,
     formArguments: FormArguments,
-    usBankAccountFormArguments: USBankAccountFormArguments,
     horizontalPadding: Dp,
     onFormFieldValuesChanged: (FormFieldValues?) -> Unit,
     onInteractionEvent: () -> Unit,
@@ -119,22 +107,14 @@ internal fun FormElement(
                 }
             }
     ) {
-        if (selectedPaymentMethodCode == USBankAccount.code || selectedPaymentMethodCode == Link.code) {
-            USBankAccountForm(
-                formArgs = formArguments,
-                usBankAccountFormArgs = usBankAccountFormArguments,
-                modifier = Modifier.padding(horizontal = horizontalPadding),
-            )
-        } else {
-            PaymentMethodForm(
-                uuid = uuid,
-                args = formArguments,
-                enabled = enabled,
-                onFormFieldValuesChanged = onFormFieldValuesChanged,
-                formElements = formElements,
-                modifier = Modifier.padding(horizontal = horizontalPadding)
-            )
-        }
+        PaymentMethodForm(
+            uuid = uuid,
+            args = formArguments,
+            enabled = enabled,
+            onFormFieldValuesChanged = onFormFieldValuesChanged,
+            formElements = formElements,
+            modifier = Modifier.padding(horizontal = horizontalPadding)
+        )
     }
 }
 

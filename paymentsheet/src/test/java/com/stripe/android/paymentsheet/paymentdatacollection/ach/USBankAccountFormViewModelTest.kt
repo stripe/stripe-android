@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
 import androidx.lifecycle.SavedStateHandle
-import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
@@ -291,7 +290,8 @@ class USBankAccountFormViewModelTest {
             defaultArgs.copy(
                 formArgs = defaultArgs.formArgs.copy(billingDetails = null),
                 savedPaymentMethod = PaymentSelection.New.USBankAccount(
-                    labelResource = "Test",
+                    code = "us_bank_account",
+                    labelResource = "Test".resolvableString,
                     iconResource = 0,
                     paymentMethodCreateParams = mock(),
                     customerRequestedSave = mock(),
@@ -343,7 +343,8 @@ class USBankAccountFormViewModelTest {
                     ),
                 ),
                 savedPaymentMethod = PaymentSelection.New.USBankAccount(
-                    labelResource = "Test",
+                    code = "us_bank_account",
+                    labelResource = "Test".resolvableString,
                     iconResource = 0,
                     paymentMethodCreateParams = mock(),
                     customerRequestedSave = mock(),
@@ -447,7 +448,8 @@ class USBankAccountFormViewModelTest {
             val viewModel = createViewModel(
                 defaultArgs.copy(
                     savedPaymentMethod = PaymentSelection.New.USBankAccount(
-                        labelResource = "Test",
+                        code = "us_bank_account",
+                        labelResource = "Test".resolvableString,
                         iconResource = 0,
                         paymentMethodCreateParams = mock(),
                         customerRequestedSave = mock(),
@@ -474,7 +476,8 @@ class USBankAccountFormViewModelTest {
             val viewModel = createViewModel(
                 defaultArgs.copy(
                     savedPaymentMethod = PaymentSelection.New.USBankAccount(
-                        labelResource = "Test",
+                        code = "us_bank_account",
+                        labelResource = "Test".resolvableString,
                         iconResource = 0,
                         paymentMethodCreateParams = mock(),
                         customerRequestedSave = mock(),
@@ -1376,7 +1379,6 @@ class USBankAccountFormViewModelTest {
         )
         return USBankAccountFormViewModel(
             args = args,
-            application = ApplicationProvider.getApplicationContext(),
             lazyPaymentConfig = { paymentConfiguration },
             savedStateHandle = savedStateHandle,
         )

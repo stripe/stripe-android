@@ -41,7 +41,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import javax.inject.Provider
-import kotlin.IllegalStateException
 import kotlin.time.Duration.Companion.seconds
 
 /**

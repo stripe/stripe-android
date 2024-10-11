@@ -6,6 +6,7 @@ import com.stripe.android.R as StripeR
 import com.stripe.android.financialconnections.R as FinancialConnectionsR
 
 class TransformToBankIconTest {
+
     @Test
     fun `given valid bank name, transform returns the correct bank icon`() {
         // bank of america

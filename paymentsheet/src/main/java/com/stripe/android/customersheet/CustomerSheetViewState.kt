@@ -13,7 +13,6 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
-import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarStateFactory
@@ -99,7 +98,6 @@ internal sealed class CustomerSheetViewState(
         val formFieldValues: FormFieldValues?,
         val formElements: List<FormElement>,
         val formArguments: FormArguments,
-        val usBankAccountFormArguments: USBankAccountFormArguments,
         val draftPaymentSelection: PaymentSelection?,
         val enabled: Boolean,
         override val isLiveMode: Boolean,

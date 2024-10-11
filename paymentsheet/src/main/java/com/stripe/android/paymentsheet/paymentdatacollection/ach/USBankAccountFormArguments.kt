@@ -34,7 +34,6 @@ import kotlinx.coroutines.flow.update
  * @param onCollectBankAccountResult emitted when the bank account has been collected by the FC SDK.
  * @param onUpdatePrimaryButtonUIState emitted when the [PrimaryButton.UIState] should be updated.
  * The caller should keep track of the current [PrimaryButton.UIState] and update the fields.
- * @param onUpdatePrimaryButtonState emitted when the [PrimaryButton.State] should be updated.
  * @param onError emitted when there is an error
  */
 internal class USBankAccountFormArguments(
@@ -53,7 +52,6 @@ internal class USBankAccountFormArguments(
     val onConfirmUSBankAccount: (PaymentSelection.New.USBankAccount) -> Unit,
     val onCollectBankAccountResult: ((CollectBankAccountResultInternal) -> Unit)?,
     val onUpdatePrimaryButtonUIState: ((PrimaryButton.UIState?) -> (PrimaryButton.UIState?)) -> Unit,
-    val onUpdatePrimaryButtonState: (PrimaryButton.State) -> Unit,
     val onError: (ResolvableString?) -> Unit,
 ) {
     companion object {
@@ -95,7 +93,6 @@ internal class USBankAccountFormArguments(
                 onConfirmUSBankAccount = viewModel::handleConfirmUSBankAccount,
                 onCollectBankAccountResult = null,
                 onUpdatePrimaryButtonUIState = { viewModel.customPrimaryButtonUiState.update(it) },
-                onUpdatePrimaryButtonState = viewModel::updatePrimaryButtonState,
                 onError = viewModel::onError
             )
         }

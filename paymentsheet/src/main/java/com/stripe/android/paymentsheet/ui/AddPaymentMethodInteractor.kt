@@ -3,13 +3,11 @@ package com.stripe.android.paymentsheet.ui
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethodCode
-import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.LinkInlineHandler
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
-import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.elements.FormElement
 import kotlinx.coroutines.CoroutineScope
@@ -36,7 +34,6 @@ internal interface AddPaymentMethodInteractor {
         val formElements: List<FormElement>,
         val paymentSelection: PaymentSelection?,
         val processing: Boolean,
-        val usBankAccountFormArguments: USBankAccountFormArguments,
     )
 
     sealed class ViewAction {
@@ -61,7 +58,6 @@ internal class DefaultAddPaymentMethodInteractor(
     private val reportFieldInteraction: (PaymentMethodCode) -> Unit,
     private val onFormFieldValuesChanged: (FormFieldValues?, String) -> Unit,
     private val reportPaymentMethodTypeSelected: (PaymentMethodCode) -> Unit,
-    private val createUSBankAccountFormArguments: (PaymentMethodCode) -> USBankAccountFormArguments,
     private val coroutineScope: CoroutineScope,
     override val isLiveMode: Boolean,
 ) : AddPaymentMethodInteractor {
@@ -89,14 +85,6 @@ internal class DefaultAddPaymentMethodInteractor(
                 reportFieldInteraction = viewModel.analyticsListener::reportFieldInteraction,
                 onFormFieldValuesChanged = formHelper::onFormFieldValuesChanged,
                 reportPaymentMethodTypeSelected = viewModel.eventReporter::onSelectPaymentMethod,
-                createUSBankAccountFormArguments = {
-                    USBankAccountFormArguments.create(
-                        viewModel = viewModel,
-                        paymentMethodMetadata = paymentMethodMetadata,
-                        hostedSurface = CollectBankAccountLauncher.HOSTED_SURFACE_PAYMENT_ELEMENT,
-                        selectedPaymentMethodCode = it,
-                    )
-                },
                 coroutineScope = coroutineScope,
                 isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
             )
@@ -122,7 +110,6 @@ internal class DefaultAddPaymentMethodInteractor(
             formElements = formElementsForCode(selectedPaymentMethodCode),
             paymentSelection = selection.value,
             processing = processing.value,
-            usBankAccountFormArguments = createUSBankAccountFormArguments(selectedPaymentMethodCode),
         )
     }
 
@@ -137,13 +124,11 @@ internal class DefaultAddPaymentMethodInteractor(
             selectedPaymentMethodCode.collect { newSelectedPaymentMethodCode ->
                 val newFormArguments = createFormArguments(newSelectedPaymentMethodCode)
                 val newFormElements = formElementsForCode(newSelectedPaymentMethodCode)
-                val newUsBankAccountFormArguments = createUSBankAccountFormArguments(newSelectedPaymentMethodCode)
 
                 _state.value = _state.value.copy(
                     selectedPaymentMethodCode = newSelectedPaymentMethodCode,
                     arguments = newFormArguments,
                     formElements = newFormElements,
-                    usBankAccountFormArguments = newUsBankAccountFormArguments
                 )
             }
         }

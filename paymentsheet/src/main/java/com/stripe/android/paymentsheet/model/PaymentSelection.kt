@@ -15,6 +15,7 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.model.PaymentSelection.CustomerRequestedSave.RequestReuse
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormScreenState
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountTextBuilder
 import kotlinx.parcelize.IgnoredOnParcel
@@ -163,11 +164,14 @@ internal sealed class PaymentSelection : Parcelable {
 
         @Parcelize
         data class USBankAccount(
-            val labelResource: String,
+            val code: String,
+            val hasResult: Boolean,
+            val usesMicrodeposits: Boolean,
+            val labelResource: ResolvableString,
             @DrawableRes val iconResource: Int,
-            val input: Input,
-            val screenState: USBankAccountFormScreenState,
-            val instantDebits: InstantDebitsInfo?,
+            val input: Input? = null,
+            val screenState: USBankAccountFormScreenState? = null,
+            val instantDebits: InstantDebitsInfo? = null,
             override val paymentMethodCreateParams: PaymentMethodCreateParams,
             override val customerRequestedSave: CustomerRequestedSave,
             override val paymentMethodOptionsParams: PaymentMethodOptionsParams? = null,
@@ -178,7 +182,18 @@ internal sealed class PaymentSelection : Parcelable {
                 merchantName: String,
                 isSetupFlow: Boolean,
             ): ResolvableString? {
-                return screenState.mandateText
+                return if (hasResult) {
+                    val isSaveForFutureUseSelected = customerRequestedSave == RequestReuse
+                    USBankAccountTextBuilder.buildMandateAndMicrodepositsText(
+                        merchantName = merchantName,
+                        isVerifyingMicrodeposits = usesMicrodeposits,
+                        isSaveForFutureUseSelected = isSaveForFutureUseSelected,
+                        isInstantDebits = false,
+                        isSetupFlow = isSetupFlow,
+                    )
+                } else {
+                    null
+                }
             }
 
             @Parcelize
