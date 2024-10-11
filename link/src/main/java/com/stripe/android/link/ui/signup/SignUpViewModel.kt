@@ -6,7 +6,7 @@ import androidx.navigation.NavHostController
 import com.stripe.android.core.Logger
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.link.LinkActivityContract
+import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.LinkEventsReporter
@@ -19,6 +19,7 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.NameConfig
 import com.stripe.android.uicore.elements.PhoneNumberController
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -28,42 +29,40 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
 
-internal class SignUpViewModel @Inject constructor(
-    private val args: LinkActivityContract.Args,
+internal class SignUpViewModel @AssistedInject constructor(
+    configuration: LinkConfiguration,
     private val linkAccountManager: LinkAccountManager,
     private val linkEventsReporter: LinkEventsReporter,
     private val logger: Logger
 ) : ViewModel() {
     internal var navController: NavHostController? = null
     val emailController = EmailConfig.createController(
-        initialValue = args.configuration.customerInfo.email
+        initialValue = configuration.customerInfo.email
     )
     val phoneNumberController = PhoneNumberController.createPhoneNumberController(
-        initialValue = args.configuration.customerInfo.phone.orEmpty(),
-        initiallySelectedCountryCode = args.configuration.customerInfo.billingCountryCode
+        initialValue = configuration.customerInfo.phone.orEmpty(),
+        initiallySelectedCountryCode = configuration.customerInfo.billingCountryCode
     )
     val nameController = NameConfig.createController(
-        initialValue = args.configuration.customerInfo.name
+        initialValue = configuration.customerInfo.name
     )
     private val _state = MutableStateFlow(
         value = SignUpScreenState(
-            signUpEnabled = false
+            signUpEnabled = false,
+            merchantName = configuration.merchantName,
+            requiresNameCollection = kotlin.run {
+                val countryCode = when (val stripeIntent = configuration.stripeIntent) {
+                    is PaymentIntent -> stripeIntent.countryCode
+                    is SetupIntent -> stripeIntent.countryCode
+                }
+                countryCode != CountryCode.US.value
+            }
         )
     )
 
     val state: StateFlow<SignUpScreenState> = _state
-
-    private val requiresNameCollection: Boolean
-        get() {
-            val countryCode = when (val stripeIntent = args.configuration.stripeIntent) {
-                is PaymentIntent -> stripeIntent.countryCode
-                is SetupIntent -> stripeIntent.countryCode
-            }
-            return countryCode != CountryCode.US.value
-        }
 
     init {
         viewModelScope.launch {
@@ -78,7 +77,7 @@ internal class SignUpViewModel @Inject constructor(
     private suspend fun signUpEnabledListener() {
         combine(
             flow = nameController.fieldState.map {
-                if (requiresNameCollection) {
+                if (state.value.requiresNameCollection) {
                     it.isValid()
                 } else {
                     true
@@ -99,8 +98,7 @@ internal class SignUpViewModel @Inject constructor(
         }.collectLatest { email ->
             delay(LOOKUP_DEBOUNCE)
             if (email != null) {
-                updateSignUpState(SignUpState.VerifyingEmail)
-                lookupConsumerEmail(email)
+                updateSignUpState(SignUpState.InputtingRemainingFields)
             } else {
                 updateSignUpState(SignUpState.InputtingPrimaryField)
             }
@@ -140,26 +138,8 @@ internal class SignUpViewModel @Inject constructor(
         }
     }
 
-    private suspend fun lookupConsumerEmail(email: String) {
-        clearError()
-        linkAccountManager.lookupConsumer(email).fold(
-            onSuccess = {
-                if (it != null) {
-                    onAccountFetched(it)
-                } else {
-                    updateSignUpState(SignUpState.InputtingRemainingFields)
-                    linkEventsReporter.onSignupStarted()
-                }
-            },
-            onFailure = {
-                updateSignUpState(SignUpState.InputtingPrimaryField)
-                onError(it)
-            }
-        )
-    }
-
     private fun onError(error: Throwable) {
-        logger.error("Error: ", error)
+        logger.error("SignUpViewModel Error: ", error)
         updateState {
             it.copy(
                 errorMessage = when (val errorMessage = error.getErrorMessage()) {

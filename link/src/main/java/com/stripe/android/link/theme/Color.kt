@@ -1,12 +1,17 @@
 package com.stripe.android.link.theme
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.Colors
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.StripeThemeDefaults
 
 private val LinkTeal = Color(0xFF00D66F)
 private val ActionLightGreen = Color(0xFF00A355)
+private val ActionGreen = Color(0xFF05A87F)
 private val ButtonLabel = Color(0xFF011E0F)
 private val ErrorText = Color(0xFFFF2F4C)
 private val ErrorBackground = Color(0x2EFE87A1)
@@ -15,18 +20,23 @@ private val LightTextPrimary = Color(0xFF30313D)
 private val LightTextSecondary = Color(0xFF6A7383)
 private val LightBackground = Color.White
 private val LightFill = Color(0xFFF6F8FA)
+private val LightProgressIndicator = Color(0xFF1D3944)
+private val LightSecondaryButtonLabel = Color(0xFF1D3944)
 
 private val DarkTextPrimary = Color.White
 private val DarkTextSecondary = Color(0x99EBEBF5)
 private val DarkBackground = Color(0xFF1C1C1E)
 private val DarkFill = Color(0x33787880)
+private val DarkProgressIndicator = LinkTeal
 
 internal data class LinkColors(
     val buttonLabel: Color,
     val actionLabelLight: Color,
     val errorText: Color,
     val errorComponentBackground: Color,
-    val materialColors: Colors
+    val progressIndicator: Color,
+    val materialColors: Colors,
+    val secondaryButtonLabel: Color,
 )
 
 internal object LinkThemeConfig {
@@ -39,17 +49,20 @@ internal object LinkThemeConfig {
         actionLabelLight = ActionLightGreen,
         errorText = ErrorText,
         errorComponentBackground = ErrorBackground,
+        progressIndicator = LightProgressIndicator,
+        secondaryButtonLabel = LightSecondaryButtonLabel,
         materialColors = lightColors(
             primary = LinkTeal,
             secondary = LightFill,
             background = LightBackground,
             surface = LightBackground,
             onPrimary = LightTextPrimary,
-            onSecondary = LightTextSecondary
+            onSecondary = LightTextSecondary,
         )
     )
 
     private val colorsDark = colorsLight.copy(
+        progressIndicator = DarkProgressIndicator,
         materialColors = darkColors(
             primary = LinkTeal,
             secondary = DarkFill,
@@ -59,4 +72,25 @@ internal object LinkThemeConfig {
             onSecondary = DarkTextSecondary
         )
     )
+}
+
+@Composable
+internal fun StripeThemeForLink(
+    content: @Composable () -> Unit
+) {
+    val stripeDefaultColors = StripeThemeDefaults.colors(isSystemInDarkTheme())
+
+    StripeTheme(
+        colors = stripeDefaultColors.copy(
+            materialColors = stripeDefaultColors.materialColors.copy(
+                primary = ActionGreen
+            )
+        ),
+        shapes = StripeThemeDefaults.shapes.copy(
+            cornerRadius = 9f
+        ),
+        typography = StripeThemeDefaults.typography
+    ) {
+        content()
+    }
 }
