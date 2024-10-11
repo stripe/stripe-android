@@ -81,9 +81,6 @@ class MainActivity : AppCompatActivity() {
                 subtitleResId = R.string.customer_subtitle,
                 klass = CustomerSheetExampleActivity::class.java,
                 section = MenuItem.Section.CustomerSheet,
-                badge = MenuItem.Badge(
-                    labelResId = R.string.beta_badge_label,
-                )
             ),
             MenuItem(
                 titleResId = R.string.address_element_title,
