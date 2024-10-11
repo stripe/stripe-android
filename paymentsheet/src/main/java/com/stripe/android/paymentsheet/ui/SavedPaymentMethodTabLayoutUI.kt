@@ -63,7 +63,6 @@ import com.stripe.android.uicore.DefaultStripeTheme
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionCard
 import com.stripe.android.uicore.elements.SectionError
-import com.stripe.android.uicore.shouldUseDarkDynamicColor
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.utils.collectAsState
@@ -294,21 +293,27 @@ private fun AddCardTab(
     onAddCardPressed: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val iconRes = if (MaterialTheme.stripeColors.component.shouldUseDarkDynamicColor()) {
-        R.drawable.stripe_ic_paymentsheet_add_dark
-    } else {
-        R.drawable.stripe_ic_paymentsheet_add_light
-    }
-
     SavedPaymentMethodTab(
+        tab = PaymentOptionTab(
+            label = PaymentOptionTab.Label(
+                text = resolvableString(R.string.stripe_paymentsheet_add_payment_method_button_label),
+                description = resolvableString(R.string.stripe_add_new_payment_method),
+                icon = null,
+            ),
+            icon = PaymentOptionTab.Icon(
+                onLight = R.drawable.stripe_ic_paymentsheet_add_light,
+                onDark = R.drawable.stripe_ic_paymentsheet_add_dark,
+            ),
+            state = when {
+                !isEnabled -> PaymentOptionTab.State.Disabled
+                else -> {
+                    PaymentOptionTab.State.Selectable(
+                        onSelect = onAddCardPressed,
+                    )
+                }
+            },
+        ),
         viewWidth = width,
-        editState = PaymentOptionEditState.None,
-        isSelected = false,
-        isEnabled = isEnabled,
-        labelText = stringResource(R.string.stripe_paymentsheet_add_payment_method_button_label),
-        iconRes = iconRes,
-        onItemSelectedListener = onAddCardPressed,
-        description = stringResource(R.string.stripe_add_new_payment_method),
         modifier = modifier,
     )
 }
@@ -322,14 +327,33 @@ private fun GooglePayTab(
     modifier: Modifier = Modifier,
 ) {
     SavedPaymentMethodTab(
+        tab = PaymentOptionTab(
+            label = PaymentOptionTab.Label(
+                text = resolvableString(StripeR.string.stripe_google_pay),
+                description = resolvableString(StripeR.string.stripe_google_pay),
+                icon = null,
+            ),
+            icon = PaymentOptionTab.Icon(
+                onLight = R.drawable.stripe_google_pay_mark,
+                onDark = R.drawable.stripe_google_pay_mark,
+            ),
+            state = when {
+                !isEnabled -> PaymentOptionTab.State.Disabled
+                isSelected -> PaymentOptionTab.State.Selected(
+                    onClick = {
+                        onItemSelected(PaymentSelection.GooglePay)
+                    },
+                )
+                else -> {
+                    PaymentOptionTab.State.Selectable(
+                        onSelect = {
+                            onItemSelected(PaymentSelection.GooglePay)
+                        },
+                    )
+                }
+            },
+        ),
         viewWidth = width,
-        editState = PaymentOptionEditState.None,
-        isSelected = isSelected,
-        isEnabled = isEnabled,
-        iconRes = R.drawable.stripe_google_pay_mark,
-        labelText = stringResource(StripeR.string.stripe_google_pay),
-        description = stringResource(StripeR.string.stripe_google_pay),
-        onItemSelectedListener = { onItemSelected(PaymentSelection.GooglePay) },
         modifier = modifier,
     )
 }
@@ -343,15 +367,33 @@ private fun LinkTab(
     modifier: Modifier = Modifier,
 ) {
     SavedPaymentMethodTab(
+        tab = PaymentOptionTab(
+            label = PaymentOptionTab.Label(
+                text = resolvableString(StripeR.string.stripe_link),
+                description = resolvableString(StripeR.string.stripe_link),
+                icon = null,
+            ),
+            icon = PaymentOptionTab.Icon(
+                onLight = R.drawable.stripe_ic_paymentsheet_link,
+                onDark = R.drawable.stripe_ic_paymentsheet_link,
+            ),
+            state = when {
+                !isEnabled -> PaymentOptionTab.State.Disabled
+                isSelected -> PaymentOptionTab.State.Selected(
+                    onClick = {
+                        onItemSelected(PaymentSelection.Link)
+                    },
+                )
+                else -> {
+                    PaymentOptionTab.State.Selectable(
+                        onSelect = {
+                            onItemSelected(PaymentSelection.Link)
+                        },
+                    )
+                }
+            },
+        ),
         viewWidth = width,
-        editState = PaymentOptionEditState.None,
-        isSelected = isSelected,
-        isEnabled = isEnabled,
-        iconRes = R.drawable.stripe_ic_paymentsheet_link,
-        iconTint = null,
-        labelText = stringResource(StripeR.string.stripe_link),
-        description = stringResource(StripeR.string.stripe_link),
-        onItemSelectedListener = { onItemSelected(PaymentSelection.Link) },
         modifier = modifier,
     )
 }
@@ -369,7 +411,6 @@ private fun SavedPaymentMethodTab(
     onItemRemoved: (PaymentMethod) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val labelIcon = paymentMethod.paymentMethod.getLabelIcon()
     val labelText = paymentMethod.paymentMethod.getLabel()?.resolve() ?: return
 
     Box(
@@ -383,41 +424,64 @@ private fun SavedPaymentMethodTab(
             }
         }
     ) {
+        val icon = paymentMethod.paymentMethod.getSavedPaymentMethodIcon()
+        val labelIcon = paymentMethod.paymentMethod.getLabelIcon()
+
         SavedPaymentMethodTab(
-            viewWidth = width,
-            editState = when {
-                isEnabled && isEditing && isModifiable -> PaymentOptionEditState.Modifiable
-                isEnabled && isEditing -> PaymentOptionEditState.Removable
-                else -> PaymentOptionEditState.None
-            },
-            isSelected = isSelected,
-            isEnabled = isEnabled,
-            isClickable = !isEditing,
-            iconRes = paymentMethod.paymentMethod.getSavedPaymentMethodIcon(),
-            labelIcon = labelIcon,
-            labelText = labelText,
-            paymentMethod = paymentMethod.displayableSavedPaymentMethod,
-            description = paymentMethod
-                .displayableSavedPaymentMethod
-                .getDescription()
-                .resolve()
-                .readNumbersAsIndividualDigits(),
-            onModifyListener = { onModifyItem(paymentMethod.paymentMethod) },
-            onModifyAccessibilityDescription = paymentMethod
-                .displayableSavedPaymentMethod
-                .getModifyDescription()
-                .resolve()
-                .readNumbersAsIndividualDigits(),
-            onRemoveListener = { onItemRemoved(paymentMethod.paymentMethod) },
-            onRemoveAccessibilityDescription = paymentMethod
-                .displayableSavedPaymentMethod
-                .getRemoveDescription()
-                .resolve()
-                .readNumbersAsIndividualDigits(),
-            onItemSelectedListener = {
-                onItemSelected(paymentMethod.toPaymentSelection())
-            },
+            tab = PaymentOptionTab(
+                label = PaymentOptionTab.Label(
+                    text = labelText.resolvableString,
+                    description = paymentMethod.displayableSavedPaymentMethod.getDescription(),
+                    icon = labelIcon?.let { iconResource ->
+                        PaymentOptionTab.Icon(
+                          onLight = iconResource,
+                          onDark = iconResource,
+                        )
+                    },
+                ),
+                icon = PaymentOptionTab.Icon(
+                    onLight = icon,
+                    onDark = icon,
+                ),
+                state = when {
+                    isEnabled && isEditing && isModifiable -> {
+                        PaymentOptionTab.State.Modifiable(
+                            accessibilityDescription = paymentMethod.displayableSavedPaymentMethod
+                                .getModifyDescription(),
+                            onModify = {
+                                onModifyItem(paymentMethod.paymentMethod)
+                            },
+                        )
+                    }
+                    isEnabled && isEditing -> {
+                        PaymentOptionTab.State.Removable(
+                            accessibilityDescription = paymentMethod.displayableSavedPaymentMethod
+                                .getRemoveDescription(),
+                            displayName = paymentMethod.displayableSavedPaymentMethod.displayName,
+                            confirmationMessage = paymentMethod.displayableSavedPaymentMethod
+                                .getDescription(),
+                            onRemove = {
+                                onItemRemoved(paymentMethod.paymentMethod)
+                            },
+                        )
+                    }
+                    isEnabled && isSelected -> PaymentOptionTab.State.Selected(
+                        onClick = {
+                            onItemSelected(paymentMethod.toPaymentSelection())
+                        },
+                    )
+                    isEnabled -> {
+                        PaymentOptionTab.State.Selectable(
+                            onSelect = {
+                                onItemSelected(paymentMethod.toPaymentSelection())
+                            },
+                        )
+                    }
+                    else -> PaymentOptionTab.State.Disabled
+                }
+            ),
             modifier = modifier,
+            viewWidth = width,
         )
     }
 }

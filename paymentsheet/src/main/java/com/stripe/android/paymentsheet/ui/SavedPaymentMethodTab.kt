@@ -33,18 +33,24 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.FixedScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
+import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.ui.core.elements.SimpleDialogElementUI
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.SectionCard
 import com.stripe.android.uicore.shouldUseDarkDynamicColor
+import com.stripe.android.uicore.strings.resolve
+import com.stripe.android.uicore.stripeColors
 
 @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
 const val SAVED_PAYMENT_METHOD_CARD_TEST_TAG = "SAVED_PAYMENT_METHOD_CARD_TEST_TAG"
@@ -62,56 +68,80 @@ private val editIconBackgroundColorDark = Color(0xFF525252)
 // the remove badge on the payment method card.
 internal val SavedPaymentMethodsTopContentPadding = 12.dp
 
+class PaymentOptionTab(
+    val label: Label,
+    val icon: Icon,
+    val state: State,
+) {
+    data class Label(
+        val text: ResolvableString,
+        val description: ResolvableString,
+        val icon: Icon?,
+    )
+
+    data class Icon(
+        @DrawableRes val onLight: Int,
+        @DrawableRes val onDark: Int,
+    )
+
+    sealed interface State {
+        class Removable(
+            val displayName: ResolvableString,
+            val confirmationMessage: ResolvableString,
+            val accessibilityDescription: ResolvableString,
+            val onRemove: () -> Unit
+        ) : State
+
+        class Modifiable(
+            val accessibilityDescription: ResolvableString,
+            val onModify: () -> Unit
+        ) : State
+
+        class Selectable(val onSelect: () -> Unit) : State
+
+        class Selected(val onClick: () -> Unit) : State
+
+        data object Disabled : State
+    }
+}
+
 @Composable
 internal fun SavedPaymentMethodTab(
+    tab: PaymentOptionTab,
     viewWidth: Dp,
-    isSelected: Boolean,
-    editState: PaymentOptionEditState,
-    isEnabled: Boolean,
-    isClickable: Boolean = isEnabled,
-    iconRes: Int,
     modifier: Modifier = Modifier,
-    iconTint: Color? = null,
-    @DrawableRes labelIcon: Int? = null,
-    labelText: String = "",
-    paymentMethod: DisplayableSavedPaymentMethod? = null,
-    description: String,
-    shouldOpenRemoveDialog: Boolean = false,
-    onRemoveListener: (() -> Unit)? = null,
-    onModifyListener: (() -> Unit)? = null,
-    onRemoveAccessibilityDescription: String = "",
-    onModifyAccessibilityDescription: String = "",
-    onItemSelectedListener: (() -> Unit),
 ) {
-    val openRemoveDialog = rememberSaveable { mutableStateOf(shouldOpenRemoveDialog) }
+    val openRemoveDialog = rememberSaveable { mutableStateOf(false) }
+
+    val state = tab.state
+    val enabled = state !is PaymentOptionTab.State.Disabled
 
     BadgedBox(
         badge = {
             SavedPaymentMethodBadge(
-                isSelected = isSelected,
-                editState = editState,
+                state = state,
                 openRemoveDialog = openRemoveDialog,
-                onModifyListener = onModifyListener,
-                onRemoveAccessibilityDescription = onRemoveAccessibilityDescription,
-                onModifyAccessibilityDescription = onModifyAccessibilityDescription
             )
         },
         content = {
             Column {
-                SavedPaymentMethodCard(
-                    isSelected = isSelected,
-                    isClickable = isClickable,
-                    labelText = labelText,
-                    iconRes = iconRes,
-                    iconTint = iconTint,
-                    onItemSelectedListener = onItemSelectedListener,
-                )
+                SavedPaymentMethodCard(tab)
+
+                val label = tab.label
+                val description = label.description.resolve()
+                val iconResource = label.icon?.let { icon ->
+                    if (MaterialTheme.colors.surface.shouldUseDarkDynamicColor()) {
+                        icon.onDark
+                    } else {
+                        icon.onLight
+                    }
+                }
 
                 LpmSelectorText(
-                    icon = labelIcon,
-                    text = labelText,
+                    icon = iconResource,
+                    text = label.text.resolve(),
                     textColor = MaterialTheme.colors.onSurface,
-                    isEnabled = isEnabled,
+                    isEnabled = enabled,
                     modifier = Modifier
                         .padding(top = 4.dp, start = 6.dp, end = 6.dp)
                         .semantics {
@@ -123,65 +153,59 @@ internal fun SavedPaymentMethodTab(
         modifier = modifier
             .padding(top = SavedPaymentMethodsTopContentPadding)
             .requiredWidth(viewWidth)
-            .alpha(alpha = if (isEnabled) 1.0F else 0.6F)
+            .alpha(alpha = if (enabled) 1.0F else 0.6F)
     )
 
-    val displayRemoveDialog = openRemoveDialog.value && editState == PaymentOptionEditState.Removable
-    if (displayRemoveDialog && onRemoveListener != null && paymentMethod != null) {
+    if (state is PaymentOptionTab.State.Removable && openRemoveDialog.value) {
         RemovePaymentMethodDialogUI(
-            paymentMethod = paymentMethod,
-            onConfirmListener = {
+            displayName = state.displayName,
+            confirmationMessage = state.confirmationMessage,
+            onConfirm = {
                 openRemoveDialog.value = false
-                onRemoveListener()
+                state.onRemove()
             },
-            onDismissListener = { openRemoveDialog.value = false }
+            onDismiss = { openRemoveDialog.value = false }
         )
     }
 }
 
 @Composable
 private fun SavedPaymentMethodBadge(
-    isSelected: Boolean,
-    editState: PaymentOptionEditState,
+    state: PaymentOptionTab.State,
     openRemoveDialog: MutableState<Boolean>,
-    onModifyListener: (() -> Unit)? = null,
-    onRemoveAccessibilityDescription: String = "",
-    onModifyAccessibilityDescription: String = ""
 ) {
-    when (editState) {
-        PaymentOptionEditState.Modifiable -> ModifyBadge(
-            onModifyAccessibilityDescription = onModifyAccessibilityDescription,
-            onPressed = { onModifyListener?.invoke() },
+    when (state) {
+        is PaymentOptionTab.State.Modifiable -> ModifyBadge(
+            onModifyAccessibilityDescription = state.accessibilityDescription
+                .resolve()
+                .readNumbersAsIndividualDigits(),
+            onPressed = { state.onModify() },
             modifier = Modifier.offset(x = (-14).dp, y = 1.dp),
         )
-        PaymentOptionEditState.Removable -> RemoveBadge(
-            onRemoveAccessibilityDescription = onRemoveAccessibilityDescription,
+        is PaymentOptionTab.State.Removable -> RemoveBadge(
+            onRemoveAccessibilityDescription = state.accessibilityDescription
+                .resolve()
+                .readNumbersAsIndividualDigits(),
             onPressed = { openRemoveDialog.value = true },
             modifier = Modifier.offset(x = (-14).dp, y = 1.dp),
         )
-        PaymentOptionEditState.None -> Unit
-    }
-
-    if (isSelected) {
-        SelectedBadge(
+        is PaymentOptionTab.State.Selected -> SelectedBadge(
             modifier = Modifier.offset(x = (-18).dp, y = 58.dp),
         )
+        is PaymentOptionTab.State.Selectable -> Unit
+        is PaymentOptionTab.State.Disabled -> Unit
     }
 }
 
 @Composable
 private fun SavedPaymentMethodCard(
-    isSelected: Boolean,
-    isClickable: Boolean,
-    iconRes: Int,
-    iconTint: Color?,
-    labelText: String,
-    onItemSelectedListener: (() -> Unit),
-    modifier: Modifier = Modifier,
+    tab: PaymentOptionTab,
 ) {
+    val state = tab.state
+
     SectionCard(
-        isSelected = isSelected,
-        modifier = modifier
+        isSelected = tab.state is PaymentOptionTab.State.Selected,
+        modifier = Modifier
             .height(64.dp)
             .padding(horizontal = 6.dp)
             .fillMaxWidth()
@@ -191,23 +215,57 @@ private fun SavedPaymentMethodCard(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .fillMaxSize()
-                .testTag("${SAVED_PAYMENT_METHOD_CARD_TEST_TAG}_$labelText")
+                .testTag("${SAVED_PAYMENT_METHOD_CARD_TEST_TAG}_${tab.label.text.resolve(LocalContext.current)}")
                 .selectable(
-                    selected = isSelected,
-                    enabled = isClickable,
-                    onClick = onItemSelectedListener,
+                    selected = state is PaymentOptionTab.State.Selected,
+                    enabled = state is PaymentOptionTab.State.Selectable,
+                    onClick = {
+                        when (state) {
+                            is PaymentOptionTab.State.Selectable -> state.onSelect()
+                            is PaymentOptionTab.State.Selected -> state.onClick()
+                            else -> Unit
+                        }
+                    },
                 ),
         ) {
+            val iconResource = if (MaterialTheme.stripeColors.component.shouldUseDarkDynamicColor()) {
+                tab.icon.onDark
+            } else {
+                tab.icon.onLight
+            }
+
             Image(
-                painter = painterResource(iconRes),
+                painter = painterResource(iconResource),
                 contentDescription = null,
-                colorFilter = iconTint?.let { ColorFilter.tint(it) },
                 modifier = Modifier
                     .height(40.dp)
                     .width(56.dp)
             )
         }
     }
+}
+
+@Composable
+private fun RemovePaymentMethodDialogUI(
+    displayName: ResolvableString,
+    confirmationMessage: ResolvableString,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val removeTitle = stringResource(
+        R.string.stripe_paymentsheet_remove_pm,
+        displayName.resolve(),
+    )
+
+    SimpleDialogElementUI(
+        titleText = removeTitle,
+        messageText = confirmationMessage.resolve(),
+        confirmText = stringResource(com.stripe.android.R.string.stripe_remove),
+        dismissText = stringResource(com.stripe.android.R.string.stripe_cancel),
+        destructive = true,
+        onConfirmListener = onConfirm,
+        onDismissListener = onDismiss,
+    )
 }
 
 @Composable
@@ -276,14 +334,21 @@ private fun ModifyBadge(
 private fun SavedPaymentMethodTabUISelected() {
     StripeTheme {
         SavedPaymentMethodTab(
+            tab = PaymentOptionTab(
+                label = PaymentOptionTab.Label(
+                    text = resolvableString("MasterCard"),
+                    description = resolvableString("MasterCard"),
+                    icon = null,
+                ),
+                icon = PaymentOptionTab.Icon(
+                    onDark = R.drawable.stripe_ic_paymentsheet_card_visa,
+                    onLight = R.drawable.stripe_ic_paymentsheet_card_visa,
+                ),
+                state = PaymentOptionTab.State.Selected(
+                    onClick = {},
+                ),
+            ),
             viewWidth = 100.dp,
-            isSelected = true,
-            editState = PaymentOptionEditState.None,
-            isEnabled = true,
-            iconRes = R.drawable.stripe_ic_paymentsheet_card_visa,
-            labelText = "MasterCard",
-            description = "MasterCard",
-            onItemSelectedListener = {},
         )
     }
 }
@@ -293,14 +358,24 @@ private fun SavedPaymentMethodTabUISelected() {
 private fun SavedPaymentMethodTabUIRemovable() {
     StripeTheme {
         SavedPaymentMethodTab(
+            tab = PaymentOptionTab(
+                label = PaymentOptionTab.Label(
+                    text = resolvableString("MasterCard"),
+                    description = resolvableString("MasterCard"),
+                    icon = null,
+                ),
+                icon = PaymentOptionTab.Icon(
+                    onDark = R.drawable.stripe_ic_paymentsheet_card_visa,
+                    onLight = R.drawable.stripe_ic_paymentsheet_card_visa,
+                ),
+                state = PaymentOptionTab.State.Removable(
+                    displayName = resolvableString("Card"),
+                    accessibilityDescription = resolvableString("Remove this card!"),
+                    confirmationMessage = resolvableString("Remove this card!"),
+                    onRemove = {},
+                ),
+            ),
             viewWidth = 100.dp,
-            isSelected = false,
-            editState = PaymentOptionEditState.Removable,
-            isEnabled = true,
-            iconRes = R.drawable.stripe_ic_paymentsheet_card_visa,
-            labelText = "MasterCard",
-            description = "MasterCard",
-            onItemSelectedListener = {},
         )
     }
 }
@@ -310,14 +385,22 @@ private fun SavedPaymentMethodTabUIRemovable() {
 private fun SavedPaymentMethodTabUIModifiable() {
     StripeTheme {
         SavedPaymentMethodTab(
+            tab = PaymentOptionTab(
+                label = PaymentOptionTab.Label(
+                    text = resolvableString("MasterCard"),
+                    description = resolvableString("MasterCard"),
+                    icon = null,
+                ),
+                icon = PaymentOptionTab.Icon(
+                    onDark = R.drawable.stripe_ic_paymentsheet_card_mastercard,
+                    onLight = R.drawable.stripe_ic_paymentsheet_card_mastercard,
+                ),
+                state = PaymentOptionTab.State.Modifiable(
+                    accessibilityDescription = resolvableString("Remove this card!"),
+                    onModify = {},
+                ),
+            ),
             viewWidth = 100.dp,
-            isSelected = false,
-            editState = PaymentOptionEditState.Modifiable,
-            isEnabled = true,
-            iconRes = R.drawable.stripe_ic_paymentsheet_card_visa,
-            labelText = "MasterCard",
-            description = "MasterCard",
-            onItemSelectedListener = {},
         )
     }
 }
