@@ -6,6 +6,4 @@ interface SentryConfig {
     val key: String
 
     val version: String
-
-    fun getTimestamp(): String
 }

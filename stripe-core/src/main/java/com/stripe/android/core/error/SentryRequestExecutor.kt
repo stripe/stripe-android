@@ -3,6 +3,7 @@ package com.stripe.android.core.error
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.StripeNetworkClient
+import com.stripe.android.core.networking.responseJson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -16,12 +17,14 @@ class SentryRequestExecutor @Inject constructor(
     suspend fun sendErrorRequest(request: SentryEnvelopeRequest) {
         withContext(Dispatchers.IO) {
             runCatching {
-                networkClient.executeRequest(request)
-
-                logger.debug("Sent Sentry error report")
+                logger.debug("Sentry request: ${request.envelopeBody}")
+                logger.debug("Sentry headers: ${request.headers}")
+                networkClient.executeRequest(request).also {
+                    logger.debug("Sentry response: ${it.responseJson()}")
+                }
             }.onFailure {
                 // TODO enqueue using WM.
-                logger.error("Exception while sending Sentry error report", it)
+                logger.error("Sentry Exception while sending error report", it)
             }
         }
     }

@@ -99,7 +99,7 @@ internal class ConsentViewModel @AssistedInject constructor(
 
     fun onContinueClick() {
         suspend {
-            throw IllegalStateException("Envelopes: Testing error reporting on Android")
+            throw IllegalStateException("Envelopes + DSN: Testing error reporting on Android")
             eventTracker.track(ConsentAgree)
             val updatedManifest: FinancialConnectionsSessionManifest = acceptConsent()
             FinancialConnections.emitEvent(Name.CONSENT_ACQUIRED)
