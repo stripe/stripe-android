@@ -37,6 +37,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.uicore.R
+import com.stripe.android.uicore.moveFocusSafely
 import com.stripe.android.uicore.text.autofill
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.job
@@ -128,7 +129,7 @@ fun PhoneNumberElementUI(
     if (moveToNextFieldOnceComplete) {
         LaunchedEffect(isComplete) {
             if (isComplete && hasFocus) {
-                focusManager.moveFocus(FocusDirection.Next)
+                focusManager.moveFocusSafely(FocusDirection.Next)
             }
         }
     }
@@ -181,7 +182,7 @@ fun PhoneNumberElementUI(
         ),
         keyboardActions = KeyboardActions(
             onNext = {
-                focusManager.moveFocus(FocusDirection.Next)
+                focusManager.moveFocusSafely(FocusDirection.Next)
             },
             onDone = {
                 focusManager.clearFocus(true)

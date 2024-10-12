@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
@@ -135,6 +136,8 @@ internal class BillingDetailsCollectionScreenshotTest {
             billingDetails = null,
             billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
             cbcEligibility = CardBrandChoiceEligibility.Ineligible,
+            hasIntentToSetup = false,
+            paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
         )
     }
 

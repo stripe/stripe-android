@@ -11,6 +11,7 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.customersheet.CustomerPermissions
 import com.stripe.android.customersheet.CustomerSheet
+import com.stripe.android.customersheet.CustomerSheetIntegration
 import com.stripe.android.customersheet.CustomerSheetLoader
 import com.stripe.android.customersheet.CustomerSheetViewModel
 import com.stripe.android.customersheet.FakeStripeRepository
@@ -63,6 +64,7 @@ internal object CustomerSheetTestHelper {
         isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable = IsFinancialConnectionsAvailable { true },
         isLiveMode: Boolean = false,
         workContext: CoroutineContext = EmptyCoroutineContext,
+        integrationType: CustomerSheetIntegration.Type = CustomerSheetIntegration.Type.CustomerAdapter,
         isGooglePayAvailable: Boolean = true,
         customerPaymentMethods: List<PaymentMethod> = listOf(CARD_PAYMENT_METHOD),
         customerPermissions: CustomerPermissions = CustomerPermissions(
@@ -114,6 +116,7 @@ internal object CustomerSheetTestHelper {
             savedSelectionDataSourceProvider = CompletableDeferred(savedSelectionDataSource),
             stripeRepository = stripeRepository,
             configuration = configuration,
+            integrationType = integrationType,
             isLiveModeProvider = { isLiveMode },
             logger = Logger.noop(),
             intentConfirmationHandlerFactory = IntentConfirmationHandler.Factory(
