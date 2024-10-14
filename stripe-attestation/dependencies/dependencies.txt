@@ -1,0 +1,70 @@
++--- org.jetbrains.kotlin:kotlin-stdlib:1.9.24
+|    +--- org.jetbrains:annotations:13.0 -> 23.0.0
+|    +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.9.24 (c)
+|    +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.0 -> 1.8.20 (c)
+|    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.0 -> 1.8.20 (c)
++--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3
+|    \--- org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.7.3
+|         +--- org.jetbrains:annotations:23.0.0
+|         +--- org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.7.3
+|         |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.7.3 (c)
+|         |    \--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3 (c)
+|         +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.20 -> 1.9.24
+|         |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.9.24 (*)
+|         \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.20
+|              +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.20 -> 1.9.24 (*)
+|              \--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.20
+|                   \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.20 -> 1.9.24 (*)
+\--- com.google.android.play:integrity:1.4.0
+     +--- com.google.android.gms:play-services-basement:18.4.0
+     |    +--- androidx.collection:collection:1.0.0 -> 1.1.0
+     |    |    \--- androidx.annotation:annotation:1.1.0
+     |    +--- androidx.core:core:1.2.0
+     |    |    +--- androidx.annotation:annotation:1.1.0
+     |    |    +--- androidx.lifecycle:lifecycle-runtime:2.0.0 -> 2.1.0
+     |    |    |    +--- androidx.lifecycle:lifecycle-common:2.1.0
+     |    |    |    |    \--- androidx.annotation:annotation:1.1.0
+     |    |    |    +--- androidx.arch.core:core-common:2.1.0
+     |    |    |    |    \--- androidx.annotation:annotation:1.1.0
+     |    |    |    \--- androidx.annotation:annotation:1.1.0
+     |    |    +--- androidx.versionedparcelable:versionedparcelable:1.1.0
+     |    |    |    +--- androidx.annotation:annotation:1.1.0
+     |    |    |    \--- androidx.collection:collection:1.0.0 -> 1.1.0 (*)
+     |    |    \--- androidx.collection:collection:1.0.0 -> 1.1.0 (*)
+     |    \--- androidx.fragment:fragment:1.1.0
+     |         +--- androidx.annotation:annotation:1.1.0
+     |         +--- androidx.core:core:1.1.0 -> 1.2.0 (*)
+     |         +--- androidx.collection:collection:1.1.0 (*)
+     |         +--- androidx.viewpager:viewpager:1.0.0
+     |         |    +--- androidx.annotation:annotation:1.0.0 -> 1.1.0
+     |         |    +--- androidx.core:core:1.0.0 -> 1.2.0 (*)
+     |         |    \--- androidx.customview:customview:1.0.0
+     |         |         +--- androidx.annotation:annotation:1.0.0 -> 1.1.0
+     |         |         \--- androidx.core:core:1.0.0 -> 1.2.0 (*)
+     |         +--- androidx.loader:loader:1.0.0
+     |         |    +--- androidx.annotation:annotation:1.0.0 -> 1.1.0
+     |         |    +--- androidx.core:core:1.0.0 -> 1.2.0 (*)
+     |         |    +--- androidx.lifecycle:lifecycle-livedata:2.0.0
+     |         |    |    +--- androidx.arch.core:core-runtime:2.0.0
+     |         |    |    |    +--- androidx.annotation:annotation:1.0.0 -> 1.1.0
+     |         |    |    |    \--- androidx.arch.core:core-common:2.0.0 -> 2.1.0 (*)
+     |         |    |    +--- androidx.lifecycle:lifecycle-livedata-core:2.0.0
+     |         |    |    |    +--- androidx.lifecycle:lifecycle-common:2.0.0 -> 2.1.0 (*)
+     |         |    |    |    +--- androidx.arch.core:core-common:2.0.0 -> 2.1.0 (*)
+     |         |    |    |    \--- androidx.arch.core:core-runtime:2.0.0 (*)
+     |         |    |    \--- androidx.arch.core:core-common:2.0.0 -> 2.1.0 (*)
+     |         |    \--- androidx.lifecycle:lifecycle-viewmodel:2.0.0 -> 2.1.0
+     |         |         \--- androidx.annotation:annotation:1.1.0
+     |         +--- androidx.activity:activity:1.0.0
+     |         |    +--- androidx.annotation:annotation:1.1.0
+     |         |    +--- androidx.core:core:1.1.0 -> 1.2.0 (*)
+     |         |    +--- androidx.lifecycle:lifecycle-runtime:2.1.0 (*)
+     |         |    +--- androidx.lifecycle:lifecycle-viewmodel:2.1.0 (*)
+     |         |    \--- androidx.savedstate:savedstate:1.0.0
+     |         |         +--- androidx.annotation:annotation:1.1.0
+     |         |         +--- androidx.arch.core:core-common:2.0.1 -> 2.1.0 (*)
+     |         |         \--- androidx.lifecycle:lifecycle-common:2.0.0 -> 2.1.0 (*)
+     |         \--- androidx.lifecycle:lifecycle-viewmodel:2.0.0 -> 2.1.0 (*)
+     +--- com.google.android.gms:play-services-tasks:18.2.0
+     |    \--- com.google.android.gms:play-services-basement:18.4.0 (*)
+     \--- com.google.android.play:core-common:2.0.4
