@@ -10,9 +10,6 @@ import androidx.fragment.app.Fragment
 
 /**
  * Superclass for starting Stripe activities.
- *
- * See [PaymentMethodsActivityStarter], [AddPaymentMethodActivityStarter],
- * [PaymentFlowActivityStarter].
  */
 @Suppress("UnnecessaryAbstractClass")
 abstract class ActivityStarter<TargetActivityType : Activity, ArgsType : ActivityStarter.Args> internal constructor(

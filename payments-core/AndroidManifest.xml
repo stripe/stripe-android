@@ -2,19 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application>
-        <activity
-            android:name=".view.AddPaymentMethodActivity"
-            android:theme="@style/StripeDefaultTheme"
-            android:exported="false" />
-        <activity
-            android:name=".view.PaymentMethodsActivity"
-            android:theme="@style/StripeDefaultTheme"
-            android:exported="false" />
-        <activity
-            android:name=".view.PaymentFlowActivity"
-            android:theme="@style/StripeDefaultTheme"
-            android:exported="false" />
-        <activity
+       <activity
             android:name=".view.PaymentAuthWebViewActivity"
             android:theme="@style/StripeDefaultTheme"
             android:exported="false" />

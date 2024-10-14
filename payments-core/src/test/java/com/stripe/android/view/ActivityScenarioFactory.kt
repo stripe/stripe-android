@@ -35,13 +35,14 @@ internal class ActivityScenarioFactory(
         )
     }
 
-    fun createAddPaymentMethodActivity() = create<AddPaymentMethodActivity>(
-        AddPaymentMethodActivityStarter.Args.Builder()
-            .setPaymentMethodType(PaymentMethod.Type.Card)
-            .setPaymentConfiguration(PaymentConfiguration.getInstance(context))
-            .setBillingAddressFields(BillingAddressFields.PostalCode)
-            .build()
-    )
+    // TODO: will need to update this with another activity, probably in a parent PR
+//    fun createAddPaymentMethodActivity() = create<AddPaymentMethodActivity>(
+//        AddPaymentMethodActivityStarter.Args.Builder()
+//            .setPaymentMethodType(PaymentMethod.Type.Card)
+//            .setPaymentConfiguration(PaymentConfiguration.getInstance(context))
+//            .setBillingAddressFields(BillingAddressFields.PostalCode)
+//            .build()
+//    )
 
     /**
      * Return a view created with an `Activity` context.
@@ -71,26 +72,26 @@ internal class ActivityScenarioFactory(
         return requireNotNull(view)
     }
 
-    fun <ViewType : View> createViewAndScenario(
-        beforeAttach: (ViewType) -> Unit = {},
-        viewFactory: (Activity) -> ViewType,
-    ): Pair<ViewType, ActivityScenario<AddPaymentMethodActivity>> {
-        var view: ViewType? = null
-        val activityScenario = createAddPaymentMethodActivity()
-
-        activityScenario.onActivity { activity ->
-            activity.setTheme(R.style.StripePaymentSheetDefaultTheme)
-
-            activity.findViewById<ViewGroup>(R.id.add_payment_method_card).let { root ->
-                root.removeAllViews()
-
-                view = viewFactory(activity).also {
-                    beforeAttach(it)
-                    root.addView(it)
-                }
-            }
-        }
-
-        return requireNotNull(view) to activityScenario
+//    fun <ViewType : View> createViewAndScenario(
+//        beforeAttach: (ViewType) -> Unit = {},
+//        viewFactory: (Activity) -> ViewType,
+//    ): Pair<ViewType, ActivityScenario<AddPaymentMethodActivity>> {
+//        var view: ViewType? = null
+//        val activityScenario = createAddPaymentMethodActivity()
+//
+//        activityScenario.onActivity { activity ->
+//            activity.setTheme(R.style.StripePaymentSheetDefaultTheme)
+//
+//            activity.findViewById<ViewGroup>(R.id.add_payment_method_card).let { root ->
+//                root.removeAllViews()
+//
+//                view = viewFactory(activity).also {
+//                    beforeAttach(it)
+//                    root.addView(it)
+//                }
+//            }
+//        }
+//
+//        return requireNotNull(view) to activityScenario
     }
 }

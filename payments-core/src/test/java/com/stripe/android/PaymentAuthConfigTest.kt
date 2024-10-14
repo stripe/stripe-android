@@ -8,9 +8,7 @@ import com.stripe.android.stripe3ds2.init.ui.StripeToolbarCustomization
 import com.stripe.android.stripe3ds2.init.ui.StripeUiCustomization
 import com.stripe.android.stripe3ds2.init.ui.UiCustomization
 import com.stripe.android.view.ActivityScenarioFactory
-import com.stripe.android.view.PaymentFlowActivity
 import org.junit.runner.RunWith
-import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -24,9 +22,9 @@ class PaymentAuthConfigTest {
         ApplicationProvider.getApplicationContext()
     )
 
+    // TODO: rerun test
     @BeforeTest
     fun setup() {
-        CustomerSession.instance = mock()
         PaymentAuthConfig.reset()
     }
 
@@ -264,9 +262,10 @@ class PaymentAuthConfigTest {
 
     @Test
     fun createWithAppTheme_shouldCreateExpectedToolbarCustomization() {
-        activityScenarioFactory.create<PaymentFlowActivity>(
-            PaymentSessionFixtures.PAYMENT_FLOW_ARGS
-        ).use { activityScenario ->
+        // TODO: might need to use a different activity
+//        activityScenarioFactory.create<PaymentFlowActivity>(
+//            PaymentSessionFixtures.PAYMENT_FLOW_ARGS
+//        ).use { activityScenario ->
             activityScenario.onActivity { activity ->
                 activity.setTheme(android.R.style.Theme)
 

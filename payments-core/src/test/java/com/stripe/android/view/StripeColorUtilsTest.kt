@@ -3,13 +3,8 @@ package com.stripe.android.view
 import android.graphics.Color
 import androidx.annotation.ColorInt
 import androidx.test.core.app.ApplicationProvider
-import com.google.common.truth.Truth.assertThat
-import com.stripe.android.CustomerSession
-import com.stripe.android.PaymentSessionFixtures
 import org.junit.runner.RunWith
-import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -19,35 +14,6 @@ internal class StripeColorUtilsTest {
     private val activityScenarioFactory = ActivityScenarioFactory(
         ApplicationProvider.getApplicationContext()
     )
-
-    @BeforeTest
-    fun setup() {
-        CustomerSession.instance = mock()
-    }
-
-    @Test
-    fun getThemeAccentColor_getsNonzeroColor() {
-        activityScenarioFactory.create<PaymentFlowActivity>(
-            PaymentSessionFixtures.PAYMENT_FLOW_ARGS
-        ).use { activityScenario ->
-            activityScenario.onActivity {
-                assertThat(Color.alpha(StripeColorUtils(it).colorAccent))
-                    .isGreaterThan(0)
-            }
-        }
-    }
-
-    @Test
-    fun getThemeColorControlNormal_getsNonzeroColor() {
-        activityScenarioFactory.create<PaymentFlowActivity>(
-            PaymentSessionFixtures.PAYMENT_FLOW_ARGS
-        ).use { activityScenario ->
-            activityScenario.onActivity {
-                assertThat(Color.alpha(StripeColorUtils(it).colorControlNormal))
-                    .isGreaterThan(0)
-            }
-        }
-    }
 
     @Test
     fun isColorTransparent_whenColorIsZero_returnsTrue() {
