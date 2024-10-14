@@ -12,6 +12,7 @@ import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
@@ -62,7 +63,14 @@ internal class DefaultCustomerSheetLoader(
         configuration: CustomerSheet.Configuration
     ): Result<CustomerSheetState.Full> = workContext.runCatching {
         val initializationDataSource = retrieveInitializationDataSource().getOrThrow()
-        val customerSheetSession = initializationDataSource.loadCustomerSheetSession().toResult().getOrThrow()
+        var customerSheetSession = initializationDataSource.loadCustomerSheetSession().toResult().getOrThrow()
+
+        val filteredPaymentMethods = customerSheetSession.paymentMethods.filter {
+            PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance).isAccepted(it)
+        }
+        customerSheetSession = customerSheetSession.copy(
+            paymentMethods = filteredPaymentMethods
+        )
 
         val metadata = createPaymentMethodMetadata(
             configuration = configuration,

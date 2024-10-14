@@ -1,6 +1,7 @@
 package com.stripe.android.customersheet.state
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ExperimentalCardBrandFilteringApi
 import com.stripe.android.customersheet.CustomerPermissions
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetLoader
@@ -24,9 +25,12 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.testing.FakeErrorReporter
+import com.stripe.android.testing.PaymentMethodFactory
+import com.stripe.android.testing.PaymentMethodFactory.update
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.utils.FakeElementsSessionRepository
 import kotlinx.coroutines.CompletableDeferred
@@ -404,6 +408,41 @@ class DefaultCustomerSheetLoaderTest {
             errorReporter.getLoggedErrors().first()
         ).isEqualTo(
             ErrorReporter.ExpectedErrorEvent.CUSTOMER_SHEET_ADAPTER_NOT_FOUND.eventName
+        )
+    }
+
+    @OptIn(ExperimentalCardBrandFilteringApi::class)
+    @Test
+    fun `when there are saved cards with disallowed brands they are filtered out`() = runTest {
+        val loader = createCustomerSheetLoader(
+            paymentMethods = listOf(
+                PaymentMethodFactory.card(id = "pm_12345").update(
+                    last4 = "1001",
+                    addCbcNetworks = false,
+                    brand = CardBrand.Visa,
+                ),
+                PaymentMethodFactory.card(id = "pm_123456").update(
+                    last4 = "1000",
+                    addCbcNetworks = false,
+                    brand = CardBrand.AmericanExpress,
+                )
+            ),
+            savedSelection = null,
+        )
+
+        val config = CustomerSheet.Configuration(
+            merchantDisplayName = "Example",
+            cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.disallowed(
+                listOf(PaymentSheet.CardBrandAcceptance.BrandCategory.Visa)
+            )
+        )
+
+        val state = loader.load(config).getOrThrow()
+        assertThat(state.customerPaymentMethods.count() ?: 0).isEqualTo(
+            1
+        )
+        assertThat(state.customerPaymentMethods?.first()?.card?.brand ?: CardBrand.Unknown).isEqualTo(
+            CardBrand.AmericanExpress
         )
     }
 

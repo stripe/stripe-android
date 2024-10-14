@@ -14,6 +14,7 @@ import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.lpmfoundations.luxe.isSaveForFutureUseValueChangeable
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.lpmfoundations.paymentmethod.link.LinkInlineConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.toPaymentSheetSaveConsentBehavior
 import com.stripe.android.model.ElementsSession
@@ -135,6 +136,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
                 customerInfo = customerInfo,
                 metadata = metadata.await(),
                 savedSelection = savedSelection,
+                cardBrandFilter = PaymentSheetCardBrandFilter(paymentSheetConfiguration.cardBrandAcceptance)
             )
         }
 
@@ -261,6 +263,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         customerInfo: CustomerInfo?,
         metadata: PaymentMethodMetadata,
         savedSelection: Deferred<SavedSelection>,
+        cardBrandFilter: PaymentSheetCardBrandFilter
     ): CustomerState? {
         val customerState = when (customerInfo) {
             is CustomerInfo.CustomerSession -> {
@@ -285,7 +288,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         return customerState?.let { state ->
             state.copy(
                 paymentMethods = state.paymentMethods
-                    .withLastUsedPaymentMethodFirst(savedSelection.await())
+                    .withLastUsedPaymentMethodFirst(savedSelection.await()).filter { cardBrandFilter.isAccepted(it) }
             )
         }
     }
