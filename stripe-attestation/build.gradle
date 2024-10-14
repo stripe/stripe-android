@@ -2,6 +2,7 @@ apply from: configs.androidLibrary
 
 dependencies {
     // Kotlin
+    implementation libs.kotlin.coroutines
 
     // AndroidX
     implementation libs.playIntegrity
