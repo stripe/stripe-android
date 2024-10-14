@@ -438,10 +438,10 @@ class DefaultCustomerSheetLoaderTest {
         )
 
         val state = loader.load(config).getOrThrow()
-        assertThat(state.customerPaymentMethods.count() ?: 0).isEqualTo(
+        assertThat(state.customerPaymentMethods.count()).isEqualTo(
             1
         )
-        assertThat(state.customerPaymentMethods?.first()?.card?.brand ?: CardBrand.Unknown).isEqualTo(
+        assertThat(state.customerPaymentMethods.first().card?.brand ?: CardBrand.Unknown).isEqualTo(
             CardBrand.AmericanExpress
         )
     }
