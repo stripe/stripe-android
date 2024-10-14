@@ -2093,7 +2093,7 @@ internal class DefaultPaymentSheetLoaderTest {
         assertThat(state.customer?.paymentMethods?.count() ?: 0).isEqualTo(
             1
         )
-        assertThat(state.customer?.paymentMethods?.first()?.card?.brand ?: CardBrand.Unknown).isEqualTo(
+        assertThat(state.customer?.paymentMethods?.first()?.card?.brand).isEqualTo(
             CardBrand.AmericanExpress
         )
     }

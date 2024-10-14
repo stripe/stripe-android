@@ -441,7 +441,7 @@ class DefaultCustomerSheetLoaderTest {
         assertThat(state.customerPaymentMethods.count()).isEqualTo(
             1
         )
-        assertThat(state.customerPaymentMethods.first().card?.brand ?: CardBrand.Unknown).isEqualTo(
+        assertThat(state.customerPaymentMethods.first().card?.brand).isEqualTo(
             CardBrand.AmericanExpress
         )
     }
