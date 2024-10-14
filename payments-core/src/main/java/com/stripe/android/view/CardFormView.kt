@@ -35,6 +35,7 @@ import com.stripe.android.view.CardValidCallback.Fields
 import com.stripe.android.uicore.R as UiCoreR
 import com.stripe.payments.model.R as PaymentsModelR
 
+// TODO: should this be removed?
 /**
  * A view to collect credit card information and provide [CardParams] for API invocation.
  * The postal code field adjust its form accordingly based on currently selected country.
