@@ -1,0 +1,112 @@
+apply from: configs.androidLibrary
+
+dependencies {
+    // Kotlin
+    implementation libs.kotlin.coroutines
+
+    // AndroidX
+    implementation libs.androidx.annotation
+    implementation libs.androidx.appCompat
+    implementation libs.androidx.browser
+    implementation libs.androidx.fragment
+    implementation libs.androidx.lifecycle
+    implementation libs.androidx.savedState
+    implementation libs.androidx.viewModel
+
+    // Compose
+
+    // Test
+    testImplementation testLibs.androidx.core
+    testImplementation testLibs.androidx.fragment
+    testImplementation testLibs.androidx.junit
+    testImplementation testLibs.androidx.junitKtx
+    testImplementation testLibs.androidx.lifecycle
+    testImplementation testLibs.androidx.testRules
+    testImplementation testLibs.hamcrest
+    testImplementation testLibs.junit
+    testImplementation testLibs.json
+    testImplementation testLibs.kotlin.annotations
+    testImplementation testLibs.kotlin.coroutines
+    testImplementation testLibs.kotlin.junit
+    testImplementation testLibs.mockito.core
+    testImplementation testLibs.mockito.inline
+    testImplementation testLibs.mockito.kotlin
+    testImplementation testLibs.robolectric
+    testImplementation testLibs.truth
+
+    androidTestImplementation testLibs.androidx.coreKtx
+    androidTestImplementation testLibs.androidx.junit
+    androidTestImplementation testLibs.androidx.junitKtx
+    androidTestImplementation testLibs.androidx.testRules
+    androidTestImplementation testLibs.androidx.testRunner
+    androidTestImplementation testLibs.androidx.truth
+    androidTestImplementation testLibs.androidx.uiAutomator
+    androidTestImplementation testLibs.espresso.core
+    androidTestImplementation (testLibs.espresso.contrib) {
+        exclude group: 'org.checkerframework', module: 'checker'
+    }
+    androidTestImplementation testLibs.mockito.core
+    androidTestImplementation testLibs.mockito.inline
+    androidTestImplementation testLibs.mockito.kotlin
+    androidTestImplementation libs.leakCanary
+    androidTestImplementation testLibs.truth
+
+    androidTestUtil testLibs.testOrchestrator
+}
+
+android {
+    defaultConfig {
+        testApplicationId "com.stripe.attestation.test"
+    }
+
+    buildFeatures {
+        compose = true
+        viewBinding true
+    }
+
+    testOptions {
+        unitTests {
+            // Note: without this, all Robolectric tests using assets will fail.
+            includeAndroidResources = true
+            all {
+                maxHeapSize = "1024m"
+            }
+        }
+
+        kotlinOptions {
+            freeCompilerArgs += ["-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"]
+        }
+
+        managedDevices {
+            localDevices {
+                register("pixel2api33") {
+                    device = "Pixel 2"
+                    apiLevel = 33
+                    systemImageSource = "aosp"
+                }
+            }
+        }
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion "${versions.androidxComposeCompiler}"
+    }
+
+    kotlinOptions {
+        freeCompilerArgs += [
+                "-opt-in=kotlinx.coroutines.FlowPreview",
+                "-Xcontext-receivers",
+        ]
+        if (gradle.ext.isCi) {
+            kotlinOptions.allWarningsAsErrors = true
+        }
+    }
+}
+
+ext {
+    artifactId = "attestation"
+    artifactName = "attestation"
+    artifactDescrption = "Internal attestation module of the Stripe Android SDK"
+}
+
+apply from: "${rootDir}/deploy/deploy.gradle"
