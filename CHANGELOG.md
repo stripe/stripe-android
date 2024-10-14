@@ -2,8 +2,6 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
-## 20.52.1 - 2024-10-14
-
 ### Basic integration
 * [DEPRECATED][9433](https://github.com/stripe/stripe-android/pull/9433) Basic integration is now deprecated and will be removed in a future release. [Please use Mobile Payment Element instead](https://docs.stripe.com/payments/mobile/migrating-to-mobile-payment-element-from-basic-integration).
 
