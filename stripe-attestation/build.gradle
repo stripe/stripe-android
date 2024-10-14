@@ -4,8 +4,7 @@ dependencies {
     // Kotlin
 
     // AndroidX
-
-    // Compose
+    implementation libs.playIntegrity
 
     // Test
     testImplementation testLibs.androidx.core
