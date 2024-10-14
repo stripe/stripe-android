@@ -22,7 +22,7 @@ internal class ActivityScenarioFactory(
         )
     }
 
-    @Suppress("Deprecated")
+    @Suppress("Deprecation")
     fun createAddPaymentMethodActivity() = create<AddPaymentMethodActivity>(
         AddPaymentMethodActivityStarter.Args.Builder()
             .setPaymentMethodType(PaymentMethod.Type.Card)
