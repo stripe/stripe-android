@@ -5,6 +5,7 @@ package com.stripe.android.lpmfoundations.paymentmethod
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.ExperimentalCardBrandFilteringApi
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.parcelize.Parcelize
 
@@ -37,6 +38,15 @@ internal class PaymentSheetCardBrandFilter(
                 !isDisallowed
             }
         }
+    }
+
+    fun isAccepted(paymentMethod: PaymentMethod): Boolean {
+        val brand = paymentMethod.card?.displayBrand?.let { displayBrand ->
+            val cardBrand = CardBrand.fromCode(displayBrand)
+            if (cardBrand == CardBrand.Unknown) null else cardBrand
+        } ?: paymentMethod.card?.brand ?: CardBrand.Unknown
+
+        return paymentMethod.type != PaymentMethod.Type.Card || isAccepted(brand)
     }
 }
 

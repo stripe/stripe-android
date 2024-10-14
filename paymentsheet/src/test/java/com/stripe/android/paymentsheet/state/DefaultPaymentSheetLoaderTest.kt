@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.state
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ExperimentalCardBrandFilteringApi
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.model.CountryCode
@@ -13,6 +14,7 @@ import com.stripe.android.link.ui.inline.LinkSignupMode.AlongsideSaveForFutureUs
 import com.stripe.android.link.ui.inline.LinkSignupMode.InsteadOfSaveForFutureUse
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntent.ConfirmationMethod.Manual
@@ -38,6 +40,7 @@ import com.stripe.android.paymentsheet.state.PaymentSheetLoadingException.Paymen
 import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentMethodFactory
+import com.stripe.android.testing.PaymentMethodFactory.update
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodsRepository
 import com.stripe.android.utils.FakeCustomerRepository
@@ -2046,6 +2049,52 @@ internal class DefaultPaymentSheetLoaderTest {
             initializationMode = initializationMode,
             orderedLpms = listOf("card", "link"),
             requireCvcRecollection = false
+        )
+    }
+
+    @OptIn(ExperimentalCardBrandFilteringApi::class)
+    @Test
+    fun `Should filter out saved cards with disallowed brands`() = runTest {
+        prefsRepository.savePaymentSelection(null)
+
+        val paymentMethods = listOf(
+            PaymentMethodFactory.card(id = "pm_12345").update(
+                last4 = "1001",
+                addCbcNetworks = false,
+                brand = CardBrand.Visa,
+            ),
+            PaymentMethodFactory.card(id = "pm_123456").update(
+                last4 = "1000",
+                addCbcNetworks = false,
+                brand = CardBrand.AmericanExpress,
+            )
+        )
+
+        val loader = createPaymentSheetLoader(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
+            isGooglePayReady = true,
+            customerRepo = FakeCustomerRepository(paymentMethods = paymentMethods),
+        )
+
+        val config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.copy(
+            cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.disallowed(
+                listOf(PaymentSheet.CardBrandAcceptance.BrandCategory.Visa)
+            )
+        )
+
+        val state = loader.load(
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
+            paymentSheetConfiguration = config,
+            initializedViaCompose = false,
+        ).getOrThrow()
+
+        assertThat(state.customer?.paymentMethods?.count() ?: 0).isEqualTo(
+            1
+        )
+        assertThat(state.customer?.paymentMethods?.first()?.card?.brand).isEqualTo(
+            CardBrand.AmericanExpress
         )
     }
 
