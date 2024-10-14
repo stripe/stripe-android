@@ -2,22 +2,13 @@ apply from: configs.androidLibrary
 
 dependencies {
     // Kotlin
-    implementation libs.kotlin.coroutines
 
     // AndroidX
-    implementation libs.androidx.annotation
-    implementation libs.androidx.appCompat
-    implementation libs.androidx.browser
-    implementation libs.androidx.fragment
-    implementation libs.androidx.lifecycle
-    implementation libs.androidx.savedState
-    implementation libs.androidx.viewModel
 
     // Compose
 
     // Test
     testImplementation testLibs.androidx.core
-    testImplementation testLibs.androidx.fragment
     testImplementation testLibs.androidx.junit
     testImplementation testLibs.androidx.junitKtx
     testImplementation testLibs.androidx.lifecycle
@@ -57,11 +48,6 @@ dependencies {
 android {
     defaultConfig {
         testApplicationId "com.stripe.attestation.test"
-    }
-
-    buildFeatures {
-        compose = true
-        viewBinding true
     }
 
     testOptions {
