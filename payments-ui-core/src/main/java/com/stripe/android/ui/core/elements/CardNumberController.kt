@@ -9,6 +9,8 @@ import androidx.compose.ui.autofill.AutofillType
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
+import com.stripe.android.CardBrandFilter
+import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.CardAccountRangeService
 import com.stripe.android.cards.CardNumber
@@ -71,6 +73,7 @@ internal class DefaultCardNumberController(
     override val initialValue: String?,
     override val showOptionalLabel: Boolean = false,
     private val cardBrandChoiceConfig: CardBrandChoiceConfig = CardBrandChoiceConfig.Ineligible,
+    private val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter(),
 ) : CardNumberController() {
     override val capitalization: KeyboardCapitalization = cardTextFieldConfig.capitalization
     override val keyboardType: KeyboardType = cardTextFieldConfig.keyboard
@@ -171,6 +174,7 @@ internal class DefaultCardNumberController(
             }
         },
         isCbcEligible = { isEligibleForCardBrandChoice },
+        cardBrandFilter = cardBrandFilter
     )
 
     override val trailingIcon: StateFlow<TextFieldIcon?> = combineAsStateFlow(
@@ -221,7 +225,7 @@ internal class DefaultCardNumberController(
         } else if (accountRangeService.accountRange != null) {
             TextFieldIcon.Trailing(accountRangeService.accountRange!!.brand.icon, isTintable = false)
         } else {
-            val cardBrands = CardBrand.getCardBrands(number)
+            val cardBrands = CardBrand.getCardBrands(number).filter { cardBrandFilter.isAccepted(it) }
 
             val staticIcons = cardBrands.map { cardBrand ->
                 TextFieldIcon.Trailing(cardBrand.icon, isTintable = false)

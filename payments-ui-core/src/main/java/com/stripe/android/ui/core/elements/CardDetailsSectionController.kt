@@ -1,6 +1,8 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.CardBrandFilter
+import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.ui.core.DefaultIsStripeCardScanAvailable
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
@@ -13,6 +15,7 @@ class CardDetailsSectionController(
     initialValues: Map<IdentifierSpec, String?>,
     collectName: Boolean = false,
     cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
+    cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter(),
 ) : SectionFieldErrorController {
 
     internal val cardDetailsElement = CardDetailsElement(
@@ -21,6 +24,7 @@ class CardDetailsSectionController(
         initialValues,
         collectName,
         cbcEligibility,
+        cardBrandFilter
     )
 
     internal val isCardScanEnabled = cardDetailsElement.isCardScanEnabled

@@ -5,6 +5,8 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
+import com.stripe.android.CardBrandFilter
+import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.cards.DefaultStaticCardAccountRanges.Companion.ACCOUNTS
 import com.stripe.android.cards.DefaultStaticCardAccountRanges.Companion.CARTES_BANCAIRES_ACCOUNT_RANGES
 import com.stripe.android.cards.DefaultStaticCardAccountRanges.Companion.UNIONPAY16_ACCOUNTS
@@ -13,6 +15,7 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.BinRange
+import com.stripe.android.model.CardBrand
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.uicore.utils.stateFlowOf
@@ -21,6 +24,7 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import kotlinx.parcelize.Parcelize
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
@@ -175,6 +179,7 @@ class CardAccountRangeServiceTest {
         cardNumber: String,
         isCbcEligible: Boolean,
         mockRemoteCardAccountRangeSource: CardAccountRangeSource? = null,
+        cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter()
     ): List<AccountRange> {
         val completable = CompletableDeferred<List<AccountRange>>()
 
@@ -193,12 +198,55 @@ class CardAccountRangeServiceTest {
                 }
             },
             isCbcEligible = { isCbcEligible },
+            cardBrandFilter = cardBrandFilter
         )
 
         service.onCardNumberChanged(CardNumber.Unvalidated(cardNumber))
 
         return completable.await()
     }
+
+    @Test
+    fun `Brands that are disallowed by the card brand filter are filtered out`() =
+        runTest {
+            // Disallow Mastercard
+            val disallowedBrands = setOf(CardBrand.MasterCard)
+            val cardBrandFilter = MockCardBrandFilter(disallowedBrands)
+
+            // Use a card number that matches Mastercard (starts with '2')
+            val cardNumber = "2"
+
+            // Call testBehavior with the custom CardBrandFilter
+            val accountRanges = testBehavior(
+                cardNumber = cardNumber,
+                isCbcEligible = false,
+                cardBrandFilter = cardBrandFilter
+            )
+
+            // Since Mastercard is disallowed, the accountRanges should be empty
+            assertThat(accountRanges).isEmpty()
+        }
+
+    @Test
+    fun `Brands that are not disallowed by the card brand filter are filtered out`() =
+        runTest {
+            // Disallow Visa
+            val disallowedBrands = setOf(CardBrand.Visa)
+            val cardBrandFilter = MockCardBrandFilter(disallowedBrands)
+
+            // Use a card number that matches Mastercard (starts with '2')
+            val cardNumber = "2"
+
+            // Call testBehavior with the custom CardBrandFilter
+            val accountRanges = testBehavior(
+                cardNumber = cardNumber,
+                isCbcEligible = false,
+                cardBrandFilter = cardBrandFilter
+            )
+
+            // Since Mastercard is allow, the accountRanges should have contents
+            assertThat(accountRanges).isNotEmpty()
+        }
 
     private fun createMockRemoteDefaultCardAccountRangeRepository(
         mockRemoteCardAccountRangeSource: CardAccountRangeSource
@@ -261,5 +309,14 @@ class CardAccountRangeServiceTest {
             DefaultAnalyticsRequestExecutor(),
             PaymentAnalyticsRequestFactory(applicationContext, publishableKey)
         )
+    }
+}
+
+@Parcelize
+private class MockCardBrandFilter(
+    private val disallowedBrands: Set<CardBrand>
+) : CardBrandFilter {
+    override fun isAccepted(cardBrand: CardBrand): Boolean {
+        return !disallowedBrands.contains(cardBrand)
     }
 }

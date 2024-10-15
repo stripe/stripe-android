@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.addresselement
 
 import android.content.Context
+import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.core.injection.INITIAL_VALUES
 import com.stripe.android.core.injection.SHIPPING_VALUES
@@ -41,6 +42,7 @@ internal object FormControllerModule {
                     "`InlineSignUpViewState` updates should not be received by `FormController`!"
                 )
             },
+            cardBrandFilter = DefaultCardBrandFilter()
         )
     )
 }
