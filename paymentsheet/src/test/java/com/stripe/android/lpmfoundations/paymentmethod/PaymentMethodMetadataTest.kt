@@ -1,6 +1,7 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ExperimentalCardBrandFilteringApi
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.link.LinkConfiguration
@@ -727,6 +728,8 @@ internal class PaymentMethodMetadataTest {
         assertThat(metadata.isExternalPaymentMethod("card")).isFalse()
     }
 
+    @OptIn(ExperimentalCardBrandFilteringApi::class)
+    @Suppress("LongMethod", "MaxLineLength")
     @Test
     fun `should create metadata properly with elements session response, payment sheet config, and data specs`() {
         val billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
@@ -763,6 +766,7 @@ internal class PaymentMethodMetadataTest {
                 defaultBillingDetails = defaultBillingDetails,
                 shippingDetails = shippingDetails,
                 preferredNetworks = listOf(CardBrand.CartesBancaires, CardBrand.Visa),
+                cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.allowed(listOf(PaymentSheet.CardBrandAcceptance.BrandCategory.Amex))
             ),
             sharedDataSpecs = listOf(SharedDataSpec("card")),
             externalPaymentMethodSpecs = listOf(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC),
@@ -790,10 +794,13 @@ internal class PaymentMethodMetadataTest {
                 isGooglePayReady = false,
                 linkInlineConfiguration = linkInlineConfiguration,
                 linkMode = null,
+                cardBrandFilter = PaymentSheetCardBrandFilter(PaymentSheet.CardBrandAcceptance.allowed(listOf(PaymentSheet.CardBrandAcceptance.BrandCategory.Amex)))
             )
         )
     }
 
+    @OptIn(ExperimentalCardBrandFilteringApi::class)
+    @Suppress("LongMethod", "MaxLineLength")
     @Test
     fun `should create metadata properly with elements session response, customer sheet config, and data specs`() {
         val billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
@@ -813,6 +820,7 @@ internal class PaymentMethodMetadataTest {
             .defaultBillingDetails(defaultBillingDetails)
             .preferredNetworks(listOf(CardBrand.CartesBancaires, CardBrand.Visa))
             .paymentMethodOrder(listOf("us_bank_account", "card", "sepa_debit"))
+            .cardBrandAcceptance(PaymentSheet.CardBrandAcceptance.allowed(listOf(PaymentSheet.CardBrandAcceptance.BrandCategory.Amex)))
             .build()
 
         val metadata = PaymentMethodMetadata.create(
@@ -855,6 +863,7 @@ internal class PaymentMethodMetadataTest {
                 financialConnectionsAvailable = false,
                 linkInlineConfiguration = null,
                 linkMode = null,
+                cardBrandFilter = PaymentSheetCardBrandFilter(PaymentSheet.CardBrandAcceptance.allowed(listOf(PaymentSheet.CardBrandAcceptance.BrandCategory.Amex))),
             )
         )
     }
