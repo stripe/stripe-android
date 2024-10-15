@@ -1,18 +1,27 @@
 package com.stripe.android.paymentsheet
 
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
+import android.os.Bundle
+import android.view.View
 import android.view.View.GONE
+import android.view.ViewGroup
+import android.widget.LinearLayout
+import androidx.appcompat.app.AppCompatActivity
+import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.R
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.uicore.StripeThemeDefaults
-import com.stripe.android.view.ActivityScenarioFactory
+import org.junit.Rule
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.BeforeTest
@@ -21,12 +30,14 @@ import kotlin.test.Test
 @RunWith(RobolectricTestRunner::class)
 class PrimaryButtonTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
-    private val activityScenarioFactory = ActivityScenarioFactory(context)
     private val primaryButton: PrimaryButton by lazy {
-        activityScenarioFactory.createView {
+        createView {
             PrimaryButton(it)
         }
     }
+
+    @get:Rule
+    internal val testActivityRule = createTestActivityRule<TestActivity>()
 
     @BeforeTest
     fun setup() {
@@ -160,5 +171,35 @@ class PrimaryButtonTest {
             .isEqualTo(1.0f)
         assertThat(primaryButton.viewBinding.lockIcon.visibility)
             .isEqualTo(GONE)
+    }
+
+    private fun <ViewType : View> createView(
+        viewFactory: (Activity) -> ViewType
+    ): ViewType {
+        var view: ViewType? = null
+
+        ActivityScenario.launch<TestActivity>(
+            Intent(context, TestActivity::class.java)
+        ).use { activityScenario ->
+            activityScenario.onActivity { activity ->
+                activity.setTheme(R.style.StripePaymentSheetDefaultTheme)
+
+                activity.findViewById<ViewGroup>(com.stripe.android.paymentsheet.R.id.label).let { root ->
+                    view = viewFactory(activity)
+                }
+            }
+        }
+
+        return requireNotNull(view)
+    }
+
+    internal class TestActivity : AppCompatActivity() {
+        override fun onCreate(savedInstanceState: Bundle?) {
+            super.onCreate(savedInstanceState)
+
+            val layout = LinearLayout(this)
+            layout.addView(PrimaryButton(this))
+            setContentView(layout)
+        }
     }
 }
