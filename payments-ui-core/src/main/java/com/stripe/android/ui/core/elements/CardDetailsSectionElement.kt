@@ -17,7 +17,7 @@ class CardDetailsSectionElement(
     initialValues: Map<IdentifierSpec, String?>,
     private val collectName: Boolean = false,
     private val cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
-    private val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter(),
+    private val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
     override val identifier: IdentifierSpec,
     override val controller: CardDetailsSectionController = CardDetailsSectionController(
         cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,

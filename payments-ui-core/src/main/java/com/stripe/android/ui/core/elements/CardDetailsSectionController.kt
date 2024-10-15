@@ -15,7 +15,7 @@ class CardDetailsSectionController(
     initialValues: Map<IdentifierSpec, String?>,
     collectName: Boolean = false,
     cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
-    cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter(),
+    cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
 ) : SectionFieldErrorController {
 
     internal val cardDetailsElement = CardDetailsElement(

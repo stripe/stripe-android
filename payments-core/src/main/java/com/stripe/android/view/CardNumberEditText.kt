@@ -50,7 +50,7 @@ class CardNumberEditText internal constructor(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     internal var viewModelStoreOwner: ViewModelStoreOwner? = null,
-    private var cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter()
+    private var cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter
 ) : StripeEditText(context, attrs, defStyleAttr) {
 
     @JvmOverloads
@@ -65,7 +65,7 @@ class CardNumberEditText internal constructor(
         Dispatchers.Main,
         Dispatchers.IO,
         { PaymentConfiguration.getInstance(context).publishableKey },
-        cardBrandFilter = DefaultCardBrandFilter()
+        cardBrandFilter = DefaultCardBrandFilter
     )
 
     private constructor(

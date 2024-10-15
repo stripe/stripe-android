@@ -179,7 +179,7 @@ class CardAccountRangeServiceTest {
         cardNumber: String,
         isCbcEligible: Boolean,
         mockRemoteCardAccountRangeSource: CardAccountRangeSource? = null,
-        cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter()
+        cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter
     ): List<AccountRange> {
         val completable = CompletableDeferred<List<AccountRange>>()
 

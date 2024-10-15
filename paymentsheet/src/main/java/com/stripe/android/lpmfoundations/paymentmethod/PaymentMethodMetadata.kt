@@ -50,7 +50,7 @@ internal data class PaymentMethodMetadata(
     val paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior,
     val linkMode: LinkMode?,
     val financialConnectionsAvailable: Boolean = DefaultIsFinancialConnectionsAvailable(),
-    val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter(),
+    val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
 ) : Parcelable {
     fun hasIntentToSetup(): Boolean {
         return when (stripeIntent) {

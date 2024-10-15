@@ -23,7 +23,7 @@ class CardAccountRangeService(
     val staticCardAccountRanges: StaticCardAccountRanges,
     private val accountRangeResultListener: AccountRangeResultListener,
     private val isCbcEligible: () -> Boolean,
-    private val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter()
+    private val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter
 ) {
 
     val isLoading: StateFlow<Boolean> = cardAccountRangeRepository.loading

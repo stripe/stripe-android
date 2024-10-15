@@ -42,7 +42,7 @@ internal object FormControllerModule {
                     "`InlineSignUpViewState` updates should not be received by `FormController`!"
                 )
             },
-            cardBrandFilter = DefaultCardBrandFilter()
+            cardBrandFilter = DefaultCardBrandFilter
         )
     )
 }

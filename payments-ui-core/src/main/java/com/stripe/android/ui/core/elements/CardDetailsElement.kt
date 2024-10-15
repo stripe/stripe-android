@@ -26,7 +26,7 @@ internal class CardDetailsElement(
     initialValues: Map<IdentifierSpec, String?>,
     collectName: Boolean = false,
     private val cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
-    private val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter(),
+    private val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
     val controller: CardDetailsController = CardDetailsController(
         cardAccountRangeRepositoryFactory,
         initialValues,
