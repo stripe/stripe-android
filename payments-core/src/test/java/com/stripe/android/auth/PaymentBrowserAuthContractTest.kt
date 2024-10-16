@@ -4,14 +4,16 @@ import android.app.Activity
 import android.content.Context
 import android.graphics.Color
 import android.os.Parcel
+import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.payments.StripeBrowserLauncherActivity
-import com.stripe.android.view.ActivityScenarioFactory
+import com.stripe.android.utils.createTestActivityRule
 import com.stripe.android.view.PaymentAuthWebViewActivity
+import org.junit.Rule
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.BeforeTest
@@ -25,14 +27,16 @@ class PaymentBrowserAuthContractTest {
     )
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
-    private val activityScenarioFactory = ActivityScenarioFactory(context)
     private lateinit var activity: Activity
+
+    @get:Rule
+    internal val testActivityRule = createTestActivityRule<TestActivity>()
 
     @BeforeTest
     fun setup() {
         PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
 
-        activityScenarioFactory.createAddPaymentMethodActivity().use { activityScenario ->
+        ActivityScenario.launch(TestActivity::class.java).use { activityScenario ->
             activityScenario.onActivity {
                 activity = it
             }
@@ -113,4 +117,6 @@ class PaymentBrowserAuthContractTest {
             isInstantApp = false
         )
     }
+
+    internal class TestActivity : Activity()
 }

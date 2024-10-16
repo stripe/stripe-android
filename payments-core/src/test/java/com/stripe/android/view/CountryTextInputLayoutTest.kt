@@ -14,6 +14,8 @@ import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.core.model.getCountryCode
 import com.stripe.android.utils.TestUtils.idleLooper
+import com.stripe.android.utils.createTestActivityRule
+import org.junit.Rule
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
@@ -41,6 +43,9 @@ class CountryTextInputLayoutTest {
     private val activityScenarioFactory = ActivityScenarioFactory(
         ApplicationProvider.getApplicationContext()
     )
+
+    @get:Rule
+    internal val testActivityRule = createTestActivityRule<ActivityScenarioFactory.TestActivity>()
 
     @BeforeTest
     fun setup() {
