@@ -22,6 +22,7 @@
             android:name=".view.PaymentRelayActivity"
             android:theme="@style/StripeTransparentTheme"
             android:exported="false" />
+        <activity android:name=".view.TestActivity"/>
 
         <!--
         Set android:launchMode="singleTop" so that the StripeBrowserLauncherActivity instance that
