@@ -19,7 +19,8 @@ import java.util.Locale
 import com.stripe.android.core.R as CoreR
 import com.stripe.android.uicore.R as UiCoreR
 
-// TODO: do we need to remove this? Is it also used by one of our card things?
+// TODO: I think we can remove this, but first we need to move the fields used by PostalCodeValidator out of this
+//  class.
 /**
  * A widget used to collect address data from a user.
  */

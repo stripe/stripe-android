@@ -26,7 +26,7 @@ import kotlin.properties.Delegates
 import androidx.appcompat.R as AppCompatR
 import com.google.android.material.R as MaterialR
 
-// TODO: can this be deleted?
+// TODO: can this be deleted? Yes, this is only used in ShippingInfoWidgetTest. Delete it when I delete that class.
 /**
  * A subclass of [TextInputLayout] that programmatically wraps a styleable [AutoCompleteTextView],
  * which configures a [CountryAdapter] to display list of countries in its popup.
