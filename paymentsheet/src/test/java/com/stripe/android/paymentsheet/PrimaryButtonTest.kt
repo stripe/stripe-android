@@ -9,7 +9,6 @@ import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.view.View
 import android.view.View.GONE
-import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.test.core.app.ActivityScenario
@@ -17,7 +16,6 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.R
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.uicore.StripeThemeDefaults
@@ -182,11 +180,7 @@ class PrimaryButtonTest {
             Intent(context, TestActivity::class.java)
         ).use { activityScenario ->
             activityScenario.onActivity { activity ->
-                activity.setTheme(R.style.StripePaymentSheetDefaultTheme)
-
-                activity.findViewById<ViewGroup>(com.stripe.android.paymentsheet.R.id.label).let { root ->
-                    view = viewFactory(activity)
-                }
+                view = viewFactory(activity)
             }
         }
 

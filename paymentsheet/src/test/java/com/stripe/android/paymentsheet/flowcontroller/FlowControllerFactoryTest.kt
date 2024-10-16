@@ -46,11 +46,9 @@ class FlowControllerFactoryTest {
 
     @Test
     fun `create() should return a FlowController instance`() {
-        val activityScenario = ActivityScenario.launch<TestActivity>(
+        ActivityScenario.launch<TestActivity>(
             Intent(context, TestActivity::class.java)
-        )
-        activityScenario
-            .moveToState(Lifecycle.State.CREATED)
+        ).moveToState(Lifecycle.State.CREATED)
             .use { activityScenario ->
                 activityScenario.onActivity { activity ->
                     val factory = createFactory(activity)
