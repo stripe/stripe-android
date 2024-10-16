@@ -32,6 +32,7 @@ import kotlinx.coroutines.launch
  * selected a payment method, [PaymentSessionData.paymentMethod] will be updated with the
  * payment method and [PaymentSessionListener.onPaymentSessionDataChanged] will be called.
  */
+@Deprecated(BASIC_INTEGRATION_DEPRECATION_WARNING)
 class PaymentSession @VisibleForTesting internal constructor(
     private val context: Context,
     viewModelStoreOwner: ViewModelStoreOwner,

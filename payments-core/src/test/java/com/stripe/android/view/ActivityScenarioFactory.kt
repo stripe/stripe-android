@@ -3,12 +3,11 @@ package com.stripe.android.view
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.os.Bundle
 import android.view.View
-import android.view.ViewGroup
+import android.widget.LinearLayout
+import androidx.appcompat.app.AppCompatActivity
 import androidx.test.core.app.ActivityScenario
-import com.stripe.android.PaymentConfiguration
-import com.stripe.android.R
-import com.stripe.android.model.PaymentMethod
 
 internal class ActivityScenarioFactory(
     private val context: Context
@@ -35,62 +34,36 @@ internal class ActivityScenarioFactory(
         )
     }
 
-    fun createAddPaymentMethodActivity() = create<AddPaymentMethodActivity>(
-        AddPaymentMethodActivityStarter.Args.Builder()
-            .setPaymentMethodType(PaymentMethod.Type.Card)
-            .setPaymentConfiguration(PaymentConfiguration.getInstance(context))
-            .setBillingAddressFields(BillingAddressFields.PostalCode)
-            .build()
-    )
-
     /**
-     * Return a view created with an `Activity` context.
+     * Return a view created with an `Activity` context. If you use this, you MUST use
+     * [com.stripe.android.utils.TestActivityRule] in your test.
      */
     fun <ViewType : View> createView(
-        beforeAttach: (ViewType) -> Unit = {},
-        viewFactory: (Activity) -> ViewType,
+        viewFactory: (Activity) -> ViewType
     ): ViewType {
         var view: ViewType? = null
 
-        createAddPaymentMethodActivity()
-            .use { activityScenario ->
-                activityScenario.onActivity { activity ->
-                    activity.setTheme(R.style.StripePaymentSheetDefaultTheme)
+        ActivityScenario.launch<TestActivity>(
+            Intent(context, TestActivity::class.java)
+        ).use { activityScenario ->
+            activityScenario.onActivity { activity ->
+                view = viewFactory(activity)
 
-                    activity.findViewById<ViewGroup>(R.id.add_payment_method_card).let { root ->
-                        root.removeAllViews()
-
-                        view = viewFactory(activity).also {
-                            beforeAttach(it)
-                            root.addView(it)
-                        }
-                    }
-                }
+                activity.layout.addView(view)
             }
+        }
 
         return requireNotNull(view)
     }
 
-    fun <ViewType : View> createViewAndScenario(
-        beforeAttach: (ViewType) -> Unit = {},
-        viewFactory: (Activity) -> ViewType,
-    ): Pair<ViewType, ActivityScenario<AddPaymentMethodActivity>> {
-        var view: ViewType? = null
-        val activityScenario = createAddPaymentMethodActivity()
+    internal class TestActivity : AppCompatActivity() {
+        lateinit var layout: LinearLayout
 
-        activityScenario.onActivity { activity ->
-            activity.setTheme(R.style.StripePaymentSheetDefaultTheme)
+        override fun onCreate(savedInstanceState: Bundle?) {
+            super.onCreate(savedInstanceState)
 
-            activity.findViewById<ViewGroup>(R.id.add_payment_method_card).let { root ->
-                root.removeAllViews()
-
-                view = viewFactory(activity).also {
-                    beforeAttach(it)
-                    root.addView(it)
-                }
-            }
+            layout = LinearLayout(this)
+            setContentView(layout)
         }
-
-        return requireNotNull(view) to activityScenario
     }
 }
