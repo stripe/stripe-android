@@ -51,10 +51,11 @@ class IntegrityStandardRequestManager(
     /**
      * Requests an Integrity token.
      *
-     * @param requestIdentifier A string to be hashed to generate a request identifier. Can be null. Provide a value
-     * that identifies the API request to protect it from tampering attacks.
+     * @param requestIdentifier A string to be hashed to generate a request identifier.
+     * Can be null. Provide a value that identifies the API request
+     * to protect it from tampering attacks.
      *
-     * @see https://developer.android.com/google/play/integrity/standard#protect-requests
+     *  [Docs](https://developer.android.com/google/play/integrity/standard#protect-requests)
      */
     suspend fun requestToken(
         requestIdentifier: String?,
@@ -67,6 +68,9 @@ class IntegrityStandardRequestManager(
         requestHash: String?,
     ): Result<String> = suspendCancellableCoroutine { continuation ->
         runCatching {
+            require(::integrityTokenProvider.isInitialized) {
+                "Integrity token provider is not initialized. Call prepare() first."
+            }
             integrityTokenProvider.request(
                 StandardIntegrityManager.StandardIntegrityTokenRequest.builder()
                     .setRequestHash(requestHash)
