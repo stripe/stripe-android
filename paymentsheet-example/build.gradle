@@ -34,6 +34,7 @@ dependencies {
     implementation project(':payments')
     implementation project(':stripecardscan')
     implementation project(':financial-connections')
+    implementation project(':link')
 
     implementation libs.androidx.activity
     implementation libs.androidx.appCompat

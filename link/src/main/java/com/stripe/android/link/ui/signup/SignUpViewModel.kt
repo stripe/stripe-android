@@ -1,15 +1,19 @@
 package com.stripe.android.link.ui.signup
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavHostController
 import com.stripe.android.core.Logger
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.link.LinkActivityContract
+import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.LinkEventsReporter
+import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.getErrorMessage
@@ -32,21 +36,21 @@ import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
 
 internal class SignUpViewModel @Inject constructor(
-    private val args: LinkActivityContract.Args,
+    private val configuration: LinkConfiguration,
     private val linkAccountManager: LinkAccountManager,
     private val linkEventsReporter: LinkEventsReporter,
     private val logger: Logger
 ) : ViewModel() {
     internal var navController: NavHostController? = null
     val emailController = EmailConfig.createController(
-        initialValue = args.configuration.customerInfo.email
+        initialValue = configuration.customerInfo.email
     )
     val phoneNumberController = PhoneNumberController.createPhoneNumberController(
-        initialValue = args.configuration.customerInfo.phone.orEmpty(),
-        initiallySelectedCountryCode = args.configuration.customerInfo.billingCountryCode
+        initialValue = configuration.customerInfo.phone.orEmpty(),
+        initiallySelectedCountryCode = configuration.customerInfo.billingCountryCode
     )
     val nameController = NameConfig.createController(
-        initialValue = args.configuration.customerInfo.name
+        initialValue = configuration.customerInfo.name
     )
     private val _state = MutableStateFlow(
         value = SignUpScreenState(
@@ -58,7 +62,7 @@ internal class SignUpViewModel @Inject constructor(
 
     private val requiresNameCollection: Boolean
         get() {
-            val countryCode = when (val stripeIntent = args.configuration.stripeIntent) {
+            val countryCode = when (val stripeIntent = configuration.stripeIntent) {
                 is PaymentIntent -> stripeIntent.countryCode
                 is SetupIntent -> stripeIntent.countryCode
             }
@@ -188,8 +192,29 @@ internal class SignUpViewModel @Inject constructor(
         }
     }
 
+    internal class Factory @Inject constructor(
+        private val linkAccountManager: LinkAccountManager,
+        private val linkEventsReporter: LinkEventsReporter,
+        private val logger: Logger,
+        private val configuration: LinkConfiguration
+    ) {
+        fun create(): SignUpViewModel {
+            return SignUpViewModel(configuration, linkAccountManager, linkEventsReporter, logger)
+        }
+    }
+
     companion object {
         // How long to wait before triggering a call to lookup the email
         internal val LOOKUP_DEBOUNCE = 1.seconds
+
+        fun factory(
+            parentComponent: NativeLinkComponent
+        ): ViewModelProvider.Factory {
+            return viewModelFactory {
+                initializer {
+                    parentComponent.signUpViewModelFactory.create()
+                }
+            }
+        }
     }
 }
