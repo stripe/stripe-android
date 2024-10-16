@@ -28,6 +28,7 @@ import com.stripe.android.CardNumberFixtures.JCB_NO_SPACES
 import com.stripe.android.CardNumberFixtures.MASTERCARD_NO_SPACES
 import com.stripe.android.CardNumberFixtures.VISA_NO_SPACES
 import com.stripe.android.CardNumberFixtures.VISA_WITH_SPACES
+import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.cards.AccountRangeFixtures
@@ -70,7 +71,6 @@ internal class CardMultilineWidgetTest {
     private val noZipCardListener: CardInputListener = mock()
 
     private val context: Context = ApplicationProvider.getApplicationContext()
-    private val activityScenarioFactory = ActivityScenarioFactory(context)
 
     private val accountRangeStore = DefaultCardAccountRangeStore(context)
 
@@ -82,6 +82,8 @@ internal class CardMultilineWidgetTest {
         // The input date here will be invalid after 2050. Please update the test.
         assertThat(Calendar.getInstance().get(Calendar.YEAR) < 2050)
             .isTrue()
+
+        CustomerSession.instance = mock()
 
         PaymentConfiguration.init(context, ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
 
@@ -853,15 +855,7 @@ internal class CardMultilineWidgetTest {
 
     @Test
     fun onFinishInflate_shouldSetPostalCodeInputLayoutHint() = runCardMultilineWidgetTest {
-        var inflatedCardMultilineWidget: CardMultilineWidget? = null
-        activityScenarioFactory
-            .createAddPaymentMethodActivity()
-            .use { activityScenario ->
-                activityScenario.onActivity { activity ->
-                    inflatedCardMultilineWidget = activity.findViewById(R.id.card_multiline_widget)
-                }
-            }
-        assertThat(requireNotNull(inflatedCardMultilineWidget).postalInputLayout.hint)
+        assertThat(cardMultilineWidget.postalInputLayout.hint)
             .isEqualTo("Postal code")
     }
 

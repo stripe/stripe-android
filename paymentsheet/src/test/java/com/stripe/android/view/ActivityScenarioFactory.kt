@@ -22,15 +22,14 @@ internal class ActivityScenarioFactory(
         )
     }
 
-    // TODO: this will need to be replaced with a real activity, probably in a parent PR
     @Suppress("Deprecation")
-//    fun createAddPaymentMethodActivity() = create<AddPaymentMethodActivity>(
-//        AddPaymentMethodActivityStarter.Args.Builder()
-//            .setPaymentMethodType(PaymentMethod.Type.Card)
-//            .setPaymentConfiguration(PaymentConfiguration.getInstance(context))
-//            .setBillingAddressFields(BillingAddressFields.PostalCode)
-//            .build()
-//    )
+    fun createAddPaymentMethodActivity() = create<AddPaymentMethodActivity>(
+        AddPaymentMethodActivityStarter.Args.Builder()
+            .setPaymentMethodType(PaymentMethod.Type.Card)
+            .setPaymentConfiguration(PaymentConfiguration.getInstance(context))
+            .setBillingAddressFields(BillingAddressFields.PostalCode)
+            .build()
+    )
 
     /**
      * Return a view created with an `Activity` context.

@@ -6,12 +6,15 @@ import androidx.appcompat.view.ContextThemeWrapper
 import androidx.test.core.app.ApplicationProvider
 import com.google.android.material.textfield.TextInputLayout
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.CustomerSession
+import com.stripe.android.PaymentSessionFixtures
 import com.stripe.android.R
 import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 
-// TODO: need to rerun this test
 @RunWith(RobolectricTestRunner::class)
 class PostalCodeEditTextTest {
     private val context = ContextThemeWrapper(
@@ -19,6 +22,11 @@ class PostalCodeEditTextTest {
         R.style.StripeDefaultTheme
     )
     private val postalCodeEditText = PostalCodeEditText(context)
+
+    @BeforeTest
+    fun setup() {
+        CustomerSession.instance = mock()
+    }
 
     @Test
     fun testConfigureForUs() {
@@ -87,11 +95,10 @@ class PostalCodeEditTextTest {
     }
 
     private fun createActivity(onActivityCallback: (Activity) -> Unit) {
-        // TODO: will need to use a different activity for this
-//        ActivityScenarioFactory(context).create<PaymentFlowActivity>(
-//            PaymentSessionFixtures.PAYMENT_FLOW_ARGS
-//        ).use { activityScenario ->
-//            activityScenario.onActivity(onActivityCallback)
-//        }
+        ActivityScenarioFactory(context).create<PaymentFlowActivity>(
+            PaymentSessionFixtures.PAYMENT_FLOW_ARGS
+        ).use { activityScenario ->
+            activityScenario.onActivity(onActivityCallback)
+        }
     }
 }

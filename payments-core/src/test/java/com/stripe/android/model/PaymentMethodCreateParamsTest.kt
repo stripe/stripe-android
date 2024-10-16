@@ -2,6 +2,7 @@ package com.stripe.android.model
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardNumberFixtures
+import com.stripe.android.view.AddPaymentMethodActivity
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -170,14 +171,13 @@ class PaymentMethodCreateParamsTest {
 
     @Test
     fun attribution_whenFpxAndProductUsageIsNotEmpty_shouldBeProductUsage() {
-        // TODO: not sure if we still need this
-//        val params = createFpx().copy(
-//            productUsage = setOf(AddPaymentMethodActivity.PRODUCT_TOKEN)
-//        )
-//        assertEquals(
-//            setOf(AddPaymentMethodActivity.PRODUCT_TOKEN),
-//            params.attribution
-//        )
+        val params = createFpx().copy(
+            productUsage = setOf(AddPaymentMethodActivity.PRODUCT_TOKEN)
+        )
+        assertEquals(
+            setOf(AddPaymentMethodActivity.PRODUCT_TOKEN),
+            params.attribution
+        )
     }
 
     @Test
@@ -193,17 +193,16 @@ class PaymentMethodCreateParamsTest {
 
     @Test
     fun attribution_whenCardAndProductUsageIsNotEmpty_shouldBeAttributionPlusProductUsage() {
-        // TODO: do we need this test?
-//        val params = PaymentMethodCreateParams.create(
-//            PaymentMethodCreateParamsFixtures.CARD_WITH_ATTRIBUTION
-//        ).copy(
-//            productUsage = setOf(AddPaymentMethodActivity.PRODUCT_TOKEN)
-//        )
-//        assertThat(params.attribution)
-//            .containsExactly(
-//                "CardMultilineWidget",
-//                AddPaymentMethodActivity.PRODUCT_TOKEN
-//            )
+        val params = PaymentMethodCreateParams.create(
+            PaymentMethodCreateParamsFixtures.CARD_WITH_ATTRIBUTION
+        ).copy(
+            productUsage = setOf(AddPaymentMethodActivity.PRODUCT_TOKEN)
+        )
+        assertThat(params.attribution)
+            .containsExactly(
+                "CardMultilineWidget",
+                AddPaymentMethodActivity.PRODUCT_TOKEN
+            )
     }
 
     @Test
