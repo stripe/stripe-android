@@ -136,8 +136,16 @@ sealed interface CollectBankAccountConfiguration : Parcelable {
         val email: String?
     ) : Parcelable, CollectBankAccountConfiguration
 
-    @Parcelize
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @Parcelize
+    data class USBankAccountInternal(
+        val name: String,
+        val email: String?,
+        val elementsSessionContext: ElementsSessionContext?,
+    ) : Parcelable, CollectBankAccountConfiguration
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @Parcelize
     data class InstantDebits(
         val email: String?,
         val elementsSessionContext: ElementsSessionContext?,

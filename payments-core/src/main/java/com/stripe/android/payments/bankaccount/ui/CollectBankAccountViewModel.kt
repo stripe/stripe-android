@@ -15,6 +15,8 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration.InstantDebits
+import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration.USBankAccount
+import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration.USBankAccountInternal
 import com.stripe.android.payments.bankaccount.di.DaggerCollectBankAccountComponent
 import com.stripe.android.payments.bankaccount.domain.AttachFinancialConnectionsSession
 import com.stripe.android.payments.bankaccount.domain.CreateFinancialConnectionsSession
@@ -62,7 +64,8 @@ internal class CollectBankAccountViewModel @Inject constructor(
 
     private suspend fun createFinancialConnectionsSession() {
         when (args) {
-            is CollectBankAccountContract.Args.ForDeferredPaymentIntent ->
+            is CollectBankAccountContract.Args.ForDeferredPaymentIntent -> {
+                val elementsSessionContext = args.configuration.retrieveElementsSessionContext()
                 createFinancialConnectionsSession.forDeferredPayments(
                     publishableKey = args.publishableKey,
                     stripeAccountId = args.stripeAccountId,
@@ -70,11 +73,14 @@ internal class CollectBankAccountViewModel @Inject constructor(
                     elementsSessionId = args.elementsSessionId,
                     customerId = args.customerId,
                     onBehalfOf = args.onBehalfOf,
+                    linkMode = elementsSessionContext?.linkMode,
                     amount = args.amount,
                     currency = args.currency
                 )
+            }
 
-            is CollectBankAccountContract.Args.ForDeferredSetupIntent ->
+            is CollectBankAccountContract.Args.ForDeferredSetupIntent -> {
+                val elementsSessionContext = args.configuration.retrieveElementsSessionContext()
                 createFinancialConnectionsSession.forDeferredPayments(
                     publishableKey = args.publishableKey,
                     stripeAccountId = args.stripeAccountId,
@@ -82,9 +88,11 @@ internal class CollectBankAccountViewModel @Inject constructor(
                     elementsSessionId = args.elementsSessionId,
                     customerId = args.customerId,
                     onBehalfOf = args.onBehalfOf,
+                    linkMode = elementsSessionContext?.linkMode,
                     amount = null,
                     currency = null
                 )
+            }
 
             is CollectBankAccountContract.Args.ForPaymentIntent ->
                 createFinancialConnectionsSession.forPaymentIntent(
@@ -280,5 +288,9 @@ internal class CollectBankAccountViewModel @Inject constructor(
 }
 
 private fun CollectBankAccountConfiguration.retrieveElementsSessionContext(): ElementsSessionContext? {
-    return (this as? InstantDebits)?.elementsSessionContext
+    return when (this) {
+        is InstantDebits -> elementsSessionContext
+        is USBankAccountInternal -> elementsSessionContext
+        is USBankAccount -> null
+    }
 }
