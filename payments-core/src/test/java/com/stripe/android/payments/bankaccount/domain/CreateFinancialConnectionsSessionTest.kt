@@ -58,7 +58,8 @@ class CreateFinancialConnectionsSessionTest {
                     clientSecret = clientSecret,
                     customerName = customerName,
                     hostedSurface = "payment_element",
-                    customerEmailAddress = null
+                    customerEmailAddress = null,
+                    linkMode = null,
                 ),
                 requestOptions = ApiRequest.Options(publishableKey)
             )
@@ -96,7 +97,8 @@ class CreateFinancialConnectionsSessionTest {
                     clientSecret = clientSecret,
                     customerName = customerName,
                     hostedSurface = "payment_element",
-                    customerEmailAddress = null
+                    customerEmailAddress = null,
+                    linkMode = null,
                 ),
                 requestOptions = ApiRequest.Options(publishableKey)
             )
@@ -159,7 +161,8 @@ class CreateFinancialConnectionsSessionTest {
                     clientSecret = clientSecret,
                     customerName = customerName,
                     customerEmailAddress = null,
-                    hostedSurface = "payment_element"
+                    hostedSurface = "payment_element",
+                    linkMode = null,
                 ),
                 requestOptions = ApiRequest.Options(
                     apiKey = publishableKey,
@@ -199,7 +202,8 @@ class CreateFinancialConnectionsSessionTest {
                     clientSecret = clientSecret,
                     customerName = customerName,
                     customerEmailAddress = null,
-                    hostedSurface = "payment_element"
+                    hostedSurface = "payment_element",
+                    linkMode = null,
                 ),
                 requestOptions = ApiRequest.Options(publishableKey)
             )
@@ -255,6 +259,7 @@ class CreateFinancialConnectionsSessionTest {
                     customerId = customerId,
                     hostedSurface = "payment_element",
                     onBehalfOf = onBehalfOf,
+                    linkMode = null,
                     amount = amount,
                     currency = currency
                 )
@@ -271,6 +276,7 @@ class CreateFinancialConnectionsSessionTest {
                         customer = customerId,
                         hostedSurface = "payment_element",
                         onBehalfOf = onBehalfOf,
+                        linkMode = null,
                         amount = amount,
                         currency = currency
                     )
@@ -308,6 +314,7 @@ class CreateFinancialConnectionsSessionTest {
                     elementsSessionId = elementsSessionId,
                     customerId = customerId,
                     onBehalfOf = onBehalfOf,
+                    linkMode = null,
                     amount = amount,
                     currency = currency,
                     hostedSurface = "payment_element"
@@ -324,6 +331,7 @@ class CreateFinancialConnectionsSessionTest {
                         verificationMethod = VerificationMethodParam.Automatic,
                         customer = customerId,
                         onBehalfOf = onBehalfOf,
+                        linkMode = null,
                         amount = amount,
                         currency = currency,
                         hostedSurface = "payment_element"

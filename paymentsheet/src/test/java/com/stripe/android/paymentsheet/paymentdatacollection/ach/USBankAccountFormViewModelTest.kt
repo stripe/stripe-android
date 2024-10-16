@@ -1050,9 +1050,15 @@ class USBankAccountFormViewModelTest {
             stripeAccountId = anyOrNull(),
             clientSecret = any(),
             configuration = eq(
-                CollectBankAccountConfiguration.USBankAccount(
+                CollectBankAccountConfiguration.USBankAccountInternal(
                     name = "Some Name",
                     email = "email@email.com",
+                    elementsSessionContext = ElementsSessionContext(
+                        initializationMode = ElementsSessionContext.InitializationMode.PaymentIntent("id_12345"),
+                        amount = 5099,
+                        currency = "usd",
+                        linkMode = null,
+                    ),
                 )
             ),
         )
