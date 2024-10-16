@@ -12,21 +12,37 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class IntegrityStandardRequestManager(
-    private val cloudProjectNumber: Long,
-    private val logger: Logger,
-    appContext: Context
-) {
-
-    private val standardIntegrityManager by lazy { IntegrityManagerFactory.createStandard(appContext) }
-    private lateinit var integrityTokenProvider: StandardIntegrityTokenProvider
-
+interface IntegrityRequestManager {
     /**
      * Prepare the integrity token.
      *
      * Needs to be called before calling [requestToken].
      */
-    suspend fun prepare() = suspendCancellableCoroutine<Result<Unit>> { continuation ->
+    suspend fun prepare(): Result<Unit>
+
+    /**
+     * Requests an Integrity token.
+     *
+     * @param requestIdentifier A string to be hashed to generate a request identifier.
+     * Can be null. Provide a value that identifies the API request
+     * to protect it from tampering attacks.
+     *
+     *  [Docs](https://developer.android.com/google/play/integrity/standard#protect-requests)
+     */
+    suspend fun requestToken(requestIdentifier: String?): Result<String>
+}
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class IntegrityStandardRequestManager(
+    private val cloudProjectNumber: Long,
+    private val logger: Logger,
+    appContext: Context
+) : IntegrityRequestManager {
+
+    private val standardIntegrityManager by lazy { IntegrityManagerFactory.createStandard(appContext) }
+    private lateinit var integrityTokenProvider: StandardIntegrityTokenProvider
+
+    override suspend fun prepare() = suspendCancellableCoroutine<Result<Unit>> { continuation ->
         runCatching {
             standardIntegrityManager.prepareIntegrityToken(
                 PrepareIntegrityTokenRequest.builder()
@@ -48,16 +64,7 @@ class IntegrityStandardRequestManager(
         }
     }
 
-    /**
-     * Requests an Integrity token.
-     *
-     * @param requestIdentifier A string to be hashed to generate a request identifier.
-     * Can be null. Provide a value that identifies the API request
-     * to protect it from tampering attacks.
-     *
-     *  [Docs](https://developer.android.com/google/play/integrity/standard#protect-requests)
-     */
-    suspend fun requestToken(
+    override suspend fun requestToken(
         requestIdentifier: String?,
     ): Result<String> {
         logger.debug("Integrity - Requesting integrity token request $requestIdentifier")
