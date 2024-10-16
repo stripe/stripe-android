@@ -20,7 +20,7 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 internal class LinkActivityViewModelTest {
     private val dispatcher = UnconfinedTestDispatcher()
-    private val vm = LinkActivityViewModel()
+    private val vm = LinkActivityViewModel(mock())
     private val navController: NavHostController = mock()
     private val dismissWithResult: (LinkActivityResult) -> Unit = mock()
 

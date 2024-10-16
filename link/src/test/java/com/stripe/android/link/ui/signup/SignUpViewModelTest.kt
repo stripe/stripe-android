@@ -4,7 +4,6 @@ import androidx.navigation.NavHostController
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.account.FakeLinkAccountManager
@@ -51,9 +50,6 @@ internal class SignUpViewModelTest {
         flags = emptyMap(),
         cardBrandChoice = null,
         passthroughModeEnabled = false
-    )
-    private val defaultArgs = LinkActivityContract.Args(
-        configuration = config,
     )
 
     private val navController: NavHostController = mock()
@@ -388,22 +384,20 @@ internal class SignUpViewModelTest {
 
     private fun createViewModel(
         prefilledEmail: String? = null,
-        args: LinkActivityContract.Args = defaultArgs,
+        configuration: LinkConfiguration = config,
         countryCode: CountryCode = CountryCode.US,
         linkEventsReporter: LinkEventsReporter = SignUpLinkEventsReporter(),
         linkAccountManager: LinkAccountManager = FakeLinkAccountManager()
     ): SignUpViewModel {
         return SignUpViewModel(
-            args = args.copy(
-                configuration = args.configuration.copy(
-                    customerInfo = args.configuration.customerInfo.copy(
-                        email = prefilledEmail,
-                    ),
-                    stripeIntent = when (val intent = args.configuration.stripeIntent) {
-                        is PaymentIntent -> intent.copy(countryCode = countryCode.value)
-                        is SetupIntent -> intent.copy(countryCode = countryCode.value)
-                    }
-                )
+            configuration = configuration.copy(
+                customerInfo = configuration.customerInfo.copy(
+                    email = prefilledEmail,
+                ),
+                stripeIntent = when (val intent = configuration.stripeIntent) {
+                    is PaymentIntent -> intent.copy(countryCode = countryCode.value)
+                    is SetupIntent -> intent.copy(countryCode = countryCode.value)
+                }
             ),
             linkAccountManager = linkAccountManager,
             linkEventsReporter = linkEventsReporter,
