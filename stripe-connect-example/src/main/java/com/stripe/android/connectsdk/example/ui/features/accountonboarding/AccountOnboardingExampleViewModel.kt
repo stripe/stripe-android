@@ -4,8 +4,10 @@ import androidx.lifecycle.ViewModel
 import com.github.kittinunf.fuel.core.FuelError
 import com.stripe.android.connectsdk.FetchClientSecretCallback.ClientSecretResultCallback
 import com.stripe.android.connectsdk.PrivateBetaConnectSDK
+import com.stripe.android.connectsdk.example.BuildConfig
 import com.stripe.android.connectsdk.example.networking.EmbeddedComponentService
 import com.stripe.android.connectsdk.example.networking.Merchant
+import com.stripe.android.core.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,14 +15,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import timber.log.Timber
 
 class AccountOnboardingExampleViewModel(
     private val embeddedComponentService: EmbeddedComponentService = EmbeddedComponentService(),
     private val networkingScope: CoroutineScope = CoroutineScope(Dispatchers.IO),
+    private val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG),
 ) : ViewModel() {
-
-    private val timber get() = Timber.tag("AccountOnboardingExampleViewModel")
 
     private val _state = MutableStateFlow(PayoutsExampleState())
     val state: StateFlow<PayoutsExampleState> = _state.asStateFlow()
@@ -38,7 +38,7 @@ class AccountOnboardingExampleViewModel(
                 resultCallback.onResult(clientSecret)
             } catch (e: FuelError) {
                 resultCallback.onError()
-                timber.e("Error fetching client secret: $e")
+                logger.error("(AccountOnboardingExampleViewModel) Error fetching client secret: $e")
             }
         }
     }
@@ -60,7 +60,7 @@ class AccountOnboardingExampleViewModel(
                     )
                 }
             } catch (e: FuelError) {
-                timber.e("Error getting accounts: $e")
+                logger.error("(AccountOnboardingExampleViewModel) Error getting accounts: $e")
             }
         }
     }

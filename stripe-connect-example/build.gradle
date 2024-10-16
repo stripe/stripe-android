@@ -13,9 +13,6 @@ dependencies {
     implementation libs.kotlin.coroutinesAndroid
     implementation libs.kotlin.serialization
 
-    // Logging
-    implementation libs.timber
-
     // Networking
     implementation libs.fuel
     implementation libs.fuelCoroutines

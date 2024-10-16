@@ -70,7 +70,6 @@ ext.versions = [
         tensorflowLite              : '2.11.0',
         tensorflowLiteSupport       : '0.4.3',
         testParameterInjector       : '1.17',
-        timber                      : '5.0.1',
         truth                       : '1.4.4',
         turbine                     : '1.1.0',
         uiAutomator                 : '2.3.0',
@@ -191,7 +190,6 @@ ext.libs = [
         tensorflowLiteSupport               : "org.tensorflow:tensorflow-lite-support:${versions.tensorflowLiteSupport}",
         tensorflowLitePlayServices          : "com.google.android.gms:play-services-tflite-java:${versions.playServicesTfLite}",
         tensorflowLitePlayServicesSupport   : "com.google.android.gms:play-services-tflite-support:${versions.playServicesTfLite}",
-        timber                              : "com.jakewharton.timber:timber:${versions.timber}",
         zxing                               : "com.google.zxing:core:${versions.zxing}",
 ]
 

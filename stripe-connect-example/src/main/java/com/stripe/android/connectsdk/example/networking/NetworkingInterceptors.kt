@@ -6,8 +6,9 @@ import com.github.kittinunf.fuel.core.FoldableResponseInterceptor
 import com.github.kittinunf.fuel.core.RequestTransformer
 import com.github.kittinunf.fuel.core.ResponseTransformer
 import com.github.kittinunf.fuel.core.extensions.cUrlString
+import com.stripe.android.connectsdk.example.BuildConfig
+import com.stripe.android.core.Logger
 import com.stripe.android.core.version.StripeSdkVersion
-import timber.log.Timber
 
 object ApplicationJsonHeaderInterceptor : FoldableRequestInterceptor {
     override fun invoke(next: RequestTransformer): RequestTransformer {
@@ -36,23 +37,25 @@ object UserAgentHeader : FoldableRequestInterceptor {
     }
 }
 
-class TimberRequestLogger(private val tag: String) : FoldableRequestInterceptor {
-    private val timber get() = Timber.tag(tag)
-
+class RequestLogger(
+    private val tag: String,
+    private val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG),
+) : FoldableRequestInterceptor {
     override fun invoke(next: RequestTransformer): RequestTransformer {
         return { request ->
-            timber.i("Request: ${request.cUrlString()}")
+            logger.info("($tag) Request: ${request.cUrlString()}")
             next(request)
         }
     }
 }
 
-class TimberResponseLogger(private val tag: String) : FoldableResponseInterceptor {
-    private val timber get() = Timber.tag(tag)
-
+class ResponseLogger(
+    private val tag: String,
+    private val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG),
+) : FoldableResponseInterceptor {
     override fun invoke(next: ResponseTransformer): ResponseTransformer {
         return { request, response ->
-            timber.i("Response: $response")
+            logger.info("($tag) Response: $response")
             next(request, response)
         }
     }

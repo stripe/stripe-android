@@ -7,6 +7,7 @@ import com.github.kittinunf.fuel.core.Request
 import com.github.kittinunf.fuel.core.Response
 import com.github.kittinunf.fuel.core.awaitResult
 import com.github.kittinunf.result.Result
+import com.stripe.android.core.Logger
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -16,8 +17,8 @@ class EmbeddedComponentService {
     private val fuel = FuelManager.instance
         .apply {
             // add logging
-            addRequestInterceptor(TimberRequestLogger("EmbeddedComponentService"))
-            addResponseInterceptor(TimberResponseLogger("EmbeddedComponentService"))
+            addRequestInterceptor(RequestLogger(tag = "EmbeddedComponentService"))
+            addResponseInterceptor(ResponseLogger(tag = "EmbeddedComponentService"))
 
             // add headers
             addRequestInterceptor(ApplicationJsonHeaderInterceptor)

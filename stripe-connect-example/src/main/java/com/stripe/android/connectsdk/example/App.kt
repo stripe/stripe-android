@@ -2,7 +2,6 @@ package com.stripe.android.connectsdk.example
 
 import android.app.Application
 import android.os.StrictMode
-import timber.log.Timber
 
 class App : Application() {
     override fun onCreate() {
@@ -24,9 +23,5 @@ class App : Application() {
                 .penaltyLog()
                 .build()
         )
-
-        if (BuildConfig.DEBUG) {
-            Timber.plant(Timber.DebugTree())
-        }
     }
 }
