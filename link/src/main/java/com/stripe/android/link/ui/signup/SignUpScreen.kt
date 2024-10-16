@@ -28,6 +28,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.R
+import com.stripe.android.link.paneViewModel
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.StripeThemeForLink
 import com.stripe.android.link.theme.linkColors
@@ -45,17 +46,18 @@ import com.stripe.android.uicore.elements.TextFieldSection
 import com.stripe.android.uicore.utils.collectAsState
 
 @Composable
-internal fun SignUpScreen(
-    signUpViewModel: SignUpViewModel
-) {
-    val signUpScreenState by signUpViewModel.state.collectAsState()
+internal fun SignUpScreen() {
+    val viewModel: SignUpViewModel = paneViewModel {
+        SignUpViewModel.factory(it)
+    }
+    val signUpScreenState by viewModel.state.collectAsState()
 
     SignUpBody(
-        emailController = signUpViewModel.emailController,
-        phoneNumberController = signUpViewModel.phoneNumberController,
-        nameController = signUpViewModel.nameController,
+        emailController = viewModel.emailController,
+        phoneNumberController = viewModel.phoneNumberController,
+        nameController = viewModel.nameController,
         signUpScreenState = signUpScreenState,
-        onSignUpClick = signUpViewModel::onSignUpClick
+        onSignUpClick = viewModel::onSignUpClick
     )
 }
 

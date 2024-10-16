@@ -5,9 +5,9 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkScreen
+import com.stripe.android.link.WebLinkActivityContract
 import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.FakeLinkEventsReporter
@@ -52,7 +52,7 @@ internal class SignUpViewModelTest {
         cardBrandChoice = null,
         passthroughModeEnabled = false
     )
-    private val defaultArgs = LinkActivityContract.Args(
+    private val defaultArgs = WebLinkActivityContract.Args(
         configuration = config,
     )
 
@@ -320,7 +320,7 @@ internal class SignUpViewModelTest {
 
     private fun createViewModel(
         prefilledEmail: String? = null,
-        args: LinkActivityContract.Args = defaultArgs,
+        args: WebLinkActivityContract.Args = defaultArgs,
         countryCode: CountryCode = CountryCode.US,
         linkEventsReporter: LinkEventsReporter = SignUpLinkEventsReporter(),
         linkAccountManager: LinkAccountManager = FakeLinkAccountManager(),

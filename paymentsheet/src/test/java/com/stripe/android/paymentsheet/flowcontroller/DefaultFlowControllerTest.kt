@@ -18,10 +18,10 @@ import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
-import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.LinkPaymentLauncher
+import com.stripe.android.link.WebLinkActivityContract
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
@@ -152,7 +152,7 @@ internal class DefaultFlowControllerTest {
         RecordingGooglePayPaymentMethodLauncherFactory(googlePayPaymentMethodLauncher)
 
     private val linkActivityResultLauncher =
-        mock<ActivityResultLauncher<LinkActivityContract.Args>>()
+        mock<ActivityResultLauncher<WebLinkActivityContract.Args>>()
 
     private val sepaMandateActivityLauncher =
         mock<ActivityResultLauncher<SepaMandateContract.Args>>()
@@ -211,7 +211,7 @@ internal class DefaultFlowControllerTest {
 
         whenever(
             activityResultCaller.registerForActivityResult(
-                any<LinkActivityContract>(),
+                any<WebLinkActivityContract>(),
                 any()
             )
         ).thenReturn(linkActivityResultLauncher)

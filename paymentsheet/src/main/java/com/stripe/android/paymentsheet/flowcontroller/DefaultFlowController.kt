@@ -685,7 +685,7 @@ internal class DefaultFlowController @Inject internal constructor(
 
         if (paymentSelection is PaymentSelection.Link) {
             // User selected Link as the payment method, not inline
-            linkLauncher.present(linkConfig)
+            linkLauncher.presentNative(linkConfig)
         } else {
             // New user paying inline, complete without launching Link
             confirmPaymentSelection(paymentSelection, state)

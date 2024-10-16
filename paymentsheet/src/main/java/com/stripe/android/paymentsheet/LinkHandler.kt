@@ -201,7 +201,7 @@ internal class LinkHandler @Inject constructor(
     fun launchLink() {
         val config = _linkConfiguration.value ?: return
 
-        linkLauncher.present(
+        linkLauncher.presentNative(
             config,
         )
 

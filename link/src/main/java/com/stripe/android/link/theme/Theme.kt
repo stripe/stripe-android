@@ -11,6 +11,7 @@ import androidx.compose.ui.unit.dp
 private val LocalColors = staticCompositionLocalOf { LinkThemeConfig.colors(false) }
 
 internal val PrimaryButtonHeight = 56.dp
+internal val AppBarHeight = 56.dp
 
 @Composable
 internal fun DefaultLinkTheme(
