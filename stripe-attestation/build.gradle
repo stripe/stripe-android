@@ -1,6 +1,8 @@
 apply from: configs.androidLibrary
 
 dependencies {
+    implementation project(':stripe-core')
+
     // Kotlin
     implementation libs.kotlin.coroutines
 
@@ -54,6 +56,7 @@ android {
         unitTests {
             // Note: without this, all Robolectric tests using assets will fail.
             includeAndroidResources = true
+            returnDefaultValues = true
             all {
                 maxHeapSize = "1024m"
             }
