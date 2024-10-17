@@ -445,6 +445,7 @@ class CollectBankAccountViewModelTest {
                     elementsSessionId = "elements_session_id",
                     customerId = "customer_id",
                     onBehalfOf = "on_behalf_of_id",
+                    linkMode = null,
                     amount = 1000,
                     currency = "usd",
                     hostedSurface = "payment_element"
@@ -464,6 +465,7 @@ class CollectBankAccountViewModelTest {
                     elementsSessionId = "elements_session_id",
                     customerId = "customer_id",
                     onBehalfOf = "on_behalf_of_id",
+                    linkMode = null,
                     amount = null,
                     currency = null,
                     hostedSurface = "payment_element"
