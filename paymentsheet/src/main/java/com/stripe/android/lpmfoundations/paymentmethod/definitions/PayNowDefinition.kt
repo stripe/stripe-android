@@ -27,11 +27,9 @@ internal object PayNowDefinition : PaymentMethodDefinition {
 
 private object PayNowUiDefinitionFactory : UiDefinitionFactory.RequiresSharedDataSpec {
     override fun createSupportedPaymentMethod(sharedDataSpec: SharedDataSpec) = SupportedPaymentMethod(
-        code = PayNowDefinition.type.code,
+        paymentMethodDefinition = PayNowDefinition,
+        sharedDataSpec = sharedDataSpec,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_paynow,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_paynow,
-        lightThemeIconUrl = null,
-        darkThemeIconUrl = null,
-        iconRequiresTinting = false,
     )
 }

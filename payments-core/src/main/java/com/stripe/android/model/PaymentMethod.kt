@@ -290,7 +290,7 @@ constructor(
             isReusable = false,
             isVoucher = true,
             requiresMandate = false,
-            hasDelayedSettlement = true,
+            hasDelayedSettlement = false,
             afterRedirectAction = AfterRedirectAction.Poll(retryCount = MAX_RETRIES),
         ),
         Alipay(

@@ -176,6 +176,9 @@ sealed interface StripeIntent : StripeModel {
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         interface DisplayVoucherDetails {
             val hostedVoucherUrl: String?
+
+            val shouldCancelIntentOnUserNavigation: Boolean
+                get() = false
         }
 
         @Parcelize
@@ -204,7 +207,10 @@ sealed interface StripeIntent : StripeModel {
              * URL of a webpage containing the voucher for this PayNow payment.
              */
             override val hostedVoucherUrl: String? = null
-        ) : NextActionData(), DisplayVoucherDetails
+        ) : NextActionData(), DisplayVoucherDetails {
+            override val shouldCancelIntentOnUserNavigation: Boolean
+                get() = true
+        }
 
         @Parcelize
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
