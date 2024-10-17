@@ -5,7 +5,6 @@ import com.google.android.gms.tasks.Task
 import com.google.android.play.core.integrity.StandardIntegrityManager
 import com.google.android.play.core.integrity.StandardIntegrityManager.PrepareIntegrityTokenRequest
 import com.google.android.play.core.integrity.StandardIntegrityManager.StandardIntegrityTokenProvider
-import com.stripe.android.core.Logger
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface IntegrityRequestManager {
@@ -25,13 +24,13 @@ interface IntegrityRequestManager {
      *
      *  [Docs](https://developer.android.com/google/play/integrity/standard#protect-requests)
      */
-    suspend fun requestToken(requestIdentifier: String?): Result<String>
+    suspend fun requestToken(requestIdentifier: String? = null): Result<String>
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class IntegrityStandardRequestManager(
     private val cloudProjectNumber: Long,
-    private val logger: Logger, // inject a lambda instead.
+    private val logError: (String, Throwable) -> Unit,
     private val factory: StandardIntegrityManagerFactory
 ) : IntegrityRequestManager {
 
@@ -48,12 +47,11 @@ class IntegrityStandardRequestManager(
 
         return finishedTask.toResult().fold(
             onSuccess = {
-                logger.debug("Integrity: Prepared integrity token successfully")
                 integrityTokenProvider = it
                 Result.success(Unit)
             },
             onFailure = { error ->
-                logger.error("Integrity: Failed to prepare integrity token", error)
+                logError("Integrity: Failed to prepare integrity token", error)
                 Result.failure(error)
             }
         )
@@ -61,10 +59,7 @@ class IntegrityStandardRequestManager(
 
     override suspend fun requestToken(
         requestIdentifier: String?,
-    ): Result<String> {
-        logger.debug("Integrity - Requesting integrity token request $requestIdentifier")
-        return request(requestIdentifier)
-    }
+    ): Result<String> = request(requestIdentifier)
 
     private suspend fun request(
         requestHash: String?,
@@ -80,11 +75,10 @@ class IntegrityStandardRequestManager(
         return finishedTask.toResult().fold(
             onSuccess = {
                 val token = it.token()
-                logger.debug("Integrity - Received integrity token $token")
                 Result.success(token)
             },
             onFailure = {
-                logger.error("Integrity - Failed to request integrity token", it)
+                logError("Integrity - Failed to request integrity token", it)
                 Result.failure(it)
             }
         )

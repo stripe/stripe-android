@@ -7,7 +7,6 @@ import com.google.android.play.core.integrity.StandardIntegrityManager
 import com.google.android.play.core.integrity.StandardIntegrityManager.StandardIntegrityToken
 import com.google.android.play.core.integrity.StandardIntegrityManager.StandardIntegrityTokenProvider
 import com.google.android.play.core.integrity.StandardIntegrityManager.StandardIntegrityTokenRequest
-import com.stripe.android.core.Logger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -60,11 +59,24 @@ class IntegrityStandardRequestManagerTest {
         assert(result.isSuccess)
     }
 
+    @Test
+    fun `requestToken - failure`() = runTest {
+        val tokenProvider = FakeStandardIntegrityTokenProvider(Tasks.forException(Exception("Failed to request token")))
+        val integrityStandardRequestManager = buildRequestManager(
+            prepareTask = Tasks.forResult(tokenProvider),
+        )
+
+        integrityStandardRequestManager.prepare()
+        val result = integrityStandardRequestManager.requestToken("requestIdentifier")
+
+        assert(result.isFailure)
+    }
+
     private fun buildRequestManager(
         prepareTask: Task<StandardIntegrityTokenProvider>
     ) = IntegrityStandardRequestManager(
         cloudProjectNumber = 123456789L,
-        logger = Logger.noop(),
+        logError = { _, _ -> },
         factory = FakeStandardIntegrityManagerFactory(prepareTask)
     )
 }

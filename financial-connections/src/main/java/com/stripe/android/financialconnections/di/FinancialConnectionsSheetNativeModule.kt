@@ -98,7 +98,7 @@ internal interface FinancialConnectionsSheetNativeModule {
             logger: Logger,
         ): IntegrityStandardRequestManager {
             return IntegrityStandardRequestManager(
-                logger = logger,
+                logError = logger::error,
                 cloudProjectNumber = 527113280969,
                 factory = RealStandardIntegrityManagerFactory(context)
             )
