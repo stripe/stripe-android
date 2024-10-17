@@ -32,6 +32,7 @@ internal sealed class CustomerSheetEvent : AnalyticsEvent {
                         configuration.billingDetailsCollectionConfiguration.toAnalyticsMap()
                         ),
                     FIELD_PREFERRED_NETWORKS to configuration.preferredNetworks.toAnalyticsValue(),
+                    FIELD_CARD_BRAND_ACCEPTANCE to configuration.cardBrandAcceptance.toAnalyticsValue(),
                 )
                 return mapOf(
                     FIELD_CUSTOMER_SHEET_CONFIGURATION to configurationMap,
@@ -266,6 +267,7 @@ internal sealed class CustomerSheetEvent : AnalyticsEvent {
         const val FIELD_ERROR_MESSAGE = "error_message"
         const val FIELD_PAYMENT_METHOD_TYPE = "payment_method_type"
         const val FIELD_SELECTED_LPM = "selected_lpm"
+        const val FIELD_CARD_BRAND_ACCEPTANCE = "card_brand_acceptance"
         const val FIELD_CUSTOMER_ACCESS_PROVIDER = "customer_access_provider"
 
         const val VALUE_EDIT_CBC_EVENT_SOURCE = "edit"

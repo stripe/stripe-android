@@ -1,8 +1,8 @@
-package com.stripe.android
+package com.stripe.android.testing
 
 import com.stripe.android.core.Logger
 
-internal class FakeLogger : Logger {
+class FakeLogger : Logger {
     val debugLogs = mutableListOf<String>()
     val infoLogs = mutableListOf<String>()
     val warningLogs = mutableListOf<String>()

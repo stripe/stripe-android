@@ -1,6 +1,7 @@
 apply from: configs.androidApplication
 
 apply plugin: 'com.emergetools.android'
+apply plugin: 'com.google.firebase.appdistribution'
 apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
 apply plugin: "org.jetbrains.kotlin.plugin.parcelize"
 apply plugin: 'shot'
@@ -117,5 +118,13 @@ android {
     }
     composeOptions {
         kotlinCompilerExtensionVersion "${versions.androidxComposeCompiler}"
+    }
+    buildTypes {
+        release {
+            firebaseAppDistribution {
+                appId = "1:577365562050:android:5b7e92d18f8ca8d1e9a15b"
+                groups = "elements-mobile"
+            }
+        }
     }
 }

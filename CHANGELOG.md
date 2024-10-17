@@ -2,6 +2,17 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+Dependencies updated in [9345](https://github.com/stripe/stripe-android/pull/9345):
+* Bumped Accompanist from 0.32.0 to 0.34.0.
+* Bumped Compose from 1.5.4 to 1.6.8.
+* Bumped Lifecycle from 2.7.0 to 2.8.6.
+* Bumped Material from 1.11.0 to 1.12.0.
+
+## 20.52.1 - 2024-10-15
+
+### Basic integration
+* [DEPRECATED][9433](https://github.com/stripe/stripe-android/pull/9433) Basic integration is now deprecated and will be removed in a future release. [Please use Mobile Payment Element instead](https://docs.stripe.com/payments/mobile/migrating-to-mobile-payment-element-from-basic-integration).
+
 ## 20.52.0 - 2024-10-07
 
 ### CustomerSheet

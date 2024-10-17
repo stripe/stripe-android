@@ -8,6 +8,10 @@ internal sealed class LinkEvent : AnalyticsEvent {
         override val eventName = "link.signup.checkbox_checked"
     }
 
+    data object SignUpFlowPresented : LinkEvent() {
+        override val eventName = "link.signup.flow_presented"
+    }
+
     object SignUpStart : LinkEvent() {
         override val eventName = "link.signup.start"
     }

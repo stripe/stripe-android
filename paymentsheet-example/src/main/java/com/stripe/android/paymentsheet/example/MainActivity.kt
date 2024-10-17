@@ -32,6 +32,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.paymentsheet.example.databinding.ActivityMainBinding
+import com.stripe.android.paymentsheet.example.playground.PaymentSheetPlaygroundActivity
 import com.stripe.android.paymentsheet.example.samples.ui.SECTION_ALPHA
 import com.stripe.android.paymentsheet.example.samples.ui.addresselement.AddressElementExampleActivity
 import com.stripe.android.paymentsheet.example.samples.ui.customersheet.CustomerSheetExampleActivity
@@ -40,7 +41,6 @@ import com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.custom_fl
 import com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.server_side_confirm.complete_flow.ServerSideConfirmationCompleteFlowActivity
 import com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.server_side_confirm.custom_flow.ServerSideConfirmationCustomFlowActivity
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
-import com.stripe.android.paymentsheet.example.playground.PaymentSheetPlaygroundActivity as NewPaymentSheetPlaygroundActivity
 
 private const val SurfaceOverlayOpacity = 0.12f
 
@@ -52,6 +52,12 @@ class MainActivity : AppCompatActivity() {
 
     private val items: List<MenuItem> by lazy {
         listOf(
+            MenuItem(
+                titleResId = R.string.playground_title,
+                subtitleResId = R.string.playground_subtitle,
+                klass = PaymentSheetPlaygroundActivity::class.java,
+                section = MenuItem.Section.Internal,
+            ),
             MenuItem(
                 titleResId = R.string.paymentsheet_title,
                 subtitleResId = R.string.paymentsheet_subtitle,
@@ -81,21 +87,12 @@ class MainActivity : AppCompatActivity() {
                 subtitleResId = R.string.customer_subtitle,
                 klass = CustomerSheetExampleActivity::class.java,
                 section = MenuItem.Section.CustomerSheet,
-                badge = MenuItem.Badge(
-                    labelResId = R.string.beta_badge_label,
-                )
             ),
             MenuItem(
                 titleResId = R.string.address_element_title,
                 subtitleResId = R.string.address_element_subtitle,
                 klass = AddressElementExampleActivity::class.java,
                 section = MenuItem.Section.AddressElement,
-            ),
-            MenuItem(
-                titleResId = R.string.playground_title,
-                subtitleResId = R.string.playground_subtitle,
-                klass = NewPaymentSheetPlaygroundActivity::class.java,
-                section = MenuItem.Section.Internal,
             ),
         )
     }
@@ -126,11 +123,11 @@ private data class MenuItem(
     )
 
     enum class Section {
+        Internal,
         CompleteFlow,
         CustomFlow,
         CustomerSheet,
         AddressElement,
-        Internal,
     }
 }
 
@@ -141,6 +138,11 @@ private fun MainScreen(items: List<MenuItem>) {
     }
 
     LazyColumn {
+        Section(
+            title = "Internal",
+            items = groupedItems.getOrElse(MenuItem.Section.Internal) { emptyList() },
+        )
+
         Section(
             title = "Complete Flow",
             items = groupedItems.getOrElse(MenuItem.Section.CompleteFlow) { emptyList() },
@@ -159,11 +161,6 @@ private fun MainScreen(items: List<MenuItem>) {
         Section(
             title = "Address Element",
             items = groupedItems.getOrElse(MenuItem.Section.AddressElement) { emptyList() }
-        )
-
-        Section(
-            title = "Internal",
-            items = groupedItems.getOrElse(MenuItem.Section.Internal) { emptyList() },
         )
 
         item {

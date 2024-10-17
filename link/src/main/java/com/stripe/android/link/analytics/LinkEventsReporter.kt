@@ -7,6 +7,7 @@ internal interface LinkEventsReporter {
     fun onInvalidSessionState(state: SessionState)
 
     fun onInlineSignupCheckboxChecked()
+    fun onSignupFlowPresented()
     fun onSignupStarted(isInline: Boolean = false)
     fun onSignupCompleted(isInline: Boolean = false)
     fun onSignupFailure(isInline: Boolean = false, error: Throwable)

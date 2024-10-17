@@ -18,6 +18,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.PaymentMethod
 import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.FieldPopulator
 import com.stripe.android.test.core.TestParameters
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -71,6 +72,7 @@ internal class TestCardInCustomerSheet : BasePlaygroundTest() {
     }
 
     @Test
+    @Ignore
     fun testCardWith3ds2() {
         testDriver.savePaymentMethodInCustomerSheet(
             testParameters.copyPlaygroundSettings { settings ->

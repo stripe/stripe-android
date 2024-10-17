@@ -14,6 +14,7 @@ import androidx.annotation.StringRes
 import androidx.core.text.util.LinkifyCompat
 import androidx.core.view.ViewCompat
 import androidx.lifecycle.lifecycleScope
+import com.stripe.android.BASIC_INTEGRATION_DEPRECATION_WARNING
 import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
@@ -32,6 +33,7 @@ import kotlinx.coroutines.launch
  *
  * Should be started with [AddPaymentMethodActivityStarter].
  */
+@Deprecated(BASIC_INTEGRATION_DEPRECATION_WARNING)
 class AddPaymentMethodActivity : StripeActivity() {
 
     private val args: AddPaymentMethodActivityStarter.Args by lazy {
