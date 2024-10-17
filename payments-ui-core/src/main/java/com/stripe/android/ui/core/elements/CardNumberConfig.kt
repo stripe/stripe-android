@@ -13,12 +13,15 @@ import com.stripe.android.R as StripeR
 internal class CardNumberConfig(
     private val isCBCEligible: Boolean,
     private val cardBrandFilter: CardBrandFilter
-)    : CardDetailsTextFieldConfig {
+) : CardDetailsTextFieldConfig {
     override val capitalization: KeyboardCapitalization = KeyboardCapitalization.None
     override val debugLabel: String = "Card number"
     override val label: Int = StripeR.string.stripe_acc_label_card_number
     override val keyboard: KeyboardType = KeyboardType.NumberPassword
     override val visualTransformation: VisualTransformation = CardNumberVisualTransformation(' ')
+
+    // Hardcoded number of card digits entered before we hit the card metadata service in CBC
+    private var digitsRequiredToFetchBrands = 8
 
     override fun determineState(brand: CardBrand, number: String, numberAllowedDigits: Int): TextFieldState {
         val luhnValid = CardUtils.isValidLuhnNumber(number)
@@ -26,7 +29,13 @@ internal class CardNumberConfig(
 
         return if (number.isBlank()) {
             TextFieldStateConstants.Error.Blank
-        } else if (!cardBrandFilter.isAccepted(brand) && (!isCBCEligible || number.length > 8)) {
+        } else if (!cardBrandFilter.isAccepted(brand) &&
+            (!isCBCEligible || number.length > digitsRequiredToFetchBrands)
+        ) {
+            /*
+              If the merchant is eligible for CBC do not show the disallowed error
+              until we have had time to hit the card metadata service for a list of possible brands
+             */
             return TextFieldStateConstants.Error.Invalid(
                 errorMessageResId = StripeR.string.stripe_disallowed_card_brand,
                 formatArgs = arrayOf(brand.displayName),

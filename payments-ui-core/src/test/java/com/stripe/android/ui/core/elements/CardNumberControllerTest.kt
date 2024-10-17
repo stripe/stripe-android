@@ -477,7 +477,7 @@ internal class CardNumberControllerTest {
         cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter
     ): DefaultCardNumberController {
         return DefaultCardNumberController(
-            cardTextFieldConfig = CardNumberConfig(),
+            cardTextFieldConfig = CardNumberConfig(isCBCEligible = false, cardBrandFilter = DefaultCardBrandFilter),
             cardAccountRangeRepository = repository,
             uiContext = testDispatcher,
             workContext = testDispatcher,
@@ -521,7 +521,7 @@ internal class CardNumberControllerTest {
 }
 
 @Parcelize
-private class FakeCardBrandFilter(
+class FakeCardBrandFilter(
     private val disallowedBrands: Set<CardBrand>
 ) : CardBrandFilter {
     override fun isAccepted(cardBrand: CardBrand): Boolean {
