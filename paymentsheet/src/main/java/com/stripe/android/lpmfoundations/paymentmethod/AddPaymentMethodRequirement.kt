@@ -79,6 +79,6 @@ private val PaymentMethodMetadata.supportsMobileInstantDebitsFlow: Boolean
         val paymentMethodTypes = stripeIntent.paymentMethodTypes
         val noUsBankAccount = USBankAccount.code !in paymentMethodTypes
         val supportsBankAccounts = "bank_account" in stripeIntent.linkFundingSources
-        val isDeferred = stripeIntent.clientSecret == null
-        return noUsBankAccount && supportsBankAccounts && !isDeferred
+//        val isDeferred = stripeIntent.clientSecret == null
+        return noUsBankAccount && supportsBankAccounts // && !isDeferred
     }

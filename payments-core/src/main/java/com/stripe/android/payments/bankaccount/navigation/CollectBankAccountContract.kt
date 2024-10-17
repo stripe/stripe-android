@@ -50,6 +50,12 @@ class CollectBankAccountContract :
     ) : Parcelable {
         fun toBundle() = bundleOf(EXTRA_ARGS to this)
 
+        val product: String?
+            get() = when (configuration) {
+                is CollectBankAccountConfiguration.InstantDebits -> "instant_debits"
+                is CollectBankAccountConfiguration.USBankAccount -> null
+            }
+
         @Parcelize
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         data class ForPaymentIntent(
