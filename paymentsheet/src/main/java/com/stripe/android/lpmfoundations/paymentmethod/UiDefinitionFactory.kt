@@ -1,5 +1,6 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
+import com.stripe.android.CardBrandFilter
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.ui.inline.InlineSignupViewState
@@ -28,6 +29,7 @@ internal sealed interface UiDefinitionFactory {
         val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
         val requiresMandate: Boolean,
         val onLinkInlineSignupStateChanged: (InlineSignupViewState) -> Unit,
+        val cardBrandFilter: CardBrandFilter,
     ) {
         interface Factory {
             fun create(
@@ -61,6 +63,7 @@ internal sealed interface UiDefinitionFactory {
                         billingDetailsCollectionConfiguration = metadata.billingDetailsCollectionConfiguration,
                         requiresMandate = requiresMandate,
                         onLinkInlineSignupStateChanged = onLinkInlineSignupStateChanged,
+                        cardBrandFilter = metadata.cardBrandFilter,
                     )
                 }
             }

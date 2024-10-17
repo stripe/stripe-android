@@ -14,6 +14,7 @@ import com.stripe.android.link.ui.inline.LinkSignupMode.AlongsideSaveForFutureUs
 import com.stripe.android.link.ui.inline.LinkSignupMode.InsteadOfSaveForFutureUse
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.LinkMode
@@ -95,6 +96,7 @@ internal class DefaultPaymentSheetLoaderTest {
         )
     }
 
+    @OptIn(ExperimentalCardBrandFilteringApi::class)
     @Test
     fun `load with configuration should return expected result`() = runTest {
         prefsRepository.savePaymentSelection(
@@ -139,6 +141,7 @@ internal class DefaultPaymentSheetLoaderTest {
                     hasCustomerConfiguration = true,
                     isGooglePayReady = true,
                     linkMode = null,
+                    cardBrandFilter = PaymentSheetCardBrandFilter(PaymentSheet.CardBrandAcceptance.all())
                 ),
             )
         )
