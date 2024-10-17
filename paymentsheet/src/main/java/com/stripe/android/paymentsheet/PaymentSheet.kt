@@ -844,7 +844,6 @@ class PaymentSheet internal constructor(
              * The layout of payment methods in PaymentSheet. Defaults to [PaymentSheet.PaymentMethodLayout.Horizontal].
              * @see [PaymentSheet.PaymentMethodLayout] for the list of available layouts.
              */
-            @ExperimentalPaymentMethodLayoutApi
             fun paymentMethodLayout(paymentMethodLayout: PaymentMethodLayout): Builder = apply {
                 this.paymentMethodLayout = paymentMethodLayout
             }
