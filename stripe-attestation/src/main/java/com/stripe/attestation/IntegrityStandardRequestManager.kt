@@ -1,15 +1,11 @@
 package com.stripe.attestation
 
-import android.content.Context
 import androidx.annotation.RestrictTo
-import com.google.android.play.core.integrity.IntegrityManagerFactory
+import com.google.android.gms.tasks.Task
 import com.google.android.play.core.integrity.StandardIntegrityManager
 import com.google.android.play.core.integrity.StandardIntegrityManager.PrepareIntegrityTokenRequest
-import com.google.android.play.core.integrity.StandardIntegrityManager.StandardIntegrityToken
 import com.google.android.play.core.integrity.StandardIntegrityManager.StandardIntegrityTokenProvider
 import com.stripe.android.core.Logger
-import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlin.coroutines.resume
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface IntegrityRequestManager {
@@ -35,33 +31,32 @@ interface IntegrityRequestManager {
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class IntegrityStandardRequestManager(
     private val cloudProjectNumber: Long,
-    private val logger: Logger,
-    appContext: Context
+    private val logger: Logger, // inject a lambda instead.
+    private val factory: StandardIntegrityManagerFactory
 ) : IntegrityRequestManager {
 
-    private val standardIntegrityManager by lazy { IntegrityManagerFactory.createStandard(appContext) }
+    private val standardIntegrityManager: StandardIntegrityManager by lazy { factory.create() }
     private lateinit var integrityTokenProvider: StandardIntegrityTokenProvider
 
-    override suspend fun prepare() = suspendCancellableCoroutine<Result<Unit>> { continuation ->
-        runCatching {
-            standardIntegrityManager.prepareIntegrityToken(
+    override suspend fun prepare(): Result<Unit> = runCatching {
+        val finishedTask: Task<StandardIntegrityTokenProvider> = standardIntegrityManager
+            .prepareIntegrityToken(
                 PrepareIntegrityTokenRequest.builder()
                     .setCloudProjectNumber(cloudProjectNumber)
                     .build()
-            )
-                .addOnSuccessListener {
-                    logger.debug("Integrity: Prepared integrity token successfully")
-                    integrityTokenProvider = it
-                    continuation.resume(Result.success(Unit))
-                }
-                .addOnFailureListener {
-                    logger.error("Integrity: Failed to prepare integrity token", it)
-                    continuation.resume(Result.failure(it))
-                }
-        }.onFailure {
-            logger.error("Integrity: Failed to prepare integrity token", it)
-            continuation.resume(Result.failure(it))
-        }
+            ).awaitTask()
+
+        return finishedTask.toResult().fold(
+            onSuccess = {
+                logger.debug("Integrity: Prepared integrity token successfully")
+                integrityTokenProvider = it
+                Result.success(Unit)
+            },
+            onFailure = { error ->
+                logger.error("Integrity: Failed to prepare integrity token", error)
+                Result.failure(error)
+            }
+        )
     }
 
     override suspend fun requestToken(
@@ -73,28 +68,25 @@ class IntegrityStandardRequestManager(
 
     private suspend fun request(
         requestHash: String?,
-    ): Result<String> = suspendCancellableCoroutine { continuation ->
-        runCatching {
-            require(::integrityTokenProvider.isInitialized) {
-                "Integrity token provider is not initialized. Call prepare() first."
-            }
-            integrityTokenProvider.request(
-                StandardIntegrityManager.StandardIntegrityTokenRequest.builder()
-                    .setRequestHash(requestHash)
-                    .build()
-            )
-                .addOnSuccessListener { response: StandardIntegrityToken ->
-                    val token = response.token()
-                    logger.debug("Integrity - Received integrity token $token")
-                    continuation.resume(Result.success(token))
-                }
-                .addOnFailureListener { exception: Exception ->
-                    logger.error("Integrity - Failed to request integrity token", exception)
-                    continuation.resume(Result.failure(exception))
-                }
-        }.onFailure {
-            logger.error("Integrity - Failed to request integrity token", it)
-            continuation.resume(Result.failure(it))
+    ): Result<String> = runCatching {
+        require(::integrityTokenProvider.isInitialized) {
+            "Integrity token provider is not initialized. Call prepare() first."
         }
+        val finishedTask = integrityTokenProvider.request(
+            StandardIntegrityManager.StandardIntegrityTokenRequest.builder()
+                .setRequestHash(requestHash)
+                .build()
+        ).awaitTask()
+        return finishedTask.toResult().fold(
+            onSuccess = {
+                val token = it.token()
+                logger.debug("Integrity - Received integrity token $token")
+                Result.success(token)
+            },
+            onFailure = {
+                logger.error("Integrity - Failed to request integrity token", it)
+                Result.failure(it)
+            }
+        )
     }
 }
