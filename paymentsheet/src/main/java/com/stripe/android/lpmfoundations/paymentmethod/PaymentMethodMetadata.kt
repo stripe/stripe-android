@@ -1,6 +1,7 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
 import android.os.Parcelable
+import com.stripe.android.CardBrandFilter
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.lpmfoundations.FormHeaderInformation
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
@@ -48,6 +49,7 @@ internal data class PaymentMethodMetadata(
     val paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior,
     val linkMode: LinkMode?,
     val financialConnectionsAvailable: Boolean = DefaultIsFinancialConnectionsAvailable(),
+    val cardBrandFilter: CardBrandFilter,
 ) : Parcelable {
     fun hasIntentToSetup(): Boolean {
         return when (stripeIntent) {
@@ -249,6 +251,7 @@ internal data class PaymentMethodMetadata(
                 linkInlineConfiguration = linkInlineConfiguration,
                 linkMode = elementsSession.linkSettings?.linkMode,
                 isGooglePayReady = isGooglePayReady,
+                cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance)
             )
         }
 
@@ -281,6 +284,7 @@ internal data class PaymentMethodMetadata(
                 paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
                 linkMode = elementsSession.linkSettings?.linkMode,
                 externalPaymentMethodSpecs = emptyList(),
+                cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance)
             )
         }
     }

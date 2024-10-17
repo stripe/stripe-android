@@ -1,5 +1,7 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
+import com.stripe.android.CardBrandFilter
+import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.lpmfoundations.paymentmethod.link.LinkInlineConfiguration
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntentFixtures
@@ -30,6 +32,7 @@ internal object PaymentMethodMetadataFactory {
         paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
         linkInlineConfiguration: LinkInlineConfiguration? = null,
         linkMode: LinkMode? = LinkMode.LinkPaymentMethod,
+        cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter
     ): PaymentMethodMetadata {
         return PaymentMethodMetadata(
             stripeIntent = stripeIntent,
@@ -49,6 +52,7 @@ internal object PaymentMethodMetadataFactory {
             isGooglePayReady = isGooglePayReady,
             linkInlineConfiguration = linkInlineConfiguration,
             linkMode = linkMode,
+            cardBrandFilter = cardBrandFilter
         )
     }
 
