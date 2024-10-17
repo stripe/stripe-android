@@ -508,6 +508,20 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                 amount = args.formArgs.amount?.value,
                 currency = args.formArgs.amount?.currencyCode,
                 linkMode = args.linkMode,
+                billingAddress = ElementsSessionContext.BillingAddress(
+                    name = name.value,
+                    phone = phone.value?.let { phoneController.getE164PhoneNumber(it) },
+                    address = address.value?.let {
+                        ElementsSessionContext.BillingAddress.Address(
+                            line1 = it.line1,
+                            line2 = it.line2,
+                            postalCode = it.postalCode,
+                            city = it.city,
+                            state = it.state,
+                            country = it.country,
+                        )
+                    },
+                ),
             ),
         )
     }
