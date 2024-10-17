@@ -83,6 +83,13 @@ data class IdentifierSpec(
         val OneLineAddress = IdentifierSpec("address")
         val SameAsShipping = IdentifierSpec("same_as_shipping", ignoreField = true)
 
+        val LinkAccountSessionId = IdentifierSpec("us_bank_account[link_account_session]")
+        val LinkPaymentMethodId = IdentifierSpec("link[payment_method_id]")
+
+        val BankName = IdentifierSpec("bank_name", destination = ParameterDestination.Local.Extras)
+        val Last4 = IdentifierSpec("last4", destination = ParameterDestination.Local.Extras)
+        val UsesMicrodeposits = IdentifierSpec("uses_microdeposits", destination = ParameterDestination.Local.Extras)
+
         val Upi = IdentifierSpec("upi")
         val Vpa = IdentifierSpec("upi[vpa]")
 

@@ -85,7 +85,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory,
     private val errorReporter: ErrorReporter,
     internal val cvcRecollectionHandler: CvcRecollectionHandler,
-    private val cvcRecollectionInteractorFactory: CvcRecollectionInteractor.Factory
+    private val cvcRecollectionInteractorFactory: CvcRecollectionInteractor.Factory,
 ) : BaseSheetViewModel(
     config = args.config,
     eventReporter = eventReporter,

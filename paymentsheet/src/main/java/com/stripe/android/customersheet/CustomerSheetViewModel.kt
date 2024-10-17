@@ -34,11 +34,13 @@ import com.stripe.android.customersheet.injection.DaggerCustomerSheetViewModelCo
 import com.stripe.android.customersheet.util.CustomerSheetHacks
 import com.stripe.android.customersheet.util.isUnverifiedUSBankAccount
 import com.stripe.android.customersheet.util.sortPaymentMethods
+import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethod.Type.USBankAccount
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodUpdateParams
@@ -60,6 +62,7 @@ import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.toSavedSelection
 import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountTextBuilder
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.PaymentMethodRemovalDelayMillis
@@ -456,6 +459,11 @@ internal class CustomerSheetViewModel(
                          * `CustomerSheet` does not implement `Link` so we don't need a coordinator or callback.
                          */
                         linkConfigurationCoordinator = null,
+                        usBankAccountFormArguments = createDefaultUsBankArguments(paymentMethodMetadata.stripeIntent),
+                        formArguments = FormArgumentsFactory.create(
+                            paymentMethodCode = paymentMethod.code,
+                            metadata = paymentMethodMetadata,
+                        ),
                         onLinkInlineSignupStateChanged = {
                             throw IllegalStateException(
                                 "`CustomerSheet` does not implement `Link` and should not " +
@@ -465,7 +473,7 @@ internal class CustomerSheetViewModel(
                     ),
                 ) ?: listOf(),
                 primaryButtonLabel = if (
-                    paymentMethod.code == PaymentMethod.Type.USBankAccount.code &&
+                    paymentMethod.code == USBankAccount.code &&
                     it.bankAccountResult !is CollectBankAccountResultInternal.Completed
                 ) {
                     UiCoreR.string.stripe_continue_button_label.resolvableString
@@ -802,8 +810,13 @@ internal class CustomerSheetViewModel(
                         "`CustomerSheet` does not implement `Link` and should not " +
                             "receive `InlineSignUpViewState` updates"
                     )
-                }
-            )
+                },
+                usBankAccountFormArguments = createDefaultUsBankArguments(stripeIntent),
+                formArguments = FormArgumentsFactory.create(
+                    paymentMethodCode = paymentMethodCode,
+                    metadata = paymentMethodMetadata,
+                ),
+            ),
         ) ?: emptyList()
 
         transition(
@@ -813,7 +826,6 @@ internal class CustomerSheetViewModel(
                 formFieldValues = null,
                 formElements = formElements,
                 formArguments = formArguments,
-                usBankAccountFormArguments = createDefaultUsBankArguments(stripeIntent),
                 draftPaymentSelection = null,
                 enabled = true,
                 isLiveMode = isLiveModeProvider(),
@@ -854,7 +866,6 @@ internal class CustomerSheetViewModel(
                 handleViewAction(CustomerSheetViewAction.OnUpdateCustomButtonUIState(it))
             },
             hostedSurface = CollectBankAccountLauncher.HOSTED_SURFACE_CUSTOMER_SHEET,
-            onUpdatePrimaryButtonState = { /* no-op, CustomerSheetScreen does not use PrimaryButton.State */ },
             onError = { error ->
                 handleViewAction(CustomerSheetViewAction.OnFormError(error))
             }
@@ -887,18 +898,37 @@ internal class CustomerSheetViewModel(
         }
     }
 
-    private fun onCollectUSBankAccountResult(bankAccountResult: CollectBankAccountResultInternal) {
+    private fun onCollectUSBankAccountResult(bankAccountResult: CollectBankAccountResultInternal?) {
         updateViewState<CustomerSheetViewState.AddPaymentMethod> {
+            val isCompleted = bankAccountResult is CollectBankAccountResultInternal.Completed
+
+            // TODO: Needed?
+            val mandateText = USBankAccountTextBuilder.buildMandateAndMicrodepositsText(
+                merchantName = configuration.merchantDisplayName,
+                isVerifyingMicrodeposits = bankAccountResult?.usesMicrodeposits ?: false,
+                isSaveForFutureUseSelected = true,
+                isSetupFlow = true,
+                isInstantDebits = false,
+            )
+
             it.copy(
                 bankAccountResult = bankAccountResult,
-                primaryButtonLabel = if (bankAccountResult is CollectBankAccountResultInternal.Completed) {
+                primaryButtonLabel = if (isCompleted) {
                     R.string.stripe_paymentsheet_save.resolvableString
                 } else {
                     UiCoreR.string.stripe_continue_button_label.resolvableString
                 },
+                mandateText = mandateText,
             )
         }
     }
+
+    private val CollectBankAccountResultInternal.usesMicrodeposits: Boolean
+        get() {
+            val completedResult = this as? CollectBankAccountResultInternal.Completed
+            val session = completedResult?.response?.usBankAccountData?.financialConnectionsSession
+            return session?.paymentAccount is BankAccount
+        }
 
     private fun onConfirmUSBankAccount(usBankAccount: PaymentSelection.New.USBankAccount) {
         createAndAttach(usBankAccount.paymentMethodCreateParams)

@@ -161,6 +161,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             paymentSelection = initialPaymentSelection.await(),
             validationError = stripeIntent.validate(),
             paymentMethodMetadata = paymentMethodMetadata,
+            initializationMode = initializationMode,
         )
 
         reportSuccessfulLoad(

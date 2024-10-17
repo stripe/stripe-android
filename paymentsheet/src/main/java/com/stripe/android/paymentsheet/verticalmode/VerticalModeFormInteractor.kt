@@ -2,13 +2,11 @@ package com.stripe.android.paymentsheet.verticalmode
 
 import com.stripe.android.lpmfoundations.FormHeaderInformation
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
-import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.LinkInlineHandler
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
-import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.utils.mapAsStateFlow
@@ -30,9 +28,9 @@ internal interface VerticalModeFormInteractor {
     fun close()
 
     data class State(
-        val selectedPaymentMethodCode: String,
+//        val selectedPaymentMethodCode: String,
         val isProcessing: Boolean,
-        val usBankAccountFormArguments: USBankAccountFormArguments,
+//        val usBankAccountFormArguments: USBankAccountFormArguments,
         val formArguments: FormArguments,
         val formElements: List<FormElement>,
         val headerInformation: FormHeaderInformation?,
@@ -49,7 +47,6 @@ internal class DefaultVerticalModeFormInteractor(
     private val formArguments: FormArguments,
     private val formElements: List<FormElement>,
     private val onFormFieldValuesChanged: (formValues: FormFieldValues?, selectedPaymentMethodCode: String) -> Unit,
-    private val usBankAccountArguments: USBankAccountFormArguments,
     private val reportFieldInteraction: (String) -> Unit,
     private val headerInformation: FormHeaderInformation?,
     private val canGoBackDelegate: () -> Boolean,
@@ -59,9 +56,7 @@ internal class DefaultVerticalModeFormInteractor(
 ) : VerticalModeFormInteractor {
     override val state: StateFlow<VerticalModeFormInteractor.State> = processing.mapAsStateFlow { isProcessing ->
         VerticalModeFormInteractor.State(
-            selectedPaymentMethodCode = selectedPaymentMethodCode,
             isProcessing = isProcessing,
-            usBankAccountFormArguments = usBankAccountArguments,
             formArguments = formArguments,
             formElements = formElements,
             headerInformation = headerInformation,
@@ -105,12 +100,6 @@ internal class DefaultVerticalModeFormInteractor(
                 formArguments = formHelper.createFormArguments(selectedPaymentMethodCode),
                 formElements = formHelper.formElementsForCode(selectedPaymentMethodCode),
                 onFormFieldValuesChanged = formHelper::onFormFieldValuesChanged,
-                usBankAccountArguments = USBankAccountFormArguments.create(
-                    viewModel = viewModel,
-                    paymentMethodMetadata = paymentMethodMetadata,
-                    hostedSurface = CollectBankAccountLauncher.HOSTED_SURFACE_PAYMENT_ELEMENT,
-                    selectedPaymentMethodCode = selectedPaymentMethodCode
-                ),
                 headerInformation = paymentMethodMetadata.formHeaderInformationForCode(
                     selectedPaymentMethodCode,
                     customerHasSavedPaymentMethods = customerStateHolder.paymentMethods.value.any {

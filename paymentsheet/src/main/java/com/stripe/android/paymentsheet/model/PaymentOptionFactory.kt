@@ -125,7 +125,7 @@ internal class PaymentOptionFactory @Inject constructor(
                     drawableResourceId = selection.iconResource,
                     lightThemeIconUrl = null,
                     darkThemeIconUrl = null,
-                    label = selection.labelResource,
+                    label = selection.labelResource.resolve(context),
                     imageLoader = ::loadPaymentOption,
                 )
             }
