@@ -1115,6 +1115,7 @@ class USBankAccountFormViewModelTest {
                         amount = 5099,
                         currency = "usd",
                         linkMode = LinkMode.LinkCardBrand,
+                        billingAddress = ElementsSessionContext.BillingAddress(),
                     ),
                 )
             ),

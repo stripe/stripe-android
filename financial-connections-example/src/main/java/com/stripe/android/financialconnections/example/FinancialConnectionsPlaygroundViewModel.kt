@@ -136,6 +136,7 @@ internal class FinancialConnectionsPlaygroundViewModel(
                                 amount = it.amount,
                                 currency = it.currency,
                                 linkMode = LinkMode.LinkPaymentMethod,
+                                billingAddress = null,
                             ),
                             experience = settings.get<ExperienceSetting>().selectedOption,
                             integrationType = settings.get<IntegrationTypeSetting>().selectedOption,
