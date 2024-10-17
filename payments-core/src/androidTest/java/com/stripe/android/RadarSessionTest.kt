@@ -62,20 +62,20 @@ class RadarSessionTest {
             ApplicationProvider.getApplicationContext(),
             FAKE_PUBLISHABLE_KEY
         )
+        CustomerSession.initCustomerSession(context, ephemeralKeyProvider)
     }
 
     @Test
     fun ensureRadarSessionsAttachHCaptchaToken(): Unit = runTest {
-        // TODO: this should be replaced with another activity
-//        activityScenarioFactory.create<PaymentFlowActivity>(
-//            PaymentSessionFixtures.PAYMENT_FLOW_ARGS
-//        ).use { scenario ->
-//            scenario.onActivity { activity ->
-//                launch(Dispatchers.Main) {
-//                    stripe.createRadarSession(activity)
-//                }
-//            }
-//        }
+        activityScenarioFactory.create<PaymentFlowActivity>(
+            PaymentSessionFixtures.PAYMENT_FLOW_ARGS
+        ).use { scenario ->
+            scenario.onActivity { activity ->
+                launch(Dispatchers.Main) {
+                    stripe.createRadarSession(activity)
+                }
+            }
+        }
     }
 
     private companion object {
