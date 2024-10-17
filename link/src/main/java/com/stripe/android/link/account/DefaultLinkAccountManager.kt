@@ -7,7 +7,6 @@ import com.stripe.android.link.BuildConfig
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.analytics.LinkEventsReporter
-import com.stripe.android.link.injection.LinkScope
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.repositories.LinkRepository
@@ -26,7 +25,6 @@ import javax.inject.Inject
 /**
  * Manages the Link account for the current user, persisting it across app usages.
  */
-@LinkScope
 internal class DefaultLinkAccountManager @Inject constructor(
     private val config: LinkConfiguration,
     private val linkRepository: LinkRepository,

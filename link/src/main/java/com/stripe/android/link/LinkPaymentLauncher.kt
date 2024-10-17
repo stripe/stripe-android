@@ -17,13 +17,17 @@ import javax.inject.Singleton
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class LinkPaymentLauncher @Inject internal constructor(
     linkAnalyticsComponentBuilder: LinkAnalyticsComponent.Builder,
-    private val linkActivityContract: LinkActivityContract,
+    private val webLinkActivityContract: WebLinkActivityContract,
+    private val nativeLinkActivityContract: NativeLinkActivityContract,
     private val linkStore: LinkStore,
 ) {
     private val analyticsHelper = linkAnalyticsComponentBuilder.build().linkAnalyticsHelper
 
     private var linkActivityResultLauncher:
-        ActivityResultLauncher<LinkActivityContract.Args>? = null
+        ActivityResultLauncher<WebLinkActivityContract.Args>? = null
+
+    private var nativeLinkActivityResultLauncher:
+        ActivityResultLauncher<NativeLinkActivityContract.Args>? = null
 
     fun register(
         activityResultRegistry: ActivityResultRegistry,
@@ -31,7 +35,18 @@ class LinkPaymentLauncher @Inject internal constructor(
     ) {
         linkActivityResultLauncher = activityResultRegistry.register(
             "LinkPaymentLauncher",
-            linkActivityContract,
+            webLinkActivityContract,
+        ) { linkActivityResult ->
+            analyticsHelper.onLinkResult(linkActivityResult)
+            if (linkActivityResult is Completed) {
+                linkStore.markLinkAsUsed()
+            }
+            callback(linkActivityResult)
+        }
+
+        nativeLinkActivityResultLauncher = activityResultRegistry.register(
+            "NativeLinkPaymentLauncher",
+            nativeLinkActivityContract,
         ) { linkActivityResult ->
             analyticsHelper.onLinkResult(linkActivityResult)
             if (linkActivityResult is Completed) {
@@ -46,7 +61,17 @@ class LinkPaymentLauncher @Inject internal constructor(
         callback: (LinkActivityResult) -> Unit,
     ) {
         linkActivityResultLauncher = activityResultCaller.registerForActivityResult(
-            linkActivityContract
+            webLinkActivityContract
+        ) { linkActivityResult ->
+            analyticsHelper.onLinkResult(linkActivityResult)
+            if (linkActivityResult is Completed) {
+                linkStore.markLinkAsUsed()
+            }
+            callback(linkActivityResult)
+        }
+
+        nativeLinkActivityResultLauncher = activityResultCaller.registerForActivityResult(
+            nativeLinkActivityContract
         ) { linkActivityResult ->
             analyticsHelper.onLinkResult(linkActivityResult)
             if (linkActivityResult is Completed) {
@@ -58,7 +83,9 @@ class LinkPaymentLauncher @Inject internal constructor(
 
     fun unregister() {
         linkActivityResultLauncher?.unregister()
+        nativeLinkActivityResultLauncher?.unregister()
         linkActivityResultLauncher = null
+        nativeLinkActivityResultLauncher = null
     }
 
     /**
@@ -69,10 +96,25 @@ class LinkPaymentLauncher @Inject internal constructor(
     fun present(
         configuration: LinkConfiguration,
     ) {
-        val args = LinkActivityContract.Args(
+        val args = WebLinkActivityContract.Args(
             configuration,
         )
         linkActivityResultLauncher?.launch(args)
+        analyticsHelper.onLinkLaunched()
+    }
+
+    /**
+     * Launch the Link UI to process a payment.
+     *
+     * @param configuration The payment and customer settings
+     */
+    fun presentNative(
+        configuration: LinkConfiguration,
+    ) {
+        val args = NativeLinkActivityContract.Args(
+            configuration,
+        )
+        nativeLinkActivityResultLauncher?.launch(args)
         analyticsHelper.onLinkLaunched()
     }
 }

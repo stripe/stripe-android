@@ -46,7 +46,7 @@ sealed class LinkActivityResult : Parcelable {
     ) : LinkActivityResult()
 }
 
-internal fun createLinkActivityResult(resultCode: Int, intent: Intent?): LinkActivityResult {
+internal fun createWebLinkActivityResult(resultCode: Int, intent: Intent?): LinkActivityResult {
     return when (resultCode) {
         Activity.RESULT_CANCELED -> {
             LinkActivityResult.Canceled()

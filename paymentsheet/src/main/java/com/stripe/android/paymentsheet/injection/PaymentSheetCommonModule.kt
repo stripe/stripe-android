@@ -173,7 +173,6 @@ internal abstract class PaymentSheetCommonModule {
         }
 
         @Provides
-        @Singleton
         fun provideDurationProvider(): DurationProvider {
             return DefaultDurationProvider.instance
         }
