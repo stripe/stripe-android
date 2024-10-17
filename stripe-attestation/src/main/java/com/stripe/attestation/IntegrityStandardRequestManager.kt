@@ -9,7 +9,8 @@ import com.google.android.play.core.integrity.StandardIntegrityManager.StandardI
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface IntegrityRequestManager {
     /**
-     * Prepare the integrity token.
+     * Prepare the integrity token. This warms up the integrity token generation, it's recommended
+     * to call it as soon as possible if you know you will need an integrity token.
      *
      * Needs to be called before calling [requestToken].
      */
