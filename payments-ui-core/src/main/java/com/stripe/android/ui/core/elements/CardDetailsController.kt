@@ -11,6 +11,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.DateConfig
+import com.stripe.android.uicore.elements.FullNameConfig
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.RowController
 import com.stripe.android.uicore.elements.RowElement
@@ -36,16 +37,9 @@ internal class CardDetailsController(
 ) : SectionFieldErrorController, SectionFieldComposable {
 
     val nameElement = if (collectName) {
-        SimpleTextElement(
-            controller = SimpleTextFieldController(
-                textFieldConfig = SimpleTextFieldConfig(
-                    label = R.string.stripe_name_on_card,
-                    capitalization = KeyboardCapitalization.Words,
-                    keyboard = androidx.compose.ui.text.input.KeyboardType.Text
-                ),
-                initialValue = initialValues[IdentifierSpec.Name],
-            ),
-            identifier = IdentifierSpec.Name,
+        FullNameElement(
+            label = R.string.stripe_name_on_card,
+            initialValue = initialValues[IdentifierSpec.Name]
         )
     } else {
         null

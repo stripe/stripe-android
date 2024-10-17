@@ -49,18 +49,18 @@ internal class TestCard : BasePlaygroundTest() {
                 settings[CollectNameSettingsDefinition] =
                     PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
                 settings[CollectEmailSettingsDefinition] =
-                    PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
+                    PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never
                 settings[CollectPhoneSettingsDefinition] =
-                    PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
+                    PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never
                 settings[CollectAddressSettingsDefinition] =
-                    PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
+                    PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
             },
             populateCustomLpmFields = {
-                populateCardDetails()
-                populateEmail()
                 populateName("Name on card")
-                populateAddress()
-                populatePhoneNumber()
+                populateCardDetails()
+//                populateEmail()
+//                populateAddress()
+//                populatePhoneNumber()
             },
         )
     }

@@ -2,6 +2,7 @@ package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.SectionElement
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
@@ -14,20 +15,12 @@ import kotlinx.serialization.Transient
 data class NameSpec(
     @SerialName("api_path")
     override val apiPath: IdentifierSpec = IdentifierSpec.Name,
-
-    @SerialName("translation_id")
-    val labelTranslationId: TranslationId = TranslationId.AddressName
 ) : FormItemSpec() {
-    @IgnoredOnParcel
-    @Transient
-    private val simpleTextSpec =
-        SimpleTextSpec(
-            apiPath,
-            labelTranslationId.resourceId,
-            Capitalization.Words,
-            KeyboardType.Text
+    fun transform(initialValues: Map<IdentifierSpec, String?>) = createSectionElement(
+        FullNameElement(
+            this.apiPath,
+            label = TranslationId.AddressName.resourceId,
+            initialValue = initialValues[IdentifierSpec.Name]
         )
-
-    fun transform(initialValues: Map<IdentifierSpec, String?>) =
-        simpleTextSpec.transform(initialValues)
+    )
 }

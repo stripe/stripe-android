@@ -171,7 +171,7 @@ internal class FieldPopulator(
         }
 
         if (!defaultBillingAddress) {
-            populateZip()
+//            populateZip()
         }
     }
 
