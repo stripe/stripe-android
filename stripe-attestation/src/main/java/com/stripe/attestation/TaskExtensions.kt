@@ -10,7 +10,7 @@ import kotlin.coroutines.resume
 /**
  * Converts a *finished* [Task] to a [Result].
  */
-fun <T> Task<T>.toResult(): Result<T> {
+internal fun <T> Task<T>.toResult(): Result<T> {
     return when {
         isSuccessful -> Result.success(result)
         isCanceled -> Result.failure(CancellationException("Task was canceled"))
