@@ -211,7 +211,7 @@ class CardAccountRangeServiceTest {
         runTest {
             // Disallow Mastercard
             val disallowedBrands = setOf(CardBrand.MasterCard)
-            val cardBrandFilter = MockCardBrandFilter(disallowedBrands)
+            val cardBrandFilter = FakeCardBrandFilter(disallowedBrands)
 
             // Use a card number that matches Mastercard (starts with '2')
             val cardNumber = "2"
@@ -232,7 +232,7 @@ class CardAccountRangeServiceTest {
         runTest {
             // Disallow Visa
             val disallowedBrands = setOf(CardBrand.Visa)
-            val cardBrandFilter = MockCardBrandFilter(disallowedBrands)
+            val cardBrandFilter = FakeCardBrandFilter(disallowedBrands)
 
             // Use a card number that matches Mastercard (starts with '2')
             val cardNumber = "2"
@@ -313,7 +313,7 @@ class CardAccountRangeServiceTest {
 }
 
 @Parcelize
-private class MockCardBrandFilter(
+private class FakeCardBrandFilter(
     private val disallowedBrands: Set<CardBrand>
 ) : CardBrandFilter {
     override fun isAccepted(cardBrand: CardBrand): Boolean {
