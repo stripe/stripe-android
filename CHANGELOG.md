@@ -2,11 +2,13 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
-Dependencies updated in [9345](https://github.com/stripe/stripe-android/pull/9345):
+Dependencies updated in [9345](https://github.com/stripe/stripe-android/pull/9345) and [9469](https://github.com/stripe/stripe-android/pull/9469):
 * Bumped Accompanist from 0.32.0 to 0.34.0.
 * Bumped Compose from 1.5.4 to 1.6.8.
 * Bumped Lifecycle from 2.7.0 to 2.8.6.
 * Bumped Material from 1.11.0 to 1.12.0.
+* Bumped Kotlin from 1.9.22 to 1.9.25.
+* Bumped Kotlin Coroutines from 1.7.3 to 1.8.1.
 
 ## 20.52.1 - 2024-10-15
 
