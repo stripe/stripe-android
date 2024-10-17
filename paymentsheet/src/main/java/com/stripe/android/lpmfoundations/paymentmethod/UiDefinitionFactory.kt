@@ -30,7 +30,7 @@ internal sealed interface UiDefinitionFactory {
         val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
         val requiresMandate: Boolean,
         val onLinkInlineSignupStateChanged: (InlineSignupViewState) -> Unit,
-        val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
+        val cardBrandFilter: CardBrandFilter,
     ) {
         interface Factory {
             fun create(
