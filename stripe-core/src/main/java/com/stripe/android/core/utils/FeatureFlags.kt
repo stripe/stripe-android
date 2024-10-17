@@ -7,6 +7,7 @@ import com.stripe.android.core.BuildConfig
 @Suppress("unused")
 object FeatureFlags {
     // Add any feature flags here
+    val nativeLinkEnabled = FeatureFlag()
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

@@ -5,6 +5,7 @@ import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.RestrictTo
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.serialization.PopupPayload
 import com.stripe.android.networking.StripeRepository
 import javax.inject.Inject
@@ -15,7 +16,7 @@ class LinkActivityContract @Inject internal constructor(
 ) : ActivityResultContract<LinkActivityContract.Args, LinkActivityResult>() {
 
     override fun createIntent(context: Context, input: Args): Intent {
-        return if (NativeLinkEnabled()) {
+        return if (FeatureFlags.nativeLinkEnabled.isEnabled) {
             nativeIntent(context, input)
         } else {
             webIntent(context, input)

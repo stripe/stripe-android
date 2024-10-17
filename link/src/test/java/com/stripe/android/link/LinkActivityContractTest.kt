@@ -3,6 +3,7 @@ package com.stripe.android.link
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.model.StripeIntentFixtures
 import com.stripe.android.networking.StripeRepository
 import org.junit.After
@@ -32,7 +33,7 @@ class LinkActivityContractTest {
 
     @Test
     fun `LinkActivityContract creates intent with URL with native link disabled`() {
-        NativeLinkEnabled.enabled = false
+        FeatureFlags.nativeLinkEnabled.setEnabled(false)
         val config = LinkConfiguration(
             stripeIntent = StripeIntentFixtures.PI_SUCCEEDED,
             merchantName = "Merchant, Inc",
@@ -64,7 +65,7 @@ class LinkActivityContractTest {
 
     @Test
     fun `LinkActivityContract creates intent with with NativeLinkArgs when native link is enabled`() {
-        NativeLinkEnabled.enabled = true
+        FeatureFlags.nativeLinkEnabled.setEnabled(true)
         val config = LinkConfiguration(
             stripeIntent = StripeIntentFixtures.PI_SUCCEEDED,
             merchantName = "Merchant, Inc",
