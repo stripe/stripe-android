@@ -2,6 +2,7 @@ package com.stripe.android.customersheet
 
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
 import com.stripe.android.paymentsheet.forms.FormFieldValues
@@ -16,6 +17,7 @@ internal sealed class CustomerSheetViewAction {
     object OnAddCardPressed : CustomerSheetViewAction()
     object OnPrimaryButtonPressed : CustomerSheetViewAction()
     object OnCancelClose : CustomerSheetViewAction()
+    class OnDisallowedCardBrandEntered(val brand: CardBrand) : CustomerSheetViewAction()
     class OnItemSelected(val selection: PaymentSelection?) : CustomerSheetViewAction()
     class OnModifyItem(val paymentMethod: PaymentMethod) : CustomerSheetViewAction()
     class OnItemRemoved(val paymentMethod: PaymentMethod) : CustomerSheetViewAction()

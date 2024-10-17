@@ -21,6 +21,7 @@ import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
 import com.stripe.android.stripecardscan.cardscan.CardScanSheetResult
 import com.stripe.android.ui.core.asIndividualDigits
+import com.stripe.android.ui.core.elements.events.LocalCardBrandDisallowedReporter
 import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventReporter
 import com.stripe.android.uicore.elements.FieldError
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -318,12 +319,18 @@ internal class DefaultCardNumberController(
         previousFocusDirection: FocusDirection
     ) {
         val reporter = LocalCardNumberCompletedEventReporter.current
-
+        val disallowedBrandReporter = LocalCardBrandDisallowedReporter.current
         LaunchedEffect(Unit) {
             // Drop the set empty value & initial value
             fieldState.drop(1).collectLatest { state ->
                 when (state) {
                     is TextFieldStateConstants.Valid.Full -> reporter.onCardNumberCompleted()
+                    is TextFieldStateConstants.Error.Invalid -> {
+                        val error = state.getError()
+                        if (error?.errorMessage == PaymentsCoreR.string.stripe_disallowed_card_brand) {
+                            disallowedBrandReporter.onDisallowedCardBrandEntered(impliedCardBrand.value)
+                        }
+                    }
                     else -> Unit
                 }
             }

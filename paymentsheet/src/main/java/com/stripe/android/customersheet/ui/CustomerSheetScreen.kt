@@ -19,6 +19,7 @@ import com.stripe.android.common.ui.PrimaryButton
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.customersheet.CustomerSheetViewAction
 import com.stripe.android.customersheet.CustomerSheetViewState
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.PaymentOptionsStateFactory
 import com.stripe.android.paymentsheet.R
@@ -32,7 +33,9 @@ import com.stripe.android.paymentsheet.ui.SavedPaymentMethodTabLayoutUI
 import com.stripe.android.paymentsheet.utils.PaymentSheetContentPadding
 import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.ui.core.elements.SimpleDialogElementUI
+import com.stripe.android.ui.core.elements.events.CardBrandDisallowedReporter
 import com.stripe.android.ui.core.elements.events.CardNumberCompletedEventReporter
+import com.stripe.android.ui.core.elements.events.LocalCardBrandDisallowedReporter
 import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventReporter
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.R as PaymentsCoreR
@@ -208,9 +211,15 @@ internal fun AddPaymentMethod(
         DefaultCardNumberCompletedEventReporter(viewActionHandler)
     }
 
+    val disallowedReporter = remember(viewActionHandler) {
+        DefaultCardBrandDisallowedReporter(viewActionHandler)
+    }
+
     if (displayForm) {
         CompositionLocalProvider(
-            LocalCardNumberCompletedEventReporter provides eventReporter
+            LocalCardNumberCompletedEventReporter provides eventReporter,
+            LocalCardBrandDisallowedReporter provides disallowedReporter
+
         ) {
             PaymentElement(
                 enabled = viewState.enabled,
@@ -313,3 +322,12 @@ private class DefaultCardNumberCompletedEventReporter(
         viewActionHandler.invoke(CustomerSheetViewAction.OnCardNumberInputCompleted)
     }
 }
+
+private class DefaultCardBrandDisallowedReporter(
+    private val viewActionHandler: (CustomerSheetViewAction) -> Unit
+) : CardBrandDisallowedReporter {
+    override fun onDisallowedCardBrandEntered(brand: CardBrand) {
+        viewActionHandler.invoke(CustomerSheetViewAction.OnDisallowedCardBrandEntered(brand))
+    }
+}
+

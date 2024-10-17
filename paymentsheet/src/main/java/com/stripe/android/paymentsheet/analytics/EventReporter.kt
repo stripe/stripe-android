@@ -96,6 +96,8 @@ internal interface EventReporter {
         paymentSelection: PaymentSelection,
     )
 
+    fun onDisallowedCardBrandEntered(brand: CardBrand)
+
     /**
      * The customer has pressed the confirm button.
      */

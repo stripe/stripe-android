@@ -115,6 +115,8 @@ internal interface CustomerSheetEventReporter {
      */
     fun onCardNumberCompleted()
 
+    fun onDisallowedCardBrandEntered(brand: CardBrand)
+
     enum class Screen(val value: String) {
         AddPaymentMethod("add_payment_method"),
         SelectPaymentMethod("select_payment_method"),
