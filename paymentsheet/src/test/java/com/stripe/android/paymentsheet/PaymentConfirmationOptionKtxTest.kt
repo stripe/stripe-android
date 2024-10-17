@@ -1,15 +1,18 @@
 package com.stripe.android.paymentsheet
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.R
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormScreenState
 import org.junit.Test
 
 class PaymentConfirmationOptionKtxTest {
@@ -246,6 +249,56 @@ class PaymentConfirmationOptionKtxTest {
         ).isNull()
     }
 
+    @Test
+    fun `Converts Instant Debits into a saved payment confirmation option`() {
+        val paymentSelection = createNewBankAccountPaymentSelection(linkMode = LinkMode.LinkPaymentMethod)
+
+        val expectedPaymentMethod = PaymentMethod.Builder()
+            .setId("pm_123")
+            .setCode(PaymentMethod.Type.Link.code)
+            .setType(PaymentMethod.Type.Link)
+            .build()
+
+        assertThat(
+            paymentSelection.toPaymentConfirmationOption(
+                initializationMode = PI_INITIALIZATION_MODE,
+                configuration = PaymentSheetFixtures.CONFIG_CUSTOMER,
+            )
+        ).isEqualTo(
+            PaymentConfirmationOption.PaymentMethod.Saved(
+                initializationMode = PI_INITIALIZATION_MODE,
+                shippingDetails = null,
+                optionsParams = null,
+                paymentMethod = expectedPaymentMethod,
+            )
+        )
+    }
+
+    @Test
+    fun `Converts Link Card Brand into a saved payment confirmation option`() {
+        val paymentSelection = createNewBankAccountPaymentSelection(linkMode = LinkMode.LinkCardBrand)
+
+        val expectedPaymentMethod = PaymentMethod.Builder()
+            .setId("pm_123")
+            .setCode(PaymentMethod.Type.Link.code)
+            .setType(PaymentMethod.Type.Link)
+            .build()
+
+        assertThat(
+            paymentSelection.toPaymentConfirmationOption(
+                initializationMode = PI_INITIALIZATION_MODE,
+                configuration = PaymentSheetFixtures.CONFIG_CUSTOMER,
+            )
+        ).isEqualTo(
+            PaymentConfirmationOption.PaymentMethod.Saved(
+                initializationMode = PI_INITIALIZATION_MODE,
+                shippingDetails = null,
+                optionsParams = null,
+                paymentMethod = expectedPaymentMethod,
+            )
+        )
+    }
+
     private fun createNewPaymentSelection(
         createParams: PaymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
         optionsParams: PaymentMethodOptionsParams? = null,
@@ -257,6 +310,37 @@ class PaymentConfirmationOptionKtxTest {
             paymentMethodOptionsParams = optionsParams,
             brand = CardBrand.CartesBancaires,
             customerRequestedSave = customerRequestedSave,
+        )
+    }
+
+    private fun createNewBankAccountPaymentSelection(
+        linkMode: LinkMode?,
+    ): PaymentSelection.New.USBankAccount {
+        return PaymentSelection.New.USBankAccount(
+            labelResource = "•••• 4242",
+            iconResource = R.drawable.stripe_ic_bank_stripe,
+            paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.US_BANK_ACCOUNT,
+            paymentMethodOptionsParams = null,
+            customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+            screenState = USBankAccountFormScreenState.MandateCollection(
+                resultIdentifier = USBankAccountFormScreenState.ResultIdentifier.PaymentMethod("pm_123"),
+                bankName = "Stripe Bank",
+                last4 = "4242",
+                intentId = null,
+                primaryButtonText = resolvableString("Pay now"),
+                mandateText = resolvableString("Legal stuff"),
+            ),
+            instantDebits = PaymentSelection.New.USBankAccount.InstantDebitsInfo(
+                paymentMethodId = "pm_123",
+                linkMode = linkMode,
+            ),
+            input = PaymentSelection.New.USBankAccount.Input(
+                name = "",
+                email = "email@email.com",
+                phone = null,
+                address = null,
+                saveForFutureUse = false,
+            ),
         )
     }
 
