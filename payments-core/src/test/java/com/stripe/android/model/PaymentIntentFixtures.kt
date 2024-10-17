@@ -1321,6 +1321,97 @@ internal object PaymentIntentFixtures {
         )
     }
 
+    val PAY_NOW_REQUIRES_ACTION by lazy {
+        requireNotNull(
+            PARSER.parse(
+                JSONObject(
+                    """
+        {
+            "id": "pi_3Q8jQDBgCYKNuUnn0cDZRt0M",
+            "object": "payment_intent",
+            "amount": 5099,
+            "amount_details": {
+                "tip": {}
+            },
+            "automatic_payment_methods": {
+                "allow_redirects": "always",
+                "enabled": true
+            },
+            "canceled_at": null,
+            "cancellation_reason": null,
+            "capture_method": "automatic",
+            "client_secret": "pi_3Q8jQDBgCYKNuUnn0cDZRt0M_secret_QQpFFMoff8BJDrlWXsNfgib5q",
+            "confirmation_method": "automatic",
+            "created": 1728655345,
+            "currency": "thb",
+            "description": null,
+            "last_payment_error": null,
+            "livemode": false,
+            "next_action": {
+                "promptpay_display_qr_code": {
+                    "data": "https://stripe.com/payment_methods/test_payment?payment_attempt=payatt_3Q8jQDBgCYKNuUnn0aobHaIn",
+                    "hosted_instructions_url": "https://payments.stripe.com/promptpay/instructions/testdata",
+                    "image_url_png": "https://qr.stripe.com/test_YWNjdF8xTnBFQVdCZ0NZS051VW5uLF9SMGt3OXZycTF4ZTBzeVUwOGRkc1ZTREJDZVY5Unp40100I0182z36.png",
+                    "image_url_svg": "https://qr.stripe.com/test_YWNjdF8xTnBFQVdCZ0NZS051VW5uLF9SMGt3OXZycTF4ZTBzeVUwOGRkc1ZTREJDZVY5Unp40100I0182z36.svg"
+                },
+                "type": "promptpay_display_qr_code"
+            },
+            "payment_method": {
+                "id": "pm_1Q8jQIBgCYKNuUnnomYZfujF",
+                "object": "payment_method",
+                "allow_redisplay": "unspecified",
+                "billing_details": {
+                    "address": {
+                        "city": "South San Francisco",
+                        "country": "US",
+                        "line1": "354 Oyster Point Blvd",
+                        "line2": null,
+                        "postal_code": "94080",
+                        "state": "CA"
+                    },
+                    "email": "email@email.com",
+                    "name": "Jenny Rosen",
+                    "phone": "+18008675309"
+                },
+                "created": 1728655350,
+                "customer": null,
+                "livemode": false,
+                "promptpay": {},
+                "type": "promptpay"
+            },
+            "payment_method_configuration_details": {
+                "id": "pmc_1NpEApBgCYKNuUnnp48ACNyA",
+                "parent": null
+            },
+            "payment_method_types": [
+                "card",
+                "promptpay"],
+            "processing": null,
+            "receipt_email": null,
+            "setup_future_usage": null,
+            "shipping": {
+                "address": {
+                    "city": "San Francisco",
+                    "country": "US",
+                    "line1": "510 Townsend St",
+                    "line2": null,
+                    "postal_code": "94102",
+                    "state": "California"
+                },
+                "carrier": null,
+                "name": "John Doe",
+                "phone": null,
+                "tracking_number": null
+            },
+            "source": null,
+            "status": "requires_action"
+        }
+                    """.trimIndent()
+                )
+            )
+        )
+    }
+
     private val CASH_APP_PAY_REQUIRES_ACTION_JSON by lazy {
         JSONObject(
             """
