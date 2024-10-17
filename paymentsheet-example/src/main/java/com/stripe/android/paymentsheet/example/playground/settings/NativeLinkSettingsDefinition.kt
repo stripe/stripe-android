@@ -1,6 +1,6 @@
 package com.stripe.android.paymentsheet.example.playground.settings
 
-import com.stripe.android.link.NativeLinkEnabled
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 
@@ -16,6 +16,6 @@ internal object NativeLinkSettingsDefinition : BooleanSettingsDefinition(
         configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData
     ) {
         super.configure(value, configurationBuilder, playgroundState, configurationData)
-        NativeLinkEnabled.enabled = value
+        FeatureFlags.nativeLinkEnabled.setEnabled(value)
     }
 }

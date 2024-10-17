@@ -1,13 +1,13 @@
 package com.stripe.android.link.injection
 
 import android.content.Context
+import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
-import com.stripe.android.link.LinkActivity
 import com.stripe.android.link.LinkActivityViewModel
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.account.LinkAccountManager
-import com.stripe.android.link.ui.signup.SignUpViewModel
+import com.stripe.android.link.analytics.LinkEventsReporter
 import dagger.BindsInstance
 import dagger.Component
 import javax.inject.Named
@@ -26,12 +26,9 @@ internal annotation class NativeLinkScope
 internal interface NativeLinkComponent {
     val linkAccountManager: LinkAccountManager
     val configuration: LinkConfiguration
-
+    val linkEventsReporter: LinkEventsReporter
+    val logger: Logger
     val viewModel: LinkActivityViewModel
-
-    val signUpViewModelFactory: SignUpViewModel.Factory
-
-    fun inject(activity: LinkActivity)
 
     @Component.Builder
     interface Builder {
