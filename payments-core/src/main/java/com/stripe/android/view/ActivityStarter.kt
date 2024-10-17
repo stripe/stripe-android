@@ -8,6 +8,7 @@ import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import androidx.fragment.app.Fragment
 
+// TODO: debatable for API review: we could make this restricted vis I think
 /**
  * Superclass for starting Stripe activities.
  */
