@@ -7,6 +7,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.junit4.createComposeRule
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.CardBrandFilter
+import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.R
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.CardNumber
@@ -28,6 +30,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
+import kotlinx.parcelize.Parcelize
 import org.junit.After
 import org.junit.Rule
 import org.junit.Test
@@ -226,6 +229,32 @@ internal class CardNumberControllerTest {
                             ),
                         ),
                         hide = false
+                    )
+                )
+        }
+    }
+
+    @Test
+    fun `trailingIcon should filter out disallowed brands`() = runTest {
+        val disallowedBrands = setOf(CardBrand.AmericanExpress, CardBrand.MasterCard)
+        val cardBrandFilter = FakeCardBrandFilter(disallowedBrands)
+        val cardNumberController = createController(cardBrandFilter = cardBrandFilter)
+
+        cardNumberController.trailingIcon.test {
+            cardNumberController.onValueChange("")
+            idleLooper()
+            assertThat(awaitItem() as TextFieldIcon.MultiTrailing)
+                .isEqualTo(
+                    TextFieldIcon.MultiTrailing(
+                        staticIcons = listOf(
+                            TextFieldIcon.Trailing(CardBrand.Visa.icon, isTintable = false),
+                            TextFieldIcon.Trailing(CardBrand.Discover.icon, isTintable = false),
+                            TextFieldIcon.Trailing(CardBrand.JCB.icon, isTintable = false),
+                        ),
+                        animatedIcons = listOf(
+                            TextFieldIcon.Trailing(CardBrand.DinersClub.icon, isTintable = false),
+                            TextFieldIcon.Trailing(CardBrand.UnionPay.icon, isTintable = false)
+                        )
                     )
                 )
         }
@@ -445,6 +474,7 @@ internal class CardNumberControllerTest {
         initialValue: String? = null,
         cardBrandChoiceConfig: CardBrandChoiceConfig = CardBrandChoiceConfig.Ineligible,
         repository: CardAccountRangeRepository = FakeCardAccountRangeRepository(),
+        cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter
     ): DefaultCardNumberController {
         return DefaultCardNumberController(
             cardTextFieldConfig = CardNumberConfig(),
@@ -453,6 +483,7 @@ internal class CardNumberControllerTest {
             workContext = testDispatcher,
             initialValue = initialValue,
             cardBrandChoiceConfig = cardBrandChoiceConfig,
+            cardBrandFilter = cardBrandFilter
         )
     }
 
@@ -486,5 +517,14 @@ internal class CardNumberControllerTest {
 
     private companion object {
         const val TEST_TAG = "CardNumberElement"
+    }
+}
+
+@Parcelize
+private class FakeCardBrandFilter(
+    private val disallowedBrands: Set<CardBrand>
+) : CardBrandFilter {
+    override fun isAccepted(cardBrand: CardBrand): Boolean {
+        return !disallowedBrands.contains(cardBrand)
     }
 }

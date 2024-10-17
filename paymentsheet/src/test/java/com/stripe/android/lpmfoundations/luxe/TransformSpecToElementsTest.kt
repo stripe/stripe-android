@@ -4,6 +4,7 @@ import androidx.appcompat.view.ContextThemeWrapper
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -388,6 +389,7 @@ private object TransformSpecToElementsFactory {
                 requiresMandate = requiresMandate,
                 linkConfigurationCoordinator = null,
                 onLinkInlineSignupStateChanged = { throw AssertionError("Not implemented") },
+                cardBrandFilter = DefaultCardBrandFilter
             )
         )
     }
