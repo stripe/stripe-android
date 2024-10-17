@@ -180,7 +180,7 @@ internal class WebIntentNextActionHandler @Inject constructor(
                     "null hostedVoucherUrl for ${actionable.nextActionType?.code}"
                 ),
             returnUrl = null,
-            shouldCancelIntentOnUserNavigation = false
+            shouldCancelIntentOnUserNavigation = shouldCancelIntentOnUserNavigation
         )
     }
 
