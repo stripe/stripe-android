@@ -1,6 +1,7 @@
 package com.stripe.android.financialconnections.domain
 
 import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext
+import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext.BillingAddress
 import com.stripe.android.financialconnections.model.PaymentMethod
 import com.stripe.android.financialconnections.repository.CachedConsumerSession
 import com.stripe.android.financialconnections.repository.FinancialConnectionsConsumerSessionRepository
@@ -11,6 +12,7 @@ import com.stripe.android.model.SharePaymentDetails
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
@@ -87,6 +89,79 @@ class RealCreateInstantDebitsResultTest {
         )
     }
 
+    @Test
+    fun `Passes along billing details to createPaymentMethod if available`() = runTest {
+        val consumerRepository = makeConsumerSessionRepository()
+        val repository = makeRepository()
+
+        val billingDetails = BillingAddress(
+            name = "Some name",
+            phone = "+15555555555",
+            address = BillingAddress.Address(
+                city = "San Francisco",
+                country = "US",
+                line1 = "123 Main St",
+                line2 = "Apt 4",
+                postalCode = "94111",
+                state = "CA",
+            ),
+        )
+
+        val createInstantDebitResult = RealCreateInstantDebitsResult(
+            consumerRepository = consumerRepository,
+            repository = repository,
+            consumerSessionProvider = { makeCachedConsumerSession() },
+            elementsSessionContext = makeElementsSessionContext(
+                linkMode = null,
+                billingAddress = billingDetails,
+            ),
+        )
+
+        createInstantDebitResult("bank_account_id_001")
+
+        verify(repository).createPaymentMethod(
+            paymentDetailsId = "ba_1234",
+            consumerSessionClientSecret = "clientSecret",
+        )
+    }
+
+    @Test
+    fun `Passes along billing details to sharePaymentDetails if available`() = runTest {
+        val consumerRepository = makeConsumerSessionRepository()
+        val repository = makeRepository()
+
+        val billingDetails = BillingAddress(
+            name = "Some name",
+            phone = "+15555555555",
+            address = BillingAddress.Address(
+                city = "San Francisco",
+                country = "US",
+                line1 = "123 Main St",
+                line2 = "Apt 4",
+                postalCode = "94111",
+                state = "CA",
+            ),
+        )
+
+        val createInstantDebitResult = RealCreateInstantDebitsResult(
+            consumerRepository = consumerRepository,
+            repository = repository,
+            consumerSessionProvider = { makeCachedConsumerSession() },
+            elementsSessionContext = makeElementsSessionContext(
+                linkMode = LinkMode.LinkCardBrand,
+                billingAddress = billingDetails,
+            ),
+        )
+
+        createInstantDebitResult("bank_account_id_001")
+
+        verify(consumerRepository).sharePaymentDetails(
+            paymentDetailsId = "ba_1234",
+            consumerSessionClientSecret = "clientSecret",
+            expectedPaymentMethodType = "card",
+        )
+    }
+
     private fun makeConsumerSessionRepository(): FinancialConnectionsConsumerSessionRepository {
         val consumerPaymentDetails = ConsumerPaymentDetails(
             paymentDetails = listOf(
@@ -103,7 +178,7 @@ class RealCreateInstantDebitsResultTest {
         )
 
         return mock<FinancialConnectionsConsumerSessionRepository> {
-            onBlocking { createPaymentDetails(any(), any()) } doReturn consumerPaymentDetails
+            onBlocking { createPaymentDetails(any(), any(), anyOrNull(), any()) } doReturn consumerPaymentDetails
             onBlocking { sharePaymentDetails(any(), any(), any()) } doReturn sharePaymentDetails
         }
     }
@@ -130,12 +205,14 @@ class RealCreateInstantDebitsResultTest {
 
     private fun makeElementsSessionContext(
         linkMode: LinkMode?,
+        billingAddress: BillingAddress? = null,
     ): ElementsSessionContext {
         return ElementsSessionContext(
             initializationMode = ElementsSessionContext.InitializationMode.PaymentIntent("pi_123"),
             amount = 100L,
             currency = "usd",
             linkMode = linkMode,
+            billingAddress = billingAddress,
         )
     }
 }
