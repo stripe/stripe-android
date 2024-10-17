@@ -8,7 +8,6 @@ import com.stripe.android.networking.StripeRepository
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.AbsPaymentController
 import com.stripe.android.view.ActivityScenarioFactory
-import com.stripe.android.view.TestActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher

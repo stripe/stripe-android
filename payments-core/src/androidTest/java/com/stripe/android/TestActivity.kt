@@ -1,4 +1,4 @@
-package com.stripe.android.view
+package com.stripe.android
 
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
