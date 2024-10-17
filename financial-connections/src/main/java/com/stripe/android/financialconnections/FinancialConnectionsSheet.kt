@@ -46,6 +46,7 @@ class FinancialConnectionsSheet internal constructor(
         val amount: Long?,
         val currency: String?,
         val linkMode: LinkMode?,
+        val billingAddress: BillingAddress?,
     ) : Parcelable {
 
         val paymentIntentId: String?
@@ -68,6 +69,51 @@ class FinancialConnectionsSheet internal constructor(
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             @Parcelize
             data object DeferredIntent : InitializationMode
+        }
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Parcelize
+        data class BillingAddress(
+            val name: String? = null,
+            val phone: String? = null,
+            val address: Address? = null,
+        ) : Parcelable {
+
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            @Parcelize
+            data class Address(
+                val line1: String? = null,
+                val line2: String? = null,
+                val postalCode: String? = null,
+                val city: String? = null,
+                val state: String? = null,
+                val country: String? = null,
+            ) : Parcelable {
+
+                fun consumerApiParams(): Map<String, Any> {
+                    return buildMap {
+                        line1?.let { put("line_1", it) }
+                        line2?.let { put("line_2", it) }
+                        postalCode?.let { put("postal_code", it) }
+                        city?.let { put("locality", it) }
+                        state?.let { put("administrative_area", it) }
+                        country?.let { put("country_code", it) }
+                    }.filter { entry ->
+                        entry.value.isNotBlank()
+                    }
+                }
+            }
+
+            fun consumerApiParams(): Map<String, Any> {
+                val contactParams = buildMap {
+                    name?.let { put("name", it) }
+                }.filter { entry ->
+                    entry.value.isNotBlank()
+                }
+
+                val addressParams = address?.consumerApiParams().orEmpty()
+                return contactParams + addressParams
+            }
         }
     }
 
