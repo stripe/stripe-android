@@ -26,13 +26,22 @@ internal class RealCreateInstantDebitsResult @Inject constructor(
         bankAccountId: String,
     ): InstantDebitsResult {
         val consumerSession = consumerSessionProvider.provideConsumerSession()
+
         val clientSecret = requireNotNull(consumerSession?.clientSecret) {
             "Consumer session client secret cannot be null"
         }
 
+        val billingEmailAddress = requireNotNull(consumerSession?.emailAddress) {
+            "Consumer session email address cannot be null"
+        }
+
+        val billingAddress = elementsSessionContext?.billingAddress
+
         val response = consumerRepository.createPaymentDetails(
             consumerSessionClientSecret = clientSecret,
             bankAccountId = bankAccountId,
+            billingAddress = billingAddress,
+            billingEmailAddress = billingEmailAddress,
         )
 
         val paymentDetails = response.paymentDetails.filterIsInstance<BankAccount>().first()
@@ -42,11 +51,14 @@ internal class RealCreateInstantDebitsResult @Inject constructor(
                 paymentDetailsId = paymentDetails.id,
                 consumerSessionClientSecret = clientSecret,
                 expectedPaymentMethodType = elementsSessionContext.linkMode.expectedPaymentMethodType,
+                billingPhone = elementsSessionContext.billingAddress?.phone,
             ).paymentMethodId
         } else {
             repository.createPaymentMethod(
                 paymentDetailsId = paymentDetails.id,
                 consumerSessionClientSecret = clientSecret,
+                billingAddress = billingAddress,
+                billingEmailAddress = billingEmailAddress,
             ).id
         }
 

@@ -163,6 +163,7 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
                 amount = 1234,
                 currency = "cad",
                 linkMode = LinkMode.LinkPaymentMethod,
+                billingAddress = null,
             )
         )
 
@@ -427,6 +428,7 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
                 consumerSessionClientSecret = anyOrNull(),
                 paymentDetailsId = anyOrNull(),
                 expectedPaymentMethodType = anyOrNull(),
+                billingPhone = anyOrNull(),
                 requestSurface = anyOrNull(),
                 requestOptions = anyOrNull(),
                 extraParams = eq(fraudParams.params),
@@ -441,6 +443,7 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
             consumerSessionClientSecret = consumerSessionClientSecret,
             paymentDetailsId = "pd_123",
             expectedPaymentMethodType = "card",
+            billingPhone = null,
         )
 
         verify(fraudDetectionDataRepository, never()).getLatest()
