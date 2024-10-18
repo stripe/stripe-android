@@ -36,7 +36,7 @@ class AccountOnboardingExampleActivity : FragmentActivity() {
                 val accountOnboardingExampleState by viewModel.state.collectAsState()
                 val accounts = accountOnboardingExampleState.accounts
 
-                MainContent(title = "Account Onboarding Example") {
+                MainContent(title = stringResource(R.string.account_onboarding)) {
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center,

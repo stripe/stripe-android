@@ -36,7 +36,7 @@ class PayoutsExampleActivity : FragmentActivity() {
                 val payoutsExampleState by viewModel.state.collectAsState()
                 val accounts = payoutsExampleState.accounts
 
-                MainContent(title = "Payouts Example") {
+                MainContent(title = stringResource(R.string.payouts)) {
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center,
