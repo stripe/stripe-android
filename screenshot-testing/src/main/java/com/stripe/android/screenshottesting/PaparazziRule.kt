@@ -10,16 +10,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalInspectionMode
 import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
-import app.cash.paparazzi.detectEnvironment
-import com.android.ide.common.rendering.api.RenderSession
 import com.android.ide.common.rendering.api.SessionParams
 import com.stripe.android.uicore.StripeTheme
 import org.junit.rules.TestRule
 import org.junit.runner.Description
 import org.junit.runners.model.Statement
-import kotlin.reflect.KProperty1
-import kotlin.reflect.full.memberProperties
-import kotlin.reflect.jvm.isAccessible
 
 class PaparazziRule(
     vararg configOptions: List<PaparazziConfigOption>,
@@ -89,8 +84,6 @@ class PaparazziRule(
                 testCase.reset()
             }
         }
-
-        dispose()
     }
 
     private fun createPaparazziDeviceConfig(): DeviceConfig {
@@ -104,21 +97,8 @@ class PaparazziRule(
             // Needed to shrink the screenshot to the height of the composable
             renderingMode = SessionParams.RenderingMode.SHRINK,
             showSystemUi = false,
-            environment = detectEnvironment().run {
-                copy(compileSdkVersion = 33, platformDir = platformDir.replace("34", "33"))
-            },
             theme = "Theme.MaterialComponents",
         )
-    }
-
-    @Suppress("UNCHECKED_CAST")
-    private fun dispose() {
-        val renderSession: RenderSession = (
-            paparazzi::class.memberProperties
-                .first { it.name == "bridgeRenderSession" } as KProperty1<Paparazzi, RenderSession>
-            ).apply { isAccessible = true }.invoke(paparazzi)
-
-        renderSession.disposeWithCompose()
     }
 }
 
