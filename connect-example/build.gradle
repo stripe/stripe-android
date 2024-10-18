@@ -127,9 +127,7 @@ android {
     kotlinOptions {
         freeCompilerArgs += [
                 "-opt-in=kotlinx.coroutines.FlowPreview",
-                "-Xcontext-receivers",
-                "-P",
-                "plugin:androidx.compose.compiler.plugins.kotlin:enableStrongSkippingMode=true"
+                "-Xcontext-receivers"
         ]
         if (gradle.ext.isCi) {
             kotlinOptions.allWarningsAsErrors = true
