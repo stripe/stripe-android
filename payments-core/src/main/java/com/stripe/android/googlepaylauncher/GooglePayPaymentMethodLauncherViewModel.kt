@@ -11,6 +11,7 @@ import com.google.android.gms.wallet.PaymentData
 import com.google.android.gms.wallet.PaymentDataRequest
 import com.google.android.gms.wallet.PaymentsClient
 import com.stripe.android.BuildConfig
+import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.exception.APIConnectionException
@@ -65,7 +66,8 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
             ),
             billingAddressParameters = args.config.billingAddressConfig.convert(),
             isEmailRequired = args.config.isEmailRequired,
-            allowCreditCards = args.config.allowCreditCards
+            allowCreditCards = args.config.allowCreditCards,
+            cardBrandFilter = DefaultCardBrandFilter
         )
     }
 
