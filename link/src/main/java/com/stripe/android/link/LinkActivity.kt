@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.VisibleForTesting
@@ -32,13 +33,13 @@ internal class LinkActivity : ComponentActivity() {
     @VisibleForTesting
     internal lateinit var navController: NavHostController
 
-    @Suppress("SwallowedException")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         try {
             viewModel = ViewModelProvider(this, LinkActivityViewModel.factory())[LinkActivityViewModel::class.java]
         } catch (e: NoArgsException) {
+            Log.e(TAG, "Failed to create LinkActivityViewModel", e)
             setResult(Activity.RESULT_CANCELED)
             finish()
         }
@@ -105,6 +106,7 @@ internal class LinkActivity : ComponentActivity() {
     }
 
     companion object {
+        private const val TAG = "LinkActivity"
         internal const val EXTRA_ARGS = "native_link_args"
 
         internal fun createIntent(
