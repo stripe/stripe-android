@@ -26,4 +26,4 @@
 
 # Stripe Connect SDK
 /connect/ @stripe/mx-mobile-reviewers
-/stripe-connect-example/ @stripe/mx-mobile-reviewers
+/connect-example/ @stripe/mx-mobile-reviewers

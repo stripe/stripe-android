@@ -98,7 +98,7 @@ apiValidation {
             "payments-core-testing",
             "paymentsheet-example",
             "stripecardscan-example",
-            "stripe-connect-example",
+            "connect-example",
             "screenshot-testing",
             "3ds2playground",
             "dokka-stripe",
