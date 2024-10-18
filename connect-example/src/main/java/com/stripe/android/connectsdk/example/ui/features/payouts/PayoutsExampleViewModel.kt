@@ -2,6 +2,7 @@ package com.stripe.android.connectsdk.example.ui.features.payouts
 
 import androidx.lifecycle.ViewModel
 import com.github.kittinunf.fuel.core.FuelError
+import com.stripe.android.connectsdk.EmbeddedComponentManager
 import com.stripe.android.connectsdk.FetchClientSecretCallback.ClientSecretResultCallback
 import com.stripe.android.connectsdk.PrivateBetaConnectSDK
 import com.stripe.android.connectsdk.example.BuildConfig
@@ -29,19 +30,7 @@ class PayoutsExampleViewModel(
         getAccounts()
     }
 
-    @OptIn(PrivateBetaConnectSDK::class)
-    fun fetchClientSecret(resultCallback: ClientSecretResultCallback) {
-        val account = _state.value.selectedAccount ?: return
-        networkingScope.launch {
-            try {
-                val clientSecret = embeddedComponentService.fetchClientSecret(account.merchantId)
-                resultCallback.onResult(clientSecret)
-            } catch (e: FuelError) {
-                resultCallback.onError()
-                logger.error("(PayoutsExampleViewModel) Error fetching client secret: $e")
-            }
-        }
-    }
+    // public methods
 
     fun onAccountSelected(account: Merchant) {
         _state.update {
@@ -49,25 +38,48 @@ class PayoutsExampleViewModel(
         }
     }
 
+    // private methods
+
+    @OptIn(PrivateBetaConnectSDK::class)
+    private fun fetchClientSecret(resultCallback: ClientSecretResultCallback) {
+        val account = _state.value.selectedAccount ?: return resultCallback.onResult(null)
+        networkingScope.launch {
+            try {
+                val clientSecret = embeddedComponentService.fetchClientSecret(account.merchantId)
+                resultCallback.onResult(clientSecret)
+            } catch (e: FuelError) {
+                resultCallback.onResult(null)
+                logger.error("(PayoutsExampleViewModel) Error fetching client secret: $e")
+            }
+        }
+    }
+
+    @OptIn(PrivateBetaConnectSDK::class)
     private fun getAccounts() {
         networkingScope.launch {
             try {
                 val response = embeddedComponentService.getAccounts()
                 _state.update {
                     it.copy(
-                        publishableKey = response.publishableKey,
                         accounts = response.availableMerchants,
                     )
                 }
+                EmbeddedComponentManager.init(
+                    configuration = EmbeddedComponentManager.Configuration(
+                        publishableKey = response.publishableKey
+                    ),
+                    fetchClientSecret = this@PayoutsExampleViewModel::fetchClientSecret
+                )
             } catch (e: FuelError) {
                 logger.error("(PayoutsExampleViewModel) Error getting accounts: $e")
             }
         }
     }
 
+    // state
+
     data class PayoutsExampleState(
         val selectedAccount: Merchant? = null,
         val accounts: List<Merchant>? = null,
-        val publishableKey: String? = null,
     )
 }

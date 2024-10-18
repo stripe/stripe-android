@@ -1,26 +1,31 @@
 package com.stripe.android.connectsdk.example.ui.features.payouts
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.fragment.app.FragmentActivity
+import androidx.fragment.compose.AndroidFragment
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.stripe.android.connectsdk.EmbeddedComponentManager
-import com.stripe.android.connectsdk.EmbeddedComponentManager.Configuration
+import com.stripe.android.connectsdk.PayoutsFragment
 import com.stripe.android.connectsdk.PrivateBetaConnectSDK
 import com.stripe.android.connectsdk.example.ConnectSdkExampleTheme
 import com.stripe.android.connectsdk.example.MainContent
+import com.stripe.android.connectsdk.example.R
 import com.stripe.android.connectsdk.example.ui.common.LaunchEmbeddedComponentsScreen
 
-@OptIn(PrivateBetaConnectSDK::class)
-class PayoutsExampleActivity : ComponentActivity() {
+class PayoutsExampleActivity : FragmentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,7 +34,6 @@ class PayoutsExampleActivity : ComponentActivity() {
             ConnectSdkExampleTheme {
                 val viewModel: PayoutsExampleViewModel = viewModel()
                 val payoutsExampleState by viewModel.state.collectAsState()
-                val sdkPublishableKey = payoutsExampleState.publishableKey
                 val accounts = payoutsExampleState.accounts
 
                 MainContent(title = "Payouts Example") {
@@ -37,22 +41,20 @@ class PayoutsExampleActivity : ComponentActivity() {
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center,
                     ) {
-                        if (sdkPublishableKey != null && accounts != null) {
-                            val embeddedComponentManager = remember(sdkPublishableKey) {
-                                EmbeddedComponentManager(
-                                    activity = this@PayoutsExampleActivity,
-                                    configuration = Configuration(sdkPublishableKey),
-                                    fetchClientSecret = viewModel::fetchClientSecret,
+                        if (accounts != null) {
+                            var isPayoutsVisible by remember { mutableStateOf(false) }
+
+                            if (isPayoutsVisible) {
+                                PayoutsComponentWrapper(onDismiss = { isPayoutsVisible = false })
+                            } else {
+                                LaunchEmbeddedComponentsScreen(
+                                    embeddedComponentName = stringResource(R.string.payouts),
+                                    selectedAccount = payoutsExampleState.selectedAccount,
+                                    connectSDKAccounts = accounts,
+                                    onConnectSDKAccountSelected = viewModel::onAccountSelected,
+                                    onEmbeddedComponentLaunched = { isPayoutsVisible = true },
                                 )
                             }
-
-                            LaunchEmbeddedComponentsScreen(
-                                embeddedComponentName = "Payouts",
-                                selectedAccount = payoutsExampleState.selectedAccount,
-                                connectSDKAccounts = accounts,
-                                onConnectSDKAccountSelected = viewModel::onAccountSelected,
-                                onEmbeddedComponentLaunched = embeddedComponentManager::presentPayouts,
-                            )
                         } else {
                             CircularProgressIndicator()
                         }
@@ -60,5 +62,12 @@ class PayoutsExampleActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    @OptIn(PrivateBetaConnectSDK::class)
+    @Composable
+    private fun PayoutsComponentWrapper(onDismiss: () -> Unit) {
+        BackHandler(onBack = onDismiss)
+        AndroidFragment<PayoutsFragment>()
     }
 }

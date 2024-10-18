@@ -1,44 +1,24 @@
 package com.stripe.android.connectsdk
 
 import android.os.Parcelable
-import androidx.activity.ComponentActivity
 import androidx.annotation.ColorInt
 import androidx.annotation.RestrictTo
 import kotlinx.parcelize.Parcelize
 
 @PrivateBetaConnectSDK
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class EmbeddedComponentManager internal constructor() {
-
-    constructor(
-        @Suppress("UNUSED_PARAMETER") activity: ComponentActivity,
-        @Suppress("UNUSED_PARAMETER") configuration: Configuration,
-        @Suppress("UNUSED_PARAMETER") fetchClientSecret: FetchClientSecretCallback,
-    ) : this() {
-        // TODO MXMOBILE-2760 - replace with actual implementation and remove the @Suppress annotations
-    }
-
+class EmbeddedComponentManager internal constructor(
+    private val configuration: Configuration,
+    private val fetchClientSecret: FetchClientSecretCallback,
+) {
     @PrivateBetaConnectSDK
-    fun presentAccountOnboarding() {
-        throw NotImplementedError("Not yet implemented")
-    }
-
-    @PrivateBetaConnectSDK
-    fun presentPayouts() {
-        throw NotImplementedError("Not yet implemented")
-    }
-
-    @PrivateBetaConnectSDK
-    fun update(
-        // TODO MXMOBILE-2507 - replace with actual implementation and remove the @Suppress annotations
-        @Suppress("UNUSED_PARAMETER") appearance: Appearance,
-    ) {
-        throw NotImplementedError("Not yet implemented")
+    fun update(@Suppress("UNUSED_PARAMETER") appearance: Appearance) {
+        throw NotImplementedError("Appearance update functionality is not yet implemented")
     }
 
     @PrivateBetaConnectSDK
     fun logout() {
-        throw NotImplementedError("Not yet implemented")
+        throw NotImplementedError("Logout functionality is not yet implemented")
     }
 
     // Configuration
@@ -56,114 +36,120 @@ class EmbeddedComponentManager internal constructor() {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
     data class Appearance(
-        val typography: Typography,
-        val colors: Colors,
-        val spacingUnit: Float? = null,
-        val buttonPrimary: Button,
-        val buttonSecondary: Button,
-        val badgeNeutral: Badge,
-        val badgeSuccess: Badge,
-        val badgeWarning: Badge,
-        val badgeDanger: Badge,
-        val cornerRadius: CornerRadius
+        val colorsLight: Colors = Colors(),
+        val colorsDark: Colors? = null,
+        val cornerRadius: CornerRadius = CornerRadius(),
+        val typography: Typography = Typography(),
+        val buttonPrimaryLight: Button = Button(),
+        val buttonPrimaryDark: Button? = null,
+        val buttonSecondaryLight: Button = Button(),
+        val buttonSecondaryDark: Button? = null,
+        val badgeNeutralLight: Badge = Badge(),
+        val badgeNeutralDark: Badge? = null,
+        val badgeSuccessLight: Badge = Badge(),
+        val badgeSuccessDark: Badge? = null,
+        val badgeWarningLight: Badge = Badge(),
+        val badgeWarningDark: Badge? = null,
+        val badgeDangerLight: Badge = Badge(),
+        val badgeDangerDark: Badge? = null
+    ) : Parcelable
+
+    @PrivateBetaConnectSDK
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @Parcelize
+    data class Colors(
+        @ColorInt val primary: Int? = null,
+        @ColorInt val background: Int? = null,
+        @ColorInt val text: Int? = null,
+        @ColorInt val secondaryText: Int? = null,
+        @ColorInt val danger: Int? = null,
+        @ColorInt val border: Int? = null,
+        @ColorInt val actionPrimaryText: Int? = null,
+        @ColorInt val actionSecondaryText: Int? = null,
+        @ColorInt val offsetBackground: Int? = null,
+        @ColorInt val formBackground: Int? = null,
+        @ColorInt val formHighlightBorder: Int? = null,
+        @ColorInt val formAccent: Int? = null
+    ) : Parcelable
+
+    @PrivateBetaConnectSDK
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @Parcelize
+    data class Button(
+        @ColorInt val colorBackground: Int? = null,
+        @ColorInt val colorBorder: Int? = null,
+        @ColorInt val colorText: Int? = null
+    ) : Parcelable
+
+    @PrivateBetaConnectSDK
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @Parcelize
+    data class Badge(
+        @ColorInt val colorBackground: Int? = null,
+        @ColorInt val colorText: Int? = null,
+        @ColorInt val colorBorder: Int? = null
+    ) : Parcelable
+
+    @PrivateBetaConnectSDK
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @Parcelize
+    data class CornerRadius(
+        val base: Float? = null,
+        val button: Float? = null,
+        val badge: Float? = null,
+        val overlay: Float? = null,
+        val form: Float? = null
+    ) : Parcelable
+
+    @PrivateBetaConnectSDK
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @Parcelize
+    data class Typography(
+        val fontFamily: String? = null,
+        val fontSizeBase: Float? = null,
+        val headingXl: Style? = null,
+        val headingLg: Style? = null,
+        val headingMd: Style? = null,
+        val headingSm: Style? = null,
+        val headingXs: Style? = null,
+        val bodyMd: Style? = null,
+        val bodySm: Style? = null,
+        val labelMd: Style? = null,
+        val labelSm: Style? = null
     ) : Parcelable {
-        companion object {
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-            val default = Appearance(
-                typography = Typography(),
-                colors = Colors(),
-                spacingUnit = null,
-                buttonPrimary = Button(),
-                buttonSecondary = Button(),
-                badgeNeutral = Badge(),
-                badgeSuccess = Badge(),
-                badgeWarning = Badge(),
-                badgeDanger = Badge(),
-                cornerRadius = CornerRadius()
+
+        @PrivateBetaConnectSDK
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Parcelize
+        data class Style(
+            val fontSize: Float? = null,
+            val fontWeight: Int? = null,
+            val textTransform: TextTransform = TextTransform.None
+        ) : Parcelable
+    }
+
+    @PrivateBetaConnectSDK
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    enum class TextTransform {
+        None,
+        Uppercase,
+        Lowercase,
+        Capitalize
+    }
+
+    companion object {
+        private var instance: EmbeddedComponentManager? = null
+
+        @PrivateBetaConnectSDK
+        @JvmStatic
+        fun init(
+            configuration: Configuration,
+            fetchClientSecret: FetchClientSecretCallback,
+        ) {
+            instance = EmbeddedComponentManager(
+                configuration,
+                fetchClientSecret,
             )
         }
-
-        @PrivateBetaConnectSDK
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        @Parcelize
-        data class Typography(
-            val font: String? = null,
-            val fontSizeBase: Float? = null,
-            val bodyMd: Style = Style(),
-            val bodySm: Style = Style(),
-            val headingXl: Style = Style(),
-            val headingLg: Style = Style(),
-            val headingMd: Style = Style(),
-            val headingSm: Style = Style(),
-            val headingXs: Style = Style(),
-            val labelMd: Style = Style(),
-            val labelSm: Style = Style()
-        ) : Parcelable {
-
-            @PrivateBetaConnectSDK
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-            @Parcelize
-            data class Style(
-                val fontSize: Float? = null,
-                val weight: String? = null,
-                val textTransform: TextTransform? = null
-            ) : Parcelable
-        }
-
-        @PrivateBetaConnectSDK
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        enum class TextTransform {
-            NONE,
-            UPPERCASE,
-            LOWERCASE,
-            CAPITALIZE
-        }
-
-        @PrivateBetaConnectSDK
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        @Parcelize
-        data class Colors(
-            @ColorInt val primary: Int? = null,
-            @ColorInt val text: Int? = null,
-            @ColorInt val danger: Int? = null,
-            @ColorInt val background: Int? = null,
-            @ColorInt val secondaryText: Int? = null,
-            @ColorInt val border: Int? = null,
-            @ColorInt val actionPrimaryText: Int? = null,
-            @ColorInt val actionSecondaryText: Int? = null,
-            @ColorInt val offsetBackground: Int? = null,
-            @ColorInt val formBackground: Int? = null,
-            @ColorInt val formHighlightBorder: Int? = null,
-            @ColorInt val formAccent: Int? = null
-        ) : Parcelable
-
-        @PrivateBetaConnectSDK
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        @Parcelize
-        data class Button(
-            @ColorInt val colorBackground: Int? = null,
-            @ColorInt val colorBorder: Int? = null,
-            @ColorInt val colorText: Int? = null
-        ) : Parcelable
-
-        @PrivateBetaConnectSDK
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        @Parcelize
-        data class Badge(
-            @ColorInt val colorBackground: Int? = null,
-            @ColorInt val colorText: Int? = null,
-            @ColorInt val colorBorder: Int? = null
-        ) : Parcelable
-
-        @PrivateBetaConnectSDK
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        @Parcelize
-        data class CornerRadius(
-            val base: Float? = null,
-            val form: Float? = null,
-            val button: Float? = null,
-            val badge: Float? = null,
-            val overlay: Float? = null
-        ) : Parcelable
     }
 }

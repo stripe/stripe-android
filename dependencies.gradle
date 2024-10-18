@@ -118,6 +118,7 @@ ext.libs = [
                 core              : "androidx.core:core:${versions.androidxCore}",
                 coreKtx           : "androidx.core:core-ktx:${versions.androidxCore}",
                 fragment          : "androidx.fragment:fragment-ktx:${versions.androidxFragment}",
+                fragmentCompose   : "androidx.fragment:fragment-compose:${versions.androidxFragment}",
                 legacySupport     : "androidx.legacy:legacy-support-v4:${versions.androidxLegacySupport}",
                 lifecycle         : "androidx.lifecycle:lifecycle-runtime-ktx:${versions.androidxLifecycle}",
                 lifecycleCompose  : "androidx.lifecycle:lifecycle-runtime-compose:${versions.androidxLifecycle}",
