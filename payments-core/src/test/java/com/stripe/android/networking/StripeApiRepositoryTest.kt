@@ -1767,7 +1767,7 @@ internal class StripeApiRepositoryTest {
                     amount = 1000,
                     hostedSurface = "payment_element",
                     currency = "usd",
-                    instantDebits = false,
+                    product = "instant_debits",
                 ),
                 DEFAULT_OPTIONS
             )
@@ -1786,6 +1786,7 @@ internal class StripeApiRepositoryTest {
                 assertThat(this["amount"]).isEqualTo(1000)
                 assertThat(this["hosted_surface"]).isEqualTo("payment_element")
                 assertThat(this["currency"]).isEqualTo("usd")
+                assertThat(this["product"]).isEqualTo("instant_debits")
             }
         }
 
