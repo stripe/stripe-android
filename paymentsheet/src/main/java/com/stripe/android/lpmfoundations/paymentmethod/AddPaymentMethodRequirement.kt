@@ -3,6 +3,7 @@ package com.stripe.android.lpmfoundations.paymentmethod
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod.Type.USBankAccount
+import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
 
 internal enum class AddPaymentMethodRequirement {
     /** A special case that indicates the payment method is always unsupported by PaymentSheet. */
@@ -80,5 +81,13 @@ private val PaymentMethodMetadata.supportsMobileInstantDebitsFlow: Boolean
         val noUsBankAccount = USBankAccount.code !in paymentMethodTypes
         val supportsBankAccounts = "bank_account" in stripeIntent.linkFundingSources
         val isDeferred = stripeIntent.clientSecret == null
-        return noUsBankAccount && supportsBankAccounts && !isDeferred
+        return noUsBankAccount && supportsBankAccounts && canShowBankForm && !isDeferred
+    }
+
+private val PaymentMethodMetadata.canShowBankForm: Boolean
+    get() {
+        val collectsEmail = billingDetailsCollectionConfiguration.email != CollectionMode.Never
+        val attachDefaults = billingDetailsCollectionConfiguration.attachDefaultsToPaymentMethod
+        val hasDefaultValue = attachDefaults && !defaultBillingDetails?.email.isNullOrBlank()
+        return collectsEmail || hasDefaultValue
     }

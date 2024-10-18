@@ -76,8 +76,11 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     private val collectingPhone =
         args.formArgs.billingDetailsCollectionConfiguration.phone == CollectionMode.Always
 
-    private val collectingName =
+    private val collectingName = if (args.instantDebits) {
+        args.formArgs.billingDetailsCollectionConfiguration.name == CollectionMode.Always
+    } else {
         args.formArgs.billingDetailsCollectionConfiguration.name != CollectionMode.Never
+    }
 
     private val collectingEmail =
         args.formArgs.billingDetailsCollectionConfiguration.email != CollectionMode.Never
@@ -249,8 +252,10 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         val hasDefaultEmail = args.formArgs.billingDetails?.email != null &&
             args.formArgs.billingDetailsCollectionConfiguration.attachDefaultsToPaymentMethod
 
-        assert((hasDefaultName || collectingName) && (hasDefaultEmail || collectingEmail)) {
-            "If name or email are not collected, they must be provided through defaults"
+        if (!args.instantDebits) {
+            assert((hasDefaultName || collectingName) && (hasDefaultEmail || collectingEmail)) {
+                "If name or email are not collected, they must be provided through defaults"
+            }
         }
     }
 
