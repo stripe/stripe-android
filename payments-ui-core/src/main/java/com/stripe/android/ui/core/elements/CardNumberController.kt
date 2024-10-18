@@ -3,6 +3,8 @@ package com.stripe.android.ui.core.elements
 import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.autofill.AutofillType
@@ -320,18 +322,29 @@ internal class DefaultCardNumberController(
     ) {
         val reporter = LocalCardNumberCompletedEventReporter.current
         val disallowedBrandReporter = LocalCardBrandDisallowedReporter.current
+
+        // Remember the last state indicating whether it was a disallowed card brand error
+        val lastLoggedCardBrand = remember { mutableStateOf<CardBrand?>(null) }
+
         LaunchedEffect(Unit) {
-            // Drop the set empty value & initial value
+            // Drop the initial value to avoid emitting on first composition
             fieldState.drop(1).collectLatest { state ->
                 when (state) {
-                    is TextFieldStateConstants.Valid.Full -> reporter.onCardNumberCompleted()
+                    is TextFieldStateConstants.Valid.Full -> {
+                        reporter.onCardNumberCompleted()
+                        lastLoggedCardBrand.value = null // Reset when valid
+                    }
                     is TextFieldStateConstants.Error.Invalid -> {
                         val error = state.getError()
-                        if (error?.errorMessage == PaymentsCoreR.string.stripe_disallowed_card_brand) {
+                        val isDisallowedError = error?.errorMessage == PaymentsCoreR.string.stripe_disallowed_card_brand
+                        if (isDisallowedError && lastLoggedCardBrand.value != impliedCardBrand.value) {
                             disallowedBrandReporter.onDisallowedCardBrandEntered(impliedCardBrand.value)
+                            lastLoggedCardBrand.value = impliedCardBrand.value
                         }
                     }
-                    else -> Unit
+                    else -> {
+                        lastLoggedCardBrand.value = null // Reset for other states
+                    }
                 }
             }
         }
