@@ -7,7 +7,6 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -172,11 +171,8 @@ private fun LoadedContent(
         }
     }
 
-    LazyLayout(
-        lazyListState = listState,
-        bodyPadding = PaddingValues(horizontal = 16.dp),
-    ) {
-        item { SearchTitle(modifier = Modifier.padding(horizontal = 8.dp)) }
+    LazyLayout(lazyListState = listState) {
+        item { SearchTitle() }
         item { Spacer(modifier = Modifier.height(24.dp)) }
         stickyHeader(key = "searchRow") {
             SearchRow(
@@ -223,7 +219,7 @@ private fun LazyListScope.searchResults(
                 key = { it.id },
                 itemContent = { institution ->
                     InstitutionResultTile(
-                        modifier = Modifier.padding(8.dp),
+                        modifier = Modifier.padding(vertical = 8.dp),
                         loading = selectedInstitutionId == institution.id,
                         enabled = selectedInstitutionId?.let { it == institution.id } ?: true,
                         institution = institution,
@@ -233,7 +229,6 @@ private fun LazyListScope.searchResults(
             )
             item(key = "search_more") {
                 SearchMoreRow(
-                    modifier = Modifier.padding(8.dp),
                     onClick = onSearchMoreClick,
                     enabled = selectedInstitutionId == null,
                 )
@@ -244,7 +239,7 @@ private fun LazyListScope.searchResults(
             // Load failure: Display error message.
             is Fail -> item {
                 NoResultsTile(
-                    modifier = Modifier.padding(8.dp),
+                    modifier = Modifier.padding(vertical = 8.dp),
                     showManualEntry = payload.featuredInstitutions.showManualEntry,
                     onManualEntryClick = onManualEntryClick
                 )
@@ -263,7 +258,7 @@ private fun LazyListScope.searchResults(
                 // NO RESULTS CASE
                 item {
                     NoResultsTile(
-                        modifier = Modifier.padding(8.dp),
+                        modifier = Modifier.padding(vertical = 8.dp),
                         showManualEntry = institutions().showManualEntry,
                         onManualEntryClick = onManualEntryClick
                     )
@@ -275,7 +270,7 @@ private fun LazyListScope.searchResults(
                     key = { it.id },
                     itemContent = { institution ->
                         InstitutionResultTile(
-                            modifier = Modifier.padding(8.dp),
+                            modifier = Modifier.padding(vertical = 8.dp),
                             loading = selectedInstitutionId == institution.id,
                             enabled = selectedInstitutionId?.let { it == institution.id } ?: true,
                             institution = institution,
@@ -286,7 +281,7 @@ private fun LazyListScope.searchResults(
                 if (institutions().showManualEntry == true) {
                     item {
                         ManualEntryRow(
-                            modifier = Modifier.padding(8.dp),
+                            modifier = Modifier.padding(vertical = 8.dp),
                             enabled = selectedInstitutionId == null,
                             onManualEntryClick = onManualEntryClick
                         )
@@ -354,7 +349,7 @@ private fun SearchRow(
         modifier = modifier
             .fillMaxWidth()
             .background(colors.backgroundSurface)
-            .padding(top = 0.dp, bottom = 8.dp, start = 8.dp, end = 8.dp)
+            .padding(top = 0.dp, bottom = 8.dp)
     ) {
         FinancialConnectionsOutlinedTextField(
             modifier = modifier
