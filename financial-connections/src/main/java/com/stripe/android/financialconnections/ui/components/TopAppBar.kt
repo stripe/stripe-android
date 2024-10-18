@@ -197,7 +197,7 @@ private fun Title(
             enter = fadeIn(animationSpec = tween()),
             exit = fadeOut(animationSpec = tween()),
         ) {
-            Icon(
+            Image(
                 modifier = Modifier.size(width = LOGO_WIDTH, height = LOGO_HEIGHT),
                 painter = painterResource(id = theme.icon),
                 contentDescription = null // decorative element
