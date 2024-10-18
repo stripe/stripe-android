@@ -1,4 +1,4 @@
-package com.stripe.android.connectsdk.example.networking
+package com.stripe.android.connect.example.networking
 
 import android.os.Build
 import com.github.kittinunf.fuel.core.FoldableRequestInterceptor
@@ -6,7 +6,7 @@ import com.github.kittinunf.fuel.core.FoldableResponseInterceptor
 import com.github.kittinunf.fuel.core.RequestTransformer
 import com.github.kittinunf.fuel.core.ResponseTransformer
 import com.github.kittinunf.fuel.core.extensions.cUrlString
-import com.stripe.android.connectsdk.example.BuildConfig
+import com.stripe.android.connect.example.BuildConfig
 import com.stripe.android.core.Logger
 import com.stripe.android.core.version.StripeSdkVersion
 

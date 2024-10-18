@@ -1,4 +1,4 @@
-package com.stripe.android.connectsdk.example
+package com.stripe.android.connect.example
 
 import android.app.Application
 import android.os.StrictMode

@@ -1,4 +1,4 @@
-package com.stripe.android.connectsdk.example.networking
+package com.stripe.android.connect.example.networking
 
 import com.github.kittinunf.fuel.core.Deserializable
 import com.github.kittinunf.fuel.core.FuelError
@@ -8,8 +8,6 @@ import com.github.kittinunf.fuel.core.Response
 import com.github.kittinunf.fuel.core.awaitResult
 import com.github.kittinunf.result.Result
 import kotlinx.serialization.DeserializationStrategy
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
 class EmbeddedComponentService {

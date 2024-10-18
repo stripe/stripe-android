@@ -1,4 +1,4 @@
-package com.stripe.android.connectsdk.example
+package com.stripe.android.connect.example
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box

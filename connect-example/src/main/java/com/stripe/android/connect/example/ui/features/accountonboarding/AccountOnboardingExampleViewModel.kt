@@ -1,13 +1,13 @@
-package com.stripe.android.connectsdk.example.ui.features.accountonboarding
+package com.stripe.android.connect.example.ui.features.accountonboarding
 
 import androidx.lifecycle.ViewModel
 import com.github.kittinunf.fuel.core.FuelError
-import com.stripe.android.connectsdk.EmbeddedComponentManager
-import com.stripe.android.connectsdk.FetchClientSecretCallback.ClientSecretResultCallback
-import com.stripe.android.connectsdk.PrivateBetaConnectSDK
-import com.stripe.android.connectsdk.example.BuildConfig
-import com.stripe.android.connectsdk.example.networking.EmbeddedComponentService
-import com.stripe.android.connectsdk.example.networking.Merchant
+import com.stripe.android.connect.EmbeddedComponentManager
+import com.stripe.android.connect.FetchClientSecretCallback.ClientSecretResultCallback
+import com.stripe.android.connect.PrivateBetaConnectSDK
+import com.stripe.android.connect.example.BuildConfig
+import com.stripe.android.connect.example.networking.EmbeddedComponentService
+import com.stripe.android.connect.example.networking.Merchant
 import com.stripe.android.core.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

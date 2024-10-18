@@ -1,4 +1,4 @@
-package com.stripe.android.connectsdk
+package com.stripe.android.connect
 
 import androidx.annotation.RestrictTo
 import androidx.fragment.app.Fragment

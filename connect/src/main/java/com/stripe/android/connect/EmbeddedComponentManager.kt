@@ -1,4 +1,4 @@
-package com.stripe.android.connectsdk
+package com.stripe.android.connect
 
 import android.os.Parcelable
 import androidx.annotation.ColorInt

@@ -1,4 +1,4 @@
-package com.stripe.android.connectsdk.example.networking
+package com.stripe.android.connect.example.networking
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

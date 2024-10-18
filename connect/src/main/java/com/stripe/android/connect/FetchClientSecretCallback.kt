@@ -1,4 +1,4 @@
-package com.stripe.android.connectsdk
+package com.stripe.android.connect
 
 @PrivateBetaConnectSDK
 fun interface FetchClientSecretCallback {
