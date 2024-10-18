@@ -329,7 +329,7 @@ internal class DefaultCardNumberController(
         var lastLoggedCardBrand by rememberSaveable { mutableStateOf<CardBrand?>(null) }
 
         LaunchedEffect(Unit) {
-            // Drop the set empty value & initial value
+            // Drop the initial value to avoid emitting on first composition
             fieldState.drop(1).collectLatest { state ->
                 when (state) {
                     is TextFieldStateConstants.Valid.Full -> {
