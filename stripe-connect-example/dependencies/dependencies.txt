@@ -5,7 +5,7 @@
 |                   +--- org.jetbrains:annotations:13.0 -> 23.0.0
 |                   \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.9.25 (c)
 +--- org.jetbrains.kotlin:kotlin-stdlib:1.9.25 (*)
-+--- project :stripe-connect
++--- project :connect
 |    +--- androidx.databinding:viewbinding:8.5.2 (*)
 |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.9.25 (*)
 |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1

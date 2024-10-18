@@ -25,5 +25,5 @@
 /financial-connections-example/ @stripe/android-connections-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
 
 # Stripe Connect SDK
-/stripe-connect/ @stripe/mx-mobile-reviewers
+/connect/ @stripe/mx-mobile-reviewers
 /stripe-connect-example/ @stripe/mx-mobile-reviewers
