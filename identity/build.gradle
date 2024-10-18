@@ -18,6 +18,7 @@ dependencies {
     implementation libs.androidx.coreKtx
     implementation libs.androidx.fragment
     implementation libs.androidx.lifecycle
+    implementation libs.androidx.lifecycleCompose
     implementation libs.androidx.liveDataKtx
     implementation libs.androidx.legacySupport
     implementation libs.androidx.navigationFragment
