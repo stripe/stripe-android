@@ -61,13 +61,6 @@ import javax.inject.Inject
 import javax.inject.Provider
 import com.stripe.android.ui.core.R as StripeUiCoreR
 
-internal data class BankFormFieldsState(
-    val showNameField: Boolean,
-    val showEmailField: Boolean,
-    val showPhoneField: Boolean,
-    val showAddressFields: Boolean,
-)
-
 internal class USBankAccountFormViewModel @Inject internal constructor(
     private val args: Args,
     private val application: Application,
@@ -78,14 +71,8 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     private val collectionConfiguration = args.formArgs.billingDetailsCollectionConfiguration
 
     val fieldsState = BankFormFieldsState(
-        showNameField = if (args.instantDebits) {
-            args.formArgs.billingDetailsCollectionConfiguration.name == CollectionMode.Always
-        } else {
-            args.formArgs.billingDetailsCollectionConfiguration.name != CollectionMode.Never
-        },
-        showEmailField = args.formArgs.billingDetailsCollectionConfiguration.email != CollectionMode.Never,
-        showPhoneField = args.formArgs.billingDetailsCollectionConfiguration.phone == CollectionMode.Always,
-        showAddressFields =args.formArgs.billingDetailsCollectionConfiguration.address == AddressCollectionMode.Full,
+        formArgs = args.formArgs,
+        instantDebits = args.instantDebits,
     )
 
     private val defaultName: String? = if (args.savedPaymentMethod != null) {
@@ -724,6 +711,42 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         private const val HAS_LAUNCHED_KEY = "has_launched"
         private const val SHOULD_RESET_KEY = "should_reset"
     }
+}
+
+internal data class BankFormFieldsState(
+    val showNameField: Boolean,
+    val showEmailField: Boolean,
+    val showPhoneField: Boolean,
+    val showAddressFields: Boolean,
+)
+
+internal fun BankFormFieldsState(
+    formArgs: FormArguments,
+    instantDebits: Boolean,
+): BankFormFieldsState {
+    val attachDefaults = formArgs.billingDetailsCollectionConfiguration.attachDefaultsToPaymentMethod
+
+    val hasDefaultName = attachDefaults && !formArgs.billingDetails?.name.isNullOrBlank()
+    val hasDefaultEmail = attachDefaults && !formArgs.billingDetails?.email.isNullOrBlank()
+
+    val collectsName = if (instantDebits) {
+        formArgs.billingDetailsCollectionConfiguration.name == CollectionMode.Always
+    } else {
+        formArgs.billingDetailsCollectionConfiguration.name != CollectionMode.Never
+    }
+
+    val collectsEmail = formArgs.billingDetailsCollectionConfiguration.email != CollectionMode.Never
+
+    return BankFormFieldsState(
+        showNameField = if (instantDebits) {
+            collectsName
+        } else {
+            collectsName || !hasDefaultName
+        },
+        showEmailField = collectsEmail || !hasDefaultEmail,
+        showPhoneField = formArgs.billingDetailsCollectionConfiguration.phone == CollectionMode.Always,
+        showAddressFields =formArgs.billingDetailsCollectionConfiguration.address == AddressCollectionMode.Full,
+    )
 }
 
 internal fun Address.asFormFieldValues(): Map<IdentifierSpec, String?> = mapOf(
