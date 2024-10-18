@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.connectsdk.example.networking.Merchant
 
 @Composable
-fun LaunchEmbeddedComponentsScreen(
+fun EmbeddedComponentsLauncherScreen(
     embeddedComponentName: String,
     selectedAccount: Merchant?,
     connectSDKAccounts: List<Merchant>,
@@ -59,7 +59,7 @@ fun LaunchEmbeddedComponentsScreen(
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun AccountSelector(
-    selectedAccount: Merchant? = null,
+    selectedAccount: Merchant?,
     accounts: List<Merchant>,
     onAccountSelected: (Merchant) -> Unit,
 ) {
@@ -87,7 +87,7 @@ fun AccountSelector(
                         expanded = false
                     }
                 ) {
-                    Text(text = account.displayName,)
+                    Text(text = account.displayName)
                 }
             }
         }
@@ -96,8 +96,8 @@ fun AccountSelector(
 
 @Preview(showBackground = true)
 @Composable
-fun LaunchEmbeddedComponentsScreenPreviewWithSelectedAccount() {
-    LaunchEmbeddedComponentsScreen(
+private fun LaunchEmbeddedComponentsScreenPreviewWithSelectedAccount() {
+    EmbeddedComponentsLauncherScreen(
         embeddedComponentName = "Payouts",
         selectedAccount = Merchant(merchantId = "1", displayName = "Selected Merchant"),
         connectSDKAccounts = listOf(
@@ -112,8 +112,8 @@ fun LaunchEmbeddedComponentsScreenPreviewWithSelectedAccount() {
 
 @Preview(showBackground = true)
 @Composable
-fun LaunchEmbeddedComponentsScreenPreviewWithNoSelectedAccount() {
-    LaunchEmbeddedComponentsScreen(
+private fun LaunchEmbeddedComponentsScreenPreviewWithNoSelectedAccount() {
+    EmbeddedComponentsLauncherScreen(
         embeddedComponentName = "Payouts",
         selectedAccount = null,
         connectSDKAccounts = listOf(
@@ -128,8 +128,8 @@ fun LaunchEmbeddedComponentsScreenPreviewWithNoSelectedAccount() {
 
 @Preview(showBackground = true)
 @Composable
-fun LaunchEmbeddedComponentsScreenPreviewWithEmptyAccounts() {
-    LaunchEmbeddedComponentsScreen(
+private fun LaunchEmbeddedComponentsScreenPreviewWithEmptyAccounts() {
+    EmbeddedComponentsLauncherScreen(
         embeddedComponentName = "Payouts",
         selectedAccount = Merchant(merchantId = "1", displayName = "Selected Merchant"),
         connectSDKAccounts = emptyList(),

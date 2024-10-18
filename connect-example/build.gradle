@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 apply from: configs.androidApplication
 
 apply plugin: 'com.google.devtools.ksp'
@@ -126,6 +128,8 @@ android {
         freeCompilerArgs += [
                 "-opt-in=kotlinx.coroutines.FlowPreview",
                 "-Xcontext-receivers",
+                "-P",
+                "plugin:androidx.compose.compiler.plugins.kotlin:enableStrongSkippingMode=true"
         ]
         if (gradle.ext.isCi) {
             kotlinOptions.allWarningsAsErrors = true

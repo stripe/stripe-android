@@ -23,7 +23,7 @@ import com.stripe.android.connectsdk.PrivateBetaConnectSDK
 import com.stripe.android.connectsdk.example.ConnectSdkExampleTheme
 import com.stripe.android.connectsdk.example.MainContent
 import com.stripe.android.connectsdk.example.R
-import com.stripe.android.connectsdk.example.ui.common.LaunchEmbeddedComponentsScreen
+import com.stripe.android.connectsdk.example.ui.common.EmbeddedComponentsLauncherScreen
 
 class PayoutsExampleActivity : FragmentActivity() {
 
@@ -47,7 +47,7 @@ class PayoutsExampleActivity : FragmentActivity() {
                             if (isPayoutsVisible) {
                                 PayoutsComponentWrapper(onDismiss = { isPayoutsVisible = false })
                             } else {
-                                LaunchEmbeddedComponentsScreen(
+                                EmbeddedComponentsLauncherScreen(
                                     embeddedComponentName = stringResource(R.string.payouts),
                                     selectedAccount = payoutsExampleState.selectedAccount,
                                     connectSDKAccounts = accounts,

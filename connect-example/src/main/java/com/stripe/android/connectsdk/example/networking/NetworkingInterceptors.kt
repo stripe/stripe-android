@@ -19,20 +19,21 @@ object ApplicationJsonHeaderInterceptor : FoldableRequestInterceptor {
 }
 
 object UserAgentHeader : FoldableRequestInterceptor {
-    private fun getUserAgent(): String {
-        val androidBrand = Build.BRAND
-        val androidDevice = Build.MODEL
-        val osVersion = Build.VERSION.SDK_INT
-        return buildString {
-            append("Stripe/ConnectSDKExample")
-            append(" (Android $androidBrand $androidDevice; (OS Version $osVersion))+")
-            append(" Version/${StripeSdkVersion.VERSION_NAME}")
+    private val userAgent: String
+        get() {
+            val androidBrand = Build.BRAND
+            val androidDevice = Build.MODEL
+            val osVersion = Build.VERSION.SDK_INT
+            return buildString {
+                append("Stripe/ConnectSDKExample")
+                append(" (Android $androidBrand $androidDevice; (OS Version $osVersion))+")
+                append(" Version/${StripeSdkVersion.VERSION_NAME}")
+            }
         }
-    }
 
     override fun invoke(next: RequestTransformer): RequestTransformer {
         return { request ->
-            next(request.header("User-Agent", getUserAgent()))
+            next(request.header("User-Agent", userAgent))
         }
     }
 }

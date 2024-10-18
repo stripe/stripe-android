@@ -51,35 +51,12 @@ class EmbeddedComponentService {
     }
 }
 
-@Serializable
-data class FetchClientSecretResponse(
-    @SerialName("client_secret")
-    val clientSecret: String
-)
-
-@Serializable
-data class GetAccountsResponse(
-    @SerialName("publishable_key")
-    val publishableKey: String,
-    @SerialName("available_merchants")
-    val availableMerchants: List<Merchant>
-)
-
-@Serializable
-data class Merchant(
-    @SerialName("merchant_id")
-    val merchantId: String,
-    @SerialName("display_name")
-    val displayName: String
-)
-
 suspend fun <T : Any> Request.awaitModel(
     serializer: DeserializationStrategy<T>
 ): Result<T, FuelError> {
     val deserializer = object : Deserializable<T> {
 
         override fun deserialize(response: Response): T {
-            println(response.toString())
             val body = response.body().asString("application/json")
             return Json.decodeFromString(serializer, body)
         }
