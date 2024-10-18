@@ -508,6 +508,146 @@ internal class PaymentIntentFlowResultProcessorTest {
             verify(mockStripeRepository).refreshPaymentIntent(any(), any())
         }
 
+    @Test
+    fun `Stops polling after max retries when encountering a Amazon Pay payment that still requires action`() =
+        runTest(testDispatcher) {
+            val requiresActionIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
+                status = StripeIntent.Status.RequiresAction,
+                paymentMethod = PaymentMethodFactory.amazonPay(),
+                paymentMethodTypes = listOf("card", "amazon_pay"),
+            )
+
+            whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
+                Result.success(requiresActionIntent),
+            )
+
+            val clientSecret = requireNotNull(requiresActionIntent.clientSecret)
+
+            val result = createProcessor().processResult(
+                PaymentFlowResult.Unvalidated(
+                    clientSecret = clientSecret,
+                    flowOutcome = StripeIntentResult.Outcome.UNKNOWN,
+                )
+            ).getOrThrow()
+
+            val expectedResult = PaymentIntentResult(
+                intent = requiresActionIntent,
+                outcomeFromFlow = StripeIntentResult.Outcome.UNKNOWN,
+                failureMessage = "We are unable to authenticate your payment method." +
+                    " Please choose a different payment method and try again.",
+            )
+
+            assertThat(result).isEqualTo(expectedResult)
+
+            // We need to retrieve the first time, before we start retries.
+            verify(mockStripeRepository, times(MAX_RETRIES + 1)).retrievePaymentIntent(any(), any(), any())
+        }
+
+    @Test
+    fun `Keeps retrying when encountering a Amazon Pay payment that still requires action`() =
+        runTest(testDispatcher) {
+            val requiresActionIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
+                status = StripeIntent.Status.RequiresAction,
+                paymentMethod = PaymentMethodFactory.amazonPay(),
+                paymentMethodTypes = listOf("card", "amazon_pay"),
+            )
+
+            val succeededIntent = requiresActionIntent.copy(status = StripeIntent.Status.Succeeded)
+
+            whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
+                Result.success(requiresActionIntent),
+                Result.success(requiresActionIntent),
+                Result.success(succeededIntent),
+            )
+
+            val clientSecret = requireNotNull(requiresActionIntent.clientSecret)
+
+            val result = createProcessor().processResult(
+                PaymentFlowResult.Unvalidated(
+                    clientSecret = clientSecret,
+                    flowOutcome = StripeIntentResult.Outcome.UNKNOWN,
+                )
+            ).getOrThrow()
+
+            val expectedResult = PaymentIntentResult(
+                intent = succeededIntent,
+                outcomeFromFlow = StripeIntentResult.Outcome.SUCCEEDED,
+                failureMessage = null,
+            )
+
+            assertThat(result).isEqualTo(expectedResult)
+        }
+
+    @Test
+    fun `Stops polling after max retries when encountering a Revolut Pay payment that still requires action`() =
+        runTest(testDispatcher) {
+            val requiresActionIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
+                status = StripeIntent.Status.RequiresAction,
+                paymentMethod = PaymentMethodFactory.revolutPay(),
+                paymentMethodTypes = listOf("card", "revolut_pay"),
+            )
+
+            whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
+                Result.success(requiresActionIntent),
+            )
+
+            val clientSecret = requireNotNull(requiresActionIntent.clientSecret)
+
+            val result = createProcessor().processResult(
+                PaymentFlowResult.Unvalidated(
+                    clientSecret = clientSecret,
+                    flowOutcome = StripeIntentResult.Outcome.UNKNOWN,
+                )
+            ).getOrThrow()
+
+            val expectedResult = PaymentIntentResult(
+                intent = requiresActionIntent,
+                outcomeFromFlow = StripeIntentResult.Outcome.UNKNOWN,
+                failureMessage = "We are unable to authenticate your payment method." +
+                    " Please choose a different payment method and try again.",
+            )
+
+            assertThat(result).isEqualTo(expectedResult)
+
+            // We need to retrieve the first time, before we start retries.
+            verify(mockStripeRepository, times(MAX_RETRIES + 1)).retrievePaymentIntent(any(), any(), any())
+        }
+
+    @Test
+    fun `Keeps retrying when encountering a Revolut Pay payment that still requires action`() =
+        runTest(testDispatcher) {
+            val requiresActionIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
+                status = StripeIntent.Status.RequiresAction,
+                paymentMethod = PaymentMethodFactory.revolutPay(),
+                paymentMethodTypes = listOf("card", "revolut_pay"),
+            )
+
+            val succeededIntent = requiresActionIntent.copy(status = StripeIntent.Status.Succeeded)
+
+            whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
+                Result.success(requiresActionIntent),
+                Result.success(requiresActionIntent),
+                Result.success(succeededIntent),
+            )
+
+            val clientSecret = requireNotNull(requiresActionIntent.clientSecret)
+
+            val result = createProcessor().processResult(
+                PaymentFlowResult.Unvalidated(
+                    clientSecret = clientSecret,
+                    flowOutcome = StripeIntentResult.Outcome.UNKNOWN,
+                )
+            ).getOrThrow()
+
+            val expectedResult = PaymentIntentResult(
+                intent = succeededIntent,
+                outcomeFromFlow = StripeIntentResult.Outcome.SUCCEEDED,
+                failureMessage = null,
+            )
+
+            assertThat(result).isEqualTo(expectedResult)
+        }
+
     private suspend fun runCanceledFlow(
         initialIntent: PaymentIntent,
         refreshedIntent: PaymentIntent = initialIntent,
