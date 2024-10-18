@@ -27,7 +27,7 @@ sealed interface CreateFinancialConnectionsSessionParams {
                 PARAM_HOSTED_SURFACE to hostedSurface,
                 PARAM_PRODUCT to "instant_debits",
                 PARAM_ATTACH_REQUIRED to true,
-                PARAM_LINK_MODE to linkMode.valueOrDisabled,
+                PARAM_LINK_MODE to linkMode.valueForHostedSurface(hostedSurface),
                 PARAM_PAYMENT_METHOD_DATA to paymentMethod.toParamMap()
             ).filterNotNullValues()
         }
@@ -51,7 +51,7 @@ sealed interface CreateFinancialConnectionsSessionParams {
             return mapOf(
                 PARAM_CLIENT_SECRET to clientSecret,
                 PARAM_HOSTED_SURFACE to hostedSurface,
-                PARAM_LINK_MODE to linkMode.valueOrDisabled,
+                PARAM_LINK_MODE to linkMode.valueForHostedSurface(hostedSurface),
                 PARAM_PAYMENT_METHOD_DATA to paymentMethod.toParamMap()
             ).filterNotNullValues()
         }
@@ -67,5 +67,10 @@ sealed interface CreateFinancialConnectionsSessionParams {
     }
 }
 
-private val LinkMode?.valueOrDisabled: String
-    get() = this?.value ?: "LINK_DISABLED"
+private fun LinkMode?.valueForHostedSurface(hostedSurface: String?): String? {
+    return if (hostedSurface != null) {
+        this?.value ?: "LINK_DISABLED"
+    } else {
+        null
+    }
+}
