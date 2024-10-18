@@ -75,7 +75,7 @@ dependencies {
 
 android {
     defaultConfig {
-        testApplicationId "com.stripe.android.connectsdk.test"
+        testApplicationId "com.stripe.android.connect.test"
     }
 
     buildFeatures {
@@ -123,8 +123,8 @@ android {
 }
 
 ext {
-    artifactId = "connectsdk"
-    artifactName = "connectsdk"
+    artifactId = "connect"
+    artifactName = "connect"
     artifactDescrption = "The Connect Embedded Components SDK module of the Stripe Android SDK"
 }
 
