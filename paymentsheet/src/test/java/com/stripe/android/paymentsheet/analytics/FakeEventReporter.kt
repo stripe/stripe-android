@@ -113,7 +113,6 @@ internal class FakeEventReporter : EventReporter {
     }
 
     override fun onDisallowedCardBrandEntered(brand: CardBrand) {
-
     }
 
     data class PaymentFailureCall(

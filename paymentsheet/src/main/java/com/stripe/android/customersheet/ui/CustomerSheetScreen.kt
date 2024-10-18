@@ -330,4 +330,3 @@ private class DefaultCardBrandDisallowedReporter(
         viewActionHandler.invoke(CustomerSheetViewAction.OnDisallowedCardBrandEntered(brand))
     }
 }
-
