@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet
 
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
+import com.stripe.android.CardBrandFilter
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
@@ -56,6 +57,7 @@ internal class FakeEditPaymentMethodInteractor(
             displayName: ResolvableString,
             canRemove: Boolean,
             isLiveMode: Boolean,
+            cardBrandFilter: CardBrandFilter
         ): ModifiableEditPaymentMethodViewInteractor {
             _calls.add(Call(initialPaymentMethod, canRemove))
 
