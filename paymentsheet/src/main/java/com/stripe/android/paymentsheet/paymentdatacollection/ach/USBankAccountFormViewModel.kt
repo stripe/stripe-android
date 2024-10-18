@@ -615,7 +615,6 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         val paymentMethodCreateParams = when (resultIdentifier) {
             is ResultIdentifier.PaymentMethod -> {
                 PaymentMethodCreateParams.createInstantDebits(
-                    paymentMethodId = resultIdentifier.paymentMethod.id!!,
                     requiresMandate = true,
                     productUsage = setOf("PaymentSheet"),
                     allowRedisplay = args.formArgs.paymentMethodSaveConsentBehavior.allowRedisplay(
