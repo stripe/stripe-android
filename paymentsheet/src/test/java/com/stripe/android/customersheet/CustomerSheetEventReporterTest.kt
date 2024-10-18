@@ -329,4 +329,16 @@ class CustomerSheetEventReporterTest {
             }
         )
     }
+
+    @Test
+    fun `onDisallowedCardBrandEntered(brand) should fire analytics request with expected event value`() {
+        eventReporter.onDisallowedCardBrandEntered(CardBrand.AmericanExpress)
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "cs_disallowed_card_brand" &&
+                    req.params["brand"] == "amex"
+            }
+        )
+    }
 }

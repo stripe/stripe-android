@@ -3236,6 +3236,20 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
+    fun `When disallowed brand entered, should report event`() = runTest(testDispatcher) {
+        val eventReporter = mock<CustomerSheetEventReporter>()
+
+        val viewModel = createViewModel(
+            workContext = testDispatcher,
+            eventReporter = eventReporter,
+        )
+
+        viewModel.handleViewAction(CustomerSheetViewAction.OnDisallowedCardBrandEntered(CardBrand.AmericanExpress))
+
+        verify(eventReporter).onDisallowedCardBrandEntered(CardBrand.AmericanExpress)
+    }
+
+    @Test
     fun `When setting up with intent, should call 'IntentConfirmationInterceptor' with expected params`() =
         runTest(testDispatcher) {
             val intentConfirmationInterceptor = FakeIntentConfirmationInterceptor()
