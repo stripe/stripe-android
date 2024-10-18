@@ -150,6 +150,7 @@ internal fun SavedPaymentMethodTabLayoutUI(
                 val isEnabled = !isProcessing && (!isEditing || item.isEnabledDuringEditing)
                 val isSelected = item == selectedPaymentOptionsItem && !isEditing
 
+                @Suppress("DEPRECATION")
                 SavedPaymentMethodTab(
                     item = item,
                     width = width,
