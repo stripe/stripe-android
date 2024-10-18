@@ -40,12 +40,11 @@ internal class LinkActivityViewModel @Inject constructor(
     }
 
     companion object {
-        val Factory: ViewModelProvider.Factory = viewModelFactory {
+        fun factory(savedStateHandle: SavedStateHandle? = null): ViewModelProvider.Factory = viewModelFactory {
             initializer {
-                val savedStateHandle: SavedStateHandle = createSavedStateHandle()
+                val handle: SavedStateHandle = savedStateHandle ?: createSavedStateHandle()
                 val app = this[APPLICATION_KEY] as Application
-                val args: NativeLinkArgs =
-                    requireNotNull(getArgs(savedStateHandle))
+                val args: NativeLinkArgs = getArgs(handle) ?: throw NoArgsException()
 
                 DaggerNativeLinkComponent
                     .builder()
@@ -59,3 +58,5 @@ internal class LinkActivityViewModel @Inject constructor(
         }
     }
 }
+
+internal class NoArgsException : IllegalArgumentException("NativeLinkArgs not found")

@@ -6,7 +6,6 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.core.os.bundleOf
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -27,9 +27,7 @@ import com.stripe.android.link.ui.wallet.WalletScreen
 import com.stripe.android.ui.core.CircularProgressIndicator
 
 internal class LinkActivity : ComponentActivity() {
-    internal val viewModel: LinkActivityViewModel by viewModels(
-        factoryProducer = { LinkActivityViewModel.Factory }
-    )
+    internal var viewModel: LinkActivityViewModel? = null
 
     @VisibleForTesting
     internal lateinit var navController: NavHostController
@@ -37,12 +35,19 @@ internal class LinkActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        try {
+            viewModel = ViewModelProvider(this, LinkActivityViewModel.factory())[LinkActivityViewModel::class.java]
+        } catch (e: NoArgsException) {
+            setResult(Activity.RESULT_CANCELED)
+            finish()
+        }
+
         setContent {
             navController = rememberNavController()
 
             LaunchedEffect(Unit) {
-                viewModel.navController = navController
-                viewModel.dismissWithResult = ::dismissWithResult
+                viewModel?.navController = navController
+                viewModel?.dismissWithResult = ::dismissWithResult
             }
 
             NavHost(
@@ -95,7 +100,7 @@ internal class LinkActivity : ComponentActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        viewModel.unregisterActivity()
+        viewModel?.unregisterActivity()
     }
 
     companion object {
