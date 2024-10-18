@@ -1,8 +1,8 @@
 +--- project :ml-core:base
 |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.9.25
 |    |    \--- org.jetbrains:annotations:13.0
-|    \--- androidx.annotation:annotation:1.7.1
-|         \--- androidx.annotation:annotation-jvm:1.7.1
+|    \--- androidx.annotation:annotation:1.9.0
+|         \--- androidx.annotation:annotation-jvm:1.9.0
 |              \--- org.jetbrains.kotlin:kotlin-stdlib:1.7.10 -> 1.9.25 (*)
 +--- org.tensorflow:tensorflow-lite-support:0.4.3
 |    +--- org.tensorflow:tensorflow-lite-support-api:0.4.3
@@ -12,5 +12,5 @@
 |    \--- org.tensorflow:tensorflow-lite:2.10.0 -> 2.11.0
 |         \--- org.tensorflow:tensorflow-lite-api:2.11.0
 +--- org.jetbrains.kotlin:kotlin-stdlib:1.9.25 (*)
-+--- androidx.annotation:annotation:1.7.1 (*)
++--- androidx.annotation:annotation:1.9.0 (*)
 \--- org.tensorflow:tensorflow-lite:2.11.0 (*)
