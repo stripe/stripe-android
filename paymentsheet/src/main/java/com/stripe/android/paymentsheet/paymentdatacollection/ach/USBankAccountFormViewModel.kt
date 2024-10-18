@@ -61,6 +61,13 @@ import javax.inject.Inject
 import javax.inject.Provider
 import com.stripe.android.ui.core.R as StripeUiCoreR
 
+internal data class BankFormFieldsState(
+    val showNameField: Boolean,
+    val showEmailField: Boolean,
+    val showPhoneField: Boolean,
+    val showAddressFields: Boolean,
+)
+
 internal class USBankAccountFormViewModel @Inject internal constructor(
     private val args: Args,
     private val application: Application,
@@ -70,21 +77,20 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     private val defaultBillingDetails = args.formArgs.billingDetails
     private val collectionConfiguration = args.formArgs.billingDetailsCollectionConfiguration
 
-    private val collectingAddress =
-        args.formArgs.billingDetailsCollectionConfiguration.address == AddressCollectionMode.Full
-
-    private val collectingPhone =
-        args.formArgs.billingDetailsCollectionConfiguration.phone == CollectionMode.Always
-
-    private val collectingName =
-        args.formArgs.billingDetailsCollectionConfiguration.name != CollectionMode.Never
-
-    private val collectingEmail =
-        args.formArgs.billingDetailsCollectionConfiguration.email != CollectionMode.Never
+    val fieldsState = BankFormFieldsState(
+        showNameField = if (args.instantDebits) {
+            args.formArgs.billingDetailsCollectionConfiguration.name == CollectionMode.Always
+        } else {
+            args.formArgs.billingDetailsCollectionConfiguration.name != CollectionMode.Never
+        },
+        showEmailField = args.formArgs.billingDetailsCollectionConfiguration.email != CollectionMode.Never,
+        showPhoneField = args.formArgs.billingDetailsCollectionConfiguration.phone == CollectionMode.Always,
+        showAddressFields =args.formArgs.billingDetailsCollectionConfiguration.address == AddressCollectionMode.Full,
+    )
 
     private val defaultName: String? = if (args.savedPaymentMethod != null) {
         args.savedPaymentMethod.input.name
-    } else if (collectingName || collectionConfiguration.attachDefaultsToPaymentMethod) {
+    } else if (fieldsState.showNameField || collectionConfiguration.attachDefaultsToPaymentMethod) {
         defaultBillingDetails?.name
     } else {
         null
@@ -100,7 +106,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
     private val defaultEmail: String? = if (args.savedPaymentMethod != null) {
         args.savedPaymentMethod.input.email
-    } else if (collectingEmail || collectionConfiguration.attachDefaultsToPaymentMethod) {
+    } else if (fieldsState.showEmailField || collectionConfiguration.attachDefaultsToPaymentMethod) {
         defaultBillingDetails?.email
     } else {
         null
@@ -116,7 +122,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
     private val defaultPhoneCountry = if (args.savedPaymentMethod != null) {
         args.savedPaymentMethod.input.address?.country
-    } else if (collectingPhone || collectionConfiguration.attachDefaultsToPaymentMethod) {
+    } else if (fieldsState.showPhoneField || collectionConfiguration.attachDefaultsToPaymentMethod) {
         defaultBillingDetails?.address?.country
     } else {
         null
@@ -124,7 +130,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
     private val defaultPhone: String? = if (args.savedPaymentMethod != null) {
         args.savedPaymentMethod.input.phone
-    } else if (collectingPhone || collectionConfiguration.attachDefaultsToPaymentMethod) {
+    } else if (fieldsState.showPhoneField || collectionConfiguration.attachDefaultsToPaymentMethod) {
         defaultBillingDetails?.phone
     } else {
         null
@@ -141,7 +147,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
     private val defaultAddress: Address? = if (args.savedPaymentMethod != null) {
         args.savedPaymentMethod.input.address
-    } else if (collectingAddress || collectionConfiguration.attachDefaultsToPaymentMethod) {
+    } else if (fieldsState.showAddressFields || collectionConfiguration.attachDefaultsToPaymentMethod) {
         defaultBillingDetails?.address?.asAddressModel()
     } else {
         null
@@ -176,13 +182,13 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         }
     }
 
-    val lastTextFieldIdentifier: StateFlow<IdentifierSpec?> = if (collectingAddress) {
+    val lastTextFieldIdentifier: StateFlow<IdentifierSpec?> = if (fieldsState.showAddressFields) {
         addressElement.getTextFieldIdentifiers().mapAsStateFlow { it.last() }
-    } else if (collectingPhone) {
+    } else if (fieldsState.showPhoneField) {
         stateFlowOf(IdentifierSpec.Phone)
-    } else if (collectingEmail) {
+    } else if (fieldsState.showEmailField) {
         stateFlowOf(IdentifierSpec.Email)
-    } else if (collectingName) {
+    } else if (fieldsState.showNameField) {
         stateFlowOf(IdentifierSpec.Name)
     } else {
         stateFlowOf(null)
@@ -249,9 +255,9 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         val hasDefaultEmail = args.formArgs.billingDetails?.email != null &&
             args.formArgs.billingDetailsCollectionConfiguration.attachDefaultsToPaymentMethod
 
-        assert((hasDefaultName || collectingName) && (hasDefaultEmail || collectingEmail)) {
-            "If name or email are not collected, they must be provided through defaults"
-        }
+//        assert((hasDefaultName || collectingName) && (hasDefaultEmail || collectingEmail)) {
+//            "If name or email are not collected, they must be provided through defaults"
+//        }
     }
 
     private var hasLaunched: Boolean

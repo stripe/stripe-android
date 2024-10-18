@@ -29,8 +29,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
-import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentSelection.New
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
@@ -95,7 +93,7 @@ internal fun USBankAccountForm(
             is USBankAccountFormScreenState.BillingDetailsCollection -> {
                 BillingDetailsCollectionScreen(
                     instantDebits = usBankAccountFormArgs.instantDebits,
-                    formArgs = formArgs,
+                    fieldsState = viewModel.fieldsState,
                     isPaymentFlow = usBankAccountFormArgs.isPaymentFlow,
                     isProcessing = screenState.isProcessing,
                     nameController = viewModel.nameController,
@@ -108,7 +106,7 @@ internal fun USBankAccountForm(
             }
             is USBankAccountFormScreenState.MandateCollection -> {
                 AccountPreviewScreen(
-                    formArgs = formArgs,
+                    fieldsState = viewModel.fieldsState,
                     bankName = screenState.bankName,
                     last4 = screenState.last4,
                     showCheckbox = usBankAccountFormArgs.showCheckbox,
@@ -127,7 +125,7 @@ internal fun USBankAccountForm(
             }
             is USBankAccountFormScreenState.VerifyWithMicrodeposits -> {
                 AccountPreviewScreen(
-                    formArgs = formArgs,
+                    fieldsState = viewModel.fieldsState,
                     bankName = screenState.paymentAccount.bankName,
                     last4 = screenState.paymentAccount.last4,
                     showCheckbox = usBankAccountFormArgs.showCheckbox,
@@ -146,7 +144,7 @@ internal fun USBankAccountForm(
             }
             is USBankAccountFormScreenState.SavedAccount -> {
                 AccountPreviewScreen(
-                    formArgs = formArgs,
+                    fieldsState = viewModel.fieldsState,
                     bankName = screenState.bankName,
                     last4 = screenState.last4,
                     showCheckbox = usBankAccountFormArgs.showCheckbox,
@@ -169,7 +167,7 @@ internal fun USBankAccountForm(
 
 @Composable
 internal fun BillingDetailsCollectionScreen(
-    formArgs: FormArguments,
+    fieldsState: BankFormFieldsState,
     instantDebits: Boolean,
     isProcessing: Boolean,
     isPaymentFlow: Boolean,
@@ -183,7 +181,7 @@ internal fun BillingDetailsCollectionScreen(
     Column(Modifier.fillMaxWidth()) {
         BillingDetailsForm(
             instantDebits = instantDebits,
-            formArgs = formArgs,
+            fieldsState = fieldsState,
             isProcessing = isProcessing,
             isPaymentFlow = isPaymentFlow,
             nameController = nameController,
@@ -198,7 +196,7 @@ internal fun BillingDetailsCollectionScreen(
 
 @Composable
 internal fun AccountPreviewScreen(
-    formArgs: FormArguments,
+    fieldsState: BankFormFieldsState,
     bankName: String?,
     last4: String?,
     showCheckbox: Boolean,
@@ -216,7 +214,7 @@ internal fun AccountPreviewScreen(
 ) {
     Column(Modifier.fillMaxWidth()) {
         BillingDetailsForm(
-            formArgs = formArgs,
+            fieldsState = fieldsState,
             instantDebits = instantDebits,
             isProcessing = isProcessing,
             isPaymentFlow = isPaymentFlow,
@@ -241,9 +239,9 @@ internal fun AccountPreviewScreen(
 @Composable
 internal fun BillingDetailsForm(
     instantDebits: Boolean,
-    formArgs: FormArguments,
     isProcessing: Boolean,
     isPaymentFlow: Boolean,
+    fieldsState: BankFormFieldsState,
     nameController: TextFieldController,
     emailController: TextFieldController,
     phoneController: PhoneNumberController,
@@ -261,14 +259,7 @@ internal fun BillingDetailsForm(
             modifier = Modifier.padding(vertical = 8.dp)
         )
 
-        val showName = if (instantDebits) {
-            // Only show if we're being forced to
-            formArgs.billingDetailsCollectionConfiguration.name == CollectionMode.Always
-        } else {
-            formArgs.billingDetailsCollectionConfiguration.name != CollectionMode.Never
-        }
-
-        if (showName) {
+        if (fieldsState.showNameField) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -282,7 +273,7 @@ internal fun BillingDetailsForm(
                 )
             }
         }
-        if (formArgs.billingDetailsCollectionConfiguration.email != CollectionMode.Never) {
+        if (fieldsState.showEmailField) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -300,7 +291,7 @@ internal fun BillingDetailsForm(
                 )
             }
         }
-        if (formArgs.billingDetailsCollectionConfiguration.phone == CollectionMode.Always) {
+        if (fieldsState.showPhoneField) {
             PhoneSection(
                 isProcessing = isProcessing,
                 phoneController = phoneController,
@@ -311,7 +302,7 @@ internal fun BillingDetailsForm(
                 },
             )
         }
-        if (formArgs.billingDetailsCollectionConfiguration.address == AddressCollectionMode.Full) {
+        if (fieldsState.showAddressFields) {
             AddressSection(
                 isProcessing = isProcessing,
                 addressController = addressController,
