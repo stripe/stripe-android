@@ -112,6 +112,9 @@ internal class FakeEventReporter : EventReporter {
     override fun onCannotProperlyReturnFromLinkAndOtherLPMs() {
     }
 
+    override fun onDisallowedCardBrandEntered(brand: CardBrand) {
+    }
+
     data class PaymentFailureCall(
         val paymentSelection: PaymentSelection?,
         val error: PaymentSheetConfirmationError

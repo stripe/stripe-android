@@ -67,6 +67,7 @@ import com.stripe.android.paymentsheet.utils.PaymentSheetContentPadding
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.CircularProgressIndicator
 import com.stripe.android.ui.core.elements.H4Text
+import com.stripe.android.ui.core.elements.events.LocalCardBrandDisallowedReporter
 import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventReporter
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.LocalAutofillEventReporter
@@ -440,6 +441,7 @@ private fun EventReporterProvider(
     CompositionLocalProvider(
         LocalAutofillEventReporter provides viewModel.eventReporter::onAutofill,
         LocalCardNumberCompletedEventReporter provides viewModel.eventReporter::onCardNumberCompleted,
+        LocalCardBrandDisallowedReporter provides viewModel.eventReporter::onDisallowedCardBrandEntered
     ) {
         content()
     }

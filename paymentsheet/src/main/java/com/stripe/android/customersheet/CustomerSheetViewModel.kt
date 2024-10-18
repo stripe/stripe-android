@@ -268,6 +268,7 @@ internal class CustomerSheetViewModel(
             is CustomerSheetViewAction.OnDismissed -> onDismissed()
             is CustomerSheetViewAction.OnAddCardPressed -> onAddCardPressed()
             is CustomerSheetViewAction.OnCardNumberInputCompleted -> onCardNumberInputCompleted()
+            is CustomerSheetViewAction.OnDisallowedCardBrandEntered -> onDisallowedCardBrandEntered(viewAction.brand)
             is CustomerSheetViewAction.OnBackPressed -> onBackPressed()
             is CustomerSheetViewAction.OnEditPressed -> onEditPressed()
             is CustomerSheetViewAction.OnItemRemoved -> onItemRemoved(viewAction.paymentMethod)
@@ -908,6 +909,10 @@ internal class CustomerSheetViewModel(
 
     private fun onCardNumberInputCompleted() {
         eventReporter.onCardNumberCompleted()
+    }
+
+    private fun onDisallowedCardBrandEntered(brand: CardBrand) {
+        eventReporter.onDisallowedCardBrandEntered(brand)
     }
 
     private fun onFormError(error: ResolvableString?) {

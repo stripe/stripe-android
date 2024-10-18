@@ -197,6 +197,16 @@ internal sealed class CustomerSheetEvent : AnalyticsEvent {
         )
     }
 
+    class CardBrandDisallowed(
+        cardBrand: CardBrand,
+    ) : CustomerSheetEvent() {
+        override val eventName: String = CS_DISALLOWED_CARD_BRAND
+
+        override val additionalParams: Map<String, Any?> = mapOf(
+            VALUE_CARD_BRAND to cardBrand.code
+        )
+    }
+
     class CardNumberCompleted : CustomerSheetEvent() {
         override val eventName: String = CS_CARD_NUMBER_COMPLETED
 
@@ -253,6 +263,7 @@ internal sealed class CustomerSheetEvent : AnalyticsEvent {
 
         const val CS_UPDATE_PAYMENT_METHOD = "cs_update_card"
         const val CS_UPDATE_PAYMENT_METHOD_FAILED = "cs_update_card_failed"
+        const val CS_DISALLOWED_CARD_BRAND = "cs_disallowed_card_brand"
 
         const val FIELD_GOOGLE_PAY_ENABLED = "google_pay_enabled"
         const val FIELD_BILLING = "default_billing_details"
@@ -272,5 +283,6 @@ internal sealed class CustomerSheetEvent : AnalyticsEvent {
 
         const val VALUE_EDIT_CBC_EVENT_SOURCE = "edit"
         const val VALUE_ADD_CBC_EVENT_SOURCE = "add"
+        const val VALUE_CARD_BRAND = "brand"
     }
 }

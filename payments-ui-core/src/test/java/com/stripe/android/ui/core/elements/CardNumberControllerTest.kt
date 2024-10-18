@@ -16,7 +16,9 @@ import com.stripe.android.cards.StaticCardAccountRangeSource
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
+import com.stripe.android.ui.core.elements.events.CardBrandDisallowedReporter
 import com.stripe.android.ui.core.elements.events.CardNumberCompletedEventReporter
+import com.stripe.android.ui.core.elements.events.LocalCardBrandDisallowedReporter
 import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventReporter
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SimpleTextElement
@@ -435,6 +437,48 @@ internal class CardNumberControllerTest {
     }
 
     @Test
+    fun `on disallowed card brand entered, should report event`() = runTest {
+        val eventReporter: CardNumberCompletedEventReporter = mock()
+        val disallowedEventReporter: CardBrandDisallowedReporter = mock()
+
+        val disallowedBrands = setOf(CardBrand.AmericanExpress, CardBrand.MasterCard)
+        val cardNumberController = createController(cardBrandFilter = FakeCardBrandFilter(disallowedBrands))
+
+        composeTestRule.setContent {
+            CompositionLocalProvider(
+                LocalCardNumberCompletedEventReporter provides eventReporter,
+                LocalCardBrandDisallowedReporter provides disallowedEventReporter
+            ) {
+                cardNumberController.ComposeUI(
+                    enabled = true,
+                    field = SimpleTextElement(
+                        identifier = IdentifierSpec.Name,
+                        controller = SimpleTextFieldController(
+                            textFieldConfig = SimpleTextFieldConfig()
+                        ),
+                    ),
+                    modifier = Modifier.testTag(TEST_TAG),
+                    hiddenIdentifiers = emptySet(),
+                    lastTextFieldIdentifier = null,
+                    nextFocusDirection = FocusDirection.Next,
+                    previousFocusDirection = FocusDirection.Next,
+                )
+            }
+        }
+
+        cardNumberController.onValueChange("37")
+        verify(disallowedEventReporter, times(1)).onDisallowedCardBrandEntered(CardBrand.AmericanExpress)
+
+        cardNumberController.onValueChange("372")
+        // Don't log again that we have disallowed American Express again
+        verify(disallowedEventReporter, times(1)).onDisallowedCardBrandEntered(CardBrand.AmericanExpress)
+
+        cardNumberController.onValueChange("")
+        cardNumberController.onValueChange("5555")
+        verify(disallowedEventReporter, times(1)).onDisallowedCardBrandEntered(CardBrand.MasterCard)
+    }
+
+    @Test
     fun `on initial number completed, should not report event`() = runTest {
         val eventReporter: CardNumberCompletedEventReporter = mock()
 
@@ -477,7 +521,7 @@ internal class CardNumberControllerTest {
         cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter
     ): DefaultCardNumberController {
         return DefaultCardNumberController(
-            cardTextFieldConfig = CardNumberConfig(isCBCEligible = false, cardBrandFilter = DefaultCardBrandFilter),
+            cardTextFieldConfig = CardNumberConfig(isCBCEligible = false, cardBrandFilter = cardBrandFilter),
             cardAccountRangeRepository = repository,
             uiContext = testDispatcher,
             workContext = testDispatcher,
