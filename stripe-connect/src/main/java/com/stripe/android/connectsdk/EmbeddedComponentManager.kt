@@ -10,13 +10,12 @@ import kotlinx.parcelize.Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class EmbeddedComponentManager internal constructor() {
 
-    // TODO MXMOBILE-2760 - replace with actual implementation and remove the @Suppress annotations
     constructor(
         @Suppress("UNUSED_PARAMETER") activity: ComponentActivity,
         @Suppress("UNUSED_PARAMETER") configuration: Configuration,
         @Suppress("UNUSED_PARAMETER") fetchClientSecret: FetchClientSecretCallback,
     ) : this() {
-        throw NotImplementedError("Not yet implemented")
+        // TODO MXMOBILE-2760 - replace with actual implementation and remove the @Suppress annotations
     }
 
     @PrivateBetaConnectSDK
