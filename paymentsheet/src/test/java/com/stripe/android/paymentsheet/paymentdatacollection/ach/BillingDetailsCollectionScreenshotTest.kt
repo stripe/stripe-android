@@ -4,13 +4,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
-import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
-import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.NameConfig
 import com.stripe.android.uicore.elements.PhoneNumberController
@@ -31,10 +26,14 @@ internal class BillingDetailsCollectionScreenshotTest {
     fun testEmpty() {
         paparazzi.snapshot {
             BillingDetailsCollectionScreen(
-                formArgs = createFormArguments(),
+                fieldsState = BankFormFieldsState(
+                    showNameField = true,
+                    showEmailField = true,
+                    showPhoneField = false,
+                    showAddressFields = false,
+                ),
                 isProcessing = false,
                 isPaymentFlow = true,
-                instantDebits = false,
                 nameController = createNameController(),
                 emailController = createEmailController(),
                 phoneController = createPhoneNumberController(),
@@ -49,10 +48,14 @@ internal class BillingDetailsCollectionScreenshotTest {
     fun testEmptySetupFlow() {
         paparazzi.snapshot {
             BillingDetailsCollectionScreen(
-                formArgs = createFormArguments(),
+                fieldsState = BankFormFieldsState(
+                    showNameField = true,
+                    showEmailField = true,
+                    showPhoneField = false,
+                    showAddressFields = false,
+                ),
                 isProcessing = false,
                 isPaymentFlow = false,
-                instantDebits = false,
                 nameController = createNameController(),
                 emailController = createEmailController(),
                 phoneController = createPhoneNumberController(),
@@ -67,10 +70,14 @@ internal class BillingDetailsCollectionScreenshotTest {
     fun testFilled() {
         paparazzi.snapshot {
             BillingDetailsCollectionScreen(
-                formArgs = createFormArguments(),
+                fieldsState = BankFormFieldsState(
+                    showNameField = true,
+                    showEmailField = true,
+                    showPhoneField = false,
+                    showAddressFields = false,
+                ),
                 isProcessing = false,
                 isPaymentFlow = true,
-                instantDebits = false,
                 nameController = createNameController("John Doe"),
                 emailController = createEmailController("email@email.com"),
                 phoneController = createPhoneNumberController(),
@@ -85,14 +92,14 @@ internal class BillingDetailsCollectionScreenshotTest {
     fun testEmptyWithBillingAddress() {
         paparazzi.snapshot {
             BillingDetailsCollectionScreen(
-                formArgs = createFormArguments(
-                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                        address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
-                    ),
+                fieldsState = BankFormFieldsState(
+                    showNameField = true,
+                    showEmailField = true,
+                    showPhoneField = false,
+                    showAddressFields = true,
                 ),
                 isProcessing = false,
                 isPaymentFlow = true,
-                instantDebits = false,
                 nameController = createNameController(),
                 emailController = createEmailController(),
                 phoneController = createPhoneNumberController(),
@@ -107,14 +114,14 @@ internal class BillingDetailsCollectionScreenshotTest {
     fun testFilledWithBillingAddress() {
         paparazzi.snapshot {
             BillingDetailsCollectionScreen(
-                formArgs = createFormArguments(
-                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                        address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
-                    ),
+                fieldsState = BankFormFieldsState(
+                    showNameField = true,
+                    showEmailField = true,
+                    showPhoneField = false,
+                    showAddressFields = true,
                 ),
                 isProcessing = false,
                 isPaymentFlow = true,
-                instantDebits = false,
                 nameController = createNameController("John Doe"),
                 emailController = createEmailController("email@email.com"),
                 phoneController = createPhoneNumberController(),
@@ -123,22 +130,6 @@ internal class BillingDetailsCollectionScreenshotTest {
                 sameAsShippingElement = null
             )
         }
-    }
-
-    private fun createFormArguments(
-        billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
-            PaymentSheet.BillingDetailsCollectionConfiguration(),
-    ): FormArguments {
-        return FormArguments(
-            paymentMethodCode = PaymentMethod.Type.USBankAccount.code,
-            merchantName = "Test Merchant",
-            amount = null,
-            billingDetails = null,
-            billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
-            cbcEligibility = CardBrandChoiceEligibility.Ineligible,
-            hasIntentToSetup = false,
-            paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
-        )
     }
 
     private fun createNameController(initialValue: String? = null): TextFieldController {

@@ -92,7 +92,6 @@ internal fun USBankAccountForm(
         when (val screenState = currentScreenState) {
             is USBankAccountFormScreenState.BillingDetailsCollection -> {
                 BillingDetailsCollectionScreen(
-                    instantDebits = usBankAccountFormArgs.instantDebits,
                     fieldsState = viewModel.fieldsState,
                     isPaymentFlow = usBankAccountFormArgs.isPaymentFlow,
                     isProcessing = screenState.isProcessing,
@@ -110,7 +109,6 @@ internal fun USBankAccountForm(
                     bankName = screenState.bankName,
                     last4 = screenState.last4,
                     showCheckbox = usBankAccountFormArgs.showCheckbox,
-                    instantDebits = usBankAccountFormArgs.instantDebits,
                     isProcessing = screenState.isProcessing,
                     isPaymentFlow = usBankAccountFormArgs.isPaymentFlow,
                     nameController = viewModel.nameController,
@@ -129,7 +127,6 @@ internal fun USBankAccountForm(
                     bankName = screenState.paymentAccount.bankName,
                     last4 = screenState.paymentAccount.last4,
                     showCheckbox = usBankAccountFormArgs.showCheckbox,
-                    instantDebits = usBankAccountFormArgs.instantDebits,
                     isProcessing = screenState.isProcessing,
                     isPaymentFlow = usBankAccountFormArgs.isPaymentFlow,
                     nameController = viewModel.nameController,
@@ -148,7 +145,6 @@ internal fun USBankAccountForm(
                     bankName = screenState.bankName,
                     last4 = screenState.last4,
                     showCheckbox = usBankAccountFormArgs.showCheckbox,
-                    instantDebits = usBankAccountFormArgs.instantDebits,
                     isProcessing = screenState.isProcessing,
                     isPaymentFlow = usBankAccountFormArgs.isPaymentFlow,
                     nameController = viewModel.nameController,
@@ -168,7 +164,6 @@ internal fun USBankAccountForm(
 @Composable
 internal fun BillingDetailsCollectionScreen(
     fieldsState: BankFormFieldsState,
-    instantDebits: Boolean,
     isProcessing: Boolean,
     isPaymentFlow: Boolean,
     nameController: TextFieldController,
@@ -180,7 +175,6 @@ internal fun BillingDetailsCollectionScreen(
 ) {
     Column(Modifier.fillMaxWidth()) {
         BillingDetailsForm(
-            instantDebits = instantDebits,
             fieldsState = fieldsState,
             isProcessing = isProcessing,
             isPaymentFlow = isPaymentFlow,
@@ -200,7 +194,6 @@ internal fun AccountPreviewScreen(
     bankName: String?,
     last4: String?,
     showCheckbox: Boolean,
-    instantDebits: Boolean,
     isProcessing: Boolean,
     isPaymentFlow: Boolean,
     nameController: TextFieldController,
@@ -215,7 +208,6 @@ internal fun AccountPreviewScreen(
     Column(Modifier.fillMaxWidth()) {
         BillingDetailsForm(
             fieldsState = fieldsState,
-            instantDebits = instantDebits,
             isProcessing = isProcessing,
             isPaymentFlow = isPaymentFlow,
             nameController = nameController,
@@ -238,7 +230,6 @@ internal fun AccountPreviewScreen(
 
 @Composable
 internal fun BillingDetailsForm(
-    instantDebits: Boolean,
     isProcessing: Boolean,
     isPaymentFlow: Boolean,
     fieldsState: BankFormFieldsState,

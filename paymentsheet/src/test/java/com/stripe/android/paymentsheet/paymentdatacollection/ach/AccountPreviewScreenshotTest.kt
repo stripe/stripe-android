@@ -4,13 +4,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
-import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
-import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -31,16 +26,6 @@ internal class AccountPreviewScreenshotTest {
             .fillMaxWidth(),
     )
 
-    private val formArguments = FormArguments(
-        paymentMethodCode = PaymentMethod.Type.USBankAccount.code,
-        merchantName = "Test Merchant",
-        amount = null,
-        billingDetails = null,
-        cbcEligibility = CardBrandChoiceEligibility.Ineligible,
-        hasIntentToSetup = false,
-        paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
-    )
-
     private val sameAsShippingElement = SameAsShippingElement(
         identifier = IdentifierSpec.SameAsShipping,
         controller = SameAsShippingController(false),
@@ -55,12 +40,16 @@ internal class AccountPreviewScreenshotTest {
     fun testPaymentFlow() {
         paparazzi.snapshot {
             AccountPreviewScreen(
-                formArgs = formArguments,
+                fieldsState = BankFormFieldsState(
+                    showNameField = true,
+                    showEmailField = true,
+                    showPhoneField = false,
+                    showAddressFields = false,
+                ),
                 bankName = "My Bank",
                 last4 = "3456",
                 isProcessing = false,
                 isPaymentFlow = true,
-                instantDebits = false,
                 nameController = createNameController(),
                 emailController = createEmailController(),
                 phoneController = createPhoneNumberController(),
@@ -78,12 +67,16 @@ internal class AccountPreviewScreenshotTest {
     fun testSetupFlow() {
         paparazzi.snapshot {
             AccountPreviewScreen(
-                formArgs = formArguments,
+                fieldsState = BankFormFieldsState(
+                    showNameField = true,
+                    showEmailField = true,
+                    showPhoneField = false,
+                    showAddressFields = false,
+                ),
                 bankName = "My Bank",
                 last4 = "3456",
                 isProcessing = false,
                 isPaymentFlow = false,
-                instantDebits = false,
                 nameController = createNameController(),
                 emailController = createEmailController(),
                 phoneController = createPhoneNumberController(),
@@ -101,16 +94,16 @@ internal class AccountPreviewScreenshotTest {
     fun testWithBillingAddress() {
         paparazzi.snapshot {
             AccountPreviewScreen(
-                formArgs = formArguments.copy(
-                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                        address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
-                    ),
+                fieldsState = BankFormFieldsState(
+                    showNameField = true,
+                    showEmailField = true,
+                    showPhoneField = false,
+                    showAddressFields = true,
                 ),
                 bankName = "My Bank",
                 last4 = "3456",
                 isProcessing = false,
                 isPaymentFlow = true,
-                instantDebits = false,
                 nameController = createNameController(),
                 emailController = createEmailController(),
                 phoneController = createPhoneNumberController(),

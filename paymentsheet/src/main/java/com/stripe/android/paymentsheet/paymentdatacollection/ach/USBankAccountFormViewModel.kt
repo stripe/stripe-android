@@ -236,15 +236,6 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                 updateScreenStateWithSaveForFutureUse(saveForFutureUse)
             }.collect()
         }
-
-        val hasDefaultName = args.formArgs.billingDetails?.name != null &&
-            args.formArgs.billingDetailsCollectionConfiguration.attachDefaultsToPaymentMethod
-        val hasDefaultEmail = args.formArgs.billingDetails?.email != null &&
-            args.formArgs.billingDetailsCollectionConfiguration.attachDefaultsToPaymentMethod
-
-//        assert((hasDefaultName || collectingName) && (hasDefaultEmail || collectingEmail)) {
-//            "If name or email are not collected, they must be provided through defaults"
-//        }
     }
 
     private var hasLaunched: Boolean
@@ -745,7 +736,7 @@ internal fun BankFormFieldsState(
         },
         showEmailField = collectsEmail || !hasDefaultEmail,
         showPhoneField = formArgs.billingDetailsCollectionConfiguration.phone == CollectionMode.Always,
-        showAddressFields =formArgs.billingDetailsCollectionConfiguration.address == AddressCollectionMode.Full,
+        showAddressFields = formArgs.billingDetailsCollectionConfiguration.address == AddressCollectionMode.Full,
     )
 }
 
