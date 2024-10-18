@@ -57,6 +57,20 @@ internal class DefaultLinkAccountManager @Inject constructor(
                     lookup = consumerSessionLookup,
                     startSession = startSession,
                 )
+            }.mapCatching {
+                it?.let { account ->
+                    if (startSession && !account.isVerified) {
+                        setAccount(
+                            linkRepository.startVerification(
+                                account.clientSecret,
+                                consumerPublishableKey,
+                            ).getOrThrow(),
+                            consumerPublishableKey
+                        )
+                    } else {
+                        account
+                    }
+                }
             }
 
     override suspend fun signInWithUserInput(
@@ -157,6 +171,18 @@ internal class DefaultLinkAccountManager @Inject constructor(
                     consumerSession = consumerSessionSignup.consumerSession,
                     publishableKey = consumerSessionSignup.publishableKey,
                 )
+            }.mapCatching { account ->
+                if (account.isVerified) {
+                    account
+                } else {
+                    setAccount(
+                        consumerSession = linkRepository.startVerification(
+                            consumerSessionClientSecret =  account.clientSecret,
+                            consumerPublishableKey = consumerPublishableKey,
+                        ).getOrThrow(),
+                        publishableKey = consumerPublishableKey
+                    )
+                }
             }
 
     override suspend fun createCardPaymentDetails(
@@ -221,8 +247,26 @@ internal class DefaultLinkAccountManager @Inject constructor(
         }
     }
 
+    override suspend fun startVerification(): Result<LinkAccount> {
+        return linkRepository.startVerification(linkAccount.value!!.clientSecret, consumerPublishableKey)
+            .also {
+                if (it.isFailure) {
+                    linkEventsReporter.on2FAStartFailure()
+                }
+            }.map { consumerSession ->
+                setAccount(consumerSession, null)
+            }
+    }
+
+    override suspend fun confirmVerification(code: String): Result<LinkAccount> {
+        return linkRepository.confirmVerification(code, linkAccount.value!!.clientSecret, consumerPublishableKey)
+            .map { consumerSession ->
+                setAccount(consumerSession, null)
+            }
+    }
+
     @VisibleForTesting
-    private fun setAccountNullable(
+    internal fun setAccountNullable(
         consumerSession: ConsumerSession?,
         publishableKey: String?,
     ): LinkAccount? {

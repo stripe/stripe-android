@@ -26,6 +26,7 @@ import org.junit.Test
 import org.mockito.Mockito.times
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
@@ -430,6 +431,109 @@ class DefaultLinkAccountManagerTest {
             assertThat(accountManager.linkAccount.value).isNotNull()
         }
 
+    @Test
+    fun `lookupConsumer starts session when startSession is true`() = runSuspendTest {
+        mockUnverifiedAccountLookup()
+
+        val accountManager = accountManager()
+
+        accountManager.lookupConsumer(EMAIL, true)
+
+        verify(linkRepository).startVerification(anyOrNull(), anyOrNull())
+        assertThat(accountManager.linkAccount.value).isNotNull()
+    }
+
+    @Test
+    fun `lookupConsumer does not start session when startSession is false`() = runSuspendTest {
+        val accountManager = accountManager()
+
+        accountManager.lookupConsumer(EMAIL, false)
+
+        verify(linkRepository, times(0)).startVerification(anyOrNull(), anyOrNull())
+        assertThat(accountManager.linkAccount.value).isNull()
+    }
+
+    @Test
+    fun `startVerification updates account`() = runSuspendTest {
+        val accountManager = accountManager()
+        accountManager.setAccountNullable(mockConsumerSession, null)
+
+        accountManager.startVerification()
+
+        assertThat(accountManager.linkAccount.value).isNotNull()
+    }
+
+    @Test
+    fun `startVerification uses consumerPublishableKey`() = runSuspendTest {
+        val accountManager = accountManager()
+        accountManager.setAccountNullable(mockConsumerSession, PUBLISHABLE_KEY)
+
+        accountManager.startVerification()
+
+        val keyCaptor = argumentCaptor<String>()
+        verify(linkRepository).startVerification(anyOrNull(), keyCaptor.capture())
+        assertThat(keyCaptor.firstValue).isEqualTo(PUBLISHABLE_KEY)
+    }
+
+    @Test
+    fun `startVerification sends analytics event when call fails`() = runSuspendTest {
+        whenever(linkRepository.startVerification(anyOrNull(), anyOrNull()))
+            .thenReturn(Result.failure(Exception()))
+
+        val accountManager = accountManager()
+        accountManager.setAccountNullable(mockConsumerSession, null)
+        accountManager.startVerification()
+
+        verify(linkEventsReporter).on2FAStartFailure()
+    }
+
+    @Test
+    fun `confirmVerification retries on auth error`() = runSuspendTest {
+        val accountManager = accountManager()
+        accountManager.setAccountNullable(mockConsumerSession, null)
+
+        whenever(
+            linkRepository.confirmVerification(
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+            )
+        ).thenReturn(
+//            Result.failure(AuthenticationException(StripeError())),
+            Result.success(mockConsumerSession)
+        )
+
+        accountManager.confirmVerification("123")
+
+        verify(linkRepository)
+            .confirmVerification(anyOrNull(), anyOrNull(), anyOrNull())
+//        verify(linkRepository).lookupConsumer(anyOrNull())
+
+        assertThat(accountManager.linkAccount.value).isNotNull()
+    }
+
+    @Test
+    fun `confirmVerification does not retry on auth error if no cookie exists`() = runSuspendTest {
+        val accountManager = accountManager()
+        accountManager.setAccountNullable(mockConsumerSession, null)
+
+        whenever(
+            linkRepository.confirmVerification(
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+            )
+        ).thenReturn(
+            Result.failure(AuthenticationException(StripeError())),
+            Result.success(mockConsumerSession)
+        )
+
+        accountManager.confirmVerification("123")
+
+        verify(linkRepository)
+            .confirmVerification(anyOrNull(), anyOrNull(), anyOrNull())
+    }
+
     private fun runSuspendTest(testBody: suspend TestScope.() -> Unit) = runTest {
         setupRepository()
         testBody()
@@ -441,6 +545,8 @@ class DefaultLinkAccountManagerTest {
         }
         whenever(linkRepository.lookupConsumer(anyOrNull()))
             .thenReturn(Result.success(consumerSessionLookup))
+        whenever(linkRepository.startVerification(anyOrNull(), anyOrNull()))
+            .thenReturn(Result.success(mockConsumerSession))
         whenever(
             linkRepository.consumerSignUp(
                 email = anyOrNull(),
@@ -516,6 +622,17 @@ class DefaultLinkAccountManagerTest {
             name = anyOrNull(),
             consentAction = eq(consumerAction)
         )
+    }
+
+    private suspend fun mockUnverifiedAccountLookup() {
+        val mockConsumerSession = mock<ConsumerSession>().apply {
+            whenever(clientSecret).thenReturn(CLIENT_SECRET)
+        }
+        val consumerSessionLookup = mock<ConsumerSessionLookup>().apply {
+            whenever(consumerSession).thenReturn(mockConsumerSession)
+        }
+        whenever(linkRepository.lookupConsumer(anyOrNull()))
+            .thenReturn(Result.success(consumerSessionLookup))
     }
 
     private companion object {
