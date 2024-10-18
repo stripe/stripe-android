@@ -333,9 +333,6 @@ public final class com/stripe/android/paymentsheet/CreateIntentResult$Success : 
 public abstract interface annotation class com/stripe/android/paymentsheet/DelicatePaymentSheetApi : java/lang/annotation/Annotation {
 }
 
-public abstract interface annotation class com/stripe/android/paymentsheet/ExperimentalPaymentMethodLayoutApi : java/lang/annotation/Annotation {
-}
-
 public abstract interface annotation class com/stripe/android/paymentsheet/ExperimentalPaymentSheetDecouplingApi : java/lang/annotation/Annotation {
 }
 
