@@ -6,6 +6,7 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
+import com.stripe.android.model.CardBrand
 import kotlinx.parcelize.Parcelize
 import org.json.JSONArray
 import org.json.JSONObject
@@ -77,7 +78,9 @@ class GooglePayJsonFactory constructor(
         /**
          * Set to false if you don't support credit cards
          */
-        allowCreditCards: Boolean? = null
+        allowCreditCards: Boolean? = null,
+
+        cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter
     ): JSONObject {
         return JSONObject()
             .put("apiVersion", API_VERSION)
@@ -88,7 +91,8 @@ class GooglePayJsonFactory constructor(
                     .put(
                         createCardPaymentMethod(
                             billingAddressParameters,
-                            allowCreditCards
+                            allowCreditCards,
+                            cardBrandFilter
                         )
                     )
             )
@@ -134,7 +138,9 @@ class GooglePayJsonFactory constructor(
         /**
          * Set to false if you don't support credit cards
          */
-        allowCreditCards: Boolean? = null
+        allowCreditCards: Boolean? = null,
+
+        cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter
     ): JSONObject {
         return JSONObject()
             .put("apiVersion", API_VERSION)
@@ -145,7 +151,8 @@ class GooglePayJsonFactory constructor(
                     .put(
                         createCardPaymentMethod(
                             billingAddressParameters,
-                            allowCreditCards
+                            allowCreditCards,
+                            cardBrandFilter
                         )
                     )
             )
@@ -224,9 +231,10 @@ class GooglePayJsonFactory constructor(
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun createCardPaymentMethod(
         billingAddressParameters: BillingAddressParameters?,
-        allowCreditCards: Boolean?
+        allowCreditCards: Boolean?,
+        cardBrandFilter: CardBrandFilter
     ): JSONObject {
-        val cardPaymentMethodParams = createBaseCardPaymentMethodParams()
+        val cardPaymentMethodParams = createBaseCardPaymentMethodParams(cardBrandFilter)
             .apply {
                 if (billingAddressParameters?.isRequired == true) {
                     put("billingAddressRequired", true)
@@ -251,7 +259,7 @@ class GooglePayJsonFactory constructor(
             .put("tokenizationSpecification", googlePayConfig.tokenizationSpecification)
     }
 
-    private fun createBaseCardPaymentMethodParams(): JSONObject {
+    private fun createBaseCardPaymentMethodParams(cardBrandFilter: CardBrandFilter): JSONObject {
         return JSONObject()
             .put("allowedAuthMethods", JSONArray(ALLOWED_AUTH_METHODS))
             .put(
@@ -259,7 +267,7 @@ class GooglePayJsonFactory constructor(
                 JSONArray(
                     DEFAULT_CARD_NETWORKS.plus(
                         listOf(JCB_CARD_NETWORK).takeIf { isJcbEnabled } ?: emptyList()
-                    )
+                    ).filter { cardBrandFilter.isAccepted(networkStringToCardBrandMap[it] ?: CardBrand.Unknown) }
                 )
             )
     }
@@ -475,5 +483,14 @@ class GooglePayJsonFactory constructor(
         private val DEFAULT_CARD_NETWORKS =
             listOf("AMEX", "DISCOVER", "MASTERCARD", "VISA")
         private const val JCB_CARD_NETWORK = "JCB"
+
+        // Mapping from Google Pay string networks to CardBrands.
+        private val networkStringToCardBrandMap = mapOf(
+            "AMEX" to CardBrand.AmericanExpress,
+            "DISCOVER" to CardBrand.Discover,
+            "MASTERCARD" to CardBrand.MasterCard,
+            "VISA" to CardBrand.Visa,
+            "JCB" to CardBrand.JCB
+        )
     }
 }

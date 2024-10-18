@@ -1,8 +1,10 @@
 package com.stripe.android
 
+import android.os.Parcel
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.version.StripeSdkVersion
+import com.stripe.android.model.CardBrand
 import org.json.JSONException
 import org.json.JSONObject
 import org.junit.runner.RunWith
@@ -300,5 +302,176 @@ class GooglePayJsonFactoryTest {
                 .getJSONObject("parameters")
                 .getBoolean("allowCreditCards")
         }
+    }
+
+    @Test
+    fun allowedCardNetworks_withCustomCardBrandFilter_shouldIncludeOnlyFilteredBrands() {
+        // Define a custom CardBrandFilter that only accepts Visa and Mastercard
+        val customCardBrandFilter = object : CardBrandFilter {
+            override fun isAccepted(cardBrand: CardBrand): Boolean {
+                return cardBrand == CardBrand.Visa || cardBrand == CardBrand.MasterCard
+            }
+
+            override fun describeContents(): Int {
+                TODO("Not yet implemented")
+            }
+
+            override fun writeToParcel(p0: Parcel, p1: Int) {
+                TODO("Not yet implemented")
+            }
+        }
+
+        val isReadyToPayRequestJson = factory.createIsReadyToPayRequest(
+            cardBrandFilter = customCardBrandFilter
+        )
+
+        val allowedCardNetworks = isReadyToPayRequestJson
+            .getJSONArray("allowedPaymentMethods")
+            .getJSONObject(0)
+            .getJSONObject("parameters")
+            .getJSONArray("allowedCardNetworks")
+            .let { StripeJsonUtils.jsonArrayToList(it) }
+
+        // Verify that only Visa and Mastercard are included
+        assertThat(allowedCardNetworks)
+            .containsExactly("MASTERCARD", "VISA")
+    }
+
+    @Test
+    fun allowedCardNetworks_withAllBrandsFilteredOut_shouldIncludeNoBrands() {
+        // Define a CardBrandFilter that rejects all brands
+        val rejectAllCardBrandFilter = object : CardBrandFilter {
+            override fun isAccepted(cardBrand: CardBrand): Boolean {
+                return false
+            }
+
+            override fun describeContents(): Int {
+                TODO("Not yet implemented")
+            }
+
+            override fun writeToParcel(p0: Parcel, p1: Int) {
+                TODO("Not yet implemented")
+            }
+        }
+
+        val isReadyToPayRequestJson = factory.createIsReadyToPayRequest(
+            cardBrandFilter = rejectAllCardBrandFilter
+        )
+
+        val allowedCardNetworks = isReadyToPayRequestJson
+            .getJSONArray("allowedPaymentMethods")
+            .getJSONObject(0)
+            .getJSONObject("parameters")
+            .optJSONArray("allowedCardNetworks")
+
+        // Verify that allowedCardNetworks is an empty array
+        assertThat(allowedCardNetworks!!.length()).isEqualTo(0)
+    }
+
+    @Test
+    fun allowedCardNetworks_withDefaultCardBrandFilter_shouldIncludeAllBrands() {
+        val isReadyToPayRequestJson = factory.createIsReadyToPayRequest(
+            cardBrandFilter = DefaultCardBrandFilter
+        )
+
+        val allowedCardNetworks = isReadyToPayRequestJson
+            .getJSONArray("allowedPaymentMethods")
+            .getJSONObject(0)
+            .getJSONObject("parameters")
+            .getJSONArray("allowedCardNetworks")
+            .let { StripeJsonUtils.jsonArrayToList(it) }
+
+        // Verify that all default brands are included
+        assertThat(allowedCardNetworks)
+            .isEqualTo(listOf("AMEX", "DISCOVER", "MASTERCARD", "VISA"))
+    }
+
+    @Test
+    fun allowedCardNetworks_whenJcbEnabled_andFilterAcceptsJcb_shouldIncludeJcb() {
+        // Enable JCB in the factory
+        val factoryWithJcbEnabled = GooglePayJsonFactory(googlePayConfig, isJcbEnabled = true)
+
+        // Define a CardBrandFilter that accepts JCB
+        val acceptJcbCardBrandFilter = object : CardBrandFilter {
+            override fun isAccepted(cardBrand: CardBrand): Boolean {
+                return cardBrand == CardBrand.JCB
+            }
+
+            override fun describeContents(): Int {
+                TODO("Not yet implemented")
+            }
+
+            override fun writeToParcel(p0: Parcel, p1: Int) {
+                TODO("Not yet implemented")
+            }
+        }
+
+        val isReadyToPayRequestJson = factoryWithJcbEnabled.createIsReadyToPayRequest(
+            cardBrandFilter = acceptJcbCardBrandFilter
+        )
+
+        val allowedCardNetworks = isReadyToPayRequestJson
+            .getJSONArray("allowedPaymentMethods")
+            .getJSONObject(0)
+            .getJSONObject("parameters")
+            .getJSONArray("allowedCardNetworks")
+            .let { StripeJsonUtils.jsonArrayToList(it) }
+
+        // Verify that only JCB is included
+        assertThat(allowedCardNetworks)
+            .containsExactly("JCB")
+    }
+
+    @Test
+    fun allowedCardNetworks_whenJcbEnabled_butFilterRejectsJcb_shouldNotIncludeJcb() {
+        // Enable JCB in the factory
+        val factoryWithJcbEnabled = GooglePayJsonFactory(googlePayConfig, isJcbEnabled = true)
+
+        // Define a CardBrandFilter that rejects JCB
+        val rejectJcbCardBrandFilter = object : CardBrandFilter {
+            override fun isAccepted(cardBrand: CardBrand): Boolean {
+                return cardBrand != CardBrand.JCB
+            }
+
+            override fun describeContents(): Int {
+                TODO("Not yet implemented")
+            }
+
+            override fun writeToParcel(p0: Parcel, p1: Int) {
+                TODO("Not yet implemented")
+            }
+        }
+
+        val isReadyToPayRequestJson = factoryWithJcbEnabled.createIsReadyToPayRequest(
+            cardBrandFilter = rejectJcbCardBrandFilter
+        )
+
+        val allowedCardNetworks = isReadyToPayRequestJson
+            .getJSONArray("allowedPaymentMethods")
+            .getJSONObject(0)
+            .getJSONObject("parameters")
+            .getJSONArray("allowedCardNetworks")
+            .let { StripeJsonUtils.jsonArrayToList(it) }
+
+        // Verify that JCB is not included
+        assertThat(allowedCardNetworks)
+            .doesNotContain("JCB")
+    }
+
+    @Test
+    fun allowedCardNetworks_whenNoCardBrandFilterProvided_shouldUseDefault() {
+        // No CardBrandFilter is provided, so the default should be used
+        val isReadyToPayRequestJson = factory.createIsReadyToPayRequest()
+
+        val allowedCardNetworks = isReadyToPayRequestJson
+            .getJSONArray("allowedPaymentMethods")
+            .getJSONObject(0)
+            .getJSONObject("parameters")
+            .getJSONArray("allowedCardNetworks")
+            .let { StripeJsonUtils.jsonArrayToList(it) }
+
+        // Verify that all default brands are included
+        assertThat(allowedCardNetworks)
+            .isEqualTo(listOf("AMEX", "DISCOVER", "MASTERCARD", "VISA"))
     }
 }

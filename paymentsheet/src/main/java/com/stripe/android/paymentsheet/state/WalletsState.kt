@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.state
 
 import androidx.annotation.StringRes
+import com.stripe.android.CardBrandFilter
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher.BillingAddressConfig
@@ -15,6 +16,7 @@ internal data class WalletsState(
     @StringRes val dividerTextResource: Int,
     val onGooglePayPressed: () -> Unit,
     val onLinkPressed: () -> Unit,
+    val cardBrandFilter: CardBrandFilter
 ) {
 
     data class Link(
@@ -39,7 +41,8 @@ internal data class WalletsState(
             googlePayLauncherConfig: GooglePayPaymentMethodLauncher.Config?,
             onGooglePayPressed: () -> Unit,
             onLinkPressed: () -> Unit,
-            isSetupIntent: Boolean
+            isSetupIntent: Boolean,
+            cardBrandFilter: CardBrandFilter
         ): WalletsState? {
             val link = Link(email = linkEmail).takeIf { isLinkAvailable == true }
 
@@ -78,6 +81,7 @@ internal data class WalletsState(
                     },
                     onGooglePayPressed = onGooglePayPressed,
                     onLinkPressed = onLinkPressed,
+                    cardBrandFilter = cardBrandFilter
                 )
             } else {
                 null

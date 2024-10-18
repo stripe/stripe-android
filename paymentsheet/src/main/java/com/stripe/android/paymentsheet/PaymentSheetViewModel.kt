@@ -22,6 +22,7 @@ import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
@@ -195,7 +196,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             googlePayButtonType = googlePayButtonType,
             onGooglePayPressed = this::checkoutWithGooglePay,
             onLinkPressed = linkHandler::launchLink,
-            isSetupIntent = paymentMethodMetadata?.stripeIntent is SetupIntent
+            isSetupIntent = paymentMethodMetadata?.stripeIntent is SetupIntent,
+            cardBrandFilter = PaymentSheetCardBrandFilter(config.cardBrandAcceptance)
         )
     }
 
