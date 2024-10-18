@@ -32,6 +32,7 @@ internal class LinkActivity : ComponentActivity() {
     @VisibleForTesting
     internal lateinit var navController: NavHostController
 
+    @Suppress("SwallowedException")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
