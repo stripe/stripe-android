@@ -3812,6 +3812,7 @@ public final class com/stripe/android/model/PaymentMethod$Type : java/lang/Enum,
 	public static final field Oxxo Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field P24 Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field PayPal Lcom/stripe/android/model/PaymentMethod$Type;
+	public static final field PromptPay Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field RevolutPay Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field Satispay Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field SepaDebit Lcom/stripe/android/model/PaymentMethod$Type;
@@ -6377,6 +6378,14 @@ public final class com/stripe/android/model/StripeIntent$NextActionData$DisplayO
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public final class com/stripe/android/model/StripeIntent$NextActionData$DisplayPayNowDetails$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/StripeIntent$NextActionData$DisplayPayNowDetails;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/model/StripeIntent$NextActionData$DisplayPayNowDetails;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public final class com/stripe/android/model/StripeIntent$NextActionData$RedirectToUrl : com/stripe/android/model/StripeIntent$NextActionData {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
@@ -6576,6 +6585,7 @@ public final class com/stripe/android/model/StripeIntent$NextActionType : java/l
 	public static final field DisplayKonbiniDetails Lcom/stripe/android/model/StripeIntent$NextActionType;
 	public static final field DisplayMultibancoDetails Lcom/stripe/android/model/StripeIntent$NextActionType;
 	public static final field DisplayOxxoDetails Lcom/stripe/android/model/StripeIntent$NextActionType;
+	public static final field DisplayPayNowDetails Lcom/stripe/android/model/StripeIntent$NextActionType;
 	public static final field RedirectToUrl Lcom/stripe/android/model/StripeIntent$NextActionType;
 	public static final field SwishRedirect Lcom/stripe/android/model/StripeIntent$NextActionType;
 	public static final field UpiAwaitNotification Lcom/stripe/android/model/StripeIntent$NextActionType;
