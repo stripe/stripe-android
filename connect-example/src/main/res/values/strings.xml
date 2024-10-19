@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name">Connect Example</string>
     <string name="account_onboarding">Account Onboarding</string>
     <string name="account_onboarding_menu_subtitle">Show a localized onboarding form that validates data</string>
     <string name="payouts">Payouts</string>
