@@ -21,6 +21,7 @@ import org.mockito.kotlin.verify
 import org.robolectric.annotation.Config
 import com.stripe.android.ui.core.R as StripeUiCoreR
 
+@Suppress("DEPRECATION")
 @RunWith(AndroidJUnit4::class)
 @Config(sdk = [Build.VERSION_CODES.Q])
 class PaymentSheetTopBarTest {

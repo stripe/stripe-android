@@ -64,6 +64,10 @@ tags:
     id: "OTP-0"
 - inputText: "111111"
 # Select previously networked account and complete
+- scrollUntilVisible:
+    element:
+      text: "Success"
+    timeout: 60000
 - tapOn: "Success"
 - tapOn: "Connect account"
 - assertVisible: "Your account was connected."
