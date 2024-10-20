@@ -12,6 +12,7 @@ import com.google.android.gms.tasks.Task
 import com.google.android.gms.wallet.PaymentData
 import com.google.android.gms.wallet.PaymentDataRequest
 import com.google.android.gms.wallet.PaymentsClient
+import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.GooglePayConfig
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.PaymentConfiguration
@@ -143,6 +144,7 @@ internal class GooglePayLauncherViewModel(
                 ),
                 isEmailRequired = args.config.isEmailRequired,
                 allowCreditCards = args.config.allowCreditCards,
+                cardBrandFilter = DefaultCardBrandFilter
             ).toString()
         }
     }

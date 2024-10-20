@@ -5,6 +5,7 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.ApiKeyFixtures
+import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
@@ -39,7 +40,8 @@ class GooglePayButtonTest {
                 buttonType = GooglePayButtonType.Pay,
                 billingAddressParameters = GooglePayJsonFactory.BillingAddressParameters(),
                 isEnabled = true,
-                onPressed = {}
+                onPressed = {},
+                cardBrandFilter = DefaultCardBrandFilter
             )
         }
 
@@ -56,7 +58,8 @@ class GooglePayButtonTest {
                 buttonType = GooglePayButtonType.Pay,
                 billingAddressParameters = GooglePayJsonFactory.BillingAddressParameters(),
                 isEnabled = true,
-                onPressed = {}
+                onPressed = {},
+                cardBrandFilter = DefaultCardBrandFilter
             )
         }
 
@@ -73,7 +76,8 @@ class GooglePayButtonTest {
                 buttonType = GooglePayButtonType.Pay,
                 billingAddressParameters = GooglePayJsonFactory.BillingAddressParameters(),
                 isEnabled = true,
-                onPressed = {}
+                onPressed = {},
+                cardBrandFilter = DefaultCardBrandFilter
             )
         }
 
@@ -90,7 +94,8 @@ class GooglePayButtonTest {
                 buttonType = GooglePayButtonType.Pay,
                 billingAddressParameters = GooglePayJsonFactory.BillingAddressParameters(),
                 isEnabled = true,
-                onPressed = {}
+                onPressed = {},
+                cardBrandFilter = DefaultCardBrandFilter
             )
         }
 

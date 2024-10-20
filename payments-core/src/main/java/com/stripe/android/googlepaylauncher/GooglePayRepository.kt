@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.annotation.RestrictTo
 import com.google.android.gms.wallet.IsReadyToPayRequest
 import com.google.android.gms.wallet.PaymentsClient
+import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
@@ -91,7 +92,8 @@ internal class DefaultGooglePayRepository(
                 googlePayJsonFactory.createIsReadyToPayRequest(
                     billingAddressParameters = billingAddressParameters,
                     existingPaymentMethodRequired = existingPaymentMethodRequired,
-                    allowCreditCards = allowCreditCards
+                    allowCreditCards = allowCreditCards,
+                    cardBrandFilter = DefaultCardBrandFilter
                 ).toString()
             )
         }.getOrElse {
