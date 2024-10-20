@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.verticalmode
 
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -461,6 +462,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             dividerTextResource = 0,
             onGooglePayPressed = {},
             onLinkPressed = {},
+            cardBrandFilter = DefaultCardBrandFilter
         )
         interactor.state.test {
             awaitItem().run {
@@ -492,6 +494,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             dividerTextResource = 0,
             onGooglePayPressed = {},
             onLinkPressed = {},
+            cardBrandFilter = DefaultCardBrandFilter
         )
         interactor.state.test {
             awaitItem().run {
@@ -527,6 +530,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 dividerTextResource = 0,
                 onGooglePayPressed = {},
                 onLinkPressed = {},
+                cardBrandFilter = DefaultCardBrandFilter
             )
             assertThat(selectedWallet).isNull()
 
@@ -554,6 +558,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             dividerTextResource = 0,
             onGooglePayPressed = {},
             onLinkPressed = {},
+            cardBrandFilter = DefaultCardBrandFilter
         )
         interactor.state.test {
             awaitItem().run {
@@ -586,6 +591,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             dividerTextResource = 0,
             onGooglePayPressed = {},
             onLinkPressed = {},
+            cardBrandFilter = DefaultCardBrandFilter
         )
         interactor.state.test {
             awaitItem().run {

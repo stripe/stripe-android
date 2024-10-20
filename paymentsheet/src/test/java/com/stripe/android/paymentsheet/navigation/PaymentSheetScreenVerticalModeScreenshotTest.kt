@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.navigation
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethodFixtures
@@ -121,6 +122,7 @@ internal class PaymentSheetScreenVerticalModeScreenshotTest {
             dividerTextResource = R.string.stripe_paymentsheet_or_pay_using,
             onGooglePayPressed = { throw AssertionError("Not expected.") },
             onLinkPressed = { throw AssertionError("Not expected.") },
+            cardBrandFilter = DefaultCardBrandFilter
         )
 
         paparazziRule.snapshot {
