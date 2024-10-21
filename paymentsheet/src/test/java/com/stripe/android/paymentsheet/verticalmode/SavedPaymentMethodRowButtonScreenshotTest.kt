@@ -26,7 +26,7 @@ internal class SavedPaymentMethodRowButtonScreenshotTest {
     )
 
     private val savedVisa = DisplayableSavedPaymentMethod(
-        displayName = "····4242".resolvableString,
+        displayName = "···· 4242".resolvableString,
         paymentMethod = PaymentMethod(
             id = "001",
             created = null,

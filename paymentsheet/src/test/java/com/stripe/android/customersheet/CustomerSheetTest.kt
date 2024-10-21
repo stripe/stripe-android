@@ -124,7 +124,7 @@ class CustomerSheetTest {
             assertThat(paymentMethodSelection.paymentMethod)
                 .isEqualTo(CARD_PAYMENT_METHOD.copy(id = "pm_1"))
             assertThat(paymentMethodSelection.paymentOption.label)
-                .isEqualTo("····4242")
+                .isEqualTo("···· 4242")
         }
 
     @Test
