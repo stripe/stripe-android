@@ -304,6 +304,16 @@ class DefaultEditPaymentMethodViewInteractorTest {
         }
     }
 
+    @Test
+    fun `availableBrands should be unmodified when using DefaultCardBrandFilter`() = runTest {
+        val interactor = createInteractor(cardBrandFilter = DefaultCardBrandFilter)
+
+        interactor.viewState.test {
+            val state = awaitItem()
+            assertThat(state.availableBrands).isEqualTo(listOf(VISA_BRAND_CHOICE, CARTES_BANCAIRES_BRAND_CHOICE))
+        }
+    }
+
     private fun createInteractor(
         eventHandler: (EditPaymentMethodViewInteractor.Event) -> Unit = {},
         onRemove: PaymentMethodRemoveOperation = { null },
