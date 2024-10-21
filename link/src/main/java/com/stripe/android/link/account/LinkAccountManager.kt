@@ -69,4 +69,13 @@ internal interface LinkAccountManager {
      * Confirms a verification code sent to the user.
      */
     suspend fun confirmVerification(code: String): Result<LinkAccount>
+
+    /**
+     * Logs the current consumer out.
+     *
+     * Regardless of the result of the API call, the local cookie is deleted and the current account
+     * is cleared. This will effectively log the user out, so there's no need to wait for the result
+     * of this call to consider it done.
+     */
+    suspend fun logout()
 }
