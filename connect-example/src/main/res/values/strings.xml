@@ -6,4 +6,19 @@
     <string name="payouts">Payouts</string>
     <string name="payouts_menu_subtitle">Show payout information and allow your users to perform payouts</string>
     <string name="connect_sdk_example">Connect SDK Example</string>
+    <string name="settings_title">Settings</string>
+    <string name="cancel">Cancel</string>
+    <string name="selected">Selected</string>
+    <string name="save">Save</string>
+    <string name="select_demo_account">Select a demo account</string>
+    <string name="other">Other</string>
+    <string name="account_id_placeholder">acct_xxxx</string>
+    <string name="custom_account">Custom Account</string>
+    <string name="component_settings">Component Settings</string>
+    <string name="view_controller_options">View Controller Options</string>
+    <string name="api_server_settings">API Server Settings</string>
+    <string name="server_url_label">Server URL</string>
+    <string name="server_url_placeholder">https://example.com</string>
+    <string name="invalid_url">Please enter a valid URL</string>
+    <string name="reset_to_default">Reset to default</string>
 </resources>

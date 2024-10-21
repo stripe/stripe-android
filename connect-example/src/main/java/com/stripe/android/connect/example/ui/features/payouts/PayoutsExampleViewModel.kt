@@ -6,8 +6,8 @@ import com.stripe.android.connect.EmbeddedComponentManager
 import com.stripe.android.connect.FetchClientSecretCallback.ClientSecretResultCallback
 import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.example.BuildConfig
-import com.stripe.android.connect.example.networking.EmbeddedComponentService
-import com.stripe.android.connect.example.networking.Merchant
+import com.stripe.android.connect.example.data.EmbeddedComponentService
+import com.stripe.android.connect.example.data.Merchant
 import com.stripe.android.core.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

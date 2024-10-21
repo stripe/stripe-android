@@ -1,4 +1,4 @@
-package com.stripe.android.connect.example.networking
+package com.stripe.android.connect.example.data
 
 import android.os.Build
 import com.github.kittinunf.fuel.core.FoldableRequestInterceptor

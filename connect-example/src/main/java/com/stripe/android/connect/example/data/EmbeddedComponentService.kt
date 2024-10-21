@@ -1,4 +1,4 @@
-package com.stripe.android.connect.example.networking
+package com.stripe.android.connect.example.data
 
 import com.github.kittinunf.fuel.core.Deserializable
 import com.github.kittinunf.fuel.core.FuelError
@@ -10,7 +10,14 @@ import com.github.kittinunf.result.Result
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.json.Json
 
-class EmbeddedComponentService {
+class EmbeddedComponentService(
+    private var exampleBackendBaseUrl: String
+) {
+
+    fun setExampleBackendBaseUrl(url: String) {
+        exampleBackendBaseUrl = url
+    }
+
     private val fuel = FuelManager.instance
         .apply {
             // add logging
@@ -27,7 +34,7 @@ class EmbeddedComponentService {
      * of available merchants. Throws a [FuelError] exception on network issues and other errors.
      */
     suspend fun getAccounts(): GetAccountsResponse {
-        return fuel.get(EXAMPLE_BACKEND_URL + "app_info")
+        return fuel.get(exampleBackendBaseUrl + "app_info")
             .awaitModel(GetAccountsResponse.serializer())
             .get()
     }
@@ -37,15 +44,11 @@ class EmbeddedComponentService {
      * Throws a [FuelError] exception on network issues and other errors.
      */
     suspend fun fetchClientSecret(account: String): String {
-        return fuel.post(EXAMPLE_BACKEND_URL + "account_session")
+        return fuel.post(exampleBackendBaseUrl + "account_session")
             .header("account", account)
             .awaitModel(FetchClientSecretResponse.serializer())
             .get()
             .clientSecret
-    }
-
-    companion object {
-        private const val EXAMPLE_BACKEND_URL = "https://stripe-connect-mobile-example-v1.glitch.me/"
     }
 }
 
