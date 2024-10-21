@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.VisibleForTesting
@@ -20,6 +19,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.stripe.android.core.Logger
 import com.stripe.android.link.ui.cardedit.CardEditScreen
 import com.stripe.android.link.ui.paymentmenthod.PaymentMethodScreen
 import com.stripe.android.link.ui.signup.SignUpScreen
@@ -39,7 +39,7 @@ internal class LinkActivity : ComponentActivity() {
         try {
             viewModel = ViewModelProvider(this, LinkActivityViewModel.factory())[LinkActivityViewModel::class.java]
         } catch (e: NoArgsException) {
-            Log.e(TAG, "Failed to create LinkActivityViewModel", e)
+            Logger.getInstance(BuildConfig.DEBUG).error("Failed to create LinkActivityViewModel", e)
             setResult(Activity.RESULT_CANCELED)
             finish()
         }
@@ -106,7 +106,6 @@ internal class LinkActivity : ComponentActivity() {
     }
 
     companion object {
-        private const val TAG = "LinkActivity"
         internal const val EXTRA_ARGS = "native_link_args"
 
         internal fun createIntent(

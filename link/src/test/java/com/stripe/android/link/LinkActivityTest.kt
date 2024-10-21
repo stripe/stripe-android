@@ -19,11 +19,12 @@ internal class LinkActivityTest {
     val intentsTestRule = IntentsRule()
 
     @Test
-    fun `finishes with a cancelled result when no popupUrl is passed`() {
+    fun `finishes with a cancelled result when no arg is passed`() {
         val intent =
             Intent(ApplicationProvider.getApplicationContext(), LinkActivity::class.java)
 
         val scenario = ActivityScenario.launchActivityForResult<LinkActivity>(intent)
+
         assertThat(scenario.result.resultCode)
             .isEqualTo(Activity.RESULT_CANCELED)
         assertNoUnverifiedIntents()
