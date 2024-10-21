@@ -292,7 +292,7 @@ class DefaultEditPaymentMethodViewInteractorTest {
             override fun describeContents(): Int = 0
 
             override fun writeToParcel(parcel: Parcel, flags: Int) {
-                // no-op
+                throw IllegalStateException("Should not invoke writeToParcel")
             }
         }
 
