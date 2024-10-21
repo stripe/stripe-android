@@ -7,6 +7,7 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.model.CardBrand
 import com.stripe.android.ui.core.CardNumberFixtures
 import com.stripe.android.uicore.elements.TextFieldStateConstants
+import com.stripe.android.utils.FakeCardBrandFilter
 import com.stripe.android.utils.isInstanceOf
 import org.junit.Test
 import com.stripe.android.R as StripeR
