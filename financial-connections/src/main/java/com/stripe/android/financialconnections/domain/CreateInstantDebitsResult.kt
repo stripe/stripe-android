@@ -46,23 +46,25 @@ internal class RealCreateInstantDebitsResult @Inject constructor(
 
         val paymentDetails = response.paymentDetails.filterIsInstance<BankAccount>().first()
 
-        val paymentMethodId = if (elementsSessionContext?.linkMode == LinkMode.LinkCardBrand) {
-            consumerRepository.sharePaymentDetails(
+        val paymentMethod = if (elementsSessionContext?.linkMode == LinkMode.LinkCardBrand) {
+            val sharePaymentDetails = consumerRepository.sharePaymentDetails(
                 paymentDetailsId = paymentDetails.id,
                 consumerSessionClientSecret = clientSecret,
                 expectedPaymentMethodType = elementsSessionContext.linkMode.expectedPaymentMethodType,
-            ).paymentMethodId
+            )
+
+            sharePaymentDetails.encodedPaymentMethod
         } else {
             repository.createPaymentMethod(
                 paymentDetailsId = paymentDetails.id,
                 consumerSessionClientSecret = clientSecret,
                 billingAddress = billingAddress,
                 billingEmailAddress = billingEmailAddress,
-            ).id
+            )
         }
 
         return InstantDebitsResult(
-            paymentMethodId = paymentMethodId,
+            paymentMethod = paymentMethod,
             bankName = paymentDetails.bankName,
             last4 = paymentDetails.last4,
         )
