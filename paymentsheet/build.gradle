@@ -25,7 +25,6 @@ dependencies {
     implementation libs.androidx.browser
     implementation libs.androidx.fragment
     implementation libs.androidx.lifecycle
-    implementation libs.androidx.lifecycleCompose
     implementation libs.androidx.savedState
     implementation libs.androidx.viewModel
 

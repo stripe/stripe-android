@@ -69,7 +69,6 @@ dependencies {
     implementation libs.androidx.browser
     implementation libs.androidx.constraintLayout
     implementation libs.androidx.coreKtx
-    implementation libs.androidx.lifecycleCompose
     implementation libs.androidx.liveDataKtx
     implementation libs.compose.activity
     implementation libs.compose.liveData
