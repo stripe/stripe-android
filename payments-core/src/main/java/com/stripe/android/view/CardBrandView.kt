@@ -1,8 +1,6 @@
 package com.stripe.android.view
 
 import android.content.Context
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffColorFilter
 import android.graphics.Typeface
 import android.os.Parcelable
 import android.util.AttributeSet
@@ -46,7 +44,6 @@ internal class CardBrandView @JvmOverloads constructor(
         val merchantPreferredNetworks: List<CardBrand> = emptyList(),
         val shouldShowCvc: Boolean = false,
         val shouldShowErrorIcon: Boolean = false,
-        val tintColor: Int = 0,
     ) : Parcelable
 
     private var stateFlow = MutableStateFlow(State())
@@ -99,12 +96,6 @@ internal class CardBrandView @JvmOverloads constructor(
         set(value) {
             stateFlow.update { it.copy(shouldShowErrorIcon = value) }
             setCardBrandIconAndTint()
-        }
-
-    internal var tintColorInt: Int
-        get() = state.tintColor
-        set(value) {
-            stateFlow.update { it.copy(tintColor = value) }
         }
 
     init {
@@ -174,14 +165,6 @@ internal class CardBrandView @JvmOverloads constructor(
                 else -> state.brand.icon
             }
         )
-
-        val tint = when {
-            shouldShowErrorIcon -> null
-            shouldShowCvc -> tintColorInt
-            else -> null
-        }
-
-        iconView.colorFilter = tint?.let { PorterDuffColorFilter(it, PorterDuff.Mode.LIGHTEN) }
     }
 
     private fun determineCardBrandToDisplay() {
