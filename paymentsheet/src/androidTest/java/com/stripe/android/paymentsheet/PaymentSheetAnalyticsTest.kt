@@ -42,7 +42,6 @@ internal class PaymentSheetAnalyticsTest {
 
     private val page: PaymentSheetPage = PaymentSheetPage(composeTestRule)
 
-    @OptIn(ExperimentalPaymentMethodLayoutApi::class)
     private val verticalModeConfiguration = PaymentSheet.Configuration.Builder("Example, Inc.")
         .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
         .build()
