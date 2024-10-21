@@ -232,6 +232,15 @@ class CountryTextInputLayout @JvmOverloads internal constructor(
         }
     }
 
+    /**
+     * @param countryCode specify a country code to display in the input. The input will display
+     * the full country display name.
+     */
+    @VisibleForTesting
+    internal fun setCountrySelected(countryCode: CountryCode) {
+        updateUiForCountryEntered(countryCode)
+    }
+
     @Deprecated(
         message = "This will be removed in a future version",
         replaceWith = ReplaceWith(
