@@ -1,8 +1,6 @@
 package com.stripe.android.view
 
 import android.content.Context
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffColorFilter
 import android.graphics.Typeface
 import android.os.Parcelable
 import android.util.AttributeSet
@@ -46,7 +44,6 @@ internal class CardBrandView @JvmOverloads constructor(
         val merchantPreferredNetworks: List<CardBrand> = emptyList(),
         val shouldShowCvc: Boolean = false,
         val shouldShowErrorIcon: Boolean = false,
-        val tintColor: Int = 0,
     ) : Parcelable
 
     private var stateFlow = MutableStateFlow(State())
@@ -99,12 +96,6 @@ internal class CardBrandView @JvmOverloads constructor(
         set(value) {
             stateFlow.update { it.copy(shouldShowErrorIcon = value) }
             setCardBrandIconAndTint()
-        }
-
-    internal var tintColorInt: Int
-        get() = state.tintColor
-        set(value) {
-            stateFlow.update { it.copy(tintColor = value) }
         }
 
     init {
@@ -167,21 +158,13 @@ internal class CardBrandView @JvmOverloads constructor(
     }
 
     private fun setCardBrandIconAndTint() {
-        iconView.setBackgroundResource(
+        iconView.setImageResource(
             when {
                 shouldShowErrorIcon -> state.brand.errorIcon
                 shouldShowCvc -> state.brand.cvcIcon
                 else -> state.brand.icon
             }
         )
-
-        val tint = when {
-            shouldShowErrorIcon -> null
-            shouldShowCvc -> tintColorInt
-            else -> tintColorInt.takeIf { state.brand == Unknown }
-        }
-
-        iconView.colorFilter = tint?.let { PorterDuffColorFilter(it, PorterDuff.Mode.LIGHTEN) }
     }
 
     private fun determineCardBrandToDisplay() {
@@ -300,7 +283,7 @@ internal class BrandAdapter(
     private fun updateView(view: View, position: Int) {
         brands.getOrNull(position - 1)?.let { brand ->
             val isSelected = brand == selectedBrand
-            view.findViewById<ImageView>(R.id.brand_icon)?.setBackgroundResource(brand.icon)
+            view.findViewById<ImageView>(R.id.brand_icon)?.setImageResource(brand.icon)
             view.findViewById<ImageView>(R.id.brand_check).apply {
                 if (isSelected) {
                     visibility = View.VISIBLE

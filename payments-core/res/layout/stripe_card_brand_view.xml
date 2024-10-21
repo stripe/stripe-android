@@ -11,7 +11,7 @@
             android:layout_width="32dp"
             android:layout_height="21dp"
             android:visibility="visible"
-            android:background="@drawable/stripe_ic_unknown"/>
+            android:src="@drawable/stripe_ic_unknown"/>
 
         <ImageView
             android:id="@+id/chevron"
