@@ -31,7 +31,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.parcelize.Parcelize
 import org.junit.After
 import org.junit.Rule
 import org.junit.Test
@@ -478,7 +477,11 @@ internal class CardNumberControllerTest {
         cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter
     ): DefaultCardNumberController {
         return DefaultCardNumberController(
-            cardTextFieldConfig = CardNumberConfig(isCardBrandChoiceEligible = false, cardBrandFilter = DefaultCardBrandFilter),
+            cardTextFieldConfig = CardNumberConfig(
+
+                isCardBrandChoiceEligible = false,
+                cardBrandFilter = DefaultCardBrandFilter
+            ),
             cardAccountRangeRepository = repository,
             uiContext = testDispatcher,
             workContext = testDispatcher,
