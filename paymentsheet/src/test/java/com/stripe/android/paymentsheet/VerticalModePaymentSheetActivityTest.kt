@@ -10,6 +10,7 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ExperimentalCardBrandFilteringApi
 import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.NetworkRule
@@ -414,9 +415,42 @@ internal class VerticalModePaymentSheetActivityTest {
         verticalModePage.assertMandateExists()
     }
 
+    @OptIn(ExperimentalCardBrandFilteringApi::class)
+    @Test
+    fun `Entering Amex card shows disallowed error when disallowed`() = runTest(
+        cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.disallowed(
+            listOf(
+
+                PaymentSheet.CardBrandAcceptance.BrandCategory.Amex
+            )
+        ),
+        networkSetup = {
+            setupElementsSessionsResponse()
+        },
+    ) {
+        verticalModePage.assertDoesNotHaveSavedPaymentMethods()
+        verticalModePage.assertPrimaryButton(isNotEnabled())
+
+        verticalModePage.clickOnNewLpm("card")
+        formPage.waitUntilVisible()
+
+        // Enter the start of an Amex card number
+        formPage.fillCardNumber("3782")
+
+        // Verify that the error message appears
+        formPage.assertErrorExists("American Express is not accepted")
+        verticalModePage.assertPrimaryButton(isNotEnabled())
+
+        // Entering an accepted card brand (Visa) should be allowed
+        formPage.fillOutCardDetails()
+        verticalModePage.assertPrimaryButton(isEnabled())
+    }
+
+    @OptIn(ExperimentalCardBrandFilteringApi::class)
     private fun runTest(
         primaryButtonLabel: String? = null,
         customer: PaymentSheet.CustomerConfiguration? = null,
+        cardBrandAcceptance: PaymentSheet.CardBrandAcceptance = PaymentSheet.CardBrandAcceptance.all(),
         networkSetup: () -> Unit,
         initialLoadWaiter: () -> Unit = { verticalModePage.waitUntilVisible() },
         test: () -> Unit,
@@ -434,6 +468,7 @@ internal class VerticalModePaymentSheetActivityTest {
                         .customer(customer)
                         .allowsDelayedPaymentMethods(true)
                         .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
+                        .cardBrandAcceptance(cardBrandAcceptance)
                         .apply {
                             if (primaryButtonLabel != null) {
                                 primaryButtonLabel(primaryButtonLabel)
