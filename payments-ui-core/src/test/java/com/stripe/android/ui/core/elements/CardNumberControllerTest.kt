@@ -24,6 +24,7 @@ import com.stripe.android.uicore.elements.SimpleTextFieldConfig
 import com.stripe.android.uicore.elements.SimpleTextFieldController
 import com.stripe.android.uicore.elements.TextFieldIcon
 import com.stripe.android.uicore.utils.stateFlowOf
+import com.stripe.android.utils.FakeCardBrandFilter
 import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
@@ -517,14 +518,5 @@ internal class CardNumberControllerTest {
 
     private companion object {
         const val TEST_TAG = "CardNumberElement"
-    }
-}
-
-@Parcelize
-class FakeCardBrandFilter(
-    private val disallowedBrands: Set<CardBrand>
-) : CardBrandFilter {
-    override fun isAccepted(cardBrand: CardBrand): Boolean {
-        return !disallowedBrands.contains(cardBrand)
     }
 }
