@@ -254,6 +254,19 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         override val additionalParams: Map<String, Any?> = mapOf()
     }
 
+    class CardBrandDisallowed(
+        cardBrand: CardBrand,
+        override val isDeferred: Boolean,
+        override val linkEnabled: Boolean,
+        override val googlePaySupported: Boolean,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "mc_disallowed_card_brand"
+
+        override val additionalParams: Map<String, Any?> = mapOf(
+            VALUE_CARD_BRAND to cardBrand.code
+        )
+    }
+
     class PressConfirmButton(
         currency: String?,
         duration: Duration?,
@@ -509,6 +522,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
 
         const val VALUE_EDIT_CBC_EVENT_SOURCE = "edit"
         const val VALUE_ADD_CBC_EVENT_SOURCE = "add"
+        const val VALUE_CARD_BRAND = "brand"
 
         const val MAX_EXTERNAL_PAYMENT_METHODS = 10
     }

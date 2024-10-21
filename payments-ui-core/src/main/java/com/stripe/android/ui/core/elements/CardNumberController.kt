@@ -3,6 +3,8 @@ package com.stripe.android.ui.core.elements
 import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.autofill.AutofillType
@@ -21,6 +23,7 @@ import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
 import com.stripe.android.stripecardscan.cardscan.CardScanSheetResult
 import com.stripe.android.ui.core.asIndividualDigits
+import com.stripe.android.ui.core.elements.events.LocalCardBrandDisallowedReporter
 import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventReporter
 import com.stripe.android.uicore.elements.FieldError
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -318,13 +321,30 @@ internal class DefaultCardNumberController(
         previousFocusDirection: FocusDirection
     ) {
         val reporter = LocalCardNumberCompletedEventReporter.current
+        val disallowedBrandReporter = LocalCardBrandDisallowedReporter.current
+
+        // Remember the last state indicating whether it was a disallowed card brand error
+        val lastLoggedCardBrand = remember { mutableStateOf<CardBrand?>(null) }
 
         LaunchedEffect(Unit) {
-            // Drop the set empty value & initial value
+            // Drop the initial value to avoid emitting on first composition
             fieldState.drop(1).collectLatest { state ->
                 when (state) {
-                    is TextFieldStateConstants.Valid.Full -> reporter.onCardNumberCompleted()
-                    else -> Unit
+                    is TextFieldStateConstants.Valid.Full -> {
+                        reporter.onCardNumberCompleted()
+                        lastLoggedCardBrand.value = null // Reset when valid
+                    }
+                    is TextFieldStateConstants.Error.Invalid -> {
+                        val error = state.getError()
+                        val isDisallowedError = error?.errorMessage == PaymentsCoreR.string.stripe_disallowed_card_brand
+                        if (isDisallowedError && lastLoggedCardBrand.value != impliedCardBrand.value) {
+                            disallowedBrandReporter.onDisallowedCardBrandEntered(impliedCardBrand.value)
+                            lastLoggedCardBrand.value = impliedCardBrand.value
+                        }
+                    }
+                    else -> {
+                        lastLoggedCardBrand.value = null // Reset for other states
+                    }
                 }
             }
         }
