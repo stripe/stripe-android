@@ -523,7 +523,7 @@ internal class CardNumberControllerTest {
         return DefaultCardNumberController(
             cardTextFieldConfig = CardNumberConfig(
                 isCardBrandChoiceEligible = false,
-                cardBrandFilter = DefaultCardBrandFilter
+                cardBrandFilter = cardBrandFilter
             ),
             cardAccountRangeRepository = repository,
             uiContext = testDispatcher,
