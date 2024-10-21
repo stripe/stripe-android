@@ -1,4 +1,4 @@
-package com.stripe.android.connect.example.ui.features.accountonboarding
+package com.stripe.android.connect.example.ui.componentpicker
 
 import androidx.lifecycle.ViewModel
 import com.github.kittinunf.fuel.core.FuelError
@@ -17,14 +17,14 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class AccountOnboardingExampleViewModel(
+class ComponentPickerViewModel(
     private val embeddedComponentService: EmbeddedComponentService = EmbeddedComponentService(),
     private val networkingScope: CoroutineScope = CoroutineScope(Dispatchers.IO),
     private val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG),
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(AccountOnboardingExampleState())
-    val state: StateFlow<AccountOnboardingExampleState> = _state.asStateFlow()
+    private val _state = MutableStateFlow(ComponentPickerState())
+    val state: StateFlow<ComponentPickerState> = _state.asStateFlow()
 
     init {
         getAccounts()
@@ -49,7 +49,7 @@ class AccountOnboardingExampleViewModel(
                 resultCallback.onResult(clientSecret)
             } catch (e: FuelError) {
                 resultCallback.onResult(null)
-                logger.error("(AccountOnboardingExampleViewModel) Error fetching client secret: $e")
+                logger.error("(ComponentPickerViewModel) Error fetching client secret: $e")
             }
         }
     }
@@ -68,17 +68,17 @@ class AccountOnboardingExampleViewModel(
                     configuration = EmbeddedComponentManager.Configuration(
                         publishableKey = response.publishableKey
                     ),
-                    fetchClientSecret = this@AccountOnboardingExampleViewModel::fetchClientSecret
+                    fetchClientSecret = this@ComponentPickerViewModel::fetchClientSecret
                 )
             } catch (e: FuelError) {
-                logger.error("(AccountOnboardingExampleViewModel) Error getting accounts: $e")
+                logger.error("(ComponentPickerViewModel) Error getting accounts: $e")
             }
         }
     }
 
     // state
 
-    data class AccountOnboardingExampleState(
+    data class ComponentPickerState(
         val selectedAccount: Merchant? = null,
         val accounts: List<Merchant>? = null,
     )

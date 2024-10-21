@@ -41,6 +41,7 @@ dependencies {
     implementation libs.compose.activity
     implementation libs.compose.navigation
     implementation libs.accompanist.systemUiController
+    implementation project(':financial-connections-example')
     debugImplementation libs.compose.uiTooling
 
     // Test

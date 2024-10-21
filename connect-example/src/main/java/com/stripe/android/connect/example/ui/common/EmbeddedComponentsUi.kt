@@ -22,7 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.stripe.android.connect.example.networking.Merchant
+import com.stripe.android.connect.example.data.Merchant
 
 @Composable
 fun EmbeddedComponentsLauncherScreen(
