@@ -167,7 +167,7 @@ internal class CardBrandView @JvmOverloads constructor(
     }
 
     private fun setCardBrandIconAndTint() {
-        iconView.setBackgroundResource(
+        iconView.setImageResource(
             when {
                 shouldShowErrorIcon -> state.brand.errorIcon
                 shouldShowCvc -> state.brand.cvcIcon
@@ -178,7 +178,7 @@ internal class CardBrandView @JvmOverloads constructor(
         val tint = when {
             shouldShowErrorIcon -> null
             shouldShowCvc -> tintColorInt
-            else -> tintColorInt.takeIf { state.brand == Unknown }
+            else -> null
         }
 
         iconView.colorFilter = tint?.let { PorterDuffColorFilter(it, PorterDuff.Mode.LIGHTEN) }
@@ -300,7 +300,7 @@ internal class BrandAdapter(
     private fun updateView(view: View, position: Int) {
         brands.getOrNull(position - 1)?.let { brand ->
             val isSelected = brand == selectedBrand
-            view.findViewById<ImageView>(R.id.brand_icon)?.setBackgroundResource(brand.icon)
+            view.findViewById<ImageView>(R.id.brand_icon)?.setImageResource(brand.icon)
             view.findViewById<ImageView>(R.id.brand_check).apply {
                 if (isSelected) {
                     visibility = View.VISIBLE
