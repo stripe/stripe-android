@@ -478,7 +478,6 @@ internal class CardNumberControllerTest {
     ): DefaultCardNumberController {
         return DefaultCardNumberController(
             cardTextFieldConfig = CardNumberConfig(
-
                 isCardBrandChoiceEligible = false,
                 cardBrandFilter = DefaultCardBrandFilter
             ),
