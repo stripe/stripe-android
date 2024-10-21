@@ -4,10 +4,12 @@
     <application>
         <activity
             android:name="com.stripe.android.link.LinkActivity"
+            android:theme="@style/StripeLinkBaseTheme"
+            android:exported="false"
+            android:label="@string/stripe_link"
+            android:windowSoftInputMode="adjustResize"
             android:autoRemoveFromRecents="true"
-            android:configChanges="orientation|keyboard|keyboardHidden|screenLayout|screenSize|smallestScreenSize"
-            android:launchMode="singleTop"
-            android:theme="@style/StripeTransparentTheme" />
+            android:configChanges="orientation|keyboard|keyboardHidden|screenLayout|screenSize|smallestScreenSize" />
 
         <activity
             android:name="com.stripe.android.link.LinkForegroundActivity"
