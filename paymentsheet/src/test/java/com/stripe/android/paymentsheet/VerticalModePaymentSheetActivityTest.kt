@@ -35,6 +35,7 @@ import org.robolectric.annotation.Config
 
 @OptIn(
     ExperimentalPaymentMethodLayoutApi::class,
+    ExperimentalCardBrandFilteringApi::class,
 )
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.Q])
@@ -444,6 +445,25 @@ internal class VerticalModePaymentSheetActivityTest {
         // Entering an accepted card brand (Visa) should be allowed
         formPage.fillOutCardDetails()
         verticalModePage.assertPrimaryButton(isEnabled())
+    }
+
+    @Test
+    fun `Displayed saved payment method is correct when a card brand is disallowed`() = runTest(
+        cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.disallowed(
+            listOf(
+
+                PaymentSheet.CardBrandAcceptance.BrandCategory.Visa
+            )
+        ),
+        customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
+        networkSetup = {
+            setupElementsSessionsResponse()
+            setupV1PaymentMethodsResponse(card1)
+        },
+    ) {
+        // Saved Visa card should be filtered out
+        verticalModePage.assertDoesNotHaveSavedPaymentMethods()
+        verticalModePage.assertPrimaryButton(isNotEnabled())
     }
 
     @OptIn(ExperimentalCardBrandFilteringApi::class)
