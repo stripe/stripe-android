@@ -56,9 +56,8 @@ internal class CardDetailsController(
         IdentifierSpec.CardNumber,
         DefaultCardNumberController(
             cardTextFieldConfig = CardNumberConfig(
-                isCBCEligible = cbcEligibility != CardBrandChoiceEligibility.Ineligible,
+                isCardBrandChoiceEligible = cbcEligibility != CardBrandChoiceEligibility.Ineligible,
                 cardBrandFilter = cardBrandFilter
-
             ),
             cardAccountRangeRepository = cardAccountRangeRepositoryFactory.create(),
             uiContext = uiContext,

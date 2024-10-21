@@ -36,6 +36,7 @@ import com.stripe.android.customersheet.util.isUnverifiedUSBankAccount
 import com.stripe.android.customersheet.util.sortPaymentMethods
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
@@ -605,6 +606,7 @@ internal class CustomerSheetViewModel(
                     },
                     canRemove = customerState.canRemove,
                     isLiveMode = requireNotNull(customerState.metadata).stripeIntent.isLiveMode,
+                    cardBrandFilter = PaymentSheetCardBrandFilter(customerState.configuration.cardBrandAcceptance)
                 ),
                 isLiveMode = isLiveModeProvider(),
             )

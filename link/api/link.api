@@ -12,12 +12,14 @@ public final class com/stripe/android/link/ComposableSingletons$LinkActivityKt {
 	public static field lambda-3 Lkotlin/jvm/functions/Function4;
 	public static field lambda-4 Lkotlin/jvm/functions/Function4;
 	public static field lambda-5 Lkotlin/jvm/functions/Function4;
+	public static field lambda-6 Lkotlin/jvm/functions/Function4;
 	public fun <init> ()V
 	public final fun getLambda-1$link_release ()Lkotlin/jvm/functions/Function4;
 	public final fun getLambda-2$link_release ()Lkotlin/jvm/functions/Function4;
 	public final fun getLambda-3$link_release ()Lkotlin/jvm/functions/Function4;
 	public final fun getLambda-4$link_release ()Lkotlin/jvm/functions/Function4;
 	public final fun getLambda-5$link_release ()Lkotlin/jvm/functions/Function4;
+	public final fun getLambda-6$link_release ()Lkotlin/jvm/functions/Function4;
 }
 
 public final class com/stripe/android/link/LinkActivityContract$Companion {
@@ -84,6 +86,14 @@ public final class com/stripe/android/link/LinkPaymentDetails$Saved$Creator : an
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/link/LinkPaymentDetails$Saved;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/link/LinkPaymentDetails$Saved;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/link/NativeLinkArgs$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/link/NativeLinkArgs;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/link/NativeLinkArgs;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 

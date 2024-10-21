@@ -32,7 +32,8 @@ internal object PaymentMethodMetadataFactory {
         paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
         linkInlineConfiguration: LinkInlineConfiguration? = null,
         linkMode: LinkMode? = LinkMode.LinkPaymentMethod,
-        cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter
+        cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
+        defaultBillingDetails: PaymentSheet.BillingDetails = PaymentSheet.BillingDetails(),
     ): PaymentMethodMetadata {
         return PaymentMethodMetadata(
             stripeIntent = stripeIntent,
@@ -43,7 +44,7 @@ internal object PaymentMethodMetadataFactory {
             paymentMethodOrder = paymentMethodOrder,
             cbcEligibility = cbcEligibility,
             merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
-            defaultBillingDetails = PaymentSheet.BillingDetails(),
+            defaultBillingDetails = defaultBillingDetails,
             shippingDetails = shippingDetails,
             hasCustomerConfiguration = hasCustomerConfiguration,
             sharedDataSpecs = sharedDataSpecs,
