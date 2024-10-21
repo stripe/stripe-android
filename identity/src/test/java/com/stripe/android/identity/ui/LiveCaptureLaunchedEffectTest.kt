@@ -1,10 +1,10 @@
 package com.stripe.android.identity.ui
 
 import android.os.Build
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.lifecycle.MediatorLiveData
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
 import androidx.navigation.NavOptionsBuilder
 import com.stripe.android.identity.TestApplication

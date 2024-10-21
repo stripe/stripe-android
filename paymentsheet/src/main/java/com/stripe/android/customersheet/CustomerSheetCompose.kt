@@ -4,7 +4,7 @@ import androidx.activity.compose.LocalActivityResultRegistryOwner
 import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.utils.rememberActivity
