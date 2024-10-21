@@ -11,7 +11,7 @@ import com.stripe.android.uicore.elements.TextFieldStateConstants
 import com.stripe.android.R as StripeR
 
 internal class CardNumberConfig(
-    private val isCBCEligible: Boolean,
+    private val isCardBrandChoiceEligible: Boolean,
     private val cardBrandFilter: CardBrandFilter
 ) : CardDetailsTextFieldConfig {
     override val capitalization: KeyboardCapitalization = KeyboardCapitalization.None
@@ -30,7 +30,7 @@ internal class CardNumberConfig(
         return if (number.isBlank()) {
             TextFieldStateConstants.Error.Blank
         } else if (!cardBrandFilter.isAccepted(brand) &&
-            (!isCBCEligible || number.length > digitsRequiredToFetchBrands)
+            (!isCardBrandChoiceEligible || number.length > digitsRequiredToFetchBrands)
         ) {
             /*
               If the merchant is eligible for CBC do not show the disallowed error

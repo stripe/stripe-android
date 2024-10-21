@@ -477,7 +477,7 @@ internal class CardNumberControllerTest {
         cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter
     ): DefaultCardNumberController {
         return DefaultCardNumberController(
-            cardTextFieldConfig = CardNumberConfig(isCBCEligible = false, cardBrandFilter = DefaultCardBrandFilter),
+            cardTextFieldConfig = CardNumberConfig(isCardBrandChoiceEligible = false, cardBrandFilter = DefaultCardBrandFilter),
             cardAccountRangeRepository = repository,
             uiContext = testDispatcher,
             workContext = testDispatcher,

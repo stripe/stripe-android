@@ -12,7 +12,7 @@ import org.junit.Test
 import com.stripe.android.R as StripeR
 
 class CardNumberConfigTest {
-    private val cardNumberConfig = CardNumberConfig(isCBCEligible = false, cardBrandFilter = DefaultCardBrandFilter)
+    private val cardNumberConfig = CardNumberConfig(isCardBrandChoiceEligible = false, cardBrandFilter = DefaultCardBrandFilter)
 
     @Test
     fun `visualTransformation formats entered value`() {
@@ -101,7 +101,7 @@ class CardNumberConfigTest {
     fun `determineState returns valid for allowed brand without CBC`() {
         val cardBrandFilter = FakeCardBrandFilter(disallowedBrands = setOf(CardBrand.MasterCard))
         val cardNumberConfig = CardNumberConfig(
-            isCBCEligible = false,
+            isCardBrandChoiceEligible = false,
             cardBrandFilter = cardBrandFilter
         )
 
@@ -118,7 +118,7 @@ class CardNumberConfigTest {
     fun `determineState returns error for disallowed brand without CBC`() {
         val cardBrandFilter = FakeCardBrandFilter(disallowedBrands = setOf(CardBrand.MasterCard))
         val cardNumberConfig = CardNumberConfig(
-            isCBCEligible = false,
+            isCardBrandChoiceEligible = false,
             cardBrandFilter = cardBrandFilter
         )
 
@@ -137,7 +137,7 @@ class CardNumberConfigTest {
     fun `determineState allows disallowed brand with CBC when number length is less than or equal to 8`() {
         val cardBrandFilter = FakeCardBrandFilter(disallowedBrands = setOf(CardBrand.MasterCard))
         val cardNumberConfig = CardNumberConfig(
-            isCBCEligible = true,
+            isCardBrandChoiceEligible = true,
             cardBrandFilter = cardBrandFilter
         )
 
@@ -155,7 +155,7 @@ class CardNumberConfigTest {
     fun `determineState returns error for disallowed brand with CBC when number length is greater than 8`() {
         val cardBrandFilter = FakeCardBrandFilter(disallowedBrands = setOf(CardBrand.MasterCard))
         val cardNumberConfig = CardNumberConfig(
-            isCBCEligible = true,
+            isCardBrandChoiceEligible = true,
             cardBrandFilter = cardBrandFilter
         )
 
@@ -174,7 +174,7 @@ class CardNumberConfigTest {
     fun `determineState returns valid for allowed brand with CBC`() {
         val cardBrandFilter = FakeCardBrandFilter(disallowedBrands = setOf(CardBrand.MasterCard))
         val cardNumberConfig = CardNumberConfig(
-            isCBCEligible = true,
+            isCardBrandChoiceEligible = true,
             cardBrandFilter = cardBrandFilter
         )
 
