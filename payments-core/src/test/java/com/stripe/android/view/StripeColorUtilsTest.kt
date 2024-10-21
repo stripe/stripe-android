@@ -1,26 +1,17 @@
 package com.stripe.android.view
 
-import android.app.Activity
 import android.graphics.Color
-import android.os.Bundle
 import android.os.Looper
-import android.os.PersistableBundle
-import android.widget.LinearLayout
 import androidx.annotation.ColorInt
-import androidx.lifecycle.Lifecycle
+import androidx.appcompat.app.AppCompatActivity
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.CustomerSession
-import com.stripe.android.PaymentSessionFixtures
 import com.stripe.android.R
-import com.stripe.android.databinding.StripeActivityBinding
 import com.stripe.android.utils.createTestActivityRule
 import org.junit.Rule
 import org.junit.runner.RunWith
-import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -31,19 +22,15 @@ internal class StripeColorUtilsTest {
         ApplicationProvider.getApplicationContext()
     )
 
-    @BeforeTest
-    fun setup() {
-        CustomerSession.instance = mock()
-    }
-
     @get:Rule
     internal var testActivityRule = createTestActivityRule<TestActivity>()
 
     @Test
     fun getThemeAccentColor_getsNonzeroColor() {
         activityScenarioFactory.create<TestActivity>().use { activityScenario ->
-            activityScenario.onActivity {
-                assertThat(Color.alpha(StripeColorUtils(it).colorAccent))
+            activityScenario.onActivity { activity ->
+                activity.setTheme(R.style.StripeDefaultTheme)
+                assertThat(Color.alpha(StripeColorUtils(activity).colorAccent))
                     .isGreaterThan(0)
             }
         }
@@ -51,14 +38,12 @@ internal class StripeColorUtilsTest {
         shadowOf(Looper.getMainLooper()).idle()
     }
 
-    // TODO: not passing, need to fix
     @Test
     fun getThemeColorControlNormal_getsNonzeroColor() {
-        activityScenarioFactory.create<TestActivity>(
-            PaymentSessionFixtures.PAYMENT_FLOW_ARGS
-        ).use { activityScenario ->
-            activityScenario.onActivity {
-                assertThat(Color.alpha(StripeColorUtils(it).colorControlNormal))
+        activityScenarioFactory.create<TestActivity>().use { activityScenario ->
+            activityScenario.onActivity { activity ->
+                activity.setTheme(R.style.StripeDefaultTheme)
+                assertThat(Color.alpha(StripeColorUtils(activity).colorControlNormal))
                     .isGreaterThan(0)
             }
         }
@@ -126,16 +111,5 @@ internal class StripeColorUtilsTest {
         assertTrue(StripeColorUtils.isColorDark(Color.BLACK))
     }
 
-    internal class TestActivity : Activity() {
-        private val viewBinding: StripeActivityBinding by lazy {
-            StripeActivityBinding.inflate(layoutInflater)
-        }
-
-        override fun onCreate(savedInstanceState: Bundle?, persistentState: PersistableBundle?) {
-            super.onCreate(savedInstanceState, persistentState)
-
-            setTheme(R.style.StripeToolBarStyle)
-            setContentView(viewBinding.root)
-        }
-    }
+    internal class TestActivity : AppCompatActivity()
 }
