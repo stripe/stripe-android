@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="stripe_paymentsheet_payment_method_item_card_number">····%1$s</string>
+    <string name="stripe_paymentsheet_payment_method_item_card_number">···· %1$s</string>
 
     <!-- Label indicating the payment intent is in testmode -->
     <string name="stripe_paymentsheet_test_mode_indicator">TEST MODE</string>

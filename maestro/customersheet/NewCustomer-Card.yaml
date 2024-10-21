@@ -41,7 +41,7 @@ appId: com.stripe.android.paymentsheet.example
 - waitForAnimationToEnd:
     timeout: 5000
 - assertVisible:
-    id: "PAYMENT_OPTION_CARD_TEST_TAG_····4242"
+    id: "PAYMENT_OPTION_CARD_TEST_TAG_···· 4242"
 - tapOn: "Confirm"
-- assertVisible: "····4242"
+- assertVisible: "···· 4242"
 - stopRecording

@@ -430,7 +430,7 @@ internal class PaymentSheetActivityTest {
 
         scenario.launch(intent).onActivity {
             composeTestRule.onNodeWithTag(
-                "SAVED_PAYMENT_METHOD_CARD_TEST_TAG_····4242",
+                "SAVED_PAYMENT_METHOD_CARD_TEST_TAG_···· 4242",
                 useUnmergedTree = true,
             ).assertIsSelected()
 
@@ -443,7 +443,7 @@ internal class PaymentSheetActivityTest {
             ).performClick()
 
             composeTestRule.onNodeWithTag(
-                "SAVED_PAYMENT_METHOD_CARD_TEST_TAG_····4242",
+                "SAVED_PAYMENT_METHOD_CARD_TEST_TAG_···· 4242",
                 useUnmergedTree = true,
             ).assertIsSelected()
         }
@@ -804,7 +804,7 @@ internal class PaymentSheetActivityTest {
         val scenario = activityScenario(viewModel)
         scenario.launch(intent).onActivity {
             composeTestRule.onNodeWithTag(
-                "SAVED_PAYMENT_METHOD_CARD_TEST_TAG_····4242",
+                "SAVED_PAYMENT_METHOD_CARD_TEST_TAG_···· 4242",
                 useUnmergedTree = true,
             ).assertIsSelected()
 

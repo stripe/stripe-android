@@ -397,7 +397,7 @@ internal class DefaultFlowControllerTest {
 
         val paymentOption = flowController.getPaymentOption()
         assertThat(paymentOption?.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_card_visa)
-        assertThat(paymentOption?.label).isEqualTo("····$last4")
+        assertThat(paymentOption?.label).isEqualTo("···· $last4")
     }
 
     @Test
@@ -419,7 +419,7 @@ internal class DefaultFlowControllerTest {
 
         val paymentOption = flowController.getPaymentOption()
         assertThat(paymentOption?.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_card_visa)
-        assertThat(paymentOption?.label).isEqualTo("····$last4")
+        assertThat(paymentOption?.label).isEqualTo("···· $last4")
 
         // Simulate a real FlowControllerInitializer that fetches the payment methods for the new
         // customer, who doesn't have any saved payment methods
@@ -514,12 +514,12 @@ internal class DefaultFlowControllerTest {
         verify(paymentOptionCallback).onPaymentOption(
             argThat {
                 drawableResourceId == R.drawable.stripe_ic_paymentsheet_card_visa &&
-                    label == "····4242"
+                    label == "···· 4242"
             }
         )
         val paymentOption = flowController.getPaymentOption()
         assertThat(paymentOption?.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_card_visa)
-        assertThat(paymentOption?.label).isEqualTo("····4242")
+        assertThat(paymentOption?.label).isEqualTo("···· 4242")
     }
 
     @Test
