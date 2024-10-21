@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.strings.orEmpty
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.PaymentMethod
@@ -547,6 +548,7 @@ class SavedPaymentMethodMutatorTest {
                 isNotPaymentFlow = true,
                 isLiveModeProvider = { true },
                 currentScreen = currentScreen,
+                cardBrandFilter = DefaultCardBrandFilter
             )
             Scenario(
                 savedPaymentMethodMutator = savedPaymentMethodMutator,
