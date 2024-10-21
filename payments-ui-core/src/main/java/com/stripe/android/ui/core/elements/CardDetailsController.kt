@@ -55,7 +55,10 @@ internal class CardDetailsController(
     val numberElement = CardNumberElement(
         IdentifierSpec.CardNumber,
         DefaultCardNumberController(
-            cardTextFieldConfig = CardNumberConfig(),
+            cardTextFieldConfig = CardNumberConfig(
+                isCardBrandChoiceEligible = cbcEligibility != CardBrandChoiceEligibility.Ineligible,
+                cardBrandFilter = cardBrandFilter
+            ),
             cardAccountRangeRepository = cardAccountRangeRepositoryFactory.create(),
             uiContext = uiContext,
             workContext = workContext,
