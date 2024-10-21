@@ -71,6 +71,10 @@ internal class DefaultLinkEventsReporter @Inject constructor(
         fireEvent(LinkEvent.AccountLookupFailure, params)
     }
 
+    override fun on2FAStartFailure() {
+        fireEvent(LinkEvent.TwoFAStartFailure)
+    }
+
     override fun onPopupShow() {
         fireEvent(LinkEvent.PopupShow)
     }
