@@ -37,6 +37,7 @@ import com.stripe.android.model.CreateFinancialConnectionsSessionParams
 import com.stripe.android.model.DeferredIntentParams
 import com.stripe.android.model.ElementsSessionFixtures
 import com.stripe.android.model.ElementsSessionParams
+import com.stripe.android.model.LinkMode
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
@@ -1764,6 +1765,7 @@ internal class StripeApiRepositoryTest {
                     verificationMethod = VerificationMethodParam.Automatic,
                     customer = "customer_id",
                     onBehalfOf = null,
+                    linkMode = LinkMode.LinkPaymentMethod,
                     amount = 1000,
                     hostedSurface = "payment_element",
                     currency = "usd"
@@ -1782,11 +1784,44 @@ internal class StripeApiRepositoryTest {
                 assertThat(this["verification_method"]).isEqualTo("automatic")
                 assertThat(this["customer"]).isEqualTo("customer_id")
                 assertThat(this["on_behalf_of"]).isEqualTo(null)
+                assertThat(this["link_mode"]).isEqualTo("LINK_PAYMENT_METHOD")
                 assertThat(this["amount"]).isEqualTo(1000)
                 assertThat(this["hosted_surface"]).isEqualTo("payment_element")
                 assertThat(this["currency"]).isEqualTo("usd")
             }
         }
+
+    @Test
+    fun `createDeferredFinancialConnectionsSession() sends correct link_mode if disabled`() = runTest {
+        val stripeResponse = StripeResponse(
+            code = 200,
+            body = FinancialConnectionsFixtures.SESSION.toString(),
+            headers = emptyMap()
+        )
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>())).thenReturn(stripeResponse)
+
+        create().createFinancialConnectionsSessionForDeferredPayments(
+            params = CreateFinancialConnectionsSessionForDeferredPaymentParams(
+                uniqueId = "uuid",
+                initialInstitution = "initial_institution",
+                manualEntryOnly = false,
+                searchSession = "search_session_id",
+                verificationMethod = VerificationMethodParam.Automatic,
+                customer = "customer_id",
+                onBehalfOf = null,
+                linkMode = null,
+                amount = 1000,
+                hostedSurface = "payment_element",
+                currency = "usd"
+            ),
+            requestOptions = DEFAULT_OPTIONS,
+        )
+
+        verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+        val params = requireNotNull(apiRequestArgumentCaptor.firstValue.params)
+
+        assertThat(params["link_mode"]).isEqualTo("LINK_DISABLED")
+    }
 
     @Test
     fun `sharePaymentDetails() sends all parameters`() =
@@ -1951,7 +1986,8 @@ internal class StripeApiRepositoryTest {
                 clientSecret = clientSecret,
                 customerName = customerName,
                 hostedSurface = "payment_element",
-                customerEmailAddress = customerEmailAddress
+                customerEmailAddress = customerEmailAddress,
+                linkMode = LinkMode.Passthrough,
             ),
             DEFAULT_OPTIONS
         )
@@ -1966,6 +2002,7 @@ internal class StripeApiRepositoryTest {
         with(params) {
             assertThat(this["client_secret"]).isEqualTo(clientSecret)
             assertThat(this["hosted_surface"]).isEqualTo("payment_element")
+            assertThat(this["link_mode"]).isEqualTo("PASSTHROUGH")
             withNestedParams("payment_method_data") {
                 assertThat(this["type"]).isEqualTo("us_bank_account")
                 withNestedParams("billing_details") {
@@ -1993,7 +2030,8 @@ internal class StripeApiRepositoryTest {
             params = CreateFinancialConnectionsSessionParams.InstantDebits(
                 clientSecret = clientSecret,
                 customerEmailAddress = customerEmailAddress,
-                hostedSurface = "payment_element"
+                hostedSurface = "payment_element",
+                linkMode = LinkMode.LinkCardBrand,
             ),
             DEFAULT_OPTIONS
         )
@@ -2010,6 +2048,7 @@ internal class StripeApiRepositoryTest {
             assertThat(this["product"]).isEqualTo("instant_debits")
             assertThat(this["hosted_surface"]).isEqualTo("payment_element")
             assertThat(this["attach_required"]).isEqualTo(true)
+            assertThat(this["link_mode"]).isEqualTo("LINK_CARD_BRAND")
             withNestedParams("payment_method_data") {
                 assertThat(this["type"]).isEqualTo("link")
                 withNestedParams("billing_details") {
@@ -2039,7 +2078,8 @@ internal class StripeApiRepositoryTest {
                 clientSecret = clientSecret,
                 customerName = customerName,
                 hostedSurface = "payment_element",
-                customerEmailAddress = customerEmailAddress
+                customerEmailAddress = customerEmailAddress,
+                linkMode = null,
             ),
             DEFAULT_OPTIONS
         )
@@ -2055,6 +2095,7 @@ internal class StripeApiRepositoryTest {
         with(params) {
             assertThat(this["client_secret"]).isEqualTo(clientSecret)
             assertThat(this["hosted_surface"]).isEqualTo("payment_element")
+            assertThat(this["link_mode"]).isEqualTo("LINK_DISABLED")
             withNestedParams("payment_method_data") {
                 assertThat(this["type"]).isEqualTo("us_bank_account")
                 withNestedParams("billing_details") {
@@ -2082,7 +2123,8 @@ internal class StripeApiRepositoryTest {
             params = CreateFinancialConnectionsSessionParams.InstantDebits(
                 clientSecret = clientSecret,
                 customerEmailAddress = customerEmailAddress,
-                hostedSurface = "payment_element"
+                hostedSurface = "payment_element",
+                linkMode = null,
             ),
             DEFAULT_OPTIONS
         )
@@ -2100,6 +2142,7 @@ internal class StripeApiRepositoryTest {
             assertThat(this["product"]).isEqualTo("instant_debits")
             assertThat(this["hosted_surface"]).isEqualTo("payment_element")
             assertThat(this["attach_required"]).isEqualTo(true)
+            assertThat(this["link_mode"]).isEqualTo("LINK_DISABLED")
             withNestedParams("payment_method_data") {
                 assertThat(this["type"]).isEqualTo("link")
                 withNestedParams("billing_details") {

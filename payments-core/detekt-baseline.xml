@@ -39,6 +39,7 @@
     <ID>LongMethod:CardFormView.kt$CardFormView$private fun setupCardWidget()</ID>
     <ID>LongMethod:CardFormViewTest.kt$CardFormViewTest$@Test fun testCardValidCallback()</ID>
     <ID>LongMethod:CardInputWidget.kt$CardInputWidget$private fun initView(attrs: AttributeSet?)</ID>
+    <ID>LongMethod:CollectBankAccountViewModel.kt$CollectBankAccountViewModel$private suspend fun createFinancialConnectionsSession()</ID>
     <ID>LongMethod:CustomerSessionOperationExecutor.kt$CustomerSessionOperationExecutor$@JvmSynthetic internal suspend fun execute( ephemeralKey: EphemeralKey, operation: EphemeralOperation )</ID>
     <ID>LongMethod:CustomerSessionTest.kt$CustomerSessionTest$@BeforeTest fun setup()</ID>
     <ID>LongMethod:CustomerSessionTest.kt$CustomerSessionTest$private suspend fun setupErrorProxy()</ID>
