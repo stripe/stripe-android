@@ -1,7 +1,6 @@
 package com.stripe.android.view
 
 import android.graphics.Color
-import android.os.Looper
 import androidx.annotation.ColorInt
 import androidx.appcompat.app.AppCompatActivity
 import androidx.test.core.app.ApplicationProvider
@@ -11,7 +10,6 @@ import com.stripe.android.utils.createTestActivityRule
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import org.robolectric.Shadows.shadowOf
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -34,8 +32,6 @@ internal class StripeColorUtilsTest {
                     .isGreaterThan(0)
             }
         }
-
-        shadowOf(Looper.getMainLooper()).idle()
     }
 
     @Test
