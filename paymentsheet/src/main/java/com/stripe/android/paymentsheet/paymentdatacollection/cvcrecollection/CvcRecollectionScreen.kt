@@ -162,7 +162,7 @@ internal fun CvcRecollectionField(
                     Text(
                         text = stringResource(
                             R.string.stripe_paymentsheet_payment_method_item_card_number,
-                            " $lastFour"
+                            lastFour
                         ),
                         style = MaterialTheme.typography.body1,
                         modifier = Modifier.testTag(TEST_TAG_CVC_LAST_FOUR)
