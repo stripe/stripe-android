@@ -37,8 +37,6 @@ import com.stripe.android.financialconnections.repository.api.RealProvideApiRequ
 import com.stripe.android.repository.ConsumersApiService
 import com.stripe.android.repository.ConsumersApiServiceImpl
 import com.stripe.android.uicore.image.StripeImageLoader
-import com.stripe.attestation.IntegrityStandardRequestManager
-import com.stripe.attestation.RealStandardIntegrityManagerFactory
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -90,19 +88,6 @@ internal interface FinancialConnectionsSheetNativeModule {
             apiVersion = apiVersion.code,
             stripeNetworkClient = stripeNetworkClient
         )
-
-        @Singleton
-        @Provides
-        fun providesIntegrityStandardRequestManager(
-            context: Application,
-            logger: Logger,
-        ): IntegrityStandardRequestManager {
-            return IntegrityStandardRequestManager(
-                logError = logger::error,
-                cloudProjectNumber = 527113280969,
-                factory = RealStandardIntegrityManagerFactory(context)
-            )
-        }
 
         @Singleton
         @Provides
