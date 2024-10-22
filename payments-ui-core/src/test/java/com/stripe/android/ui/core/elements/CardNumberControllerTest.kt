@@ -443,13 +443,15 @@ internal class CardNumberControllerTest {
     @Test
     fun `on disallowed card brand entered, should report event`() = runTest {
         val fakeDisallowedEventReporter = FakeCardBrandDisallowedReporter()
+        val eventReporter: CardNumberCompletedEventReporter = mock()
 
         val disallowedBrands = setOf(CardBrand.AmericanExpress, CardBrand.MasterCard)
         val cardNumberController = createController(cardBrandFilter = FakeCardBrandFilter(disallowedBrands))
 
         composeTestRule.setContent {
             CompositionLocalProvider(
-                LocalCardBrandDisallowedReporter provides fakeDisallowedEventReporter
+                LocalCardBrandDisallowedReporter provides fakeDisallowedEventReporter,
+                LocalCardNumberCompletedEventReporter provides eventReporter
             ) {
                 cardNumberController.ComposeUI(
                     enabled = true,
@@ -487,6 +489,29 @@ internal class CardNumberControllerTest {
             // Expect MasterCard to be reported once
             val secondReported = awaitItem()
             assertEquals(CardBrand.MasterCard, secondReported, "MasterCard should be reported once")
+
+            // Simulate entering an invalid card number
+            cardNumberController.onValueChange("66")
+            expectNoEvents()
+
+            // Simulate entering "5555" for MasterCard
+            cardNumberController.onValueChange("5555")
+
+            // Expect MasterCard to be reported once
+            val thirdReported = awaitItem()
+            assertEquals(CardBrand.MasterCard, thirdReported, "MasterCard should be reported once")
+
+            // Simulate entering a valid Visa card number
+            cardNumberController.onValueChange("4242424242424242")
+            expectNoEvents()
+
+            // Simulate entering a MasterCard
+            cardNumberController.onValueChange("")
+            cardNumberController.onValueChange("5555555555554444")
+
+            // Expect MasterCard to be reported once
+            val fourthReported = awaitItem()
+            assertEquals(CardBrand.MasterCard, fourthReported, "MasterCard should be reported once")
         }
     }
 
