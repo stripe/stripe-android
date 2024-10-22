@@ -2,9 +2,7 @@ package com.stripe.android.link.ui.verification
 
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavHostController
 import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
@@ -12,7 +10,6 @@ import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.model.AccountStatus
-import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.getErrorMessage
 import com.stripe.android.ui.core.elements.OTPSpec
@@ -27,14 +24,13 @@ import javax.inject.Inject
 /**
  * ViewModel that handles user verification confirmation logic.
  */
-@Suppress("TooManyFunctions")
 internal class VerificationViewModel @Inject constructor(
     private val linkAccountManager: LinkAccountManager,
     private val linkEventsReporter: LinkEventsReporter,
     private val logger: Logger
 ) : ViewModel() {
-    lateinit var linkAccount: LinkAccount
-    lateinit var navController: NavHostController
+    private var goBack: (userInitiated: Boolean) -> Unit = {}
+    private var navigateAndClearStack: (route: LinkScreen) -> Unit = {}
 
     private val _viewState = MutableStateFlow(VerificationViewState())
     val viewState: StateFlow<VerificationViewState> = _viewState
@@ -44,11 +40,7 @@ internal class VerificationViewModel @Inject constructor(
      * navigating to the Wallet screen using [Navigator].
      */
     var onVerificationCompleted: () -> Unit = {
-        navController.navigate(LinkScreen.Wallet.route) {
-            popUpTo(navController.backQueue.first().destination.id) {
-                inclusive = true
-            }
-        }
+        navigateAndClearStack(LinkScreen.Wallet)
     }
 
     val otpElement = OTPSpec.transform()
@@ -57,8 +49,8 @@ internal class VerificationViewModel @Inject constructor(
         otpElement.otpCompleteFlow.stateIn(viewModelScope, SharingStarted.Lazily, null)
 
     @VisibleForTesting
-    internal fun init(linkAccount: LinkAccount) {
-        this.linkAccount = linkAccount
+    internal fun init() {
+        val linkAccount = linkAccountManager.linkAccount.value ?: return goBack(true)
         if (linkAccount.accountStatus != AccountStatus.VerificationStarted) {
             startVerification()
         }
@@ -133,8 +125,8 @@ internal class VerificationViewModel @Inject constructor(
 
     fun onBack() {
         clearError()
-//        navigator.onBack(userInitiated = true)
-//        linkEventsReporter.on2FACancel()
+        goBack(true)
+        linkEventsReporter.on2FACancel()
         viewModelScope.launch {
             linkAccountManager.logout()
         }
@@ -142,7 +134,7 @@ internal class VerificationViewModel @Inject constructor(
 
     fun onChangeEmailClicked() {
         clearError()
-//        navigator.navigateTo(LinkScreen.SignUp, clearBackStack = true)
+        navigateAndClearStack(LinkScreen.SignUp)
         viewModelScope.launch {
             linkAccountManager.logout()
         }
@@ -187,21 +179,4 @@ internal class VerificationViewModel @Inject constructor(
                 is ErrorMessage.Raw -> this.errorMessage.resolvableString
             }
         }
-
-//    internal class Factory(
-//        private val account: LinkAccount,
-//        private val injector: NonFallbackInjector
-//    ) : ViewModelProvider.Factory, NonFallbackInjectable {
-//
-//        @Inject
-//        lateinit var viewModel: VerificationViewModel
-//
-//        @Suppress("UNCHECKED_CAST")
-//        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-//            injector.inject(this)
-//            return viewModel.apply {
-//                init(account)
-//            } as T
-//        }
-//    }
 }
