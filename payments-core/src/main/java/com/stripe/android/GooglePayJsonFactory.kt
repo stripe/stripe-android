@@ -79,8 +79,6 @@ class GooglePayJsonFactory constructor(
          * Set to false if you don't support credit cards
          */
         allowCreditCards: Boolean? = null,
-
-        cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter
     ): JSONObject {
         return JSONObject()
             .put("apiVersion", API_VERSION)
@@ -92,7 +90,7 @@ class GooglePayJsonFactory constructor(
                         createCardPaymentMethod(
                             billingAddressParameters,
                             allowCreditCards,
-                            cardBrandFilter
+                            DefaultCardBrandFilter
                         )
                     )
             )
@@ -260,16 +258,15 @@ class GooglePayJsonFactory constructor(
     }
 
     private fun createBaseCardPaymentMethodParams(cardBrandFilter: CardBrandFilter): JSONObject {
+        val acceptedCardBrands = DEFAULT_CARD_NETWORKS
+            .plus(listOf(JCB_CARD_NETWORK).takeIf { isJcbEnabled } ?: emptyList())
+            .filter {
+                val cardBrand = networkStringToCardBrandMap[it] ?: CardBrand.Unknown
+                cardBrandFilter.isAccepted(cardBrand)
+            }
         return JSONObject()
             .put("allowedAuthMethods", JSONArray(ALLOWED_AUTH_METHODS))
-            .put(
-                "allowedCardNetworks",
-                JSONArray(
-                    DEFAULT_CARD_NETWORKS.plus(
-                        listOf(JCB_CARD_NETWORK).takeIf { isJcbEnabled } ?: emptyList()
-                    ).filter { cardBrandFilter.isAccepted(networkStringToCardBrandMap[it] ?: CardBrand.Unknown) }
-                )
-            )
+            .put("allowedCardNetworks", JSONArray(acceptedCardBrands))
     }
 
     /**

@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.annotation.RestrictTo
 import com.google.android.gms.wallet.IsReadyToPayRequest
 import com.google.android.gms.wallet.PaymentsClient
+import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.core.Logger
@@ -49,6 +50,7 @@ internal class DefaultGooglePayRepository(
     private val paymentsClientFactory: PaymentsClientFactory = DefaultPaymentsClientFactory(context),
     private val errorReporter: ErrorReporter,
     private val logger: Logger = Logger.noop(),
+    private val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter
 ) : GooglePayRepository {
 
     @Inject
@@ -65,7 +67,8 @@ internal class DefaultGooglePayRepository(
         googlePayConfig.allowCreditCards,
         DefaultPaymentsClientFactory(context),
         errorReporter,
-        logger
+        logger,
+        googlePayConfig.cardBrandFilter
     )
 
     private val googlePayJsonFactory = GooglePayJsonFactory(context)
@@ -92,8 +95,7 @@ internal class DefaultGooglePayRepository(
                 googlePayJsonFactory.createIsReadyToPayRequest(
                     billingAddressParameters = billingAddressParameters,
                     existingPaymentMethodRequired = existingPaymentMethodRequired,
-                    allowCreditCards = allowCreditCards,
-                    cardBrandFilter = DefaultCardBrandFilter
+                    allowCreditCards = allowCreditCards
                 ).toString()
             )
         }.getOrElse {
