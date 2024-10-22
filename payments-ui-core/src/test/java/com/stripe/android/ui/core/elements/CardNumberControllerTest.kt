@@ -42,6 +42,8 @@ import org.mockito.Mockito.verify
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verifyNoInteractions
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.DefaultAsserter.assertEquals
+import kotlin.test.assertEquals
 import com.stripe.android.R as StripeR
 import com.stripe.android.uicore.R as StripeUiCoreR
 import com.stripe.payments.model.R as PaymentModelR
@@ -438,16 +440,14 @@ internal class CardNumberControllerTest {
 
     @Test
     fun `on disallowed card brand entered, should report event`() = runTest {
-        val eventReporter: CardNumberCompletedEventReporter = mock()
-        val disallowedEventReporter: CardBrandDisallowedReporter = mock()
+        val fakeDisallowedEventReporter = FakeCardBrandDisallowedReporter()
 
         val disallowedBrands = setOf(CardBrand.AmericanExpress, CardBrand.MasterCard)
         val cardNumberController = createController(cardBrandFilter = FakeCardBrandFilter(disallowedBrands))
 
         composeTestRule.setContent {
             CompositionLocalProvider(
-                LocalCardNumberCompletedEventReporter provides eventReporter,
-                LocalCardBrandDisallowedReporter provides disallowedEventReporter
+                LocalCardBrandDisallowedReporter provides fakeDisallowedEventReporter
             ) {
                 cardNumberController.ComposeUI(
                     enabled = true,
@@ -466,16 +466,21 @@ internal class CardNumberControllerTest {
             }
         }
 
+        // Start by typing in an Amex card then a Mastercard
         cardNumberController.onValueChange("37")
-        verify(disallowedEventReporter, times(1)).onDisallowedCardBrandEntered(CardBrand.AmericanExpress)
-
         cardNumberController.onValueChange("372")
-        // Don't log again that we have disallowed American Express again
-        verify(disallowedEventReporter, times(1)).onDisallowedCardBrandEntered(CardBrand.AmericanExpress)
-
         cardNumberController.onValueChange("")
         cardNumberController.onValueChange("5555")
-        verify(disallowedEventReporter, times(1)).onDisallowedCardBrandEntered(CardBrand.MasterCard)
+
+        // Verify that AmericanExpress was reported once
+        val americanExpressReports = fakeDisallowedEventReporter.reportedBrands
+            .filter { it == CardBrand.AmericanExpress }
+        assertEquals(1, americanExpressReports.size, "AmericanExpress should be reported once")
+
+        // Verify that MasterCard was reported once
+        val masterCardReports = fakeDisallowedEventReporter.reportedBrands
+            .filter { it == CardBrand.MasterCard }
+        assertEquals(1, masterCardReports.size, "MasterCard should be reported once")
     }
 
     @Test
@@ -564,5 +569,14 @@ internal class CardNumberControllerTest {
 
     private companion object {
         const val TEST_TAG = "CardNumberElement"
+    }
+}
+
+class FakeCardBrandDisallowedReporter : CardBrandDisallowedReporter {
+    private val _reportedBrands = mutableListOf<CardBrand>()
+    val reportedBrands: List<CardBrand> get() = _reportedBrands
+
+    override fun onDisallowedCardBrandEntered(brand: CardBrand) {
+        _reportedBrands.add(brand)
     }
 }
