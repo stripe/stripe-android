@@ -172,17 +172,6 @@ internal class SignUpViewModel @Inject constructor(
         }
     }
 
-    internal class Factory @Inject constructor(
-        private val linkAccountManager: LinkAccountManager,
-        private val linkEventsReporter: LinkEventsReporter,
-        private val logger: Logger,
-        private val configuration: LinkConfiguration
-    ) {
-        fun create(): SignUpViewModel {
-            return SignUpViewModel(configuration, linkAccountManager, linkEventsReporter, logger)
-        }
-    }
-
     companion object {
         // How long to wait before triggering a call to lookup the email
         internal val LOOKUP_DEBOUNCE = 1.seconds
