@@ -2,7 +2,12 @@ package com.stripe.android.view
 
 import android.graphics.Color
 import androidx.annotation.ColorInt
+import androidx.appcompat.app.AppCompatActivity
 import androidx.test.core.app.ApplicationProvider
+import com.google.common.truth.Truth.assertThat
+import com.stripe.android.R
+import com.stripe.android.utils.createTestActivityRule
+import org.junit.Rule
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
@@ -14,6 +19,31 @@ internal class StripeColorUtilsTest {
     private val activityScenarioFactory = ActivityScenarioFactory(
         ApplicationProvider.getApplicationContext()
     )
+
+    @get:Rule
+    internal var testActivityRule = createTestActivityRule<TestActivity>()
+
+    @Test
+    fun getThemeAccentColor_getsNonzeroColor() {
+        activityScenarioFactory.create<TestActivity>().use { activityScenario ->
+            activityScenario.onActivity { activity ->
+                activity.setTheme(R.style.StripeDefaultTheme)
+                assertThat(Color.alpha(StripeColorUtils(activity).colorAccent))
+                    .isGreaterThan(0)
+            }
+        }
+    }
+
+    @Test
+    fun getThemeColorControlNormal_getsNonzeroColor() {
+        activityScenarioFactory.create<TestActivity>().use { activityScenario ->
+            activityScenario.onActivity { activity ->
+                activity.setTheme(R.style.StripeDefaultTheme)
+                assertThat(Color.alpha(StripeColorUtils(activity).colorControlNormal))
+                    .isGreaterThan(0)
+            }
+        }
+    }
 
     @Test
     fun isColorTransparent_whenColorIsZero_returnsTrue() {
@@ -76,4 +106,6 @@ internal class StripeColorUtilsTest {
         assertTrue(StripeColorUtils.isColorDark(darkishRed))
         assertTrue(StripeColorUtils.isColorDark(Color.BLACK))
     }
+
+    internal class TestActivity : AppCompatActivity()
 }
