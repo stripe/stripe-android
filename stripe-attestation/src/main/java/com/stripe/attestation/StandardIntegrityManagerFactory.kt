@@ -1,6 +1,6 @@
 package com.stripe.attestation
 
-import android.content.Context
+import android.app.Application
 import androidx.annotation.RestrictTo
 import com.google.android.play.core.integrity.IntegrityManagerFactory
 import com.google.android.play.core.integrity.StandardIntegrityManager
@@ -16,7 +16,7 @@ fun interface StandardIntegrityManagerFactory {
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class RealStandardIntegrityManagerFactory(private val appContext: Context) : StandardIntegrityManagerFactory {
+class RealStandardIntegrityManagerFactory(private val appContext: Application) : StandardIntegrityManagerFactory {
     override fun create(): StandardIntegrityManager {
         return IntegrityManagerFactory.createStandard(appContext)
     }
