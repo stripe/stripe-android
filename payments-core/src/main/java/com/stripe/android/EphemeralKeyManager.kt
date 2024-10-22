@@ -167,4 +167,4 @@ internal class EphemeralKeyManager(
     }
 }
 
-private typealias TimeSupplier = () -> Long
+internal typealias TimeSupplier = () -> Long
