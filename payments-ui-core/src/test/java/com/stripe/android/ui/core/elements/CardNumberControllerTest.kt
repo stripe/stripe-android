@@ -29,7 +29,9 @@ import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.FakeCardBrandFilter
 import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -466,21 +468,27 @@ internal class CardNumberControllerTest {
             }
         }
 
-        // Start by typing in an Amex card then a Mastercard
-        cardNumberController.onValueChange("37")
-        cardNumberController.onValueChange("372")
-        cardNumberController.onValueChange("")
-        cardNumberController.onValueChange("5555")
+        fakeDisallowedEventReporter.reportedBrands.test {
+            // Simulate entering "37" for American Express
+            cardNumberController.onValueChange("37")
+            // Simulate entering "372" (still American Express)
+            cardNumberController.onValueChange("372")
+            // Simulate clearing the input
+            cardNumberController.onValueChange("")
+            // Simulate entering "5555" for MasterCard
+            cardNumberController.onValueChange("5555")
 
-        // Verify that AmericanExpress was reported once
-        val americanExpressReports = fakeDisallowedEventReporter.reportedBrands
-            .filter { it == CardBrand.AmericanExpress }
-        assertEquals(1, americanExpressReports.size, "AmericanExpress should be reported once")
+            // Expect AmericanExpress to be reported once
+            val firstReported = awaitItem()
+            assertEquals(CardBrand.AmericanExpress, firstReported, "AmericanExpress should be reported once")
 
-        // Verify that MasterCard was reported once
-        val masterCardReports = fakeDisallowedEventReporter.reportedBrands
-            .filter { it == CardBrand.MasterCard }
-        assertEquals(1, masterCardReports.size, "MasterCard should be reported once")
+            // Expect MasterCard to be reported once
+            val secondReported = awaitItem()
+            assertEquals(CardBrand.MasterCard, secondReported, "MasterCard should be reported once")
+
+            // Ensure no more events are emitted
+            cancelAndIgnoreRemainingEvents()
+        }
     }
 
     @Test
@@ -573,10 +581,10 @@ internal class CardNumberControllerTest {
 }
 
 class FakeCardBrandDisallowedReporter : CardBrandDisallowedReporter {
-    private val _reportedBrands = mutableListOf<CardBrand>()
-    val reportedBrands: List<CardBrand> get() = _reportedBrands
+    private val _reportedBrands = MutableSharedFlow<CardBrand>(extraBufferCapacity = Int.MAX_VALUE)
+    val reportedBrands = _reportedBrands.asSharedFlow()
 
     override fun onDisallowedCardBrandEntered(brand: CardBrand) {
-        _reportedBrands.add(brand)
+        _reportedBrands.tryEmit(brand)
     }
 }
