@@ -30,6 +30,11 @@ internal class PaymentSheetDeferredTest {
 
     private val integrationType: IntegrationType = IntegrationType.Compose
 
+    private val defaultConfiguration = PaymentSheet.Configuration(
+        merchantDisplayName = "Example, Inc.",
+        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+    )
+
     @Test
     fun testDeferredIntentCardPayment() = runPaymentSheetTest(
         networkRule = networkRule,
@@ -55,7 +60,7 @@ internal class PaymentSheetDeferredTest {
                         currency = "usd"
                     )
                 ),
-                configuration = null,
+                configuration = defaultConfiguration,
             )
         }
 
@@ -123,7 +128,7 @@ internal class PaymentSheetDeferredTest {
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Setup()
                 ),
-                configuration = null,
+                configuration = defaultConfiguration,
             )
         }
 
@@ -189,6 +194,7 @@ internal class PaymentSheetDeferredTest {
                 ),
                 configuration = PaymentSheet.Configuration.Builder("Example, Inc.")
                     .customer(PaymentSheet.CustomerConfiguration("cus_foobar", "ek_test_foobar"))
+                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
                     .build(),
             )
         }
@@ -271,6 +277,7 @@ internal class PaymentSheetDeferredTest {
                 ),
                 configuration = PaymentSheet.Configuration.Builder("Example, Inc.")
                     .customer(PaymentSheet.CustomerConfiguration("cus_foobar", "ek_test_foobar"))
+                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
                     .build(),
             )
         }
@@ -343,7 +350,7 @@ internal class PaymentSheetDeferredTest {
                         currency = "usd"
                     )
                 ),
-                configuration = null,
+                configuration = defaultConfiguration,
             )
         }
 
@@ -391,7 +398,7 @@ internal class PaymentSheetDeferredTest {
                         currency = "usd"
                     )
                 ),
-                configuration = null,
+                configuration = defaultConfiguration,
             )
         }
 
@@ -438,6 +445,7 @@ internal class PaymentSheetDeferredTest {
                 ),
                 configuration = PaymentSheet.Configuration.Builder("Example, Inc")
                     .allowsDelayedPaymentMethods(true)
+                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
                     .build(),
             )
         }
@@ -513,7 +521,7 @@ internal class PaymentSheetDeferredTest {
                         currency = "usd"
                     )
                 ),
-                configuration = null,
+                configuration = defaultConfiguration,
             )
         }
 
@@ -581,7 +589,7 @@ internal class PaymentSheetDeferredTest {
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Setup()
                 ),
-                configuration = null,
+                configuration = defaultConfiguration,
             )
         }
 

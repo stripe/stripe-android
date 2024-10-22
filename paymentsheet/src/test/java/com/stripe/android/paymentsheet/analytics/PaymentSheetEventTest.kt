@@ -1365,7 +1365,7 @@ class PaymentSheetEventTest {
             "billing_details_collection_configuration" to expectedBillingDetailsCollection,
             "preferred_networks" to null,
             "external_payment_methods" to null,
-            "payment_method_layout" to "horizontal",
+            "payment_method_layout" to "automatic",
             "card_brand_acceptance" to false,
         )
         assertThat(

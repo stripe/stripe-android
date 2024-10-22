@@ -274,6 +274,7 @@ internal class GooglePayTest {
             resultCallback = paymentResultCallback,
         ) { context ->
             val configBuilder = PaymentSheet.Configuration.Builder(merchantDisplayName = "Merchant, Inc.")
+                .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
 
             if (hasGooglePayConfig) {
                 configBuilder.googlePay(
