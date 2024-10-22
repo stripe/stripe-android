@@ -24,8 +24,4 @@ class App : Application() {
                 .build()
         )
     }
-
-    private fun initEmbeddedComponents() {
-
-    }
 }
