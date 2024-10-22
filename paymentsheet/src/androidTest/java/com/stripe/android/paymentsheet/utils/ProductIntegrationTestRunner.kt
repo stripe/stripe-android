@@ -42,7 +42,8 @@ internal sealed interface ProductIntegrationTestRunnerContext {
 
     fun launch(
         configuration: PaymentSheet.Configuration = PaymentSheet.Configuration(
-            merchantDisplayName = "Merchant, Inc."
+            merchantDisplayName = "Merchant, Inc.",
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
         )
     )
 

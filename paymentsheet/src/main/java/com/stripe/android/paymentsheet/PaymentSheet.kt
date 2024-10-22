@@ -598,7 +598,7 @@ class PaymentSheet internal constructor(
 
         internal val externalPaymentMethods: List<String> = ConfigurationDefaults.externalPaymentMethods,
 
-        internal val paymentMethodLayout: PaymentMethodLayout = PaymentMethodLayout.default,
+        internal val paymentMethodLayout: PaymentMethodLayout = ConfigurationDefaults.paymentMethodLayout,
 
         internal val cardBrandAcceptance: CardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance,
     ) : Parcelable {
@@ -749,7 +749,7 @@ class PaymentSheet internal constructor(
                 ConfigurationDefaults.allowsRemovalOfLastSavedPaymentMethod
             private var paymentMethodOrder: List<String> = ConfigurationDefaults.paymentMethodOrder
             private var externalPaymentMethods: List<String> = ConfigurationDefaults.externalPaymentMethods
-            private var paymentMethodLayout: PaymentMethodLayout = PaymentMethodLayout.default
+            private var paymentMethodLayout: PaymentMethodLayout = ConfigurationDefaults.paymentMethodLayout
             private var cardBrandAcceptance: CardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance
 
             fun merchantDisplayName(merchantDisplayName: String) =
@@ -911,11 +911,7 @@ class PaymentSheet internal constructor(
         /**
          * This lets Stripe choose the best layout for payment methods in the sheet.
          */
-        Automatic;
-
-        internal companion object {
-            internal val default: PaymentMethodLayout = Horizontal
-        }
+        Automatic
     }
 
     @Parcelize

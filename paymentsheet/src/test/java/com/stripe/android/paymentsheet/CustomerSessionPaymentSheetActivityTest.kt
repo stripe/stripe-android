@@ -242,6 +242,7 @@ internal class CustomerSessionPaymentSheetActivityTest {
                         ),
                         allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod,
                         preferredNetworks = listOf(CardBrand.CartesBancaires, CardBrand.Visa),
+                        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
                     ),
                     statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR,
                 )
