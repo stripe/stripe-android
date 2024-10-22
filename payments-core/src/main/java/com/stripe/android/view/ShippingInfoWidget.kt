@@ -19,7 +19,6 @@ import java.util.Locale
 import com.stripe.android.core.R as CoreR
 import com.stripe.android.uicore.R as UiCoreR
 
-// TODO: do we need to remove this? Is it also used by one of our card things?
 /**
  * A widget used to collect address data from a user.
  */

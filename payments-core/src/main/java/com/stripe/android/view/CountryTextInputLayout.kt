@@ -26,7 +26,6 @@ import kotlin.properties.Delegates
 import androidx.appcompat.R as AppCompatR
 import com.google.android.material.R as MaterialR
 
-// TODO: can this be deleted?
 /**
  * A subclass of [TextInputLayout] that programmatically wraps a styleable [AutoCompleteTextView],
  * which configures a [CountryAdapter] to display list of countries in its popup.
@@ -231,6 +230,15 @@ class CountryTextInputLayout @JvmOverloads internal constructor(
         if (isUpdated) {
             updateInitialCountry()
         }
+    }
+
+    /**
+     * @param countryCode specify a country code to display in the input. The input will display
+     * the full country display name.
+     */
+    @VisibleForTesting
+    internal fun setCountrySelected(countryCode: CountryCode) {
+        updateUiForCountryEntered(countryCode)
     }
 
     @Deprecated(
