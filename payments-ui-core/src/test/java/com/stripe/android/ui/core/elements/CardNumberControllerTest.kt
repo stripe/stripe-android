@@ -471,23 +471,22 @@ internal class CardNumberControllerTest {
         fakeDisallowedEventReporter.reportedBrands.test {
             // Simulate entering "37" for American Express
             cardNumberController.onValueChange("37")
-            // Simulate entering "372" (still American Express)
-            cardNumberController.onValueChange("372")
-            // Simulate clearing the input
-            cardNumberController.onValueChange("")
-            // Simulate entering "5555" for MasterCard
-            cardNumberController.onValueChange("5555")
 
             // Expect AmericanExpress to be reported once
             val firstReported = awaitItem()
             assertEquals(CardBrand.AmericanExpress, firstReported, "AmericanExpress should be reported once")
 
+            // Simulate entering "372" (still American Express)
+            cardNumberController.onValueChange("372")
+            // Simulate clearing the input
+            cardNumberController.onValueChange("")
+            // Simulate entering "5555" for MasterCard
+            expectNoEvents()
+            cardNumberController.onValueChange("5555")
+
             // Expect MasterCard to be reported once
             val secondReported = awaitItem()
             assertEquals(CardBrand.MasterCard, secondReported, "MasterCard should be reported once")
-
-            // Ensure no more events are emitted
-            cancelAndIgnoreRemainingEvents()
         }
     }
 
