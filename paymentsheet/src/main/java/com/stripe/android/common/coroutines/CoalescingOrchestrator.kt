@@ -19,6 +19,7 @@ internal class CoalescingOrchestrator<T : Any>(
 ) {
     @Volatile
     private lateinit var data: T
+
     @Volatile
     private var dataInitialized: Boolean = false
 
