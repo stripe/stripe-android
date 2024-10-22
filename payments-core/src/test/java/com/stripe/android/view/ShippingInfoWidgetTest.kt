@@ -3,7 +3,6 @@ package com.stripe.android.view
 import android.app.Activity
 import android.content.Context
 import android.os.Bundle
-import android.os.Looper
 import android.view.View
 import android.widget.LinearLayout
 import androidx.test.core.app.ActivityScenario
@@ -18,7 +17,6 @@ import com.stripe.android.utils.createTestActivityRule
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import org.robolectric.Shadows.shadowOf
 import java.util.Locale
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -174,8 +172,6 @@ class ShippingInfoWidgetTest {
         postalEditText.setText("12345")
         stateEditText.setText("CA")
         phoneEditText.setText("8675555309")
-
-        shadowOf(Looper.getMainLooper()).idle()
 
         assertThat(shippingInfoWidget.validateAllFields())
             .isTrue()
