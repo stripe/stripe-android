@@ -5,6 +5,7 @@ import com.google.android.gms.tasks.Task
 import com.google.android.play.core.integrity.StandardIntegrityManager
 import com.google.android.play.core.integrity.StandardIntegrityManager.PrepareIntegrityTokenRequest
 import com.google.android.play.core.integrity.StandardIntegrityManager.StandardIntegrityTokenProvider
+import com.google.android.play.core.integrity.StandardIntegrityManager.StandardIntegrityTokenRequest
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface IntegrityRequestManager {
@@ -46,16 +47,10 @@ class IntegrityStandardRequestManager(
                     .build()
             ).awaitTask()
 
-        return finishedTask.toResult().fold(
-            onSuccess = {
-                integrityTokenProvider = it
-                Result.success(Unit)
-            },
-            onFailure = { error ->
-                logError("Integrity: Failed to prepare integrity token", error)
-                Result.failure(error)
-            }
-        )
+        finishedTask.toResult()
+            .onSuccess { integrityTokenProvider = it }
+            .onFailure { error -> logError("Integrity: Failed to prepare integrity token", error) }
+            .getOrThrow()
     }
 
     override suspend fun requestToken(
@@ -65,24 +60,18 @@ class IntegrityStandardRequestManager(
     private suspend fun request(
         requestHash: String?,
     ): Result<String> = runCatching {
-        requireNotNull(integrityTokenProvider) {
-            "Integrity token provider is not initialized. Call prepare() first."
-        }.run {
-            val finishedTask = request(
-                StandardIntegrityManager.StandardIntegrityTokenRequest.builder()
-                    .setRequestHash(requestHash)
-                    .build()
-            ).awaitTask()
-            return finishedTask.toResult().fold(
-                onSuccess = {
-                    val token = it.token()
-                    Result.success(token)
-                },
-                onFailure = {
-                    logError("Integrity - Failed to request integrity token", it)
-                    Result.failure(it)
-                }
-            )
-        }
+        val finishedTask = requireNotNull(
+            value = integrityTokenProvider,
+            lazyMessage = { "Integrity token provider is not initialized. Call prepare() first." }
+        ).request(
+            StandardIntegrityTokenRequest.builder()
+                .setRequestHash(requestHash)
+                .build()
+        ).awaitTask()
+
+        finishedTask.toResult()
+            .mapCatching { it.token() }
+            .onFailure { error -> logError("Integrity - Failed to request integrity token", error) }
+            .getOrThrow()
     }
 }
