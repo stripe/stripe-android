@@ -9,8 +9,10 @@ import com.google.android.play.core.integrity.StandardIntegrityManager.StandardI
 import com.google.android.play.core.integrity.StandardIntegrityManager.StandardIntegrityTokenRequest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import org.junit.After
 import org.junit.Before
 import kotlin.test.Test
 
@@ -70,6 +72,11 @@ class IntegrityStandardRequestManagerTest {
         val result = integrityStandardRequestManager.requestToken("requestIdentifier")
 
         assert(result.isFailure)
+    }
+
+    @After
+    fun cleanup() {
+        Dispatchers.resetMain()
     }
 
     private fun buildRequestManager(
