@@ -29,6 +29,15 @@ jobs:
         env:
           EMERGE_API_TOKEN: ${{ secrets.EMERGE_API_KEY }}
           EMERGE_TAG: push
+      - name: Assemble Release
+        run: ./gradlew :financial-connections-example:assembleRelease
+      - name: Firebase App Distribution
+        uses: wzieba/Firebase-Distribution-Github-Action@a41b2f7ab3f7c2631b6a73fb2f660b517cef45a9
+        with:
+          appId: "1:527113280969:android:3c57e90cbb8c0397d95c18"
+          serviceCredentialsFileContent: ${{ secrets.FINANCIAL_CONNECTIONS_GOOGLE_CLOUD_KEY }}
+          file: paymentsheet-example/build/outputs/apk/release/financial-connections-example-release.apk
+          groups: financial-connections-testers
   upload-payment-sheet:
     runs-on: ubuntu-latest
     steps:
