@@ -10,7 +10,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-internal class PaymentSheetCardBrandFilter(
+internal data class PaymentSheetCardBrandFilter(
     private val cardBrandAcceptance: PaymentSheet.CardBrandAcceptance
 ) : CardBrandFilter {
 

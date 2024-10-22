@@ -711,7 +711,6 @@ class CardInputWidget @JvmOverloads constructor(
         isShowingFullCard = true
 
         @ColorInt var errorColorInt = cardNumberEditText.defaultErrorColorInt
-        cardBrandView.tintColorInt = cardNumberEditText.hintTextColors.defaultColor
         var cardHintText: String? = null
         var shouldRequestFocus = true
 
@@ -719,11 +718,6 @@ class CardInputWidget @JvmOverloads constructor(
             attrs,
             R.styleable.CardInputView
         ) {
-            cardBrandView.tintColorInt = getColor(
-                R.styleable.CardInputView_cardTint,
-                cardBrandView.tintColorInt
-            )
-
             errorColorInt = getColor(
                 R.styleable.CardInputView_cardTextErrorColor,
                 errorColorInt

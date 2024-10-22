@@ -355,6 +355,7 @@ constructor(
             isVoucher = false,
             requiresMandate = false,
             hasDelayedSettlement = false,
+            afterRedirectAction = AfterRedirectAction.Poll(),
         ),
         Sunbit(
             "sunbit",
@@ -383,6 +384,7 @@ constructor(
             isVoucher = false,
             requiresMandate = false,
             hasDelayedSettlement = false,
+            afterRedirectAction = AfterRedirectAction.Poll(),
         ),
         Alma(
             "alma",

@@ -221,7 +221,7 @@ internal sealed class PaymentSelection : Parcelable {
             val iconResource = R.drawable.stripe_ic_paymentsheet_link
 
             @IgnoredOnParcel
-            val label = "····${paymentDetails.last4}"
+            val label = "···· ${paymentDetails.last4}"
         }
 
         @Parcelize

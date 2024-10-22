@@ -32,9 +32,6 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
-@OptIn(
-    ExperimentalPaymentMethodLayoutApi::class,
-)
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.Q])
 internal class VerticalModePaymentSheetActivityTest {

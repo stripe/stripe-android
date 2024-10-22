@@ -19,6 +19,9 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.utils.FakeCustomerRepository
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
@@ -31,6 +34,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
+import java.util.concurrent.CountDownLatch
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.test.assertFailsWith
 
@@ -95,6 +99,46 @@ class CustomerAdapterTest {
 
         customer = adapter.getCustomerEphemeralKey()
         assertThat(customer.getOrNull()?.customerId).isEqualTo("1")
+        assertThat(ephemeralKeyProviderCounter.get()).isEqualTo(1)
+    }
+
+    @Test
+    fun `customerEphemeralKeyProvider only called once when multiple async calls`() = runTest {
+        val ephemeralKeyProviderCounter = AtomicInteger(0)
+        val resultDeferred = CompletableDeferred<CustomerAdapter.Result<CustomerEphemeralKey>>()
+        val adapter = createAdapter(
+            customerEphemeralKeyProvider = {
+                ephemeralKeyProviderCounter.incrementAndGet()
+                resultDeferred.await()
+            },
+            timeProvider = { 1234 }
+        )
+
+        val countDownLatch = CountDownLatch(2)
+        val first = async(testDispatcher) {
+            countDownLatch.countDown()
+            val customer = adapter.getCustomerEphemeralKey()
+            assertThat(customer.getOrNull()?.customerId).isEqualTo("1234")
+        }
+        val second = async(testDispatcher) {
+            countDownLatch.countDown()
+            val customer = adapter.getCustomerEphemeralKey()
+            assertThat(customer.getOrNull()?.customerId).isEqualTo("1234")
+        }
+
+        countDownLatch.await()
+
+        resultDeferred.complete(
+            CustomerAdapter.Result.success(
+                CustomerEphemeralKey(
+                    customerId = "1234",
+                    ephemeralKey = "ek_123"
+                )
+            )
+        )
+
+        listOf(first, second).awaitAll()
+
         assertThat(ephemeralKeyProviderCounter.get()).isEqualTo(1)
     }
 

@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.ui
 
+import com.stripe.android.CardBrandFilter
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.model.CardBrand
@@ -48,6 +49,7 @@ internal interface ModifiableEditPaymentMethodViewInteractor : EditPaymentMethod
             displayName: ResolvableString,
             canRemove: Boolean,
             isLiveMode: Boolean,
+            cardBrandFilter: CardBrandFilter
         ): ModifiableEditPaymentMethodViewInteractor
     }
 }
@@ -60,6 +62,7 @@ internal class DefaultEditPaymentMethodViewInteractor(
     private val updateExecutor: PaymentMethodUpdateOperation,
     private val canRemove: Boolean,
     override val isLiveMode: Boolean,
+    private val cardBrandFilter: CardBrandFilter,
     workContext: CoroutineContext = Dispatchers.Default,
 ) : ModifiableEditPaymentMethodViewInteractor {
     private val choice = MutableStateFlow(initialPaymentMethod.getPreferredChoice())
@@ -77,7 +80,7 @@ internal class DefaultEditPaymentMethodViewInteractor(
         error,
     ) { paymentMethod, choice, status, confirmDeletion, error ->
         val savedChoice = paymentMethod.getPreferredChoice()
-        val availableChoices = paymentMethod.getAvailableNetworks()
+        val availableChoices = paymentMethod.getAvailableNetworks().filter { cardBrandFilter.isAccepted(it.brand) }
 
         EditPaymentMethodViewState(
             last4 = paymentMethod.getLast4(),
@@ -201,6 +204,7 @@ internal class DefaultEditPaymentMethodViewInteractor(
             displayName: ResolvableString,
             canRemove: Boolean,
             isLiveMode: Boolean,
+            cardBrandFilter: CardBrandFilter
         ): ModifiableEditPaymentMethodViewInteractor {
             return DefaultEditPaymentMethodViewInteractor(
                 initialPaymentMethod = initialPaymentMethod,
@@ -210,6 +214,7 @@ internal class DefaultEditPaymentMethodViewInteractor(
                 displayName = displayName,
                 canRemove = canRemove,
                 isLiveMode = isLiveMode,
+                cardBrandFilter = cardBrandFilter
             )
         }
     }

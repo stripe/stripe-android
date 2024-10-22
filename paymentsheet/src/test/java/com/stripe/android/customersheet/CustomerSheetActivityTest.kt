@@ -126,7 +126,7 @@ internal class CustomerSheetActivityTest {
                 PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             ),
         ) {
-            page.waitForText("····4242")
+            page.waitForText("···· 4242")
         }
     }
 

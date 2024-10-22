@@ -2,11 +2,25 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
-Dependencies updated in [9345](https://github.com/stripe/stripe-android/pull/9345):
+## 20.53.0 - 2024-10-21
+
+### PaymentSheet
+* [ADDED] [9429](https://github.com/stripe/stripe-android/pull/9429) `PaymentSheet.PaymentMethodLayout` is now generally available. Configure the layout of payment methods in the sheet using `PaymentSheet.Configuration.Builder.paymentMethodLayout` to display them either horizontally, vertically, or let Stripe optimize the layout automatically.
+
+Dependencies updated in [9345](https://github.com/stripe/stripe-android/pull/9345) and [9469](https://github.com/stripe/stripe-android/pull/9469) and [9473](https://github.com/stripe/stripe-android/pull/9473):
 * Bumped Accompanist from 0.32.0 to 0.34.0.
 * Bumped Compose from 1.5.4 to 1.6.8.
 * Bumped Lifecycle from 2.7.0 to 2.8.6.
 * Bumped Material from 1.11.0 to 1.12.0.
+* Bumped Kotlin from 1.9.22 to 1.9.25.
+* Bumped Kotlin Coroutines from 1.7.3 to 1.8.1.
+* Bumped Androidx Annotation from 1.7.1 to 1.9.0.
+* Bumped Appcompat from 1.6.1 to 1.7.0.
+* Bumped Androidx Browser from 1.7.0 to 1.8.0.
+* Bumped Androidx Fragment from 1.6.2 to 1.8.4.
+* Bumped Dagger from 2.50 to 2.52.
+* Bumped GSON from 1.10.1 to 1.11.0.
+* Bumped Play Services Wallet from 19.3.0 to 19.4.0.
 
 ## 20.52.1 - 2024-10-15
 

@@ -12,7 +12,7 @@ interface CardBrandFilter : Parcelable {
 
 @Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class DefaultCardBrandFilter : CardBrandFilter {
+object DefaultCardBrandFilter : CardBrandFilter {
     override fun isAccepted(cardBrand: CardBrand): Boolean {
         return true
     }
