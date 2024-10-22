@@ -36,7 +36,7 @@ class IntegrityStandardRequestManager(
 ) : IntegrityRequestManager {
 
     private val standardIntegrityManager: StandardIntegrityManager by lazy { factory.create() }
-    private lateinit var integrityTokenProvider: StandardIntegrityTokenProvider
+    private var integrityTokenProvider: StandardIntegrityTokenProvider? = null
 
     override suspend fun prepare(): Result<Unit> = runCatching {
         val finishedTask: Task<StandardIntegrityTokenProvider> = standardIntegrityManager
@@ -65,23 +65,24 @@ class IntegrityStandardRequestManager(
     private suspend fun request(
         requestHash: String?,
     ): Result<String> = runCatching {
-        require(::integrityTokenProvider.isInitialized) {
+        requireNotNull(integrityTokenProvider) {
             "Integrity token provider is not initialized. Call prepare() first."
+        }.run {
+            val finishedTask = request(
+                StandardIntegrityManager.StandardIntegrityTokenRequest.builder()
+                    .setRequestHash(requestHash)
+                    .build()
+            ).awaitTask()
+            return finishedTask.toResult().fold(
+                onSuccess = {
+                    val token = it.token()
+                    Result.success(token)
+                },
+                onFailure = {
+                    logError("Integrity - Failed to request integrity token", it)
+                    Result.failure(it)
+                }
+            )
         }
-        val finishedTask = integrityTokenProvider.request(
-            StandardIntegrityManager.StandardIntegrityTokenRequest.builder()
-                .setRequestHash(requestHash)
-                .build()
-        ).awaitTask()
-        return finishedTask.toResult().fold(
-            onSuccess = {
-                val token = it.token()
-                Result.success(token)
-            },
-            onFailure = {
-                logError("Integrity - Failed to request integrity token", it)
-                Result.failure(it)
-            }
-        )
     }
 }
