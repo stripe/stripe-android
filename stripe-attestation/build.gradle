@@ -8,41 +8,10 @@ dependencies {
     implementation libs.playIntegrity
 
     // Test
-    testImplementation testLibs.androidx.core
-    testImplementation testLibs.androidx.junit
-    testImplementation testLibs.androidx.junitKtx
-    testImplementation testLibs.androidx.lifecycle
-    testImplementation testLibs.androidx.testRules
-    testImplementation testLibs.hamcrest
     testImplementation testLibs.junit
-    testImplementation testLibs.json
     testImplementation testLibs.kotlin.annotations
     testImplementation testLibs.kotlin.coroutines
     testImplementation testLibs.kotlin.junit
-    testImplementation testLibs.mockito.core
-    testImplementation testLibs.mockito.inline
-    testImplementation testLibs.mockito.kotlin
-    testImplementation testLibs.robolectric
-    testImplementation testLibs.truth
-
-    androidTestImplementation testLibs.androidx.coreKtx
-    androidTestImplementation testLibs.androidx.junit
-    androidTestImplementation testLibs.androidx.junitKtx
-    androidTestImplementation testLibs.androidx.testRules
-    androidTestImplementation testLibs.androidx.testRunner
-    androidTestImplementation testLibs.androidx.truth
-    androidTestImplementation testLibs.androidx.uiAutomator
-    androidTestImplementation testLibs.espresso.core
-    androidTestImplementation (testLibs.espresso.contrib) {
-        exclude group: 'org.checkerframework', module: 'checker'
-    }
-    androidTestImplementation testLibs.mockito.core
-    androidTestImplementation testLibs.mockito.inline
-    androidTestImplementation testLibs.mockito.kotlin
-    androidTestImplementation libs.leakCanary
-    androidTestImplementation testLibs.truth
-
-    androidTestUtil testLibs.testOrchestrator
 }
 
 android {
@@ -52,8 +21,7 @@ android {
 
     testOptions {
         unitTests {
-            // Note: without this, all Robolectric tests using assets will fail.
-            includeAndroidResources = true
+            returnDefaultValues = true
             all {
                 maxHeapSize = "1024m"
             }
@@ -61,16 +29,6 @@ android {
 
         kotlinOptions {
             freeCompilerArgs += ["-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"]
-        }
-
-        managedDevices {
-            localDevices {
-                register("pixel2api33") {
-                    device = "Pixel 2"
-                    apiLevel = 33
-                    systemImageSource = "aosp"
-                }
-            }
         }
     }
 
