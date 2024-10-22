@@ -5,14 +5,15 @@ import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.AuthenticationException
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkPaymentDetails
+import com.stripe.android.link.TestFactory
+import com.stripe.android.link.analytics.FakeLinkEventsReporter
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
+import com.stripe.android.link.repositories.FakeLinkRepository
 import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
-import com.stripe.android.model.CardParams
-import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSessionSignup
@@ -20,123 +21,113 @@ import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.testing.FakeErrorReporter
+import com.stripe.android.testing.PaymentIntentFactory
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
-import org.mockito.Mockito.times
-import org.mockito.kotlin.any
-import org.mockito.kotlin.anyOrNull
-import org.mockito.kotlin.argumentCaptor
-import org.mockito.kotlin.eq
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
 
 class DefaultLinkAccountManagerTest {
-    private val linkRepository = mock<LinkRepository>()
-    private val linkEventsReporter = mock<LinkEventsReporter>()
-
-    private val verifiedSession = mock<ConsumerSession.VerificationSession>().apply {
-        whenever(type).thenReturn(ConsumerSession.VerificationSession.SessionType.Sms)
-        whenever(state).thenReturn(ConsumerSession.VerificationSession.SessionState.Verified)
-    }
-
-    private val mockConsumerSession = ConsumerSession(
-        emailAddress = EMAIL,
-        clientSecret = CLIENT_SECRET,
-        verificationSessions = listOf(verifiedSession),
-        redactedPhoneNumber = "+1********42",
-        redactedFormattedPhoneNumber = "+1 (***) ***-**42",
-    )
-
-    private val mockConsumerSessionSignup = ConsumerSessionSignup(
-        consumerSession = mockConsumerSession,
-        publishableKey = PUBLISHABLE_KEY,
-    )
-
-    private val mockConsumerSessionLookup = ConsumerSessionLookup(
-        exists = true,
-        consumerSession = mockConsumerSession,
-        publishableKey = PUBLISHABLE_KEY,
-    )
 
     @Test
     fun `When cookie exists and network call fails then account status is Error`() = runSuspendTest {
-        val accountManager = accountManager(EMAIL)
-        whenever(linkRepository.lookupConsumer(anyOrNull())).thenReturn(Result.failure(Exception()))
+        val linkRepository = FakeLinkRepository()
+        linkRepository.lookupConsumerResult = Result.failure(Exception())
+        val accountManager = accountManager(TestFactory.EMAIL, linkRepository = linkRepository)
         assertThat(accountManager.accountStatus.first()).isEqualTo(AccountStatus.Error)
     }
 
     @Test
     fun `When customerEmail is set in arguments then it is looked up`() = runSuspendTest {
-        assertThat(accountManager(EMAIL).accountStatus.first()).isEqualTo(AccountStatus.Verified)
+        val linkRepository = object : FakeLinkRepository() {
+            var callCount = 0
+            override suspend fun lookupConsumer(email: String): Result<ConsumerSessionLookup> {
+                if (email == TestFactory.EMAIL) callCount += 1
+                return super.lookupConsumer(email)
+            }
+        }
+        assertThat(
+            accountManager(
+                TestFactory.EMAIL,
+                linkRepository = linkRepository
+            ).accountStatus.first()
+        ).isEqualTo(AccountStatus.Verified)
 
-        verify(linkRepository).lookupConsumer(EMAIL)
+        assertThat(linkRepository.callCount).isEqualTo(1)
     }
 
     @Test
     fun `When customerEmail is set and network call fails then account status is Error`() = runSuspendTest {
-        whenever(linkRepository.lookupConsumer(anyOrNull()))
-            .thenReturn(Result.failure(Exception()))
+        val linkRepository = object : FakeLinkRepository() {
+            override suspend fun lookupConsumer(email: String): Result<ConsumerSessionLookup> {
+                return Result.failure(Exception())
+            }
+        }
 
-        assertThat(accountManager(EMAIL).accountStatus.first()).isEqualTo(AccountStatus.Error)
+        assertThat(
+            accountManager(
+                TestFactory.EMAIL,
+                linkRepository = linkRepository
+            ).accountStatus.first()
+        ).isEqualTo(AccountStatus.Error)
     }
 
     @Test
     fun `When ConsumerSession contains consumerPublishableKey then key is updated`() = runTest {
-        val accountManager = accountManager()
+        val linkRepository = object : FakeLinkRepository() {
+            override suspend fun lookupConsumer(email: String): Result<ConsumerSessionLookup> {
+                return Result.success(TestFactory.CONSUMER_SESSION_LOOKUP)
+            }
+        }
+        val accountManager = accountManager(linkRepository = linkRepository)
 
         assertThat(accountManager.consumerPublishableKey).isNull()
 
-        whenever(linkRepository.lookupConsumer(any())).thenReturn(
-            Result.success(mockConsumerSessionLookup)
-        )
+        linkRepository.lookupConsumerResult = Result.success(TestFactory.CONSUMER_SESSION_LOOKUP)
 
         accountManager.lookupConsumer(
             email = "email",
             startSession = true,
         )
 
-        assertThat(accountManager.consumerPublishableKey).isEqualTo(PUBLISHABLE_KEY)
+        assertThat(accountManager.consumerPublishableKey).isEqualTo(TestFactory.PUBLISHABLE_KEY)
     }
 
     @Test
     fun `When ConsumerSession is updated with the same email then consumerPublishableKey is kept`() = runTest {
-        val accountManager = accountManager()
+        val linkRepository = FakeLinkRepository()
+        linkRepository.lookupConsumerResult = Result.success(TestFactory.CONSUMER_SESSION_LOOKUP)
 
-        whenever(linkRepository.lookupConsumer(any())).thenReturn(
-            Result.success(mockConsumerSessionLookup)
-        )
+        val accountManager = accountManager(linkRepository = linkRepository)
 
         accountManager.lookupConsumer(
             email = "email",
             startSession = true,
         )
 
-        assertThat(accountManager.consumerPublishableKey).isEqualTo(PUBLISHABLE_KEY)
+        assertThat(accountManager.consumerPublishableKey).isEqualTo(TestFactory.PUBLISHABLE_KEY)
 
         accountManager.setLinkAccountFromLookupResult(
-            lookup = mockConsumerSessionLookup.copy(publishableKey = null),
+            lookup = TestFactory.CONSUMER_SESSION_LOOKUP.copy(publishableKey = null),
             startSession = true,
         )
 
-        assertThat(accountManager.consumerPublishableKey).isEqualTo(PUBLISHABLE_KEY)
+        assertThat(accountManager.consumerPublishableKey).isEqualTo(TestFactory.PUBLISHABLE_KEY)
     }
 
     @Test
     fun `When ConsumerSession is updated with different email then consumerPublishableKey is removed`() {
         val accountManager = accountManager()
         accountManager.setLinkAccountFromLookupResult(
-            mockConsumerSessionLookup,
+            TestFactory.CONSUMER_SESSION_LOOKUP,
             startSession = true,
         )
 
-        assertThat(accountManager.consumerPublishableKey).isEqualTo(PUBLISHABLE_KEY)
+        assertThat(accountManager.consumerPublishableKey).isEqualTo(TestFactory.PUBLISHABLE_KEY)
 
         accountManager.setLinkAccountFromLookupResult(
-            mockConsumerSessionLookup.copy(
-                consumerSession = mockConsumerSession.copy(emailAddress = "different@email.com"),
+            TestFactory.CONSUMER_SESSION_LOOKUP.copy(
+                consumerSession = TestFactory.CONSUMER_SESSION.copy(emailAddress = "different@email.com"),
                 publishableKey = null,
             ),
             startSession = true,
@@ -147,317 +138,479 @@ class DefaultLinkAccountManagerTest {
 
     @Test
     fun `lookupConsumer sends analytics event when call fails`() = runSuspendTest {
-        whenever(linkRepository.lookupConsumer(anyOrNull()))
-            .thenReturn(Result.failure(Exception()))
+        val linkEventsReporter = object : AccountManagerEventsReporter() {
+            var callCount = 0
+            override fun onAccountLookupFailure(error: Throwable) {
+                callCount += 1
+                super.onAccountLookupFailure(error)
+            }
+        }
+        val linkRepository = FakeLinkRepository()
+        linkRepository.lookupConsumerResult = Result.failure(Exception())
 
-        accountManager().lookupConsumer(EMAIL, false)
+        accountManager(linkRepository = linkRepository, linkEventsReporter = linkEventsReporter)
+            .lookupConsumer(
+                TestFactory.EMAIL,
+                false
+            )
 
-        verify(linkEventsReporter).onAccountLookupFailure(any<Exception>())
+        assertThat(linkEventsReporter.callCount).isEqualTo(1)
     }
 
     @Test
-    fun `signInWithUserInput sends correct parameters and starts session for existing user`() =
-        runSuspendTest {
-            val accountManager = accountManager()
-
-            accountManager.signInWithUserInput(UserInput.SignIn(EMAIL))
-
-            verify(linkRepository).lookupConsumer(eq(EMAIL))
-            assertThat(accountManager.linkAccount.value).isNotNull()
+    fun `signInWithUserInput sends correct parameters and starts session for existing user`() = runSuspendTest {
+        val linkRepository = object : FakeLinkRepository() {
+            var callCount = 0
+            override suspend fun lookupConsumer(email: String): Result<ConsumerSessionLookup> {
+                if (email == TestFactory.EMAIL) callCount += 1
+                return super.lookupConsumer(email)
+            }
         }
+        val accountManager = accountManager(linkRepository = linkRepository)
+
+        accountManager.signInWithUserInput(UserInput.SignIn(TestFactory.EMAIL))
+
+        assertThat(linkRepository.callCount).isEqualTo(1)
+        assertThat(accountManager.linkAccount.value).isNotNull()
+    }
 
     @Test
-    fun `signInWithUserInput sends correct parameters and starts session for new user`() =
-        runSuspendTest {
-            val accountManager = accountManager()
-            val phone = "phone"
-            val country = "country"
-            val name = "name"
-
-            accountManager.signInWithUserInput(
-                UserInput.SignUp(
-                    email = EMAIL,
-                    phone = phone,
-                    country = country,
-                    name = name,
-                    consentAction = SignUpConsentAction.Checkbox
+    fun `signInWithUserInput sends correct parameters and starts session for new user`() = runSuspendTest {
+        val phone = "phone"
+        val country = "country"
+        val name = "name"
+        val linkRepository = object : FakeLinkRepository() {
+            var callCount = 0
+            override suspend fun consumerSignUp(
+                actualEmail: String,
+                actualPhone: String,
+                actualCountry: String,
+                actualName: String?,
+                actualConsentAction: ConsumerSignUpConsentAction
+            ): Result<ConsumerSessionSignup> {
+                val userDetailsMatch = actualEmail == TestFactory.EMAIL &&
+                    phone == actualPhone &&
+                    country == actualCountry &&
+                    name == actualName
+                if (userDetailsMatch && actualConsentAction == ConsumerSignUpConsentAction.Checkbox) {
+                    callCount += 1
+                }
+                return super.consumerSignUp(
+                    actualEmail,
+                    actualPhone,
+                    actualCountry,
+                    actualName,
+                    actualConsentAction
                 )
-            )
-
-            verify(linkRepository).consumerSignUp(
-                email = eq(EMAIL),
-                phone = eq(phone),
-                country = eq(country),
-                name = eq(name),
-                consentAction = eq(ConsumerSignUpConsentAction.Checkbox)
-            )
-            assertThat(accountManager.linkAccount.value).isNotNull()
+            }
         }
+        val accountManager = accountManager(linkRepository = linkRepository)
+
+        accountManager.signInWithUserInput(
+            UserInput.SignUp(
+                email = TestFactory.EMAIL,
+                phone = phone,
+                country = country,
+                name = name,
+                consentAction = SignUpConsentAction.Checkbox
+            )
+        )
+
+        assertThat(linkRepository.callCount).isEqualTo(1)
+        assertThat(accountManager.linkAccount.value).isNotNull()
+    }
 
     @Test
     fun `signInWithUserInput sends correct consumer action on 'Checkbox' consent action`() = runSuspendTest {
-        accountManager().signInWithUserInput(createUserInputWithAction(SignUpConsentAction.Checkbox))
+        val linkRepository = object : FakeLinkRepository() {
+            var callCount = 0
+            override suspend fun consumerSignUp(
+                email: String,
+                phone: String,
+                country: String,
+                name: String?,
+                consentAction: ConsumerSignUpConsentAction
+            ): Result<ConsumerSessionSignup> {
+                if (consentAction == ConsumerSignUpConsentAction.Checkbox) callCount += 1
+                return super.consumerSignUp(email, phone, country, name, consentAction)
+            }
+        }
+        accountManager(linkRepository = linkRepository).signInWithUserInput(
+            createUserInputWithAction(
+                SignUpConsentAction.Checkbox
+            )
+        )
 
-        verifyConsumerAction(ConsumerSignUpConsentAction.Checkbox)
+        assertThat(linkRepository.callCount).isEqualTo(1)
     }
 
     @Test
     fun `signInWithUserInput sends correct consumer action on 'CheckboxWithPrefilledEmail' consent action`() =
         runSuspendTest {
-            accountManager().signInWithUserInput(
+            val linkRepository = object : FakeLinkRepository() {
+                var callCount = 0
+                override suspend fun consumerSignUp(
+                    email: String,
+                    phone: String,
+                    country: String,
+                    name: String?,
+                    consentAction: ConsumerSignUpConsentAction
+                ): Result<ConsumerSessionSignup> {
+                    if (consentAction == ConsumerSignUpConsentAction.CheckboxWithPrefilledEmail) {
+                        callCount += 1
+                    }
+                    return super.consumerSignUp(email, phone, country, name, consentAction)
+                }
+            }
+            accountManager(linkRepository = linkRepository).signInWithUserInput(
                 createUserInputWithAction(
                     SignUpConsentAction.CheckboxWithPrefilledEmail
                 )
             )
 
-            verifyConsumerAction(ConsumerSignUpConsentAction.CheckboxWithPrefilledEmail)
+            assertThat(linkRepository.callCount).isEqualTo(1)
         }
 
     @Test
     fun `signInWithUserInput sends correct consumer action on 'CheckboxWithPrefilledEmailAndPhone' consent action`() =
         runSuspendTest {
-            accountManager().signInWithUserInput(
+            val linkRepository = object : FakeLinkRepository() {
+                var callCount = 0
+                override suspend fun consumerSignUp(
+                    email: String,
+                    phone: String,
+                    country: String,
+                    name: String?,
+                    consentAction: ConsumerSignUpConsentAction
+                ): Result<ConsumerSessionSignup> {
+                    if (consentAction == ConsumerSignUpConsentAction.CheckboxWithPrefilledEmailAndPhone) {
+                        callCount += 1
+                    }
+                    return super.consumerSignUp(email, phone, country, name, consentAction)
+                }
+            }
+            accountManager(linkRepository = linkRepository).signInWithUserInput(
                 createUserInputWithAction(
                     SignUpConsentAction.CheckboxWithPrefilledEmailAndPhone
                 )
             )
 
-            verifyConsumerAction(ConsumerSignUpConsentAction.CheckboxWithPrefilledEmailAndPhone)
+            assertThat(linkRepository.callCount).isEqualTo(1)
         }
 
     @Test
     fun `signInWithUserInput sends correct consumer action on 'Implied' consent action`() = runSuspendTest {
-        accountManager().signInWithUserInput(createUserInputWithAction(SignUpConsentAction.Implied))
+        val linkRepository = object : FakeLinkRepository() {
+            var callCount = 0
+            override suspend fun consumerSignUp(
+                email: String,
+                phone: String,
+                country: String,
+                name: String?,
+                consentAction: ConsumerSignUpConsentAction
+            ): Result<ConsumerSessionSignup> {
+                if (consentAction == ConsumerSignUpConsentAction.Implied) {
+                    callCount += 1
+                }
+                return super.consumerSignUp(email, phone, country, name, consentAction)
+            }
+        }
+        accountManager(linkRepository = linkRepository).signInWithUserInput(
+            createUserInputWithAction(
+                SignUpConsentAction.Implied
+            )
+        )
 
-        verifyConsumerAction(ConsumerSignUpConsentAction.Implied)
+        assertThat(linkRepository.callCount).isEqualTo(1)
     }
 
     @Test
     fun `signInWithUserInput sends correct consumer action on 'ImpliedWithPrefilledEmail' consent action`() =
         runSuspendTest {
-            accountManager().signInWithUserInput(
+            val linkRepository = object : FakeLinkRepository() {
+                var callCount = 0
+                override suspend fun consumerSignUp(
+                    email: String,
+                    phone: String,
+                    country: String,
+                    name: String?,
+                    consentAction: ConsumerSignUpConsentAction
+                ): Result<ConsumerSessionSignup> {
+                    if (consentAction == ConsumerSignUpConsentAction.ImpliedWithPrefilledEmail) {
+                        callCount += 1
+                    }
+                    return super.consumerSignUp(email, phone, country, name, consentAction)
+                }
+            }
+            accountManager(linkRepository = linkRepository).signInWithUserInput(
                 createUserInputWithAction(
                     SignUpConsentAction.ImpliedWithPrefilledEmail
                 )
             )
 
-            verifyConsumerAction(ConsumerSignUpConsentAction.ImpliedWithPrefilledEmail)
+            assertThat(linkRepository.callCount).isEqualTo(1)
         }
 
     @Test
-    fun `signInWithUserInput for new user sends analytics event when call succeeds`() =
-        runSuspendTest {
-            accountManager().signInWithUserInput(
-                UserInput.SignUp(
-                    email = EMAIL,
-                    phone = "phone",
-                    country = "country",
-                    name = "name",
-                    consentAction = SignUpConsentAction.Checkbox
-                )
-            )
-
-            verify(linkEventsReporter).onSignupCompleted(true)
-        }
-
-    @Test
-    fun `signInWithUserInput for new user fails when user is logged in`() =
-        runSuspendTest {
-            val manager = accountManager()
-
-            manager.setLinkAccountFromLookupResult(
-                mockConsumerSessionLookup,
-                startSession = true,
-            )
-
-            val result = manager.signInWithUserInput(
-                UserInput.SignUp(
-                    email = EMAIL,
-                    phone = "phone",
-                    country = "country",
-                    name = "name",
-                    consentAction = SignUpConsentAction.Checkbox
-                )
-            )
-
-            assertThat(result.exceptionOrNull()).isEqualTo(
-                AlreadyLoggedInLinkException(
-                    email = EMAIL,
-                    accountStatus = AccountStatus.Verified
-                )
-            )
-        }
-
-    @Test
-    fun `signInWithUserInput for new user sends event when fails when user is logged in`() =
-        runSuspendTest {
-            val manager = accountManager()
-
-            manager.setLinkAccountFromLookupResult(
-                mockConsumerSessionLookup,
-                startSession = true,
-            )
-
-            manager.signInWithUserInput(
-                UserInput.SignUp(
-                    email = EMAIL,
-                    phone = "phone",
-                    country = "country",
-                    name = "name",
-                    consentAction = SignUpConsentAction.Checkbox
-                )
-            )
-
-            verify(linkEventsReporter).onInvalidSessionState(LinkEventsReporter.SessionState.Verified)
-        }
-
-    @Test
-    fun `signInWithUserInput for new user sends analytics event when call fails`() =
-        runSuspendTest {
-            whenever(
-                linkRepository.consumerSignUp(
-                    email = anyOrNull(),
-                    phone = anyOrNull(),
-                    country = anyOrNull(),
-                    name = anyOrNull(),
-                    consentAction = anyOrNull()
-                )
-            ).thenReturn(Result.failure(Exception()))
-
-            accountManager().signInWithUserInput(
-                UserInput.SignUp(
-                    email = EMAIL,
-                    phone = "phone",
-                    country = "country",
-                    name = "name",
-                    consentAction = SignUpConsentAction.Checkbox
-                )
-            )
-
-            verify(linkEventsReporter).onSignupFailure(eq(true), any<Exception>())
-        }
-
-    @Test
-    fun `createPaymentDetails for card does not retry on auth error`() =
-        runSuspendTest {
-            val accountManager = accountManager()
-
-            accountManager.setLinkAccountFromLookupResult(
-                mockConsumerSessionLookup,
-                startSession = true,
-            )
-
-            whenever(
-                linkRepository.createCardPaymentDetails(
-                    anyOrNull(),
-                    anyOrNull(),
-                    anyOrNull(),
-                    anyOrNull(),
-                    anyOrNull(),
-                    anyOrNull(),
-                )
-            ).thenReturn(
-                Result.failure(AuthenticationException(StripeError())),
-                Result.success(mock())
-            )
-
-            accountManager.createCardPaymentDetails(mock())
-
-            verify(linkRepository)
-                .createCardPaymentDetails(
-                    anyOrNull(),
-                    anyOrNull(),
-                    anyOrNull(),
-                    anyOrNull(),
-                    anyOrNull(),
-                    anyOrNull(),
-                )
-            verify(linkRepository, times(0)).lookupConsumer(anyOrNull())
-        }
-
-    @Test
-    fun `createCardPaymentDetails makes correct calls in passthrough mode`() =
-        runSuspendTest {
-            val accountManager = accountManager(passthroughModeEnabled = true)
-
-            accountManager.setLinkAccountFromLookupResult(
-                mockConsumerSessionLookup,
-                startSession = true,
-            )
-
-            val paymentDetails = mock<ConsumerPaymentDetails.PaymentDetails>().apply {
-                whenever(id).thenReturn("csmrpd*AYq4D_sXdAAAAOQ0")
+    fun `signInWithUserInput for new user sends analytics event when call succeeds`() = runSuspendTest {
+        val linkEventsReporter = object : AccountManagerEventsReporter() {
+            var callCount = 0
+            override fun onSignupCompleted(isInline: Boolean) {
+                if (isInline) callCount += 1
+                super.onSignupCompleted(isInline)
             }
-            whenever(
-                linkRepository.createCardPaymentDetails(
-                    anyOrNull(),
-                    anyOrNull(),
-                    anyOrNull(),
-                    anyOrNull(),
-                    anyOrNull(),
-                    anyOrNull(),
-                )
-            ).thenReturn(
-                Result.success(LinkPaymentDetails.New(paymentDetails, mock(), mock()))
-            )
-
-            val paymentMethodCreateParams = PaymentMethodCreateParams.createCard(
-                CardParams(
-                    number = "4242424242424242",
-                    expMonth = 1,
-                    expYear = 27,
-                    cvc = "123",
-                )
-            )
-            val result = accountManager.createCardPaymentDetails(paymentMethodCreateParams)
-            assertThat(result.isSuccess).isTrue()
-            val linkPaymentDetails = result.getOrThrow()
-            assertThat(linkPaymentDetails.paymentDetails.id).isEqualTo(PAYMENT_METHOD_ID)
-
-            verify(linkRepository)
-                .createCardPaymentDetails(
-                    paymentMethodCreateParams = anyOrNull(),
-                    userEmail = anyOrNull(),
-                    stripeIntent = anyOrNull(),
-                    consumerSessionClientSecret = anyOrNull(),
-                    consumerPublishableKey = anyOrNull(),
-                    active = anyOrNull(),
-                )
-            verify(linkRepository).shareCardPaymentDetails(
-                paymentMethodCreateParams = eq(paymentMethodCreateParams),
-                id = eq("csmrpd*AYq4D_sXdAAAAOQ0"),
-                last4 = eq("4242"),
-                consumerSessionClientSecret = eq(CLIENT_SECRET),
-            )
-            assertThat(accountManager.linkAccount.value).isNotNull()
         }
+        accountManager(linkEventsReporter = linkEventsReporter).signInWithUserInput(
+            UserInput.SignUp(
+                email = TestFactory.EMAIL,
+                phone = "phone",
+                country = "country",
+                name = "name",
+                consentAction = SignUpConsentAction.Checkbox
+            )
+        )
+
+        assertThat(linkEventsReporter.callCount).isEqualTo(1)
+    }
+
+    @Test
+    fun `signInWithUserInput for new user fails when user is logged in`() = runSuspendTest {
+        val manager = accountManager()
+
+        manager.setLinkAccountFromLookupResult(
+            TestFactory.CONSUMER_SESSION_LOOKUP,
+            startSession = true,
+        )
+
+        val result = manager.signInWithUserInput(
+            UserInput.SignUp(
+                email = TestFactory.EMAIL,
+                phone = "phone",
+                country = "country",
+                name = "name",
+                consentAction = SignUpConsentAction.Checkbox
+            )
+        )
+
+        assertThat(result.exceptionOrNull()).isEqualTo(
+            AlreadyLoggedInLinkException(
+                email = TestFactory.EMAIL,
+                accountStatus = AccountStatus.Verified
+            )
+        )
+    }
+
+    @Test
+    fun `signInWithUserInput for new user sends event when fails when user is logged in`() = runSuspendTest {
+        val linkEventsReporter = object : AccountManagerEventsReporter() {
+            var callCount = 0
+            override fun onInvalidSessionState(state: LinkEventsReporter.SessionState) {
+                if (state == LinkEventsReporter.SessionState.Verified) callCount += 1
+                super.onInvalidSessionState(state)
+            }
+        }
+        val manager = accountManager(linkEventsReporter = linkEventsReporter)
+
+        manager.setLinkAccountFromLookupResult(
+            TestFactory.CONSUMER_SESSION_LOOKUP,
+            startSession = true,
+        )
+
+        manager.signInWithUserInput(
+            UserInput.SignUp(
+                email = TestFactory.EMAIL,
+                phone = "phone",
+                country = "country",
+                name = "name",
+                consentAction = SignUpConsentAction.Checkbox
+            )
+        )
+
+        assertThat(linkEventsReporter.callCount).isEqualTo(1)
+    }
+
+    @Test
+    fun `signInWithUserInput for new user sends analytics event when call fails`() = runSuspendTest {
+        val linkRepository = FakeLinkRepository()
+        linkRepository.consumerSignUpResult = Result.failure(Exception())
+
+        val linkEventsReporter = object : AccountManagerEventsReporter() {
+            var callCount = 0
+            override fun onSignupFailure(isInline: Boolean, error: Throwable) {
+                if (isInline) callCount += 1
+                super.onSignupFailure(isInline, error)
+            }
+        }
+
+        accountManager(linkRepository = linkRepository, linkEventsReporter = linkEventsReporter)
+            .signInWithUserInput(
+                UserInput.SignUp(
+                    email = TestFactory.EMAIL,
+                    phone = "phone",
+                    country = "country",
+                    name = "name",
+                    consentAction = SignUpConsentAction.Checkbox
+                )
+            )
+
+        assertThat(linkEventsReporter.callCount).isEqualTo(1)
+    }
+
+    @Test
+    fun `createPaymentDetails for card does not retry on auth error`() = runSuspendTest {
+        val linkRepository = object : FakeLinkRepository() {
+            var result = listOf(
+                Result.failure(AuthenticationException(StripeError())),
+                Result.success(TestFactory.LINK_NEW_PAYMENT_DETAILS)
+            )
+            var callCount = 0
+            override suspend fun createCardPaymentDetails(
+                paymentMethodCreateParams: PaymentMethodCreateParams,
+                userEmail: String,
+                stripeIntent: StripeIntent,
+                consumerSessionClientSecret: String,
+                consumerPublishableKey: String?,
+                active: Boolean
+            ): Result<LinkPaymentDetails.New> {
+                val details = result.first()
+                if (result.size > 1) {
+                    result = result.subList(1, result.size)
+                }
+                return details
+            }
+
+            override suspend fun lookupConsumer(email: String): Result<ConsumerSessionLookup> {
+                callCount += 1
+                return super.lookupConsumer(email)
+            }
+        }
+        val accountManager = accountManager(linkRepository = linkRepository)
+
+        accountManager.setLinkAccountFromLookupResult(
+            TestFactory.CONSUMER_SESSION_LOOKUP,
+            startSession = true,
+        )
+
+        accountManager.createCardPaymentDetails(TestFactory.PAYMENT_METHOD_CREATE_PARAMS)
+
+        assertThat(linkRepository.result.size).isEqualTo(1)
+        assertThat(linkRepository.callCount).isEqualTo(0)
+    }
+
+    @Test
+    fun `createCardPaymentDetails makes correct calls in passthrough mode`() = runSuspendTest {
+        val linkRepository = object : FakeLinkRepository() {
+            var createCardPaymentDetailsCallCount = 0
+            var shareCardPaymentDetailsCallCount = 0
+            override suspend fun createCardPaymentDetails(
+                paymentMethodCreateParams: PaymentMethodCreateParams,
+                userEmail: String,
+                stripeIntent: StripeIntent,
+                consumerSessionClientSecret: String,
+                consumerPublishableKey: String?,
+                active: Boolean
+            ): Result<LinkPaymentDetails.New> {
+                createCardPaymentDetailsCallCount += 1
+                return Result.success(TestFactory.LINK_NEW_PAYMENT_DETAILS)
+            }
+
+            override suspend fun shareCardPaymentDetails(
+                paymentMethodCreateParams: PaymentMethodCreateParams,
+                id: String,
+                last4: String,
+                consumerSessionClientSecret: String
+            ): Result<LinkPaymentDetails.New> {
+                val paymentDetailsMatch = paymentMethodCreateParams == TestFactory.PAYMENT_METHOD_CREATE_PARAMS &&
+                    id == TestFactory.LINK_NEW_PAYMENT_DETAILS.paymentDetails.id &&
+                    last4 == TestFactory.LINK_NEW_PAYMENT_DETAILS.paymentDetails.last4
+                if (paymentDetailsMatch && consumerSessionClientSecret == TestFactory.CLIENT_SECRET) {
+                    shareCardPaymentDetailsCallCount += 1
+                }
+                return super.shareCardPaymentDetails(
+                    paymentMethodCreateParams,
+                    id,
+                    last4,
+                    consumerSessionClientSecret
+                )
+            }
+        }
+        val accountManager = accountManager(passthroughModeEnabled = true, linkRepository = linkRepository)
+
+        accountManager.setLinkAccountFromLookupResult(
+            TestFactory.CONSUMER_SESSION_LOOKUP,
+            startSession = true,
+        )
+
+        val result = accountManager.createCardPaymentDetails(TestFactory.PAYMENT_METHOD_CREATE_PARAMS)
+
+        assertThat(result.isSuccess).isTrue()
+        val linkPaymentDetails = result.getOrThrow()
+        assertThat(linkPaymentDetails.paymentDetails.id)
+            .isEqualTo(TestFactory.LINK_NEW_PAYMENT_DETAILS.paymentDetails.id)
+
+        assertThat(linkRepository.createCardPaymentDetailsCallCount).isEqualTo(1)
+        assertThat(linkRepository.shareCardPaymentDetailsCallCount).isEqualTo(1)
+        assertThat(accountManager.linkAccount.value).isNotNull()
+    }
 
     @Test
     fun `lookupConsumer starts session when startSession is true`() = runSuspendTest {
-        mockUnverifiedAccountLookup()
+        val linkRepository = object : FakeLinkRepository() {
+            var callCount = 0
+            override suspend fun lookupConsumer(email: String): Result<ConsumerSessionLookup> {
+                val consumerSession = TestFactory.CONSUMER_SESSION.copy(
+                    clientSecret = TestFactory.CLIENT_SECRET,
+                    verificationSessions = emptyList()
+                )
+                val consumerSessionLookup = TestFactory.CONSUMER_SESSION_LOOKUP.copy(
+                    consumerSession = consumerSession
+                )
+                return Result.success(consumerSessionLookup)
+            }
 
-        val accountManager = accountManager()
+            override suspend fun startVerification(
+                consumerSessionClientSecret: String,
+                consumerPublishableKey: String?
+            ): Result<ConsumerSession> {
+                callCount += 1
+                return super.startVerification(consumerSessionClientSecret, consumerPublishableKey)
+            }
+        }
 
-        accountManager.lookupConsumer(EMAIL, true)
+        val accountManager = accountManager(
+            linkRepository = linkRepository
+        )
 
-        verify(linkRepository).startVerification(anyOrNull(), anyOrNull())
+        accountManager.lookupConsumer(TestFactory.EMAIL, true)
+
+        assertThat(linkRepository.callCount).isEqualTo(1)
         assertThat(accountManager.linkAccount.value).isNotNull()
     }
 
     @Test
     fun `lookupConsumer does not start session when startSession is false`() = runSuspendTest {
-        val accountManager = accountManager()
+        val linkRepository = object : FakeLinkRepository() {
+            var callCount = 0
+            override suspend fun startVerification(
+                consumerSessionClientSecret: String,
+                consumerPublishableKey: String?
+            ): Result<ConsumerSession> {
+                callCount += 1
+                return super.startVerification(consumerSessionClientSecret, consumerPublishableKey)
+            }
+        }
+        val accountManager = accountManager(linkRepository = linkRepository)
 
-        accountManager.lookupConsumer(EMAIL, false)
+        accountManager.lookupConsumer(TestFactory.EMAIL, false)
 
-        verify(linkRepository, times(0)).startVerification(anyOrNull(), anyOrNull())
+        assertThat(linkRepository.callCount).isEqualTo(0)
         assertThat(accountManager.linkAccount.value).isNull()
     }
 
     @Test
     fun `startVerification updates account`() = runSuspendTest {
         val accountManager = accountManager()
-        accountManager.setAccountNullable(mockConsumerSession, null)
+        accountManager.setAccountNullable(TestFactory.CONSUMER_SESSION, null)
 
         accountManager.startVerification()
 
@@ -466,130 +619,115 @@ class DefaultLinkAccountManagerTest {
 
     @Test
     fun `startVerification uses consumerPublishableKey`() = runSuspendTest {
-        val accountManager = accountManager()
-        accountManager.setAccountNullable(mockConsumerSession, PUBLISHABLE_KEY)
+        val linkRepository = object : FakeLinkRepository() {
+            var consumerPublishableKey: String? = null
+            var callCount = 0
+            override suspend fun startVerification(
+                consumerSessionClientSecret: String,
+                consumerPublishableKey: String?
+            ): Result<ConsumerSession> {
+                callCount += 1
+                this.consumerPublishableKey = consumerPublishableKey
+                return super.startVerification(consumerSessionClientSecret, consumerPublishableKey)
+            }
+        }
+        val accountManager = accountManager(linkRepository = linkRepository)
+        accountManager.setAccountNullable(TestFactory.CONSUMER_SESSION, TestFactory.PUBLISHABLE_KEY)
 
         accountManager.startVerification()
 
-        val keyCaptor = argumentCaptor<String>()
-        verify(linkRepository).startVerification(anyOrNull(), keyCaptor.capture())
-        assertThat(keyCaptor.firstValue).isEqualTo(PUBLISHABLE_KEY)
+        assertThat(linkRepository.callCount).isEqualTo(1)
+        assertThat(linkRepository.consumerPublishableKey).isEqualTo(TestFactory.PUBLISHABLE_KEY)
     }
 
     @Test
     fun `startVerification sends analytics event when call fails`() = runSuspendTest {
-        whenever(linkRepository.startVerification(anyOrNull(), anyOrNull()))
-            .thenReturn(Result.failure(Exception()))
+        val linkRepository = FakeLinkRepository()
+        linkRepository.startVerificationResult = Result.failure(Exception())
 
-        val accountManager = accountManager()
-        accountManager.setAccountNullable(mockConsumerSession, null)
+        val linkEventsReporter = object : AccountManagerEventsReporter() {
+            var callCount = 0
+            override fun on2FAStartFailure() {
+                callCount += 1
+                super.on2FAStartFailure()
+            }
+        }
+
+        val accountManager = accountManager(linkRepository = linkRepository, linkEventsReporter = linkEventsReporter)
+        accountManager.setAccountNullable(TestFactory.CONSUMER_SESSION, null)
         accountManager.startVerification()
 
-        verify(linkEventsReporter).on2FAStartFailure()
+        assertThat(linkEventsReporter.callCount).isEqualTo(1)
     }
 
     @Test
     fun `confirmVerification returns error when link account is null`() = runSuspendTest {
-        val accountManager = accountManager()
+        val linkRepository = FakeLinkRepository()
+        val accountManager = accountManager(linkRepository = linkRepository)
         accountManager.setAccountNullable(null, null)
 
         val result = accountManager.confirmVerification("123")
 
-        assertThat(result).isEqualTo(Result.failure<LinkAccount>(Throwable("no link account found")))
+        assertThat(result.exceptionOrNull()?.message).isEqualTo("no link account found")
     }
 
     @Test
     fun `confirmVerification returns success result when verification succeeds`() = runSuspendTest {
-        val accountManager = accountManager()
-        accountManager.setAccountNullable(mockConsumerSession, null)
+        val linkRepository = object : FakeLinkRepository() {
+            var callCount = 0
+            override suspend fun confirmVerification(
+                verificationCode: String,
+                consumerSessionClientSecret: String,
+                consumerPublishableKey: String?
+            ): Result<ConsumerSession> {
+                callCount += 1
+                return super.confirmVerification(verificationCode, consumerSessionClientSecret, consumerPublishableKey)
+            }
+        }
+        val accountManager = accountManager(linkRepository = linkRepository)
+        accountManager.setAccountNullable(TestFactory.CONSUMER_SESSION, null)
 
-        whenever(
-            linkRepository.confirmVerification(
-                anyOrNull(),
-                anyOrNull(),
-                anyOrNull(),
-            )
-        ).thenReturn(
-            Result.success(mockConsumerSession)
-        )
+        linkRepository.confirmVerificationResult = Result.success(TestFactory.CONSUMER_SESSION)
 
-        accountManager.confirmVerification("123")
+        val result = accountManager.confirmVerification("123")
 
-        verify(linkRepository)
-            .confirmVerification(anyOrNull(), anyOrNull(), anyOrNull())
-        assertThat(accountManager.linkAccount).isEqualTo(LinkAccount(mockConsumerSession))
+        assertThat(linkRepository.callCount).isEqualTo(1)
+        assertThat(result.isSuccess).isTrue()
     }
 
     @Test
     fun `confirmVerification returns failure result when verification fails`() = runSuspendTest {
-        val accountManager = accountManager()
-        accountManager.setAccountNullable(mockConsumerSession, null)
-
-        whenever(
-            linkRepository.confirmVerification(
-                anyOrNull(),
-                anyOrNull(),
-                anyOrNull(),
-            )
-        ).thenReturn(
-            Result.failure(Throwable("oops"))
-        )
+        val error = Throwable("oops")
+        val linkRepository = object : FakeLinkRepository() {
+            var callCount = 0
+            override suspend fun confirmVerification(
+                verificationCode: String,
+                consumerSessionClientSecret: String,
+                consumerPublishableKey: String?
+            ): Result<ConsumerSession> {
+                callCount += 1
+                return Result.failure(error)
+            }
+        }
+        val accountManager = accountManager(linkRepository = linkRepository)
+        accountManager.setAccountNullable(TestFactory.CONSUMER_SESSION, null)
 
         val result = accountManager.confirmVerification("123")
 
-        verify(linkRepository).confirmVerification(anyOrNull(), anyOrNull(), anyOrNull())
-        assertThat(result).isEqualTo(Result.failure<LinkAccount>(Throwable("oops")))
+        assertThat(linkRepository.callCount).isEqualTo(1)
+        assertThat(result).isEqualTo(Result.failure<LinkAccount>(error))
     }
 
     private fun runSuspendTest(testBody: suspend TestScope.() -> Unit) = runTest {
-        setupRepository()
         testBody()
-    }
-
-    private suspend fun setupRepository() {
-        val consumerSessionLookup = mock<ConsumerSessionLookup>().apply {
-            whenever(consumerSession).thenReturn(mockConsumerSession)
-        }
-        whenever(linkRepository.lookupConsumer(anyOrNull()))
-            .thenReturn(Result.success(consumerSessionLookup))
-        whenever(linkRepository.startVerification(anyOrNull(), anyOrNull()))
-            .thenReturn(Result.success(mockConsumerSession))
-        whenever(
-            linkRepository.consumerSignUp(
-                email = anyOrNull(),
-                phone = anyOrNull(),
-                country = anyOrNull(),
-                name = anyOrNull(),
-                consentAction = any()
-            )
-        ).thenReturn(Result.success(mockConsumerSessionSignup))
-        whenever(
-            linkRepository.shareCardPaymentDetails(
-                paymentMethodCreateParams = anyOrNull(),
-                id = anyOrNull(),
-                last4 = anyOrNull(),
-                consumerSessionClientSecret = anyOrNull(),
-            )
-        ).thenReturn(
-            Result.success(
-                LinkPaymentDetails.Saved(
-                    paymentDetails = ConsumerPaymentDetails.Passthrough(
-                        id = PAYMENT_METHOD_ID,
-                        last4 = "1234",
-                    ),
-                    paymentMethodCreateParams = PaymentMethodCreateParams.createLink(
-                        paymentDetailsId = PAYMENT_METHOD_ID,
-                        consumerSessionClientSecret = CLIENT_SECRET,
-                    ),
-                )
-            )
-        )
     }
 
     private fun accountManager(
         customerEmail: String? = null,
-        stripeIntent: StripeIntent = mock(),
+        stripeIntent: StripeIntent = PaymentIntentFactory.create(),
         passthroughModeEnabled: Boolean = false,
+        linkRepository: LinkRepository = FakeLinkRepository(),
+        linkEventsReporter: LinkEventsReporter = AccountManagerEventsReporter()
     ) = DefaultLinkAccountManager(
         config = LinkConfiguration(
             stripeIntent = stripeIntent,
@@ -613,39 +751,19 @@ class DefaultLinkAccountManagerTest {
 
     private fun createUserInputWithAction(consentAction: SignUpConsentAction): UserInput.SignUp {
         return UserInput.SignUp(
-            email = EMAIL,
+            email = TestFactory.EMAIL,
             phone = "phone",
             country = "country",
             name = "name",
             consentAction = consentAction
         )
     }
+}
 
-    private suspend fun verifyConsumerAction(consumerAction: ConsumerSignUpConsentAction) {
-        verify(linkRepository).consumerSignUp(
-            email = any(),
-            phone = any(),
-            country = any(),
-            name = anyOrNull(),
-            consentAction = eq(consumerAction)
-        )
-    }
-
-    private suspend fun mockUnverifiedAccountLookup() {
-        val mockConsumerSession = mock<ConsumerSession>().apply {
-            whenever(clientSecret).thenReturn(CLIENT_SECRET)
-        }
-        val consumerSessionLookup = mock<ConsumerSessionLookup>().apply {
-            whenever(consumerSession).thenReturn(mockConsumerSession)
-        }
-        whenever(linkRepository.lookupConsumer(anyOrNull()))
-            .thenReturn(Result.success(consumerSessionLookup))
-    }
-
-    private companion object {
-        const val EMAIL = "email@stripe.com"
-        const val CLIENT_SECRET = "client_secret"
-        const val PUBLISHABLE_KEY = "publishable_key"
-        const val PAYMENT_METHOD_ID = "pm_1NsnWALu5o3P18Zp36Q7YfWW"
-    }
+private open class AccountManagerEventsReporter : FakeLinkEventsReporter() {
+    override fun onInvalidSessionState(state: LinkEventsReporter.SessionState) = Unit
+    override fun onSignupCompleted(isInline: Boolean) = Unit
+    override fun onSignupFailure(isInline: Boolean, error: Throwable) = Unit
+    override fun onAccountLookupFailure(error: Throwable) = Unit
+    override fun on2FAStartFailure() = Unit
 }
