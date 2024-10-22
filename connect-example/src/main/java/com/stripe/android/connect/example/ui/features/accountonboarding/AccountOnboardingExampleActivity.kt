@@ -1,6 +1,7 @@
 package com.stripe.android.connect.example.ui.features.accountonboarding
 
 import android.os.Bundle
+import android.view.View
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Box
@@ -15,10 +16,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.fragment.app.FragmentActivity
-import androidx.fragment.compose.AndroidFragment
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.stripe.android.connect.AccountOnboardingFragment
+import com.stripe.android.connect.AccountOnboardingFragmentListener
+import com.stripe.android.connect.AccountOnboardingView
 import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.example.ConnectSdkExampleTheme
 import com.stripe.android.connect.example.MainContent
@@ -68,6 +70,18 @@ class AccountOnboardingExampleActivity : FragmentActivity() {
     @Composable
     private fun AccountOnboardingComponentWrapper(onDismiss: () -> Unit) {
         BackHandler(onBack = onDismiss)
-        AndroidFragment<AccountOnboardingFragment>()
+        AndroidView(factory = { context ->
+            AccountOnboardingView(context).apply {
+                registerListener(object : AccountOnboardingFragmentListener {
+                    override fun onLoadFailure(error: Throwable) {
+                        // Handle error
+                    }
+
+                    override fun onExit() {
+                        onDismiss()
+                    }
+                })
+            }
+        })
     }
 }
