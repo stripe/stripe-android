@@ -9,6 +9,7 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.LinearLayout
+import androidx.annotation.VisibleForTesting
 import com.stripe.android.R
 import com.stripe.android.core.model.Country
 import com.stripe.android.core.model.CountryUtils
@@ -28,7 +29,8 @@ class ShippingInfoWidget @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : LinearLayout(context, attrs, defStyleAttr) {
 
-    private val viewBinding: StripeAddressWidgetBinding by lazy {
+    @VisibleForTesting
+    internal val viewBinding: StripeAddressWidgetBinding by lazy {
         StripeAddressWidgetBinding.inflate(
             LayoutInflater.from(context),
             this
