@@ -22,19 +22,11 @@ internal data class PaymentSheetCardBrandFilter(
 
             is PaymentSheet.CardBrandAcceptance.Allowed -> {
                 val isAllowed = brandCategory != null && cardBrandAcceptance.brands.contains(brandCategory)
-                if (!isAllowed) {
-                    // TODO(porter) Log event for disallowed brand
-                    // Maybe log this in the loader
-                }
                 isAllowed
             }
 
             is PaymentSheet.CardBrandAcceptance.Disallowed -> {
                 val isDisallowed = brandCategory != null && cardBrandAcceptance.brands.contains(brandCategory)
-                if (isDisallowed) {
-                    // TODO(porter) Log event for disallowed brand
-                    // Maybe log this in the loader
-                }
                 !isDisallowed
             }
         }

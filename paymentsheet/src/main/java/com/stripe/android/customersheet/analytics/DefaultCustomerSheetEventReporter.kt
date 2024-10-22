@@ -182,6 +182,14 @@ internal class DefaultCustomerSheetEventReporter @Inject constructor(
         fireEvent(CustomerSheetEvent.CardNumberCompleted())
     }
 
+    override fun onDisallowedCardBrandEntered(brand: CardBrand) {
+        fireEvent(
+            CustomerSheetEvent.CardBrandDisallowed(
+                cardBrand = brand,
+            )
+        )
+    }
+
     private fun fireEvent(event: CustomerSheetEvent) {
         CoroutineScope(workContext).launch {
             analyticsRequestExecutor.executeAsync(
