@@ -327,7 +327,7 @@ internal class DefaultCardNumberController(
         val lastLoggedCardBrand = remember { mutableStateOf<CardBrand?>(null) }
 
         LaunchedEffect(Unit) {
-            // Drop the initial value to avoid emitting on first composition
+            // Drop the set empty value & initial value
             fieldState.drop(1).collectLatest { state ->
                 when (state) {
                     is TextFieldStateConstants.Valid.Full -> {
