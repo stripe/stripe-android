@@ -1,10 +1,12 @@
 package com.stripe.android
 
 import android.os.Parcel
+import androidx.annotation.RestrictTo
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.model.CardBrand
+import kotlinx.parcelize.Parcelize
 import org.json.JSONException
 import org.json.JSONObject
 import org.junit.runner.RunWith
@@ -49,6 +51,14 @@ class GooglePayJsonFactoryTest {
         assertEquals(expectedJson.toString(), isReadyToPayRequestJson.toString())
     }
 
+    @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    object ExcludeAmexCardBrandFilter : CardBrandFilter {
+        override fun isAccepted(cardBrand: CardBrand): Boolean {
+            return cardBrand != CardBrand.AmericanExpress
+        }
+    }
+
     @Test
     fun testCreateIsReadyToPayRequestJson_withArgs() {
         val isReadyToPayRequestJson = factory.createIsReadyToPayRequest(
@@ -57,7 +67,8 @@ class GooglePayJsonFactoryTest {
                 format = GooglePayJsonFactory.BillingAddressParameters.Format.Full,
                 isPhoneNumberRequired = true
             ),
-            existingPaymentMethodRequired = true
+            existingPaymentMethodRequired = true,
+            cardBrandFilter = ExcludeAmexCardBrandFilter
         )
         val expectedJson = JSONObject(
             """
@@ -68,7 +79,7 @@ class GooglePayJsonFactoryTest {
                     "type": "CARD",
                     "parameters": {
                         "allowedAuthMethods": ["PAN_ONLY", "CRYPTOGRAM_3DS"],
-                        "allowedCardNetworks": ["AMEX", "DISCOVER", "MASTERCARD", "VISA"],
+                        "allowedCardNetworks": ["DISCOVER", "MASTERCARD", "VISA"],
                         "billingAddressRequired": true,
                         "billingAddressParameters": {
                             "phoneNumberRequired": true,

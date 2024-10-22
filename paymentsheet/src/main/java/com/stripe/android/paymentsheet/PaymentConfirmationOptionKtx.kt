@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet
 
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentSelection
 
@@ -49,6 +50,7 @@ internal fun PaymentSelection.toPaymentConfirmationOption(
                     customAmount = googlePay.amount,
                     customLabel = googlePay.label,
                     billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
+                    cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance)
                 )
             )
         }

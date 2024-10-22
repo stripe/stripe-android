@@ -404,6 +404,7 @@ internal class IntentConfirmationHandler(
                 merchantName = config.merchantName,
                 isEmailRequired = config.billingDetailsCollectionConfiguration.collectsEmail,
                 billingAddressConfig = config.billingDetailsCollectionConfiguration.toBillingAddressConfig(),
+                cardBrandFilter = config.cardBrandFilter
             ),
             readyCallback = {
                 // Do nothing since we are skipping the ready check below
