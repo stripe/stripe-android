@@ -88,6 +88,35 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+val radioAppearance = PaymentSheet.EmbeddedPaymentElementAppearance.Radio(
+    selectedColor = getColor(R.colors.primary),
+    unselectedColor = getColor(R.colors.secondary)
+)
+
+val flatAppearance = PaymentSheet.EmbeddedPaymentElementAppearance.Flat(
+    separatorThicknessDp = 8.0f,
+    separatorColor = getColor(R.colors.border),
+    separatorInsetsDp = 4.0f,
+    topSeparatorEnabled = true,
+    bottomSeparatorEnabled = false,
+    radio = radioAppearance
+)
+
+val floatingAppearance = PaymentSheet.EmbeddedPaymentElementAppearance.Floating(
+    spacingDp = 12.0f
+)
+
+val rowAppearance = PaymentSheet.EmbeddedPaymentElementAppearance.Row(
+    additionalInsetsDp = 0.0f,
+    flat = flatAppearance,
+    floating = floatingAppearance
+)
+
+val embeddedAppearance = PaymentSheet.EmbeddedPaymentElementAppearance(
+    row = rowAppearance,
+    style = PaymentSheet.EmbeddedPaymentElementAppearance.Style.FlatWithRadio
+)
+
         setContent {
             val paymentSheet = PaymentSheet.Builder(viewModel::onPaymentSheetResult)
                 .externalPaymentMethodConfirmHandler(this)

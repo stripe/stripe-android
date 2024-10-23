@@ -13,6 +13,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.fragment.app.Fragment
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.ExperimentalCardBrandFilteringApi
+import com.stripe.android.Stripe
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.link.account.LinkStore
@@ -944,6 +945,11 @@ class PaymentSheet internal constructor(
          * Describes the appearance of the primary button (e.g., the "Pay" button).
          */
         val primaryButton: PrimaryButton = PrimaryButton(),
+
+        /**
+         * Describes the appearance of the Embedded Payment Element
+         */
+        val embeddedAppearance: EmbeddedPaymentElementAppearance = EmbeddedPaymentElementAppearance.default
     ) : Parcelable {
         constructor() : this(
             colorsLight = Colors.defaultLight,
@@ -951,6 +957,7 @@ class PaymentSheet internal constructor(
             shapes = Shapes.default,
             typography = Typography.default,
             primaryButton = PrimaryButton(),
+            embeddedAppearance = EmbeddedPaymentElementAppearance.default
         )
 
         fun getColors(isDark: Boolean): Colors {
@@ -963,6 +970,8 @@ class PaymentSheet internal constructor(
             private var shapes = Shapes.default
             private var typography = Typography.default
             private var primaryButton: PrimaryButton = PrimaryButton()
+            private var embeddedAppearance: EmbeddedPaymentElementAppearance =
+                EmbeddedPaymentElementAppearance.default
 
             fun colorsLight(colors: Colors) = apply {
                 this.colorsLight = colors
@@ -984,8 +993,12 @@ class PaymentSheet internal constructor(
                 this.primaryButton = primaryButton
             }
 
+            fun embeddedAppearance(embeddedAppearance: EmbeddedPaymentElementAppearance) = apply {
+                this.embeddedAppearance = embeddedAppearance
+            }
+
             fun build(): Appearance {
-                return Appearance(colorsLight, colorsDark, shapes, typography, primaryButton)
+                return Appearance(colorsLight, colorsDark, shapes, typography, primaryButton, embeddedAppearance)
             }
         }
     }
@@ -1160,6 +1173,209 @@ class PaymentSheet internal constructor(
                 sizeScaleFactor = StripeThemeDefaults.typography.fontSizeMultiplier,
                 fontResId = StripeThemeDefaults.typography.fontFamily
             )
+        }
+    }
+
+    @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
+    @Parcelize
+    data class EmbeddedPaymentElementAppearance(
+        val row: Row,
+        val style: Style
+    ) : Parcelable {
+        /**
+         * The display style options for the Embedded Mobile Payment Element.
+         */
+        enum class Style {
+            /**
+             * A flat style with radio buttons.
+             */
+            FlatWithRadio,
+
+            /**
+             * A floating button style.
+             */
+            FloatingButton
+        }
+
+        companion object {
+            val default = EmbeddedPaymentElementAppearance(
+                row = Row.defaultLight,
+                style = Style.FlatWithRadio
+            )
+        }
+
+        /**
+         * Describes the appearance of the row in the Embedded Mobile Payment Element.
+         */
+        @Parcelize
+        data class Row(
+        /**
+         * Additional vertical insets applied to a payment method row.
+         * - Note: Increasing this value increases the height of each row.
+         */
+        val additionalInsetsDp: Float,
+
+            /**
+             * Appearance settings for the flat style.
+             */
+            val flat: Flat,
+
+            /**
+             * Appearance settings for the floating button style
+             */
+            val floating: Floating
+        ) : Parcelable {
+            constructor(
+                context: Context,
+                additionalInsetsDp: Int,
+                flat: Flat,
+                floating: Floating
+            ) : this(
+                additionalInsetsDp = context.getRawValueFromDimenResource(additionalInsetsDp),
+                flat = flat,
+                floating = floating
+            )
+
+            companion object {
+                val defaultLight = Row(
+                    additionalInsetsDp = StripeThemeDefaults.row.additionalInsets,
+                    flat = Flat.defaultLight,
+                    floating = Floating.default
+                )
+
+                val defaultDark = Row(
+                    additionalInsetsDp = StripeThemeDefaults.row.additionalInsets,
+                    flat = Flat.defaultDark,
+                    floating = Floating.default
+                )
+            }
+        }
+
+        @Parcelize
+        data class Flat(
+            /**
+             * The thickness of the separator line between rows.
+             */
+            val separatorThicknessDp: Float,
+
+            /**
+             * The color of the separator line between rows.
+             */
+            @ColorInt
+            val separatorColor: Int,
+
+            /**
+             * The insets of the separator line between rows.
+             */
+            val separatorInsetsDp: Float,
+
+            /**
+             * Determines if the top separator is visible at the top of the Embedded Mobile Payment Element.
+             */
+            val topSeparatorEnabled: Boolean,
+
+            /**
+             * Determines if the bottom separator is visible at the bottom of the Embedded Mobile Payment Element.
+             */
+            val bottomSeparatorEnabled: Boolean,
+
+            /**
+             * Appearance settings for the radio button
+             */
+            val radio: Radio
+        ) : Parcelable {
+            constructor(
+                context: Context,
+                separatorThicknessDp: Int,
+                separatorColor: Color,
+                separatorInsetsDp: Int,
+                topSeparatorEnabled: Boolean,
+                bottomSeparatorEnabled: Boolean,
+                radio: Radio
+            ) : this(
+                separatorThicknessDp = context.getRawValueFromDimenResource(separatorThicknessDp),
+                separatorColor = separatorColor.toArgb(),
+                separatorInsetsDp = context.getRawValueFromDimenResource(separatorInsetsDp),
+                topSeparatorEnabled = topSeparatorEnabled,
+                bottomSeparatorEnabled = bottomSeparatorEnabled,
+                radio = radio
+            )
+
+            companion object {
+                val defaultLight = Flat(
+                    separatorThicknessDp = StripeThemeDefaults.flat.separatorThickness,
+                    separatorColor = StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
+                    separatorInsetsDp = StripeThemeDefaults.flat.separatorInsets,
+                    topSeparatorEnabled = StripeThemeDefaults.flat.topSeparatorEnabled,
+                    bottomSeparatorEnabled = StripeThemeDefaults.flat.bottomSeparatorEnabled,
+                    radio = Radio.defaultLight
+                )
+
+                val defaultDark = Flat(
+                    separatorThicknessDp = StripeThemeDefaults.flat.separatorThickness,
+                    separatorColor = StripeThemeDefaults.colorsDark.componentBorder.toArgb(),
+                    separatorInsetsDp = StripeThemeDefaults.flat.separatorInsets,
+                    topSeparatorEnabled = StripeThemeDefaults.flat.topSeparatorEnabled,
+                    bottomSeparatorEnabled = StripeThemeDefaults.flat.bottomSeparatorEnabled,
+                    radio = Radio.defaultDark
+                )
+            }
+        }
+
+        @Parcelize
+        data class Radio(
+            /**
+             * The color of the radio button when selected.
+             */
+            @ColorInt
+            val selectedColor: Int,
+
+            /**
+             * The color of the radio button when unselected.
+             */
+            @ColorInt
+            val unselectedColor: Int
+        ) : Parcelable {
+            constructor(
+                selectedColor: Color,
+                unselectedColor: Color
+            ) : this(
+                selectedColor = selectedColor.toArgb(),
+                unselectedColor = unselectedColor.toArgb()
+            )
+
+            companion object {
+                val defaultLight = Radio(
+                    selectedColor = StripeThemeDefaults.colorsLight.materialColors.primary,
+                    unselectedColor = StripeThemeDefaults.colorsLight.componentBorder
+                )
+
+                val defaultDark = Radio(
+                    selectedColor = StripeThemeDefaults.colorsDark.materialColors.primary,
+                    unselectedColor = StripeThemeDefaults.colorsDark.componentBorder
+                )
+            }
+        }
+
+        @Parcelize
+        data class Floating(
+            /**
+             * The spacing between payment method rows
+             */
+            val spacingDp: Float
+        ) : Parcelable {
+            constructor(
+                context: Context,
+                spacingDp: Int
+            ) : this(
+                spacingDp = context.getRawValueFromDimenResource(spacingDp)
+            )
+
+            companion object {
+                val default = Floating(
+                    spacingDp = StripeThemeDefaults.floating.spacing
+                )
+            }
         }
     }
 
@@ -2143,3 +2359,5 @@ class PaymentSheet internal constructor(
         }
     }
 }
+
+typealias embeddedTypography = PaymentSheet.Typography
