@@ -59,6 +59,14 @@ android {
         jvmTarget = "11"
     }
 
+    if (JavaVersion.current() < JavaVersion.VERSION_17) {
+        kotlin {
+            jvmToolchain {
+                languageVersion.set(JavaLanguageVersion.of("17"))
+            }
+        }
+    }
+
     packagingOptions {
         resources {
             excludes += ['LICENSE.txt']
