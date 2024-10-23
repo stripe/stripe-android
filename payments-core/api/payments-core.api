@@ -7136,7 +7136,6 @@ public final class com/stripe/android/payments/paymentlauncher/PaymentResult$Fai
 }
 
 public final class com/stripe/android/view/ActivityStarter$Args$Companion {
-	public static final field EXTRA Ljava/lang/String;
 }
 
 public final class com/stripe/android/view/BecsDebitBanks$Bank : android/os/Parcelable {

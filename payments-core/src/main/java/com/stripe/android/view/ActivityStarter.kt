@@ -15,6 +15,7 @@ class ActivityStarter private constructor() {
     interface Args : Parcelable {
         companion object {
             @VisibleForTesting
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             const val EXTRA: String = "extra_activity_args"
         }
     }
