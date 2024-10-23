@@ -572,7 +572,7 @@ class DefaultLinkAccountManagerTest {
                 consumerSessionClientSecret: String,
                 consumerPublishableKey: String?
             ): Result<ConsumerSession> {
-                callCount += 1
+                if (consumerPublishableKey == TestFactory.PUBLISHABLE_KEY) callCount += 1
                 return super.startVerification(consumerSessionClientSecret, consumerPublishableKey)
             }
         }
