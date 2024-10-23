@@ -5,6 +5,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -44,9 +45,9 @@ fun MainContent(
 ) {
     Scaffold(
         topBar = {
-            Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+            Column(modifier = Modifier.fillMaxWidth()) {
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().padding(8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     if (startTitleContent != null) {
@@ -54,12 +55,14 @@ fun MainContent(
                             startTitleContent()
                         }
                     }
+                    Spacer(modifier = Modifier.weight(1f))
                     Text(
                         modifier = Modifier.padding(8.dp),
                         text = title,
                         fontSize = 24.sp,
                         fontWeight = FontWeight.SemiBold,
                     )
+                    Spacer(modifier = Modifier.weight(1f))
                     if (endTitleContent != null) {
                         Box(modifier = Modifier.padding(start = 8.dp)) {
                             endTitleContent()

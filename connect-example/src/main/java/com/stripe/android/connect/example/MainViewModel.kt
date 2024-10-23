@@ -41,7 +41,7 @@ class MainViewModel(
     private fun fetchAccounts() {
         networkingScope.launch {
             try {
-                val response = embeddedComponentService.getAccounts()
+                embeddedComponentService.getAccounts()
                 _state.update {
                     it.copy(isLoading = false, errorMessage = null)
                 }
