@@ -6,7 +6,6 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.GetFinancialConnectionsAcccountsParams
 import com.stripe.android.financialconnections.model.MixedOAuthParams
-import com.stripe.android.financialconnections.model.PaymentMethod
 import com.stripe.android.financialconnections.moreFinancialConnectionsAccountList
 import com.stripe.android.financialconnections.repository.FinancialConnectionsRepository
 
@@ -21,7 +20,7 @@ internal class FakeFinancialConnectionsRepository : FinancialConnectionsReposito
     var postCompleteFinancialConnectionsSessionsResultProvider: () -> FinancialConnectionsSession =
         { TODO() }
 
-    var createPaymentMethod: () -> PaymentMethod = { TODO() }
+    var createPaymentMethod: () -> String = { TODO() }
 
     override suspend fun getFinancialConnectionsAccounts(
         getFinancialConnectionsAcccountsParams: GetFinancialConnectionsAcccountsParams
@@ -48,7 +47,7 @@ internal class FakeFinancialConnectionsRepository : FinancialConnectionsReposito
         consumerSessionClientSecret: String,
         billingAddress: BillingAddress?,
         billingEmailAddress: String,
-    ): PaymentMethod {
+    ): String {
         return createPaymentMethod()
     }
 }

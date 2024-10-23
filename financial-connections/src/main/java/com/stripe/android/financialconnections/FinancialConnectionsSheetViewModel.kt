@@ -5,6 +5,7 @@ import android.app.Application
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.util.Base64
 import androidx.activity.result.ActivityResult
 import androidx.annotation.StringRes
 import androidx.lifecycle.SavedStateHandle
@@ -19,6 +20,7 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheetState.Au
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.FinishWithResult
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenAuthFlowWithUrl
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenNativeAuthFlow
+import com.stripe.android.financialconnections.FinancialConnectionsSheetViewModel.Companion.QUERY_PARAM_PAYMENT_METHOD
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ErrorCode
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Metadata
@@ -185,6 +187,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
             // For Instant Debits, add a query parameter to the hosted auth URL so that payment account creation
             // takes place on the web side of the flow and the payment method ID is returned to the app.
             queryParams.add("return_payment_method=true")
+            queryParams.add("expand_payment_method=true")
             linkMode?.let { queryParams.add("link_mode=${it.value}") }
         }
 
@@ -466,14 +469,14 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     }
 
     private fun onSuccessFromInstantDebits(url: Uri) {
-        runCatching { requireNotNull(url.getQueryParameter(QUERY_PARAM_PAYMENT_METHOD_ID)) }
-            .onSuccess { paymentMethodId ->
+        runCatching { url.getEncodedPaymentMethodOrThrow() }
+            .onSuccess { paymentMethod ->
                 withState {
                     finishWithResult(
                         state = it,
                         result = Completed(
                             instantDebits = InstantDebitsResult(
-                                paymentMethodId = paymentMethodId,
+                                paymentMethod = paymentMethod,
                                 last4 = url.getQueryParameter(QUERY_PARAM_LAST4),
                                 bankName = url.getQueryParameter(QUERY_BANK_NAME)
                             ),
@@ -550,7 +553,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         }
 
         internal const val MAX_ACCOUNTS = 100
-        internal const val QUERY_PARAM_PAYMENT_METHOD_ID = "payment_method_id"
+        internal const val QUERY_PARAM_PAYMENT_METHOD = "payment_method"
         internal const val QUERY_PARAM_LAST4 = "last4"
         internal const val QUERY_BANK_NAME = "bank_name"
     }
@@ -558,4 +561,9 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     override fun updateTopAppBar(state: FinancialConnectionsSheetState): TopAppBarStateUpdate? {
         return null
     }
+}
+
+private fun Uri.getEncodedPaymentMethodOrThrow(): String {
+    val encodedPaymentMethod = requireNotNull(getQueryParameter(QUERY_PARAM_PAYMENT_METHOD))
+    return String(Base64.decode(encodedPaymentMethod, 0), Charsets.UTF_8)
 }

@@ -11,7 +11,6 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.GetFinancialConnectionsAcccountsParams
 import com.stripe.android.financialconnections.model.MixedOAuthParams
-import com.stripe.android.financialconnections.model.PaymentMethod
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
 import com.stripe.android.financialconnections.network.NetworkConstants
 import com.stripe.android.financialconnections.repository.api.ProvideApiRequestOptions
@@ -60,7 +59,7 @@ internal interface FinancialConnectionsRepository {
         consumerSessionClientSecret: String,
         billingAddress: BillingAddress?,
         billingEmailAddress: String,
-    ): PaymentMethod
+    ): String
 }
 
 internal class FinancialConnectionsRepositoryImpl @Inject constructor(
@@ -141,7 +140,7 @@ internal class FinancialConnectionsRepositoryImpl @Inject constructor(
         consumerSessionClientSecret: String,
         billingAddress: BillingAddress?,
         billingEmailAddress: String,
-    ): PaymentMethod {
+    ): String {
         val linkParams = mapOf(
             "type" to "link",
             "link" to mapOf(
@@ -172,10 +171,7 @@ internal class FinancialConnectionsRepositoryImpl @Inject constructor(
             params = linkParams + billingParams + fraudDetectionParams,
         )
 
-        return requestExecutor.execute(
-            request,
-            PaymentMethod.serializer()
-        )
+        return requestExecutor.execute(request)
     }
 
     internal companion object {
