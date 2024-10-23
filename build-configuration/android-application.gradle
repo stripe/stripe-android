@@ -59,9 +59,11 @@ android {
         jvmTarget = "11"
     }
 
-    kotlin {
-        jvmToolchain {
-            languageVersion.set(JavaLanguageVersion.of("21"))
+    if (JavaVersion.current() < JavaVersion.VERSION_17) {
+        kotlin {
+            jvmToolchain {
+                languageVersion.set(JavaLanguageVersion.of("17"))
+            }
         }
     }
 
