@@ -39,6 +39,7 @@ import kotlinx.coroutines.test.setMain
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
@@ -1322,6 +1323,129 @@ class USBankAccountFormViewModelTest {
             ),
             expectedAllowRedisplay = PaymentMethod.AllowRedisplay.ALWAYS,
         )
+
+    @Test
+    fun `Creates correct ElementsSessionContext if attaching defaults to PaymentMethod`() = runTest {
+        val args = createArgsForBillingDetailsCollectionInInstantDebits(
+            collectName = false,
+            collectEmail = true,
+            collectPhone = false,
+            collectAddress = false,
+            attachDefaultsToPaymentMethod = true,
+        )
+
+        val elementsSessionContext = testElementsSessionContextGeneration(viewModelArgs = args)
+
+        assertThat(elementsSessionContext?.billingAddress).isEqualTo(
+            ElementsSessionContext.BillingAddress(
+                name = "Jenny Rose",
+                phone = "+13105551234",
+                address = ElementsSessionContext.BillingAddress.Address(
+                    line1 = "123 Main Street",
+                    line2 = "Apt 456",
+                    city = "San Francisco",
+                    state = "CA",
+                    postalCode = "94111",
+                    country = "US",
+                ),
+            )
+        )
+    }
+
+    @Test
+    fun `Creates correct ElementsSessionContext if not attaching defaults to PaymentMethod`() = runTest {
+        val args = createArgsForBillingDetailsCollectionInInstantDebits(
+            collectName = false,
+            collectEmail = true,
+            collectPhone = false,
+            collectAddress = false,
+            attachDefaultsToPaymentMethod = false,
+        )
+
+        val elementsSessionContext = testElementsSessionContextGeneration(viewModelArgs = args)
+
+        assertThat(elementsSessionContext?.billingAddress).isEqualTo(
+            ElementsSessionContext.BillingAddress(
+                name = null,
+                phone = null,
+                address = null,
+            )
+        )
+    }
+
+    @Test
+    fun `Creates correct ElementsSessionContext if not attaching defaults to PaymentMethod with specific collection`() = runTest {
+        val args = createArgsForBillingDetailsCollectionInInstantDebits(
+            collectName = false,
+            collectEmail = true,
+            collectPhone = true,
+            collectAddress = false,
+            attachDefaultsToPaymentMethod = false,
+        )
+
+        val elementsSessionContext = testElementsSessionContextGeneration(viewModelArgs = args)
+
+        assertThat(elementsSessionContext?.billingAddress).isEqualTo(
+            ElementsSessionContext.BillingAddress(
+                name = null,
+                phone = "+13105551234",
+                address = null,
+            )
+        )
+    }
+
+    private fun testElementsSessionContextGeneration(
+        viewModelArgs: USBankAccountFormViewModel.Args,
+    ): ElementsSessionContext? {
+        val viewModel = createViewModel(viewModelArgs)
+        viewModel.collectBankAccountLauncher = mockCollectBankAccountLauncher
+
+        val screenState = viewModel.currentScreenState.value
+        viewModel.handlePrimaryButtonClick(screenState)
+
+        val argumentCaptor = argumentCaptor<CollectBankAccountConfiguration>()
+
+        verify(mockCollectBankAccountLauncher).presentWithPaymentIntent(
+            publishableKey = any(),
+            stripeAccountId = anyOrNull(),
+            clientSecret = any(),
+            configuration = argumentCaptor.capture(),
+        )
+
+        val instantDebitsConfiguration = argumentCaptor.firstValue as CollectBankAccountConfiguration.InstantDebits
+        return instantDebitsConfiguration.elementsSessionContext
+    }
+
+    private fun createArgsForBillingDetailsCollectionInInstantDebits(
+        collectEmail: Boolean,
+        collectName: Boolean,
+        collectPhone: Boolean,
+        collectAddress: Boolean,
+        attachDefaultsToPaymentMethod: Boolean,
+    ): USBankAccountFormViewModel.Args {
+        val billingDetails = PaymentSheet.BillingDetails(
+            name = CUSTOMER_NAME,
+            email = CUSTOMER_EMAIL,
+            phone = CUSTOMER_PHONE,
+            address = CUSTOMER_ADDRESS,
+        )
+
+        val billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+            name = if (collectName) CollectionMode.Always else CollectionMode.Never,
+            email = if (collectEmail) CollectionMode.Always else CollectionMode.Never,
+            phone = if (collectPhone) CollectionMode.Always else CollectionMode.Never,
+            address = if (collectAddress) AddressCollectionMode.Full else AddressCollectionMode.Never,
+            attachDefaultsToPaymentMethod = attachDefaultsToPaymentMethod,
+        )
+
+        return defaultArgs.copy(
+            instantDebits = true,
+            formArgs = defaultArgs.formArgs.copy(
+                billingDetails = billingDetails,
+                billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+            )
+        )
+    }
 
     private fun testAllowRedisplay(
         showCheckbox: Boolean,
