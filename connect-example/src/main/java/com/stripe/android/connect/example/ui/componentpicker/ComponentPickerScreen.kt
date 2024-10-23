@@ -23,7 +23,6 @@ import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.rememberModalBottomSheetState
@@ -62,18 +61,20 @@ fun ComponentPickerScreen(
             Icon(
                 imageVector = Icons.Default.Settings,
                 contentDescription = stringResource(R.string.settings),
-                modifier = Modifier.clickable {
-                    coroutineScope.launch { settingsSheetState.show() }
-                },
+                modifier = Modifier
+                    .clickable {
+                        coroutineScope.launch { settingsSheetState.show() }
+                    }.padding(8.dp),
             )
         },
         endTitleContent = {
             Icon(
                 imageVector = Icons.Default.MoreVert,
                 contentDescription = stringResource(R.string.customize_appearance),
-                modifier = Modifier.clickable {
-                    coroutineScope.launch { /** open appearance menu **/ }
-                },
+                modifier = Modifier
+                    .clickable {
+                        coroutineScope.launch { /** open appearance menu **/ }
+                    }.padding(8.dp),
             )
         }
     ) {
@@ -110,7 +111,9 @@ private fun LazyItemScope.MenuRowItem(menuItem: MenuItem) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(modifier = Modifier.weight(1f)) {
-            Column(modifier = Modifier.padding(8.dp)) {
+            Column(modifier = Modifier
+                .padding(start = 16.dp, top = 8.dp, bottom = 8.dp, end = 16.dp)
+            ) {
                 Spacer(modifier = Modifier.height(8.dp))
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -169,7 +172,7 @@ private val menuItems = listOf(
 
 @Composable
 @Preview(showBackground = true)
-fun ComponentListPreview() {
+private fun ComponentListPreview() {
     ConnectSdkExampleTheme {
         ComponentList(menuItems)
     }
