@@ -3,9 +3,9 @@ package com.stripe.android.connect.example.ui.settings
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.connect.BuildConfig
+import com.stripe.android.connect.example.data.EmbeddedComponentService
 import com.stripe.android.connect.example.data.FieldOption
 import com.stripe.android.connect.example.data.FutureRequirement
-import com.stripe.android.connect.example.data.Merchant
 import com.stripe.android.connect.example.data.SettingsService
 import com.stripe.android.connect.example.data.OnboardingSettings
 import com.stripe.android.connect.example.data.PresentationSettings
@@ -31,19 +31,23 @@ class SettingsViewModel(
     }
 
     fun onAccountSelected(accountId: String) {
-        _state.update { it.copy(selectedAccountId = accountId) }
+        _state.update { it.copy(selectedAccountId = accountId, saveEnabled = true) }
     }
 
     fun onServerUrlChanged(url: String) {
-        _state.update { it.copy(serverUrl = url) }
+        _state.update { it.copy(serverUrl = url, saveEnabled = true) }
+    }
+
+    fun onResetServerUrlClicked() {
+        onServerUrlChanged(EmbeddedComponentService.DEFAULT_SERVER_BASE_URL)
     }
 
     fun onOnboardingSettingsChanged(settings: OnboardingSettings) {
-        _state.update { it.copy(onboardingSettings = settings) }
+        _state.update { it.copy(onboardingSettings = settings, saveEnabled = true) }
     }
 
     fun onPresentationSettingsChanged(settings: PresentationSettings) {
-        _state.update { it.copy(presentationSettings = settings) }
+        _state.update { it.copy(presentationSettings = settings, saveEnabled = true) }
     }
 
     fun saveSettings() {
@@ -55,6 +59,8 @@ class SettingsViewModel(
                 settingsService.setPresentationSettings(presentationSettings)
             }
             logger.info("Settings saved")
+
+            _state.update { it.copy(saveEnabled = false) }
         }
     }
 
@@ -66,7 +72,8 @@ class SettingsViewModel(
                 serverUrl = settingsService.getSelectedServerBaseURL(),
                 selectedAccountId = settingsService.getSelectedMerchant(),
                 onboardingSettings = settingsService.getOnboardingSettings(),
-                presentationSettings = settingsService.getPresentationSettings()
+                presentationSettings = settingsService.getPresentationSettings(),
+                saveEnabled = false,
             )
         }
     }
@@ -92,6 +99,9 @@ class SettingsViewModel(
             embedInNavBar = true
         )
     ) {
+        val serverUrlResetEnabled: Boolean
+            get() = serverUrl != EmbeddedComponentService.DEFAULT_SERVER_BASE_URL
+
         sealed interface DemoMerchant {
             val merchantId: String?
 

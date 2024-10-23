@@ -55,7 +55,7 @@ class MainActivity : ComponentActivity() {
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center,
             ) {
-                Text(stringResource(R.string.warming_up_app))
+                Text(stringResource(R.string.warming_up_the_server))
             }
         }
     }

@@ -27,6 +27,6 @@
     <string name="reset_to_default">Reset to default</string>
     <string name="failed_to_start_app">Failed to start app.</string>
     <string name="reload">Reload</string>
-    <string name="warming_up_app">"Warming up server. This may take a minute…"</string>
+    <string name="warming_up_the_server">Warming up the server… This may take several seconds</string>
     <string name="app_settings">App Settings</string>
 </resources>
