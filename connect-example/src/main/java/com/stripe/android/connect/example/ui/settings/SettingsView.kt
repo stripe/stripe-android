@@ -48,8 +48,6 @@ fun SettingsView(
     val state by viewModel.state.collectAsState()
     val navController = rememberNavController()
 
-    val isCustomEndpointValid = state.serverUrl.isNotEmpty() // You might want to implement a proper URL validation
-
     val isUsingCustomMerchant = state.selectedAccount?.let { selectedAccount ->
         state.accounts?.contains(selectedAccount) != true
     } ?: true
