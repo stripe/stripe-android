@@ -18,6 +18,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Divider
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.Text
@@ -55,28 +56,32 @@ fun ComponentPickerScreen(
         skipHalfExpanded = true,
     )
     val coroutineScope = rememberCoroutineScope()
+    fun toggleSettingsSheet() {
+        coroutineScope.launch {
+            if (!settingsSheetState.isVisible) {
+                settingsSheetState.show()
+            } else {
+                settingsSheetState.hide()
+            }
+        }
+    }
+
     MainContent(
         title = stringResource(R.string.connect_sdk_example),
-        startTitleContent = {
-            Icon(
-                imageVector = Icons.Default.Settings,
-                contentDescription = stringResource(R.string.settings),
-                modifier = Modifier
-                    .clickable {
-                        coroutineScope.launch { settingsSheetState.show() }
-                    }.padding(8.dp),
-            )
+        actions = {
+            IconButton(onClick = { toggleSettingsSheet() }) {
+                Icon(
+                    imageVector = Icons.Default.Settings,
+                    contentDescription = stringResource(R.string.settings),
+                )
+            }
+            IconButton(onClick = { toggleSettingsSheet() }) {
+                Icon(
+                    imageVector = Icons.Default.MoreVert,
+                    contentDescription = stringResource(R.string.customize_appearance),
+                )
+            }
         },
-        endTitleContent = {
-            Icon(
-                imageVector = Icons.Default.MoreVert,
-                contentDescription = stringResource(R.string.customize_appearance),
-                modifier = Modifier
-                    .clickable {
-                        coroutineScope.launch { /** open appearance menu **/ }
-                    }.padding(8.dp),
-            )
-        }
     ) {
         ModalBottomSheetLayout(
             modifier = Modifier.fillMaxSize(),
