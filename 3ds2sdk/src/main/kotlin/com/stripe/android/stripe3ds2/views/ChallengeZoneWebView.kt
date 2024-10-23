@@ -8,7 +8,7 @@ import androidx.annotation.VisibleForTesting
 import com.stripe.android.stripe3ds2.databinding.StripeChallengeZoneWebViewBinding
 import java.util.regex.Pattern
 
-internal class ChallengeZoneWebView @JvmOverloads constructor(
+class ChallengeZoneWebView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0

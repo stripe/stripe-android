@@ -12,7 +12,7 @@ import com.google.android.material.textfield.TextInputLayout
 import com.stripe.android.stripe3ds2.databinding.StripeChallengeZoneTextViewBinding
 import com.stripe.android.stripe3ds2.init.ui.TextBoxCustomization
 
-internal class ChallengeZoneTextView @JvmOverloads constructor(
+class ChallengeZoneTextView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
