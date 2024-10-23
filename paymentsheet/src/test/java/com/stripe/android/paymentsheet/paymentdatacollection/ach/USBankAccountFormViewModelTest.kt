@@ -795,7 +795,8 @@ class USBankAccountFormViewModelTest {
     fun `Launches collect bank account for deferred payment screen when deferred payment`() = runTest {
         val viewModel = createViewModel(
             defaultArgs.copy(
-                clientSecret = null
+                clientSecret = null,
+                linkMode = LinkMode.LinkPaymentMethod,
             )
         )
 
@@ -806,9 +807,7 @@ class USBankAccountFormViewModelTest {
 
         assertThat(
             currentScreenState
-        ).isInstanceOf<
-            USBankAccountFormScreenState.BillingDetailsCollection
-            >()
+        ).isInstanceOf<USBankAccountFormScreenState.BillingDetailsCollection>()
 
         viewModel.handlePrimaryButtonClick(
             currentScreenState as USBankAccountFormScreenState.BillingDetailsCollection
@@ -817,7 +816,18 @@ class USBankAccountFormViewModelTest {
         verify(mockCollectBankAccountLauncher).presentWithDeferredPayment(
             publishableKey = any(),
             stripeAccountId = any(),
-            configuration = any(),
+            configuration = eq(
+                CollectBankAccountConfiguration.USBankAccountInternal(
+                    name = "Jenny Rose",
+                    email = "email@email.com",
+                    elementsSessionContext = ElementsSessionContext(
+                        initializationMode = ElementsSessionContext.InitializationMode.DeferredIntent,
+                        amount = 5099,
+                        currency = "usd",
+                        linkMode = LinkMode.LinkPaymentMethod,
+                    ),
+                )
+            ),
             elementsSessionId = any(),
             customerId = anyOrNull(),
             onBehalfOf = any(),
@@ -831,7 +841,11 @@ class USBankAccountFormViewModelTest {
         val viewModel = createViewModel(
             defaultArgs.copy(
                 clientSecret = null,
-                isPaymentFlow = false
+                isPaymentFlow = false,
+                linkMode = LinkMode.LinkPaymentMethod,
+                formArgs = defaultArgs.formArgs.copy(
+                    amount = null,
+                )
             )
         )
 
@@ -842,9 +856,7 @@ class USBankAccountFormViewModelTest {
 
         assertThat(
             currentScreenState
-        ).isInstanceOf<
-            USBankAccountFormScreenState.BillingDetailsCollection
-            >()
+        ).isInstanceOf<USBankAccountFormScreenState.BillingDetailsCollection>()
 
         viewModel.handlePrimaryButtonClick(
             currentScreenState as USBankAccountFormScreenState.BillingDetailsCollection
@@ -853,7 +865,18 @@ class USBankAccountFormViewModelTest {
         verify(mockCollectBankAccountLauncher).presentWithDeferredSetup(
             publishableKey = any(),
             stripeAccountId = any(),
-            configuration = any(),
+            configuration = eq(
+                CollectBankAccountConfiguration.USBankAccountInternal(
+                    name = "Jenny Rose",
+                    email = "email@email.com",
+                    elementsSessionContext = ElementsSessionContext(
+                        initializationMode = ElementsSessionContext.InitializationMode.DeferredIntent,
+                        amount = null,
+                        currency = null,
+                        linkMode = LinkMode.LinkPaymentMethod,
+                    ),
+                )
+            ),
             elementsSessionId = any(),
             customerId = anyOrNull(),
             onBehalfOf = any(),
@@ -1050,9 +1073,15 @@ class USBankAccountFormViewModelTest {
             stripeAccountId = anyOrNull(),
             clientSecret = any(),
             configuration = eq(
-                CollectBankAccountConfiguration.USBankAccount(
+                CollectBankAccountConfiguration.USBankAccountInternal(
                     name = "Some Name",
                     email = "email@email.com",
+                    elementsSessionContext = ElementsSessionContext(
+                        initializationMode = ElementsSessionContext.InitializationMode.PaymentIntent("id_12345"),
+                        amount = 5099,
+                        currency = "usd",
+                        linkMode = null,
+                    ),
                 )
             ),
         )

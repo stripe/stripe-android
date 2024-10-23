@@ -498,6 +498,21 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     }
 
     private fun createInstantDebitsConfiguration(): CollectBankAccountConfiguration.InstantDebits {
+        return CollectBankAccountConfiguration.InstantDebits(
+            email = email.value,
+            elementsSessionContext = makeElementsSessionContext(),
+        )
+    }
+
+    private fun createUSBankAccountConfiguration(): CollectBankAccountConfiguration.USBankAccountInternal {
+        return CollectBankAccountConfiguration.USBankAccountInternal(
+            name = name.value,
+            email = email.value,
+            elementsSessionContext = makeElementsSessionContext(),
+        )
+    }
+
+    private fun makeElementsSessionContext(): ElementsSessionContext {
         val initializationMode = if (args.clientSecret == null) {
             ElementsSessionContext.InitializationMode.DeferredIntent
         } else if (args.isPaymentFlow) {
@@ -506,34 +521,26 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             ElementsSessionContext.InitializationMode.SetupIntent(args.stripeIntentId!!)
         }
 
-        return CollectBankAccountConfiguration.InstantDebits(
-            email = email.value,
-            elementsSessionContext = ElementsSessionContext(
-                initializationMode = initializationMode,
-                amount = args.formArgs.amount?.value,
-                currency = args.formArgs.amount?.currencyCode,
-                linkMode = args.linkMode,
-            ),
-        )
-    }
-
-    private fun createUSBankAccountConfiguration(): CollectBankAccountConfiguration.USBankAccount {
-        return CollectBankAccountConfiguration.USBankAccount(
-            name = name.value,
-            email = email.value,
+        return ElementsSessionContext(
+            initializationMode = initializationMode,
+            amount = args.formArgs.amount?.value,
+            currency = args.formArgs.amount?.currencyCode,
+            linkMode = args.linkMode,
         )
     }
 
     private fun collectBankAccountForDeferredIntent() {
         val elementsSessionId = args.stripeIntentId ?: return
+        val elementsSessionContext = makeElementsSessionContext()
 
         if (args.isPaymentFlow) {
             collectBankAccountLauncher?.presentWithDeferredPayment(
                 publishableKey = lazyPaymentConfig.get().publishableKey,
                 stripeAccountId = lazyPaymentConfig.get().stripeAccountId,
-                configuration = CollectBankAccountConfiguration.USBankAccount(
-                    name.value,
-                    email.value
+                configuration = CollectBankAccountConfiguration.USBankAccountInternal(
+                    name = name.value,
+                    email = email.value,
+                    elementsSessionContext = elementsSessionContext,
                 ),
                 elementsSessionId = elementsSessionId,
                 customerId = null,
@@ -545,9 +552,10 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             collectBankAccountLauncher?.presentWithDeferredSetup(
                 publishableKey = lazyPaymentConfig.get().publishableKey,
                 stripeAccountId = lazyPaymentConfig.get().stripeAccountId,
-                configuration = CollectBankAccountConfiguration.USBankAccount(
-                    name.value,
-                    email.value
+                configuration = CollectBankAccountConfiguration.USBankAccountInternal(
+                    name = name.value,
+                    email = email.value,
+                    elementsSessionContext = elementsSessionContext,
                 ),
                 elementsSessionId = elementsSessionId,
                 customerId = null,
