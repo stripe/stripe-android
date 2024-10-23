@@ -7,12 +7,7 @@ import com.github.kittinunf.fuel.core.Request
 import com.github.kittinunf.fuel.core.Response
 import com.github.kittinunf.fuel.core.awaitResult
 import com.github.kittinunf.result.Result
-import com.stripe.android.connect.FetchClientSecretCallback
-import com.stripe.android.connect.PrivateBetaConnectSDK
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.json.Json
 
@@ -40,7 +35,8 @@ class EmbeddedComponentService private constructor() {
      * of available merchants. Throws a [FuelError] exception on network issues and other errors.
      */
     suspend fun getAccounts(): GetAccountsResponse {
-        return fuel.get(exampleBackendBaseUrl + "app_info")
+        delay(3_000)
+        return fuel.get(exampleBackendBaseUrl + "app_info_simulate_404")
             .awaitModel(GetAccountsResponse.serializer())
             .get()
     }

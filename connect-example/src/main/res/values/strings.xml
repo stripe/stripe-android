@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Connect Example</string>
+
+    <string name="beta_all_caps">BETA</string>
+
     <string name="account_onboarding">Account Onboarding</string>
     <string name="account_onboarding_menu_subtitle">Show a localized onboarding form that validates data</string>
     <string name="payouts">Payouts</string>
@@ -21,4 +24,7 @@
     <string name="server_url_placeholder">https://example.com</string>
     <string name="invalid_url">Please enter a valid URL</string>
     <string name="reset_to_default">Reset to default</string>
+    <string name="failed_to_start_app">Failed to start app.</string>
+    <string name="reload">Reload</string>
+    <string name="app_settings">App Settings</string>
 </resources>
