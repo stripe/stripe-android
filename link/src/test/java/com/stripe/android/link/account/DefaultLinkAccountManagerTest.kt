@@ -58,11 +58,8 @@ class DefaultLinkAccountManagerTest {
 
     @Test
     fun `When customerEmail is set and network call fails then account status is Error`() = runSuspendTest {
-        val linkRepository = object : FakeLinkRepository() {
-            override suspend fun lookupConsumer(email: String): Result<ConsumerSessionLookup> {
-                return Result.failure(Exception())
-            }
-        }
+        val linkRepository = FakeLinkRepository()
+        linkRepository.lookupConsumerResult = Result.failure(Exception())
 
         assertThat(
             accountManager(
@@ -74,11 +71,7 @@ class DefaultLinkAccountManagerTest {
 
     @Test
     fun `When ConsumerSession contains consumerPublishableKey then key is updated`() = runTest {
-        val linkRepository = object : FakeLinkRepository() {
-            override suspend fun lookupConsumer(email: String): Result<ConsumerSessionLookup> {
-                return Result.success(TestFactory.CONSUMER_SESSION_LOOKUP)
-            }
-        }
+        val linkRepository = FakeLinkRepository()
         val accountManager = accountManager(linkRepository = linkRepository)
 
         assertThat(accountManager.consumerPublishableKey).isNull()
