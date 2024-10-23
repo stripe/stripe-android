@@ -9,7 +9,8 @@
     <string name="payouts">Payouts</string>
     <string name="payouts_menu_subtitle">Show payout information and allow your users to perform payouts</string>
     <string name="connect_sdk_example">Connect SDK Example</string>
-    <string name="settings_title">Settings</string>
+    <string name="customize_appearance">Customize Appearance</string>
+    <string name="settings">Settings</string>
     <string name="cancel">Cancel</string>
     <string name="selected">Selected</string>
     <string name="save">Save</string>
@@ -26,5 +27,6 @@
     <string name="reset_to_default">Reset to default</string>
     <string name="failed_to_start_app">Failed to start app.</string>
     <string name="reload">Reload</string>
+    <string name="warming_up_app">"Warming up server. This may take a minute…"</string>
     <string name="app_settings">App Settings</string>
 </resources>

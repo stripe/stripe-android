@@ -40,7 +40,9 @@ class MainActivity : ComponentActivity() {
                         errorMessage = state.errorMessage,
                         onReloadRequested = viewModel::reload,
                     )
-                    else -> ComponentPickerScreen()
+                    else -> ComponentPickerScreen(
+                        onReloadRequested = viewModel::reload,
+                    )
                 }
             }
         }
@@ -53,7 +55,7 @@ class MainActivity : ComponentActivity() {
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center,
             ) {
-                Text("Warming up server....")
+                Text(stringResource(R.string.warming_up_app))
             }
         }
     }
@@ -64,7 +66,9 @@ class MainActivity : ComponentActivity() {
         errorMessage: String? = null,
         onReloadRequested: () -> Unit,
     ) {
-        MainContent(title = stringResource(R.string.connect_sdk_example)) {
+        MainContent(
+            title = stringResource(R.string.connect_sdk_example),
+        ) {
             val settingsSheetState = rememberModalBottomSheetState(
                 initialValue = ModalBottomSheetValue.Hidden,
                 skipHalfExpanded = true,
