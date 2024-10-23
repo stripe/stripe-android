@@ -77,12 +77,6 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
-
-    kotlin {
-        jvmToolchain {
-            languageVersion.set(JavaLanguageVersion.of("21"))
-        }
-    }
 }
 
 if (project.hasProperty("enable_dokka") && project.enable_dokka) {
