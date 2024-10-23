@@ -169,18 +169,6 @@ internal class DefaultLinkAccountManager @Inject constructor(
                     consumerSession = consumerSessionSignup.consumerSession,
                     publishableKey = consumerSessionSignup.publishableKey,
                 )
-            }.mapCatching { account ->
-                if (account.isVerified) {
-                    account
-                } else {
-                    setAccount(
-                        consumerSession = linkRepository.startVerification(
-                            consumerSessionClientSecret = account.clientSecret,
-                            consumerPublishableKey = consumerPublishableKey,
-                        ).getOrThrow(),
-                        publishableKey = consumerPublishableKey
-                    )
-                }
             }
 
     override suspend fun createCardPaymentDetails(
@@ -246,11 +234,10 @@ internal class DefaultLinkAccountManager @Inject constructor(
     }
 
     override suspend fun startVerification(): Result<LinkAccount> {
-        return linkRepository.startVerification(linkAccount.value!!.clientSecret, consumerPublishableKey)
-            .also {
-                if (it.isFailure) {
-                    linkEventsReporter.on2FAStartFailure()
-                }
+        val clientSecret = linkAccount.value?.clientSecret ?: return Result.failure(Throwable("no link account found"))
+        return linkRepository.startVerification(clientSecret, consumerPublishableKey)
+            .onFailure {
+                linkEventsReporter.on2FAStartFailure()
             }.map { consumerSession ->
                 setAccount(consumerSession, null)
             }
