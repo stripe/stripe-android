@@ -1,8 +1,10 @@
 package com.stripe.android.link.ui.signup
 
 import androidx.activity.ComponentActivity
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.hasTextExactly
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -24,7 +26,7 @@ class SignUpComposeTest {
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
     @Test
-    fun status_inputting_email_shows_only_email_field() {
+    fun `status inputting email shows only email field`() {
         setContent(SignUpState.InputtingPrimaryField)
 
         onEmailField().assertExists()
@@ -36,7 +38,7 @@ class SignUpComposeTest {
     }
 
     @Test
-    fun status_verifying_email_is_disabled() {
+    fun `status verifying email is disabled`() {
         setContent(SignUpState.VerifyingEmail)
 
         onEmailField().assertExists()
@@ -48,7 +50,7 @@ class SignUpComposeTest {
     }
 
     @Test
-    fun status_inputting_phone_shows_all_fields_if_name_required() {
+    fun `status inputting phone shows all fields if name required`() {
         setContent(
             signUpState = SignUpState.InputtingRemainingFields,
             requiresNameCollection = true
@@ -65,7 +67,7 @@ class SignUpComposeTest {
     }
 
     @Test
-    fun status_inputting_phone_shows_only_phone_field_if_name_not_required() {
+    fun `status inputting phone shows only phone field if name not required`() {
         setContent(SignUpState.InputtingRemainingFields)
 
         onEmailField().assertExists()
@@ -78,14 +80,15 @@ class SignUpComposeTest {
     }
 
     @Test
-    fun header_message_is_correct() {
+    fun `header message is correct`() {
         setContent(SignUpState.InputtingPrimaryField)
 
-        composeTestRule.onNodeWithText("Secure 1\u2060-\u2060click checkout").assertExists()
+        composeTestRule.onNodeWithTag(SIGN_UP_HEADER_TAG)
+            .assert(hasTextExactly("Secure 1\u2060-\u2060click checkout"))
     }
 
     @Test
-    fun signup_button_is_disabled_when_not_ready_to_sign_up() {
+    fun `signup button is disabled when not ready to sign up`() {
         setContent(SignUpState.InputtingRemainingFields, isReadyToSignUp = false)
 
         onSignUpButton().assertExists()
@@ -93,7 +96,7 @@ class SignUpComposeTest {
     }
 
     @Test
-    fun signup_button_is_enabled_when_ready_to_sign_up() {
+    fun `signup button is enabled when ready to sign up`() {
         setContent(SignUpState.InputtingRemainingFields, isReadyToSignUp = true)
 
         onSignUpButton().assertExists()
@@ -101,14 +104,14 @@ class SignUpComposeTest {
     }
 
     @Test
-    fun when_error_message_not_null_in_state_InputtingPhoneOrName_then_it_is_visible() {
+    fun `when error message not null in state InputtingPhoneOrName then it is visible`() {
         val errorMessage = "Error message"
         setContent(SignUpState.InputtingRemainingFields, errorMessage = errorMessage.resolvableString)
         composeTestRule.onNodeWithText(errorMessage).assertExists()
     }
 
     @Test
-    fun when_error_message_not_null_in_state_InputtingEmail_then_it_is_visible() {
+    fun `when error message not null in state InputtingEmail then it is visible`() {
         val errorMessage = "Error message"
         setContent(SignUpState.InputtingPrimaryField, errorMessage = errorMessage.resolvableString)
         composeTestRule.onNodeWithText(errorMessage).assertExists()

@@ -162,7 +162,7 @@ internal class SignUpViewModelTest {
         viewModel.performValidSignup()
 
         assertThat(viewModel.contentState.errorMessage).isEqualTo(errorMessage.resolvableString)
-        assertThat(logger.errorLogs.last()).isEqualTo("SignUpViewModel Error: " to exception)
+        assertThat(logger.errorLogs).isEqualTo(listOf("SignUpViewModel Error: " to exception))
     }
 
     @Test

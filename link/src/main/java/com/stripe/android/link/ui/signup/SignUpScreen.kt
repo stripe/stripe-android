@@ -15,12 +15,12 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
@@ -30,7 +30,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.stripe.android.link.R
-import com.stripe.android.link.linkViewModel
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.StripeThemeForLink
 import com.stripe.android.link.theme.linkColors
@@ -49,12 +48,9 @@ import com.stripe.android.uicore.utils.collectAsState
 
 @Composable
 internal fun SignUpScreen(
+    viewModel: SignUpViewModel,
     navController: NavHostController
 ) {
-    val viewModel: SignUpViewModel = linkViewModel {
-        SignUpViewModel.factory(it)
-    }
-
     DisposableEffect(Unit) {
         viewModel.navController = navController
 
@@ -73,7 +69,6 @@ internal fun SignUpScreen(
     )
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 internal fun SignUpBody(
     emailController: TextFieldController,
@@ -91,6 +86,7 @@ internal fun SignUpBody(
         Text(
             text = stringResource(R.string.stripe_sign_up_header),
             modifier = Modifier
+                .testTag(SIGN_UP_HEADER_TAG)
                 .padding(vertical = 4.dp),
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.h2,
@@ -118,7 +114,8 @@ internal fun SignUpBody(
         ) {
             ErrorText(
                 text = signUpScreenState.errorMessage?.resolve(LocalContext.current).orEmpty(),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
             )
         }
         AnimatedVisibility(visible = signUpScreenState.signUpState == SignUpState.InputtingRemainingFields) {
@@ -176,7 +173,6 @@ private fun EmailCollectionSection(
     }
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun SecondaryFields(
     phoneNumberController: PhoneNumberController,
@@ -218,7 +214,9 @@ private fun SecondaryFields(
         AnimatedVisibility(visible = signUpScreenState.errorMessage != null) {
             ErrorText(
                 text = signUpScreenState.errorMessage?.resolve(LocalContext.current).orEmpty(),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .testTag(SIGN_UP_ERROR_TAG)
+                    .fillMaxWidth()
             )
         }
         PrimaryButton(
@@ -235,6 +233,9 @@ private fun SecondaryFields(
         )
     }
 }
+
+internal const val SIGN_UP_HEADER_TAG = "signUpHeaderTag"
+internal const val SIGN_UP_ERROR_TAG = "signUpErrorTag"
 
 @Preview
 @Composable
