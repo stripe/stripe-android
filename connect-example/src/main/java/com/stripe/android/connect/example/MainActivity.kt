@@ -38,7 +38,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.stripe.android.connect.example.ui.features.accountonboarding.AccountOnboardingExampleActivity
 import com.stripe.android.connect.example.ui.features.payouts.PayoutsExampleActivity
-import com.stripe.android.connect.example.R
 
 class MainActivity : ComponentActivity() {
 
