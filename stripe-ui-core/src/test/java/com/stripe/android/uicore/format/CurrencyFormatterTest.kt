@@ -154,7 +154,7 @@ class CurrencyFormatterTest {
                 Locale.FRANCE
             )
         )
-            .isEqualTo("1 234,12 \$US")
+            .isEqualTo("1 234,12 \$US")
     }
 
     @Test
