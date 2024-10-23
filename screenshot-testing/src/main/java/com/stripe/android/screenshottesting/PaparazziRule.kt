@@ -48,6 +48,8 @@ class PaparazziRule(
             "Description in PaparazziRule can't be null"
         }
 
+        var errorResult: Throwable? = null
+
         for (testCase in testCases) {
             testCase.initialize()
 
@@ -85,12 +87,21 @@ class PaparazziRule(
                     },
                     description = newDescription,
                 ).evaluate()
+            } catch (t: Throwable) {
+                if (errorResult == null) {
+                    errorResult = t
+                }
             } finally {
                 testCase.reset()
             }
         }
 
         dispose()
+
+        if (errorResult != null) {
+            // We want to generate all scenarios. So don't stop running the scenarios until all are complete.
+            throw errorResult
+        }
     }
 
     private fun createPaparazziDeviceConfig(): DeviceConfig {
