@@ -10,6 +10,8 @@ import androidx.annotation.VisibleForTesting
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class ActivityStarter private constructor() {
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     interface Args : Parcelable {
         companion object {
             @VisibleForTesting
@@ -17,6 +19,7 @@ class ActivityStarter private constructor() {
         }
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     interface Result : Parcelable {
         fun toBundle(): Bundle
 

@@ -7135,19 +7135,8 @@ public final class com/stripe/android/payments/paymentlauncher/PaymentResult$Fai
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public abstract interface class com/stripe/android/view/ActivityStarter$Args : android/os/Parcelable {
-	public static final field Companion Lcom/stripe/android/view/ActivityStarter$Args$Companion;
-	public static final field EXTRA Ljava/lang/String;
-}
-
 public final class com/stripe/android/view/ActivityStarter$Args$Companion {
 	public static final field EXTRA Ljava/lang/String;
-}
-
-public abstract interface class com/stripe/android/view/ActivityStarter$Result : android/os/Parcelable {
-	public static final field Companion Lcom/stripe/android/view/ActivityStarter$Result$Companion;
-	public static final field EXTRA Ljava/lang/String;
-	public abstract fun toBundle ()Landroid/os/Bundle;
 }
 
 public final class com/stripe/android/view/ActivityStarter$Result$Companion {
