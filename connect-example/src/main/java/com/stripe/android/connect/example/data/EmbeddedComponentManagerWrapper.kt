@@ -10,12 +10,12 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 
 @OptIn(PrivateBetaConnectSDK::class)
-class EmbeddedComponentManagerWrapper private constructor(private val application: Application) {
+class EmbeddedComponentManagerWrapper private constructor() {
 
     private val ioScope: CoroutineScope by lazy { CoroutineScope(Dispatchers.IO) }
 
     private val embeddedComponentService: EmbeddedComponentService by lazy { EmbeddedComponentService.getInstance() }
-    private val settingsService: SettingsService by lazy { SettingsService(application.baseContext) }
+    private val settingsService: SettingsService by lazy { SettingsService.getInstance() }
 
     init {
         reinitManagerOnPublishableKeyChange()
@@ -61,8 +61,8 @@ class EmbeddedComponentManagerWrapper private constructor(private val applicatio
         /**
          * Initializes the wrapper. This must be done in Application.onCreate().
          */
-        fun init(application: Application): EmbeddedComponentManagerWrapper {
-            return EmbeddedComponentManagerWrapper(application).also {
+        fun init(): EmbeddedComponentManagerWrapper {
+            return EmbeddedComponentManagerWrapper().also {
                 instance = it
             }
         }

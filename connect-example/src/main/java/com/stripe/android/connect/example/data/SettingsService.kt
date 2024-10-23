@@ -1,5 +1,6 @@
 package com.stripe.android.connect.example.data
 
+import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
@@ -7,7 +8,7 @@ import com.stripe.android.connect.example.data.EmbeddedComponentService.Companio
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-class SettingsService(context: Context) {
+class SettingsService private constructor(context: Context) {
 
     private val sharedPreferences: SharedPreferences by lazy {
         context.getSharedPreferences("SettingsService", Context.MODE_PRIVATE)
@@ -100,6 +101,19 @@ class SettingsService(context: Context) {
         private const val ONBOARDING_SKIP_TERMS_OF_SERVICE = "OnboardingSkipTermsOfService"
         private const val ONBOARDING_FIELD_OPTION = "OnboardingFieldOption"
         private const val ONBOARDING_FUTURE_REQUIREMENTS = "OnboardingFutureRequirements"
+
+        // Instance
+        private var instance: SettingsService? = null
+
+        fun init(application: Application): SettingsService {
+            return SettingsService(application).also {
+                instance = it
+            }
+        }
+
+        fun getInstance(): SettingsService {
+            return instance ?: throw IllegalStateException("SettingsService is not initialized")
+        }
     }
 }
 

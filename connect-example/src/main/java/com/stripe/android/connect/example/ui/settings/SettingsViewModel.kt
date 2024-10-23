@@ -2,6 +2,7 @@ package com.stripe.android.connect.example.ui.settings
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.kittinunf.fuel.core.FuelError
 import com.stripe.android.connect.BuildConfig
@@ -23,10 +24,9 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class SettingsViewModel(
-    application: Application,
     private val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG),
-    private val settingsService: SettingsService = SettingsService(application.baseContext),
-) : AndroidViewModel(application) {
+    private val settingsService: SettingsService = SettingsService.getInstance(),
+) : ViewModel() {
 
     private val _state = MutableStateFlow(
         SettingsState(serverUrl = settingsService.getSelectedServerBaseURL())
