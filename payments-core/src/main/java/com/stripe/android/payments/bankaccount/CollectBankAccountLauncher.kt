@@ -11,6 +11,7 @@ import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountCont
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
 import com.stripe.android.payments.bankaccount.navigation.toUSBankAccountResult
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -131,22 +132,27 @@ interface CollectBankAccountLauncher {
 sealed interface CollectBankAccountConfiguration : Parcelable {
 
     @Parcelize
-    data class USBankAccount(
-        val name: String,
-        val email: String?
-    ) : Parcelable, CollectBankAccountConfiguration
-
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    @Parcelize
-    data class USBankAccountInternal(
+    @Poko
+    class USBankAccount @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) constructor(
         val name: String,
         val email: String?,
-        val elementsSessionContext: ElementsSessionContext?,
-    ) : Parcelable, CollectBankAccountConfiguration
+        internal val elementsSessionContext: ElementsSessionContext?,
+    ) : Parcelable, CollectBankAccountConfiguration {
+
+        constructor(
+            name: String,
+            email: String?,
+        ) : this(
+            name = name,
+            email = email,
+            elementsSessionContext = null,
+        )
+    }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
-    data class InstantDebits(
+    @Poko
+    class InstantDebits(
         val email: String?,
         val elementsSessionContext: ElementsSessionContext?,
     ) : Parcelable, CollectBankAccountConfiguration
