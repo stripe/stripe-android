@@ -7,6 +7,7 @@ on:
   push:
     branches:
       - master
+      - carlosmuvi/BANKCON-15935/distribute-financial-connections-android-on-master
 
 jobs:
   upload-identity:
