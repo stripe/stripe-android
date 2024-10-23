@@ -26,21 +26,19 @@ class SettingsViewModel(
     application: Application,
     private val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG),
     private val settingsService: SettingsService = SettingsService(application.baseContext),
-    private val embeddedComponentService: EmbeddedComponentService = EmbeddedComponentService(
-        exampleBackendBaseUrl = settingsService.getSelectedServerBaseURL()
-    ),
 ) : AndroidViewModel(application) {
 
-    private val _state = MutableStateFlow(SettingsState(settingsService.getSelectedServerBaseURL()))
+    private val _state = MutableStateFlow(
+        SettingsState(serverUrl = settingsService.getSelectedServerBaseURL())
+    )
     val state = _state.asStateFlow()
 
     init {
-        getAccounts()
         loadAppSettings()
     }
 
-    fun onAccountSelected(account: Merchant) {
-        _state.update { it.copy(selectedAccount = account) }
+    fun onAccountSelected(accountId: String) {
+        _state.update { it.copy(selectedAccountId = accountId) }
     }
 
     fun onServerUrlChanged(url: String) {
@@ -59,7 +57,7 @@ class SettingsViewModel(
         viewModelScope.launch {
             with(state.value) {
                 settingsService.setSelectedServerBaseURL(serverUrl)
-                selectedAccount?.let { settingsService.setSelectedMerchant(it) }
+                if (selectedAccountId != null) settingsService.setSelectedMerchant(selectedAccountId)
                 settingsService.setOnboardingSettings(onboardingSettings)
                 settingsService.setPresentationSettings(presentationSettings)
             }
@@ -67,47 +65,11 @@ class SettingsViewModel(
         }
     }
 
-    @OptIn(PrivateBetaConnectSDK::class)
-    private fun fetchClientSecret(resultCallback: ClientSecretResultCallback) {
-        val account = state.value.selectedAccount ?: return resultCallback.onResult(null)
-        viewModelScope.launch {
-            try {
-                val clientSecret = embeddedComponentService.fetchClientSecret(account.merchantId)
-                resultCallback.onResult(clientSecret)
-            } catch (e: FuelError) {
-                resultCallback.onResult(null)
-                logger.error("Error fetching client secret: $e")
-            }
-        }
-    }
-
-    @OptIn(PrivateBetaConnectSDK::class)
-    private fun getAccounts() {
-        viewModelScope.launch {
-            try {
-                val response = embeddedComponentService.getAccounts()
-                _state.update {
-                    it.copy(accounts = response.availableMerchants)
-                }
-                EmbeddedComponentManager.init(
-                    configuration = EmbeddedComponentManager.Configuration(
-                        publishableKey = response.publishableKey
-                    ),
-                    fetchClientSecret = this@SettingsViewModel::fetchClientSecret
-                )
-            } catch (e: FuelError) {
-                logger.error("Error getting accounts: $e")
-            }
-        }
-    }
-
     private fun loadAppSettings() {
         _state.update {
             it.copy(
                 serverUrl = settingsService.getSelectedServerBaseURL(),
-                selectedAccount = settingsService.getSelectedMerchant()?.let { merchantId ->
-                    Merchant(merchantId, "")
-                },
+                selectedAccountId = settingsService.getSelectedMerchant(),
                 onboardingSettings = settingsService.getOnboardingSettings(),
                 presentationSettings = settingsService.getPresentationSettings()
             )
@@ -116,7 +78,7 @@ class SettingsViewModel(
 
     data class SettingsState(
         val serverUrl: String,
-        val selectedAccount: Merchant? = null,
+        val selectedAccountId: String? = null,
         val accounts: List<Merchant>? = null,
         val onboardingSettings: OnboardingSettings = OnboardingSettings(
             fullTermsOfServiceString = null,

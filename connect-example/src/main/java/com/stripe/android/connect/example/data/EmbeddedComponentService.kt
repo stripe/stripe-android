@@ -7,14 +7,20 @@ import com.github.kittinunf.fuel.core.Request
 import com.github.kittinunf.fuel.core.Response
 import com.github.kittinunf.fuel.core.awaitResult
 import com.github.kittinunf.result.Result
+import com.stripe.android.connect.FetchClientSecretCallback
+import com.stripe.android.connect.PrivateBetaConnectSDK
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.json.Json
 
-class EmbeddedComponentService(
-    private var exampleBackendBaseUrl: String
-) {
+class EmbeddedComponentService private constructor() {
 
-    fun setExampleBackendBaseUrl(url: String) {
+    private var exampleBackendBaseUrl: String = DEFAULT_SERVER_BASE_URL
+
+    fun setBackendBaseUrl(url: String) {
         exampleBackendBaseUrl = url
     }
 
@@ -49,6 +55,17 @@ class EmbeddedComponentService(
             .awaitModel(FetchClientSecretResponse.serializer())
             .get()
             .clientSecret
+    }
+
+    companion object {
+        const val DEFAULT_SERVER_BASE_URL = "https://stripe-connect-mobile-example-v1.glitch.me/"
+
+        private var instance: EmbeddedComponentService? = null
+        fun getInstance(): EmbeddedComponentService {
+            return instance ?: EmbeddedComponentService().also {
+                instance = it
+            }
+        }
     }
 }
 

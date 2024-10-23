@@ -18,7 +18,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class ComponentPickerViewModel(
-    private val embeddedComponentService: EmbeddedComponentService = EmbeddedComponentService(),
+    private val embeddedComponentService: EmbeddedComponentService = EmbeddedComponentService.getInstance(),
     private val networkingScope: CoroutineScope = CoroutineScope(Dispatchers.IO),
     private val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG),
 ) : ViewModel() {

@@ -32,34 +32,7 @@ class AccountOnboardingExampleActivity : FragmentActivity() {
 
         setContent {
             ConnectSdkExampleTheme {
-                val viewModel: AccountOnboardingExampleViewModel = viewModel()
-                val accountOnboardingExampleState by viewModel.state.collectAsState()
-                val accounts = accountOnboardingExampleState.accounts
-
-                MainContent(title = stringResource(R.string.account_onboarding)) {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        if (accounts != null) {
-                            var isAccountOnboardingVisible by remember { mutableStateOf(false) }
-
-                            if (isAccountOnboardingVisible) {
-                                AccountOnboardingComponentWrapper(onDismiss = { isAccountOnboardingVisible = false })
-                            } else {
-                                EmbeddedComponentsLauncherScreen(
-                                    embeddedComponentName = stringResource(R.string.account_onboarding),
-                                    selectedAccount = accountOnboardingExampleState.selectedAccount,
-                                    connectSDKAccounts = accounts,
-                                    onConnectSDKAccountSelected = viewModel::onAccountSelected,
-                                    onEmbeddedComponentLaunched = { isAccountOnboardingVisible = true },
-                                )
-                            }
-                        } else {
-                            CircularProgressIndicator()
-                        }
-                    }
-                }
+                AccountOnboardingComponentWrapper(onDismiss = this@AccountOnboardingExampleActivity::finish)
             }
         }
     }

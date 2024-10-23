@@ -3,10 +3,18 @@ package com.stripe.android.connect.example.data
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
+import com.stripe.android.connect.example.data.EmbeddedComponentService.Companion.DEFAULT_SERVER_BASE_URL
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 class SettingsService(context: Context) {
-    private val sharedPreferences: SharedPreferences =
+
+    private val sharedPreferences: SharedPreferences by lazy {
         context.getSharedPreferences("SettingsService", Context.MODE_PRIVATE)
+    }
+
+    private val _serverBaseUrl: MutableStateFlow<String> = MutableStateFlow(getSelectedServerBaseURL())
+    val serverBaseUrl: StateFlow<String> = _serverBaseUrl
 
     fun getSelectedServerBaseURL(): String {
         return sharedPreferences.getString(SERVER_BASE_URL_KEY, DEFAULT_SERVER_BASE_URL) ?: DEFAULT_SERVER_BASE_URL
@@ -14,6 +22,14 @@ class SettingsService(context: Context) {
 
     fun setSelectedServerBaseURL(value: String) {
         sharedPreferences.edit { putString(SERVER_BASE_URL_KEY, value) }
+        _serverBaseUrl.value = value
+    }
+
+    private val _publishableKey: MutableStateFlow<String?> = MutableStateFlow(null)
+    val publishableKey: StateFlow<String?> = _publishableKey
+
+    fun setPublishableKey(value: String) {
+        _publishableKey.value = value
     }
 
     fun getAppearanceId(): String? {
@@ -66,13 +82,11 @@ class SettingsService(context: Context) {
         return sharedPreferences.getString(SELECTED_MERCHANT_KEY, null)
     }
 
-    fun setSelectedMerchant(merchant: Merchant?) {
-        sharedPreferences.edit { putString(SELECTED_MERCHANT_KEY, merchant?.merchantId) }
+    fun setSelectedMerchant(accountId: String) {
+        sharedPreferences.edit { putString(SELECTED_MERCHANT_KEY, accountId) }
     }
 
     companion object {
-        const val DEFAULT_SERVER_BASE_URL = "https://stripe-connect-mobile-example-v1.glitch.me/"
-
         // Keys
         private const val SERVER_BASE_URL_KEY = "ServerBaseURL"
         private const val APPEARANCE_ID_KEY = "AppearanceId"
