@@ -53,6 +53,7 @@ class CollectBankAccountContract :
         val product: String?
             get() = when (configuration) {
                 is CollectBankAccountConfiguration.InstantDebits -> "instant_debits"
+                is CollectBankAccountConfiguration.USBankAccountInternal,
                 is CollectBankAccountConfiguration.USBankAccount -> null
             }
 
