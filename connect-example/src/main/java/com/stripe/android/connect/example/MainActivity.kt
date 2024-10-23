@@ -90,7 +90,13 @@ class MainActivity : ComponentActivity() {
                         Text(stringResource(R.string.reload))
                     }
                     TextButton(onClick = {
-                        coroutineScope.launch { settingsSheetState.show() }
+                        coroutineScope.launch {
+                            if (!settingsSheetState.isVisible) {
+                                settingsSheetState.show()
+                            } else {
+                                settingsSheetState.hide()
+                            }
+                        }
                     }) {
                         Text(stringResource(R.string.app_settings))
                     }

@@ -1,15 +1,8 @@
 package com.stripe.android.connect.example.ui.settings
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.github.kittinunf.fuel.core.FuelError
 import com.stripe.android.connect.BuildConfig
-import com.stripe.android.connect.EmbeddedComponentManager
-import com.stripe.android.connect.FetchClientSecretCallback.ClientSecretResultCallback
-import com.stripe.android.connect.PrivateBetaConnectSDK
-import com.stripe.android.connect.example.data.EmbeddedComponentService
 import com.stripe.android.connect.example.data.FieldOption
 import com.stripe.android.connect.example.data.FutureRequirement
 import com.stripe.android.connect.example.data.Merchant
@@ -65,6 +58,8 @@ class SettingsViewModel(
         }
     }
 
+    // Private functions
+
     private fun loadAppSettings() {
         _state.update {
             it.copy(
@@ -76,10 +71,13 @@ class SettingsViewModel(
         }
     }
 
+    // State
+
     data class SettingsState(
         val serverUrl: String,
-        val selectedAccountId: String? = null,
-        val accounts: List<Merchant>? = null,
+        val saveEnabled: Boolean = false,
+        val accounts: List<DemoMerchant> = listOf(DemoMerchant.Other()),
+        val selectedAccountId: String? = accounts.firstOrNull()?.merchantId,
         val onboardingSettings: OnboardingSettings = OnboardingSettings(
             fullTermsOfServiceString = null,
             recipientTermsOfServiceString = null,
@@ -93,5 +91,18 @@ class SettingsViewModel(
             embedInTabBar = false,
             embedInNavBar = true
         )
-    )
+    ) {
+        sealed interface DemoMerchant {
+            val merchantId: String?
+
+            data class Merchant(
+                val displayName: String,
+                override val merchantId: String,
+            ) : DemoMerchant
+
+            data class Other(
+                override val merchantId: String? = null,
+            ) : DemoMerchant
+        }
+    }
 }

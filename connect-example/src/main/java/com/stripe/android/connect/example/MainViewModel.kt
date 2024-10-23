@@ -1,5 +1,6 @@
 package com.stripe.android.connect.example
 
+import androidx.compose.runtime.withFrameMillis
 import androidx.lifecycle.ViewModel
 import com.github.kittinunf.fuel.core.FuelError
 import com.stripe.android.connect.PrivateBetaConnectSDK
@@ -12,6 +13,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
 
 class MainViewModel(
     private val embeddedComponentService: EmbeddedComponentService = EmbeddedComponentService.getInstance(),
@@ -26,7 +28,7 @@ class MainViewModel(
         fetchAccounts()
     }
 
-    // public methods
+    // Public methods
 
     fun reload() {
         _state.update {
@@ -35,7 +37,7 @@ class MainViewModel(
         fetchAccounts()
     }
 
-    // private methods
+    // Private methods
 
     @OptIn(PrivateBetaConnectSDK::class)
     private fun fetchAccounts() {
@@ -54,7 +56,7 @@ class MainViewModel(
         }
     }
 
-    // state
+    // State
 
     data class MainState(
         val isLoading: Boolean = true,

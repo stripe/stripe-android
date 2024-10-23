@@ -6,6 +6,11 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -23,6 +28,7 @@ import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.example.ConnectSdkExampleTheme
 import com.stripe.android.connect.example.MainContent
 import com.stripe.android.connect.example.R
+import com.stripe.android.connect.example.ui.common.BackIconButton
 import com.stripe.android.connect.example.ui.common.EmbeddedComponentsLauncherScreen
 
 class PayoutsExampleActivity : FragmentActivity() {
@@ -32,7 +38,14 @@ class PayoutsExampleActivity : FragmentActivity() {
 
         setContent {
             ConnectSdkExampleTheme {
-                PayoutsComponentWrapper(onDismiss = this@PayoutsExampleActivity::finish)
+                MainContent(
+                    title = stringResource(R.string.payouts),
+                    navigationIcon = {
+                        BackIconButton(onClick = this@PayoutsExampleActivity::finish)
+                    }
+                ) {
+                    PayoutsComponentWrapper(onDismiss = this@PayoutsExampleActivity::finish)
+                }
             }
         }
     }
