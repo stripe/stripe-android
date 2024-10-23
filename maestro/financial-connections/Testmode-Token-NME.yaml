@@ -68,3 +68,4 @@ tags:
 - scrollUntilVisible:
     element:
       text: ".*Completed.*"
+- stopRecording
