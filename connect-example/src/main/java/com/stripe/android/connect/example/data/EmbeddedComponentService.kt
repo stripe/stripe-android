@@ -7,7 +7,6 @@ import com.github.kittinunf.fuel.core.Request
 import com.github.kittinunf.fuel.core.Response
 import com.github.kittinunf.fuel.core.awaitResult
 import com.github.kittinunf.result.Result
-import kotlinx.coroutines.delay
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.json.Json
 
@@ -21,6 +20,11 @@ class EmbeddedComponentService private constructor() {
 
     private val fuel = FuelManager.instance
         .apply {
+            // Set the timeout to 30 seconds (longer than standard due to
+            // the Glitch server sleeping after 5 minutes of inactivity)
+            timeoutInMillisecond = 30_000
+            timeoutReadInMillisecond = 30_000
+
             // add logging
             addRequestInterceptor(RequestLogger(tag = "EmbeddedComponentService"))
             addResponseInterceptor(ResponseLogger(tag = "EmbeddedComponentService"))
@@ -35,8 +39,7 @@ class EmbeddedComponentService private constructor() {
      * of available merchants. Throws a [FuelError] exception on network issues and other errors.
      */
     suspend fun getAccounts(): GetAccountsResponse {
-        delay(3_000)
-        return fuel.get(exampleBackendBaseUrl + "app_info_simulate_404")
+        return fuel.get(exampleBackendBaseUrl + "app_info_simulate")
             .awaitModel(GetAccountsResponse.serializer())
             .get()
     }

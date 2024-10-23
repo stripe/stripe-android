@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -15,11 +16,19 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Divider
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
+import androidx.compose.material.ModalBottomSheetLayout
+import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -34,11 +43,51 @@ import com.stripe.android.connect.example.R
 import com.stripe.android.connect.example.ui.common.BetaBadge
 import com.stripe.android.connect.example.ui.features.accountonboarding.AccountOnboardingExampleActivity
 import com.stripe.android.connect.example.ui.features.payouts.PayoutsExampleActivity
+import com.stripe.android.connect.example.ui.settings.SettingsView
+import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun ComponentPickerScreen() {
-    MainContent(title = stringResource(R.string.connect_sdk_example)) {
-        ComponentList()
+fun ComponentPickerScreen(
+    onReloadRequested: () -> Unit,
+) {
+    val settingsSheetState = rememberModalBottomSheetState(
+        initialValue = ModalBottomSheetValue.Hidden,
+        skipHalfExpanded = true,
+    )
+    val coroutineScope = rememberCoroutineScope()
+    MainContent(
+        title = stringResource(R.string.connect_sdk_example),
+        startTitleContent = {
+            Icon(
+                imageVector = Icons.Default.Settings,
+                contentDescription = stringResource(R.string.settings),
+                modifier = Modifier.clickable {
+                    coroutineScope.launch { settingsSheetState.show() }
+                },
+            )
+        },
+        endTitleContent = {
+            Icon(
+                imageVector = Icons.Default.MoreVert,
+                contentDescription = stringResource(R.string.customize_appearance),
+                modifier = Modifier.clickable {
+                    coroutineScope.launch { /** open appearance menu **/ }
+                },
+            )
+        }
+    ) {
+        ModalBottomSheetLayout(
+            modifier = Modifier.fillMaxSize(),
+            sheetState = settingsSheetState,
+            sheetContent = {
+                SettingsView(
+                    onDismiss = onReloadRequested,
+                )
+            },
+        ) {
+            ComponentList()
+        }
     }
 }
 
