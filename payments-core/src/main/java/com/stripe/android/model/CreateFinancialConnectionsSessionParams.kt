@@ -68,6 +68,9 @@ sealed interface CreateFinancialConnectionsSessionParams {
 }
 
 private fun LinkMode?.valueForHostedSurface(hostedSurface: String?): String? {
+    // This is to align with the Web behavior, where we only send the link_mode
+    // for flows hosted in a Stripe-owned surface. To make sure a value is sent even if link_mode
+    // is null, we default to LINK_DISABLED.
     return if (hostedSurface != null) {
         this?.value ?: "LINK_DISABLED"
     } else {
