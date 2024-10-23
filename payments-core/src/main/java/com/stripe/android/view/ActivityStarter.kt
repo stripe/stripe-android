@@ -23,6 +23,7 @@ class ActivityStarter private constructor() {
     interface Result : Parcelable {
         fun toBundle(): Bundle
 
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         companion object {
             const val EXTRA: String = "extra_activity_result"
         }

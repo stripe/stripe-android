@@ -7139,10 +7139,6 @@ public final class com/stripe/android/view/ActivityStarter$Args$Companion {
 	public static final field EXTRA Ljava/lang/String;
 }
 
-public final class com/stripe/android/view/ActivityStarter$Result$Companion {
-	public static final field EXTRA Ljava/lang/String;
-}
-
 public final class com/stripe/android/view/BecsDebitBanks$Bank : android/os/Parcelable {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
