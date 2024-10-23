@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+### Basic Integration
+* [REMOVED][9501](https://github.com/stripe/stripe-android/pull/9501) Basic Integration has been removed. [Please use Mobile Payment Element instead](https://docs.stripe.com/payments/mobile/migrating-to-mobile-payment-element-from-basic-integration).
+
 ## 20.53.0 - 2024-10-21
 
 ### PaymentSheet

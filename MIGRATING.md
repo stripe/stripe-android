@@ -1,5 +1,8 @@
 # Migration Guide
 
+## Migrating from versions < 21.0.0
+- Basic Integration has been removed. [Please use Mobile Payment Element instead](https://docs.stripe.com/payments/mobile/migrating-to-mobile-payment-element-from-basic-integration).
+
 ## Migrating from versions < 20.26.0
 - Changes to `PaymentSheetContract`:
   * The class has been deprecated and will be removed in a future release. Use the `PaymentSheet` constructor or the new `rememberPaymentSheet()` method.
