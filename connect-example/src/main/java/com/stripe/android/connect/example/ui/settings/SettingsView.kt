@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.Button
 import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.RadioButton
@@ -30,6 +29,7 @@ import com.stripe.android.connect.example.MainContent
 import com.stripe.android.connect.example.R
 import com.stripe.android.connect.example.data.OnboardingSettings
 import com.stripe.android.connect.example.ui.settings.SettingsViewModel.SettingsState.DemoMerchant
+
 
 @Composable
 fun SettingsView(
@@ -88,30 +88,36 @@ private fun SelectAnAccount(
     onAccountSelected: (String) -> Unit,
     onOtherAccountInputChanged: (String) -> Unit,
 ) {
-    Text("Select a demo account", style = MaterialTheme.typography.h6)
+    Text(stringResource(R.string.select_demo_account), style = MaterialTheme.typography.h6)
     Spacer(modifier = Modifier.height(8.dp))
     accounts.forEach { merchant ->
         when (merchant) {
             is DemoMerchant.Merchant -> {
-                Row {
-                    Column {
-                        Text(text = merchant.displayName)
-                        Text(text = merchant.merchantId, style = MaterialTheme.typography.caption)
-                    }
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     RadioButton(
                         selected = merchant.merchantId == selectedAccountId,
                         onClick = { onAccountSelected(merchant.merchantId) },
                     )
+                    Column {
+                        Text(text = merchant.displayName)
+                        Text(text = merchant.merchantId, style = MaterialTheme.typography.caption)
+                    }
                 }
             }
             is DemoMerchant.Other -> {
-                OutlinedTextField(
-                    value = merchant.merchantId ?: "",
-                    onValueChange = onOtherAccountInputChanged,
-                    label = { Text(stringResource(R.string.other)) },
-                    placeholder = { Text(stringResource(R.string.account_id_placeholder)) },
-                    modifier = Modifier.fillMaxWidth()
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    RadioButton(
+                        selected = merchant.merchantId == selectedAccountId,
+                        onClick = { onAccountSelected(merchant.merchantId ?: "") },
+                    )
+                    OutlinedTextField(
+                        value = merchant.merchantId ?: "",
+                        onValueChange = onOtherAccountInputChanged,
+                        label = { Text(stringResource(R.string.other)) },
+                        placeholder = { Text(stringResource(R.string.account_id_placeholder)) },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
             }
         }
     }
@@ -166,7 +172,7 @@ private fun NavigationLink(
     onClick: () -> Unit,
     content: @Composable () -> Unit
 ) {
-    IconButton(
+    TextButton(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth()
     ) {

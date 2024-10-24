@@ -14,23 +14,12 @@ class SettingsService private constructor(context: Context) {
         context.getSharedPreferences("SettingsService", Context.MODE_PRIVATE)
     }
 
-    private val _serverBaseUrl: MutableStateFlow<String> = MutableStateFlow(getSelectedServerBaseURL())
-    val serverBaseUrl: StateFlow<String> = _serverBaseUrl
-
-    fun getSelectedServerBaseURL(): String {
-        return sharedPreferences.getString(SERVER_BASE_URL_KEY, DEFAULT_SERVER_BASE_URL) ?: DEFAULT_SERVER_BASE_URL
+    fun getSelectedServerBaseURL(): String? {
+        return sharedPreferences.getString(SERVER_BASE_URL_KEY, null)
     }
 
     fun setSelectedServerBaseURL(value: String) {
         sharedPreferences.edit { putString(SERVER_BASE_URL_KEY, value) }
-        _serverBaseUrl.value = value
-    }
-
-    private val _publishableKey: MutableStateFlow<String?> = MutableStateFlow(null)
-    val publishableKey: StateFlow<String?> = _publishableKey
-
-    fun setPublishableKey(value: String) {
-        _publishableKey.value = value
     }
 
     fun getAppearanceId(): String? {
