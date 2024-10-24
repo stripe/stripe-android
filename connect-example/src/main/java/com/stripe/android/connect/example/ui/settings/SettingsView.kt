@@ -1,5 +1,6 @@
 package com.stripe.android.connect.example.ui.settings
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -45,6 +46,7 @@ fun SettingsView(
     val state by viewModel.state.collectAsState()
     var serverUrlDidChange = remember { false }
 
+    BackHandler { onDismiss() }
     LaunchedEffect(state.serverUrl) { serverUrlDidChange = true } // track if the serverURL ever changes
     MainContent(
         title = stringResource(R.string.settings),
