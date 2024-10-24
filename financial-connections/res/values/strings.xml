@@ -41,6 +41,7 @@
     <string name="stripe_search">Search</string>
     <string name="stripe_account_picker_dropdown_hint">Choose one</string>
     <string name="stripe_success_pane_title">Success</string>
+    <string name="stripe_success_pane_title_microdeposits">Almost there</string>
     <string name="stripe_success_pane_desc_microdeposits">You can expect micro-deposits to account ••••%1$s in 1–2 days and an email with further instructions.</string>
     <string name="stripe_success_pane_desc_microdeposits_no_account">You can expect micro-deposits to your account in 1–2 days and an email with further instructions.</string>
     <plurals name="stripe_success_pane_desc">

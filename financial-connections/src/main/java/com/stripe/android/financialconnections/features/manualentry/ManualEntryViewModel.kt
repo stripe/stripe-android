@@ -153,6 +153,9 @@ internal class ManualEntryViewModel @AssistedInject constructor(
                 clearCachedAccounts()
                 if (sync.manifest.manualEntryUsesMicrodeposits) {
                     successContentRepository.set(
+                        heading = TextResource.StringId(
+                            R.string.stripe_success_pane_title_microdeposits
+                        ),
                         message = TextResource.StringId(
                             R.string.stripe_success_pane_desc_microdeposits,
                             listOf(account.takeLast(4))
