@@ -55,20 +55,6 @@ internal class DefaultLinkAccountManager @Inject constructor(
                     lookup = consumerSessionLookup,
                     startSession = startSession,
                 )
-            }.mapCatching { account ->
-                if (account == null) return@mapCatching null
-                if (startSession && !account.isVerified) {
-                    val consumerSession = linkRepository.startVerification(
-                        consumerSessionClientSecret = account.clientSecret,
-                        consumerPublishableKey = consumerPublishableKey,
-                    ).getOrThrow()
-                    setAccount(
-                        consumerSession = consumerSession,
-                        publishableKey = consumerPublishableKey
-                    )
-                } else {
-                    account
-                }
             }
 
     override suspend fun signInWithUserInput(
