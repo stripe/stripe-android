@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
@@ -20,6 +21,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.connect.example.ui.componentpicker.ComponentPickerScreen
 import com.stripe.android.connect.example.ui.settings.SettingsView
@@ -52,10 +55,13 @@ class MainActivity : ComponentActivity() {
     private fun LoadingScreen() {
         MainContent(title = stringResource(R.string.connect_sdk_example)) {
             Box(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxSize().padding(24.dp),
                 contentAlignment = Alignment.Center,
             ) {
-                Text(stringResource(R.string.warming_up_the_server))
+                Text(
+                    text = stringResource(R.string.warming_up_the_server),
+                    textAlign = TextAlign.Center,
+                )
             }
         }
     }
