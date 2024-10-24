@@ -16,6 +16,9 @@ class EmbeddedComponentService private constructor() {
 
     fun setBackendBaseUrl(url: String) {
         exampleBackendBaseUrl = url
+        if (!exampleBackendBaseUrl.endsWith("/")) {
+            exampleBackendBaseUrl += "/"
+        }
     }
 
     private val fuel = FuelManager.instance
@@ -39,7 +42,7 @@ class EmbeddedComponentService private constructor() {
      * of available merchants. Throws a [FuelError] exception on network issues and other errors.
      */
     suspend fun getAccounts(): GetAccountsResponse {
-        return fuel.get(exampleBackendBaseUrl + "app_info_404")
+        return fuel.get(exampleBackendBaseUrl + "app_info")
             .awaitModel(GetAccountsResponse.serializer())
             .get()
     }

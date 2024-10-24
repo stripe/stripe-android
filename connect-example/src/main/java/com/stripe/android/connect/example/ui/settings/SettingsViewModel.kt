@@ -10,14 +10,18 @@ import com.stripe.android.connect.example.data.SettingsService
 import com.stripe.android.connect.example.data.OnboardingSettings
 import com.stripe.android.connect.example.data.PresentationSettings
 import com.stripe.android.connect.example.data.SkipTermsOfService
+import com.stripe.android.connect.example.ui.settings.SettingsViewModel.SettingsState.DemoMerchant
 import com.stripe.android.core.Logger
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class SettingsViewModel(
     private val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG),
+    private val embeddedComponentService: EmbeddedComponentService = EmbeddedComponentService.getInstance(),
     private val settingsService: SettingsService = SettingsService.getInstance(),
 ) : ViewModel() {
 
@@ -28,14 +32,46 @@ class SettingsViewModel(
 
     init {
         loadAppSettings()
+
+        viewModelScope.launch {
+            _state.map {
+                // when any of the below values change,
+                // enable the save button
+                listOf(
+                    it.presentationSettings,
+                    it.onboardingSettings,
+                    it.accounts,
+                    it.selectedAccountId,
+                    it.serverUrl,
+                )
+            }.distinctUntilChanged()
+            .collect {
+                _state.update { it.copy(saveEnabled = true) }
+            }
+        }
     }
 
     fun onAccountSelected(accountId: String) {
-        _state.update { it.copy(selectedAccountId = accountId, saveEnabled = true) }
+        _state.update { it.copy(selectedAccountId = accountId) }
+    }
+
+    fun onOtherAccountInputChanged(otherAccountIdInput: String) {
+        _state.update { state ->
+            state.copy(
+                selectedAccountId = otherAccountIdInput,
+                accounts = state.accounts.map { acc ->
+                    when (acc) {
+                        is DemoMerchant.Merchant -> acc
+                        is DemoMerchant.Other -> acc.copy(merchantId = otherAccountIdInput)
+                    }
+                },
+                saveEnabled = true,
+            )
+        }
     }
 
     fun onServerUrlChanged(url: String) {
-        _state.update { it.copy(serverUrl = url, saveEnabled = true) }
+        _state.update { it.copy(serverUrl = url) }
     }
 
     fun onResetServerUrlClicked() {
@@ -43,17 +79,18 @@ class SettingsViewModel(
     }
 
     fun onOnboardingSettingsChanged(settings: OnboardingSettings) {
-        _state.update { it.copy(onboardingSettings = settings, saveEnabled = true) }
+        _state.update { it.copy(onboardingSettings = settings) }
     }
 
     fun onPresentationSettingsChanged(settings: PresentationSettings) {
-        _state.update { it.copy(presentationSettings = settings, saveEnabled = true) }
+        _state.update { it.copy(presentationSettings = settings) }
     }
 
     fun saveSettings() {
         viewModelScope.launch {
             with(state.value) {
                 settingsService.setSelectedServerBaseURL(serverUrl)
+                embeddedComponentService.setBackendBaseUrl(serverUrl)
                 if (selectedAccountId != null) settingsService.setSelectedMerchant(selectedAccountId)
                 settingsService.setOnboardingSettings(onboardingSettings)
                 settingsService.setPresentationSettings(presentationSettings)

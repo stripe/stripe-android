@@ -19,7 +19,7 @@
     <string name="account_id_placeholder">acct_xxxx</string>
     <string name="custom_account">Custom Account</string>
     <string name="component_settings">Component Settings</string>
-    <string name="view_controller_options">View Controller Options</string>
+    <string name="presentation_options">Presentation Options</string>
     <string name="api_server_settings">API Server Settings</string>
     <string name="server_url_label">Server URL</string>
     <string name="server_url_placeholder">https://example.com</string>
