@@ -33,17 +33,20 @@ fun MainContent(
     actions: @Composable RowScope.() -> Unit = {},
     content: @Composable () -> Unit,
 ) {
-    Scaffold(topBar = {
-        TopAppBar(title = {
-            Text(
-                text = title,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.SemiBold,
-            )
-        },
-        navigationIcon = navigationIcon,
-        actions = actions,
-    )}) { contentPadding ->
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        topBar = {
+            TopAppBar(title = {
+                Text(
+                    text = title,
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.SemiBold,
+                )
+            },
+            navigationIcon = navigationIcon,
+            actions = actions,
+        )},
+    ) { contentPadding ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
