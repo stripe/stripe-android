@@ -6,7 +6,7 @@ import com.stripe.android.core.exception.AuthenticationException
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.core.networking.ApiRequest
-import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext.BillingAddress
+import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext.BillingDetails
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccountList
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.GetFinancialConnectionsAcccountsParams
@@ -58,7 +58,7 @@ internal interface FinancialConnectionsRepository {
     suspend fun createPaymentMethod(
         paymentDetailsId: String,
         consumerSessionClientSecret: String,
-        billingAddress: BillingAddress?,
+        billingDetails: BillingDetails?,
         billingEmailAddress: String,
     ): PaymentMethod
 }
@@ -139,7 +139,7 @@ internal class FinancialConnectionsRepositoryImpl @Inject constructor(
     override suspend fun createPaymentMethod(
         paymentDetailsId: String,
         consumerSessionClientSecret: String,
-        billingAddress: BillingAddress?,
+        billingDetails: BillingDetails?,
         billingEmailAddress: String,
     ): PaymentMethod {
         val linkParams = mapOf(
@@ -152,16 +152,16 @@ internal class FinancialConnectionsRepositoryImpl @Inject constructor(
             ),
         )
 
-        val billingDetails = buildMap {
-            if (billingAddress != null) {
-                putAll(billingAddress.apiParams())
+        val billingDetailsParams = buildMap {
+            if (billingDetails != null) {
+                putAll(billingDetails.apiParams())
             }
 
             put("email", billingEmailAddress)
         }
 
         val billingParams = mapOf(
-            "billing_details" to billingDetails,
+            "billing_details" to billingDetailsParams,
         )
 
         val fraudDetectionParams = fraudDetectionDataRepository.getCached()?.params.orEmpty()

@@ -526,21 +526,23 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             amount = args.formArgs.amount?.value,
             currency = args.formArgs.amount?.currencyCode,
             linkMode = args.linkMode,
-            billingAddress = makeElementsSessionContextBillingAddress(),
+            billingDetails = makeElementsSessionContextBillingAddress(),
         )
     }
 
-    private fun makeElementsSessionContextBillingAddress(): ElementsSessionContext.BillingAddress {
+    private fun makeElementsSessionContextBillingAddress(): ElementsSessionContext.BillingDetails {
         val attachDefaultsToPaymentMethod = collectionConfiguration.attachDefaultsToPaymentMethod
         val name = name.value.takeIf { collectingName || attachDefaultsToPaymentMethod }
+        val email = email.value.takeIf { collectingEmail || attachDefaultsToPaymentMethod }
         val phone = phone.value.takeIf { collectingPhone || attachDefaultsToPaymentMethod }
         val address = address.value.takeIf { collectingAddress || attachDefaultsToPaymentMethod }
 
-        return ElementsSessionContext.BillingAddress(
+        return ElementsSessionContext.BillingDetails(
             name = name,
+            email = email,
             phone = phone?.let { phoneController.getE164PhoneNumber(it) },
             address = address?.let {
-                ElementsSessionContext.BillingAddress.Address(
+                ElementsSessionContext.BillingDetails.Address(
                     line1 = it.line1,
                     line2 = it.line2,
                     postalCode = it.postalCode,

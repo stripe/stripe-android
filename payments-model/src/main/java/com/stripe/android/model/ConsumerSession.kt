@@ -19,6 +19,8 @@ data class ConsumerSession(
     val redactedFormattedPhoneNumber: String,
     @SerialName("redacted_phone_number")
     val redactedPhoneNumber: String,
+    @SerialName("unredacted_phone_number")
+    val unredactedPhoneNumber: String?,
     @SerialName("verification_sessions")
     val verificationSessions: List<VerificationSession> = emptyList(),
 ) : StripeModel {

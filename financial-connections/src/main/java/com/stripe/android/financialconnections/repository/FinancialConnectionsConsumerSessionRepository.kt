@@ -3,7 +3,7 @@ package com.stripe.android.financialconnections.repository
 import com.stripe.android.core.Logger
 import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext
-import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext.BillingAddress
+import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext.BillingDetails
 import com.stripe.android.financialconnections.domain.IsLinkWithStripe
 import com.stripe.android.financialconnections.repository.api.FinancialConnectionsConsumersApiService
 import com.stripe.android.financialconnections.repository.api.ProvideApiRequestOptions
@@ -59,7 +59,7 @@ internal interface FinancialConnectionsConsumerSessionRepository {
     suspend fun createPaymentDetails(
         bankAccountId: String,
         consumerSessionClientSecret: String,
-        billingAddress: BillingAddress?,
+        billingDetails: BillingDetails?,
         billingEmailAddress: String,
     ): ConsumerPaymentDetails
 
@@ -206,14 +206,14 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
     override suspend fun createPaymentDetails(
         bankAccountId: String,
         consumerSessionClientSecret: String,
-        billingAddress: BillingAddress?,
+        billingDetails: BillingDetails?,
         billingEmailAddress: String,
     ): ConsumerPaymentDetails {
         return consumersApiService.createPaymentDetails(
             consumerSessionClientSecret = consumerSessionClientSecret,
             paymentDetailsCreateParams = ConsumerPaymentDetailsCreateParams.BankAccount(
                 bankAccountId = bankAccountId,
-                billingAddress = billingAddress?.consumerApiParams(),
+                billingAddress = billingDetails?.toConsumerBillingAddress(),
                 billingEmailAddress = billingEmailAddress,
             ),
             requestSurface = requestSurface,
@@ -237,7 +237,7 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
             consumerSessionClientSecret = consumerSessionClientSecret,
             paymentDetailsId = paymentDetailsId,
             expectedPaymentMethodType = expectedPaymentMethodType,
-            billingPhone = elementsSessionContext?.billingAddress?.phone?.takeIf { it.isNotBlank() },
+            billingPhone = elementsSessionContext?.billingDetails?.phone?.takeIf { it.isNotBlank() },
             requestSurface = requestSurface,
             requestOptions = provideApiRequestOptions(useConsumerPublishableKey = false),
             extraParams = extraParams + fraudDetectionData,
@@ -276,26 +276,23 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
     }
 }
 
-private fun BillingAddress.consumerApiParams(): Map<String, Any> {
+private fun BillingDetails.toConsumerBillingAddress(): Map<String, Any> {
     val contactParams = buildMap {
         name?.let { put("name", it) }
     }.filter { entry ->
         entry.value.isNotBlank()
     }
 
-    val addressParams = address?.consumerApiParams().orEmpty()
-    return contactParams + addressParams
-}
-
-private fun BillingAddress.Address.consumerApiParams(): Map<String, Any> {
-    return buildMap {
-        line1?.let { put("line_1", it) }
-        line2?.let { put("line_2", it) }
-        postalCode?.let { put("postal_code", it) }
-        city?.let { put("locality", it) }
-        state?.let { put("administrative_area", it) }
-        country?.let { put("country_code", it) }
+    val addressParams = buildMap {
+        address?.line1?.let { put("line_1", it) }
+        address?.line2?.let { put("line_2", it) }
+        address?.postalCode?.let { put("postal_code", it) }
+        address?.city?.let { put("locality", it) }
+        address?.state?.let { put("administrative_area", it) }
+        address?.country?.let { put("country_code", it) }
     }.filterValues {
         it.isNotBlank()
     }
+
+    return contactParams + addressParams
 }

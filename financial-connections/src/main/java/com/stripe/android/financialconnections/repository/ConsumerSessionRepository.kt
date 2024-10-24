@@ -15,6 +15,7 @@ internal const val KeyConsumerSession = "ConsumerSession"
 internal data class CachedConsumerSession(
     val emailAddress: String,
     val phoneNumber: String,
+    val unredactedPhoneNumber: String?,
     val clientSecret: String,
     val publishableKey: String?,
     val isVerified: Boolean,
@@ -61,6 +62,7 @@ internal class RealConsumerSessionRepository @Inject constructor(
     ) = CachedConsumerSession(
         emailAddress = emailAddress,
         phoneNumber = getRedactedPhoneNumber(),
+        unredactedPhoneNumber = unredactedPhoneNumber,
         clientSecret = clientSecret,
         publishableKey = publishableKey,
         isVerified = verificationSessions.any { it.state == Verified || it.type == SignUp },

@@ -35,12 +35,16 @@ internal class RealCreateInstantDebitsResult @Inject constructor(
             "Consumer session email address cannot be null"
         }
 
-        val billingAddress = elementsSessionContext?.billingAddress
+        val billingDetails = elementsSessionContext?.billingDetails?.copy(
+            // Use the email address and phone number that the consumer actually entered
+            email = billingEmailAddress,
+            phone = consumerSession?.unredactedPhoneNumber ?: elementsSessionContext.billingDetails.phone,
+        )
 
         val response = consumerRepository.createPaymentDetails(
             consumerSessionClientSecret = clientSecret,
             bankAccountId = bankAccountId,
-            billingAddress = billingAddress,
+            billingDetails = billingDetails,
             billingEmailAddress = billingEmailAddress,
         )
 
@@ -51,13 +55,13 @@ internal class RealCreateInstantDebitsResult @Inject constructor(
                 paymentDetailsId = paymentDetails.id,
                 consumerSessionClientSecret = clientSecret,
                 expectedPaymentMethodType = elementsSessionContext.linkMode.expectedPaymentMethodType,
-                billingPhone = elementsSessionContext.billingAddress?.phone,
+                billingPhone = elementsSessionContext.billingDetails?.phone,
             ).paymentMethodId
         } else {
             repository.createPaymentMethod(
                 paymentDetailsId = paymentDetails.id,
                 consumerSessionClientSecret = clientSecret,
-                billingAddress = billingAddress,
+                billingDetails = billingDetails,
                 billingEmailAddress = billingEmailAddress,
             ).id
         }

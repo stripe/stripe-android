@@ -826,7 +826,7 @@ class USBankAccountFormViewModelTest {
                         amount = 5099,
                         currency = "usd",
                         linkMode = LinkMode.LinkPaymentMethod,
-                        billingAddress = ElementsSessionContext.BillingAddress(
+                        billingDetails = ElementsSessionContext.BillingDetails(
                             name = "Jenny Rose",
                         ),
                     ),
@@ -878,7 +878,7 @@ class USBankAccountFormViewModelTest {
                         amount = null,
                         currency = null,
                         linkMode = LinkMode.LinkPaymentMethod,
-                        billingAddress = ElementsSessionContext.BillingAddress(
+                        billingDetails = ElementsSessionContext.BillingDetails(
                             name = "Jenny Rose",
                         ),
                     ),
@@ -1088,7 +1088,7 @@ class USBankAccountFormViewModelTest {
                         amount = 5099,
                         currency = "usd",
                         linkMode = null,
-                        billingAddress = ElementsSessionContext.BillingAddress(
+                        billingDetails = ElementsSessionContext.BillingDetails(
                             name = "Some Name",
                         ),
                     ),
@@ -1125,7 +1125,7 @@ class USBankAccountFormViewModelTest {
                         amount = 5099,
                         currency = "usd",
                         linkMode = LinkMode.LinkCardBrand,
-                        billingAddress = ElementsSessionContext.BillingAddress(),
+                        billingDetails = ElementsSessionContext.BillingDetails(),
                     ),
                 )
             ),
@@ -1345,11 +1345,11 @@ class USBankAccountFormViewModelTest {
 
         val elementsSessionContext = testElementsSessionContextGeneration(viewModelArgs = args)
 
-        assertThat(elementsSessionContext?.billingAddress).isEqualTo(
-            ElementsSessionContext.BillingAddress(
+        assertThat(elementsSessionContext?.billingDetails).isEqualTo(
+            ElementsSessionContext.BillingDetails(
                 name = "Jenny Rose",
                 phone = "+13105551234",
-                address = ElementsSessionContext.BillingAddress.Address(
+                address = ElementsSessionContext.BillingDetails.Address(
                     line1 = "123 Main Street",
                     line2 = "Apt 456",
                     city = "San Francisco",
@@ -1373,8 +1373,8 @@ class USBankAccountFormViewModelTest {
 
         val elementsSessionContext = testElementsSessionContextGeneration(viewModelArgs = args)
 
-        assertThat(elementsSessionContext?.billingAddress).isEqualTo(
-            ElementsSessionContext.BillingAddress(
+        assertThat(elementsSessionContext?.billingDetails).isEqualTo(
+            ElementsSessionContext.BillingDetails(
                 name = null,
                 phone = null,
                 address = null,
@@ -1394,8 +1394,8 @@ class USBankAccountFormViewModelTest {
 
         val elementsSessionContext = testElementsSessionContextGeneration(viewModelArgs = args)
 
-        assertThat(elementsSessionContext?.billingAddress).isEqualTo(
-            ElementsSessionContext.BillingAddress(
+        assertThat(elementsSessionContext?.billingDetails).isEqualTo(
+            ElementsSessionContext.BillingDetails(
                 name = null,
                 phone = "+13105551234",
                 address = null,

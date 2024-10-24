@@ -47,7 +47,7 @@ class FinancialConnectionsSheet internal constructor(
         val amount: Long?,
         val currency: String?,
         val linkMode: LinkMode?,
-        val billingAddress: BillingAddress?,
+        val billingDetails: BillingDetails?,
     ) : Parcelable {
 
         val paymentIntentId: String?
@@ -74,9 +74,10 @@ class FinancialConnectionsSheet internal constructor(
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Parcelize
-        data class BillingAddress(
+        data class BillingDetails(
             val name: String? = null,
             val phone: String? = null,
+            val email: String? = null,
             val address: Address? = null,
         ) : Parcelable {
 
