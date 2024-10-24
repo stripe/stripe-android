@@ -1393,6 +1393,15 @@ public final class com/stripe/android/stripe3ds2/transactions/UiType : java/lang
 	public static fun values ()[Lcom/stripe/android/stripe3ds2/transactions/UiType;
 }
 
+public abstract interface class com/stripe/android/stripe3ds2/utils/AnalyticsDelegate {
+	public abstract fun cancelButtonTappedWithTransactionId (Ljava/lang/String;)V
+	public abstract fun didReceiveChallengeResponseWithTransactionId (Ljava/lang/String;Ljava/lang/String;)V
+	public abstract fun oobContinueButtonTappedWithTransactionID (Ljava/lang/String;)V
+	public abstract fun oobFlowDidPause (Ljava/lang/String;)V
+	public abstract fun oobFlowDidResume (Ljava/lang/String;)V
+	public abstract fun otpSubmitButtonTappedWithTransactionID (Ljava/lang/String;)V
+}
+
 public final class com/stripe/android/stripe3ds2/utils/CustomizeUtils {
 	public static final field INSTANCE Lcom/stripe/android/stripe3ds2/utils/CustomizeUtils;
 	public final fun buildStyledText (Landroid/content/Context;Ljava/lang/String;Lcom/stripe/android/stripe3ds2/init/ui/Customization;)Landroid/text/SpannableString;
