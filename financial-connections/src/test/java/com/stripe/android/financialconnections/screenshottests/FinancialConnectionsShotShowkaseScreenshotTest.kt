@@ -26,6 +26,7 @@ import org.junit.runner.RunWith
 @RunWith(TestParameterInjector::class)
 class PaparazziSampleScreenshotTest {
 
+    @Suppress("DEPRECATION")
     object PreviewProvider : TestParameter.TestParameterValuesProvider {
         override fun provideValues(): List<ComponentTestPreview> {
             val metadata = Showkase.getMetadata()

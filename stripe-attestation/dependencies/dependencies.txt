@@ -1,12 +1,12 @@
-+--- org.jetbrains.kotlin:kotlin-stdlib:1.9.25
++--- org.jetbrains.kotlin:kotlin-stdlib:2.0.21
 |    \--- org.jetbrains:annotations:13.0 -> 23.0.0
-+--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1
-|    \--- org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.8.1
++--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0
+|    \--- org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.9.0
 |         +--- org.jetbrains:annotations:23.0.0
-|         +--- org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.8.1
-|         |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.8.1 (c)
-|         |    \--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1 (c)
-|         \--- org.jetbrains.kotlin:kotlin-stdlib:1.9.21 -> 1.9.25 (*)
+|         +--- org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.9.0
+|         |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.9.0 (c)
+|         |    \--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0 (c)
+|         \--- org.jetbrains.kotlin:kotlin-stdlib:2.0.0 -> 2.0.21 (*)
 \--- com.google.android.play:integrity:1.4.0
      +--- com.google.android.gms:play-services-basement:18.4.0
      |    +--- androidx.collection:collection:1.0.0 -> 1.1.0

@@ -41,13 +41,13 @@ public final class com/stripe/android/stripecardscan/cardimageverification/CardI
 	public final fun component2 ()Z
 	public final fun copy (Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration$StrictModeFrameCount;Z)Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration;
 	public static synthetic fun copy$default (Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration;Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration$StrictModeFrameCount;ZILjava/lang/Object;)Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration;
-	public fun describeContents ()I
+	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getEnableCannotScanButton ()Z
 	public final fun getStrictModeFrames ()Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration$StrictModeFrameCount;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class com/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration$Creator : android/os/Parcelable$Creator {
@@ -66,11 +66,11 @@ public abstract class com/stripe/android/stripecardscan/cardimageverification/Ca
 public final class com/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration$StrictModeFrameCount$High : com/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration$StrictModeFrameCount {
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public static final field INSTANCE Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration$StrictModeFrameCount$High;
-	public fun describeContents ()I
+	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class com/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration$StrictModeFrameCount$High$Creator : android/os/Parcelable$Creator {
@@ -84,11 +84,11 @@ public final class com/stripe/android/stripecardscan/cardimageverification/CardI
 public final class com/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration$StrictModeFrameCount$Low : com/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration$StrictModeFrameCount {
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public static final field INSTANCE Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration$StrictModeFrameCount$Low;
-	public fun describeContents ()I
+	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class com/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration$StrictModeFrameCount$Low$Creator : android/os/Parcelable$Creator {
@@ -102,11 +102,11 @@ public final class com/stripe/android/stripecardscan/cardimageverification/CardI
 public final class com/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration$StrictModeFrameCount$Medium : com/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration$StrictModeFrameCount {
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public static final field INSTANCE Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration$StrictModeFrameCount$Medium;
-	public fun describeContents ()I
+	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class com/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration$StrictModeFrameCount$Medium$Creator : android/os/Parcelable$Creator {
@@ -120,11 +120,11 @@ public final class com/stripe/android/stripecardscan/cardimageverification/CardI
 public final class com/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration$StrictModeFrameCount$None : com/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration$StrictModeFrameCount {
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public static final field INSTANCE Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration$StrictModeFrameCount$None;
-	public fun describeContents ()I
+	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class com/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration$StrictModeFrameCount$None$Creator : android/os/Parcelable$Creator {
@@ -152,12 +152,12 @@ public final class com/stripe/android/stripecardscan/cardimageverification/CardI
 	public final fun component1 ()Lcom/stripe/android/stripecardscan/scanui/CancellationReason;
 	public final fun copy (Lcom/stripe/android/stripecardscan/scanui/CancellationReason;)Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheetResult$Canceled;
 	public static synthetic fun copy$default (Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheetResult$Canceled;Lcom/stripe/android/stripecardscan/scanui/CancellationReason;ILjava/lang/Object;)Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheetResult$Canceled;
-	public fun describeContents ()I
+	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getReason ()Lcom/stripe/android/stripecardscan/scanui/CancellationReason;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class com/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheetResult$Canceled$Creator : android/os/Parcelable$Creator {
@@ -175,13 +175,13 @@ public final class com/stripe/android/stripecardscan/cardimageverification/CardI
 	public final fun component2 ()Lcom/stripe/android/stripecardscan/payment/card/ScannedCard;
 	public final fun copy (Ljava/lang/String;Lcom/stripe/android/stripecardscan/payment/card/ScannedCard;)Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheetResult$Completed;
 	public static synthetic fun copy$default (Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheetResult$Completed;Ljava/lang/String;Lcom/stripe/android/stripecardscan/payment/card/ScannedCard;ILjava/lang/Object;)Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheetResult$Completed;
-	public fun describeContents ()I
+	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getCardImageVerificationIntentId ()Ljava/lang/String;
 	public final fun getScannedCard ()Lcom/stripe/android/stripecardscan/payment/card/ScannedCard;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class com/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheetResult$Completed$Creator : android/os/Parcelable$Creator {
@@ -198,12 +198,12 @@ public final class com/stripe/android/stripecardscan/cardimageverification/CardI
 	public final fun component1 ()Ljava/lang/Throwable;
 	public final fun copy (Ljava/lang/Throwable;)Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheetResult$Failed;
 	public static synthetic fun copy$default (Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheetResult$Failed;Ljava/lang/Throwable;ILjava/lang/Object;)Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheetResult$Failed;
-	public fun describeContents ()I
+	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getError ()Ljava/lang/Throwable;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class com/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheetResult$Failed$Creator : android/os/Parcelable$Creator {
@@ -299,12 +299,12 @@ public final class com/stripe/android/stripecardscan/cardscan/CardScanSheetResul
 	public final fun component1 ()Lcom/stripe/android/stripecardscan/scanui/CancellationReason;
 	public final fun copy (Lcom/stripe/android/stripecardscan/scanui/CancellationReason;)Lcom/stripe/android/stripecardscan/cardscan/CardScanSheetResult$Canceled;
 	public static synthetic fun copy$default (Lcom/stripe/android/stripecardscan/cardscan/CardScanSheetResult$Canceled;Lcom/stripe/android/stripecardscan/scanui/CancellationReason;ILjava/lang/Object;)Lcom/stripe/android/stripecardscan/cardscan/CardScanSheetResult$Canceled;
-	public fun describeContents ()I
+	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getReason ()Lcom/stripe/android/stripecardscan/scanui/CancellationReason;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class com/stripe/android/stripecardscan/cardscan/CardScanSheetResult$Canceled$Creator : android/os/Parcelable$Creator {
@@ -321,12 +321,12 @@ public final class com/stripe/android/stripecardscan/cardscan/CardScanSheetResul
 	public final fun component1 ()Lcom/stripe/android/stripecardscan/payment/card/ScannedCard;
 	public final fun copy (Lcom/stripe/android/stripecardscan/payment/card/ScannedCard;)Lcom/stripe/android/stripecardscan/cardscan/CardScanSheetResult$Completed;
 	public static synthetic fun copy$default (Lcom/stripe/android/stripecardscan/cardscan/CardScanSheetResult$Completed;Lcom/stripe/android/stripecardscan/payment/card/ScannedCard;ILjava/lang/Object;)Lcom/stripe/android/stripecardscan/cardscan/CardScanSheetResult$Completed;
-	public fun describeContents ()I
+	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getScannedCard ()Lcom/stripe/android/stripecardscan/payment/card/ScannedCard;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class com/stripe/android/stripecardscan/cardscan/CardScanSheetResult$Completed$Creator : android/os/Parcelable$Creator {
@@ -343,12 +343,12 @@ public final class com/stripe/android/stripecardscan/cardscan/CardScanSheetResul
 	public final fun component1 ()Ljava/lang/Throwable;
 	public final fun copy (Ljava/lang/Throwable;)Lcom/stripe/android/stripecardscan/cardscan/CardScanSheetResult$Failed;
 	public static synthetic fun copy$default (Lcom/stripe/android/stripecardscan/cardscan/CardScanSheetResult$Failed;Ljava/lang/Throwable;ILjava/lang/Object;)Lcom/stripe/android/stripecardscan/cardscan/CardScanSheetResult$Failed;
-	public fun describeContents ()I
+	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getError ()Ljava/lang/Throwable;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class com/stripe/android/stripecardscan/cardscan/CardScanSheetResult$Failed$Creator : android/os/Parcelable$Creator {
@@ -521,12 +521,12 @@ public final class com/stripe/android/stripecardscan/payment/card/ScannedCard : 
 	public final fun component1 ()Ljava/lang/String;
 	public final fun copy (Ljava/lang/String;)Lcom/stripe/android/stripecardscan/payment/card/ScannedCard;
 	public static synthetic fun copy$default (Lcom/stripe/android/stripecardscan/payment/card/ScannedCard;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/stripecardscan/payment/card/ScannedCard;
-	public fun describeContents ()I
+	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getPan ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class com/stripe/android/stripecardscan/payment/card/ScannedCard$Creator : android/os/Parcelable$Creator {
@@ -543,11 +543,11 @@ public abstract interface class com/stripe/android/stripecardscan/scanui/Cancell
 public final class com/stripe/android/stripecardscan/scanui/CancellationReason$Back : com/stripe/android/stripecardscan/scanui/CancellationReason {
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public static final field INSTANCE Lcom/stripe/android/stripecardscan/scanui/CancellationReason$Back;
-	public fun describeContents ()I
+	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class com/stripe/android/stripecardscan/scanui/CancellationReason$Back$Creator : android/os/Parcelable$Creator {
@@ -561,11 +561,11 @@ public final class com/stripe/android/stripecardscan/scanui/CancellationReason$B
 public final class com/stripe/android/stripecardscan/scanui/CancellationReason$CameraPermissionDenied : com/stripe/android/stripecardscan/scanui/CancellationReason {
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public static final field INSTANCE Lcom/stripe/android/stripecardscan/scanui/CancellationReason$CameraPermissionDenied;
-	public fun describeContents ()I
+	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class com/stripe/android/stripecardscan/scanui/CancellationReason$CameraPermissionDenied$Creator : android/os/Parcelable$Creator {
@@ -579,11 +579,11 @@ public final class com/stripe/android/stripecardscan/scanui/CancellationReason$C
 public final class com/stripe/android/stripecardscan/scanui/CancellationReason$Closed : com/stripe/android/stripecardscan/scanui/CancellationReason {
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public static final field INSTANCE Lcom/stripe/android/stripecardscan/scanui/CancellationReason$Closed;
-	public fun describeContents ()I
+	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class com/stripe/android/stripecardscan/scanui/CancellationReason$Closed$Creator : android/os/Parcelable$Creator {
@@ -597,11 +597,11 @@ public final class com/stripe/android/stripecardscan/scanui/CancellationReason$C
 public final class com/stripe/android/stripecardscan/scanui/CancellationReason$UserCannotScan : com/stripe/android/stripecardscan/scanui/CancellationReason {
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public static final field INSTANCE Lcom/stripe/android/stripecardscan/scanui/CancellationReason$UserCannotScan;
-	public fun describeContents ()I
+	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class com/stripe/android/stripecardscan/scanui/CancellationReason$UserCannotScan$Creator : android/os/Parcelable$Creator {

@@ -41,11 +41,11 @@ public final class com/stripe/android/identity/IdentityVerificationSheet$Verific
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public static final field INSTANCE Lcom/stripe/android/identity/IdentityVerificationSheet$VerificationFlowResult$Canceled;
-	public fun describeContents ()I
+	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class com/stripe/android/identity/IdentityVerificationSheet$VerificationFlowResult$Canceled$Creator : android/os/Parcelable$Creator {
@@ -60,11 +60,11 @@ public final class com/stripe/android/identity/IdentityVerificationSheet$Verific
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public static final field INSTANCE Lcom/stripe/android/identity/IdentityVerificationSheet$VerificationFlowResult$Completed;
-	public fun describeContents ()I
+	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class com/stripe/android/identity/IdentityVerificationSheet$VerificationFlowResult$Completed$Creator : android/os/Parcelable$Creator {
@@ -79,9 +79,9 @@ public final class com/stripe/android/identity/IdentityVerificationSheet$Verific
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public fun <init> (Ljava/lang/Throwable;)V
-	public fun describeContents ()I
+	public final fun describeContents ()I
 	public final fun getThrowable ()Ljava/lang/Throwable;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class com/stripe/android/identity/IdentityVerificationSheet$VerificationFlowResult$Failed$Creator : android/os/Parcelable$Creator {

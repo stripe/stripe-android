@@ -19,7 +19,9 @@ import java.util.Objects
  * See [PaymentMethod] for API object.
  */
 @Parcelize
-data class PaymentMethodCreateParams internal constructor(
+data class PaymentMethodCreateParams
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+constructor(
     internal val code: PaymentMethodCode,
     internal val requiresMandate: Boolean,
     val card: Card? = null,
