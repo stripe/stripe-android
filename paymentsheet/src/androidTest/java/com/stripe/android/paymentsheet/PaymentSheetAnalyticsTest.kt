@@ -46,6 +46,11 @@ internal class PaymentSheetAnalyticsTest {
         .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
         .build()
 
+    private val horizontalModeConfiguration = PaymentSheet.Configuration(
+        merchantDisplayName = "Example, Inc.",
+        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+    )
+
     @Before
     fun setup() {
         Stripe.advancedFraudSignalsEnabled = false
@@ -80,7 +85,7 @@ internal class PaymentSheetAnalyticsTest {
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = null,
+                configuration = horizontalModeConfiguration,
             )
         }
 
@@ -138,7 +143,7 @@ internal class PaymentSheetAnalyticsTest {
         testContext.configureFlowController {
             configureWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = null,
+                configuration = horizontalModeConfiguration,
                 callback = { success, error ->
                     assertThat(success).isTrue()
                     assertThat(error).isNull()

@@ -74,6 +74,7 @@ internal class PaymentSheetBillingConfigurationTest {
                         address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
                         attachDefaultsToPaymentMethod = true,
                     ),
+                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
                 ),
             )
         }
@@ -147,6 +148,7 @@ internal class PaymentSheetBillingConfigurationTest {
                         address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
                         attachDefaultsToPaymentMethod = false,
                     ),
+                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
                 ),
             )
         }
@@ -205,6 +207,7 @@ internal class PaymentSheetBillingConfigurationTest {
                         address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
                         attachDefaultsToPaymentMethod = false,
                     ),
+                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
                 ),
             )
         }

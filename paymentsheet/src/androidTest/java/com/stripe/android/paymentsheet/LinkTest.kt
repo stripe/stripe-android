@@ -167,7 +167,8 @@ internal class LinkTest {
                     customer = PaymentSheet.CustomerConfiguration(
                         id = "cus_1",
                         ephemeralKeySecret = "123"
-                    )
+                    ),
+                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
                 )
             )
 
@@ -447,7 +448,8 @@ internal class LinkTest {
                     customer = PaymentSheet.CustomerConfiguration(
                         id = "cus_1",
                         ephemeralKeySecret = "123"
-                    )
+                    ),
+                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
                 )
             )
 
@@ -892,7 +894,8 @@ internal class LinkTest {
             defaultBillingDetails = PaymentSheet.BillingDetails(
                 email = "test-${UUID.randomUUID()}@email.com",
                 phone = "+15555555555",
-            )
+            ),
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
         )
 
         testContext.launch(configuration)
