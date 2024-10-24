@@ -16,6 +16,7 @@ import com.stripe.android.financialconnections.network.FinancialConnectionsReque
 import com.stripe.android.financialconnections.network.NetworkConstants
 import com.stripe.android.financialconnections.repository.api.ProvideApiRequestOptions
 import com.stripe.android.financialconnections.utils.filterNotNullValues
+import com.stripe.android.financialconnections.utils.toApiParams
 import javax.inject.Inject
 
 internal interface FinancialConnectionsRepository {
@@ -153,10 +154,7 @@ internal class FinancialConnectionsRepositoryImpl @Inject constructor(
         )
 
         val billingDetailsParams = buildMap {
-            if (billingDetails != null) {
-                putAll(billingDetails.apiParams())
-            }
-
+            billingDetails?.let { putAll(it.toApiParams()) }
             put("email", billingEmailAddress)
         }
 

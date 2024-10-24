@@ -7,7 +7,7 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheet.Element
 import com.stripe.android.financialconnections.domain.IsLinkWithStripe
 import com.stripe.android.financialconnections.repository.api.FinancialConnectionsConsumersApiService
 import com.stripe.android.financialconnections.repository.api.ProvideApiRequestOptions
-import com.stripe.android.financialconnections.utils.filterNotNullValues
+import com.stripe.android.financialconnections.utils.toConsumerBillingAddressParams
 import com.stripe.android.model.AttachConsumerToLinkAccountSession
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
@@ -213,7 +213,7 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
             consumerSessionClientSecret = consumerSessionClientSecret,
             paymentDetailsCreateParams = ConsumerPaymentDetailsCreateParams.BankAccount(
                 bankAccountId = bankAccountId,
-                billingAddress = billingDetails?.toConsumerBillingAddress(),
+                billingAddress = billingDetails?.toConsumerBillingAddressParams(),
                 billingEmailAddress = billingEmailAddress,
             ),
             requestSurface = requestSurface,
@@ -229,10 +229,6 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
     ): SharePaymentDetails {
         val fraudDetectionData = fraudDetectionDataRepository.getCached()?.params.orEmpty()
 
-        val extraParams = mapOf(
-            "billing_phone" to billingPhone,
-        ).filterNotNullValues()
-
         return consumersApiService.sharePaymentDetails(
             consumerSessionClientSecret = consumerSessionClientSecret,
             paymentDetailsId = paymentDetailsId,
@@ -240,7 +236,7 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
             billingPhone = elementsSessionContext?.billingDetails?.phone?.takeIf { it.isNotBlank() },
             requestSurface = requestSurface,
             requestOptions = provideApiRequestOptions(useConsumerPublishableKey = false),
-            extraParams = extraParams + fraudDetectionData,
+            extraParams = fraudDetectionData,
         ).getOrThrow()
     }
 
@@ -274,25 +270,4 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
         logger.debug("SYNC_CACHE: updating local consumer session from signUp")
         consumerSessionRepository.storeNewConsumerSession(signup.consumerSession, signup.publishableKey)
     }
-}
-
-private fun BillingDetails.toConsumerBillingAddress(): Map<String, Any> {
-    val contactParams = buildMap {
-        name?.let { put("name", it) }
-    }.filter { entry ->
-        entry.value.isNotBlank()
-    }
-
-    val addressParams = buildMap {
-        address?.line1?.let { put("line_1", it) }
-        address?.line2?.let { put("line_2", it) }
-        address?.postalCode?.let { put("postal_code", it) }
-        address?.city?.let { put("locality", it) }
-        address?.state?.let { put("administrative_area", it) }
-        address?.country?.let { put("country_code", it) }
-    }.filterValues {
-        it.isNotBlank()
-    }
-
-    return contactParams + addressParams
 }

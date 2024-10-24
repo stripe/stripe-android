@@ -7,7 +7,6 @@ import androidx.fragment.app.Fragment
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForDataLauncher
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForTokenLauncher
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetLauncher
-import com.stripe.android.financialconnections.utils.filterNotNullValues
 import com.stripe.android.model.LinkMode
 import kotlinx.parcelize.Parcelize
 
@@ -90,29 +89,7 @@ class FinancialConnectionsSheet internal constructor(
                 val city: String? = null,
                 val state: String? = null,
                 val country: String? = null,
-            ) : Parcelable {
-
-                fun apiParams(): Map<String, Any> {
-                    return buildMap {
-                        line1?.let { put("line1", it) }
-                        line2?.let { put("line2", it) }
-                        postalCode?.let { put("postal_code", it) }
-                        city?.let { put("city", it) }
-                        state?.let { put("state", it) }
-                        country?.let { put("country", it) }
-                    }.filterValues {
-                        it.isNotBlank()
-                    }
-                }
-            }
-
-            fun apiParams(): Map<String, Any> {
-                return mapOf(
-                    "name" to name,
-                    "phone" to phone,
-                    "address" to address?.apiParams(),
-                ).filterNotNullValues()
-            }
+            ) : Parcelable
         }
     }
 
