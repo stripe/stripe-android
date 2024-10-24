@@ -61,6 +61,7 @@ internal fun PaymentSheetTopBar(
     elevation: Dp,
     onNavigationIconPressed: () -> Unit,
 ) {
+    @Suppress("DEPRECATION")
     val keyboardController = LocalTextInputService.current
     val tintColor = MaterialTheme.stripeColors.appBarIcon
 
