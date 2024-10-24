@@ -330,7 +330,7 @@
 |    |    +--- androidx.core:core-ktx:1.13.1 (*)
 |    |    +--- org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3 (*)
 |    |    \--- org.jetbrains.kotlin:kotlin-parcelize-runtime:1.9.25 (*)
-|    +--- androidx.databinding:viewbinding:8.5.2
+|    +--- androidx.databinding:viewbinding:8.7.1
 |    |    \--- androidx.annotation:annotation:1.0.0 -> 1.9.0 (*)
 |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.9.25 (*)
 |    +--- project :hcaptcha
@@ -792,7 +792,7 @@
 |    |    +--- org.bouncycastle:bcprov-jdk15to18:1.69
 |    |    +--- com.nimbusds:nimbus-jose-jwt:9.21
 |    |    |    \--- com.github.stephenc.jcip:jcip-annotations:1.0-1
-|    |    +--- androidx.databinding:viewbinding:8.2.1 -> 8.5.2 (*)
+|    |    +--- androidx.databinding:viewbinding:8.2.1 -> 8.7.1 (*)
 |    |    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.10
 |    |         +--- org.jetbrains.kotlin:kotlin-stdlib:1.9.10 -> 1.9.25 (*)
 |    |         \--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.9.10
@@ -800,14 +800,14 @@
 |    \--- org.jetbrains.kotlin:kotlin-parcelize-runtime:1.9.25 (*)
 +--- project :paymentsheet
 |    +--- project :payments-core (*)
-|    +--- androidx.databinding:viewbinding:8.5.2 (*)
+|    +--- androidx.databinding:viewbinding:8.7.1 (*)
 |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.9.25 (*)
 |    +--- project :link
 |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.9.25 (*)
 |    |    +--- project :payments-core (*)
 |    |    +--- project :stripe-core (*)
 |    |    +--- project :payments-ui-core
-|    |    |    +--- androidx.databinding:viewbinding:8.5.2 (*)
+|    |    |    +--- androidx.databinding:viewbinding:8.7.1 (*)
 |    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.9.25 (*)
 |    |    |    +--- project :stripe-core (*)
 |    |    |    +--- project :payments-core (*)
@@ -947,7 +947,7 @@
 |    +--- androidx.compose.ui:ui-viewbinding:1.6.8
 |    |    +--- androidx.compose.ui:ui:1.6.8 (*)
 |    |    +--- androidx.compose.ui:ui-util:1.6.8 (*)
-|    |    +--- androidx.databinding:viewbinding:4.1.2 -> 8.5.2 (*)
+|    |    +--- androidx.databinding:viewbinding:4.1.2 -> 8.7.1 (*)
 |    |    +--- androidx.fragment:fragment-ktx:1.3.2 -> 1.8.4 (*)
 |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 -> 1.9.25 (*)
 |    |    +--- androidx.compose.ui:ui:1.6.8 (c)
