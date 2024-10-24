@@ -46,8 +46,8 @@ internal class LinkActivity : ComponentActivity() {
             finish()
         }
 
+        val vm = viewModel ?: return
         setContent {
-            val vm = viewModel ?: return@setContent
             var bottomSheetContent by remember { mutableStateOf<BottomSheetContent?>(null) }
             val sheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
             val coroutineScope = rememberCoroutineScope()
