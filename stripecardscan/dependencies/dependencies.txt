@@ -129,7 +129,7 @@
 |         +--- org.jetbrains.kotlin:kotlin-stdlib:1.9.25 (*)
 |         \--- org.jetbrains.kotlin:kotlin-android-extensions-runtime:1.9.25
 |              \--- org.jetbrains.kotlin:kotlin-stdlib:1.9.25 (*)
-+--- androidx.databinding:viewbinding:8.5.2
++--- androidx.databinding:viewbinding:8.7.1
 |    \--- androidx.annotation:annotation:1.0.0 -> 1.9.0 (*)
 +--- org.jetbrains.kotlin:kotlin-stdlib:1.9.25 (*)
 +--- project :camera-core

@@ -324,7 +324,7 @@
 |    |    +--- androidx.core:core-ktx:1.13.1 (*)
 |    |    +--- org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3 (*)
 |    |    \--- org.jetbrains.kotlin:kotlin-parcelize-runtime:1.9.25 (*)
-|    +--- androidx.databinding:viewbinding:8.5.2
+|    +--- androidx.databinding:viewbinding:8.7.1
 |    |    \--- androidx.annotation:annotation:1.0.0 -> 1.9.0 (*)
 |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.9.25 (*)
 |    +--- project :hcaptcha
@@ -773,7 +773,7 @@
 |    |    +--- org.bouncycastle:bcprov-jdk15to18:1.69
 |    |    +--- com.nimbusds:nimbus-jose-jwt:9.21
 |    |    |    \--- com.github.stephenc.jcip:jcip-annotations:1.0-1
-|    |    +--- androidx.databinding:viewbinding:8.2.1 -> 8.5.2 (*)
+|    |    +--- androidx.databinding:viewbinding:8.2.1 -> 8.7.1 (*)
 |    |    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.10
 |    |         +--- org.jetbrains.kotlin:kotlin-stdlib:1.9.10 -> 1.9.25 (*)
 |    |         \--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.9.10
