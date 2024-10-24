@@ -9,26 +9,21 @@ import com.stripe.android.camera.framework.image.size
 import com.stripe.android.camera.framework.util.toRect
 import com.stripe.android.stripecardscan.framework.ResourceFetcher
 import com.stripe.android.stripecardscan.test.R
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class SSDOcrTest {
     private val appContext = InstrumentationRegistry.getInstrumentation().targetContext
     private val testContext = InstrumentationRegistry.getInstrumentation().context
 
-    /**
-     * TODO: this method should use runBlockingTest instead of runBlocking. However, an issue with
-     * runBlockingTest currently fails when functions under test use withContext(Dispatchers.IO) or
-     * withContext(Dispatchers.Default).
-     *
-     * See https://github.com/Kotlin/kotlinx.coroutines/issues/1204 for details.
-     */
     @Test
     @MediumTest
-    fun resourceModelExecution_works() = runBlocking {
+    fun resourceModelExecution_works() = runTest {
         val bitmap = testContext.resources.getDrawable(R.drawable.ocr_card_numbers, null)
             .toBitmap()
             .scale(Size(600, 375))
@@ -56,16 +51,9 @@ class SSDOcrTest {
         assertEquals("4242424242424242", prediction.pan)
     }
 
-    /**
-     * TODO: this method should use runBlockingTest instead of runBlocking. However, an issue with
-     * runBlockingTest currently fails when functions under test use withContext(Dispatchers.IO) or
-     * withContext(Dispatchers.Default).
-     *
-     * See https://github.com/Kotlin/kotlinx.coroutines/issues/1204 for details.
-     */
     @Test
     @MediumTest
-    fun resourceModelExecution_worksWithQR() = runBlocking {
+    fun resourceModelExecution_worksWithQR() = runTest {
         val bitmap = testContext.resources.getDrawable(R.drawable.ocr_card_numbers_qr, null)
             .toBitmap()
             .scale(Size(600, 375))
@@ -93,16 +81,9 @@ class SSDOcrTest {
         assertEquals("4242424242424242", prediction.pan)
     }
 
-    /**
-     * TODO: this method should use runBlockingTest instead of runBlocking. However, an issue with
-     * runBlockingTest currently fails when functions under test use withContext(Dispatchers.IO) or
-     * withContext(Dispatchers.Default).
-     *
-     * See https://github.com/Kotlin/kotlinx.coroutines/issues/1204 for details.
-     */
     @Test
     @MediumTest
-    fun resourceModelExecution_worksRepeatedly() = runBlocking {
+    fun resourceModelExecution_worksRepeatedly() = runTest {
         val bitmap = testContext.resources.getDrawable(R.drawable.ocr_card_numbers, null)
             .toBitmap()
             .scale(Size(600, 375))
