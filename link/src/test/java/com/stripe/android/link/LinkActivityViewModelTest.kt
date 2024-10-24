@@ -14,6 +14,7 @@ import androidx.navigation.NavHostController
 import androidx.savedstate.SavedStateRegistryOwner
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.link.account.FakeLinkAccountManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -33,7 +34,7 @@ import kotlin.test.assertFailsWith
 @RunWith(RobolectricTestRunner::class)
 internal class LinkActivityViewModelTest {
     private val dispatcher = UnconfinedTestDispatcher()
-    private val vm = LinkActivityViewModel(mock())
+    private val vm = LinkActivityViewModel(mock(), FakeLinkAccountManager())
     private val navController: NavHostController = mock()
     private val dismissWithResult: (LinkActivityResult) -> Unit = mock()
 
