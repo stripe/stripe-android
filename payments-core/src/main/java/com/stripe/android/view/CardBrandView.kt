@@ -13,6 +13,7 @@ import android.widget.ImageView
 import android.widget.ListPopupWindow
 import android.widget.TextView
 import androidx.annotation.VisibleForTesting
+import androidx.transition.TransitionManager
 import com.stripe.android.R
 import com.stripe.android.databinding.StripeCardBrandViewBinding
 import com.stripe.android.model.CardBrand
@@ -179,6 +180,8 @@ internal class CardBrandView @JvmOverloads constructor(
 
     private fun updateBrandSpinner() {
         val showDropdown = isCbcEligible && possibleBrands.size > 1 && !shouldShowCvc && !shouldShowErrorIcon
+        val parentViewGroup = parent as? ViewGroup
+
         if (showDropdown) {
             initListPopup()
             this.setOnClickListener {
@@ -188,9 +191,12 @@ internal class CardBrandView @JvmOverloads constructor(
                     listPopup.show()
                 }
             }
+
+            parentViewGroup.animateNextChanges()
             chevron.visibility = View.VISIBLE
         } else {
             this.setOnClickListener(null)
+            parentViewGroup.animateNextChanges()
             chevron.visibility = View.GONE
         }
     }
@@ -235,6 +241,13 @@ internal class CardBrandView @JvmOverloads constructor(
         determineCardBrandToDisplay()
         updateBrandSpinner()
         super.onRestoreInstanceState(savedState?.superState ?: state)
+    }
+
+    private fun ViewGroup?.animateNextChanges() {
+        this?.let {
+            TransitionManager.endTransitions(this)
+            TransitionManager.beginDelayedTransition(this)
+        }
     }
 
     @Parcelize
