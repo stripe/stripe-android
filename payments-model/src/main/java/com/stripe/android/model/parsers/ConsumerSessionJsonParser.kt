@@ -1,6 +1,7 @@
 package com.stripe.android.model.parsers
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.model.StripeJsonUtils.optString
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.model.ConsumerSession
 import org.json.JSONObject
@@ -23,6 +24,7 @@ class ConsumerSessionJsonParser : ModelJsonParser<ConsumerSession> {
             emailAddress = consumerSessionJson.getString(FIELD_CONSUMER_SESSION_EMAIL),
             redactedFormattedPhoneNumber = consumerSessionJson.getString(FIELD_CONSUMER_SESSION_FORMATTED_PHONE),
             redactedPhoneNumber = consumerSessionJson.getString(FIELD_CONSUMER_SESSION_PHONE),
+            unredactedPhoneNumber = optString(consumerSessionJson, FIELD_CONSUMER_SESSION_UNREDACTED_PHONE),
             verificationSessions = verificationSession,
         )
     }
@@ -43,6 +45,7 @@ class ConsumerSessionJsonParser : ModelJsonParser<ConsumerSession> {
         private const val FIELD_CONSUMER_SESSION_SECRET = "client_secret"
         private const val FIELD_CONSUMER_SESSION_EMAIL = "email_address"
         private const val FIELD_CONSUMER_SESSION_PHONE = "redacted_phone_number"
+        private const val FIELD_CONSUMER_SESSION_UNREDACTED_PHONE = "unredacted_phone_number"
         private const val FIELD_CONSUMER_SESSION_FORMATTED_PHONE = "redacted_formatted_phone_number"
         private const val FIELD_CONSUMER_SESSION_VERIFICATION_SESSIONS = "verification_sessions"
 

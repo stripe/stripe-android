@@ -6,6 +6,7 @@ import com.stripe.android.core.exception.AuthenticationException
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext.BillingDetails
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccountList
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.GetFinancialConnectionsAcccountsParams
@@ -15,6 +16,7 @@ import com.stripe.android.financialconnections.network.FinancialConnectionsReque
 import com.stripe.android.financialconnections.network.NetworkConstants
 import com.stripe.android.financialconnections.repository.api.ProvideApiRequestOptions
 import com.stripe.android.financialconnections.utils.filterNotNullValues
+import com.stripe.android.financialconnections.utils.toApiParams
 import javax.inject.Inject
 
 internal interface FinancialConnectionsRepository {
@@ -57,6 +59,8 @@ internal interface FinancialConnectionsRepository {
     suspend fun createPaymentMethod(
         paymentDetailsId: String,
         consumerSessionClientSecret: String,
+        billingDetails: BillingDetails?,
+        billingEmailAddress: String,
     ): PaymentMethod
 }
 
@@ -135,18 +139,27 @@ internal class FinancialConnectionsRepositoryImpl @Inject constructor(
 
     override suspend fun createPaymentMethod(
         paymentDetailsId: String,
-        consumerSessionClientSecret: String
+        consumerSessionClientSecret: String,
+        billingDetails: BillingDetails?,
+        billingEmailAddress: String,
     ): PaymentMethod {
-        val credentials = mapOf(
-            "consumer_session_client_secret" to consumerSessionClientSecret,
-        )
-
-        val params = mapOf(
+        val linkParams = mapOf(
             "type" to "link",
             "link" to mapOf(
-                "credentials" to credentials,
+                "credentials" to mapOf(
+                    "consumer_session_client_secret" to consumerSessionClientSecret,
+                ),
                 "payment_details_id" to paymentDetailsId,
             ),
+        )
+
+        val billingDetailsParams = buildMap {
+            billingDetails?.let { putAll(it.toApiParams()) }
+            put("email", billingEmailAddress)
+        }
+
+        val billingParams = mapOf(
+            "billing_details" to billingDetailsParams,
         )
 
         val fraudDetectionParams = fraudDetectionDataRepository.getCached()?.params.orEmpty()
@@ -154,7 +167,7 @@ internal class FinancialConnectionsRepositoryImpl @Inject constructor(
         val request = apiRequestFactory.createPost(
             url = paymentMethodsUrl,
             options = provideApiRequestOptions(useConsumerPublishableKey = false),
-            params = params + fraudDetectionParams,
+            params = linkParams + billingParams + fraudDetectionParams,
         )
 
         return requestExecutor.execute(
