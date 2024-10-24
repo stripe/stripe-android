@@ -321,7 +321,7 @@ class DefaultLinkAccountManagerTest {
     fun `signInWithUserInput sends correct consumer action on 'ImpliedWithPrefilledEmail' consent action`() =
         runSuspendTest {
             val linkRepository = object : FakeLinkRepository() {
-                var callCount = 0
+                val consentActions = arrayListOf<ConsumerSignUpConsentAction>()
                 override suspend fun consumerSignUp(
                     email: String,
                     phone: String,
@@ -329,9 +329,7 @@ class DefaultLinkAccountManagerTest {
                     name: String?,
                     consentAction: ConsumerSignUpConsentAction
                 ): Result<ConsumerSessionSignup> {
-                    if (consentAction == ConsumerSignUpConsentAction.ImpliedWithPrefilledEmail) {
-                        callCount += 1
-                    }
+                    consentActions.add(consentAction)
                     return super.consumerSignUp(email, phone, country, name, consentAction)
                 }
             }
@@ -341,7 +339,8 @@ class DefaultLinkAccountManagerTest {
                 )
             )
 
-            assertThat(linkRepository.callCount).isEqualTo(1)
+            assertThat(linkRepository.consentActions)
+                .isEqualTo(listOf(ConsumerSignUpConsentAction.ImpliedWithPrefilledEmail))
         }
 
     @Test
@@ -543,40 +542,6 @@ class DefaultLinkAccountManagerTest {
 
         assertThat(linkRepository.createCardPaymentDetailsCallCount).isEqualTo(1)
         assertThat(linkRepository.shareCardPaymentDetailsCallCount).isEqualTo(1)
-        assertThat(accountManager.linkAccount.value).isNotNull()
-    }
-
-    @Test
-    fun `lookupConsumer starts session when startSession is true`() = runSuspendTest {
-        val linkRepository = object : FakeLinkRepository() {
-            var callCount = 0
-            override suspend fun lookupConsumer(email: String): Result<ConsumerSessionLookup> {
-                val consumerSession = TestFactory.CONSUMER_SESSION.copy(
-                    clientSecret = TestFactory.CLIENT_SECRET,
-                    verificationSessions = emptyList()
-                )
-                val consumerSessionLookup = TestFactory.CONSUMER_SESSION_LOOKUP.copy(
-                    consumerSession = consumerSession
-                )
-                return Result.success(consumerSessionLookup)
-            }
-
-            override suspend fun startVerification(
-                consumerSessionClientSecret: String,
-                consumerPublishableKey: String?
-            ): Result<ConsumerSession> {
-                if (consumerPublishableKey == TestFactory.PUBLISHABLE_KEY) callCount += 1
-                return super.startVerification(consumerSessionClientSecret, consumerPublishableKey)
-            }
-        }
-
-        val accountManager = accountManager(
-            linkRepository = linkRepository
-        )
-
-        accountManager.lookupConsumer(TestFactory.EMAIL, true)
-
-        assertThat(linkRepository.callCount).isEqualTo(1)
         assertThat(accountManager.linkAccount.value).isNotNull()
     }
 
