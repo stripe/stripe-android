@@ -51,6 +51,7 @@ internal sealed class Destination(
     val closeWithoutConfirmation: Boolean,
     val logPaneLaunched: Boolean,
     extraArgs: List<NamedNavArgument> = emptyList(),
+    val fadeOnlyTransition: Boolean,
     protected val composable: @Composable (NavBackStackEntry) -> Unit
 ) {
 
@@ -95,6 +96,7 @@ internal sealed class Destination(
         route = Pane.INSTITUTION_PICKER.value,
         closeWithoutConfirmation = false,
         logPaneLaunched = true,
+        fadeOnlyTransition = false,
         composable = { InstitutionPickerScreen(it) },
     )
 
@@ -102,6 +104,7 @@ internal sealed class Destination(
         route = Pane.CONSENT.value,
         closeWithoutConfirmation = true,
         logPaneLaunched = true,
+        fadeOnlyTransition = false,
         composable = { ConsentScreen() }
     )
 
@@ -109,6 +112,7 @@ internal sealed class Destination(
         route = Pane.PARTNER_AUTH_DRAWER.value,
         closeWithoutConfirmation = false,
         logPaneLaunched = true,
+        fadeOnlyTransition = false,
         composable = { PartnerAuthScreen(inModal = true) }
     )
 
@@ -116,6 +120,7 @@ internal sealed class Destination(
         route = Pane.PARTNER_AUTH.value,
         closeWithoutConfirmation = false,
         logPaneLaunched = true,
+        fadeOnlyTransition = false,
         composable = { PartnerAuthScreen(inModal = false) }
     )
 
@@ -123,6 +128,7 @@ internal sealed class Destination(
         route = Pane.ACCOUNT_PICKER.value,
         closeWithoutConfirmation = false,
         logPaneLaunched = true,
+        fadeOnlyTransition = false,
         composable = { AccountPickerScreen() }
     )
 
@@ -130,6 +136,7 @@ internal sealed class Destination(
         route = Pane.SUCCESS.value,
         closeWithoutConfirmation = true,
         logPaneLaunched = true,
+        fadeOnlyTransition = false,
         composable = { SuccessScreen() }
     )
 
@@ -137,6 +144,7 @@ internal sealed class Destination(
         route = Pane.MANUAL_ENTRY.value,
         closeWithoutConfirmation = false,
         logPaneLaunched = true,
+        fadeOnlyTransition = false,
         composable = { ManualEntryScreen() }
     )
 
@@ -144,6 +152,7 @@ internal sealed class Destination(
         route = Pane.ATTACH_LINKED_PAYMENT_ACCOUNT.value,
         closeWithoutConfirmation = false,
         logPaneLaunched = true,
+        fadeOnlyTransition = true,
         composable = { AttachPaymentScreen() }
     )
 
@@ -151,6 +160,7 @@ internal sealed class Destination(
         route = Pane.NETWORKING_LINK_SIGNUP_PANE.value,
         closeWithoutConfirmation = false,
         logPaneLaunched = true,
+        fadeOnlyTransition = false,
         composable = { NetworkingLinkSignupScreen() }
     )
 
@@ -164,6 +174,7 @@ internal sealed class Destination(
         ),
         closeWithoutConfirmation = false,
         logPaneLaunched = true,
+        fadeOnlyTransition = false,
         composable = { NetworkingLinkLoginWarmupScreen(it) }
     )
 
@@ -171,6 +182,7 @@ internal sealed class Destination(
         route = Pane.NETWORKING_LINK_VERIFICATION.value,
         closeWithoutConfirmation = false,
         logPaneLaunched = true,
+        fadeOnlyTransition = false,
         composable = { NetworkingLinkVerificationScreen() }
     )
 
@@ -178,6 +190,7 @@ internal sealed class Destination(
         route = Pane.NETWORKING_SAVE_TO_LINK_VERIFICATION.value,
         closeWithoutConfirmation = false,
         logPaneLaunched = true,
+        fadeOnlyTransition = false,
         composable = { NetworkingSaveToLinkVerificationScreen() }
     )
 
@@ -185,6 +198,7 @@ internal sealed class Destination(
         route = Pane.LINK_ACCOUNT_PICKER.value,
         closeWithoutConfirmation = false,
         logPaneLaunched = true,
+        fadeOnlyTransition = false,
         composable = { LinkAccountPickerScreen() },
     )
 
@@ -192,6 +206,7 @@ internal sealed class Destination(
         route = Pane.LINK_STEP_UP_VERIFICATION.value,
         closeWithoutConfirmation = false,
         logPaneLaunched = true,
+        fadeOnlyTransition = false,
         composable = { LinkStepUpVerificationScreen() }
     )
 
@@ -199,6 +214,7 @@ internal sealed class Destination(
         route = Pane.RESET.value,
         closeWithoutConfirmation = false,
         logPaneLaunched = true,
+        fadeOnlyTransition = false,
         composable = { ResetScreen() }
     )
 
@@ -206,6 +222,7 @@ internal sealed class Destination(
         route = Pane.EXIT.value,
         closeWithoutConfirmation = false,
         logPaneLaunched = false,
+        fadeOnlyTransition = false,
         composable = { ExitModal(it) }
     )
 
@@ -213,6 +230,7 @@ internal sealed class Destination(
         route = Pane.NOTICE.value,
         closeWithoutConfirmation = false,
         logPaneLaunched = false,
+        fadeOnlyTransition = false,
         composable = { NoticeSheet(it) },
     )
 
@@ -220,6 +238,7 @@ internal sealed class Destination(
         route = Pane.ACCOUNT_UPDATE_REQUIRED.value,
         closeWithoutConfirmation = false,
         logPaneLaunched = false,
+        fadeOnlyTransition = false,
         composable = { AccountUpdateRequiredModal(it) },
     )
 
@@ -227,6 +246,7 @@ internal sealed class Destination(
         route = Pane.UNEXPECTED_ERROR.value,
         closeWithoutConfirmation = false,
         logPaneLaunched = false,
+        fadeOnlyTransition = false,
         composable = { ErrorScreen() }
     )
 
@@ -234,6 +254,7 @@ internal sealed class Destination(
         route = Pane.BANK_AUTH_REPAIR.value,
         closeWithoutConfirmation = false,
         logPaneLaunched = true,
+        fadeOnlyTransition = false,
         composable = { BankAuthRepairScreen() }
     )
 
@@ -241,6 +262,7 @@ internal sealed class Destination(
         route = Pane.MANUAL_ENTRY_SUCCESS.value,
         closeWithoutConfirmation = true,
         logPaneLaunched = true,
+        fadeOnlyTransition = false,
         composable = { ManualEntrySuccessScreen() }
     )
 
