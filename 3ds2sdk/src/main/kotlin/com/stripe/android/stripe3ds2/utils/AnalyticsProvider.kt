@@ -20,7 +20,7 @@ internal class AnalyticsProvider private constructor() {
             get() {
                 val provider = this.provider ?: AnalyticsProvider()
 
-                if (this.provider ==  null) {
+                if (this.provider == null) {
                     this.provider = provider
                 }
 

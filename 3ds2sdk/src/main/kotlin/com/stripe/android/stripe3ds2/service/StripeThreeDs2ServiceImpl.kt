@@ -24,12 +24,10 @@ import com.stripe.android.stripe3ds2.transaction.MessageVersionRegistry
 import com.stripe.android.stripe3ds2.transaction.SdkTransactionId
 import com.stripe.android.stripe3ds2.transaction.Transaction
 import com.stripe.android.stripe3ds2.transaction.TransactionFactory
-import com.stripe.android.stripe3ds2.utils.AnalyticsDelegate
 import com.stripe.android.stripe3ds2.utils.ImageCache
 import com.stripe.android.stripe3ds2.views.Brand
 import java.security.PublicKey
 import java.security.cert.X509Certificate
-import java.util.ServiceLoader
 import kotlin.coroutines.CoroutineContext
 
 class StripeThreeDs2ServiceImpl @VisibleForTesting internal constructor(
