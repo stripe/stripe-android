@@ -169,6 +169,7 @@ private fun PaymentSheetScreen(
 
 @Composable
 private fun DismissKeyboardOnProcessing(processing: Boolean) {
+    @Suppress("DEPRECATION")
     val keyboardController = LocalTextInputService.current
 
     if (processing) {
