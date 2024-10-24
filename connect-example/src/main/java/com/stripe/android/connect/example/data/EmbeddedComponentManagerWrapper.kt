@@ -5,6 +5,7 @@ import com.stripe.android.connect.FetchClientSecretCallback.ClientSecretResultCa
 import com.stripe.android.connect.PrivateBetaConnectSDK
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 
@@ -25,6 +26,7 @@ class EmbeddedComponentManagerWrapper private constructor() {
         ioScope.launch {
             embeddedComponentService.publishableKey
                 .filterNotNull()
+                .distinctUntilChanged()
                 .collect { publishableKey ->
                     EmbeddedComponentManager.init(
                         configuration = EmbeddedComponentManager.Configuration(

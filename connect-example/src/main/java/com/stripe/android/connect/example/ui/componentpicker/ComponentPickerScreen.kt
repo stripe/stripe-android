@@ -88,7 +88,8 @@ fun ComponentPickerScreen(
             sheetState = settingsSheetState,
             sheetContent = {
                 SettingsView(
-                    onDismiss = onReloadRequested,
+                    onDismiss = { coroutineScope.launch { settingsSheetState.hide() } },
+                    onReloadRequested = onReloadRequested,
                 )
             },
         ) {
