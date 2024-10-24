@@ -49,9 +49,9 @@ import com.stripe.android.paymentsheet.ui.PaymentMethodUpdateOperation
 import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import com.stripe.android.utils.CompletableSingle
 import com.stripe.android.utils.DummyActivityResultCaller
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.StandardTestDispatcher
 import org.mockito.kotlin.mock
@@ -112,9 +112,9 @@ internal object CustomerSheetTestHelper {
             workContext = workContext,
             originalPaymentSelection = savedPaymentSelection,
             paymentConfigurationProvider = { paymentConfiguration },
-            paymentMethodDataSourceProvider = CompletableDeferred(paymentMethodDataSource),
-            intentDataSourceProvider = CompletableDeferred(intentDataSource),
-            savedSelectionDataSourceProvider = CompletableDeferred(savedSelectionDataSource),
+            paymentMethodDataSourceProvider = CompletableSingle(paymentMethodDataSource),
+            intentDataSourceProvider = CompletableSingle(intentDataSource),
+            savedSelectionDataSourceProvider = CompletableSingle(savedSelectionDataSource),
             stripeRepository = stripeRepository,
             configuration = configuration,
             integrationType = integrationType,

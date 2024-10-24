@@ -5,6 +5,8 @@ import androidx.activity.ComponentActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import com.stripe.android.common.coroutines.Single
+import com.stripe.android.common.coroutines.asSingle
 import com.stripe.android.customersheet.CustomerSheetIntegration
 import com.stripe.android.customersheet.data.CustomerSheetInitializationDataSource
 import com.stripe.android.customersheet.data.CustomerSheetIntentDataSource
@@ -13,12 +15,7 @@ import com.stripe.android.customersheet.data.CustomerSheetSavedSelectionDataSour
 import com.stripe.android.customersheet.data.injection.DaggerCustomerAdapterDataSourceComponent
 import com.stripe.android.customersheet.data.injection.DaggerCustomerSessionDataSourceComponent
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.first
 
 /**
  * This objects holds references to objects that need to be shared across Activity boundaries
@@ -27,20 +24,20 @@ import kotlinx.coroutines.flow.first
 @OptIn(ExperimentalCustomerSessionApi::class)
 internal object CustomerSheetHacks {
     private val _initializationDataSource = MutableStateFlow<CustomerSheetInitializationDataSource?>(null)
-    val initializationDataSource: Deferred<CustomerSheetInitializationDataSource>
-        get() = _initializationDataSource.asDeferred()
+    val initializationDataSource: Single<CustomerSheetInitializationDataSource>
+        get() = _initializationDataSource.asSingle()
 
     private val _paymentMethodDataSource = MutableStateFlow<CustomerSheetPaymentMethodDataSource?>(null)
-    val paymentMethodDataSource: Deferred<CustomerSheetPaymentMethodDataSource>
-        get() = _paymentMethodDataSource.asDeferred()
+    val paymentMethodDataSource: Single<CustomerSheetPaymentMethodDataSource>
+        get() = _paymentMethodDataSource.asSingle()
 
     private val _savedSelectionDataSource = MutableStateFlow<CustomerSheetSavedSelectionDataSource?>(null)
-    val savedSelectionDataSource: Deferred<CustomerSheetSavedSelectionDataSource>
-        get() = _savedSelectionDataSource.asDeferred()
+    val savedSelectionDataSource: Single<CustomerSheetSavedSelectionDataSource>
+        get() = _savedSelectionDataSource.asSingle()
 
     private val _intentDataSource = MutableStateFlow<CustomerSheetIntentDataSource?>(null)
-    val intentDataSource: Deferred<CustomerSheetIntentDataSource>
-        get() = _intentDataSource.asDeferred()
+    val intentDataSource: Single<CustomerSheetIntentDataSource>
+        get() = _intentDataSource.asSingle()
 
     fun initialize(
         application: Application,
@@ -102,16 +99,5 @@ internal object CustomerSheetHacks {
         _paymentMethodDataSource.value = null
         _savedSelectionDataSource.value = null
         _intentDataSource.value = null
-    }
-}
-
-private fun <T : Any> Flow<T?>.asDeferred(): Deferred<T> {
-    val deferred = CompletableDeferred<T>()
-
-    // Prevent casting to CompletableDeferred and manual completion.
-    return object : Deferred<T> by deferred {
-        override suspend fun await(): T {
-            return this@asDeferred.filterNotNull().first()
-        }
     }
 }
