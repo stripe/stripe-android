@@ -84,7 +84,11 @@ class MainActivity : ComponentActivity() {
             ModalBottomSheetLayout(
                 modifier = Modifier.fillMaxSize(),
                 sheetState = settingsSheetState,
-                sheetContent = { SettingsView(onDismiss = onReloadRequested) },
+                sheetContent = {
+                    SettingsView(
+                        onDismiss = { coroutineScope.launch { settingsSheetState.hide() } },
+                        onReloadRequested = onReloadRequested,
+                    ) },
             ) {
                 Column(
                     modifier = Modifier.fillMaxSize(),
