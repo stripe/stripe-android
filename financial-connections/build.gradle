@@ -89,7 +89,8 @@ android {
     kotlinOptions {
         freeCompilerArgs += [
                 "-opt-in=kotlin.RequiresOptIn",
-                "-opt-in=androidx.compose.material.ExperimentalMaterialApi"
+                "-opt-in=androidx.compose.material.ExperimentalMaterialApi",
+                "-Xconsistent-data-class-copy-visibility",
         ]
     }
 }

@@ -24,7 +24,9 @@ sealed class PaymentMethodOptionsParams(
     }
 
     @Parcelize
-    data class Card @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) constructor(
+    data class Card
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    constructor(
         var cvc: String? = null,
         var network: String? = null,
         var setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage? = null,

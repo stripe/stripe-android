@@ -15,6 +15,7 @@ import com.stripe.android.customersheet.data.injection.DaggerCustomerSessionData
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.InternalForInheritanceCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.filterNotNull
@@ -105,6 +106,7 @@ internal object CustomerSheetHacks {
     }
 }
 
+@OptIn(InternalForInheritanceCoroutinesApi::class)
 private fun <T : Any> Flow<T?>.asDeferred(): Deferred<T> {
     val deferred = CompletableDeferred<T>()
 

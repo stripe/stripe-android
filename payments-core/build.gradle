@@ -111,6 +111,7 @@ android {
             freeCompilerArgs += [
                     "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
                     "-Xcontext-receivers",
+                    "-Xconsistent-data-class-copy-visibility",
             ]
         }
     }

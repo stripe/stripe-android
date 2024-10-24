@@ -69,7 +69,10 @@ android {
             }
         }
         kotlinOptions {
-            freeCompilerArgs += ["-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"]
+            freeCompilerArgs += [
+                    "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
+                    "-Xconsistent-data-class-copy-visibility",
+            ]
         }
     }
 }

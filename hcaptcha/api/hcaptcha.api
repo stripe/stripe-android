@@ -13,13 +13,13 @@ public final class com/stripe/hcaptcha/HCaptchaStateListener$Creator : android/o
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/hcaptcha/config/HCaptchaConfig$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+public synthetic class com/stripe/hcaptcha/config/HCaptchaConfig$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field INSTANCE Lcom/stripe/hcaptcha/config/HCaptchaConfig$$serializer;
-	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
-	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/hcaptcha/config/HCaptchaConfig;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/hcaptcha/config/HCaptchaConfig;
 	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
-	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/hcaptcha/config/HCaptchaConfig;)V
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/hcaptcha/config/HCaptchaConfig;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
