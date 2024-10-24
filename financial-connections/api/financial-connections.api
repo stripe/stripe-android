@@ -145,19 +145,19 @@ public final class com/stripe/android/financialconnections/FinancialConnectionsS
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/financialconnections/FinancialConnectionsSheet$ElementsSessionContext$BillingAddress$Address$Creator : android/os/Parcelable$Creator {
+public final class com/stripe/android/financialconnections/FinancialConnectionsSheet$ElementsSessionContext$BillingDetails$Address$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/financialconnections/FinancialConnectionsSheet$ElementsSessionContext$BillingAddress$Address;
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/financialconnections/FinancialConnectionsSheet$ElementsSessionContext$BillingDetails$Address;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/financialconnections/FinancialConnectionsSheet$ElementsSessionContext$BillingAddress$Address;
+	public final fun newArray (I)[Lcom/stripe/android/financialconnections/FinancialConnectionsSheet$ElementsSessionContext$BillingDetails$Address;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/financialconnections/FinancialConnectionsSheet$ElementsSessionContext$BillingAddress$Creator : android/os/Parcelable$Creator {
+public final class com/stripe/android/financialconnections/FinancialConnectionsSheet$ElementsSessionContext$BillingDetails$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/financialconnections/FinancialConnectionsSheet$ElementsSessionContext$BillingAddress;
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/financialconnections/FinancialConnectionsSheet$ElementsSessionContext$BillingDetails;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/financialconnections/FinancialConnectionsSheet$ElementsSessionContext$BillingAddress;
+	public final fun newArray (I)[Lcom/stripe/android/financialconnections/FinancialConnectionsSheet$ElementsSessionContext$BillingDetails;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
