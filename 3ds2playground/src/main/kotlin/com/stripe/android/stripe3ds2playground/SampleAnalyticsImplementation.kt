@@ -3,7 +3,7 @@ package com.stripe.android.stripe3ds2playground
 import android.util.Log
 import com.stripe.android.stripe3ds2.utils.AnalyticsDelegate
 
-internal class SampleAnalyticsImplementation: AnalyticsDelegate {
+internal class SampleAnalyticsImplementation : AnalyticsDelegate {
 
     override fun didReceiveChallengeResponseWithTransactionId(transactionId: String, flow: String) {
         Log.d("Playground Analytics", "Did Receive Challenge With Trans ID: $transactionId, $flow")

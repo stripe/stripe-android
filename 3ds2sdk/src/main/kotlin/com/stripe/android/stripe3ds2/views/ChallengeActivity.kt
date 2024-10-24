@@ -15,7 +15,7 @@ import com.stripe.android.stripe3ds2.init.ui.UiCustomization
 import com.stripe.android.stripe3ds2.observability.DefaultErrorReporter
 import com.stripe.android.stripe3ds2.observability.ErrorReporter
 import com.stripe.android.stripe3ds2.observability.Stripe3ds2ErrorReporterConfig
-import com.stripe.android.stripe3ds2.service.AnalyticsProvider
+import com.stripe.android.stripe3ds2.utils.AnalyticsProvider
 import com.stripe.android.stripe3ds2.transaction.ChallengeAction
 import com.stripe.android.stripe3ds2.transaction.ChallengeActionHandler
 import com.stripe.android.stripe3ds2.transaction.ChallengeResult

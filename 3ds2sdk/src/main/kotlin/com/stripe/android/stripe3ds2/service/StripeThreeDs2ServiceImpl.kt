@@ -203,30 +203,3 @@ class StripeThreeDs2ServiceImpl @VisibleForTesting internal constructor(
         private const val STRIPE_SDK_REFERENCE_NUMBER = "3DS_LOA_SDK_STIN_020100_00142"
     }
 }
-
-class AnalyticsProvider private constructor() {
-    private val loader: ServiceLoader<AnalyticsDelegate> = ServiceLoader.load(AnalyticsDelegate::class.java)
-
-    fun serviceImpl(): AnalyticsDelegate? {
-        if (loader.iterator().hasNext()) {
-            return loader.iterator().next()
-        }
-
-        return null
-    }
-
-    companion object {
-        private var provider: AnalyticsProvider? = null
-
-        val instance: AnalyticsProvider
-            get() {
-                val provider = this.provider ?: AnalyticsProvider()
-
-                if (this.provider ==  null) {
-                    this.provider = provider
-                }
-
-                return provider
-            }
-    }
-}
