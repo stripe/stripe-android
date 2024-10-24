@@ -1,6 +1,5 @@
 package com.stripe.android.connect.example.data
 
-import android.app.Application
 import com.stripe.android.connect.EmbeddedComponentManager
 import com.stripe.android.connect.FetchClientSecretCallback.ClientSecretResultCallback
 import com.stripe.android.connect.PrivateBetaConnectSDK
@@ -24,7 +23,7 @@ class EmbeddedComponentManagerWrapper private constructor() {
     // re-init the manager anytime the publishable key changes
     private fun reinitManagerOnPublishableKeyChange() {
         ioScope.launch {
-            settingsService.publishableKey
+            embeddedComponentService.publishableKey
                 .filterNotNull()
                 .collect { publishableKey ->
                     EmbeddedComponentManager.init(
@@ -66,7 +65,6 @@ class EmbeddedComponentManagerWrapper private constructor() {
                 instance = it
             }
         }
-
 
         fun getInstance(): EmbeddedComponentManagerWrapper {
             return instance ?: throw IllegalStateException("EmbeddedComponentManagerWrapper is not initialized")

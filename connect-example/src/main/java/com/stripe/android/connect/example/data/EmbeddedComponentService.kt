@@ -7,18 +7,31 @@ import com.github.kittinunf.fuel.core.Request
 import com.github.kittinunf.fuel.core.Response
 import com.github.kittinunf.fuel.core.awaitResult
 import com.github.kittinunf.result.Result
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.json.Json
 
-class EmbeddedComponentService private constructor() {
+class EmbeddedComponentService private constructor(
+    private val settingsService: SettingsService = SettingsService.getInstance(),
+) {
 
-    private var exampleBackendBaseUrl: String = DEFAULT_SERVER_BASE_URL
+    var serverBaseUrl: String = settingsService.getSelectedServerBaseURL() ?: DEFAULT_SERVER_BASE_URL
+        private set
+
+    private val _publishableKey: MutableStateFlow<String?> = MutableStateFlow(null)
+    val publishableKey: StateFlow<String?> = _publishableKey
+
+    private val _accounts: MutableStateFlow<List<Merchant>?> = MutableStateFlow(null)
+    val accounts: StateFlow<List<Merchant>?> = _accounts
 
     fun setBackendBaseUrl(url: String) {
-        exampleBackendBaseUrl = url
-        if (!exampleBackendBaseUrl.endsWith("/")) {
-            exampleBackendBaseUrl += "/"
+        serverBaseUrl = if (!url.endsWith("/")) {
+            "$url/"
+        } else {
+            url
         }
+        settingsService.setSelectedServerBaseURL(url)
     }
 
     private val fuel = FuelManager.instance
@@ -42,9 +55,13 @@ class EmbeddedComponentService private constructor() {
      * of available merchants. Throws a [FuelError] exception on network issues and other errors.
      */
     suspend fun getAccounts(): GetAccountsResponse {
-        return fuel.get(exampleBackendBaseUrl + "app_info")
+        return fuel.get(serverBaseUrl + "app_info")
             .awaitModel(GetAccountsResponse.serializer())
             .get()
+            .apply {
+                _publishableKey.value = publishableKey
+                _accounts.value = availableMerchants
+            }
     }
 
     /**
@@ -52,7 +69,7 @@ class EmbeddedComponentService private constructor() {
      * Throws a [FuelError] exception on network issues and other errors.
      */
     suspend fun fetchClientSecret(account: String): String {
-        return fuel.post(exampleBackendBaseUrl + "account_session")
+        return fuel.post(serverBaseUrl + "account_session")
             .header("account", account)
             .awaitModel(FetchClientSecretResponse.serializer())
             .get()

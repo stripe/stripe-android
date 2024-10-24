@@ -25,13 +25,11 @@ class SettingsViewModel(
     private val settingsService: SettingsService = SettingsService.getInstance(),
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(
-        SettingsState(serverUrl = settingsService.getSelectedServerBaseURL())
-    )
+    private val _state = MutableStateFlow(SettingsState(serverUrl = embeddedComponentService.serverBaseUrl))
     val state = _state.asStateFlow()
 
     init {
-        loadAppSettings()
+        loadSettings()
 
         viewModelScope.launch {
             _state.map {
@@ -95,7 +93,7 @@ class SettingsViewModel(
                 settingsService.setOnboardingSettings(onboardingSettings)
                 settingsService.setPresentationSettings(presentationSettings)
             }
-            logger.info("Settings saved")
+            logger.info("(SettingsViewModel) Settings saved")
 
             _state.update { it.copy(saveEnabled = false) }
         }
@@ -103,11 +101,22 @@ class SettingsViewModel(
 
     // Private functions
 
-    private fun loadAppSettings() {
-        _state.update {
-            it.copy(
-                serverUrl = settingsService.getSelectedServerBaseURL(),
-                selectedAccountId = settingsService.getSelectedMerchant(),
+    private fun loadSettings() {
+        _state.update { state ->
+            val accountsFromService = embeddedComponentService.accounts.value ?: emptyList()
+            val selectedAccount = settingsService.getSelectedMerchant()
+            val selectedAccountIsOther = accountsFromService.none { it.merchantId == selectedAccount }
+            val mergedAccounts = accountsFromService.map {
+                DemoMerchant.Merchant(
+                    displayName = it.displayName,
+                    merchantId = it.merchantId
+                )
+            } + DemoMerchant.Other(if (selectedAccountIsOther) selectedAccount else null)
+
+            state.copy(
+                serverUrl = embeddedComponentService.serverBaseUrl,
+                selectedAccountId = selectedAccount,
+                accounts = mergedAccounts,
                 onboardingSettings = settingsService.getOnboardingSettings(),
                 presentationSettings = settingsService.getPresentationSettings(),
                 saveEnabled = false,
