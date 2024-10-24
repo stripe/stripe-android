@@ -55,4 +55,13 @@ internal class FormPage(
             .onNodeWithTag(FORM_ELEMENT_TEST_TAG)
             .assertDoesNotExist()
     }
+
+    fun assertErrorExists(errorMessage: String) {
+        composeTestRule.onNode(hasText(errorMessage)).assertExists()
+    }
+
+    fun fillCardNumber(number: String) {
+        waitUntilVisible()
+        replaceText(cardNumber, number)
+    }
 }

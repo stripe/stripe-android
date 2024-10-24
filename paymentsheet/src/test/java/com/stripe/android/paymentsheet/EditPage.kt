@@ -27,6 +27,21 @@ internal class EditPage(
             .performClick()
     }
 
+    fun assertNotInDropdown(cardBrand: String) {
+        // Click on the dropdown menu to expand it
+        composeTestRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG)
+            .performClick()
+
+        // Attempt to find the node with the specified cardBrand
+        // and assert that it does not exist
+        composeTestRule.onNodeWithTag("${TEST_TAG_DROP_DOWN_CHOICE}_$cardBrand")
+            .assertDoesNotExist()
+
+        // Optionally, close the dropdown menu if it's still open
+        composeTestRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG)
+            .performClick()
+    }
+
     fun update() {
         composeTestRule.onNodeWithTag(TEST_TAG_EDIT_SCREEN_UPDATE_BUTTON)
             .performClick()
