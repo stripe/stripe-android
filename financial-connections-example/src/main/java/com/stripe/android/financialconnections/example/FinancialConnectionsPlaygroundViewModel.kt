@@ -434,9 +434,6 @@ enum class Merchant(
     Networking("networking"),
     LiveTesting("live_testing", canSwitchBetweenTestAndLive = false),
     TestMode("testmode", canSwitchBetweenTestAndLive = false),
-    NmeDefaultVerification("nme", canSwitchBetweenTestAndLive = true),
-    NmeABAVVerification("nme_abav", canSwitchBetweenTestAndLive = true),
-    NmeSkipVerification("nme_skip", canSwitchBetweenTestAndLive = true),
     Custom("other");
 
     companion object {
