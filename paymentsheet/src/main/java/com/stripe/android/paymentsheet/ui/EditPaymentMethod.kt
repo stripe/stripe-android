@@ -19,13 +19,12 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.LocalMinimumInteractiveComponentEnforcement
+import androidx.compose.material.LocalRippleConfiguration
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.RippleConfiguration
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material.TextField
-import androidx.compose.material.ripple.LocalRippleTheme
-import androidx.compose.material.ripple.RippleAlpha
-import androidx.compose.material.ripple.RippleTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -34,7 +33,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
@@ -191,7 +189,7 @@ private fun RemoveButton(
 ) {
     CompositionLocalProvider(
         LocalContentAlpha provides if (removing) ContentAlpha.disabled else ContentAlpha.high,
-        LocalRippleTheme provides ErrorRippleTheme
+        LocalRippleConfiguration provides RippleConfiguration(color = MaterialTheme.colors.error),
     ) {
         Box(
             modifier = Modifier
@@ -288,24 +286,6 @@ private fun Dropdown(
 
                 viewActionHandler.invoke(EditPaymentMethodViewAction.OnBrandChoiceOptionsDismissed)
             }
-        )
-    }
-}
-
-private object ErrorRippleTheme : RippleTheme {
-    @Composable
-    override fun defaultColor(): Color {
-        return RippleTheme.defaultRippleColor(
-            MaterialTheme.colors.error,
-            lightTheme = MaterialTheme.colors.isLight
-        )
-    }
-
-    @Composable
-    override fun rippleAlpha(): RippleAlpha {
-        return RippleTheme.defaultRippleAlpha(
-            MaterialTheme.colors.error.copy(alpha = 0.25f),
-            lightTheme = MaterialTheme.colors.isLight
         )
     }
 }

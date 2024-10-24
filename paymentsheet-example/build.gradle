@@ -36,7 +36,6 @@ dependencies {
     implementation project(':stripecardscan')
     implementation project(':financial-connections')
 
-    implementation 'androidx.compose.foundation:foundation:1.7.4'
     implementation libs.androidx.activity
     implementation libs.androidx.appCompat
     implementation libs.androidx.constraintLayout
