@@ -2957,14 +2957,15 @@ internal class PaymentSheetViewModelTest {
         val savedStateHandle = SavedStateHandle(
             initialState = mapOf(
                 "AwaitingPaymentResult" to true,
-                "IntentConfirmationArguments" to IntentConfirmationHandler.Args(
+                "IntentConfirmationParameters" to PaymentConfirmationMediator.Parameters(
                     intent = PAYMENT_INTENT,
                     confirmationOption = PaymentConfirmationOption.PaymentMethod.Saved(
                         initializationMode = ARGS_CUSTOMER_WITH_GOOGLEPAY.initializationMode,
                         paymentMethod = CARD_PAYMENT_METHOD,
                         optionsParams = null,
                         shippingDetails = null,
-                    )
+                    ),
+                    deferredIntentConfirmationType = null,
                 )
             )
         )
@@ -3027,11 +3028,19 @@ internal class PaymentSheetViewModelTest {
 
         val paymentResultListener = viewModel.capturePaymentResultListener()
 
+        val createParams = PaymentMethodCreateParams.create(
+            card = PaymentMethodCreateParams.Card()
+        )
         val selection = PaymentSelection.New.Card(
             brand = CardBrand.Visa,
             customerRequestedSave = customerRequestedSave,
-            paymentMethodCreateParams = PaymentMethodCreateParams.create(
-                card = PaymentMethodCreateParams.Card()
+            paymentMethodCreateParams = createParams
+        )
+
+        fakeIntentConfirmationInterceptor.enqueueConfirmStep(
+            confirmParams = ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
+                paymentMethodCreateParams = createParams,
+                clientSecret = "pi_1234"
             )
         )
 
