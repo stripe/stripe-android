@@ -436,6 +436,13 @@ constructor(
             requiresMandate = false,
             hasDelayedSettlement = true,
         ),
+        PromptPay(
+            code = "promptpay",
+            isReusable = false,
+            isVoucher = true,
+            requiresMandate = false,
+            hasDelayedSettlement = true,
+        ),
         Konbini(
             code = "konbini",
             isReusable = false,

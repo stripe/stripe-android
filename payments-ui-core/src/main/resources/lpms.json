@@ -849,17 +849,17 @@
     ],
     "next_action_spec": {
       "confirm_response_status_specs": {
-          "requires_action": {
-              "type": "redirect_to_url"
-          }
+        "requires_action": {
+          "type": "redirect_to_url"
+        }
       },
       "post_confirm_handling_pi_status_specs": {
-          "succeeded": {
-              "type": "finished"
-          },
-          "requires_action": {
-              "type": "canceled"
-          }
+        "succeeded": {
+          "type": "finished"
+        },
+        "requires_action": {
+          "type": "canceled"
+        }
       }
     }
   },
@@ -876,17 +876,17 @@
     ],
     "next_action_spec": {
       "confirm_response_status_specs": {
-          "requires_action": {
-              "type": "redirect_to_url"
-          }
+        "requires_action": {
+          "type": "redirect_to_url"
+        }
       },
       "post_confirm_handling_pi_status_specs": {
-          "succeeded": {
-              "type": "finished"
-          },
-          "requires_action": {
-              "type": "canceled"
-          }
+        "succeeded": {
+          "type": "finished"
+        },
+        "requires_action": {
+          "type": "canceled"
+        }
       }
     }
   },
@@ -903,17 +903,17 @@
     ],
     "next_action_spec": {
       "confirm_response_status_specs": {
-          "requires_action": {
-              "type": "redirect_to_url"
-          }
+        "requires_action": {
+          "type": "redirect_to_url"
+        }
       },
       "post_confirm_handling_pi_status_specs": {
-          "succeeded": {
-              "type": "finished"
-          },
-          "requires_action": {
-              "type": "canceled"
-          }
+        "succeeded": {
+          "type": "finished"
+        },
+        "requires_action": {
+          "type": "canceled"
+        }
       }
     }
   },
@@ -1155,5 +1155,33 @@
         }
       }
     ]
+  },
+  {
+    "type": "promptpay",
+    "async": false,
+    "fields": [
+      {
+        "for": "name",
+        "type": "placeholder"
+      },
+      {
+        "api_path": {
+          "v1": "billing_details[email]"
+        },
+        "type": "email"
+      },
+      {
+        "for": "phone",
+        "type": "placeholder"
+      },
+      {
+        "for": "billing_address",
+        "type": "placeholder"
+      }
+    ],
+    "selector_icon": {
+      "dark_theme_png": "https://js.stripe.com/v3/fingerprinted/img/payment-methods/icon-pm-promptpay_dark@3x-2400215dce9fef04215e36678470bd60.png",
+      "light_theme_png": "https://js.stripe.com/v3/fingerprinted/img/payment-methods/icon-pm-promptpay@3x-0a4aa4e294f27d753dd91b91526ada61.png",
+    }
   }
 ]
