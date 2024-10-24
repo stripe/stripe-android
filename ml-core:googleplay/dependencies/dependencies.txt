@@ -1,9 +1,9 @@
 +--- project :ml-core:base
-|    +--- org.jetbrains.kotlin:kotlin-stdlib:1.9.25
+|    +--- org.jetbrains.kotlin:kotlin-stdlib:2.0.21
 |    |    \--- org.jetbrains:annotations:13.0
 |    \--- androidx.annotation:annotation:1.9.0
 |         \--- androidx.annotation:annotation-jvm:1.9.0
-|              \--- org.jetbrains.kotlin:kotlin-stdlib:1.7.10 -> 1.9.25 (*)
+|              \--- org.jetbrains.kotlin:kotlin-stdlib:1.7.10 -> 2.0.21 (*)
 +--- com.google.android.gms:play-services-tflite-support:16.0.1
 |    +--- com.google.android.gms:play-services-basement:18.1.0
 |    |    +--- androidx.collection:collection:1.0.0
@@ -101,5 +101,5 @@
 |         +--- org.checkerframework:checker-qual:2.5.8
 |         +--- org.tensorflow:tensorflow-lite-api:2.9.0 -> 2.10.0
 |         \--- com.google.android.odml:image:1.0.0-beta1
-+--- org.jetbrains.kotlin:kotlin-stdlib:1.9.25 (*)
++--- org.jetbrains.kotlin:kotlin-stdlib:2.0.21 (*)
 \--- com.google.android.gms:play-services-tflite-java:16.0.1 (*)
