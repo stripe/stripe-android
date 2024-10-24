@@ -23,7 +23,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -59,12 +58,14 @@ fun SettingsView(
         }
     ) {
         LazyColumn(
-            contentPadding = PaddingValues(16.dp)
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             item { SelectAnAccount(
                 accounts = state.accounts,
                 selectedAccountId = state.selectedAccountId,
-                onAccountSelected = viewModel::onAccountSelected
+                onAccountSelected = viewModel::onAccountSelected,
+                onOtherAccountInputChanged = viewModel::onOtherAccountInputChanged,
             ) }
             item { ComponentSettings(
                 onboardingSettings = state.onboardingSettings,
@@ -84,7 +85,8 @@ fun SettingsView(
 private fun SelectAnAccount(
     accounts: List<DemoMerchant>,
     selectedAccountId: String?,
-    onAccountSelected: (String) -> Unit
+    onAccountSelected: (String) -> Unit,
+    onOtherAccountInputChanged: (String) -> Unit,
 ) {
     Text("Select a demo account", style = MaterialTheme.typography.h6)
     Spacer(modifier = Modifier.height(8.dp))
@@ -105,9 +107,9 @@ private fun SelectAnAccount(
             is DemoMerchant.Other -> {
                 OutlinedTextField(
                     value = merchant.merchantId ?: "",
-                    onValueChange = { onAccountSelected(it) },
-                    label = { Text("Other") },
-                    placeholder = { Text("acct_xxxx") },
+                    onValueChange = onOtherAccountInputChanged,
+                    label = { Text(stringResource(R.string.other)) },
+                    placeholder = { Text(stringResource(R.string.account_id_placeholder)) },
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -118,20 +120,20 @@ private fun SelectAnAccount(
 @Composable
 private fun ComponentSettings(
     onboardingSettings: OnboardingSettings,
-    onSettingsChanged: (OnboardingSettings) -> Unit
+    onSettingsChanged: (OnboardingSettings) -> Unit,
 ) {
     Text("Component Settings", style = MaterialTheme.typography.h6)
     Spacer(modifier = Modifier.height(8.dp))
     NavigationLink(
         onClick = { /* Navigate to OnboardingSettingsView */ },
     ) {
-        Text("Account onboarding")
+        Text(stringResource(R.string.account_onboarding))
     }
 
     NavigationLink(
         onClick = { /* Navigate to PresentationSettingsView */ },
     ) {
-        Text("View Controller Options")
+        Text(stringResource(R.string.presentation_options))
     }
 }
 
