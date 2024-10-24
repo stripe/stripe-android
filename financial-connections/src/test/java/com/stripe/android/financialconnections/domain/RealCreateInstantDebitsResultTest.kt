@@ -219,6 +219,11 @@ class RealCreateInstantDebitsResultTest {
             currency = "usd",
             linkMode = linkMode,
             billingDetails = billingDetails,
+            prefillDetails = ElementsSessionContext.PrefillDetails(
+                email = null,
+                phone = null,
+                phoneCountryCode = null,
+            )
         )
     }
 }

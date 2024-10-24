@@ -164,6 +164,11 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
                 currency = "cad",
                 linkMode = LinkMode.LinkPaymentMethod,
                 billingDetails = null,
+                prefillDetails = ElementsSessionContext.PrefillDetails(
+                    email = null,
+                    phone = null,
+                    phoneCountryCode = null,
+                ),
             )
         )
 

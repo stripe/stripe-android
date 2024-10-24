@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.Click
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.NetworkingNewConsumer
@@ -68,6 +69,7 @@ internal class NetworkingLinkSignupViewModel @AssistedInject constructor(
     private val logger: Logger,
     private val presentSheet: PresentSheet,
     private val linkSignupHandler: LinkSignupHandler,
+    private val elementsSessionContext: ElementsSessionContext?,
 ) : FinancialConnectionsViewModel<NetworkingLinkSignupState>(initialState, nativeAuthFlowCoordinator) {
 
     private val pane: Pane
@@ -93,16 +95,19 @@ internal class NetworkingLinkSignupViewModel @AssistedInject constructor(
 
             eventTracker.track(PaneLoaded(pane))
 
+            val prefillDetails = elementsSessionContext?.prefillDetails
+
             NetworkingLinkSignupState.Payload(
                 content = requireNotNull(content),
                 merchantName = sync.manifest.getBusinessName(),
                 emailController = SimpleTextFieldController(
                     textFieldConfig = EmailConfig(label = R.string.stripe_networking_signup_email_label),
-                    initialValue = sync.manifest.accountholderCustomerEmailAddress,
+                    initialValue = sync.manifest.accountholderCustomerEmailAddress ?: prefillDetails?.email,
                     showOptionalLabel = false
                 ),
                 phoneController = PhoneNumberController.createPhoneNumberController(
-                    initialValue = sync.manifest.accountholderPhoneNumber ?: "",
+                    initialValue = sync.manifest.accountholderPhoneNumber ?: prefillDetails?.phone ?: "",
+                    initiallySelectedCountryCode = prefillDetails?.phoneCountryCode,
                 ),
                 isInstantDebits = initialState.isInstantDebits,
             )
@@ -340,6 +345,9 @@ internal data class NetworkingLinkSignupState(
 
         val focusEmailField: Boolean
             get() = isInstantDebits && emailController.initialValue.isNullOrBlank()
+
+        val focusPhoneFieldOnShow: Boolean
+            get() = phoneController.initialPhoneNumber.isBlank()
     }
 
     data class Content(
