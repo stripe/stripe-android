@@ -163,7 +163,7 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
                 amount = 1234,
                 currency = "cad",
                 linkMode = LinkMode.LinkPaymentMethod,
-                billingAddress = null,
+                billingDetails = null,
             )
         )
 

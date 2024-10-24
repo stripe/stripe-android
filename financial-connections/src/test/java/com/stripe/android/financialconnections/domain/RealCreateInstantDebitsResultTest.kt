@@ -1,7 +1,7 @@
 package com.stripe.android.financialconnections.domain
 
 import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext
-import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext.BillingAddress
+import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext.BillingDetails
 import com.stripe.android.financialconnections.model.PaymentMethod
 import com.stripe.android.financialconnections.repository.CachedConsumerSession
 import com.stripe.android.financialconnections.repository.FinancialConnectionsConsumerSessionRepository
@@ -65,7 +65,7 @@ class RealCreateInstantDebitsResultTest {
         verify(repository).createPaymentMethod(
             paymentDetailsId = "ba_1234",
             consumerSessionClientSecret = "clientSecret",
-            billingAddress = null,
+            billingDetails = null,
             billingEmailAddress = "test@test.com",
         )
     }
@@ -89,7 +89,7 @@ class RealCreateInstantDebitsResultTest {
         verify(repository).createPaymentMethod(
             paymentDetailsId = "ba_1234",
             consumerSessionClientSecret = "clientSecret",
-            billingAddress = null,
+            billingDetails = null,
             billingEmailAddress = "test@test.com",
         )
     }
@@ -99,10 +99,10 @@ class RealCreateInstantDebitsResultTest {
         val consumerRepository = makeConsumerSessionRepository()
         val repository = makeRepository()
 
-        val billingDetails = BillingAddress(
+        val billingDetails = BillingDetails(
             name = "Some name",
             phone = "+15555555555",
-            address = BillingAddress.Address(
+            address = BillingDetails.Address(
                 city = "San Francisco",
                 country = "US",
                 line1 = "123 Main St",
@@ -118,7 +118,7 @@ class RealCreateInstantDebitsResultTest {
             consumerSessionProvider = { makeCachedConsumerSession() },
             elementsSessionContext = makeElementsSessionContext(
                 linkMode = null,
-                billingAddress = billingDetails,
+                billingDetails = billingDetails,
             ),
         )
 
@@ -127,7 +127,7 @@ class RealCreateInstantDebitsResultTest {
         verify(repository).createPaymentMethod(
             paymentDetailsId = "ba_1234",
             consumerSessionClientSecret = "clientSecret",
-            billingAddress = billingDetails,
+            billingDetails = billingDetails,
             billingEmailAddress = "test@test.com",
         )
     }
@@ -137,10 +137,10 @@ class RealCreateInstantDebitsResultTest {
         val consumerRepository = makeConsumerSessionRepository()
         val repository = makeRepository()
 
-        val billingDetails = BillingAddress(
+        val billingDetails = BillingDetails(
             name = "Some name",
             phone = "+15555555555",
-            address = BillingAddress.Address(
+            address = BillingDetails.Address(
                 city = "San Francisco",
                 country = "US",
                 line1 = "123 Main St",
@@ -156,7 +156,7 @@ class RealCreateInstantDebitsResultTest {
             consumerSessionProvider = { makeCachedConsumerSession() },
             elementsSessionContext = makeElementsSessionContext(
                 linkMode = LinkMode.LinkCardBrand,
-                billingAddress = billingDetails,
+                billingDetails = billingDetails,
             ),
         )
 
@@ -213,14 +213,14 @@ class RealCreateInstantDebitsResultTest {
 
     private fun makeElementsSessionContext(
         linkMode: LinkMode?,
-        billingAddress: BillingAddress? = null,
+        billingDetails: BillingDetails? = null,
     ): ElementsSessionContext {
         return ElementsSessionContext(
             initializationMode = ElementsSessionContext.InitializationMode.PaymentIntent("pi_123"),
             amount = 100L,
             currency = "usd",
             linkMode = linkMode,
-            billingAddress = billingAddress,
+            billingDetails = billingDetails,
         )
     }
 }
