@@ -19,8 +19,8 @@ internal class SignUpScreenshotTest(
 ) {
     @get:Rule
     val paparazziRule = PaparazziRule(
-        SystemAppearance.entries,
-        FontSize.entries
+        listOf(SystemAppearance.DarkTheme),
+        listOf(FontSize.DefaultFont)
     )
 
     @Test

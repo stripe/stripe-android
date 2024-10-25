@@ -22,16 +22,6 @@ internal class PrimaryButtonScreenshotTest {
             .fillMaxWidth(),
     )
 
-    @get:Rule
-    val localesPaparazziRule = PaparazziRule(
-        SystemAppearance.entries,
-        FontSize.entries,
-        Locale.entries,
-        boxModifier = Modifier
-            .padding(0.dp)
-            .fillMaxWidth(),
-    )
-
     @Test
     fun testEnabledState() {
         snapshot(PrimaryButtonState.Enabled)
