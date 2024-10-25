@@ -4,41 +4,36 @@ import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.runTest
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.runBlocking
 import kotlin.test.Test
 import kotlin.time.Duration.Companion.seconds
 
 class SingleKtxTest {
     @Test
-    fun `On converting 'StateFlow' to 'Single' should complete if it has a value`() = runTest {
+    fun `On converting 'StateFlow' to 'Single' should complete if it has a value`() = runBlocking {
         val flow = MutableStateFlow(value = 0)
 
         assertThat(flow.asSingle().await()).isEqualTo(0)
     }
 
     @Test
-    fun `On converting 'StateFlow' to 'Single' should wait until value is set`() = runTest {
-        val countDownLatch = CountDownLatch(1)
-
+    fun `On converting 'StateFlow' to 'Single' should wait until value is set`() = runBlocking {
         val flow = MutableStateFlow<Int?>(null)
         val single = flow.asSingle()
 
-        launch {
+        val job = launch {
             assertThat(single.await()).isEqualTo(0)
-            countDownLatch.countDown()
         }
 
         delay(50)
 
         flow.value = 0
 
-        countDownLatch.await(5, TimeUnit.SECONDS)
+        job.join()
     }
 
     @Test
-    fun `On await with timeout, should return value if set`() = runTest {
+    fun `On await with timeout, should return value if set`() = runBlocking {
         val flow = MutableStateFlow(value = 0)
         val single = flow.asSingle()
 
@@ -54,7 +49,7 @@ class SingleKtxTest {
     }
 
     @Test
-    fun `On await with timeout, should fail if timeout message if a value is not set`() = runTest {
+    fun `On await with timeout, should fail if timeout message if a value is not set`() = runBlocking {
         val flow = MutableStateFlow<Int?>(value = null)
         val single = flow.asSingle()
 
