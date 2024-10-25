@@ -34,7 +34,6 @@ internal class LinkActivityViewModel @Inject constructor(
             showHeader = true,
             showOverflowMenu = false,
             email = null,
-            accountStatus = null
         )
     )
     val linkState: StateFlow<LinkAppBarState> = _linkState

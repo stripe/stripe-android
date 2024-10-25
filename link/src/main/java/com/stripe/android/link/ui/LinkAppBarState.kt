@@ -8,5 +8,4 @@ internal data class LinkAppBarState(
     val showHeader: Boolean,
     val showOverflowMenu: Boolean,
     val email: String?,
-    val accountStatus: AccountStatus?
 )

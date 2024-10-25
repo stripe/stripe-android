@@ -149,7 +149,6 @@ private fun LinkAppBarPreview() {
                     showHeader = true,
                     showOverflowMenu = true,
                     email = "email@example.com",
-                    accountStatus = AccountStatus.Verified
                 ),
                 onBackPressed = {},
                 showBottomSheetContent = {}
@@ -169,7 +168,6 @@ private fun LinkAppBarNoEmail() {
                     showHeader = true,
                     showOverflowMenu = true,
                     email = null,
-                    accountStatus = AccountStatus.SignedOut
                 ),
                 onBackPressed = {},
                 showBottomSheetContent = {}
@@ -189,7 +187,6 @@ private fun LinkAppBarChildScreen() {
                     showHeader = false,
                     showOverflowMenu = false,
                     email = "email@example.com",
-                    accountStatus = AccountStatus.Verified
                 ),
                 onBackPressed = {},
                 showBottomSheetContent = {}
@@ -209,7 +206,6 @@ private fun LinkAppBarChildScreenNoEmail() {
                     showHeader = false,
                     showOverflowMenu = false,
                     email = null,
-                    accountStatus = AccountStatus.SignedOut
                 ),
                 onBackPressed = {},
                 showBottomSheetContent = {}

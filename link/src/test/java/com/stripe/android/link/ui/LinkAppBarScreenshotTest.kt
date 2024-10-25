@@ -5,10 +5,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.R
-import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.screenshottesting.FontSize
-import com.stripe.android.screenshottesting.Locale
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
 import org.junit.Rule
@@ -24,16 +22,6 @@ internal class LinkAppBarScreenshotTest(
     val paparazziRule = PaparazziRule(
         SystemAppearance.entries,
         FontSize.entries,
-        boxModifier = Modifier
-            .padding(0.dp)
-            .fillMaxWidth(),
-    )
-
-    @get:Rule
-    val localesPaparazziRule = PaparazziRule(
-        SystemAppearance.entries,
-        FontSize.entries,
-        Locale.entries,
         boxModifier = Modifier
             .padding(0.dp)
             .fillMaxWidth(),
@@ -59,26 +47,24 @@ internal class LinkAppBarScreenshotTest(
             val showHeaderOptions = listOf(true to "HeaderShown", false to "NoHeader")
             val showOverflowMenuOptions = listOf(true to "WithOverflow", false to "NoOverflow")
             val emailOptions = listOf(null to "NoEmail", "test@test.com" to "WithEmail")
-            val accountStatusOptions = AccountStatus.entries
 
-            return showHeaderOptions.flatMap { (showHeader, headerName) ->
+            val tests = showHeaderOptions.flatMap { (showHeader, headerName) ->
                 showOverflowMenuOptions.flatMap { (showOverflow, overflowName) ->
-                    emailOptions.flatMap { (email, emailName) ->
-                        accountStatusOptions.map { status ->
-                            TestCase(
-                                name = "LinkAppBar$headerName$overflowName$emailName${status.name}",
-                                state = LinkAppBarState(
-                                    navigationIcon = R.drawable.stripe_link_close,
-                                    showHeader = showHeader,
-                                    showOverflowMenu = showOverflow,
-                                    email = email,
-                                    accountStatus = status
-                                )
+                    emailOptions.map { (email, emailName) ->
+                        TestCase(
+                            name = "LinkAppBar$headerName$overflowName$emailName",
+                            state = LinkAppBarState(
+                                navigationIcon = R.drawable.stripe_link_close,
+                                showHeader = showHeader,
+                                showOverflowMenu = showOverflow,
+                                email = email,
                             )
-                        }
+                        )
                     }
                 }
             }
+            println(tests.size)
+            return tests
         }
     }
 

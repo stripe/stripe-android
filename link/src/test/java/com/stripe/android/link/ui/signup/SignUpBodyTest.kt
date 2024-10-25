@@ -21,7 +21,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-class SignUpComposeTest {
+class SignUpBodyTest {
     @get:Rule
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
