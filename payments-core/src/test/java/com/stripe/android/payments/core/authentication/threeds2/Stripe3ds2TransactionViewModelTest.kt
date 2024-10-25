@@ -34,12 +34,6 @@ import kotlin.test.assertNotNull
 
 @RunWith(RobolectricTestRunner::class)
 class Stripe3ds2TransactionViewModelTest {
-    // FragmentScenario is needed to provide SavedStateRegistryOwner required
-    // by Stripe3ds2TransactionViewModelFactory
-    private val scenario = launchFragmentInContainer(initialState = Lifecycle.State.CREATED) {
-        TestFragment()
-    }
-
     private val context = ApplicationProvider.getApplicationContext<Application>()
     private val stripeRepository = mock<StripeRepository>()
 
@@ -83,6 +77,11 @@ class Stripe3ds2TransactionViewModelTest {
 
     @Test
     fun `Stripe3ds2TransactionViewModel gets initialized`() {
+        // FragmentScenario is needed to provide SavedStateRegistryOwner required
+        // by Stripe3ds2TransactionViewModelFactory
+        val scenario = launchFragmentInContainer(initialState = Lifecycle.State.CREATED) {
+            TestFragment()
+        }
         scenario.onFragment { fragment ->
             val factory = Stripe3ds2TransactionViewModelFactory { ARGS }
 

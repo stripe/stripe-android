@@ -149,6 +149,7 @@ internal class BottomSheetNavigator(
      * A [Composable] function that hosts the current sheet content. This should be set as
      * sheetContent of your [ModalBottomSheetLayout].
      */
+    @SuppressLint("ProduceStateDoesNotAssignValue")
     internal val sheetContent: @Composable ColumnScope.() -> Unit = {
         val saveableStateHolder = rememberSaveableStateHolder()
         val transitionsInProgressEntries by transitionsInProgress.collectAsState()

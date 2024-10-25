@@ -4,6 +4,7 @@ apply plugin: 'com.emergetools.android'
 apply plugin: 'com.google.firebase.appdistribution'
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
+apply plugin: 'org.jetbrains.kotlin.plugin.compose'
 
 def testEnvironment = System.getenv("test_environment") ?: "production"
 
@@ -48,10 +49,6 @@ android {
 
     buildFeatures {
         compose true
-    }
-
-    composeOptions {
-        kotlinCompilerExtensionVersion "${versions.androidxComposeCompiler}"
     }
 }
 

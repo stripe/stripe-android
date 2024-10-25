@@ -20,7 +20,9 @@ import com.stripe.android.utils.TestUtils
 import com.stripe.android.utils.injectableActivityScenario
 import org.junit.After
 import org.junit.runner.RunWith
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.stub
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 import kotlin.test.assertIs
@@ -51,10 +53,14 @@ class Stripe3ds2TransactionActivityTest {
 
     @Test
     fun `fragmentFactory should be a ChallengeProgressFragmentFactory`() {
+        val viewModel = mock<Stripe3ds2TransactionViewModel>()
+        viewModel.stub {
+            onBlocking { viewModel.start3ds2Flow() } doReturn NextStep.Complete(PaymentFlowResult.Unvalidated())
+        }
         injectableActivityScenario<Stripe3ds2TransactionActivity> {
             injectActivity {
                 viewModelFactory =
-                    TestUtils.viewModelFactoryFor(mock<Stripe3ds2TransactionViewModel>())
+                    TestUtils.viewModelFactoryFor(viewModel)
             }
         }.launch(
             Intent(
