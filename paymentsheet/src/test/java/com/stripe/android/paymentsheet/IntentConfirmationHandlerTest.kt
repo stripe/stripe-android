@@ -352,10 +352,9 @@ class IntentConfirmationHandlerTest {
 
             val failedResult = result.asFailed()
 
-            val message = "No 'PaymentLauncher' instance was created before starting confirmation. " +
-                "Did you call register?"
+            val message = "No launcher for IntentConfirmationDefinition was found, did you call register?"
 
-            assertThat(failedResult.cause).isInstanceOf(IllegalArgumentException::class.java)
+            assertThat(failedResult.cause).isInstanceOf(IllegalStateException::class.java)
             assertThat(failedResult.cause.message).isEqualTo(message)
             assertThat(failedResult.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
             assertThat(failedResult.type).isEqualTo(PaymentConfirmationErrorType.Fatal)
@@ -751,7 +750,7 @@ class IntentConfirmationHandlerTest {
 
         val savedStateHandle = SavedStateHandle().apply {
             set("AwaitingPreConfirmResult", true)
-            set("IntentConfirmationArguments", bacsArguments)
+            set("PaymentConfirmationArguments", bacsArguments)
         }
 
         val intentConfirmationHandler = createIntentConfirmationHandler(
@@ -822,7 +821,14 @@ class IntentConfirmationHandlerTest {
     fun `On init with 'SavedStateHandle', should receive result through 'awaitIntentResult'`() = runTest {
         val savedStateHandle = SavedStateHandle().apply {
             set("AwaitingPaymentResult", true)
-            set("IntentConfirmationArguments", DEFAULT_ARGUMENTS)
+            set(
+                "IntentConfirmationParameters",
+                PaymentConfirmationMediator.Parameters(
+                    confirmationOption = DEFAULT_ARGUMENTS.confirmationOption,
+                    intent = DEFAULT_ARGUMENTS.intent,
+                    deferredIntentConfirmationType = null,
+                )
+            )
         }
 
         val intentConfirmationHandler = createIntentConfirmationHandler(
