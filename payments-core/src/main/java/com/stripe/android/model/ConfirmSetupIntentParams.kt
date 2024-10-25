@@ -1,5 +1,6 @@
 package com.stripe.android.model
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT_SECRET
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_MANDATE_DATA
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_MANDATE_ID
@@ -13,7 +14,9 @@ import kotlinx.parcelize.Parcelize
  * Model representing parameters for [confirming a SetupIntent](https://stripe.com/docs/api/setup_intents/confirm).
  */
 @Parcelize
-data class ConfirmSetupIntentParams internal constructor(
+data class ConfirmSetupIntentParams
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+constructor(
     @get:JvmSynthetic override val clientSecret: String,
 
     /**
