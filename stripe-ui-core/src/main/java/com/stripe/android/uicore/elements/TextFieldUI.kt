@@ -322,6 +322,7 @@ fun AnimatedIcons(
 
     val isRunningInTestHarness = LocalInstrumentationTest.current
 
+    @SuppressLint("ProduceStateDoesNotAssignValue")
     val target by produceState(initialValue = icons.first()) {
         if (!isRunningInTestHarness) {
             composableScope.launch {

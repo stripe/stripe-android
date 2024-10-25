@@ -2,6 +2,7 @@ apply from: configs.androidApplication
 
 apply plugin: 'com.emergetools.android'
 apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
+apply plugin: 'org.jetbrains.kotlin.plugin.compose'
 
 assemble.dependsOn('lint')
 
@@ -31,10 +32,6 @@ android {
     buildFeatures {
         viewBinding true
         compose true
-    }
-
-    composeOptions {
-        kotlinCompilerExtensionVersion "${versions.androidxComposeCompiler}"
     }
 
     flavorDimensions += "theme"

@@ -39,7 +39,7 @@ internal abstract class IdentityScanViewModel(
      */
     internal val targetScanTypeFlow = MutableStateFlow<IdentityScanState.ScanType?>(null)
 
-    private lateinit var cameraManager: IdentityCameraManager
+    lateinit var cameraManager: IdentityCameraManager
 
     abstract val scanFeedback: StateFlow<Int?>
 

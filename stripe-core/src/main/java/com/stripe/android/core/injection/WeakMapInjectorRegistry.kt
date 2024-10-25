@@ -21,7 +21,7 @@ object WeakMapInjectorRegistry : InjectorRegistry {
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @VisibleForTesting
-    val staticCacheMap = WeakHashMap<Injector, @receiver:InjectorKey String>()
+    val staticCacheMap = WeakHashMap<Injector, String>()
 
     /**
      * Global unique monotonically increasing key to be assigned as a suffixes to

@@ -1,9 +1,8 @@
 package com.stripe.android.model
 
 import android.os.Parcelable
+import androidx.annotation.RestrictTo
 import com.stripe.android.model.ConfirmPaymentIntentParams.SetupFutureUsage
-import com.stripe.android.model.ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
-import com.stripe.android.model.ConfirmPaymentIntentParams.SetupFutureUsage.OnSession
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT_SECRET
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_MANDATE_ID
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_DATA
@@ -16,7 +15,9 @@ import kotlinx.parcelize.Parcelize
  * Model representing parameters for [confirming a PaymentIntent](https://stripe.com/docs/api/payment_intents/confirm).
  */
 @Parcelize
-data class ConfirmPaymentIntentParams internal constructor(
+data class ConfirmPaymentIntentParams
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+constructor(
     val paymentMethodCreateParams: PaymentMethodCreateParams? = null,
 
     /**
