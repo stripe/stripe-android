@@ -7,6 +7,7 @@ import com.stripe.android.core.BuildConfig
 object FeatureFlags {
     // Add any feature flags here
     val nativeLinkEnabled = FeatureFlag()
+    val instantDebitsBillingDetails = FeatureFlag()
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
