@@ -5,6 +5,11 @@
 ### Basic Integration
 * [REMOVED][9501](https://github.com/stripe/stripe-android/pull/9501) Basic Integration has been removed. [Please use Mobile Payment Element instead](https://docs.stripe.com/payments/mobile/migrating-to-mobile-payment-element-from-basic-integration).
 
+Dependencies updated in [9511](https://github.com/stripe/stripe-android/pull/9511):
+* Bumped Accompanist from 0.34.0 to 0.36.0.
+* Bumped Compose from 1.5.4 to 1.6.8.
+* Bumped Androidx Navigation from 2.7.7 to 2.8.3.
+
 ## 20.53.0 - 2024-10-21
 
 ### PaymentSheet
