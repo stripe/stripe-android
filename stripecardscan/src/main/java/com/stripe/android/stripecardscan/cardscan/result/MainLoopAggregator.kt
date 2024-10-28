@@ -21,8 +21,8 @@ internal class MainLoopAggregator(
     SSDOcr.Input,
     MainLoopState,
     SSDOcr.Prediction,
-    MainLoopAggregator.InterimResult,
-    MainLoopAggregator.FinalResult
+    InterimResult,
+    FinalResult
     >(
     listener = listener,
     initialState = MainLoopState.Initial(TimeSource.Monotonic),

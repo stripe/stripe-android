@@ -2,7 +2,7 @@
 This module provides support for the standalone Stripe CardScan product.
 
 # Overview
-This library provides a user interface through which users can scan payment cards and extract information from them. It uses the Stripe Publishable Key to authenticate with Stripe services.
+This library provides a user interface through which users can scan payment cards and extract information from them.
 
 Note that this is a standalone SDK and, while compatible with, does not directly integrate with the [PaymentIntent](https://stripe.com/docs/api/payment_intents) API nor with [next_action](https://stripe.com/docs/api/errors#errors-payment_intent-next_action).
 
@@ -44,7 +44,7 @@ Add `CardScanSheet` in your activity or fragment where you want to invoke the ve
 
 Note: the `create` method must be called in your fragment or activity’s `onCreate` method in order to register the `ActivityResultListener` with your activity.
 
-a. Initialize `CardScanSheet`  with your `publishableKey` and the `id, client secret`
+a. Initialize `CardScanSheet`
 b. When it's time to invoke the verification flow, display the sheet with `CardScanSheet.present()`
 c. When the verification flow is finished, the sheet will be dismissed and the `onFinished` block will be called with a `CardScanSheetResult`
 
@@ -64,7 +64,6 @@ class LaunchActivity : AppCompatActivity {
      */
     val cardScanSheet = CardScanSheet.create(
       from = LaunchActivity.this,
-      stripePublishableKey = "stripe_key",
     )
 
     findViewById(R.id.scanCardButton).setOnClickListener { _ ->
@@ -127,7 +126,7 @@ class LaunchActivity : AppCompatActivity {
 
     Note: the `create` method must be called in your fragment or activity’s `onCreate` method in order to register the `ActivityResultListener` with your activity.
 
-    a. Initialize `CardImageVerificationSheet`  with your `publishableKey` and the `id, client secret`
+    a. Initialize `CardImageVerificationSheet`
     b. When it's time to invoke the verification flow, display the sheet with `CardImageVerificationSheet.present()`
     c. When the verification flow is finished, the sheet will be dismissed and the `onFinished` block will be called with a `CardImageVerificationSheetResult`
 
@@ -147,7 +146,6 @@ class LaunchActivity : AppCompatActivity {
          */
         val cardImageVerificationSheet = CardImageVerificationSheet.create(
           from = LaunchActivity.this,
-          stripePublishableKey = "stripe_key",
         )
     
         findViewById(R.id.scanCardButton).setOnClickListener { _ ->

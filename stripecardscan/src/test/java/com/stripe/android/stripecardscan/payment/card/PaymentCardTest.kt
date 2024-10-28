@@ -1,5 +1,6 @@
 package com.stripe.android.stripecardscan.payment.card
 
+import android.annotation.SuppressLint
 import androidx.test.filters.SmallTest
 import org.junit.Before
 import org.junit.Test
@@ -50,6 +51,7 @@ private val SAMPLE_ADVANCED_CUSTOM_CARD_ISSUER = CardIssuer.Custom("Advanced Cus
 
 class PaymentCardTest {
 
+    @SuppressLint("CheckResult")
     @Before
     fun addCardIssuers() {
         supportCardIssuer(
@@ -148,80 +150,6 @@ class PaymentCardTest {
 
     @Test
     @SmallTest
-    fun isValidExpiry() {
-        val expDay = "01"
-        val expMonth = "02"
-        val expYear = nextYear().toString()
-
-        assertTrue { isValidExpiry(expDay, expMonth, expYear) }
-        assertTrue { isValidExpiry(null, expMonth, expYear) }
-    }
-
-    @Test
-    @SmallTest
-    fun isValidExpiry_leapYear() {
-        val expDay = "29"
-        val expMonth = "2"
-        val expYear = nextLeapYear().toString()
-
-        assertTrue { isValidExpiry(expDay, expMonth, expYear) }
-    }
-
-    @Test
-    @SmallTest
-    fun isValidExpiry_nonLeapYear() {
-        val expDay = "29"
-        val expMonth = "2"
-        val expYear = "2023"
-
-        assertFalse { isValidExpiry(expDay, expMonth, expYear) }
-    }
-
-    @Test
-    @SmallTest
-    fun isValidExpiry_pastDate() {
-        val expDay = "10"
-        val expMonth = "25"
-        val expYear = "2019"
-
-        assertFalse { isValidExpiry(expDay, expMonth, expYear) }
-    }
-
-    @Test
-    @SmallTest
-    fun isValidExpiry_pastDay() {
-        val cal = Calendar.getInstance().apply { add(Calendar.DAY_OF_MONTH, -1) }
-        val expDay = cal.get(Calendar.DAY_OF_MONTH).toString()
-        val expMonth = (cal.get(Calendar.MONTH) + 1).toString() // Calendar months are 0-based.
-        val expYear = cal.get(Calendar.YEAR).toString()
-
-        assertFalse { isValidExpiry(expDay, expMonth, expYear) }
-    }
-
-    @Test
-    @SmallTest
-    fun isValidExpiry_pastMonth() {
-        val cal = Calendar.getInstance().apply { add(Calendar.MONTH, -1) }
-        val expDay = cal.get(Calendar.DAY_OF_MONTH).toString()
-        val expMonth = (cal.get(Calendar.MONTH) + 1).toString() // Calendar months are 0-based.
-        val expYear = cal.get(Calendar.YEAR).toString()
-
-        assertFalse { isValidExpiry(expDay, expMonth, expYear) }
-    }
-
-    @Test
-    @SmallTest
-    fun isValidExpiry_pastYear() {
-        val cal = Calendar.getInstance().apply { add(Calendar.YEAR, -1) }
-        val expDay = cal.get(Calendar.DAY_OF_MONTH).toString()
-        val expMonth = (cal.get(Calendar.MONTH) + 1).toString() // Calendar months are 0-based.
-        val expYear = cal.get(Calendar.YEAR).toString()
-
-        assertFalse { isValidExpiry(expDay, expMonth, expYear) }
-    }
-
-    @Test
-    @SmallTest
     fun formatPan() {
         assertEquals("3400 000000 00009", formatPan(SAMPLE_AMEX_PAN))
         assertEquals("3628 141221 8285", formatPan(SAMPLE_DINERS_CLUB_PAN_14))
@@ -240,46 +168,5 @@ class PaymentCardTest {
         assertEquals("99000 00000 00000 0804", formatPan(SAMPLE_CUSTOM_19_PAN))
         assertEquals("99100 00000 00000 00505", formatPan(SAMPLE_ADVANCED_CUSTOM_20_PAN))
         assertEquals("1234 5678 9012 3456", formatPan("1234567890123456"))
-    }
-
-    @Test
-    @SmallTest
-    fun formatIssuer() {
-        assertEquals("American Express", formatIssuer(CardIssuer.AmericanExpress))
-        assertEquals("Diners Club", formatIssuer(CardIssuer.DinersClub))
-        assertEquals("Discover", formatIssuer(CardIssuer.Discover))
-        assertEquals("JCB", formatIssuer(CardIssuer.JCB))
-        assertEquals("MasterCard", formatIssuer(CardIssuer.MasterCard))
-        assertEquals("UnionPay", formatIssuer(CardIssuer.UnionPay))
-        assertEquals("Unknown", formatIssuer(CardIssuer.Unknown))
-        assertEquals("Visa", formatIssuer(CardIssuer.Visa))
-        assertEquals("Custom", formatIssuer(SAMPLE_CUSTOM_CARD_ISSUER))
-        assertEquals("Advanced Custom", formatIssuer(SAMPLE_ADVANCED_CUSTOM_CARD_ISSUER))
-    }
-
-    @Test
-    @SmallTest
-    fun formatExpiry() {
-        assertEquals("01/02/03", formatExpiry("01", "02", "03"))
-        assertEquals("01/02/03", formatExpiry("1", "02", "03"))
-        assertEquals("01/02/03", formatExpiry("1", "2", "03"))
-        assertEquals("01/02/03", formatExpiry("1", "2", "3"))
-        assertEquals("01/02/03", formatExpiry("1", "2", "2003"))
-        assertEquals("02/03", formatExpiry(null, "02", "03"))
-    }
-
-    private fun nextYear(): Int {
-        return Calendar.getInstance().get(Calendar.YEAR) + 1
-    }
-
-    private fun nextLeapYear(): Int {
-        val calendar = GregorianCalendar()
-        var year = Calendar.getInstance().get(Calendar.YEAR) + 1
-
-        while (!calendar.isLeapYear(year)) {
-            year += 1
-        }
-
-        return year
     }
 }
