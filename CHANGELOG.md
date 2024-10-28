@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+### PaymentSheet
+- [CHANGED] [9498](https://github.com/stripe/stripe-android/pull/9498) The default value of `PaymentSheet.Configuration.Builder.paymentMethodLayout` has changed from Horizontal to Automatic.
+
 ### Basic Integration
 * [REMOVED][9501](https://github.com/stripe/stripe-android/pull/9501) Basic Integration has been removed. [Please use Mobile Payment Element instead](https://docs.stripe.com/payments/mobile/migrating-to-mobile-payment-element-from-basic-integration).
 
