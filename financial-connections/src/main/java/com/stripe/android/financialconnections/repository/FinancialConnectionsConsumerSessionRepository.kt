@@ -226,6 +226,7 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
         billingPhone: String?,
     ): SharePaymentDetails {
         val fraudDetectionData = fraudDetectionDataRepository.getCached()?.params.orEmpty()
+        val expandParams = mapOf("expand" to listOf("payment_method"))
 
         return consumersApiService.sharePaymentDetails(
             consumerSessionClientSecret = consumerSessionClientSecret,
@@ -234,7 +235,7 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
             billingPhone = elementsSessionContext?.billingDetails?.phone?.takeIf { it.isNotBlank() },
             requestSurface = requestSurface,
             requestOptions = provideApiRequestOptions(useConsumerPublishableKey = false),
-            extraParams = fraudDetectionData,
+            extraParams = fraudDetectionData + expandParams,
         ).getOrThrow()
     }
 

@@ -39,6 +39,7 @@ internal object HostedAuthUrlBuilder {
             // For Instant Debits, add a query parameter to the hosted auth URL so that payment account creation
             // takes place on the web side of the flow and the payment method ID is returned to the app.
             queryParams.add("return_payment_method=true")
+            queryParams.add("expand_payment_method=true")
             linkMode?.let { queryParams.add("link_mode=${it.value}") }
             billingDetails?.let { queryParams.add(makeBillingDetailsQueryParams(it)) }
         }

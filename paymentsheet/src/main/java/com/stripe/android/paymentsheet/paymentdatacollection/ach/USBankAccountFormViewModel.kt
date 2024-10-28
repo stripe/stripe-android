@@ -337,10 +337,10 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     ) {
         _currentScreenState.update {
             USBankAccountFormScreenState.MandateCollection(
-                resultIdentifier = ResultIdentifier.PaymentMethod(result.paymentMethodId),
+                resultIdentifier = ResultIdentifier.PaymentMethod(result.paymentMethod),
                 bankName = result.bankName,
                 last4 = result.last4,
-                intentId = result.intent.id,
+                intentId = result.intent?.id,
                 primaryButtonText = buildPrimaryButtonText(),
                 mandateText = buildMandateText(isVerifyWithMicrodeposits = false),
             )
@@ -572,15 +572,17 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         val elementsSessionId = args.stripeIntentId ?: return
         val elementsSessionContext = makeElementsSessionContext()
 
+        val configuration = if (args.instantDebits) {
+            createInstantDebitsConfiguration()
+        } else {
+            createUSBankAccountConfiguration()
+        }
+
         if (args.isPaymentFlow) {
             collectBankAccountLauncher?.presentWithDeferredPayment(
                 publishableKey = lazyPaymentConfig.get().publishableKey,
                 stripeAccountId = lazyPaymentConfig.get().stripeAccountId,
-                configuration = CollectBankAccountConfiguration.USBankAccountInternal(
-                    name = name.value,
-                    email = email.value,
-                    elementsSessionContext = elementsSessionContext,
-                ),
+                configuration = configuration,
                 elementsSessionId = elementsSessionId,
                 customerId = null,
                 onBehalfOf = args.onBehalfOf,
@@ -591,11 +593,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             collectBankAccountLauncher?.presentWithDeferredSetup(
                 publishableKey = lazyPaymentConfig.get().publishableKey,
                 stripeAccountId = lazyPaymentConfig.get().stripeAccountId,
-                configuration = CollectBankAccountConfiguration.USBankAccountInternal(
-                    name = name.value,
-                    email = email.value,
-                    elementsSessionContext = elementsSessionContext,
-                ),
+                configuration = configuration,
                 elementsSessionId = elementsSessionId,
                 customerId = null,
                 onBehalfOf = args.onBehalfOf,
@@ -633,7 +631,6 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         val paymentMethodCreateParams = when (resultIdentifier) {
             is ResultIdentifier.PaymentMethod -> {
                 PaymentMethodCreateParams.createInstantDebits(
-                    paymentMethodId = resultIdentifier.id,
                     requiresMandate = true,
                     productUsage = setOf("PaymentSheet"),
                     allowRedisplay = args.formArgs.paymentMethodSaveConsentBehavior.allowRedisplay(
@@ -663,7 +660,14 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
         val instantDebitsInfo = (resultIdentifier as? ResultIdentifier.PaymentMethod)?.let {
             PaymentSelection.New.USBankAccount.InstantDebitsInfo(
-                paymentMethodId = it.id,
+                paymentMethod = it.paymentMethod.copy(
+                    billingDetails = PaymentMethod.BillingDetails(
+                        name = name.value,
+                        email = email.value,
+                        phone = phone.value,
+                        address = address.value,
+                    ),
+                ),
                 linkMode = args.linkMode,
             )
         }
