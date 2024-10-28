@@ -121,6 +121,8 @@
   <!-- Accessibility action for deleting a payment method -->
   <string name="stripe_delete_payment_method">Hapuskan Kaedah Pembayaran</string>
   <string name="stripe_delete_payment_method_prompt_title">Hapuskan kaedah pembayaran?</string>
+  <!-- Error message for card entry form when a user enters a card with a brand that is not accepted. -->
+  <string name="stripe_disallowed_card_brand">%s tidak diterima</string>
   <!-- Done button title -->
   <string name="stripe_done">Selesai</string>
   <!-- Button title to enter editing mode -->
