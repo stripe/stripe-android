@@ -86,6 +86,7 @@ interface ConsumersApiService {
         consumerSessionClientSecret: String,
         paymentDetailsId: String,
         expectedPaymentMethodType: String,
+        billingPhone: String?,
         requestSurface: String,
         requestOptions: ApiRequest.Options,
         extraParams: Map<String, Any?>,
@@ -295,6 +296,7 @@ class ConsumersApiServiceImpl(
         consumerSessionClientSecret: String,
         paymentDetailsId: String,
         expectedPaymentMethodType: String,
+        billingPhone: String?,
         requestSurface: String,
         requestOptions: ApiRequest.Options,
         extraParams: Map<String, Any?>,
@@ -312,6 +314,7 @@ class ConsumersApiServiceImpl(
                     "credentials" to mapOf(
                         "consumer_session_client_secret" to consumerSessionClientSecret
                     ),
+                    "billing_phone" to billingPhone,
                 ) + extraParams,
             ),
             responseJsonParser = SharePaymentDetailsJsonParser,
