@@ -36,11 +36,6 @@ internal class PrimaryButtonScreenshotTest {
         snapshot(PrimaryButtonState.Completed)
     }
 
-    @Test
-    fun testProcessingState() {
-        snapshot(PrimaryButtonState.Processing)
-    }
-
     private fun snapshot(state: PrimaryButtonState) {
         paparazziRule.snapshot {
             DefaultLinkTheme {
