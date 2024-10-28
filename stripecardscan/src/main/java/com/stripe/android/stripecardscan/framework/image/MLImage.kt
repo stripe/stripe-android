@@ -3,8 +3,6 @@ package com.stripe.android.stripecardscan.framework.image
 import android.graphics.Bitmap
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
-import java.nio.IntBuffer
-import kotlin.math.roundToInt
 
 private const val DIM_PIXEL_SIZE = 3
 private const val NUM_BYTES_PER_CHANNEL = 4 // Float.size / Byte.size

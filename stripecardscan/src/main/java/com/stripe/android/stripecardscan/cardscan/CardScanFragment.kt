@@ -140,7 +140,6 @@ class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
                     changeScanState(CardScanState.Correct)
                     activity?.let { cameraAdapter.unbindFromLifecycle(it) }
                     resultListener.cardScanComplete(ScannedCard(result.pan))
-                    scanStat.trackResult("scan_complete")
                     closeScanner()
                 }.let { }
             }
@@ -151,13 +150,6 @@ class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
             override suspend fun onInterimResult(
                 result: MainLoopAggregator.InterimResult
             ) = launch(Dispatchers.Main) {
-                if (
-                    result.state is MainLoopState.OcrFound &&
-                    !hasPreviousValidResult.getAndSet(true)
-                ) {
-                    scanStat.trackResult("ocr_pan_observed")
-                }
-
                 when (result.state) {
                     is MainLoopState.Initial -> changeScanState(CardScanState.NotFound)
                     is MainLoopState.OcrFound -> changeScanState(CardScanState.Found)

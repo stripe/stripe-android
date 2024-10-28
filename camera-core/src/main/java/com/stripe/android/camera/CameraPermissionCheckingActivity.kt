@@ -10,7 +10,6 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.stripe.android.camera.framework.Stats
 import com.stripe.android.core.storage.StorageFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -41,8 +40,6 @@ abstract class CameraPermissionCheckingActivity :
 
     private val mainScope = CoroutineScope(Dispatchers.Main)
 
-    private val permissionStat = Stats.trackTask(PERMISSION_STATS_TRACK_NAME)
-
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     override fun ensureCameraPermission(
         onCameraReady: () -> Unit,
@@ -55,7 +52,6 @@ abstract class CameraPermissionCheckingActivity :
                 this,
                 Manifest.permission.CAMERA
             ) == PackageManager.PERMISSION_GRANTED -> {
-                mainScope.launch { permissionStat.trackResult("success") }
                 mainScope.launch {
                     onCameraReady()
                 }
@@ -86,13 +82,11 @@ abstract class CameraPermissionCheckingActivity :
         if (requestCode == PERMISSION_REQUEST_CODE && grantResults.isNotEmpty()) {
             when (grantResults[0]) {
                 PackageManager.PERMISSION_GRANTED -> {
-                    mainScope.launch { permissionStat.trackResult("success") }
                     mainScope.launch {
                         onCameraReady()
                     }
                 }
                 else -> {
-                    mainScope.launch { permissionStat.trackResult("failure") }
                     onUserDeniedCameraPermission()
                 }
             }
@@ -149,7 +143,6 @@ abstract class CameraPermissionCheckingActivity :
 
     private companion object {
         private const val PERMISSION_STORAGE_NAME = "scan_camera_permissions"
-        private const val PERMISSION_STATS_TRACK_NAME = "camera_permission"
         private const val PERMISSION_REQUEST_CODE = 1200
         private const val PERMISSION_RATIONALE_SHOWN = "permission_rationale_shown"
     }

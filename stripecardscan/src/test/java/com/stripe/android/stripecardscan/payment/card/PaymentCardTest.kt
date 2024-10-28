@@ -4,8 +4,6 @@ import android.annotation.SuppressLint
 import androidx.test.filters.SmallTest
 import org.junit.Before
 import org.junit.Test
-import java.util.Calendar
-import java.util.GregorianCalendar
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue

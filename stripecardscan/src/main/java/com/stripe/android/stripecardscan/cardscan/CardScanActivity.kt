@@ -12,7 +12,6 @@ import android.widget.ImageView
 import androidx.activity.addCallback
 import androidx.annotation.RestrictTo
 import com.stripe.android.camera.CameraPreviewImage
-import com.stripe.android.camera.framework.Stats
 import com.stripe.android.camera.scanui.ScanErrorListener
 import com.stripe.android.camera.scanui.ScanState
 import com.stripe.android.camera.scanui.SimpleScanStateful
@@ -37,7 +36,6 @@ import com.stripe.android.stripecardscan.scanui.util.show
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import java.util.concurrent.atomic.AtomicBoolean
 
 internal const val INTENT_PARAM_REQUEST = "request"
@@ -147,7 +145,6 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
                     changeScanState(CardScanState.Correct)
                     cameraAdapter.unbindFromLifecycle(this@CardScanActivity)
                     resultListener.cardScanComplete(ScannedCard(result.pan))
-                    scanStat.trackResult("card_scanned")
                     closeScanner()
                 }.let { }
             }
@@ -158,13 +155,6 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
             override suspend fun onInterimResult(
                 result: MainLoopAggregator.InterimResult
             ) = launch(Dispatchers.Main) {
-                if (
-                    result.state is MainLoopState.OcrFound &&
-                    !hasPreviousValidResult.getAndSet(true)
-                ) {
-                    scanStat.trackResult("ocr_pan_observed")
-                }
-
                 when (result.state) {
                     is MainLoopState.Initial -> changeScanState(CardScanState.NotFound)
                     is MainLoopState.OcrFound -> changeScanState(CardScanState.Found)
@@ -184,7 +174,6 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
         setContentView(viewBinding.root)
 
         onBackPressedDispatcher.addCallback {
-            runBlocking { scanStat.trackResult("user_canceled") }
             resultListener.userCanceled(CancellationReason.Back)
             closeScanner()
         }

@@ -25,8 +25,7 @@ internal class MainLoopAggregator(
     FinalResult
     >(
     listener = listener,
-    initialState = MainLoopState.Initial(TimeSource.Monotonic),
-    statsName = null // TODO: when we want to collect this in scan stats, give this a name
+    initialState = MainLoopState.Initial(TimeSource.Monotonic)
 ) {
 
     internal data class FinalResult(
