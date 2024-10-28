@@ -121,6 +121,8 @@
   <!-- Accessibility action for deleting a payment method -->
   <string name="stripe_delete_payment_method">Odstrániť spôsob platby</string>
   <string name="stripe_delete_payment_method_prompt_title">Vymazať spôsob platby?</string>
+  <!-- Error message for card entry form when a user enters a card with a brand that is not accepted. -->
+  <string name="stripe_disallowed_card_brand">Karta %s sa neakceptuje</string>
   <!-- Done button title -->
   <string name="stripe_done">Hotovo</string>
   <!-- Button title to enter editing mode -->
