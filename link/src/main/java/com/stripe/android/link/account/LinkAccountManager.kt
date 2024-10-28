@@ -59,4 +59,14 @@ internal interface LinkAccountManager {
         lookup: ConsumerSessionLookup,
         startSession: Boolean,
     ): LinkAccount?
+
+    /**
+     * Triggers sending a verification code to the user.
+     */
+    suspend fun startVerification(): Result<LinkAccount>
+
+    /**
+     * Confirms a verification code sent to the user.
+     */
+    suspend fun confirmVerification(code: String): Result<LinkAccount>
 }

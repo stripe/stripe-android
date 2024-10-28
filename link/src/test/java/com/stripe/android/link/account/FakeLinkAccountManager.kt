@@ -22,6 +22,8 @@ internal open class FakeLinkAccountManager : LinkAccountManager {
     override val accountStatus: Flow<AccountStatus> = _accountStatus
 
     var lookupConsumerResult: Result<LinkAccount?> = Result.success(null)
+    var startVerificationResult: Result<LinkAccount> = Result.success(LinkAccount(ConsumerSession("", "", "", "")))
+    var confirmVerification: Result<LinkAccount> = Result.success(LinkAccount(ConsumerSession("", "", "", "")))
     var signUpResult: Result<LinkAccount> = Result.success(LinkAccount(ConsumerSession("", "", "", "")))
     var signInWithUserInputResult: Result<LinkAccount> = Result.success(LinkAccount(ConsumerSession("", "", "", "")))
     var logOutResult: Result<ConsumerSession> = Result.success(ConsumerSession("", "", "", ""))
@@ -75,5 +77,13 @@ internal open class FakeLinkAccountManager : LinkAccountManager {
 
     override fun setLinkAccountFromLookupResult(lookup: ConsumerSessionLookup, startSession: Boolean): LinkAccount? {
         return linkAccountFromLookupResult
+    }
+
+    override suspend fun startVerification(): Result<LinkAccount> {
+        return startVerificationResult
+    }
+
+    override suspend fun confirmVerification(code: String): Result<LinkAccount> {
+        return confirmVerification
     }
 }
