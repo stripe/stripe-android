@@ -12,6 +12,7 @@ import com.stripe.android.confirmPaymentIntent
 import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext
+import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext.InitializationMode
 import com.stripe.android.financialconnections.FinancialConnectionsSheetForTokenResult
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
@@ -131,6 +132,9 @@ internal class FinancialConnectionsPlaygroundViewModel(
                             ephemeralKey = it.ephemeralKey,
                             customerId = it.customerId,
                             elementsSessionContext = ElementsSessionContext(
+                                initializationMode = InitializationMode.PaymentIntent(it.intentId),
+                                amount = it.amount,
+                                currency = it.currency,
                                 linkMode = LinkMode.LinkPaymentMethod,
                             ),
                             experience = settings.get<ExperienceSetting>().selectedOption,

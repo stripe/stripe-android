@@ -525,6 +525,22 @@ class DefaultEventReporterTest {
     }
 
     @Test
+    fun `onDisallowedCardBrandEntered(brand) should fire analytics request with expected event value`() {
+        val customEventReporter = createEventReporter(EventReporter.Mode.Custom) {
+            simulateSuccessfulSetup()
+        }
+
+        customEventReporter.onDisallowedCardBrandEntered(CardBrand.AmericanExpress)
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_disallowed_card_brand" &&
+                    req.params["brand"] == "amex"
+            }
+        )
+    }
+
+    @Test
     fun `constructor does not read from PaymentConfiguration`() {
         PaymentConfiguration.clearInstance()
         // Would crash if it tries to read from the uninitialized PaymentConfiguration

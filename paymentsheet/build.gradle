@@ -3,6 +3,7 @@ apply from: configs.androidLibrary
 apply plugin: 'com.google.devtools.ksp'
 apply plugin: "org.jetbrains.kotlin.plugin.parcelize"
 apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
+apply plugin: 'org.jetbrains.kotlin.plugin.compose'
 apply plugin: 'app.cash.paparazzi'
 apply plugin: 'dev.drewhamilton.poko'
 
@@ -25,6 +26,7 @@ dependencies {
     implementation libs.androidx.browser
     implementation libs.androidx.fragment
     implementation libs.androidx.lifecycle
+    implementation libs.androidx.lifecycleCompose
     implementation libs.androidx.savedState
     implementation libs.androidx.viewModel
 
@@ -146,14 +148,11 @@ android {
         }
     }
 
-    composeOptions {
-        kotlinCompilerExtensionVersion "${versions.androidxComposeCompiler}"
-    }
-
     kotlinOptions {
         freeCompilerArgs += [
                 "-opt-in=kotlinx.coroutines.FlowPreview",
                 "-Xcontext-receivers",
+                "-Xconsistent-data-class-copy-visibility"
         ]
         if (gradle.ext.isCi) {
             kotlinOptions.allWarningsAsErrors = true

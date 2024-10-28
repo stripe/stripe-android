@@ -3,14 +3,20 @@ apply from: configs.androidApplication
 apply plugin: 'com.google.devtools.ksp'
 apply plugin: "org.jetbrains.kotlin.plugin.parcelize"
 apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
+apply plugin: 'org.jetbrains.kotlin.plugin.compose'
 
 dependencies {
     implementation project(":stripe-connect")
+    implementation project(':stripe-core')
 
     // Kotlin
     implementation libs.kotlin.coroutines
     implementation libs.kotlin.coroutinesAndroid
     implementation libs.kotlin.serialization
+
+    // Networking
+    implementation libs.fuel
+    implementation libs.fuelCoroutines
 
     // AndroidX
     implementation libs.androidx.activity
@@ -110,10 +116,6 @@ android {
                 }
             }
         }
-    }
-
-    composeOptions {
-        kotlinCompilerExtensionVersion "${versions.androidxComposeCompiler}"
     }
 
     kotlinOptions {

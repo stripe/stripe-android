@@ -6,7 +6,6 @@ import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.link.LinkPaymentDetails
-import com.stripe.android.link.injection.LinkScope
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams.Card.Companion.extraConfirmationParams
@@ -28,7 +27,6 @@ import kotlin.coroutines.CoroutineContext
 /**
  * Repository that uses [StripeRepository] for Link services.
  */
-@LinkScope
 internal class LinkApiRepository @Inject constructor(
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
     @Named(STRIPE_ACCOUNT_ID) private val stripeAccountIdProvider: () -> String?,
@@ -66,6 +64,10 @@ internal class LinkApiRepository @Inject constructor(
             country = country,
             name = name,
             locale = locale,
+            amount = null,
+            currency = null,
+            paymentIntentId = null,
+            setupIntentId = null,
             consentAction = consentAction,
             requestOptions = buildRequestOptions(),
             requestSurface = REQUEST_SURFACE,

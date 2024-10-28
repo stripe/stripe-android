@@ -117,6 +117,26 @@ object PaymentMethodFactory {
         )
     }
 
+    fun amazonPay(): PaymentMethod {
+        return PaymentMethod(
+            id = "pm_1234",
+            created = 123456789L,
+            liveMode = false,
+            type = PaymentMethod.Type.AmazonPay,
+            code = PaymentMethod.Type.AmazonPay.code,
+        )
+    }
+
+    fun revolutPay(): PaymentMethod {
+        return PaymentMethod(
+            id = "pm_1234",
+            created = 123456789L,
+            liveMode = false,
+            type = PaymentMethod.Type.RevolutPay,
+            code = PaymentMethod.Type.RevolutPay.code,
+        )
+    }
+
     fun convertCardToJson(paymentMethod: PaymentMethod): JSONObject {
         val paymentMethodJson = convertGenericPaymentMethodToJson(paymentMethod)
 

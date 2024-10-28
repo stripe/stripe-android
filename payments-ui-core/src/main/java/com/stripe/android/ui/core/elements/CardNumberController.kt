@@ -3,12 +3,18 @@ package com.stripe.android.ui.core.elements
 import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.autofill.AutofillType
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
+import com.stripe.android.CardBrandFilter
+import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.CardAccountRangeService
 import com.stripe.android.cards.CardNumber
@@ -19,6 +25,7 @@ import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
 import com.stripe.android.stripecardscan.cardscan.CardScanSheetResult
 import com.stripe.android.ui.core.asIndividualDigits
+import com.stripe.android.ui.core.elements.events.LocalCardBrandDisallowedReporter
 import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventReporter
 import com.stripe.android.uicore.elements.FieldError
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -71,6 +78,7 @@ internal class DefaultCardNumberController(
     override val initialValue: String?,
     override val showOptionalLabel: Boolean = false,
     private val cardBrandChoiceConfig: CardBrandChoiceConfig = CardBrandChoiceConfig.Ineligible,
+    private val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
 ) : CardNumberController() {
     override val capitalization: KeyboardCapitalization = cardTextFieldConfig.capitalization
     override val keyboardType: KeyboardType = cardTextFieldConfig.keyboard
@@ -171,6 +179,7 @@ internal class DefaultCardNumberController(
             }
         },
         isCbcEligible = { isEligibleForCardBrandChoice },
+        cardBrandFilter = cardBrandFilter
     )
 
     override val trailingIcon: StateFlow<TextFieldIcon?> = combineAsStateFlow(
@@ -221,7 +230,7 @@ internal class DefaultCardNumberController(
         } else if (accountRangeService.accountRange != null) {
             TextFieldIcon.Trailing(accountRangeService.accountRange!!.brand.icon, isTintable = false)
         } else {
-            val cardBrands = CardBrand.getCardBrands(number)
+            val cardBrands = CardBrand.getCardBrands(number).filter { cardBrandFilter.isAccepted(it) }
 
             val staticIcons = cardBrands.map { cardBrand ->
                 TextFieldIcon.Trailing(cardBrand.icon, isTintable = false)
@@ -314,13 +323,30 @@ internal class DefaultCardNumberController(
         previousFocusDirection: FocusDirection
     ) {
         val reporter = LocalCardNumberCompletedEventReporter.current
+        val disallowedBrandReporter = LocalCardBrandDisallowedReporter.current
+
+        // Remember the last state indicating whether it was a disallowed card brand error
+        var lastLoggedCardBrand by rememberSaveable { mutableStateOf<CardBrand?>(null) }
 
         LaunchedEffect(Unit) {
             // Drop the set empty value & initial value
             fieldState.drop(1).collectLatest { state ->
                 when (state) {
-                    is TextFieldStateConstants.Valid.Full -> reporter.onCardNumberCompleted()
-                    else -> Unit
+                    is TextFieldStateConstants.Valid.Full -> {
+                        reporter.onCardNumberCompleted()
+                        lastLoggedCardBrand = null // Reset when valid
+                    }
+                    is TextFieldStateConstants.Error.Invalid -> {
+                        val error = state.getError()
+                        val isDisallowedError = error?.errorMessage == PaymentsCoreR.string.stripe_disallowed_card_brand
+                        if (isDisallowedError && lastLoggedCardBrand != impliedCardBrand.value) {
+                            disallowedBrandReporter.onDisallowedCardBrandEntered(impliedCardBrand.value)
+                            lastLoggedCardBrand = impliedCardBrand.value
+                        }
+                    }
+                    else -> {
+                        lastLoggedCardBrand = null // Reset for other states
+                    }
                 }
             }
         }

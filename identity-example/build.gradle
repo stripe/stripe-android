@@ -2,6 +2,7 @@ apply from: configs.androidApplication
 
 apply plugin: 'com.emergetools.android'
 apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
+apply plugin: 'org.jetbrains.kotlin.plugin.compose'
 
 assemble.dependsOn('lint')
 
@@ -31,10 +32,6 @@ android {
     buildFeatures {
         viewBinding true
         compose true
-    }
-
-    composeOptions {
-        kotlinCompilerExtensionVersion "${versions.androidxComposeCompiler}"
     }
 
     flavorDimensions += "theme"
@@ -69,6 +66,7 @@ dependencies {
     implementation libs.androidx.browser
     implementation libs.androidx.constraintLayout
     implementation libs.androidx.coreKtx
+    implementation libs.androidx.lifecycleCompose
     implementation libs.androidx.liveDataKtx
     implementation libs.compose.activity
     implementation libs.compose.liveData

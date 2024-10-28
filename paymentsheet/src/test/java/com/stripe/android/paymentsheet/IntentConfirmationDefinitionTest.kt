@@ -156,7 +156,7 @@ class IntentConfirmationDefinitionTest {
 
         assertThat(failAction.cause).isEqualTo(cause)
         assertThat(failAction.message).isEqualTo(message.resolvableString)
-        assertThat(failAction.errorType).isEqualTo(PaymentConfirmationErrorType.Internal)
+        assertThat(failAction.errorType).isEqualTo(PaymentConfirmationErrorType.Payment)
     }
 
     @Test

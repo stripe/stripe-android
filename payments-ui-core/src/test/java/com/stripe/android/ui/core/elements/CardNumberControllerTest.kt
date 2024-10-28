@@ -7,6 +7,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.junit4.createComposeRule
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.CardBrandFilter
+import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.R
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.CardNumber
@@ -14,7 +16,9 @@ import com.stripe.android.cards.StaticCardAccountRangeSource
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
+import com.stripe.android.ui.core.elements.events.CardBrandDisallowedReporter
 import com.stripe.android.ui.core.elements.events.CardNumberCompletedEventReporter
+import com.stripe.android.ui.core.elements.events.LocalCardBrandDisallowedReporter
 import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventReporter
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SimpleTextElement
@@ -22,9 +26,12 @@ import com.stripe.android.uicore.elements.SimpleTextFieldConfig
 import com.stripe.android.uicore.elements.SimpleTextFieldController
 import com.stripe.android.uicore.elements.TextFieldIcon
 import com.stripe.android.uicore.utils.stateFlowOf
+import com.stripe.android.utils.FakeCardBrandFilter
 import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -37,6 +44,8 @@ import org.mockito.Mockito.verify
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verifyNoInteractions
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.DefaultAsserter.assertEquals
+import kotlin.test.assertEquals
 import com.stripe.android.R as StripeR
 import com.stripe.android.uicore.R as StripeUiCoreR
 import com.stripe.payments.model.R as PaymentModelR
@@ -232,6 +241,32 @@ internal class CardNumberControllerTest {
     }
 
     @Test
+    fun `trailingIcon should filter out disallowed brands`() = runTest {
+        val disallowedBrands = setOf(CardBrand.AmericanExpress, CardBrand.MasterCard)
+        val cardBrandFilter = FakeCardBrandFilter(disallowedBrands)
+        val cardNumberController = createController(cardBrandFilter = cardBrandFilter)
+
+        cardNumberController.trailingIcon.test {
+            cardNumberController.onValueChange("")
+            idleLooper()
+            assertThat(awaitItem() as TextFieldIcon.MultiTrailing)
+                .isEqualTo(
+                    TextFieldIcon.MultiTrailing(
+                        staticIcons = listOf(
+                            TextFieldIcon.Trailing(CardBrand.Visa.icon, isTintable = false),
+                            TextFieldIcon.Trailing(CardBrand.Discover.icon, isTintable = false),
+                            TextFieldIcon.Trailing(CardBrand.JCB.icon, isTintable = false),
+                        ),
+                        animatedIcons = listOf(
+                            TextFieldIcon.Trailing(CardBrand.DinersClub.icon, isTintable = false),
+                            TextFieldIcon.Trailing(CardBrand.UnionPay.icon, isTintable = false)
+                        )
+                    )
+                )
+        }
+    }
+
+    @Test
     fun `on cbc eligible with preferred brands, should use the preferred brand if none are initially selected`() = runTest {
         val cardNumberController = createController(
             cardBrandChoiceConfig = CardBrandChoiceConfig.Eligible(
@@ -406,6 +441,81 @@ internal class CardNumberControllerTest {
     }
 
     @Test
+    fun `on disallowed card brand entered, should report event`() = runTest {
+        val fakeDisallowedEventReporter = FakeCardBrandDisallowedReporter()
+        val eventReporter: CardNumberCompletedEventReporter = mock()
+
+        val disallowedBrands = setOf(CardBrand.AmericanExpress, CardBrand.MasterCard)
+        val cardNumberController = createController(cardBrandFilter = FakeCardBrandFilter(disallowedBrands))
+
+        composeTestRule.setContent {
+            CompositionLocalProvider(
+                LocalCardBrandDisallowedReporter provides fakeDisallowedEventReporter,
+                LocalCardNumberCompletedEventReporter provides eventReporter
+            ) {
+                cardNumberController.ComposeUI(
+                    enabled = true,
+                    field = SimpleTextElement(
+                        identifier = IdentifierSpec.Name,
+                        controller = SimpleTextFieldController(
+                            textFieldConfig = SimpleTextFieldConfig()
+                        ),
+                    ),
+                    modifier = Modifier.testTag(TEST_TAG),
+                    hiddenIdentifiers = emptySet(),
+                    lastTextFieldIdentifier = null,
+                    nextFocusDirection = FocusDirection.Next,
+                    previousFocusDirection = FocusDirection.Next,
+                )
+            }
+        }
+
+        fakeDisallowedEventReporter.reportedBrands.test {
+            // Simulate entering "37" for American Express
+            cardNumberController.onValueChange("37")
+
+            // Expect AmericanExpress to be reported once
+            val firstReported = awaitItem()
+            assertEquals(CardBrand.AmericanExpress, firstReported, "AmericanExpress should be reported once")
+
+            // Simulate entering "372" (still American Express)
+            cardNumberController.onValueChange("372")
+            // Simulate clearing the input
+            cardNumberController.onValueChange("")
+            // Simulate entering "5555" for MasterCard
+            expectNoEvents()
+            cardNumberController.onValueChange("5555")
+
+            // Expect MasterCard to be reported once
+            val secondReported = awaitItem()
+            assertEquals(CardBrand.MasterCard, secondReported, "MasterCard should be reported once")
+
+            // Simulate entering an invalid card number
+            cardNumberController.onValueChange("66")
+            expectNoEvents()
+
+            // Simulate entering "5555" for MasterCard
+            cardNumberController.onValueChange("5555")
+
+            // Expect MasterCard to be reported once
+            val thirdReported = awaitItem()
+            assertEquals(CardBrand.MasterCard, thirdReported, "MasterCard should be reported once")
+
+            // Simulate entering a valid Visa card number
+            cardNumberController.onValueChange("4242424242424242")
+            expectNoEvents()
+
+            // Simulate entering a MasterCard
+            cardNumberController.onValueChange("")
+            cardNumberController.onValueChange("5555555555554444")
+
+            // Expect MasterCard to be reported once
+            val fourthReported = awaitItem()
+            assertEquals(CardBrand.MasterCard, fourthReported, "MasterCard should be reported once")
+        }
+    }
+
+    @Test
     fun `on initial number completed, should not report event`() = runTest {
         val eventReporter: CardNumberCompletedEventReporter = mock()
 
@@ -445,14 +555,19 @@ internal class CardNumberControllerTest {
         initialValue: String? = null,
         cardBrandChoiceConfig: CardBrandChoiceConfig = CardBrandChoiceConfig.Ineligible,
         repository: CardAccountRangeRepository = FakeCardAccountRangeRepository(),
+        cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter
     ): DefaultCardNumberController {
         return DefaultCardNumberController(
-            cardTextFieldConfig = CardNumberConfig(),
+            cardTextFieldConfig = CardNumberConfig(
+                isCardBrandChoiceEligible = false,
+                cardBrandFilter = cardBrandFilter
+            ),
             cardAccountRangeRepository = repository,
             uiContext = testDispatcher,
             workContext = testDispatcher,
             initialValue = initialValue,
             cardBrandChoiceConfig = cardBrandChoiceConfig,
+            cardBrandFilter = cardBrandFilter
         )
     }
 
@@ -486,5 +601,14 @@ internal class CardNumberControllerTest {
 
     private companion object {
         const val TEST_TAG = "CardNumberElement"
+    }
+}
+
+class FakeCardBrandDisallowedReporter : CardBrandDisallowedReporter {
+    private val _reportedBrands = MutableSharedFlow<CardBrand>(extraBufferCapacity = Int.MAX_VALUE)
+    val reportedBrands = _reportedBrands.asSharedFlow()
+
+    override fun onDisallowedCardBrandEntered(brand: CardBrand) {
+        _reportedBrands.tryEmit(brand)
     }
 }

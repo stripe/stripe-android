@@ -378,6 +378,7 @@ internal class PlaygroundSettings private constructor(
             CustomerSettingsDefinition,
             CheckoutModeSettingsDefinition,
             LinkSettingsDefinition,
+            NativeLinkSettingsDefinition,
             CountrySettingsDefinition,
             CurrencySettingsDefinition,
             GooglePaySettingsDefinition,
@@ -399,6 +400,7 @@ internal class PlaygroundSettings private constructor(
             PaymentMethodOrderSettingsDefinition,
             ExternalPaymentMethodSettingsDefinition,
             LayoutSettingsDefinition,
+            CardBrandAcceptanceSettingsDefinition,
         )
 
         private val nonUiSettingDefinitions: List<PlaygroundSettingDefinition<*>> = listOf(

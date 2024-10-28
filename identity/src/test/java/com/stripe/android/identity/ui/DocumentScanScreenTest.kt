@@ -15,6 +15,8 @@ import androidx.navigation.NavController
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.identity.R
 import com.stripe.android.identity.TestApplication
+import com.stripe.android.identity.camera.IdentityAggregator
+import com.stripe.android.identity.ml.FaceDetectorOutput
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.states.IdentityScanState
@@ -144,7 +146,13 @@ class DocumentScanScreenTest {
     fun verifyScannedState() {
         testDocumentScanScreen(
             targetScanType = IdentityScanState.ScanType.DOC_FRONT,
-            scannerState = IdentityScanViewModel.State.Scanned(mock()),
+            scannerState = IdentityScanViewModel.State.Scanned(
+                IdentityAggregator.FinalResult(
+                    frame = mock(),
+                    result = mock<FaceDetectorOutput>(),
+                    identityState = mock(),
+                )
+            ),
             messageId = R.string.stripe_scanned
         ) {
             verify(mockDocumentScanViewModel).stopScan(any())

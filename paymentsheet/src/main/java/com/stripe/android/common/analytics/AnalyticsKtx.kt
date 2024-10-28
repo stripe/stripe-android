@@ -71,6 +71,10 @@ internal fun PaymentSheet.Configuration.getExternalPaymentMethodsAnalyticsValue(
     return this.externalPaymentMethods.takeIf { it.isNotEmpty() }?.take(PaymentSheetEvent.MAX_EXTERNAL_PAYMENT_METHODS)
 }
 
+internal fun PaymentSheet.CardBrandAcceptance.toAnalyticsValue(): Boolean {
+    return this !is PaymentSheet.CardBrandAcceptance.All
+}
+
 internal fun PaymentSheet.PaymentMethodLayout.toAnalyticsValue(): String {
     return when (this) {
         PaymentSheet.PaymentMethodLayout.Horizontal -> "horizontal"

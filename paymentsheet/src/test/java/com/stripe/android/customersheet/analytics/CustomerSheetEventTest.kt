@@ -44,6 +44,7 @@ class CustomerSheetEventTest {
                 "address" to "Automatic",
             ),
             "preferred_networks" to null,
+            "card_brand_acceptance" to false,
         )
 
         assertThat(event.additionalParams)
@@ -88,6 +89,7 @@ class CustomerSheetEventTest {
                 "address" to "Automatic",
             ),
             "preferred_networks" to null,
+            "card_brand_acceptance" to false,
         )
 
         assertThat(event.additionalParams)
@@ -131,6 +133,7 @@ class CustomerSheetEventTest {
             "payment_method_order" to listOf("klarna", "afterpay", "card"),
             "billing_details_collection_configuration" to expectedBillingDetailsCollection,
             "preferred_networks" to "cartes_bancaires, visa",
+            "card_brand_acceptance" to false,
         )
 
         val event = CustomerSheetEvent.Init(

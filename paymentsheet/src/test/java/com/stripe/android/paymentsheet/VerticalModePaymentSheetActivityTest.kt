@@ -10,7 +10,9 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ExperimentalCardBrandFilteringApi
 import com.stripe.android.core.utils.urlEncode
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
@@ -33,7 +35,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 @OptIn(
-    ExperimentalPaymentMethodLayoutApi::class,
+    ExperimentalCardBrandFilteringApi::class,
 )
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.Q])
@@ -414,9 +416,95 @@ internal class VerticalModePaymentSheetActivityTest {
         verticalModePage.assertMandateExists()
     }
 
+    @OptIn(ExperimentalCardBrandFilteringApi::class)
+    @Test
+    fun `Entering Amex card shows disallowed error when disallowed`() = runTest(
+        cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.disallowed(
+            listOf(
+
+                PaymentSheet.CardBrandAcceptance.BrandCategory.Amex
+            )
+        ),
+        networkSetup = {
+            setupElementsSessionsResponse()
+        },
+    ) {
+        verticalModePage.assertDoesNotHaveSavedPaymentMethods()
+        verticalModePage.assertPrimaryButton(isNotEnabled())
+
+        verticalModePage.clickOnNewLpm("card")
+        formPage.waitUntilVisible()
+
+        // Enter the start of an Amex card number
+        formPage.fillCardNumber("3782")
+
+        // Verify that the error message appears
+        formPage.assertErrorExists("American Express is not accepted")
+        verticalModePage.assertPrimaryButton(isNotEnabled())
+
+        // Entering an accepted card brand (Visa) should be allowed
+        formPage.fillOutCardDetails()
+        verticalModePage.assertPrimaryButton(isEnabled())
+    }
+
+    @Test
+    fun `Displayed saved payment method is correct when a card brand is disallowed`() = runTest(
+        cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.disallowed(
+            listOf(
+
+                PaymentSheet.CardBrandAcceptance.BrandCategory.Visa
+            )
+        ),
+        customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
+        networkSetup = {
+            setupElementsSessionsResponse()
+            setupV1PaymentMethodsResponse(card1)
+        },
+    ) {
+        // Saved Visa card should be filtered out
+        verticalModePage.assertDoesNotHaveSavedPaymentMethods()
+        verticalModePage.assertPrimaryButton(isNotEnabled())
+    }
+
+    @Test
+    fun `Disallowed brands are hidden in the CBC dropdown`() = runTest(
+        cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.disallowed(
+            listOf(
+
+                PaymentSheet.CardBrandAcceptance.BrandCategory.Visa
+            )
+        ),
+        customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
+        networkSetup = {
+            setupElementsSessionsResponse(isCbcEligible = true)
+            setupV1PaymentMethodsResponse(
+                card1.copy(addCbcNetworks = true, brand = CardBrand.CartesBancaires),
+                card2.copy(addCbcNetworks = true, brand = CardBrand.CartesBancaires)
+            )
+        },
+    ) {
+        verticalModePage.assertHasSavedPaymentMethods()
+        verticalModePage.assertHasSelectedSavedPaymentMethod("pm_12345", cardBrand = "cartes_bancaries")
+        verticalModePage.assertPrimaryButton(isEnabled())
+        verticalModePage.waitUntilVisible()
+
+        verticalModePage.clickViewMore()
+        managePage.waitUntilVisible()
+        verticalModePage.assertHasSelectedSavedPaymentMethod("pm_12345", cardBrand = "cartes_bancaries")
+        managePage.clickEdit()
+        managePage.clickEdit("pm_12345")
+
+        editPage.assertIsVisible()
+
+        // Even though our card is co-branded, Visa should not show up in the dropdown as it is disallowed
+        editPage.assertNotInDropdown("Visa")
+    }
+
+    @OptIn(ExperimentalCardBrandFilteringApi::class)
     private fun runTest(
         primaryButtonLabel: String? = null,
         customer: PaymentSheet.CustomerConfiguration? = null,
+        cardBrandAcceptance: PaymentSheet.CardBrandAcceptance = PaymentSheet.CardBrandAcceptance.all(),
         networkSetup: () -> Unit,
         initialLoadWaiter: () -> Unit = { verticalModePage.waitUntilVisible() },
         test: () -> Unit,
@@ -434,6 +522,7 @@ internal class VerticalModePaymentSheetActivityTest {
                         .customer(customer)
                         .allowsDelayedPaymentMethods(true)
                         .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
+                        .cardBrandAcceptance(cardBrandAcceptance)
                         .apply {
                             if (primaryButtonLabel != null) {
                                 primaryButtonLabel(primaryButtonLabel)
@@ -555,6 +644,7 @@ internal class VerticalModePaymentSheetActivityTest {
         override val id: String,
         val last4: String,
         val addCbcNetworks: Boolean = false,
+        val brand: CardBrand = CardBrand.Visa
     ) : PaymentMethodDetails {
         override val type: String = "card"
 
@@ -564,6 +654,7 @@ internal class VerticalModePaymentSheetActivityTest {
             ).update(
                 last4 = last4,
                 addCbcNetworks = addCbcNetworks,
+                brand = brand
             )
             return PaymentMethodFactory.convertCardToJson(transform(card))
         }

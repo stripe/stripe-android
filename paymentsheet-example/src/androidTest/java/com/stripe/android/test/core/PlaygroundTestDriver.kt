@@ -1032,7 +1032,7 @@ internal class PlaygroundTestDriver(
     /**
      * Here we wait for PollingActivity to first come into view then wait for it to go away by checking if the Approve payment text is there
      */
-    private fun waitForPollingToFinish(timeout: Duration = 30.seconds) {
+    private fun waitForPollingToFinish(timeout: Duration = 60.seconds) {
         val className =
             "com.stripe.android.paymentsheet.paymentdatacollection.polling.PollingActivity"
         while (currentActivity?.componentName?.className != className) {

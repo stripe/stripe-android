@@ -2,6 +2,47 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+### PaymentSheet
+- [CHANGED] [9498](https://github.com/stripe/stripe-android/pull/9498) The default value of `PaymentSheet.Configuration.Builder.paymentMethodLayout` has changed from Horizontal to Automatic.
+
+### Basic Integration
+* [REMOVED][9501](https://github.com/stripe/stripe-android/pull/9501) Basic Integration has been removed. [Please use Mobile Payment Element instead](https://docs.stripe.com/payments/mobile/migrating-to-mobile-payment-element-from-basic-integration).
+
+Dependencies updated in [9512](https://github.com/stripe/stripe-android/pull/9512):
+* Bumped Kotlin from 1.9.25 to 2.0.21.
+* Bumped Kotlin Coroutines from 1.8.1 to 1.9.0.
+
+## 20.53.0 - 2024-10-21
+
+### PaymentSheet
+* [ADDED] [9429](https://github.com/stripe/stripe-android/pull/9429) `PaymentSheet.PaymentMethodLayout` is now generally available. Configure the layout of payment methods in the sheet using `PaymentSheet.Configuration.Builder.paymentMethodLayout` to display them either horizontally, vertically, or let Stripe optimize the layout automatically.
+
+Dependencies updated in [9345](https://github.com/stripe/stripe-android/pull/9345) and [9469](https://github.com/stripe/stripe-android/pull/9469) and [9473](https://github.com/stripe/stripe-android/pull/9473):
+* Bumped Accompanist from 0.32.0 to 0.34.0.
+* Bumped Compose from 1.5.4 to 1.6.8.
+* Bumped Lifecycle from 2.7.0 to 2.8.6.
+* Bumped Material from 1.11.0 to 1.12.0.
+* Bumped Kotlin from 1.9.22 to 1.9.25.
+* Bumped Kotlin Coroutines from 1.7.3 to 1.8.1.
+* Bumped Androidx Annotation from 1.7.1 to 1.9.0.
+* Bumped Appcompat from 1.6.1 to 1.7.0.
+* Bumped Androidx Browser from 1.7.0 to 1.8.0.
+* Bumped Androidx Fragment from 1.6.2 to 1.8.4.
+* Bumped Dagger from 2.50 to 2.52.
+* Bumped GSON from 1.10.1 to 1.11.0.
+* Bumped Play Services Wallet from 19.3.0 to 19.4.0.
+
+## 20.52.1 - 2024-10-15
+
+### Basic integration
+* [DEPRECATED][9433](https://github.com/stripe/stripe-android/pull/9433) Basic integration is now deprecated and will be removed in a future release. [Please use Mobile Payment Element instead](https://docs.stripe.com/payments/mobile/migrating-to-mobile-payment-element-from-basic-integration).
+
+## 20.52.0 - 2024-10-07
+
+### CustomerSheet
+* [ADDED] `CustomerSheet` is now generally available. For more information see our docs [here](https://docs.stripe.com/elements/customer-sheet).
+* [ADDED] `CustomerSession` on `CustomerSheet` is now in private beta. For more information see our docs [here](https://docs.corp.stripe.com/elements/customer-sheet?platform=android&mobile-customer-session=customer-session).
+
 ## 20.51.1 - 2024-09-30
 * Stability and efficiency improvements.
 
@@ -26,6 +67,7 @@
 
 ## 20.49.0 - 2024-09-09
 
+* [ADDED] `CustomerSession` on `PaymentSheet` is now in private beta. For more information see our docs [here](https://docs.corp.stripe.com/payments/accept-a-payment?platform=android&mobile-customer-session=customer-session).
 * [BREAKING][9158](https://github.com/stripe/stripe-android/pull/9158) Updates to CVC recollection APIs, currently in private beta. Add `requireCvcRecollection` param to `IntentConfiguration`. This is a breaking change for merchants using `PaymentSheet.Builder.cvcRecollectionEnabledCallback` and `PaymentSheet.FlowController.Builder.cvcRecollectionEnabledCallback`. Requires opt-in for `ExperimentalCvcRecollectionApi` annotation.
 
 ## 20.48.6 - 2024-08-26

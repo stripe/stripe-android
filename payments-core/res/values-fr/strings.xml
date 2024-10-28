@@ -121,6 +121,8 @@
   <!-- Accessibility action for deleting a payment method -->
   <string name="stripe_delete_payment_method">Supprimer le moyen de paiement</string>
   <string name="stripe_delete_payment_method_prompt_title">Supprimer le moyen de paiement ?</string>
+  <!-- Error message for card entry form when a user enters a card with a brand that is not accepted. -->
+  <string name="stripe_disallowed_card_brand">%s n\'est pas accepté</string>
   <!-- Done button title -->
   <string name="stripe_done">Terminé</string>
   <!-- Button title to enter editing mode -->

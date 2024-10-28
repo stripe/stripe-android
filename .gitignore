@@ -50,3 +50,5 @@ example/gen
 
 # Stripe-internal `pay` commands
 .pay/*
+
+.kotlin/sessions

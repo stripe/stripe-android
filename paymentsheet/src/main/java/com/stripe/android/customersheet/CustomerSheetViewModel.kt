@@ -10,6 +10,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
+import com.stripe.android.common.coroutines.Single
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
@@ -36,6 +37,7 @@ import com.stripe.android.customersheet.util.isUnverifiedUSBankAccount
 import com.stripe.android.customersheet.util.sortPaymentMethods
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
@@ -69,7 +71,6 @@ import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
-import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -90,9 +91,9 @@ internal class CustomerSheetViewModel(
     application: Application, // TODO (jameswoo) remove application
     private var originalPaymentSelection: PaymentSelection?,
     private val paymentConfigurationProvider: Provider<PaymentConfiguration>,
-    private val paymentMethodDataSourceProvider: Deferred<CustomerSheetPaymentMethodDataSource>,
-    private val intentDataSourceProvider: Deferred<CustomerSheetIntentDataSource>,
-    private val savedSelectionDataSourceProvider: Deferred<CustomerSheetSavedSelectionDataSource>,
+    private val paymentMethodDataSourceProvider: Single<CustomerSheetPaymentMethodDataSource>,
+    private val intentDataSourceProvider: Single<CustomerSheetIntentDataSource>,
+    private val savedSelectionDataSourceProvider: Single<CustomerSheetSavedSelectionDataSource>,
     private val configuration: CustomerSheet.Configuration,
     private val integrationType: CustomerSheetIntegration.Type,
     private val logger: Logger,
@@ -267,6 +268,7 @@ internal class CustomerSheetViewModel(
             is CustomerSheetViewAction.OnDismissed -> onDismissed()
             is CustomerSheetViewAction.OnAddCardPressed -> onAddCardPressed()
             is CustomerSheetViewAction.OnCardNumberInputCompleted -> onCardNumberInputCompleted()
+            is CustomerSheetViewAction.OnDisallowedCardBrandEntered -> onDisallowedCardBrandEntered(viewAction.brand)
             is CustomerSheetViewAction.OnBackPressed -> onBackPressed()
             is CustomerSheetViewAction.OnEditPressed -> onEditPressed()
             is CustomerSheetViewAction.OnItemRemoved -> onItemRemoved(viewAction.paymentMethod)
@@ -604,6 +606,7 @@ internal class CustomerSheetViewModel(
                     },
                     canRemove = customerState.canRemove,
                     isLiveMode = requireNotNull(customerState.metadata).stripeIntent.isLiveMode,
+                    cardBrandFilter = PaymentSheetCardBrandFilter(customerState.configuration.cardBrandAcceptance)
                 ),
                 isLiveMode = isLiveModeProvider(),
             )
@@ -906,6 +909,10 @@ internal class CustomerSheetViewModel(
 
     private fun onCardNumberInputCompleted() {
         eventReporter.onCardNumberCompleted()
+    }
+
+    private fun onDisallowedCardBrandEntered(brand: CardBrand) {
+        eventReporter.onDisallowedCardBrandEntered(brand)
     }
 
     private fun onFormError(error: ResolvableString?) {

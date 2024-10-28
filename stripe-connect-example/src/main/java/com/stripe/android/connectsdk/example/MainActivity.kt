@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -22,7 +23,7 @@ import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,28 +36,28 @@ import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.stripe.android.connectsdk.example.ui.accountonboarding.AccountOnboardingExampleActivity
-import com.stripe.android.connectsdk.example.ui.payouts.PayoutsExampleActivity
+import com.stripe.android.connectsdk.example.ui.features.accountonboarding.AccountOnboardingExampleActivity
+import com.stripe.android.connectsdk.example.ui.features.payouts.PayoutsExampleActivity
 
 class MainActivity : ComponentActivity() {
 
     private data class MenuItem(
-        val title: String,
-        val subtitle: String,
+        @StringRes val title: Int,
+        @StringRes val subtitle: Int,
         val activity: Class<out ComponentActivity>,
         val isBeta: Boolean = false,
     )
 
     private val menuItems = listOf(
         MenuItem(
-            title = resources.getString(R.string.account_onboarding),
-            subtitle = resources.getString(R.string.account_onboarding_menu_subtitle),
+            title = R.string.account_onboarding,
+            subtitle = R.string.account_onboarding_menu_subtitle,
             activity = AccountOnboardingExampleActivity::class.java,
             isBeta = true,
         ),
         MenuItem(
-            title = resources.getString(R.string.payouts),
-            subtitle = resources.getString(R.string.payouts_menu_subtitle),
+            title = R.string.payouts,
+            subtitle = R.string.payouts_menu_subtitle,
             activity = PayoutsExampleActivity::class.java,
             isBeta = true,
         ),
@@ -100,7 +101,7 @@ class MainActivity : ComponentActivity() {
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         Text(
-                            text = menuItem.title,
+                            text = stringResource(menuItem.title),
                             fontSize = 16.sp,
                             fontWeight = FontWeight.SemiBold,
                         )
@@ -110,8 +111,7 @@ class MainActivity : ComponentActivity() {
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-
-                        text = menuItem.subtitle,
+                        text = stringResource(menuItem.subtitle),
                         fontSize = 16.sp,
                     )
                 }
@@ -124,7 +124,7 @@ class MainActivity : ComponentActivity() {
                     .size(36.dp)
                     .padding(start = 8.dp),
                 contentDescription = null,
-                imageVector = Icons.Default.KeyboardArrowRight,
+                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
             )
         }
     }

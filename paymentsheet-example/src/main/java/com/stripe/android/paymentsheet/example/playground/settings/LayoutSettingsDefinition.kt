@@ -1,17 +1,15 @@
 package com.stripe.android.paymentsheet.example.playground.settings
 
-import com.stripe.android.paymentsheet.ExperimentalPaymentMethodLayoutApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import java.util.Locale
 
-@OptIn(ExperimentalPaymentMethodLayoutApi::class)
 internal object LayoutSettingsDefinition :
     PlaygroundSettingDefinition<Layout>,
     PlaygroundSettingDefinition.Saveable<Layout> by EnumSaveable(
         key = "layout",
         values = Layout.entries.toTypedArray(),
-        defaultValue = Layout.HORIZONTAL,
+        defaultValue = Layout.AUTOMATIC,
     ),
     PlaygroundSettingDefinition.Displayable<Layout> {
     override val displayName: String = "Payment Method Layout"

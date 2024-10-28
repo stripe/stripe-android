@@ -1449,7 +1449,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
 
         val parser = ElementsSessionJsonParser(
             params = params,
-            apiKey = options.apiKey
+            isLiveMode = options.apiKeyIsLiveMode
         )
 
         val requestParams = buildMap {

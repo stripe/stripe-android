@@ -1,6 +1,7 @@
 package com.stripe.android.customersheet
 
 import android.content.Context
+import com.stripe.android.common.coroutines.CoalescingOrchestrator
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
@@ -36,6 +37,10 @@ internal class StripeCustomerAdapter @Inject internal constructor(
 
     @Volatile
     private var cachedCustomerEphemeralKey: CachedCustomerEphemeralKey? = null
+
+    private val customerEphemeralKeyCoalescingOrchestrator = CoalescingOrchestrator(
+        factory = customerEphemeralKeyProvider::provideCustomerEphemeralKey,
+    )
 
     override val canCreateSetupIntents: Boolean
         get() = setupIntentClientSecretProvider != null
@@ -189,7 +194,7 @@ internal class StripeCustomerAdapter @Inject internal constructor(
                 )
             }?.result ?: run {
                 val newCachedCustomerEphemeralKey = CachedCustomerEphemeralKey(
-                    result = customerEphemeralKeyProvider.provideCustomerEphemeralKey(),
+                    result = customerEphemeralKeyCoalescingOrchestrator.get(),
                     date = timeProvider(),
                 )
                 cachedCustomerEphemeralKey = newCachedCustomerEphemeralKey

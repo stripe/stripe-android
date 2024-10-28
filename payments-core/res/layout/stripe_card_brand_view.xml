@@ -3,15 +3,14 @@
 
     <LinearLayout
         android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        android:animateLayoutChanges="true">
+        android:layout_width="wrap_content">
 
         <ImageView
             android:id="@+id/icon"
             android:layout_width="32dp"
             android:layout_height="21dp"
             android:visibility="visible"
-            android:background="@drawable/stripe_ic_unknown"/>
+            android:src="@drawable/stripe_ic_unknown"/>
 
         <ImageView
             android:id="@+id/chevron"

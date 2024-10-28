@@ -29,7 +29,8 @@ internal object PaymentSheetFixtures {
     internal val SETUP_INTENT_CLIENT_SECRET = PaymentIntentClientSecret(SETUP_CLIENT_SECRET)
 
     internal val CONFIG_MINIMUM = PaymentSheet.Configuration(
-        merchantDisplayName = MERCHANT_DISPLAY_NAME
+        merchantDisplayName = MERCHANT_DISPLAY_NAME,
+        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
     )
 
     internal val CONFIG_WITH_EVERYTHING = PaymentSheet.Configuration(
@@ -85,6 +86,7 @@ internal object PaymentSheetFixtures {
     internal val CONFIG_CUSTOMER = PaymentSheet.Configuration(
         merchantDisplayName = MERCHANT_DISPLAY_NAME,
         customer = defaultCustomerConfig,
+        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
     )
 
     internal val EMPTY_CUSTOMER_STATE = CustomerState(
@@ -100,7 +102,8 @@ internal object PaymentSheetFixtures {
     internal val CONFIG_GOOGLEPAY
         get() = PaymentSheet.Configuration(
             merchantDisplayName = MERCHANT_DISPLAY_NAME,
-            googlePay = ConfigFixtures.GOOGLE_PAY
+            googlePay = ConfigFixtures.GOOGLE_PAY,
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
         )
 
     internal val CONFIG_CUSTOMER_WITH_GOOGLEPAY
