@@ -11,7 +11,7 @@ import com.stripe.android.uicore.StripeThemeDefaults
 
 private val LinkTeal = Color(0xFF00D66F)
 private val ActionLightGreen = Color(0xFF00A355)
-private val ActionGreen = Color(0xFF001F0F)
+private val ActionGreen = Color(0xFF05A87F)
 private val ButtonLabel = Color(0xFF011E0F)
 private val ErrorText = Color(0xFFFF2F4C)
 private val ErrorBackground = Color(0x2EFE87A1)
