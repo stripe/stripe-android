@@ -4,6 +4,7 @@ import android.os.Parcelable
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.financialconnections.model.BankAccount
 import kotlinx.parcelize.Parcelize
+import com.stripe.android.model.PaymentMethod as PaymentMethodModel
 
 internal sealed class USBankAccountFormScreenState(
     open val error: ResolvableString? = null,
@@ -57,7 +58,7 @@ internal sealed class USBankAccountFormScreenState(
         data class Session(val id: String) : ResultIdentifier
 
         @Parcelize
-        data class PaymentMethod(val paymentMethod: com.stripe.android.model.PaymentMethod) : ResultIdentifier
+        data class PaymentMethod(val paymentMethod: PaymentMethodModel) : ResultIdentifier
     }
 }
 
