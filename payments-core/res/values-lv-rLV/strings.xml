@@ -121,6 +121,8 @@
   <!-- Accessibility action for deleting a payment method -->
   <string name="stripe_delete_payment_method">Dzēst maksājuma metodi</string>
   <string name="stripe_delete_payment_method_prompt_title">Vai dzēst maksājuma metodi?</string>
+  <!-- Error message for card entry form when a user enters a card with a brand that is not accepted. -->
+  <string name="stripe_disallowed_card_brand">%s netiek pieņemts</string>
   <!-- Done button title -->
   <string name="stripe_done">Gatavs</string>
   <!-- Button title to enter editing mode -->
