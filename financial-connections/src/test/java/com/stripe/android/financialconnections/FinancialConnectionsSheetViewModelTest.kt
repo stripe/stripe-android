@@ -149,6 +149,7 @@ class FinancialConnectionsSheetViewModelTest {
                             amount = 123,
                             currency = "usd",
                             linkMode = LinkMode.LinkPaymentMethod,
+                            billingDetails = null,
                         ),
                     )
                 )
@@ -180,6 +181,7 @@ class FinancialConnectionsSheetViewModelTest {
                         amount = 123,
                         currency = "usd",
                         linkMode = null,
+                        billingDetails = null,
                     ),
                 )
             )
