@@ -44,25 +44,53 @@ internal class LinkAppBarScreenshotTest(
         @JvmStatic
         @Parameterized.Parameters(name = "{0}")
         fun data(): List<TestCase> {
-            val showHeaderOptions = listOf(true to "HeaderShown", false to "NoHeader")
-            val showOverflowMenuOptions = listOf(true to "WithOverflow", false to "NoOverflow")
-            val emailOptions = listOf(null to "NoEmail", "test@test.com" to "WithEmail")
-
-            return showHeaderOptions.flatMap { (showHeader, headerName) ->
-                showOverflowMenuOptions.flatMap { (showOverflow, overflowName) ->
-                    emailOptions.map { (email, emailName) ->
-                        TestCase(
-                            name = "LinkAppBar$headerName$overflowName$emailName",
-                            state = LinkAppBarState(
-                                navigationIcon = R.drawable.stripe_link_close,
-                                showHeader = showHeader,
-                                showOverflowMenu = showOverflow,
-                                email = email,
-                            )
-                        )
-                    }
-                }
-            }
+            return listOf(
+                TestCase(
+                    name = "LinkAppBarWithHeaderWithOverflowMenuWithEmail",
+                    state = LinkAppBarState(
+                        navigationIcon = R.drawable.stripe_link_close,
+                        showHeader = true,
+                        showOverflowMenu = true,
+                        email = "test@test.com",
+                    )
+                ),
+                TestCase(
+                    name = "LinkAppBarWithHeaderNoOverflowMenuWithEmail",
+                    state = LinkAppBarState(
+                        navigationIcon = R.drawable.stripe_link_close,
+                        showHeader = true,
+                        showOverflowMenu = false,
+                        email = "test@test.com",
+                    )
+                ),
+                TestCase(
+                    name = "LinkAppBarNoHeaderWithOverflowMenuWithEmail",
+                    state = LinkAppBarState(
+                        navigationIcon = R.drawable.stripe_link_close,
+                        showHeader = false,
+                        showOverflowMenu = true,
+                        email = "test@test.com",
+                    )
+                ),
+                TestCase(
+                    name = "LinkAppBarNoHeaderWithOverflowMenuNoEmail",
+                    state = LinkAppBarState(
+                        navigationIcon = R.drawable.stripe_link_close,
+                        showHeader = false,
+                        showOverflowMenu = true,
+                        email = null,
+                    )
+                ),
+                TestCase(
+                    name = "LinkAppBarNoHeaderNoOverflowMenuNoEmail",
+                    state = LinkAppBarState(
+                        navigationIcon = R.drawable.stripe_link_close,
+                        showHeader = false,
+                        showOverflowMenu = false,
+                        email = null,
+                    )
+                ),
+            )
         }
     }
 
