@@ -440,7 +440,10 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
             )
         ).thenReturn(
             Result.success(
-                SharePaymentDetails(paymentMethodId = "pm_123")
+                SharePaymentDetails(
+                    paymentMethodId = "pm_123",
+                    encodedPaymentMethod = "{\"id\": \"pm_123\"}",
+                )
             )
         )
 

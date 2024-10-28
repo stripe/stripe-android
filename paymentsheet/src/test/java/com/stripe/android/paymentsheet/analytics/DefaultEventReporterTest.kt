@@ -18,6 +18,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormScreenState
+import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.utils.FakeDurationProvider
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.json.JSONException
@@ -845,11 +846,13 @@ class DefaultEventReporterTest {
                 saveForFutureUse = false,
             ),
             instantDebits = PaymentSelection.New.USBankAccount.InstantDebitsInfo(
-                paymentMethodId = "pm_123456789",
+                paymentMethod = PaymentMethodFactory.instantDebits(),
                 linkMode = linkMode,
             ).takeIf { it.linkMode != null },
             screenState = USBankAccountFormScreenState.MandateCollection(
-                resultIdentifier = USBankAccountFormScreenState.ResultIdentifier.PaymentMethod("pm_123456789"),
+                resultIdentifier = USBankAccountFormScreenState.ResultIdentifier.PaymentMethod(
+                    paymentMethod = PaymentMethodFactory.instantDebits(),
+                ),
                 intentId = "intent_1234",
                 bankName = "Stripe Bank",
                 last4 = "6789",

@@ -252,7 +252,7 @@ class CreateFinancialConnectionsSessionTest {
 
             // When
             val deferredIntent: Result<FinancialConnectionsSession> =
-                createFinancialConnectionsSession.forDeferredPayments(
+                createFinancialConnectionsSession.forDeferredIntent(
                     publishableKey = publishableKey,
                     stripeAccountId = stripeAccountId,
                     elementsSessionId = elementsSessionId,
@@ -261,7 +261,8 @@ class CreateFinancialConnectionsSessionTest {
                     onBehalfOf = onBehalfOf,
                     linkMode = null,
                     amount = amount,
-                    currency = currency
+                    currency = currency,
+                    product = null,
                 )
 
             // Then
@@ -278,7 +279,8 @@ class CreateFinancialConnectionsSessionTest {
                         onBehalfOf = onBehalfOf,
                         linkMode = null,
                         amount = amount,
-                        currency = currency
+                        currency = currency,
+                        product = null,
                     )
                 ),
                 requestOptions = eq(
@@ -308,7 +310,7 @@ class CreateFinancialConnectionsSessionTest {
 
             // When
             val paymentIntent: Result<FinancialConnectionsSession> =
-                createFinancialConnectionsSession.forDeferredPayments(
+                createFinancialConnectionsSession.forDeferredIntent(
                     publishableKey = publishableKey,
                     stripeAccountId = null,
                     elementsSessionId = elementsSessionId,
@@ -317,7 +319,8 @@ class CreateFinancialConnectionsSessionTest {
                     linkMode = null,
                     amount = amount,
                     currency = currency,
-                    hostedSurface = "payment_element"
+                    hostedSurface = "payment_element",
+                    product = null,
                 )
 
             // Then
@@ -334,7 +337,8 @@ class CreateFinancialConnectionsSessionTest {
                         linkMode = null,
                         amount = amount,
                         currency = currency,
-                        hostedSurface = "payment_element"
+                        hostedSurface = "payment_element",
+                        product = null,
                     )
                 ),
                 requestOptions = eq(
