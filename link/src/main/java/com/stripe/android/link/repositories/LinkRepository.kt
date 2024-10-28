@@ -54,4 +54,21 @@ internal interface LinkRepository {
         consumerSessionClientSecret: String,
         consumerAccountPublishableKey: String?,
     ): Result<ConsumerSession>
+
+    /**
+     * Start an SMS verification.
+     */
+    suspend fun startVerification(
+        consumerSessionClientSecret: String,
+        consumerPublishableKey: String?,
+    ): Result<ConsumerSession>
+
+    /**
+     * Confirm an SMS verification code.
+     */
+    suspend fun confirmVerification(
+        verificationCode: String,
+        consumerSessionClientSecret: String,
+        consumerPublishableKey: String?,
+    ): Result<ConsumerSession>
 }

@@ -219,8 +219,26 @@ internal class DefaultLinkAccountManager @Inject constructor(
         }
     }
 
+    override suspend fun startVerification(): Result<LinkAccount> {
+        val clientSecret = linkAccount.value?.clientSecret ?: return Result.failure(Throwable("no link account found"))
+        return linkRepository.startVerification(clientSecret, consumerPublishableKey)
+            .onFailure {
+                linkEventsReporter.on2FAStartFailure()
+            }.map { consumerSession ->
+                setAccount(consumerSession, null)
+            }
+    }
+
+    override suspend fun confirmVerification(code: String): Result<LinkAccount> {
+        val clientSecret = linkAccount.value?.clientSecret ?: return Result.failure(Throwable("no link account found"))
+        return linkRepository.confirmVerification(code, clientSecret, consumerPublishableKey)
+            .map { consumerSession ->
+                setAccount(consumerSession, null)
+            }
+    }
+
     @VisibleForTesting
-    private fun setAccountNullable(
+    internal fun setAccountNullable(
         consumerSession: ConsumerSession?,
         publishableKey: String?,
     ): LinkAccount? {
