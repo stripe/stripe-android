@@ -85,9 +85,7 @@ private fun RowScope.LinkAppBarTitle(
             .padding(top = 18.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Icon(
-            painter = painterResource(R.drawable.stripe_link_logo),
-            contentDescription = stringResource(R.string.stripe_link),
+        LinkIcon(
             tint = MaterialTheme.linkColors.linkLogo
         )
 

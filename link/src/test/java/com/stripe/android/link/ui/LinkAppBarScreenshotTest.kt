@@ -48,7 +48,7 @@ internal class LinkAppBarScreenshotTest(
             val showOverflowMenuOptions = listOf(true to "WithOverflow", false to "NoOverflow")
             val emailOptions = listOf(null to "NoEmail", "test@test.com" to "WithEmail")
 
-            val tests = showHeaderOptions.flatMap { (showHeader, headerName) ->
+            return showHeaderOptions.flatMap { (showHeader, headerName) ->
                 showOverflowMenuOptions.flatMap { (showOverflow, overflowName) ->
                     emailOptions.map { (email, emailName) ->
                         TestCase(
@@ -63,8 +63,6 @@ internal class LinkAppBarScreenshotTest(
                     }
                 }
             }
-            println(tests.size)
-            return tests
         }
     }
 
