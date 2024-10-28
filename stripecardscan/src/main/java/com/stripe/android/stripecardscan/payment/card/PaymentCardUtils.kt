@@ -81,7 +81,6 @@ import androidx.annotation.CheckResult
  */
 
 private const val IIN_LENGTH = 6
-private const val LAST_FOUR_LENGTH = 4
 internal const val QUICK_READ_LENGTH = 16
 internal const val QUICK_READ_GROUP_LENGTH = 4
 

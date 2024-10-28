@@ -36,7 +36,6 @@ import com.stripe.android.stripecardscan.scanui.util.show
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
-import java.util.concurrent.atomic.AtomicBoolean
 
 internal const val INTENT_PARAM_REQUEST = "request"
 internal const val INTENT_PARAM_RESULT = "result"
@@ -81,8 +80,6 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
     private val viewFinderBackground: ViewFinderBackground by lazy {
         viewBinding.cameraView.viewFinderBackgroundView
     }
-
-    private val hasPreviousValidResult = AtomicBoolean(false)
 
     override var scanState: CardScanState? = CardScanState.NotFound
 

@@ -38,7 +38,6 @@ import com.stripe.android.stripecardscan.scanui.util.setVisible
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
-import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.min
 import kotlin.math.roundToInt
 import com.stripe.android.camera.R as CameraR
@@ -68,8 +67,6 @@ class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
     private val viewFinderBackground: ViewFinderBackground by lazy {
         viewBinding.cameraView.viewFinderBackgroundView
     }
-
-    private val hasPreviousValidResult = AtomicBoolean(false)
 
     override var scanState: CardScanState? = CardScanState.NotFound
 
