@@ -28,11 +28,10 @@ internal interface StripeCardScanProxy {
     companion object {
         fun create(
             fragment: Fragment,
-            stripePublishableKey: String,
             onFinished: (cardScanSheetResult: CardScanSheetResult) -> Unit,
             errorReporter: ErrorReporter,
             provider: () -> StripeCardScanProxy = {
-                DefaultStripeCardScanProxy(CardScanSheet.create(fragment, stripePublishableKey, onFinished))
+                DefaultStripeCardScanProxy(CardScanSheet.create(fragment, onFinished))
             },
             isStripeCardScanAvailable: IsStripeCardScanAvailable = DefaultIsStripeCardScanAvailable(),
         ): StripeCardScanProxy {
@@ -45,11 +44,10 @@ internal interface StripeCardScanProxy {
 
         fun create(
             activity: AppCompatActivity,
-            stripePublishableKey: String,
             onFinished: (cardScanSheetResult: CardScanSheetResult) -> Unit,
             errorReporter: ErrorReporter,
             provider: () -> StripeCardScanProxy = {
-                DefaultStripeCardScanProxy(CardScanSheet.create(activity, stripePublishableKey, onFinished))
+                DefaultStripeCardScanProxy(CardScanSheet.create(activity, onFinished))
             },
             isStripeCardScanAvailable: IsStripeCardScanAvailable = DefaultIsStripeCardScanAvailable(),
         ): StripeCardScanProxy {
