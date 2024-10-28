@@ -9,7 +9,7 @@ import androidx.compose.ui.res.stringResource
 import com.stripe.android.uicore.R
 
 @Composable
-fun LinkIcon(
+internal fun LinkIcon(
     modifier: Modifier = Modifier,
     tint: Color = Color.Unspecified
 ) {
