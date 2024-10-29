@@ -30,6 +30,10 @@ internal open class FakeLinkEventsReporter : LinkEventsReporter {
         throw NotImplementedError()
     }
 
+    override fun on2FAStartFailure() {
+        throw NotImplementedError()
+    }
+
     override fun onPopupShow() {
         throw NotImplementedError()
     }

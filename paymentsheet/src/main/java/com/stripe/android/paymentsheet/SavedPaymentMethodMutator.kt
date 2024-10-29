@@ -1,8 +1,10 @@
 package com.stripe.android.paymentsheet
 
 import androidx.lifecycle.viewModelScope
+import com.stripe.android.CardBrandFilter
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.orEmpty
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
@@ -44,6 +46,7 @@ internal class SavedPaymentMethodMutator(
     private val isLiveModeProvider: () -> Boolean,
     private val customerStateHolder: CustomerStateHolder,
     private val currentScreen: StateFlow<PaymentSheetScreen>,
+    private val cardBrandFilter: CardBrandFilter,
     isCbcEligible: () -> Boolean,
     isGooglePayReady: StateFlow<Boolean>,
     isLinkEnabled: StateFlow<Boolean?>,
@@ -225,6 +228,7 @@ internal class SavedPaymentMethodMutator(
                     },
                     canRemove = canRemove.value,
                     isLiveMode = isLiveModeProvider(),
+                    cardBrandFilter = cardBrandFilter
                 ),
             )
         )
@@ -332,6 +336,7 @@ internal class SavedPaymentMethodMutator(
                 isNotPaymentFlow = !viewModel.isCompleteFlow,
                 isLiveModeProvider = { requireNotNull(viewModel.paymentMethodMetadata.value).stripeIntent.isLiveMode },
                 currentScreen = viewModel.navigationHandler.currentScreen,
+                cardBrandFilter = PaymentSheetCardBrandFilter(viewModel.config.cardBrandAcceptance)
             )
         }
     }

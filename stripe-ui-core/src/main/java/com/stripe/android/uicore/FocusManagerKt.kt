@@ -11,10 +11,18 @@ import com.stripe.android.core.Logger
  * We should log + silently fail instead of crashing when this exception occurs.
  */
 internal fun FocusManager.moveFocusSafely(focusDirection: FocusDirection): Boolean {
+    fun logError(e: Exception) {
+        Logger.getInstance(BuildConfig.DEBUG).warning("Skipping moving focus due to exception: $e")
+    }
+
     try {
         return this.moveFocus(focusDirection)
     } catch (e: IllegalArgumentException) {
-        Logger.getInstance(BuildConfig.DEBUG).warning("Skipping moving focus due to exception: $e")
+        logError(e)
+        // This indicates that focus was not moved.
+        return false
+    } catch (e: IllegalStateException) {
+        logError(e)
         // This indicates that focus was not moved.
         return false
     }

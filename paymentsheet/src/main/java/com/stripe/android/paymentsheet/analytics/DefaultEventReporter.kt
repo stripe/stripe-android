@@ -210,6 +210,17 @@ internal class DefaultEventReporter @Inject internal constructor(
         )
     }
 
+    override fun onDisallowedCardBrandEntered(brand: CardBrand) {
+        fireEvent(
+            PaymentSheetEvent.CardBrandDisallowed(
+                cardBrand = brand,
+                isDeferred = isDeferred,
+                linkEnabled = linkEnabled,
+                googlePaySupported = googlePaySupported,
+            )
+        )
+    }
+
     override fun onPressConfirmButton(paymentSelection: PaymentSelection?) {
         val duration = durationProvider.end(DurationProvider.Key.ConfirmButtonClicked)
 

@@ -12,7 +12,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import kotlin.test.BeforeTest
 import org.junit.Test
 import java.lang.RuntimeException
 
@@ -49,20 +48,8 @@ class RadarSessionTest {
             testDispatcher
         )
 
-    private val ephemeralKeyProvider: EphemeralKeyProvider =
-        EphemeralKeyProvider { _, _ -> }
-
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val activityScenarioFactory = ActivityScenarioFactory(context)
-
-    @BeforeTest
-    fun setup() {
-        PaymentConfiguration.init(
-            ApplicationProvider.getApplicationContext(),
-            FAKE_PUBLISHABLE_KEY
-        )
-        CustomerSession.initCustomerSession(context, ephemeralKeyProvider)
-    }
 
     @Test
     fun ensureRadarSessionsAttachHCaptchaToken(): Unit = runTest {

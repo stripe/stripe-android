@@ -54,7 +54,6 @@ import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarSta
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.utils.parcelable
-import com.stripe.android.model.LinkMode
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -128,16 +127,13 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
             logNoBrowserAvailableAndFinish()
             return
         }
+
         val manifest = sync.manifest
-        val isInstantDebits = stateFlow.value.isInstantDebits
         val nativeAuthFlowEnabled = nativeRouter.nativeAuthFlowEnabled(manifest)
         nativeRouter.logExposure(manifest)
 
-        val linkMode = initialState.initialArgs.elementsSessionContext?.linkMode
         val hostedAuthUrl = buildHostedAuthUrl(
             hostedAuthUrl = manifest.hostedAuthUrl,
-            isInstantDebits = isInstantDebits,
-            linkMode = linkMode,
         )
         if (hostedAuthUrl == null) {
             finishWithResult(
@@ -171,14 +167,14 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         }
     }
 
-    private fun buildHostedAuthUrl(
-        hostedAuthUrl: String?,
-        isInstantDebits: Boolean,
-        linkMode: LinkMode?,
-    ): String? {
+    private fun buildHostedAuthUrl(hostedAuthUrl: String?): String? {
         if (hostedAuthUrl == null) {
             return null
         }
+
+        val isInstantDebits = stateFlow.value.isInstantDebits
+        val elementsSessionContext = initialState.initialArgs.elementsSessionContext
+        val linkMode = elementsSessionContext?.linkMode
 
         val queryParams = mutableListOf(hostedAuthUrl)
         if (isInstantDebits) {
@@ -186,6 +182,12 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
             // takes place on the web side of the flow and the payment method ID is returned to the app.
             queryParams.add("return_payment_method=true")
             linkMode?.let { queryParams.add("link_mode=${it.value}") }
+        }
+
+        elementsSessionContext?.prefillDetails?.run {
+            email?.let { queryParams.add("email=$it") }
+            phone?.let { queryParams.add("linkMobilePhone=$it") }
+            phoneCountryCode?.let { queryParams.add("linkMobilePhoneCountry=$it") }
         }
 
         return queryParams.joinToString("&")

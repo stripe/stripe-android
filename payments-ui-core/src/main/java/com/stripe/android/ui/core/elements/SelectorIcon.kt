@@ -10,7 +10,7 @@ import kotlinx.serialization.Serializable
 @SerialName("next_action_spec")
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Parcelize
-data class SelectorIcon internal constructor(
+data class SelectorIcon(
     @SerialName("light_theme_png") val lightThemePng: String? = null,
     @SerialName("dark_theme_png") val darkThemePng: String? = null,
 ) : Parcelable

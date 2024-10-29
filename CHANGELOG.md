@@ -3,6 +3,18 @@
 ## XX.XX.XX - 20XX-XX-XX
 
 ### PaymentSheet
+- [CHANGED] [9498](https://github.com/stripe/stripe-android/pull/9498) The default value of `PaymentSheet.Configuration.Builder.paymentMethodLayout` has changed from Horizontal to Automatic.
+
+### Basic Integration
+* [REMOVED][9501](https://github.com/stripe/stripe-android/pull/9501) Basic Integration has been removed. [Please use Mobile Payment Element instead](https://docs.stripe.com/payments/mobile/migrating-to-mobile-payment-element-from-basic-integration).
+
+Dependencies updated in [9512](https://github.com/stripe/stripe-android/pull/9512):
+* Bumped Kotlin from 1.9.25 to 2.0.21.
+* Bumped Kotlin Coroutines from 1.8.1 to 1.9.0.
+
+## 20.53.0 - 2024-10-21
+
+### PaymentSheet
 * [ADDED] [9429](https://github.com/stripe/stripe-android/pull/9429) `PaymentSheet.PaymentMethodLayout` is now generally available. Configure the layout of payment methods in the sheet using `PaymentSheet.Configuration.Builder.paymentMethodLayout` to display them either horizontally, vertically, or let Stripe optimize the layout automatically.
 
 Dependencies updated in [9345](https://github.com/stripe/stripe-android/pull/9345) and [9469](https://github.com/stripe/stripe-android/pull/9469) and [9473](https://github.com/stripe/stripe-android/pull/9473):

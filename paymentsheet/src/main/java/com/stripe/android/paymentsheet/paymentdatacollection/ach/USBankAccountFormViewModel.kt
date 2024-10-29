@@ -12,6 +12,7 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext
 import com.stripe.android.financialconnections.model.BankAccount
@@ -498,6 +499,21 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     }
 
     private fun createInstantDebitsConfiguration(): CollectBankAccountConfiguration.InstantDebits {
+        return CollectBankAccountConfiguration.InstantDebits(
+            email = email.value,
+            elementsSessionContext = makeElementsSessionContext(),
+        )
+    }
+
+    private fun createUSBankAccountConfiguration(): CollectBankAccountConfiguration.USBankAccountInternal {
+        return CollectBankAccountConfiguration.USBankAccountInternal(
+            name = name.value,
+            email = email.value,
+            elementsSessionContext = makeElementsSessionContext(),
+        )
+    }
+
+    private fun makeElementsSessionContext(): ElementsSessionContext {
         val initializationMode = if (args.clientSecret == null) {
             ElementsSessionContext.InitializationMode.DeferredIntent
         } else if (args.isPaymentFlow) {
@@ -506,34 +522,64 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             ElementsSessionContext.InitializationMode.SetupIntent(args.stripeIntentId!!)
         }
 
-        return CollectBankAccountConfiguration.InstantDebits(
-            email = email.value,
-            elementsSessionContext = ElementsSessionContext(
-                initializationMode = initializationMode,
-                amount = args.formArgs.amount?.value,
-                currency = args.formArgs.amount?.currencyCode,
-                linkMode = args.linkMode,
-            ),
+        return ElementsSessionContext(
+            initializationMode = initializationMode,
+            amount = args.formArgs.amount?.value,
+            currency = args.formArgs.amount?.currencyCode,
+            linkMode = args.linkMode,
+            billingDetails = if (FeatureFlags.instantDebitsBillingDetails.isEnabled) {
+                makeElementsSessionContextBillingDetails()
+            } else {
+                null
+            },
+            prefillDetails = makePrefillDetails(),
         )
     }
 
-    private fun createUSBankAccountConfiguration(): CollectBankAccountConfiguration.USBankAccount {
-        return CollectBankAccountConfiguration.USBankAccount(
-            name = name.value,
-            email = email.value,
+    private fun makeElementsSessionContextBillingDetails(): ElementsSessionContext.BillingDetails {
+        val attachDefaultsToPaymentMethod = collectionConfiguration.attachDefaultsToPaymentMethod
+        val name = name.value.takeIf { collectingName || attachDefaultsToPaymentMethod }
+        val email = email.value.takeIf { collectingEmail || attachDefaultsToPaymentMethod }
+        val phone = phone.value.takeIf { collectingPhone || attachDefaultsToPaymentMethod }
+        val address = address.value.takeIf { collectingAddress || attachDefaultsToPaymentMethod }
+
+        return ElementsSessionContext.BillingDetails(
+            name = name,
+            email = email,
+            phone = phone?.let { phoneController.getE164PhoneNumber(it) },
+            address = address?.let {
+                ElementsSessionContext.BillingDetails.Address(
+                    line1 = it.line1,
+                    line2 = it.line2,
+                    postalCode = it.postalCode,
+                    city = it.city,
+                    state = it.state,
+                    country = it.country,
+                )
+            },
+        )
+    }
+
+    private fun makePrefillDetails(): ElementsSessionContext.PrefillDetails {
+        return ElementsSessionContext.PrefillDetails(
+            email = email.value ?: defaultBillingDetails?.email,
+            phone = phone.value ?: defaultBillingDetails?.phone,
+            phoneCountryCode = phoneController.getCountryCode(),
         )
     }
 
     private fun collectBankAccountForDeferredIntent() {
         val elementsSessionId = args.stripeIntentId ?: return
+        val elementsSessionContext = makeElementsSessionContext()
 
         if (args.isPaymentFlow) {
             collectBankAccountLauncher?.presentWithDeferredPayment(
                 publishableKey = lazyPaymentConfig.get().publishableKey,
                 stripeAccountId = lazyPaymentConfig.get().stripeAccountId,
-                configuration = CollectBankAccountConfiguration.USBankAccount(
-                    name.value,
-                    email.value
+                configuration = CollectBankAccountConfiguration.USBankAccountInternal(
+                    name = name.value,
+                    email = email.value,
+                    elementsSessionContext = elementsSessionContext,
                 ),
                 elementsSessionId = elementsSessionId,
                 customerId = null,
@@ -545,9 +591,10 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             collectBankAccountLauncher?.presentWithDeferredSetup(
                 publishableKey = lazyPaymentConfig.get().publishableKey,
                 stripeAccountId = lazyPaymentConfig.get().stripeAccountId,
-                configuration = CollectBankAccountConfiguration.USBankAccount(
-                    name.value,
-                    email.value
+                configuration = CollectBankAccountConfiguration.USBankAccountInternal(
+                    name = name.value,
+                    email = email.value,
+                    elementsSessionContext = elementsSessionContext,
                 ),
                 elementsSessionId = elementsSessionId,
                 customerId = null,

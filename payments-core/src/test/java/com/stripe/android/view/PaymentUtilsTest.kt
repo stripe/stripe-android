@@ -68,7 +68,7 @@ class PaymentUtilsTest {
         Locale.setDefault(Locale("ar", "JO")) // Jordan
         val jordanianDinar = Currency.getInstance("JOD")
         assertThat(PaymentUtils.formatPriceString(100123.0, jordanianDinar))
-            .isEqualTo("د.أ.\u200F ١٠٠٫١٢٣")
+            .isEqualTo("\u200F١٠٠٫١٢٣ د.أ.\u200F")
 
         Locale.setDefault(Locale.UK)
         val britishPound = Currency.getInstance(Locale.UK)

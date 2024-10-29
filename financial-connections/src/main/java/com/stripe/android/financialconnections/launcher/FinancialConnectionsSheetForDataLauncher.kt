@@ -56,7 +56,8 @@ class FinancialConnectionsSheetForDataLauncher(
     ) {
         activityResultLauncher.launch(
             FinancialConnectionsSheetActivityArgs.ForData(
-                configuration
+                configuration = configuration,
+                elementsSessionContext = elementsSessionContext,
             )
         )
     }

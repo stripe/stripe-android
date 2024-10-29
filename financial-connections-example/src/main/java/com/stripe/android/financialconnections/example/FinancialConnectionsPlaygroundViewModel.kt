@@ -19,6 +19,7 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsEve
 import com.stripe.android.financialconnections.example.data.BackendRepository
 import com.stripe.android.financialconnections.example.data.Settings
 import com.stripe.android.financialconnections.example.settings.ConfirmIntentSetting
+import com.stripe.android.financialconnections.example.settings.EmailSetting
 import com.stripe.android.financialconnections.example.settings.ExperienceSetting
 import com.stripe.android.financialconnections.example.settings.FinancialConnectionsPlaygroundUrlHelper
 import com.stripe.android.financialconnections.example.settings.FlowSetting
@@ -136,6 +137,14 @@ internal class FinancialConnectionsPlaygroundViewModel(
                                 amount = it.amount,
                                 currency = it.currency,
                                 linkMode = LinkMode.LinkPaymentMethod,
+                                billingDetails = ElementsSessionContext.BillingDetails(
+                                    email = settings.get<EmailSetting>().selectedOption,
+                                ),
+                                prefillDetails = ElementsSessionContext.PrefillDetails(
+                                    email = settings.get<EmailSetting>().selectedOption,
+                                    phone = null,
+                                    phoneCountryCode = null,
+                                ),
                             ),
                             experience = settings.get<ExperienceSetting>().selectedOption,
                             integrationType = settings.get<IntegrationTypeSetting>().selectedOption,

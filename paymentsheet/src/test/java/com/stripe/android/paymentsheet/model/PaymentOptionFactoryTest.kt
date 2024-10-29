@@ -56,7 +56,7 @@ class PaymentOptionFactoryTest {
             PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         )
         assertThat(paymentOption.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_card_visa)
-        assertThat(paymentOption.label).isEqualTo("····4242")
+        assertThat(paymentOption.label).isEqualTo("···· 4242")
     }
 
     @Test
@@ -69,7 +69,7 @@ class PaymentOptionFactoryTest {
             )
         )
         assertThat(paymentOption.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_card_visa)
-        assertThat(paymentOption.label).isEqualTo("····4242")
+        assertThat(paymentOption.label).isEqualTo("···· 4242")
     }
 
     @Test
@@ -81,7 +81,7 @@ class PaymentOptionFactoryTest {
             )
         )
         assertThat(paymentOption.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_card_visa)
-        assertThat(paymentOption.label).isEqualTo("····4242")
+        assertThat(paymentOption.label).isEqualTo("···· 4242")
     }
 
     @Test
@@ -93,7 +93,7 @@ class PaymentOptionFactoryTest {
             )
         )
         assertThat(paymentOption.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_link)
-        assertThat(paymentOption.label).isEqualTo("····4242")
+        assertThat(paymentOption.label).isEqualTo("···· 4242")
     }
 
     @Test
@@ -117,7 +117,7 @@ class PaymentOptionFactoryTest {
             )
         )
         assertThat(paymentOption.drawableResourceId).isEqualTo(R.drawable.stripe_google_pay_mark)
-        assertThat(paymentOption.label).isEqualTo("····4242")
+        assertThat(paymentOption.label).isEqualTo("···· 4242")
     }
 
     @Test

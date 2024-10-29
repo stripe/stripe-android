@@ -173,7 +173,7 @@ internal class IntentConfirmationFlowTest {
         assertThat(failAction.cause).isInstanceOf(IllegalStateException::class.java)
         assertThat(failAction.cause.message).isEqualTo("An error occurred!")
         assertThat(failAction.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
-        assertThat(failAction.errorType).isEqualTo(PaymentConfirmationErrorType.Internal)
+        assertThat(failAction.errorType).isEqualTo(PaymentConfirmationErrorType.Payment)
     }
 
     @Test
@@ -200,7 +200,7 @@ internal class IntentConfirmationFlowTest {
         assertThat(failAction.cause).isInstanceOf(IllegalStateException::class.java)
         assertThat(failAction.cause.message).isEqualTo("An error occurred!")
         assertThat(failAction.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
-        assertThat(failAction.errorType).isEqualTo(PaymentConfirmationErrorType.Internal)
+        assertThat(failAction.errorType).isEqualTo(PaymentConfirmationErrorType.Payment)
     }
 
     private fun createDeferredConfirmationOption(): PaymentConfirmationOption.PaymentMethod.New {

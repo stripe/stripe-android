@@ -9,6 +9,8 @@ import com.stripe.android.financialconnections.ApiKeyFixtures.consumerSessionSig
 import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
 import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
 import com.stripe.android.financialconnections.CoroutineTestRule
+import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext
+import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext.InitializationMode
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ConsentAgree.analyticsValue
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
@@ -32,6 +34,7 @@ import com.stripe.android.financialconnections.repository.FinancialConnectionsCo
 import com.stripe.android.financialconnections.utils.TestHandleError
 import com.stripe.android.financialconnections.utils.UriUtils
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.LinkMode
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -58,6 +61,7 @@ class NetworkingLinkSignupViewModelTest {
     private fun buildViewModel(
         state: NetworkingLinkSignupState,
         signupHandler: LinkSignupHandler = mockLinkSignupHandlerForNetworking(),
+        elementsSessionContext: ElementsSessionContext? = null,
     ) = NetworkingLinkSignupViewModel(
         getOrFetchSync = getOrFetchSync,
         logger = Logger.noop(),
@@ -69,6 +73,7 @@ class NetworkingLinkSignupViewModelTest {
         nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
         presentSheet = mock(),
         linkSignupHandler = signupHandler,
+        elementsSessionContext = elementsSessionContext,
     )
 
     @Test
@@ -93,6 +98,44 @@ class NetworkingLinkSignupViewModelTest {
         val state = viewModel.stateFlow.value
         val payload = requireNotNull(state.payload())
         assertThat(payload.emailController.fieldValue.value).isEqualTo("test@test.com")
+    }
+
+    @Test
+    fun `init - creates controllers with Elements billing details`() = runTest {
+        val manifest = sessionManifest()
+
+        whenever(getOrFetchSync(any())).thenReturn(
+            syncResponse().copy(
+                manifest = manifest,
+                text = TextUpdate(
+                    consent = null,
+                    networkingLinkSignupPane = networkingLinkSignupPane(),
+                )
+            )
+        )
+        whenever(lookupAccount(any())).thenReturn(ConsumerSessionLookup(exists = false))
+
+        val viewModel = buildViewModel(
+            state = NetworkingLinkSignupState(),
+            elementsSessionContext = ElementsSessionContext(
+                initializationMode = InitializationMode.PaymentIntent("pi_1234"),
+                amount = null,
+                currency = null,
+                linkMode = LinkMode.LinkPaymentMethod,
+                billingDetails = null,
+                prefillDetails = ElementsSessionContext.PrefillDetails(
+                    email = "email@email.com",
+                    phone = "5555555555",
+                    phoneCountryCode = "US",
+                ),
+            )
+        )
+
+        val state = viewModel.stateFlow.value
+        val payload = requireNotNull(state.payload())
+        assertThat(payload.emailController.fieldValue.value).isEqualTo("email@email.com")
+        assertThat(payload.phoneController.fieldValue.value).isEqualTo("5555555555")
+        assertThat(payload.phoneController.countryDropdownController.rawFieldValue.value).isEqualTo("US")
     }
 
     @Test
