@@ -15,8 +15,12 @@ class PayoutsFragment internal constructor() : Fragment() {
         return inflater.inflate(R.layout.stripe_payouts_fragment, container, false)
     }
 
+    @PrivateBetaConnectSDK
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
+
         @PrivateBetaConnectSDK
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun create(): PayoutsFragment {
             return PayoutsFragment()
         }

@@ -12,11 +12,13 @@ class EmbeddedComponentManager internal constructor(
     private val fetchClientSecret: FetchClientSecretCallback,
 ) {
     @PrivateBetaConnectSDK
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun update(@Suppress("UNUSED_PARAMETER") appearance: Appearance) {
         throw NotImplementedError("Appearance update functionality is not yet implemented")
     }
 
     @PrivateBetaConnectSDK
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun logout() {
         throw NotImplementedError("Logout functionality is not yet implemented")
     }
@@ -137,10 +139,13 @@ class EmbeddedComponentManager internal constructor(
         Capitalize
     }
 
+    @PrivateBetaConnectSDK
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
         private var instance: EmbeddedComponentManager? = null
 
         @PrivateBetaConnectSDK
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @JvmStatic
         fun init(
             configuration: Configuration,

@@ -15,7 +15,11 @@ class AccountOnboardingFragment internal constructor() : Fragment() {
         return inflater.inflate(R.layout.stripe_account_onboarding_fragment, container, false)
     }
 
+    @PrivateBetaConnectSDK
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @PrivateBetaConnectSDK
         fun create(): AccountOnboardingFragment {
             return AccountOnboardingFragment()
