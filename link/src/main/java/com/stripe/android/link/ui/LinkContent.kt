@@ -32,6 +32,7 @@ import com.stripe.android.link.ui.paymentmenthod.PaymentMethodScreen
 import com.stripe.android.link.ui.signup.SignUpScreen
 import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.link.ui.verification.VerificationScreen
+import com.stripe.android.link.ui.verification.VerificationViewModel
 import com.stripe.android.link.ui.wallet.WalletScreen
 import com.stripe.android.ui.core.CircularProgressIndicator
 import kotlinx.coroutines.launch
@@ -121,7 +122,18 @@ private fun Screens(
         }
 
         composable(LinkScreen.Verification.route) {
-//            VerificationScreen()
+            val viewModel: VerificationViewModel = linkViewModel { parentComponent ->
+                VerificationViewModel.factory(
+                    parentComponent = parentComponent,
+                    goBack = { userInitiated ->
+                        navController.popBackStack()
+                    },
+                    navigateAndClearStack = { screen ->
+                        navController.navigate(screen.route)
+                    }
+                )
+            }
+            VerificationScreen(viewModel)
         }
 
         composable(LinkScreen.Wallet.route) {

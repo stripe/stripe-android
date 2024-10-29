@@ -2,15 +2,18 @@ package com.stripe.android.link.ui.verification
 
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.LinkEventsReporter
+import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.AccountStatus
-import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.getErrorMessage
 import com.stripe.android.ui.core.elements.OTPSpec
@@ -26,13 +29,12 @@ import javax.inject.Inject
  * ViewModel that handles user verification confirmation logic.
  */
 internal class VerificationViewModel @Inject constructor(
-    private val linkAccount: LinkAccount,
     private val linkAccountManager: LinkAccountManager,
     private val linkEventsReporter: LinkEventsReporter,
-    private val logger: Logger
+    private val logger: Logger,
+    private val goBack: (userInitiated: Boolean) -> Unit,
+    private val navigateAndClearStack: (route: LinkScreen) -> Unit
 ) : ViewModel() {
-    private var goBack: (userInitiated: Boolean) -> Unit = {}
-    private var navigateAndClearStack: (route: LinkScreen) -> Unit = {}
 
     private val _viewState = MutableStateFlow(VerificationViewState())
     val viewState: StateFlow<VerificationViewState> = _viewState
@@ -157,8 +159,6 @@ internal class VerificationViewModel @Inject constructor(
     private fun onError(error: Throwable) = error.getErrorMessage().let { message ->
         logger.error("VerificationViewModel Error: ", error)
 
-
-
         updateViewState {
             it.copy(
                 isProcessing = false,
@@ -181,4 +181,24 @@ internal class VerificationViewModel @Inject constructor(
                 is ErrorMessage.Raw -> this.errorMessage.resolvableString
             }
         }
+
+    companion object {
+        fun factory(
+            parentComponent: NativeLinkComponent,
+            goBack: (userInitiated: Boolean) -> Unit,
+            navigateAndClearStack: (route: LinkScreen) -> Unit
+        ): ViewModelProvider.Factory {
+            return viewModelFactory {
+                initializer {
+                    VerificationViewModel(
+                        linkAccountManager = parentComponent.linkAccountManager,
+                        linkEventsReporter = parentComponent.linkEventsReporter,
+                        logger = parentComponent.logger,
+                        goBack = goBack,
+                        navigateAndClearStack = navigateAndClearStack
+                    )
+                }
+            }
+        }
+    }
 }

@@ -2,7 +2,6 @@ package com.stripe.android.link.ui.verification
 
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
-import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -37,7 +36,6 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.link.R
 import com.stripe.android.link.theme.linkColors
 import com.stripe.android.link.theme.linkShapes
-import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.uicore.DefaultStripeTheme
 import com.stripe.android.uicore.elements.OTPElement
