@@ -7,6 +7,8 @@
 
 ### Basic Integration
 * [REMOVED][9501](https://github.com/stripe/stripe-android/pull/9501) Basic Integration has been removed. [Please use Mobile Payment Element instead](https://docs.stripe.com/payments/mobile/migrating-to-mobile-payment-element-from-basic-integration).
+
+### StripeCardScan
 * [REMOVED][9523](https://github.com/stripe/stripe-android/pull/9523) Card image verification has been removed. [Please use OCR only scanning instead](https://github.com/stripe/stripe-android/tree/master/stripecardscan#credit-card-ocr).
 
 Dependencies updated in [9512](https://github.com/stripe/stripe-android/pull/9512):
