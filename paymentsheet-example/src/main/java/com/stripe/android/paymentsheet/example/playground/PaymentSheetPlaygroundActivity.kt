@@ -39,6 +39,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.stripe.android.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetResult
 import com.stripe.android.customersheet.rememberCustomerSheet
@@ -83,31 +84,36 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
         )
     }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
+    //@OptIn(ExperimentalCustomerSessionApi::class, ExperimentalEmbeddedPaymentElementApi::class)
+    //@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
+    //@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
     @Suppress("LongMethod")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        val flatWithRadioStyle = PaymentSheet.EmbeddedPaymentElement.RowStyle.FlatWithRadio(
+            separatorThicknessDp = 8.0f,
+            separatorColor = getColor(R.colors.border),
+            separatorInsetsDp = 4.0f,
+            topSeparatorEnabled = true,
+            bottomSeparatorEnabled = false,
+            selectedColor = getColor(R.colors.primary),
+            unselectedColor = getColor(R.colors.secondary)
+        )
+        val embeddedAppearance = PaymentSheet.EmbeddedPaymentElement(
+            style = flatWithRadioStyle,
+        )
+        val app = PaymentSheet.Appearance(
+            colorsLight = PaymentSheet.Colors.defaultLight,
+            colorsDark = PaymentSheet.Colors.defaultDark,
+            shapes = PaymentSheet.Shapes(0f, 0f),
+            typography = PaymentSheet.Typography.default,
+            primaryButton = PaymentSheet.PrimaryButton(),
+        )
 
-val flatAppearance = PaymentSheet.EmbeddedPaymentElementAppearance.Flat(
-    separatorThicknessDp = 8.0f,
-    separatorColor = getColor(R.colors.border),
-    separatorInsetsDp = 4.0f,
-    topSeparatorEnabled = true,
-    bottomSeparatorEnabled = false,
-)
+        val app2 = PaymentSheet.Appearance()
 
-
-val flatWithRadioStyle = PaymentSheet.EmbeddedPaymentElementAppearance.Style.FlatWithRadio(
-    flat = flatAppearance,
-    selectedColor = getColor(R.colors.primary),
-    unselectedColor = getColor(R.colors.secondary)
-)
-
-val embeddedAppearance = PaymentSheet.EmbeddedPaymentElementAppearance(
-    style = flatWithRadioStyle,
-    additionalInsetsDp = 0F
-)
+        val appBuilder = PaymentSheet.Appearance.Builder().typography(PaymentSheet.Typography.default).build()
 
         setContent {
             val paymentSheet = PaymentSheet.Builder(viewModel::onPaymentSheetResult)
