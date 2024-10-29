@@ -150,19 +150,19 @@ private fun ApiServerSettings(
     resetServerUrlEnabled: Boolean,
     resetServerUrlClicked: () -> Unit,
 ) {
-    Text("API Server Settings", style = MaterialTheme.typography.h6)
+    Text(stringResource(R.string.api_server_settings), style = MaterialTheme.typography.h6)
     Spacer(modifier = Modifier.height(8.dp))
     OutlinedTextField(
         value = serverUrl,
         onValueChange = onServerUrlChanged,
-        label = { Text("Server URL") },
-        placeholder = { Text("https://example.com") },
+        label = { Text(stringResource(R.string.server_url_label)) },
+        placeholder = { Text(stringResource(R.string.server_url_placeholder)) },
         modifier = Modifier.fillMaxWidth()
     )
     Button(
         enabled = resetServerUrlEnabled,
         onClick = resetServerUrlClicked,
     ) {
-        Text("Reset to default")
+        Text(stringResource(R.string.reset_to_default))
     }
 }
