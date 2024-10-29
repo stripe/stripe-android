@@ -140,6 +140,11 @@ internal class FinancialConnectionsPlaygroundViewModel(
                                 billingDetails = ElementsSessionContext.BillingDetails(
                                     email = settings.get<EmailSetting>().selectedOption,
                                 ),
+                                prefillDetails = ElementsSessionContext.PrefillDetails(
+                                    email = settings.get<EmailSetting>().selectedOption,
+                                    phone = null,
+                                    phoneCountryCode = null,
+                                ),
                             ),
                             experience = settings.get<ExperienceSetting>().selectedOption,
                             integrationType = settings.get<IntegrationTypeSetting>().selectedOption,

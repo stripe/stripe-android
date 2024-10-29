@@ -47,6 +47,7 @@ class FinancialConnectionsSheet internal constructor(
         val currency: String?,
         val linkMode: LinkMode?,
         val billingDetails: BillingDetails?,
+        val prefillDetails: PrefillDetails,
     ) : Parcelable {
 
         val paymentIntentId: String?
@@ -91,6 +92,14 @@ class FinancialConnectionsSheet internal constructor(
                 val country: String? = null,
             ) : Parcelable
         }
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Parcelize
+        data class PrefillDetails(
+            val email: String?,
+            val phone: String?,
+            val phoneCountryCode: String?,
+        ) : Parcelable
     }
 
     /**

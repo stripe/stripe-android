@@ -839,6 +839,11 @@ class USBankAccountFormViewModelTest {
                             name = "Jenny Rose",
                             email = "email@email.com",
                         ),
+                        prefillDetails = ElementsSessionContext.PrefillDetails(
+                            email = "email@email.com",
+                            phone = null,
+                            phoneCountryCode = "US",
+                        ),
                     ),
                 )
             ),
@@ -891,6 +896,11 @@ class USBankAccountFormViewModelTest {
                         billingDetails = ElementsSessionContext.BillingDetails(
                             name = "Jenny Rose",
                             email = "email@email.com",
+                        ),
+                        prefillDetails = ElementsSessionContext.PrefillDetails(
+                            email = "email@email.com",
+                            phone = null,
+                            phoneCountryCode = "US",
                         ),
                     ),
                 )
@@ -1103,6 +1113,11 @@ class USBankAccountFormViewModelTest {
                             name = "Some Name",
                             email = "email@email.com",
                         ),
+                        prefillDetails = ElementsSessionContext.PrefillDetails(
+                            email = "email@email.com",
+                            phone = null,
+                            phoneCountryCode = "US",
+                        ),
                     ),
                 )
             ),
@@ -1139,6 +1154,11 @@ class USBankAccountFormViewModelTest {
                         linkMode = LinkMode.LinkCardBrand,
                         billingDetails = ElementsSessionContext.BillingDetails(
                             email = "email@email.com",
+                        ),
+                        prefillDetails = ElementsSessionContext.PrefillDetails(
+                            email = "email@email.com",
+                            phone = null,
+                            phoneCountryCode = "US",
                         ),
                     ),
                 )

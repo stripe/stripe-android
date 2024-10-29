@@ -532,6 +532,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             } else {
                 null
             },
+            prefillDetails = makePrefillDetails(),
         )
     }
 
@@ -556,6 +557,14 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                     country = it.country,
                 )
             },
+        )
+    }
+
+    private fun makePrefillDetails(): ElementsSessionContext.PrefillDetails {
+        return ElementsSessionContext.PrefillDetails(
+            email = email.value ?: defaultBillingDetails?.email,
+            phone = phone.value ?: defaultBillingDetails?.phone,
+            phoneCountryCode = phoneController.getCountryCode(),
         )
     }
 
