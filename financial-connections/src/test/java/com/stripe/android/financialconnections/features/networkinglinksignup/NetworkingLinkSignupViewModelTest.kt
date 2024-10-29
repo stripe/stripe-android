@@ -122,6 +122,7 @@ class NetworkingLinkSignupViewModelTest {
                 amount = null,
                 currency = null,
                 linkMode = LinkMode.LinkPaymentMethod,
+                billingDetails = null,
                 prefillDetails = ElementsSessionContext.PrefillDetails(
                     email = "email@email.com",
                     phone = "5555555555",

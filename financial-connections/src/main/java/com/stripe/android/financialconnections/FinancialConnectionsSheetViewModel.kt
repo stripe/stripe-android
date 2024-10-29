@@ -176,11 +176,6 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         val elementsSessionContext = initialState.initialArgs.elementsSessionContext
         val linkMode = elementsSessionContext?.linkMode
 
-        val prefillDetails = elementsSessionContext?.prefillDetails
-        val email = prefillDetails?.email
-        val phone = prefillDetails?.phone
-        val phoneCountry = prefillDetails?.phoneCountryCode
-
         val queryParams = mutableListOf(hostedAuthUrl)
         if (isInstantDebits) {
             // For Instant Debits, add a query parameter to the hosted auth URL so that payment account creation
@@ -189,9 +184,11 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
             linkMode?.let { queryParams.add("link_mode=${it.value}") }
         }
 
-        email?.let { queryParams.add("email=$it") }
-        phone?.let { queryParams.add("linkMobilePhone=$it") }
-        phoneCountry?.let { queryParams.add("linkMobilePhoneCountry=$it") }
+        elementsSessionContext?.prefillDetails?.run {
+            email?.let { queryParams.add("email=$it") }
+            phone?.let { queryParams.add("linkMobilePhone=$it") }
+            phoneCountryCode?.let { queryParams.add("linkMobilePhoneCountry=$it") }
+        }
 
         return queryParams.joinToString("&")
     }
