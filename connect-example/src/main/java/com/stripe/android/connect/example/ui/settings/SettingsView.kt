@@ -17,10 +17,8 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.RadioButton
 import androidx.compose.material.Text
-import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -34,7 +32,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.connect.example.MainContent
 import com.stripe.android.connect.example.R
-import com.stripe.android.connect.example.data.OnboardingSettings
 import com.stripe.android.connect.example.ui.settings.SettingsViewModel.SettingsState.DemoMerchant
 
 @Composable
@@ -83,10 +80,6 @@ fun SettingsView(
                 selectedAccountId = state.selectedAccountId,
                 onAccountSelected = viewModel::onAccountSelected,
                 onOtherAccountInputChanged = viewModel::onOtherAccountInputChanged,
-            ) }
-            item { ComponentSettings(
-                onboardingSettings = state.onboardingSettings,
-                onSettingsChanged = viewModel::onOnboardingSettingsChanged
             ) }
             item { ApiServerSettings(
                 serverUrl = state.serverUrl,
@@ -151,26 +144,6 @@ private fun SelectAnAccount(
 }
 
 @Composable
-private fun ComponentSettings(
-    onboardingSettings: OnboardingSettings,
-    onSettingsChanged: (OnboardingSettings) -> Unit,
-) {
-    Text("Component Settings", style = MaterialTheme.typography.h6)
-    Spacer(modifier = Modifier.height(8.dp))
-    NavigationLink(
-        onClick = { /* Navigate to OnboardingSettingsView */ },
-    ) {
-        Text(stringResource(R.string.account_onboarding))
-    }
-
-    NavigationLink(
-        onClick = { /* Navigate to PresentationSettingsView */ },
-    ) {
-        Text(stringResource(R.string.presentation_options))
-    }
-}
-
-@Composable
 private fun ApiServerSettings(
     serverUrl: String,
     onServerUrlChanged: (String) -> Unit,
@@ -191,28 +164,5 @@ private fun ApiServerSettings(
         onClick = resetServerUrlClicked,
     ) {
         Text("Reset to default")
-    }
-}
-
-@Composable
-private fun NavigationLink(
-    onClick: () -> Unit,
-    content: @Composable () -> Unit
-) {
-    TextButton(
-        onClick = onClick,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            content()
-            Icon(
-                imageVector = Icons.AutoMirrored.Default.ArrowForward,
-                contentDescription = null
-            )
-        }
     }
 }
