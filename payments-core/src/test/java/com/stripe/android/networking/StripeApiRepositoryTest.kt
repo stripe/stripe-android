@@ -1814,7 +1814,8 @@ internal class StripeApiRepositoryTest {
                 linkMode = null,
                 amount = 1000,
                 hostedSurface = "payment_element",
-                currency = "usd"
+                currency = "usd",
+                product = null,
             ),
             requestOptions = DEFAULT_OPTIONS,
         )
