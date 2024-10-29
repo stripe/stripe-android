@@ -54,7 +54,7 @@ internal object HostedAuthUrlBuilder {
 
     private fun makeBillingDetailsQueryParams(billingAddress: BillingDetails): String {
         val params = mapOf(
-            "billing_details" to billingAddress.toApiParams(),
+            "billingDetails" to billingAddress.toApiParams(),
         )
         return QueryStringFactory.createFromParamsWithEmptyValues(params)
     }
