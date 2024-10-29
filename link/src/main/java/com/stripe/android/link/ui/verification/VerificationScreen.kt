@@ -7,7 +7,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -32,16 +31,15 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.link.R
 import com.stripe.android.link.theme.linkColors
 import com.stripe.android.link.theme.linkShapes
 import com.stripe.android.link.ui.ErrorText
+import com.stripe.android.link.ui.ScrollableTopLevelColumn
 import com.stripe.android.uicore.DefaultStripeTheme
 import com.stripe.android.uicore.elements.OTPElement
 import com.stripe.android.uicore.elements.OTPElementUI
 import com.stripe.android.uicore.utils.collectAsState
-import kotlinx.coroutines.delay
 
 @Composable
 internal fun VerificationScreen(
@@ -64,7 +62,7 @@ internal fun VerificationScreen(
         if (state.requestFocus) {
             // Workaround for keyboard not being shown when focus is requested in a Dialog
             // https://issuetracker.google.com/issues/204502668
-            delay(200)
+//            delay(200)
             focusRequester.requestFocus()
             keyboardController?.show()
             viewModel.onFocusRequested()
@@ -79,13 +77,8 @@ internal fun VerificationScreen(
     }
 
     VerificationBody(
-        showChangeEmailMessage = true,
-        redactedPhoneNumber = state.redactedPhoneNumber,
-        email = state.email,
+        state = state,
         otpElement = viewModel.otpElement,
-        isProcessing = state.isProcessing,
-        isSendingNewCode = state.isSendingNewCode,
-        errorMessage = state.errorMessage,
         focusRequester = focusRequester,
         onBack = viewModel::onBack,
         onChangeEmailClick = viewModel::onChangeEmailClicked,
@@ -95,21 +88,16 @@ internal fun VerificationScreen(
 
 @Composable
 internal fun VerificationBody(
-    showChangeEmailMessage: Boolean,
-    redactedPhoneNumber: String,
-    email: String,
+    state: VerificationViewState,
     otpElement: OTPElement,
-    isProcessing: Boolean,
-    isSendingNewCode: Boolean,
-    errorMessage: ResolvableString?,
-    focusRequester: FocusRequester,
     onBack: () -> Unit,
     onChangeEmailClick: () -> Unit,
-    onResendCodeClick: () -> Unit
+    onResendCodeClick: () -> Unit,
+    focusRequester: FocusRequester = remember { FocusRequester() },
 ) {
     BackHandler(onBack = onBack)
 
-    Column {
+    ScrollableTopLevelColumn {
         Text(
             text = stringResource(R.string.stripe_verification_header),
             modifier = Modifier
@@ -119,7 +107,7 @@ internal fun VerificationBody(
             color = MaterialTheme.colors.onPrimary
         )
         Text(
-            text = stringResource(R.string.stripe_verification_message, redactedPhoneNumber),
+            text = stringResource(R.string.stripe_verification_message, state.redactedPhoneNumber),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 4.dp, bottom = 20.dp),
@@ -129,7 +117,7 @@ internal fun VerificationBody(
         )
         DefaultStripeTheme {
             OTPElementUI(
-                enabled = !isProcessing,
+                enabled = !state.isProcessing,
                 element = otpElement,
                 modifier = Modifier.padding(vertical = 10.dp),
                 colors = MaterialTheme.linkColors.otpElementColors,
@@ -137,24 +125,22 @@ internal fun VerificationBody(
             )
         }
 
-        if (showChangeEmailMessage) {
-            ChangeEmailRow(
-                email = email,
-                isProcessing = isProcessing,
-                onChangeEmailClick = onChangeEmailClick,
-            )
-        }
+        ChangeEmailRow(
+            email = state.email,
+            isProcessing = state.isProcessing,
+            onChangeEmailClick = onChangeEmailClick,
+        )
 
-        AnimatedVisibility(visible = errorMessage != null) {
+        AnimatedVisibility(visible = state.errorMessage != null) {
             ErrorText(
-                text = errorMessage?.resolve(LocalContext.current).orEmpty(),
+                text = state.errorMessage?.resolve(LocalContext.current).orEmpty(),
                 modifier = Modifier.fillMaxWidth()
             )
         }
 
         ResendCodeButton(
-            isProcessing = isProcessing,
-            isSendingNewCode = isSendingNewCode,
+            isProcessing = state.isProcessing,
+            isSendingNewCode = state.isSendingNewCode,
             onClick = onResendCodeClick,
         )
     }

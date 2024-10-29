@@ -86,4 +86,6 @@ internal open class FakeLinkAccountManager : LinkAccountManager {
     override suspend fun confirmVerification(code: String): Result<LinkAccount> {
         return confirmVerification
     }
+
+    override suspend fun logout() = Unit
 }

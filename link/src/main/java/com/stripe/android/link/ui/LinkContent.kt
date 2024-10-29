@@ -125,11 +125,14 @@ private fun Screens(
             val viewModel: VerificationViewModel = linkViewModel { parentComponent ->
                 VerificationViewModel.factory(
                     parentComponent = parentComponent,
+                    navController = navController,
                     goBack = { userInitiated ->
                         navController.popBackStack()
                     },
                     navigateAndClearStack = { screen ->
                         navController.navigate(screen.route)
+                    },
+                    dismissWithResult = {
                     }
                 )
             }

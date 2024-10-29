@@ -6,9 +6,11 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import androidx.navigation.NavHostController
 import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.LinkEventsReporter
@@ -32,11 +34,24 @@ internal class VerificationViewModel @Inject constructor(
     private val linkAccountManager: LinkAccountManager,
     private val linkEventsReporter: LinkEventsReporter,
     private val logger: Logger,
+    private val navController: NavHostController,
     private val goBack: (userInitiated: Boolean) -> Unit,
-    private val navigateAndClearStack: (route: LinkScreen) -> Unit
+    private val navigateAndClearStack: (route: LinkScreen) -> Unit,
+    private val dismissWithResult: (LinkActivityResult) -> Unit
 ) : ViewModel() {
 
-    private val _viewState = MutableStateFlow(VerificationViewState())
+    private val _viewState = MutableStateFlow(
+        value = run {
+            val linkAccount = linkAccountManager.linkAccount.value
+            if (linkAccount == null) {
+                dismissWithResult(LinkActivityResult.Failed(NoLinkAccountFoundForVerification()))
+            }
+            VerificationViewState(
+                redactedPhoneNumber = linkAccount?.redactedPhoneNumber ?: "",
+                email = linkAccount?.email ?: ""
+            )
+        }
+    )
     val viewState: StateFlow<VerificationViewState> = _viewState
 
     /**
@@ -51,6 +66,10 @@ internal class VerificationViewModel @Inject constructor(
 
     private val otpCode: StateFlow<String?> =
         otpElement.otpCompleteFlow.stateIn(viewModelScope, SharingStarted.Lazily, null)
+
+    init {
+        init()
+    }
 
     @VisibleForTesting
     internal fun init() {
@@ -185,8 +204,10 @@ internal class VerificationViewModel @Inject constructor(
     companion object {
         fun factory(
             parentComponent: NativeLinkComponent,
+            navController: NavHostController,
             goBack: (userInitiated: Boolean) -> Unit,
-            navigateAndClearStack: (route: LinkScreen) -> Unit
+            navigateAndClearStack: (route: LinkScreen) -> Unit,
+            dismissWithResult: (LinkActivityResult) -> Unit
         ): ViewModelProvider.Factory {
             return viewModelFactory {
                 initializer {
@@ -194,11 +215,15 @@ internal class VerificationViewModel @Inject constructor(
                         linkAccountManager = parentComponent.linkAccountManager,
                         linkEventsReporter = parentComponent.linkEventsReporter,
                         logger = parentComponent.logger,
+                        navController = navController,
                         goBack = goBack,
-                        navigateAndClearStack = navigateAndClearStack
+                        navigateAndClearStack = navigateAndClearStack,
+                        dismissWithResult = dismissWithResult
                     )
                 }
             }
         }
     }
 }
+
+internal class NoLinkAccountFoundForVerification : IllegalStateException("no link account found for verification")
