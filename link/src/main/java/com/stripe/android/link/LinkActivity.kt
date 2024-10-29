@@ -12,7 +12,6 @@ import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -26,6 +25,7 @@ import androidx.navigation.compose.rememberNavController
 import com.stripe.android.core.Logger
 import com.stripe.android.link.ui.BottomSheetContent
 import com.stripe.android.link.ui.LinkContent
+import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.launch
 
 internal class LinkActivity : ComponentActivity() {
