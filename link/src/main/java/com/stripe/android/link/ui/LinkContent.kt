@@ -121,7 +121,7 @@ private fun Screens(
         }
 
         composable(LinkScreen.Verification.route) {
-            VerificationScreen()
+//            VerificationScreen()
         }
 
         composable(LinkScreen.Wallet.route) {

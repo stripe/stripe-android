@@ -71,4 +71,12 @@ internal interface LinkRepository {
         consumerSessionClientSecret: String,
         consumerPublishableKey: String?,
     ): Result<ConsumerSession>
+
+    /**
+     * Logs out the current consumer.
+     */
+    suspend fun logout(
+        consumerSessionClientSecret: String,
+        consumerPublishableKey: String?,
+    ): Result<ConsumerSession>
 }

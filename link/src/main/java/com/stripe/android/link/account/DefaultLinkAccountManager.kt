@@ -17,9 +17,11 @@ import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
@@ -235,6 +237,17 @@ internal class DefaultLinkAccountManager @Inject constructor(
             .map { consumerSession ->
                 setAccount(consumerSession, null)
             }
+    }
+
+    override suspend fun logout() {
+        linkAccount.value?.let { account ->
+            _linkAccount.value = null
+            val publishableKey = consumerPublishableKey
+            consumerPublishableKey = null
+            GlobalScope.launch {
+                linkRepository.logout(account.clientSecret, publishableKey)
+            }
+        }
     }
 
     @VisibleForTesting
