@@ -1742,6 +1742,7 @@ internal class CardInputWidgetTest {
             expiryDateEditText.append("12")
             expiryDateEditText.append("50")
             cvcEditText.append("123")
+            cardNumberEditText.requestFocus()
 
             onView(withId(R.id.card_brand_view)).perform(click())
             onData(anything()).inRoot(isPlatformPopup()).atPosition(1).perform(click())
