@@ -124,12 +124,6 @@ data class PrimaryButtonTypography(
 )
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-data class EmbeddedRowStyle(
-    val additionalInsets: Float,
-    val flat: EmbeddedFlatStyle
-)
-
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class EmbeddedFlatStyle(
     val separatorThickness: Float,
     val separatorColor: Color,
@@ -142,6 +136,12 @@ data class EmbeddedFlatStyle(
 data class EmbeddedRadioStyle(
     val selectedColor: Color,
     val unselectedColor: Color
+)
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class EmbeddedInsets(
+    val checkmarkInsetDp: Float,
+    val additionalInsetsDp: Float
 )
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -244,23 +244,13 @@ object StripeThemeDefaults {
         bottomSeparatorEnabled = true
     )
 
-    val row = EmbeddedRowStyle(
-        additionalInsets = 4.0f,
-        flat = flat
+    val embeddedCommon = EmbeddedInsets(
+        additionalInsetsDp = 4.0f,
+        checkmarkInsetDp = 12.0f
     )
 
     val floating = EmbeddedFloatingStyle(
         spacing = 12.0f
-    )
-
-    val radioLight = EmbeddedRadioStyle(
-        selectedColor = colorsLight.materialColors.primary,
-        unselectedColor = colorsLight.componentBorder
-    )
-
-    val radioDark = EmbeddedRadioStyle(
-        selectedColor = colorsDark.materialColors.primary,
-        unselectedColor = colorsDark.componentBorder
     )
 }
 

@@ -11,10 +11,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.fragment.app.Fragment
-import com.google.android.gms.common.internal.safeparcel.SafeParcelable
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.ExperimentalCardBrandFilteringApi
-import com.stripe.android.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.link.account.LinkStore
@@ -921,6 +919,7 @@ class PaymentSheet internal constructor(
     }
 
     @Parcelize
+    @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
     data class Appearance(
         /**
          * Describes the colors used while the system is in light mode.
@@ -950,8 +949,7 @@ class PaymentSheet internal constructor(
         /**
          * Describes the appearance of the Embedded Payment Element
          */
-        @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
-        internal val embeddedAppearance: EmbeddedPaymentElement = EmbeddedPaymentElement.default
+        internal val embeddedAppearance: Embedded = Embedded.default
     ) : Parcelable {
         constructor() : this(
             colorsLight = Colors.defaultLight,
@@ -974,12 +972,235 @@ class PaymentSheet internal constructor(
             shapes = shapes,
             typography = typography,
             primaryButton = primaryButton,
-            embeddedAppearance = EmbeddedPaymentElement.default
+            embeddedAppearance = Embedded.default
         )
 
         fun getColors(isDark: Boolean): Colors {
             return if (isDark) colorsDark else colorsLight
         }
+
+        @ExperimentalEmbeddedPaymentElementApi
+        @Parcelize
+        class Embedded(
+            internal val style: RowStyle
+        ) : Parcelable {
+
+            internal companion object {
+                val default = Embedded(
+                    style = RowStyle.FlatWithRadio.defaultLight
+                )
+            }
+
+            @Parcelize
+            sealed class RowStyle : Parcelable {
+
+                @Parcelize
+                class FlatWithRadio(
+                    /**
+                     * The thickness of the separator line between rows.
+                     */
+                    val separatorThicknessDp: Float,
+
+                    /**
+                     * The color of the separator line between rows.
+                     */
+                    @ColorInt
+                    val separatorColor: Int,
+
+                    /**
+                     * The insets of the separator line between rows.
+                     */
+                    val separatorInsetsDp: Float,
+
+                    /**
+                     * Determines if the top separator is visible at the top of the Embedded Mobile Payment Element.
+                     */
+                    val topSeparatorEnabled: Boolean,
+
+                    /**
+                     * Determines if the bottom separator is visible at the bottom of the Embedded Mobile Payment Element.
+                     */
+                    val bottomSeparatorEnabled: Boolean,
+                    /**
+                     * The color of the radio button when selected.
+                     */
+                    @ColorInt
+                    val selectedColor: Int,
+
+                    /**
+                     * The color of the radio button when unselected.
+                     */
+                    @ColorInt
+                    val unselectedColor: Int,
+                    /**
+                     * Additional vertical insets applied to a payment method row.
+                     * - Note: Increasing this value increases the height of each row.
+                     */
+                    val additionalInsetsDp: Float,
+                ) : RowStyle() {
+                    constructor(
+                        context: Context,
+                        separatorThicknessDp: Int,
+                        separatorColor: Color,
+                        separatorInsetsDp: Int,
+                        topSeparatorEnabled: Boolean,
+                        bottomSeparatorEnabled: Boolean,
+                        selectedColor: Color,
+                        unselectedColor: Color,
+                        additionalInsetsDp: Int
+                    ) : this(
+                        separatorThicknessDp = context.getRawValueFromDimenResource(separatorThicknessDp),
+                        separatorColor = separatorColor.toArgb(),
+                        separatorInsetsDp = context.getRawValueFromDimenResource(separatorInsetsDp),
+                        topSeparatorEnabled = topSeparatorEnabled,
+                        bottomSeparatorEnabled = bottomSeparatorEnabled,
+                        selectedColor = selectedColor.toArgb(),
+                        unselectedColor = unselectedColor.toArgb(),
+                        additionalInsetsDp = context.getRawValueFromDimenResource(additionalInsetsDp)
+                    )
+                    internal companion object {
+                        val defaultLight = FlatWithRadio(
+                            separatorThicknessDp = StripeThemeDefaults.flat.separatorThickness,
+                            separatorColor = StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
+                            separatorInsetsDp = StripeThemeDefaults.flat.separatorInsets,
+                            topSeparatorEnabled = StripeThemeDefaults.flat.topSeparatorEnabled,
+                            bottomSeparatorEnabled = StripeThemeDefaults.flat.bottomSeparatorEnabled,
+                            selectedColor = StripeThemeDefaults.colorsLight.materialColors.primary.toArgb(),
+                            unselectedColor = StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
+                            additionalInsetsDp = StripeThemeDefaults.embeddedCommon.additionalInsetsDp
+                        )
+
+                        val defaultDark = FlatWithRadio(
+                            separatorThicknessDp = StripeThemeDefaults.flat.separatorThickness,
+                            separatorColor = StripeThemeDefaults.colorsDark.componentBorder.toArgb(),
+                            separatorInsetsDp = StripeThemeDefaults.flat.separatorInsets,
+                            topSeparatorEnabled = StripeThemeDefaults.flat.topSeparatorEnabled,
+                            bottomSeparatorEnabled = StripeThemeDefaults.flat.bottomSeparatorEnabled,
+                            selectedColor = StripeThemeDefaults.colorsDark.materialColors.primary.toArgb(),
+                            unselectedColor = StripeThemeDefaults.colorsDark.componentBorder.toArgb(),
+                            additionalInsetsDp = StripeThemeDefaults.embeddedCommon.additionalInsetsDp
+                        )
+                    }
+                }
+
+                @Parcelize
+                class FlatWithCheckmark(
+                    /**
+                     * The thickness of the separator line between rows.
+                     */
+                    val separatorThicknessDp: Float,
+
+                    /**
+                     * The color of the separator line between rows.
+                     */
+                    @ColorInt
+                    val separatorColor: Int,
+
+                    /**
+                     * The insets of the separator line between rows.
+                     */
+                    val separatorInsetsDp: Float,
+
+                    /**
+                     * Determines if the top separator is visible at the top of the Embedded Mobile Payment Element.
+                     */
+                    val topSeparatorEnabled: Boolean,
+
+                    /**
+                     * Determines if the bottom separator is visible at the bottom of the Embedded Mobile Payment Element.
+                     */
+                    val bottomSeparatorEnabled: Boolean,
+                    /**
+                     * The color of the checkmark.
+                     */
+                    @ColorInt
+                    val checkmarkColor: Int,
+                    /**
+                     * Inset of the checkmark from the end of the row
+                     */
+                    val checkmarkInsetDp: Float,
+                    /**
+                     * Additional vertical insets applied to a payment method row.
+                     * - Note: Increasing this value increases the height of each row.
+                     */
+                    val additionalInsetsDp: Float,
+                ) : RowStyle() {
+                    constructor(
+                        context: Context,
+                        separatorThicknessDp: Int,
+                        separatorColor: Color,
+                        separatorInsetsDp: Int,
+                        topSeparatorEnabled: Boolean,
+                        bottomSeparatorEnabled: Boolean,
+                        checkmarkColor: Color,
+                        checkmarkInsetDp: Int,
+                        additionalInsetsDp: Int
+                    ) : this(
+                        separatorThicknessDp = context.getRawValueFromDimenResource(separatorThicknessDp),
+                        separatorColor = separatorColor.toArgb(),
+                        separatorInsetsDp = context.getRawValueFromDimenResource(separatorInsetsDp),
+                        topSeparatorEnabled = topSeparatorEnabled,
+                        bottomSeparatorEnabled = bottomSeparatorEnabled,
+                        checkmarkColor = checkmarkColor.toArgb(),
+                        checkmarkInsetDp = context.getRawValueFromDimenResource(checkmarkInsetDp),
+                        additionalInsetsDp = context.getRawValueFromDimenResource(additionalInsetsDp)
+                    )
+                    internal companion object {
+                        val defaultLight = FlatWithCheckmark(
+                            separatorThicknessDp = StripeThemeDefaults.flat.separatorThickness,
+                            separatorColor = StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
+                            separatorInsetsDp = StripeThemeDefaults.flat.separatorInsets,
+                            topSeparatorEnabled = StripeThemeDefaults.flat.topSeparatorEnabled,
+                            bottomSeparatorEnabled = StripeThemeDefaults.flat.bottomSeparatorEnabled,
+                            checkmarkColor = StripeThemeDefaults.colorsLight.materialColors.primary.toArgb(),
+                            checkmarkInsetDp = StripeThemeDefaults.embeddedCommon.checkmarkInsetDp,
+                            additionalInsetsDp = StripeThemeDefaults.embeddedCommon.additionalInsetsDp
+                        )
+
+                        val defaultDark = FlatWithCheckmark(
+                            separatorThicknessDp = StripeThemeDefaults.flat.separatorThickness,
+                            separatorColor = StripeThemeDefaults.colorsDark.componentBorder.toArgb(),
+                            separatorInsetsDp = StripeThemeDefaults.flat.separatorInsets,
+                            topSeparatorEnabled = StripeThemeDefaults.flat.topSeparatorEnabled,
+                            bottomSeparatorEnabled = StripeThemeDefaults.flat.bottomSeparatorEnabled,
+                            checkmarkColor = StripeThemeDefaults.colorsDark.materialColors.primary.toArgb(),
+                            checkmarkInsetDp = StripeThemeDefaults.embeddedCommon.checkmarkInsetDp,
+                            additionalInsetsDp = StripeThemeDefaults.embeddedCommon.additionalInsetsDp
+                        )
+                    }
+                }
+
+                @Parcelize
+                class FloatingButton(
+                    /**
+                     * The spacing between payment method rows
+                     */
+                    val spacingDp: Float,
+                    /**
+                     * Additional vertical insets applied to a payment method row.
+                     * - Note: Increasing this value increases the height of each row.
+                     */
+                    val additionalInsetsDp: Float,
+                ) : RowStyle() {
+                    constructor(
+                        context: Context,
+                        spacingDp: Int,
+                        additionalInsetsDp: Int
+                    ) : this(
+                        spacingDp = context.getRawValueFromDimenResource(spacingDp),
+                        additionalInsetsDp = context.getRawValueFromDimenResource(additionalInsetsDp)
+                    )
+
+                    internal companion object {
+                        val default = FloatingButton(
+                            spacingDp = StripeThemeDefaults.floating.spacing,
+                            additionalInsetsDp = StripeThemeDefaults.embeddedCommon.additionalInsetsDp
+                        )
+                    }
+                }
+            }
+        }
+
 
         class Builder {
             private var colorsLight = Colors.defaultLight
@@ -988,8 +1209,8 @@ class PaymentSheet internal constructor(
             private var typography = Typography.default
             private var primaryButton: PrimaryButton = PrimaryButton()
             @ExperimentalEmbeddedPaymentElementApi
-            private var embeddedAppearance: EmbeddedPaymentElement =
-                EmbeddedPaymentElement.default
+            private var embeddedAppearance: Embedded =
+                Embedded.default
 
             fun colorsLight(colors: Colors) = apply {
                 this.colorsLight = colors
@@ -1012,7 +1233,7 @@ class PaymentSheet internal constructor(
             }
 
             @ExperimentalEmbeddedPaymentElementApi
-            fun embeddedAppearance(embeddedAppearance: EmbeddedPaymentElement) = apply {
+            fun embeddedAppearance(embeddedAppearance: Embedded) = apply {
                 this.embeddedAppearance = embeddedAppearance
             }
 
@@ -1196,123 +1417,227 @@ class PaymentSheet internal constructor(
         }
     }
 
-    @ExperimentalEmbeddedPaymentElementApi
-    @Parcelize
-    class EmbeddedPaymentElement(
-        val style: RowStyle
-    ) : Parcelable {
-
-        companion object {
-            val default = EmbeddedPaymentElement(
-                style = RowStyle.FlatWithRadio.defaultLight
-            )
-        }
-
-        @Parcelize
-        sealed class RowStyle : Parcelable {
-
-            @Parcelize
-            class FlatWithRadio(
-                /**
-                 * The thickness of the separator line between rows.
-                 */
-                val separatorThicknessDp: Float,
-
-                /**
-                 * The color of the separator line between rows.
-                 */
-                @ColorInt
-                val separatorColor: Int,
-
-                /**
-                 * The insets of the separator line between rows.
-                 */
-                val separatorInsetsDp: Float,
-
-                /**
-                 * Determines if the top separator is visible at the top of the Embedded Mobile Payment Element.
-                 */
-                val topSeparatorEnabled: Boolean,
-
-                /**
-                 * Determines if the bottom separator is visible at the bottom of the Embedded Mobile Payment Element.
-                 */
-                val bottomSeparatorEnabled: Boolean,
-                /**
-                 * The color of the radio button when selected.
-                 */
-                @ColorInt
-                val selectedColor: Int,
-
-                /**
-                 * The color of the radio button when unselected.
-                 */
-                @ColorInt
-                val unselectedColor: Int
-            ) : RowStyle() {
-                constructor(
-                    context: Context,
-                    separatorThicknessDp: Int,
-                    separatorColor: Color,
-                    separatorInsetsDp: Int,
-                    topSeparatorEnabled: Boolean,
-                    bottomSeparatorEnabled: Boolean,
-                    selectedColor: Color,
-                    unselectedColor: Color
-                ) : this(
-                    separatorThicknessDp = context.getRawValueFromDimenResource(separatorThicknessDp),
-                    separatorColor = separatorColor.toArgb(),
-                    separatorInsetsDp = context.getRawValueFromDimenResource(separatorInsetsDp),
-                    topSeparatorEnabled = topSeparatorEnabled,
-                    bottomSeparatorEnabled = bottomSeparatorEnabled,
-                    selectedColor = selectedColor.toArgb(),
-                    unselectedColor = unselectedColor.toArgb()
-                )
-                companion object {
-                    val defaultLight = FlatWithRadio(
-                        separatorThicknessDp = StripeThemeDefaults.flat.separatorThickness,
-                        separatorColor = StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
-                        separatorInsetsDp = StripeThemeDefaults.flat.separatorInsets,
-                        topSeparatorEnabled = StripeThemeDefaults.flat.topSeparatorEnabled,
-                        bottomSeparatorEnabled = StripeThemeDefaults.flat.bottomSeparatorEnabled,
-                        selectedColor = StripeThemeDefaults.colorsLight.materialColors.primary.toArgb(),
-                        unselectedColor = StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
-                    )
-
-                    val defaultDark = FlatWithRadio(
-                        separatorThicknessDp = StripeThemeDefaults.flat.separatorThickness,
-                        separatorColor = StripeThemeDefaults.colorsDark.componentBorder.toArgb(),
-                        separatorInsetsDp = StripeThemeDefaults.flat.separatorInsets,
-                        topSeparatorEnabled = StripeThemeDefaults.flat.topSeparatorEnabled,
-                        bottomSeparatorEnabled = StripeThemeDefaults.flat.bottomSeparatorEnabled,
-                        selectedColor = StripeThemeDefaults.colorsDark.materialColors.primary.toArgb(),
-                        unselectedColor = StripeThemeDefaults.colorsDark.componentBorder.toArgb(),
-                    )
-                }
-            }
-
-            @Parcelize
-            class FloatingButton(
-                /**
-                 * The spacing between payment method rows
-                 */
-                val spacingDp: Float
-            ) : RowStyle() {
-                constructor(
-                    context: Context,
-                    spacingDp: Int
-                ) : this(
-                    spacingDp = context.getRawValueFromDimenResource(spacingDp)
-                )
-
-                companion object {
-                    val default = FloatingButton(
-                        spacingDp = StripeThemeDefaults.floating.spacing
-                    )
-                }
-            }
-        }
-    }
+//    @ExperimentalEmbeddedPaymentElementApi
+//    @Parcelize
+//    class EmbeddedPaymentElement(
+//        val style: RowStyle
+//    ) : Parcelable {
+//
+//        companion object {
+//            val default = EmbeddedPaymentElement(
+//                style = RowStyle.FlatWithRadio.defaultLight
+//            )
+//        }
+//
+//        @Parcelize
+//        sealed class RowStyle : Parcelable {
+//
+//            @Parcelize
+//            class FlatWithRadio(
+//                /**
+//                 * The thickness of the separator line between rows.
+//                 */
+//                val separatorThicknessDp: Float,
+//
+//                /**
+//                 * The color of the separator line between rows.
+//                 */
+//                @ColorInt
+//                val separatorColor: Int,
+//
+//                /**
+//                 * The insets of the separator line between rows.
+//                 */
+//                val separatorInsetsDp: Float,
+//
+//                /**
+//                 * Determines if the top separator is visible at the top of the Embedded Mobile Payment Element.
+//                 */
+//                val topSeparatorEnabled: Boolean,
+//
+//                /**
+//                 * Determines if the bottom separator is visible at the bottom of the Embedded Mobile Payment Element.
+//                 */
+//                val bottomSeparatorEnabled: Boolean,
+//                /**
+//                 * The color of the radio button when selected.
+//                 */
+//                @ColorInt
+//                val selectedColor: Int,
+//
+//                /**
+//                 * The color of the radio button when unselected.
+//                 */
+//                @ColorInt
+//                val unselectedColor: Int,
+//                /**
+//                 * Additional vertical insets applied to a payment method row.
+//                 * - Note: Increasing this value increases the height of each row.
+//                 */
+//                val additionalInsetsDp: Float,
+//            ) : RowStyle() {
+//                constructor(
+//                    context: Context,
+//                    separatorThicknessDp: Int,
+//                    separatorColor: Color,
+//                    separatorInsetsDp: Int,
+//                    topSeparatorEnabled: Boolean,
+//                    bottomSeparatorEnabled: Boolean,
+//                    selectedColor: Color,
+//                    unselectedColor: Color,
+//                    additionalInsetsDp: Int
+//                ) : this(
+//                    separatorThicknessDp = context.getRawValueFromDimenResource(separatorThicknessDp),
+//                    separatorColor = separatorColor.toArgb(),
+//                    separatorInsetsDp = context.getRawValueFromDimenResource(separatorInsetsDp),
+//                    topSeparatorEnabled = topSeparatorEnabled,
+//                    bottomSeparatorEnabled = bottomSeparatorEnabled,
+//                    selectedColor = selectedColor.toArgb(),
+//                    unselectedColor = unselectedColor.toArgb(),
+//                    additionalInsetsDp = context.getRawValueFromDimenResource(additionalInsetsDp)
+//                )
+//                companion object {
+//                    val defaultLight = FlatWithRadio(
+//                        separatorThicknessDp = StripeThemeDefaults.flat.separatorThickness,
+//                        separatorColor = StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
+//                        separatorInsetsDp = StripeThemeDefaults.flat.separatorInsets,
+//                        topSeparatorEnabled = StripeThemeDefaults.flat.topSeparatorEnabled,
+//                        bottomSeparatorEnabled = StripeThemeDefaults.flat.bottomSeparatorEnabled,
+//                        selectedColor = StripeThemeDefaults.colorsLight.materialColors.primary.toArgb(),
+//                        unselectedColor = StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
+//                        additionalInsetsDp = StripeThemeDefaults.embeddedCommon.additionalInsetsDp
+//                    )
+//
+//                    val defaultDark = FlatWithRadio(
+//                        separatorThicknessDp = StripeThemeDefaults.flat.separatorThickness,
+//                        separatorColor = StripeThemeDefaults.colorsDark.componentBorder.toArgb(),
+//                        separatorInsetsDp = StripeThemeDefaults.flat.separatorInsets,
+//                        topSeparatorEnabled = StripeThemeDefaults.flat.topSeparatorEnabled,
+//                        bottomSeparatorEnabled = StripeThemeDefaults.flat.bottomSeparatorEnabled,
+//                        selectedColor = StripeThemeDefaults.colorsDark.materialColors.primary.toArgb(),
+//                        unselectedColor = StripeThemeDefaults.colorsDark.componentBorder.toArgb(),
+//                        additionalInsetsDp = StripeThemeDefaults.embeddedCommon.additionalInsetsDp
+//                    )
+//                }
+//            }
+//
+//            @Parcelize
+//            class FlatWithCheckmark(
+//                /**
+//                 * The thickness of the separator line between rows.
+//                 */
+//                val separatorThicknessDp: Float,
+//
+//                /**
+//                 * The color of the separator line between rows.
+//                 */
+//                @ColorInt
+//                val separatorColor: Int,
+//
+//                /**
+//                 * The insets of the separator line between rows.
+//                 */
+//                val separatorInsetsDp: Float,
+//
+//                /**
+//                 * Determines if the top separator is visible at the top of the Embedded Mobile Payment Element.
+//                 */
+//                val topSeparatorEnabled: Boolean,
+//
+//                /**
+//                 * Determines if the bottom separator is visible at the bottom of the Embedded Mobile Payment Element.
+//                 */
+//                val bottomSeparatorEnabled: Boolean,
+//                /**
+//                 * The color of the checkmark.
+//                 */
+//                @ColorInt
+//                val checkmarkColor: Int,
+//                /**
+//                 * Inset of the checkmark from the end of the row
+//                 */
+//                val checkmarkInsetDp: Float,
+//                /**
+//                 * Additional vertical insets applied to a payment method row.
+//                 * - Note: Increasing this value increases the height of each row.
+//                 */
+//                val additionalInsetsDp: Float,
+//            ) : RowStyle() {
+//                constructor(
+//                    context: Context,
+//                    separatorThicknessDp: Int,
+//                    separatorColor: Color,
+//                    separatorInsetsDp: Int,
+//                    topSeparatorEnabled: Boolean,
+//                    bottomSeparatorEnabled: Boolean,
+//                    checkmarkColor: Color,
+//                    checkmarkInsetDp: Int,
+//                    additionalInsetsDp: Int
+//                ) : this(
+//                    separatorThicknessDp = context.getRawValueFromDimenResource(separatorThicknessDp),
+//                    separatorColor = separatorColor.toArgb(),
+//                    separatorInsetsDp = context.getRawValueFromDimenResource(separatorInsetsDp),
+//                    topSeparatorEnabled = topSeparatorEnabled,
+//                    bottomSeparatorEnabled = bottomSeparatorEnabled,
+//                    checkmarkColor = checkmarkColor.toArgb(),
+//                    checkmarkInsetDp = context.getRawValueFromDimenResource(checkmarkInsetDp),
+//                    additionalInsetsDp = context.getRawValueFromDimenResource(additionalInsetsDp)
+//                )
+//                companion object {
+//                    val defaultLight = FlatWithCheckmark(
+//                        separatorThicknessDp = StripeThemeDefaults.flat.separatorThickness,
+//                        separatorColor = StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
+//                        separatorInsetsDp = StripeThemeDefaults.flat.separatorInsets,
+//                        topSeparatorEnabled = StripeThemeDefaults.flat.topSeparatorEnabled,
+//                        bottomSeparatorEnabled = StripeThemeDefaults.flat.bottomSeparatorEnabled,
+//                        checkmarkColor = StripeThemeDefaults.colorsLight.materialColors.primary.toArgb(),
+//                        checkmarkInsetDp = StripeThemeDefaults.embeddedCommon.checkmarkInsetDp,
+//                        additionalInsetsDp = StripeThemeDefaults.embeddedCommon.additionalInsetsDp
+//                    )
+//
+//                    val defaultDark = FlatWithCheckmark(
+//                        separatorThicknessDp = StripeThemeDefaults.flat.separatorThickness,
+//                        separatorColor = StripeThemeDefaults.colorsDark.componentBorder.toArgb(),
+//                        separatorInsetsDp = StripeThemeDefaults.flat.separatorInsets,
+//                        topSeparatorEnabled = StripeThemeDefaults.flat.topSeparatorEnabled,
+//                        bottomSeparatorEnabled = StripeThemeDefaults.flat.bottomSeparatorEnabled,
+//                        checkmarkColor = StripeThemeDefaults.colorsDark.materialColors.primary.toArgb(),
+//                        checkmarkInsetDp = StripeThemeDefaults.embeddedCommon.checkmarkInsetDp,
+//                        additionalInsetsDp = StripeThemeDefaults.embeddedCommon.additionalInsetsDp
+//                    )
+//                }
+//            }
+//
+//            @Parcelize
+//            class FloatingButton(
+//                /**
+//                 * The spacing between payment method rows
+//                 */
+//                val spacingDp: Float,
+//                /**
+//                 * Additional vertical insets applied to a payment method row.
+//                 * - Note: Increasing this value increases the height of each row.
+//                 */
+//                val additionalInsetsDp: Float,
+//            ) : RowStyle() {
+//                constructor(
+//                    context: Context,
+//                    spacingDp: Int,
+//                    additionalInsetsDp: Int
+//                ) : this(
+//                    spacingDp = context.getRawValueFromDimenResource(spacingDp),
+//                    additionalInsetsDp = context.getRawValueFromDimenResource(additionalInsetsDp)
+//                )
+//
+//                companion object {
+//                    val default = FloatingButton(
+//                        spacingDp = StripeThemeDefaults.floating.spacing,
+//                        additionalInsetsDp = StripeThemeDefaults.embeddedCommon.additionalInsetsDp
+//                    )
+//                }
+//            }
+//        }
+//    }
 
     @Parcelize
     data class PrimaryButton(
