@@ -38,6 +38,7 @@ class StripeThreeDs2ServiceImpl @VisibleForTesting internal constructor(
     private val publicKeyFactory: PublicKeyFactory,
     override val warnings: List<Warning>,
 ) : StripeThreeDs2Service {
+
     @JvmOverloads
     constructor(
         context: Context,

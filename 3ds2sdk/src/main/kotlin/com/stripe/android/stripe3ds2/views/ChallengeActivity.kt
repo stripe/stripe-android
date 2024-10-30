@@ -25,6 +25,7 @@ import com.stripe.android.stripe3ds2.transaction.StripeErrorRequestExecutor
 import com.stripe.android.stripe3ds2.transaction.TransactionTimer
 import com.stripe.android.stripe3ds2.transactions.ChallengeResponseData
 import com.stripe.android.stripe3ds2.transactions.UiType
+import com.stripe.android.stripe3ds2.utils.AnalyticsProvider
 import kotlinx.coroutines.Dispatchers
 
 open class ChallengeActivity : AppCompatActivity() {
@@ -97,11 +98,14 @@ open class ChallengeActivity : AppCompatActivity() {
     }
 
     private var progressDialog: Dialog? = null
-    private var currentUITypeCode = ""
+	
+    private var currentChallengeResponseData: ChallengeResponseData? = null
+    private val analyticsDelegate = AnalyticsProvider.instance.serviceImpl()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         supportFragmentManager.fragmentFactory = ChallengeFragmentFactory(
             uiCustomization = viewArgs.uiCustomization,
+            analyticsDelegate = analyticsDelegate,
             transactionTimer = transactionTimer,
             errorRequestExecutor = errorRequestExecutor,
             errorReporter = errorReporter,
@@ -162,7 +166,7 @@ open class ChallengeActivity : AppCompatActivity() {
             if (cres != null) {
                 startFragment(cres)
 
-                currentUITypeCode = cres.uiType?.code.orEmpty()
+                currentChallengeResponseData = cres
             }
         }
 
@@ -174,13 +178,15 @@ open class ChallengeActivity : AppCompatActivity() {
             if (isTimeout == true) {
                 viewModel.onFinish(
                     ChallengeResult.Timeout(
-                        currentUITypeCode,
+                        currentChallengeResponseData?.uiType?.code.orEmpty(),
                         viewArgs.cresData.uiType,
                         viewArgs.intentData
                     )
                 )
             }
         }
+
+        currentChallengeResponseData = viewArgs.cresData
     }
 
     private fun startFragment(
@@ -219,7 +225,11 @@ open class ChallengeActivity : AppCompatActivity() {
     override fun onPause() {
         super.onPause()
         viewModel.shouldRefreshUi = true
-        viewModel.shouldAutoSubmitOOB = UiType.fromCode(currentUITypeCode) == UiType.OutOfBand
+
+        val uiType = UiType.fromCode(currentChallengeResponseData?.uiType?.code.orEmpty())
+        val isOutOfBandChallenge = uiType == UiType.OutOfBand
+        viewModel.shouldAutoSubmitOOB = isOutOfBandChallenge
+
         dismissKeyboard()
     }
 
@@ -244,6 +254,10 @@ open class ChallengeActivity : AppCompatActivity() {
         cancelButton?.setOnClickListener {
             cancelButton.isClickable = false
             viewModel.submit(ChallengeAction.Cancel)
+
+            currentChallengeResponseData?.let {
+                analyticsDelegate?.cancelButtonTappedWithTransactionId(it.serverTransId)
+            }
         }
     }
 
