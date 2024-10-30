@@ -63,33 +63,3 @@ private fun intersectionOverUnionOf(currentBox: RectForm, nextBox: RectForm): Fl
     val currentArea = currentBox.areaClamped()
     return overlapArea / (nextArea + currentArea - overlapArea + eps)
 }
-
-/**
- * Runs greedy NonMaxSuppression over the raw predictions. Greedy NMS looks for the local maximas
- * ("peaks") in the prediction confidences of the consecutive same predictions, keeps those,
- * and replaces the other values as the background class.
- *
- * Example: given the following [rawPredictions] and [confidence] pair
- *   [rawPredictions]: [LABEL0, LABEL0, LABEL0, LABEL1, LABEL1, LABEL1]
- *   [confidence]:     [0.1,    0.2,    0.4,    0.3,    0.5,   0.3]
- *   Output:           [BACKGROUND, BACKGROUND, LABEL0, BACKGROUND, LABEL, BACKGROUND]
- */
-internal fun <Input> greedyNonMaxSuppression(
-    rawPredictions: Array<Input>,
-    confidence: FloatArray,
-    backgroundClass: Input
-): Array<Input> {
-    val digits = rawPredictions.clone()
-
-    // greedy non max suppression
-    for (idx in 0 until digits.size - 1) {
-        if (digits[idx] != backgroundClass && digits[idx + 1] != backgroundClass) {
-            if (confidence[idx] < confidence[idx + 1]) {
-                digits[idx] = backgroundClass
-            } else {
-                digits[idx + 1] = backgroundClass
-            }
-        }
-    }
-    return digits
-}

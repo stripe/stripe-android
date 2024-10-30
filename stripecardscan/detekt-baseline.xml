@@ -83,7 +83,6 @@
     <ID>TooGenericExceptionCaught:TensorFlowLiteAnalyzer.kt$TFLAnalyzerFactory$t: Throwable</ID>
     <ID>TooGenericExceptionThrown:RetryTest.kt$RetryTest$throw RuntimeException()</ID>
     <ID>TooManyFunctions:ArrayExtensions.kt$com.stripe.android.stripecardscan.framework.util.ArrayExtensions.kt</ID>
-    <ID>TooManyFunctions:CardImageVerificationActivity.kt$CardImageVerificationActivity : SimpleScanActivitySimpleScanStateful</ID>
     <ID>TooManyFunctions:CardScanFragment.kt$CardScanFragment : ScanFragmentSimpleScanStateful</ID>
     <ID>TooManyFunctions:PaymentCardUtils.kt$com.stripe.android.stripecardscan.payment.card.PaymentCardUtils.kt</ID>
     <ID>TooManyFunctions:RectForm.kt$com.stripe.android.stripecardscan.framework.ml.ssd.RectForm.kt</ID>

@@ -40,7 +40,6 @@
     <color name="stripeNotFoundOutline" description="The outline color of the scan window when no card is visible">#FFFFFF</color>
     <color name="stripeFoundOutline" description="The outline color of the scan window when a card has been found and the scan is started">#1E90FF</color>
     <color name="stripeCorrectOutline" description="The outline color of the scan window when the scan has completed">#2ED573</color>
-    <color name="stripeWrongOutline" description="The outline color of the scan window when a card has been found that does not match the required card">#FF2222</color>
 
     <color name="stripeCloseButtonDarkColor" description="The color of the close button when the background is a dark color">#FFFFFF</color>
     <color name="stripeFlashButtonDarkColor" description="The color of the torch button when the background is a dark color">#FFFFFF</color>

@@ -3,7 +3,6 @@ package com.stripe.android.stripecardscan.framework.time
 import android.util.Log
 import androidx.annotation.CheckResult
 import androidx.annotation.RestrictTo
-import kotlinx.coroutines.runBlocking
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.TimeSource
@@ -39,16 +38,6 @@ internal sealed class Timer {
         } else {
             NoOpTimer
         }
-    }
-
-    /**
-     * Log the duration of a single task and return the result from that task.
-     *
-     * TODO: use contracts when they are no longer experimental
-     */
-    fun <T> measure(taskName: String? = null, task: () -> T): T {
-        // contract { callsInPlace(task, EXACTLY_ONCE) }
-        return runBlocking { measureSuspend(taskName) { task() } }
     }
 
     abstract suspend fun <T> measureSuspend(taskName: String? = null, task: suspend () -> T): T
