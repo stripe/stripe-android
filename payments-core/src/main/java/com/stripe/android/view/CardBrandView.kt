@@ -59,7 +59,7 @@ internal class CardBrandView @JvmOverloads constructor(
         get() = state.isCbcEligible
         set(value) {
             stateFlow.update { it.copy(isCbcEligible = value) }
-            updateBrandSpinner()
+            updateBrandSpinner(animate = true)
         }
 
     var brand: CardBrand
@@ -67,7 +67,7 @@ internal class CardBrandView @JvmOverloads constructor(
         set(value) {
             stateFlow.update { it.copy(brand = value) }
             determineCardBrandToDisplay()
-            updateBrandSpinner()
+            updateBrandSpinner(animate = true)
         }
 
     var possibleBrands: List<CardBrand>
@@ -75,7 +75,7 @@ internal class CardBrandView @JvmOverloads constructor(
         set(value) {
             stateFlow.update { it.copy(possibleBrands = value) }
             determineCardBrandToDisplay()
-            updateBrandSpinner()
+            updateBrandSpinner(animate = true)
         }
 
     var merchantPreferredNetworks: List<CardBrand>
@@ -90,6 +90,7 @@ internal class CardBrandView @JvmOverloads constructor(
         set(value) {
             stateFlow.update { it.copy(shouldShowCvc = value) }
             setCardBrandIconAndTint()
+            updateBrandSpinner(animate = false)
         }
 
     var shouldShowErrorIcon: Boolean
@@ -104,7 +105,7 @@ internal class CardBrandView @JvmOverloads constructor(
         isFocusable = false
 
         determineCardBrandToDisplay()
-        updateBrandSpinner()
+        updateBrandSpinner(animate = false)
     }
 
     fun paymentMethodCreateParamsNetworks(): PaymentMethodCreateParams.Card.Networks? {
@@ -178,7 +179,7 @@ internal class CardBrandView @JvmOverloads constructor(
         setCardBrandIconAndTint()
     }
 
-    private fun updateBrandSpinner() {
+    private fun updateBrandSpinner(animate: Boolean) {
         val showDropdown = isCbcEligible && possibleBrands.size > 1 && !shouldShowCvc && !shouldShowErrorIcon
         val parentViewGroup = parent as? ViewGroup
 
@@ -192,11 +193,18 @@ internal class CardBrandView @JvmOverloads constructor(
                 }
             }
 
-            parentViewGroup.animateNextChanges()
+            if (animate) {
+                parentViewGroup.animateNextChanges()
+            }
+
             chevron.visibility = View.VISIBLE
         } else {
             this.setOnClickListener(null)
-            parentViewGroup.animateNextChanges()
+
+            if (animate) {
+                parentViewGroup.animateNextChanges()
+            }
+
             chevron.visibility = View.GONE
         }
     }
@@ -239,7 +247,7 @@ internal class CardBrandView @JvmOverloads constructor(
         val savedState = state as? SavedState
         this.state = savedState?.state ?: State()
         determineCardBrandToDisplay()
-        updateBrandSpinner()
+        updateBrandSpinner(animate = false)
         super.onRestoreInstanceState(savedState?.superState ?: state)
     }
 
