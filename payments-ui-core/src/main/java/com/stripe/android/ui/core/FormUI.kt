@@ -93,23 +93,22 @@ private fun FormUIElement(
     lastTextFieldIdentifier: IdentifierSpec?,
 ) {
     when (element) {
-        is SectionElement -> {
-            SectionElementUI(
-                modifier = Modifier.padding(vertical = 8.dp),
-                enabled = enabled,
-                element = element,
-                hiddenIdentifiers = hiddenIdentifiers,
-                lastTextFieldIdentifier = lastTextFieldIdentifier,
-            )
-        }
-        is CheckboxFieldElement -> {
-            CheckboxFieldUI(
-                modifier = Modifier.padding(vertical = 4.dp),
-                controller = element.controller,
-                enabled = enabled
-            )
-        }
-        is StaticTextElement -> StaticTextElementUI(element)
+        is SectionElement -> SectionElementUI(
+            modifier = Modifier.padding(vertical = 8.dp),
+            enabled = enabled,
+            element = element,
+            hiddenIdentifiers = hiddenIdentifiers,
+            lastTextFieldIdentifier = lastTextFieldIdentifier,
+        )
+        is CheckboxFieldElement -> CheckboxFieldUI(
+            modifier = Modifier.padding(vertical = 4.dp),
+            controller = element.controller,
+            enabled = enabled
+        )
+        is StaticTextElement -> StaticTextElementUI(
+            element = element,
+            modifier = Modifier.padding(vertical = 8.dp),
+        )
         is SaveForFutureUseElement -> SaveForFutureUseElementUI(
             modifier = Modifier.padding(vertical = 4.dp),
             enabled = enabled,
