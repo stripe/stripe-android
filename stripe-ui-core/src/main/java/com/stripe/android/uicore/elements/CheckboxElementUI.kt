@@ -37,7 +37,6 @@ fun CheckboxElementUI(
 
     Row(
         modifier = modifier
-            .padding(vertical = 4.dp)
             .semantics {
                 testTag = automationTestTag
                 stateDescription = accessibilityDescription

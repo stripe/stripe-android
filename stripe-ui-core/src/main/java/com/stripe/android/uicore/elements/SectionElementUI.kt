@@ -23,6 +23,7 @@ fun SectionElementUI(
     element: SectionElement,
     hiddenIdentifiers: Set<IdentifierSpec>,
     lastTextFieldIdentifier: IdentifierSpec?,
+    modifier: Modifier = Modifier,
     nextFocusDirection: FocusDirection = FocusDirection.Down,
     previousFocusDirection: FocusDirection = FocusDirection.Up
 ) {
@@ -49,6 +50,7 @@ fun SectionElementUI(
         Section(
             controller.label,
             sectionErrorString,
+            modifier = modifier,
             contentOutsideCard = {
                 elementsOutsideCard.forEach { field ->
                     SectionFieldElementUI(
