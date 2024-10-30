@@ -3,7 +3,7 @@ package com.stripe.android.stripe3ds2.transaction
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
-internal sealed class ChallengeAction : Parcelable {
+sealed class ChallengeAction : Parcelable {
     @Parcelize
     data class NativeForm(
         internal val userEntry: String,

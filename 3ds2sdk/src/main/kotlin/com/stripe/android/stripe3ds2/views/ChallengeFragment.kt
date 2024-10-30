@@ -3,6 +3,7 @@ package com.stripe.android.stripe3ds2.views
 import android.graphics.Color
 import android.os.Bundle
 import android.view.View
+import android.widget.ScrollView
 import androidx.annotation.VisibleForTesting
 import androidx.core.os.BundleCompat
 import androidx.core.view.isGone
@@ -28,7 +29,7 @@ import com.stripe.android.stripe3ds2.transactions.UiType
 import com.stripe.android.stripe3ds2.utils.AnalyticsDelegate
 import kotlin.coroutines.CoroutineContext
 
-internal class ChallengeFragment(
+class ChallengeFragment(
     private val uiCustomization: StripeUiCustomization,
     private val analyticsDelegate: AnalyticsDelegate?,
     private val transactionTimer: TransactionTimer,
@@ -59,6 +60,9 @@ internal class ChallengeFragment(
 
     private var _viewBinding: StripeChallengeFragmentBinding? = null
     internal val viewBinding get() = requireNotNull(_viewBinding)
+
+    private var _scrollView: ScrollView? = null
+    val scrollView get() = requireNotNull(_scrollView)
 
     val challengeZoneView: ChallengeZoneView by lazy { viewBinding.caChallengeZone }
     private val brandZoneView: BrandZoneView by lazy { viewBinding.caBrandZone }
@@ -126,6 +130,7 @@ internal class ChallengeFragment(
         analyticsDelegate?.didReceiveChallengeResponseWithTransactionId(cresData.serverTransId, uiTypeCode)
 
         _viewBinding = StripeChallengeFragmentBinding.bind(view)
+        _scrollView = viewBinding.caScrollView
 
         viewModel.challengeText.observe(viewLifecycleOwner) { challengeText ->
             challengeZoneTextView.setText(challengeText)

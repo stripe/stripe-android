@@ -106,9 +106,9 @@ internal data class DefaultMessageTransformer @VisibleForTesting internal constr
     @VisibleForTesting
     @Throws(ChallengeResponseParseException::class, JSONException::class)
     internal fun validateAcsToSdkCounter(cres: JSONObject) {
-        if (!isLiveMode) {
-            return
-        }
+//        if (!isLiveMode) {
+//            return
+//        }
 
         if (!cres.has(FIELD_ACS_COUNTER_ACS_TO_SDK)) {
             throw ChallengeResponseParseException

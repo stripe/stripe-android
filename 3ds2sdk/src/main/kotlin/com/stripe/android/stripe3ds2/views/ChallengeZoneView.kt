@@ -18,7 +18,7 @@ import com.stripe.android.stripe3ds2.init.ui.ButtonCustomization
 import com.stripe.android.stripe3ds2.init.ui.LabelCustomization
 
 @Suppress("TooManyFunctions")
-internal class ChallengeZoneView @JvmOverloads constructor(
+class ChallengeZoneView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
@@ -41,7 +41,7 @@ internal class ChallengeZoneView @JvmOverloads constructor(
      * @return True if the user has selected Yes, else false if the user selected No or made no
      * selection at all
      */
-    internal val whitelistingSelection: Boolean
+    val whitelistingSelection: Boolean
         get() = whitelistRadioGroup.checkedRadioButtonId == R.id.czv_whitelist_yes_button
 
     init {
