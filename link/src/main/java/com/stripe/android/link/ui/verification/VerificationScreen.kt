@@ -60,9 +60,6 @@ internal fun VerificationScreen(
 
     LaunchedEffect(state.requestFocus) {
         if (state.requestFocus) {
-            // Workaround for keyboard not being shown when focus is requested in a Dialog
-            // https://issuetracker.google.com/issues/204502668
-//            delay(200)
             focusRequester.requestFocus()
             keyboardController?.show()
             viewModel.onFocusRequested()

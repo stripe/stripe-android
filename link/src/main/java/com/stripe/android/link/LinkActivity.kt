@@ -80,7 +80,7 @@ internal class LinkActivity : ComponentActivity() {
                 onUpdateSheetContent = {
                     bottomSheetContent = it
                 },
-                onBackPressed = onBackPressedDispatcher::onBackPressed
+                onBackPressed = onBackPressedDispatcher::onBackPressed,
             )
         }
     }

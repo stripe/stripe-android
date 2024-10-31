@@ -10,7 +10,10 @@ import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.MutableCreationExtras
+import androidx.navigation.NavGraph
 import androidx.navigation.NavHostController
+import androidx.navigation.NavOptionsBuilder
+import androidx.navigation.PopUpToBuilder
 import androidx.savedstate.SavedStateRegistryOwner
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
@@ -24,6 +27,9 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
@@ -109,6 +115,73 @@ internal class LinkActivityViewModelTest {
 
         val viewModel = factory.create(LinkActivityViewModel::class.java, creationExtras())
         assertThat(viewModel.activityRetainedComponent.configuration).isEqualTo(mockArgs.configuration)
+    }
+
+    @Test
+    fun `goBack should dismiss with cancel result when pop back stack fails`() = runTest(dispatcher) {
+        whenever(navController.popBackStack()).thenReturn(false)
+
+        vm.goBack()
+
+        verify(navController).popBackStack()
+        verify(dismissWithResult).invoke(LinkActivityResult.Canceled())
+    }
+
+    @Test
+    fun `goBack should not dismiss when pop back stack succeeds`() = runTest(dispatcher) {
+        whenever(navController.popBackStack()).thenReturn(true)
+
+        vm.goBack()
+
+        verify(navController).popBackStack()
+        verify(dismissWithResult, times(0)).invoke(LinkActivityResult.Canceled())
+    }
+
+    @Test
+    fun `navigate should change route clear back stack inclusively when clearStack is True`() = runTest(dispatcher) {
+        val startDestinationId = 123
+        val navGraph: NavGraph = mock()
+
+        whenever(navController.graph).thenReturn(navGraph)
+        whenever(navGraph.startDestinationId).thenReturn(startDestinationId)
+
+        vm.navigate(LinkScreen.Wallet, clearStack = true)
+
+        argumentCaptor<NavOptionsBuilder.() -> Unit>().apply {
+            verify(navController).navigate(eq(LinkScreen.Wallet.route), capture())
+
+            val navOptionsBuilder: NavOptionsBuilder = mock()
+            firstValue.invoke(navOptionsBuilder)
+
+            argumentCaptor<PopUpToBuilder.() -> Unit>().apply {
+                verify(navOptionsBuilder).popUpTo(eq(startDestinationId), capture())
+
+                val popUpToBuilder = PopUpToBuilder()
+                firstValue.invoke(popUpToBuilder)
+
+                assertThat(popUpToBuilder.inclusive).isTrue()
+            }
+        }
+    }
+
+    @Test
+    fun `navigate should only change route when clearStack is False`() = runTest(dispatcher) {
+        val startDestinationId = 123
+        val navGraph: NavGraph = mock()
+
+        whenever(navController.graph).thenReturn(navGraph)
+        whenever(navGraph.startDestinationId).thenReturn(startDestinationId)
+
+        vm.navigate(LinkScreen.Wallet, clearStack = false)
+
+        argumentCaptor<NavOptionsBuilder.() -> Unit>().apply {
+            verify(navController).navigate(eq(LinkScreen.Wallet.route), capture())
+
+            val navOptionsBuilder: NavOptionsBuilder = mock()
+            firstValue.invoke(navOptionsBuilder)
+
+            verify(navOptionsBuilder, times(0)).popUpTo(eq(startDestinationId), any())
+        }
     }
 
     private fun creationExtras(): CreationExtras {

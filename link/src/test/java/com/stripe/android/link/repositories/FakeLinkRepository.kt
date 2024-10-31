@@ -1,7 +1,6 @@
 package com.stripe.android.link.repositories
 
 import com.stripe.android.link.TestFactory
-import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent

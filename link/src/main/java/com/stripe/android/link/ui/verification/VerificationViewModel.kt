@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import androidx.navigation.NavHostController
 import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
@@ -34,8 +33,7 @@ internal class VerificationViewModel @Inject constructor(
     private val linkAccountManager: LinkAccountManager,
     private val linkEventsReporter: LinkEventsReporter,
     private val logger: Logger,
-    private val navController: NavHostController,
-    private val goBack: (userInitiated: Boolean) -> Unit,
+    private val goBack: () -> Unit,
     private val navigateAndClearStack: (route: LinkScreen) -> Unit,
     private val dismissWithResult: (LinkActivityResult) -> Unit
 ) : ViewModel() {
@@ -54,14 +52,6 @@ internal class VerificationViewModel @Inject constructor(
     )
     val viewState: StateFlow<VerificationViewState> = _viewState
 
-    /**
-     * Callback when user has successfully verified their account. If not overridden, defaults to
-     * navigating to the Wallet screen using [Navigator].
-     */
-    var onVerificationCompleted: () -> Unit = {
-        navigateAndClearStack(LinkScreen.Wallet)
-    }
-
     val otpElement = OTPSpec.transform()
 
     private val otpCode: StateFlow<String?> =
@@ -73,7 +63,7 @@ internal class VerificationViewModel @Inject constructor(
 
     @VisibleForTesting
     internal fun init() {
-        val linkAccount = linkAccountManager.linkAccount.value ?: return goBack(true)
+        val linkAccount = linkAccountManager.linkAccount.value ?: return goBack()
         if (linkAccount.accountStatus != AccountStatus.VerificationStarted) {
             startVerification()
         }
@@ -103,7 +93,7 @@ internal class VerificationViewModel @Inject constructor(
                     }
 
                     linkEventsReporter.on2FAComplete()
-                    onVerificationCompleted()
+                    navigateAndClearStack(LinkScreen.Wallet)
                 },
                 onFailure = {
                     linkEventsReporter.on2FAFailure()
@@ -148,10 +138,10 @@ internal class VerificationViewModel @Inject constructor(
 
     fun onBack() {
         clearError()
-        goBack(true)
+        goBack()
         linkEventsReporter.on2FACancel()
         viewModelScope.launch {
-            linkAccountManager.logout()
+            linkAccountManager.logOut()
         }
     }
 
@@ -159,7 +149,7 @@ internal class VerificationViewModel @Inject constructor(
         clearError()
         navigateAndClearStack(LinkScreen.SignUp)
         viewModelScope.launch {
-            linkAccountManager.logout()
+            linkAccountManager.logOut()
         }
     }
 
@@ -204,8 +194,7 @@ internal class VerificationViewModel @Inject constructor(
     companion object {
         fun factory(
             parentComponent: NativeLinkComponent,
-            navController: NavHostController,
-            goBack: (userInitiated: Boolean) -> Unit,
+            goBack: () -> Unit,
             navigateAndClearStack: (route: LinkScreen) -> Unit,
             dismissWithResult: (LinkActivityResult) -> Unit
         ): ViewModelProvider.Factory {
@@ -215,7 +204,6 @@ internal class VerificationViewModel @Inject constructor(
                         linkAccountManager = parentComponent.linkAccountManager,
                         linkEventsReporter = parentComponent.linkEventsReporter,
                         logger = parentComponent.logger,
-                        navController = navController,
                         goBack = goBack,
                         navigateAndClearStack = navigateAndClearStack,
                         dismissWithResult = dismissWithResult

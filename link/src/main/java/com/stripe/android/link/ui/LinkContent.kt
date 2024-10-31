@@ -21,6 +21,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.stripe.android.link.LinkAction
+import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkActivityViewModel
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.linkViewModel
@@ -87,7 +88,16 @@ internal fun LinkContent(
                     }
                 )
 
-                Screens(navController)
+                Screens(
+                    navController = navController,
+                    goBack = viewModel::goBack,
+                    navigateAndClearStack = { screen ->
+                        viewModel.navigate(screen, clearStack = true)
+                    },
+                    dismissWithResult = { result ->
+                        viewModel.dismissWithResult?.invoke(result)
+                    }
+                )
             }
         }
     }
@@ -95,7 +105,10 @@ internal fun LinkContent(
 
 @Composable
 private fun Screens(
-    navController: NavHostController
+    navController: NavHostController,
+    goBack: () -> Unit,
+    navigateAndClearStack: (route: LinkScreen) -> Unit,
+    dismissWithResult: (LinkActivityResult) -> Unit
 ) {
     NavHost(
         navController = navController,
@@ -125,15 +138,9 @@ private fun Screens(
             val viewModel: VerificationViewModel = linkViewModel { parentComponent ->
                 VerificationViewModel.factory(
                     parentComponent = parentComponent,
-                    navController = navController,
-                    goBack = { userInitiated ->
-                        navController.popBackStack()
-                    },
-                    navigateAndClearStack = { screen ->
-                        navController.navigate(screen.route)
-                    },
-                    dismissWithResult = {
-                    }
+                    goBack = goBack,
+                    navigateAndClearStack = navigateAndClearStack,
+                    dismissWithResult = dismissWithResult
                 )
             }
             VerificationScreen(viewModel)
