@@ -45,7 +45,6 @@ internal abstract class AbsFinancialConnectionsAccountsRepository : FinancialCon
         clientSecret: String,
         sessionId: String,
         selectAccounts: List<String>,
-        updateLocalCache: Boolean
     ): PartnerAccountsList {
         TODO("Not yet implemented")
     }

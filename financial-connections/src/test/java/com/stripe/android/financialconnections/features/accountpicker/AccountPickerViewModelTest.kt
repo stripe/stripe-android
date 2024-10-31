@@ -348,7 +348,6 @@ internal class AccountPickerViewModelTest {
             selectAccounts(
                 selectedAccountIds = any(),
                 sessionId = any(),
-                updateLocalCache = any(),
             )
         ).thenReturn(response)
     }

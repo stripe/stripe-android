@@ -150,7 +150,6 @@ internal class AccountPickerViewModel @AssistedInject constructor(
                 // If account selection has to be skipped, submit all selectable accounts.
                 payload.skipAccountSelection -> submitAccounts(
                     selectedIds = payload.selectableAccounts.map { it.id }.toSet(),
-                    updateLocalCache = false,
                     isSkipAccountSelection = true
                 )
                 // the user saw an OAuth account selection screen and selected
@@ -158,7 +157,6 @@ internal class AccountPickerViewModel @AssistedInject constructor(
                 // we had done account selection, and submit.
                 payload.userSelectedSingleAccountInInstitution -> submitAccounts(
                     selectedIds = setOf(payload.accounts.first().id),
-                    updateLocalCache = true,
                     isSkipAccountSelection = true
                 )
 
@@ -278,7 +276,6 @@ internal class AccountPickerViewModel @AssistedInject constructor(
             state.payload()?.let {
                 submitAccounts(
                     selectedIds = state.selectedIds,
-                    updateLocalCache = true,
                     isSkipAccountSelection = false
                 )
             } ?: run {
@@ -289,7 +286,6 @@ internal class AccountPickerViewModel @AssistedInject constructor(
 
     private fun submitAccounts(
         selectedIds: Set<String>,
-        updateLocalCache: Boolean,
         isSkipAccountSelection: Boolean
     ) {
         suspend {
@@ -304,7 +300,6 @@ internal class AccountPickerViewModel @AssistedInject constructor(
             val accountsList: PartnerAccountsList = selectAccounts(
                 selectedAccountIds = selectedIds,
                 sessionId = requireNotNull(manifest.activeAuthSession).id,
-                updateLocalCache = updateLocalCache
             )
 
             val consumerSessionClientSecret = consumerSessionProvider.provideConsumerSession()?.clientSecret
