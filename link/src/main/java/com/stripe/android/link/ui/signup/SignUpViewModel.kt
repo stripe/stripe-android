@@ -54,20 +54,19 @@ internal class SignUpViewModel @Inject constructor(
     )
     private val _state = MutableStateFlow(
         value = SignUpScreenState(
-            signUpEnabled = false
+            signUpEnabled = false,
+            merchantName = configuration.merchantName,
+            requiresNameCollection = kotlin.run {
+                val countryCode = when (val stripeIntent = configuration.stripeIntent) {
+                    is PaymentIntent -> stripeIntent.countryCode
+                    is SetupIntent -> stripeIntent.countryCode
+                }
+                countryCode != CountryCode.US.value
+            }
         )
     )
 
     val state: StateFlow<SignUpScreenState> = _state
-
-    private val requiresNameCollection: Boolean
-        get() {
-            val countryCode = when (val stripeIntent = configuration.stripeIntent) {
-                is PaymentIntent -> stripeIntent.countryCode
-                is SetupIntent -> stripeIntent.countryCode
-            }
-            return countryCode != CountryCode.US.value
-        }
 
     init {
         viewModelScope.launch {
@@ -82,7 +81,7 @@ internal class SignUpViewModel @Inject constructor(
     private suspend fun signUpEnabledListener() {
         combine(
             flow = nameController.fieldState.map {
-                if (requiresNameCollection) {
+                if (state.value.requiresNameCollection) {
                     it.isValid()
                 } else {
                     true
@@ -103,8 +102,7 @@ internal class SignUpViewModel @Inject constructor(
         }.collectLatest { email ->
             delay(LOOKUP_DEBOUNCE)
             if (email != null) {
-                updateSignUpState(SignUpState.VerifyingEmail)
-                lookupConsumerEmail(email)
+                updateSignUpState(SignUpState.InputtingRemainingFields)
             } else {
                 updateSignUpState(SignUpState.InputtingPrimaryField)
             }
@@ -116,7 +114,7 @@ internal class SignUpViewModel @Inject constructor(
         viewModelScope.launch {
             linkAccountManager.signUp(
                 email = emailController.fieldValue.value,
-                phone = phoneNumberController.fieldValue.value,
+                phone = phoneNumberController.getE164PhoneNumber(phoneNumberController.fieldValue.value),
                 country = phoneNumberController.getCountryCode(),
                 name = nameController.fieldValue.value,
                 consentAction = SignUpConsentAction.Implied
@@ -144,26 +142,8 @@ internal class SignUpViewModel @Inject constructor(
         }
     }
 
-    private suspend fun lookupConsumerEmail(email: String) {
-        clearError()
-        linkAccountManager.lookupConsumer(email).fold(
-            onSuccess = {
-                if (it != null) {
-                    onAccountFetched(it)
-                } else {
-                    updateSignUpState(SignUpState.InputtingRemainingFields)
-                    linkEventsReporter.onSignupStarted()
-                }
-            },
-            onFailure = {
-                updateSignUpState(SignUpState.InputtingPrimaryField)
-                onError(it)
-            }
-        )
-    }
-
     private fun onError(error: Throwable) {
-        logger.error("Error: ", error)
+        logger.error("SignUpViewModel Error: ", error)
         updateState {
             it.copy(
                 errorMessage = when (val errorMessage = error.getErrorMessage()) {

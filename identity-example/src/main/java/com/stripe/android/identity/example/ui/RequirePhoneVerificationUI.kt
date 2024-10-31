@@ -63,6 +63,7 @@ internal fun RequirePhoneVerificationUI(
                 .padding(horizontal = 20.dp)
         ) {
             SectionElementUI(
+                modifier = Modifier.padding(vertical = 8.dp),
                 enabled = true,
                 element = SectionElement.wrap(
                     PhoneNumberElement(
@@ -71,7 +72,7 @@ internal fun RequirePhoneVerificationUI(
                     )
                 ),
                 hiddenIdentifiers = emptySet(),
-                lastTextFieldIdentifier = IdentifierSpec.Phone
+                lastTextFieldIdentifier = IdentifierSpec.Phone,
             )
         }
     }

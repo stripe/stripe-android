@@ -5,233 +5,6 @@ public final class com/stripe/android/stripecardscan/BuildConfig {
 	public fun <init> ()V
 }
 
-public final class com/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet {
-	public static final field Companion Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Companion;
-	public synthetic fun <init> (Ljava/lang/String;Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public static final fun create (Landroidx/activity/ComponentActivity;Ljava/lang/String;Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$CardImageVerificationResultCallback;)Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet;
-	public static final fun create (Landroidx/activity/ComponentActivity;Ljava/lang/String;Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration;Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$CardImageVerificationResultCallback;)Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet;
-	public static final fun create (Landroidx/activity/ComponentActivity;Ljava/lang/String;Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration;Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$CardImageVerificationResultCallback;Landroidx/activity/result/ActivityResultRegistry;)Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet;
-	public static final fun create (Landroidx/fragment/app/Fragment;Ljava/lang/String;Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$CardImageVerificationResultCallback;)Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet;
-	public static final fun create (Landroidx/fragment/app/Fragment;Ljava/lang/String;Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration;Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$CardImageVerificationResultCallback;)Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet;
-	public static final fun create (Landroidx/fragment/app/Fragment;Ljava/lang/String;Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration;Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$CardImageVerificationResultCallback;Landroidx/activity/result/ActivityResultRegistry;)Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet;
-	public final fun present (Ljava/lang/String;Ljava/lang/String;)V
-}
-
-public abstract interface class com/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$CardImageVerificationResultCallback {
-	public abstract fun onCardImageVerificationSheetResult (Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheetResult;)V
-}
-
-public final class com/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Companion {
-	public final fun create (Landroidx/activity/ComponentActivity;Ljava/lang/String;Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$CardImageVerificationResultCallback;)Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet;
-	public final fun create (Landroidx/activity/ComponentActivity;Ljava/lang/String;Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration;Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$CardImageVerificationResultCallback;)Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet;
-	public final fun create (Landroidx/activity/ComponentActivity;Ljava/lang/String;Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration;Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$CardImageVerificationResultCallback;Landroidx/activity/result/ActivityResultRegistry;)Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet;
-	public final fun create (Landroidx/fragment/app/Fragment;Ljava/lang/String;Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$CardImageVerificationResultCallback;)Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet;
-	public final fun create (Landroidx/fragment/app/Fragment;Ljava/lang/String;Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration;Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$CardImageVerificationResultCallback;)Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet;
-	public final fun create (Landroidx/fragment/app/Fragment;Ljava/lang/String;Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration;Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$CardImageVerificationResultCallback;Landroidx/activity/result/ActivityResultRegistry;)Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet;
-	public static synthetic fun create$default (Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Companion;Landroidx/activity/ComponentActivity;Ljava/lang/String;Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration;Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$CardImageVerificationResultCallback;Landroidx/activity/result/ActivityResultRegistry;ILjava/lang/Object;)Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet;
-	public static synthetic fun create$default (Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Companion;Landroidx/fragment/app/Fragment;Ljava/lang/String;Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration;Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$CardImageVerificationResultCallback;Landroidx/activity/result/ActivityResultRegistry;ILjava/lang/Object;)Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet;
-}
-
-public final class com/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration : android/os/Parcelable {
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> ()V
-	public fun <init> (Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration$StrictModeFrameCount;Z)V
-	public synthetic fun <init> (Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration$StrictModeFrameCount;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration$StrictModeFrameCount;
-	public final fun component2 ()Z
-	public final fun copy (Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration$StrictModeFrameCount;Z)Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration;
-	public static synthetic fun copy$default (Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration;Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration$StrictModeFrameCount;ZILjava/lang/Object;)Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration;
-	public final fun describeContents ()I
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getEnableCannotScanButton ()Z
-	public final fun getStrictModeFrames ()Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration$StrictModeFrameCount;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-	public final fun writeToParcel (Landroid/os/Parcel;I)V
-}
-
-public final class com/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public abstract class com/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration$StrictModeFrameCount : android/os/Parcelable {
-	public synthetic fun <init> (Lkotlin/jvm/functions/Function1;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun getCount ()Lkotlin/jvm/functions/Function1;
-}
-
-public final class com/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration$StrictModeFrameCount$High : com/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration$StrictModeFrameCount {
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public static final field INSTANCE Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration$StrictModeFrameCount$High;
-	public final fun describeContents ()I
-	public fun equals (Ljava/lang/Object;)Z
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-	public final fun writeToParcel (Landroid/os/Parcel;I)V
-}
-
-public final class com/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration$StrictModeFrameCount$High$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration$StrictModeFrameCount$High;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration$StrictModeFrameCount$High;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration$StrictModeFrameCount$Low : com/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration$StrictModeFrameCount {
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public static final field INSTANCE Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration$StrictModeFrameCount$Low;
-	public final fun describeContents ()I
-	public fun equals (Ljava/lang/Object;)Z
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-	public final fun writeToParcel (Landroid/os/Parcel;I)V
-}
-
-public final class com/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration$StrictModeFrameCount$Low$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration$StrictModeFrameCount$Low;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration$StrictModeFrameCount$Low;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration$StrictModeFrameCount$Medium : com/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration$StrictModeFrameCount {
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public static final field INSTANCE Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration$StrictModeFrameCount$Medium;
-	public final fun describeContents ()I
-	public fun equals (Ljava/lang/Object;)Z
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-	public final fun writeToParcel (Landroid/os/Parcel;I)V
-}
-
-public final class com/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration$StrictModeFrameCount$Medium$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration$StrictModeFrameCount$Medium;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration$StrictModeFrameCount$Medium;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration$StrictModeFrameCount$None : com/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration$StrictModeFrameCount {
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public static final field INSTANCE Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration$StrictModeFrameCount$None;
-	public final fun describeContents ()I
-	public fun equals (Ljava/lang/Object;)Z
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-	public final fun writeToParcel (Landroid/os/Parcel;I)V
-}
-
-public final class com/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration$StrictModeFrameCount$None$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration$StrictModeFrameCount$None;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration$StrictModeFrameCount$None;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheetParams$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheetParams;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheetParams;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public abstract interface class com/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheetResult : android/os/Parcelable {
-}
-
-public final class com/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheetResult$Canceled : com/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheetResult {
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> (Lcom/stripe/android/stripecardscan/scanui/CancellationReason;)V
-	public final fun component1 ()Lcom/stripe/android/stripecardscan/scanui/CancellationReason;
-	public final fun copy (Lcom/stripe/android/stripecardscan/scanui/CancellationReason;)Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheetResult$Canceled;
-	public static synthetic fun copy$default (Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheetResult$Canceled;Lcom/stripe/android/stripecardscan/scanui/CancellationReason;ILjava/lang/Object;)Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheetResult$Canceled;
-	public final fun describeContents ()I
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getReason ()Lcom/stripe/android/stripecardscan/scanui/CancellationReason;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-	public final fun writeToParcel (Landroid/os/Parcel;I)V
-}
-
-public final class com/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheetResult$Canceled$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheetResult$Canceled;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheetResult$Canceled;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheetResult$Completed : com/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheetResult {
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> (Ljava/lang/String;Lcom/stripe/android/stripecardscan/payment/card/ScannedCard;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Lcom/stripe/android/stripecardscan/payment/card/ScannedCard;
-	public final fun copy (Ljava/lang/String;Lcom/stripe/android/stripecardscan/payment/card/ScannedCard;)Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheetResult$Completed;
-	public static synthetic fun copy$default (Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheetResult$Completed;Ljava/lang/String;Lcom/stripe/android/stripecardscan/payment/card/ScannedCard;ILjava/lang/Object;)Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheetResult$Completed;
-	public final fun describeContents ()I
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getCardImageVerificationIntentId ()Ljava/lang/String;
-	public final fun getScannedCard ()Lcom/stripe/android/stripecardscan/payment/card/ScannedCard;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-	public final fun writeToParcel (Landroid/os/Parcel;I)V
-}
-
-public final class com/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheetResult$Completed$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheetResult$Completed;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheetResult$Completed;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheetResult$Failed : com/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheetResult {
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> (Ljava/lang/Throwable;)V
-	public final fun component1 ()Ljava/lang/Throwable;
-	public final fun copy (Ljava/lang/Throwable;)Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheetResult$Failed;
-	public static synthetic fun copy$default (Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheetResult$Failed;Ljava/lang/Throwable;ILjava/lang/Object;)Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheetResult$Failed;
-	public final fun describeContents ()I
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getError ()Ljava/lang/Throwable;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-	public final fun writeToParcel (Landroid/os/Parcel;I)V
-}
-
-public final class com/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheetResult$Failed$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheetResult$Failed;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheetResult$Failed;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/stripecardscan/cardimageverification/exception/InvalidCivException : java/lang/Exception {
-	public fun <init> (Ljava/lang/String;)V
-}
-
-public final class com/stripe/android/stripecardscan/cardimageverification/exception/InvalidStripePublishableKeyException : java/lang/Exception {
-	public fun <init> (Ljava/lang/String;)V
-}
-
-public final class com/stripe/android/stripecardscan/cardimageverification/exception/StripeNetworkException : java/lang/Exception {
-	public fun <init> (Ljava/lang/String;)V
-}
-
-public final class com/stripe/android/stripecardscan/cardimageverification/exception/UnknownScanException : java/lang/Exception {
-	public fun <init> ()V
-	public fun <init> (Ljava/lang/String;)V
-	public synthetic fun <init> (Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-}
-
 public final class com/stripe/android/stripecardscan/cardscan/CardScanFragment : com/stripe/android/stripecardscan/scanui/ScanFragment, com/stripe/android/camera/scanui/SimpleScanStateful {
 	public fun <init> ()V
 	public synthetic fun changeScanState (Lcom/stripe/android/camera/scanui/ScanState;)Z
@@ -248,7 +21,6 @@ public final class com/stripe/android/stripecardscan/cardscan/CardScanFragment :
 	public fun onCreateView (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Landroid/os/Bundle;)Landroid/view/View;
 	public fun onDestroy ()V
 	public fun onResume ()V
-	public fun onStart ()V
 	public synthetic fun setScanState (Lcom/stripe/android/camera/scanui/ScanState;)V
 	public fun setScanState (Lcom/stripe/android/stripecardscan/cardscan/CardScanState;)V
 	public synthetic fun setScanStatePrevious (Lcom/stripe/android/camera/scanui/ScanState;)V
@@ -257,16 +29,14 @@ public final class com/stripe/android/stripecardscan/cardscan/CardScanFragment :
 
 public final class com/stripe/android/stripecardscan/cardscan/CardScanFragmentKt {
 	public static final field CARD_SCAN_FRAGMENT_BUNDLE_KEY Ljava/lang/String;
-	public static final field CARD_SCAN_FRAGMENT_PARAMS_KEY Ljava/lang/String;
 	public static final field CARD_SCAN_FRAGMENT_REQUEST_KEY Ljava/lang/String;
 }
 
 public final class com/stripe/android/stripecardscan/cardscan/CardScanSheet {
 	public static final field Companion Lcom/stripe/android/stripecardscan/cardscan/CardScanSheet$Companion;
-	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun attachCardScanFragment (Landroidx/lifecycle/LifecycleOwner;Landroidx/fragment/app/FragmentManager;ILkotlin/jvm/functions/Function1;)V
-	public static final fun create (Landroidx/activity/ComponentActivity;Ljava/lang/String;Lcom/stripe/android/stripecardscan/cardscan/CardScanSheet$CardScanResultCallback;Landroidx/activity/result/ActivityResultRegistry;)Lcom/stripe/android/stripecardscan/cardscan/CardScanSheet;
-	public static final fun create (Landroidx/fragment/app/Fragment;Ljava/lang/String;Lcom/stripe/android/stripecardscan/cardscan/CardScanSheet$CardScanResultCallback;Landroidx/activity/result/ActivityResultRegistry;)Lcom/stripe/android/stripecardscan/cardscan/CardScanSheet;
+	public static final fun create (Landroidx/activity/ComponentActivity;Lcom/stripe/android/stripecardscan/cardscan/CardScanSheet$CardScanResultCallback;Landroidx/activity/result/ActivityResultRegistry;)Lcom/stripe/android/stripecardscan/cardscan/CardScanSheet;
+	public static final fun create (Landroidx/fragment/app/Fragment;Lcom/stripe/android/stripecardscan/cardscan/CardScanSheet$CardScanResultCallback;Landroidx/activity/result/ActivityResultRegistry;)Lcom/stripe/android/stripecardscan/cardscan/CardScanSheet;
 	public final fun present ()V
 }
 
@@ -275,10 +45,10 @@ public abstract interface class com/stripe/android/stripecardscan/cardscan/CardS
 }
 
 public final class com/stripe/android/stripecardscan/cardscan/CardScanSheet$Companion {
-	public final fun create (Landroidx/activity/ComponentActivity;Ljava/lang/String;Lcom/stripe/android/stripecardscan/cardscan/CardScanSheet$CardScanResultCallback;Landroidx/activity/result/ActivityResultRegistry;)Lcom/stripe/android/stripecardscan/cardscan/CardScanSheet;
-	public final fun create (Landroidx/fragment/app/Fragment;Ljava/lang/String;Lcom/stripe/android/stripecardscan/cardscan/CardScanSheet$CardScanResultCallback;Landroidx/activity/result/ActivityResultRegistry;)Lcom/stripe/android/stripecardscan/cardscan/CardScanSheet;
-	public static synthetic fun create$default (Lcom/stripe/android/stripecardscan/cardscan/CardScanSheet$Companion;Landroidx/activity/ComponentActivity;Ljava/lang/String;Lcom/stripe/android/stripecardscan/cardscan/CardScanSheet$CardScanResultCallback;Landroidx/activity/result/ActivityResultRegistry;ILjava/lang/Object;)Lcom/stripe/android/stripecardscan/cardscan/CardScanSheet;
-	public static synthetic fun create$default (Lcom/stripe/android/stripecardscan/cardscan/CardScanSheet$Companion;Landroidx/fragment/app/Fragment;Ljava/lang/String;Lcom/stripe/android/stripecardscan/cardscan/CardScanSheet$CardScanResultCallback;Landroidx/activity/result/ActivityResultRegistry;ILjava/lang/Object;)Lcom/stripe/android/stripecardscan/cardscan/CardScanSheet;
+	public final fun create (Landroidx/activity/ComponentActivity;Lcom/stripe/android/stripecardscan/cardscan/CardScanSheet$CardScanResultCallback;Landroidx/activity/result/ActivityResultRegistry;)Lcom/stripe/android/stripecardscan/cardscan/CardScanSheet;
+	public final fun create (Landroidx/fragment/app/Fragment;Lcom/stripe/android/stripecardscan/cardscan/CardScanSheet$CardScanResultCallback;Landroidx/activity/result/ActivityResultRegistry;)Lcom/stripe/android/stripecardscan/cardscan/CardScanSheet;
+	public static synthetic fun create$default (Lcom/stripe/android/stripecardscan/cardscan/CardScanSheet$Companion;Landroidx/activity/ComponentActivity;Lcom/stripe/android/stripecardscan/cardscan/CardScanSheet$CardScanResultCallback;Landroidx/activity/result/ActivityResultRegistry;ILjava/lang/Object;)Lcom/stripe/android/stripecardscan/cardscan/CardScanSheet;
+	public static synthetic fun create$default (Lcom/stripe/android/stripecardscan/cardscan/CardScanSheet$Companion;Landroidx/fragment/app/Fragment;Lcom/stripe/android/stripecardscan/cardscan/CardScanSheet$CardScanResultCallback;Landroidx/activity/result/ActivityResultRegistry;ILjava/lang/Object;)Lcom/stripe/android/stripecardscan/cardscan/CardScanSheet;
 	public final fun removeCardScanFragment (Landroidx/fragment/app/FragmentManager;)V
 }
 
@@ -378,10 +148,6 @@ public final class com/stripe/android/stripecardscan/cardscan/CardScanState$NotF
 	public fun equals (Ljava/lang/Object;)Z
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-}
-
-public final class com/stripe/android/stripecardscan/cardscan/exception/InvalidStripePublishableKeyException : java/lang/Exception {
-	public fun <init> (Ljava/lang/String;)V
 }
 
 public final class com/stripe/android/stripecardscan/cardscan/exception/UnknownScanException : java/lang/Exception {

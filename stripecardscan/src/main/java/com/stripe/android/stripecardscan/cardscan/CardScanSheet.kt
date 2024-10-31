@@ -8,7 +8,6 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistry
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.IdRes
-import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.add
@@ -20,9 +19,7 @@ import com.stripe.android.stripecardscan.scanui.CancellationReason
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-internal data class CardScanSheetParams(
-    val stripePublishableKey: String
-) : Parcelable
+internal class CardScanSheetParams : Parcelable
 
 sealed interface CardScanSheetResult : Parcelable {
 
@@ -42,7 +39,7 @@ sealed interface CardScanSheetResult : Parcelable {
 
 private const val CARD_SCAN_FRAGMENT_TAG = "CardScanFragmentTag"
 
-class CardScanSheet private constructor(private val stripePublishableKey: String) {
+class CardScanSheet private constructor() {
 
     private lateinit var launcher: ActivityResultLauncher<CardScanSheetParams>
 
@@ -64,11 +61,10 @@ class CardScanSheet private constructor(private val stripePublishableKey: String
         @JvmStatic
         fun create(
             from: ComponentActivity,
-            stripePublishableKey: String,
             cardScanSheetResultCallback: CardScanResultCallback,
             registry: ActivityResultRegistry = from.activityResultRegistry
         ) =
-            CardScanSheet(stripePublishableKey).apply {
+            CardScanSheet().apply {
                 launcher = from.registerForActivityResult(
                     activityResultContract,
                     registry,
@@ -86,11 +82,10 @@ class CardScanSheet private constructor(private val stripePublishableKey: String
         @JvmStatic
         fun create(
             from: Fragment,
-            stripePublishableKey: String,
             cardScanSheetResultCallback: CardScanResultCallback,
             registry: ActivityResultRegistry? = null
         ) =
-            CardScanSheet(stripePublishableKey).apply {
+            CardScanSheet().apply {
                 launcher = if (registry != null) {
                     from.registerForActivityResult(
                         activityResultContract,
@@ -151,11 +146,7 @@ class CardScanSheet private constructor(private val stripePublishableKey: String
      * https://paper.dropbox.com/doc/Bouncer-Web-API-Review--BTOclListnApWjHdpv4DoaOuAg-Wy0HGlL0XfwAOz9hHuzS1#:h2=Creating-a-CardImageVerificati
      */
     fun present() {
-        launcher.launch(
-            CardScanSheetParams(
-                stripePublishableKey = stripePublishableKey
-            )
-        )
+        launcher.launch(CardScanSheetParams())
     }
 
     /**
@@ -172,9 +163,6 @@ class CardScanSheet private constructor(private val stripePublishableKey: String
             setReorderingAllowed(true)
             add<CardScanFragment>(
                 fragmentContainer,
-                args = bundleOf(
-                    CARD_SCAN_FRAGMENT_PARAMS_KEY to CardScanSheetParams(stripePublishableKey)
-                ),
                 tag = CARD_SCAN_FRAGMENT_TAG
             )
         }

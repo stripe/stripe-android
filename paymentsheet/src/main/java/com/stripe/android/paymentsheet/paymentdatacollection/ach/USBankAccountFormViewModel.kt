@@ -12,6 +12,7 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext
 import com.stripe.android.financialconnections.model.BankAccount
@@ -526,6 +527,44 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             amount = args.formArgs.amount?.value,
             currency = args.formArgs.amount?.currencyCode,
             linkMode = args.linkMode,
+            billingDetails = if (FeatureFlags.instantDebitsBillingDetails.isEnabled) {
+                makeElementsSessionContextBillingDetails()
+            } else {
+                null
+            },
+            prefillDetails = makePrefillDetails(),
+        )
+    }
+
+    private fun makeElementsSessionContextBillingDetails(): ElementsSessionContext.BillingDetails {
+        val attachDefaultsToPaymentMethod = collectionConfiguration.attachDefaultsToPaymentMethod
+        val name = name.value.takeIf { collectingName || attachDefaultsToPaymentMethod }
+        val email = email.value.takeIf { collectingEmail || attachDefaultsToPaymentMethod }
+        val phone = phone.value.takeIf { collectingPhone || attachDefaultsToPaymentMethod }
+        val address = address.value.takeIf { collectingAddress || attachDefaultsToPaymentMethod }
+
+        return ElementsSessionContext.BillingDetails(
+            name = name,
+            email = email,
+            phone = phone?.let { phoneController.getE164PhoneNumber(it) },
+            address = address?.let {
+                ElementsSessionContext.BillingDetails.Address(
+                    line1 = it.line1,
+                    line2 = it.line2,
+                    postalCode = it.postalCode,
+                    city = it.city,
+                    state = it.state,
+                    country = it.country,
+                )
+            },
+        )
+    }
+
+    private fun makePrefillDetails(): ElementsSessionContext.PrefillDetails {
+        return ElementsSessionContext.PrefillDetails(
+            email = email.value ?: defaultBillingDetails?.email,
+            phone = phone.value ?: defaultBillingDetails?.phone,
+            phoneCountryCode = phoneController.getCountryCode(),
         )
     }
 

@@ -151,7 +151,9 @@ private fun NetworkingLinkSignupLoaded(
     LaunchedEffect(showFullForm) {
         if (showFullForm) {
             scrollState.animateScrollToBottom()
-            phoneNumberFocusRequester.requestFocus()
+            if (payload.focusPhoneFieldOnShow) {
+                phoneNumberFocusRequester.requestFocus()
+            }
         }
     }
 

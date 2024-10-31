@@ -7,25 +7,26 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.VisibleForTesting
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material.rememberModalBottomSheetState
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.core.os.bundleOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.stripe.android.core.Logger
-import com.stripe.android.link.ui.cardedit.CardEditScreen
-import com.stripe.android.link.ui.paymentmenthod.PaymentMethodScreen
-import com.stripe.android.link.ui.signup.SignUpScreen
-import com.stripe.android.link.ui.verification.VerificationScreen
-import com.stripe.android.link.ui.wallet.WalletScreen
-import com.stripe.android.ui.core.CircularProgressIndicator
+import com.stripe.android.link.ui.BottomSheetContent
+import com.stripe.android.link.ui.LinkContent
+import com.stripe.android.uicore.utils.collectAsState
+import kotlinx.coroutines.launch
 
 internal class LinkActivity : ComponentActivity() {
     internal var viewModel: LinkActivityViewModel? = null
@@ -33,6 +34,7 @@ internal class LinkActivity : ComponentActivity() {
     @VisibleForTesting
     internal lateinit var navController: NavHostController
 
+    @OptIn(ExperimentalMaterialApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -44,48 +46,42 @@ internal class LinkActivity : ComponentActivity() {
             finish()
         }
 
+        val vm = viewModel ?: return
         setContent {
+            var bottomSheetContent by remember { mutableStateOf<BottomSheetContent?>(null) }
+            val sheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
+            val coroutineScope = rememberCoroutineScope()
+            val appBarState by vm.linkState.collectAsState()
+
+            if (bottomSheetContent != null) {
+                DisposableEffect(bottomSheetContent) {
+                    coroutineScope.launch { sheetState.show() }
+                    onDispose {
+                        coroutineScope.launch { sheetState.hide() }
+                    }
+                }
+            }
             navController = rememberNavController()
 
             LaunchedEffect(Unit) {
-                viewModel?.navController = navController
-                viewModel?.dismissWithResult = ::dismissWithResult
+                viewModel?.let {
+                    it.navController = navController
+                    it.dismissWithResult = ::dismissWithResult
+                    lifecycle.addObserver(it)
+                }
             }
 
-            NavHost(
+            LinkContent(
+                viewModel = vm,
                 navController = navController,
-                startDestination = LinkScreen.Loading.route
-            ) {
-                composable(LinkScreen.Loading.route) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator()
-                    }
-                }
-
-                composable(LinkScreen.SignUp.route) {
-                    SignUpScreen()
-                }
-
-                composable(LinkScreen.Verification.route) {
-                    VerificationScreen()
-                }
-
-                composable(LinkScreen.Wallet.route) {
-                    WalletScreen()
-                }
-
-                composable(LinkScreen.CardEdit.route) {
-                    CardEditScreen()
-                }
-
-                composable(LinkScreen.PaymentMethod.route) {
-                    PaymentMethodScreen()
-                }
-            }
+                appBarState = appBarState,
+                sheetState = sheetState,
+                bottomSheetContent = bottomSheetContent,
+                onUpdateSheetContent = {
+                    bottomSheetContent = it
+                },
+                onBackPressed = onBackPressedDispatcher::onBackPressed
+            )
         }
     }
 

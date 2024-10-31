@@ -1,15 +1,18 @@
 package com.stripe.android.identity.ui
 
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.unit.dp
 import com.stripe.android.identity.R
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.DobParam
@@ -70,10 +73,11 @@ internal fun DOBSection(
     }
 
     SectionElementUI(
+        modifier = Modifier.padding(vertical = 8.dp),
         enabled = enabled,
         element = dobSectionElement,
         hiddenIdentifiers = setOf(),
-        lastTextFieldIdentifier = null
+        lastTextFieldIdentifier = null,
     )
 }
 

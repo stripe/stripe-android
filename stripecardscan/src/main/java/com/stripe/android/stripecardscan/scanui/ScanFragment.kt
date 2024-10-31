@@ -20,7 +20,6 @@ import com.stripe.android.camera.CameraAdapter
 import com.stripe.android.camera.CameraErrorListener
 import com.stripe.android.camera.CameraPreviewImage
 import com.stripe.android.camera.DefaultCameraErrorListener
-import com.stripe.android.camera.framework.Stats
 import com.stripe.android.core.storage.StorageFactory
 import com.stripe.android.mlcore.impl.InterpreterInitializerImpl
 import com.stripe.android.stripecardscan.R
@@ -29,7 +28,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlin.coroutines.CoroutineContext
 import com.stripe.android.camera.R as CameraR
 
@@ -39,9 +37,6 @@ private const val PERMISSION_RATIONALE_SHOWN = "permission_rationale_shown"
 abstract class ScanFragment : Fragment(), CoroutineScope {
 
     override val coroutineContext: CoroutineContext = Dispatchers.Main
-
-    internal val scanStat = Stats.trackTask("scan_activity")
-    private val permissionStat = Stats.trackTask("camera_permission")
 
     protected var isFlashlightOn: Boolean = false
         private set
@@ -71,17 +66,14 @@ abstract class ScanFragment : Fragment(), CoroutineScope {
             ActivityResultContracts.RequestPermission()
         ) { isGranted: Boolean ->
             if (isGranted) {
-                launch { permissionStat.trackResult("success") }
                 prepareCamera { onCameraReady() }
             } else {
-                launch { permissionStat.trackResult("failure") }
                 showPermissionDenied()
             }
         }
 
     override fun onStart() {
         super.onStart()
-        Stats.startScan()
 
         context?.let {
             if (!CameraAdapter.isCameraSupported(it)) {
@@ -128,7 +120,6 @@ abstract class ScanFragment : Fragment(), CoroutineScope {
                 requireActivity(),
                 Manifest.permission.CAMERA
             ) == PackageManager.PERMISSION_GRANTED -> {
-                launch { permissionStat.trackResult("success") }
                 prepareCamera { onCameraReady() }
             }
             storage.getBoolean(
@@ -203,7 +194,6 @@ abstract class ScanFragment : Fragment(), CoroutineScope {
      */
     protected open fun scanFailure(cause: Throwable? = null) {
         Log.e(LOG_TAG, "Canceling scan due to error", cause)
-        runBlocking { scanStat.trackResult("scan_failure") }
         resultListener.failed(cause)
         closeScanner()
     }
@@ -212,7 +202,6 @@ abstract class ScanFragment : Fragment(), CoroutineScope {
      * The scan has been closed by the user.
      */
     protected open fun userClosedScanner() {
-        runBlocking { scanStat.trackResult("user_canceled") }
         resultListener.userCanceled(CancellationReason.Closed)
         closeScanner()
     }
@@ -234,9 +223,7 @@ abstract class ScanFragment : Fragment(), CoroutineScope {
         instructionsText.visibility = View.GONE
         cameraAdapter.bindToLifecycle(this)
 
-        val torchStat = Stats.trackTask("torch_supported")
         cameraAdapter.withFlashSupport {
-            launch { torchStat.trackResult(if (it) "supported" else "unsupported") }
             setFlashlightState(cameraAdapter.isTorchOn())
             onFlashSupported(it)
         }

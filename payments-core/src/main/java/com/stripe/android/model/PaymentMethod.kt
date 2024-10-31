@@ -256,6 +256,11 @@ constructor(
             isVoucher = false,
             requiresMandate = false,
             hasDelayedSettlement = false,
+            // We are intentionally polling for P24 even though it uses the redirect trampoline.
+            // About 20% of the time, the intent is still in `requires_action` status
+            // after redirecting following a successful payment.
+            // This allows time for the intent to transition to its terminal state.
+            afterRedirectAction = AfterRedirectAction.Poll(),
         ),
         Bancontact(
             "bancontact",
@@ -965,7 +970,7 @@ constructor(
      * Requires the FPX payment method enabled on your account via
      * https://dashboard.stripe.com/account/payments/settings.
      *
-     * To obtain the FPX bank's display name and icon, see [com.stripe.android.view.FpxBank].
+     * To obtain the FPX bank's display name, see [com.stripe.android.view.FpxBank].
      */
     @Parcelize
     data class Fpx internal constructor(

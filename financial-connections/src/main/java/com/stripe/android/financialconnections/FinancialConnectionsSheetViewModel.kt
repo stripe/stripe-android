@@ -54,7 +54,6 @@ import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarSta
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.utils.parcelable
-import com.stripe.android.model.LinkMode
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -128,17 +127,16 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
             logNoBrowserAvailableAndFinish()
             return
         }
+
         val manifest = sync.manifest
-        val isInstantDebits = stateFlow.value.isInstantDebits
         val nativeAuthFlowEnabled = nativeRouter.nativeAuthFlowEnabled(manifest)
         nativeRouter.logExposure(manifest)
 
-        val linkMode = initialState.initialArgs.elementsSessionContext?.linkMode
-        val hostedAuthUrl = buildHostedAuthUrl(
-            hostedAuthUrl = manifest.hostedAuthUrl,
-            isInstantDebits = isInstantDebits,
-            linkMode = linkMode,
+        val hostedAuthUrl = HostedAuthUrlBuilder.create(
+            args = initialState.initialArgs,
+            manifest = manifest,
         )
+
         if (hostedAuthUrl == null) {
             finishWithResult(
                 state = stateFlow.value,
@@ -169,26 +167,6 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                 }
             }
         }
-    }
-
-    private fun buildHostedAuthUrl(
-        hostedAuthUrl: String?,
-        isInstantDebits: Boolean,
-        linkMode: LinkMode?,
-    ): String? {
-        if (hostedAuthUrl == null) {
-            return null
-        }
-
-        val queryParams = mutableListOf(hostedAuthUrl)
-        if (isInstantDebits) {
-            // For Instant Debits, add a query parameter to the hosted auth URL so that payment account creation
-            // takes place on the web side of the flow and the payment method ID is returned to the app.
-            queryParams.add("return_payment_method=true")
-            linkMode?.let { queryParams.add("link_mode=${it.value}") }
-        }
-
-        return queryParams.joinToString("&")
     }
 
     private fun logNoBrowserAvailableAndFinish() {

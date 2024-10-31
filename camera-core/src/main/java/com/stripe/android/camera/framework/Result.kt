@@ -94,8 +94,7 @@ abstract class ResultAggregator<
     FinalResult
     >(
     private val listener: AggregateResultListener<InterimResult, FinalResult>,
-    private val initialState: State,
-    private val statsName: String?
+    private val initialState: State
 ) : StatefulResultHandler<DataFrame, State, AnalyzerResult, Boolean>(initialState),
     LifecycleEventObserver {
 
@@ -104,10 +103,6 @@ abstract class ResultAggregator<
     private var isCanceled = false
     private var isPaused = false
     private var isFinished = false
-
-    private val aggregatorExecutionStats = runBlocking {
-        statsName?.let { Stats.trackRepeatingTask(it) }
-    }
 
     private val frameRateTracker by lazy { FrameRateTracker(this::class.java.simpleName) }
 
@@ -183,8 +178,6 @@ abstract class ResultAggregator<
 
             finalResultMutex.withLock {
                 val (interimResult, finalResult) = aggregateResult(data, result)
-
-                aggregatorExecutionStats?.trackResult("frame_processed")
 
                 listener.onInterimResult(interimResult)
 

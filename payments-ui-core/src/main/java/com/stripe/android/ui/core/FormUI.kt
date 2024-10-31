@@ -3,9 +3,11 @@ package com.stripe.android.ui.core
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import com.stripe.android.ui.core.elements.AffirmElementUI
 import com.stripe.android.ui.core.elements.AffirmHeaderElement
 import com.stripe.android.ui.core.elements.AfterpayClearpayElementUI
@@ -30,6 +32,8 @@ import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.OTPElement
 import com.stripe.android.uicore.elements.OTPElementUI
+import com.stripe.android.uicore.elements.SameAsShippingElement
+import com.stripe.android.uicore.elements.SameAsShippingElementUI
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SectionElementUI
 import com.stripe.android.uicore.utils.collectAsState
@@ -70,7 +74,7 @@ fun FormUI(
     Column(
         modifier = modifier.fillMaxWidth(1f)
     ) {
-        elements.forEachIndexed { _, element ->
+        elements.forEachIndexed { index, element ->
             if (!hiddenIdentifiers.contains(element.identifier)) {
                 FormUIElement(
                     element = element,
@@ -92,31 +96,58 @@ private fun FormUIElement(
 ) {
     when (element) {
         is SectionElement -> SectionElementUI(
-            enabled,
-            element,
-            hiddenIdentifiers,
-            lastTextFieldIdentifier
+            modifier = Modifier.padding(vertical = 8.dp),
+            enabled = enabled,
+            element = element,
+            hiddenIdentifiers = hiddenIdentifiers,
+            lastTextFieldIdentifier = lastTextFieldIdentifier,
         )
         is CheckboxFieldElement -> CheckboxFieldUI(
+            modifier = Modifier.padding(vertical = 4.dp),
             controller = element.controller,
             enabled = enabled
         )
-        is StaticTextElement -> StaticTextElementUI(element)
-        is SaveForFutureUseElement -> SaveForFutureUseElementUI(enabled, element)
-        is AfterpayClearpayHeaderElement -> AfterpayClearpayElementUI(
-            enabled,
-            element
+        is StaticTextElement -> StaticTextElementUI(
+            element = element,
+            modifier = Modifier.padding(vertical = 8.dp),
         )
-        is AuBecsDebitMandateTextElement -> AuBecsDebitMandateElementUI(element)
-        is AffirmHeaderElement -> AffirmElementUI()
-        is MandateTextElement -> MandateTextUI(element)
+        is SaveForFutureUseElement -> SaveForFutureUseElementUI(
+            modifier = Modifier.padding(vertical = 4.dp),
+            enabled = enabled,
+            element = element,
+        )
+        is SameAsShippingElement -> SameAsShippingElementUI(
+            controller = element.controller,
+            modifier = Modifier.padding(vertical = 4.dp),
+        )
+        is AfterpayClearpayHeaderElement -> AfterpayClearpayElementUI(
+            enabled = enabled,
+            element = element,
+            modifier = Modifier.padding(4.dp, 8.dp, 4.dp, 4.dp),
+        )
+        is AuBecsDebitMandateTextElement -> AuBecsDebitMandateElementUI(
+            element = element,
+            modifier = Modifier.padding(vertical = 8.dp),
+        )
+        is AffirmHeaderElement -> AffirmElementUI(
+            modifier = Modifier.padding(vertical = 8.dp),
+        )
+        is MandateTextElement -> MandateTextUI(
+            element = element,
+            modifier = Modifier.padding(top = element.topPadding, bottom = 8.dp)
+        )
         is CardDetailsSectionElement -> CardDetailsSectionElementUI(
             enabled,
             element.controller,
             hiddenIdentifiers,
             lastTextFieldIdentifier
         )
-        is BsbElement -> BsbElementUI(enabled, element, lastTextFieldIdentifier)
+        is BsbElement -> BsbElementUI(
+            enabled = enabled,
+            element = element,
+            lastTextFieldIdentifier = lastTextFieldIdentifier,
+            modifier = Modifier.padding(vertical = 8.dp),
+        )
         is OTPElement -> OTPElementUI(enabled, element)
         is RenderableFormElement -> element.ComposeUI(enabled)
         is EmptyFormElement -> {}

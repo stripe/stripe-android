@@ -18,7 +18,6 @@ import androidx.fragment.app.setFragmentResult
 import com.stripe.android.camera.CameraAdapter
 import com.stripe.android.camera.CameraErrorListener
 import com.stripe.android.camera.CameraPreviewImage
-import com.stripe.android.camera.framework.Stats
 import com.stripe.android.camera.scanui.ScanErrorListener
 import com.stripe.android.camera.scanui.SimpleScanStateful
 import com.stripe.android.camera.scanui.ViewFinderBackground
@@ -26,16 +25,10 @@ import com.stripe.android.camera.scanui.util.asRect
 import com.stripe.android.camera.scanui.util.startAnimation
 import com.stripe.android.stripecardscan.R
 import com.stripe.android.stripecardscan.camera.getScanCameraAdapter
-import com.stripe.android.stripecardscan.cardscan.exception.InvalidStripePublishableKeyException
 import com.stripe.android.stripecardscan.cardscan.exception.UnknownScanException
 import com.stripe.android.stripecardscan.cardscan.result.MainLoopAggregator
 import com.stripe.android.stripecardscan.cardscan.result.MainLoopState
 import com.stripe.android.stripecardscan.databinding.StripeFragmentCardscanBinding
-import com.stripe.android.stripecardscan.framework.api.dto.ScanStatistics
-import com.stripe.android.stripecardscan.framework.api.uploadScanStatsOCR
-import com.stripe.android.stripecardscan.framework.util.AppDetails
-import com.stripe.android.stripecardscan.framework.util.Device
-import com.stripe.android.stripecardscan.framework.util.ScanConfig
 import com.stripe.android.stripecardscan.payment.card.ScannedCard
 import com.stripe.android.stripecardscan.scanui.CancellationReason
 import com.stripe.android.stripecardscan.scanui.ScanFragment
@@ -45,7 +38,6 @@ import com.stripe.android.stripecardscan.scanui.util.setVisible
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
-import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.min
 import kotlin.math.roundToInt
 import com.stripe.android.camera.R as CameraR
@@ -53,7 +45,6 @@ import com.stripe.android.camera.R as CameraR
 private val MINIMUM_RESOLUTION = Size(1067, 600) // minimum size of OCR
 const val CARD_SCAN_FRAGMENT_REQUEST_KEY = "CardScanRequestKey"
 const val CARD_SCAN_FRAGMENT_BUNDLE_KEY = "CardScanBundleKey"
-const val CARD_SCAN_FRAGMENT_PARAMS_KEY = "CardScanParamsKey"
 
 class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
 
@@ -76,12 +67,6 @@ class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
     private val viewFinderBackground: ViewFinderBackground by lazy {
         viewBinding.cameraView.viewFinderBackgroundView
     }
-
-    private val params: CardScanSheetParams by lazy {
-        arguments?.getParcelable(CARD_SCAN_FRAGMENT_PARAMS_KEY) ?: CardScanSheetParams("")
-    }
-
-    private val hasPreviousValidResult = AtomicBoolean(false)
 
     override var scanState: CardScanState? = CardScanState.NotFound
 
@@ -152,7 +137,6 @@ class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
                     changeScanState(CardScanState.Correct)
                     activity?.let { cameraAdapter.unbindFromLifecycle(it) }
                     resultListener.cardScanComplete(ScannedCard(result.pan))
-                    scanStat.trackResult("scan_complete")
                     closeScanner()
                 }.let { }
             }
@@ -163,13 +147,6 @@ class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
             override suspend fun onInterimResult(
                 result: MainLoopAggregator.InterimResult
             ) = launch(Dispatchers.Main) {
-                if (
-                    result.state is MainLoopState.OcrFound &&
-                    !hasPreviousValidResult.getAndSet(true)
-                ) {
-                    scanStat.trackResult("ocr_pan_observed")
-                }
-
                 when (result.state) {
                     is MainLoopState.Initial -> changeScanState(CardScanState.NotFound)
                     is MainLoopState.OcrFound -> changeScanState(CardScanState.Found)
@@ -214,13 +191,6 @@ class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
 
         displayState(requireNotNull(scanState), scanStatePrevious)
         return viewBinding.root
-    }
-
-    override fun onStart() {
-        super.onStart()
-        if (!ensureValidParams()) {
-            return
-        }
     }
 
     override fun onResume() {
@@ -299,14 +269,6 @@ class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
      */
     override fun onFlashlightStateChanged(flashlightOn: Boolean) {}
 
-    private fun ensureValidParams() = when {
-        params.stripePublishableKey.isEmpty() -> {
-            scanFailure(InvalidStripePublishableKeyException("Missing publishable key"))
-            false
-        }
-        else -> true
-    }
-
     override fun displayState(newState: CardScanState, previousState: CardScanState?) {
         when (newState) {
             is CardScanState.NotFound, CardScanState.Found -> {
@@ -336,15 +298,6 @@ class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
     }
 
     override fun closeScanner() {
-        uploadScanStatsOCR(
-            stripePublishableKey = params.stripePublishableKey,
-            instanceId = Stats.instanceId,
-            scanId = Stats.scanId,
-            device = Device.fromContext(context),
-            appDetails = AppDetails.fromContext(context),
-            scanStatistics = ScanStatistics.fromStats(),
-            scanConfig = ScanConfig(0)
-        )
         scanFlow.resetFlow()
         super.closeScanner()
     }

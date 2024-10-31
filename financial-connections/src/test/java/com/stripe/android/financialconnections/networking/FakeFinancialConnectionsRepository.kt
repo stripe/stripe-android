@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.networking
 
+import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext.BillingDetails
 import com.stripe.android.financialconnections.financialConnectionsSessionWithNoMoreAccounts
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccountList
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
@@ -44,7 +45,8 @@ internal class FakeFinancialConnectionsRepository : FinancialConnectionsReposito
 
     override suspend fun createPaymentMethod(
         paymentDetailsId: String,
-        consumerSessionClientSecret: String
+        consumerSessionClientSecret: String,
+        billingDetails: BillingDetails?,
     ): PaymentMethod {
         return createPaymentMethod()
     }

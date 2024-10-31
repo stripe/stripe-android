@@ -346,7 +346,11 @@ private fun PhoneSection(
             .padding(0.dp),
         contentAlignment = Alignment.CenterEnd
     ) {
-        Section(null, sectionErrorString) {
+        Section(
+            modifier = Modifier.padding(vertical = 8.dp),
+            title = null,
+            error = sectionErrorString,
+        ) {
             PhoneNumberElementUI(
                 enabled = !isProcessing,
                 controller = phoneController,
@@ -382,7 +386,11 @@ private fun AddressSection(
         contentAlignment = Alignment.CenterEnd
     ) {
         Column {
-            Section(PaymentsUiCoreR.string.stripe_billing_details, sectionErrorString) {
+            Section(
+                modifier = Modifier.padding(vertical = 8.dp),
+                title = PaymentsUiCoreR.string.stripe_billing_details,
+                error = sectionErrorString,
+            ) {
                 AddressElementUI(
                     enabled = !isProcessing,
                     controller = addressController,
@@ -391,7 +399,7 @@ private fun AddressSection(
                 )
             }
             sameAsShippingElement?.let {
-                SameAsShippingElementUI(it.controller)
+                SameAsShippingElementUI(it.controller, Modifier.padding(vertical = 4.dp))
             }
         }
     }
