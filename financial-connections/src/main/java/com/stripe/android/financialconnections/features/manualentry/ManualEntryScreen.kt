@@ -30,6 +30,7 @@ import com.stripe.android.financialconnections.features.common.UnclassifiedError
 import com.stripe.android.financialconnections.features.manualentry.ManualEntryPreviewParameterProvider.PreviewState
 import com.stripe.android.financialconnections.features.manualentry.ManualEntryState.Payload
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount
+import com.stripe.android.financialconnections.model.ManualEntryPane
 import com.stripe.android.financialconnections.presentation.Async
 import com.stripe.android.financialconnections.presentation.Async.Fail
 import com.stripe.android.financialconnections.presentation.Async.Loading
@@ -141,26 +142,29 @@ private fun ManualEntryLoaded(
         scrollState = scrollState,
         body = {
             Spacer(modifier = Modifier.size(8.dp))
-            Title()
+            payload.content.title?.let {
+                Title(it)
+            }
             Spacer(modifier = Modifier.size(16.dp))
-            if (payload.verifyWithMicrodeposits) {
+            if (payload.content.body != null) {
                 Spacer(modifier = Modifier.size(8.dp))
                 Text(
-                    text = stringResource(R.string.stripe_manualentry_microdeposits_desc),
+                    text = payload.content.body,
                     color = FinancialConnectionsTheme.colors.textDefault,
                     style = FinancialConnectionsTheme.typography.bodyMedium
                 )
             }
-            if (payload.testMode) {
+            if (payload.content.testModeBannerLabel != null) {
                 Spacer(modifier = Modifier.size(8.dp))
                 TestModeBanner(
                     enabled = loading.not(),
-                    buttonLabel = stringResource(id = R.string.stripe_manualentry_test_banner),
+                    buttonLabel = payload.content.testModeBannerLabel,
                     onButtonClick = onTestFill
                 )
             }
             Spacer(modifier = Modifier.size(24.dp))
             AccountForm(
+                content = payload.content,
                 enabled = loading.not(),
                 routing = routing,
                 routingError = routingError,
@@ -181,6 +185,7 @@ private fun ManualEntryLoaded(
             ManualEntryFooter(
                 isValidForm = isValidForm,
                 loading = loading,
+                cta = payload.content.cta,
                 onSubmit = onSubmit
             )
         }
@@ -202,10 +207,10 @@ private fun ErrorMessage(
 }
 
 @Composable
-private fun Title() {
+private fun Title(title: String) {
     Text(
         modifier = Modifier.fillMaxWidth(),
-        text = stringResource(R.string.stripe_manualentry_title),
+        text = title,
         color = FinancialConnectionsTheme.colors.textDefault,
         style = FinancialConnectionsTheme.typography.headingXLarge
     )
@@ -213,6 +218,7 @@ private fun Title() {
 
 @Composable
 private fun AccountForm(
+    content: ManualEntryPane,
     enabled: Boolean,
     routing: String,
     routingError: Int?,
@@ -228,30 +234,36 @@ private fun AccountForm(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        InputWithError(
-            enabled = enabled,
-            label = R.string.stripe_manualentry_routing,
-            input = routing,
-            error = routingError,
-            testTag = "RoutingInput",
-            onInputChanged = onRoutingEntered,
-        )
-        InputWithError(
-            enabled = enabled,
-            label = R.string.stripe_manualentry_account,
-            input = account,
-            error = accountError,
-            testTag = "AccountInput",
-            onInputChanged = onAccountEntered,
-        )
-        InputWithError(
-            enabled = enabled,
-            label = R.string.stripe_manualentry_accountconfirm,
-            input = accountConfirm,
-            error = accountConfirmError,
-            testTag = "ConfirmAccountInput",
-            onInputChanged = onAccountConfirmEntered,
-        )
+        content.routingNumberLabel?.let {
+            InputWithError(
+                enabled = enabled,
+                label = it,
+                input = routing,
+                error = routingError,
+                testTag = "RoutingInput",
+                onInputChanged = onRoutingEntered,
+            )
+        }
+        content.accountNumberLabel?.let {
+            InputWithError(
+                enabled = enabled,
+                label = it,
+                input = account,
+                error = accountError,
+                testTag = "AccountInput",
+                onInputChanged = onAccountEntered,
+            )
+        }
+        content.confirmAccountNumberLabel?.let {
+            InputWithError(
+                enabled = enabled,
+                label = it,
+                input = accountConfirm,
+                error = accountConfirmError,
+                testTag = "ConfirmAccountInput",
+                onInputChanged = onAccountConfirmEntered,
+            )
+        }
     }
 }
 
@@ -259,6 +271,7 @@ private fun AccountForm(
 private fun ManualEntryFooter(
     isValidForm: Boolean,
     loading: Boolean,
+    cta: String,
     onSubmit: () -> Unit
 ) {
     Column {
@@ -269,7 +282,7 @@ private fun ManualEntryFooter(
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-            Text(text = stringResource(R.string.stripe_manualentry_cta))
+            Text(text = cta)
         }
     }
 }
@@ -280,7 +293,7 @@ private fun InputWithError(
     enabled: Boolean,
     input: String,
     @StringRes error: Int?,
-    label: Int,
+    label: String,
     testTag: String,
     onInputChanged: (String) -> Unit
 ) {
@@ -296,7 +309,7 @@ private fun InputWithError(
             ),
             placeholder = {
                 Text(
-                    text = stringResource(id = label),
+                    text = label,
                     style = FinancialConnectionsTheme.typography.labelLarge,
                     color = FinancialConnectionsTheme.colors.textSubdued
                 )

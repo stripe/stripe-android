@@ -23,6 +23,7 @@ import com.stripe.android.financialconnections.domain.UpdateCachedAccounts
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount
 import com.stripe.android.financialconnections.model.ManualEntryMode
+import com.stripe.android.financialconnections.model.ManualEntryPane
 import com.stripe.android.financialconnections.model.PaymentAccountParams
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.destination
@@ -82,11 +83,11 @@ internal class ManualEntryViewModel @AssistedInject constructor(
         suspend {
             val sync = getOrFetchSync()
             val manifest = requireNotNull(sync.manifest)
+            val content = requireNotNull(manifest.displayText?.manualEntryPane)
             eventTracker.track(PaneLoaded(Pane.MANUAL_ENTRY))
             ManualEntryState.Payload(
-                verifyWithMicrodeposits = manifest.manualEntryUsesMicrodeposits,
                 customManualEntry = manifest.manualEntryMode == ManualEntryMode.CUSTOM,
-                testMode = manifest.livemode.not()
+                content = content,
             )
         }.execute {
             copy(payload = it)
@@ -206,8 +207,7 @@ internal data class ManualEntryState(
 ) {
 
     data class Payload(
-        val verifyWithMicrodeposits: Boolean,
+        val content: ManualEntryPane,
         val customManualEntry: Boolean,
-        val testMode: Boolean
     )
 }

@@ -17,6 +17,8 @@ internal data class TextUpdate(
     val consent: ConsentPane? = null,
     @SerialName("link_login_pane")
     val linkLoginPane: LinkLoginPane? = null,
+    @SerialName("manual_entry_pane")
+    val manualEntryPane: ManualEntryPane? = null,
     @SerialName("networking_link_signup_pane")
     val networkingLinkSignupPane: NetworkingLinkSignupPane? = null,
     @SerialName("oauth_prepane")
@@ -315,4 +317,22 @@ internal data class NetworkedAccount(
 internal data class AddNewAccount(
     @SerialName("body") val body: String,
     @SerialName("icon") val icon: Image? = null,
+) : Parcelable
+
+@Serializable
+@Parcelize
+internal data class ManualEntryPane(
+    @SerialName("title") val title: String?,
+    @SerialName("body") val body: String?,
+    @SerialName("test_mode_banner_label") val testModeBannerLabel: String?,
+    @SerialName("routing_number_label") val routingNumberLabel: String?,
+    @SerialName("account_number_label") val accountNumberLabel: String?,
+    @SerialName("confirm_account_number_label") val confirmAccountNumberLabel: String?,
+    @SerialName("cta") val cta: String,
+    @SerialName("error_routing_number_too_short") val errorRoutingNumberTooShort: String,
+    @SerialName("error_invalid_routing_number") val errorInvalidRoutingNumber: String,
+    @SerialName("error_routing_number_required") val errorRoutingNumberRequired: String,
+    @SerialName("error_account_number_required") val errorAccountNumberRequired: String,
+    @SerialName("error_account_number_too_long") val errorAccountNumberTooLong: String,
+    @SerialName("error_account_numbers_mismatch") val errorAccountNumbersMismatch: String,
 ) : Parcelable
