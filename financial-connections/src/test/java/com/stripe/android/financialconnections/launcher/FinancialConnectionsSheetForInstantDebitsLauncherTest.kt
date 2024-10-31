@@ -20,7 +20,7 @@ class FinancialConnectionsSheetForInstantDebitsLauncherTest {
     fun `create and present should return expected ConnectionsSheetResult#Completed`() {
         val testRegistry = FakeActivityResultRegistry(
             FinancialConnectionsSheetInstantDebitsResult.Completed(
-                paymentMethod = encodedPaymentMethod,
+                encodedPaymentMethod = encodedPaymentMethod,
                 last4 = "1234",
                 bankName = "Bank of America",
             )
@@ -43,7 +43,7 @@ class FinancialConnectionsSheetForInstantDebitsLauncherTest {
                 assertThat(results)
                     .containsExactly(
                         FinancialConnectionsSheetInstantDebitsResult.Completed(
-                            paymentMethod = encodedPaymentMethod,
+                            encodedPaymentMethod = encodedPaymentMethod,
                             last4 = "1234",
                             bankName = "Bank of America",
                         )

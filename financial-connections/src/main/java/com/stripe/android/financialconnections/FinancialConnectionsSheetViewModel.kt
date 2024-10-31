@@ -453,7 +453,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                         state = it,
                         result = Completed(
                             instantDebits = InstantDebitsResult(
-                                paymentMethod = paymentMethod,
+                                encodedPaymentMethod = paymentMethod,
                                 last4 = url.getQueryParameter(QUERY_PARAM_LAST4),
                                 bankName = url.getQueryParameter(QUERY_BANK_NAME)
                             ),

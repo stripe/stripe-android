@@ -42,7 +42,7 @@ class FinancialConnectionsSheetForInstantDebitsContract :
         is FinancialConnectionsSheetActivityResult.Completed -> when (instantDebits) {
             null -> Failed(IllegalArgumentException("Instant debits result is missing"))
             else -> Completed(
-                paymentMethod = instantDebits.paymentMethod,
+                encodedPaymentMethod = instantDebits.encodedPaymentMethod,
                 last4 = instantDebits.last4,
                 bankName = instantDebits.bankName,
             )

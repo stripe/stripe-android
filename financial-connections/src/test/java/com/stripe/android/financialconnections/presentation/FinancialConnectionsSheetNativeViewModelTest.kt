@@ -321,7 +321,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
             initialState = initialState,
             createInstantDebitsResult = {
                 InstantDebitsResult(
-                    paymentMethod = encodedPaymentMethod,
+                    encodedPaymentMethod = encodedPaymentMethod,
                     last4 = "4242",
                     bankName = "Stripe Bank",
                 )
@@ -333,7 +333,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
         val expectedViewEffect = Finish(
             result = Completed(
                 instantDebits = InstantDebitsResult(
-                    paymentMethod = encodedPaymentMethod,
+                    encodedPaymentMethod = encodedPaymentMethod,
                     last4 = "4242",
                     bankName = "Stripe Bank",
                 ),
@@ -375,7 +375,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
             initialState = initialState,
             createInstantDebitsResult = {
                 InstantDebitsResult(
-                    paymentMethod = encodedPaymentMethod,
+                    encodedPaymentMethod = encodedPaymentMethod,
                     last4 = "4242",
                     bankName = "Stripe Bank",
                 )

@@ -54,7 +54,7 @@ internal sealed class FinancialConnectionsSheetActivityResult : Parcelable {
 
 @Parcelize
 internal data class InstantDebitsResult(
-    val paymentMethod: String,
+    val encodedPaymentMethod: String,
     val last4: String?,
     val bankName: String?
 ) : Parcelable

@@ -20,6 +20,8 @@ internal fun PaymentSelection.toPaymentConfirmationOption(
         )
         is PaymentSelection.New.USBankAccount -> {
             if (instantDebits != null) {
+                // For Instant Debits, we create the PaymentMethod inside the bank auth flow. Therefore,
+                // we can just use the already created object here.
                 PaymentConfirmationOption.PaymentMethod.Saved(
                     initializationMode = initializationMode,
                     shippingDetails = configuration.shippingDetails,

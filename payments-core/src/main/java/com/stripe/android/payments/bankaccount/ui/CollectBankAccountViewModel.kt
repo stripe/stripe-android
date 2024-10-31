@@ -190,7 +190,7 @@ internal class CollectBankAccountViewModel @Inject constructor(
         result: FinancialConnectionsSheetInstantDebitsResult.Completed,
     ) {
         finishWithRefreshedIntent { intent ->
-            val paymentMethod = result.paymentMethod.parsePaymentMethod()
+            val paymentMethod = result.encodedPaymentMethod.parsePaymentMethod()
 
             CollectBankAccountResponseInternal(
                 intent = intent,
@@ -211,6 +211,7 @@ internal class CollectBankAccountViewModel @Inject constructor(
         val paymentMethod = PaymentMethodJsonParser().parse(json)
         paymentMethod
     } catch (e: Exception) {
+        logger.error("Failed to parse PaymentMethod", e)
         null
     }
 
