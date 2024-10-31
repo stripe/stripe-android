@@ -1,9 +1,12 @@
 package com.stripe.android.identity.ui
 
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import com.stripe.android.identity.R
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.NameParam
@@ -54,10 +57,11 @@ internal fun NameSection(
     val lastName by lastNameController.fieldValue.collectAsState()
 
     SectionElementUI(
+        modifier = Modifier.padding(vertical = 8.dp),
         enabled = enabled,
         element = nameSectionElement,
         hiddenIdentifiers = setOf(),
-        lastTextFieldIdentifier = null
+        lastTextFieldIdentifier = null,
     )
 
     LaunchedEffect(firstName, lastName) {

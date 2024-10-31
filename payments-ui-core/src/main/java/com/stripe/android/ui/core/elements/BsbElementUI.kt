@@ -6,6 +6,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -19,7 +20,8 @@ import com.stripe.android.uicore.utils.collectAsState
 fun BsbElementUI(
     enabled: Boolean,
     element: BsbElement,
-    lastTextFieldIdentifier: IdentifierSpec?
+    lastTextFieldIdentifier: IdentifierSpec?,
+    modifier: Modifier = Modifier,
 ) {
     val error by element.textElement.controller.error.collectAsState()
     val bankName by element.bankName.collectAsState()
@@ -53,7 +55,8 @@ fun BsbElementUI(
                         color = MaterialTheme.stripeColors.subtitle
                     )
                 }
-            }
+            },
+            modifier = modifier,
         )
     }
 }

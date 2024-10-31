@@ -107,7 +107,12 @@ fun TextFieldSection(
         } ?: stringResource(it.errorMessage)
     }
 
-    Section(title = sectionTitle, error = sectionErrorString, isSelected = isSelected) {
+    Section(
+        modifier = Modifier.padding(vertical = 8.dp),
+        title = sectionTitle,
+        error = sectionErrorString,
+        isSelected = isSelected,
+    ) {
         TextField(
             textFieldController = textFieldController,
             enabled = enabled,
