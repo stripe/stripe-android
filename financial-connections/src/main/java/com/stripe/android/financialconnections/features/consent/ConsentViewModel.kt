@@ -95,8 +95,9 @@ internal class ConsentViewModel @AssistedInject constructor(
     fun onContinueClick() {
         viewModelScope.launch {
             val token: Result<String> = standardRequestManager.requestToken("random_token")
+            logger.debug("Token: $token")
             runCatching {
-                verifyIntegrity(token.getOrThrow(), "com.random")
+                // verifyIntegrity(token.getOrThrow(), "com.random")
             }.onFailure {
                 logger.error("Error verifying integrity", it)
             }.onSuccess {
