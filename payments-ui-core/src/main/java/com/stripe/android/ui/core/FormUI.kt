@@ -32,6 +32,8 @@ import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.OTPElement
 import com.stripe.android.uicore.elements.OTPElementUI
+import com.stripe.android.uicore.elements.SameAsShippingElement
+import com.stripe.android.uicore.elements.SameAsShippingElementUI
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SectionElementUI
 import com.stripe.android.uicore.utils.collectAsState
@@ -113,6 +115,10 @@ private fun FormUIElement(
             modifier = Modifier.padding(vertical = 4.dp),
             enabled = enabled,
             element = element,
+        )
+        is SameAsShippingElement -> SameAsShippingElementUI(
+            controller = element.controller,
+            modifier = Modifier.padding(vertical = 4.dp),
         )
         is AfterpayClearpayHeaderElement -> AfterpayClearpayElementUI(
             enabled = enabled,
