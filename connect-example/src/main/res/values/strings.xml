@@ -29,4 +29,11 @@
     <string name="reload">Reload</string>
     <string name="warming_up_the_server">Warming up the server… This may take several seconds</string>
     <string name="app_settings">App Settings</string>
+
+    <!-- Appearance Strings -->
+    <string name="appearance_default">Default</string>
+    <string name="appearance_ogre">Ogre</string>
+    <string name="appearance_hot_dog">Hot Dog Stand</string>
+    <string name="appearance_ocean_breeze">Ocean Breeze</string>
+    <string name="appearance_link">Link</string>
 </resources>

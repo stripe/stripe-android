@@ -4,9 +4,7 @@ import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
-import com.stripe.android.connect.example.data.EmbeddedComponentService.Companion.DEFAULT_SERVER_BASE_URL
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import com.stripe.android.connect.example.ui.appearance.AppearanceInfo
 
 class SettingsService private constructor(context: Context) {
 
@@ -22,12 +20,13 @@ class SettingsService private constructor(context: Context) {
         sharedPreferences.edit { putString(SERVER_BASE_URL_KEY, value) }
     }
 
-    fun getAppearanceId(): String? {
-        return sharedPreferences.getString(APPEARANCE_ID_KEY, null)
+    fun getAppearanceId(): AppearanceInfo.AppearanceId? {
+        val appearanceId = sharedPreferences.getString(APPEARANCE_ID_KEY, null) ?: return null
+        return AppearanceInfo.AppearanceId.valueOf(appearanceId)
     }
 
-    fun setAppearanceId(value: String?) {
-        sharedPreferences.edit { putString(APPEARANCE_ID_KEY, value) }
+    fun setAppearanceId(value: AppearanceInfo.AppearanceId?) {
+        sharedPreferences.edit { putString(APPEARANCE_ID_KEY, value?.name) }
     }
 
     fun getOnboardingSettings(): OnboardingSettings {

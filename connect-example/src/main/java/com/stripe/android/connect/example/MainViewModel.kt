@@ -1,6 +1,5 @@
 package com.stripe.android.connect.example
 
-import androidx.compose.runtime.withFrameMillis
 import androidx.lifecycle.ViewModel
 import com.github.kittinunf.fuel.core.FuelError
 import com.stripe.android.connect.PrivateBetaConnectSDK
@@ -13,7 +12,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withTimeout
 
 class MainViewModel(
     private val embeddedComponentService: EmbeddedComponentService = EmbeddedComponentService.getInstance(),

@@ -28,7 +28,11 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -40,6 +44,7 @@ import androidx.compose.ui.unit.sp
 import com.stripe.android.connect.example.ConnectSdkExampleTheme
 import com.stripe.android.connect.example.MainContent
 import com.stripe.android.connect.example.R
+import com.stripe.android.connect.example.ui.appearance.AppearanceView
 import com.stripe.android.connect.example.ui.common.BetaBadge
 import com.stripe.android.connect.example.ui.features.accountonboarding.AccountOnboardingExampleActivity
 import com.stripe.android.connect.example.ui.features.payouts.PayoutsExampleActivity
@@ -51,17 +56,19 @@ import kotlinx.coroutines.launch
 fun ComponentPickerScreen(
     onReloadRequested: () -> Unit,
 ) {
-    val settingsSheetState = rememberModalBottomSheetState(
+    val sheetState = rememberModalBottomSheetState(
         initialValue = ModalBottomSheetValue.Hidden,
         skipHalfExpanded = true,
     )
+    var sheetType by remember { mutableStateOf(SheetType.SETTINGS) }
     val coroutineScope = rememberCoroutineScope()
-    fun toggleSettingsSheet() {
+    fun toggleSettingsSheet(newSheetType: SheetType) {
         coroutineScope.launch {
-            if (!settingsSheetState.isVisible) {
-                settingsSheetState.show()
+            if (!sheetState.isVisible) {
+                sheetType = newSheetType
+                sheetState.show()
             } else {
-                settingsSheetState.hide()
+                sheetState.hide()
             }
         }
     }
@@ -69,13 +76,13 @@ fun ComponentPickerScreen(
     MainContent(
         title = stringResource(R.string.connect_sdk_example),
         actions = {
-            IconButton(onClick = { toggleSettingsSheet() }) {
+            IconButton(onClick = { toggleSettingsSheet(SheetType.SETTINGS) }) {
                 Icon(
                     imageVector = Icons.Default.Settings,
                     contentDescription = stringResource(R.string.settings),
                 )
             }
-            IconButton(onClick = { toggleSettingsSheet() }) {
+            IconButton(onClick = { toggleSettingsSheet(SheetType.APPEARANCE) }) {
                 Icon(
                     imageVector = Icons.Default.MoreVert,
                     contentDescription = stringResource(R.string.customize_appearance),
@@ -85,12 +92,17 @@ fun ComponentPickerScreen(
     ) {
         ModalBottomSheetLayout(
             modifier = Modifier.fillMaxSize(),
-            sheetState = settingsSheetState,
+            sheetState = sheetState,
             sheetContent = {
-                SettingsView(
-                    onDismiss = { coroutineScope.launch { settingsSheetState.hide() } },
-                    onReloadRequested = onReloadRequested,
-                )
+                when (sheetType) {
+                    SheetType.SETTINGS -> SettingsView(
+                        onDismiss = { coroutineScope.launch { sheetState.hide() } },
+                        onReloadRequested = onReloadRequested,
+                    )
+                    SheetType.APPEARANCE -> AppearanceView(
+                        onDismiss = { coroutineScope.launch { sheetState.hide() } },
+                    )
+                }
             },
         ) {
             ComponentList()
@@ -152,6 +164,11 @@ private fun LazyItemScope.MenuRowItem(menuItem: MenuItem) {
             imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
         )
     }
+}
+
+private enum class SheetType {
+    SETTINGS,
+    APPEARANCE,
 }
 
 private data class MenuItem(
