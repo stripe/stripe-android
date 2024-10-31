@@ -15,6 +15,7 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.uicore.elements.FormElement
+import com.stripe.android.uicore.elements.SameAsShippingElement
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import org.junit.Test
@@ -74,14 +75,11 @@ class CardDefinitionTest {
                 shippingDetails = AddressDetails(isCheckboxSelected = true)
             )
         )
-        assertThat(formElements).hasSize(2)
+        assertThat(formElements).hasSize(3)
         assertThat(formElements[0].identifier.v1).isEqualTo("card_details")
         assertThat(formElements[1].identifier.v1).isEqualTo("credit_billing_section")
-
-        val billingDetailsElement = formElements[1] as SectionElement
-        assertThat(billingDetailsElement.fields).hasSize(2)
-        assertThat(billingDetailsElement.fields[0].identifier.v1).isEqualTo("credit_billing")
-        assertThat(billingDetailsElement.fields[1].identifier.v1).isEqualTo("same_as_shipping")
+        assertThat(formElements[2].identifier.v1).isEqualTo("same_as_shipping")
+        assertThat(formElements[2]).isInstanceOf(SameAsShippingElement::class.java)
     }
 
     @Test

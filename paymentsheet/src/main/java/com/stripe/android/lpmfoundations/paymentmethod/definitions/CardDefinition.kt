@@ -94,8 +94,8 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
             if (billingDetailsCollectionConfiguration.address
                 != PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
             ) {
-                add(
-                    cardBillingElement(
+                addAll(
+                    cardBillingElements(
                         billingDetailsCollectionConfiguration.address.toInternal(),
                         arguments.initialValues,
                         arguments.shippingValues,
@@ -175,11 +175,11 @@ internal fun PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectio
     }
 }
 
-private fun cardBillingElement(
+private fun cardBillingElements(
     collectionMode: BillingDetailsCollectionConfiguration.AddressCollectionMode,
     initialValues: Map<IdentifierSpec, String?>,
     shippingValues: Map<IdentifierSpec, String?>?,
-): FormElement {
+): List<FormElement> {
     val sameAsShippingElement =
         shippingValues?.get(IdentifierSpec.SameAsShipping)
             ?.toBooleanStrictOrNull()
@@ -198,12 +198,12 @@ private fun cardBillingElement(
         collectionMode = collectionMode,
     )
 
-    return SectionElement.wrap(
-        listOfNotNull(
+    return listOfNotNull(
+        SectionElement.wrap(
             addressElement,
-            sameAsShippingElement
+            PaymentsUiCoreR.string.stripe_billing_details,
         ),
-        PaymentsUiCoreR.string.stripe_billing_details
+        sameAsShippingElement,
     )
 }
 

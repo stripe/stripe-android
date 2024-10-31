@@ -9,10 +9,10 @@ import com.stripe.android.uicore.elements.AddressType
 import com.stripe.android.uicore.elements.CountryConfig
 import com.stripe.android.uicore.elements.CountryElement
 import com.stripe.android.uicore.elements.DropdownFieldController
+import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SameAsShippingController
 import com.stripe.android.uicore.elements.SameAsShippingElement
-import com.stripe.android.uicore.elements.SectionElement
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -56,19 +56,21 @@ data class AddressSpec(
     fun transform(
         initialValues: Map<IdentifierSpec, String?>,
         shippingValues: Map<IdentifierSpec, String?>?,
-    ): SectionElement? {
+    ): List<FormElement> {
         val label = if (showLabel) R.string.stripe_billing_details else null
         return if (displayFields.size == 1 && displayFields.first() == DisplayField.Country) {
-            createSectionElement(
-                sectionFieldElement = CountryElement(
-                    identifier = IdentifierSpec.Generic("billing_details[address][country]"),
-                    controller = DropdownFieldController(
-                        CountryConfig(this.allowedCountryCodes),
-                        initialValue = initialValues[this.apiPath]
-                    )
-                ),
-                label = label
-            ).takeUnless { hideCountry }
+            listOfNotNull(
+                createSectionElement(
+                    sectionFieldElement = CountryElement(
+                        identifier = IdentifierSpec.Generic("billing_details[address][country]"),
+                        controller = DropdownFieldController(
+                            CountryConfig(this.allowedCountryCodes),
+                            initialValue = initialValues[this.apiPath]
+                        )
+                    ),
+                    label = label
+                ).takeUnless { hideCountry }
+            )
         } else {
             val sameAsShippingElement =
                 shippingValues?.get(IdentifierSpec.SameAsShipping)
@@ -88,12 +90,12 @@ data class AddressSpec(
                 shippingValuesMap = shippingValues,
                 hideCountry = hideCountry,
             )
-            createSectionElement(
-                sectionFieldElements = listOfNotNull(
-                    addressElement,
-                    sameAsShippingElement
+            listOfNotNull(
+                createSectionElement(
+                    sectionFieldElement = addressElement,
+                    label = label
                 ),
-                label = label
+                sameAsShippingElement,
             )
         }
     }
