@@ -21,6 +21,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.stripe.android.link.LinkAction
+import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkActivityViewModel
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.linkViewModel
@@ -32,6 +33,7 @@ import com.stripe.android.link.ui.paymentmenthod.PaymentMethodScreen
 import com.stripe.android.link.ui.signup.SignUpScreen
 import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.link.ui.verification.VerificationScreen
+import com.stripe.android.link.ui.verification.VerificationViewModel
 import com.stripe.android.link.ui.wallet.WalletScreen
 import com.stripe.android.ui.core.CircularProgressIndicator
 import kotlinx.coroutines.launch
@@ -86,7 +88,16 @@ internal fun LinkContent(
                     }
                 )
 
-                Screens(navController)
+                Screens(
+                    navController = navController,
+                    goBack = viewModel::goBack,
+                    navigateAndClearStack = { screen ->
+                        viewModel.navigate(screen, clearStack = true)
+                    },
+                    dismissWithResult = { result ->
+                        viewModel.dismissWithResult?.invoke(result)
+                    }
+                )
             }
         }
     }
@@ -94,7 +105,10 @@ internal fun LinkContent(
 
 @Composable
 private fun Screens(
-    navController: NavHostController
+    navController: NavHostController,
+    goBack: () -> Unit,
+    navigateAndClearStack: (route: LinkScreen) -> Unit,
+    dismissWithResult: (LinkActivityResult) -> Unit
 ) {
     NavHost(
         navController = navController,
@@ -121,7 +135,15 @@ private fun Screens(
         }
 
         composable(LinkScreen.Verification.route) {
-            VerificationScreen()
+            val viewModel: VerificationViewModel = linkViewModel { parentComponent ->
+                VerificationViewModel.factory(
+                    parentComponent = parentComponent,
+                    goBack = goBack,
+                    navigateAndClearStack = navigateAndClearStack,
+                    dismissWithResult = dismissWithResult
+                )
+            }
+            VerificationScreen(viewModel)
         }
 
         composable(LinkScreen.Wallet.route) {

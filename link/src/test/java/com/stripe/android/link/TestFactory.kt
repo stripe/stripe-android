@@ -1,5 +1,6 @@
 package com.stripe.android.link
 
+import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.model.CardParams
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerSession
@@ -8,7 +9,7 @@ import com.stripe.android.model.ConsumerSessionSignup
 import com.stripe.android.model.PaymentMethodCreateParams
 import org.mockito.kotlin.mock
 
-object TestFactory {
+internal object TestFactory {
 
     fun consumerSessionLookUp(
         publishableKey: String,
@@ -66,4 +67,6 @@ object TestFactory {
         paymentMethodCreateParams = PAYMENT_METHOD_CREATE_PARAMS,
         originalParams = mock()
     )
+
+    val LINK_ACCOUNT = LinkAccount(CONSUMER_SESSION)
 }

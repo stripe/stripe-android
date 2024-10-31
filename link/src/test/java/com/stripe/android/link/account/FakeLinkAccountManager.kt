@@ -23,7 +23,7 @@ internal open class FakeLinkAccountManager : LinkAccountManager {
 
     var lookupConsumerResult: Result<LinkAccount?> = Result.success(null)
     var startVerificationResult: Result<LinkAccount> = Result.success(LinkAccount(ConsumerSession("", "", "", "")))
-    var confirmVerification: Result<LinkAccount> = Result.success(LinkAccount(ConsumerSession("", "", "", "")))
+    var confirmVerificationResult: Result<LinkAccount> = Result.success(LinkAccount(ConsumerSession("", "", "", "")))
     var signUpResult: Result<LinkAccount> = Result.success(LinkAccount(ConsumerSession("", "", "", "")))
     var signInWithUserInputResult: Result<LinkAccount> = Result.success(LinkAccount(ConsumerSession("", "", "", "")))
     var logOutResult: Result<ConsumerSession> = Result.success(ConsumerSession("", "", "", ""))
@@ -84,6 +84,6 @@ internal open class FakeLinkAccountManager : LinkAccountManager {
     }
 
     override suspend fun confirmVerification(code: String): Result<LinkAccount> {
-        return confirmVerification
+        return confirmVerificationResult
     }
 }

@@ -54,6 +54,23 @@ internal class LinkActivityViewModel @Inject constructor(
         }
     }
 
+    fun navigate(screen: LinkScreen, clearStack: Boolean) {
+        val navController = navController ?: return
+        navController.navigate(screen.route) {
+            if (clearStack) {
+                popUpTo(navController.graph.startDestinationId) {
+                    inclusive = true
+                }
+            }
+        }
+    }
+
+    fun goBack() {
+        if (navController?.popBackStack() == false) {
+            dismissWithResult?.invoke(LinkActivityResult.Canceled())
+        }
+    }
+
     fun unregisterActivity() {
         navController = null
         dismissWithResult = null
