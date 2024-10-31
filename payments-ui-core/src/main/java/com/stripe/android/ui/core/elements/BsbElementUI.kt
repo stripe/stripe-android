@@ -37,26 +37,24 @@ fun BsbElementUI(
         Section(
             null,
             sectionErrorString,
-            contentInCard = {
-                TextField(
-                    element.textElement.controller,
-                    enabled = enabled,
-                    imeAction = if (lastTextFieldIdentifier == element.identifier) {
-                        ImeAction.Done
-                    } else {
-                        ImeAction.Next
-                    }
-                )
-            },
-            contentOutsideCard = {
-                bankName?.let {
-                    Text(
-                        it,
-                        color = MaterialTheme.stripeColors.subtitle
-                    )
-                }
-            },
             modifier = modifier,
-        )
+        ) {
+            TextField(
+                element.textElement.controller,
+                enabled = enabled,
+                imeAction = if (lastTextFieldIdentifier == element.identifier) {
+                    ImeAction.Done
+                } else {
+                    ImeAction.Next
+                }
+            )
+        }
+
+        bankName?.let {
+            Text(
+                it,
+                color = MaterialTheme.stripeColors.subtitle
+            )
+        }
     }
 }

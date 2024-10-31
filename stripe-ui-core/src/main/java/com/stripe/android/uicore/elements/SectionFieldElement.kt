@@ -8,8 +8,6 @@ import kotlinx.coroutines.flow.StateFlow
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface SectionFieldElement {
     val identifier: IdentifierSpec
-    val shouldRenderOutsideCard: Boolean
-        get() = false
 
     /**
      * Whether the field element allows user interaction.
