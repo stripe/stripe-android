@@ -18,7 +18,6 @@ import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Divider
-import androidx.compose.material.Icon
 import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -29,10 +28,8 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.invisibleToUser
@@ -50,8 +47,6 @@ import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.linkColors
 import com.stripe.android.link.utils.InlineContentTemplateBuilder
 import com.stripe.android.uicore.StripeTheme
-import com.stripe.android.R as StripeR
-import com.stripe.android.uicore.R as StripeUiCoreR
 
 private val LinkButtonVerticalPadding = 10.dp
 private val LinkButtonHorizontalPadding = 25.dp
@@ -190,7 +185,7 @@ private fun RowScope.SignedOutButtonContent() {
         text = iconizedText,
         textAlign = TextAlign.Center,
         inlineContent = InlineContentTemplateBuilder().apply {
-            add(id = LINK_ICON_ID, width = 2.6.em, height = 0.9.em) { LinkIcon() }
+            add(id = LINK_ICON_ID, width = 2.6.em, height = 0.9.em) { LinkButtonIcon() }
         }.build(),
         modifier = Modifier
             .padding(start = 6.dp)
@@ -235,23 +230,11 @@ private fun LinkIconAndDivider() {
         overflow = TextOverflow.Ellipsis,
         maxLines = 1,
         inlineContent = InlineContentTemplateBuilder().apply {
-            add(id = LINK_ICON_ID, width = 3.em, height = 1.1.em) { LinkIcon() }
+            add(id = LINK_ICON_ID, width = 3.em, height = 1.1.em) { LinkButtonIcon() }
             add(id = LINK_DIVIDER_ID, width = 0.1.em, height = 1.3.em) { LinkDivider() }
             addSpacer(id = LINK_DIVIDER_SPACER_ID, width = 0.5.em)
         }.build(),
         modifier = Modifier.semantics { this.invisibleToUser() },
-    )
-}
-
-@Composable
-private fun LinkIcon() {
-    Icon(
-        painter = painterResource(StripeUiCoreR.drawable.stripe_link_logo_bw),
-        contentDescription = stringResource(StripeR.string.stripe_link),
-        modifier = Modifier
-            .aspectRatio(LINK_ICON_ASPECT_RATIO)
-            .alpha(LocalContentAlpha.current),
-        tint = Color.Unspecified,
     )
 }
 
@@ -262,5 +245,14 @@ private fun LinkDivider() {
             .width(1.dp)
             .fillMaxHeight(),
         color = MaterialTheme.linkColors.actionLabelLight,
+    )
+}
+
+@Composable
+private fun LinkButtonIcon() {
+    LinkIcon(
+        modifier = Modifier
+            .aspectRatio(LINK_ICON_ASPECT_RATIO)
+            .alpha(LocalContentAlpha.current)
     )
 }
