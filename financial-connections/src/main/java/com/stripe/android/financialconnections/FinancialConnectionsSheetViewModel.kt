@@ -132,9 +132,11 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         val nativeAuthFlowEnabled = nativeRouter.nativeAuthFlowEnabled(manifest)
         nativeRouter.logExposure(manifest)
 
-        val hostedAuthUrl = buildHostedAuthUrl(
-            hostedAuthUrl = manifest.hostedAuthUrl,
+        val hostedAuthUrl = HostedAuthUrlBuilder.create(
+            args = initialState.initialArgs,
+            manifest = manifest,
         )
+
         if (hostedAuthUrl == null) {
             finishWithResult(
                 state = stateFlow.value,
@@ -165,32 +167,6 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                 }
             }
         }
-    }
-
-    private fun buildHostedAuthUrl(hostedAuthUrl: String?): String? {
-        if (hostedAuthUrl == null) {
-            return null
-        }
-
-        val isInstantDebits = stateFlow.value.isInstantDebits
-        val elementsSessionContext = initialState.initialArgs.elementsSessionContext
-        val linkMode = elementsSessionContext?.linkMode
-
-        val queryParams = mutableListOf(hostedAuthUrl)
-        if (isInstantDebits) {
-            // For Instant Debits, add a query parameter to the hosted auth URL so that payment account creation
-            // takes place on the web side of the flow and the payment method ID is returned to the app.
-            queryParams.add("return_payment_method=true")
-            linkMode?.let { queryParams.add("link_mode=${it.value}") }
-        }
-
-        elementsSessionContext?.prefillDetails?.run {
-            email?.let { queryParams.add("email=$it") }
-            phone?.let { queryParams.add("linkMobilePhone=$it") }
-            phoneCountryCode?.let { queryParams.add("linkMobilePhoneCountry=$it") }
-        }
-
-        return queryParams.joinToString("&")
     }
 
     private fun logNoBrowserAvailableAndFinish() {
