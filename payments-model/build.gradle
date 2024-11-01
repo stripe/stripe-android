@@ -14,6 +14,7 @@ android {
 
 dependencies {
     implementation project(":stripe-core")
+    implementation project(":payments-core")
     implementation libs.androidx.appCompat
     implementation libs.androidx.coreKtx
     implementation libs.kotlin.serialization

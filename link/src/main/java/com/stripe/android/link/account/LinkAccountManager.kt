@@ -5,6 +5,8 @@ import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
+import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -69,4 +71,19 @@ internal interface LinkAccountManager {
      * Confirms a verification code sent to the user.
      */
     suspend fun confirmVerification(code: String): Result<LinkAccount>
+
+    /**
+     * Update an existing payment method in the signed in consumer account.
+     */
+    suspend fun updatePaymentDetails(updateParams: ConsumerPaymentDetailsUpdateParams):  Result<ConsumerPaymentDetails>
+
+    /**
+     * Delete the payment method from the signed in consumer account.
+     */
+    suspend fun deletePaymentDetails(paymentDetailsId: String): Result<Unit>
+
+    /**
+     * Fetch all saved payment methods for the signed in consumer.
+     */
+    suspend fun listPaymentDetails(): Result<ConsumerPaymentDetails>
 }
