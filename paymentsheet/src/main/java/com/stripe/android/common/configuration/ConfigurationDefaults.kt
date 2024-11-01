@@ -26,4 +26,5 @@ internal object ConfigurationDefaults {
     val externalPaymentMethods: List<String> = emptyList()
     val paymentMethodLayout: PaymentMethodLayout = PaymentMethodLayout.Automatic
     val cardBrandAcceptance: PaymentSheet.CardBrandAcceptance = PaymentSheet.CardBrandAcceptance.All
+    const val embeddedViewDisplaysMandateText: Boolean = true
 }
