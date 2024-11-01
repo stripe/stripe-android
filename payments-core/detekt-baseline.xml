@@ -163,8 +163,10 @@
     <ID>MaximumLineLength:GooglePayPaymentMethodLauncherActivity.kt$GooglePayPaymentMethodLauncherActivity$ </ID>
     <ID>MaximumLineLength:PaymentRelayContract.kt$PaymentRelayContract$internal</ID>
     <ID>SwallowedException:ActivityUtils.kt$e: IllegalArgumentException</ID>
+    <ID>SwallowedException:CollectBankAccountViewModel.kt$CollectBankAccountViewModel$e: Exception</ID>
     <ID>SwallowedException:PaymentUtils.kt$PaymentUtils$e: ClassCastException</ID>
     <ID>ThrowsCount:StripeApiRepository.kt$StripeApiRepository$@Throws( InvalidRequestException::class, AuthenticationException::class, CardException::class, APIException::class ) private fun handleApiError(response: StripeResponse&lt;String>)</ID>
+    <ID>TooGenericExceptionCaught:CollectBankAccountViewModel.kt$CollectBankAccountViewModel$e: Exception</ID>
     <ID>TooGenericExceptionThrown:DefaultAlipayRepository.kt$DefaultAlipayRepository$throw RuntimeException("Unable to authenticate Payment Intent with Alipay SDK")</ID>
     <ID>TooGenericExceptionThrown:PaymentFlowViewModelTest.kt$PaymentFlowViewModelTest.ThrowingShippingMethodsFactory$throw RuntimeException("Always throws an exception")</ID>
     <ID>TooManyFunctions:AccountParams.kt$AccountParams.BusinessTypeParams.Company$Builder</ID>

@@ -8,6 +8,7 @@ object FeatureFlags {
     // Add any feature flags here
     val nativeLinkEnabled = FeatureFlag()
     val instantDebitsBillingDetails = FeatureFlag()
+    val instantDebitsDeferredIntent = FeatureFlag()
     val useNewUpdateCardScreen = FeatureFlag()
 }
 

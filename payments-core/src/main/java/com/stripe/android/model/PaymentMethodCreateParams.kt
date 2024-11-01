@@ -318,12 +318,6 @@ constructor(
         return ((toParamMap()["card"] as? Map<*, *>?)?.get("number") as? String)?.takeLast(4)
     }
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    fun linkBankPaymentMethodId(): String? {
-        val linkParams = (toParamMap()["link"] as? Map<*, *>) ?: return null
-        return linkParams["payment_method_id"] as? String
-    }
-
     @Parcelize
     data class Card
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -1309,7 +1303,6 @@ constructor(
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
         fun createInstantDebits(
-            paymentMethodId: String,
             requiresMandate: Boolean,
             productUsage: Set<String>,
             allowRedisplay: PaymentMethod.AllowRedisplay? = null,
@@ -1317,11 +1310,7 @@ constructor(
             return PaymentMethodCreateParams(
                 code = PaymentMethod.Type.Link.code,
                 requiresMandate = requiresMandate,
-                overrideParamMap = mapOf(
-                    "link" to mapOf(
-                        "payment_method_id" to paymentMethodId,
-                    ),
-                ),
+                overrideParamMap = emptyMap(),
                 allowRedisplay = allowRedisplay,
                 productUsage = productUsage,
             )

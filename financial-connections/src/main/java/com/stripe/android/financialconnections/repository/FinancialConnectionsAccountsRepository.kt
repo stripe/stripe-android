@@ -56,7 +56,6 @@ internal interface FinancialConnectionsAccountsRepository {
         clientSecret: String,
         sessionId: String,
         selectAccounts: List<String>,
-        updateLocalCache: Boolean
     ): PartnerAccountsList
 
     suspend fun postShareNetworkedAccounts(
@@ -192,8 +191,7 @@ private class FinancialConnectionsAccountsRepositoryImpl(
     override suspend fun postAuthorizationSessionSelectedAccounts(
         clientSecret: String,
         sessionId: String,
-        selectAccounts: List<String>,
-        updateLocalCache: Boolean
+        selectAccounts: List<String>
     ): PartnerAccountsList {
         val request = apiRequestFactory.createPost(
             url = authorizationSessionSelectedAccountsUrl,
@@ -208,12 +206,10 @@ private class FinancialConnectionsAccountsRepositoryImpl(
             request,
             PartnerAccountsList.serializer()
         ).also {
-            if (updateLocalCache) {
-                updateCachedAccounts(
-                    "postAuthorizationSessionSelectedAccounts",
-                    it.data
-                )
-            }
+            updateCachedAccounts(
+                "postAuthorizationSessionSelectedAccounts",
+                it.data
+            )
         }
     }
 

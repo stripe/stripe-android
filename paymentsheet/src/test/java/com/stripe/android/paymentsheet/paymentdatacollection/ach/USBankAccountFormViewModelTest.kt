@@ -30,6 +30,7 @@ import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConf
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.testing.FeatureFlagTestRule
+import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -1545,7 +1546,9 @@ class USBankAccountFormViewModelTest {
                     mandateText = resolvableString("Save"),
                     primaryButtonText = resolvableString("Confirm"),
                     resultIdentifier = when (isInstantDebits) {
-                        true -> USBankAccountFormScreenState.ResultIdentifier.PaymentMethod(id = "pm_1")
+                        true -> USBankAccountFormScreenState.ResultIdentifier.PaymentMethod(
+                            paymentMethod = PaymentMethodFactory.instantDebits(),
+                        )
                         false -> USBankAccountFormScreenState.ResultIdentifier.Session(id = "session_1")
                     }
                 )

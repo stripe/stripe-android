@@ -107,6 +107,16 @@ object PaymentMethodFactory {
         )
     }
 
+    fun instantDebits(): PaymentMethod {
+        return PaymentMethod(
+            id = "pm_1234",
+            created = 123456789L,
+            liveMode = false,
+            type = PaymentMethod.Type.Link,
+            code = PaymentMethod.Type.Link.code,
+        )
+    }
+
     fun sepaDebit(): PaymentMethod {
         return PaymentMethod(
             id = "pm_1234",

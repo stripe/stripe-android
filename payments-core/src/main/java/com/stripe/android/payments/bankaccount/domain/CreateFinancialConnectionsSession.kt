@@ -75,7 +75,7 @@ internal class CreateFinancialConnectionsSession @Inject constructor(
     }
 
     /**
-     * Creates a [FinancialConnectionsSession] for deferred payments.
+     * Creates a [FinancialConnectionsSession] for deferred intent.
      *
      * @param elementsSessionId the elements session id
      *
@@ -83,7 +83,7 @@ internal class CreateFinancialConnectionsSession @Inject constructor(
      * @param amount the amount of the payment
      * @param currency the currency of the payment
      */
-    suspend fun forDeferredPayments(
+    suspend fun forDeferredIntent(
         publishableKey: String,
         stripeAccountId: String?,
         elementsSessionId: String,
@@ -92,7 +92,8 @@ internal class CreateFinancialConnectionsSession @Inject constructor(
         hostedSurface: String?,
         linkMode: LinkMode?,
         amount: Int?,
-        currency: String?
+        currency: String?,
+        product: String?,
     ): Result<FinancialConnectionsSession> {
         return stripeRepository.createFinancialConnectionsSessionForDeferredPayments(
             params = CreateFinancialConnectionsSessionForDeferredPaymentParams(
@@ -107,6 +108,7 @@ internal class CreateFinancialConnectionsSession @Inject constructor(
                 linkMode = linkMode,
                 amount = amount,
                 currency = currency,
+                product = product,
             ),
             requestOptions = ApiRequest.Options(
                 publishableKey,

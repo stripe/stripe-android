@@ -40,50 +40,30 @@ fun SectionElementUI(
             } ?: stringResource(it.errorMessage)
         }
 
-        val elementsInsideCard = element.fields.filter {
-            !it.shouldRenderOutsideCard
-        }
-        val elementsOutsideCard = element.fields.filter {
-            it.shouldRenderOutsideCard
-        }
-
         Section(
             controller.label,
             sectionErrorString,
             modifier = modifier,
-            contentOutsideCard = {
-                elementsOutsideCard.forEach { field ->
-                    SectionFieldElementUI(
-                        enabled,
-                        field,
-                        hiddenIdentifiers = hiddenIdentifiers,
-                        lastTextFieldIdentifier = lastTextFieldIdentifier,
-                        nextFocusDirection = nextFocusDirection,
-                        previousFocusDirection = previousFocusDirection
-                    )
-                }
-            },
-            contentInCard = {
-                elementsInsideCard.forEachIndexed { index, field ->
-                    SectionFieldElementUI(
-                        enabled,
-                        field,
-                        hiddenIdentifiers = hiddenIdentifiers,
-                        lastTextFieldIdentifier = lastTextFieldIdentifier,
-                        nextFocusDirection = nextFocusDirection,
-                        previousFocusDirection = previousFocusDirection
-                    )
-                    if (index != elementsInsideCard.lastIndex) {
-                        Divider(
-                            color = MaterialTheme.stripeColors.componentDivider,
-                            thickness = MaterialTheme.stripeShapes.borderStrokeWidth.dp,
-                            modifier = Modifier.padding(
-                                horizontal = MaterialTheme.stripeShapes.borderStrokeWidth.dp
-                            )
+        ) {
+            element.fields.forEachIndexed { index, field ->
+                SectionFieldElementUI(
+                    enabled,
+                    field,
+                    hiddenIdentifiers = hiddenIdentifiers,
+                    lastTextFieldIdentifier = lastTextFieldIdentifier,
+                    nextFocusDirection = nextFocusDirection,
+                    previousFocusDirection = previousFocusDirection
+                )
+                if (index != element.fields.lastIndex) {
+                    Divider(
+                        color = MaterialTheme.stripeColors.componentDivider,
+                        thickness = MaterialTheme.stripeShapes.borderStrokeWidth.dp,
+                        modifier = Modifier.padding(
+                            horizontal = MaterialTheme.stripeShapes.borderStrokeWidth.dp
                         )
-                    }
+                    )
                 }
             }
-        )
+        }
     }
 }

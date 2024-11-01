@@ -163,9 +163,43 @@ class FinancialConnectionsSheetViewModelTest {
             // Then
             withState(viewModel) {
                 val viewEffect = it.viewEffect as OpenAuthFlowWithUrl
-                assertThat(viewEffect.url).isEqualTo(
-                    "${syncResponse.manifest.hostedAuthUrl}&return_payment_method=true&link_mode=LINK_PAYMENT_METHOD"
+                assertThat(viewEffect.url).contains("return_payment_method=true")
+            }
+        }
+
+    @Test
+    fun `init - when instant debits flow, hosted auth url expands the payment method`() =
+        runTest {
+            // Given
+            whenever(browserManager.canOpenHttpsUrl()).thenReturn(true)
+            whenever(getOrFetchSync(any())).thenReturn(syncResponse)
+            whenever(nativeRouter.nativeAuthFlowEnabled(any())).thenReturn(false)
+
+            // When
+            val viewModel = createViewModel(
+                defaultInitialState.copy(
+                    initialArgs = ForInstantDebits(
+                        configuration = configuration,
+                        elementsSessionContext = ElementsSessionContext(
+                            initializationMode = ElementsSessionContext.InitializationMode.PaymentIntent("pi_123"),
+                            amount = 123,
+                            currency = "usd",
+                            linkMode = LinkMode.LinkPaymentMethod,
+                            billingDetails = null,
+                            prefillDetails = ElementsSessionContext.PrefillDetails(
+                                email = null,
+                                phone = null,
+                                phoneCountryCode = null,
+                            )
+                        ),
+                    )
                 )
+            )
+
+            // Then
+            withState(viewModel) {
+                val viewEffect = it.viewEffect as OpenAuthFlowWithUrl
+                assertThat(viewEffect.url).contains("expand_payment_method=true")
             }
         }
 
@@ -200,9 +234,7 @@ class FinancialConnectionsSheetViewModelTest {
         // Then
         withState(viewModel) {
             val viewEffect = it.viewEffect as OpenAuthFlowWithUrl
-            assertThat(viewEffect.url).isEqualTo(
-                "${syncResponse.manifest.hostedAuthUrl}&return_payment_method=true"
-            )
+            assertThat(viewEffect.url).doesNotContain("link_mode")
         }
     }
 
@@ -237,13 +269,9 @@ class FinancialConnectionsSheetViewModelTest {
         // Then
         withState(viewModel) {
             val viewEffect = it.viewEffect as OpenAuthFlowWithUrl
-            assertThat(viewEffect.url).isEqualTo(
-                syncResponse.manifest.hostedAuthUrl +
-                    "&return_payment_method=true" +
-                    "&email=email@email.com" +
-                    "&linkMobilePhone=5555551234" +
-                    "&linkMobilePhoneCountry=US"
-            )
+            assertThat(viewEffect.url).contains("email=email@email.com")
+            assertThat(viewEffect.url).contains("linkMobilePhone=5555551234")
+            assertThat(viewEffect.url).contains("linkMobilePhoneCountry=US")
         }
     }
 

@@ -399,7 +399,7 @@ private fun AddressSection(
                 )
             }
             sameAsShippingElement?.let {
-                SameAsShippingElementUI(it.controller)
+                SameAsShippingElementUI(it.controller, Modifier.padding(vertical = 4.dp))
             }
         }
     }

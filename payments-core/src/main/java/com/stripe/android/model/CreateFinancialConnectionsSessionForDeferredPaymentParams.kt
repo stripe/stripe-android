@@ -13,7 +13,7 @@ data class CreateFinancialConnectionsSessionForDeferredPaymentParams(
     val customer: String?,
     val onBehalfOf: String?,
     val linkMode: LinkMode?,
-
+    val product: String?,
     // PaymentIntent only params
     val amount: Int?,
     val currency: String?,
@@ -31,6 +31,7 @@ data class CreateFinancialConnectionsSessionForDeferredPaymentParams(
             PARAM_LINK_MODE to (linkMode?.value ?: "LINK_DISABLED"),
             PARAM_AMOUNT to amount,
             PARAM_CURRENCY to currency,
+            PARAM_PRODUCT to product,
         )
     }
 
@@ -46,6 +47,7 @@ data class CreateFinancialConnectionsSessionForDeferredPaymentParams(
         const val PARAM_LINK_MODE = "link_mode"
         const val PARAM_AMOUNT = "amount"
         const val PARAM_CURRENCY = "currency"
+        const val PARAM_PRODUCT = "product"
     }
 }
 
