@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.dp
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.SelectedBadge
@@ -35,7 +36,7 @@ internal fun ManageScreenUI(interactor: ManageScreenInteractor) {
             SavedPaymentMethodRowButton(
                 displayableSavedPaymentMethod = it,
                 isEnabled = true,
-                isClickable = !state.isEditing,
+                isClickable = FeatureFlags.useNewUpdateCardScreen.isEnabled || !state.isEditing,
                 isSelected = isSelected,
                 trailingContent = {
                     TrailingContent(
@@ -57,10 +58,28 @@ internal fun ManageScreenUI(interactor: ManageScreenInteractor) {
                     )
                 },
                 onClick = {
-                    interactor.handleViewAction(ManageScreenInteractor.ViewAction.SelectPaymentMethod(it))
-                },
+                    rowOnClick(
+                        isEditing = state.isEditing,
+                        selectPaymentMethod = {
+                            interactor.handleViewAction(ManageScreenInteractor.ViewAction.SelectPaymentMethod(it))
+                        },
+                        updatePaymentMethod = {
+                            interactor.handleViewAction(ManageScreenInteractor.ViewAction.UpdatePaymentMethod(it))
+                        }
+                    )
+                }
             )
         }
+    }
+}
+
+private fun rowOnClick(isEditing: Boolean, selectPaymentMethod: () -> Unit, updatePaymentMethod: () -> Unit) {
+    if (isEditing && FeatureFlags.useNewUpdateCardScreen.isEnabled) {
+        updatePaymentMethod()
+    }
+
+    if (!isEditing) {
+        selectPaymentMethod()
     }
 }
 
@@ -73,6 +92,48 @@ private fun TrailingContent(
     paymentMethod: DisplayableSavedPaymentMethod,
     deletePaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     editPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
+) {
+    if (FeatureFlags.useNewUpdateCardScreen.isEnabled) {
+        ChevronTrailingContent(
+            paymentMethod = paymentMethod,
+            isEditing = isEditing,
+            isSelected = isSelected,
+        )
+    } else {
+        TrailingContentWithIcons(
+            isEditing,
+            isModifiable,
+            paymentMethod,
+            editPaymentMethod,
+            canRemove,
+            deletePaymentMethod,
+            isSelected
+        )
+    }
+}
+
+@Composable
+private fun ChevronTrailingContent(
+    paymentMethod: DisplayableSavedPaymentMethod,
+    isEditing: Boolean,
+    isSelected: Boolean,
+) {
+    if (isEditing) {
+        ChevronIcon(paymentMethodId = paymentMethod.paymentMethod.id)
+    } else if (isSelected) {
+        SelectedBadge()
+    }
+}
+
+@Composable
+private fun TrailingContentWithIcons(
+    isEditing: Boolean,
+    isModifiable: Boolean,
+    paymentMethod: DisplayableSavedPaymentMethod,
+    editPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
+    canRemove: Boolean,
+    deletePaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
+    isSelected: Boolean
 ) {
     if (isEditing && isModifiable) {
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
