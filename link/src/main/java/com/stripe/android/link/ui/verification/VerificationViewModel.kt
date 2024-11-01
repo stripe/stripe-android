@@ -1,6 +1,5 @@
 package com.stripe.android.link.ui.verification
 
-import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -58,12 +57,16 @@ internal class VerificationViewModel @Inject constructor(
         otpElement.otpCompleteFlow.stateIn(viewModelScope, SharingStarted.Lazily, null)
 
     init {
-        init()
+        setUp()
     }
 
-    @VisibleForTesting
-    internal fun init() {
-        val linkAccount = linkAccountManager.linkAccount.value ?: return goBack()
+    private fun setUp() {
+        val linkAccount = linkAccountManager.linkAccount.value
+
+        if (linkAccount == null) {
+            dismissWithResult(LinkActivityResult.Failed(NoLinkAccountFoundForVerification()))
+            return
+        }
         if (linkAccount.accountStatus != AccountStatus.VerificationStarted) {
             startVerification()
         }
