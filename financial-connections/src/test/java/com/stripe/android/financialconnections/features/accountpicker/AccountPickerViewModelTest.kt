@@ -78,6 +78,7 @@ internal class AccountPickerViewModelTest {
             )
             givenPollAccountsReturns(
                 partnerAccountList().copy(
+                    data = listOf(partnerAccount()),
                     skipAccountSelection = true
                 )
             )
@@ -101,7 +102,8 @@ internal class AccountPickerViewModelTest {
 
         givenPollAccountsReturns(
             partnerAccountList().copy(
-                skipAccountSelection = null
+                data = listOf(partnerAccount()),
+                skipAccountSelection = true
             )
         )
 
@@ -348,7 +350,6 @@ internal class AccountPickerViewModelTest {
             selectAccounts(
                 selectedAccountIds = any(),
                 sessionId = any(),
-                updateLocalCache = any(),
             )
         ).thenReturn(response)
     }
