@@ -30,21 +30,19 @@ fun Section(
     error: String?,
     modifier: Modifier = Modifier,
     isSelected: Boolean = false,
-    contentOutsideCard: @Composable () -> Unit = {},
-    contentInCard: @Composable () -> Unit
+    content: @Composable () -> Unit
 ) {
     Column {
         Column(modifier = modifier) {
             SectionTitle(title)
             SectionCard(
                 isSelected = isSelected,
-                content = contentInCard,
+                content = content,
             )
         }
         if (error != null) {
             SectionError(error)
         }
-        contentOutsideCard()
     }
 }
 
