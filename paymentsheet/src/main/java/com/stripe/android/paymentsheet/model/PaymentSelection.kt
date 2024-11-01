@@ -183,7 +183,7 @@ internal sealed class PaymentSelection : Parcelable {
 
             @Parcelize
             data class InstantDebitsInfo(
-                val paymentMethodId: String,
+                val paymentMethod: PaymentMethod,
                 val linkMode: LinkMode?,
             ) : Parcelable
 

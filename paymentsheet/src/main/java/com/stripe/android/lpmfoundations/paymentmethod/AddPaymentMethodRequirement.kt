@@ -1,5 +1,6 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod.Type.USBankAccount
@@ -81,7 +82,8 @@ private val PaymentMethodMetadata.supportsMobileInstantDebitsFlow: Boolean
         val noUsBankAccount = USBankAccount.code !in paymentMethodTypes
         val supportsBankAccounts = "bank_account" in stripeIntent.linkFundingSources
         val isDeferred = stripeIntent.clientSecret == null
-        return noUsBankAccount && supportsBankAccounts && canShowBankForm && !isDeferred
+        return noUsBankAccount && supportsBankAccounts && canShowBankForm &&
+            (!isDeferred || FeatureFlags.instantDebitsDeferredIntent.isEnabled)
     }
 
 private val PaymentMethodMetadata.canShowBankForm: Boolean

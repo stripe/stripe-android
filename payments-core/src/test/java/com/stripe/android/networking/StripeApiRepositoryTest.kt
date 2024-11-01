@@ -1768,7 +1768,8 @@ internal class StripeApiRepositoryTest {
                     linkMode = LinkMode.LinkPaymentMethod,
                     amount = 1000,
                     hostedSurface = "payment_element",
-                    currency = "usd"
+                    currency = "usd",
+                    product = "instant_debits",
                 ),
                 DEFAULT_OPTIONS
             )
@@ -1788,6 +1789,7 @@ internal class StripeApiRepositoryTest {
                 assertThat(this["amount"]).isEqualTo(1000)
                 assertThat(this["hosted_surface"]).isEqualTo("payment_element")
                 assertThat(this["currency"]).isEqualTo("usd")
+                assertThat(this["product"]).isEqualTo("instant_debits")
             }
         }
 
@@ -1812,7 +1814,8 @@ internal class StripeApiRepositoryTest {
                 linkMode = null,
                 amount = 1000,
                 hostedSurface = "payment_element",
-                currency = "usd"
+                currency = "usd",
+                product = null,
             ),
             requestOptions = DEFAULT_OPTIONS,
         )
