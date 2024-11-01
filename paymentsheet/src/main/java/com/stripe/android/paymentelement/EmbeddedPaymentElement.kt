@@ -1,23 +1,28 @@
 package com.stripe.android.paymentelement
 
+import androidx.activity.ComponentActivity
 import androidx.annotation.RestrictTo
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.AnnotatedString
+import androidx.lifecycle.SavedStateViewModelFactory
+import androidx.lifecycle.ViewModelProvider
+import com.stripe.android.paymentelement.embedded.SharedPaymentElementViewModel
 import com.stripe.android.paymentsheet.PaymentSheet
 import dev.drewhamilton.poko.Poko
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @ExperimentalEmbeddedPaymentElementApi
-class EmbeddedPaymentElement internal constructor() {
+class EmbeddedPaymentElement internal constructor(
+    private val sharedViewModel: SharedPaymentElementViewModel
+) {
     /**
      * Contains information about the customer's selected payment option.
      * Use this to display the payment option in your own UI.
      */
-    val paymentOption: StateFlow<PaymentOptionDisplayData?> = MutableStateFlow(null)
+    val paymentOption: StateFlow<PaymentOptionDisplayData?> = sharedViewModel.paymentOption
 
     /**
      * Call this method to initialize [EmbeddedPaymentElement] or when the IntentConfiguration values you used to
@@ -29,7 +34,7 @@ class EmbeddedPaymentElement internal constructor() {
      *      returns [ConfigureResult.Cancelled].
      */
     suspend fun configure(): ConfigureResult {
-        return ConfigureResult.Failed(IllegalStateException("Not implemented."))
+        return sharedViewModel.configure()
     }
 
     /**
@@ -113,8 +118,12 @@ class EmbeddedPaymentElement internal constructor() {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
         @ExperimentalEmbeddedPaymentElementApi
-        fun create(): EmbeddedPaymentElement {
-            return EmbeddedPaymentElement()
+        fun create(activity: ComponentActivity): EmbeddedPaymentElement {
+            val sharedViewModel = ViewModelProvider(
+                owner = activity,
+                factory = SavedStateViewModelFactory()
+            )[SharedPaymentElementViewModel::class.java]
+            return EmbeddedPaymentElement(sharedViewModel)
         }
     }
 }
