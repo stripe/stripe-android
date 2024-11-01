@@ -33,8 +33,8 @@ class EmbeddedPaymentElement internal constructor(
      * - Note: If you call [configure] while a previous call to [configure] is still in progress, the previous call
      *      returns [ConfigureResult.Cancelled].
      */
-    suspend fun configure(): ConfigureResult {
-        return sharedViewModel.configure()
+    suspend fun configure(intentConfiguration: PaymentSheet.IntentConfiguration): ConfigureResult {
+        return sharedViewModel.configure(intentConfiguration)
     }
 
     /**

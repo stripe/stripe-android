@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import com.stripe.android.paymentelement.EmbeddedPaymentElement.ConfigureResult
 import com.stripe.android.paymentelement.EmbeddedPaymentElement.PaymentOptionDisplayData
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
+import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -13,7 +14,7 @@ internal class SharedPaymentElementViewModel : ViewModel() {
     private val _paymentOption: MutableStateFlow<PaymentOptionDisplayData?> = MutableStateFlow(null)
     val paymentOption: StateFlow<PaymentOptionDisplayData?> = _paymentOption.asStateFlow()
 
-    suspend fun configure(): ConfigureResult {
-        return ConfigureResult.Failed(IllegalStateException("Not implemented."))
+    suspend fun configure(intentConfiguration: PaymentSheet.IntentConfiguration): ConfigureResult {
+        return ConfigureResult.Failed(IllegalStateException("Not implemented. $intentConfiguration"))
     }
 }
