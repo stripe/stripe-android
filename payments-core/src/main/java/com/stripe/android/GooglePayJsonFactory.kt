@@ -473,7 +473,7 @@ class GooglePayJsonFactory constructor(
 
         private val ALLOWED_AUTH_METHODS = listOf("PAN_ONLY", "CRYPTOGRAM_3DS")
         private val DEFAULT_CARD_NETWORKS =
-            listOf("DISCOVER", "MASTERCARD", "VISA")
+            listOf("AMEX", "DISCOVER", "MASTERCARD", "VISA")
         private const val JCB_CARD_NETWORK = "JCB"
     }
 }
