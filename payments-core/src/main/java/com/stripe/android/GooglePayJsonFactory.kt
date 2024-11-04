@@ -472,6 +472,7 @@ class GooglePayJsonFactory constructor(
     ) : Parcelable
 
     companion object {
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @JvmStatic
         var cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter
 
