@@ -2,34 +2,16 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
-    <ID>ConstructorParameterNaming:ClientDevice.kt$ClientDevice$@SerialName("device_id") val android_id: String?</ID>
-    <ID>ConstructorParameterNaming:ClientDevice.kt$ClientDevice$@SerialName("vendor_id") val vendor_id: String?</ID>
-    <ID>ConstructorParameterNaming:Device.kt$Device$val android_id: String?</ID>
-    <ID>EmptyFunctionBlock:CardImageVerificationFlowTest.kt$CardImageVerificationFlowTest.&lt;no name provided>${}</ID>
     <ID>EmptyFunctionBlock:CardScanFragment.kt$CardScanFragment${}</ID>
-    <ID>ForbiddenComment:ClientStats.kt$StatsPayload$// TODO: these should probably be reported as part of scanstats</ID>
-    <ID>ForbiddenComment:MainLoopAggregator.kt$MainLoopAggregator$// TODO: when we want to collect this in scan stats, give this a name</ID>
     <ID>ForbiddenComment:PaymentCardUtils.kt$* Determine if a PAN is valid. * * TODO: this should use a contract like the following once contracts are no longer experimental: * ``` * contract { returns(true) implies (pan != null) } * ```</ID>
-    <ID>ForbiddenComment:RequiresMatchingCard.kt$RequiresMatchingCard$/* * TODO: Use contracts once they're supported. [CardMatch.Match], [CardMatch.Mismatch], and * [CardMatch.NoRequiredCard] guarantees that pan != null */</ID>
     <ID>ForbiddenComment:SSD.kt$* The model outputs a particular location or a particular class of each prior before moving on to * the next prior. For instance, the model will output probabilities for background class * corresponding to all priors before outputting the probability of next class for the first prior. * This method serves to rearrange the output if you are using outputs from multiple layers If you * use outputs from single layer use the method defined above * * TODO: simplify this</ID>
     <ID>ForbiddenComment:ScanActivity.kt$ScanActivity$// TODO: this should be reported as part of scanstats, but is not yet supported</ID>
     <ID>ForbiddenComment:ScanActivity.kt$ScanActivity$// TODO: this should probably be reported as part of scanstats, but is not yet supported</ID>
     <ID>ForbiddenComment:ScanFragment.kt$ScanFragment$// TODO: this should be reported as part of scanstats, but is not yet supported</ID>
     <ID>ForbiddenComment:ScanFragment.kt$ScanFragment$// TODO: this should probably be reported as part of scanstats, but is not yet supported</ID>
-    <ID>ForbiddenComment:StripeApi.kt$// TODO: this should probably be reported as part of scanstats, but is not yet supported</ID>
     <ID>ForbiddenComment:Timer.kt$* Measure the amount of time a process takes. * * TODO: use contracts when they are no longer experimental</ID>
     <ID>ForbiddenComment:Timer.kt$LoggingTimer$// TODO: use contracts when they are no longer experimental</ID>
     <ID>ForbiddenComment:Timer.kt$NoOpTimer$// TODO: use contracts when they are no longer experimental</ID>
-    <ID>ForbiddenComment:Timer.kt$Timer$* Log the duration of a single task and return the result from that task. * * TODO: use contracts when they are no longer experimental</ID>
-    <ID>FunctionOnlyReturningConstant:AppDetails.kt$private fun getApplicationId(): String</ID>
-    <ID>FunctionOnlyReturningConstant:Device.kt$@SuppressLint("HardwareIds") private fun getAndroidId()</ID>
-    <ID>FunctionOnlyReturningConstant:Device.kt$internal fun getPlatform()</ID>
-    <ID>LongMethod:Fetcher.kt$WebFetcher$override suspend fun fetchData(forImmediateUse: Boolean, isOptional: Boolean): FetchedData</ID>
-    <ID>MagicNumber:BitmapExtensions.kt$100.0</ID>
-    <ID>MagicNumber:CardExpiry.kt$100</ID>
-    <ID>MagicNumber:CardExpiry.kt$12</ID>
-    <ID>MagicNumber:CardExpiry.kt$31</ID>
-    <ID>MagicNumber:CardExpiry.kt$4</ID>
     <ID>MagicNumber:CombinePriors.kt$12</ID>
     <ID>MagicNumber:CombinePriors.kt$16</ID>
     <ID>MagicNumber:CombinePriors.kt$19</ID>
@@ -38,10 +20,7 @@
     <ID>MagicNumber:CombinePriors.kt$38</ID>
     <ID>MagicNumber:MLImage.kt$MLImage$0xFF</ID>
     <ID>MagicNumber:MLImage.kt$MLImage$16</ID>
-    <ID>MagicNumber:MLImage.kt$MLImage$24</ID>
     <ID>MagicNumber:MLImage.kt$MLImage$8</ID>
-    <ID>MagicNumber:Network.kt$LegacyStripeNetwork$200</ID>
-    <ID>MagicNumber:Network.kt$LegacyStripeNetwork$300</ID>
     <ID>MagicNumber:NonMaximumSuppression.kt$0.00001f</ID>
     <ID>MagicNumber:NonMaximumSuppression.kt$200</ID>
     <ID>MagicNumber:PanValidator.kt$LuhnPanValidator$10</ID>
@@ -50,49 +29,16 @@
     <ID>MagicNumber:RectForm.kt$3</ID>
     <ID>MagicNumber:ScanActivity.kt$ScanActivity$1500</ID>
     <ID>MagicNumber:ScanFragment.kt$ScanFragment$1500</ID>
-    <ID>MagicNumber:SimpleScanActivity.kt$SimpleScanActivity$128</ID>
     <ID>MagicNumber:SizeAndCenter.kt$3</ID>
-    <ID>MagicNumber:Yolo.kt$3</ID>
-    <ID>MagicNumber:Yolo.kt$4</ID>
-    <ID>MagicNumber:Yolo.kt$5</ID>
     <ID>MatchingDeclarationName:SSD.kt$OcrFeatureMapSizes</ID>
-    <ID>MaxLineLength:StripeNetwork.kt$StripeNetwork$private suspend</ID>
-    <ID>MaximumLineLength:StripeNetwork.kt$StripeNetwork$ </ID>
-    <ID>NestedBlockDepth:Network.kt$@Throws(IOException::class) private fun downloadFile( url: URL, outputFile: File )</ID>
     <ID>NestedBlockDepth:SSD.kt$internal fun rearrangeOCRArray( locations: Array&lt;FloatArray>, featureMapSizes: OcrFeatureMapSizes, numberOfPriors: Int, locationsPerPrior: Int ): Array&lt;FloatArray></ID>
-    <ID>NestedBlockDepth:Yolo.kt$internal fun processYoloLayer( layer: Array&lt;Array&lt;FloatArray>>, anchors: Array&lt;Pair&lt;Int, Int>>, imageSize: Size, numClasses: Int, confidenceThreshold: Float ): List&lt;DetectionBox></ID>
-    <ID>SwallowedException:Device.kt$t: Throwable</ID>
-    <ID>SwallowedException:Fetcher.kt$FetchedData.Companion$t: Throwable</ID>
-    <ID>SwallowedException:File.kt$t: Throwable</ID>
     <ID>SwallowedException:Loader.kt$Loader$t: Throwable</ID>
-    <ID>SwallowedException:Network.kt$et: Throwable</ID>
-    <ID>SwallowedException:StripeNetwork.kt$StripeNetwork$et: Throwable</ID>
-    <ID>ThrowsCount:Retry.kt$internal suspend fun &lt;T> retry( retryDelayFunction: (attempt: Int, totalAttempts: Int) -> Duration, times: Int = DEFAULT_RETRIES, excluding: List&lt;Class&lt;out Throwable>> = emptyList(), task: suspend () -> T ): T</ID>
-    <ID>TooGenericExceptionCaught:Device.kt$t: Throwable</ID>
-    <ID>TooGenericExceptionCaught:Fetcher.kt$FetchedData.Companion$t: Throwable</ID>
-    <ID>TooGenericExceptionCaught:Fetcher.kt$WebFetcher$t: Throwable</ID>
-    <ID>TooGenericExceptionCaught:File.kt$t: Throwable</ID>
-    <ID>TooGenericExceptionCaught:GetVerifyCameraAdapter.kt$t: Throwable</ID>
     <ID>TooGenericExceptionCaught:Loader.kt$Loader$t: Throwable</ID>
-    <ID>TooGenericExceptionCaught:Network.kt$LegacyStripeNetwork$t: Throwable</ID>
-    <ID>TooGenericExceptionCaught:Network.kt$et: Throwable</ID>
-    <ID>TooGenericExceptionCaught:Network.kt$t: Throwable</ID>
-    <ID>TooGenericExceptionCaught:Retry.kt$t: Throwable</ID>
-    <ID>TooGenericExceptionCaught:StripeNetwork.kt$StripeNetwork$et: Throwable</ID>
-    <ID>TooGenericExceptionCaught:StripeNetwork.kt$StripeNetwork$t: Throwable</ID>
     <ID>TooGenericExceptionCaught:TensorFlowLiteAnalyzer.kt$TFLAnalyzerFactory$t: Throwable</ID>
-    <ID>TooGenericExceptionThrown:RetryTest.kt$RetryTest$throw RuntimeException()</ID>
     <ID>TooManyFunctions:ArrayExtensions.kt$com.stripe.android.stripecardscan.framework.util.ArrayExtensions.kt</ID>
-    <ID>TooManyFunctions:CardScanFragment.kt$CardScanFragment : ScanFragmentSimpleScanStateful</ID>
-    <ID>TooManyFunctions:PaymentCardUtils.kt$com.stripe.android.stripecardscan.payment.card.PaymentCardUtils.kt</ID>
     <ID>TooManyFunctions:RectForm.kt$com.stripe.android.stripecardscan.framework.ml.ssd.RectForm.kt</ID>
     <ID>TooManyFunctions:ScanActivity.kt$ScanActivity : CameraPermissionCheckingActivityCoroutineScope</ID>
     <ID>TooManyFunctions:ScanFragment.kt$ScanFragment : FragmentCoroutineScope</ID>
-    <ID>TooManyFunctions:SimpleScanActivity.kt$SimpleScanActivity&lt;ScanFlowParameters> : ScanActivity</ID>
     <ID>TooManyFunctions:SizeAndCenter.kt$com.stripe.android.stripecardscan.framework.ml.ssd.SizeAndCenter.kt</ID>
-    <ID>UnusedParameter:StripeApi.kt$savedFrames: Collection&lt;SavedFrame></ID>
-    <ID>UnusedPrivateMember:PaymentCardUtils.kt$@CheckResult private fun jaccardIndex(string1: String, string2: String): Double</ID>
-    <ID>UnusedPrivateMember:PaymentCardUtils.kt$private fun String.isDigitsOnly()</ID>
-    <ID>UnusedPrivateProperty:ScanActivity.kt$ScanActivity$private val permissionStat = Stats.trackTask("camera_permission")</ID>
   </CurrentIssues>
 </SmellBaseline>

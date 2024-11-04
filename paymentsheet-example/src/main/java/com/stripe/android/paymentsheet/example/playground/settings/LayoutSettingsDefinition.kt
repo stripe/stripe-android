@@ -32,7 +32,10 @@ internal object LayoutSettingsDefinition :
     }
 
     override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
-        return configurationData.integrationType.isPaymentFlow()
+        return configurationData.integrationType in setOf(
+            PlaygroundConfigurationData.IntegrationType.PaymentSheet,
+            PlaygroundConfigurationData.IntegrationType.FlowController,
+        )
     }
 
     override fun configure(

@@ -1,6 +1,8 @@
 package com.stripe.android.paymentsheet.example.playground.settings
 
 import com.stripe.android.customersheet.CustomerSheet
+import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
@@ -14,6 +16,15 @@ internal interface PlaygroundSettingDefinition<T> {
         configurationBuilder: PaymentSheet.Configuration.Builder,
         playgroundState: PlaygroundState.Payment,
         configurationData: PaymentSheetConfigurationData,
+    ) {
+    }
+
+    @ExperimentalEmbeddedPaymentElementApi
+    fun configure(
+        value: T,
+        configurationBuilder: EmbeddedPaymentElement.Configuration.Builder,
+        playgroundState: PlaygroundState.Payment,
+        configurationData: EmbeddedConfigurationData,
     ) {
     }
 
@@ -52,6 +63,27 @@ internal interface PlaygroundSettingDefinition<T> {
 
     data class PaymentSheetConfigurationData(
         private val configurationBuilder: PaymentSheet.Configuration.Builder,
+        var billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
+            PaymentSheet.BillingDetailsCollectionConfiguration()
+    ) {
+        // Billing details is a nested configuration, but we have individual settings for it in the
+        // UI, this helper keeps all of the configurations, rather than just the most recent.
+        fun updateBillingDetails(
+            block: PaymentSheet.BillingDetailsCollectionConfiguration.() ->
+            PaymentSheet.BillingDetailsCollectionConfiguration
+        ) {
+            billingDetailsCollectionConfiguration.apply {
+                billingDetailsCollectionConfiguration = block()
+            }
+            configurationBuilder.billingDetailsCollectionConfiguration(
+                billingDetailsCollectionConfiguration
+            )
+        }
+    }
+
+    @ExperimentalEmbeddedPaymentElementApi
+    data class EmbeddedConfigurationData(
+        private val configurationBuilder: EmbeddedPaymentElement.Configuration.Builder,
         var billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
             PaymentSheet.BillingDetailsCollectionConfiguration()
     ) {
