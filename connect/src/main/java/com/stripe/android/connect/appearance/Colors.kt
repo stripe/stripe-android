@@ -3,10 +3,12 @@ package com.stripe.android.connect.appearance
 import android.os.Parcelable
 import androidx.annotation.ColorInt
 import com.stripe.android.connect.PrivateBetaConnectSDK
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
 @PrivateBetaConnectSDK
 @Parcelize
+@Poko
 class Colors(
     /**
      * The primary color used throughout the components. If null the default will be used.
