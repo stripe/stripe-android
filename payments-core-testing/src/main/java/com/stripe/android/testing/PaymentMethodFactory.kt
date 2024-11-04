@@ -187,7 +187,6 @@ object PaymentMethodFactory {
         usBankAccountJson.put("financial_connections_account", usBankAccount.financialConnectionsAccount)
         usBankAccountJson.put("fingerprint", usBankAccount.fingerprint)
         usBankAccountJson.put("last4", usBankAccount.last4)
-        usBankAccountJson.put("linked_account", usBankAccount.linkedAccount)
         usBankAccountJson.put("routing_number", usBankAccount.routingNumber)
 
         val networksJson = JSONObject()

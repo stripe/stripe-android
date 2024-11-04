@@ -3632,7 +3632,6 @@ public final class com/stripe/android/model/PaymentMethod$USBankAccount : com/st
 	public final field financialConnectionsAccount Ljava/lang/String;
 	public final field fingerprint Ljava/lang/String;
 	public final field last4 Ljava/lang/String;
-	public final field linkedAccount Ljava/lang/String;
 	public final field networks Lcom/stripe/android/model/PaymentMethod$USBankAccount$USBankNetworks;
 	public final field routingNumber Ljava/lang/String;
 	public final fun component1 ()Lcom/stripe/android/model/PaymentMethod$USBankAccount$USBankAccountHolderType;
