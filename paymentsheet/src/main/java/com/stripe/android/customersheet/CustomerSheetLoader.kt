@@ -1,5 +1,6 @@
 package com.stripe.android.customersheet
 
+import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.common.coroutines.Single
 import com.stripe.android.common.coroutines.awaitWithTimeout
 import com.stripe.android.core.exception.StripeException
@@ -75,6 +76,7 @@ internal class DefaultCustomerSheetLoader(
             configuration = configuration,
             customerSheetSession = customerSheetSession,
         )
+        GooglePayJsonFactory.cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance)
 
         createCustomerSheetState(
             customerSheetSession = customerSheetSession,

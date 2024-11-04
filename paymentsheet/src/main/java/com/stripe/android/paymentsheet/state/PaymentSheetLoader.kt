@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.state
 
+import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.common.coroutines.runCatching
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
@@ -105,6 +106,8 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         )
 
         val isGooglePayReady = isGooglePayReady(paymentSheetConfiguration, elementsSession)
+        val cardBrandFilter = PaymentSheetCardBrandFilter(paymentSheetConfiguration.cardBrandAcceptance)
+        GooglePayJsonFactory.cardBrandFilter = cardBrandFilter
 
         val savedSelection = async {
             retrieveSavedSelection(
