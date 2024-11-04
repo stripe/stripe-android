@@ -6,6 +6,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import com.stripe.android.uicore.utils.collectAsState
+import kotlinx.coroutines.flow.filterNotNull
 
 @Composable
 internal fun USBankAccountEmitters(
@@ -17,17 +18,23 @@ internal fun USBankAccountEmitters(
     val activityResultRegistryOwner = LocalActivityResultRegistryOwner.current
 
     LaunchedEffect(Unit) {
-        viewModel.result.collect { result ->
-            result?.let {
-                usBankAccountFormArgs.onConfirmUSBankAccount(result)
+        viewModel.selection.filterNotNull().collect { result ->
+            usBankAccountFormArgs.onBankAccountLinked(result)
+        }
+    }
+
+    usBankAccountFormArgs.onConfirmUSBankAccount?.let { confirmListener ->
+        LaunchedEffect(Unit) {
+            viewModel.result.filterNotNull().collect { result ->
+                confirmListener(result)
             }
         }
     }
 
-    LaunchedEffect(Unit) {
-        viewModel.collectBankAccountResult.collect { result ->
-            result?.let {
-                usBankAccountFormArgs.onCollectBankAccountResult?.invoke(result)
+    usBankAccountFormArgs.onCollectBankAccountResult?.let { collectListener ->
+        LaunchedEffect(Unit) {
+            viewModel.collectBankAccountResult.filterNotNull().collect { result ->
+                collectListener(result)
             }
         }
     }

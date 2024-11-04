@@ -54,9 +54,11 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Provider
@@ -192,10 +194,14 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         stateFlowOf(null)
     }
 
-    private val _result = MutableSharedFlow<PaymentSelection.New.USBankAccount?>(replay = 1)
-    val result: Flow<PaymentSelection.New.USBankAccount?> = _result
+    private val _selection = MutableStateFlow<PaymentSelection.New.USBankAccount?>(null)
+    val selection: StateFlow<PaymentSelection.New.USBankAccount?> = _selection.asStateFlow()
+
     private val _collectBankAccountResult = MutableSharedFlow<CollectBankAccountResultInternal?>(replay = 1)
     val collectBankAccountResult: Flow<CollectBankAccountResultInternal?> = _collectBankAccountResult
+
+    private val _result = MutableSharedFlow<PaymentSelection.New.USBankAccount?>(replay = 1)
+    val result: Flow<PaymentSelection.New.USBankAccount?> = _result
 
     private val defaultSaveForFutureUse: Boolean =
         args.savedPaymentMethod?.input?.saveForFutureUse ?: false
@@ -288,6 +294,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     fun handleCollectBankAccountResult(result: CollectBankAccountResultInternal) {
         hasLaunched = false
         _collectBankAccountResult.tryEmit(result)
+
         when (result) {
             is CollectBankAccountResultInternal.Completed -> {
                 handleCompletedBankAccountResult(result)
@@ -335,7 +342,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     private fun handleCompletedInstantDebitsResult(
         result: CollectBankAccountForInstantDebitsResult.Completed,
     ) {
-        _currentScreenState.update {
+        val screenState = _currentScreenState.updateAndGet {
             USBankAccountFormScreenState.MandateCollection(
                 resultIdentifier = ResultIdentifier.PaymentMethod(result.paymentMethod),
                 bankName = result.bankName,
@@ -345,6 +352,8 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                 mandateText = buildMandateText(isVerifyWithMicrodeposits = false),
             )
         }
+
+        _selection.value = screenState.toPaymentSelection()
     }
 
     private fun handleResultForACH(
@@ -353,7 +362,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     ) {
         when (val paymentAccount = usBankAccountData.financialConnectionsSession.paymentAccount) {
             is BankAccount -> {
-                _currentScreenState.update {
+                val screenState = _currentScreenState.updateAndGet {
                     USBankAccountFormScreenState.VerifyWithMicrodeposits(
                         paymentAccount = paymentAccount,
                         financialConnectionsSessionId = usBankAccountData.financialConnectionsSession.id,
@@ -362,10 +371,12 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                         mandateText = buildMandateText(isVerifyWithMicrodeposits = true),
                     )
                 }
+
+                _selection.value = screenState.toPaymentSelection()
             }
 
             is FinancialConnectionsAccount -> {
-                _currentScreenState.update {
+                val screenState = _currentScreenState.updateAndGet {
                     USBankAccountFormScreenState.MandateCollection(
                         resultIdentifier = ResultIdentifier.Session(
                             id = usBankAccountData.financialConnectionsSession.id,
@@ -377,6 +388,8 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                         mandateText = buildMandateText(isVerifyWithMicrodeposits = false),
                     )
                 }
+
+                _selection.value = screenState.toPaymentSelection()
             }
 
             null -> {
@@ -386,41 +399,13 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     }
 
     fun handlePrimaryButtonClick(screenState: USBankAccountFormScreenState) {
-        when (screenState) {
-            is USBankAccountFormScreenState.BillingDetailsCollection -> {
-                _currentScreenState.update {
-                    screenState.copy(isProcessing = true)
-                }
-                collectBankAccount(args.clientSecret)
+        if (screenState is USBankAccountFormScreenState.BillingDetailsCollection) {
+            _currentScreenState.update {
+                screenState.copy(isProcessing = true)
             }
-
-            is USBankAccountFormScreenState.MandateCollection ->
-                updatePaymentSelection(
-                    resultIdentifier = screenState.resultIdentifier,
-                    bankName = screenState.bankName,
-                    last4 = screenState.last4,
-                )
-
-            is USBankAccountFormScreenState.VerifyWithMicrodeposits ->
-                updatePaymentSelection(
-                    resultIdentifier = ResultIdentifier.Session(
-                        id = screenState.financialConnectionsSessionId,
-                    ),
-                    bankName = screenState.paymentAccount.bankName,
-                    last4 = screenState.paymentAccount.last4
-                )
-
-            is USBankAccountFormScreenState.SavedAccount -> {
-                screenState.financialConnectionsSessionId?.let { linkAccountId ->
-                    updatePaymentSelection(
-                        resultIdentifier = ResultIdentifier.Session(
-                            id = linkAccountId,
-                        ),
-                        bankName = screenState.bankName,
-                        last4 = screenState.last4
-                    )
-                }
-            }
+            collectBankAccount(args.clientSecret)
+        } else {
+            // Handled elsewhere
         }
     }
 
@@ -442,7 +427,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         if (shouldReset) {
             reset()
         }
-        _result.tryEmit(null)
+//        _result.tryEmit(null)
         _collectBankAccountResult.tryEmit(null)
         collectBankAccountLauncher?.unregister()
         collectBankAccountLauncher = null
@@ -571,7 +556,6 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
     private fun collectBankAccountForDeferredIntent() {
         val elementsSessionId = args.stripeIntentId ?: return
-        val elementsSessionContext = makeElementsSessionContext()
 
         val configuration = if (args.instantDebits) {
             createInstantDebitsConfiguration()
@@ -602,27 +586,10 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         }
     }
 
-    private fun updatePaymentSelection(
-        resultIdentifier: ResultIdentifier,
-        bankName: String?,
-        last4: String?
-    ) {
-        if (bankName == null || last4 == null) return
-
-        val paymentSelection = createNewPaymentSelection(
-            resultIdentifier = resultIdentifier,
-            last4 = last4,
-            bankName = bankName,
-        )
-
-        _result.tryEmit(paymentSelection)
-        shouldReset = true
-    }
-
     private fun createNewPaymentSelection(
         resultIdentifier: ResultIdentifier,
-        last4: String,
-        bankName: String,
+        last4: String?,
+        bankName: String?,
     ): PaymentSelection.New.USBankAccount {
         val customerRequestedSave = customerRequestedSave(
             showCheckbox = args.showCheckbox,
@@ -681,11 +648,15 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             null
         }
 
-        return PaymentSelection.New.USBankAccount(
-            labelResource = application.getString(
+        val labelResource = last4?.let {
+            application.getString(
                 R.string.stripe_paymentsheet_payment_method_item_card_number,
-                last4
-            ),
+                it,
+            )
+        }
+
+        return PaymentSelection.New.USBankAccount(
+            labelResource = labelResource ?: "••••",
             iconResource = TransformToBankIcon(bankName),
             paymentMethodCreateParams = paymentMethodCreateParams,
             paymentMethodOptionsParams = paymentMethodOptionsParams,
@@ -737,6 +708,37 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             isInstantDebits = args.instantDebits,
             isSetupFlow = !args.isPaymentFlow,
         )
+    }
+
+    private fun USBankAccountFormScreenState.toPaymentSelection(): PaymentSelection.New.USBankAccount? {
+        return when (this) {
+            is USBankAccountFormScreenState.BillingDetailsCollection -> {
+                null
+            }
+            is USBankAccountFormScreenState.MandateCollection -> {
+                createNewPaymentSelection(
+                    resultIdentifier = resultIdentifier,
+                    bankName = bankName,
+                    last4 = last4,
+                )
+            }
+            is USBankAccountFormScreenState.VerifyWithMicrodeposits -> {
+                createNewPaymentSelection(
+                    resultIdentifier = ResultIdentifier.Session(financialConnectionsSessionId),
+                    bankName = paymentAccount.bankName,
+                    last4 = paymentAccount.last4
+                )
+            }
+            is USBankAccountFormScreenState.SavedAccount -> {
+                financialConnectionsSessionId?.let { linkAccountId ->
+                    createNewPaymentSelection(
+                        resultIdentifier = ResultIdentifier.Session(linkAccountId),
+                        bankName = bankName,
+                        last4 = last4
+                    )
+                }
+            }
+        }
     }
 
     internal class Factory(

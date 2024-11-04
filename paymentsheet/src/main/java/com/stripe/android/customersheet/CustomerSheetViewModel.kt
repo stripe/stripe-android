@@ -847,6 +847,9 @@ internal class CustomerSheetViewModel(
             onMandateTextChanged = { mandate, showAbove ->
                 handleViewAction(CustomerSheetViewAction.OnUpdateMandateText(mandate, showAbove))
             },
+            onBankAccountLinked = {
+                // Nothing to do here
+            },
             onCollectBankAccountResult = {
                 handleViewAction(CustomerSheetViewAction.OnCollectBankAccountResult(it))
             },

@@ -141,7 +141,12 @@ internal abstract class BaseSheetViewModel(
 
     abstract fun handlePaymentMethodSelected(selection: PaymentSelection?)
 
-    abstract fun handleConfirmUSBankAccount(paymentSelection: PaymentSelection.New.USBankAccount)
+//    @Deprecated("Remove")
+//    abstract fun handleConfirmUSBankAccount(paymentSelection: PaymentSelection.New.USBankAccount)
+
+    fun handleBankAccountLinked(selection: PaymentSelection.New.USBankAccount?) {
+        updateSelection(selection)
+    }
 
     fun updateSelection(selection: PaymentSelection?) {
         when (selection) {

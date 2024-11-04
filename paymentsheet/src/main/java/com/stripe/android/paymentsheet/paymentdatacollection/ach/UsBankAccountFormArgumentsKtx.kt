@@ -13,14 +13,17 @@ internal fun USBankAccountFormArguments.handleScreenStateChanged(
         onError(it)
     }
 
-    val showProcessingWhenClicked = screenState is BillingDetailsCollection || isCompleteFlow
-
-    updatePrimaryButton(
-        text = screenState.primaryButtonText,
-        onClick = { onPrimaryButtonClick(screenState) },
-        enabled = enabled,
-        shouldShowProcessingWhenClicked = showProcessingWhenClicked
-    )
+    if (screenState is BillingDetailsCollection) {
+        updatePrimaryButton(
+            text = screenState.primaryButtonText,
+            onClick = { onPrimaryButtonClick(screenState) },
+            enabled = enabled,
+            shouldShowProcessingWhenClicked = isCompleteFlow,
+        )
+    } else {
+        // Clear the primary button
+        onUpdatePrimaryButtonUIState { null }
+    }
 
     onMandateTextChanged(screenState.mandateText, false)
 }
