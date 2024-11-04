@@ -4,12 +4,14 @@ import android.content.Context
 import android.content.Intent
 import android.os.Parcelable
 import androidx.activity.result.contract.ActivityResultContract
+import androidx.annotation.RestrictTo
 import androidx.core.os.bundleOf
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import kotlinx.parcelize.Parcelize
 
-internal class GooglePayLauncherContract :
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class GooglePayLauncherContract :
     ActivityResultContract<GooglePayLauncherContract.Args, GooglePayLauncher.Result>() {
 
     override fun createIntent(context: Context, input: Args): Intent {
@@ -31,6 +33,7 @@ internal class GooglePayLauncherContract :
      * Args for launching [GooglePayLauncherContract] to confirm a [PaymentIntent].
      */
     @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class PaymentIntentArgs @JvmOverloads constructor(
         override val clientSecret: String,
         override val config: GooglePayLauncher.Config,
@@ -41,6 +44,7 @@ internal class GooglePayLauncherContract :
      * Args for launching [GooglePayLauncherContract] to confirm a [SetupIntent].
      */
     @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class SetupIntentArgs @JvmOverloads constructor(
         override val clientSecret: String,
         override val config: GooglePayLauncher.Config,
@@ -49,6 +53,7 @@ internal class GooglePayLauncherContract :
         internal val label: String? = null,
     ) : Args()
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     sealed class Args : Parcelable {
         internal abstract val clientSecret: String
         internal abstract val config: GooglePayLauncher.Config
