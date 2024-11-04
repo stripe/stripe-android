@@ -240,8 +240,12 @@ internal class DefaultLinkAccountManager @Inject constructor(
     }
 
     override suspend fun updatePaymentDetails(updateParams: ConsumerPaymentDetailsUpdateParams): Result<ConsumerPaymentDetails> {
-        linkRepository.consumerSignUp()
-        TODO("Not yet implemented")
+        val clientSecret = linkAccount.value?.clientSecret ?: return Result.failure(Throwable("no link account found"))
+        return linkRepository.updatePaymentDetails(
+            updateParams = updateParams,
+            consumerSessionClientSecret = clientSecret,
+            consumerPublishableKey = consumerPublishableKey
+        )
     }
 
     override suspend fun deletePaymentDetails(paymentDetailsId: String): Result<Unit> {

@@ -3,13 +3,14 @@ package com.stripe.android.model
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
 import kotlinx.parcelize.Parcelize
+import kotlinx.parcelize.RawValue
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Parcelize
 class ConsumerPaymentDetailsUpdateParams(
     val id: String,
     val isDefault: Boolean? = null,
-    val cardPaymentMethodCreateParams: PaymentMethodCreateParams? = null
+    val cardPaymentMethodCreateParamsMap: Map<String, @RawValue Any>? = null
 ) : StripeParamsModel, Parcelable {
 
     override fun toParamMap(): Map<String, Any> {
@@ -17,7 +18,7 @@ class ConsumerPaymentDetailsUpdateParams(
 
         isDefault?.let { params["is_default"] = it }
 
-        cardPaymentMethodCreateParams?.toParamMap()?.let { map ->
+        cardPaymentMethodCreateParamsMap?.let { map ->
             (map["card"] as? Map<*, *>)?.let { card ->
                 card["exp_month"]?.let { params["exp_month"] = it }
                 card["exp_year"]?.let { params["exp_year"] = it }

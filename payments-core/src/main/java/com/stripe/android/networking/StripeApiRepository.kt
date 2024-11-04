@@ -53,6 +53,7 @@ import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT_SECRET
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.CreateFinancialConnectionsSessionForDeferredPaymentParams
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
@@ -1462,8 +1463,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
         clientSecret: String,
         paymentDetailsId: String,
         requestOptions: ApiRequest.Options
-    ) {
-        makeApiRequest(
+    ): Result<Unit> {
+        return makeApiRequest(
             apiRequestFactory.createDelete(
                 getConsumerPaymentDetailsUrl(paymentDetailsId),
                 requestOptions,
@@ -1473,8 +1474,35 @@ class StripeApiRepository @JvmOverloads internal constructor(
                         "consumer_session_client_secret" to clientSecret
                     )
                 )
-            )
-        ) {}
+            ),
+            onResponse = {}
+        ).runCatching {
+            // no-op
+        }
+    }
+
+    override suspend fun updatePaymentDetails(
+        clientSecret: String,
+        paymentDetailsUpdateParams: ConsumerPaymentDetailsUpdateParams,
+        requestOptions: ApiRequest.Options
+    ): Result<ConsumerPaymentDetails> {
+        return fetchStripeModelResult(
+            apiRequestFactory.createPost(
+                getConsumerPaymentDetailsUrl(paymentDetailsUpdateParams.id),
+                requestOptions,
+                mapOf(
+                    "request_surface" to "android_payment_element",
+                    "credentials" to mapOf(
+                        "consumer_session_client_secret" to clientSecret
+                    )
+                ).plus(
+                    paymentDetailsUpdateParams.toParamMap()
+                )
+            ),
+            ConsumerPaymentDetailsJsonParser
+        ) {
+            // no-op
+        }
     }
 
     private suspend fun retrieveElementsSession(
