@@ -9,6 +9,7 @@ import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams.Card.Companion.extraConfirmationParams
+import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSessionSignup
@@ -214,6 +215,31 @@ internal class LinkApiRepository @Inject constructor(
                 stripeAccountIdProvider()
             )
         )
+    }
+
+    override suspend fun deletePaymentDetails(
+        paymentDetailsId: String,
+        consumerSessionClientSecret: String,
+        consumerPublishableKey: String?
+    ): Result<Unit> {
+        return stripeRepository.deletePaymentDetails(
+            clientSecret = consumerSessionClientSecret,
+            paymentDetailsId = paymentDetailsId,
+            requestOptions = consumerPublishableKey?.let {
+                ApiRequest.Options(it)
+            } ?: ApiRequest.Options(
+                publishableKeyProvider(),
+                stripeAccountIdProvider()
+            )
+        ).runCatching {  }
+    }
+
+    override suspend fun updatePaymentDetails(
+        updateParams: ConsumerPaymentDetailsUpdateParams,
+        consumerSessionClientSecret: String,
+        consumerPublishableKey: String?
+    ): Result<ConsumerPaymentDetails> {
+        TODO("Not yet implemented")
     }
 
     private fun buildRequestOptions(

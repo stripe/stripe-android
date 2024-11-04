@@ -240,11 +240,16 @@ internal class DefaultLinkAccountManager @Inject constructor(
     }
 
     override suspend fun updatePaymentDetails(updateParams: ConsumerPaymentDetailsUpdateParams): Result<ConsumerPaymentDetails> {
+        linkRepository.consumerSignUp()
         TODO("Not yet implemented")
     }
 
     override suspend fun deletePaymentDetails(paymentDetailsId: String): Result<Unit> {
-        TODO("Not yet implemented")
+        return linkRepository.deletePaymentDetails(
+            paymentDetailsId,
+            "clientSecret",
+            consumerPublishableKey
+        )
     }
 
     override suspend fun listPaymentDetails(): Result<ConsumerPaymentDetails> {
