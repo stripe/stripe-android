@@ -158,6 +158,8 @@ public final class com/stripe/android/GooglePayJsonFactory {
 	public final fun createPaymentDataRequest (Lcom/stripe/android/GooglePayJsonFactory$TransactionInfo;Lcom/stripe/android/GooglePayJsonFactory$BillingAddressParameters;Lcom/stripe/android/GooglePayJsonFactory$ShippingAddressParameters;ZLcom/stripe/android/GooglePayJsonFactory$MerchantInfo;)Lorg/json/JSONObject;
 	public final fun createPaymentDataRequest (Lcom/stripe/android/GooglePayJsonFactory$TransactionInfo;Lcom/stripe/android/GooglePayJsonFactory$BillingAddressParameters;Lcom/stripe/android/GooglePayJsonFactory$ShippingAddressParameters;ZLcom/stripe/android/GooglePayJsonFactory$MerchantInfo;Ljava/lang/Boolean;)Lorg/json/JSONObject;
 	public static synthetic fun createPaymentDataRequest$default (Lcom/stripe/android/GooglePayJsonFactory;Lcom/stripe/android/GooglePayJsonFactory$TransactionInfo;Lcom/stripe/android/GooglePayJsonFactory$BillingAddressParameters;Lcom/stripe/android/GooglePayJsonFactory$ShippingAddressParameters;ZLcom/stripe/android/GooglePayJsonFactory$MerchantInfo;Ljava/lang/Boolean;ILjava/lang/Object;)Lorg/json/JSONObject;
+	public static final fun getCardBrandFilter ()Lcom/stripe/android/CardBrandFilter;
+	public static final fun setCardBrandFilter (Lcom/stripe/android/CardBrandFilter;)V
 }
 
 public final class com/stripe/android/GooglePayJsonFactory$BillingAddressParameters : android/os/Parcelable {

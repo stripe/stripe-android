@@ -471,8 +471,8 @@ class GooglePayJsonFactory constructor(
         internal val merchantName: String? = null
     ) : Parcelable
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @JvmStatic
         var cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter
 
