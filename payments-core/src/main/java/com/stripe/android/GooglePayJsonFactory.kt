@@ -259,6 +259,9 @@ class GooglePayJsonFactory constructor(
             .plus(listOf(JCB_CARD_NETWORK).takeIf { isJcbEnabled } ?: emptyList())
             .filter {
                 val cardBrand = networkStringToCardBrandMap[it] ?: CardBrand.Unknown
+                // Note(porter): I encountered strange behavior when using filtered card brands when making the isReady call for Google Pay
+                // It would error out with an unknown error, I believe this is a bug in Google Pay so for the isReadyCall we don't filter card brands
+                // But for subsequent calls we do, which gives the desired behavior.
                 if (isReadyCall) DefaultCardBrandFilter.isAccepted(cardBrand) else cardBrandFilter.isAccepted(cardBrand)
             }
         return JSONObject()
