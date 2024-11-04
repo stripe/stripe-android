@@ -9,11 +9,7 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import kotlinx.parcelize.Parcelize
 
-@Deprecated(
-    message = "This class isn't meant for public use and will be removed in a future release. " +
-        "Use GooglePayLauncher directly.",
-)
-class GooglePayLauncherContract :
+internal class GooglePayLauncherContract :
     ActivityResultContract<GooglePayLauncherContract.Args, GooglePayLauncher.Result>() {
 
     override fun createIntent(context: Context, input: Args): Intent {
