@@ -2098,38 +2098,6 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `Sends confirm pressed event when fully confirming US bank account payment`() = runTest {
-        val newPaymentSelection = PaymentSelection.New.USBankAccount(
-            labelResource = "Test",
-            iconResource = 0,
-            paymentMethodCreateParams = mock(),
-            customerRequestedSave = mock(),
-            input = PaymentSelection.New.USBankAccount.Input(
-                name = "",
-                email = null,
-                phone = null,
-                address = null,
-                saveForFutureUse = false,
-            ),
-            instantDebits = null,
-            screenState = USBankAccountFormScreenState.SavedAccount(
-                financialConnectionsSessionId = "session_1234",
-                intentId = "intent_1234",
-                bankName = "Stripe Bank",
-                last4 = "6789",
-                primaryButtonText = "Continue".resolvableString,
-                mandateText = null,
-            ),
-        )
-
-        val viewModel = createViewModel()
-
-        viewModel.handleConfirmUSBankAccount(newPaymentSelection)
-
-        verify(eventReporter).onPressConfirmButton(newPaymentSelection)
-    }
-
-    @Test
     fun `Sends no confirm pressed event when opening US bank account auth flow`() = runTest {
         val paymentIntent = PAYMENT_INTENT.copy(
             amount = 9999,

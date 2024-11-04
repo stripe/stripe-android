@@ -194,14 +194,11 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         stateFlowOf(null)
     }
 
-    private val _selection = MutableStateFlow<PaymentSelection.New.USBankAccount?>(null)
-    val selection: StateFlow<PaymentSelection.New.USBankAccount?> = _selection.asStateFlow()
-
     private val _collectBankAccountResult = MutableSharedFlow<CollectBankAccountResultInternal?>(replay = 1)
     val collectBankAccountResult: Flow<CollectBankAccountResultInternal?> = _collectBankAccountResult
 
-    private val _result = MutableSharedFlow<PaymentSelection.New.USBankAccount?>(replay = 1)
-    val result: Flow<PaymentSelection.New.USBankAccount?> = _result
+    private val _result = MutableStateFlow<PaymentSelection.New.USBankAccount?>(null)
+    val result: StateFlow<PaymentSelection.New.USBankAccount?> = _result.asStateFlow()
 
     private val defaultSaveForFutureUse: Boolean =
         args.savedPaymentMethod?.input?.saveForFutureUse ?: false
@@ -353,7 +350,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             )
         }
 
-        _selection.value = screenState.toPaymentSelection()
+        _result.value = screenState.toPaymentSelection()
     }
 
     private fun handleResultForACH(
@@ -372,7 +369,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                     )
                 }
 
-                _selection.value = screenState.toPaymentSelection()
+                _result.value = screenState.toPaymentSelection()
             }
 
             is FinancialConnectionsAccount -> {
@@ -389,7 +386,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                     )
                 }
 
-                _selection.value = screenState.toPaymentSelection()
+                _result.value = screenState.toPaymentSelection()
             }
 
             null -> {
@@ -399,13 +396,13 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     }
 
     fun handlePrimaryButtonClick(screenState: USBankAccountFormScreenState) {
+        val screenState = currentScreenState.value
         if (screenState is USBankAccountFormScreenState.BillingDetailsCollection) {
             _currentScreenState.update {
                 screenState.copy(isProcessing = true)
             }
+
             collectBankAccount(args.clientSecret)
-        } else {
-            // Handled elsewhere
         }
     }
 
@@ -688,13 +685,15 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     }
 
     private fun updateScreenStateWithSaveForFutureUse(saveForFutureUse: Boolean) {
-        _currentScreenState.update { state ->
+        val selection = _currentScreenState.updateAndGet { state ->
             val mandateText = buildMandateText(
                 isVerifyWithMicrodeposits = state is USBankAccountFormScreenState.VerifyWithMicrodeposits,
                 isSaveForFutureUseSelected = saveForFutureUse,
             )
             state.updateWithMandate(mandateText)
         }
+
+        _result.value = selection.toPaymentSelection()
     }
 
     private fun buildMandateText(

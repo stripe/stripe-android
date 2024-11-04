@@ -18,16 +18,8 @@ internal fun USBankAccountEmitters(
     val activityResultRegistryOwner = LocalActivityResultRegistryOwner.current
 
     LaunchedEffect(Unit) {
-        viewModel.selection.filterNotNull().collect { result ->
+        viewModel.result.filterNotNull().collect { result ->
             usBankAccountFormArgs.onBankAccountLinked(result)
-        }
-    }
-
-    usBankAccountFormArgs.onConfirmUSBankAccount?.let { confirmListener ->
-        LaunchedEffect(Unit) {
-            viewModel.result.filterNotNull().collect { result ->
-                confirmListener(result)
-            }
         }
     }
 

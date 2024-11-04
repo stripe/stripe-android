@@ -61,6 +61,7 @@ internal class CustomerSheetScreenshotTest {
         draftPaymentSelection = null,
         hostedSurface = CollectBankAccountLauncher.HOSTED_SURFACE_CUSTOMER_SHEET,
         onMandateTextChanged = { _, _ -> },
+        onBankAccountLinked = { },
         onConfirmUSBankAccount = { },
         onCollectBankAccountResult = { },
         onUpdatePrimaryButtonState = { },
