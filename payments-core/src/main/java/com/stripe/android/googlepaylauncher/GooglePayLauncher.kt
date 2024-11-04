@@ -12,14 +12,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.lifecycleScope
-import com.stripe.android.PaymentConfiguration
-import com.stripe.android.core.networking.AnalyticsRequestExecutor
-import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.googlepaylauncher.GooglePayLauncher.Result
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
-import com.stripe.android.networking.PaymentAnalyticsEvent
-import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
@@ -41,8 +36,6 @@ class GooglePayLauncher internal constructor(
     private val readyCallback: ReadyCallback,
     private val activityResultLauncher: ActivityResultLauncher<GooglePayLauncherContract.Args>,
     private val googlePayRepositoryFactory: (GooglePayEnvironment) -> GooglePayRepository,
-    paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
-    analyticsRequestExecutor: AnalyticsRequestExecutor
 ) {
     private var isReady = false
 
@@ -86,12 +79,6 @@ class GooglePayLauncher internal constructor(
                 )
             )
         },
-        PaymentAnalyticsRequestFactory(
-            activity,
-            PaymentConfiguration.getInstance(activity).publishableKey,
-            setOf(PRODUCT_USAGE)
-        ),
-        DefaultAnalyticsRequestExecutor()
     )
 
     /**
@@ -133,19 +120,9 @@ class GooglePayLauncher internal constructor(
                 )
             )
         },
-        paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
-            context = fragment.requireContext(),
-            publishableKey = PaymentConfiguration.getInstance(fragment.requireContext()).publishableKey,
-            defaultProductUsageTokens = setOf(PRODUCT_USAGE),
-        ),
-        analyticsRequestExecutor = DefaultAnalyticsRequestExecutor(),
     )
 
     init {
-        analyticsRequestExecutor.executeAsync(
-            paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.GooglePayLauncherInit)
-        )
-
         lifecycleScope.launch {
             val repository = googlePayRepositoryFactory(config.environment)
             readyCallback.onReady(
@@ -389,12 +366,6 @@ fun rememberGooglePayLauncher(
                     )
                 )
             },
-            PaymentAnalyticsRequestFactory(
-                context,
-                PaymentConfiguration.getInstance(context).publishableKey,
-                setOf(GooglePayLauncher.PRODUCT_USAGE)
-            ),
-            DefaultAnalyticsRequestExecutor()
         )
     }
 }
