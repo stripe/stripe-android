@@ -13,7 +13,6 @@ open class FakeLinkRepository : LinkRepository {
     var logOutResult = Result.success(TestFactory.CONSUMER_SESSION)
     var startVerificationResult = Result.success(TestFactory.CONSUMER_SESSION)
     var confirmVerificationResult = Result.success(TestFactory.CONSUMER_SESSION)
-    var logoutResult = Result.success(TestFactory.CONSUMER_SESSION)
 
     override suspend fun lookupConsumer(email: String) = lookupConsumerResult
 
@@ -56,9 +55,4 @@ open class FakeLinkRepository : LinkRepository {
         consumerSessionClientSecret: String,
         consumerPublishableKey: String?
     ) = confirmVerificationResult
-
-    override suspend fun logout(
-        consumerSessionClientSecret: String,
-        consumerPublishableKey: String?
-    ) = logoutResult
 }

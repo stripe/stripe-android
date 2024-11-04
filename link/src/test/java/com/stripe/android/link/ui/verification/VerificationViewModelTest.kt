@@ -4,7 +4,6 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.FakeLinkAccountManager
@@ -42,25 +41,6 @@ internal class VerificationViewModelTest {
 
     @Test
     fun `init sends analytics event`() = runTest(dispatcher) {
-        val linkEventsReporter = object : FakeLinkEventsReporter() {
-            var callCount = 0
-            override fun on2FAStart() {
-                callCount += 1
-            }
-        }
-        val linkAccountManager = FakeLinkAccountManager()
-        linkAccountManager.setLinkAccount(TestFactory.LINK_ACCOUNT)
-
-        createViewModel(
-            linkEventsReporter = linkEventsReporter,
-            linkAccountManager = linkAccountManager
-        )
-
-        assertThat(linkEventsReporter.callCount).isEqualTo(1)
-    }
-
-    @Test
-    fun `startVerification triggers verification start`() = runTest(dispatcher) {
         val linkAccountManager = object : FakeLinkAccountManager() {
             var callCount = 0
             override suspend fun startVerification(): Result<LinkAccount> {
@@ -69,8 +49,9 @@ internal class VerificationViewModelTest {
             }
         }
 
-        val viewModel = createViewModel(linkAccountManager = linkAccountManager)
-        viewModel.startVerification()
+        createViewModel(
+            linkAccountManager = linkAccountManager
+        )
 
         assertThat(linkAccountManager.callCount).isEqualTo(1)
     }
@@ -82,7 +63,6 @@ internal class VerificationViewModelTest {
         linkAccountManager.startVerificationResult = Result.failure(RuntimeException(errorMessage))
 
         val viewModel = createViewModel(linkAccountManager = linkAccountManager)
-        viewModel.startVerification()
 
         assertThat(viewModel.viewState.value.errorMessage).isEqualTo(errorMessage.resolvableString)
     }
@@ -90,25 +70,16 @@ internal class VerificationViewModelTest {
     @Test
     fun `When confirmVerification succeeds then it navigates to Wallet and analytics event is sent`() =
         runTest(dispatcher) {
-            val linkEventsReporter = object : FakeLinkEventsReporter() {
-                var callCount = 0
-                override fun on2FAComplete() {
-                    callCount += 1
-                }
-            }
-
             val screens = arrayListOf<LinkScreen>()
             fun navigateAndClearStack(screen: LinkScreen) {
                 screens.add(screen)
             }
 
             val viewModel = createViewModel(
-                linkEventsReporter = linkEventsReporter,
                 navigateAndClearStack = ::navigateAndClearStack
             )
             viewModel.onVerificationCodeEntered("code")
 
-            assertThat(linkEventsReporter.callCount).isEqualTo(1)
             assertThat(screens).isEqualTo(listOf(LinkScreen.Wallet))
         }
 
@@ -117,23 +88,15 @@ internal class VerificationViewModelTest {
         runTest(dispatcher) {
             val errorMessage = "Error message"
             val linkAccountManager = FakeLinkAccountManager()
-            val linkEventsReporter = object : FakeLinkEventsReporter() {
-                var callCount = 0
-                override fun on2FAFailure() {
-                    callCount += 1
-                }
-            }
 
             linkAccountManager.confirmVerificationResult = Result.failure(RuntimeException(errorMessage))
 
             val viewModel = createViewModel(
-                linkEventsReporter = linkEventsReporter,
                 linkAccountManager = linkAccountManager
             )
             viewModel.onVerificationCodeEntered("code")
 
             assertThat(viewModel.viewState.value.errorMessage).isEqualTo(errorMessage.resolvableString)
-            assertThat(linkEventsReporter.callCount).isEqualTo(1)
         }
 
     @Test
@@ -262,15 +225,14 @@ internal class VerificationViewModelTest {
         logger: Logger = FakeLogger(),
         navigateAndClearStack: (LinkScreen) -> Unit = {},
         goBack: () -> Unit = {},
-        dismissWithResult: (LinkActivityResult) -> Unit = {}
     ): VerificationViewModel {
         return VerificationViewModel(
             linkAccountManager = linkAccountManager,
             linkEventsReporter = linkEventsReporter,
             logger = logger,
-            dismissWithResult = dismissWithResult,
             navigateAndClearStack = navigateAndClearStack,
-            goBack = goBack
+            goBack = goBack,
+            linkAccount = TestFactory.LINK_ACCOUNT
         )
     }
 }

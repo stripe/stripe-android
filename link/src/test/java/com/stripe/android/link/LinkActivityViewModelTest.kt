@@ -34,7 +34,8 @@ import kotlin.test.assertFailsWith
 @RunWith(RobolectricTestRunner::class)
 internal class LinkActivityViewModelTest {
     private val dispatcher = UnconfinedTestDispatcher()
-    private val vm = LinkActivityViewModel(mock(), FakeLinkAccountManager())
+    private val linkAccountManager = FakeLinkAccountManager()
+    private val vm = LinkActivityViewModel(mock(), linkAccountManager)
     private val navController: NavHostController = mock()
     private val dismissWithResult: (LinkActivityResult) -> Unit = mock()
 
@@ -109,6 +110,13 @@ internal class LinkActivityViewModelTest {
 
         val viewModel = factory.create(LinkActivityViewModel::class.java, creationExtras())
         assertThat(viewModel.activityRetainedComponent.configuration).isEqualTo(mockArgs.configuration)
+    }
+
+    @Test
+    fun `linkAccount value returns latest value from link account manager`() = runTest(dispatcher) {
+        linkAccountManager.setLinkAccount(TestFactory.LINK_ACCOUNT)
+
+        assertThat(vm.linkAccount).isEqualTo(TestFactory.LINK_ACCOUNT)
     }
 
     private fun creationExtras(): CreationExtras {

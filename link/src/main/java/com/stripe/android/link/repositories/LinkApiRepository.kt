@@ -200,22 +200,6 @@ internal class LinkApiRepository @Inject constructor(
         }
     }
 
-    override suspend fun logout(
-        consumerSessionClientSecret: String,
-        consumerPublishableKey: String?
-    ): Result<ConsumerSession> = withContext(workContext) {
-        stripeRepository.logOut(
-            consumerSessionClientSecret = consumerSessionClientSecret,
-            consumerAccountPublishableKey = consumerPublishableKey,
-            requestOptions = consumerPublishableKey?.let {
-                ApiRequest.Options(it)
-            } ?: ApiRequest.Options(
-                publishableKeyProvider(),
-                stripeAccountIdProvider()
-            )
-        )
-    }
-
     private fun buildRequestOptions(
         consumerAccountPublishableKey: String? = null,
     ): ApiRequest.Options {

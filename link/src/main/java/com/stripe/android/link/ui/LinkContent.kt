@@ -24,7 +24,9 @@ import com.stripe.android.link.LinkAction
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkActivityViewModel
 import com.stripe.android.link.LinkScreen
+import com.stripe.android.link.NoLinkAccountFound
 import com.stripe.android.link.linkViewModel
+import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.linkColors
 import com.stripe.android.link.theme.linkShapes
@@ -96,6 +98,9 @@ internal fun LinkContent(
                     },
                     dismissWithResult = { result ->
                         viewModel.dismissWithResult?.invoke(result)
+                    },
+                    getLinkAccount = {
+                        viewModel.linkAccount
                     }
                 )
             }
@@ -106,6 +111,7 @@ internal fun LinkContent(
 @Composable
 private fun Screens(
     navController: NavHostController,
+    getLinkAccount: () -> LinkAccount?,
     goBack: () -> Unit,
     navigateAndClearStack: (route: LinkScreen) -> Unit,
     dismissWithResult: (LinkActivityResult) -> Unit
@@ -135,12 +141,14 @@ private fun Screens(
         }
 
         composable(LinkScreen.Verification.route) {
+            val linkAccount = getLinkAccount()
+                ?: return@composable dismissWithResult(LinkActivityResult.Failed(NoLinkAccountFound()))
             val viewModel: VerificationViewModel = linkViewModel { parentComponent ->
                 VerificationViewModel.factory(
                     parentComponent = parentComponent,
                     goBack = goBack,
                     navigateAndClearStack = navigateAndClearStack,
-                    dismissWithResult = dismissWithResult
+                    linkAccount = linkAccount
                 )
             }
             VerificationScreen(viewModel)

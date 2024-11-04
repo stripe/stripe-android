@@ -8,12 +8,12 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.getErrorMessage
 import com.stripe.android.ui.core.elements.OTPSpec
@@ -29,25 +29,24 @@ import javax.inject.Inject
  * ViewModel that handles user verification confirmation logic.
  */
 internal class VerificationViewModel @Inject constructor(
+    private val linkAccount: LinkAccount,
     private val linkAccountManager: LinkAccountManager,
     private val linkEventsReporter: LinkEventsReporter,
     private val logger: Logger,
     private val goBack: () -> Unit,
     private val navigateAndClearStack: (route: LinkScreen) -> Unit,
-    private val dismissWithResult: (LinkActivityResult) -> Unit
 ) : ViewModel() {
 
     private val _viewState = MutableStateFlow(
-        value = run {
-            val linkAccount = linkAccountManager.linkAccount.value
-            if (linkAccount == null) {
-                dismissWithResult(LinkActivityResult.Failed(NoLinkAccountFoundForVerification()))
-            }
-            VerificationViewState(
-                redactedPhoneNumber = linkAccount?.redactedPhoneNumber ?: "",
-                email = linkAccount?.email ?: ""
-            )
-        }
+        value = VerificationViewState(
+            redactedPhoneNumber = linkAccount.redactedPhoneNumber,
+            email = linkAccount.email,
+            isProcessing = false,
+            requestFocus = true,
+            errorMessage = null,
+            isSendingNewCode = false,
+            didSendNewCode = false
+        )
     )
     val viewState: StateFlow<VerificationViewState> = _viewState
 
@@ -61,17 +60,9 @@ internal class VerificationViewModel @Inject constructor(
     }
 
     private fun setUp() {
-        val linkAccount = linkAccountManager.linkAccount.value
-
-        if (linkAccount == null) {
-            dismissWithResult(LinkActivityResult.Failed(NoLinkAccountFoundForVerification()))
-            return
-        }
         if (linkAccount.accountStatus != AccountStatus.VerificationStarted) {
             startVerification()
         }
-
-        linkEventsReporter.on2FAStart()
 
         viewModelScope.launch {
             otpCode.collect { code ->
@@ -80,7 +71,7 @@ internal class VerificationViewModel @Inject constructor(
         }
     }
 
-    fun onVerificationCodeEntered(code: String) {
+    suspend fun onVerificationCodeEntered(code: String) {
         updateViewState {
             it.copy(
                 isProcessing = true,
@@ -88,28 +79,23 @@ internal class VerificationViewModel @Inject constructor(
             )
         }
 
-        viewModelScope.launch {
-            linkAccountManager.confirmVerification(code).fold(
-                onSuccess = {
-                    updateViewState {
-                        it.copy(isProcessing = false)
-                    }
-
-                    linkEventsReporter.on2FAComplete()
-                    navigateAndClearStack(LinkScreen.Wallet)
-                },
-                onFailure = {
-                    linkEventsReporter.on2FAFailure()
-                    for (i in 0 until otpElement.controller.otpLength) {
-                        otpElement.controller.onValueChanged(i, "")
-                    }
-                    onError(it)
+        linkAccountManager.confirmVerification(code).fold(
+            onSuccess = {
+                updateViewState {
+                    it.copy(isProcessing = false)
                 }
-            )
-        }
+                navigateAndClearStack(LinkScreen.Wallet)
+            },
+            onFailure = {
+                for (i in 0 until otpElement.controller.otpLength) {
+                    otpElement.controller.onValueChanged(i, "")
+                }
+                onError(it)
+            }
+        )
     }
 
-    fun startVerification() {
+    private fun startVerification() {
         updateViewState {
             it.copy(errorMessage = null)
         }
@@ -174,10 +160,7 @@ internal class VerificationViewModel @Inject constructor(
         updateViewState {
             it.copy(
                 isProcessing = false,
-                errorMessage = when (message) {
-                    is ErrorMessage.FromResources -> message.stringResId.resolvableString
-                    is ErrorMessage.Raw -> message.errorMessage.resolvableString
-                },
+                errorMessage = message.resolvableString,
             )
         }
     }
@@ -197,24 +180,22 @@ internal class VerificationViewModel @Inject constructor(
     companion object {
         fun factory(
             parentComponent: NativeLinkComponent,
+            linkAccount: LinkAccount,
             goBack: () -> Unit,
             navigateAndClearStack: (route: LinkScreen) -> Unit,
-            dismissWithResult: (LinkActivityResult) -> Unit
         ): ViewModelProvider.Factory {
             return viewModelFactory {
                 initializer {
                     VerificationViewModel(
+                        linkAccount = linkAccount,
                         linkAccountManager = parentComponent.linkAccountManager,
                         linkEventsReporter = parentComponent.linkEventsReporter,
                         logger = parentComponent.logger,
                         goBack = goBack,
                         navigateAndClearStack = navigateAndClearStack,
-                        dismissWithResult = dismissWithResult
                     )
                 }
             }
         }
     }
 }
-
-internal class NoLinkAccountFoundForVerification : IllegalStateException("no link account found for verification")

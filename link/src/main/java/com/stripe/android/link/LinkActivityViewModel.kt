@@ -17,6 +17,7 @@ import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.injection.DaggerNativeLinkComponent
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.LinkAppBarState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -37,6 +38,10 @@ internal class LinkActivityViewModel @Inject constructor(
         )
     )
     val linkState: StateFlow<LinkAppBarState> = _linkState
+
+    val linkAccount: LinkAccount?
+        get() = linkAccountManager.linkAccount.value
+
     var navController: NavHostController? = null
     var dismissWithResult: ((LinkActivityResult) -> Unit)? = null
 

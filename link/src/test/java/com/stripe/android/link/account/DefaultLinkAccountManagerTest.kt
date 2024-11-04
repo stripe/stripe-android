@@ -567,12 +567,19 @@ class DefaultLinkAccountManagerTest {
 
     @Test
     fun `startVerification updates account`() = runSuspendTest {
-        val accountManager = accountManager()
+        val linkEventsReporter = object : AccountManagerEventsReporter() {
+            var callCount = 0
+            override fun on2FAStart() {
+                callCount += 1
+            }
+        }
+        val accountManager = accountManager(linkEventsReporter = linkEventsReporter)
         accountManager.setAccountNullable(TestFactory.CONSUMER_SESSION, null)
 
         accountManager.startVerification()
 
         assertThat(accountManager.linkAccount.value).isNotNull()
+        assertThat(linkEventsReporter.callCount).isEqualTo(1)
     }
 
     @Test
@@ -621,7 +628,9 @@ class DefaultLinkAccountManagerTest {
     @Test
     fun `confirmVerification returns error when link account is null`() = runSuspendTest {
         val linkRepository = FakeLinkRepository()
-        val accountManager = accountManager(linkRepository = linkRepository)
+        val accountManager = accountManager(
+            linkRepository = linkRepository,
+        )
         accountManager.setAccountNullable(null, null)
 
         val result = accountManager.confirmVerification("123")
@@ -642,7 +651,13 @@ class DefaultLinkAccountManagerTest {
                 return super.confirmVerification(verificationCode, consumerSessionClientSecret, consumerPublishableKey)
             }
         }
-        val accountManager = accountManager(linkRepository = linkRepository)
+        val linkEventsReporter = object : AccountManagerEventsReporter() {
+            var callCount = 0
+            override fun on2FAComplete() {
+                callCount += 1
+            }
+        }
+        val accountManager = accountManager(linkRepository = linkRepository, linkEventsReporter = linkEventsReporter)
         accountManager.setAccountNullable(TestFactory.CONSUMER_SESSION, null)
 
         linkRepository.confirmVerificationResult = Result.success(TestFactory.CONSUMER_SESSION)
@@ -651,6 +666,7 @@ class DefaultLinkAccountManagerTest {
 
         assertThat(linkRepository.callCount).isEqualTo(1)
         assertThat(result.isSuccess).isTrue()
+        assertThat(linkEventsReporter.callCount).isEqualTo(1)
     }
 
     @Test
@@ -667,13 +683,20 @@ class DefaultLinkAccountManagerTest {
                 return Result.failure(error)
             }
         }
-        val accountManager = accountManager(linkRepository = linkRepository)
+        val linkEventsReporter = object : AccountManagerEventsReporter() {
+            var callCount = 0
+            override fun on2FAFailure() {
+                callCount += 1
+            }
+        }
+        val accountManager = accountManager(linkRepository = linkRepository, linkEventsReporter = linkEventsReporter)
         accountManager.setAccountNullable(TestFactory.CONSUMER_SESSION, null)
 
         val result = accountManager.confirmVerification("123")
 
         assertThat(linkRepository.callCount).isEqualTo(1)
         assertThat(result).isEqualTo(Result.failure<LinkAccount>(error))
+        assertThat(linkEventsReporter.callCount).isEqualTo(1)
     }
 
     private fun runSuspendTest(testBody: suspend TestScope.() -> Unit) = runTest {
@@ -724,4 +747,7 @@ private open class AccountManagerEventsReporter : FakeLinkEventsReporter() {
     override fun onSignupFailure(isInline: Boolean, error: Throwable) = Unit
     override fun onAccountLookupFailure(error: Throwable) = Unit
     override fun on2FAStartFailure() = Unit
+    override fun on2FAStart() = Unit
+    override fun on2FAComplete() = Unit
+    override fun on2FAFailure() = Unit
 }

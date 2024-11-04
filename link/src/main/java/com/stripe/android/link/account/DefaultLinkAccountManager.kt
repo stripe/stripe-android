@@ -221,6 +221,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
 
     override suspend fun startVerification(): Result<LinkAccount> {
         val clientSecret = linkAccount.value?.clientSecret ?: return Result.failure(Throwable("no link account found"))
+        linkEventsReporter.on2FAStart()
         return linkRepository.startVerification(clientSecret, consumerPublishableKey)
             .onFailure {
                 linkEventsReporter.on2FAStartFailure()
@@ -232,7 +233,11 @@ internal class DefaultLinkAccountManager @Inject constructor(
     override suspend fun confirmVerification(code: String): Result<LinkAccount> {
         val clientSecret = linkAccount.value?.clientSecret ?: return Result.failure(Throwable("no link account found"))
         return linkRepository.confirmVerification(code, clientSecret, consumerPublishableKey)
-            .map { consumerSession ->
+            .onSuccess {
+                linkEventsReporter.on2FAComplete()
+            }.onFailure {
+                linkEventsReporter.on2FAFailure()
+            }.map { consumerSession ->
                 setAccount(consumerSession, null)
             }
     }
