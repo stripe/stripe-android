@@ -4,6 +4,7 @@ import com.github.kittinunf.fuel.core.FuelError
 import com.stripe.android.connect.EmbeddedComponentManager
 import com.stripe.android.connect.FetchClientSecretCallback.ClientSecretResultCallback
 import com.stripe.android.connect.PrivateBetaConnectSDK
+import com.stripe.android.connect.appearance.Appearance
 import com.stripe.android.core.BuildConfig
 import com.stripe.android.core.Logger
 import kotlinx.coroutines.CoroutineScope
@@ -47,6 +48,7 @@ class EmbeddedComponentManagerProvider @Inject constructor(
                 publishableKey = publishableKey,
             ),
             fetchClientSecretCallback = ::fetchClientSecret,
+            appearance = Appearance()
         ).also {
             embeddedComponentManager = it
         }

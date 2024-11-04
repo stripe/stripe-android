@@ -4,12 +4,12 @@ import android.content.Context
 import android.os.Parcelable
 import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
-import com.stripe.android.connect.EmbeddedComponentManager.Appearance
-import com.stripe.android.connect.EmbeddedComponentManager.Badge
-import com.stripe.android.connect.EmbeddedComponentManager.Button
-import com.stripe.android.connect.EmbeddedComponentManager.Colors
-import com.stripe.android.connect.EmbeddedComponentManager.CornerRadius
 import com.stripe.android.connect.PrivateBetaConnectSDK
+import com.stripe.android.connect.appearance.Appearance
+import com.stripe.android.connect.appearance.Badge
+import com.stripe.android.connect.appearance.Button
+import com.stripe.android.connect.appearance.Colors
+import com.stripe.android.connect.appearance.CornerRadius
 import com.stripe.android.connect.example.R
 import kotlinx.parcelize.Parcelize
 
