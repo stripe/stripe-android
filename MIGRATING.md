@@ -7,6 +7,9 @@
 ### PaymentSheet
 - PaymentSheet displays payment methods in either a vertical or horizontal layout. Prior to this major version, PaymentSheet defaulted to a horizontal layout. Now, Stripe optimizes the layout automatically. To set a specific layout instead, set the `PaymentSheet.Configuration.Builder.paymentMethodLayout` property to either Horizontal or Vertical.
 
+### Financial Connections
+- Deprecated `PaymentMethod#linkedAccount` has been removed. Use `PaymentMethod#financialConnectionsAccount` instead.
+
 ## Migrating from versions < 20.26.0
 - Changes to `PaymentSheetContract`:
   * The class has been deprecated and will be removed in a future release. Use the `PaymentSheet` constructor or the new `rememberPaymentSheet()` method.
