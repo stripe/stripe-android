@@ -53,6 +53,7 @@ import com.stripe.android.paymentsheet.example.playground.activity.AppearanceBot
 import com.stripe.android.paymentsheet.example.playground.activity.AppearanceStore
 import com.stripe.android.paymentsheet.example.playground.activity.FawryActivity
 import com.stripe.android.paymentsheet.example.playground.activity.QrCodeActivity
+import com.stripe.android.paymentsheet.example.playground.embedded.EmbeddedPlaygroundActivity
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationType
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
@@ -277,10 +278,12 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
 
         when (playgroundState) {
             is PlaygroundState.Payment -> {
-                ShippingAddressButton(
-                    addressLauncher = addressLauncher,
-                    playgroundState = playgroundState,
-                )
+                if (playgroundState.displaysShippingAddressButton()) {
+                    ShippingAddressButton(
+                        addressLauncher = addressLauncher,
+                        playgroundState = playgroundState,
+                    )
+                }
 
                 when (playgroundState.integrationType) {
                     PlaygroundConfigurationData.IntegrationType.PaymentSheet -> {
@@ -296,6 +299,13 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
                             playgroundState = playgroundState,
                         )
                     }
+
+                    PlaygroundConfigurationData.IntegrationType.Embedded -> {
+                        EmbeddedUi(
+                            playgroundState = playgroundState,
+                        )
+                    }
+
                     else -> Unit
                 }
             }
@@ -362,6 +372,24 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
         BuyButton(
             buyButtonEnabled = flowControllerState?.selectedPaymentOption != null,
             onClick = flowController::confirm
+        )
+    }
+
+    @Composable
+    fun EmbeddedUi(
+        playgroundState: PlaygroundState.Payment,
+    ) {
+        val context = LocalContext.current
+        BuyButton(
+            buyButtonEnabled = true,
+            onClick = {
+                context.startActivity(
+                    EmbeddedPlaygroundActivity.create(
+                        context = context,
+                        playgroundState = playgroundState,
+                    )
+                )
+            }
         )
     }
 
@@ -444,12 +472,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
             }
         } else {
             paymentSheet.presentWithIntentConfiguration(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = playgroundState.checkoutMode.intentConfigurationMode(playgroundState),
-                    paymentMethodTypes = playgroundState.paymentMethodTypes,
-                    paymentMethodConfigurationId = playgroundState.paymentMethodConfigurationId,
-                    requireCvcRecollection = playgroundState.requireCvcRecollectionForDeferred
-                ),
+                intentConfiguration = playgroundState.intentConfiguration(),
                 configuration = playgroundState.paymentSheetConfiguration(),
             )
         }
@@ -475,12 +498,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
             }
         } else {
             flowController.configureWithIntentConfiguration(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = playgroundState.checkoutMode.intentConfigurationMode(playgroundState),
-                    paymentMethodTypes = playgroundState.paymentMethodTypes,
-                    paymentMethodConfigurationId = playgroundState.paymentMethodConfigurationId,
-                    requireCvcRecollection = playgroundState.requireCvcRecollectionForDeferred
-                ),
+                intentConfiguration = playgroundState.intentConfiguration(),
                 configuration = playgroundState.paymentSheetConfiguration(),
                 callback = viewModel::onFlowControllerConfigured,
             )
