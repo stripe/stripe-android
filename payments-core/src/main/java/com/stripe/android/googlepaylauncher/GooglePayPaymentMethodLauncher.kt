@@ -14,13 +14,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.lifecycleScope
-import com.stripe.android.PaymentConfiguration
-import com.stripe.android.core.networking.AnalyticsRequestExecutor
-import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher.Result
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.networking.PaymentAnalyticsEvent
-import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
@@ -45,14 +40,7 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
     @Assisted private val readyCallback: ReadyCallback,
     @Assisted private val activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>,
     @Assisted private val skipReadyCheck: Boolean,
-    context: Context,
     private val googlePayRepositoryFactory: (GooglePayEnvironment) -> GooglePayRepository,
-    paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
-        context,
-        PaymentConfiguration.getInstance(context).publishableKey,
-        setOf(PRODUCT_USAGE_TOKEN)
-    ),
-    analyticsRequestExecutor: AnalyticsRequestExecutor = DefaultAnalyticsRequestExecutor(),
 ) {
     private var isReady = false
 
@@ -124,7 +112,6 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
         readyCallback,
         activityResultLauncher,
         false,
-        context,
         googlePayRepositoryFactory = {
             DefaultGooglePayRepository(
                 context = context,
@@ -141,10 +128,6 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
     )
 
     init {
-        analyticsRequestExecutor.executeAsync(
-            paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.GooglePayPaymentMethodLauncherInit)
-        )
-
         if (!skipReadyCheck) {
             lifecycleScope.launch {
                 val repository = googlePayRepositoryFactory(config.environment)
