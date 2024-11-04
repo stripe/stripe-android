@@ -1132,20 +1132,6 @@ constructor(
          */
         @JvmField val routingNumber: String?,
     ) : TypeData() {
-        /**
-         * The token of the Linked Account used to create the payment method
-         *
-         * [us_bank_account.linkedAccount](https://stripe.com/docs/api/payment_methods/object#payment_method_object-us_bank_account-linked_account)
-         */
-        @Deprecated(
-            message = "Renamed to 'financialConnectionsAccount', " +
-                "'linkedAccount' will be removed in a future major update",
-            replaceWith = ReplaceWith(expression = "financialConnectionsAccount")
-        )
-        @IgnoredOnParcel
-        @JvmField
-        val linkedAccount: String? = financialConnectionsAccount
-
         override val type: Type get() = Type.USBankAccount
 
         @Parcelize
