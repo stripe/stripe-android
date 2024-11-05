@@ -8,6 +8,7 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.CardBrandFilter
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.exception.StripeException
@@ -17,6 +18,7 @@ import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
@@ -55,7 +57,7 @@ internal class IntentConfirmationHandler(
     private val coroutineScope: CoroutineScope,
     private val savedStateHandle: SavedStateHandle,
     private val errorReporter: ErrorReporter,
-    private val logger: UserFacingLogger?,
+    private val logger: UserFacingLogger?
 ) {
     private val intentConfirmationRegistry = PaymentConfirmationRegistry(
         confirmationDefinitions = listOf(
@@ -407,7 +409,8 @@ internal class IntentConfirmationHandler(
                 // Do nothing since we are skipping the ready check below
             },
             activityResultLauncher = activityLauncher,
-            skipReadyCheck = true
+            skipReadyCheck = true,
+            cardBrandFilter = config.cardBrandFilter
         )
     }
 
@@ -661,7 +664,7 @@ internal class IntentConfirmationHandler(
         private val savedStateHandle: SavedStateHandle,
         private val statusBarColor: () -> Int?,
         private val errorReporter: ErrorReporter,
-        private val logger: UserFacingLogger?,
+        private val logger: UserFacingLogger?
     ) {
         fun create(scope: CoroutineScope): IntentConfirmationHandler {
             return IntentConfirmationHandler(
@@ -680,7 +683,7 @@ internal class IntentConfirmationHandler(
                 coroutineScope = scope,
                 errorReporter = errorReporter,
                 savedStateHandle = savedStateHandle,
-                logger = logger,
+                logger = logger
             )
         }
     }

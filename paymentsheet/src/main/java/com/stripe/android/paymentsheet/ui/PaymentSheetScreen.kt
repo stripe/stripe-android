@@ -50,8 +50,10 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidViewBinding
+import com.stripe.android.CardBrandFilter
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.link.ui.LinkButton
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.R
@@ -310,7 +312,7 @@ private fun PaymentSheetContent(
     error: ResolvableString?,
     currentScreen: PaymentSheetScreen,
     mandateText: MandateText?,
-    modifier: Modifier,
+    modifier: Modifier
 ) {
     val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
 
@@ -333,6 +335,7 @@ private fun PaymentSheetContent(
                 onLinkPressed = state.onLinkPressed,
                 dividerSpacing = currentScreen.walletsDividerSpacing,
                 modifier = Modifier.padding(bottom = bottomSpacing),
+                cardBrandFilter = PaymentSheetCardBrandFilter(viewModel.config.cardBrandAcceptance)
             )
         }
 
@@ -389,6 +392,7 @@ internal fun Wallet(
     onLinkPressed: () -> Unit,
     dividerSpacing: Dp,
     modifier: Modifier = Modifier,
+    cardBrandFilter: CardBrandFilter
 ) {
     val padding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
 
@@ -401,6 +405,7 @@ internal fun Wallet(
                 billingAddressParameters = googlePay.billingAddressParameters,
                 isEnabled = state.buttonsEnabled,
                 onPressed = onGooglePayPressed,
+                cardBrandFilter = cardBrandFilter
             )
         }
 

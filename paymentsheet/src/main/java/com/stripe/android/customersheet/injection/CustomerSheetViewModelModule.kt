@@ -6,6 +6,8 @@ import android.content.res.Resources
 import androidx.core.os.LocaleListCompat
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.BuildConfig
+import com.stripe.android.CardBrandFilter
+import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ENABLE_LOGGING
@@ -146,7 +148,7 @@ internal interface CustomerSheetViewModelModule {
             stripePaymentLauncherAssistedFactory: StripePaymentLauncherAssistedFactory,
             statusBarColor: Int?,
             intentConfirmationInterceptor: IntentConfirmationInterceptor,
-            errorReporter: ErrorReporter,
+            errorReporter: ErrorReporter
         ): IntentConfirmationHandler.Factory {
             return IntentConfirmationHandler.Factory(
                 intentConfirmationInterceptor = intentConfirmationInterceptor,
@@ -157,7 +159,7 @@ internal interface CustomerSheetViewModelModule {
                 statusBarColor = { statusBarColor },
                 savedStateHandle = savedStateHandle,
                 errorReporter = errorReporter,
-                logger = null,
+                logger = null
             )
         }
 

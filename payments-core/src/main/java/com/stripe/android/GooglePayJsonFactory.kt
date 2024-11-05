@@ -6,6 +6,7 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
+import com.stripe.android.model.CardBrand
 import kotlinx.parcelize.Parcelize
 import org.json.JSONArray
 import org.json.JSONObject
@@ -28,7 +29,9 @@ class GooglePayJsonFactory constructor(
      *
      * JCB currently can only be accepted in Japan.
      */
-    private val isJcbEnabled: Boolean = false
+    private val isJcbEnabled: Boolean = false,
+
+    private val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter
 ) {
     /**
      * [PaymentConfiguration] must be instantiated before calling this.
@@ -41,20 +44,25 @@ class GooglePayJsonFactory constructor(
          *
          * JCB currently can only be accepted in Japan.
          */
-        isJcbEnabled: Boolean = false
+        isJcbEnabled: Boolean = false,
+
+        cardBrandFilter: CardBrandFilter
     ) : this(
         googlePayConfig = GooglePayConfig(context),
-        isJcbEnabled = isJcbEnabled
+        isJcbEnabled = isJcbEnabled,
+        cardBrandFilter = cardBrandFilter
     )
 
     @Inject
     internal constructor(
         @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
         @Named(STRIPE_ACCOUNT_ID) stripeAccountIdProvider: () -> String?,
-        googlePayConfig: GooglePayPaymentMethodLauncher.Config
+        googlePayConfig: GooglePayPaymentMethodLauncher.Config,
+        cardBrandFilter: CardBrandFilter
     ) : this(
         googlePayConfig = GooglePayConfig(publishableKeyProvider(), stripeAccountIdProvider()),
-        isJcbEnabled = googlePayConfig.isJcbEnabled
+        isJcbEnabled = googlePayConfig.isJcbEnabled,
+        cardBrandFilter = cardBrandFilter
     )
 
     /**
@@ -252,16 +260,15 @@ class GooglePayJsonFactory constructor(
     }
 
     private fun createBaseCardPaymentMethodParams(): JSONObject {
+        val acceptedCardBrands = DEFAULT_CARD_NETWORKS
+            .plus(listOf(JCB_CARD_NETWORK).takeIf { isJcbEnabled } ?: emptyList())
+            .filter {
+                val cardBrand = networkStringToCardBrandMap[it] ?: CardBrand.Unknown
+                cardBrandFilter.isAccepted(cardBrand)
+            }
         return JSONObject()
             .put("allowedAuthMethods", JSONArray(ALLOWED_AUTH_METHODS))
-            .put(
-                "allowedCardNetworks",
-                JSONArray(
-                    DEFAULT_CARD_NETWORKS.plus(
-                        listOf(JCB_CARD_NETWORK).takeIf { isJcbEnabled } ?: emptyList()
-                    )
-                )
-            )
+            .put("allowedCardNetworks", JSONArray(acceptedCardBrands))
     }
 
     /**
@@ -475,5 +482,14 @@ class GooglePayJsonFactory constructor(
         private val DEFAULT_CARD_NETWORKS =
             listOf("AMEX", "DISCOVER", "MASTERCARD", "VISA")
         private const val JCB_CARD_NETWORK = "JCB"
+
+        // Mapping from Google Pay string networks to CardBrands.
+        private val networkStringToCardBrandMap = mapOf(
+            "AMEX" to CardBrand.AmericanExpress,
+            "DISCOVER" to CardBrand.Discover,
+            "MASTERCARD" to CardBrand.MasterCard,
+            "VISA" to CardBrand.Visa,
+            "JCB" to CardBrand.JCB
+        )
     }
 }

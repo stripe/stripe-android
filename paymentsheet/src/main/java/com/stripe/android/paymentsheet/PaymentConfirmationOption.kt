@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import android.os.Parcelable
+import com.stripe.android.CardBrandFilter
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
@@ -23,6 +24,7 @@ internal sealed interface PaymentConfirmationOption : Parcelable {
             val customAmount: Long?,
             val customLabel: String?,
             val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
+            val cardBrandFilter: CardBrandFilter
         ) : Parcelable
     }
 
