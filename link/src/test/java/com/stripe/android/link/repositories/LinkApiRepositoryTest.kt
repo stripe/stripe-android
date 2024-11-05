@@ -519,13 +519,14 @@ class LinkApiRepositoryTest {
     }
 
     @Test
-    fun `deletePaymentDetails catches exception and returns failure`() = runTest {
+    fun `deletePaymentDetails returns error result when repository fails`() = runTest {
+        val error = RuntimeException("error")
         whenever(stripeRepository.deletePaymentDetails(any(), any(), any()))
-            .thenThrow(RuntimeException("error"))
+            .thenReturn(Result.failure(error))
 
         val result = linkRepository.deletePaymentDetails("id", "secret", "key")
 
-        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()).isEqualTo(error)
     }
 
     @Test

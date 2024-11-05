@@ -224,7 +224,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
     }
 
     override suspend fun startVerification(): Result<LinkAccount> {
-        val clientSecret = linkAccount.value?.clientSecret ?: return Result.failure(NoSuchElementException())
+        val clientSecret = linkAccount.value?.clientSecret ?: return Result.failure(NoLinkAccountFoundException())
         return linkRepository.startVerification(clientSecret, consumerPublishableKey)
             .onFailure {
                 linkEventsReporter.on2FAStartFailure()
@@ -263,7 +263,10 @@ internal class DefaultLinkAccountManager @Inject constructor(
 
     override suspend fun listPaymentDetails(): Result<ConsumerPaymentDetails> {
         val clientSecret = linkAccount.value?.clientSecret ?: return Result.failure(NoLinkAccountFoundException())
-        return linkRepository.listPaymentDetails(clientSecret, consumerPublishableKey)
+        return linkRepository.listPaymentDetails(
+            consumerSessionClientSecret = clientSecret,
+            consumerPublishableKey = consumerPublishableKey
+        )
     }
 
     @VisibleForTesting

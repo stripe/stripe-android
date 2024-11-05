@@ -222,18 +222,16 @@ internal class LinkApiRepository @Inject constructor(
         consumerSessionClientSecret: String,
         consumerPublishableKey: String?
     ): Result<Unit> {
-        return runCatching {
-            stripeRepository.deletePaymentDetails(
-                clientSecret = consumerSessionClientSecret,
-                paymentDetailsId = paymentDetailsId,
-                requestOptions = consumerPublishableKey?.let {
-                    ApiRequest.Options(it)
-                } ?: ApiRequest.Options(
-                    publishableKeyProvider(),
-                    stripeAccountIdProvider()
-                )
+        return stripeRepository.deletePaymentDetails(
+            clientSecret = consumerSessionClientSecret,
+            paymentDetailsId = paymentDetailsId,
+            requestOptions = consumerPublishableKey?.let {
+                ApiRequest.Options(it)
+            } ?: ApiRequest.Options(
+                publishableKeyProvider(),
+                stripeAccountIdProvider()
             )
-        }
+        )
     }
 
     override suspend fun updatePaymentDetails(
@@ -242,9 +240,9 @@ internal class LinkApiRepository @Inject constructor(
         consumerPublishableKey: String?
     ): Result<ConsumerPaymentDetails> {
         return stripeRepository.updatePaymentDetails(
-            consumerSessionClientSecret,
-            updateParams,
-            consumerPublishableKey?.let {
+            clientSecret = consumerSessionClientSecret,
+            paymentDetailsUpdateParams = updateParams,
+            requestOptions = consumerPublishableKey?.let {
                 ApiRequest.Options(it)
             } ?: ApiRequest.Options(
                 publishableKeyProvider(),
