@@ -142,10 +142,10 @@ public final class com/stripe/android/GooglePayConfig {
 
 public final class com/stripe/android/GooglePayJsonFactory {
 	public static final field $stable I
-	public fun <init> (Landroid/content/Context;ZLcom/stripe/android/CardBrandFilter;)V
-	public synthetic fun <init> (Landroid/content/Context;ZLcom/stripe/android/CardBrandFilter;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun <init> (Lcom/stripe/android/GooglePayConfig;ZLcom/stripe/android/CardBrandFilter;)V
-	public synthetic fun <init> (Lcom/stripe/android/GooglePayConfig;ZLcom/stripe/android/CardBrandFilter;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Landroid/content/Context;Z)V
+	public synthetic fun <init> (Landroid/content/Context;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lcom/stripe/android/GooglePayConfig;Z)V
+	public synthetic fun <init> (Lcom/stripe/android/GooglePayConfig;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun createIsReadyToPayRequest ()Lorg/json/JSONObject;
 	public final fun createIsReadyToPayRequest (Lcom/stripe/android/GooglePayJsonFactory$BillingAddressParameters;)Lorg/json/JSONObject;
 	public final fun createIsReadyToPayRequest (Lcom/stripe/android/GooglePayJsonFactory$BillingAddressParameters;Ljava/lang/Boolean;)Lorg/json/JSONObject;

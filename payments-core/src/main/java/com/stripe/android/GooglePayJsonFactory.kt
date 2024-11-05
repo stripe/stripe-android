@@ -21,7 +21,7 @@ import javax.inject.Singleton
  * for Google Pay API version 2.0.
  */
 @Singleton
-class GooglePayJsonFactory constructor(
+class GooglePayJsonFactory internal constructor(
     private val googlePayConfig: GooglePayConfig,
 
     /**
@@ -36,6 +36,7 @@ class GooglePayJsonFactory constructor(
     /**
      * [PaymentConfiguration] must be instantiated before calling this.
      */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     constructor(
         context: Context,
 
@@ -51,6 +52,36 @@ class GooglePayJsonFactory constructor(
         googlePayConfig = GooglePayConfig(context),
         isJcbEnabled = isJcbEnabled,
         cardBrandFilter = cardBrandFilter
+    )
+
+    constructor(
+        context: Context,
+
+        /**
+         * Enable JCB as an allowed card network. By default, JCB is disabled.
+         *
+         * JCB currently can only be accepted in Japan.
+         */
+        isJcbEnabled: Boolean = false
+    ) : this(
+        googlePayConfig = GooglePayConfig(context),
+        isJcbEnabled = isJcbEnabled,
+        cardBrandFilter = DefaultCardBrandFilter
+    )
+
+    constructor(
+        googlePayConfig: GooglePayConfig,
+
+        /**
+         * Enable JCB as an allowed card network. By default, JCB is disabled.
+         *
+         * JCB currently can only be accepted in Japan.
+         */
+        isJcbEnabled: Boolean = false
+    ) : this(
+        googlePayConfig = googlePayConfig,
+        isJcbEnabled = isJcbEnabled,
+        cardBrandFilter = DefaultCardBrandFilter
     )
 
     @Inject
