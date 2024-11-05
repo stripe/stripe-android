@@ -82,7 +82,7 @@ internal class ManageScreenUIScreenshotTest {
 
     @Test
     fun testManageUIScreen_usesNewUpdateCardScreen_inEditMode() {
-        FeatureFlags.useNewUpdateCardScreen.setEnabled(true)
+        featureFlagTestRule.setEnabled(true)
         paparazziRule.snapshot {
             ManageScreenUI(
                 interactor = FakeManageScreenInteractor(
