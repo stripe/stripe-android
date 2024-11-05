@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkMode
@@ -234,7 +235,10 @@ class PaymentConfirmationOptionKtxTest {
                     merchantCurrencyCode = "USD",
                     customAmount = 5000,
                     customLabel = "Merchant Payments",
-                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration()
+                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
+                    cardBrandFilter = PaymentSheetCardBrandFilter(
+                        cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.All
+                    )
                 )
             )
         )

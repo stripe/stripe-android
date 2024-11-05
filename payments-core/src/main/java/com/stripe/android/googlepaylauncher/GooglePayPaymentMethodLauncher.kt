@@ -14,6 +14,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import com.stripe.android.CardBrandFilter
+import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
@@ -47,6 +49,7 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
     @Assisted private val skipReadyCheck: Boolean,
     context: Context,
     private val googlePayRepositoryFactory: (GooglePayEnvironment) -> GooglePayRepository,
+    @Assisted private val cardBrandFilter: CardBrandFilter,
     paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
         context,
         PaymentConfiguration.getInstance(context).publishableKey,
@@ -81,7 +84,8 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
             resultCallback.onResult(it)
         },
         config,
-        readyCallback
+        readyCallback,
+        DefaultCardBrandFilter
     )
 
     /**
@@ -109,7 +113,8 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
             resultCallback.onResult(it)
         },
         config,
-        readyCallback
+        readyCallback,
+        DefaultCardBrandFilter
     )
 
     internal constructor(
@@ -117,7 +122,8 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
         lifecycleScope: CoroutineScope,
         activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>,
         config: Config,
-        readyCallback: ReadyCallback
+        readyCallback: ReadyCallback,
+        cardBrandFilter: CardBrandFilter
     ) : this(
         lifecycleScope,
         config,
@@ -138,6 +144,7 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
                 )
             )
         },
+        cardBrandFilter = cardBrandFilter
     )
 
     init {
@@ -219,6 +226,7 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
                 amount = amount,
                 label = label,
                 transactionId = transactionId,
+                cardBrandFilter = cardBrandFilter
             )
         )
     }
@@ -408,7 +416,8 @@ fun rememberGooglePayPaymentMethodLauncher(
             config = config,
             readyCallback = {
                 currentReadyCallback.onReady(it)
-            }
+            },
+            cardBrandFilter = DefaultCardBrandFilter
         )
     }
 }

@@ -55,7 +55,7 @@ internal class IntentConfirmationHandler(
     private val coroutineScope: CoroutineScope,
     private val savedStateHandle: SavedStateHandle,
     private val errorReporter: ErrorReporter,
-    private val logger: UserFacingLogger?,
+    private val logger: UserFacingLogger?
 ) {
     private val intentConfirmationRegistry = PaymentConfirmationRegistry(
         confirmationDefinitions = listOf(
@@ -407,7 +407,8 @@ internal class IntentConfirmationHandler(
                 // Do nothing since we are skipping the ready check below
             },
             activityResultLauncher = activityLauncher,
-            skipReadyCheck = true
+            skipReadyCheck = true,
+            cardBrandFilter = config.cardBrandFilter
         )
     }
 
@@ -661,7 +662,7 @@ internal class IntentConfirmationHandler(
         private val savedStateHandle: SavedStateHandle,
         private val statusBarColor: () -> Int?,
         private val errorReporter: ErrorReporter,
-        private val logger: UserFacingLogger?,
+        private val logger: UserFacingLogger?
     ) {
         fun create(scope: CoroutineScope): IntentConfirmationHandler {
             return IntentConfirmationHandler(
@@ -680,7 +681,7 @@ internal class IntentConfirmationHandler(
                 coroutineScope = scope,
                 errorReporter = errorReporter,
                 savedStateHandle = savedStateHandle,
-                logger = logger,
+                logger = logger
             )
         }
     }
