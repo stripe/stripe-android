@@ -143,11 +143,12 @@ internal class NetworkingLinkSignupViewModel @AssistedInject constructor(
                 }
             },
             onFail = { error ->
+                val displayErrorScreen = stateFlow.value.isInstantDebits && error is PermissionException
                 handleError(
                     extraMessage = "Error looking up account",
                     error = error,
                     pane = pane,
-                    displayErrorScreen = error is PermissionException,
+                    displayErrorScreen = displayErrorScreen,
                 )
             },
         )
