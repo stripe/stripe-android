@@ -1,6 +1,14 @@
 public abstract interface annotation class com/stripe/android/ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi : java/lang/annotation/Annotation {
 }
 
+public final class com/stripe/android/common/model/CommonConfiguration$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/common/model/CommonConfiguration;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/common/model/CommonConfiguration;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public abstract interface class com/stripe/android/customersheet/CustomerAdapter {
 	public static final field Companion Lcom/stripe/android/customersheet/CustomerAdapter$Companion;
 	public abstract fun attachPaymentMethod (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -1757,6 +1765,14 @@ public final class com/stripe/android/paymentsheet/flowcontroller/DefaultFlowCon
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/flowcontroller/DefaultFlowController$Args;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/flowcontroller/DefaultFlowController$Args;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/paymentsheet/flowcontroller/DefaultFlowController$State$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/flowcontroller/DefaultFlowController$State;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/flowcontroller/DefaultFlowController$State;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 

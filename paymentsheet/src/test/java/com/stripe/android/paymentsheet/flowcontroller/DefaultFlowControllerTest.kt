@@ -14,6 +14,7 @@ import app.cash.turbine.plusAssign
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
@@ -82,7 +83,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.Cvc
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionResult
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.LinkState
-import com.stripe.android.paymentsheet.state.PaymentSheetLoader
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.paymentsheet.ui.SepaMandateContract
 import com.stripe.android.paymentsheet.ui.SepaMandateResult
@@ -91,9 +92,9 @@ import com.stripe.android.paymentsheet.utils.RecordingGooglePayPaymentMethodLaun
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
-import com.stripe.android.utils.FakePaymentSheetLoader
+import com.stripe.android.utils.FakePaymentElementLoader
 import com.stripe.android.utils.IntentConfirmationInterceptorTestRule
-import com.stripe.android.utils.RelayingPaymentSheetLoader
+import com.stripe.android.utils.RelayingPaymentElementLoader
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -406,7 +407,7 @@ internal class DefaultFlowControllerTest {
         val last4 = paymentMethods.first().card?.last4.orEmpty()
 
         // Initially configure for a customer with saved payment methods
-        val paymentSheetLoader = FakePaymentSheetLoader(
+        val paymentSheetLoader = FakePaymentElementLoader(
             customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(paymentMethods = paymentMethods),
             paymentSelection = PaymentSelection.Saved(paymentMethods.first()),
         )
@@ -437,7 +438,7 @@ internal class DefaultFlowControllerTest {
     @Test
     fun `init with failure should return expected value`() = runTest {
         createFlowController(
-            paymentSheetLoader = FakePaymentSheetLoader(shouldFail = true)
+            paymentElementLoader = FakePaymentElementLoader(shouldFail = true)
         ).configureExpectingError()
     }
 
@@ -452,12 +453,13 @@ internal class DefaultFlowControllerTest {
         val expectedArgs = PaymentOptionContract.Args(
             state = PaymentSheetState.Full(
                 customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
-                config = PaymentSheet.Configuration("com.stripe.android.paymentsheet.test"),
+                config = PaymentSheet.Configuration("com.stripe.android.paymentsheet.test").asCommonConfiguration(),
                 paymentSelection = null,
                 linkState = null,
                 validationError = null,
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(allowsDelayedPaymentMethods = false),
             ),
+            configuration = PaymentSheet.Configuration("com.stripe.android.paymentsheet.test"),
             statusBarColor = STATUS_BAR_COLOR,
             enableLogging = ENABLE_LOGGING,
             productUsage = PRODUCT_USAGE
@@ -498,54 +500,56 @@ internal class DefaultFlowControllerTest {
     }
 
     @Test
-    fun `onPaymentOptionResult() with saved payment method selection result should invoke callback with payment option`() = runTest {
-        val flowController = createFlowController()
+    fun `onPaymentOptionResult() with saved payment method selection result should invoke callback with payment option`() =
+        runTest {
+            val flowController = createFlowController()
 
-        flowController.configureExpectingSuccess(
-            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
-        )
-
-        flowController.onPaymentOptionResult(
-            PaymentOptionResult.Succeeded(
-                PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+            flowController.configureExpectingSuccess(
+                configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
             )
-        )
 
-        verify(paymentOptionCallback).onPaymentOption(
-            argThat {
-                drawableResourceId == R.drawable.stripe_ic_paymentsheet_card_visa &&
-                    label == "···· 4242"
-            }
-        )
-        val paymentOption = flowController.getPaymentOption()
-        assertThat(paymentOption?.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_card_visa)
-        assertThat(paymentOption?.label).isEqualTo("···· 4242")
-    }
+            flowController.onPaymentOptionResult(
+                PaymentOptionResult.Succeeded(
+                    PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+                )
+            )
+
+            verify(paymentOptionCallback).onPaymentOption(
+                argThat {
+                    drawableResourceId == R.drawable.stripe_ic_paymentsheet_card_visa &&
+                        label == "···· 4242"
+                }
+            )
+            val paymentOption = flowController.getPaymentOption()
+            assertThat(paymentOption?.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_card_visa)
+            assertThat(paymentOption?.label).isEqualTo("···· 4242")
+        }
 
     @Test
-    fun `onPaymentOptionResult() with failure when initial value is a card invoke callback with last saved`() = runTest {
-        val flowController = createFlowController(
-            paymentSelection = PaymentSelection.GooglePay,
-        )
+    fun `onPaymentOptionResult() with failure when initial value is a card invoke callback with last saved`() =
+        runTest {
+            val flowController = createFlowController(
+                paymentSelection = PaymentSelection.GooglePay,
+            )
 
-        flowController.configureExpectingSuccess(
-            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
-        )
+            flowController.configureExpectingSuccess(
+                configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
+            )
 
-        flowController.onPaymentOptionResult(
-            PaymentOptionResult.Failed(Exception("Message for testing"))
-        )
+            flowController.onPaymentOptionResult(
+                PaymentOptionResult.Failed(Exception("Message for testing"))
+            )
 
-        verify(paymentOptionCallback).onPaymentOption(
-            argThat {
-                drawableResourceId == R.drawable.stripe_google_pay_mark &&
-                    label == "Google Pay"
-            }
-        )
-        val paymentOption = flowController.getPaymentOption()
-        assertThat(paymentOption?.drawableResourceId).isEqualTo(R.drawable.stripe_google_pay_mark)
-        assertThat(paymentOption?.label).isEqualTo("Google Pay")
-    }
+            verify(paymentOptionCallback).onPaymentOption(
+                argThat {
+                    drawableResourceId == R.drawable.stripe_google_pay_mark &&
+                        label == "Google Pay"
+                }
+            )
+            val paymentOption = flowController.getPaymentOption()
+            assertThat(paymentOption?.drawableResourceId).isEqualTo(R.drawable.stripe_google_pay_mark)
+            assertThat(paymentOption?.label).isEqualTo("Google Pay")
+        }
 
     @Test
     fun `onPaymentOptionResult() with null invoke callback with null`() = runTest {
@@ -662,7 +666,7 @@ internal class DefaultFlowControllerTest {
         flowController.confirmPaymentSelection(
             NEW_CARD_PAYMENT_SELECTION,
             PaymentSheetState.Full(
-                PaymentSheetFixtures.CONFIG_CUSTOMER,
+                PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
                     paymentMethods = PAYMENT_METHODS
                 ),
@@ -701,7 +705,7 @@ internal class DefaultFlowControllerTest {
         flowController.confirmPaymentSelection(
             GENERIC_PAYMENT_SELECTION,
             PaymentSheetState.Full(
-                PaymentSheetFixtures.CONFIG_CUSTOMER,
+                PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
                     paymentMethods = PAYMENT_METHODS
                 ),
@@ -743,7 +747,7 @@ internal class DefaultFlowControllerTest {
         flowController.confirmPaymentSelection(
             paymentSelection,
             PaymentSheetState.Full(
-                PaymentSheetFixtures.CONFIG_CUSTOMER,
+                PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
                     paymentMethods = PAYMENT_METHODS
                 ),
@@ -824,44 +828,45 @@ internal class DefaultFlowControllerTest {
     }
 
     @Test
-    fun `confirmPaymentSelection() with LinkInline and user not signed in should confirm with PaymentLauncher`() = runTest {
-        val flowController = createFlowController(
-            paymentSelection = PaymentSelection.Link,
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.paymentMethodTypes.plus("link")
+    fun `confirmPaymentSelection() with LinkInline and user not signed in should confirm with PaymentLauncher`() =
+        runTest {
+            val flowController = createFlowController(
+                paymentSelection = PaymentSelection.Link,
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    paymentMethodTypes = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.paymentMethodTypes.plus("link")
+                )
             )
-        )
 
-        flowController.configureExpectingSuccess(
-            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
-        )
-
-        val paymentSelection = PaymentSelection.New.LinkInline(
-            LinkPaymentDetails.New(
-                PaymentDetailsFixtures.CONSUMER_SINGLE_PAYMENT_DETAILS.paymentDetails.first(),
-                mock(),
-                PaymentMethodCreateParamsFixtures.DEFAULT_CARD
-            ),
-            PaymentSelection.CustomerRequestedSave.NoRequest,
-        )
-
-        flowController.onPaymentOptionResult(
-            PaymentOptionResult.Succeeded(
-                paymentSelection
+            flowController.configureExpectingSuccess(
+                configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
             )
-        )
 
-        fakeIntentConfirmationInterceptor.enqueueConfirmStep(
-            confirmParams = ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
-                paymentMethodCreateParams = paymentSelection.paymentMethodCreateParams,
-                clientSecret = PaymentSheetFixtures.CLIENT_SECRET
+            val paymentSelection = PaymentSelection.New.LinkInline(
+                LinkPaymentDetails.New(
+                    PaymentDetailsFixtures.CONSUMER_SINGLE_PAYMENT_DETAILS.paymentDetails.first(),
+                    mock(),
+                    PaymentMethodCreateParamsFixtures.DEFAULT_CARD
+                ),
+                PaymentSelection.CustomerRequestedSave.NoRequest,
             )
-        )
 
-        flowController.confirm()
+            flowController.onPaymentOptionResult(
+                PaymentOptionResult.Succeeded(
+                    paymentSelection
+                )
+            )
 
-        verify(paymentLauncher).confirm(any<ConfirmPaymentIntentParams>())
-    }
+            fakeIntentConfirmationInterceptor.enqueueConfirmStep(
+                confirmParams = ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
+                    paymentMethodCreateParams = paymentSelection.paymentMethodCreateParams,
+                    clientSecret = PaymentSheetFixtures.CLIENT_SECRET
+                )
+            )
+
+            flowController.confirm()
+
+            verify(paymentLauncher).confirm(any<ConfirmPaymentIntentParams>())
+        }
 
     @Test
     fun `confirmPaymentSelection() with Link and shipping should have shipping details in confirm params`() = runTest {
@@ -915,46 +920,47 @@ internal class DefaultFlowControllerTest {
     }
 
     @Test
-    fun `confirmPaymentSelection() with Link and no shipping should not have shipping details in confirm params`() = runTest {
-        val flowController = createFlowController(
-            paymentSelection = PaymentSelection.Link,
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.paymentMethodTypes.plus("link")
+    fun `confirmPaymentSelection() with Link and no shipping should not have shipping details in confirm params`() =
+        runTest {
+            val flowController = createFlowController(
+                paymentSelection = PaymentSelection.Link,
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    paymentMethodTypes = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.paymentMethodTypes.plus("link")
+                )
             )
-        )
 
-        flowController.configureExpectingSuccess(
-            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
-        )
-
-        val paymentSelection = PaymentSelection.New.LinkInline(
-            LinkPaymentDetails.New(
-                PaymentDetailsFixtures.CONSUMER_SINGLE_PAYMENT_DETAILS.paymentDetails.first(),
-                mock(),
-                PaymentMethodCreateParamsFixtures.DEFAULT_CARD
-            ),
-            PaymentSelection.CustomerRequestedSave.NoRequest,
-        )
-
-        flowController.onPaymentOptionResult(
-            PaymentOptionResult.Succeeded(paymentSelection)
-        )
-
-        fakeIntentConfirmationInterceptor.enqueueConfirmStep(
-            confirmParams = ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
-                paymentMethodCreateParams = paymentSelection.paymentMethodCreateParams,
-                clientSecret = PaymentSheetFixtures.CLIENT_SECRET
+            flowController.configureExpectingSuccess(
+                configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
             )
-        )
 
-        flowController.confirm()
+            val paymentSelection = PaymentSelection.New.LinkInline(
+                LinkPaymentDetails.New(
+                    PaymentDetailsFixtures.CONSUMER_SINGLE_PAYMENT_DETAILS.paymentDetails.first(),
+                    mock(),
+                    PaymentMethodCreateParamsFixtures.DEFAULT_CARD
+                ),
+                PaymentSelection.CustomerRequestedSave.NoRequest,
+            )
 
-        val paramsCaptor = argumentCaptor<ConfirmPaymentIntentParams>()
+            flowController.onPaymentOptionResult(
+                PaymentOptionResult.Succeeded(paymentSelection)
+            )
 
-        verify(paymentLauncher).confirm(paramsCaptor.capture())
+            fakeIntentConfirmationInterceptor.enqueueConfirmStep(
+                confirmParams = ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
+                    paymentMethodCreateParams = paymentSelection.paymentMethodCreateParams,
+                    clientSecret = PaymentSheetFixtures.CLIENT_SECRET
+                )
+            )
 
-        assertThat(paramsCaptor.firstValue.toParamMap()["shipping"]).isNull()
-    }
+            flowController.confirm()
+
+            val paramsCaptor = argumentCaptor<ConfirmPaymentIntentParams>()
+
+            verify(paymentLauncher).confirm(paramsCaptor.capture())
+
+            assertThat(paramsCaptor.firstValue.toParamMap()["shipping"]).isNull()
+        }
 
     @Test
     fun `confirm() with default sepa saved payment method should show sepa mandate`() = runTest {
@@ -1392,8 +1398,8 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `Returns failure if attempting to confirm while configure calls is in-flight`() = runTest {
-        val mockLoader = RelayingPaymentSheetLoader()
-        val flowController = createFlowController(paymentSheetLoader = mockLoader)
+        val mockLoader = RelayingPaymentElementLoader()
+        val flowController = createFlowController(paymentElementLoader = mockLoader)
 
         mockLoader.enqueueSuccess()
 
@@ -1430,8 +1436,8 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `Returns failure if attempting to confirm if last configure call has failed`() = runTest {
-        val mockLoader = RelayingPaymentSheetLoader()
-        val flowController = createFlowController(paymentSheetLoader = mockLoader)
+        val mockLoader = RelayingPaymentElementLoader()
+        val flowController = createFlowController(paymentElementLoader = mockLoader)
 
         mockLoader.enqueueSuccess()
 
@@ -1466,8 +1472,8 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `Does not present payment options if last configure call has failed`() = runTest {
-        val mockLoader = RelayingPaymentSheetLoader()
-        val flowController = createFlowController(paymentSheetLoader = mockLoader)
+        val mockLoader = RelayingPaymentElementLoader()
+        val flowController = createFlowController(paymentElementLoader = mockLoader)
 
         mockLoader.enqueueSuccess()
 
@@ -1489,8 +1495,8 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `Does not present payment options if last configure call is in-flight`() = runTest {
-        val mockLoader = RelayingPaymentSheetLoader()
-        val flowController = createFlowController(paymentSheetLoader = mockLoader)
+        val mockLoader = RelayingPaymentElementLoader()
+        val flowController = createFlowController(paymentElementLoader = mockLoader)
 
         mockLoader.enqueueSuccess()
 
@@ -1802,13 +1808,14 @@ internal class DefaultFlowControllerTest {
     }
 
     @Test
-    fun `On complete internal payment result in PI mode & should not reuse, should not save payment selection`() = runTest {
-        selectionSavedTest(shouldSave = false) { flowController ->
-            flowController.configureWithPaymentIntent(
-                paymentIntentClientSecret = "pi_12345"
-            ) { _, _ -> }
+    fun `On complete internal payment result in PI mode & should not reuse, should not save payment selection`() =
+        runTest {
+            selectionSavedTest(shouldSave = false) { flowController ->
+                flowController.configureWithPaymentIntent(
+                    paymentIntentClientSecret = "pi_12345"
+                ) { _, _ -> }
+            }
         }
-    }
 
     @Test
     fun `On complete internal payment result in SI mode, should save payment selection`() = runTest {
@@ -1820,33 +1827,35 @@ internal class DefaultFlowControllerTest {
     }
 
     @Test
-    fun `On complete internal payment result with intent config in PI mode, should not save payment selection`() = runTest {
-        selectionSavedTest(shouldSave = false) { flowController ->
-            flowController.configureWithIntentConfiguration(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
-                        amount = 10L,
-                        currency = "USD"
+    fun `On complete internal payment result with intent config in PI mode, should not save payment selection`() =
+        runTest {
+            selectionSavedTest(shouldSave = false) { flowController ->
+                flowController.configureWithIntentConfiguration(
+                    intentConfiguration = PaymentSheet.IntentConfiguration(
+                        mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                            amount = 10L,
+                            currency = "USD"
+                        )
                     )
-                )
-            ) { _, _ -> }
+                ) { _, _ -> }
+            }
         }
-    }
 
     @Test
-    fun `On complete internal payment result with intent config in PI+SFU mode, should save payment selection`() = runTest {
-        selectionSavedTest { flowController ->
-            flowController.configureWithIntentConfiguration(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
-                        amount = 10L,
-                        currency = "USD",
-                        setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession
+    fun `On complete internal payment result with intent config in PI+SFU mode, should save payment selection`() =
+        runTest {
+            selectionSavedTest { flowController ->
+                flowController.configureWithIntentConfiguration(
+                    intentConfiguration = PaymentSheet.IntentConfiguration(
+                        mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                            amount = 10L,
+                            currency = "USD",
+                            setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession
+                        )
                     )
-                )
-            ) { _, _ -> }
+                ) { _, _ -> }
+            }
         }
-    }
 
     @Test
     fun `On complete internal payment result with intent config in SI mode, should save payment selection`() = runTest {
@@ -2336,7 +2345,7 @@ internal class DefaultFlowControllerTest {
         eventReporter: EventReporter = this.eventReporter,
     ): DefaultFlowController {
         return createFlowController(
-            FakePaymentSheetLoader(
+            FakePaymentElementLoader(
                 customer = customer,
                 stripeIntent = stripeIntent,
                 paymentSelection = paymentSelection,
@@ -2351,7 +2360,7 @@ internal class DefaultFlowControllerTest {
     }
 
     private fun createFlowController(
-        paymentSheetLoader: PaymentSheetLoader,
+        paymentElementLoader: PaymentElementLoader,
         viewModel: FlowControllerViewModel = createViewModel(),
         bacsMandateConfirmationLauncherFactory: BacsMandateConfirmationLauncherFactory = mock(),
         cvcRecollectionLauncherFactory: CvcRecollectionLauncherFactory = mock(),
@@ -2383,11 +2392,11 @@ internal class DefaultFlowControllerTest {
         bacsMandateConfirmationLauncherFactory = bacsMandateConfirmationLauncherFactory,
         linkLauncher = linkPaymentLauncher,
         configurationHandler = FlowControllerConfigurationHandler(
-            paymentSheetLoader = paymentSheetLoader,
+            paymentElementLoader = paymentElementLoader,
             uiContext = testDispatcher,
             eventReporter = eventReporter,
             viewModel = viewModel,
-            paymentSelectionUpdater = { _, _, newState -> newState.paymentSelection },
+            paymentSelectionUpdater = { _, _, newState, _ -> newState.paymentSelection },
         ),
         intentConfirmationInterceptor = fakeIntentConfirmationInterceptor,
         errorReporter = errorReporter,
@@ -2457,7 +2466,7 @@ internal class DefaultFlowControllerTest {
             listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD) + PaymentMethodFixtures.createCards(5)
 
         private val PAYMENT_SHEET_STATE_FULL = PaymentSheetState.Full(
-            PaymentSheetFixtures.CONFIG_CUSTOMER,
+            PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
             customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
                 paymentMethods = PAYMENT_METHODS
             ),

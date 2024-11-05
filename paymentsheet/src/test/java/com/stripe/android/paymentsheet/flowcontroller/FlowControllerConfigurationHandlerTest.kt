@@ -16,11 +16,11 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.LinkState
-import com.stripe.android.paymentsheet.state.PaymentSheetLoader
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.SessionTestRule
-import com.stripe.android.utils.FakePaymentSheetLoader
+import com.stripe.android.utils.FakePaymentElementLoader
 import com.stripe.android.utils.IntentConfirmationInterceptorTestRule
-import com.stripe.android.utils.RelayingPaymentSheetLoader
+import com.stripe.android.utils.RelayingPaymentElementLoader
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
@@ -317,7 +317,7 @@ class FlowControllerConfigurationHandlerTest {
             var onInitCallbacks = 0
 
             val configurationHandler = createConfigurationHandler(
-                FakePaymentSheetLoader(
+                FakePaymentElementLoader(
                     customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
                     delay = 2.seconds,
                 )
@@ -343,8 +343,8 @@ class FlowControllerConfigurationHandlerTest {
 
     @Test
     fun `Cancels current configure job if new call to configure comes in`() = runTest {
-        val loader = RelayingPaymentSheetLoader()
-        val configurationHandler = createConfigurationHandler(paymentSheetLoader = loader)
+        val loader = RelayingPaymentElementLoader()
+        val configurationHandler = createConfigurationHandler(paymentElementLoader = loader)
 
         val amounts = (0 until 10).map { index ->
             1_000L + index * 200L
@@ -381,8 +381,8 @@ class FlowControllerConfigurationHandlerTest {
 
     @Test
     fun `Cancels current configure job if coroutine scope is canceled`() = runTest {
-        val loader = RelayingPaymentSheetLoader()
-        val configurationHandler = createConfigurationHandler(paymentSheetLoader = loader)
+        val loader = RelayingPaymentElementLoader()
+        val configurationHandler = createConfigurationHandler(paymentElementLoader = loader)
 
         val resultTurbine = Turbine<Unit>()
 
@@ -408,7 +408,7 @@ class FlowControllerConfigurationHandlerTest {
     fun `Records configuration failure correctly in view model`() = runTest {
         val resultTurbine = Turbine<Throwable?>()
         val configurationHandler = createConfigurationHandler(
-            paymentSheetLoader = FakePaymentSheetLoader(shouldFail = true),
+            paymentElementLoader = FakePaymentElementLoader(shouldFail = true),
         )
 
         configurationHandler.configure(
@@ -515,8 +515,8 @@ class FlowControllerConfigurationHandlerTest {
         )
     }
 
-    private fun defaultPaymentSheetLoader(): PaymentSheetLoader {
-        return FakePaymentSheetLoader(
+    private fun defaultPaymentSheetLoader(): PaymentElementLoader {
+        return FakePaymentElementLoader(
             customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             paymentSelection = PaymentSelection.Link,
@@ -535,14 +535,14 @@ class FlowControllerConfigurationHandlerTest {
     }
 
     private fun createConfigurationHandler(
-        paymentSheetLoader: PaymentSheetLoader = defaultPaymentSheetLoader()
+        paymentElementLoader: PaymentElementLoader = defaultPaymentSheetLoader()
     ): FlowControllerConfigurationHandler {
         return FlowControllerConfigurationHandler(
-            paymentSheetLoader = paymentSheetLoader,
+            paymentElementLoader = paymentElementLoader,
             uiContext = testDispatcher,
             eventReporter = eventReporter,
             viewModel = viewModel,
-            paymentSelectionUpdater = { _, _, newState -> newState.paymentSelection },
+            paymentSelectionUpdater = { _, _, newState, _ -> newState.paymentSelection },
         )
     }
 }

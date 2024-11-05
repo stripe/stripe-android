@@ -2,6 +2,7 @@ package com.stripe.android.lpmfoundations.paymentmethod
 
 import android.os.Parcelable
 import com.stripe.android.CardBrandFilter
+import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.lpmfoundations.FormHeaderInformation
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
@@ -224,7 +225,7 @@ internal data class PaymentMethodMetadata(
     internal companion object {
         internal fun create(
             elementsSession: ElementsSession,
-            configuration: PaymentSheet.Configuration,
+            configuration: CommonConfiguration,
             sharedDataSpecs: List<SharedDataSpec>,
             externalPaymentMethodSpecs: List<ExternalPaymentMethodSpec>,
             isGooglePayReady: Boolean,

@@ -56,6 +56,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.Cvc
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionLauncher
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionLauncherFactory
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionResult
+import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.paymentsheet.toPaymentConfirmationOption
 import com.stripe.android.paymentsheet.ui.SepaMandateContract
@@ -261,7 +262,7 @@ internal class DefaultFlowController @Inject internal constructor(
         }
     }
 
-    private fun currentStateForPresenting(): Result<PaymentSheetState.Full> {
+    private fun currentStateForPresenting(): Result<State> {
         val state = viewModel.state
             ?: return Result.failure(
                 IllegalStateException(
@@ -295,7 +296,8 @@ internal class DefaultFlowController @Inject internal constructor(
         )
 
         val args = PaymentOptionContract.Args(
-            state = state.copy(paymentSelection = viewModel.paymentSelection),
+            state = state.paymentSheetState.copy(paymentSelection = viewModel.paymentSelection),
+            configuration = state.config,
             statusBarColor = statusBarColor(),
             enableLogging = enableLogging,
             productUsage = productUsage,
@@ -334,12 +336,12 @@ internal class DefaultFlowController @Inject internal constructor(
 
         when (val paymentSelection = viewModel.paymentSelection) {
             is PaymentSelection.Link,
-            is PaymentSelection.New.LinkInline -> confirmLink(paymentSelection, state)
+            is PaymentSelection.New.LinkInline -> confirmLink(paymentSelection, state.paymentSheetState)
             is PaymentSelection.GooglePay,
             is PaymentSelection.ExternalPaymentMethod,
             is PaymentSelection.New,
-            null -> confirmPaymentSelection(paymentSelection, state)
-            is PaymentSelection.Saved -> confirmSavedPaymentMethod(paymentSelection, state)
+            null -> confirmPaymentSelection(paymentSelection, state.paymentSheetState)
+            is PaymentSelection.Saved -> confirmSavedPaymentMethod(paymentSelection, state.paymentSheetState)
         }
     }
 
@@ -441,7 +443,7 @@ internal class DefaultFlowController @Inject internal constructor(
                                 )
                             )
                             viewModel.paymentSelection = selection
-                            confirmPaymentSelection(selection, state)
+                            confirmPaymentSelection(selection, state.paymentSheetState)
                         } ?: paymentResultCallback.onPaymentSheetResult(
                             PaymentSheetResult.Failed(
                                 CvcRecollectionException(
@@ -478,7 +480,7 @@ internal class DefaultFlowController @Inject internal constructor(
                     viewModel.paymentSelection = paymentSelection
                     confirmPaymentSelection(
                         paymentSelection,
-                        state
+                        state.paymentSheetState,
                     )
                 },
                 onFailure = { error ->
@@ -501,8 +503,8 @@ internal class DefaultFlowController @Inject internal constructor(
         paymentOptionResult?.paymentMethods?.let {
             val currentState = viewModel.state
 
-            viewModel.state = currentState?.copy(
-                customer = currentState.customer?.copy(paymentMethods = it)
+            viewModel.state = currentState?.copyPaymentSheetState(
+                customer = currentState.paymentSheetState.customer?.copy(paymentMethods = it)
             )
         }
         when (paymentOptionResult) {
@@ -732,6 +734,22 @@ internal class DefaultFlowController @Inject internal constructor(
         val clientSecret: String,
         val config: PaymentSheet.Configuration?
     ) : Parcelable
+
+    @Parcelize
+    data class State(
+        val paymentSheetState: PaymentSheetState.Full,
+        val config: PaymentSheet.Configuration,
+    ) : Parcelable {
+        fun copyPaymentSheetState(
+            paymentSelection: PaymentSelection? = paymentSheetState.paymentSelection,
+            customer: CustomerState? = paymentSheetState.customer,
+        ): State = copy(
+            paymentSheetState = paymentSheetState.copy(
+                paymentSelection = paymentSelection,
+                customer = customer,
+            )
+        )
+    }
 
     companion object {
         fun getInstance(

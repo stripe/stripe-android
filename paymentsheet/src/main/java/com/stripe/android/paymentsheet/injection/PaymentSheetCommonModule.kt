@@ -44,9 +44,9 @@ import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.repositories.RealElementsSessionRepository
 import com.stripe.android.paymentsheet.state.DefaultLinkAccountStatusProvider
-import com.stripe.android.paymentsheet.state.DefaultPaymentSheetLoader
+import com.stripe.android.paymentsheet.state.DefaultPaymentElementLoader
 import com.stripe.android.paymentsheet.state.LinkAccountStatusProvider
-import com.stripe.android.paymentsheet.state.PaymentSheetLoader
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.ui.DefaultEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import dagger.Binds
@@ -81,7 +81,7 @@ internal abstract class PaymentSheetCommonModule {
     ): ElementsSessionRepository
 
     @Binds
-    abstract fun bindsPaymentSheetLoader(impl: DefaultPaymentSheetLoader): PaymentSheetLoader
+    abstract fun bindsPaymentSheetLoader(impl: DefaultPaymentElementLoader): PaymentElementLoader
 
     @Binds
     abstract fun bindsUserFacingLogger(impl: RealUserFacingLogger): UserFacingLogger

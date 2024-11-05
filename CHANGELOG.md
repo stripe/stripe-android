@@ -2,6 +2,8 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+## 21.0.0 - 2024-11-04
+
 ### PaymentSheet
 - [CHANGED] [9498](https://github.com/stripe/stripe-android/pull/9498) The default value of `PaymentSheet.Configuration.Builder.paymentMethodLayout` has changed from Horizontal to Automatic.
 

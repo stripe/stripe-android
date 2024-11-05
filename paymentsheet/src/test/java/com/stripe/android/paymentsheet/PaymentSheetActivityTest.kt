@@ -85,7 +85,7 @@ import com.stripe.android.uicore.elements.bottomsheet.BottomSheetContentTestTag
 import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
-import com.stripe.android.utils.FakePaymentSheetLoader
+import com.stripe.android.utils.FakePaymentElementLoader
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
@@ -1130,7 +1130,7 @@ internal class PaymentSheetActivityTest {
             PaymentSheetViewModel(
                 args = args,
                 eventReporter = eventReporter,
-                paymentSheetLoader = FakePaymentSheetLoader(
+                paymentElementLoader = FakePaymentElementLoader(
                     stripeIntent = paymentIntent,
                     customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(paymentMethods = paymentMethods),
                     isGooglePayAvailable = isGooglePayAvailable,

@@ -1098,56 +1098,12 @@ public abstract interface class com/stripe/android/googlepaylauncher/GooglePayLa
 	public abstract fun onResult (Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$Result;)V
 }
 
-public final class com/stripe/android/googlepaylauncher/GooglePayLauncherContract : androidx/activity/result/contract/ActivityResultContract {
-	public static final field $stable I
-	public fun <init> ()V
-	public fun createIntent (Landroid/content/Context;Lcom/stripe/android/googlepaylauncher/GooglePayLauncherContract$Args;)Landroid/content/Intent;
-	public synthetic fun createIntent (Landroid/content/Context;Ljava/lang/Object;)Landroid/content/Intent;
-	public fun parseResult (ILandroid/content/Intent;)Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$Result;
-	public synthetic fun parseResult (ILandroid/content/Intent;)Ljava/lang/Object;
-}
-
-public abstract class com/stripe/android/googlepaylauncher/GooglePayLauncherContract$Args : android/os/Parcelable {
-	public static final field $stable I
-}
-
-public final class com/stripe/android/googlepaylauncher/GooglePayLauncherContract$PaymentIntentArgs : com/stripe/android/googlepaylauncher/GooglePayLauncherContract$Args {
-	public static final field $stable I
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> (Ljava/lang/String;Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$Config;)V
-	public fun <init> (Ljava/lang/String;Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$Config;Ljava/lang/String;)V
-	public synthetic fun <init> (Ljava/lang/String;Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$Config;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun copy (Ljava/lang/String;Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$Config;Ljava/lang/String;)Lcom/stripe/android/googlepaylauncher/GooglePayLauncherContract$PaymentIntentArgs;
-	public static synthetic fun copy$default (Lcom/stripe/android/googlepaylauncher/GooglePayLauncherContract$PaymentIntentArgs;Ljava/lang/String;Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$Config;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/googlepaylauncher/GooglePayLauncherContract$PaymentIntentArgs;
-	public final fun describeContents ()I
-	public fun equals (Ljava/lang/Object;)Z
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-	public final fun writeToParcel (Landroid/os/Parcel;I)V
-}
-
 public final class com/stripe/android/googlepaylauncher/GooglePayLauncherContract$PaymentIntentArgs$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/googlepaylauncher/GooglePayLauncherContract$PaymentIntentArgs;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/googlepaylauncher/GooglePayLauncherContract$PaymentIntentArgs;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/googlepaylauncher/GooglePayLauncherContract$SetupIntentArgs : com/stripe/android/googlepaylauncher/GooglePayLauncherContract$Args {
-	public static final field $stable I
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> (Ljava/lang/String;Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$Config;Ljava/lang/String;)V
-	public fun <init> (Ljava/lang/String;Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$Config;Ljava/lang/String;Ljava/lang/Long;)V
-	public fun <init> (Ljava/lang/String;Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$Config;Ljava/lang/String;Ljava/lang/Long;Ljava/lang/String;)V
-	public synthetic fun <init> (Ljava/lang/String;Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$Config;Ljava/lang/String;Ljava/lang/Long;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun copy (Ljava/lang/String;Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$Config;Ljava/lang/String;Ljava/lang/Long;Ljava/lang/String;)Lcom/stripe/android/googlepaylauncher/GooglePayLauncherContract$SetupIntentArgs;
-	public static synthetic fun copy$default (Lcom/stripe/android/googlepaylauncher/GooglePayLauncherContract$SetupIntentArgs;Ljava/lang/String;Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$Config;Ljava/lang/String;Ljava/lang/Long;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/googlepaylauncher/GooglePayLauncherContract$SetupIntentArgs;
-	public final fun describeContents ()I
-	public fun equals (Ljava/lang/Object;)Z
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class com/stripe/android/googlepaylauncher/GooglePayLauncherContract$SetupIntentArgs$Creator : android/os/Parcelable$Creator {

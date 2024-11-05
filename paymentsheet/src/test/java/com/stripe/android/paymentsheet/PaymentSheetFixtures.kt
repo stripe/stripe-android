@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet
 import android.content.res.ColorStateList
 import android.graphics.Color
 import androidx.core.graphics.toColorInt
+import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.PaymentMethod
@@ -130,12 +131,13 @@ internal object PaymentSheetFixtures {
     internal val PAYMENT_OPTIONS_CONTRACT_ARGS = PaymentOptionContract.Args(
         state = PaymentSheetState.Full(
             customer = EMPTY_CUSTOMER_STATE,
-            config = CONFIG_GOOGLEPAY,
+            config = CONFIG_GOOGLEPAY.asCommonConfiguration(),
             paymentSelection = null,
             linkState = null,
             validationError = null,
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         ),
+        configuration = CONFIG_GOOGLEPAY,
         statusBarColor = STATUS_BAR_COLOR,
         enableLogging = false,
         productUsage = mock()
@@ -145,7 +147,7 @@ internal object PaymentSheetFixtures {
         paymentMethods: List<PaymentMethod> = state.customer?.paymentMethods ?: emptyList(),
         isGooglePayReady: Boolean = state.paymentMethodMetadata.isGooglePayReady,
         stripeIntent: StripeIntent = state.stripeIntent,
-        config: PaymentSheet.Configuration = state.config,
+        config: PaymentSheet.Configuration = configuration,
         paymentSelection: PaymentSelection? = state.paymentSelection,
         linkState: LinkState? = state.linkState,
     ): PaymentOptionContract.Args {
@@ -160,7 +162,7 @@ internal object PaymentSheetFixtures {
                         canRemoveDuplicates = false,
                     )
                 ),
-                config = config,
+                config = config.asCommonConfiguration(),
                 paymentSelection = paymentSelection,
                 linkState = linkState,
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(
@@ -168,6 +170,7 @@ internal object PaymentSheetFixtures {
                     isGooglePayReady = isGooglePayReady,
                 ),
             ),
+            configuration = config,
         )
     }
 
