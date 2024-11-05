@@ -4,7 +4,7 @@ import com.stripe.android.core.injection.UIContext
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.InitializationMode.DeferredIntent
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.state.PaymentSheetLoader
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.paymentsheet.validate
 import kotlinx.coroutines.CoroutineScope
@@ -18,7 +18,7 @@ import kotlin.coroutines.CoroutineContext
 
 @Singleton
 internal class FlowControllerConfigurationHandler @Inject constructor(
-    private val paymentSheetLoader: PaymentSheetLoader,
+    private val paymentElementLoader: PaymentElementLoader,
     @UIContext private val uiContext: CoroutineContext,
     private val eventReporter: EventReporter,
     private val viewModel: FlowControllerViewModel,
@@ -87,7 +87,7 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
 
         viewModel.resetSession()
 
-        paymentSheetLoader.load(
+        paymentElementLoader.load(
             initializationMode = initializationMode,
             paymentSheetConfiguration = configuration,
             isReloadingAfterProcessDeath = false,

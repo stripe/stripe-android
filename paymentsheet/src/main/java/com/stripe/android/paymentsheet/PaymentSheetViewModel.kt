@@ -41,7 +41,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.Arg
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcCompletionState
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionInteractor
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
-import com.stripe.android.paymentsheet.state.PaymentSheetLoader
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
@@ -73,7 +73,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     // Properties provided through PaymentSheetViewModelComponent.Builder
     internal val args: PaymentSheetContractV2.Args,
     eventReporter: EventReporter,
-    private val paymentSheetLoader: PaymentSheetLoader,
+    private val paymentElementLoader: PaymentElementLoader,
     customerRepository: CustomerRepository,
     private val prefsRepository: PrefsRepository,
     private val logger: Logger,
@@ -283,7 +283,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     private suspend fun loadPaymentSheetState() {
         val result = withContext(workContext) {
-            paymentSheetLoader.load(
+            paymentElementLoader.load(
                 initializationMode = args.initializationMode,
                 paymentSheetConfiguration = args.config,
                 isReloadingAfterProcessDeath = intentConfirmationHandler.hasReloadedFromProcessDeath,
