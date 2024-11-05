@@ -9,6 +9,7 @@ object FeatureFlags {
     val nativeLinkEnabled = FeatureFlag()
     val instantDebitsBillingDetails = FeatureFlag()
     val instantDebitsDeferredIntent = FeatureFlag()
+    val useNewUpdateCardScreen = FeatureFlag()
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
