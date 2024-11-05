@@ -2239,8 +2239,8 @@ internal class DefaultPaymentSheetLoaderTest {
             externalPaymentMethodData = externalPaymentMethodData,
         ),
         userFacingLogger: FakeUserFacingLogger = FakeUserFacingLogger(),
-    ): PaymentSheetLoader {
-        return DefaultPaymentSheetLoader(
+    ): PaymentElementLoader {
+        return DefaultPaymentElementLoader(
             prefsRepositoryFactory = { prefsRepository },
             googlePayRepositoryFactory = {
                 if (isGooglePayReady) readyGooglePayRepository else unreadyGooglePayRepository

@@ -82,7 +82,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.Cvc
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionResult
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.LinkState
-import com.stripe.android.paymentsheet.state.PaymentSheetLoader
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.paymentsheet.ui.SepaMandateContract
 import com.stripe.android.paymentsheet.ui.SepaMandateResult
@@ -91,9 +91,9 @@ import com.stripe.android.paymentsheet.utils.RecordingGooglePayPaymentMethodLaun
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
-import com.stripe.android.utils.FakePaymentSheetLoader
+import com.stripe.android.utils.FakePaymentElementLoader
 import com.stripe.android.utils.IntentConfirmationInterceptorTestRule
-import com.stripe.android.utils.RelayingPaymentSheetLoader
+import com.stripe.android.utils.RelayingPaymentElementLoader
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -406,7 +406,7 @@ internal class DefaultFlowControllerTest {
         val last4 = paymentMethods.first().card?.last4.orEmpty()
 
         // Initially configure for a customer with saved payment methods
-        val paymentSheetLoader = FakePaymentSheetLoader(
+        val paymentSheetLoader = FakePaymentElementLoader(
             customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(paymentMethods = paymentMethods),
             paymentSelection = PaymentSelection.Saved(paymentMethods.first()),
         )
@@ -437,7 +437,7 @@ internal class DefaultFlowControllerTest {
     @Test
     fun `init with failure should return expected value`() = runTest {
         createFlowController(
-            paymentSheetLoader = FakePaymentSheetLoader(shouldFail = true)
+            paymentElementLoader = FakePaymentElementLoader(shouldFail = true)
         ).configureExpectingError()
     }
 
@@ -1392,8 +1392,8 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `Returns failure if attempting to confirm while configure calls is in-flight`() = runTest {
-        val mockLoader = RelayingPaymentSheetLoader()
-        val flowController = createFlowController(paymentSheetLoader = mockLoader)
+        val mockLoader = RelayingPaymentElementLoader()
+        val flowController = createFlowController(paymentElementLoader = mockLoader)
 
         mockLoader.enqueueSuccess()
 
@@ -1430,8 +1430,8 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `Returns failure if attempting to confirm if last configure call has failed`() = runTest {
-        val mockLoader = RelayingPaymentSheetLoader()
-        val flowController = createFlowController(paymentSheetLoader = mockLoader)
+        val mockLoader = RelayingPaymentElementLoader()
+        val flowController = createFlowController(paymentElementLoader = mockLoader)
 
         mockLoader.enqueueSuccess()
 
@@ -1466,8 +1466,8 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `Does not present payment options if last configure call has failed`() = runTest {
-        val mockLoader = RelayingPaymentSheetLoader()
-        val flowController = createFlowController(paymentSheetLoader = mockLoader)
+        val mockLoader = RelayingPaymentElementLoader()
+        val flowController = createFlowController(paymentElementLoader = mockLoader)
 
         mockLoader.enqueueSuccess()
 
@@ -1489,8 +1489,8 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `Does not present payment options if last configure call is in-flight`() = runTest {
-        val mockLoader = RelayingPaymentSheetLoader()
-        val flowController = createFlowController(paymentSheetLoader = mockLoader)
+        val mockLoader = RelayingPaymentElementLoader()
+        val flowController = createFlowController(paymentElementLoader = mockLoader)
 
         mockLoader.enqueueSuccess()
 
@@ -2336,7 +2336,7 @@ internal class DefaultFlowControllerTest {
         eventReporter: EventReporter = this.eventReporter,
     ): DefaultFlowController {
         return createFlowController(
-            FakePaymentSheetLoader(
+            FakePaymentElementLoader(
                 customer = customer,
                 stripeIntent = stripeIntent,
                 paymentSelection = paymentSelection,
@@ -2351,7 +2351,7 @@ internal class DefaultFlowControllerTest {
     }
 
     private fun createFlowController(
-        paymentSheetLoader: PaymentSheetLoader,
+        paymentElementLoader: PaymentElementLoader,
         viewModel: FlowControllerViewModel = createViewModel(),
         bacsMandateConfirmationLauncherFactory: BacsMandateConfirmationLauncherFactory = mock(),
         cvcRecollectionLauncherFactory: CvcRecollectionLauncherFactory = mock(),
@@ -2383,7 +2383,7 @@ internal class DefaultFlowControllerTest {
         bacsMandateConfirmationLauncherFactory = bacsMandateConfirmationLauncherFactory,
         linkLauncher = linkPaymentLauncher,
         configurationHandler = FlowControllerConfigurationHandler(
-            paymentSheetLoader = paymentSheetLoader,
+            paymentElementLoader = paymentElementLoader,
             uiContext = testDispatcher,
             eventReporter = eventReporter,
             viewModel = viewModel,

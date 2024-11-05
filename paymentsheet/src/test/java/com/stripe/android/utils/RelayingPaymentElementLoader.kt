@@ -3,13 +3,13 @@ package com.stripe.android.utils
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.state.PaymentSheetLoader
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetLoadingException
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.testing.PaymentIntentFactory
 import kotlinx.coroutines.channels.Channel
 
-internal class RelayingPaymentSheetLoader : PaymentSheetLoader {
+internal class RelayingPaymentElementLoader : PaymentElementLoader {
 
     private val results = Channel<Result<PaymentSheetState.Full>>(capacity = 1)
 

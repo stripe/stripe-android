@@ -46,7 +46,7 @@ import kotlin.coroutines.CoroutineContext
  * Loads the information necessary to display [PaymentSheet], either directly or via
  * [PaymentSheet.FlowController].
  */
-internal interface PaymentSheetLoader {
+internal interface PaymentElementLoader {
 
     suspend fun load(
         initializationMode: PaymentSheet.InitializationMode,
@@ -57,14 +57,14 @@ internal interface PaymentSheetLoader {
 }
 
 /**
- * A default implementation of [PaymentSheetLoader] used to load necessary information for
+ * A default implementation of [PaymentElementLoader] used to load necessary information for
  * building [PaymentSheet]. See the linked flow diagram to understand how this implementation
  * loads [PaymentSheet] information based its provided initialization options.
  *
  * @see <a href="https://whimsical.com/paymentsheet-loading-flow-diagram-EwTmrwvNmhcD9B2PKuSu82/">Flow Diagram</a>
  */
 @Singleton
-internal class DefaultPaymentSheetLoader @Inject constructor(
+internal class DefaultPaymentElementLoader @Inject constructor(
     private val prefsRepositoryFactory: @JvmSuppressWildcards (PaymentSheet.CustomerConfiguration?) -> PrefsRepository,
     private val googlePayRepositoryFactory: @JvmSuppressWildcards (GooglePayEnvironment) -> GooglePayRepository,
     private val elementsSessionRepository: ElementsSessionRepository,
@@ -79,7 +79,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     private val externalPaymentMethodsRepository: ExternalPaymentMethodsRepository,
     private val userFacingLogger: UserFacingLogger,
     private val cvcRecollectionHandler: CvcRecollectionHandler
-) : PaymentSheetLoader {
+) : PaymentElementLoader {
 
     @Suppress("LongMethod")
     override suspend fun load(

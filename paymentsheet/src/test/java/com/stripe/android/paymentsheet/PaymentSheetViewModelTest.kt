@@ -91,7 +91,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.Cvc
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.LinkState
-import com.stripe.android.paymentsheet.state.PaymentSheetLoader
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetLoadingException
 import com.stripe.android.paymentsheet.state.PaymentSheetLoadingException.PaymentIntentInTerminalState
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
@@ -111,10 +111,10 @@ import com.stripe.android.utils.DummyActivityResultCaller
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
-import com.stripe.android.utils.FakePaymentSheetLoader
+import com.stripe.android.utils.FakePaymentElementLoader
 import com.stripe.android.utils.IntentConfirmationInterceptorTestRule
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
-import com.stripe.android.utils.RelayingPaymentSheetLoader
+import com.stripe.android.utils.RelayingPaymentElementLoader
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
@@ -2969,12 +2969,12 @@ internal class PaymentSheetViewModelTest {
                 )
             )
         )
-        val paymentSheetLoader = RelayingPaymentSheetLoader()
+        val paymentSheetLoader = RelayingPaymentElementLoader()
 
         val viewModel = createViewModel(
             stripeIntent = stripeIntent,
             savedStateHandle = savedStateHandle,
-            paymentSheetLoader = paymentSheetLoader,
+            paymentElementLoader = paymentSheetLoader,
         )
 
         val resultListener = viewModel.capturePaymentResultListener()
@@ -3093,7 +3093,7 @@ internal class PaymentSheetViewModelTest {
         paymentLauncherFactory: StripePaymentLauncherAssistedFactory = this.paymentLauncherFactory,
         validationError: PaymentSheetLoadingException? = null,
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
-        paymentSheetLoader: PaymentSheetLoader = FakePaymentSheetLoader(
+        paymentElementLoader: PaymentElementLoader = FakePaymentElementLoader(
             stripeIntent = stripeIntent,
             shouldFail = shouldFailLoad,
             linkState = linkState,
@@ -3117,7 +3117,7 @@ internal class PaymentSheetViewModelTest {
             PaymentSheetViewModel(
                 args = args,
                 eventReporter = eventReporter,
-                paymentSheetLoader = paymentSheetLoader,
+                paymentElementLoader = paymentElementLoader,
                 customerRepository = customerRepository,
                 prefsRepository = prefsRepository,
                 logger = Logger.noop(),
