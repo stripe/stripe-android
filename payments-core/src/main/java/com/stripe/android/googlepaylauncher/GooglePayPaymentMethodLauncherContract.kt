@@ -50,7 +50,6 @@ class GooglePayPaymentMethodLauncherContract :
         internal val amount: Int,
         internal val transactionId: String? = null,
         internal val injectionParams: InjectionParams? = null,
-//        internal val cardBrandFilter: CardBrandFilter
     ) : Parcelable {
         @JvmOverloads
         constructor(
@@ -58,7 +57,6 @@ class GooglePayPaymentMethodLauncherContract :
             currencyCode: String,
             amount: Int,
             transactionId: String? = null,
-//            cardBrandFilter: CardBrandFilter
         ) : this(config, currencyCode, amount, transactionId, null)
 
         internal fun toBundle() = bundleOf(EXTRA_ARGS to this)
