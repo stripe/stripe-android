@@ -30,7 +30,6 @@ import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConf
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.testing.FeatureFlagTestRule
-import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -157,13 +156,9 @@ class USBankAccountFormViewModelTest {
 
             assertThat(
                 currentScreenState
-            ).isInstanceOf<
-                USBankAccountFormScreenState.BillingDetailsCollection
-                >()
+            ).isInstanceOf<USBankAccountFormScreenState.BillingDetailsCollection>()
 
-            viewModel.handlePrimaryButtonClick(
-                currentScreenState as USBankAccountFormScreenState.BillingDetailsCollection
-            )
+            viewModel.handlePrimaryButtonClick()
 
             verify(mockCollectBankAccountLauncher).presentWithPaymentIntent(any(), any(), any(), any())
         }
@@ -243,12 +238,7 @@ class USBankAccountFormViewModelTest {
             viewModel.collectBankAccountLauncher = mockCollectBankAccountLauncher
             viewModel.reset()
 
-            val currentScreenState =
-                viewModel.currentScreenState.value
-
-            viewModel.handlePrimaryButtonClick(
-                currentScreenState as USBankAccountFormScreenState.BillingDetailsCollection
-            )
+            viewModel.handlePrimaryButtonClick()
 
             verify(mockCollectBankAccountLauncher).presentWithPaymentIntent(any(), any(), any(), any())
         }
@@ -806,9 +796,7 @@ class USBankAccountFormViewModelTest {
             currentScreenState
         ).isInstanceOf<USBankAccountFormScreenState.BillingDetailsCollection>()
 
-        viewModel.handlePrimaryButtonClick(
-            currentScreenState as USBankAccountFormScreenState.BillingDetailsCollection
-        )
+        viewModel.handlePrimaryButtonClick()
 
         verify(mockCollectBankAccountLauncher).presentWithDeferredPayment(
             publishableKey = any(),
@@ -864,9 +852,7 @@ class USBankAccountFormViewModelTest {
             currentScreenState
         ).isInstanceOf<USBankAccountFormScreenState.BillingDetailsCollection>()
 
-        viewModel.handlePrimaryButtonClick(
-            currentScreenState as USBankAccountFormScreenState.BillingDetailsCollection
-        )
+        viewModel.handlePrimaryButtonClick()
 
         verify(mockCollectBankAccountLauncher).presentWithDeferredSetup(
             publishableKey = any(),
@@ -930,7 +916,7 @@ class USBankAccountFormViewModelTest {
             assertThat(awaitItem().isProcessing)
                 .isFalse()
 
-            viewModel.handlePrimaryButtonClick(viewModel.currentScreenState.value)
+            viewModel.handlePrimaryButtonClick()
 
             assertThat(awaitItem().isProcessing)
                 .isTrue()
@@ -1011,7 +997,7 @@ class USBankAccountFormViewModelTest {
             assertThat(awaitItem())
                 .isInstanceOf<USBankAccountFormScreenState.MandateCollection>()
 
-            viewModel.handlePrimaryButtonClick(viewModel.currentScreenState.value)
+            viewModel.handlePrimaryButtonClick()
             viewModel.reset()
 
             assertThat(expectMostRecentItem())
@@ -1027,7 +1013,7 @@ class USBankAccountFormViewModelTest {
             assertThat(awaitItem())
                 .isInstanceOf<USBankAccountFormScreenState.BillingDetailsCollection>()
 
-            viewModel.handlePrimaryButtonClick(viewModel.currentScreenState.value)
+            viewModel.handlePrimaryButtonClick()
 
             assertThat(awaitItem())
                 .isInstanceOf<USBankAccountFormScreenState.BillingDetailsCollection>()
@@ -1078,8 +1064,7 @@ class USBankAccountFormViewModelTest {
         viewModel.nameController.onValueChange("Some Name")
         viewModel.emailController.onValueChange("email@email.com")
 
-        val currentState = viewModel.currentScreenState.value
-        viewModel.handlePrimaryButtonClick(currentState)
+        viewModel.handlePrimaryButtonClick()
 
         verify(mockCollectBankAccountLauncher).presentWithPaymentIntent(
             publishableKey = any(),
@@ -1122,8 +1107,7 @@ class USBankAccountFormViewModelTest {
 
         viewModel.emailController.onValueChange("email@email.com")
 
-        val currentState = viewModel.currentScreenState.value
-        viewModel.handlePrimaryButtonClick(currentState)
+        viewModel.handlePrimaryButtonClick()
 
         verify(mockCollectBankAccountLauncher).presentWithPaymentIntent(
             publishableKey = any(),
@@ -1426,8 +1410,7 @@ class USBankAccountFormViewModelTest {
         val viewModel = createViewModel(viewModelArgs)
         viewModel.collectBankAccountLauncher = mockCollectBankAccountLauncher
 
-        val screenState = viewModel.currentScreenState.value
-        viewModel.handlePrimaryButtonClick(screenState)
+        viewModel.handlePrimaryButtonClick()
 
         val argumentCaptor = argumentCaptor<CollectBankAccountConfiguration>()
 
@@ -1509,6 +1492,7 @@ class USBankAccountFormViewModelTest {
     ) = runTest {
         val viewModel = createViewModel(
             defaultArgs.copy(
+                instantDebits = isInstantDebits,
                 showCheckbox = showCheckbox,
                 formArgs = defaultArgs.formArgs.copy(
                     hasIntentToSetup = hasIntentForSetup,
@@ -1528,21 +1512,7 @@ class USBankAccountFormViewModelTest {
                 result = awaitItem()
             }
 
-            viewModel.handlePrimaryButtonClick(
-                USBankAccountFormScreenState.MandateCollection(
-                    intentId = "pm_1",
-                    bankName = "Test bank",
-                    last4 = "1456",
-                    mandateText = resolvableString("Save"),
-                    primaryButtonText = resolvableString("Confirm"),
-                    resultIdentifier = when (isInstantDebits) {
-                        true -> USBankAccountFormScreenState.ResultIdentifier.PaymentMethod(
-                            paymentMethod = PaymentMethodFactory.instantDebits(),
-                        )
-                        false -> USBankAccountFormScreenState.ResultIdentifier.Session(id = "session_1")
-                    }
-                )
-            )
+            viewModel.handlePrimaryButtonClick()
 
             assertThat(result?.paymentMethodCreateParams?.toParamMap()).containsEntry(
                 "allow_redisplay",

@@ -7,7 +7,7 @@ import com.stripe.android.paymentsheet.ui.PrimaryButton
 internal fun USBankAccountFormArguments.handleScreenStateChanged(
     screenState: USBankAccountFormScreenState,
     enabled: Boolean,
-    onPrimaryButtonClick: (USBankAccountFormScreenState) -> Unit,
+    onPrimaryButtonClick: () -> Unit,
 ) {
     screenState.error?.let {
         onError(it)
@@ -16,7 +16,7 @@ internal fun USBankAccountFormArguments.handleScreenStateChanged(
     if (screenState is BillingDetailsCollection) {
         updatePrimaryButton(
             text = screenState.primaryButtonText,
-            onClick = { onPrimaryButtonClick(screenState) },
+            onClick = onPrimaryButtonClick,
             enabled = enabled,
             shouldShowProcessingWhenClicked = isCompleteFlow,
         )

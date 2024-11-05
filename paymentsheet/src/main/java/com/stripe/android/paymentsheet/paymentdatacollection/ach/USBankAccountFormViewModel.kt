@@ -395,7 +395,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         }
     }
 
-    fun handlePrimaryButtonClick(screenState: USBankAccountFormScreenState) {
+    fun handlePrimaryButtonClick() {
         val screenState = currentScreenState.value
         if (screenState is USBankAccountFormScreenState.BillingDetailsCollection) {
             _currentScreenState.update {
