@@ -306,7 +306,7 @@ class GooglePayJsonFactoryTest {
 
     @Test
     fun `allowedCardNetworks should only include Visa and Mastercard when filtered`() {
-        // Create a custom CardBrandFilter that accepts only Visa and Mastercard
+        // Create a CardBrandFilter that accepts only Visa and Mastercard
         val customCardBrandFilter = object : CardBrandFilter {
             override fun isAccepted(cardBrand: CardBrand): Boolean {
                 return cardBrand == CardBrand.Visa || cardBrand == CardBrand.MasterCard
@@ -344,7 +344,7 @@ class GooglePayJsonFactoryTest {
 
     @Test
     fun `allowedCardNetworks should be empty when all card brands are filtered out`() {
-        // Create a custom CardBrandFilter that rejects all card brands
+        // Create a CardBrandFilter that rejects all card brands
         val customCardBrandFilter = object : CardBrandFilter {
             override fun isAccepted(cardBrand: CardBrand): Boolean {
                 return false
@@ -372,14 +372,15 @@ class GooglePayJsonFactoryTest {
             .getJSONObject(0)
             .getJSONObject("parameters")
             .optJSONArray("allowedCardNetworks")
+            .let { StripeJsonUtils.jsonArrayToList(it) }
 
-        // Since all card brands are filtered out, allowedCardNetworks should be null
-        assertThat(allowedCardNetworks).isNull()
+        // Since all card brands are filtered out, allowedCardNetworks should be empty
+        assertThat(allowedCardNetworks).isEmpty()
     }
 
     @Test
     fun `allowedCardNetworks should include all default networks when no filtering`() {
-        // Create a custom CardBrandFilter that accepts all card brands
+        // Create a CardBrandFilter that accepts all card brands
         val customCardBrandFilter = object : CardBrandFilter {
             override fun isAccepted(cardBrand: CardBrand): Boolean {
                 return true
@@ -417,7 +418,7 @@ class GooglePayJsonFactoryTest {
 
     @Test
     fun `allowedCardNetworks should include JCB when JCB is enabled and accepted by filter`() {
-        // Create a custom CardBrandFilter that accepts all card brands
+        // Create a CardBrandFilter that accepts all card brands
         val customCardBrandFilter = object : CardBrandFilter {
             override fun isAccepted(cardBrand: CardBrand): Boolean {
                 return true
@@ -455,7 +456,7 @@ class GooglePayJsonFactoryTest {
 
     @Test
     fun `allowedCardNetworks should not include JCB when JCB is enabled but filtered out`() {
-        // Create a custom CardBrandFilter that rejects JCB
+        // Create a CardBrandFilter that rejects JCB
         val customCardBrandFilter = object : CardBrandFilter {
             override fun isAccepted(cardBrand: CardBrand): Boolean {
                 return cardBrand != CardBrand.JCB
