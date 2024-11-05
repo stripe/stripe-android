@@ -3,9 +3,11 @@ package com.stripe.android.link.repositories
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.link.LinkPaymentDetails
+import com.stripe.android.link.TestFactory
 import com.stripe.android.link.model.PaymentDetailsFixtures
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
+import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSessionSignup
@@ -492,6 +494,139 @@ class LinkApiRepositoryTest {
         val result = linkRepository.startVerification("secret", "key")
 
         assertThat(result.isFailure).isTrue()
+    }
+
+    @Test
+    fun `deletePaymentDetails without consumerPublishableKey sends correct parameters`() = runTest {
+        val secret = "secret"
+        val id = "payment_details_id"
+        linkRepository.deletePaymentDetails(id, secret, null)
+
+        verify(stripeRepository).deletePaymentDetails(
+            eq(secret),
+            eq(id),
+            eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID))
+        )
+    }
+
+    @Test
+    fun `deletePaymentDetails returns successful result`() = runTest {
+        whenever(stripeRepository.deletePaymentDetails(any(), any(), any())).thenReturn(Result.success(Unit))
+
+        val result = linkRepository.deletePaymentDetails("id", "secret", "key")
+
+        assertThat(result.isSuccess).isTrue()
+    }
+
+    @Test
+    fun `deletePaymentDetails catches exception and returns failure`() = runTest {
+        whenever(stripeRepository.deletePaymentDetails(any(), any(), any()))
+            .thenThrow(RuntimeException("error"))
+
+        val result = linkRepository.deletePaymentDetails("id", "secret", "key")
+
+        assertThat(result.isFailure).isTrue()
+    }
+
+    @Test
+    fun `updatePaymentDetails sends correct parameters`() = runTest {
+        val secret = "secret"
+        val params = ConsumerPaymentDetailsUpdateParams("id")
+        val consumerKey = "key"
+
+        linkRepository.updatePaymentDetails(
+            params,
+            secret,
+            consumerKey
+        )
+
+        verify(stripeRepository).updatePaymentDetails(
+            eq(secret),
+            eq(params),
+            eq(ApiRequest.Options(consumerKey))
+        )
+    }
+
+    @Test
+    fun `updatePaymentDetails without consumerPublishableKey sends correct parameters`() = runTest {
+        val secret = "secret"
+        val params = ConsumerPaymentDetailsUpdateParams("id")
+
+        linkRepository.updatePaymentDetails(
+            params,
+            secret,
+            null
+        )
+
+        verify(stripeRepository).updatePaymentDetails(
+            eq(secret),
+            eq(params),
+            eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID))
+        )
+    }
+
+    @Test
+    fun `updatePaymentDetails returns successful result`() = runTest {
+        whenever(stripeRepository.updatePaymentDetails(any(), any(), any()))
+            .thenReturn(Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS))
+
+        val result = linkRepository.updatePaymentDetails(
+            ConsumerPaymentDetailsUpdateParams("id"),
+            "secret",
+            "key"
+        )
+
+        assertThat(result.getOrNull()).isEqualTo(TestFactory.CONSUMER_PAYMENT_DETAILS)
+    }
+
+    @Test
+    fun `updatePaymentDetails catches exception and returns failure`() = runTest {
+        val error = RuntimeException("error")
+        whenever(stripeRepository.updatePaymentDetails(any(), any(), any()))
+            .thenReturn(Result.failure(error))
+
+        val result = linkRepository.updatePaymentDetails(
+            ConsumerPaymentDetailsUpdateParams("id"),
+            "secret",
+            "key"
+        )
+
+        assertThat(result.exceptionOrNull()).isEqualTo(error)
+    }
+
+    @Test
+    fun `listPaymentDetails sends correct parameters`() = runTest {
+        val secret = "secret"
+        val consumerKey = "key"
+        linkRepository.listPaymentDetails(secret, consumerKey)
+
+        verify(stripeRepository).listPaymentDetails(
+            eq(secret),
+            eq(emptySet()),
+            eq(ApiRequest.Options(consumerKey))
+        )
+    }
+
+    @Test
+    fun `listPaymentDetails without consumerPublishableKey sends correct parameters`() = runTest {
+        val secret = "secret"
+        linkRepository.listPaymentDetails(secret, null)
+
+        verify(stripeRepository).listPaymentDetails(
+            eq(secret),
+            eq(emptySet()),
+            eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID))
+        )
+    }
+
+    @Test
+    fun `listPaymentDetails returns successful result`() = runTest {
+        whenever(stripeRepository.listPaymentDetails(any(), any(), any()))
+            .thenReturn(Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS))
+
+        val result = linkRepository.listPaymentDetails("secret", "key")
+
+        assertThat(result.getOrNull()).isEqualTo(TestFactory.CONSUMER_PAYMENT_DETAILS)
     }
 
     private val cardPaymentMethodCreateParams =

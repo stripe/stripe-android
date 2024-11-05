@@ -382,8 +382,6 @@ interface StripeRepository {
         params: Map<String, String>? = null
     ): Result<MobileCardElementConfig>
 
-
-
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun listPaymentDetails(
         clientSecret: String,

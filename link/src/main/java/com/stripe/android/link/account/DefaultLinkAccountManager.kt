@@ -27,6 +27,7 @@ import javax.inject.Inject
 /**
  * Manages the Link account for the current user, persisting it across app usages.
  */
+@SuppressWarnings("TooManyFunctions")
 internal class DefaultLinkAccountManager @Inject constructor(
     private val config: LinkConfiguration,
     private val linkRepository: LinkRepository,
@@ -239,7 +240,9 @@ internal class DefaultLinkAccountManager @Inject constructor(
             }
     }
 
-    override suspend fun updatePaymentDetails(updateParams: ConsumerPaymentDetailsUpdateParams): Result<ConsumerPaymentDetails> {
+    override suspend fun updatePaymentDetails(
+        updateParams: ConsumerPaymentDetailsUpdateParams
+    ): Result<ConsumerPaymentDetails> {
         val clientSecret = linkAccount.value?.clientSecret ?: return Result.failure(Throwable("no link account found"))
         return linkRepository.updatePaymentDetails(
             updateParams = updateParams,

@@ -66,4 +66,13 @@ object TestFactory {
         paymentMethodCreateParams = PAYMENT_METHOD_CREATE_PARAMS,
         originalParams = mock()
     )
+
+    val CONSUMER_PAYMENT_DETAILS: ConsumerPaymentDetails = ConsumerPaymentDetails(
+        paymentDetails = listOf(
+            ConsumerPaymentDetails.Card(
+                id = "pm_123",
+                last4 = "4242",
+            )
+        )
+    )
 }

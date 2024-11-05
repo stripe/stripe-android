@@ -13,6 +13,7 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 
+@SuppressWarnings("TooManyFunctions")
 internal interface LinkAccountManager {
     val linkAccount: StateFlow<LinkAccount?>
     val accountStatus: Flow<AccountStatus>
@@ -75,7 +76,7 @@ internal interface LinkAccountManager {
     /**
      * Update an existing payment method in the signed in consumer account.
      */
-    suspend fun updatePaymentDetails(updateParams: ConsumerPaymentDetailsUpdateParams):  Result<ConsumerPaymentDetails>
+    suspend fun updatePaymentDetails(updateParams: ConsumerPaymentDetailsUpdateParams): Result<ConsumerPaymentDetails>
 
     /**
      * Delete the payment method from the signed in consumer account.
