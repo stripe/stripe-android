@@ -32,7 +32,7 @@ data class ConsumerPaymentDetails(
              * Reads the address from the [PaymentMethodCreateParams] mapping format to the format
              * used by [ConsumerPaymentDetails].
              */
-            fun getAddressFromMap(
+            internal fun getAddressFromMap(
                 cardPaymentMethodCreateParamsMap: Map<String, Any>
             ): Pair<String, Any>? {
                 val billingDetails =

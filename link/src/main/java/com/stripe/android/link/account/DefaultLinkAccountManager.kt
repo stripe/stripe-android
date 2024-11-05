@@ -6,6 +6,7 @@ import com.stripe.android.core.exception.StripeException
 import com.stripe.android.link.BuildConfig
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkPaymentDetails
+import com.stripe.android.link.NoLinkAccountFoundException
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
@@ -223,7 +224,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
     }
 
     override suspend fun startVerification(): Result<LinkAccount> {
-        val clientSecret = linkAccount.value?.clientSecret ?: return Result.failure(Throwable("no link account found"))
+        val clientSecret = linkAccount.value?.clientSecret ?: return Result.failure(NoSuchElementException())
         return linkRepository.startVerification(clientSecret, consumerPublishableKey)
             .onFailure {
                 linkEventsReporter.on2FAStartFailure()
@@ -233,7 +234,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
     }
 
     override suspend fun confirmVerification(code: String): Result<LinkAccount> {
-        val clientSecret = linkAccount.value?.clientSecret ?: return Result.failure(Throwable("no link account found"))
+        val clientSecret = linkAccount.value?.clientSecret ?: return Result.failure(NoLinkAccountFoundException())
         return linkRepository.confirmVerification(code, clientSecret, consumerPublishableKey)
             .map { consumerSession ->
                 setAccount(consumerSession, null)
@@ -243,7 +244,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
     override suspend fun updatePaymentDetails(
         updateParams: ConsumerPaymentDetailsUpdateParams
     ): Result<ConsumerPaymentDetails> {
-        val clientSecret = linkAccount.value?.clientSecret ?: return Result.failure(Throwable("no link account found"))
+        val clientSecret = linkAccount.value?.clientSecret ?: return Result.failure(NoLinkAccountFoundException())
         return linkRepository.updatePaymentDetails(
             updateParams = updateParams,
             consumerSessionClientSecret = clientSecret,
@@ -252,15 +253,16 @@ internal class DefaultLinkAccountManager @Inject constructor(
     }
 
     override suspend fun deletePaymentDetails(paymentDetailsId: String): Result<Unit> {
+        val clientSecret = linkAccount.value?.clientSecret ?: return Result.failure(NoLinkAccountFoundException())
         return linkRepository.deletePaymentDetails(
-            paymentDetailsId,
-            "clientSecret",
-            consumerPublishableKey
+            paymentDetailsId = paymentDetailsId,
+            consumerSessionClientSecret = clientSecret,
+            consumerPublishableKey = consumerPublishableKey
         )
     }
 
     override suspend fun listPaymentDetails(): Result<ConsumerPaymentDetails> {
-        val clientSecret = linkAccount.value?.clientSecret ?: return Result.failure(Throwable("no link account found"))
+        val clientSecret = linkAccount.value?.clientSecret ?: return Result.failure(NoLinkAccountFoundException())
         return linkRepository.listPaymentDetails(clientSecret, consumerPublishableKey)
     }
 

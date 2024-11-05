@@ -580,7 +580,7 @@ class LinkApiRepositoryTest {
     }
 
     @Test
-    fun `updatePaymentDetails catches exception and returns failure`() = runTest {
+    fun `updatePaymentDetails returns error result when repository fails`() = runTest {
         val error = RuntimeException("error")
         whenever(stripeRepository.updatePaymentDetails(any(), any(), any()))
             .thenReturn(Result.failure(error))

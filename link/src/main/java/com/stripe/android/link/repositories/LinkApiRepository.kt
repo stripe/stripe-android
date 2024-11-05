@@ -241,16 +241,14 @@ internal class LinkApiRepository @Inject constructor(
         consumerSessionClientSecret: String,
         consumerPublishableKey: String?
     ): Result<ConsumerPaymentDetails> {
-        return requireNotNull(
-            stripeRepository.updatePaymentDetails(
-                consumerSessionClientSecret,
-                updateParams,
-                consumerPublishableKey?.let {
-                    ApiRequest.Options(it)
-                } ?: ApiRequest.Options(
-                    publishableKeyProvider(),
-                    stripeAccountIdProvider()
-                )
+        return stripeRepository.updatePaymentDetails(
+            consumerSessionClientSecret,
+            updateParams,
+            consumerPublishableKey?.let {
+                ApiRequest.Options(it)
+            } ?: ApiRequest.Options(
+                publishableKeyProvider(),
+                stripeAccountIdProvider()
             )
         )
     }
