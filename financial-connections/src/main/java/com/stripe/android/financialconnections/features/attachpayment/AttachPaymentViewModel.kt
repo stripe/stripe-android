@@ -25,7 +25,7 @@ import com.stripe.android.financialconnections.presentation.Async
 import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.repository.SuccessContentRepository
-import com.stripe.android.financialconnections.ui.TextResource.PluralId
+import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.utils.error
 import com.stripe.android.financialconnections.utils.measureTimeMillis
 import dagger.assisted.Assisted
@@ -60,15 +60,11 @@ internal class AttachPaymentViewModel @AssistedInject constructor(
                     params = PaymentAccountParams.LinkedAccount(requireNotNull(id))
                 )
             }
-            if (manifest.isNetworkingUserFlow == true && manifest.accountholderIsLinkConsumer == true) {
-                result.networkingSuccessful?.let {
-                    successContentRepository.set(
-                        message = PluralId(
-                            value = R.plurals.stripe_success_pane_desc_link_success,
-                            count = accounts.size
-                        )
-                    )
-                }
+            manifest.displayText?.successPane?.let {
+                successContentRepository.set(
+                    message = TextResource.Text(it.subCaption),
+                    heading = TextResource.Text(it.caption),
+                )
             }
             eventTracker.track(
                 PollAttachPaymentsSucceeded(
