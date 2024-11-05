@@ -143,7 +143,8 @@ internal object CustomerSheetTestHelper {
                         config: GooglePayPaymentMethodLauncher.Config,
                         readyCallback: GooglePayPaymentMethodLauncher.ReadyCallback,
                         activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>,
-                        skipReadyCheck: Boolean
+                        skipReadyCheck: Boolean,
+                        cardBrandFilter: CardBrandFilter
                     ): GooglePayPaymentMethodLauncher = mock()
                 },
                 statusBarColor = { null },

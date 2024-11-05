@@ -173,7 +173,7 @@ internal class PaymentSheetViewModelTest {
     }
     private val googlePayLauncher = mock<GooglePayPaymentMethodLauncher>()
     private val googlePayLauncherFactory = mock<GooglePayPaymentMethodLauncherFactory> {
-        on { create(any(), any(), any(), any(), any()) } doReturn googlePayLauncher
+        on { create(any(), any(), any(), any(), any(), any()) } doReturn googlePayLauncher
     }
     private val fakeIntentConfirmationInterceptor = FakeIntentConfirmationInterceptor()
     private val fakeEditPaymentMethodInteractorFactory = FakeEditPaymentMethodInteractorFactory(testDispatcher)

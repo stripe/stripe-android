@@ -8,6 +8,8 @@ import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.CardBrandFilter
+import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.UserFacingLogger
@@ -1473,7 +1475,7 @@ class IntentConfirmationHandlerTest {
     fun `On start Google Pay with PI, should create and launch Google Pay launcher properly`() = runTest {
         val googlePayPaymentMethodLauncher = mock<GooglePayPaymentMethodLauncher>()
         val googlePayPaymentMethodLauncherFactory = mock<GooglePayPaymentMethodLauncherFactory> {
-            on { create(any(), any(), any(), any(), any()) } doReturn googlePayPaymentMethodLauncher
+            on { create(any(), any(), any(), any(), any(), any()) } doReturn googlePayPaymentMethodLauncher
         }
 
         val intentConfirmationHandler = createIntentConfirmationHandler(
@@ -1514,7 +1516,8 @@ class IntentConfirmationHandlerTest {
             ),
             readyCallback = any(),
             activityResultLauncher = any(),
-            skipReadyCheck = eq(true)
+            skipReadyCheck = eq(true),
+            cardBrandFilter = DefaultCardBrandFilter
         )
 
         verify(googlePayPaymentMethodLauncher).present(
@@ -1529,7 +1532,7 @@ class IntentConfirmationHandlerTest {
     fun `On start Google Pay with SI, should create and launch Google Pay launcher properly`() = runTest {
         val googlePayPaymentMethodLauncher = mock<GooglePayPaymentMethodLauncher>()
         val googlePayPaymentMethodLauncherFactory = mock<GooglePayPaymentMethodLauncherFactory> {
-            on { create(any(), any(), any(), any(), any()) } doReturn googlePayPaymentMethodLauncher
+            on { create(any(), any(), any(), any(), any(), any()) } doReturn googlePayPaymentMethodLauncher
         }
 
         val intentConfirmationHandler = createIntentConfirmationHandler(
@@ -1558,7 +1561,8 @@ class IntentConfirmationHandlerTest {
             ),
             readyCallback = any(),
             activityResultLauncher = any(),
-            skipReadyCheck = eq(true)
+            skipReadyCheck = eq(true),
+            cardBrandFilter = DefaultCardBrandFilter
         )
 
         verify(googlePayPaymentMethodLauncher).present(
@@ -1928,7 +1932,8 @@ class IntentConfirmationHandlerTest {
                     config: GooglePayPaymentMethodLauncher.Config,
                     readyCallback: GooglePayPaymentMethodLauncher.ReadyCallback,
                     activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>,
-                    skipReadyCheck: Boolean
+                    skipReadyCheck: Boolean,
+                    cardBrandFilter: CardBrandFilter
                 ): GooglePayPaymentMethodLauncher = mock()
             },
         paymentLauncher: PaymentLauncher = FakePaymentLauncher(),
@@ -2084,7 +2089,8 @@ class IntentConfirmationHandlerTest {
                 merchantCountryCode = "US",
                 billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
                 customAmount = 5000,
-                customLabel = "Merchant Payments"
+                customLabel = "Merchant Payments",
+                cardBrandFilter = DefaultCardBrandFilter
             )
         )
 

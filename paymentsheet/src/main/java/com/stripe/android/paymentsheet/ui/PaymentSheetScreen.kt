@@ -303,6 +303,7 @@ private fun PaymentSheetContent(
     }
 }
 
+@Suppress("LongMethod")
 @Composable
 private fun PaymentSheetContent(
     viewModel: BaseSheetViewModel,
@@ -315,7 +316,6 @@ private fun PaymentSheetContent(
     modifier: Modifier
 ) {
     val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
-
     Column(modifier = modifier) {
         headerText?.let { text ->
             H4Text(
@@ -358,7 +358,6 @@ private fun PaymentSheetContent(
         }
 
         Spacer(modifier = Modifier.height(currentScreen.bottomContentPadding))
-
         error?.let {
             ErrorMessage(
                 error = it.resolve(),
