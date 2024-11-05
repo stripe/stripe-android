@@ -263,12 +263,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
         }
     }
 
-//    override fun handleConfirmUSBankAccount(paymentSelection: PaymentSelection.New.USBankAccount) {
-//        updateSelection(paymentSelection)
-//        eventReporter.onPressConfirmButton(selection.value)
-//        onUserSelection()
-//    }
-
     override fun clearErrorMessages() {
         _error.value = null
     }

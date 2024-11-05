@@ -927,37 +927,22 @@ class USBankAccountFormViewModelTest {
     fun `When collect bank account is returned from FC SDK, the result is emitted`() = runTest {
         val viewModel = createViewModel()
 
-        viewModel.collectBankAccountResult.test {
-            val verifiedAccount = mockVerifiedBankAccount()
-            viewModel.handleCollectBankAccountResult(
-                result = verifiedAccount
-            )
+        viewModel.result.test {
+            viewModel.handleCollectBankAccountResult(mockVerifiedBankAccount())
+            assertThat(awaitItem()).isNotNull()
 
-            assertThat(awaitItem())
-                .isEqualTo(verifiedAccount)
+            // Simulate a removal
+            viewModel.reset()
 
             viewModel.handleCollectBankAccountResult(
                 result = CollectBankAccountResultInternal.Cancelled
             )
+            expectNoEvents()
 
-            assertThat(awaitItem())
-                .isEqualTo(CollectBankAccountResultInternal.Cancelled)
-            // Reset was called, so the result should be null
-            assertThat(awaitItem())
-                .isNull()
-
-            val failure = CollectBankAccountResultInternal.Failed(
-                IllegalArgumentException("Failed")
-            )
             viewModel.handleCollectBankAccountResult(
-                result = failure
+                CollectBankAccountResultInternal.Failed(IllegalArgumentException("Failed"))
             )
-
-            assertThat(awaitItem())
-                .isEqualTo(failure)
-            // Reset was called, so the result should be null
-            assertThat(awaitItem())
-                .isNull()
+            expectNoEvents()
         }
     }
 
@@ -965,19 +950,12 @@ class USBankAccountFormViewModelTest {
     fun `When the view model is reset, collect bank account result should be null`() = runTest {
         val viewModel = createViewModel()
 
-        viewModel.collectBankAccountResult.test {
-            val verifiedAccount = mockVerifiedBankAccount()
-            viewModel.handleCollectBankAccountResult(
-                result = verifiedAccount
-            )
-
-            assertThat(awaitItem())
-                .isEqualTo(verifiedAccount)
+        viewModel.result.test {
+            viewModel.handleCollectBankAccountResult(mockVerifiedBankAccount())
+            assertThat(awaitItem()).isNotNull()
 
             viewModel.reset()
-
-            assertThat(awaitItem())
-                .isEqualTo(null)
+            assertThat(awaitItem()).isNull()
         }
     }
 

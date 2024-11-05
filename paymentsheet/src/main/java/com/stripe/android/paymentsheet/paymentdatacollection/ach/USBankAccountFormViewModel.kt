@@ -50,15 +50,11 @@ import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Provider
@@ -194,12 +190,6 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         stateFlowOf(null)
     }
 
-    private val _collectBankAccountResult = MutableSharedFlow<CollectBankAccountResultInternal?>(replay = 1)
-    val collectBankAccountResult: Flow<CollectBankAccountResultInternal?> = _collectBankAccountResult
-
-    private val _result = MutableStateFlow<PaymentSelection.New.USBankAccount?>(null)
-    val result: StateFlow<PaymentSelection.New.USBankAccount?> = _result.asStateFlow()
-
     private val defaultSaveForFutureUse: Boolean =
         args.savedPaymentMethod?.input?.saveForFutureUse ?: false
 
@@ -210,8 +200,22 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
     val saveForFutureUse: StateFlow<Boolean> = saveForFutureUseElement.controller.saveForFutureUse
 
-    private val _currentScreenState = MutableStateFlow(value = determineInitialState())
-    val currentScreenState: StateFlow<USBankAccountFormScreenState> = _currentScreenState
+    private val screenStateWithoutSaveForFutureUse = MutableStateFlow(value = determineInitialState())
+
+    val currentScreenState: StateFlow<USBankAccountFormScreenState> = combineAsStateFlow(
+        screenStateWithoutSaveForFutureUse,
+        saveForFutureUse,
+    ) { state, saveForFutureUse ->
+        val mandateText = buildMandateText(
+            isVerifyWithMicrodeposits = state is USBankAccountFormScreenState.VerifyWithMicrodeposits,
+            isSaveForFutureUseSelected = saveForFutureUse,
+        )
+        state.updateWithMandate(mandateText)
+    }
+
+    val result: StateFlow<PaymentSelection.New.USBankAccount?> = currentScreenState.mapAsStateFlow {
+        it.toPaymentSelection()
+    }
 
     val requiredFields = combineAsStateFlow(
         nameController.formFieldValue.mapAsStateFlow { it.isComplete },
@@ -290,7 +294,6 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     @VisibleForTesting
     fun handleCollectBankAccountResult(result: CollectBankAccountResultInternal) {
         hasLaunched = false
-        _collectBankAccountResult.tryEmit(result)
 
         when (result) {
             is CollectBankAccountResultInternal.Completed -> {
@@ -339,7 +342,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     private fun handleCompletedInstantDebitsResult(
         result: CollectBankAccountForInstantDebitsResult.Completed,
     ) {
-        val screenState = _currentScreenState.updateAndGet {
+        screenStateWithoutSaveForFutureUse.update {
             USBankAccountFormScreenState.MandateCollection(
                 resultIdentifier = ResultIdentifier.PaymentMethod(result.paymentMethod),
                 bankName = result.bankName,
@@ -349,8 +352,6 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                 mandateText = buildMandateText(isVerifyWithMicrodeposits = false),
             )
         }
-
-        _result.value = screenState.toPaymentSelection()
     }
 
     private fun handleResultForACH(
@@ -359,7 +360,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     ) {
         when (val paymentAccount = usBankAccountData.financialConnectionsSession.paymentAccount) {
             is BankAccount -> {
-                val screenState = _currentScreenState.updateAndGet {
+                screenStateWithoutSaveForFutureUse.update {
                     USBankAccountFormScreenState.VerifyWithMicrodeposits(
                         paymentAccount = paymentAccount,
                         financialConnectionsSessionId = usBankAccountData.financialConnectionsSession.id,
@@ -368,12 +369,10 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                         mandateText = buildMandateText(isVerifyWithMicrodeposits = true),
                     )
                 }
-
-                _result.value = screenState.toPaymentSelection()
             }
 
             is FinancialConnectionsAccount -> {
-                val screenState = _currentScreenState.updateAndGet {
+                screenStateWithoutSaveForFutureUse.update {
                     USBankAccountFormScreenState.MandateCollection(
                         resultIdentifier = ResultIdentifier.Session(
                             id = usBankAccountData.financialConnectionsSession.id,
@@ -385,8 +384,6 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                         mandateText = buildMandateText(isVerifyWithMicrodeposits = false),
                     )
                 }
-
-                _result.value = screenState.toPaymentSelection()
             }
 
             null -> {
@@ -398,7 +395,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     fun handlePrimaryButtonClick() {
         val screenState = currentScreenState.value
         if (screenState is USBankAccountFormScreenState.BillingDetailsCollection) {
-            _currentScreenState.update {
+            screenStateWithoutSaveForFutureUse.update {
                 screenState.copy(isProcessing = true)
             }
 
@@ -410,8 +407,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         hasLaunched = false
         shouldReset = false
         saveForFutureUseElement.controller.onValueChange(true)
-        _collectBankAccountResult.tryEmit(null)
-        _currentScreenState.update {
+        screenStateWithoutSaveForFutureUse.update {
             USBankAccountFormScreenState.BillingDetailsCollection(
                 error = error,
                 primaryButtonText = StripeUiCoreR.string.stripe_continue_button_label.resolvableString,
@@ -424,8 +420,6 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         if (shouldReset) {
             reset()
         }
-//        _result.tryEmit(null)
-        _collectBankAccountResult.tryEmit(null)
         collectBankAccountLauncher?.unregister()
         collectBankAccountLauncher = null
     }
@@ -685,15 +679,13 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     }
 
     private fun updateScreenStateWithSaveForFutureUse(saveForFutureUse: Boolean) {
-        val selection = _currentScreenState.updateAndGet { state ->
+        screenStateWithoutSaveForFutureUse.update { state ->
             val mandateText = buildMandateText(
                 isVerifyWithMicrodeposits = state is USBankAccountFormScreenState.VerifyWithMicrodeposits,
                 isSaveForFutureUseSelected = saveForFutureUse,
             )
             state.updateWithMandate(mandateText)
         }
-
-        _result.value = selection.toPaymentSelection()
     }
 
     private fun buildMandateText(

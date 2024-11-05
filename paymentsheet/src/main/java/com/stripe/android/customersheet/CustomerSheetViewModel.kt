@@ -41,15 +41,14 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilt
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethod.Type.USBankAccount
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
-import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
 import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
 import com.stripe.android.paymentsheet.IntentConfirmationHandler
 import com.stripe.android.paymentsheet.PaymentConfirmationOption
 import com.stripe.android.paymentsheet.PaymentConfirmationResult
@@ -103,7 +102,6 @@ internal class CustomerSheetViewModel(
     @Named(IS_LIVE_MODE) private val isLiveModeProvider: () -> Boolean,
     intentConfirmationHandlerFactory: IntentConfirmationHandler.Factory,
     private val customerSheetLoader: CustomerSheetLoader,
-    private val isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable,
     private val editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory,
     private val errorReporter: ErrorReporter,
 ) : ViewModel() {
@@ -121,7 +119,6 @@ internal class CustomerSheetViewModel(
         @Named(IS_LIVE_MODE) isLiveModeProvider: () -> Boolean,
         intentConfirmationHandlerFactory: IntentConfirmationHandler.Factory,
         customerSheetLoader: CustomerSheetLoader,
-        isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable,
         editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory,
         errorReporter: ErrorReporter,
     ) : this(
@@ -140,7 +137,6 @@ internal class CustomerSheetViewModel(
         isLiveModeProvider = isLiveModeProvider,
         intentConfirmationHandlerFactory = intentConfirmationHandlerFactory,
         customerSheetLoader = customerSheetLoader,
-        isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
         editInteractorFactory = editInteractorFactory,
         errorReporter = errorReporter,
     )
@@ -286,11 +282,8 @@ internal class CustomerSheetViewModel(
             is CustomerSheetViewAction.OnUpdateMandateText -> {
                 updateMandateText(viewAction.mandateText, viewAction.showAbovePrimaryButton)
             }
-            is CustomerSheetViewAction.OnCollectBankAccountResult -> {
-                onCollectUSBankAccountResult(viewAction.bankAccountResult)
-            }
-            is CustomerSheetViewAction.OnConfirmUSBankAccount -> {
-                onConfirmUSBankAccount(viewAction.usBankAccount)
+            is CustomerSheetViewAction.OnBankAccountSelectionChanged -> {
+                onCollectUSBankAccountResult(viewAction.paymentSelection)
             }
             is CustomerSheetViewAction.OnFormError -> {
                 onFormError(viewAction.error)
@@ -306,7 +299,7 @@ internal class CustomerSheetViewModel(
      */
     fun bottomSheetConfirmStateChange(): Boolean {
         val currentViewState = viewState.value
-        return if (currentViewState.shouldDisplayDismissConfirmationModal(isFinancialConnectionsAvailable)) {
+        return if (currentViewState.shouldDisplayDismissConfirmationModal()) {
             updateViewState<CustomerSheetViewState.AddPaymentMethod> {
                 it.copy(
                     displayDismissConfirmationModal = true,
@@ -467,8 +460,7 @@ internal class CustomerSheetViewModel(
                     ),
                 ) ?: listOf(),
                 primaryButtonLabel = if (
-                    paymentMethod.code == PaymentMethod.Type.USBankAccount.code &&
-                    it.bankAccountResult !is CollectBankAccountResultInternal.Completed
+                    paymentMethod.code == USBankAccount.code && it.bankAccountSelection == null
                 ) {
                     UiCoreR.string.stripe_continue_button_label.resolvableString
                 } else {
@@ -717,13 +709,19 @@ internal class CustomerSheetViewModel(
                         enabled = false,
                     )
                 }
-                val formFieldValues = currentViewState.formFieldValues ?: error("completeFormValues cannot be null")
-                val params = formFieldValues
-                    .transformToPaymentMethodCreateParams(
+
+                val createParams = if (currentViewState.paymentMethodCode == USBankAccount.code) {
+                    currentViewState.bankAccountSelection?.paymentMethodCreateParams
+                        ?: error("Invalid bankAccountSelection")
+                } else {
+                    val formFieldValues = currentViewState.formFieldValues ?: error("completeFormValues cannot be null")
+                    formFieldValues.transformToPaymentMethodCreateParams(
                         paymentMethodCode = currentViewState.paymentMethodCode,
                         paymentMethodMetadata = requireNotNull(customerState.value.metadata)
                     )
-                createAndAttach(params)
+                }
+
+                createAndAttach(createParams)
             }
             is CustomerSheetViewState.SelectPaymentMethod -> {
                 setSelectionConfirmationState { state ->
@@ -825,7 +823,7 @@ internal class CustomerSheetViewModel(
                 primaryButtonLabel = R.string.stripe_paymentsheet_save.resolvableString,
                 primaryButtonEnabled = false,
                 customPrimaryButtonUiState = null,
-                bankAccountResult = null,
+                bankAccountSelection = null,
                 errorReporter = errorReporter,
             ),
             reset = isFirstPaymentMethod
@@ -847,14 +845,8 @@ internal class CustomerSheetViewModel(
             onMandateTextChanged = { mandate, showAbove ->
                 handleViewAction(CustomerSheetViewAction.OnUpdateMandateText(mandate, showAbove))
             },
-            onBankAccountLinked = {
-                // Nothing to do here
-            },
-            onCollectBankAccountResult = {
-                handleViewAction(CustomerSheetViewAction.OnCollectBankAccountResult(it))
-            },
-            onConfirmUSBankAccount = {
-                handleViewAction(CustomerSheetViewAction.OnConfirmUSBankAccount(it))
+            onLinkedBankAccountChanged = {
+                handleViewAction(CustomerSheetViewAction.OnBankAccountSelectionChanged(it))
             },
             onUpdatePrimaryButtonUIState = {
                 handleViewAction(CustomerSheetViewAction.OnUpdateCustomButtonUIState(it))
@@ -876,8 +868,10 @@ internal class CustomerSheetViewModel(
                     customPrimaryButtonUiState = uiState,
                 )
             } else {
+                val enabled = it.paymentMethodCode == USBankAccount.code || it.formFieldValues != null
+
                 it.copy(
-                    primaryButtonEnabled = it.formFieldValues != null && !it.isProcessing,
+                    primaryButtonEnabled = enabled && !it.isProcessing,
                     customPrimaryButtonUiState = null,
                 )
             }
@@ -893,21 +887,19 @@ internal class CustomerSheetViewModel(
         }
     }
 
-    private fun onCollectUSBankAccountResult(bankAccountResult: CollectBankAccountResultInternal) {
+    private fun onCollectUSBankAccountResult(
+        paymentSelection: PaymentSelection.New.USBankAccount?,
+    ) {
         updateViewState<CustomerSheetViewState.AddPaymentMethod> {
             it.copy(
-                bankAccountResult = bankAccountResult,
-                primaryButtonLabel = if (bankAccountResult is CollectBankAccountResultInternal.Completed) {
+                bankAccountSelection = paymentSelection,
+                primaryButtonLabel = if (paymentSelection != null) {
                     R.string.stripe_paymentsheet_save.resolvableString
                 } else {
                     UiCoreR.string.stripe_continue_button_label.resolvableString
                 },
             )
         }
-    }
-
-    private fun onConfirmUSBankAccount(usBankAccount: PaymentSelection.New.USBankAccount) {
-        createAndAttach(usBankAccount.paymentMethodCreateParams)
     }
 
     private fun onCardNumberInputCompleted() {

@@ -33,7 +33,6 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
@@ -62,7 +61,6 @@ internal object CustomerSheetTestHelper {
     internal val application = ApplicationProvider.getApplicationContext<Application>()
 
     internal fun createViewModel(
-        isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable = IsFinancialConnectionsAvailable { true },
         isLiveMode: Boolean = false,
         workContext: CoroutineContext = EmptyCoroutineContext,
         integrationType: CustomerSheetIntegration.Type = CustomerSheetIntegration.Type.CustomerAdapter,
@@ -153,7 +151,6 @@ internal object CustomerSheetTestHelper {
             ),
             eventReporter = eventReporter,
             customerSheetLoader = customerSheetLoader,
-            isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
             editInteractorFactory = editInteractorFactory,
             errorReporter = errorReporter,
         ).apply {
