@@ -1475,7 +1475,9 @@ class IntentConfirmationHandlerTest {
     fun `On start Google Pay with PI, should create and launch Google Pay launcher properly`() = runTest {
         val googlePayPaymentMethodLauncher = mock<GooglePayPaymentMethodLauncher>()
         val googlePayPaymentMethodLauncherFactory = mock<GooglePayPaymentMethodLauncherFactory> {
-            on { create(any(), any(), any(), any(), any(), any()) } doReturn googlePayPaymentMethodLauncher
+            on {
+                create(any(), any(), any(), any(), any(), eq(DefaultCardBrandFilter))
+            } doReturn googlePayPaymentMethodLauncher
         }
 
         val intentConfirmationHandler = createIntentConfirmationHandler(
@@ -1517,7 +1519,7 @@ class IntentConfirmationHandlerTest {
             readyCallback = any(),
             activityResultLauncher = any(),
             skipReadyCheck = eq(true),
-            cardBrandFilter = DefaultCardBrandFilter
+            cardBrandFilter = eq(DefaultCardBrandFilter)
         )
 
         verify(googlePayPaymentMethodLauncher).present(
@@ -1532,7 +1534,9 @@ class IntentConfirmationHandlerTest {
     fun `On start Google Pay with SI, should create and launch Google Pay launcher properly`() = runTest {
         val googlePayPaymentMethodLauncher = mock<GooglePayPaymentMethodLauncher>()
         val googlePayPaymentMethodLauncherFactory = mock<GooglePayPaymentMethodLauncherFactory> {
-            on { create(any(), any(), any(), any(), any(), any()) } doReturn googlePayPaymentMethodLauncher
+            on {
+                create(any(), any(), any(), any(), any(), eq(DefaultCardBrandFilter))
+            } doReturn googlePayPaymentMethodLauncher
         }
 
         val intentConfirmationHandler = createIntentConfirmationHandler(
@@ -1562,7 +1566,7 @@ class IntentConfirmationHandlerTest {
             readyCallback = any(),
             activityResultLauncher = any(),
             skipReadyCheck = eq(true),
-            cardBrandFilter = DefaultCardBrandFilter
+            cardBrandFilter = eq(DefaultCardBrandFilter)
         )
 
         verify(googlePayPaymentMethodLauncher).present(
