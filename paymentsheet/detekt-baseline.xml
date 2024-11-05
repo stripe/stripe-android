@@ -17,7 +17,7 @@
     <ID>LargeClass:CustomerSheetViewModelTest.kt$CustomerSheetViewModelTest</ID>
     <ID>LargeClass:DefaultEventReporterTest.kt$DefaultEventReporterTest</ID>
     <ID>LargeClass:DefaultFlowControllerTest.kt$DefaultFlowControllerTest</ID>
-    <ID>LargeClass:DefaultPaymentSheetLoaderTest.kt$DefaultPaymentSheetLoaderTest</ID>
+    <ID>LargeClass:DefaultPaymentElementLoaderTest.kt$DefaultPaymentElementLoaderTest</ID>
     <ID>LargeClass:IntentConfirmationHandlerTest.kt$IntentConfirmationHandlerTest</ID>
     <ID>LargeClass:PaymentMethodMetadataTest.kt$PaymentMethodMetadataTest</ID>
     <ID>LargeClass:PaymentOptionsViewModelTest.kt$PaymentOptionsViewModelTest</ID>
@@ -53,7 +53,7 @@
     <ID>MaxLineLength:CustomerSheetViewModelTest.kt$CustomerSheetViewModelTest$publishableKey = "pk_test_51HvTI7Lu5o3livep6t5AgBSkMvWoTtA0nyA7pVYDqpfLkRtWun7qZTYCOHCReprfLM464yaBeF72UFfB7cY9WG4a00ZnDtiC2C"</ID>
     <ID>MaxLineLength:DefaultCustomerSheetLoaderTest.kt$DefaultCustomerSheetLoaderTest$fun</ID>
     <ID>MaxLineLength:DefaultFlowControllerTest.kt$DefaultFlowControllerTest$fun</ID>
-    <ID>MaxLineLength:DefaultPaymentSheetLoaderTest.kt$DefaultPaymentSheetLoaderTest$fun</ID>
+    <ID>MaxLineLength:DefaultPaymentElementLoaderTest.kt$DefaultPaymentElementLoaderTest$fun</ID>
     <ID>MaxLineLength:FlowControllerConfigurationHandlerTest.kt$FlowControllerConfigurationHandlerTest$.</ID>
     <ID>MaxLineLength:InjectableActivityScenario.kt$InjectableActivityScenario$delegate ?: throw IllegalStateException("Cannot move to state $newState since the activity hasn't been launched.")</ID>
     <ID>MaxLineLength:InjectableActivityScenario.kt$InjectableActivityScenario$val d = delegate ?: throw IllegalStateException("Cannot run onActivity since the activity hasn't been launched.")</ID>
