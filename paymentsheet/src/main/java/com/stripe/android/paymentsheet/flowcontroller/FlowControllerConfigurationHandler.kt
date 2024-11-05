@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.flowcontroller
 
+import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.InitializationMode.DeferredIntent
@@ -89,7 +90,7 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
 
         paymentElementLoader.load(
             initializationMode = initializationMode,
-            paymentSheetConfiguration = configuration,
+            configuration = configuration.asCommonConfiguration(),
             isReloadingAfterProcessDeath = false,
             initializedViaCompose = initializedViaCompose,
         ).fold(
@@ -98,7 +99,7 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
                     onConfigured(state.validationError)
                 } else {
                     viewModel.previousConfigureRequest = configureRequest
-                    onInitSuccess(state, configureRequest)
+                    onInitSuccess(state, configuration, configureRequest)
                     onConfigured()
                 }
             },
@@ -110,12 +111,13 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
 
     private suspend fun onInitSuccess(
         state: PaymentSheetState.Full,
+        configuration: PaymentSheet.Configuration,
         configureRequest: ConfigureRequest,
     ) {
         val isDecoupling = configureRequest.initializationMode is DeferredIntent
 
         eventReporter.onInit(
-            configuration = state.config,
+            configuration = configuration,
             isDeferred = isDecoupling,
         )
 
@@ -123,10 +125,11 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
             currentSelection = viewModel.paymentSelection,
             previousConfig = viewModel.state?.config,
             newState = state,
+            newConfig = configuration,
         )
 
         withContext(uiContext) {
-            viewModel.state = state
+            viewModel.state = DefaultFlowController.State(paymentSheetState = state, config = configuration)
         }
     }
 

@@ -2,6 +2,7 @@ package com.stripe.android.lpmfoundations.paymentmethod
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ExperimentalCardBrandFilteringApi
+import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.link.LinkConfiguration
@@ -759,7 +760,7 @@ internal class PaymentMethodMetadataTest {
 
         val metadata = PaymentMethodMetadata.create(
             elementsSession = elementsSession,
-            configuration = configuration,
+            configuration = configuration.asCommonConfiguration(),
             sharedDataSpecs = sharedDataSpecs,
             externalPaymentMethodSpecs = externalPaymentMethodSpecs,
             isGooglePayReady = false,
@@ -914,7 +915,7 @@ internal class PaymentMethodMetadataTest {
             elementsSession = createElementsSession(
                 mobilePaymentElementComponent = mobilePaymentElementComponent
             ),
-            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER,
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
             sharedDataSpecs = listOf(),
             externalPaymentMethodSpecs = listOf(),
             isGooglePayReady = false,

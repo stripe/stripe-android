@@ -57,7 +57,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
     editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory
 ) : BaseSheetViewModel(
-    config = args.state.config,
+    config = args.configuration,
     eventReporter = eventReporter,
     customerRepository = customerRepository,
     workContext = workContext,

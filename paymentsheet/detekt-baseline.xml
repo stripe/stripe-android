@@ -29,7 +29,7 @@
     <ID>LongMethod:EditPaymentMethod.kt$@Composable internal fun EditPaymentMethodUi( viewState: EditPaymentMethodViewState, viewActionHandler: (action: EditPaymentMethodViewAction) -> Unit, modifier: Modifier = Modifier )</ID>
     <ID>LongMethod:FormViewModelTest.kt$FormViewModelTest$@Test fun `Verify params are set when element address fields are complete`()</ID>
     <ID>LongMethod:FormViewModelTest.kt$FormViewModelTest$@Test fun `Verify params are set when required address fields are complete`()</ID>
-    <ID>LongMethod:PaymentConfirmationOptionKtx.kt$internal fun PaymentSelection.toPaymentConfirmationOption( initializationMode: PaymentSheet.InitializationMode, configuration: PaymentSheet.Configuration, ): PaymentConfirmationOption?</ID>
+    <ID>LongMethod:PaymentConfirmationOptionKtx.kt$internal fun PaymentSelection.toPaymentConfirmationOption( initializationMode: PaymentSheet.InitializationMode, configuration: CommonConfiguration, ): PaymentConfirmationOption?</ID>
     <ID>LongMethod:PaymentMethodVerticalLayoutInteractor.kt$DefaultPaymentMethodVerticalLayoutInteractor.Companion$fun create( viewModel: BaseSheetViewModel, paymentMethodMetadata: PaymentMethodMetadata, customerStateHolder: CustomerStateHolder, ): PaymentMethodVerticalLayoutInteractor</ID>
     <ID>LongMethod:PaymentOptionFactory.kt$PaymentOptionFactory$fun create(selection: PaymentSelection): PaymentOption</ID>
     <ID>LongMethod:PaymentSheetConfigurationKtx.kt$internal fun PaymentSheet.Appearance.parseAppearance()</ID>
@@ -53,6 +53,7 @@
     <ID>MaxLineLength:CustomerSheetViewModelTest.kt$CustomerSheetViewModelTest$publishableKey = "pk_test_51HvTI7Lu5o3livep6t5AgBSkMvWoTtA0nyA7pVYDqpfLkRtWun7qZTYCOHCReprfLM464yaBeF72UFfB7cY9WG4a00ZnDtiC2C"</ID>
     <ID>MaxLineLength:DefaultCustomerSheetLoaderTest.kt$DefaultCustomerSheetLoaderTest$fun</ID>
     <ID>MaxLineLength:DefaultFlowControllerTest.kt$DefaultFlowControllerTest$fun</ID>
+    <ID>MaxLineLength:DefaultFlowControllerTest.kt$DefaultFlowControllerTest$paymentMethodTypes = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.paymentMethodTypes.plus("link")</ID>
     <ID>MaxLineLength:DefaultPaymentElementLoaderTest.kt$DefaultPaymentElementLoaderTest$fun</ID>
     <ID>MaxLineLength:FlowControllerConfigurationHandlerTest.kt$FlowControllerConfigurationHandlerTest$.</ID>
     <ID>MaxLineLength:InjectableActivityScenario.kt$InjectableActivityScenario$delegate ?: throw IllegalStateException("Cannot move to state $newState since the activity hasn't been launched.")</ID>

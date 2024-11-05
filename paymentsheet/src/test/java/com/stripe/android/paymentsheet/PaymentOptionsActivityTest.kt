@@ -410,9 +410,9 @@ internal class PaymentOptionsActivityTest {
     fun `mandate text is shown above primary button when in vertical mode`() {
         val args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
             paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
-            config = PAYMENT_OPTIONS_CONTRACT_ARGS.state.config.copy(
+            config = PAYMENT_OPTIONS_CONTRACT_ARGS.configuration.copy(
                 paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
-            )
+            ),
         )
         runActivityScenario(args) { scenario ->
             scenario.onActivity { activity ->

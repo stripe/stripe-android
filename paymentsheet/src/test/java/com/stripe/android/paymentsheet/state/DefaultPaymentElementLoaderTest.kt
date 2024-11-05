@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.state
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ExperimentalCardBrandFilteringApi
+import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.model.CountryCode
@@ -119,10 +120,10 @@ internal class DefaultPaymentElementLoaderTest {
             ).getOrThrow()
         ).isEqualTo(
             PaymentSheetState.Full(
-                config = config,
+                config = config.asCommonConfiguration(),
                 customer = CustomerState(
                     id = config.customer!!.id,
-                    ephemeralKeySecret = config.customer!!.ephemeralKeySecret,
+                    ephemeralKeySecret = config.customer.ephemeralKeySecret,
                     paymentMethods = PAYMENT_METHODS,
                     permissions = CustomerState.Permissions(
                         canRemovePaymentMethods = true,
@@ -231,25 +232,26 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `Should default to no payment method if customer has no payment methods and no last used payment method`() = runTest {
-        prefsRepository.savePaymentSelection(null)
+    fun `Should default to no payment method if customer has no payment methods and no last used payment method`() =
+        runTest {
+            prefsRepository.savePaymentSelection(null)
 
-        val loader = createPaymentElementLoader(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
-            isGooglePayReady = true,
-            customerRepo = FakeCustomerRepository(paymentMethods = emptyList()),
-        )
+            val loader = createPaymentElementLoader(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
+                isGooglePayReady = true,
+                customerRepo = FakeCustomerRepository(paymentMethods = emptyList()),
+            )
 
-        val result = loader.load(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
-                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
-            ),
-            paymentSheetConfiguration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
-            initializedViaCompose = false,
-        ).getOrThrow()
+            val result = loader.load(
+                initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                    clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+                ),
+                paymentSheetConfiguration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+                initializedViaCompose = false,
+            ).getOrThrow()
 
-        assertThat(result.paymentSelection).isNull()
-    }
+            assertThat(result.paymentSelection).isNull()
+        }
 
     @Test
     fun `load() with customer should fetch only supported payment method types`() =
@@ -2294,4 +2296,16 @@ internal class DefaultPaymentElementLoaderTest {
             clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
         )
     }
+
+    private suspend fun PaymentElementLoader.load(
+        initializationMode: PaymentSheet.InitializationMode,
+        paymentSheetConfiguration: PaymentSheet.Configuration,
+        isReloadingAfterProcessDeath: Boolean = false,
+        initializedViaCompose: Boolean,
+    ): Result<PaymentSheetState.Full> = load(
+        initializationMode = initializationMode,
+        configuration = paymentSheetConfiguration.asCommonConfiguration(),
+        isReloadingAfterProcessDeath = isReloadingAfterProcessDeath,
+        initializedViaCompose = initializedViaCompose,
+    )
 }

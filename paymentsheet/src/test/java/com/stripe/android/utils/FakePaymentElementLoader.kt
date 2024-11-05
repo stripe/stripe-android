@@ -1,5 +1,6 @@
 package com.stripe.android.utils
 
+import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
@@ -38,7 +39,7 @@ internal class FakePaymentElementLoader(
 
     override suspend fun load(
         initializationMode: PaymentSheet.InitializationMode,
-        paymentSheetConfiguration: PaymentSheet.Configuration,
+        configuration: CommonConfiguration,
         isReloadingAfterProcessDeath: Boolean,
         initializedViaCompose: Boolean,
     ): Result<PaymentSheetState.Full> {
@@ -48,17 +49,17 @@ internal class FakePaymentElementLoader(
         } else {
             Result.success(
                 PaymentSheetState.Full(
-                    config = paymentSheetConfiguration,
+                    config = configuration,
                     customer = customer,
                     linkState = linkState,
                     paymentSelection = paymentSelection,
                     validationError = validationError,
                     paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                         stripeIntent = stripeIntent,
-                        billingDetailsCollectionConfiguration = paymentSheetConfiguration
+                        billingDetailsCollectionConfiguration = configuration
                             .billingDetailsCollectionConfiguration,
-                        allowsDelayedPaymentMethods = paymentSheetConfiguration.allowsDelayedPaymentMethods,
-                        allowsPaymentMethodsRequiringShippingAddress = paymentSheetConfiguration
+                        allowsDelayedPaymentMethods = configuration.allowsDelayedPaymentMethods,
+                        allowsPaymentMethodsRequiringShippingAddress = configuration
                             .allowsPaymentMethodsRequiringShippingAddress,
                         isGooglePayReady = isGooglePayAvailable,
                         cbcEligibility = cbcEligibility,
