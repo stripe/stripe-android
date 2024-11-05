@@ -13,6 +13,7 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.analytics.SessionSavedStateHandler
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.common.exception.stripeErrorMessage
+import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
@@ -285,7 +286,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         val result = withContext(workContext) {
             paymentElementLoader.load(
                 initializationMode = args.initializationMode,
-                paymentSheetConfiguration = args.config,
+                configuration = args.config.asCommonConfiguration(),
                 isReloadingAfterProcessDeath = intentConfirmationHandler.hasReloadedFromProcessDeath,
                 initializedViaCompose = args.initializedViaCompose,
             )
@@ -513,7 +514,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private fun confirmPaymentSelection(paymentSelection: PaymentSelection?) {
         viewModelScope.launch(workContext) {
             val confirmationOption = paymentSelectionWithCvcIfEnabled(paymentSelection)
-                ?.toPaymentConfirmationOption(args.initializationMode, config)
+                ?.toPaymentConfirmationOption(args.initializationMode, config.asCommonConfiguration())
 
             confirmationOption?.let { option ->
                 val stripeIntent = awaitStripeIntent()

@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
@@ -27,7 +28,7 @@ class PaymentConfirmationOptionKtxTest {
         assertThat(
             paymentSelection.toPaymentConfirmationOption(
                 initializationMode = PI_INITIALIZATION_MODE,
-                configuration = PaymentSheetFixtures.CONFIG_CUSTOMER,
+                configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
             )
         ).isEqualTo(
             PaymentConfirmationOption.PaymentMethod.New(
@@ -49,7 +50,7 @@ class PaymentConfirmationOptionKtxTest {
         assertThat(
             paymentSelection.toPaymentConfirmationOption(
                 initializationMode = SI_INITIALIZATION_MODE,
-                configuration = PaymentSheetFixtures.CONFIG_CUSTOMER,
+                configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
             )
         ).isEqualTo(
             PaymentConfirmationOption.PaymentMethod.New(
@@ -71,7 +72,7 @@ class PaymentConfirmationOptionKtxTest {
         assertThat(
             paymentSelection.toPaymentConfirmationOption(
                 initializationMode = PI_INITIALIZATION_MODE,
-                configuration = PaymentSheetFixtures.CONFIG_CUSTOMER,
+                configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
             )
         ).isEqualTo(
             PaymentConfirmationOption.PaymentMethod.New(
@@ -104,7 +105,7 @@ class PaymentConfirmationOptionKtxTest {
         assertThat(
             paymentSelection.toPaymentConfirmationOption(
                 initializationMode = PI_INITIALIZATION_MODE,
-                configuration = PaymentSheetFixtures.CONFIG_CUSTOMER
+                configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration()
             )
         ).isEqualTo(
             PaymentConfirmationOption.BacsPaymentMethod(
@@ -126,7 +127,7 @@ class PaymentConfirmationOptionKtxTest {
         assertThat(
             paymentSelection.toPaymentConfirmationOption(
                 initializationMode = SI_INITIALIZATION_MODE,
-                configuration = PaymentSheetFixtures.CONFIG_CUSTOMER,
+                configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
             )
         ).isEqualTo(
             PaymentConfirmationOption.PaymentMethod.New(
@@ -151,7 +152,7 @@ class PaymentConfirmationOptionKtxTest {
         assertThat(
             paymentSelection.toPaymentConfirmationOption(
                 initializationMode = PI_INITIALIZATION_MODE,
-                configuration = PaymentSheetFixtures.CONFIG_CUSTOMER,
+                configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
             )
         ).isEqualTo(
             PaymentConfirmationOption.PaymentMethod.Saved(
@@ -184,7 +185,7 @@ class PaymentConfirmationOptionKtxTest {
         assertThat(
             paymentSelection.toPaymentConfirmationOption(
                 initializationMode = PI_INITIALIZATION_MODE,
-                configuration = PaymentSheetFixtures.CONFIG_CUSTOMER,
+                configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
             )
         ).isEqualTo(
             PaymentConfirmationOption.ExternalPaymentMethod(
@@ -204,7 +205,7 @@ class PaymentConfirmationOptionKtxTest {
         assertThat(
             PaymentSelection.GooglePay.toPaymentConfirmationOption(
                 initializationMode = PI_INITIALIZATION_MODE,
-                configuration = PaymentSheetFixtures.CONFIG_CUSTOMER,
+                configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
             )
         ).isNull()
     }
@@ -220,7 +221,7 @@ class PaymentConfirmationOptionKtxTest {
                         amount = 5000,
                         environment = PaymentSheet.GooglePayConfiguration.Environment.Production
                     )
-                )
+                ).asCommonConfiguration()
             )
         ).isEqualTo(
             PaymentConfirmationOption.GooglePay(
@@ -244,7 +245,7 @@ class PaymentConfirmationOptionKtxTest {
         assertThat(
             PaymentSelection.Link.toPaymentConfirmationOption(
                 initializationMode = PI_INITIALIZATION_MODE,
-                configuration = PaymentSheetFixtures.CONFIG_CUSTOMER,
+                configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
             )
         ).isNull()
     }
@@ -258,7 +259,7 @@ class PaymentConfirmationOptionKtxTest {
         assertThat(
             paymentSelection.toPaymentConfirmationOption(
                 initializationMode = PI_INITIALIZATION_MODE,
-                configuration = PaymentSheetFixtures.CONFIG_CUSTOMER,
+                configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
             )
         ).isEqualTo(
             PaymentConfirmationOption.PaymentMethod.Saved(
@@ -279,7 +280,7 @@ class PaymentConfirmationOptionKtxTest {
         assertThat(
             paymentSelection.toPaymentConfirmationOption(
                 initializationMode = PI_INITIALIZATION_MODE,
-                configuration = PaymentSheetFixtures.CONFIG_CUSTOMER,
+                configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
             )
         ).isEqualTo(
             PaymentConfirmationOption.PaymentMethod.Saved(

@@ -1,11 +1,12 @@
 package com.stripe.android.paymentsheet
 
+import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentSelection
 
 internal fun PaymentSelection.toPaymentConfirmationOption(
     initializationMode: PaymentSheet.InitializationMode,
-    configuration: PaymentSheet.Configuration,
+    configuration: CommonConfiguration,
 ): PaymentConfirmationOption? {
     return when (this) {
         is PaymentSelection.Saved -> PaymentConfirmationOption.PaymentMethod.Saved(

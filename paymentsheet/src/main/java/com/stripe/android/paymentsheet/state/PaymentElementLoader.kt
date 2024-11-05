@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.state
 
 import com.stripe.android.common.coroutines.runCatching
+import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
@@ -50,7 +51,7 @@ internal interface PaymentElementLoader {
 
     suspend fun load(
         initializationMode: PaymentSheet.InitializationMode,
-        paymentSheetConfiguration: PaymentSheet.Configuration,
+        configuration: CommonConfiguration,
         isReloadingAfterProcessDeath: Boolean = false,
         initializedViaCompose: Boolean,
     ): Result<PaymentSheetState.Full>
@@ -84,31 +85,31 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     @Suppress("LongMethod")
     override suspend fun load(
         initializationMode: PaymentSheet.InitializationMode,
-        paymentSheetConfiguration: PaymentSheet.Configuration,
+        configuration: CommonConfiguration,
         isReloadingAfterProcessDeath: Boolean,
         initializedViaCompose: Boolean,
     ): Result<PaymentSheetState.Full> = workContext.runCatching(::reportFailedLoad) {
         eventReporter.onLoadStarted(initializedViaCompose)
 
-        val savedPaymentMethodSelection = retrieveSavedPaymentMethodSelection(paymentSheetConfiguration)
+        val savedPaymentMethodSelection = retrieveSavedPaymentMethodSelection(configuration)
 
         val elementsSession = retrieveElementsSession(
             initializationMode = initializationMode,
-            customer = paymentSheetConfiguration.customer,
-            externalPaymentMethods = paymentSheetConfiguration.externalPaymentMethods,
+            customer = configuration.customer,
+            externalPaymentMethods = configuration.externalPaymentMethods,
             defaultPaymentMethodId = savedPaymentMethodSelection?.id,
         ).getOrThrow()
 
         val customerInfo = createCustomerInfo(
-            config = paymentSheetConfiguration,
+            configuration = configuration,
             elementsSession = elementsSession,
         )
 
-        val isGooglePayReady = isGooglePayReady(paymentSheetConfiguration, elementsSession)
+        val isGooglePayReady = isGooglePayReady(configuration, elementsSession)
 
         val savedSelection = async {
             retrieveSavedSelection(
-                config = paymentSheetConfiguration,
+                configuration = configuration,
                 isGooglePayReady = isGooglePayReady,
                 elementsSession = elementsSession
             )
@@ -116,7 +117,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
 
         val linkState = async {
             createLinkState(
-                config = paymentSheetConfiguration,
+                configuration = configuration,
                 elementsSession = elementsSession,
                 customer = customerInfo,
             )
@@ -124,7 +125,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
 
         val metadata = async {
             createPaymentMethodMetadata(
-                paymentSheetConfiguration = paymentSheetConfiguration,
+                configuration = configuration,
                 elementsSession = elementsSession,
                 isGooglePayReady = isGooglePayReady,
                 linkState = linkState.await(),
@@ -136,7 +137,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 customerInfo = customerInfo,
                 metadata = metadata.await(),
                 savedSelection = savedSelection,
-                cardBrandFilter = PaymentSheetCardBrandFilter(paymentSheetConfiguration.cardBrandAcceptance)
+                cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance)
             )
         }
 
@@ -155,7 +156,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         }
 
         val state = PaymentSheetState.Full(
-            config = paymentSheetConfiguration,
+            config = configuration,
             customer = customer.await(),
             linkState = linkState.await(),
             paymentSelection = initialPaymentSelection.await(),
@@ -189,7 +190,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     }
 
     private fun createPaymentMethodMetadata(
-        paymentSheetConfiguration: PaymentSheet.Configuration,
+        configuration: CommonConfiguration,
         elementsSession: ElementsSession,
         linkState: LinkState?,
         isGooglePayReady: Boolean,
@@ -208,13 +209,13 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         )
 
         logIfMissingExternalPaymentMethods(
-            requestedExternalPaymentMethods = paymentSheetConfiguration.externalPaymentMethods,
+            requestedExternalPaymentMethods = configuration.externalPaymentMethods,
             actualExternalPaymentMethods = externalPaymentMethodSpecs
         )
 
         return PaymentMethodMetadata.create(
             elementsSession = elementsSession,
-            configuration = paymentSheetConfiguration,
+            configuration = configuration,
             sharedDataSpecs = sharedDataSpecsResult.sharedDataSpecs,
             externalPaymentMethodSpecs = externalPaymentMethodSpecs,
             isGooglePayReady = isGooglePayReady,
@@ -223,10 +224,10 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     }
 
     private fun createCustomerInfo(
-        config: PaymentSheet.Configuration,
+        configuration: CommonConfiguration,
         elementsSession: ElementsSession,
     ): CustomerInfo? {
-        val customer = config.customer
+        val customer = configuration.customer
 
         return when (val accessType = customer?.accessType) {
             is PaymentSheet.CustomerAccessType.CustomerSession -> {
@@ -315,12 +316,14 @@ internal class DefaultPaymentElementLoader @Inject constructor(
 
     private suspend fun createLinkState(
         elementsSession: ElementsSession,
-        config: PaymentSheet.Configuration,
+        configuration: CommonConfiguration,
         customer: CustomerInfo?,
     ): LinkState? {
-        return if (elementsSession.isLinkEnabled && !config.billingDetailsCollectionConfiguration.collectsAnything) {
+        return if (elementsSession.isLinkEnabled &&
+            !configuration.billingDetailsCollectionConfiguration.collectsAnything
+        ) {
             loadLinkState(
-                config = config,
+                configuration = configuration,
                 customer = customer,
                 elementsSession = elementsSession,
                 merchantCountry = elementsSession.merchantCountry,
@@ -334,7 +337,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     }
 
     private suspend fun loadLinkState(
-        config: PaymentSheet.Configuration,
+        configuration: CommonConfiguration,
         customer: CustomerInfo?,
         elementsSession: ElementsSession,
         merchantCountry: String?,
@@ -343,7 +346,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         flags: Map<String, Boolean>,
     ): LinkState {
         val linkConfig = createLinkConfiguration(
-            config = config,
+            configuration = configuration,
             customer = customer,
             elementsSession = elementsSession,
             merchantCountry = merchantCountry,
@@ -365,7 +368,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             code = PaymentMethod.Type.Card.code,
             intent = elementsSession.stripeIntent,
             paymentMethodSaveConsentBehavior = elementsSession.toPaymentSheetSaveConsentBehavior(),
-            hasCustomerConfiguration = config.customer != null,
+            hasCustomerConfiguration = configuration.customer != null,
         )
         val hasUsedLink = linkStore.hasUsedLink()
 
@@ -392,28 +395,28 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     }
 
     private suspend fun createLinkConfiguration(
-        config: PaymentSheet.Configuration,
+        configuration: CommonConfiguration,
         customer: CustomerInfo?,
         elementsSession: ElementsSession,
         merchantCountry: String?,
         passthroughModeEnabled: Boolean,
         flags: Map<String, Boolean>,
     ): LinkConfiguration {
-        val shippingDetails: AddressDetails? = config.shippingDetails
+        val shippingDetails: AddressDetails? = configuration.shippingDetails
 
         val customerPhone = if (shippingDetails?.isCheckboxSelected == true) {
             shippingDetails.phoneNumber
         } else {
-            config.defaultBillingDetails?.phone
+            configuration.defaultBillingDetails?.phone
         }
 
         val shippingAddress = if (shippingDetails?.isCheckboxSelected == true) {
-            shippingDetails.toIdentifierMap(config.defaultBillingDetails)
+            shippingDetails.toIdentifierMap(configuration.defaultBillingDetails)
         } else {
             null
         }
 
-        val customerEmail = config.defaultBillingDetails?.email ?: customer?.let {
+        val customerEmail = configuration.defaultBillingDetails?.email ?: customer?.let {
             customerRepository.retrieveCustomer(
                 CustomerRepository.CustomerInfo(
                     id = it.id,
@@ -422,13 +425,13 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             )
         }?.email
 
-        val merchantName = config.merchantDisplayName
+        val merchantName = configuration.merchantDisplayName
 
         val customerInfo = LinkConfiguration.CustomerInfo(
-            name = config.defaultBillingDetails?.name,
+            name = configuration.defaultBillingDetails?.name,
             email = customerEmail,
             phone = customerPhone,
-            billingCountryCode = config.defaultBillingDetails?.address?.country,
+            billingCountryCode = configuration.defaultBillingDetails?.address?.country,
         )
 
         val cardBrandChoice = elementsSession.cardBrandChoice?.let { cardBrandChoice ->
@@ -451,13 +454,13 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     }
 
     private suspend fun isGooglePayReady(
-        paymentSheetConfiguration: PaymentSheet.Configuration,
+        configuration: CommonConfiguration,
         elementsSession: ElementsSession,
     ): Boolean {
-        return elementsSession.isGooglePayEnabled && paymentSheetConfiguration.isGooglePayReady()
+        return elementsSession.isGooglePayEnabled && configuration.isGooglePayReady()
     }
 
-    private suspend fun PaymentSheet.Configuration.isGooglePayReady(): Boolean {
+    private suspend fun CommonConfiguration.isGooglePayReady(): Boolean {
         return googlePay?.environment?.let { environment ->
             googlePayRepositoryFactory(
                 when (environment) {
@@ -489,21 +492,21 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     }
 
     private suspend fun retrieveSavedSelection(
-        config: PaymentSheet.Configuration,
+        configuration: CommonConfiguration,
         isGooglePayReady: Boolean,
         elementsSession: ElementsSession
     ): SavedSelection {
         return retrieveSavedSelection(
-            config = config,
+            configuration = configuration,
             isGooglePayReady = isGooglePayReady,
             isLinkAvailable = elementsSession.isLinkEnabled,
         )
     }
 
     private suspend fun retrieveSavedPaymentMethodSelection(
-        config: PaymentSheet.Configuration,
+        configuration: CommonConfiguration,
     ): SavedSelection.PaymentMethod? {
-        return when (config.customer?.accessType) {
+        return when (configuration.customer?.accessType) {
             is PaymentSheet.CustomerAccessType.CustomerSession -> {
                 /*
                  * For `CustomerSession`, `v1/elements/sessions` needs to know the client-side saved default payment
@@ -513,7 +516,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                  * if they are ready and can safely set them to `false`.
                  */
                 retrieveSavedSelection(
-                    config = config,
+                    configuration = configuration,
                     isGooglePayReady = false,
                     isLinkAvailable = false,
                 ) as? SavedSelection.PaymentMethod
@@ -524,12 +527,12 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     }
 
     private suspend fun retrieveSavedSelection(
-        config: PaymentSheet.Configuration,
+        configuration: CommonConfiguration,
         isGooglePayReady: Boolean,
         isLinkAvailable: Boolean,
     ): SavedSelection {
-        val customerConfig = config.customer
-        val prefsRepository = prefsRepositoryFactory(customerConfig)
+        val customerConfiguration = configuration.customer
+        val prefsRepository = prefsRepositoryFactory(customerConfiguration)
 
         return prefsRepository.getSavedSelection(
             isGooglePayAvailable = isGooglePayReady,

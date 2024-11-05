@@ -1,5 +1,7 @@
 package com.stripe.android.utils
 
+import com.stripe.android.common.model.CommonConfiguration
+import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -21,7 +23,7 @@ internal class RelayingPaymentElementLoader : PaymentElementLoader {
             Result.success(
                 PaymentSheetState.Full(
                     customer = null,
-                    config = PaymentSheet.Configuration("Example"),
+                    config = PaymentSheet.Configuration("Example").asCommonConfiguration(),
                     paymentSelection = null,
                     linkState = null,
                     validationError = validationError,
@@ -42,7 +44,7 @@ internal class RelayingPaymentElementLoader : PaymentElementLoader {
 
     override suspend fun load(
         initializationMode: PaymentSheet.InitializationMode,
-        paymentSheetConfiguration: PaymentSheet.Configuration,
+        onfiguration: CommonConfiguration,
         isReloadingAfterProcessDeath: Boolean,
         initializedViaCompose: Boolean,
     ): Result<PaymentSheetState.Full> {
