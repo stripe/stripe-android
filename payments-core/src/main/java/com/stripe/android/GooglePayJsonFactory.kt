@@ -46,7 +46,7 @@ class GooglePayJsonFactory constructor(
          */
         isJcbEnabled: Boolean = false,
 
-        cardBrandFilter: CardBrandFilter
+        cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter
     ) : this(
         googlePayConfig = GooglePayConfig(context),
         isJcbEnabled = isJcbEnabled,
