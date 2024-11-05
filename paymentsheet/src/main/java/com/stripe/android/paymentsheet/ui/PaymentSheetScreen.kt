@@ -303,7 +303,6 @@ private fun PaymentSheetContent(
     }
 }
 
-@Suppress("LongMethod")
 @Composable
 private fun PaymentSheetContent(
     viewModel: BaseSheetViewModel,
