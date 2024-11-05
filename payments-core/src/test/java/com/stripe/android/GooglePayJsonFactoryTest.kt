@@ -417,6 +417,28 @@ class GooglePayJsonFactoryTest {
     }
 
     @Test
+    fun `allowedCardNetworks should include all default networks when no filter passed in`() {
+        val factory = GooglePayJsonFactory(
+            googlePayConfig = googlePayConfig,
+            isJcbEnabled = false
+        )
+
+        val isReadyToPayRequestJson = factory.createIsReadyToPayRequest()
+
+        val allowedCardNetworks = isReadyToPayRequestJson
+            .getJSONArray("allowedPaymentMethods")
+            .getJSONObject(0)
+            .getJSONObject("parameters")
+            .getJSONArray("allowedCardNetworks")
+            .let {
+                StripeJsonUtils.jsonArrayToList(it)
+            }
+
+        assertThat(allowedCardNetworks)
+            .containsExactly("AMEX", "DISCOVER", "MASTERCARD", "VISA")
+    }
+
+    @Test
     fun `allowedCardNetworks should include JCB when JCB is enabled and accepted by filter`() {
         // Create a CardBrandFilter that accepts all card brands
         val customCardBrandFilter = object : CardBrandFilter {
