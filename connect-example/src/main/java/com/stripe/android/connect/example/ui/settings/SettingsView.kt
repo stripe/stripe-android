@@ -99,10 +99,9 @@ private fun SelectAnAccount(
     onOtherAccountInputChanged: (String) -> Unit,
 ) {
     Column(
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Text(stringResource(R.string.select_demo_account), style = MaterialTheme.typography.h6)
-        Spacer(modifier = Modifier.height(8.dp))
         accounts.forEach { merchant ->
             when (merchant) {
                 is DemoMerchant.Merchant -> {
