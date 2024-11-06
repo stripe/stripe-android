@@ -15,9 +15,9 @@ jobs:
       - name: Build base branch
         run: ./gradlew :identity-example:assembleRelease && mv identity-example/build/outputs/apk/theme1/release/identity-example-theme1-release.apk identity-example/build/outputs/apk/theme1/release/identity-example-release-base.apk
       - name: Upload APK
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: apk
+          name: identity-base-apk
           path: identity-example/build/outputs/apk/theme1/release/identity-example-release-base.apk
 
   # Checkout PR branch and build the APK
@@ -30,9 +30,9 @@ jobs:
       - name: Build PR branch
         run: ./gradlew :identity-example:assembleRelease && mv identity-example/build/outputs/apk/theme1/release/identity-example-theme1-release.apk identity-example/build/outputs/apk/theme1/release/identity-example-release-pr.apk
       - name: Upload APK
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: apk
+          name: identity-pr-apk
           path: identity-example/build/outputs/apk/theme1/release/identity-example-release-pr.apk
 
   # Execute Diffuse only when the two APKs are built successfully
@@ -44,11 +44,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Download APKs
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
-          name: apk
           path: apk
-          pattern: identity-example-release-*.apk
+          pattern: identity-*-apk
+          merge-multiple: true
       - name: diffuse
         id: diffuse
         uses: usefulness/diffuse-action@41995fe8ff6be0a8847e63bdc5a4679c704b455c
@@ -77,7 +77,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload diffuse output
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: diffuse-output
           path: ${{ steps.diffuse.outputs.diff-file }}
