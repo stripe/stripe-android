@@ -52,8 +52,6 @@ import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -249,12 +247,6 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             }
         }
 
-        viewModelScope.launch {
-            saveForFutureUse.onEach { saveForFutureUse ->
-                updateScreenStateWithSaveForFutureUse(saveForFutureUse)
-            }.collect()
-        }
-
         val hasDefaultName = args.formArgs.billingDetails?.name != null &&
             args.formArgs.billingDetailsCollectionConfiguration.attachDefaultsToPaymentMethod
         val hasDefaultEmail = args.formArgs.billingDetails?.email != null &&
@@ -406,7 +398,6 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     fun reset(error: ResolvableString? = null) {
         hasLaunched = false
         shouldReset = false
-        saveForFutureUseElement.controller.onValueChange(true)
         screenStateWithoutSaveForFutureUse.update {
             USBankAccountFormScreenState.BillingDetailsCollection(
                 error = error,
@@ -414,6 +405,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                 isProcessing = false,
             )
         }
+        saveForFutureUseElement.controller.onValueChange(true)
     }
 
     fun onDestroy() {
@@ -675,16 +667,6 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             }
 
             else -> StripeUiCoreR.string.stripe_continue_button_label.resolvableString
-        }
-    }
-
-    private fun updateScreenStateWithSaveForFutureUse(saveForFutureUse: Boolean) {
-        screenStateWithoutSaveForFutureUse.update { state ->
-            val mandateText = buildMandateText(
-                isVerifyWithMicrodeposits = state is USBankAccountFormScreenState.VerifyWithMicrodeposits,
-                isSaveForFutureUseSelected = saveForFutureUse,
-            )
-            state.updateWithMandate(mandateText)
         }
     }
 

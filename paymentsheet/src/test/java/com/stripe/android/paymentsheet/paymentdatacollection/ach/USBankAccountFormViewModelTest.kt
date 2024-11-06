@@ -928,11 +928,14 @@ class USBankAccountFormViewModelTest {
         val viewModel = createViewModel()
 
         viewModel.result.test {
+            assertThat(awaitItem()).isNull()
+
             viewModel.handleCollectBankAccountResult(mockVerifiedBankAccount())
             assertThat(awaitItem()).isNotNull()
 
             // Simulate a removal
             viewModel.reset()
+            assertThat(awaitItem()).isNull()
 
             viewModel.handleCollectBankAccountResult(
                 result = CollectBankAccountResultInternal.Cancelled
@@ -951,6 +954,8 @@ class USBankAccountFormViewModelTest {
         val viewModel = createViewModel()
 
         viewModel.result.test {
+            assertThat(awaitItem()).isNull()
+
             viewModel.handleCollectBankAccountResult(mockVerifiedBankAccount())
             assertThat(awaitItem()).isNotNull()
 
