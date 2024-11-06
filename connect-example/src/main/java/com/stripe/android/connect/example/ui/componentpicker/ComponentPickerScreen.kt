@@ -129,8 +129,8 @@ private fun LazyItemScope.MenuRowItem(menuItem: MenuItem) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(modifier = Modifier.weight(1f)) {
-            Column(modifier = Modifier
-                .padding(start = 16.dp, top = 8.dp, bottom = 8.dp, end = 16.dp)
+            Column(
+                modifier = Modifier.padding(start = 16.dp, top = 8.dp, bottom = 8.dp, end = 16.dp)
             ) {
                 Spacer(modifier = Modifier.height(8.dp))
                 Row(

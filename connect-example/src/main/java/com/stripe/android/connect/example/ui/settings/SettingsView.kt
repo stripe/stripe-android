@@ -75,18 +75,22 @@ fun SettingsView(
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            item { SelectAnAccount(
-                accounts = state.accounts,
-                selectedAccount = state.selectedAccount,
-                onAccountSelected = viewModel::onAccountSelected,
-                onOtherAccountInputChanged = viewModel::onOtherAccountInputChanged,
-            ) }
-            item { ApiServerSettings(
-                serverUrl = state.serverUrl,
-                onServerUrlChanged = viewModel::onServerUrlChanged,
-                resetServerUrlEnabled = state.serverUrlResetEnabled,
-                resetServerUrlClicked = viewModel::onResetServerUrlClicked,
-            ) }
+            item {
+                SelectAnAccount(
+                    accounts = state.accounts,
+                    selectedAccount = state.selectedAccount,
+                    onAccountSelected = viewModel::onAccountSelected,
+                    onOtherAccountInputChanged = viewModel::onOtherAccountInputChanged,
+                )
+            }
+            item {
+                ApiServerSettings(
+                    serverUrl = state.serverUrl,
+                    onServerUrlChanged = viewModel::onServerUrlChanged,
+                    resetServerUrlEnabled = state.serverUrlResetEnabled,
+                    resetServerUrlClicked = viewModel::onResetServerUrlClicked,
+                )
+            }
         }
     }
 }
