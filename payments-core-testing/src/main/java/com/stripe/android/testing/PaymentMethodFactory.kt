@@ -64,6 +64,14 @@ object PaymentMethodFactory {
         )
     }
 
+    fun visaCard(): PaymentMethod {
+        return card(random = false).update(
+            last4 = "4242",
+            addCbcNetworks = false,
+            brand = CardBrand.Visa,
+        )
+    }
+
     fun cashAppPay(): PaymentMethod {
         return PaymentMethod(
             id = "pm_1234",
