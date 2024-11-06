@@ -7,8 +7,8 @@ internal object NewUpdateCardScreenDefinition : BooleanSettingsDefinition(
     displayName = "Enable new update card screen",
     defaultValue = false,
 ) {
-    override fun valueUpdated(value: Boolean, playgroundSettings: PlaygroundSettings) {
-        super.valueUpdated(value, playgroundSettings)
+    override fun setValue(value: Boolean) {
+        super.setValue(value)
         FeatureFlags.useNewUpdateCardScreen.setEnabled(isEnabled = value)
     }
 }
