@@ -7,6 +7,7 @@ import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.ColorInt
 import androidx.annotation.VisibleForTesting
 import androidx.core.os.bundleOf
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
 
@@ -33,7 +34,7 @@ internal class PaymentSheetContractV2 :
 
     @Parcelize
     data class Args(
-        internal val initializationMode: PaymentSheet.InitializationMode,
+        internal val initializationMode: PaymentElementLoader.InitializationMode,
         internal val config: PaymentSheet.Configuration,
         @ColorInt internal val statusBarColor: Int?,
         val initializedViaCompose: Boolean = false,

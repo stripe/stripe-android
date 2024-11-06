@@ -112,7 +112,7 @@ internal class DefaultPaymentElementLoaderTest {
 
         assertThat(
             loader.load(
-                initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                     clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
                 ),
                 config,
@@ -155,7 +155,7 @@ internal class DefaultPaymentElementLoaderTest {
         )
 
         val result = loader.load(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
             PaymentSheetFixtures.CONFIG_MINIMUM,
@@ -178,7 +178,7 @@ internal class DefaultPaymentElementLoaderTest {
 
         assertThat(
             loader.load(
-                initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                     clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
                 ),
                 PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
@@ -198,7 +198,7 @@ internal class DefaultPaymentElementLoaderTest {
         )
 
         val state = loader.load(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
             paymentSheetConfiguration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
@@ -221,7 +221,7 @@ internal class DefaultPaymentElementLoaderTest {
         )
 
         val result = loader.load(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
             paymentSheetConfiguration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
@@ -243,7 +243,7 @@ internal class DefaultPaymentElementLoaderTest {
             )
 
             val result = loader.load(
-                initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                     clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
                 ),
                 paymentSheetConfiguration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
@@ -274,7 +274,7 @@ internal class DefaultPaymentElementLoaderTest {
             )
 
             loader.load(
-                initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                     clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
                 ),
                 PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
@@ -309,7 +309,7 @@ internal class DefaultPaymentElementLoaderTest {
             )
 
             loader.load(
-                initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                     clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
                 ),
                 PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
@@ -339,7 +339,7 @@ internal class DefaultPaymentElementLoaderTest {
             )
 
             val loadResult = loader.load(
-                initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                     clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
                 ),
                 PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
@@ -361,7 +361,7 @@ internal class DefaultPaymentElementLoaderTest {
                     )
                 )
             ).load(
-                initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                     clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
                 ),
                 PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
@@ -388,7 +388,7 @@ internal class DefaultPaymentElementLoaderTest {
                     )
                 )
             ).load(
-                initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                     clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
                 ),
                 PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
@@ -422,7 +422,7 @@ internal class DefaultPaymentElementLoaderTest {
                 paymentMethodTypes = listOf("card", "sepa_debit")
             )
         ).load(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
             ),
             paymentSheetConfiguration = PaymentSheetFixtures.CONFIG_CUSTOMER.copy(
@@ -449,7 +449,7 @@ internal class DefaultPaymentElementLoaderTest {
         val result = createPaymentElementLoader(
             stripeIntent = paymentIntent,
         ).load(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
             PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
@@ -466,7 +466,7 @@ internal class DefaultPaymentElementLoaderTest {
                 confirmationMethod = Manual,
             ),
         ).load(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
             paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
@@ -481,7 +481,7 @@ internal class DefaultPaymentElementLoaderTest {
         val result = createPaymentElementLoader(
             customerRepo = FakeCustomerRepository(paymentMethods = PAYMENT_METHODS)
         ).load(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
             paymentSheetConfiguration = mockConfiguration(
@@ -502,7 +502,7 @@ internal class DefaultPaymentElementLoaderTest {
         val loader = createPaymentElementLoader(linkAccountState = AccountStatus.Verified)
 
         val result = loader.load(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = mockConfiguration(),
             initializedViaCompose = false,
         ).getOrThrow()
@@ -515,7 +515,7 @@ internal class DefaultPaymentElementLoaderTest {
         val loader = createPaymentElementLoader(linkAccountState = AccountStatus.NeedsVerification)
 
         val result = loader.load(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = mockConfiguration(),
             initializedViaCompose = false,
         ).getOrThrow()
@@ -528,7 +528,7 @@ internal class DefaultPaymentElementLoaderTest {
         val loader = createPaymentElementLoader(linkAccountState = AccountStatus.VerificationStarted)
 
         val result = loader.load(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = mockConfiguration(),
             initializedViaCompose = false,
         ).getOrThrow()
@@ -541,7 +541,7 @@ internal class DefaultPaymentElementLoaderTest {
         val loader = createPaymentElementLoader(linkAccountState = AccountStatus.SignedOut)
 
         val result = loader.load(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = mockConfiguration(),
             initializedViaCompose = false,
         ).getOrThrow()
@@ -559,7 +559,7 @@ internal class DefaultPaymentElementLoaderTest {
         )
 
         val result = loader.load(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = mockConfiguration(
                 defaultBillingDetails = billingDetails,
             ),
@@ -596,7 +596,7 @@ internal class DefaultPaymentElementLoaderTest {
         )
 
         val result = loader.load(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = mockConfiguration(
                 shippingDetails = shippingDetails,
             ),
@@ -620,7 +620,7 @@ internal class DefaultPaymentElementLoaderTest {
         )
 
         val result = loader.load(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = mockConfiguration(),
             initializedViaCompose = false,
         ).getOrThrow()
@@ -651,7 +651,7 @@ internal class DefaultPaymentElementLoaderTest {
         )
 
         val result = loader.load(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = mockConfiguration(),
             initializedViaCompose = false,
         ).getOrThrow()
@@ -680,7 +680,7 @@ internal class DefaultPaymentElementLoaderTest {
         )
 
         val result = loader.load(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = mockConfiguration(),
             initializedViaCompose = false,
         ).getOrThrow()
@@ -701,7 +701,7 @@ internal class DefaultPaymentElementLoaderTest {
         )
 
         val result = loader.load(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = mockConfiguration(),
             initializedViaCompose = false,
         ).getOrThrow()
@@ -729,7 +729,7 @@ internal class DefaultPaymentElementLoaderTest {
         )
 
         val result = loader.load(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = mockConfiguration(),
             initializedViaCompose = false,
         ).getOrThrow()
@@ -752,7 +752,7 @@ internal class DefaultPaymentElementLoaderTest {
         )
 
         val result = loader.load(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = mockConfiguration(),
             initializedViaCompose = false,
         ).getOrThrow()
@@ -771,7 +771,7 @@ internal class DefaultPaymentElementLoaderTest {
         )
 
         val result = loader.load(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = mockConfiguration(),
             initializedViaCompose = false,
         ).getOrThrow()
@@ -787,7 +787,7 @@ internal class DefaultPaymentElementLoaderTest {
         )
 
         val result = loader.load(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = mockConfiguration(),
             initializedViaCompose = false,
         ).getOrThrow()
@@ -803,7 +803,7 @@ internal class DefaultPaymentElementLoaderTest {
         )
 
         val result = loader.load(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = mockConfiguration(),
             initializedViaCompose = false,
         ).getOrThrow()
@@ -819,7 +819,7 @@ internal class DefaultPaymentElementLoaderTest {
         )
 
         val result = loader.load(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = mockConfiguration(),
             initializedViaCompose = false,
         ).getOrThrow()
@@ -838,7 +838,7 @@ internal class DefaultPaymentElementLoaderTest {
         )
 
         val result = loader.load(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = mockConfiguration(),
             initializedViaCompose = false,
         ).getOrThrow()
@@ -855,7 +855,7 @@ internal class DefaultPaymentElementLoaderTest {
         )
 
         val result = loader.load(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = mockConfiguration(),
             initializedViaCompose = false,
         ).getOrThrow()
@@ -878,7 +878,7 @@ internal class DefaultPaymentElementLoaderTest {
         )
 
         val result = loader.load(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = mockConfiguration(
                 shippingDetails = shippingDetails,
                 defaultBillingDetails = billingDetails,
@@ -903,7 +903,7 @@ internal class DefaultPaymentElementLoaderTest {
         )
 
         val result = loader.load(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = mockConfiguration(
                 customer = PaymentSheet.CustomerConfiguration(
                     id = "id",
@@ -927,7 +927,7 @@ internal class DefaultPaymentElementLoaderTest {
         )
 
         val result = loader.load(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = mockConfiguration(
                 customer = PaymentSheet.CustomerConfiguration(
                     id = "id",
@@ -952,7 +952,7 @@ internal class DefaultPaymentElementLoaderTest {
         )
 
         val result = loader.load(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
             initializedViaCompose = false,
         ).exceptionOrNull()
@@ -969,7 +969,7 @@ internal class DefaultPaymentElementLoaderTest {
         val loader = createPaymentElementLoader(
             linkSettings = createLinkSettings(passthroughModeEnabled = false),
         )
-        val initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret")
+        val initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret")
 
         loader.load(
             initializationMode = initializationMode,
@@ -1025,7 +1025,7 @@ internal class DefaultPaymentElementLoaderTest {
         val loader = createPaymentElementLoader(
             linkSettings = createLinkSettings(passthroughModeEnabled = false),
         )
-        val initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
+        val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
             intentConfiguration = PaymentSheet.IntentConfiguration(
                 mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                     amount = 1234,
@@ -1058,7 +1058,7 @@ internal class DefaultPaymentElementLoaderTest {
         val loader = createPaymentElementLoader(error = error)
 
         loader.load(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
             initializedViaCompose = false,
         )
@@ -1073,7 +1073,7 @@ internal class DefaultPaymentElementLoaderTest {
         val loader = createPaymentElementLoader(error = error)
 
         loader.load(
-            initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 1234,
@@ -1098,7 +1098,7 @@ internal class DefaultPaymentElementLoaderTest {
         )
 
         loader.load(
-            initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 1234,
@@ -1122,7 +1122,7 @@ internal class DefaultPaymentElementLoaderTest {
         val loader = createPaymentElementLoader(fallbackError = error)
 
         loader.load(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = intent.clientSecret!!,
             ),
             paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
@@ -1143,7 +1143,7 @@ internal class DefaultPaymentElementLoaderTest {
         )
 
         val result = loader.load(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
             paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
@@ -1161,7 +1161,7 @@ internal class DefaultPaymentElementLoaderTest {
         )
 
         val result = loader.load(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
             paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
@@ -1180,7 +1180,7 @@ internal class DefaultPaymentElementLoaderTest {
         )
 
         val result = loader.load(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
             paymentSheetConfiguration = PaymentSheet.Configuration(
@@ -1243,7 +1243,7 @@ internal class DefaultPaymentElementLoaderTest {
         val loader = createPaymentElementLoader()
 
         val result = loader.load(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
             paymentSheetConfiguration = PaymentSheet.Configuration(
@@ -1299,7 +1299,7 @@ internal class DefaultPaymentElementLoaderTest {
         )
 
         loader.load(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "client_secret"
             ),
             paymentSheetConfiguration = PaymentSheet.Configuration(
@@ -1354,7 +1354,7 @@ internal class DefaultPaymentElementLoaderTest {
             )
 
             val state = loader.load(
-                initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                     clientSecret = "client_secret"
                 ),
                 paymentSheetConfiguration = PaymentSheet.Configuration(
@@ -1401,7 +1401,7 @@ internal class DefaultPaymentElementLoaderTest {
             )
 
             val state = loader.load(
-                initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                     clientSecret = "client_secret"
                 ),
                 paymentSheetConfiguration = PaymentSheet.Configuration(
@@ -1441,7 +1441,7 @@ internal class DefaultPaymentElementLoaderTest {
             )
 
             val state = loader.load(
-                initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                     clientSecret = "client_secret"
                 ),
                 paymentSheetConfiguration = PaymentSheet.Configuration(
@@ -1481,7 +1481,7 @@ internal class DefaultPaymentElementLoaderTest {
             )
 
             val state = loader.load(
-                initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                     clientSecret = "client_secret"
                 ),
                 paymentSheetConfiguration = PaymentSheet.Configuration(
@@ -1508,7 +1508,7 @@ internal class DefaultPaymentElementLoaderTest {
             val loader = createPaymentElementLoader()
 
             val state = loader.load(
-                initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                     clientSecret = "client_secret"
                 ),
                 paymentSheetConfiguration = PaymentSheet.Configuration(
@@ -1543,7 +1543,7 @@ internal class DefaultPaymentElementLoaderTest {
             )
 
             val exception = loader.load(
-                initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                     clientSecret = "client_secret"
                 ),
                 paymentSheetConfiguration = PaymentSheet.Configuration(
@@ -1581,7 +1581,7 @@ internal class DefaultPaymentElementLoaderTest {
             )
 
             val state = loader.load(
-                initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                     clientSecret = "client_secret"
                 ),
                 paymentSheetConfiguration = PaymentSheet.Configuration(
@@ -1625,7 +1625,7 @@ internal class DefaultPaymentElementLoaderTest {
             )
 
             val state = loader.load(
-                initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                     clientSecret = "client_secret"
                 ),
                 paymentSheetConfiguration = PaymentSheet.Configuration(
@@ -1680,7 +1680,7 @@ internal class DefaultPaymentElementLoaderTest {
         )
 
         val result = loader.load(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = mockConfiguration(
                 customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
                     id = "id",
@@ -1717,7 +1717,7 @@ internal class DefaultPaymentElementLoaderTest {
             )
 
             val result = loader.load(
-                initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
+                initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
                 paymentSheetConfiguration = mockConfiguration(
                     customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
                         id = "id",
@@ -1771,7 +1771,7 @@ internal class DefaultPaymentElementLoaderTest {
             )
 
             loader.load(
-                initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
+                initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
                 paymentSheetConfiguration = mockConfiguration(
                     customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
                         id = "id",
@@ -1811,7 +1811,7 @@ internal class DefaultPaymentElementLoaderTest {
             )
 
             loader.load(
-                initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
+                initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
                 paymentSheetConfiguration = mockConfiguration(
                     customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
                         id = "id",
@@ -1842,7 +1842,7 @@ internal class DefaultPaymentElementLoaderTest {
             )
 
             loader.load(
-                initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
+                initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
                 paymentSheetConfiguration = mockConfiguration(
                     customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
                         id = "id",
@@ -1875,7 +1875,7 @@ internal class DefaultPaymentElementLoaderTest {
             )
 
             loader.load(
-                initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
+                initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
                 paymentSheetConfiguration = mockConfiguration(
                     customer = PaymentSheet.CustomerConfiguration(
                         id = "id",
@@ -1996,7 +1996,7 @@ internal class DefaultPaymentElementLoaderTest {
             linkSettings = createLinkSettings(passthroughModeEnabled = false),
         )
 
-        val initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
+        val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
             intentConfiguration = PaymentSheet.IntentConfiguration(
                 mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                     amount = 100L,
@@ -2030,7 +2030,7 @@ internal class DefaultPaymentElementLoaderTest {
             linkSettings = createLinkSettings(passthroughModeEnabled = false),
         )
 
-        val initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
+        val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
             intentConfiguration = PaymentSheet.IntentConfiguration(
                 mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                     amount = 100L,
@@ -2088,7 +2088,7 @@ internal class DefaultPaymentElementLoaderTest {
         )
 
         val state = loader.load(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
             paymentSheetConfiguration = config,
@@ -2116,7 +2116,7 @@ internal class DefaultPaymentElementLoaderTest {
         )
 
         val result = loader.load(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
             paymentSheetConfiguration = PaymentSheet.Configuration.Builder(merchantDisplayName = "Example, Inc.")
@@ -2135,7 +2135,7 @@ internal class DefaultPaymentElementLoaderTest {
         val loader = createPaymentElementLoader(
             linkSettings = createLinkSettings(passthroughModeEnabled = false),
         )
-        val initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret")
+        val initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret")
 
         loader.load(
             initializationMode = initializationMode,
@@ -2292,13 +2292,13 @@ internal class DefaultPaymentElementLoaderTest {
                 ephemeralKeySecret = "some_secret",
             ),
         )
-        private val DEFAULT_INITIALIZATION_MODE = PaymentSheet.InitializationMode.PaymentIntent(
+        private val DEFAULT_INITIALIZATION_MODE = PaymentElementLoader.InitializationMode.PaymentIntent(
             clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
         )
     }
 
     private suspend fun PaymentElementLoader.load(
-        initializationMode: PaymentSheet.InitializationMode,
+        initializationMode: PaymentElementLoader.InitializationMode,
         paymentSheetConfiguration: PaymentSheet.Configuration,
         isReloadingAfterProcessDeath: Boolean = false,
         initializedViaCompose: Boolean,

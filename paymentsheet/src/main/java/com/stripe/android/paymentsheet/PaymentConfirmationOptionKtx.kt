@@ -4,9 +4,10 @@ import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 
 internal fun PaymentSelection.toPaymentConfirmationOption(
-    initializationMode: PaymentSheet.InitializationMode,
+    initializationMode: PaymentElementLoader.InitializationMode,
     configuration: CommonConfiguration,
 ): PaymentConfirmationOption? {
     return when (this) {

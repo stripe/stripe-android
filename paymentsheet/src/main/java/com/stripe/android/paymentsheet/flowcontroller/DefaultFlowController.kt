@@ -57,6 +57,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.Cvc
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionLauncherFactory
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionResult
 import com.stripe.android.paymentsheet.state.CustomerState
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.paymentsheet.toPaymentConfirmationOption
 import com.stripe.android.paymentsheet.ui.SepaMandateContract
@@ -133,7 +134,7 @@ internal class DefaultFlowController @Inject internal constructor(
         logger = logger,
     ).create(viewModelScope.plus(workContext))
 
-    private val initializationMode: PaymentSheet.InitializationMode?
+    private val initializationMode: PaymentElementLoader.InitializationMode?
         get() = viewModel.previousConfigureRequest?.initializationMode
 
     override var shippingDetails: AddressDetails?
@@ -212,7 +213,7 @@ internal class DefaultFlowController @Inject internal constructor(
         callback: PaymentSheet.FlowController.ConfigCallback
     ) {
         configure(
-            mode = PaymentSheet.InitializationMode.PaymentIntent(paymentIntentClientSecret),
+            mode = PaymentElementLoader.InitializationMode.PaymentIntent(paymentIntentClientSecret),
             configuration = configuration ?: PaymentSheet.Configuration.default(context),
             callback = callback,
         )
@@ -224,7 +225,7 @@ internal class DefaultFlowController @Inject internal constructor(
         callback: PaymentSheet.FlowController.ConfigCallback
     ) {
         configure(
-            mode = PaymentSheet.InitializationMode.SetupIntent(setupIntentClientSecret),
+            mode = PaymentElementLoader.InitializationMode.SetupIntent(setupIntentClientSecret),
             configuration = configuration ?: PaymentSheet.Configuration.default(context),
             callback = callback,
         )
@@ -236,14 +237,14 @@ internal class DefaultFlowController @Inject internal constructor(
         callback: PaymentSheet.FlowController.ConfigCallback
     ) {
         configure(
-            mode = PaymentSheet.InitializationMode.DeferredIntent(intentConfiguration),
+            mode = PaymentElementLoader.InitializationMode.DeferredIntent(intentConfiguration),
             configuration = configuration ?: PaymentSheet.Configuration.default(context),
             callback = callback,
         )
     }
 
     private fun configure(
-        mode: PaymentSheet.InitializationMode,
+        mode: PaymentElementLoader.InitializationMode,
         configuration: PaymentSheet.Configuration,
         callback: PaymentSheet.FlowController.ConfigCallback
     ) {

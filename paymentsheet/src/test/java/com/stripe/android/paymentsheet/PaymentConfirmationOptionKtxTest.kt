@@ -14,6 +14,7 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormScreenState
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.PaymentMethodFactory
 import org.junit.Test
 
@@ -344,11 +345,11 @@ class PaymentConfirmationOptionKtxTest {
     }
 
     private companion object {
-        val PI_INITIALIZATION_MODE = PaymentSheet.InitializationMode.PaymentIntent(
+        val PI_INITIALIZATION_MODE = PaymentElementLoader.InitializationMode.PaymentIntent(
             clientSecret = "pi_123"
         )
 
-        val SI_INITIALIZATION_MODE = PaymentSheet.InitializationMode.SetupIntent(
+        val SI_INITIALIZATION_MODE = PaymentElementLoader.InitializationMode.SetupIntent(
             clientSecret = "pi_123"
         )
     }

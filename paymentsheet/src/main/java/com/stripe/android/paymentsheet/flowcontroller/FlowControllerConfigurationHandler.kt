@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet.flowcontroller
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.PaymentSheet.InitializationMode.DeferredIntent
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
@@ -38,7 +37,7 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
 
     fun configure(
         scope: CoroutineScope,
-        initializationMode: PaymentSheet.InitializationMode,
+        initializationMode: PaymentElementLoader.InitializationMode,
         configuration: PaymentSheet.Configuration,
         initializedViaCompose: Boolean,
         callback: PaymentSheet.FlowController.ConfigCallback,
@@ -57,7 +56,7 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
     }
 
     private suspend fun configureInternal(
-        initializationMode: PaymentSheet.InitializationMode,
+        initializationMode: PaymentElementLoader.InitializationMode,
         configuration: PaymentSheet.Configuration,
         initializedViaCompose: Boolean,
         callback: PaymentSheet.FlowController.ConfigCallback,
@@ -114,7 +113,7 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
         configuration: PaymentSheet.Configuration,
         configureRequest: ConfigureRequest,
     ) {
-        val isDecoupling = configureRequest.initializationMode is DeferredIntent
+        val isDecoupling = configureRequest.initializationMode is PaymentElementLoader.InitializationMode.DeferredIntent
 
         eventReporter.onInit(
             configuration = configuration,
@@ -138,7 +137,7 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
     }
 
     data class ConfigureRequest(
-        val initializationMode: PaymentSheet.InitializationMode,
+        val initializationMode: PaymentElementLoader.InitializationMode,
         val configuration: PaymentSheet.Configuration,
     )
 }

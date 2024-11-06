@@ -68,6 +68,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.bacs.FakeBacsMandat
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.Args
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionInteractor
 import com.stripe.android.paymentsheet.state.LinkState
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.ui.GOOGLE_PAY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_EDIT_BUTTON_TEST_TAG
@@ -158,7 +159,7 @@ internal class PaymentSheetActivityTest {
     private val intent = contract.createIntent(
         context,
         PaymentSheetContractV2.Args(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "pi_1234_secret_5678",
             ),
             config = PaymentSheetFixtures.CONFIG_CUSTOMER,
@@ -976,7 +977,7 @@ internal class PaymentSheetActivityTest {
         )
 
         val args = PaymentSheetContractV2.Args(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "abc",
             ),
             config = PaymentSheet.Configuration(
@@ -1002,7 +1003,7 @@ internal class PaymentSheetActivityTest {
     @Test
     fun `Handles invalid client secret correctly`() {
         val args = PaymentSheetContractV2.Args(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(clientSecret = ""),
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(clientSecret = ""),
             config = PaymentSheet.Configuration(
                 merchantDisplayName = "Some name",
             ),

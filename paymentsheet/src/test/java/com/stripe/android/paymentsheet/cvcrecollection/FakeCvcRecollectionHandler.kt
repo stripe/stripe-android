@@ -1,9 +1,9 @@
 package com.stripe.android.paymentsheet.cvcrecollection
 
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionData
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 
 internal class FakeCvcRecollectionHandler : CvcRecollectionHandler {
     var cvcRecollectionEnabled = false
@@ -16,13 +16,13 @@ internal class FakeCvcRecollectionHandler : CvcRecollectionHandler {
 
     override fun cvcRecollectionEnabled(
         stripeIntent: StripeIntent?,
-        initializationMode: PaymentSheet.InitializationMode?
+        initializationMode: PaymentElementLoader.InitializationMode?
     ) = requiresCVCRecollection || cvcRecollectionEnabled
 
     override fun requiresCVCRecollection(
         stripeIntent: StripeIntent?,
         paymentSelection: PaymentSelection?,
-        initializationMode: PaymentSheet.InitializationMode?,
+        initializationMode: PaymentElementLoader.InitializationMode?,
         extraRequirements: () -> Boolean
     ) = requiresCVCRecollection && extraRequirements()
 }

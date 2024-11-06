@@ -11,6 +11,7 @@ import com.stripe.android.paymentsheet.FakePrefsRepository
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
+import com.stripe.android.paymentsheet.state.PaymentElementLoader.InitializationMode
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.SetupIntentFactory
@@ -56,7 +57,7 @@ class DefaultCustomerSessionElementsSessionManagerTest {
         assertThat(lastParams?.externalPaymentMethods).isEmpty()
 
         val initializationMode = lastParams?.initializationMode
-        assertThat(initializationMode).isInstanceOf(PaymentSheet.InitializationMode.DeferredIntent::class.java)
+        assertThat(initializationMode).isInstanceOf(InitializationMode.DeferredIntent::class.java)
 
         val intentConfiguration = initializationMode.asDeferred().intentConfiguration
         assertThat(intentConfiguration.paymentMethodTypes).containsExactly(
@@ -470,7 +471,7 @@ class DefaultCustomerSessionElementsSessionManagerTest {
         )
     }
 
-    private fun PaymentSheet.InitializationMode?.asDeferred(): PaymentSheet.InitializationMode.DeferredIntent {
-        return this as PaymentSheet.InitializationMode.DeferredIntent
+    private fun InitializationMode?.asDeferred(): InitializationMode.DeferredIntent {
+        return this as InitializationMode.DeferredIntent
     }
 }

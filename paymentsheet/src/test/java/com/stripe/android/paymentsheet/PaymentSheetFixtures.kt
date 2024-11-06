@@ -13,6 +13,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.LinkState
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import org.mockito.kotlin.mock
@@ -176,14 +177,14 @@ internal object PaymentSheetFixtures {
 
     internal val ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP
         get() = PaymentSheetContractV2.Args(
-            initializationMode = PaymentSheet.InitializationMode.SetupIntent("seti_1234_secret_1234"),
+            initializationMode = PaymentElementLoader.InitializationMode.SetupIntent("seti_1234_secret_1234"),
             CONFIG_CUSTOMER_WITH_GOOGLEPAY,
             STATUS_BAR_COLOR
         )
 
     internal val ARGS_CUSTOMER_WITH_GOOGLEPAY
         get() = PaymentSheetContractV2.Args(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
             CONFIG_CUSTOMER_WITH_GOOGLEPAY,
@@ -192,7 +193,7 @@ internal object PaymentSheetFixtures {
 
     internal val ARGS_CUSTOMER_WITHOUT_GOOGLEPAY
         get() = PaymentSheetContractV2.Args(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
             CONFIG_CUSTOMER,
@@ -208,7 +209,7 @@ internal object PaymentSheetFixtures {
 
     internal val ARGS_DEFERRED_INTENT
         get() = PaymentSheetContractV2.Args(
-            initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 10L,

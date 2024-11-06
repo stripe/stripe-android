@@ -6,6 +6,7 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionData
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import org.junit.Test
 
 class CvcRecollectionHandlerTest {
@@ -33,7 +34,7 @@ class CvcRecollectionHandlerTest {
         val response = handler.requiresCVCRecollection(
             stripeIntent = paymentIntent,
             paymentSelection = paymentSelection,
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("")
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("")
         )
         assertThat(response).isTrue()
     }
@@ -47,7 +48,7 @@ class CvcRecollectionHandlerTest {
         val response = handler.requiresCVCRecollection(
             stripeIntent = paymentIntent,
             paymentSelection = paymentSelection,
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(""),
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(""),
             extraRequirements = { false }
         )
         assertThat(response).isFalse()
@@ -62,7 +63,7 @@ class CvcRecollectionHandlerTest {
         val response = handler.requiresCVCRecollection(
             stripeIntent = paymentIntent,
             paymentSelection = paymentSelection,
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("")
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("")
         )
         assertThat(response).isFalse()
     }
@@ -76,7 +77,7 @@ class CvcRecollectionHandlerTest {
         val response = handler.requiresCVCRecollection(
             stripeIntent = paymentIntent,
             paymentSelection = paymentSelection,
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("")
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("")
         )
         assertThat(response).isFalse()
     }
@@ -88,7 +89,7 @@ class CvcRecollectionHandlerTest {
         val response = handler.requiresCVCRecollection(
             stripeIntent = paymentIntent,
             paymentSelection = paymentSelection,
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("")
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("")
         )
         assertThat(response).isFalse()
     }
@@ -102,7 +103,7 @@ class CvcRecollectionHandlerTest {
         val response = handler.requiresCVCRecollection(
             stripeIntent = paymentIntent,
             paymentSelection = paymentSelection,
-            initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 1234,
@@ -124,7 +125,7 @@ class CvcRecollectionHandlerTest {
         val response = handler.requiresCVCRecollection(
             stripeIntent = paymentIntent,
             paymentSelection = paymentSelection,
-            initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 1234,
@@ -147,7 +148,7 @@ class CvcRecollectionHandlerTest {
         val response = handler.requiresCVCRecollection(
             stripeIntent = paymentIntent,
             paymentSelection = paymentSelection,
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("")
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("")
         )
         assertThat(response).isFalse()
     }
@@ -159,7 +160,7 @@ class CvcRecollectionHandlerTest {
         val response = handler.requiresCVCRecollection(
             stripeIntent = paymentIntent,
             paymentSelection = paymentSelection,
-            initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 1234,
@@ -181,7 +182,7 @@ class CvcRecollectionHandlerTest {
         val response = handler.requiresCVCRecollection(
             stripeIntent = paymentIntent,
             paymentSelection = paymentSelection,
-            initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 1234,
@@ -200,7 +201,7 @@ class CvcRecollectionHandlerTest {
 
         val response = handler.cvcRecollectionEnabled(
             stripeIntent = paymentIntent,
-            initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 1234,
@@ -219,7 +220,7 @@ class CvcRecollectionHandlerTest {
 
         val response = handler.cvcRecollectionEnabled(
             stripeIntent = paymentIntent,
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("")
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("")
         )
         assertThat(response).isTrue()
     }
@@ -230,7 +231,7 @@ class CvcRecollectionHandlerTest {
 
         val response = handler.cvcRecollectionEnabled(
             stripeIntent = paymentIntent,
-            initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 1234,
@@ -249,7 +250,7 @@ class CvcRecollectionHandlerTest {
 
         val response = handler.cvcRecollectionEnabled(
             stripeIntent = paymentIntent,
-            initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 1234,
@@ -268,7 +269,7 @@ class CvcRecollectionHandlerTest {
 
         val response = handler.cvcRecollectionEnabled(
             stripeIntent = paymentIntent,
-            initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Setup(),
                     requireCvcRecollection = true
@@ -284,7 +285,7 @@ class CvcRecollectionHandlerTest {
 
         val response = handler.cvcRecollectionEnabled(
             stripeIntent = paymentIntent,
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("")
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("")
         )
         assertThat(response).isFalse()
     }

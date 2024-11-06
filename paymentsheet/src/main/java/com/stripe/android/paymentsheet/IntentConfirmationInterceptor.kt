@@ -17,6 +17,7 @@ import com.stripe.android.model.setupFutureUsage
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentsheet.IntentConfirmationInterceptor.NextStep
 import com.stripe.android.paymentsheet.injection.IS_FLOW_CONTROLLER
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -62,7 +63,7 @@ internal interface IntentConfirmationInterceptor {
     }
 
     suspend fun intercept(
-        initializationMode: PaymentSheet.InitializationMode,
+        initializationMode: PaymentElementLoader.InitializationMode,
         paymentMethodCreateParams: PaymentMethodCreateParams,
         paymentMethodOptionsParams: PaymentMethodOptionsParams? = null,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
@@ -70,7 +71,7 @@ internal interface IntentConfirmationInterceptor {
     ): NextStep
 
     suspend fun intercept(
-        initializationMode: PaymentSheet.InitializationMode,
+        initializationMode: PaymentElementLoader.InitializationMode,
         paymentMethod: PaymentMethod,
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
@@ -111,14 +112,14 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         )
 
     override suspend fun intercept(
-        initializationMode: PaymentSheet.InitializationMode,
+        initializationMode: PaymentElementLoader.InitializationMode,
         paymentMethodCreateParams: PaymentMethodCreateParams,
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         customerRequestedSave: Boolean,
     ): NextStep {
         return when (initializationMode) {
-            is PaymentSheet.InitializationMode.DeferredIntent -> {
+            is PaymentElementLoader.InitializationMode.DeferredIntent -> {
                 handleDeferredIntent(
                     intentConfiguration = initializationMode.intentConfiguration,
                     shippingValues = shippingValues,
@@ -128,7 +129,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                 )
             }
 
-            is PaymentSheet.InitializationMode.PaymentIntent -> {
+            is PaymentElementLoader.InitializationMode.PaymentIntent -> {
                 createConfirmStep(
                     clientSecret = initializationMode.clientSecret,
                     shippingValues = shippingValues,
@@ -137,7 +138,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                 )
             }
 
-            is PaymentSheet.InitializationMode.SetupIntent -> {
+            is PaymentElementLoader.InitializationMode.SetupIntent -> {
                 createConfirmStep(
                     clientSecret = initializationMode.clientSecret,
                     shippingValues = shippingValues,
@@ -148,13 +149,13 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
     }
 
     override suspend fun intercept(
-        initializationMode: PaymentSheet.InitializationMode,
+        initializationMode: PaymentElementLoader.InitializationMode,
         paymentMethod: PaymentMethod,
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
     ): NextStep {
         return when (initializationMode) {
-            is PaymentSheet.InitializationMode.DeferredIntent -> {
+            is PaymentElementLoader.InitializationMode.DeferredIntent -> {
                 val offSession = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
                 handleDeferredIntent(
                     intentConfiguration = initializationMode.intentConfiguration,
@@ -165,7 +166,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                 )
             }
 
-            is PaymentSheet.InitializationMode.PaymentIntent -> {
+            is PaymentElementLoader.InitializationMode.PaymentIntent -> {
                 createConfirmStep(
                     clientSecret = initializationMode.clientSecret,
                     shippingValues = shippingValues,
@@ -175,7 +176,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                 )
             }
 
-            is PaymentSheet.InitializationMode.SetupIntent -> {
+            is PaymentElementLoader.InitializationMode.SetupIntent -> {
                 createConfirmStep(
                     clientSecret = initializationMode.clientSecret,
                     shippingValues = shippingValues,

@@ -7,6 +7,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.utils.FakePaymentConfirmationDefinition
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.SetupIntentFactory
@@ -26,7 +27,7 @@ class PaymentConfirmationMediatorTest {
 
         val canConfirm = mediator.canConfirm(
             confirmationOption = PaymentConfirmationOption.PaymentMethod.Saved(
-                initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                     clientSecret = "pi_123_secret_123",
                 ),
                 optionsParams = null,
@@ -315,7 +316,7 @@ class PaymentConfirmationMediatorTest {
         )
 
         val confirmationOption = PaymentConfirmationOption.PaymentMethod.Saved(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "pi_123_secret_123",
             ),
             optionsParams = null,
@@ -418,7 +419,7 @@ class PaymentConfirmationMediatorTest {
 
     private companion object {
         private val SAVED_CONFIRMATION_OPTION = PaymentConfirmationOption.PaymentMethod.Saved(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(clientSecret = "pi_123"),
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(clientSecret = "pi_123"),
             shippingDetails = null,
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             optionsParams = null,

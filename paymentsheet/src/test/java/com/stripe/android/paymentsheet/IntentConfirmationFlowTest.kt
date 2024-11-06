@@ -14,6 +14,7 @@ import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.FakePaymentLauncher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -25,7 +26,7 @@ internal class IntentConfirmationFlowTest {
 
         val action = intentConfirmationDefinition.action(
             confirmationOption = PaymentConfirmationOption.PaymentMethod.New(
-                initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                     clientSecret = "pi_123_secret_123",
                 ),
                 createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
@@ -64,7 +65,7 @@ internal class IntentConfirmationFlowTest {
 
         val action = intentConfirmationDefinition.action(
             confirmationOption = PaymentConfirmationOption.PaymentMethod.New(
-                initializationMode = PaymentSheet.InitializationMode.SetupIntent(
+                initializationMode = PaymentElementLoader.InitializationMode.SetupIntent(
                     clientSecret = "pi_123_secret_123",
                 ),
                 createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
@@ -205,7 +206,7 @@ internal class IntentConfirmationFlowTest {
 
     private fun createDeferredConfirmationOption(): PaymentConfirmationOption.PaymentMethod.New {
         return PaymentConfirmationOption.PaymentMethod.New(
-            initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Setup(
                         currency = "USD",

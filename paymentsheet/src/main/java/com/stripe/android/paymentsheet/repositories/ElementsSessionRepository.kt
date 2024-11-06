@@ -12,6 +12,7 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.toDeferredIntentParams
 import kotlinx.coroutines.withContext
 import java.util.Calendar
@@ -21,7 +22,7 @@ import kotlin.coroutines.CoroutineContext
 
 internal interface ElementsSessionRepository {
     suspend fun get(
-        initializationMode: PaymentSheet.InitializationMode,
+        initializationMode: PaymentElementLoader.InitializationMode,
         customer: PaymentSheet.CustomerConfiguration?,
         externalPaymentMethods: List<String>,
         defaultPaymentMethodId: String?,
@@ -46,7 +47,7 @@ internal class RealElementsSessionRepository @Inject constructor(
         )
 
     override suspend fun get(
-        initializationMode: PaymentSheet.InitializationMode,
+        initializationMode: PaymentElementLoader.InitializationMode,
         customer: PaymentSheet.CustomerConfiguration?,
         externalPaymentMethods: List<String>,
         defaultPaymentMethodId: String?,
@@ -109,7 +110,7 @@ private fun StripeIntent.withoutWeChatPay(): StripeIntent {
     }
 }
 
-internal fun PaymentSheet.InitializationMode.toElementsSessionParams(
+internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
     customer: PaymentSheet.CustomerConfiguration?,
     externalPaymentMethods: List<String>,
     defaultPaymentMethodId: String?,
@@ -117,7 +118,7 @@ internal fun PaymentSheet.InitializationMode.toElementsSessionParams(
     val customerSessionClientSecret = customer?.toElementSessionParam()
 
     return when (this) {
-        is PaymentSheet.InitializationMode.PaymentIntent -> {
+        is PaymentElementLoader.InitializationMode.PaymentIntent -> {
             ElementsSessionParams.PaymentIntentType(
                 clientSecret = clientSecret,
                 customerSessionClientSecret = customerSessionClientSecret,
@@ -126,7 +127,7 @@ internal fun PaymentSheet.InitializationMode.toElementsSessionParams(
             )
         }
 
-        is PaymentSheet.InitializationMode.SetupIntent -> {
+        is PaymentElementLoader.InitializationMode.SetupIntent -> {
             ElementsSessionParams.SetupIntentType(
                 clientSecret = clientSecret,
                 customerSessionClientSecret = customerSessionClientSecret,
@@ -135,7 +136,7 @@ internal fun PaymentSheet.InitializationMode.toElementsSessionParams(
             )
         }
 
-        is PaymentSheet.InitializationMode.DeferredIntent -> {
+        is PaymentElementLoader.InitializationMode.DeferredIntent -> {
             ElementsSessionParams.DeferredIntentType(
                 deferredIntentParams = intentConfiguration.toDeferredIntentParams(),
                 externalPaymentMethods = externalPaymentMethods,

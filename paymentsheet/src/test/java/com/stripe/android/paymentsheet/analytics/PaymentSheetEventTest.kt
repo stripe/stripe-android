@@ -14,6 +14,7 @@ import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
@@ -477,7 +478,7 @@ class PaymentSheetEventTest {
     @Test
     fun `LoadSucceeded initialization mode is correct for setup intents`() {
         val event = createLoadSucceededEvent(
-            initializationMode = PaymentSheet.InitializationMode.SetupIntent(clientSecret = "cs_example")
+            initializationMode = PaymentElementLoader.InitializationMode.SetupIntent(clientSecret = "cs_example")
         )
 
         assertThat(event.params).containsEntry("intent_type", "setup_intent")
@@ -486,7 +487,7 @@ class PaymentSheetEventTest {
     @Test
     fun `LoadSucceeded initialization mode is correct for deferred setup intents`() {
         val event = createLoadSucceededEvent(
-            initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Setup()
                 )
@@ -499,7 +500,7 @@ class PaymentSheetEventTest {
     @Test
     fun `LoadSucceeded initialization mode is correct for deferred payment intents`() {
         val event = createLoadSucceededEvent(
-            initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 50,
@@ -1486,7 +1487,7 @@ class PaymentSheetEventTest {
         )
     }
 
-    private val paymentIntentInitializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+    private val paymentIntentInitializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
         clientSecret = "cs_example"
     )
 
@@ -1512,7 +1513,7 @@ class PaymentSheetEventTest {
         googlePaySupported: Boolean = false,
         duration: Duration = (5L).seconds,
         paymentSelection: PaymentSelection? = null,
-        initializationMode: PaymentSheet.InitializationMode = paymentIntentInitializationMode,
+        initializationMode: PaymentElementLoader.InitializationMode = paymentIntentInitializationMode,
         orderedLpms: List<String> = listOf("card"),
     ): PaymentSheetEvent.LoadSucceeded {
         return PaymentSheetEvent.LoadSucceeded(
