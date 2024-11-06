@@ -119,7 +119,7 @@ internal class DefaultPaymentElementLoaderTest {
                 initializedViaCompose = false,
             ).getOrThrow()
         ).isEqualTo(
-            PaymentSheetState.Full(
+            PaymentElementLoader.State(
                 config = config.asCommonConfiguration(),
                 customer = CustomerState(
                     id = config.customer!!.id,
@@ -2302,7 +2302,7 @@ internal class DefaultPaymentElementLoaderTest {
         paymentSheetConfiguration: PaymentSheet.Configuration,
         isReloadingAfterProcessDeath: Boolean = false,
         initializedViaCompose: Boolean,
-    ): Result<PaymentSheetState.Full> = load(
+    ): Result<PaymentElementLoader.State> = load(
         initializationMode = initializationMode,
         configuration = paymentSheetConfiguration.asCommonConfiguration(),
         isReloadingAfterProcessDeath = isReloadingAfterProcessDeath,

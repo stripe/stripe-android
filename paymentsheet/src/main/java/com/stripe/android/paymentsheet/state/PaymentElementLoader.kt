@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.state
 
+import android.os.Parcelable
 import com.stripe.android.common.coroutines.runCatching
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.core.Logger
@@ -39,6 +40,7 @@ import com.stripe.android.ui.core.elements.ExternalPaymentMethodsRepository
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
+import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
@@ -54,7 +56,20 @@ internal interface PaymentElementLoader {
         configuration: CommonConfiguration,
         isReloadingAfterProcessDeath: Boolean = false,
         initializedViaCompose: Boolean,
-    ): Result<PaymentSheetState.Full>
+    ): Result<State>
+
+    @Parcelize
+    data class State(
+        val config: CommonConfiguration,
+        val customer: CustomerState?,
+        val linkState: LinkState?,
+        val paymentSelection: PaymentSelection?,
+        val validationError: PaymentSheetLoadingException?,
+        val paymentMethodMetadata: PaymentMethodMetadata,
+    ) : Parcelable {
+        val stripeIntent: StripeIntent
+            get() = paymentMethodMetadata.stripeIntent
+    }
 }
 
 /**
@@ -88,7 +103,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         configuration: CommonConfiguration,
         isReloadingAfterProcessDeath: Boolean,
         initializedViaCompose: Boolean,
-    ): Result<PaymentSheetState.Full> = workContext.runCatching(::reportFailedLoad) {
+    ): Result<PaymentElementLoader.State> = workContext.runCatching(::reportFailedLoad) {
         eventReporter.onLoadStarted(initializedViaCompose)
 
         val savedPaymentMethodSelection = retrieveSavedPaymentMethodSelection(configuration)
@@ -155,7 +170,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             throw PaymentSheetLoadingException.NoPaymentMethodTypesAvailable(requested)
         }
 
-        val state = PaymentSheetState.Full(
+        val state = PaymentElementLoader.State(
             config = configuration,
             customer = customer.await(),
             linkState = linkState.await(),
@@ -574,7 +589,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
 
     private fun reportSuccessfulLoad(
         elementsSession: ElementsSession,
-        state: PaymentSheetState.Full,
+        state: PaymentElementLoader.State,
         isReloadingAfterProcessDeath: Boolean,
         isGooglePaySupported: Boolean,
         initializationMode: PaymentSheet.InitializationMode,

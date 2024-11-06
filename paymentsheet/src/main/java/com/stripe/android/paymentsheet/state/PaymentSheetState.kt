@@ -21,6 +21,15 @@ internal sealed interface PaymentSheetState : Parcelable {
         val validationError: PaymentSheetLoadingException?,
         val paymentMethodMetadata: PaymentMethodMetadata,
     ) : PaymentSheetState {
+        constructor(state: PaymentElementLoader.State) : this(
+            config = state.config,
+            customer = state.customer,
+            linkState = state.linkState,
+            paymentSelection = state.paymentSelection,
+            validationError = state.validationError,
+            paymentMethodMetadata = state.paymentMethodMetadata,
+        )
+
         val showSavedPaymentMethods: Boolean
             get() = (customer != null && customer.paymentMethods.isNotEmpty()) || paymentMethodMetadata.isGooglePayReady
 

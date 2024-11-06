@@ -293,7 +293,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
 
         result.fold(
-            onSuccess = { handlePaymentSheetStateLoaded(it) },
+            onSuccess = { handlePaymentSheetStateLoaded(PaymentSheetState.Full(it)) },
             onFailure = { handlePaymentSheetStateLoadFailure(it) },
         )
     }
