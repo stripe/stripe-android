@@ -53,7 +53,6 @@ import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAv
 import com.stripe.android.paymentsheet.IntentConfirmationHandler
 import com.stripe.android.paymentsheet.PaymentConfirmationOption
 import com.stripe.android.paymentsheet.PaymentConfirmationResult
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
 import com.stripe.android.paymentsheet.forms.FormFieldValues
@@ -62,6 +61,7 @@ import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.toSavedSelection
 import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.PaymentMethodRemovalDelayMillis
@@ -1003,7 +1003,7 @@ internal class CustomerSheetViewModel(
             arguments = IntentConfirmationHandler.Args(
                 intent = stripeIntent,
                 confirmationOption = PaymentConfirmationOption.PaymentMethod.Saved(
-                    initializationMode = PaymentSheet.InitializationMode.SetupIntent(
+                    initializationMode = PaymentElementLoader.InitializationMode.SetupIntent(
                         clientSecret = clientSecret
                     ),
                     shippingDetails = null,

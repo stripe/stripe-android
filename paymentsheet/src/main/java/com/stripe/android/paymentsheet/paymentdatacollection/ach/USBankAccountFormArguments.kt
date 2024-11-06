@@ -11,6 +11,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import kotlinx.coroutines.flow.update
@@ -73,7 +74,7 @@ internal class USBankAccountFormArguments(
             val initializationMode = (viewModel as? PaymentSheetViewModel)
                 ?.args
                 ?.initializationMode
-            val onBehalfOf = (initializationMode as? PaymentSheet.InitializationMode.DeferredIntent)
+            val onBehalfOf = (initializationMode as? PaymentElementLoader.InitializationMode.DeferredIntent)
                 ?.intentConfiguration
                 ?.onBehalfOf
             val stripeIntent = paymentMethodMetadata.stripeIntent

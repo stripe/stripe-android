@@ -21,9 +21,8 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerFactory
-import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentOption
-import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
+import com.stripe.android.paymentsheet.state.PaymentElementLoader.InitializationMode
 import com.stripe.android.uicore.PRIMARY_BUTTON_SUCCESS_BACKGROUND_COLOR
 import com.stripe.android.uicore.StripeThemeDefaults
 import com.stripe.android.uicore.getRawValueFromDimenResource
@@ -303,41 +302,6 @@ class PaymentSheet internal constructor(
             mode = InitializationMode.DeferredIntent(intentConfiguration),
             configuration = configuration,
         )
-    }
-
-    internal sealed class InitializationMode : Parcelable {
-
-        internal abstract fun validate()
-
-        @Parcelize
-        internal data class PaymentIntent(
-            val clientSecret: String,
-        ) : InitializationMode() {
-
-            override fun validate() {
-                PaymentIntentClientSecret(clientSecret).validate()
-            }
-        }
-
-        @Parcelize
-        internal data class SetupIntent(
-            val clientSecret: String,
-        ) : InitializationMode() {
-
-            override fun validate() {
-                SetupIntentClientSecret(clientSecret).validate()
-            }
-        }
-
-        @Parcelize
-        internal data class DeferredIntent(
-            val intentConfiguration: IntentConfiguration,
-        ) : InitializationMode() {
-
-            override fun validate() {
-                // Nothing to do here
-            }
-        }
     }
 
     /**

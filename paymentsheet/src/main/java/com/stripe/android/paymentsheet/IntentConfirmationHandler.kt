@@ -30,6 +30,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateCon
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncherFactory
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationResult
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateData
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -40,7 +41,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import javax.inject.Provider
-import kotlin.IllegalStateException
 import kotlin.time.Duration.Companion.seconds
 
 /**
@@ -605,11 +605,11 @@ internal class IntentConfirmationHandler(
         } as T
     }
 
-    private val PaymentSheet.InitializationMode.isProcessingPayment: Boolean
+    private val PaymentElementLoader.InitializationMode.isProcessingPayment: Boolean
         get() = when (this) {
-            is PaymentSheet.InitializationMode.PaymentIntent -> true
-            is PaymentSheet.InitializationMode.SetupIntent -> false
-            is PaymentSheet.InitializationMode.DeferredIntent -> {
+            is PaymentElementLoader.InitializationMode.PaymentIntent -> true
+            is PaymentElementLoader.InitializationMode.SetupIntent -> false
+            is PaymentElementLoader.InitializationMode.DeferredIntent -> {
                 intentConfiguration.mode is PaymentSheet.IntentConfiguration.Mode.Payment
             }
         }

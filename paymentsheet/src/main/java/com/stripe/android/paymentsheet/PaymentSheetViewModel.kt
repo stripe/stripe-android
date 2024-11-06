@@ -222,7 +222,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             }
         }
 
-        val isDeferred = args.initializationMode is PaymentSheet.InitializationMode.DeferredIntent
+        val isDeferred = args.initializationMode is PaymentElementLoader.InitializationMode.DeferredIntent
 
         eventReporter.onInit(
             configuration = config,
@@ -770,11 +770,11 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 }
 
-private val PaymentSheet.InitializationMode.isProcessingPayment: Boolean
+private val PaymentElementLoader.InitializationMode.isProcessingPayment: Boolean
     get() = when (this) {
-        is PaymentSheet.InitializationMode.PaymentIntent -> true
-        is PaymentSheet.InitializationMode.SetupIntent -> false
-        is PaymentSheet.InitializationMode.DeferredIntent -> {
+        is PaymentElementLoader.InitializationMode.PaymentIntent -> true
+        is PaymentElementLoader.InitializationMode.SetupIntent -> false
+        is PaymentElementLoader.InitializationMode.DeferredIntent -> {
             intentConfiguration.mode is PaymentSheet.IntentConfiguration.Mode.Payment
         }
     }

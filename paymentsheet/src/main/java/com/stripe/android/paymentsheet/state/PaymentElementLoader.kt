@@ -24,13 +24,16 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheet.IntentConfiguration
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
+import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
+import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.model.validate
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
@@ -52,11 +55,45 @@ import kotlin.coroutines.CoroutineContext
 internal interface PaymentElementLoader {
 
     suspend fun load(
-        initializationMode: PaymentSheet.InitializationMode,
+        initializationMode: InitializationMode,
         configuration: CommonConfiguration,
         isReloadingAfterProcessDeath: Boolean = false,
         initializedViaCompose: Boolean,
     ): Result<State>
+
+    sealed class InitializationMode : Parcelable {
+        abstract fun validate()
+
+        @Parcelize
+        data class PaymentIntent(
+            val clientSecret: String,
+        ) : InitializationMode() {
+
+            override fun validate() {
+                PaymentIntentClientSecret(clientSecret).validate()
+            }
+        }
+
+        @Parcelize
+        data class SetupIntent(
+            val clientSecret: String,
+        ) : InitializationMode() {
+
+            override fun validate() {
+                SetupIntentClientSecret(clientSecret).validate()
+            }
+        }
+
+        @Parcelize
+        data class DeferredIntent(
+            val intentConfiguration: IntentConfiguration,
+        ) : InitializationMode() {
+
+            override fun validate() {
+                // Nothing to do here
+            }
+        }
+    }
 
     @Parcelize
     data class State(
@@ -99,7 +136,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
 
     @Suppress("LongMethod")
     override suspend fun load(
-        initializationMode: PaymentSheet.InitializationMode,
+        initializationMode: PaymentElementLoader.InitializationMode,
         configuration: CommonConfiguration,
         isReloadingAfterProcessDeath: Boolean,
         initializedViaCompose: Boolean,
@@ -191,7 +228,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     }
 
     private suspend fun retrieveElementsSession(
-        initializationMode: PaymentSheet.InitializationMode,
+        initializationMode: PaymentElementLoader.InitializationMode,
         customer: PaymentSheet.CustomerConfiguration?,
         externalPaymentMethods: List<String>,
         defaultPaymentMethodId: String?,
@@ -592,7 +629,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         state: PaymentElementLoader.State,
         isReloadingAfterProcessDeath: Boolean,
         isGooglePaySupported: Boolean,
-        initializationMode: PaymentSheet.InitializationMode,
+        initializationMode: PaymentElementLoader.InitializationMode,
     ) {
         elementsSession.sessionsError?.let { sessionsError ->
             eventReporter.onElementsSessionLoadFailed(sessionsError)

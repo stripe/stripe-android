@@ -11,6 +11,7 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
@@ -47,7 +48,7 @@ internal class ElementsSessionRepositoryTest {
         val locale = Locale.GERMANY
         val session = withLocale(locale) {
             createRepository().get(
-                initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                     clientSecret = "client_secret",
                 ),
                 customer = null,
@@ -76,7 +77,7 @@ internal class ElementsSessionRepositoryTest {
 
             val session = withLocale(Locale.ITALY) {
                 createRepository().get(
-                    initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                    initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                         clientSecret = "client_secret",
                     ),
                     customer = null,
@@ -102,7 +103,7 @@ internal class ElementsSessionRepositoryTest {
 
             val session = withLocale(Locale.ITALY) {
                 createRepository().get(
-                    initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                    initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                         clientSecret = "client_secret",
                     ),
                     customer = null,
@@ -134,7 +135,7 @@ internal class ElementsSessionRepositoryTest {
             { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
             testDispatcher,
         ).get(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "client_secret",
             ),
             customer = null,
@@ -166,7 +167,7 @@ internal class ElementsSessionRepositoryTest {
             { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
             testDispatcher,
         ).get(
-            initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 1234,
@@ -198,7 +199,7 @@ internal class ElementsSessionRepositoryTest {
             { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
             testDispatcher,
         ).get(
-            initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 1234,
@@ -237,7 +238,7 @@ internal class ElementsSessionRepositoryTest {
         )
 
         repository.get(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "client_secret"
             ),
             customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
@@ -281,7 +282,7 @@ internal class ElementsSessionRepositoryTest {
         )
 
         repository.get(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "client_secret"
             ),
             customer = null,

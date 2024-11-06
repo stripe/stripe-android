@@ -84,7 +84,7 @@ class FlowControllerConfigurationHandlerTest {
         val beforeSessionId = AnalyticsRequestFactory.sessionId
         configurationHandler.configure(
             scope = this,
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
             ),
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
@@ -230,7 +230,7 @@ class FlowControllerConfigurationHandlerTest {
 
         configurationHandler.configure(
             scope = this,
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(" "),
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(" "),
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
             initializedViaCompose = false,
         ) { _, error ->
@@ -248,7 +248,7 @@ class FlowControllerConfigurationHandlerTest {
 
         configurationHandler.configure(
             scope = this,
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
             ),
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.copy(
@@ -270,7 +270,7 @@ class FlowControllerConfigurationHandlerTest {
 
         configurationHandler.configure(
             scope = this,
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
             ),
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.copy(
@@ -294,7 +294,7 @@ class FlowControllerConfigurationHandlerTest {
 
         configurationHandler.configure(
             scope = this,
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
             ),
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.copy(
@@ -325,7 +325,7 @@ class FlowControllerConfigurationHandlerTest {
             testScope.launch {
                 configurationHandler.configure(
                     scope = this,
-                    initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                    initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                         clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
                     ),
                     configuration = PaymentSheet.Configuration("Some name"),
@@ -355,7 +355,7 @@ class FlowControllerConfigurationHandlerTest {
         for (amount in amounts) {
             configurationHandler.configure(
                 scope = this,
-                initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
+                initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
                     intentConfiguration = PaymentSheet.IntentConfiguration(
                         mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                             amount = amount,
@@ -388,7 +388,7 @@ class FlowControllerConfigurationHandlerTest {
 
         configurationHandler.configure(
             scope = testScope,
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
             ),
             configuration = PaymentSheet.Configuration("Some name"),
@@ -413,7 +413,7 @@ class FlowControllerConfigurationHandlerTest {
 
         configurationHandler.configure(
             scope = this,
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
             ),
             configuration = PaymentSheet.Configuration("Some name"),
@@ -433,7 +433,7 @@ class FlowControllerConfigurationHandlerTest {
 
         configurationHandler.configure(
             scope = this,
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("pi_123_sk_456"),
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("pi_123_sk_456"),
             configuration = PaymentSheet.Configuration("Some name"),
             initializedViaCompose = false,
         ) { _, _ ->
@@ -459,7 +459,7 @@ class FlowControllerConfigurationHandlerTest {
 
         configurationHandler.configure(
             scope = this,
-            initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 1234,
@@ -493,7 +493,7 @@ class FlowControllerConfigurationHandlerTest {
 
         configurationHandler.configure(
             scope = this,
-            initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 1234,
@@ -530,8 +530,8 @@ class FlowControllerConfigurationHandlerTest {
 
     private fun createInitializationMode(
         clientSecret: String = PaymentSheetFixtures.CLIENT_SECRET,
-    ): PaymentSheet.InitializationMode {
-        return PaymentSheet.InitializationMode.PaymentIntent(clientSecret)
+    ): PaymentElementLoader.InitializationMode {
+        return PaymentElementLoader.InitializationMode.PaymentIntent(clientSecret)
     }
 
     private fun createConfigurationHandler(

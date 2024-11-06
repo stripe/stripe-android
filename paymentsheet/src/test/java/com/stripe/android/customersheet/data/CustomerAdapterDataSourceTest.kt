@@ -9,9 +9,9 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
+import com.stripe.android.paymentsheet.state.PaymentElementLoader.InitializationMode
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.SetupIntentFactory
@@ -659,7 +659,7 @@ class CustomerAdapterDataSourceTest {
 
         val initializationMode = elementsSessionRepository.lastParams?.initializationMode
 
-        assertThat(initializationMode).isInstanceOf<PaymentSheet.InitializationMode.DeferredIntent>()
+        assertThat(initializationMode).isInstanceOf<InitializationMode.DeferredIntent>()
 
         val deferredInitializationMode = initializationMode.asDeferred()
 
@@ -691,8 +691,8 @@ class CustomerAdapterDataSourceTest {
         )
     }
 
-    private fun PaymentSheet.InitializationMode?.asDeferred(): PaymentSheet.InitializationMode.DeferredIntent {
-        return this as PaymentSheet.InitializationMode.DeferredIntent
+    private fun InitializationMode?.asDeferred(): InitializationMode.DeferredIntent {
+        return this as InitializationMode.DeferredIntent
     }
 
     private fun <T> CustomerSheetDataResult<T>.asSuccess(): CustomerSheetDataResult.Success<T> {

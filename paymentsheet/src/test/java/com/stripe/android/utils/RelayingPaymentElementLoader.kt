@@ -42,7 +42,7 @@ internal class RelayingPaymentElementLoader : PaymentElementLoader {
     }
 
     override suspend fun load(
-        initializationMode: PaymentSheet.InitializationMode,
+        initializationMode: PaymentElementLoader.InitializationMode,
         onfiguration: CommonConfiguration,
         isReloadingAfterProcessDeath: Boolean,
         initializedViaCompose: Boolean,

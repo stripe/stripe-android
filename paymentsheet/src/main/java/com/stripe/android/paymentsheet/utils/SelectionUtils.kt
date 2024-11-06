@@ -3,18 +3,18 @@
 package com.stripe.android.paymentsheet.utils
 
 import androidx.annotation.RestrictTo
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 
 internal fun PaymentSelection.New.canSave(
-    initializationMode: PaymentSheet.InitializationMode
+    initializationMode: PaymentElementLoader.InitializationMode
 ): Boolean {
     val requestedToSave = customerRequestedSave == PaymentSelection.CustomerRequestedSave.RequestReuse
 
     return when (initializationMode) {
-        is PaymentSheet.InitializationMode.PaymentIntent -> requestedToSave
-        is PaymentSheet.InitializationMode.SetupIntent -> true
-        is PaymentSheet.InitializationMode.DeferredIntent -> {
+        is PaymentElementLoader.InitializationMode.PaymentIntent -> requestedToSave
+        is PaymentElementLoader.InitializationMode.SetupIntent -> true
+        is PaymentElementLoader.InitializationMode.DeferredIntent -> {
             initializationMode.intentConfiguration.mode.setupFutureUse != null || requestedToSave
         }
     }

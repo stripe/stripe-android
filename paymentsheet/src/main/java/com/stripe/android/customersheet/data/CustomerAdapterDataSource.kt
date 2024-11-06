@@ -15,6 +15,7 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -100,7 +101,7 @@ internal class CustomerAdapterDataSource @Inject constructor(
 
     private suspend fun fetchElementsSession(): Result<ElementsSession> {
         val paymentMethodTypes = createPaymentMethodTypes()
-        val initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
+        val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
             PaymentSheet.IntentConfiguration(
                 mode = PaymentSheet.IntentConfiguration.Mode.Setup(),
                 paymentMethodTypes = paymentMethodTypes,

@@ -19,6 +19,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_EDIT_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_EDIT_SCREEN_REMOVE_BUTTON
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG
@@ -231,7 +232,7 @@ internal class CustomerSessionPaymentSheetActivityTest {
             PaymentSheetContractV2().createIntent(
                 ApplicationProvider.getApplicationContext(),
                 PaymentSheetContractV2.Args(
-                    initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                    initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                         clientSecret = "pi_1234_secret_5678",
                     ),
                     config = PaymentSheet.Configuration(

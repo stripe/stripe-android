@@ -22,6 +22,7 @@ import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.ResponseReplacement
 import com.stripe.android.networktesting.testBodyFromFile
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.PaymentMethodFactory.update
@@ -515,7 +516,7 @@ internal class VerticalModePaymentSheetActivityTest {
             PaymentSheetContractV2().createIntent(
                 ApplicationProvider.getApplicationContext(),
                 PaymentSheetContractV2.Args(
-                    initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                    initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                         clientSecret = "pi_1234_secret_5678",
                     ),
                     config = PaymentSheet.Configuration.Builder(merchantDisplayName = "Merchant, Inc.")

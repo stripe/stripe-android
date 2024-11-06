@@ -15,6 +15,7 @@ import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.toConfirmPaymentIntentShipping
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.FakePaymentLauncher
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import kotlinx.coroutines.test.runTest
@@ -55,7 +56,7 @@ class IntentConfirmationDefinitionTest {
                 intentConfirmationInterceptor = intentConfirmationInterceptor,
             )
 
-            val initializationMode = PaymentSheet.InitializationMode.PaymentIntent(clientSecret = "pi_123")
+            val initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(clientSecret = "pi_123")
             val createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD
             val shippingDetails = AddressDetails(name = "John Doe")
 
@@ -413,7 +414,7 @@ class IntentConfirmationDefinitionTest {
 
     private companion object {
         private val SAVED_PAYMENT_CONFIRMATION_OPTION = PaymentConfirmationOption.PaymentMethod.Saved(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "pi_123"
             ),
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,

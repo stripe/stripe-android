@@ -5,13 +5,14 @@ import com.stripe.android.CardBrandFilter
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.parcelize.Parcelize
 import com.stripe.android.model.PaymentMethod as PaymentMethodModel
 
 internal sealed interface PaymentConfirmationOption : Parcelable {
     @Parcelize
     data class GooglePay(
-        val initializationMode: PaymentSheet.InitializationMode,
+        val initializationMode: PaymentElementLoader.InitializationMode,
         val shippingDetails: AddressDetails?,
         val config: Config,
     ) : PaymentConfirmationOption {
@@ -36,7 +37,7 @@ internal sealed interface PaymentConfirmationOption : Parcelable {
 
     @Parcelize
     data class BacsPaymentMethod(
-        val initializationMode: PaymentSheet.InitializationMode,
+        val initializationMode: PaymentElementLoader.InitializationMode,
         val shippingDetails: AddressDetails?,
         val createParams: PaymentMethodCreateParams,
         val optionsParams: PaymentMethodOptionsParams?,
@@ -44,12 +45,12 @@ internal sealed interface PaymentConfirmationOption : Parcelable {
     ) : PaymentConfirmationOption
 
     sealed interface PaymentMethod : PaymentConfirmationOption {
-        val initializationMode: PaymentSheet.InitializationMode
+        val initializationMode: PaymentElementLoader.InitializationMode
         val shippingDetails: AddressDetails?
 
         @Parcelize
         data class Saved(
-            override val initializationMode: PaymentSheet.InitializationMode,
+            override val initializationMode: PaymentElementLoader.InitializationMode,
             override val shippingDetails: AddressDetails?,
             val paymentMethod: PaymentMethodModel,
             val optionsParams: PaymentMethodOptionsParams?,
@@ -57,7 +58,7 @@ internal sealed interface PaymentConfirmationOption : Parcelable {
 
         @Parcelize
         data class New(
-            override val initializationMode: PaymentSheet.InitializationMode,
+            override val initializationMode: PaymentElementLoader.InitializationMode,
             override val shippingDetails: AddressDetails?,
             val createParams: PaymentMethodCreateParams,
             val optionsParams: PaymentMethodOptionsParams?,

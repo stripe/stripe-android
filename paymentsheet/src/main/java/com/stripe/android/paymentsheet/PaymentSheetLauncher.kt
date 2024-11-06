@@ -1,9 +1,11 @@
 package com.stripe.android.paymentsheet
 
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
+
 internal interface PaymentSheetLauncher {
 
     fun present(
-        mode: PaymentSheet.InitializationMode,
+        mode: PaymentElementLoader.InitializationMode,
         configuration: PaymentSheet.Configuration? = null
     )
 }

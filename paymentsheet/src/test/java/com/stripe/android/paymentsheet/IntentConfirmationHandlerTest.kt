@@ -35,6 +35,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateCon
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationResult
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateData
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.FakeBacsMandateConfirmationLauncher
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.FakePaymentLauncher
@@ -73,7 +74,7 @@ class IntentConfirmationHandlerTest {
     fun `On 'start' with existing payment method, should call interceptor properly`() = runTest {
         val interceptor = FakeIntentConfirmationInterceptor()
 
-        val initializationMode = PaymentSheet.InitializationMode.PaymentIntent(clientSecret = "ci_123")
+        val initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(clientSecret = "ci_123")
         val shippingDetails = AddressDetails(
             name = "John Doe",
             phoneNumber = "11234567890",
@@ -143,7 +144,7 @@ class IntentConfirmationHandlerTest {
                 arguments = IntentConfirmationHandler.Args(
                     intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                     confirmationOption = PaymentConfirmationOption.PaymentMethod.Saved(
-                        initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                        initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                             clientSecret = "pi_456_secret_456"
                         ),
                         shippingDetails = null,
@@ -169,7 +170,7 @@ class IntentConfirmationHandlerTest {
     fun `On 'start' with new payment method, should call interceptor properly`() = runTest {
         val interceptor = FakeIntentConfirmationInterceptor()
 
-        val initializationMode = PaymentSheet.InitializationMode.PaymentIntent(clientSecret = "ci_123")
+        val initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(clientSecret = "ci_123")
         val newCard = PaymentMethodCreateParams.createCard(
             CardParams(
                 number = "4242424242424242",
@@ -214,7 +215,7 @@ class IntentConfirmationHandlerTest {
     fun `On 'start' with deferred intent initialization, should call interceptor properly`() = runTest {
         val interceptor = FakeIntentConfirmationInterceptor()
 
-        val initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
+        val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
             intentConfiguration = PaymentSheet.IntentConfiguration(
                 mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                     amount = 100L,
@@ -1449,7 +1450,7 @@ class IntentConfirmationHandlerTest {
         intentConfirmationHandler.start(
             arguments = DEFAULT_ARGUMENTS.copy(
                 confirmationOption = GOOGLE_PAY_OPTION.copy(
-                    initializationMode = PaymentSheet.InitializationMode.SetupIntent(
+                    initializationMode = PaymentElementLoader.InitializationMode.SetupIntent(
                         clientSecret = "si_123_secret_123",
                     ),
                     config = GOOGLE_PAY_OPTION.config.copy(
@@ -1623,7 +1624,7 @@ class IntentConfirmationHandlerTest {
 
             assertThat(call).isEqualTo(
                 FakeIntentConfirmationInterceptor.InterceptCall.WithExistingPaymentMethod(
-                    initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                    initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                         clientSecret = "pi_456_secret_456"
                     ),
                     paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
@@ -2032,7 +2033,9 @@ class IntentConfirmationHandlerTest {
         email: String? = "johndoe@email.com",
     ): PaymentConfirmationOption.BacsPaymentMethod {
         return PaymentConfirmationOption.BacsPaymentMethod(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(clientSecret = "pi_456_secret_456"),
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = "pi_456_secret_456"
+            ),
             shippingDetails = null,
             createParams = PaymentMethodCreateParams.create(
                 bacsDebit = PaymentMethodCreateParams.BacsDebit(
@@ -2054,7 +2057,9 @@ class IntentConfirmationHandlerTest {
         val DEFAULT_ARGUMENTS = IntentConfirmationHandler.Args(
             intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             confirmationOption = PaymentConfirmationOption.PaymentMethod.Saved(
-                initializationMode = PaymentSheet.InitializationMode.PaymentIntent(clientSecret = "pi_456_secret_456"),
+                initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                    clientSecret = "pi_456_secret_456"
+                ),
                 shippingDetails = null,
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                 optionsParams = null,
@@ -2067,7 +2072,9 @@ class IntentConfirmationHandlerTest {
         )
 
         val BACS_OPTION = PaymentConfirmationOption.BacsPaymentMethod(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(clientSecret = "pi_456_secret_456"),
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = "pi_456_secret_456"
+            ),
             shippingDetails = null,
             appearance = APPEARANCE,
             createParams = PaymentMethodCreateParams.create(
@@ -2084,7 +2091,9 @@ class IntentConfirmationHandlerTest {
         )
 
         val GOOGLE_PAY_OPTION = PaymentConfirmationOption.GooglePay(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(clientSecret = "pi_456_secret_456"),
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = "pi_456_secret_456"
+            ),
             shippingDetails = null,
             config = PaymentConfirmationOption.GooglePay.Config(
                 environment = PaymentSheet.GooglePayConfiguration.Environment.Production,

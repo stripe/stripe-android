@@ -2094,7 +2094,7 @@ internal class DefaultFlowControllerTest {
 
         assertThat(call).isEqualTo(
             FakeIntentConfirmationInterceptor.InterceptCall.WithExistingPaymentMethod(
-                initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                     clientSecret = "pi_123"
                 ),
                 shippingValues = ConfirmPaymentIntentParams.Shipping(
@@ -2157,7 +2157,7 @@ internal class DefaultFlowControllerTest {
 
         assertThat(call).isEqualTo(
             FakeIntentConfirmationInterceptor.InterceptCall.WithNewPaymentMethod(
-                initializationMode = PaymentSheet.InitializationMode.SetupIntent(
+                initializationMode = PaymentElementLoader.InitializationMode.SetupIntent(
                     clientSecret = "si_123",
                 ),
                 shippingValues = null,
