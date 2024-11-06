@@ -55,6 +55,8 @@
   <string name="stripe_paymentsheet_confirm_your_cvc">Confirm your CVC</string>
   <!-- Text for a button that allows manual entry of an address -->
   <string name="stripe_paymentsheet_enter_address_manually">Enter address manually</string>
+  <!-- Title shown above a view containing a customer's card payment methods that they can delete or update -->
+  <string name="stripe_paymentsheet_manage_card">Manage card</string>
   <!-- Title shown above a view containing the customer's card payment methods that they can delete or update -->
   <string name="stripe_paymentsheet_manage_payment_methods">Manage payment methods</string>
   <!-- Title shown above a carousel containing the customer's payment methods -->
