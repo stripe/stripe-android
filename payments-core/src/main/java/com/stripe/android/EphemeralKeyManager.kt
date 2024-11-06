@@ -166,5 +166,3 @@ internal class EphemeralKeyManager(
         private const val REFRESH_BUFFER_IN_SECONDS = 30L
     }
 }
-
-internal typealias TimeSupplier = () -> Long
