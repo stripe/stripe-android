@@ -29,6 +29,7 @@ import kotlinx.parcelize.Parcelize
 
 @Stable
 internal sealed interface PlaygroundState : Parcelable {
+    val snapshot: PlaygroundSettings.Snapshot
     val integrationType: PlaygroundConfigurationData.IntegrationType
     val countryCode: Country
     val endpoint: String
@@ -36,7 +37,7 @@ internal sealed interface PlaygroundState : Parcelable {
     @Stable
     @Parcelize
     data class Payment(
-        val snapshot: PlaygroundSettings.Snapshot,
+        override val snapshot: PlaygroundSettings.Snapshot,
         val amount: Long,
         val paymentMethodTypes: List<String>,
         val customerConfig: PaymentSheet.CustomerConfiguration?,
@@ -99,7 +100,7 @@ internal sealed interface PlaygroundState : Parcelable {
     @Stable
     @Parcelize
     data class Customer(
-        private val snapshot: PlaygroundSettings.Snapshot,
+        override val snapshot: PlaygroundSettings.Snapshot,
         override val endpoint: String,
     ) : PlaygroundState {
         override val integrationType

@@ -7,7 +7,8 @@ internal object NativeLinkSettingsDefinition : BooleanSettingsDefinition(
     displayName = "Native Link",
     defaultValue = false,
 ) {
-    override fun valueUpdated(value: Boolean, playgroundSettings: PlaygroundSettings) {
+    override fun setValue(value: Boolean) {
+        super.setValue(value)
         FeatureFlags.nativeLinkEnabled.setEnabled(value)
     }
 }

@@ -268,6 +268,19 @@ internal class PlaygroundSettings private constructor(
             )
         }
 
+        fun setValues() {
+            settings.forEach { (setting, value) ->
+                setting.setValue(value)
+            }
+        }
+
+        private fun <T> PlaygroundSettingDefinition<T>.setValue(
+            value: Any?,
+        ) {
+            @Suppress("UNCHECKED_CAST")
+            (this.setValue(value as T))
+        }
+
         fun saveToSharedPreferences(context: Context) {
             val sharedPreferences = context.getSharedPreferences(
                 sharedPreferencesName,
