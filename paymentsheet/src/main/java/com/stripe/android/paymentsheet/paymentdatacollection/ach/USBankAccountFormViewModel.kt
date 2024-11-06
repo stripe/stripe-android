@@ -215,7 +215,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         state.updateWithMandate(mandateText)
     }
 
-    val result: StateFlow<PaymentSelection.New.USBankAccount?> = combineAsStateFlow(
+    val linkedAccount: StateFlow<PaymentSelection.New.USBankAccount?> = combineAsStateFlow(
         currentScreenState,
         billingDetails,
     ) { state, billingDetails ->

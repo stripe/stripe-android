@@ -168,7 +168,7 @@ class USBankAccountFormViewModelTest {
     fun `Transitions to correct screen state when collecting an unverified bank account in complete flow`() = runTest {
         val viewModel = createViewModel()
 
-        viewModel.result.test {
+        viewModel.linkedAccount.test {
             skipItems(1)
             viewModel.handleCollectBankAccountResult(mockUnverifiedBankAccount())
             assertThat(awaitItem()?.screenState).isInstanceOf<USBankAccountFormScreenState.VerifyWithMicrodeposits>()
@@ -179,7 +179,7 @@ class USBankAccountFormViewModelTest {
     fun `Transitions to correct screen state when collecting a verified bank account in complete flow`() = runTest {
         val viewModel = createViewModel()
 
-        viewModel.result.test {
+        viewModel.linkedAccount.test {
             skipItems(1)
             viewModel.handleCollectBankAccountResult(mockVerifiedBankAccount())
             assertThat(awaitItem()?.screenState).isInstanceOf<USBankAccountFormScreenState.MandateCollection>()
@@ -191,7 +191,7 @@ class USBankAccountFormViewModelTest {
         val viewModel = createViewModel(defaultArgs.copy(isCompleteFlow = false))
         val bankAccount = mockUnverifiedBankAccount()
 
-        viewModel.result.test {
+        viewModel.linkedAccount.test {
             skipItems(1)
             viewModel.handleCollectBankAccountResult(bankAccount)
             assertThat(awaitItem()?.screenState).isInstanceOf<USBankAccountFormScreenState.VerifyWithMicrodeposits>()
@@ -203,7 +203,7 @@ class USBankAccountFormViewModelTest {
         val viewModel = createViewModel(defaultArgs.copy(isCompleteFlow = false))
         val bankAccount = mockVerifiedBankAccount()
 
-        viewModel.result.test {
+        viewModel.linkedAccount.test {
             skipItems(1)
             viewModel.handleCollectBankAccountResult(bankAccount)
             assertThat(awaitItem()?.screenState).isInstanceOf<USBankAccountFormScreenState.MandateCollection>()
@@ -220,7 +220,7 @@ class USBankAccountFormViewModelTest {
         )
         val bankAccount = mockVerifiedBankAccount()
 
-        viewModel.result.test {
+        viewModel.linkedAccount.test {
             skipItems(1)
             viewModel.handleCollectBankAccountResult(bankAccount)
 
@@ -928,7 +928,7 @@ class USBankAccountFormViewModelTest {
     fun `When collect bank account is returned from FC SDK, the result is emitted`() = runTest {
         val viewModel = createViewModel()
 
-        viewModel.result.test {
+        viewModel.linkedAccount.test {
             assertThat(awaitItem()).isNull()
 
             viewModel.handleCollectBankAccountResult(mockVerifiedBankAccount())
@@ -954,7 +954,7 @@ class USBankAccountFormViewModelTest {
     fun `When the view model is reset, collect bank account result should be null`() = runTest {
         val viewModel = createViewModel()
 
-        viewModel.result.test {
+        viewModel.linkedAccount.test {
             assertThat(awaitItem()).isNull()
 
             viewModel.handleCollectBankAccountResult(mockVerifiedBankAccount())
@@ -1394,7 +1394,7 @@ class USBankAccountFormViewModelTest {
             args = defaultArgs.copy(showCheckbox = true)
         )
 
-        viewModel.result.test {
+        viewModel.linkedAccount.test {
             assertThat(awaitItem()).isNull()
 
             viewModel.nameController.onValueChange("Some Name")
@@ -1416,7 +1416,7 @@ class USBankAccountFormViewModelTest {
             args = defaultArgs.copy(showCheckbox = true)
         )
 
-        viewModel.result.test {
+        viewModel.linkedAccount.test {
             assertThat(awaitItem()).isNull()
 
             viewModel.nameController.onValueChange("Some Name")
@@ -1529,7 +1529,7 @@ class USBankAccountFormViewModelTest {
             )
         )
 
-        viewModel.result.test {
+        viewModel.linkedAccount.test {
             skipItems(1)
 
             viewModel.handleCollectBankAccountResult(mockVerifiedBankAccount())
