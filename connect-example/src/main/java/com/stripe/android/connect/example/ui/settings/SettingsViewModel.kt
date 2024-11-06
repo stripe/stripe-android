@@ -39,7 +39,7 @@ class SettingsViewModel(
                     it.presentationSettings,
                     it.onboardingSettings,
                     it.accounts,
-                    it.selectedAccountId,
+                    it.selectedAccount,
                     it.serverUrl,
                 )
             }.distinctUntilChanged()
@@ -49,20 +49,22 @@ class SettingsViewModel(
         }
     }
 
-    fun onAccountSelected(accountId: String) {
-        _state.update { it.copy(selectedAccountId = accountId) }
+    fun onAccountSelected(account: DemoMerchant) {
+        _state.update { it.copy(selectedAccount = account) }
     }
 
     fun onOtherAccountInputChanged(otherAccountIdInput: String) {
         _state.update { state ->
+            val updatedAccounts = state.accounts.map { acc ->
+                when (acc) {
+                    is DemoMerchant.Merchant -> acc
+                    is DemoMerchant.Other -> acc.copy(merchantId = otherAccountIdInput)
+                }
+            }
+            val otherAccount = updatedAccounts.filterIsInstance<DemoMerchant.Other>().firstOrNull()
             state.copy(
-                selectedAccountId = otherAccountIdInput,
-                accounts = state.accounts.map { acc ->
-                    when (acc) {
-                        is DemoMerchant.Merchant -> acc
-                        is DemoMerchant.Other -> acc.copy(merchantId = otherAccountIdInput)
-                    }
-                },
+                selectedAccount = otherAccount,
+                accounts = updatedAccounts,
                 saveEnabled = true,
             )
         }
@@ -76,19 +78,13 @@ class SettingsViewModel(
         onServerUrlChanged(EmbeddedComponentService.DEFAULT_SERVER_BASE_URL)
     }
 
-    fun onOnboardingSettingsChanged(settings: OnboardingSettings) {
-        _state.update { it.copy(onboardingSettings = settings) }
-    }
-
-    fun onPresentationSettingsChanged(settings: PresentationSettings) {
-        _state.update { it.copy(presentationSettings = settings) }
-    }
-
     fun saveSettings() {
         viewModelScope.launch {
             with(state.value) {
                 settingsService.setSelectedServerBaseURL(serverUrl)
                 embeddedComponentService.setBackendBaseUrl(serverUrl)
+
+                val selectedAccountId = selectedAccount?.merchantId
                 if (selectedAccountId != null) settingsService.setSelectedMerchant(selectedAccountId)
                 settingsService.setOnboardingSettings(onboardingSettings)
                 settingsService.setPresentationSettings(presentationSettings)
@@ -104,18 +100,21 @@ class SettingsViewModel(
     private fun loadSettings() {
         _state.update { state ->
             val accountsFromService = embeddedComponentService.accounts.value ?: emptyList()
-            val selectedAccount = settingsService.getSelectedMerchant()
-            val selectedAccountIsOther = accountsFromService.none { it.merchantId == selectedAccount }
+            val selectedAccountId = settingsService.getSelectedMerchant() ?: ""
+            val selectedAccountIsOther = accountsFromService.none { it.merchantId == selectedAccountId }
+
+            val otherAccount = DemoMerchant.Other(if (selectedAccountIsOther) selectedAccountId else "")
             val mergedAccounts = accountsFromService.map {
                 DemoMerchant.Merchant(
                     displayName = it.displayName,
                     merchantId = it.merchantId
                 )
-            } + DemoMerchant.Other(if (selectedAccountIsOther) selectedAccount else null)
+            } + otherAccount
 
+            val selectedAccount = mergedAccounts.firstOrNull { it.merchantId == selectedAccountId } ?: otherAccount
             state.copy(
                 serverUrl = embeddedComponentService.serverBaseUrl,
-                selectedAccountId = selectedAccount,
+                selectedAccount = selectedAccount,
                 accounts = mergedAccounts,
                 onboardingSettings = settingsService.getOnboardingSettings(),
                 presentationSettings = settingsService.getPresentationSettings(),
@@ -130,7 +129,7 @@ class SettingsViewModel(
         val serverUrl: String,
         val saveEnabled: Boolean = false,
         val accounts: List<DemoMerchant> = listOf(DemoMerchant.Other()),
-        val selectedAccountId: String? = accounts.firstOrNull()?.merchantId,
+        val selectedAccount: DemoMerchant? = accounts.firstOrNull(),
         val onboardingSettings: OnboardingSettings = OnboardingSettings(
             fullTermsOfServiceString = null,
             recipientTermsOfServiceString = null,
@@ -157,7 +156,7 @@ class SettingsViewModel(
             ) : DemoMerchant
 
             data class Other(
-                override val merchantId: String? = null,
+                override val merchantId: String = "", // other merchant id is based on user input
             ) : DemoMerchant
         }
     }

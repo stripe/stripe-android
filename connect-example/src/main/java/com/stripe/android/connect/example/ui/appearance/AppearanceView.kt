@@ -81,17 +81,20 @@ private fun SelectAnAppearance(
     selectedAppearance: AppearanceInfo.AppearanceId?,
     onAppearanceSelected: (AppearanceInfo.AppearanceId) -> Unit,
 ) {
-    Column {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
         appearances.forEach { appearance ->
             Row(
                 verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable { onAppearanceSelected(appearance) },
             ) {
                 RadioButton(
                     selected = appearance == selectedAppearance,
-                    onClick = {},
+                    onClick = null, // onClick handled by row
                 )
                 Column {
                     Text(text = stringResource(appearance.displayNameRes))

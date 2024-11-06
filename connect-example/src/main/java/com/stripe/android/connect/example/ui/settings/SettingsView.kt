@@ -77,7 +77,7 @@ fun SettingsView(
         ) {
             item { SelectAnAccount(
                 accounts = state.accounts,
-                selectedAccountId = state.selectedAccountId,
+                selectedAccount = state.selectedAccount,
                 onAccountSelected = viewModel::onAccountSelected,
                 onOtherAccountInputChanged = viewModel::onOtherAccountInputChanged,
             ) }
@@ -94,49 +94,55 @@ fun SettingsView(
 @Composable
 private fun SelectAnAccount(
     accounts: List<DemoMerchant>,
-    selectedAccountId: String?,
-    onAccountSelected: (String) -> Unit,
+    selectedAccount: DemoMerchant?,
+    onAccountSelected: (DemoMerchant) -> Unit,
     onOtherAccountInputChanged: (String) -> Unit,
 ) {
-    Text(stringResource(R.string.select_demo_account), style = MaterialTheme.typography.h6)
-    Spacer(modifier = Modifier.height(8.dp))
-    accounts.forEach { merchant ->
-        when (merchant) {
-            is DemoMerchant.Merchant -> {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { onAccountSelected(merchant.merchantId) },
-                ) {
-                    RadioButton(
-                        selected = merchant.merchantId == selectedAccountId,
-                        onClick = {},
-                    )
-                    Column {
-                        Text(text = merchant.displayName)
-                        Text(text = merchant.merchantId, style = MaterialTheme.typography.caption)
+    Column(
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Text(stringResource(R.string.select_demo_account), style = MaterialTheme.typography.h6)
+        Spacer(modifier = Modifier.height(8.dp))
+        accounts.forEach { merchant ->
+            when (merchant) {
+                is DemoMerchant.Merchant -> {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onAccountSelected(merchant) },
+                    ) {
+                        RadioButton(
+                            selected = merchant.merchantId == selectedAccount?.merchantId,
+                            onClick = null, // onClick handled by row
+                        )
+                        Column {
+                            Text(text = merchant.displayName)
+                            Text(text = merchant.merchantId, style = MaterialTheme.typography.caption)
+                        }
                     }
                 }
-            }
-            is DemoMerchant.Other -> {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { onAccountSelected(merchant.merchantId ?: "") },
-                ) {
-                    RadioButton(
-                        selected = merchant.merchantId == selectedAccountId,
-                        onClick = {},
-                    )
-                    OutlinedTextField(
-                        value = merchant.merchantId ?: "",
-                        onValueChange = onOtherAccountInputChanged,
-                        label = { Text(stringResource(R.string.other)) },
-                        placeholder = { Text(stringResource(R.string.account_id_placeholder)) },
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                is DemoMerchant.Other -> {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onAccountSelected(merchant) },
+                    ) {
+                        RadioButton(
+                            selected = merchant.merchantId == selectedAccount?.merchantId,
+                            onClick = null, // onClick handled by row
+                        )
+                        OutlinedTextField(
+                            value = merchant.merchantId,
+                            onValueChange = onOtherAccountInputChanged,
+                            label = { Text(stringResource(R.string.other)) },
+                            placeholder = { Text(stringResource(R.string.account_id_placeholder)) },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
                 }
             }
         }
