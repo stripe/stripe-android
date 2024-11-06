@@ -28,6 +28,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.PaymentSelection.CustomerRequestedSave
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.ui.core.Amount
@@ -1015,7 +1016,7 @@ class USBankAccountFormViewModelTest {
                 showCheckbox = true,
                 saveForFutureUse = true
             )
-        ).isEqualTo(PaymentSelection.CustomerRequestedSave.RequestReuse)
+        ).isEqualTo(CustomerRequestedSave.RequestReuse)
     }
 
     @Test
@@ -1025,7 +1026,7 @@ class USBankAccountFormViewModelTest {
                 showCheckbox = true,
                 saveForFutureUse = false
             )
-        ).isEqualTo(PaymentSelection.CustomerRequestedSave.RequestNoReuse)
+        ).isEqualTo(CustomerRequestedSave.RequestNoReuse)
     }
 
     @Test
@@ -1035,7 +1036,7 @@ class USBankAccountFormViewModelTest {
                 showCheckbox = false,
                 saveForFutureUse = false
             )
-        ).isEqualTo(PaymentSelection.CustomerRequestedSave.NoRequest)
+        ).isEqualTo(CustomerRequestedSave.NoRequest)
     }
 
     @Test
@@ -1385,6 +1386,50 @@ class USBankAccountFormViewModelTest {
                 phone = "+13105551234",
             )
         )
+    }
+
+    @Test
+    fun `Updates result when 'save for future use' changes after linking account`() = runTest {
+        val viewModel = createViewModel(
+            args = defaultArgs.copy(showCheckbox = true)
+        )
+
+        viewModel.result.test {
+            assertThat(awaitItem()).isNull()
+
+            viewModel.nameController.onValueChange("Some Name")
+            viewModel.emailController.onValueChange("email@email.com")
+            viewModel.handleCollectBankAccountResult(mockVerifiedBankAccount())
+            assertThat(awaitItem()?.customerRequestedSave).isEqualTo(CustomerRequestedSave.RequestNoReuse)
+
+            viewModel.saveForFutureUseElement.controller.onValueChange(true)
+            assertThat(awaitItem()?.customerRequestedSave).isEqualTo(CustomerRequestedSave.RequestReuse)
+
+            viewModel.saveForFutureUseElement.controller.onValueChange(false)
+            assertThat(awaitItem()?.customerRequestedSave).isEqualTo(CustomerRequestedSave.RequestNoReuse)
+        }
+    }
+
+    @Test
+    fun `Updates result when billing address changes after linking account`() = runTest {
+        val viewModel = createViewModel(
+            args = defaultArgs.copy(showCheckbox = true)
+        )
+
+        viewModel.result.test {
+            assertThat(awaitItem()).isNull()
+
+            viewModel.nameController.onValueChange("Some Name")
+            viewModel.emailController.onValueChange("email@email.com")
+            viewModel.handleCollectBankAccountResult(mockVerifiedBankAccount())
+            assertThat(awaitItem()?.paymentMethodCreateParams?.billingDetails?.email).isEqualTo("email@email.com")
+
+            viewModel.emailController.onValueChange("email@email.ca")
+            assertThat(awaitItem()?.paymentMethodCreateParams?.billingDetails?.email).isEqualTo("email@email.ca")
+
+            viewModel.emailController.onValueChange("email@email.com")
+            assertThat(awaitItem()?.paymentMethodCreateParams?.billingDetails?.email).isEqualTo("email@email.com")
+        }
     }
 
     private fun testElementsSessionContextGeneration(

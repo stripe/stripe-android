@@ -39,7 +39,7 @@
     <ID>LongMethod:USBankAccountForm.kt$@Composable internal fun BillingDetailsForm( instantDebits: Boolean, formArgs: FormArguments, isProcessing: Boolean, isPaymentFlow: Boolean, nameController: TextFieldController, emailController: TextFieldController, phoneController: PhoneNumberController, addressController: AddressController, lastTextFieldIdentifier: IdentifierSpec?, sameAsShippingElement: SameAsShippingElement?, )</ID>
     <ID>LongMethod:USBankAccountForm.kt$@Composable internal fun USBankAccountForm( formArgs: FormArguments, usBankAccountFormArgs: USBankAccountFormArguments, modifier: Modifier = Modifier, )</ID>
     <ID>LongMethod:USBankAccountForm.kt$@Composable private fun AccountDetailsForm( showCheckbox: Boolean, isProcessing: Boolean, bankName: String?, last4: String?, saveForFutureUseElement: SaveForFutureUseElement, onRemoveAccount: () -> Unit, )</ID>
-    <ID>LongMethod:USBankAccountFormViewModel.kt$USBankAccountFormViewModel$private fun createNewPaymentSelection( resultIdentifier: ResultIdentifier, last4: String?, bankName: String?, ): PaymentSelection.New.USBankAccount</ID>
+    <ID>LongMethod:USBankAccountFormViewModel.kt$USBankAccountFormViewModel$private fun USBankAccountFormScreenState.createNewPaymentSelection( resultIdentifier: ResultIdentifier, last4: String?, bankName: String?, billingDetails: PaymentMethod.BillingDetails, ): PaymentSelection.New.USBankAccount</ID>
     <ID>LongMethod:USBankAccountFormViewModelTest.kt$USBankAccountFormViewModelTest$@Test fun `Restores screen state when re-opening screen`()</ID>
     <ID>MagicNumber:BaseSheetActivity.kt$BaseSheetActivity$30</ID>
     <ID>MagicNumber:NewPaymentMethodTabLayoutUI.kt$.3f</ID>

@@ -200,6 +200,10 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
     private val screenStateWithoutSaveForFutureUse = MutableStateFlow(value = determineInitialState())
 
+    private val billingDetails = combineAsStateFlow(name, email, phone, address) { name, email, phone, address ->
+        PaymentMethod.BillingDetails(address, email, name, phone)
+    }
+
     val currentScreenState: StateFlow<USBankAccountFormScreenState> = combineAsStateFlow(
         screenStateWithoutSaveForFutureUse,
         saveForFutureUse,
@@ -211,8 +215,11 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         state.updateWithMandate(mandateText)
     }
 
-    val result: StateFlow<PaymentSelection.New.USBankAccount?> = currentScreenState.mapAsStateFlow {
-        it.toPaymentSelection()
+    val result: StateFlow<PaymentSelection.New.USBankAccount?> = combineAsStateFlow(
+        currentScreenState,
+        billingDetails,
+    ) { state, billingDetails ->
+        state.toPaymentSelection(billingDetails)
     }
 
     val requiredFields = combineAsStateFlow(
@@ -569,10 +576,11 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         }
     }
 
-    private fun createNewPaymentSelection(
+    private fun USBankAccountFormScreenState.createNewPaymentSelection(
         resultIdentifier: ResultIdentifier,
         last4: String?,
         bankName: String?,
+        billingDetails: PaymentMethod.BillingDetails,
     ): PaymentSelection.New.USBankAccount {
         val customerRequestedSave = customerRequestedSave(
             showCheckbox = args.showCheckbox,
@@ -595,12 +603,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                     usBankAccount = PaymentMethodCreateParams.USBankAccount(
                         linkAccountSessionId = resultIdentifier.id,
                     ),
-                    billingDetails = PaymentMethod.BillingDetails(
-                        name = name.value,
-                        email = email.value,
-                        phone = phone.value,
-                        address = address.value,
-                    ),
+                    billingDetails = billingDetails,
                     allowRedisplay = args.formArgs.paymentMethodSaveConsentBehavior.allowRedisplay(
                         isSetupIntent = args.formArgs.hasIntentToSetup,
                         customerRequestedSave = customerRequestedSave,
@@ -612,12 +615,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         val instantDebitsInfo = (resultIdentifier as? ResultIdentifier.PaymentMethod)?.let {
             PaymentSelection.New.USBankAccount.InstantDebitsInfo(
                 paymentMethod = it.paymentMethod.copy(
-                    billingDetails = PaymentMethod.BillingDetails(
-                        name = name.value,
-                        email = email.value,
-                        phone = phone.value,
-                        address = address.value,
-                    ),
+                    billingDetails = billingDetails,
                 ),
                 linkMode = args.linkMode,
             )
@@ -644,13 +642,13 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             paymentMethodCreateParams = paymentMethodCreateParams,
             paymentMethodOptionsParams = paymentMethodOptionsParams,
             customerRequestedSave = customerRequestedSave,
-            screenState = currentScreenState.value,
+            screenState = this,
             instantDebits = instantDebitsInfo,
             input = PaymentSelection.New.USBankAccount.Input(
-                name = name.value,
-                email = email.value,
-                phone = phone.value,
-                address = address.value,
+                name = billingDetails.name.orEmpty(),
+                email = billingDetails.email,
+                phone = billingDetails.phone,
+                address = billingDetails.address,
                 saveForFutureUse = saveForFutureUse.value,
             ),
         )
@@ -683,7 +681,9 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         )
     }
 
-    private fun USBankAccountFormScreenState.toPaymentSelection(): PaymentSelection.New.USBankAccount? {
+    private fun USBankAccountFormScreenState.toPaymentSelection(
+        billingDetails: PaymentMethod.BillingDetails,
+    ): PaymentSelection.New.USBankAccount? {
         return when (this) {
             is USBankAccountFormScreenState.BillingDetailsCollection -> {
                 null
@@ -693,13 +693,15 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                     resultIdentifier = resultIdentifier,
                     bankName = bankName,
                     last4 = last4,
+                    billingDetails = billingDetails,
                 )
             }
             is USBankAccountFormScreenState.VerifyWithMicrodeposits -> {
                 createNewPaymentSelection(
                     resultIdentifier = ResultIdentifier.Session(financialConnectionsSessionId),
                     bankName = paymentAccount.bankName,
-                    last4 = paymentAccount.last4
+                    last4 = paymentAccount.last4,
+                    billingDetails = billingDetails,
                 )
             }
             is USBankAccountFormScreenState.SavedAccount -> {
@@ -707,7 +709,8 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                     createNewPaymentSelection(
                         resultIdentifier = ResultIdentifier.Session(linkAccountId),
                         bankName = bankName,
-                        last4 = last4
+                        last4 = last4,
+                        billingDetails = billingDetails,
                     )
                 }
             }
