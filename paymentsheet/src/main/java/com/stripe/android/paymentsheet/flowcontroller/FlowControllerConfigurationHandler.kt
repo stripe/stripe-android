@@ -99,7 +99,7 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
                     onConfigured(state.validationError)
                 } else {
                     viewModel.previousConfigureRequest = configureRequest
-                    onInitSuccess(state, configuration, configureRequest)
+                    onInitSuccess(PaymentSheetState.Full(state), configuration, configureRequest)
                     onConfigured()
                 }
             },

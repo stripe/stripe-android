@@ -7,13 +7,12 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetLoadingException
-import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.testing.PaymentIntentFactory
 import kotlinx.coroutines.channels.Channel
 
 internal class RelayingPaymentElementLoader : PaymentElementLoader {
 
-    private val results = Channel<Result<PaymentSheetState.Full>>(capacity = 1)
+    private val results = Channel<Result<PaymentElementLoader.State>>(capacity = 1)
 
     fun enqueueSuccess(
         stripeIntent: StripeIntent = PaymentIntentFactory.create(),
@@ -21,7 +20,7 @@ internal class RelayingPaymentElementLoader : PaymentElementLoader {
     ) {
         enqueue(
             Result.success(
-                PaymentSheetState.Full(
+                PaymentElementLoader.State(
                     customer = null,
                     config = PaymentSheet.Configuration("Example").asCommonConfiguration(),
                     paymentSelection = null,
@@ -38,7 +37,7 @@ internal class RelayingPaymentElementLoader : PaymentElementLoader {
         enqueue(Result.failure(error))
     }
 
-    private fun enqueue(result: Result<PaymentSheetState.Full>) {
+    private fun enqueue(result: Result<PaymentElementLoader.State>) {
         results.trySend(result)
     }
 
@@ -47,7 +46,7 @@ internal class RelayingPaymentElementLoader : PaymentElementLoader {
         onfiguration: CommonConfiguration,
         isReloadingAfterProcessDeath: Boolean,
         initializedViaCompose: Boolean,
-    ): Result<PaymentSheetState.Full> {
+    ): Result<PaymentElementLoader.State> {
         return results.receive()
     }
 }

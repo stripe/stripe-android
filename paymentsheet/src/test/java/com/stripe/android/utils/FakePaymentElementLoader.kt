@@ -11,7 +11,6 @@ import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetLoadingException
-import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import kotlinx.coroutines.delay
 import kotlin.time.Duration
@@ -42,13 +41,13 @@ internal class FakePaymentElementLoader(
         configuration: CommonConfiguration,
         isReloadingAfterProcessDeath: Boolean,
         initializedViaCompose: Boolean,
-    ): Result<PaymentSheetState.Full> {
+    ): Result<PaymentElementLoader.State> {
         delay(delay)
         return if (shouldFail) {
             Result.failure(IllegalStateException("oh no"))
         } else {
             Result.success(
-                PaymentSheetState.Full(
+                PaymentElementLoader.State(
                     config = configuration,
                     customer = customer,
                     linkState = linkState,
