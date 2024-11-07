@@ -22,7 +22,7 @@ class SettingsService private constructor(context: Context) {
 
     fun getAppearanceId(): AppearanceInfo.AppearanceId? {
         val appearanceId = sharedPreferences.getString(APPEARANCE_ID_KEY, null) ?: return null
-        return AppearanceInfo.AppearanceId.valueOf(appearanceId)
+        return AppearanceInfo.AppearanceId.entries.firstOrNull { it.name == appearanceId }
     }
 
     fun setAppearanceId(value: AppearanceInfo.AppearanceId?) {
