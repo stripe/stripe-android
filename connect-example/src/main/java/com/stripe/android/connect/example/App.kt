@@ -2,8 +2,11 @@ package com.stripe.android.connect.example
 
 import android.app.Application
 import android.os.StrictMode
+import com.stripe.android.connect.example.data.EmbeddedComponentManagerWrapper
+import com.stripe.android.connect.example.data.SettingsService
 
 class App : Application() {
+
     override fun onCreate() {
         super.onCreate()
 
@@ -23,5 +26,8 @@ class App : Application() {
                 .penaltyLog()
                 .build()
         )
+
+        SettingsService.init(this)
+        EmbeddedComponentManagerWrapper.init()
     }
 }

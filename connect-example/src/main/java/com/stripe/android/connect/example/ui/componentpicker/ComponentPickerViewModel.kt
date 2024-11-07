@@ -1,4 +1,4 @@
-package com.stripe.android.connect.example.ui.features.payouts
+package com.stripe.android.connect.example.ui.componentpicker
 
 import androidx.lifecycle.ViewModel
 import com.github.kittinunf.fuel.core.FuelError
@@ -6,8 +6,8 @@ import com.stripe.android.connect.EmbeddedComponentManager
 import com.stripe.android.connect.FetchClientSecretCallback.ClientSecretResultCallback
 import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.example.BuildConfig
-import com.stripe.android.connect.example.networking.EmbeddedComponentService
-import com.stripe.android.connect.example.networking.Merchant
+import com.stripe.android.connect.example.data.EmbeddedComponentService
+import com.stripe.android.connect.example.data.Merchant
 import com.stripe.android.core.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -17,14 +17,15 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class PayoutsExampleViewModel(
-    private val embeddedComponentService: EmbeddedComponentService = EmbeddedComponentService(),
+class ComponentPickerViewModel(
+    private val embeddedComponentService: EmbeddedComponentService = EmbeddedComponentService.getInstance(),
     private val networkingScope: CoroutineScope = CoroutineScope(Dispatchers.IO),
     private val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG),
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(PayoutsExampleState())
-    val state: StateFlow<PayoutsExampleState> = _state.asStateFlow()
+    private val loggingTag = this::class.java.name
+    private val _state = MutableStateFlow(ComponentPickerState())
+    val state: StateFlow<ComponentPickerState> = _state.asStateFlow()
 
     init {
         getAccounts()
@@ -49,7 +50,7 @@ class PayoutsExampleViewModel(
                 resultCallback.onResult(clientSecret)
             } catch (e: FuelError) {
                 resultCallback.onResult(null)
-                logger.error("(PayoutsExampleViewModel) Error fetching client secret: $e")
+                logger.error("($loggingTag) Error fetching client secret: $e")
             }
         }
     }
@@ -68,17 +69,17 @@ class PayoutsExampleViewModel(
                     configuration = EmbeddedComponentManager.Configuration(
                         publishableKey = response.publishableKey
                     ),
-                    fetchClientSecret = this@PayoutsExampleViewModel::fetchClientSecret
+                    fetchClientSecret = this@ComponentPickerViewModel::fetchClientSecret
                 )
             } catch (e: FuelError) {
-                logger.error("(PayoutsExampleViewModel) Error getting accounts: $e")
+                logger.error("($loggingTag) Error getting accounts: $e")
             }
         }
     }
 
     // state
 
-    data class PayoutsExampleState(
+    data class ComponentPickerState(
         val selectedAccount: Merchant? = null,
         val accounts: List<Merchant>? = null,
     )

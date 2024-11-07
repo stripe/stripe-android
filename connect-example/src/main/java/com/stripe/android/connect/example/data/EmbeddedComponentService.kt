@@ -1,4 +1,4 @@
-package com.stripe.android.connect.example.networking
+package com.stripe.android.connect.example.data
 
 import com.github.kittinunf.fuel.core.Deserializable
 import com.github.kittinunf.fuel.core.FuelError
@@ -7,12 +7,40 @@ import com.github.kittinunf.fuel.core.Request
 import com.github.kittinunf.fuel.core.Response
 import com.github.kittinunf.fuel.core.awaitResult
 import com.github.kittinunf.result.Result
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.json.Json
 
-class EmbeddedComponentService {
+class EmbeddedComponentService private constructor(
+    private val settingsService: SettingsService = SettingsService.getInstance(),
+) {
+
+    var serverBaseUrl: String = settingsService.getSelectedServerBaseURL() ?: DEFAULT_SERVER_BASE_URL
+        private set
+
+    private val _publishableKey: MutableStateFlow<String?> = MutableStateFlow(null)
+    val publishableKey: StateFlow<String?> = _publishableKey
+
+    private val _accounts: MutableStateFlow<List<Merchant>?> = MutableStateFlow(null)
+    val accounts: StateFlow<List<Merchant>?> = _accounts
+
+    fun setBackendBaseUrl(url: String) {
+        serverBaseUrl = if (!url.endsWith("/")) {
+            "$url/"
+        } else {
+            url
+        }
+        settingsService.setSelectedServerBaseURL(url)
+    }
+
     private val fuel = FuelManager.instance
         .apply {
+            // Set the timeout to 30 seconds (longer than standard due to
+            // the Glitch server sleeping after 5 minutes of inactivity)
+            timeoutInMillisecond = 30_000
+            timeoutReadInMillisecond = 30_000
+
             // add logging
             addRequestInterceptor(RequestLogger(tag = "EmbeddedComponentService"))
             addResponseInterceptor(ResponseLogger(tag = "EmbeddedComponentService"))
@@ -27,9 +55,13 @@ class EmbeddedComponentService {
      * of available merchants. Throws a [FuelError] exception on network issues and other errors.
      */
     suspend fun getAccounts(): GetAccountsResponse {
-        return fuel.get(EXAMPLE_BACKEND_URL + "app_info")
+        return fuel.get(serverBaseUrl + "app_info")
             .awaitModel(GetAccountsResponse.serializer())
             .get()
+            .apply {
+                _publishableKey.value = publishableKey
+                _accounts.value = availableMerchants
+            }
     }
 
     /**
@@ -37,7 +69,7 @@ class EmbeddedComponentService {
      * Throws a [FuelError] exception on network issues and other errors.
      */
     suspend fun fetchClientSecret(account: String): String {
-        return fuel.post(EXAMPLE_BACKEND_URL + "account_session")
+        return fuel.post(serverBaseUrl + "account_session")
             .header("account", account)
             .awaitModel(FetchClientSecretResponse.serializer())
             .get()
@@ -45,7 +77,14 @@ class EmbeddedComponentService {
     }
 
     companion object {
-        private const val EXAMPLE_BACKEND_URL = "https://stripe-connect-mobile-example-v1.glitch.me/"
+        const val DEFAULT_SERVER_BASE_URL = "https://stripe-connect-mobile-example-v1.glitch.me/"
+
+        private var instance: EmbeddedComponentService? = null
+        fun getInstance(): EmbeddedComponentService {
+            return instance ?: EmbeddedComponentService().also {
+                instance = it
+            }
+        }
     }
 }
 
