@@ -49,7 +49,7 @@ internal class LinkSignupHandlerForInstantDebits @Inject constructor(
 
         val signup = consumerRepository.signUp(
             email = state.validEmail!!,
-            phoneNumber = phoneController.getE164PhoneNumber(state.validPhone!!),
+            phoneNumber = state.validPhone!!,
             country = phoneController.getCountryCode(),
         )
 
@@ -95,7 +95,7 @@ internal class LinkSignupHandlerForNetworking @Inject constructor(
         saveAccountToLink.new(
             country = phoneController.getCountryCode(),
             email = state.validEmail!!,
-            phoneNumber = phoneController.getE164PhoneNumber(state.validPhone!!),
+            phoneNumber = state.validPhone!!,
             selectedAccounts = selectedAccounts,
             shouldPollAccountNumbers = manifest.isDataFlow,
         )
