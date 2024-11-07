@@ -45,7 +45,7 @@ internal class TestLinkCardBrand : BasePlaygroundTest() {
 
         testDriver.confirmLinkBankPayment(
             testParameters = params,
-            afterAuthorization = {
+            afterAuthorization = { _, _ ->
                 rules.compose.waitUntil(DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
                     rules.compose
                         .onAllNodesWithTag(TEST_TAG_ACCOUNT_DETAILS)
@@ -62,7 +62,7 @@ internal class TestLinkCardBrand : BasePlaygroundTest() {
             testParameters = testParameters.copy(
                 authorizationAction = AuthorizeAction.Cancel,
             ),
-            afterAuthorization = {
+            afterAuthorization = { _, _ ->
                 ComposeButton(rules.compose, hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG))
                     .waitFor(isEnabled())
             }

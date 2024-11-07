@@ -106,10 +106,6 @@ internal class FakeBaseSheetViewModel private constructor(
         // Not yet implemented.
     }
 
-    override fun handleConfirmUSBankAccount(paymentSelection: PaymentSelection.New.USBankAccount) {
-        throw AssertionError("Not expected.")
-    }
-
     override fun onUserCancel() {
         throw AssertionError("Not expected.")
     }
