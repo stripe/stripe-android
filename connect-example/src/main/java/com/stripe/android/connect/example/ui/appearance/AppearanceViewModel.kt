@@ -29,9 +29,9 @@ class AppearanceViewModel(
                 // enable the save button
                 listOf(it.selectedAppearance)
             }.distinctUntilChanged()
-            .collect {
-                _state.update { it.copy(saveEnabled = true) }
-            }
+                .collect {
+                    _state.update { it.copy(saveEnabled = true) }
+                }
         }
     }
 

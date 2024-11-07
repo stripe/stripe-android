@@ -6,9 +6,9 @@ import com.stripe.android.connect.BuildConfig
 import com.stripe.android.connect.example.data.EmbeddedComponentService
 import com.stripe.android.connect.example.data.FieldOption
 import com.stripe.android.connect.example.data.FutureRequirement
-import com.stripe.android.connect.example.data.SettingsService
 import com.stripe.android.connect.example.data.OnboardingSettings
 import com.stripe.android.connect.example.data.PresentationSettings
+import com.stripe.android.connect.example.data.SettingsService
 import com.stripe.android.connect.example.data.SkipTermsOfService
 import com.stripe.android.connect.example.ui.settings.SettingsViewModel.SettingsState.DemoMerchant
 import com.stripe.android.core.Logger
@@ -43,9 +43,9 @@ class SettingsViewModel(
                     it.serverUrl,
                 )
             }.distinctUntilChanged()
-            .collect {
-                _state.update { it.copy(saveEnabled = true) }
-            }
+                .collect {
+                    _state.update { it.copy(saveEnabled = true) }
+                }
         }
     }
 

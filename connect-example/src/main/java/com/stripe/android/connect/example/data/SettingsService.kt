@@ -32,11 +32,23 @@ class SettingsService private constructor(context: Context) {
     fun getOnboardingSettings(): OnboardingSettings {
         return OnboardingSettings(
             fullTermsOfServiceString = sharedPreferences.getString(ONBOARDING_TERMS_OF_SERVICE_URL, null),
-            recipientTermsOfServiceString = sharedPreferences.getString(ONBOARDING_RECIPIENT_TERMS_OF_SERVICE_STRING, null),
+            recipientTermsOfServiceString = sharedPreferences.getString(
+                ONBOARDING_RECIPIENT_TERMS_OF_SERVICE_STRING,
+                null,
+            ),
             privacyPolicyString = sharedPreferences.getString(ONBOARDING_PRIVACY_POLICY_STRING, null),
-            skipTermsOfService = SkipTermsOfService.valueOf(sharedPreferences.getString(ONBOARDING_SKIP_TERMS_OF_SERVICE, SkipTermsOfService.DEFAULT.name) ?: SkipTermsOfService.DEFAULT.name),
-            fieldOption = FieldOption.valueOf(sharedPreferences.getString(ONBOARDING_FIELD_OPTION, FieldOption.DEFAULT.name) ?: FieldOption.DEFAULT.name),
-            futureRequirement = FutureRequirement.valueOf(sharedPreferences.getString(ONBOARDING_FUTURE_REQUIREMENTS, FutureRequirement.DEFAULT.name) ?: FutureRequirement.DEFAULT.name)
+            skipTermsOfService = SkipTermsOfService.valueOf(
+                sharedPreferences.getString(ONBOARDING_SKIP_TERMS_OF_SERVICE, SkipTermsOfService.DEFAULT.name)
+                    ?: SkipTermsOfService.DEFAULT.name,
+            ),
+            fieldOption = FieldOption.valueOf(
+                sharedPreferences.getString(ONBOARDING_FIELD_OPTION, FieldOption.DEFAULT.name)
+                    ?: FieldOption.DEFAULT.name,
+            ),
+            futureRequirement = FutureRequirement.valueOf(
+                sharedPreferences.getString(ONBOARDING_FUTURE_REQUIREMENTS, FutureRequirement.DEFAULT.name)
+                    ?: FutureRequirement.DEFAULT.name,
+            ),
         )
     }
 

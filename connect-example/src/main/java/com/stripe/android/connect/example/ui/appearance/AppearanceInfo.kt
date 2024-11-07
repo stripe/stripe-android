@@ -1,8 +1,8 @@
 package com.stripe.android.connect.example.ui.appearance
 
 import android.content.Context
-import androidx.annotation.StringRes
 import android.os.Parcelable
+import androidx.annotation.StringRes
 import com.stripe.android.connect.EmbeddedComponentManager.Appearance
 import com.stripe.android.connect.EmbeddedComponentManager.Badge
 import com.stripe.android.connect.EmbeddedComponentManager.Button

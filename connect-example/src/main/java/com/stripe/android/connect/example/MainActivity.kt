@@ -89,7 +89,7 @@ class MainActivity : ComponentActivity() {
                         onDismiss = { coroutineScope.launch { settingsSheetState.hide() } },
                         onReloadRequested = onReloadRequested,
                     )
-               },
+                },
             ) {
                 Column(
                     modifier = Modifier.fillMaxSize().padding(24.dp),
