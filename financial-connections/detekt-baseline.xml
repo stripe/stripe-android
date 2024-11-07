@@ -24,6 +24,7 @@
     <ID>MagicNumber:SharedPartnerAuth.kt$.50f</ID>
     <ID>MatchingDeclarationName:ServerDrivenUi.kt$BulletUI</ID>
     <ID>MatchingDeclarationName:Type.kt$FinancialConnectionsTypography</ID>
+    <ID>MaxLineLength:NetworkingLinkSignupViewModelTest.kt$NetworkingLinkSignupViewModelTest$fun</ID>
     <ID>NestedBlockDepth:InstitutionPickerScreen.kt$private fun LazyListScope.searchResults( isInputEmpty: Boolean, payload: Payload, selectedInstitutionId: String?, onInstitutionSelected: (FinancialConnectionsInstitution, Boolean) -> Unit, institutions: Async&lt;InstitutionResponse>, onManualEntryClick: () -> Unit, onSearchMoreClick: () -> Unit )</ID>
     <ID>SwallowedException:PollAttachPaymentAccount.kt$PollAttachPaymentAccount$e: StripeException</ID>
     <ID>SwallowedException:PollAuthorizationSessionAccounts.kt$PollAuthorizationSessionAccounts$e: StripeException</ID>

@@ -3,7 +3,9 @@ package com.stripe.android.financialconnections.features.networkinglinksignup
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
+import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIConnectionException
+import com.stripe.android.core.exception.PermissionException
 import com.stripe.android.financialconnections.ApiKeyFixtures.cachedPartnerAccounts
 import com.stripe.android.financialconnections.ApiKeyFixtures.consumerSessionSignup
 import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
@@ -36,6 +38,7 @@ import com.stripe.android.financialconnections.utils.UriUtils
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.LinkMode
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -74,6 +77,7 @@ class NetworkingLinkSignupViewModelTest {
         presentSheet = mock(),
         linkSignupHandler = signupHandler,
         elementsSessionContext = elementsSessionContext,
+        handleError = handleError,
     )
 
     @Test
@@ -483,6 +487,102 @@ class NetworkingLinkSignupViewModelTest {
             viewModel.onSaveAccount()
             expectNoEvents()
         }
+    }
+
+    @Test
+    fun `Navigates to error pane if encountering permission exception in lookup in Instant Debits`() = runTest {
+        val initialSyncResponse = syncResponse().copy(
+            manifest = sessionManifest().copy(
+                accountholderCustomerEmailAddress = "known_user@email.com",
+                isLinkWithStripe = true,
+            ),
+            text = TextUpdate(linkLoginPane = linkLoginPane()),
+        )
+
+        val permissionException = PermissionException(stripeError = StripeError())
+
+        whenever(getOrFetchSync(any())).thenReturn(initialSyncResponse)
+        whenever(lookupAccount(any())).then {
+            throw permissionException
+        }
+
+        buildViewModel(
+            state = NetworkingLinkSignupState(isInstantDebits = true),
+            signupHandler = mockLinkSignupHandlerForInstantDebits(failOnSignup = true),
+        )
+
+        delay(300)
+
+        handleError.assertError(
+            extraMessage = "Error looking up account",
+            error = permissionException,
+            pane = LINK_LOGIN,
+            displayErrorScreen = true,
+        )
+    }
+
+    @Test
+    fun `Does not navigate to error pane if encountering non-permission exception in lookup in Instant Debits`() = runTest {
+        val initialSyncResponse = syncResponse().copy(
+            manifest = sessionManifest().copy(
+                accountholderCustomerEmailAddress = "known_user@email.com",
+                isLinkWithStripe = true,
+            ),
+            text = TextUpdate(linkLoginPane = linkLoginPane()),
+        )
+
+        val apiException = APIConnectionException()
+
+        whenever(getOrFetchSync(any())).thenReturn(initialSyncResponse)
+        whenever(lookupAccount(any())).then {
+            throw apiException
+        }
+
+        buildViewModel(
+            state = NetworkingLinkSignupState(isInstantDebits = true),
+            signupHandler = mockLinkSignupHandlerForInstantDebits(failOnSignup = true),
+        )
+
+        delay(300)
+
+        handleError.assertError(
+            extraMessage = "Error looking up account",
+            error = apiException,
+            pane = LINK_LOGIN,
+            displayErrorScreen = false,
+        )
+    }
+
+    @Test
+    fun `Does not navigate to error pane if encountering any exception in lookup in Financial Connections`() = runTest {
+        val initialSyncResponse = syncResponse().copy(
+            manifest = sessionManifest().copy(
+                accountholderCustomerEmailAddress = "known_user@email.com",
+                isLinkWithStripe = false,
+            ),
+            text = TextUpdate(networkingLinkSignupPane = networkingLinkSignupPane()),
+        )
+
+        val permissionException = PermissionException(stripeError = StripeError())
+
+        whenever(getOrFetchSync(any())).thenReturn(initialSyncResponse)
+        whenever(lookupAccount(any())).then {
+            throw permissionException
+        }
+
+        buildViewModel(
+            state = NetworkingLinkSignupState(isInstantDebits = false),
+            signupHandler = mockLinkSignupHandlerForNetworking(failOnSignup = true),
+        )
+
+        delay(300)
+
+        handleError.assertError(
+            extraMessage = "Error looking up account",
+            error = permissionException,
+            pane = NETWORKING_LINK_SIGNUP_PANE,
+            displayErrorScreen = false,
+        )
     }
 
     private fun mockLinkSignupHandlerForNetworking(
