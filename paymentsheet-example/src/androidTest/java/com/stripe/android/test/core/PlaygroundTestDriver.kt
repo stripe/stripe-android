@@ -762,12 +762,13 @@ internal class PlaygroundTestDriver(
 
     fun confirmUSBankAccount(
         testParameters: TestParameters,
-        afterAuthorization: (Selectors) -> Unit = {},
+        afterAuthorization: (Selectors, FieldPopulator) -> Unit = { _, _ -> },
     ): PlaygroundState? {
         return confirmBankAccount(
             testParameters = testParameters,
-            executeFlow = { doUSBankAccountAuthorization() },
+            executeFlow = { doUSBankAccountAuthorization(testParameters.authorizationAction) },
             afterCollectingBankInfo = afterAuthorization,
+            confirmIntent = true,
         )
     }
 
@@ -777,14 +778,14 @@ internal class PlaygroundTestDriver(
     ) {
         confirmBankAccountInCustomFlow(
             testParameters = testParameters,
-            executeFlow = { doUSBankAccountAuthorization() },
+            executeFlow = { doUSBankAccountAuthorization(testParameters.authorizationAction) },
             afterCollectingBankInfo = afterAuthorization,
         )
     }
 
     fun confirmLinkBankPayment(
         testParameters: TestParameters,
-        afterAuthorization: (Selectors) -> Unit = {},
+        afterAuthorization: (Selectors, FieldPopulator) -> Unit = { _, _ -> },
     ): PlaygroundState? {
         return confirmBankAccount(
             testParameters = testParameters,
@@ -808,21 +809,23 @@ internal class PlaygroundTestDriver(
     private fun confirmBankAccount(
         testParameters: TestParameters,
         executeFlow: () -> Unit,
-        afterCollectingBankInfo: (Selectors) -> Unit = {},
-        confirmIntent: Boolean = false,
+        afterCollectingBankInfo: (Selectors, FieldPopulator) -> Unit = { _, _ -> },
+        confirmIntent: Boolean,
     ): PlaygroundState? {
         setup(testParameters)
         launchComplete()
 
         clickPaymentSelection()
 
-        FieldPopulator(
+        val populator = FieldPopulator(
             selectors = selectors,
             testParameters = testParameters,
             populateCustomLpmFields = {},
             verifyCustomLpmFields = {},
             values = FieldPopulator.Values(),
-        ).populateFields()
+        )
+
+        populator.populateFields()
 
         // Verify device requirements are met prior to attempting confirmation.  Do this
         // after we have had the chance to capture a screenshot.
@@ -837,7 +840,7 @@ internal class PlaygroundTestDriver(
 
         executeFlow()
 
-        afterCollectingBankInfo(selectors)
+        afterCollectingBankInfo(selectors, populator)
 
         if (confirmIntent) {
             pressBuy()
@@ -1274,7 +1277,7 @@ internal class PlaygroundTestDriver(
         clickButton("Connect account", composeCanDetach = true)
 
         clickButton("Not now")
-        clickButton("Back to Mobile Example Account")
+        clickButtonWithTag("done_button")
     }
 
     private fun executeEntireInstantDebitsFlow() = with(device) {
@@ -1290,7 +1293,15 @@ internal class PlaygroundTestDriver(
         clickButtonWithTag("done_button")
     }
 
-    private fun doUSBankAccountAuthorization() {
+    private fun doUSBankAccountAuthorization(authAction: AuthorizeAction?) {
+        if (authAction == AuthorizeAction.Cancel) {
+            cancelAchFlowOnLaunch()
+        } else {
+            executeUsBankAccountFlow()
+        }
+    }
+
+    private fun cancelAchFlowOnLaunch() {
         while (currentActivity?.javaClass?.name != FINANCIAL_CONNECTIONS_ACTIVITY) {
             TimeUnit.MILLISECONDS.sleep(250)
         }
