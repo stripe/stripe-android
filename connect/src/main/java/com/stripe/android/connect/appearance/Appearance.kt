@@ -10,14 +10,9 @@ import kotlinx.parcelize.Parcelize
 @Poko
 class Appearance(
     /**
-     * Describes the colors used while the system is in light mode.
+     * Describes the colors used in embedded components.
      */
-    val colorsLight: Colors = Colors.default,
-
-    /**
-     * Describes the colors used while the system is in dark mode, or null if dark mode is not supported. Dark mode is not supported by default.
-     */
-    val colorsDark: Colors? = null,
+    val colors: Colors = Colors.default,
 
     /**
      * Describes the corner radius used in embedded components.
@@ -30,64 +25,32 @@ class Appearance(
     val typography: Typography = Typography.default,
 
     /**
-     * Describes the primary button appearance settings when in light mode.
+     * Describes the primary button appearance settings.
      */
-    val buttonPrimaryLight: Button = Button.default,
+    val buttonPrimary: Button = Button.default,
 
     /**
-     * Describes the primary button appearance settings when in dark mode. If null then dark mode is not supported.
+     * Describes the secondary button appearance settings.
      */
-    val buttonPrimaryDark: Button? = null,
-
-    /**
-     * Describes the secondary button appearance settings when in light mode.
-     */
-    val buttonSecondaryLight: Button = Button.default,
-
-    /**
-     * Describes the secondary button appearance settings when in dark mode. If null then dark mode is not supported.
-     */
-    val buttonSecondaryDark: Button? = null,
+    val buttonSecondary: Button = Button.default,
 
     /**
      * Describes the neutral badge appearance settings.
      */
-    val badgeNeutralLight: Badge = Badge.default,
+    val badgeNeutral: Badge = Badge.default,
 
     /**
-     * Describes the neutral badge appearance settings. If null then dark mode is not supported.
+     * Describes the success badge appearance settings.
      */
-    val badgeNeutralDark: Badge? = null,
+    val badgeSuccess: Badge = Badge.default,
 
     /**
-     * Describes the success badge appearance settings when in light mode.
+     * Describes the warning badge appearance settings.
      */
-    val badgeSuccessLight: Badge = Badge.default,
+    val badgeWarning: Badge = Badge.default,
 
     /**
-     * Describes the success badge appearance settings when in dark mode. If null then dark mode is not supported.
-
+     * Describes the danger badge appearance settings.
      */
-    val badgeSuccessDark: Badge? = null,
-
-    /**
-     * Describes the warning badge appearance settings when in light mode.
-     */
-    val badgeWarningLight: Badge = Badge.default,
-
-    /**
-     * Describes the warning badge appearance settings when in dark mode. If null then dark mode is not supported.
-     */
-    val badgeWarningDark: Badge? = null,
-
-    /**
-     * Describes the danger badge appearance settings when in light mode.
-     */
-    val badgeDangerLight: Badge = Badge.default,
-
-    /**
-     * Describes the danger badge appearance settings when in dark mode. If null then dark mode is not supported.
-
-     */
-    val badgeDangerDark: Badge? = null,
+    val badgeDanger: Badge = Badge.default,
 ) : Parcelable
