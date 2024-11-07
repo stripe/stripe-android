@@ -25,6 +25,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -41,7 +42,7 @@ fun SettingsView(
     viewModel: SettingsViewModel = viewModel()
 ) {
     val state by viewModel.state.collectAsState()
-    var serverUrlDidChange = remember { false }
+    var serverUrlDidChange = rememberSaveable { false }
 
     BackHandler { onDismiss() }
     LaunchedEffect(state.serverUrl) { serverUrlDidChange = true } // track if the serverURL ever changes
