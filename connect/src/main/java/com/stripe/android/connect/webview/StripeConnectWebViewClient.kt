@@ -21,7 +21,7 @@ internal class StripeConnectWebViewClient(
     private val jsonSerializer: Json = Json {
         ignoreUnknownKeys = true
     }
-): WebViewClient() {
+) : WebViewClient() {
 
     override fun onPageStarted(view: WebView, url: String?, favicon: Bitmap?) {
         initJavascriptBridge(view)
