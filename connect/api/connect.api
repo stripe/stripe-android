@@ -78,9 +78,10 @@ public final class com/stripe/android/connect/databinding/StripeAccountOnboardin
 }
 
 public final class com/stripe/android/connect/databinding/StripePayoutsFragmentBinding : androidx/viewbinding/ViewBinding {
+	public final field stripeWebView Landroid/webkit/WebView;
 	public static fun bind (Landroid/view/View;)Lcom/stripe/android/connect/databinding/StripePayoutsFragmentBinding;
 	public synthetic fun getRoot ()Landroid/view/View;
-	public fun getRoot ()Landroidx/constraintlayout/widget/ConstraintLayout;
+	public fun getRoot ()Landroid/widget/FrameLayout;
 	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/connect/databinding/StripePayoutsFragmentBinding;
 	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/connect/databinding/StripePayoutsFragmentBinding;
 }
