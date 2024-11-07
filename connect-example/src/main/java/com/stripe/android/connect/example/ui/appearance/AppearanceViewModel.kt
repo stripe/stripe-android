@@ -24,11 +24,9 @@ class AppearanceViewModel(
         loadAppearance()
 
         viewModelScope.launch {
-            _state.map {
-                // when any of the below values change,
-                // enable the save button
-                listOf(it.selectedAppearance)
-            }.distinctUntilChanged()
+            // when the appearance changes, enable the save button
+            _state.map { it.selectedAppearance }
+                .distinctUntilChanged()
                 .collect {
                     _state.update { it.copy(saveEnabled = true) }
                 }
