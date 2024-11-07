@@ -16,6 +16,7 @@ import java.io.IOException
 @OptIn(PrivateBetaConnectSDK::class)
 class EmbeddedComponentManagerWrapper private constructor() {
 
+    private val loggingTag = this::class.java.name
     private val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG)
     private val ioScope: CoroutineScope by lazy { CoroutineScope(Dispatchers.IO) }
 
@@ -56,10 +57,10 @@ class EmbeddedComponentManagerWrapper private constructor() {
                 val clientSecret = embeddedComponentService.fetchClientSecret(account)
                 clientSecretResultCallback.onResult(clientSecret)
             } catch (e: FuelError) {
-                logger.error("(EmbeddedComponentManagerWrapper) Failed to fetch client secret", e)
+                logger.error("($loggingTag) Failed to fetch client secret", e)
                 clientSecretResultCallback.onResult(null)
             } catch (e: IOException) {
-                logger.error("(EmbeddedComponentManagerWrapper) Failed to fetch client secret", e)
+                logger.error("($loggingTag) Failed to fetch client secret", e)
                 clientSecretResultCallback.onResult(null)
             }
         }

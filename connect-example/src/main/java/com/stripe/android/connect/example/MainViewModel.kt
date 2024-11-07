@@ -19,6 +19,7 @@ class MainViewModel(
     private val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG),
 ) : ViewModel() {
 
+    private val loggingTag = this::class.java.name
     private val _state = MutableStateFlow(MainState())
     val state: StateFlow<MainState> = _state.asStateFlow()
 
@@ -49,7 +50,7 @@ class MainViewModel(
                 _state.update {
                     it.copy(isLoading = false, errorMessage = e.message)
                 }
-                logger.error("(MainViewModel) Error getting accounts: $e")
+                logger.error("($loggingTag) Error getting accounts: $e")
             }
         }
     }

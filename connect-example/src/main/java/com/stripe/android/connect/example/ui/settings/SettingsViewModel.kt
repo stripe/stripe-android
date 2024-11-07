@@ -25,6 +25,7 @@ class SettingsViewModel(
     private val settingsService: SettingsService = SettingsService.getInstance(),
 ) : ViewModel() {
 
+    private val loggingTag = this::class.java.name
     private val _state = MutableStateFlow(SettingsState(serverUrl = embeddedComponentService.serverBaseUrl))
     val state = _state.asStateFlow()
 
@@ -89,7 +90,7 @@ class SettingsViewModel(
                 settingsService.setOnboardingSettings(onboardingSettings)
                 settingsService.setPresentationSettings(presentationSettings)
             }
-            logger.info("(SettingsViewModel) Settings saved")
+            logger.info("($loggingTag) Settings saved")
 
             _state.update { it.copy(saveEnabled = false) }
         }

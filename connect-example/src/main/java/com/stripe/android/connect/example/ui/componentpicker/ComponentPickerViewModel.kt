@@ -23,6 +23,7 @@ class ComponentPickerViewModel(
     private val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG),
 ) : ViewModel() {
 
+    private val loggingTag = this::class.java.name
     private val _state = MutableStateFlow(ComponentPickerState())
     val state: StateFlow<ComponentPickerState> = _state.asStateFlow()
 
@@ -49,7 +50,7 @@ class ComponentPickerViewModel(
                 resultCallback.onResult(clientSecret)
             } catch (e: FuelError) {
                 resultCallback.onResult(null)
-                logger.error("(ComponentPickerViewModel) Error fetching client secret: $e")
+                logger.error("($loggingTag) Error fetching client secret: $e")
             }
         }
     }
@@ -71,7 +72,7 @@ class ComponentPickerViewModel(
                     fetchClientSecret = this@ComponentPickerViewModel::fetchClientSecret
                 )
             } catch (e: FuelError) {
-                logger.error("(ComponentPickerViewModel) Error getting accounts: $e")
+                logger.error("($loggingTag) Error getting accounts: $e")
             }
         }
     }

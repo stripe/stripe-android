@@ -17,6 +17,7 @@ class AppearanceViewModel(
     private val settingsService: SettingsService = SettingsService.getInstance(),
 ) : ViewModel() {
 
+    private val loggingTag = this::class.java.name
     private val _state = MutableStateFlow(AppearanceState())
     val state = _state.asStateFlow()
 
@@ -42,7 +43,7 @@ class AppearanceViewModel(
             with(state.value) {
                 settingsService.setAppearanceId(selectedAppearance)
             }
-            logger.info("(AppearanceViewModel) Appearance saved")
+            logger.info("($loggingTag) Appearance saved")
 
             _state.update { it.copy(saveEnabled = false) }
         }
