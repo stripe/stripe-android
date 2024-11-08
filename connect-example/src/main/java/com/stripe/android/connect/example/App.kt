@@ -4,7 +4,10 @@ import android.app.Application
 import android.os.StrictMode
 import com.stripe.android.connect.example.data.EmbeddedComponentManagerWrapper
 import com.stripe.android.connect.example.data.SettingsService
+import dagger.hilt.android.HiltAndroidApp
+import javax.inject.Inject
 
+@HiltAndroidApp
 class App : Application() {
 
     override fun onCreate() {

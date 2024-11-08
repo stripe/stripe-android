@@ -33,6 +33,7 @@ ext.versions = [
         espresso                    : '3.6.1',
         firebaseAppDistribution     : '5.0.0',
         fuel                        : '2.3.1',
+        hilt                        : '2.52',
         goDaddyColorPicker          : '0.7.0',
         googleServices              : '4.4.2',
         gson                        : '2.11.0',
@@ -163,6 +164,10 @@ ext.libs = [
         fuelCoroutines                      : "com.github.kittinunf.fuel:fuel-coroutines:${versions.fuel}",
         goDaddyColorPicker                  : "com.godaddy.android.colorpicker:compose-color-picker-android:${versions.goDaddyColorPicker}",
         gson                                : "com.google.code.gson:gson:${versions.gson}",
+        hilt: [
+                android                     : "com.google.dagger:hilt-android:${versions.hilt}",
+                compiler                    : "com.google.dagger:hilt-compiler:${versions.hilt}"
+        ],
         instantApps                         : "com.google.android.instantapps:instantapps:${versions.instantApps}",
         kotlin                              : [
                 standard              : "org.jetbrains.kotlin:kotlin-stdlib:${versions.kotlin}",
