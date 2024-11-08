@@ -15,8 +15,6 @@ import com.stripe.android.connect.webview.StripeConnectWebViewClient
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class PayoutsFragment internal constructor() : Fragment() {
 
-    private val stripeWebViewClient by lazy { StripeConnectWebViewClient(Component.PAYOUTS) }
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.stripe_payouts_fragment, container, false)
     }
@@ -26,6 +24,7 @@ class PayoutsFragment internal constructor() : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val webView = view.findViewById<WebView>(R.id.stripe_web_view)
+        val stripeWebViewClient = StripeConnectWebViewClient(Component.PAYOUTS)
         stripeWebViewClient.configureAndLoadWebView(webView)
     }
 
