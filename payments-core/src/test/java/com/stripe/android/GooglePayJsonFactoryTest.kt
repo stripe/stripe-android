@@ -327,16 +327,15 @@ class GooglePayJsonFactoryTest {
             cardBrandFilter = customCardBrandFilter
         )
 
-        val isReadyToPayRequestJson = factory.createIsReadyToPayRequest()
+        val createCardPaymentMethodRequestJson = factory.createCardPaymentMethod(
+            billingAddressParameters = null,
+            allowCreditCards = true
+        )
 
-        val allowedCardNetworks = isReadyToPayRequestJson
-            .getJSONArray("allowedPaymentMethods")
-            .getJSONObject(0)
+        val allowedCardNetworks = createCardPaymentMethodRequestJson
             .getJSONObject("parameters")
-            .getJSONArray("allowedCardNetworks")
-            .let {
-                StripeJsonUtils.jsonArrayToList(it)
-            }
+            .optJSONArray("allowedCardNetworks")
+            .let { StripeJsonUtils.jsonArrayToList(it) }
 
         assertThat(allowedCardNetworks)
             .containsExactly("MASTERCARD", "VISA")
@@ -365,11 +364,12 @@ class GooglePayJsonFactoryTest {
             cardBrandFilter = customCardBrandFilter
         )
 
-        val isReadyToPayRequestJson = factory.createIsReadyToPayRequest()
+        val createCardPaymentMethodRequestJson = factory.createCardPaymentMethod(
+            billingAddressParameters = null,
+            allowCreditCards = true
+        )
 
-        val allowedCardNetworks = isReadyToPayRequestJson
-            .getJSONArray("allowedPaymentMethods")
-            .getJSONObject(0)
+        val allowedCardNetworks = createCardPaymentMethodRequestJson
             .getJSONObject("parameters")
             .optJSONArray("allowedCardNetworks")
             .let { StripeJsonUtils.jsonArrayToList(it) }
@@ -499,16 +499,15 @@ class GooglePayJsonFactoryTest {
             cardBrandFilter = customCardBrandFilter
         )
 
-        val isReadyToPayRequestJson = factory.createIsReadyToPayRequest()
+        val createCardPaymentMethodRequestJson = factory.createCardPaymentMethod(
+            billingAddressParameters = null,
+            allowCreditCards = true
+        )
 
-        val allowedCardNetworks = isReadyToPayRequestJson
-            .getJSONArray("allowedPaymentMethods")
-            .getJSONObject(0)
+        val allowedCardNetworks = createCardPaymentMethodRequestJson
             .getJSONObject("parameters")
-            .getJSONArray("allowedCardNetworks")
-            .let {
-                StripeJsonUtils.jsonArrayToList(it)
-            }
+            .optJSONArray("allowedCardNetworks")
+            .let { StripeJsonUtils.jsonArrayToList(it) }
 
         // JCB should not be included even though JCB is enabled, because it's filtered out
         assertThat(allowedCardNetworks)
