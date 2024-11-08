@@ -53,6 +53,7 @@ dependencies {
     testImplementation testLibs.mockito.kotlin
     testImplementation testLibs.robolectric
     testImplementation testLibs.truth
+    testImplementation project(':stripe-core')
 
     androidTestImplementation testLibs.androidx.composeUi
     androidTestImplementation testLibs.androidx.coreKtx
