@@ -57,6 +57,8 @@ class StripeConnectWebViewClientTest {
 
         webViewClient.configureAndLoadWebView(mockWebView)
 
-        verify(mockWebView).loadUrl("https://connect-js.stripe.com/v1.0/android_webview.html#component=payouts&publicKey=pk_test_123")
+        verify(mockWebView).loadUrl(
+            "https://connect-js.stripe.com/v1.0/android_webview.html#component=payouts&publicKey=pk_test_123"
+        )
     }
 }
