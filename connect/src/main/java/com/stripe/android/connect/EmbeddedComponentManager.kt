@@ -10,9 +10,19 @@ import kotlin.coroutines.resume
 @PrivateBetaConnectSDK
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class EmbeddedComponentManager internal constructor(
-    internal val configuration: Configuration,
+    private val configuration: Configuration,
     private val fetchClientSecretCallback: FetchClientSecretCallback,
 ) {
+    /**
+     * Returns the Connect Embedded Component URL for the given [StripeEmbeddedComponent].
+     */
+    internal fun getStripeURL(component: StripeEmbeddedComponent): String {
+        return buildString {
+            append("https://connect-js.stripe.com/v1.0/android_webview.html")
+            append("#component=${component.componentName}")
+            append("&publicKey=${configuration.publishableKey}")
+        }
+    }
 
     /**
      * Fetch the client secret from the consumer of the SDK.

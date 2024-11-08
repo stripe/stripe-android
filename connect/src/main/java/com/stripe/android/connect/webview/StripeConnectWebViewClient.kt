@@ -8,6 +8,7 @@ import android.webkit.WebViewClient
 import com.stripe.android.connect.BuildConfig
 import com.stripe.android.connect.EmbeddedComponentManager
 import com.stripe.android.connect.PrivateBetaConnectSDK
+import com.stripe.android.connect.StripeEmbeddedComponent
 import com.stripe.android.core.Logger
 import com.stripe.android.core.version.StripeSdkVersion
 import kotlinx.coroutines.runBlocking
@@ -16,7 +17,7 @@ import kotlinx.serialization.json.Json
 
 @OptIn(PrivateBetaConnectSDK::class)
 internal class StripeConnectWebViewClient(
-    private val connectComponent: StripeConnectURL.Component,
+    private val connectComponent: StripeEmbeddedComponent,
     private val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG),
     private val jsonSerializer: Json = Json {
         ignoreUnknownKeys = true
@@ -41,8 +42,7 @@ internal class StripeConnectWebViewClient(
             addJavascriptInterface(StripeJsInterface(), ANDROID_JS_INTERFACE)
             addJavascriptInterface(StripeJsInterfaceInternal(), ANDROID_JS_INTERNAL_INTERFACE)
 
-            val publishableKey = EmbeddedComponentManager.getInstance().configuration.publishableKey
-            loadUrl(StripeConnectURL.getStripeURL(connectComponent, publishableKey))
+            loadUrl(EmbeddedComponentManager.getInstance().getStripeURL(connectComponent))
         }
     }
 
@@ -127,7 +127,7 @@ internal class StripeConnectWebViewClient(
         @JavascriptInterface
         fun fetchClientSecret(): String {
             return runBlocking {
-                EmbeddedComponentManager.getInstance().fetchClientSecret() ?: ""
+                checkNotNull(EmbeddedComponentManager.getInstance().fetchClientSecret())
             }
         }
     }

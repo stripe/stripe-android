@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import android.webkit.WebView
 import androidx.annotation.RestrictTo
 import androidx.fragment.app.Fragment
-import com.stripe.android.connect.webview.StripeConnectURL.Component
 import com.stripe.android.connect.webview.StripeConnectWebViewClient
 
 @PrivateBetaConnectSDK
@@ -24,7 +23,7 @@ class PayoutsFragment internal constructor() : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val webView = view.findViewById<WebView>(R.id.stripe_web_view)
-        val stripeWebViewClient = StripeConnectWebViewClient(Component.PAYOUTS)
+        val stripeWebViewClient = StripeConnectWebViewClient(StripeEmbeddedComponent.PAYOUTS)
         stripeWebViewClient.configureAndLoadWebView(webView)
     }
 

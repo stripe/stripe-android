@@ -4,6 +4,7 @@ import android.webkit.WebSettings
 import android.webkit.WebView
 import com.stripe.android.connect.EmbeddedComponentManager
 import com.stripe.android.connect.PrivateBetaConnectSDK
+import com.stripe.android.connect.StripeEmbeddedComponent
 import com.stripe.android.core.Logger
 import com.stripe.android.core.version.StripeSdkVersion
 import kotlinx.serialization.json.Json
@@ -18,11 +19,11 @@ import org.mockito.kotlin.isNull
 @OptIn(PrivateBetaConnectSDK::class)
 class StripeConnectWebViewClientTest {
 
-    private val mockWebView: WebView = mock {
-        on { settings } doReturn mockSettings
-    }
     private val mockSettings: WebSettings = mock {
         on { userAgentString } doReturn "user-agent"
+    }
+    private val mockWebView: WebView = mock {
+        on { settings } doReturn mockSettings
     }
 
     private lateinit var webViewClient: StripeConnectWebViewClient
@@ -30,7 +31,7 @@ class StripeConnectWebViewClientTest {
     @Before
     fun setup() {
         webViewClient = StripeConnectWebViewClient(
-            connectComponent = StripeConnectURL.Component.PAYOUTS,
+            connectComponent = StripeEmbeddedComponent.PAYOUTS,
             logger = Logger.getInstance(enableLogging = false),
             jsonSerializer = Json { ignoreUnknownKeys = true },
         )
