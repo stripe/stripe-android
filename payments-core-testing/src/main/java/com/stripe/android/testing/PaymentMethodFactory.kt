@@ -60,6 +60,8 @@ object PaymentMethodFactory {
             code = PaymentMethod.Type.Card.code,
             card = PaymentMethod.Card(
                 last4 = "4242",
+                expiryMonth = 3,
+                expiryYear = 2027,
             ),
         )
     }
