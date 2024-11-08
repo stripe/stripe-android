@@ -57,6 +57,12 @@ class AddressElementExampleActivity : AppCompatActivity() {
                         Button(
                             onClick = {
                                 val config = AddressLauncher.Configuration.Builder()
+                                    .additionalFields(
+                                        additionalFields = AddressLauncher.AdditionalFieldsConfiguration(
+                                            phone = AddressLauncher.AdditionalFieldsConfiguration
+                                                .FieldConfiguration.REQUIRED
+                                        )
+                                    )
                                     // Provide your Google Places API key to enable autocomplete
                                     .googlePlacesApiKey(Settings(context).googlePlacesApiKey)
                                     .build()
