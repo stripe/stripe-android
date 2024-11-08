@@ -4,9 +4,12 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
 import com.stripe.android.connect.example.ui.appearance.AppearanceInfo
+import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
+import javax.inject.Singleton
 
-class SettingsService @Inject constructor(context: Context) {
+@Singleton
+class SettingsService @Inject constructor(@ApplicationContext context: Context) {
 
     private val sharedPreferences: SharedPreferences by lazy {
         context.getSharedPreferences("SettingsService", Context.MODE_PRIVATE)

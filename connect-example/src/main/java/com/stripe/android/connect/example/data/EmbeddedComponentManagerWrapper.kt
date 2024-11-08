@@ -12,9 +12,12 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import java.io.IOException
+import javax.inject.Inject
+import javax.inject.Singleton
 
 @OptIn(PrivateBetaConnectSDK::class)
-class EmbeddedComponentManagerWrapper(
+@Singleton
+class EmbeddedComponentManagerWrapper @Inject constructor(
     private val embeddedComponentService: EmbeddedComponentService,
     private val settingsService: SettingsService,
 ) {
