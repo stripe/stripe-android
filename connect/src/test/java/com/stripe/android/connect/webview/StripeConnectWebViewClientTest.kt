@@ -8,13 +8,13 @@ import com.stripe.android.connect.StripeEmbeddedComponent
 import com.stripe.android.core.Logger
 import com.stripe.android.core.version.StripeSdkVersion
 import kotlinx.serialization.json.Json
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.verify
 import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.isNull
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
 
 @OptIn(PrivateBetaConnectSDK::class)
 class StripeConnectWebViewClientTest {
