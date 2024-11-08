@@ -12,7 +12,7 @@ import androidx.fragment.app.Fragment
 class AccountOnboardingFragment internal constructor() : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.stripe_account_onboarding_fragment, container, false)
+        return inflater.inflate(R.layout.stripe_not_built_yet, container, false)
     }
 
     @PrivateBetaConnectSDK

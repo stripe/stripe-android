@@ -22,7 +22,7 @@ class PayoutsView @JvmOverloads internal constructor(
             "Currently only programmatic creation of PayoutsView is supported."
         }
 
-        inflate(getContext(), R.layout.stripe_payouts_fragment, this)
+        inflate(getContext(), R.layout.stripe_connect_webview, this)
 
         val webView = findViewById<WebView>(R.id.stripe_web_view)
         val stripeWebViewClient = StripeConnectWebViewClient(
