@@ -2,8 +2,8 @@ package com.stripe.android.connect
 
 /**
  * Represents a given Stripe Embedded Component.
- * [componentName] matches the canonical name from passed into
- * the JS Stripe Connect Instance `create` method: https://docs.stripe.com/connect/supported-embedded-components
+ * [componentName] matches the canonical name passed into the JS Stripe Connect Instance
+ * `create` method: https://docs.stripe.com/connect/supported-embedded-components
  */
 internal enum class StripeEmbeddedComponent(val componentName: String) {
     /**
