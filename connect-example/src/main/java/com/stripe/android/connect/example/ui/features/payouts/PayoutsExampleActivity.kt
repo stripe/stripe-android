@@ -15,6 +15,7 @@ import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.example.ConnectSdkExampleTheme
 import com.stripe.android.connect.example.MainContent
 import com.stripe.android.connect.example.R
+import com.stripe.android.connect.example.data.EmbeddedComponentManagerFactory
 import com.stripe.android.connect.example.ui.common.BackIconButton
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -23,10 +24,11 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class PayoutsExampleActivity : FragmentActivity() {
 
-    @Inject private lateinit var embeddedComponentManager: EmbeddedComponentManager
+    @Inject lateinit var embeddedComponentManagerFactory: EmbeddedComponentManagerFactory
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val embeddedComponentManager = embeddedComponentManagerFactory.getEmbeddedComponentManager()
 
         setContent {
             ConnectSdkExampleTheme {
@@ -36,7 +38,10 @@ class PayoutsExampleActivity : FragmentActivity() {
                         BackIconButton(onClick = this@PayoutsExampleActivity::finish)
                     }
                 ) {
-                    PayoutsComponentWrapper(onDismiss = this@PayoutsExampleActivity::finish)
+                    PayoutsComponentWrapper(
+                        embeddedComponentManager = embeddedComponentManager,
+                        onDismiss = this@PayoutsExampleActivity::finish,
+                    )
                 }
             }
         }
@@ -44,7 +49,10 @@ class PayoutsExampleActivity : FragmentActivity() {
 
     @OptIn(PrivateBetaConnectSDK::class)
     @Composable
-    private fun PayoutsComponentWrapper(onDismiss: () -> Unit) {
+    private fun PayoutsComponentWrapper(
+        embeddedComponentManager: EmbeddedComponentManager,
+        onDismiss: () -> Unit,
+    ) {
         BackHandler(onBack = onDismiss)
         AndroidView(modifier = Modifier.fillMaxSize(), factory = { context ->
             embeddedComponentManager.createPayoutsView(context)
