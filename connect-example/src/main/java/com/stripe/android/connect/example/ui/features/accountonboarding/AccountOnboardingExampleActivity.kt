@@ -13,7 +13,9 @@ import com.stripe.android.connect.example.ConnectSdkExampleTheme
 import com.stripe.android.connect.example.MainContent
 import com.stripe.android.connect.example.R
 import com.stripe.android.connect.example.ui.common.BackIconButton
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class AccountOnboardingExampleActivity : FragmentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {

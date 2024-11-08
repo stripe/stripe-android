@@ -10,37 +10,39 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import java.io.IOException
 
 @OptIn(PrivateBetaConnectSDK::class)
-class EmbeddedComponentManagerWrapper private constructor() {
+class EmbeddedComponentManagerWrapper(
+    private val embeddedComponentService: EmbeddedComponentService,
+    private val settingsService: SettingsService,
+) {
 
     private val loggingTag = this::class.java.name
     private val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG)
     private val ioScope: CoroutineScope by lazy { CoroutineScope(Dispatchers.IO) }
 
-    private val embeddedComponentService: EmbeddedComponentService by lazy { EmbeddedComponentService.getInstance() }
-    private val settingsService: SettingsService by lazy { SettingsService.getInstance() }
-
-    init {
+    /**
+     * Init must be called in Application.onCreate().
+     */
+    fun init() {
         reinitManagerOnPublishableKeyChange()
     }
 
     // re-init the manager anytime the publishable key changes
     private fun reinitManagerOnPublishableKeyChange() {
         ioScope.launch {
-            embeddedComponentService.publishableKey
-                .filterNotNull()
-                .distinctUntilChanged()
-                .collect { publishableKey ->
-                    EmbeddedComponentManager.init(
-                        configuration = EmbeddedComponentManager.Configuration(
-                            publishableKey = publishableKey,
-                        ),
-                        fetchClientSecret = ::fetchClientSecret,
-                    )
-                }
+            val publishableKey = embeddedComponentService.publishableKey.filterNotNull().firstOrNull() ?: return@launch
+
+            EmbeddedComponentManager.init(
+                configuration = EmbeddedComponentManager.Configuration(
+                    publishableKey = publishableKey,
+                ),
+                fetchClientSecret = ::fetchClientSecret,
+            )
         }
     }
 
@@ -63,23 +65,6 @@ class EmbeddedComponentManagerWrapper private constructor() {
                 logger.error("($loggingTag) Failed to fetch client secret", e)
                 clientSecretResultCallback.onResult(null)
             }
-        }
-    }
-
-    companion object {
-        private var instance: EmbeddedComponentManagerWrapper? = null
-
-        /**
-         * Initializes the wrapper. This must be done in Application.onCreate().
-         */
-        fun init(): EmbeddedComponentManagerWrapper {
-            return EmbeddedComponentManagerWrapper().also {
-                instance = it
-            }
-        }
-
-        fun getInstance(): EmbeddedComponentManagerWrapper {
-            return instance ?: throw IllegalStateException("EmbeddedComponentManagerWrapper is not initialized")
         }
     }
 }
