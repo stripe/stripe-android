@@ -27,11 +27,29 @@ class AuBankAccountNumberConfigTest {
 
     @Test
     fun `verify incomplete bank account number is in incomplete state`() {
-        assertThat(auBankAccountNumberConfig.determineState("123"))
+        assertThat(auBankAccountNumberConfig.determineState("12"))
             .isInstanceOf<TextFieldStateConstants.Error.Incomplete>()
 
-        assertThat(auBankAccountNumberConfig.determineState("123456"))
+        assertThat(auBankAccountNumberConfig.determineState("123"))
             .isInstanceOf<TextFieldStateConstants.Error.Incomplete>()
+    }
+
+    @Test
+    fun `verify valid bank account number but not maximum is in limitless state`() {
+        assertThat(auBankAccountNumberConfig.determineState("1234"))
+            .isInstanceOf<TextFieldStateConstants.Valid.Limitless>()
+
+        assertThat(auBankAccountNumberConfig.determineState("12345"))
+            .isInstanceOf<TextFieldStateConstants.Valid.Limitless>()
+
+        assertThat(auBankAccountNumberConfig.determineState("123456"))
+            .isInstanceOf<TextFieldStateConstants.Valid.Limitless>()
+
+        assertThat(auBankAccountNumberConfig.determineState("1234567"))
+            .isInstanceOf<TextFieldStateConstants.Valid.Limitless>()
+
+        assertThat(auBankAccountNumberConfig.determineState("12345678"))
+            .isInstanceOf<TextFieldStateConstants.Valid.Limitless>()
     }
 
     @Test
