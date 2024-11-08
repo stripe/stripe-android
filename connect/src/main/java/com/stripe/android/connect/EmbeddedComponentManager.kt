@@ -3,14 +3,41 @@ package com.stripe.android.connect
 import android.os.Parcelable
 import androidx.annotation.ColorInt
 import androidx.annotation.RestrictTo
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.parcelize.Parcelize
+import kotlin.coroutines.resume
 
 @PrivateBetaConnectSDK
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class EmbeddedComponentManager internal constructor(
     private val configuration: Configuration,
-    private val fetchClientSecret: FetchClientSecretCallback,
+    private val fetchClientSecretCallback: FetchClientSecretCallback,
 ) {
+    /**
+     * Returns the Connect Embedded Component URL for the given [StripeEmbeddedComponent].
+     */
+    internal fun getStripeURL(component: StripeEmbeddedComponent): String {
+        return buildString {
+            append("https://connect-js.stripe.com/v1.0/android_webview.html")
+            append("#component=${component.componentName}")
+            append("&publicKey=${configuration.publishableKey}")
+        }
+    }
+
+    /**
+     * Fetch the client secret from the consumer of the SDK.
+     */
+    internal suspend fun fetchClientSecret(): String? {
+        return suspendCancellableCoroutine { continuation ->
+            val resultCallback = object : FetchClientSecretCallback.ClientSecretResultCallback {
+                override fun onResult(secret: String?) {
+                    continuation.resume(secret)
+                }
+            }
+            fetchClientSecretCallback.fetchClientSecret(resultCallback)
+        }
+    }
+
     @PrivateBetaConnectSDK
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun update(@Suppress("UNUSED_PARAMETER") appearance: Appearance) {
@@ -155,6 +182,13 @@ class EmbeddedComponentManager internal constructor(
                 configuration,
                 fetchClientSecret,
             )
+        }
+
+        @PrivateBetaConnectSDK
+        @JvmStatic
+        fun getInstance(): EmbeddedComponentManager {
+            return instance
+                ?: throw IllegalStateException("EmbeddedComponentManager has not been initialized")
         }
     }
 }

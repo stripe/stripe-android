@@ -3,7 +3,9 @@ package com.stripe.android.connect.example.ui.features.payouts
 import android.os.Bundle
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.compose.AndroidFragment
@@ -37,6 +39,6 @@ class PayoutsExampleActivity : FragmentActivity() {
     @Composable
     private fun PayoutsComponentWrapper(onDismiss: () -> Unit) {
         BackHandler(onBack = onDismiss)
-        AndroidFragment<PayoutsFragment>()
+        AndroidFragment<PayoutsFragment>(modifier = Modifier.fillMaxSize())
     }
 }
