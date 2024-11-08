@@ -1,14 +1,14 @@
 package com.stripe.android.connect
 
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.yield
 import org.junit.Before
 import org.junit.Test
-import org.mockito.kotlin.*
+import org.mockito.Mockito.mock
+import org.mockito.Mockito.verify
+import org.mockito.kotlin.any
+import org.mockito.kotlin.whenever
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
-import kotlin.test.assertTrue
 
 @OptIn(PrivateBetaConnectSDK::class)
 class EmbeddedComponentManagerTest {
