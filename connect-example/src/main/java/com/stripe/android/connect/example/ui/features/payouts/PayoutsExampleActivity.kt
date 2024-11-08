@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.fragment.app.FragmentActivity
+import com.stripe.android.connect.EmbeddedComponentManager
 import com.stripe.android.connect.PayoutsView
 import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.example.ConnectSdkExampleTheme
@@ -16,9 +17,13 @@ import com.stripe.android.connect.example.MainContent
 import com.stripe.android.connect.example.R
 import com.stripe.android.connect.example.ui.common.BackIconButton
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
+@OptIn(PrivateBetaConnectSDK::class)
 @AndroidEntryPoint
 class PayoutsExampleActivity : FragmentActivity() {
+
+    @Inject private lateinit var embeddedComponentManager: EmbeddedComponentManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,7 +47,7 @@ class PayoutsExampleActivity : FragmentActivity() {
     private fun PayoutsComponentWrapper(onDismiss: () -> Unit) {
         BackHandler(onBack = onDismiss)
         AndroidView(modifier = Modifier.fillMaxSize(), factory = { context ->
-            PayoutsView(context)
+            embeddedComponentManager.createPayoutsView(context)
         })
     }
 }

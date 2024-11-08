@@ -9,17 +9,26 @@ import com.stripe.android.connect.webview.StripeConnectWebViewClient
 
 @PrivateBetaConnectSDK
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class PayoutsView @JvmOverloads constructor(
+class PayoutsView @JvmOverloads internal constructor(
     context: Context,
     attrs: AttributeSet? = null,
-    defStyleAttr: Int = 0
+    defStyleAttr: Int = 0,
+    embeddedComponentManager: EmbeddedComponentManager? = null
 ) : FrameLayout(context, attrs, defStyleAttr) {
 
     init {
+        checkNotNull(embeddedComponentManager) {
+            "EmbeddedComponentManager must not be null." +
+            "Currently only programmatic creation of PayoutsView is supported."
+        }
+
         inflate(getContext(), R.layout.stripe_payouts_fragment, this)
 
         val webView = findViewById<WebView>(R.id.stripe_web_view)
-        val stripeWebViewClient = StripeConnectWebViewClient(StripeEmbeddedComponent.PAYOUTS)
+        val stripeWebViewClient = StripeConnectWebViewClient(
+            embeddedComponentManager,
+            StripeEmbeddedComponent.PAYOUTS,
+        )
         stripeWebViewClient.configureAndLoadWebView(webView)
     }
 }
