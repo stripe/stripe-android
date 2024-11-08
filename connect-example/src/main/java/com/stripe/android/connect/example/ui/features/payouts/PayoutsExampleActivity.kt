@@ -7,9 +7,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.fragment.app.FragmentActivity
-import androidx.fragment.compose.AndroidFragment
-import com.stripe.android.connect.PayoutsFragment
+import com.stripe.android.connect.PayoutsView
 import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.example.ConnectSdkExampleTheme
 import com.stripe.android.connect.example.MainContent
@@ -41,6 +41,8 @@ class PayoutsExampleActivity : FragmentActivity() {
     @Composable
     private fun PayoutsComponentWrapper(onDismiss: () -> Unit) {
         BackHandler(onBack = onDismiss)
-        AndroidFragment<PayoutsFragment>(modifier = Modifier.fillMaxSize())
+        AndroidView(modifier = Modifier.fillMaxSize(), factory = { context ->
+            PayoutsView(context)
+        })
     }
 }
