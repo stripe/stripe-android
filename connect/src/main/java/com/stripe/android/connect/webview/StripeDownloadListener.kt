@@ -1,9 +1,10 @@
 package com.stripe.android.connect.webview
 
 import android.app.DownloadManager
+import android.app.DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED
 import android.content.Context
 import android.net.Uri
-import android.os.Environment
+import android.os.Environment.DIRECTORY_DOWNLOADS
 import android.webkit.DownloadListener
 import android.webkit.URLUtil
 import com.stripe.android.connect.R
@@ -28,14 +29,12 @@ class StripeDownloadListener(
         contentLength: Long
     ) {
         url ?: return
-        val request = DownloadManager.Request(Uri.parse(url))
 
-        request.setDestinationInExternalPublicDir(
-            Environment.DIRECTORY_DOWNLOADS,
-            URLUtil.guessFileName(url, contentDisposition, mimetype)
-        )
-        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-        request.setTitle(URLUtil.guessFileName(url, contentDisposition, mimetype))
+        val request = DownloadManager.Request(Uri.parse(url))
+        val fileName = URLUtil.guessFileName(url, contentDisposition, mimetype)
+        request.setDestinationInExternalPublicDir(DIRECTORY_DOWNLOADS, fileName)
+        request.setNotificationVisibility(VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+        request.setTitle(fileName)
         request.setDescription(context.getString(R.string.stripe_downloading_file))
         request.setMimeType(mimetype)
 
