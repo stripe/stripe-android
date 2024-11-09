@@ -30,15 +30,15 @@ class StripeDownloadListener(
     ) {
         url ?: return
 
-        val request = DownloadManager.Request(Uri.parse(url))
-        val fileName = URLUtil.guessFileName(url, contentDisposition, mimetype)
-        request.setDestinationInExternalPublicDir(DIRECTORY_DOWNLOADS, fileName)
-        request.setNotificationVisibility(VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-        request.setTitle(fileName)
-        request.setDescription(context.getString(R.string.stripe_downloading_file))
-        request.setMimeType(mimetype)
-
         ioScope.launch {
+            val request = DownloadManager.Request(Uri.parse(url))
+            val fileName = URLUtil.guessFileName(url, contentDisposition, mimetype)
+            request.setDestinationInExternalPublicDir(DIRECTORY_DOWNLOADS, fileName)
+            request.setNotificationVisibility(VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+            request.setTitle(fileName)
+            request.setDescription(context.getString(R.string.stripe_downloading_file))
+            request.setMimeType(mimetype)
+
             downloadManager.enqueue(request)
         }
     }
