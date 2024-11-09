@@ -69,20 +69,20 @@ public final class com/stripe/android/connect/EmbeddedComponentManager$Typograph
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/connect/databinding/StripeAccountOnboardingFragmentBinding : androidx/viewbinding/ViewBinding {
-	public static fun bind (Landroid/view/View;)Lcom/stripe/android/connect/databinding/StripeAccountOnboardingFragmentBinding;
-	public synthetic fun getRoot ()Landroid/view/View;
-	public fun getRoot ()Landroidx/constraintlayout/widget/ConstraintLayout;
-	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/connect/databinding/StripeAccountOnboardingFragmentBinding;
-	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/connect/databinding/StripeAccountOnboardingFragmentBinding;
-}
-
-public final class com/stripe/android/connect/databinding/StripePayoutsFragmentBinding : androidx/viewbinding/ViewBinding {
+public final class com/stripe/android/connect/databinding/StripeConnectWebviewBinding : androidx/viewbinding/ViewBinding {
 	public final field stripeWebView Landroid/webkit/WebView;
-	public static fun bind (Landroid/view/View;)Lcom/stripe/android/connect/databinding/StripePayoutsFragmentBinding;
+	public static fun bind (Landroid/view/View;)Lcom/stripe/android/connect/databinding/StripeConnectWebviewBinding;
 	public synthetic fun getRoot ()Landroid/view/View;
 	public fun getRoot ()Landroid/widget/FrameLayout;
-	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/connect/databinding/StripePayoutsFragmentBinding;
-	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/connect/databinding/StripePayoutsFragmentBinding;
+	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/connect/databinding/StripeConnectWebviewBinding;
+	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/connect/databinding/StripeConnectWebviewBinding;
+}
+
+public final class com/stripe/android/connect/databinding/StripeNotBuiltYetBinding : androidx/viewbinding/ViewBinding {
+	public static fun bind (Landroid/view/View;)Lcom/stripe/android/connect/databinding/StripeNotBuiltYetBinding;
+	public synthetic fun getRoot ()Landroid/view/View;
+	public fun getRoot ()Landroidx/constraintlayout/widget/ConstraintLayout;
+	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/connect/databinding/StripeNotBuiltYetBinding;
+	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/connect/databinding/StripeNotBuiltYetBinding;
 }
 
