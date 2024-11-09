@@ -19,7 +19,7 @@ class PayoutsView @JvmOverloads internal constructor(
     init {
         checkNotNull(embeddedComponentManager) {
             "EmbeddedComponentManager must not be null." +
-            "Currently only programmatic creation of PayoutsView is supported."
+                "Currently only programmatic creation of PayoutsView is supported."
         }
 
         inflate(getContext(), R.layout.stripe_connect_webview, this)
