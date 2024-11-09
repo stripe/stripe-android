@@ -40,6 +40,9 @@ internal class StripeConnectWebViewClient(
                 useWideViewPort = true
                 userAgentString = "$userAgentString - stripe-android/${StripeSdkVersion.VERSION_NAME}"
             }
+
+            setDownloadListener(StripeDownloadListener(webView.context))
+
             addJavascriptInterface(StripeJsInterface(), ANDROID_JS_INTERFACE)
             addJavascriptInterface(StripeJsInterfaceInternal(), ANDROID_JS_INTERNAL_INTERFACE)
 
