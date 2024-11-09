@@ -10,7 +10,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.fragment.app.FragmentActivity
 import com.stripe.android.connect.EmbeddedComponentManager
-import com.stripe.android.connect.PayoutsView
 import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.example.ConnectSdkExampleTheme
 import com.stripe.android.connect.example.MainContent
