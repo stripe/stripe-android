@@ -12,6 +12,7 @@ import android.webkit.DownloadListener
 import android.webkit.URLUtil
 import android.widget.Toast
 import com.stripe.android.connect.R
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
@@ -23,6 +24,18 @@ internal class StripeDownloadListener(
     private val downloadManager: DownloadManager? =
         context.getSystemService(Context.DOWNLOAD_SERVICE) as? DownloadManager,
     private val ioScope: CoroutineScope = CoroutineScope(Dispatchers.IO),
+    // methods below exposed for mocking in tests
+    private val getDownloadManagerRequest: (Uri) -> DownloadManager.Request = { uri ->
+        DownloadManager.Request(uri)
+    },
+    private val getFileName: (url: String, contentDisposition: String?, mimeType: String?) -> String =
+        { url, contentDisposition, mimeType ->
+            URLUtil.guessFileName(url, contentDisposition, mimeType)
+        },
+    private val parseUri: (String) -> Uri = { Uri.parse(it) },
+    private val showToast: (String) -> Unit = { toastString ->
+        Toast.makeText(context, toastString, Toast.LENGTH_LONG).show()
+    }
 ) : DownloadListener {
 
     override fun onDownloadStart(
@@ -38,8 +51,8 @@ internal class StripeDownloadListener(
         }
 
         ioScope.launch {
-            val request = DownloadManager.Request(Uri.parse(url))
-            val fileName = URLUtil.guessFileName(url, contentDisposition, mimetype)
+            val request = getDownloadManagerRequest(parseUri(url))
+            val fileName = getFileName(url, contentDisposition, mimetype)
             request.setDestinationInExternalPublicDir(DIRECTORY_DOWNLOADS, fileName)
             request.setNotificationVisibility(VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
             request.setTitle(fileName)
@@ -69,17 +82,13 @@ internal class StripeDownloadListener(
 
     private fun showErrorToast() {
         MainScope().launch {
-            val errorString = context.getString(R.string.stripe_unable_to_download_file)
-            val toast = Toast.makeText(context, errorString, Toast.LENGTH_LONG)
-            toast.show()
+            showToast(context.getString(R.string.stripe_unable_to_download_file))
         }
     }
 
     private fun showOpenFileToast() {
         MainScope().launch {
-            val downloadCompleteString = context.getString(R.string.stripe_download_complete)
-            val toast = Toast.makeText(context, downloadCompleteString, Toast.LENGTH_LONG)
-            toast.show()
+            showToast(context.getString(R.string.stripe_download_complete))
         }
     }
 

@@ -25,6 +25,7 @@ class StripeConnectWebViewClientTest {
     }
     private val mockWebView: WebView = mock {
         on { settings } doReturn mockSettings
+        on { context } doReturn mock()
     }
 
     private lateinit var webViewClient: StripeConnectWebViewClient
