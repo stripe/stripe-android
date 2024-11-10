@@ -12,7 +12,6 @@ import android.webkit.DownloadListener
 import android.webkit.URLUtil
 import android.widget.Toast
 import com.stripe.android.connect.R
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
