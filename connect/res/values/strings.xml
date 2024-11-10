@@ -2,4 +2,6 @@
 <resources>
     <string name="stripe_not_yet_built">Not yet built…</string>
     <string name="stripe_downloading_file">Downloading file</string>
+    <string name="stripe_download_complete">Download complete</string>
+    <string name="stripe_unable_to_download_file">Unable to download file</string>
 </resources>
