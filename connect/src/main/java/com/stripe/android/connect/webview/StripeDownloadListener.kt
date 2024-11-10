@@ -18,7 +18,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.File
 
-class StripeDownloadListener(
+internal class StripeDownloadListener(
     private val context: Context,
     private val ioScope: CoroutineScope = CoroutineScope(Dispatchers.IO),
 ) : DownloadListener {
@@ -56,31 +56,23 @@ class StripeDownloadListener(
                 if (index < 0) break // status does not exist - abort
                 val status = cursor.getInt(index)
                 if (status == DownloadManager.STATUS_SUCCESSFUL) {
-                    showOpenFileToast(fileName, mimetype)
+                    showOpenFileToast()
                     break // download complete - exit the loop
                 }
                 cursor.close()
-                delay(1000)
+                delay(DOWNLOAD_DELAY_MS)
             }
         }
     }
 
-    private fun showOpenFileToast(fileName: String, mimeType: String?) {
+    private fun showOpenFileToast() {
         MainScope().launch {
             val toast = Toast.makeText(context, "Download complete", Toast.LENGTH_LONG)
-            toast.view?.setOnClickListener {
-                openFile(fileName, mimeType)
-            }
             toast.show()
         }
     }
 
-    private fun openFile(fileName: String, mimeType: String?) {
-        val file = File(context.getExternalFilesDir(DIRECTORY_DOWNLOADS), fileName)
-        val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
-        val intent = Intent(Intent.ACTION_VIEW)
-        intent.setDataAndType(uri, mimeType)
-        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        context.startActivity(intent)
+    internal companion object {
+        private const val DOWNLOAD_DELAY_MS = 1_000L
     }
 }
