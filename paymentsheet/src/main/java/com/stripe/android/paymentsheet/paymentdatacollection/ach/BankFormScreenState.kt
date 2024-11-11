@@ -31,7 +31,7 @@ internal data class BankFormScreenState(
         val isVerifyingWithMicrodeposits: Boolean,
     ) : Parcelable
 
-    internal sealed interface ResultIdentifier : Parcelable {
+    sealed interface ResultIdentifier : Parcelable {
         @Parcelize
         data class Session(val id: String) : ResultIdentifier
 

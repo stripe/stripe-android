@@ -83,7 +83,7 @@ internal fun USBankAccountForm(
         },
     )
 
-    val currentScreenState by viewModel.currentScreenState.collectAsState()
+    val state by viewModel.currentScreenState.collectAsState()
     val lastTextFieldIdentifier by viewModel.lastTextFieldIdentifier.collectAsState()
 
     USBankAccountEmitters(
@@ -91,35 +91,70 @@ internal fun USBankAccountForm(
         usBankAccountFormArgs = usBankAccountFormArgs,
     )
 
+    BankAccountForm(
+        state = state,
+        formArgs = formArgs,
+        instantDebits = usBankAccountFormArgs.instantDebits,
+        isPaymentFlow = usBankAccountFormArgs.isPaymentFlow,
+        showCheckbox = usBankAccountFormArgs.showCheckbox,
+        nameController = viewModel.nameController,
+        emailController = viewModel.emailController,
+        phoneController = viewModel.phoneController,
+        addressController = viewModel.addressElement.controller,
+        lastTextFieldIdentifier = lastTextFieldIdentifier,
+        sameAsShippingElement = viewModel.sameAsShippingElement,
+        saveForFutureUseElement = viewModel.saveForFutureUseElement,
+        onRemoveAccount = viewModel::reset,
+        modifier = modifier.fillMaxWidth(),
+    )
+}
+
+@Composable
+internal fun BankAccountForm(
+    state: BankFormScreenState,
+    formArgs: FormArguments,
+    instantDebits: Boolean,
+    isPaymentFlow: Boolean,
+    showCheckbox: Boolean,
+    nameController: TextFieldController,
+    emailController: TextFieldController,
+    phoneController: PhoneNumberController,
+    addressController: AddressController,
+    lastTextFieldIdentifier: IdentifierSpec?,
+    sameAsShippingElement: SameAsShippingElement?,
+    saveForFutureUseElement: SaveForFutureUseElement,
+    modifier: Modifier = Modifier,
+    onRemoveAccount: () -> Unit,
+) {
     Column(modifier.fillMaxWidth()) {
         BillingDetailsForm(
-            instantDebits = usBankAccountFormArgs.instantDebits,
+            instantDebits = instantDebits,
             formArgs = formArgs,
-            isPaymentFlow = usBankAccountFormArgs.isPaymentFlow,
-            isProcessing = currentScreenState.isProcessing,
-            nameController = viewModel.nameController,
-            emailController = viewModel.emailController,
-            phoneController = viewModel.phoneController,
-            addressController = viewModel.addressElement.controller,
+            isPaymentFlow = isPaymentFlow,
+            isProcessing = state.isProcessing,
+            nameController = nameController,
+            emailController = emailController,
+            phoneController = phoneController,
+            addressController = addressController,
             lastTextFieldIdentifier = lastTextFieldIdentifier,
-            sameAsShippingElement = viewModel.sameAsShippingElement,
+            sameAsShippingElement = sameAsShippingElement,
         )
 
-        currentScreenState.linkedBankAccount?.let { linkedBankAccount ->
+        state.linkedBankAccount?.let { linkedBankAccount ->
             AccountDetailsForm(
-                showCheckbox = usBankAccountFormArgs.showCheckbox,
-                isProcessing = currentScreenState.isProcessing,
+                showCheckbox = showCheckbox,
+                isProcessing = state.isProcessing,
                 bankName = linkedBankAccount.bankName,
                 last4 = linkedBankAccount.last4,
-                saveForFutureUseElement = viewModel.saveForFutureUseElement,
-                onRemoveAccount = viewModel::reset,
+                saveForFutureUseElement = saveForFutureUseElement,
+                onRemoveAccount = onRemoveAccount,
             )
         }
     }
 }
 
 @Composable
-internal fun BillingDetailsForm(
+private fun BillingDetailsForm(
     instantDebits: Boolean,
     formArgs: FormArguments,
     isProcessing: Boolean,

@@ -13,9 +13,9 @@ import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormScreenState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.PaymentMethodFactory
+import com.stripe.android.utils.BankFormScreenStateFactory
 import org.junit.Test
 
 class ConfirmationHandlerOptionKtxTest {
@@ -320,15 +320,8 @@ class ConfirmationHandlerOptionKtxTest {
             paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.US_BANK_ACCOUNT,
             paymentMethodOptionsParams = null,
             customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
-            screenState = USBankAccountFormScreenState.MandateCollection(
-                resultIdentifier = USBankAccountFormScreenState.ResultIdentifier.PaymentMethod(
-                    paymentMethod = PaymentMethodFactory.instantDebits(),
-                ),
-                bankName = "Stripe Bank",
-                last4 = "4242",
-                intentId = null,
-                primaryButtonText = resolvableString("Pay now"),
-                mandateText = resolvableString("Legal stuff"),
+            screenState = BankFormScreenStateFactory.createWithPaymentMethod(
+                paymentMethod = PaymentMethodFactory.instantDebits(),
             ),
             instantDebits = PaymentSelection.New.USBankAccount.InstantDebitsInfo(
                 paymentMethod = PaymentMethodFactory.instantDebits(),
