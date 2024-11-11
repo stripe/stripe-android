@@ -127,7 +127,7 @@ private fun DeletePaymentMethodUi(interactor: UpdatePaymentMethodInteractor) {
     if (openRemoveDialog.value) {
         RemovePaymentMethodDialogUI(paymentMethod = interactor.displayableSavedPaymentMethod, onConfirmListener = {
             openRemoveDialog.value = false
-            interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.DeletePaymentMethod)
+            interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.RemovePaymentMethod)
         }, onDismissListener = {
             openRemoveDialog.value = false
         })
@@ -280,7 +280,7 @@ private fun PreviewUpdatePaymentMethodUI() {
             canRemove = true,
             displayableSavedPaymentMethod = exampleCard,
             card = exampleCard.paymentMethod.card!!,
-            onDeletePaymentMethod = {},
+            onRemovePaymentMethod = {},
             navigateBack = {},
         ),
         modifier = Modifier

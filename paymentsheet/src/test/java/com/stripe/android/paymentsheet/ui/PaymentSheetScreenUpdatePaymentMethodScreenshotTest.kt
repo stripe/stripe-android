@@ -36,7 +36,7 @@ class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
             isLiveMode = true,
             displayableSavedPaymentMethod = paymentMethod,
             card = paymentMethod.paymentMethod.card!!,
-            onDeletePaymentMethod = {},
+            onRemovePaymentMethod = {},
             navigateBack = {},
             canRemove = canRemove,
         )

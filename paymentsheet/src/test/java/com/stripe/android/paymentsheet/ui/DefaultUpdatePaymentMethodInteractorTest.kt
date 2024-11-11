@@ -10,12 +10,12 @@ import org.junit.Test
 class DefaultUpdatePaymentMethodInteractorTest {
 
     @Test
-    fun deleteViewAction_deletesPmAndNavigatesBack() {
+    fun removeViewAction_removesPmAndNavigatesBack() {
         val paymentMethod = PaymentMethodFixtures.displayableCard()
 
-        var deletedPm: PaymentMethod? = null
-        fun onDeletePaymentMethod(paymentMethod: PaymentMethod) {
-            deletedPm = paymentMethod
+        var removedPm: PaymentMethod? = null
+        fun onRemovePaymentMethod(paymentMethod: PaymentMethod) {
+            removedPm = paymentMethod
         }
 
         var navigatedBack = false
@@ -26,12 +26,12 @@ class DefaultUpdatePaymentMethodInteractorTest {
         runScenario(
             canRemove = true,
             displayableSavedPaymentMethod = paymentMethod,
-            onDeletePaymentMethod = ::onDeletePaymentMethod,
+            onRemovePaymentMethod = ::onRemovePaymentMethod,
             navigateBack = ::navigateBack,
         ) {
-            interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.DeletePaymentMethod)
+            interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.RemovePaymentMethod)
 
-            assertThat(deletedPm).isEqualTo(paymentMethod.paymentMethod)
+            assertThat(removedPm).isEqualTo(paymentMethod.paymentMethod)
             assertThat(navigatedBack).isTrue()
         }
     }
@@ -41,7 +41,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
     private fun runScenario(
         canRemove: Boolean = false,
         displayableSavedPaymentMethod: DisplayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
-        onDeletePaymentMethod: (PaymentMethod) -> Unit = { notImplemented() },
+        onRemovePaymentMethod: (PaymentMethod) -> Unit = { notImplemented() },
         navigateBack: () -> Unit = { notImplemented() },
         testBlock: suspend TestParams.() -> Unit
     ) {
@@ -50,7 +50,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
             canRemove = canRemove,
             displayableSavedPaymentMethod = displayableSavedPaymentMethod,
             card = displayableSavedPaymentMethod.paymentMethod.card!!,
-            onDeletePaymentMethod = onDeletePaymentMethod,
+            onRemovePaymentMethod = onRemovePaymentMethod,
             navigateBack = navigateBack,
         )
 

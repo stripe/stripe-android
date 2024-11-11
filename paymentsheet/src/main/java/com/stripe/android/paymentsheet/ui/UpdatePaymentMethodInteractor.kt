@@ -12,7 +12,7 @@ internal interface UpdatePaymentMethodInteractor {
     fun handleViewAction(viewAction: ViewAction)
 
     sealed class ViewAction {
-        data object DeletePaymentMethod : ViewAction()
+        data object RemovePaymentMethod : ViewAction()
     }
 }
 
@@ -21,13 +21,13 @@ internal class DefaultUpdatePaymentMethodInteractor(
     override val canRemove: Boolean,
     override val displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
     override val card: PaymentMethod.Card,
-    val onDeletePaymentMethod: (PaymentMethod) -> Unit,
+    val onRemovePaymentMethod: (PaymentMethod) -> Unit,
     val navigateBack: () -> Unit,
 ) : UpdatePaymentMethodInteractor {
     override fun handleViewAction(viewAction: UpdatePaymentMethodInteractor.ViewAction) {
         when (viewAction) {
-            UpdatePaymentMethodInteractor.ViewAction.DeletePaymentMethod -> {
-                onDeletePaymentMethod(displayableSavedPaymentMethod.paymentMethod)
+            UpdatePaymentMethodInteractor.ViewAction.RemovePaymentMethod -> {
+                onRemovePaymentMethod(displayableSavedPaymentMethod.paymentMethod)
                 navigateBack()
             }
         }

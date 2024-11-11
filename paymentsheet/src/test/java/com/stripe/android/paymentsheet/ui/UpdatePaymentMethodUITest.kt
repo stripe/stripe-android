@@ -158,7 +158,7 @@ class UpdatePaymentMethodUITest {
         composeRule.onNodeWithTag(TEST_TAG_DIALOG_CONFIRM_BUTTON).performClick()
 
         viewActionRecorder.consume(
-            UpdatePaymentMethodInteractor.ViewAction.DeletePaymentMethod
+            UpdatePaymentMethodInteractor.ViewAction.RemovePaymentMethod
         )
         assertThat(viewActionRecorder.viewActions).isEmpty()
         composeRule.onNodeWithTag(TEST_TAG_SIMPLE_DIALOG).assertDoesNotExist()
