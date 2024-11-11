@@ -41,7 +41,7 @@ private fun DisplayableSavedPaymentMethod.getRemoveDialogTitle() = when (payment
 private fun DisplayableSavedPaymentMethod.getRemoveDialogDescription() = when (paymentMethod.type) {
     PaymentMethod.Type.Card -> resolvableString(
         com.stripe.android.R.string.stripe_card_with_last_4,
-        paymentMethod.card?.brand,
+        this.brandDisplayName(),
         paymentMethod.card?.last4
     )
     PaymentMethod.Type.SepaDebit -> resolvableString(
