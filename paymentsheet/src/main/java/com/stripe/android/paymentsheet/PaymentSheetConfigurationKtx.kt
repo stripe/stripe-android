@@ -4,7 +4,6 @@ import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.sp
-import com.stripe.android.common.validation.CustomerSessionClientSecretValidator
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.uicore.PrimaryButtonColors
@@ -12,64 +11,6 @@ import com.stripe.android.uicore.PrimaryButtonShape
 import com.stripe.android.uicore.PrimaryButtonTypography
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.StripeThemeDefaults
-import java.lang.IllegalArgumentException
-
-internal fun PaymentSheet.Configuration.validate() {
-    // These are not localized as they are not intended to be displayed to a user.
-    when {
-        merchantDisplayName.isBlank() -> {
-            throw IllegalArgumentException(
-                "When a Configuration is passed to PaymentSheet," +
-                    " the Merchant display name cannot be an empty string."
-            )
-        }
-        customer?.id?.isBlank() == true -> {
-            throw IllegalArgumentException(
-                "When a CustomerConfiguration is passed to PaymentSheet," +
-                    " the Customer ID cannot be an empty string."
-            )
-        }
-    }
-
-    customer?.accessType?.let { customerAccessType ->
-        when (customerAccessType) {
-            is PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey -> {
-                if (customerAccessType.ephemeralKeySecret.isBlank() || customer.ephemeralKeySecret.isBlank()) {
-                    throw IllegalArgumentException(
-                        "When a CustomerConfiguration is passed to PaymentSheet, " +
-                            "the ephemeralKeySecret cannot be an empty string."
-                    )
-                }
-            }
-            is PaymentSheet.CustomerAccessType.CustomerSession -> {
-                val result = CustomerSessionClientSecretValidator
-                    .validate(customerAccessType.customerSessionClientSecret)
-
-                when (result) {
-                    is CustomerSessionClientSecretValidator.Result.Error.Empty -> {
-                        throw IllegalArgumentException(
-                            "When a CustomerConfiguration is passed to PaymentSheet, " +
-                                "the customerSessionClientSecret cannot be an empty string."
-                        )
-                    }
-                    is CustomerSessionClientSecretValidator.Result.Error.LegacyEphemeralKey -> {
-                        throw IllegalArgumentException(
-                            "Argument looks like an Ephemeral Key secret, but expecting a CustomerSession client " +
-                                "secret. See CustomerSession API: https://docs.stripe.com/api/customer_sessions/create"
-                        )
-                    }
-                    is CustomerSessionClientSecretValidator.Result.Error.UnknownKey -> {
-                        throw IllegalArgumentException(
-                            "Argument does not look like a CustomerSession client secret. " +
-                                "See CustomerSession API: https://docs.stripe.com/api/customer_sessions/create"
-                        )
-                    }
-                    is CustomerSessionClientSecretValidator.Result.Valid -> Unit
-                }
-            }
-        }
-    }
-}
 
 internal fun PaymentSheet.Configuration.containsVolatileDifferences(
     other: PaymentSheet.Configuration
