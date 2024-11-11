@@ -66,7 +66,8 @@ class Colors(
     @ColorInt val formHighlightBorder: Int? = null,
 
     /**
-     * The accent color used for filling form elements like checkboxes or radio buttons. If null the default will be used.
+     * The accent color used for filling form elements like checkboxes or radio buttons.
+     * If null the default will be used.
      */
     @ColorInt val formAccent: Int? = null,
 ) : Parcelable {

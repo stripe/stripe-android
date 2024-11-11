@@ -12,6 +12,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
+@Suppress("TooManyFunctions")
 class SettingsService @Inject constructor(@ApplicationContext context: Context) {
 
     /**

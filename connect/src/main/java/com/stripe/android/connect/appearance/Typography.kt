@@ -75,7 +75,8 @@ class Typography(
         val fontSize: Float? = null,
 
         /**
-         * The weight of the font used in this style (e.g., bold, normal) between 0-1000. If null the default will be used.
+         * The weight of the font used in this style (e.g., bold, normal) between 0-1000.
+         * If null the default will be used.
          */
         val fontWeight: Int? = null,
 

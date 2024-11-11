@@ -150,37 +150,44 @@ data class AppearanceJsVariables(
     @ColorInt val badgeSuccessColorBorder: IntAsRgbHexString?,
 
     /**
-     * The background color used in status badges to highlight things that might require action, but are optional to resolve.
+     * The background color used in status badges to highlight things that might require action,
+     * but are optional to resolve.
      */
     @ColorInt val badgeWarningColorBackground: IntAsRgbHexString?,
 
     /**
-     * The text color used in status badges to highlight things that might require action, but are optional to resolve.
+     * The text color used in status badges to highlight things that might require action,
+     * but are optional to resolve.
      */
     @ColorInt val badgeWarningColorText: IntAsRgbHexString?,
 
     /**
-     * The border color used in status badges to highlight things that might require action, but are optional to resolve.
+     * The border color used in status badges to highlight things that might require action,
+     * but are optional to resolve.
      */
     @ColorInt val badgeWarningColorBorder: IntAsRgbHexString?,
 
     /**
-     * The background color used in status badges for high-priority, critical situations that the user must address immediately, and to indicate failed or unsuccessful outcomes.
+     * The background color used in status badges for high-priority, critical situations that the user must address
+     * immediately, and to indicate failed or unsuccessful outcomes.
      */
     @ColorInt val badgeDangerColorBackground: IntAsRgbHexString?,
 
     /**
-     * The text color used in status badges for high-priority, critical situations that the user must address immediately, and to indicate failed or unsuccessful outcomes.
+     * The text color used in status badges for high-priority, critical situations that the user must address
+     * immediately, and to indicate failed or unsuccessful outcomes.
      */
     @ColorInt val badgeDangerColorText: IntAsRgbHexString?,
 
     /**
-     * The border color used in status badges for high-priority, critical situations that the user must address immediately, and to indicate failed or unsuccessful outcomes.
+     * The border color used in status badges for high-priority, critical situations that the user must address
+     * immediately, and to indicate failed or unsuccessful outcomes.
      */
     @ColorInt val badgeDangerColorBorder: IntAsRgbHexString?,
 
     /**
-     * The background color used when highlighting information, like the selected row on a table or particular piece of UI.
+     * The background color used when highlighting information, like the selected row on a table or particular piece of
+     * UI.
      */
     @ColorInt val offsetBackgroundColor: IntAsRgbHexString?,
 
@@ -260,7 +267,8 @@ data class AppearanceJsVariables(
     val headingXlFontWeight: Int?,
 
     /**
-     * The text transform for the extra large heading typography. Heading typography variables accept a valid text transform value.
+     * The text transform for the extra large heading typography. Heading typography variables accept a valid text
+     * transform value.
      */
     val headingXlTextTransform: TextTransform?,
 
@@ -275,7 +283,8 @@ data class AppearanceJsVariables(
     val headingLgFontWeight: Int?,
 
     /**
-     * The text transform for the large heading typography. Heading typography variables accept a valid text transform value.
+     * The text transform for the large heading typography. Heading typography variables accept a valid text
+     * transform value.
      */
     val headingLgTextTransform: TextTransform?,
 
@@ -290,7 +299,8 @@ data class AppearanceJsVariables(
     val headingMdFontWeight: Int?,
 
     /**
-     * The text transform for the medium heading typography. Heading typography variables accept a valid text transform value.
+     * The text transform for the medium heading typography. Heading typography variables accept a valid text
+     * transform value.
      */
     val headingMdTextTransform: TextTransform?,
 
@@ -305,7 +315,8 @@ data class AppearanceJsVariables(
     val headingSmFontWeight: Int?,
 
     /**
-     * The text transform for the small heading typography. Heading typography variables accept a valid text transform value.
+     * The text transform for the small heading typography. Heading typography variables accept a valid text
+     * transform value.
      */
     val headingSmTextTransform: TextTransform?,
 
@@ -320,7 +331,8 @@ data class AppearanceJsVariables(
     val headingXsFontWeight: Int?,
 
     /**
-     * The text transform for the extra small heading typography. Heading typography variables accept a valid text transform value.
+     * The text transform for the extra small heading typography. Heading typography variables accept a valid text
+     * transform value.
      */
     val headingXsTextTransform: TextTransform?,
 
@@ -335,7 +347,8 @@ data class AppearanceJsVariables(
     val labelMdFontWeight: Int?,
 
     /**
-     * The text transform for the medium label typography. Label typography variables accept a valid text transform value.
+     * The text transform for the medium label typography. Label typography variables accept a valid text
+     * transform value.
      */
     val labelMdTextTransform: TextTransform?,
 
@@ -350,12 +363,14 @@ data class AppearanceJsVariables(
     val labelSmFontWeight: Int?,
 
     /**
-     * The text transform for the small label typography. Label typography variables accept a valid text transform value.
+     * The text transform for the small label typography. Label typography variables accept a valid text
+     * transform value.
      */
     val labelSmTextTransform: TextTransform?,
 )
 
 @PrivateBetaConnectSDK
+@Suppress("LongMethod")
 internal fun Appearance.toJs(): AppearanceJs {
     return AppearanceJs(
         variables = AppearanceJsVariables(

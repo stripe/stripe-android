@@ -15,12 +15,14 @@ object IntAsRgbHexStringSerializer : KSerializer<Int> {
     override val descriptor: SerialDescriptor =
         PrimitiveSerialDescriptor("IntAsRgbHexString", PrimitiveKind.STRING)
 
+    @Suppress("MagicNumber")
     override fun serialize(encoder: Encoder, value: Int) {
         // Convert the integer to a hex color string
         val hexString = "#%06X".format(0xFFFFFF and value)
         encoder.encodeString(hexString)
     }
 
+    @Suppress("MagicNumber")
     override fun deserialize(decoder: Decoder): Int {
         // Decode the hex color string back to an integer
         val hexString = decoder.decodeString()
