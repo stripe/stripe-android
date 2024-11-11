@@ -2,6 +2,14 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+### PaymentSheet
+- [FIXED][9571](https://github.com/stripe/stripe-android/pull/9571) Fixed country prefix not being added when adding a payment method when collecting phone numbers with `BillingDetailsCollectionConfiguration`.
+- [FIXED][9576](https://github.com/stripe/stripe-android/pull/9576) Fixed minimum and maximum account number length for `Au Becs Debit` LPM. Customers can now provide account numbers with a length of 4 to 9 digits.
+
+### AddressElement
+- [FIXED][9571](https://github.com/stripe/stripe-android/pull/9571) Fixed country prefix not being added to the phone number in the returned `AddressDetails` if customer provides a phone number.
+- [FIXED][9577](https://github.com/stripe/stripe-android/pull/9577) Fixed phone number requirement bug that would allow users to optionally provide phone number even if a phone number is set as required by the merchant.
+
 ## 21.0.0 - 2024-11-04
 
 ### PaymentSheet
