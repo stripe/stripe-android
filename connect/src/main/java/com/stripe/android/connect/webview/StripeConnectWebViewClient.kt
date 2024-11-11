@@ -10,7 +10,6 @@ import com.stripe.android.connect.EmbeddedComponentManager
 import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.StripeEmbeddedComponent
 import com.stripe.android.connect.appearance.Appearance
-import com.stripe.android.connect.appearance.Colors
 import com.stripe.android.connect.webview.serialization.ConnectInstanceJs
 import com.stripe.android.connect.webview.serialization.toJs
 import com.stripe.android.core.Logger
@@ -56,6 +55,7 @@ internal class StripeConnectWebViewClient(
     }
 
     private fun initJavascriptBridge(webView: WebView) {
+        logger.debug("Initializing Javascript Bridge")
         webView.evaluateJavascript(
             """
                 $ANDROID_JS_INTERFACE.accountSessionClaimed = (message) => {
@@ -126,14 +126,7 @@ internal class StripeConnectWebViewClient(
             val pageLoadMessage = jsonSerializer.decodeFromString<PageLoadMessage>(message)
             logger.debug("Page did load: $pageLoadMessage")
 
-            val payload = ConnectInstanceJs(
-                appearance = Appearance(colors = Colors(primary = 0xff0000)).toJs(),
-            )
-
-            webView.evaluateSdkJs(
-                "updateConnectInstance",
-                jsonSerializer.encodeToJsonElement(payload).jsonObject
-            )
+            updateConnectInstance(embeddedComponentManager.appearanceFlow.value)
         }
 
         @JavascriptInterface
@@ -147,6 +140,14 @@ internal class StripeConnectWebViewClient(
             return runBlocking {
                 checkNotNull(embeddedComponentManager.fetchClientSecret())
             }
+        }
+
+        private fun updateConnectInstance(appearance: Appearance) {
+            val payload = ConnectInstanceJs(appearance = appearance.toJs())
+            webView.evaluateSdkJs(
+                "updateConnectInstance",
+                jsonSerializer.encodeToJsonElement(payload).jsonObject
+            )
         }
     }
 
@@ -179,7 +180,7 @@ internal class StripeConnectWebViewClient(
     )
 
     private fun WebView.evaluateSdkJs(function: String, payload: JsonObject) {
-        post { evaluateJavascript("Android.$function($payload)", null) }
+        post { evaluateJavascript("$ANDROID_JS_INTERFACE.$function($payload)", null) }
     }
 
     internal companion object {

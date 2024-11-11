@@ -5,11 +5,21 @@ import android.content.SharedPreferences
 import androidx.core.content.edit
 import com.stripe.android.connect.example.ui.appearance.AppearanceInfo
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class SettingsService @Inject constructor(@ApplicationContext context: Context) {
+
+    /**
+     * Keep a strong reference to change listeners else they'll be garbage collected.
+     * See docs for [SharedPreferences.registerOnSharedPreferenceChangeListener].
+     */
+    private val changeListeners =
+        mutableListOf<SharedPreferences.OnSharedPreferenceChangeListener>()
 
     private val sharedPreferences: SharedPreferences by lazy {
         context.getSharedPreferences("SettingsService", Context.MODE_PRIVATE)
@@ -26,6 +36,13 @@ class SettingsService @Inject constructor(@ApplicationContext context: Context) 
     fun getAppearanceId(): AppearanceInfo.AppearanceId? {
         val appearanceId = sharedPreferences.getString(APPEARANCE_ID_KEY, null) ?: return null
         return AppearanceInfo.AppearanceId.entries.firstOrNull { it.name == appearanceId }
+    }
+
+    fun getAppearanceIdFlow(): Flow<AppearanceInfo.AppearanceId?> {
+        return observePref(APPEARANCE_ID_KEY) { prefs, key ->
+            val appearanceId = prefs.getString(key, null) ?: return@observePref null
+            AppearanceInfo.AppearanceId.valueOf(appearanceId)
+        }
     }
 
     fun setAppearanceId(value: AppearanceInfo.AppearanceId?) {
@@ -88,6 +105,27 @@ class SettingsService @Inject constructor(@ApplicationContext context: Context) 
 
     fun setSelectedMerchant(accountId: String) {
         sharedPreferences.edit { putString(SELECTED_MERCHANT_KEY, accountId) }
+    }
+
+    private inline fun <T> observePref(
+        key: String,
+        crossinline getter: (sharedPrefs: SharedPreferences, key: String) -> T
+    ): Flow<T> {
+        return callbackFlow {
+            trySend(getter(sharedPreferences, key))
+            val callback =
+                SharedPreferences.OnSharedPreferenceChangeListener { sharedPreferences, k ->
+                    if (k == key) {
+                        trySend(getter(sharedPreferences, key))
+                    }
+                }
+            synchronized(changeListeners) { changeListeners.add(callback) }
+            sharedPreferences.registerOnSharedPreferenceChangeListener(callback)
+            awaitClose {
+                synchronized(changeListeners) { changeListeners.remove(callback) }
+                sharedPreferences.unregisterOnSharedPreferenceChangeListener(callback)
+            }
+        }
     }
 
     companion object {

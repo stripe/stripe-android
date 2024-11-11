@@ -29,8 +29,8 @@ data class AppearanceInfo(
     }
 
     companion object {
-        fun getAppearance(appearanceId: AppearanceId, context: Context) {
-            when (appearanceId) {
+        fun getAppearance(appearanceId: AppearanceId, context: Context): AppearanceInfo {
+            return when (appearanceId) {
                 AppearanceId.Default -> defaultAppearance()
                 AppearanceId.Ogre -> ogreAppearance(context)
                 AppearanceId.HotDog -> hotDogAppearance(context)
