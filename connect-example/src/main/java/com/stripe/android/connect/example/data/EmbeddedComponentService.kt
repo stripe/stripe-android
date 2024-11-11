@@ -7,8 +7,10 @@ import com.github.kittinunf.fuel.core.Request
 import com.github.kittinunf.fuel.core.Response
 import com.github.kittinunf.fuel.core.awaitResult
 import com.github.kittinunf.result.Result
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
@@ -57,25 +59,35 @@ class EmbeddedComponentService @Inject constructor(
      * of available merchants. Throws a [FuelError] exception on network issues and other errors.
      */
     suspend fun getAccounts(): GetAccountsResponse {
-        return fuel.get(serverBaseUrl + "app_info")
-            .awaitModel(GetAccountsResponse.serializer())
-            .get()
-            .apply {
-                _publishableKey.value = publishableKey
-                _accounts.value = availableMerchants
-            }
+        return withContext(Dispatchers.IO) {
+            fuel.get(serverBaseUrl + "app_info")
+                .awaitModel(GetAccountsResponse.serializer())
+                .get()
+                .apply {
+                    _publishableKey.value = publishableKey
+                    _accounts.value = availableMerchants
+                }
+        }
     }
+
+    /**
+     * Returns the publishable key for use in the Stripe Connect SDK.
+     * Throws a [FuelError] exception on network issues and other errors.
+     */
+    suspend fun loadPublishableKey(): GetAccountsResponse = getAccounts()
 
     /**
      * Returns the client secret for the given merchant account to be used in the Stripe Connect SDK.
      * Throws a [FuelError] exception on network issues and other errors.
      */
     suspend fun fetchClientSecret(account: String): String {
-        return fuel.post(serverBaseUrl + "account_session")
-            .header("account", account)
-            .awaitModel(FetchClientSecretResponse.serializer())
-            .get()
-            .clientSecret
+        return withContext(Dispatchers.IO) {
+            fuel.post(serverBaseUrl + "account_session")
+                .header("account", account)
+                .awaitModel(FetchClientSecretResponse.serializer())
+                .get()
+                .clientSecret
+        }
     }
 
     companion object {

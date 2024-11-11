@@ -3,6 +3,7 @@ package com.stripe.android.connect.webview
 import android.webkit.WebSettings
 import android.webkit.WebView
 import com.stripe.android.connect.EmbeddedComponentManager
+import com.stripe.android.connect.EmbeddedComponentManager.Configuration
 import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.StripeEmbeddedComponent
 import com.stripe.android.core.Logger
@@ -30,7 +31,13 @@ class StripeConnectWebViewClientTest {
 
     @Before
     fun setup() {
+        val embeddedComponentManager = EmbeddedComponentManager(
+            configuration = Configuration(publishableKey = "pk_test_123"),
+            fetchClientSecretCallback = { },
+        )
+
         webViewClient = StripeConnectWebViewClient(
+            embeddedComponentManager = embeddedComponentManager,
             connectComponent = StripeEmbeddedComponent.PAYOUTS,
             logger = Logger.getInstance(enableLogging = false),
             jsonSerializer = Json { ignoreUnknownKeys = true },
@@ -53,8 +60,6 @@ class StripeConnectWebViewClientTest {
 
     @Test
     fun `configureAndLoadWebView sets publishable key in url`() {
-        EmbeddedComponentManager.init(EmbeddedComponentManager.Configuration("pk_test_123")) {}
-
         webViewClient.configureAndLoadWebView(mockWebView)
 
         verify(mockWebView).loadUrl(

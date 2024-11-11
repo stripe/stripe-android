@@ -17,6 +17,7 @@ import kotlinx.serialization.json.Json
 
 @OptIn(PrivateBetaConnectSDK::class)
 internal class StripeConnectWebViewClient(
+    private val embeddedComponentManager: EmbeddedComponentManager,
     private val connectComponent: StripeEmbeddedComponent,
     private val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG),
     private val jsonSerializer: Json = Json {
@@ -42,7 +43,7 @@ internal class StripeConnectWebViewClient(
             addJavascriptInterface(StripeJsInterface(), ANDROID_JS_INTERFACE)
             addJavascriptInterface(StripeJsInterfaceInternal(), ANDROID_JS_INTERNAL_INTERFACE)
 
-            loadUrl(EmbeddedComponentManager.getInstance().getStripeURL(connectComponent))
+            loadUrl(embeddedComponentManager.getStripeURL(connectComponent))
         }
     }
 
@@ -127,7 +128,7 @@ internal class StripeConnectWebViewClient(
         @JavascriptInterface
         fun fetchClientSecret(): String {
             return runBlocking {
-                checkNotNull(EmbeddedComponentManager.getInstance().fetchClientSecret())
+                checkNotNull(embeddedComponentManager.fetchClientSecret())
             }
         }
     }

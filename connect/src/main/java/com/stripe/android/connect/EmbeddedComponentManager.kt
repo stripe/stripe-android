@@ -1,5 +1,6 @@
 package com.stripe.android.connect
 
+import android.content.Context
 import android.os.Parcelable
 import androidx.annotation.ColorInt
 import androidx.annotation.RestrictTo
@@ -9,10 +10,18 @@ import kotlin.coroutines.resume
 
 @PrivateBetaConnectSDK
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class EmbeddedComponentManager internal constructor(
+class EmbeddedComponentManager(
     private val configuration: Configuration,
     private val fetchClientSecretCallback: FetchClientSecretCallback,
 ) {
+
+    /**
+     * Create a new [PayoutsView] for inclusion in the view hierarchy.
+     */
+    fun createPayoutsView(context: Context): PayoutsView {
+        return PayoutsView(context = context, embeddedComponentManager = this)
+    }
+
     /**
      * Returns the Connect Embedded Component URL for the given [StripeEmbeddedComponent].
      */
@@ -164,31 +173,5 @@ class EmbeddedComponentManager internal constructor(
         Uppercase,
         Lowercase,
         Capitalize
-    }
-
-    @PrivateBetaConnectSDK
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    companion object {
-        private var instance: EmbeddedComponentManager? = null
-
-        @PrivateBetaConnectSDK
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        @JvmStatic
-        fun init(
-            configuration: Configuration,
-            fetchClientSecret: FetchClientSecretCallback,
-        ) {
-            instance = EmbeddedComponentManager(
-                configuration,
-                fetchClientSecret,
-            )
-        }
-
-        @PrivateBetaConnectSDK
-        @JvmStatic
-        fun getInstance(): EmbeddedComponentManager {
-            return instance
-                ?: throw IllegalStateException("EmbeddedComponentManager has not been initialized")
-        }
     }
 }
