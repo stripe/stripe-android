@@ -64,16 +64,16 @@ internal class StripeDownloadListener(
             val query = DownloadManager.Query().setFilterById(downloadId)
             var isDownloading = true
             while (isDownloading) {
-                val cursor = downloadManager.query(query)
-                cursor.moveToFirst()
-                val index = cursor.getColumnIndex(DownloadManager.COLUMN_STATUS)
-                if (index < 0) break // status does not exist - abort
-                val status = cursor.getInt(index)
-                if (status !in listOf(STATUS_PENDING, STATUS_RUNNING, STATUS_PAUSED)) {
-                    showOpenFileToast()
-                    isDownloading = false // download complete - exit the loop
+                downloadManager.query(query).use { cursor ->
+                    cursor.moveToFirst()
+                    val index = cursor.getColumnIndex(DownloadManager.COLUMN_STATUS)
+                    if (index < 0) return@launch // status does not exist - abort
+                    val status = cursor.getInt(index)
+                    if (status !in listOf(STATUS_PENDING, STATUS_RUNNING, STATUS_PAUSED)) {
+                        showOpenFileToast()
+                        isDownloading = false // download complete - exit the loop
+                    }
                 }
-                cursor.close()
                 delay(DOWNLOAD_DELAY_MS)
             }
         }
