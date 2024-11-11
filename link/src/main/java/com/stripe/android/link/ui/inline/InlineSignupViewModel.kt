@@ -190,13 +190,11 @@ internal class InlineSignupViewModel @AssistedInject constructor(
 
         return if (email != null && phoneNumber != null && signUpMode != null) {
             val isNameValid = !requiresNameCollection || !name.isNullOrBlank()
-
-            val phone = phoneController.getE164PhoneNumber(phoneNumber)
             val country = phoneController.getCountryCode()
 
             UserInput.SignUp(
                 email = email,
-                phone = phone,
+                phone = phoneNumber,
                 country = country,
                 name = name,
                 consentAction = signUpMode.toConsentAction(

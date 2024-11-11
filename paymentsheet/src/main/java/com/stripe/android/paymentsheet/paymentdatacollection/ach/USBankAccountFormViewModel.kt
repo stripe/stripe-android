@@ -522,7 +522,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             name = name,
             // The createPaymentDetails endpoint does not accept uppercase characters.
             email = email?.lowercase(),
-            phone = phone?.let { phoneController.getE164PhoneNumber(it) },
+            phone = phone,
             address = address?.let {
                 ElementsSessionContext.BillingDetails.Address(
                     line1 = it.line1,

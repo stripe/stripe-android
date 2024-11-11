@@ -263,7 +263,7 @@ class USBankAccountFormViewModelTest {
         val input = PaymentSelection.New.USBankAccount.Input(
             name = "Some One",
             email = "someone@email.com",
-            phone = "1112223456",
+            phone = "+11112223456",
             address = Address(
                 line1 = "123 Not Main Street",
                 line2 = "Apt 123",
@@ -308,7 +308,7 @@ class USBankAccountFormViewModelTest {
         val input = PaymentSelection.New.USBankAccount.Input(
             name = "Some One",
             email = "someone@email.com",
-            phone = "1112223456",
+            phone = "+11112223456",
             address = Address(
                 line1 = "123 Not Main Street",
                 line2 = "Apt 123",
@@ -363,7 +363,7 @@ class USBankAccountFormViewModelTest {
                     billingDetails = PaymentSheet.BillingDetails(
                         name = CUSTOMER_NAME,
                         email = CUSTOMER_EMAIL,
-                        phone = CUSTOMER_PHONE_COUNTRY_CODE + CUSTOMER_PHONE,
+                        phone = CUSTOMER_PHONE,
                         address = CUSTOMER_ADDRESS,
                     ),
                     billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
@@ -505,7 +505,7 @@ class USBankAccountFormViewModelTest {
                         billingDetails = PaymentSheet.BillingDetails(
                             name = CUSTOMER_NAME,
                             email = CUSTOMER_EMAIL,
-                            phone = CUSTOMER_PHONE_COUNTRY_CODE + CUSTOMER_PHONE,
+                            phone = CUSTOMER_PHONE,
                             address = CUSTOMER_ADDRESS,
                         ),
                         billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
@@ -1626,8 +1626,7 @@ class USBankAccountFormViewModelTest {
         const val CUSTOMER_EMAIL = "email@email.com"
         const val STRIPE_ACCOUNT_ID = "stripe_account_id"
         const val CUSTOMER_COUNTRY = "US"
-        const val CUSTOMER_PHONE_COUNTRY_CODE = "+1"
-        const val CUSTOMER_PHONE = "3105551234"
+        const val CUSTOMER_PHONE = "+13105551234"
         val CUSTOMER_ADDRESS = PaymentSheet.Address(
             line1 = "123 Main Street",
             line2 = "Apt 456",
