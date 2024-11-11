@@ -4,7 +4,6 @@ import android.app.Application
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultRegistryOwner
-import androidx.annotation.RestrictTo
 import androidx.core.app.ActivityOptionsCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -323,7 +322,6 @@ class CustomerSheet internal constructor(
              * **Note**: Card brand filtering is not currently supported in Link.
              */
             @ExperimentalCardBrandFilteringApi
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun cardBrandAcceptance(
                 cardBrandAcceptance: CardBrandAcceptance
             ) = apply {
