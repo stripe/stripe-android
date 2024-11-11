@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.fragment.app.FragmentActivity
+import com.stripe.android.connect.BuildConfig
 import com.stripe.android.connect.EmbeddedComponentManager
 import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.example.ConnectSdkExampleTheme
@@ -16,6 +17,7 @@ import com.stripe.android.connect.example.MainContent
 import com.stripe.android.connect.example.R
 import com.stripe.android.connect.example.data.EmbeddedComponentManagerProvider
 import com.stripe.android.connect.example.ui.common.BackIconButton
+import com.stripe.android.core.Logger
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -24,6 +26,7 @@ import javax.inject.Inject
 class PayoutsExampleActivity : FragmentActivity() {
 
     @Inject lateinit var embeddedComponentManagerProvider: EmbeddedComponentManagerProvider
+    private val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,6 +34,7 @@ class PayoutsExampleActivity : FragmentActivity() {
             embeddedComponentManagerProvider.provideEmbeddedComponentManager()
         } catch (e: IllegalStateException) {
             // TODO - handle app restoration more gracefully
+            logger.error("(PayoutsExampleActivity) Error retrieving EmbeddedComponentManager: $e")
             finish() // we don't have an embedded component manager, so go back to MainActivity to get one
             return
         }
