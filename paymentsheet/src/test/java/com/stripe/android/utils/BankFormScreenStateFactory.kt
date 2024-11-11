@@ -43,7 +43,6 @@ internal object BankFormScreenStateFactory {
                 intentId = "intent_1234",
                 bankName = "Stripe Bank",
                 last4 = "6789",
-                primaryButtonText = "Continue".resolvableString,
                 mandateText = mandateText,
                 isVerifyingWithMicrodeposits = isVerifyingWithMicrodeposits,
             )

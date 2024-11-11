@@ -55,7 +55,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Provider
-import com.stripe.android.ui.core.R as StripeUiCoreR
 
 internal class USBankAccountFormViewModel @Inject internal constructor(
     private val args: Args,
@@ -207,11 +206,13 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         screenStateWithoutSaveForFutureUse,
         saveForFutureUse,
     ) { state, saveForFutureUse ->
-        val isVerifyWithMicrodeposits = state.linkedBankAccount != null && state.linkedBankAccount.isVerifyingWithMicrodeposits
-        val mandateText = buildMandateText(
-            isVerifyWithMicrodeposits = isVerifyWithMicrodeposits,
-            isSaveForFutureUseSelected = saveForFutureUse,
-        )
+        val mandateText = state.linkedBankAccount?.let {
+            buildMandateText(
+                isVerifyWithMicrodeposits = it.isVerifyingWithMicrodeposits,
+                isSaveForFutureUseSelected = saveForFutureUse,
+            )
+        }
+
         state.updateWithMandate(mandateText)
     }
 
@@ -349,7 +350,6 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                     last4 = result.last4,
                     intentId = result.intent?.id,
                     financialConnectionsSessionId = null,
-                    primaryButtonText = buildPrimaryButtonText(),
                     mandateText = buildMandateText(isVerifyWithMicrodeposits = false),
                     isVerifyingWithMicrodeposits = false,
                 )
@@ -373,7 +373,6 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                             last4 = paymentAccount.last4,
                             intentId = intentId,
                             financialConnectionsSessionId = usBankAccountData.financialConnectionsSession.id,
-                            primaryButtonText = buildPrimaryButtonText(),
                             mandateText = buildMandateText(isVerifyWithMicrodeposits = true),
                             isVerifyingWithMicrodeposits = true,
                         )
@@ -392,7 +391,6 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                             last4 = paymentAccount.last4,
                             intentId = intentId,
                             financialConnectionsSessionId = usBankAccountData.financialConnectionsSession.id,
-                            primaryButtonText = buildPrimaryButtonText(),
                             mandateText = buildMandateText(isVerifyWithMicrodeposits = false),
                             isVerifyingWithMicrodeposits = false,
                         )
@@ -410,7 +408,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         val screenState = currentScreenState.value
         if (screenState.linkedBankAccount == null) {
             screenStateWithoutSaveForFutureUse.update {
-                screenState.processing()
+                it.processing()
             }
 
             collectBankAccount(args.clientSecret)
@@ -654,20 +652,6 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                 saveForFutureUse = saveForFutureUse.value,
             ),
         )
-    }
-
-    private fun buildPrimaryButtonText(): ResolvableString {
-        return when {
-            args.isCompleteFlow -> {
-                if (args.isPaymentFlow) {
-                    args.formArgs.amount!!.buildPayButtonLabel()
-                } else {
-                    StripeUiCoreR.string.stripe_setup_button_label.resolvableString
-                }
-            }
-
-            else -> StripeUiCoreR.string.stripe_continue_button_label.resolvableString
-        }
     }
 
     private fun buildMandateText(

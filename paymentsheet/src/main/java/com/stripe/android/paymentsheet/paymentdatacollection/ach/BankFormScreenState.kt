@@ -26,7 +26,6 @@ internal data class BankFormScreenState(
         val last4: String?,
         val intentId: String?,
         val financialConnectionsSessionId: String?,
-        val primaryButtonText: ResolvableString,
         val mandateText: ResolvableString,
         val isVerifyingWithMicrodeposits: Boolean,
     ) : Parcelable
@@ -41,9 +40,9 @@ internal data class BankFormScreenState(
 }
 
 internal fun BankFormScreenState.updateWithMandate(
-    mandate: ResolvableString,
+    mandate: ResolvableString?,
 ): BankFormScreenState {
-    return if (linkedBankAccount != null) {
+    return if (linkedBankAccount != null && mandate != null) {
         copy(linkedBankAccount = linkedBankAccount.copy(mandateText = mandate))
     } else {
         this
