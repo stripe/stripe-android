@@ -5,6 +5,7 @@ import com.github.kittinunf.fuel.core.FuelError
 import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.example.data.EmbeddedComponentService
 import com.stripe.android.core.Logger
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,14 +13,17 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class MainViewModel(
-    private val embeddedComponentService: EmbeddedComponentService = EmbeddedComponentService.getInstance(),
-    private val networkingScope: CoroutineScope = CoroutineScope(Dispatchers.IO),
-    private val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG),
+@HiltViewModel
+class MainViewModel @Inject constructor(
+    private val embeddedComponentService: EmbeddedComponentService,
 ) : ViewModel() {
 
+    private val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG)
     private val loggingTag = this::class.java.name
+    private val networkingScope: CoroutineScope = CoroutineScope(Dispatchers.IO)
+
     private val _state = MutableStateFlow(MainState())
     val state: StateFlow<MainState> = _state.asStateFlow()
 

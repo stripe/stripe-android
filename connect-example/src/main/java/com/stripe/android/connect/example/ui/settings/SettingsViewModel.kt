@@ -12,20 +12,24 @@ import com.stripe.android.connect.example.data.SettingsService
 import com.stripe.android.connect.example.data.SkipTermsOfService
 import com.stripe.android.connect.example.ui.settings.SettingsViewModel.SettingsState.DemoMerchant
 import com.stripe.android.core.Logger
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class SettingsViewModel(
-    private val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG),
-    private val embeddedComponentService: EmbeddedComponentService = EmbeddedComponentService.getInstance(),
-    private val settingsService: SettingsService = SettingsService.getInstance(),
+@HiltViewModel
+class SettingsViewModel @Inject constructor(
+    private val embeddedComponentService: EmbeddedComponentService,
+    private val settingsService: SettingsService
 ) : ViewModel() {
 
+    private val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG)
     private val loggingTag = this::class.java.name
+
     private val _state = MutableStateFlow(SettingsState(serverUrl = embeddedComponentService.serverBaseUrl))
     val state = _state.asStateFlow()
 

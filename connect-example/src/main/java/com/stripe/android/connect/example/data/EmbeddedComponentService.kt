@@ -11,11 +11,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.json.Json
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class EmbeddedComponentService private constructor(
-    private val settingsService: SettingsService = SettingsService.getInstance(),
+@Singleton
+class EmbeddedComponentService @Inject constructor(
+    private val settingsService: SettingsService,
 ) {
-
     var serverBaseUrl: String = settingsService.getSelectedServerBaseURL() ?: DEFAULT_SERVER_BASE_URL
         private set
 
@@ -78,13 +80,6 @@ class EmbeddedComponentService private constructor(
 
     companion object {
         const val DEFAULT_SERVER_BASE_URL = "https://stripe-connect-mobile-example-v1.glitch.me/"
-
-        private var instance: EmbeddedComponentService? = null
-        fun getInstance(): EmbeddedComponentService {
-            return instance ?: EmbeddedComponentService().also {
-                instance = it
-            }
-        }
     }
 }
 

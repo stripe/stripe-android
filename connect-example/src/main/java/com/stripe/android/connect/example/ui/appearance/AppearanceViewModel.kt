@@ -5,19 +5,23 @@ import androidx.lifecycle.viewModelScope
 import com.stripe.android.connect.BuildConfig
 import com.stripe.android.connect.example.data.SettingsService
 import com.stripe.android.core.Logger
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class AppearanceViewModel(
-    private val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG),
-    private val settingsService: SettingsService = SettingsService.getInstance(),
+@HiltViewModel
+class AppearanceViewModel @Inject constructor(
+    private val settingsService: SettingsService,
 ) : ViewModel() {
 
+    private val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG)
     private val loggingTag = this::class.java.name
+
     private val _state = MutableStateFlow(AppearanceState())
     val state = _state.asStateFlow()
 
