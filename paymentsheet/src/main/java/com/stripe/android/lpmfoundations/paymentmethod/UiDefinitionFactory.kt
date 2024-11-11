@@ -12,13 +12,14 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.SharedDataSpec
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 
 internal sealed interface UiDefinitionFactory {
-    class Arguments(
+    data class Arguments(
         val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
         val linkConfigurationCoordinator: LinkConfigurationCoordinator?,
         val initialValues: Map<IdentifierSpec, String?>,
@@ -28,6 +29,7 @@ internal sealed interface UiDefinitionFactory {
         val cbcEligibility: CardBrandChoiceEligibility,
         val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
         val requiresMandate: Boolean,
+        val usBankAccountFormArguments: USBankAccountFormArguments,
         val onLinkInlineSignupStateChanged: (InlineSignupViewState) -> Unit,
         val cardBrandFilter: CardBrandFilter,
     ) {
@@ -43,6 +45,7 @@ internal sealed interface UiDefinitionFactory {
                 private val onLinkInlineSignupStateChanged: (InlineSignupViewState) -> Unit,
                 private val paymentMethodCreateParams: PaymentMethodCreateParams? = null,
                 private val paymentMethodExtraParams: PaymentMethodExtraParams? = null,
+                private val usBankAccountFormArguments: USBankAccountFormArguments,
             ) : Factory {
                 override fun create(
                     metadata: PaymentMethodMetadata,
@@ -62,6 +65,7 @@ internal sealed interface UiDefinitionFactory {
                         saveForFutureUseInitialValue = false,
                         billingDetailsCollectionConfiguration = metadata.billingDetailsCollectionConfiguration,
                         requiresMandate = requiresMandate,
+                        usBankAccountFormArguments = usBankAccountFormArguments,
                         onLinkInlineSignupStateChanged = onLinkInlineSignupStateChanged,
                         cardBrandFilter = metadata.cardBrandFilter,
                     )

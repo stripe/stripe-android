@@ -12,6 +12,7 @@ import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.elements.FormElement
@@ -21,6 +22,7 @@ internal class FormHelper(
     private val paymentMethodMetadata: PaymentMethodMetadata,
     private val newPaymentSelectionProvider: () -> NewOrExternalPaymentSelection?,
     private val selectionUpdater: (PaymentSelection?) -> Unit,
+    private val usBankAccountFormArgumentsFactory: (PaymentMethodCode) -> USBankAccountFormArguments,
     private val linkConfigurationCoordinator: LinkConfigurationCoordinator,
     private val onLinkInlineSignupStateChanged: (InlineSignupViewState) -> Unit,
 ) {
@@ -37,6 +39,14 @@ internal class FormHelper(
                     viewModel.newPaymentSelection
                 },
                 linkConfigurationCoordinator = viewModel.linkHandler.linkConfigurationCoordinator,
+                usBankAccountFormArgumentsFactory = { code ->
+                    USBankAccountFormArguments.create(
+                        viewModel = viewModel,
+                        paymentMethodMetadata = paymentMethodMetadata,
+                        hostedSurface = "payment_element",
+                        selectedPaymentMethodCode = code,
+                    )
+                },
                 onLinkInlineSignupStateChanged = linkInlineHandler::onStateUpdated,
                 selectionUpdater = {
                     viewModel.updateSelection(it)
@@ -48,6 +58,8 @@ internal class FormHelper(
     fun formElementsForCode(code: String): List<FormElement> {
         val currentSelection = newPaymentSelectionProvider()?.takeIf { it.getType() == code }
 
+        val usBankAccountFormArguments = usBankAccountFormArgumentsFactory(code)
+
         return paymentMethodMetadata.formElementsForCode(
             code = code,
             uiDefinitionFactoryArgumentsFactory = UiDefinitionFactory.Arguments.Factory.Default(
@@ -56,6 +68,7 @@ internal class FormHelper(
                 onLinkInlineSignupStateChanged = onLinkInlineSignupStateChanged,
                 paymentMethodCreateParams = currentSelection?.getPaymentMethodCreateParams(),
                 paymentMethodExtraParams = currentSelection?.getPaymentMethodExtraParams(),
+                usBankAccountFormArguments = usBankAccountFormArguments,
             ),
         ) ?: emptyList()
     }

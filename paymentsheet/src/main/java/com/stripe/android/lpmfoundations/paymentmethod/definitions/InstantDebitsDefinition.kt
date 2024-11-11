@@ -5,6 +5,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequireme
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
+import com.stripe.android.lpmfoundations.paymentmethod.bank.BankFormElementsFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.ui.core.R as PaymentsUiCoreR
@@ -40,11 +41,10 @@ private object InstantDebitsUiDefinitionFactory : UiDefinitionFactory.Simple {
         )
     }
 
-    // Instant Debits uses its own mechanism, not these form elements.
     override fun createFormElements(
         metadata: PaymentMethodMetadata,
         arguments: UiDefinitionFactory.Arguments,
     ): List<FormElement> {
-        return emptyList()
+        return BankFormElementsFactory.create(metadata, arguments)
     }
 }

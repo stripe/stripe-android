@@ -28,11 +28,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.model.PaymentSelection.New
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseElementUI
@@ -60,29 +58,11 @@ const val TEST_TAG_ACCOUNT_DETAILS = "TEST_TAG_ACCOUNT_DETAILS"
 
 @Composable
 internal fun USBankAccountForm(
+    viewModel: USBankAccountFormViewModel,
     formArgs: FormArguments,
     usBankAccountFormArgs: USBankAccountFormArguments,
     modifier: Modifier = Modifier,
 ) {
-    val viewModel = viewModel<USBankAccountFormViewModel>(
-        factory = USBankAccountFormViewModel.Factory {
-            USBankAccountFormViewModel.Args(
-                instantDebits = usBankAccountFormArgs.instantDebits,
-                linkMode = usBankAccountFormArgs.linkMode,
-                formArgs = formArgs,
-                hostedSurface = usBankAccountFormArgs.hostedSurface,
-                showCheckbox = usBankAccountFormArgs.showCheckbox,
-                isCompleteFlow = usBankAccountFormArgs.isCompleteFlow,
-                isPaymentFlow = usBankAccountFormArgs.isPaymentFlow,
-                stripeIntentId = usBankAccountFormArgs.stripeIntentId,
-                clientSecret = usBankAccountFormArgs.clientSecret,
-                onBehalfOf = usBankAccountFormArgs.onBehalfOf,
-                savedPaymentMethod = usBankAccountFormArgs.draftPaymentSelection as? New.USBankAccount,
-                shippingDetails = usBankAccountFormArgs.shippingDetails,
-            )
-        },
-    )
-
     val state by viewModel.currentScreenState.collectAsState()
     val lastTextFieldIdentifier by viewModel.lastTextFieldIdentifier.collectAsState()
 

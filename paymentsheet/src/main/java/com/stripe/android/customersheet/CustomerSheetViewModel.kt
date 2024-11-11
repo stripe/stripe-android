@@ -450,6 +450,7 @@ internal class CustomerSheetViewModel(
                          * `CustomerSheet` does not implement `Link` so we don't need a coordinator or callback.
                          */
                         linkConfigurationCoordinator = null,
+                        usBankAccountFormArguments = createDefaultUsBankArguments(paymentMethodMetadata.stripeIntent),
                         onLinkInlineSignupStateChanged = {
                             throw IllegalStateException(
                                 "`CustomerSheet` does not implement `Link` and should not " +
@@ -458,9 +459,7 @@ internal class CustomerSheetViewModel(
                         }
                     ),
                 ) ?: listOf(),
-                primaryButtonLabel = if (
-                    paymentMethod.code == USBankAccount.code && it.bankAccountSelection == null
-                ) {
+                primaryButtonLabel = if (paymentMethod.code == USBankAccount.code && it.bankAccountSelection == null) {
                     UiCoreR.string.stripe_continue_button_label.resolvableString
                 } else {
                     R.string.stripe_paymentsheet_save.resolvableString
@@ -802,8 +801,9 @@ internal class CustomerSheetViewModel(
                         "`CustomerSheet` does not implement `Link` and should not " +
                             "receive `InlineSignUpViewState` updates"
                     )
-                }
-            )
+                },
+                usBankAccountFormArguments = createDefaultUsBankArguments(stripeIntent),
+            ),
         ) ?: emptyList()
 
         transition(
