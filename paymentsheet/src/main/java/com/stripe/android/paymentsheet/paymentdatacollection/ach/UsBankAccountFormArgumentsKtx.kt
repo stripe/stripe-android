@@ -1,11 +1,12 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
 import com.stripe.android.core.strings.ResolvableString
-import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormScreenState.BillingDetailsCollection
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.ui.core.R as StripeUiCoreR
 
 internal fun USBankAccountFormArguments.handleScreenStateChanged(
-    screenState: USBankAccountFormScreenState,
+    screenState: BankFormScreenState,
     enabled: Boolean,
     onPrimaryButtonClick: () -> Unit,
 ) {
@@ -13,9 +14,9 @@ internal fun USBankAccountFormArguments.handleScreenStateChanged(
         onError(it)
     }
 
-    if (screenState is BillingDetailsCollection) {
+    if (screenState.linkedBankAccount == null) {
         updatePrimaryButton(
-            text = screenState.primaryButtonText,
+            text = resolvableString(StripeUiCoreR.string.stripe_continue_button_label),
             onClick = onPrimaryButtonClick,
             enabled = enabled,
             shouldShowProcessingWhenClicked = isCompleteFlow,
@@ -25,7 +26,7 @@ internal fun USBankAccountFormArguments.handleScreenStateChanged(
         onUpdatePrimaryButtonUIState { null }
     }
 
-    onMandateTextChanged(screenState.mandateText, false)
+    onMandateTextChanged(screenState.linkedBankAccount?.mandateText, false)
 }
 
 private fun USBankAccountFormArguments.updatePrimaryButton(
