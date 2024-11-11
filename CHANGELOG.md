@@ -2,6 +2,8 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+## 21.0.1 - 2024-11-11
+
 ### PaymentSheet
 - [FIXED][9571](https://github.com/stripe/stripe-android/pull/9571) Fixed country prefix not being added when adding a payment method when collecting phone numbers with `BillingDetailsCollectionConfiguration`.
 - [FIXED][9576](https://github.com/stripe/stripe-android/pull/9576) Fixed minimum and maximum account number length for `Au Becs Debit` LPM. Customers can now provide account numbers with a length of 4 to 9 digits.
