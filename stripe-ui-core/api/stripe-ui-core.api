@@ -236,7 +236,7 @@ public final class com/stripe/android/uicore/elements/TextFieldStateConstants$Va
 public final class com/stripe/android/uicore/elements/TextFieldUIKt {
 	public static final fun AnimatedIcons (Ljava/util/List;ZLandroidx/compose/runtime/Composer;I)V
 	public static final fun TextField-qRf7idA (Lcom/stripe/android/uicore/elements/TextFieldController;ZILandroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function1;IILandroidx/compose/ui/focus/FocusRequester;Landroidx/compose/runtime/Composer;II)V
-	public static final fun TextFieldSection-vbMXUkU (Landroidx/compose/ui/Modifier;Lcom/stripe/android/uicore/elements/TextFieldController;IZZLjava/lang/Integer;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+	public static final fun TextFieldSection (Landroidx/compose/ui/Modifier;Lcom/stripe/android/uicore/elements/TextFieldController;ZLjava/lang/Integer;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class com/stripe/android/uicore/elements/bottomsheet/ComposableSingletons$StripeBottomSheetLayoutKt {

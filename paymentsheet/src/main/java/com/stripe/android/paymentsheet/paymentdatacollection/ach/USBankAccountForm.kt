@@ -47,6 +47,7 @@ import com.stripe.android.uicore.elements.SameAsShippingElement
 import com.stripe.android.uicore.elements.SameAsShippingElementUI
 import com.stripe.android.uicore.elements.Section
 import com.stripe.android.uicore.elements.SectionCard
+import com.stripe.android.uicore.elements.TextField
 import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.elements.TextFieldSection
 import com.stripe.android.uicore.stripeColors
@@ -276,10 +277,15 @@ internal fun BillingDetailsForm(
                 contentAlignment = Alignment.CenterEnd
             ) {
                 TextFieldSection(
+                    modifier = Modifier.padding(vertical = 8.dp),
                     textFieldController = nameController,
-                    imeAction = ImeAction.Next,
-                    enabled = !isProcessing
-                )
+                ) {
+                    TextField(
+                        textFieldController = nameController,
+                        enabled = !isProcessing,
+                        imeAction = ImeAction.Next,
+                    )
+                }
             }
         }
         if (formArgs.billingDetailsCollectionConfiguration.email != CollectionMode.Never) {
@@ -290,14 +296,19 @@ internal fun BillingDetailsForm(
                 contentAlignment = Alignment.CenterEnd
             ) {
                 TextFieldSection(
+                    modifier = Modifier.padding(vertical = 8.dp),
                     textFieldController = emailController,
-                    imeAction = if (lastTextFieldIdentifier == IdentifierSpec.Email) {
-                        ImeAction.Done
-                    } else {
-                        ImeAction.Next
-                    },
-                    enabled = !isProcessing
-                )
+                ) {
+                    TextField(
+                        textFieldController = emailController,
+                        enabled = !isProcessing,
+                        imeAction = if (lastTextFieldIdentifier == IdentifierSpec.Email) {
+                            ImeAction.Done
+                        } else {
+                            ImeAction.Next
+                        },
+                    )
+                }
             }
         }
         if (formArgs.billingDetailsCollectionConfiguration.phone == CollectionMode.Always) {

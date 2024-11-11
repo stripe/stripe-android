@@ -65,6 +65,7 @@ import com.stripe.android.financialconnections.ui.theme.Theme
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.uicore.elements.DropDown
 import com.stripe.android.uicore.elements.PhoneNumberCollectionSection
+import com.stripe.android.uicore.elements.TextField
 import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.elements.TextFieldSection
 import com.stripe.android.uicore.utils.collectAsState
@@ -319,13 +320,19 @@ internal fun EmailSection(
         ) {
             TextFieldSection(
                 modifier = Modifier
-                    .focusRequester(focusRequester)
-                    .onFocusChanged { focused = it.isFocused },
+                    .padding(vertical = 8.dp),
                 isSelected = focused,
                 textFieldController = emailController,
-                imeAction = if (showFullForm) ImeAction.Next else ImeAction.Done,
-                enabled = enabled
-            )
+            ) {
+                TextField(
+                    modifier = Modifier
+                        .focusRequester(focusRequester)
+                        .onFocusChanged { focused = it.isFocused },
+                    textFieldController = emailController,
+                    imeAction = if (showFullForm) ImeAction.Next else ImeAction.Done,
+                    enabled = enabled
+                )
+            }
             if (loading) {
                 CircularProgressIndicator(
                     modifier = Modifier
