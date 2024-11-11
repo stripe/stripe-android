@@ -5,6 +5,11 @@ import android.graphics.Bitmap
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.core.view.doOnAttach
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.findViewTreeLifecycleOwner
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.stripe.android.connect.BuildConfig
 import com.stripe.android.connect.EmbeddedComponentManager
 import com.stripe.android.connect.PrivateBetaConnectSDK
@@ -14,6 +19,8 @@ import com.stripe.android.connect.webview.serialization.ConnectInstanceJs
 import com.stripe.android.connect.webview.serialization.toJs
 import com.stripe.android.core.Logger
 import com.stripe.android.core.version.StripeSdkVersion
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -104,6 +111,24 @@ internal class StripeConnectWebViewClient(
     }
 
     private inner class StripeJsInterfaceInternal(private val webView: WebView) {
+        private var isPageLoaded: Boolean = false
+
+        init {
+            webView.doOnAttach { view ->
+                val lifecycleOwner = view.findViewTreeLifecycleOwner()
+                lifecycleOwner?.lifecycleScope?.launch {
+                    lifecycleOwner.repeatOnLifecycle(Lifecycle.State.CREATED) {
+                        embeddedComponentManager.appearanceFlow
+                            .collectLatest { appearance ->
+                                if (isPageLoaded) {
+                                    updateConnectInstance(appearance)
+                                }
+                            }
+                    }
+                }
+            }
+        }
+
         @JavascriptInterface
         fun log(message: String) {
             logger.debug("Log from JS: $message")
@@ -126,6 +151,7 @@ internal class StripeConnectWebViewClient(
             val pageLoadMessage = jsonSerializer.decodeFromString<PageLoadMessage>(message)
             logger.debug("Page did load: $pageLoadMessage")
 
+            isPageLoaded = true
             updateConnectInstance(embeddedComponentManager.appearanceFlow.value)
         }
 
@@ -180,7 +206,11 @@ internal class StripeConnectWebViewClient(
     )
 
     private fun WebView.evaluateSdkJs(function: String, payload: JsonObject) {
-        post { evaluateJavascript("$ANDROID_JS_INTERFACE.$function($payload)", null) }
+        val command = "$ANDROID_JS_INTERFACE.$function($payload)"
+        post {
+            logger.debug("Evaluating JS: $command")
+            evaluateJavascript(command, null)
+        }
     }
 
     internal companion object {

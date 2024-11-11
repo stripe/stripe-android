@@ -12,8 +12,8 @@ import androidx.fragment.app.FragmentActivity
 import com.stripe.android.connect.BuildConfig
 import com.stripe.android.connect.EmbeddedComponentManager
 import com.stripe.android.connect.PrivateBetaConnectSDK
+import com.stripe.android.connect.example.BasicComponentContent
 import com.stripe.android.connect.example.ConnectSdkExampleTheme
-import com.stripe.android.connect.example.MainContent
 import com.stripe.android.connect.example.R
 import com.stripe.android.connect.example.data.EmbeddedComponentManagerProvider
 import com.stripe.android.connect.example.ui.common.BackIconButton
@@ -25,7 +25,8 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class PayoutsExampleActivity : FragmentActivity() {
 
-    @Inject lateinit var embeddedComponentManagerProvider: EmbeddedComponentManagerProvider
+    @Inject
+    lateinit var embeddedComponentManagerProvider: EmbeddedComponentManagerProvider
     private val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,7 +42,7 @@ class PayoutsExampleActivity : FragmentActivity() {
 
         setContent {
             ConnectSdkExampleTheme {
-                MainContent(
+                BasicComponentContent(
                     title = stringResource(R.string.payouts),
                     navigationIcon = {
                         BackIconButton(onClick = this@PayoutsExampleActivity::finish)
