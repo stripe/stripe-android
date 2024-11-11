@@ -4,9 +4,11 @@ import android.content.res.Resources
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.ZeroCornerSize
 import androidx.compose.material.Card
@@ -18,6 +20,7 @@ import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onSizeChanged
@@ -95,6 +98,39 @@ internal fun UpdatePaymentMethodUI(interactor: UpdatePaymentMethodInteractor, mo
             fontWeight = FontWeight.Normal,
             modifier = Modifier.padding(top = 12.dp)
         )
+
+        if (interactor.canRemove) {
+            DeletePaymentMethodUi(interactor)
+        }
+    }
+}
+
+@Composable
+private fun DeletePaymentMethodUi(interactor: UpdatePaymentMethodInteractor) {
+    val openRemoveDialog = rememberSaveable { mutableStateOf(false) }
+
+    Spacer(modifier = Modifier.requiredHeight(32.dp))
+
+    com.stripe.android.common.ui.PrimaryButton(
+        label = stringResource(id = R.string.stripe_remove),
+        isLoading = false,
+        isEnabled = true,
+        onButtonClick = {
+            openRemoveDialog.value = true
+        },
+        overrideBackgroundColor = MaterialTheme.colors.background,
+        overrideBorderColor = MaterialTheme.colors.error,
+        overrideOnBackgroundColor = MaterialTheme.colors.error,
+        modifier = Modifier.testTag(UPDATE_PM_REMOVE_BUTTON_TEST_TAG)
+    )
+
+    if (openRemoveDialog.value) {
+        RemovePaymentMethodDialogUI(paymentMethod = interactor.displayableSavedPaymentMethod, onConfirmListener = {
+            openRemoveDialog.value = false
+            interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.DeletePaymentMethod)
+        }, onDismissListener = {
+            openRemoveDialog.value = false
+        })
     }
 }
 
@@ -241,8 +277,11 @@ private fun PreviewUpdatePaymentMethodUI() {
     UpdatePaymentMethodUI(
         interactor = DefaultUpdatePaymentMethodInteractor(
             isLiveMode = false,
+            canRemove = true,
             displayableSavedPaymentMethod = exampleCard,
             card = exampleCard.paymentMethod.card!!,
+            onDeletePaymentMethod = {},
+            navigateBack = {},
         ),
         modifier = Modifier
     )
@@ -256,3 +295,4 @@ private const val YEAR_2100 = 2100
 
 internal const val UPDATE_PM_EXPIRY_FIELD_TEST_TAG = "update_payment_method_expiry_date"
 internal const val UPDATE_PM_CVC_FIELD_TEST_TAG = "update_payment_method_cvc"
+internal const val UPDATE_PM_REMOVE_BUTTON_TEST_TAG = "update_payment_method_remove_button"

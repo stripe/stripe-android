@@ -5,12 +5,31 @@ import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 
 internal interface UpdatePaymentMethodInteractor {
     val isLiveMode: Boolean
+    val canRemove: Boolean
     val displayableSavedPaymentMethod: DisplayableSavedPaymentMethod
     val card: PaymentMethod.Card
+
+    fun handleViewAction(viewAction: ViewAction)
+
+    sealed class ViewAction {
+        data object DeletePaymentMethod : ViewAction()
+    }
 }
 
 internal class DefaultUpdatePaymentMethodInteractor(
     override val isLiveMode: Boolean,
+    override val canRemove: Boolean,
     override val displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
     override val card: PaymentMethod.Card,
-) : UpdatePaymentMethodInteractor
+    val onDeletePaymentMethod: (PaymentMethod) -> Unit,
+    val navigateBack: () -> Unit,
+) : UpdatePaymentMethodInteractor {
+    override fun handleViewAction(viewAction: UpdatePaymentMethodInteractor.ViewAction) {
+        when (viewAction) {
+            UpdatePaymentMethodInteractor.ViewAction.DeletePaymentMethod -> {
+                onDeletePaymentMethod(displayableSavedPaymentMethod.paymentMethod)
+                navigateBack()
+            }
+        }
+    }
+}

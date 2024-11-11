@@ -241,8 +241,11 @@ internal class SavedPaymentMethodMutator(
                 PaymentSheetScreen.UpdatePaymentMethod(
                     DefaultUpdatePaymentMethodInteractor(
                         isLiveMode = isLiveModeProvider(),
+                        canRemove = canRemove.value,
                         displayableSavedPaymentMethod,
                         card = it,
+                        onDeletePaymentMethod = ::removePaymentMethod,
+                        navigateBack = { navigationHandler.pop() },
                     )
                 )
             )
