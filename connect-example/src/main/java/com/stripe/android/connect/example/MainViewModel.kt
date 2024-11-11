@@ -1,13 +1,11 @@
 package com.stripe.android.connect.example
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.github.kittinunf.fuel.core.FuelError
-import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.example.data.EmbeddedComponentService
 import com.stripe.android.core.Logger
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -22,7 +20,6 @@ class MainViewModel @Inject constructor(
 
     private val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG)
     private val loggingTag = this::class.java.name
-    private val networkingScope: CoroutineScope = CoroutineScope(Dispatchers.IO)
 
     private val _state = MutableStateFlow(MainState())
     val state: StateFlow<MainState> = _state.asStateFlow()
@@ -42,9 +39,8 @@ class MainViewModel @Inject constructor(
 
     // Private methods
 
-    @OptIn(PrivateBetaConnectSDK::class)
     private fun fetchAccounts() {
-        networkingScope.launch {
+        viewModelScope.launch {
             try {
                 embeddedComponentService.getAccounts()
                 _state.update {

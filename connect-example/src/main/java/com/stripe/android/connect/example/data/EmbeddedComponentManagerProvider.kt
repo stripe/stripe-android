@@ -8,8 +8,6 @@ import com.stripe.android.core.BuildConfig
 import com.stripe.android.core.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import java.io.IOException
 import javax.inject.Inject
@@ -17,7 +15,7 @@ import javax.inject.Singleton
 
 @OptIn(PrivateBetaConnectSDK::class)
 @Singleton
-class EmbeddedComponentManagerFactory @Inject constructor(
+class EmbeddedComponentManagerProvider @Inject constructor(
     private val embeddedComponentService: EmbeddedComponentService,
     private val settingsService: SettingsService,
 ) {
@@ -32,29 +30,25 @@ class EmbeddedComponentManagerFactory @Inject constructor(
     private val ioScope: CoroutineScope by lazy { CoroutineScope(Dispatchers.IO) }
 
     /**
-     * Init must be called in Application.onCreate().
+     * Provides the EmbeddedComponentManager instance, creating it if it doesn't exist.
+     * Throws [IllegalStateException] if an EmbeddedComponentManager cannot be created at this time.
      */
-    fun init() {
-        initializeEmbeddedComponentManagerInstance()
-    }
+    fun provideEmbeddedComponentManager(): EmbeddedComponentManager {
+        if (embeddedComponentManager != null) {
+            return embeddedComponentManager!!
+        }
 
-    fun getEmbeddedComponentManager(): EmbeddedComponentManager {
-        return embeddedComponentManager ?: throw IllegalStateException(
-            "EmbeddedComponentManager not yet initialized. Publishable key must be populated in " +
-                "EmbeddedComponentService first."
-        )
-    }
+        // TODO - handle app restoration where publishableKey may be null when this is called
+        val publishableKey = embeddedComponentService.publishableKey.value
+            ?: throw IllegalStateException("Publishable key must be set before creating EmbeddedComponentManager")
 
-    private fun initializeEmbeddedComponentManagerInstance() {
-        ioScope.launch {
-            val publishableKey = embeddedComponentService.publishableKey.filterNotNull().firstOrNull() ?: return@launch
-
-            embeddedComponentManager = EmbeddedComponentManager(
-                configuration = EmbeddedComponentManager.Configuration(
-                    publishableKey = publishableKey
-                ),
-                fetchClientSecretCallback = ::fetchClientSecret
-            )
+        return EmbeddedComponentManager(
+            configuration = EmbeddedComponentManager.Configuration(
+                publishableKey = publishableKey,
+            ),
+            fetchClientSecretCallback = ::fetchClientSecret,
+        ).also {
+            embeddedComponentManager = it
         }
     }
 

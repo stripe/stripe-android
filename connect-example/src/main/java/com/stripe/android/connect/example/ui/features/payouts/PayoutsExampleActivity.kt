@@ -14,7 +14,7 @@ import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.example.ConnectSdkExampleTheme
 import com.stripe.android.connect.example.MainContent
 import com.stripe.android.connect.example.R
-import com.stripe.android.connect.example.data.EmbeddedComponentManagerFactory
+import com.stripe.android.connect.example.data.EmbeddedComponentManagerProvider
 import com.stripe.android.connect.example.ui.common.BackIconButton
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -23,11 +23,17 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class PayoutsExampleActivity : FragmentActivity() {
 
-    @Inject lateinit var embeddedComponentManagerFactory: EmbeddedComponentManagerFactory
+    @Inject lateinit var embeddedComponentManagerProvider: EmbeddedComponentManagerProvider
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val embeddedComponentManager = embeddedComponentManagerFactory.getEmbeddedComponentManager()
+        val embeddedComponentManager = try {
+            embeddedComponentManagerProvider.provideEmbeddedComponentManager()
+        } catch (e: IllegalStateException) {
+            // TODO - handle app restoration more gracefully
+            finish() // we don't have an embedded component manager, so go back to MainActivity to get one
+            return
+        }
 
         setContent {
             ConnectSdkExampleTheme {

@@ -9,26 +9,42 @@ import com.stripe.android.connect.webview.StripeConnectWebViewClient
 
 @PrivateBetaConnectSDK
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class PayoutsView @JvmOverloads internal constructor(
+class PayoutsView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0,
     embeddedComponentManager: EmbeddedComponentManager? = null
 ) : FrameLayout(context, attrs, defStyleAttr) {
 
-    init {
-        checkNotNull(embeddedComponentManager) {
-            "EmbeddedComponentManager must not be null." +
-                "Currently only programmatic creation of PayoutsView is supported."
-        }
+    private var stripeWebViewClient: StripeConnectWebViewClient? = null
 
+    init {
         inflate(getContext(), R.layout.stripe_connect_webview, this)
 
+        embeddedComponentManager?.let {
+            configureWebView(it)
+        }
+    }
+
+    /**
+     * Set the [EmbeddedComponentManager] to use for this view.
+     * Must be called when this view is created via XML.
+     * Cannot be called more than once per instance.
+     */
+    fun setEmbeddedComponentManager(embeddedComponentManager: EmbeddedComponentManager) {
+        if (stripeWebViewClient != null) {
+            throw IllegalStateException("EmbeddedComponentManager already set")
+        }
+        configureWebView(embeddedComponentManager)
+    }
+
+    private fun configureWebView(embeddedComponentManager: EmbeddedComponentManager) {
         val webView = findViewById<WebView>(R.id.stripe_web_view)
-        val stripeWebViewClient = StripeConnectWebViewClient(
+        stripeWebViewClient = StripeConnectWebViewClient(
             embeddedComponentManager,
             StripeEmbeddedComponent.PAYOUTS,
-        )
-        stripeWebViewClient.configureAndLoadWebView(webView)
+        ).apply {
+            configureAndLoadWebView(webView)
+        }
     }
 }
