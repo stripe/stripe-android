@@ -40,7 +40,7 @@ internal class VerificationViewModelTest {
     }
 
     @Test
-    fun `init sends analytics event`() = runTest(dispatcher) {
+    fun `init starts verification with link account manager`() = runTest(dispatcher) {
         val linkAccountManager = object : FakeLinkAccountManager() {
             var callCount = 0
             override suspend fun startVerification(): Result<LinkAccount> {
@@ -68,7 +68,7 @@ internal class VerificationViewModelTest {
     }
 
     @Test
-    fun `When confirmVerification succeeds then it navigates to Wallet and analytics event is sent`() =
+    fun `When confirmVerification succeeds then it navigates to Wallet`() =
         runTest(dispatcher) {
             val screens = arrayListOf<LinkScreen>()
             fun navigateAndClearStack(screen: LinkScreen) {
@@ -84,7 +84,7 @@ internal class VerificationViewModelTest {
         }
 
     @Test
-    fun `When confirmVerification fails then an error message is shown and analytics event is sent`() =
+    fun `When confirmVerification fails then an error message is shown`() =
         runTest(dispatcher) {
             val errorMessage = "Error message"
             val linkAccountManager = FakeLinkAccountManager()

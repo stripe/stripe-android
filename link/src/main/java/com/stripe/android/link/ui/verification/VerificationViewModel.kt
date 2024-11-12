@@ -88,7 +88,7 @@ internal class VerificationViewModel @Inject constructor(
             },
             onFailure = {
                 for (i in 0 until otpElement.controller.otpLength) {
-                    otpElement.controller.onValueChanged(i, "")
+                    otpElement.controller.reset()
                 }
                 onError(it)
             }
