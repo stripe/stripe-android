@@ -187,7 +187,8 @@ internal interface EventReporter {
 
     enum class Mode(val code: String) {
         Complete("complete"),
-        Custom("custom");
+        Custom("custom"),
+        Embedded("embedded");
 
         @Keep
         override fun toString(): String = code

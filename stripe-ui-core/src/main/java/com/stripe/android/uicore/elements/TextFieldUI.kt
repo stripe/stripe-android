@@ -90,11 +90,9 @@ private fun defaultAutofillEventReporter(): (String) -> Unit {
 fun TextFieldSection(
     modifier: Modifier = Modifier,
     textFieldController: TextFieldController,
-    imeAction: ImeAction,
-    enabled: Boolean,
     isSelected: Boolean = false,
     @StringRes sectionTitle: Int? = null,
-    onTextStateChanged: (TextFieldState?) -> Unit = {}
+    content: @Composable () -> Unit,
 ) {
     val error by textFieldController.error.collectAsState()
 
@@ -108,19 +106,12 @@ fun TextFieldSection(
     }
 
     Section(
-        modifier = Modifier.padding(vertical = 8.dp),
+        modifier = modifier,
         title = sectionTitle,
         error = sectionErrorString,
         isSelected = isSelected,
-    ) {
-        TextField(
-            textFieldController = textFieldController,
-            enabled = enabled,
-            imeAction = imeAction,
-            modifier = modifier,
-            onTextStateChanged = onTextStateChanged
-        )
-    }
+        content = content,
+    )
 }
 
 /**

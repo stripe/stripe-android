@@ -278,6 +278,7 @@ class DefaultManageScreenInteractorTest {
             onSelectPaymentMethod = onSelectPaymentMethod,
             onDeletePaymentMethod = { notImplemented() },
             onEditPaymentMethod = { notImplemented() },
+            onUpdatePaymentMethod = { notImplemented() },
             navigateBack = handleBackPressed,
             dispatcher = dispatcher,
             isLiveMode = true,

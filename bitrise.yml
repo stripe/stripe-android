@@ -455,6 +455,10 @@ workflows:
       - script@1:
           inputs:
             - content: echo "STRIPE_EXAMPLE_BACKEND_URL=$STRIPE_EXAMPLE_BACKEND_URL" >> ~/.gradle/gradle.properties; echo "STRIPE_EXAMPLE_PUBLISHABLE_KEY=$STRIPE_EXAMPLE_PUBLISHABLE_KEY" >> ~/.gradle/gradle.properties
+      - activate-build-cache-for-gradle:
+          inputs:
+            - push: 'true'
+            - validation_level: warning
   conclude_all:
     steps:
       - script-runner@0:

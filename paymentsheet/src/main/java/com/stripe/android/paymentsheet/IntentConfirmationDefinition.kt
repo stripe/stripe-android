@@ -17,19 +17,19 @@ internal class IntentConfirmationDefinition(
     private val intentConfirmationInterceptor: IntentConfirmationInterceptor,
     private val paymentLauncherFactory: (ActivityResultLauncher<PaymentLauncherContract.Args>) -> PaymentLauncher,
 ) : PaymentConfirmationDefinition<
-    PaymentConfirmationOption.PaymentMethod,
+    ConfirmationHandler.Option.PaymentMethod,
     PaymentLauncher,
     IntentConfirmationDefinition.Args,
     InternalPaymentResult
     > {
     override val key: String = "IntentConfirmation"
 
-    override fun option(confirmationOption: PaymentConfirmationOption): PaymentConfirmationOption.PaymentMethod? {
-        return confirmationOption as? PaymentConfirmationOption.PaymentMethod
+    override fun option(confirmationOption: ConfirmationHandler.Option): ConfirmationHandler.Option.PaymentMethod? {
+        return confirmationOption as? ConfirmationHandler.Option.PaymentMethod
     }
 
     override suspend fun action(
-        confirmationOption: PaymentConfirmationOption.PaymentMethod,
+        confirmationOption: ConfirmationHandler.Option.PaymentMethod,
         intent: StripeIntent
     ): PaymentConfirmationDefinition.ConfirmationAction<Args> {
         val nextStep = intentConfirmationInterceptor.intercept(confirmationOption = confirmationOption)
@@ -81,7 +81,7 @@ internal class IntentConfirmationDefinition(
     override fun launch(
         launcher: PaymentLauncher,
         arguments: Args,
-        confirmationOption: PaymentConfirmationOption.PaymentMethod,
+        confirmationOption: ConfirmationHandler.Option.PaymentMethod,
         intent: StripeIntent,
     ) {
         when (arguments) {
@@ -91,22 +91,22 @@ internal class IntentConfirmationDefinition(
     }
 
     override fun toPaymentConfirmationResult(
-        confirmationOption: PaymentConfirmationOption.PaymentMethod,
+        confirmationOption: ConfirmationHandler.Option.PaymentMethod,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
         intent: StripeIntent,
         result: InternalPaymentResult
-    ): PaymentConfirmationResult {
+    ): ConfirmationHandler.Result {
         return when (result) {
-            is InternalPaymentResult.Completed -> PaymentConfirmationResult.Succeeded(
+            is InternalPaymentResult.Completed -> ConfirmationHandler.Result.Succeeded(
                 intent = result.intent,
                 deferredIntentConfirmationType = deferredIntentConfirmationType,
             )
-            is InternalPaymentResult.Failed -> PaymentConfirmationResult.Failed(
+            is InternalPaymentResult.Failed -> ConfirmationHandler.Result.Failed(
                 cause = result.throwable,
                 message = result.throwable.stripeErrorMessage(),
                 type = PaymentConfirmationErrorType.Payment,
             )
-            is InternalPaymentResult.Canceled -> PaymentConfirmationResult.Canceled(
+            is InternalPaymentResult.Canceled -> ConfirmationHandler.Result.Canceled(
                 action = PaymentCancellationAction.InformCancellation
             )
         }

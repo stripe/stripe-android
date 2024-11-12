@@ -4,7 +4,6 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -34,11 +33,8 @@ internal sealed class CustomerSheetViewAction {
         val mandateText: ResolvableString?,
         val showAbovePrimaryButton: Boolean,
     ) : CustomerSheetViewAction()
-    class OnConfirmUSBankAccount(
-        val usBankAccount: PaymentSelection.New.USBankAccount,
-    ) : CustomerSheetViewAction()
-    class OnCollectBankAccountResult(
-        val bankAccountResult: CollectBankAccountResultInternal,
+    class OnBankAccountSelectionChanged(
+        val paymentSelection: PaymentSelection.New.USBankAccount?,
     ) : CustomerSheetViewAction()
     class OnFormError(
         val error: ResolvableString?,

@@ -6,7 +6,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
@@ -51,8 +50,7 @@ internal class USBankAccountFormArguments(
     val shippingDetails: AddressDetails?,
     val draftPaymentSelection: PaymentSelection?,
     val onMandateTextChanged: (mandate: ResolvableString?, showAbove: Boolean) -> Unit,
-    val onConfirmUSBankAccount: (PaymentSelection.New.USBankAccount) -> Unit,
-    val onCollectBankAccountResult: ((CollectBankAccountResultInternal) -> Unit)?,
+    val onLinkedBankAccountChanged: (PaymentSelection.New.USBankAccount?) -> Unit,
     val onUpdatePrimaryButtonUIState: ((PrimaryButton.UIState?) -> (PrimaryButton.UIState?)) -> Unit,
     val onUpdatePrimaryButtonState: (PrimaryButton.State) -> Unit,
     val onError: (ResolvableString?) -> Unit,
@@ -93,8 +91,7 @@ internal class USBankAccountFormArguments(
                 shippingDetails = viewModel.config.shippingDetails,
                 draftPaymentSelection = viewModel.newPaymentSelection?.paymentSelection,
                 onMandateTextChanged = viewModel.mandateHandler::updateMandateText,
-                onConfirmUSBankAccount = viewModel::handleConfirmUSBankAccount,
-                onCollectBankAccountResult = null,
+                onLinkedBankAccountChanged = viewModel::handleLinkedBankAccountChanged,
                 onUpdatePrimaryButtonUIState = { viewModel.customPrimaryButtonUiState.update(it) },
                 onUpdatePrimaryButtonState = viewModel::updatePrimaryButtonState,
                 onError = viewModel::onError

@@ -28,6 +28,7 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
+import com.stripe.android.paymentsheet.ConfirmationHandler
 import com.stripe.android.paymentsheet.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.ExternalPaymentMethodInterceptor
 import com.stripe.android.paymentsheet.InitializedViaCompose
@@ -35,7 +36,6 @@ import com.stripe.android.paymentsheet.IntentConfirmationHandler
 import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.PaymentCancellationAction
 import com.stripe.android.paymentsheet.PaymentConfirmationErrorType
-import com.stripe.android.paymentsheet.PaymentConfirmationResult
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionContract
 import com.stripe.android.paymentsheet.PaymentOptionResult
@@ -59,7 +59,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.Cvc
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
-import com.stripe.android.paymentsheet.toPaymentConfirmationOption
+import com.stripe.android.paymentsheet.toConfirmationOption
 import com.stripe.android.paymentsheet.ui.SepaMandateContract
 import com.stripe.android.paymentsheet.ui.SepaMandateResult
 import com.stripe.android.paymentsheet.utils.canSave
@@ -198,10 +198,10 @@ internal class DefaultFlowController @Inject internal constructor(
         lifecycleOwner.lifecycleScope.launch {
             intentConfirmationHandler.state.collectLatest { state ->
                 when (state) {
-                    is IntentConfirmationHandler.State.Idle,
-                    is IntentConfirmationHandler.State.Preconfirming,
-                    is IntentConfirmationHandler.State.Confirming -> Unit
-                    is IntentConfirmationHandler.State.Complete -> onIntentResult(state.result)
+                    is ConfirmationHandler.State.Idle,
+                    is ConfirmationHandler.State.Preconfirming,
+                    is ConfirmationHandler.State.Confirming -> Unit
+                    is ConfirmationHandler.State.Complete -> onIntentResult(state.result)
                 }
             }
         }
@@ -388,7 +388,7 @@ internal class DefaultFlowController @Inject internal constructor(
         viewModelScope.launch {
             val initializationMode = requireNotNull(initializationMode)
 
-            val confirmationOption = paymentSelection?.toPaymentConfirmationOption(
+            val confirmationOption = paymentSelection?.toConfirmationOption(
                 initializationMode = initializationMode,
                 configuration = state.config,
             )
@@ -397,7 +397,7 @@ internal class DefaultFlowController @Inject internal constructor(
                 val stripeIntent = requireNotNull(state.stripeIntent)
 
                 intentConfirmationHandler.start(
-                    arguments = IntentConfirmationHandler.Args(
+                    arguments = ConfirmationHandler.Args(
                         confirmationOption = option,
                         intent = stripeIntent,
                     )
@@ -415,7 +415,7 @@ internal class DefaultFlowController @Inject internal constructor(
                 }
 
                 onIntentResult(
-                    PaymentConfirmationResult.Failed(
+                    ConfirmationHandler.Result.Failed(
                         cause = exception,
                         message = exception.stripeErrorMessage(),
                         type = PaymentConfirmationErrorType.Internal,
@@ -540,9 +540,9 @@ internal class DefaultFlowController @Inject internal constructor(
         }
     }
 
-    private fun onIntentResult(result: PaymentConfirmationResult) {
+    private fun onIntentResult(result: ConfirmationHandler.Result) {
         when (result) {
-            is PaymentConfirmationResult.Succeeded -> {
+            is ConfirmationHandler.Result.Succeeded -> {
                 val stripeIntent = result.intent
                 val currentSelection = viewModel.paymentSelection
                 val currentInitializationMode = initializationMode
@@ -583,7 +583,7 @@ internal class DefaultFlowController @Inject internal constructor(
                     shouldLog = false,
                 )
             }
-            is PaymentConfirmationResult.Failed -> {
+            is ConfirmationHandler.Result.Failed -> {
                 val error = result.type.toConfirmationError(result.cause)
 
                 error?.let {
@@ -599,13 +599,13 @@ internal class DefaultFlowController @Inject internal constructor(
                     shouldLog = false,
                 )
             }
-            is PaymentConfirmationResult.Canceled -> {
+            is ConfirmationHandler.Result.Canceled -> {
                 handleCancellation(result)
             }
         }
     }
 
-    private fun handleCancellation(canceled: PaymentConfirmationResult.Canceled) {
+    private fun handleCancellation(canceled: ConfirmationHandler.Result.Canceled) {
         when (canceled.action) {
             PaymentCancellationAction.InformCancellation -> {
                 onPaymentResult(

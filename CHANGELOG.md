@@ -2,6 +2,31 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+## 21.0.1 - 2024-11-11
+
+### PaymentSheet
+- [FIXED][9571](https://github.com/stripe/stripe-android/pull/9571) Fixed country prefix not being added when adding a payment method when collecting phone numbers with `BillingDetailsCollectionConfiguration`.
+- [FIXED][9576](https://github.com/stripe/stripe-android/pull/9576) Fixed minimum and maximum account number length for `Au Becs Debit` LPM. Customers can now provide account numbers with a length of 4 to 9 digits.
+
+### AddressElement
+- [FIXED][9571](https://github.com/stripe/stripe-android/pull/9571) Fixed country prefix not being added to the phone number in the returned `AddressDetails` if customer provides a phone number.
+- [FIXED][9577](https://github.com/stripe/stripe-android/pull/9577) Fixed phone number requirement bug that would allow users to optionally provide phone number even if a phone number is set as required by the merchant.
+
+## 21.0.0 - 2024-11-04
+
+### PaymentSheet
+- [CHANGED] [9498](https://github.com/stripe/stripe-android/pull/9498) The default value of `PaymentSheet.Configuration.Builder.paymentMethodLayout` has changed from Horizontal to Automatic.
+
+### Basic Integration
+* [REMOVED][9501](https://github.com/stripe/stripe-android/pull/9501) Basic Integration has been removed. [Please use Mobile Payment Element instead](https://docs.stripe.com/payments/mobile/migrating-to-mobile-payment-element-from-basic-integration).
+
+### StripeCardScan
+* [REMOVED][9523](https://github.com/stripe/stripe-android/pull/9523) Card image verification has been removed. [Please use OCR only scanning instead](https://github.com/stripe/stripe-android/tree/master/stripecardscan#credit-card-ocr).
+
+Dependencies updated in [9512](https://github.com/stripe/stripe-android/pull/9512):
+* Bumped Kotlin from 1.9.25 to 2.0.21.
+* Bumped Kotlin Coroutines from 1.8.1 to 1.9.0.
+
 ## 20.53.0 - 2024-10-21
 
 ### PaymentSheet

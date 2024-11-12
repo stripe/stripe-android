@@ -1,8 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name">Connect Example</string>
+
+    <string name="beta_all_caps">BETA</string>
     <string name="account_onboarding">Account Onboarding</string>
     <string name="account_onboarding_menu_subtitle">Show a localized onboarding form that validates data</string>
     <string name="payouts">Payouts</string>
     <string name="payouts_menu_subtitle">Show payout information and allow your users to perform payouts</string>
     <string name="connect_sdk_example">Connect SDK Example</string>
+    <string name="customize_appearance">Customize Appearance</string>
+    <string name="settings">Settings</string>
+    <string name="cancel">Cancel</string>
+    <string name="back">back</string>
+    <string name="selected">Selected</string>
+    <string name="save">Save</string>
+    <string name="select_demo_account">Select a demo account</string>
+    <string name="other">Other</string>
+    <string name="account_id_placeholder">acct_xxxx</string>
+    <string name="custom_account">Custom Account</string>
+    <string name="component_settings">Component Settings</string>
+    <string name="presentation_options">Presentation Options</string>
+    <string name="api_server_settings">API Server Settings</string>
+    <string name="server_url_label">Server URL</string>
+    <string name="server_url_placeholder">https://example.com</string>
+    <string name="invalid_url">Please enter a valid URL</string>
+    <string name="reset_to_default">Reset to default</string>
+    <string name="failed_to_start_app">Failed to start app.</string>
+    <string name="reload">Reload</string>
+    <string name="warming_up_the_server">Warming up the server… This may take several seconds</string>
+    <string name="app_settings">App Settings</string>
+
+    <!-- Appearance Strings -->
+    <string name="appearance_default">Default</string>
+    <string name="appearance_ogre">Ogre</string>
+    <string name="appearance_hot_dog">Hot Dog Stand</string>
+    <string name="appearance_ocean_breeze">Ocean Breeze</string>
+    <string name="appearance_link">Link</string>
 </resources>

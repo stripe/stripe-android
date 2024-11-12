@@ -6,7 +6,7 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.model.StripeIntent
 
 internal interface PaymentConfirmationDefinition<
-    TConfirmationOption : PaymentConfirmationOption,
+    TConfirmationOption : ConfirmationHandler.Option,
     TLauncher,
     TLauncherArgs,
     TLauncherResult : Parcelable
@@ -14,7 +14,7 @@ internal interface PaymentConfirmationDefinition<
     val key: String
 
     fun option(
-        confirmationOption: PaymentConfirmationOption,
+        confirmationOption: ConfirmationHandler.Option,
     ): TConfirmationOption?
 
     suspend fun action(
@@ -39,12 +39,12 @@ internal interface PaymentConfirmationDefinition<
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
         intent: StripeIntent,
         result: TLauncherResult,
-    ): PaymentConfirmationResult
+    ): ConfirmationHandler.Result
 
     sealed interface ConfirmationAction<TLauncherArgs> {
         data class Complete<TLauncherArgs>(
             val intent: StripeIntent,
-            val confirmationOption: PaymentConfirmationOption,
+            val confirmationOption: ConfirmationHandler.Option,
             val deferredIntentConfirmationType: DeferredIntentConfirmationType?,
         ) : ConfirmationAction<TLauncherArgs>
 

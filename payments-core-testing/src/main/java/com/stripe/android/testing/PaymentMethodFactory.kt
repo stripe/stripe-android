@@ -60,7 +60,17 @@ object PaymentMethodFactory {
             code = PaymentMethod.Type.Card.code,
             card = PaymentMethod.Card(
                 last4 = "4242",
+                expiryMonth = 3,
+                expiryYear = 2027,
             ),
+        )
+    }
+
+    fun visaCard(): PaymentMethod {
+        return card(random = false).update(
+            last4 = "4242",
+            addCbcNetworks = false,
+            brand = CardBrand.Visa,
         )
     }
 

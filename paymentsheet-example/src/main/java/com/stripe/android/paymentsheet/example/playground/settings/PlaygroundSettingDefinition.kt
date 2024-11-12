@@ -48,6 +48,20 @@ internal interface PlaygroundSettingDefinition<T> {
     ) {
     }
 
+    /** Performs any side effects necessary to use this setting's value.
+     *
+     * This is useful if you need to take action for a setting to take effect, e.g. if you need to configure a feature
+     * flag based on this setting's value.
+     * */
+    fun setValue(
+        value: T
+    ) {
+    }
+
+    /** Called whenever the value changes.
+     *
+     * This is useful for updating the UI or other settings after a setting has changed.
+     * */
     fun valueUpdated(value: T, playgroundSettings: PlaygroundSettings) {}
 
     fun applicable(configurationData: PlaygroundConfigurationData): Boolean = true

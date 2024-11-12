@@ -6,6 +6,8 @@ apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
 apply plugin: 'org.jetbrains.kotlin.plugin.compose'
 
 dependencies {
+    implementation project(':stripe-core')
+
     // Kotlin
     implementation libs.kotlin.coroutines
     implementation libs.kotlin.coroutinesAndroid
@@ -51,6 +53,7 @@ dependencies {
     testImplementation testLibs.mockito.kotlin
     testImplementation testLibs.robolectric
     testImplementation testLibs.truth
+    testImplementation project(':stripe-core')
 
     androidTestImplementation testLibs.androidx.composeUi
     androidTestImplementation testLibs.androidx.coreKtx

@@ -1,16 +1,52 @@
 package com.stripe.android.connect
 
+import android.content.Context
 import android.os.Parcelable
 import androidx.annotation.ColorInt
 import androidx.annotation.RestrictTo
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.parcelize.Parcelize
+import kotlin.coroutines.resume
 
 @PrivateBetaConnectSDK
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class EmbeddedComponentManager internal constructor(
+class EmbeddedComponentManager(
     private val configuration: Configuration,
-    private val fetchClientSecret: FetchClientSecretCallback,
+    private val fetchClientSecretCallback: FetchClientSecretCallback,
 ) {
+
+    /**
+     * Create a new [PayoutsView] for inclusion in the view hierarchy.
+     */
+    fun createPayoutsView(context: Context): PayoutsView {
+        return PayoutsView(context = context, embeddedComponentManager = this)
+    }
+
+    /**
+     * Returns the Connect Embedded Component URL for the given [StripeEmbeddedComponent].
+     */
+    internal fun getStripeURL(component: StripeEmbeddedComponent): String {
+        return buildString {
+            append("https://connect-js.stripe.com/v1.0/android_webview.html")
+            append("#component=${component.componentName}")
+            append("&publicKey=${configuration.publishableKey}")
+        }
+    }
+
+    /**
+     * Fetch the client secret from the consumer of the SDK.
+     */
+    internal suspend fun fetchClientSecret(): String? {
+        return suspendCancellableCoroutine { continuation ->
+            val resultCallback = object : FetchClientSecretCallback.ClientSecretResultCallback {
+                override fun onResult(secret: String?) {
+                    continuation.resume(secret)
+                }
+            }
+            fetchClientSecretCallback.fetchClientSecret(resultCallback)
+        }
+    }
+
     @PrivateBetaConnectSDK
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun update(@Suppress("UNUSED_PARAMETER") appearance: Appearance) {
@@ -137,24 +173,5 @@ class EmbeddedComponentManager internal constructor(
         Uppercase,
         Lowercase,
         Capitalize
-    }
-
-    @PrivateBetaConnectSDK
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    companion object {
-        private var instance: EmbeddedComponentManager? = null
-
-        @PrivateBetaConnectSDK
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        @JvmStatic
-        fun init(
-            configuration: Configuration,
-            fetchClientSecret: FetchClientSecretCallback,
-        ) {
-            instance = EmbeddedComponentManager(
-                configuration,
-                fetchClientSecret,
-            )
-        }
     }
 }

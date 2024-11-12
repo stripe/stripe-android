@@ -127,7 +127,8 @@ class GooglePayJsonFactory internal constructor(
                     .put(
                         createCardPaymentMethod(
                             billingAddressParameters,
-                            allowCreditCards
+                            allowCreditCards,
+                            forIsReadyToPayRequest = true
                         )
                     )
             )
@@ -263,9 +264,10 @@ class GooglePayJsonFactory internal constructor(
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun createCardPaymentMethod(
         billingAddressParameters: BillingAddressParameters?,
-        allowCreditCards: Boolean?
+        allowCreditCards: Boolean?,
+        forIsReadyToPayRequest: Boolean = false
     ): JSONObject {
-        val cardPaymentMethodParams = createBaseCardPaymentMethodParams()
+        val cardPaymentMethodParams = createBaseCardPaymentMethodParams(forIsReadyToPayRequest = forIsReadyToPayRequest)
             .apply {
                 if (billingAddressParameters?.isRequired == true) {
                     put("billingAddressRequired", true)
@@ -290,13 +292,20 @@ class GooglePayJsonFactory internal constructor(
             .put("tokenizationSpecification", googlePayConfig.tokenizationSpecification)
     }
 
-    private fun createBaseCardPaymentMethodParams(): JSONObject {
-        val acceptedCardBrands = DEFAULT_CARD_NETWORKS
-            .plus(listOf(JCB_CARD_NETWORK).takeIf { isJcbEnabled } ?: emptyList())
-            .filter {
-                val cardBrand = networkStringToCardBrandMap[it] ?: CardBrand.Unknown
-                cardBrandFilter.isAccepted(cardBrand)
-            }
+    private fun createBaseCardPaymentMethodParams(forIsReadyToPayRequest: Boolean = false): JSONObject {
+        val acceptedCardBrands = if (forIsReadyToPayRequest) {
+            // Use all card networks for isReadyToPayRequest
+            DEFAULT_CARD_NETWORKS.plus(listOf(JCB_CARD_NETWORK).takeIf { isJcbEnabled } ?: emptyList())
+        } else {
+            // Apply filtering for actual payment request
+            DEFAULT_CARD_NETWORKS
+                .plus(listOf(JCB_CARD_NETWORK).takeIf { isJcbEnabled } ?: emptyList())
+                .filter {
+                    val cardBrand = networkStringToCardBrandMap[it] ?: CardBrand.Unknown
+                    cardBrandFilter.isAccepted(cardBrand)
+                }
+        }
+
         return JSONObject()
             .put("allowedAuthMethods", JSONArray(ALLOWED_AUTH_METHODS))
             .put("allowedCardNetworks", JSONArray(acceptedCardBrands))

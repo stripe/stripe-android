@@ -6,6 +6,7 @@ import android.os.Parcelable
 import android.util.Log
 import androidx.compose.runtime.Stable
 import androidx.core.content.edit
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
@@ -268,6 +269,19 @@ internal class PlaygroundSettings private constructor(
             )
         }
 
+        fun setValues() {
+            settings.forEach { (setting, value) ->
+                setting.setValue(value)
+            }
+        }
+
+        private fun <T> PlaygroundSettingDefinition<T>.setValue(
+            value: Any?,
+        ) {
+            @Suppress("UNCHECKED_CAST")
+            (this.setValue(value as T))
+        }
+
         fun saveToSharedPreferences(context: Context) {
             val sharedPreferences = context.getSharedPreferences(
                 sharedPreferencesName,
@@ -410,7 +424,7 @@ internal class PlaygroundSettings private constructor(
             CustomerSettingsDefinition,
             CheckoutModeSettingsDefinition,
             LinkSettingsDefinition,
-            NativeLinkSettingsDefinition,
+            FeatureFlagSettingsDefinition(FeatureFlags.nativeLinkEnabled),
             CountrySettingsDefinition,
             CurrencySettingsDefinition,
             GooglePaySettingsDefinition,
@@ -433,7 +447,7 @@ internal class PlaygroundSettings private constructor(
             ExternalPaymentMethodSettingsDefinition,
             LayoutSettingsDefinition,
             CardBrandAcceptanceSettingsDefinition,
-            NewUpdateCardScreenDefinition,
+            FeatureFlagSettingsDefinition(FeatureFlags.useNewUpdateCardScreen),
         )
 
         private val nonUiSettingDefinitions: List<PlaygroundSettingDefinition<*>> = listOf(

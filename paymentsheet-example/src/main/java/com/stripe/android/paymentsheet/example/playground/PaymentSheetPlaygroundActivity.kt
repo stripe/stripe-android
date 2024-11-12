@@ -275,6 +275,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
         if (playgroundState == null) {
             return
         }
+        playgroundState.snapshot.setValues()
 
         when (playgroundState) {
             is PlaygroundState.Payment -> {

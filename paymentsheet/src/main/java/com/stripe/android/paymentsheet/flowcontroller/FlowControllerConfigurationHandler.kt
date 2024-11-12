@@ -6,7 +6,6 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
-import com.stripe.android.paymentsheet.validate
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -71,7 +70,7 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
 
         try {
             initializationMode.validate()
-            configuration.validate()
+            configuration.asCommonConfiguration().validate()
         } catch (e: IllegalArgumentException) {
             onConfigured(error = e)
             return

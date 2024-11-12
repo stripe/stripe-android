@@ -92,7 +92,7 @@ class DefaultIntentConfirmationInterceptorTest {
             val interceptor = createIntentConfirmationInterceptor()
 
             val nextStep = interceptor.intercept(
-                confirmationOption = PaymentConfirmationOption.PaymentMethod.Saved(
+                confirmationOption = ConfirmationHandler.Option.PaymentMethod.Saved(
                     initializationMode = InitializationMode.PaymentIntent("pi_1234_secret_4321"),
                     shippingDetails = null,
                     paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,

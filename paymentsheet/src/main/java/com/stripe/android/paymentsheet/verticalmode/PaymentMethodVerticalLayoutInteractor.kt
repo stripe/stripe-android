@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.verticalmode
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
@@ -50,7 +51,7 @@ internal interface PaymentMethodVerticalLayoutInteractor {
 
     sealed interface ViewAction {
         data object TransitionToManageSavedPaymentMethods : ViewAction
-        data object TransitionToManageOneSavedPaymentMethod : ViewAction
+        data class OnManageOneSavedPaymentMethod(val savedPaymentMethod: DisplayableSavedPaymentMethod) : ViewAction
         data class PaymentMethodSelected(val selectedPaymentMethodCode: String) : ViewAction
         data class SavedPaymentMethodSelected(val savedPaymentMethod: PaymentMethod) : ViewAction
         data class EditPaymentMethod(val savedPaymentMethod: DisplayableSavedPaymentMethod) : ViewAction
@@ -88,6 +89,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val isCurrentScreen: StateFlow<Boolean>,
     private val reportPaymentMethodTypeSelected: (PaymentMethodCode) -> Unit,
     private val reportFormShown: (PaymentMethodCode) -> Unit,
+    private val onUpdatePaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     override val isLiveMode: Boolean,
     dispatcher: CoroutineContext = Dispatchers.Default,
 ) : PaymentMethodVerticalLayoutInteractor {
@@ -142,6 +144,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 onSelectSavedPaymentMethod = {
                     viewModel.handlePaymentMethodSelected(PaymentSelection.Saved(it))
                 },
+                onUpdatePaymentMethod = { viewModel.savedPaymentMethodMutator.updatePaymentMethod(it) },
                 walletsState = viewModel.walletsState,
                 isFlowController = !viewModel.isCompleteFlow,
                 updateSelection = viewModel::updateSelection,
@@ -371,8 +374,12 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             ViewAction.TransitionToManageSavedPaymentMethods -> {
                 transitionTo(manageScreenFactory())
             }
-            ViewAction.TransitionToManageOneSavedPaymentMethod -> {
-                transitionTo(manageOneSavedPaymentMethodFactory())
+            is ViewAction.OnManageOneSavedPaymentMethod -> {
+                if (FeatureFlags.useNewUpdateCardScreen.isEnabled) {
+                    onUpdatePaymentMethod(viewAction.savedPaymentMethod)
+                } else {
+                    transitionTo(manageOneSavedPaymentMethodFactory())
+                }
             }
             is ViewAction.EditPaymentMethod -> {
                 onEditPaymentMethod(viewAction.savedPaymentMethod)
