@@ -41,6 +41,7 @@ import com.stripe.android.uicore.elements.TextFieldColors
 import com.stripe.android.uicore.getBorderStroke
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.stripeShapes
+import com.stripe.android.common.ui.PrimaryButton as PrimaryButton
 
 @Composable
 internal fun UpdatePaymentMethodUI(interactor: UpdatePaymentMethodInteractor, modifier: Modifier) {
@@ -111,7 +112,7 @@ private fun DeletePaymentMethodUi(interactor: UpdatePaymentMethodInteractor) {
 
     Spacer(modifier = Modifier.requiredHeight(32.dp))
 
-    com.stripe.android.common.ui.PrimaryButton(
+    PrimaryButton(
         label = stringResource(id = R.string.stripe_remove),
         isLoading = false,
         isEnabled = true,
