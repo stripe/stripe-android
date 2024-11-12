@@ -5,10 +5,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performClick
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
+import com.stripe.android.paymentsheet.ViewActionRecorder
+import com.stripe.android.ui.core.elements.TEST_TAG_DIALOG_CONFIRM_BUTTON
+import com.stripe.android.ui.core.elements.TEST_TAG_SIMPLE_DIALOG
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -129,6 +135,35 @@ class UpdatePaymentMethodUITest {
         }
     }
 
+    @Test
+    fun canRemoveIsFalse_removeButtonHidden() = runScenario(
+        canRemove = false,
+    ) {
+        composeRule.onNodeWithTag(UPDATE_PM_REMOVE_BUTTON_TEST_TAG).assertDoesNotExist()
+    }
+
+    @Test
+    fun canRemoveIsTrue_removeButtonHidden() = runScenario(
+        canRemove = true,
+    ) {
+        composeRule.onNodeWithTag(UPDATE_PM_REMOVE_BUTTON_TEST_TAG).assertExists()
+    }
+
+    @Test
+    fun clickingRemoveButton_displaysDialog_deletesOnConfirm() = runScenario(canRemove = true) {
+        composeRule.onNodeWithTag(UPDATE_PM_REMOVE_BUTTON_TEST_TAG).assertExists()
+        composeRule.onNodeWithTag(UPDATE_PM_REMOVE_BUTTON_TEST_TAG).performClick()
+
+        composeRule.onNodeWithTag(TEST_TAG_DIALOG_CONFIRM_BUTTON).assertExists()
+        composeRule.onNodeWithTag(TEST_TAG_DIALOG_CONFIRM_BUTTON).performClick()
+
+        viewActionRecorder.consume(
+            UpdatePaymentMethodInteractor.ViewAction.RemovePaymentMethod
+        )
+        assertThat(viewActionRecorder.viewActions).isEmpty()
+        composeRule.onNodeWithTag(TEST_TAG_SIMPLE_DIALOG).assertDoesNotExist()
+    }
+
     private fun assertExpiryDateEquals(text: String) {
         composeRule.onNodeWithTag(UPDATE_PM_EXPIRY_FIELD_TEST_TAG).assertTextContains(
             text
@@ -141,20 +176,39 @@ class UpdatePaymentMethodUITest {
         )
     }
 
+    private class FakeUpdatePaymentMethodInteractor(
+        override val displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
+        override val canRemove: Boolean,
+        val viewActionRecorder: ViewActionRecorder<UpdatePaymentMethodInteractor.ViewAction>,
+    ) : UpdatePaymentMethodInteractor {
+        override val isLiveMode: Boolean = false
+        override val card: PaymentMethod.Card = displayableSavedPaymentMethod.paymentMethod.card!!
+
+        override fun handleViewAction(viewAction: UpdatePaymentMethodInteractor.ViewAction) {
+            viewActionRecorder.record(viewAction)
+        }
+    }
+
     private fun runScenario(
-        displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
-        testBlock: () -> Unit,
+        displayableSavedPaymentMethod: DisplayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
+        canRemove: Boolean = true,
+        testBlock: Scenario.() -> Unit,
     ) {
-        val interactor = DefaultUpdatePaymentMethodInteractor(
-            isLiveMode = false,
+        val viewActionRecorder = ViewActionRecorder<UpdatePaymentMethodInteractor.ViewAction>()
+        val interactor = FakeUpdatePaymentMethodInteractor(
             displayableSavedPaymentMethod = displayableSavedPaymentMethod,
-            card = displayableSavedPaymentMethod.paymentMethod.card!!,
+            canRemove = canRemove,
+            viewActionRecorder = viewActionRecorder,
         )
 
         composeRule.setContent {
             UpdatePaymentMethodUI(interactor = interactor, modifier = Modifier)
         }
 
-        testBlock()
+        Scenario(viewActionRecorder).apply(testBlock)
     }
+
+    private data class Scenario(
+        val viewActionRecorder: ViewActionRecorder<UpdatePaymentMethodInteractor.ViewAction>,
+    )
 }
