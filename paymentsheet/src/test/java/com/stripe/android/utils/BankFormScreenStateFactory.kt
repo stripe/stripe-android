@@ -11,11 +11,15 @@ internal object BankFormScreenStateFactory {
         sessionId: String,
         isVerifyingWithMicrodeposits: Boolean = false,
         mandateText: ResolvableString = "Some legal text".resolvableString,
+        bankName: String? = "Stripe Bank",
+        last4: String? = "6789",
     ): BankFormScreenState {
         return create(
             resultIdentifier = BankFormScreenState.ResultIdentifier.Session(sessionId),
             isVerifyingWithMicrodeposits = isVerifyingWithMicrodeposits,
             mandateText = mandateText,
+            bankName = bankName,
+            last4 = last4,
         )
     }
 
@@ -28,6 +32,8 @@ internal object BankFormScreenStateFactory {
             resultIdentifier = BankFormScreenState.ResultIdentifier.PaymentMethod(paymentMethod),
             isVerifyingWithMicrodeposits = isVerifyingWithMicrodeposits,
             mandateText = mandateText,
+            bankName = "Stripe Bank",
+            last4 = "6789",
         )
     }
 
@@ -35,14 +41,16 @@ internal object BankFormScreenStateFactory {
         resultIdentifier: BankFormScreenState.ResultIdentifier,
         isVerifyingWithMicrodeposits: Boolean,
         mandateText: ResolvableString,
+        bankName: String?,
+        last4: String?,
     ): BankFormScreenState {
         return BankFormScreenState(
             linkedBankAccount = BankFormScreenState.LinkedBankAccount(
                 resultIdentifier = resultIdentifier,
                 financialConnectionsSessionId = "session_1234",
                 intentId = "intent_1234",
-                bankName = "Stripe Bank",
-                last4 = "6789",
+                bankName = bankName,
+                last4 = last4,
                 mandateText = mandateText,
                 isVerifyingWithMicrodeposits = isVerifyingWithMicrodeposits,
             )

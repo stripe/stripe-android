@@ -146,6 +146,7 @@ internal fun BankAccountForm(
                 isProcessing = state.isProcessing,
                 bankName = linkedBankAccount.bankName,
                 last4 = linkedBankAccount.last4,
+                label = linkedBankAccount.label,
                 saveForFutureUseElement = saveForFutureUseElement,
                 onRemoveAccount = onRemoveAccount,
             )
@@ -336,6 +337,7 @@ private fun AccountDetailsForm(
     isProcessing: Boolean,
     bankName: String?,
     last4: String?,
+    label: String,
     saveForFutureUseElement: SaveForFutureUseElement,
     onRemoveAccount: () -> Unit,
 ) {
@@ -375,7 +377,7 @@ private fun AccountDetailsForm(
                     )
 
                     Text(
-                        text = "$bankName •••• $last4",
+                        text = label,
                         modifier = Modifier.alpha(if (isProcessing) 0.5f else 1f),
                         color = MaterialTheme.stripeColors.onComponent,
                     )

@@ -28,7 +28,15 @@ internal data class BankFormScreenState(
         val financialConnectionsSessionId: String?,
         val mandateText: ResolvableString,
         val isVerifyingWithMicrodeposits: Boolean,
-    ) : Parcelable
+    ) : Parcelable {
+
+        val label: String
+            get() = buildString {
+                bankName?.let { append("$it ") }
+                append("••••")
+                last4?.let { append(" $it") }
+            }
+    }
 
     sealed interface ResultIdentifier : Parcelable {
         @Parcelize
