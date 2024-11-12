@@ -1,11 +1,13 @@
 package com.stripe.android.link.account
 
 import com.stripe.android.link.LinkPaymentDetails
+import com.stripe.android.link.TestFactory
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -37,6 +39,11 @@ internal open class FakeLinkAccountManager : LinkAccountManager {
         )
     )
     var linkAccountFromLookupResult: LinkAccount? = null
+    var updatePaymentDetailsResult: Result<ConsumerPaymentDetails> =
+        Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS)
+    var deletePaymentDetailsResult: Result<Unit> = Result.success(Unit)
+    var listPaymentDetailsResult: Result<ConsumerPaymentDetails> = Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS)
+
     override var consumerPublishableKey: String? = null
 
     fun setLinkAccount(account: LinkAccount?) {
@@ -86,4 +93,12 @@ internal open class FakeLinkAccountManager : LinkAccountManager {
     override suspend fun confirmVerification(code: String): Result<LinkAccount> {
         return confirmVerification
     }
+
+    override suspend fun updatePaymentDetails(
+        updateParams: ConsumerPaymentDetailsUpdateParams
+    ) = updatePaymentDetailsResult
+
+    override suspend fun deletePaymentDetails(paymentDetailsId: String) = deletePaymentDetailsResult
+
+    override suspend fun listPaymentDetails() = listPaymentDetailsResult
 }
