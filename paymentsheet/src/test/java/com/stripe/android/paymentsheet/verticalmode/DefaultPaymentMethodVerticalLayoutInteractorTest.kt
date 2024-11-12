@@ -4,6 +4,7 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
@@ -21,6 +22,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor.ViewAction
+import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
@@ -29,12 +31,20 @@ import com.stripe.android.uicore.elements.FormElement
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.junit.Test
 import org.mockito.Mockito.mock
 import com.stripe.android.paymentsheet.R as PaymentSheetR
 
 @Suppress("LargeClass")
 class DefaultPaymentMethodVerticalLayoutInteractorTest {
+
+    @get:Rule
+    val featureFlagTestRule = FeatureFlagTestRule(
+        featureFlag = FeatureFlags.useNewUpdateCardScreen,
+        isEnabled = false
+    )
+
     @Test
     fun state_updatesWhenProcessingUpdates() = runScenario {
         interactor.state.test {
@@ -799,7 +809,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     }
 
     @Test
-    fun handleViewAction_TransitionToManageOneSavedPaymentMethod_transitionsToManageOnSavedPMScreen() {
+    fun handleViewAction_OnManageOneSavedPaymentMethod_transitionsToManageOnSavedPMScreen() {
         var calledManageOneSavedPaymentMethodScreenFactory = false
         var calledTransitionTo = false
         runScenario(
@@ -811,9 +821,28 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 calledTransitionTo = true
             }
         ) {
-            interactor.handleViewAction(ViewAction.TransitionToManageOneSavedPaymentMethod)
+            interactor.handleViewAction(
+                ViewAction.OnManageOneSavedPaymentMethod(
+                    PaymentMethodFixtures.displayableCard()
+                )
+            )
             assertThat(calledManageOneSavedPaymentMethodScreenFactory).isTrue()
             assertThat(calledTransitionTo).isTrue()
+        }
+    }
+
+    @Test
+    fun handleViewAction_OnManageOneSavedPaymentMethod_transitionsToUpdateScreen_whenFeatureEnabled() {
+        var updatedPaymentMethod: DisplayableSavedPaymentMethod? = null
+        runScenario(
+            onUpdatePaymentMethod = {
+                updatedPaymentMethod = it
+            },
+            useNewUpdatePaymentMethodScreen = true,
+        ) {
+            val paymentMethod = PaymentMethodFixtures.displayableCard()
+            interactor.handleViewAction(ViewAction.OnManageOneSavedPaymentMethod(paymentMethod))
+            assertThat(updatedPaymentMethod).isEqualTo(paymentMethod)
         }
     }
 
@@ -984,6 +1013,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         fun onUpdateSelection(paymentSelection: PaymentSelection?) {
             updatedSelection = paymentSelection
         }
+
         val verticalModeSelection = PaymentSelection.GooglePay
 
         runScenario(
@@ -1026,13 +1056,16 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         initialMostRecentlySelectedSavedPaymentMethod: PaymentMethod? = null,
         onEditPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit = { notImplemented() },
         onSelectSavedPaymentMethod: (PaymentMethod) -> Unit = { notImplemented() },
+        onUpdatePaymentMethod: (DisplayableSavedPaymentMethod) -> Unit = { notImplemented() },
         isFlowController: Boolean = false,
         updateSelection: (PaymentSelection?) -> Unit = { notImplemented() },
         onMandateTextUpdated: (ResolvableString?) -> Unit = { notImplemented() },
         reportPaymentMethodTypeSelected: (PaymentMethodCode) -> Unit = { notImplemented() },
         reportFormShown: (PaymentMethodCode) -> Unit = { notImplemented() },
+        useNewUpdatePaymentMethodScreen: Boolean = false,
         testBlock: suspend TestParams.() -> Unit
     ) {
+        featureFlagTestRule.setEnabled(useNewUpdatePaymentMethodScreen)
         val processing: MutableStateFlow<Boolean> = MutableStateFlow(initialProcessing)
         val selection: MutableStateFlow<PaymentSelection?> = MutableStateFlow(initialSelection)
         val paymentMethods: MutableStateFlow<List<PaymentMethod>> = MutableStateFlow(initialPaymentMethods)
@@ -1065,6 +1098,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 selection.value = paymentSelection
                 updateSelection(paymentSelection)
             },
+            onUpdatePaymentMethod = onUpdatePaymentMethod,
             isCurrentScreen = isCurrentScreen,
             dispatcher = UnconfinedTestDispatcher(),
             canRemove = canRemove,
