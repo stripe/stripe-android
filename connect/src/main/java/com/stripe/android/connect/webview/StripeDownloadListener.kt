@@ -6,11 +6,8 @@ import android.app.DownloadManager.STATUS_PAUSED
 import android.app.DownloadManager.STATUS_PENDING
 import android.app.DownloadManager.STATUS_RUNNING
 import android.content.Context
-import android.net.Uri
 import android.os.Environment.DIRECTORY_DOWNLOADS
 import android.webkit.DownloadListener
-import android.webkit.URLUtil
-import android.widget.Toast
 import com.stripe.android.connect.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -20,21 +17,10 @@ import kotlinx.coroutines.launch
 
 internal class StripeDownloadListener(
     private val context: Context,
-    private val downloadManager: DownloadManager? =
-        context.getSystemService(Context.DOWNLOAD_SERVICE) as? DownloadManager,
+    private val stripeDownloadManager: StripeDownloadManager = StripeDownloadManagerImpl(context),
+    private val stripeToastManager: StripeToastManager = StripeToastManagerImpl(context),
     private val ioScope: CoroutineScope = CoroutineScope(Dispatchers.IO),
-    // methods below exposed for mocking in tests
-    private val getDownloadManagerRequest: (Uri) -> DownloadManager.Request = { uri ->
-        DownloadManager.Request(uri)
-    },
-    private val getFileName: (url: String, contentDisposition: String?, mimeType: String?) -> String =
-        { url, contentDisposition, mimeType ->
-            URLUtil.guessFileName(url, contentDisposition, mimeType)
-        },
-    private val parseUri: (String) -> Uri = { Uri.parse(it) },
-    private val showToast: (String) -> Unit = { toastString ->
-        Toast.makeText(context, toastString, Toast.LENGTH_LONG).show()
-    }
+    private val mainScope: CoroutineScope = MainScope(),
 ) : DownloadListener {
 
     override fun onDownloadStart(
@@ -44,31 +30,40 @@ internal class StripeDownloadListener(
         mimetype: String?,
         contentLength: Long
     ) {
-        if (url == null || downloadManager == null) {
+        if (url == null) {
             showErrorToast()
             return
         }
 
         ioScope.launch {
-            val request = getDownloadManagerRequest(parseUri(url))
-            val fileName = getFileName(url, contentDisposition, mimetype)
+            val request = stripeDownloadManager.getDownloadRequest(url)
+            val fileName = stripeDownloadManager.getFileName(url, contentDisposition, mimetype)
             request.setDestinationInExternalPublicDir(DIRECTORY_DOWNLOADS, fileName)
             request.setNotificationVisibility(VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
             request.setTitle(fileName)
             request.setDescription(context.getString(R.string.stripe_downloading_file))
             request.setMimeType(mimetype)
 
-            val downloadId = downloadManager.enqueue(request)
+            val downloadId = stripeDownloadManager.enqueue(request)
+            if (downloadId == null) {
+                showErrorToast()
+                return@launch
+            }
 
             // Monitor the download progress and show a toast when done
-            val query = DownloadManager.Query().setFilterById(downloadId)
+            val query = stripeDownloadManager.getQueryById(downloadId)
             var isDownloading = true
             while (isDownloading) {
-                downloadManager.query(query).use { cursor ->
-                    cursor.moveToFirst()
-                    val index = cursor.getColumnIndex(DownloadManager.COLUMN_STATUS)
+                val cursor = stripeDownloadManager.query(query)
+                if (cursor == null) {
+                    showErrorToast()
+                    return@launch
+                }
+                cursor.use { resource ->
+                    resource.moveToFirst()
+                    val index = resource.getColumnIndex(DownloadManager.COLUMN_STATUS)
                     if (index < 0) return@launch // status does not exist - abort
-                    val status = cursor.getInt(index)
+                    val status = resource.getInt(index)
                     if (status !in listOf(STATUS_PENDING, STATUS_RUNNING, STATUS_PAUSED)) {
                         showOpenFileToast()
                         isDownloading = false // download complete - exit the loop
@@ -80,14 +75,14 @@ internal class StripeDownloadListener(
     }
 
     private fun showErrorToast() {
-        MainScope().launch {
-            showToast(context.getString(R.string.stripe_unable_to_download_file))
+        mainScope.launch {
+            stripeToastManager.showToast(context.getString(R.string.stripe_unable_to_download_file))
         }
     }
 
     private fun showOpenFileToast() {
-        MainScope().launch {
-            showToast(context.getString(R.string.stripe_download_complete))
+        mainScope.launch {
+            stripeToastManager.showToast(context.getString(R.string.stripe_download_complete))
         }
     }
 

@@ -2,6 +2,7 @@ package com.stripe.android.connect.webview
 
 import android.app.DownloadManager
 import android.content.Context
+import android.database.Cursor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.TestScope
@@ -15,14 +16,11 @@ import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoInteractions
+import org.mockito.kotlin.whenever
 
 class StripeDownloadListenerTest {
 
-    private val downloadManager: DownloadManager = mock {
-        on { enqueue(any()) } doReturn 123L
-    }
     private val downloadManagerRequest: DownloadManager.Request = mock {
-        // mock all builder methods to return this mock, for proper chaining
         on { setDestinationInExternalPublicDir(any(), any()) } doReturn mock
         on { setNotificationVisibility(any()) } doReturn mock
         on { setTitle(any()) } doReturn mock
@@ -30,9 +28,14 @@ class StripeDownloadListenerTest {
         on { setMimeType(any()) } doReturn mock
     }
     private val context: Context = mock {
-        on { getSystemService(Context.DOWNLOAD_SERVICE) } doReturn downloadManager
         on { getString(any()) } doReturn "Placeholder string"
     }
+    private val stripeDownloadManager: StripeDownloadManager = mock {
+        on { getDownloadRequest(any()) } doReturn downloadManagerRequest
+        on { getFileName(any(), any(), any()) } doReturn "file.pdf"
+        on { enqueue(any()) } doReturn 123L
+    }
+    private val stripeToastManager: StripeToastManager = mock()
     private val testScope = TestScope()
 
     private lateinit var stripeDownloadListener: StripeDownloadListener
@@ -45,17 +48,17 @@ class StripeDownloadListenerTest {
 
     private fun initDownloadListener(
         context: Context = this.context,
-        downloadManager: DownloadManager? = this.downloadManager,
+        stripeDownloadManager: StripeDownloadManager = this.stripeDownloadManager,
+        stripeToastManager: StripeToastManager = this.stripeToastManager,
         ioScope: CoroutineScope = testScope,
+        mainScope: CoroutineScope = testScope,
     ) {
         stripeDownloadListener = StripeDownloadListener(
             context = context,
-            downloadManager = downloadManager,
+            stripeDownloadManager = stripeDownloadManager,
+            stripeToastManager = stripeToastManager,
             ioScope = ioScope,
-            getDownloadManagerRequest = { downloadManagerRequest }, // mock request
-            getFileName = { _, _, _ -> "file.pdf" }, // fake file name for testing
-            parseUri = { mock() }, // mock Uri.parse
-            showToast = { }, // no-op toast for testing
+            mainScope = mainScope,
         )
     }
 
@@ -67,10 +70,19 @@ class StripeDownloadListenerTest {
         val mimeType = "application/pdf"
         val contentLength = 1024L
 
+        val cursor: Cursor = mock {
+            on { moveToFirst() } doReturn true
+            on { getColumnIndex(any()) } doReturn 0
+            on { getInt(any()) } doReturn DownloadManager.STATUS_SUCCESSFUL
+        }
+        whenever(stripeDownloadManager.getQueryById(any())).thenReturn(mock())
+        whenever(stripeDownloadManager.query(any())).thenReturn(cursor)
+
         stripeDownloadListener.onDownloadStart(url, userAgent, contentDisposition, mimeType, contentLength)
         testScope.testScheduler.advanceUntilIdle()
 
-        verify(downloadManager).enqueue(any())
+        verify(stripeDownloadManager).enqueue(any())
+        verify(stripeToastManager).showToast(any())
     }
 
     @Test
@@ -78,12 +90,13 @@ class StripeDownloadListenerTest {
         stripeDownloadListener.onDownloadStart(null, "", "", "", 0)
         testScope.testScheduler.advanceUntilIdle()
 
-        verifyNoInteractions(downloadManager)
+        verifyNoInteractions(stripeDownloadManager)
+        verify(stripeToastManager).showToast(any())
     }
 
     @Test
-    fun `onDownloadStart does nothing when download manager doesn't exist`() = runTest {
-        initDownloadListener(downloadManager = null)
+    fun `onDownloadStart shows error toast when enqueue returns null`() = runTest {
+        whenever(stripeDownloadManager.enqueue(any())).thenReturn(null)
 
         val url = "https://example.com/file.pdf"
         val userAgent = "Mozilla/5.0"
@@ -94,6 +107,6 @@ class StripeDownloadListenerTest {
         stripeDownloadListener.onDownloadStart(url, userAgent, contentDisposition, mimeType, contentLength)
         testScope.testScheduler.advanceUntilIdle()
 
-        verifyNoInteractions(downloadManager)
+        verify(stripeToastManager).showToast(any())
     }
 }
