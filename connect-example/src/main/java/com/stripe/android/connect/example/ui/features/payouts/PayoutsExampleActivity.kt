@@ -1,5 +1,18 @@
 package com.stripe.android.connect.example.ui.features.payouts
 
+import android.os.Bundle
+import androidx.activity.compose.BackHandler
+import androidx.activity.compose.setContent
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.fragment.app.FragmentActivity
+import com.stripe.android.connect.BuildConfig
+import com.stripe.android.connect.EmbeddedComponentManager
 import android.content.Context
 import android.view.View
 import android.widget.Toast
@@ -8,17 +21,34 @@ import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.example.R
 import com.stripe.android.connect.example.ui.common.BasicComponentExampleActivity
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.first
+import javax.inject.Inject
 
 @OptIn(PrivateBetaConnectSDK::class)
 @AndroidEntryPoint
 class PayoutsExampleActivity : BasicComponentExampleActivity() {
     override val titleRes: Int = R.string.payouts
 
+    private lateinit var requestPermissionLauncher: ActivityResultLauncher<String>
+    private val requestPermissionFlow: MutableSharedFlow<Boolean> = MutableSharedFlow()
+
+    override fun onCreate() {
+        requestPermissionLauncher = registerForActivityResult(
+            ActivityResultContracts.RequestPermission()
+        ) { isGranted ->
+            requestPermissionFlow.tryEmit(isGranted)
+        }
+    }
+
     override fun createComponentView(context: Context): View {
         return embeddedComponentManager.createPayoutsView(
             context = context,
             listener = Listener(),
-        )
+        )  { permission ->
+            requestPermissionLauncher.launch(permission)
+            requestPermissionFlow.first() // wait for the next result
+        }
     }
 
     private inner class Listener : PayoutsListener {

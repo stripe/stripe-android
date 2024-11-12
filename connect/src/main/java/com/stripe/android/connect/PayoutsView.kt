@@ -23,8 +23,9 @@ class PayoutsView private constructor(
         attrs: AttributeSet? = null,
         defStyleAttr: Int = 0,
         embeddedComponentManager: EmbeddedComponentManager? = null,
+        requestPermissionFromUser: (suspend (String) -> Boolean)? = null,
         listener: PayoutsListener? = null,
-    ) : this(
+) : this(
         context,
         attrs,
         defStyleAttr,

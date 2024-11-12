@@ -44,12 +44,14 @@ class EmbeddedComponentManager(
      */
     fun createPayoutsView(
         context: Context,
-        listener: PayoutsListener? = null
+        requestPermissionFromUser = requestPermissionFromUser,
+        listener: PayoutsListener? = null,
     ): PayoutsView {
         return PayoutsView(
             context = context,
             embeddedComponentManager = this,
-            listener = listener
+            listener = listener,
+            requestPermissionFromUser = requestPermissionFromUser,
         )
     }
 
