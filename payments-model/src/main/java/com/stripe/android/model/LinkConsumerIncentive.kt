@@ -17,5 +17,5 @@ data class LinkConsumerIncentive(
         val amountPercent: Float?,
         val currency: String?,
         val paymentMethod: String,
-    ): StripeModel
+    ) : StripeModel
 }
