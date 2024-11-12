@@ -7,7 +7,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext
 import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
@@ -30,7 +29,6 @@ import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConf
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSelection.CustomerRequestedSave
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
-import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -39,7 +37,6 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import org.junit.Rule
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
@@ -84,12 +81,6 @@ class USBankAccountFormViewModelTest {
 
     private val mockCollectBankAccountLauncher = mock<CollectBankAccountLauncher>()
     private val savedStateHandle = SavedStateHandle()
-
-    @get:Rule
-    val instantDebitsBillingDetailsFeatureRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.instantDebitsBillingDetails,
-        isEnabled = true,
-    )
 
     @BeforeTest
     fun setUp() {
