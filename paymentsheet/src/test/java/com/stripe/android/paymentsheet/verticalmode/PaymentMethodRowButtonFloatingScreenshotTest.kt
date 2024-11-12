@@ -13,7 +13,7 @@ import com.stripe.android.ui.core.R
 import org.junit.Rule
 import org.junit.Test
 
-internal class PaymentMethodRowButtonScreenshotTest {
+internal class PaymentMethodRowButtonFloatingScreenshotTest {
 
     @get:Rule
     val paparazziRule = PaparazziRule(
@@ -26,7 +26,7 @@ internal class PaymentMethodRowButtonScreenshotTest {
     @Test
     fun testInitialState() {
         paparazziRule.snapshot {
-            PaymentMethodRowButton(
+            PaymentMethodRowButtonFloating(
                 isEnabled = true,
                 isSelected = false,
                 iconContent = {
@@ -45,7 +45,7 @@ internal class PaymentMethodRowButtonScreenshotTest {
     @Test
     fun testDisabledState() {
         paparazziRule.snapshot {
-            PaymentMethodRowButton(
+            PaymentMethodRowButtonFloating(
                 isEnabled = false,
                 isSelected = false,
                 iconContent = {
@@ -64,7 +64,7 @@ internal class PaymentMethodRowButtonScreenshotTest {
     @Test
     fun testSelectedState() {
         paparazziRule.snapshot {
-            PaymentMethodRowButton(
+            PaymentMethodRowButtonFloating(
                 isEnabled = true,
                 isSelected = true,
                 iconContent = {
@@ -83,7 +83,7 @@ internal class PaymentMethodRowButtonScreenshotTest {
     @Test
     fun testMultilineText() {
         paparazziRule.snapshot {
-            PaymentMethodRowButton(
+            PaymentMethodRowButtonFloating(
                 isEnabled = true,
                 isSelected = false,
                 iconContent = {
@@ -102,7 +102,7 @@ internal class PaymentMethodRowButtonScreenshotTest {
     @Test
     fun testMultilineTextTruncation() {
         paparazziRule.snapshot {
-            PaymentMethodRowButton(
+            PaymentMethodRowButtonFloating(
                 isEnabled = true,
                 isSelected = false,
                 iconContent = {
@@ -122,7 +122,7 @@ internal class PaymentMethodRowButtonScreenshotTest {
     @Test
     fun testTailingContent() {
         paparazziRule.snapshot {
-            PaymentMethodRowButton(
+            PaymentMethodRowButtonFloating(
                 isEnabled = true,
                 isSelected = false,
                 iconContent = {
