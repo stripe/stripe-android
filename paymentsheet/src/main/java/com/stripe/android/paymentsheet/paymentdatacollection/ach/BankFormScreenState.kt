@@ -48,3 +48,13 @@ internal fun BankFormScreenState.updateWithMandate(
         this
     }
 }
+
+internal fun BankFormScreenState.updateWithLinkedBankAccount(
+    account: BankFormScreenState.LinkedBankAccount,
+): BankFormScreenState {
+    return copy(
+        linkedBankAccount = account,
+        _isProcessing = false,
+        error = null,
+    )
+}

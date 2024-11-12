@@ -343,8 +343,8 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         result: CollectBankAccountForInstantDebitsResult.Completed,
     ) {
         screenStateWithoutSaveForFutureUse.update {
-            it.copy(
-                linkedBankAccount = BankFormScreenState.LinkedBankAccount(
+            it.updateWithLinkedBankAccount(
+                account = BankFormScreenState.LinkedBankAccount(
                     resultIdentifier = ResultIdentifier.PaymentMethod(result.paymentMethod),
                     bankName = result.bankName,
                     last4 = result.last4,
@@ -364,8 +364,8 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         when (val paymentAccount = usBankAccountData.financialConnectionsSession.paymentAccount) {
             is BankAccount -> {
                 screenStateWithoutSaveForFutureUse.update {
-                    it.copy(
-                        linkedBankAccount = BankFormScreenState.LinkedBankAccount(
+                    it.updateWithLinkedBankAccount(
+                        account = BankFormScreenState.LinkedBankAccount(
                             resultIdentifier = ResultIdentifier.Session(
                                 id = usBankAccountData.financialConnectionsSession.id,
                             ),
@@ -382,8 +382,8 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
             is FinancialConnectionsAccount -> {
                 screenStateWithoutSaveForFutureUse.update {
-                    it.copy(
-                        linkedBankAccount = BankFormScreenState.LinkedBankAccount(
+                    it.updateWithLinkedBankAccount(
+                        account = BankFormScreenState.LinkedBankAccount(
                             resultIdentifier = ResultIdentifier.Session(
                                 id = usBankAccountData.financialConnectionsSession.id,
                             ),
