@@ -6,18 +6,18 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 
-internal fun PaymentSelection.toPaymentConfirmationOption(
+internal fun PaymentSelection.toConfirmationOption(
     initializationMode: PaymentElementLoader.InitializationMode,
     configuration: CommonConfiguration,
-): PaymentConfirmationOption? {
+): ConfirmationHandler.Option? {
     return when (this) {
-        is PaymentSelection.Saved -> PaymentConfirmationOption.PaymentMethod.Saved(
+        is PaymentSelection.Saved -> ConfirmationHandler.Option.PaymentMethod.Saved(
             initializationMode = initializationMode,
             shippingDetails = configuration.shippingDetails,
             paymentMethod = paymentMethod,
             optionsParams = paymentMethodOptionsParams,
         )
-        is PaymentSelection.ExternalPaymentMethod -> PaymentConfirmationOption.ExternalPaymentMethod(
+        is PaymentSelection.ExternalPaymentMethod -> ConfirmationHandler.Option.ExternalPaymentMethod(
             type = type,
             billingDetails = billingDetails,
         )
@@ -25,14 +25,14 @@ internal fun PaymentSelection.toPaymentConfirmationOption(
             if (instantDebits != null) {
                 // For Instant Debits, we create the PaymentMethod inside the bank auth flow. Therefore,
                 // we can just use the already created object here.
-                PaymentConfirmationOption.PaymentMethod.Saved(
+                ConfirmationHandler.Option.PaymentMethod.Saved(
                     initializationMode = initializationMode,
                     shippingDetails = configuration.shippingDetails,
                     paymentMethod = instantDebits.paymentMethod,
                     optionsParams = paymentMethodOptionsParams,
                 )
             } else {
-                PaymentConfirmationOption.PaymentMethod.New(
+                ConfirmationHandler.Option.PaymentMethod.New(
                     initializationMode = initializationMode,
                     shippingDetails = configuration.shippingDetails,
                     createParams = paymentMethodCreateParams,
@@ -43,7 +43,7 @@ internal fun PaymentSelection.toPaymentConfirmationOption(
         }
         is PaymentSelection.New -> {
             if (paymentMethodCreateParams.typeCode == PaymentMethod.Type.BacsDebit.code) {
-                PaymentConfirmationOption.BacsPaymentMethod(
+                ConfirmationHandler.Option.BacsPaymentMethod(
                     initializationMode = initializationMode,
                     shippingDetails = configuration.shippingDetails,
                     createParams = paymentMethodCreateParams,
@@ -51,7 +51,7 @@ internal fun PaymentSelection.toPaymentConfirmationOption(
                     appearance = configuration.appearance,
                 )
             } else {
-                PaymentConfirmationOption.PaymentMethod.New(
+                ConfirmationHandler.Option.PaymentMethod.New(
                     initializationMode = initializationMode,
                     shippingDetails = configuration.shippingDetails,
                     createParams = paymentMethodCreateParams,
@@ -61,10 +61,10 @@ internal fun PaymentSelection.toPaymentConfirmationOption(
             }
         }
         is PaymentSelection.GooglePay -> configuration.googlePay?.let { googlePay ->
-            PaymentConfirmationOption.GooglePay(
+            ConfirmationHandler.Option.GooglePay(
                 initializationMode = initializationMode,
                 shippingDetails = configuration.shippingDetails,
-                config = PaymentConfirmationOption.GooglePay.Config(
+                config = ConfirmationHandler.Option.GooglePay.Config(
                     environment = googlePay.environment,
                     merchantName = configuration.merchantDisplayName,
                     merchantCountryCode = googlePay.countryCode,

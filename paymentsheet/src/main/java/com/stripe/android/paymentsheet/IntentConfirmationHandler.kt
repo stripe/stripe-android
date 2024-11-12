@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet
 
 import android.app.Activity
-import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -39,7 +38,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.parcelize.Parcelize
 import javax.inject.Provider
 import kotlin.time.Duration.Companion.seconds
 
@@ -56,7 +54,7 @@ internal class IntentConfirmationHandler(
     private val savedStateHandle: SavedStateHandle,
     private val errorReporter: ErrorReporter,
     private val logger: UserFacingLogger?
-) {
+) : ConfirmationHandler {
     private val intentConfirmationRegistry = PaymentConfirmationRegistry(
         confirmationDefinitions = listOf(
             IntentConfirmationDefinition(
@@ -73,7 +71,7 @@ internal class IntentConfirmationHandler(
     private var googlePayPaymentMethodLauncher:
         ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>? = null
 
-    private var currentArguments: Args?
+    private var currentArguments: ConfirmationHandler.Args?
         get() = savedStateHandle[ARGUMENTS_KEY]
         set(value) {
             savedStateHandle[ARGUMENTS_KEY] = value
@@ -90,25 +88,25 @@ internal class IntentConfirmationHandler(
 
     private val _state = MutableStateFlow(
         if (hasReloadedWhileAwaitingPreConfirm) {
-            State.Preconfirming(
+            ConfirmationHandler.State.Preconfirming(
                 confirmationOption = currentArguments?.confirmationOption,
                 inPreconfirmFlow = true,
             )
         } else if (hasReloadedWhileAwaitingConfirm) {
-            State.Confirming
+            ConfirmationHandler.State.Confirming
         } else {
-            State.Idle
+            ConfirmationHandler.State.Idle
         }
     )
-    val state: StateFlow<State> = _state.asStateFlow()
+    override val state: StateFlow<ConfirmationHandler.State> = _state.asStateFlow()
 
     init {
         if (hasReloadedWhileAwaitingConfirm) {
             coroutineScope.launch {
                 delay(1.seconds)
 
-                if (_state.value is State.Confirming) {
-                    onIntentResult(PaymentConfirmationResult.Canceled(action = PaymentCancellationAction.None))
+                if (_state.value is ConfirmationHandler.State.Confirming) {
+                    onIntentResult(ConfirmationHandler.Result.Canceled(action = PaymentCancellationAction.None))
                 }
             }
         }
@@ -120,7 +118,7 @@ internal class IntentConfirmationHandler(
      * @param activityResultCaller a class that can call [Activity.startActivityForResult]-style APIs
      * @param lifecycleOwner a class tied to an Android [Lifecycle]
      */
-    fun register(activityResultCaller: ActivityResultCaller, lifecycleOwner: LifecycleOwner) {
+    override fun register(activityResultCaller: ActivityResultCaller, lifecycleOwner: LifecycleOwner) {
         confirmationMediators.forEach { mediator ->
             mediator.register(activityResultCaller, ::onIntentResult)
         }
@@ -165,16 +163,19 @@ internal class IntentConfirmationHandler(
      *
      * @param arguments arguments required to confirm a Stripe intent
      */
-    fun start(
-        arguments: Args,
+    override fun start(
+        arguments: ConfirmationHandler.Args,
     ) {
         val currentState = _state.value
 
-        if (currentState is State.Preconfirming || currentState is State.Confirming) {
+        if (
+            currentState is ConfirmationHandler.State.Preconfirming ||
+            currentState is ConfirmationHandler.State.Confirming
+        ) {
             return
         }
 
-        _state.value = State.Preconfirming(
+        _state.value = ConfirmationHandler.State.Preconfirming(
             confirmationOption = arguments.confirmationOption,
             inPreconfirmFlow = false,
         )
@@ -192,13 +193,13 @@ internal class IntentConfirmationHandler(
      *
      * @return result of intent confirmation process or null if not started.
      */
-    suspend fun awaitIntentResult(): PaymentConfirmationResult? {
+    override suspend fun awaitIntentResult(): ConfirmationHandler.Result? {
         return when (val state = _state.value) {
-            is State.Idle -> null
-            is State.Complete -> state.result
-            is State.Preconfirming,
-            is State.Confirming -> {
-                val complete = _state.firstInstanceOf<State.Complete>()
+            is ConfirmationHandler.State.Idle -> null
+            is ConfirmationHandler.State.Complete -> state.result
+            is ConfirmationHandler.State.Preconfirming,
+            is ConfirmationHandler.State.Confirming -> {
+                val complete = _state.firstInstanceOf<ConfirmationHandler.State.Complete>()
 
                 complete.result
             }
@@ -206,16 +207,16 @@ internal class IntentConfirmationHandler(
     }
 
     private suspend fun preconfirm(
-        arguments: Args
+        arguments: ConfirmationHandler.Args,
     ) {
         val confirmationOption = arguments.confirmationOption
 
-        if (confirmationOption is PaymentConfirmationOption.GooglePay) {
+        if (confirmationOption is ConfirmationHandler.Option.GooglePay) {
             launchGooglePay(
                 googlePay = confirmationOption,
                 intent = arguments.intent,
             )
-        } else if (confirmationOption is PaymentConfirmationOption.BacsPaymentMethod) {
+        } else if (confirmationOption is ConfirmationHandler.Option.BacsPaymentMethod) {
             launchBacsMandate(confirmationOption)
         } else {
             confirm(arguments)
@@ -223,15 +224,15 @@ internal class IntentConfirmationHandler(
     }
 
     private suspend fun confirm(
-        arguments: Args
+        arguments: ConfirmationHandler.Args,
     ) {
         currentArguments = arguments
 
-        _state.value = State.Confirming
+        _state.value = ConfirmationHandler.State.Confirming
 
         val confirmationOption = arguments.confirmationOption
 
-        if (confirmationOption is PaymentConfirmationOption.ExternalPaymentMethod) {
+        if (confirmationOption is ConfirmationHandler.Option.ExternalPaymentMethod) {
             confirmExternalPaymentMethod(confirmationOption)
         } else {
             confirm(confirmationOption, arguments.intent)
@@ -239,7 +240,7 @@ internal class IntentConfirmationHandler(
     }
 
     private suspend fun confirm(
-        confirmationOption: PaymentConfirmationOption,
+        confirmationOption: ConfirmationHandler.Option,
         intent: StripeIntent,
     ) {
         val mediator = confirmationMediators.find { mediator ->
@@ -257,7 +258,7 @@ internal class IntentConfirmationHandler(
             )
 
             onIntentResult(
-                PaymentConfirmationResult.Failed(
+                ConfirmationHandler.Result.Failed(
                     cause = IllegalStateException(
                         "Attempted to confirm invalid ${confirmationOption::class.qualifiedName} confirmation type"
                     ),
@@ -277,7 +278,7 @@ internal class IntentConfirmationHandler(
             }
             is PaymentConfirmationMediator.Action.Fail -> {
                 onIntentResult(
-                    PaymentConfirmationResult.Failed(
+                    ConfirmationHandler.Result.Failed(
                         cause = action.cause,
                         message = action.message,
                         type = action.errorType,
@@ -286,7 +287,7 @@ internal class IntentConfirmationHandler(
             }
             is PaymentConfirmationMediator.Action.Complete -> {
                 onIntentResult(
-                    PaymentConfirmationResult.Succeeded(
+                    ConfirmationHandler.Result.Succeeded(
                         intent = intent,
                         deferredIntentConfirmationType = action.deferredIntentConfirmationType,
                     )
@@ -296,7 +297,7 @@ internal class IntentConfirmationHandler(
     }
 
     private fun confirmExternalPaymentMethod(
-        confirmationOption: PaymentConfirmationOption.ExternalPaymentMethod
+        confirmationOption: ConfirmationHandler.Option.ExternalPaymentMethod
     ) {
         /*
          * In case of process death, we should store that we waiting for a payment result to return from a
@@ -314,7 +315,7 @@ internal class IntentConfirmationHandler(
     }
 
     private fun launchGooglePay(
-        googlePay: PaymentConfirmationOption.GooglePay,
+        googlePay: ConfirmationHandler.Option.GooglePay,
         intent: StripeIntent,
     ) {
         if (googlePay.config.merchantCurrencyCode == null && !googlePay.initializationMode.isProcessingPayment) {
@@ -324,7 +325,7 @@ internal class IntentConfirmationHandler(
             logger?.logWarningWithoutPii(message)
 
             onIntentResult(
-                PaymentConfirmationResult.Failed(
+                ConfirmationHandler.Result.Failed(
                     cause = IllegalStateException(message),
                     message = R.string.stripe_something_went_wrong.resolvableString,
                     type = PaymentConfirmationErrorType.MerchantIntegration,
@@ -338,7 +339,7 @@ internal class IntentConfirmationHandler(
             requireNotNull(googlePayPaymentMethodLauncher)
         }.getOrElse {
             onIntentResult(
-                PaymentConfirmationResult.Failed(
+                ConfirmationHandler.Result.Failed(
                     cause = it,
                     message = R.string.stripe_something_went_wrong.resolvableString,
                     type = PaymentConfirmationErrorType.Internal
@@ -352,7 +353,7 @@ internal class IntentConfirmationHandler(
             requireNotNull(googlePayPaymentMethodLauncherFactory)
         }.getOrElse {
             onIntentResult(
-                PaymentConfirmationResult.Failed(
+                ConfirmationHandler.Result.Failed(
                     cause = it,
                     message = R.string.stripe_something_went_wrong.resolvableString,
                     type = PaymentConfirmationErrorType.Internal
@@ -372,7 +373,7 @@ internal class IntentConfirmationHandler(
 
         storeIsAwaitingForPreConfirmResult()
 
-        _state.value = State.Preconfirming(confirmationOption = googlePay, inPreconfirmFlow = true)
+        _state.value = ConfirmationHandler.State.Preconfirming(confirmationOption = googlePay, inPreconfirmFlow = true)
 
         launcher.present(
             currencyCode = intent.asPaymentIntent()?.currency
@@ -389,7 +390,7 @@ internal class IntentConfirmationHandler(
     private fun createGooglePayLauncher(
         factory: GooglePayPaymentMethodLauncherFactory,
         activityLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>,
-        config: PaymentConfirmationOption.GooglePay.Config,
+        config: ConfirmationHandler.Option.GooglePay.Config,
     ): GooglePayPaymentMethodLauncher {
         return factory.create(
             lifecycleScope = coroutineScope,
@@ -413,13 +414,13 @@ internal class IntentConfirmationHandler(
     }
 
     private fun launchBacsMandate(
-        confirmationOption: PaymentConfirmationOption.BacsPaymentMethod,
+        confirmationOption: ConfirmationHandler.Option.BacsPaymentMethod,
     ) {
         BacsMandateData.fromConfirmationOption(confirmationOption)?.let { data ->
             runCatching {
                 requireNotNull(bacsMandateConfirmationLauncher)
             }.onSuccess { launcher ->
-                _state.value = State.Preconfirming(
+                _state.value = ConfirmationHandler.State.Preconfirming(
                     confirmationOption = confirmationOption,
                     inPreconfirmFlow = true,
                 )
@@ -432,7 +433,7 @@ internal class IntentConfirmationHandler(
                 )
             }.onFailure { cause ->
                 onIntentResult(
-                    PaymentConfirmationResult.Failed(
+                    ConfirmationHandler.Result.Failed(
                         cause = cause,
                         message = R.string.stripe_something_went_wrong.resolvableString,
                         type = PaymentConfirmationErrorType.Internal
@@ -441,7 +442,7 @@ internal class IntentConfirmationHandler(
             }
         } ?: run {
             onIntentResult(
-                PaymentConfirmationResult.Failed(
+                ConfirmationHandler.Result.Failed(
                     cause = IllegalArgumentException(
                         "Given payment selection could not be converted to Bacs data!"
                     ),
@@ -459,12 +460,12 @@ internal class IntentConfirmationHandler(
             when (result) {
                 is BacsMandateConfirmationResult.Confirmed -> {
                     val arguments = currentArguments
-                    val bacs = arguments?.confirmationOption as? PaymentConfirmationOption.BacsPaymentMethod
+                    val bacs = arguments?.confirmationOption as? ConfirmationHandler.Option.BacsPaymentMethod
 
                     bacs?.let { bacsPaymentMethod ->
                         confirm(
                             arguments.copy(
-                                confirmationOption = PaymentConfirmationOption.PaymentMethod.New(
+                                confirmationOption = ConfirmationHandler.Option.PaymentMethod.New(
                                     initializationMode = bacsPaymentMethod.initializationMode,
                                     shippingDetails = bacsPaymentMethod.shippingDetails,
                                     createParams = bacsPaymentMethod.createParams,
@@ -476,12 +477,12 @@ internal class IntentConfirmationHandler(
                     }
                 }
                 is BacsMandateConfirmationResult.ModifyDetails -> onIntentResult(
-                    PaymentConfirmationResult.Canceled(
+                    ConfirmationHandler.Result.Canceled(
                         action = PaymentCancellationAction.ModifyPaymentDetails
                     )
                 )
                 is BacsMandateConfirmationResult.Cancelled -> onIntentResult(
-                    PaymentConfirmationResult.Canceled(
+                    ConfirmationHandler.Result.Canceled(
                         action = PaymentCancellationAction.None
                     )
                 )
@@ -492,21 +493,23 @@ internal class IntentConfirmationHandler(
     private fun onExternalPaymentMethodResult(result: PaymentResult) {
         val intentResult = currentArguments?.let { arguments ->
             when (result) {
-                is PaymentResult.Completed -> PaymentConfirmationResult.Succeeded(
+                is PaymentResult.Completed -> ConfirmationHandler.Result.Succeeded(
                     intent = arguments.intent,
                     deferredIntentConfirmationType = null,
                 )
-                is PaymentResult.Failed -> PaymentConfirmationResult.Failed(
+                is PaymentResult.Failed -> ConfirmationHandler.Result.Failed(
                     cause = result.throwable,
                     message = result.throwable.stripeErrorMessage(),
                     type = PaymentConfirmationErrorType.ExternalPaymentMethod,
                 )
-                is PaymentResult.Canceled -> PaymentConfirmationResult.Canceled(action = PaymentCancellationAction.None)
+                is PaymentResult.Canceled -> ConfirmationHandler.Result.Canceled(
+                    action = PaymentCancellationAction.None
+                )
             }
         } ?: run {
             val cause = IllegalStateException("Arguments should have been initialized before handling EPM result!")
 
-            PaymentConfirmationResult.Failed(
+            ConfirmationHandler.Result.Failed(
                 cause = cause,
                 message = cause.stripeErrorMessage(),
                 type = PaymentConfirmationErrorType.ExternalPaymentMethod,
@@ -521,10 +524,10 @@ internal class IntentConfirmationHandler(
             when (result) {
                 is GooglePayPaymentMethodLauncher.Result.Completed -> {
                     val arguments = currentArguments
-                    val paymentMethod = arguments?.confirmationOption as? PaymentConfirmationOption.GooglePay
+                    val paymentMethod = arguments?.confirmationOption as? ConfirmationHandler.Option.GooglePay
 
                     paymentMethod?.let { option ->
-                        val confirmationOption = PaymentConfirmationOption.PaymentMethod.Saved(
+                        val confirmationOption = ConfirmationHandler.Option.PaymentMethod.Saved(
                             paymentMethod = result.paymentMethod,
                             initializationMode = option.initializationMode,
                             shippingDetails = option.shippingDetails,
@@ -540,7 +543,7 @@ internal class IntentConfirmationHandler(
                 }
                 is GooglePayPaymentMethodLauncher.Result.Failed -> {
                     onIntentResult(
-                        PaymentConfirmationResult.Failed(
+                        ConfirmationHandler.Result.Failed(
                             cause = result.error,
                             message = when (result.errorCode) {
                                 GooglePayPaymentMethodLauncher.NETWORK_ERROR ->
@@ -553,7 +556,7 @@ internal class IntentConfirmationHandler(
                 }
                 is GooglePayPaymentMethodLauncher.Result.Canceled -> {
                     onIntentResult(
-                        PaymentConfirmationResult.Canceled(
+                        ConfirmationHandler.Result.Canceled(
                             action = PaymentCancellationAction.InformCancellation
                         )
                     )
@@ -562,10 +565,10 @@ internal class IntentConfirmationHandler(
         }
     }
 
-    private fun onIntentResult(result: PaymentConfirmationResult) {
+    private fun onIntentResult(result: ConfirmationHandler.Result) {
         currentArguments = null
 
-        _state.value = State.Complete(result)
+        _state.value = ConfirmationHandler.State.Complete(result)
 
         removeIsAwaitingForPaymentResult()
         removeIsAwaitingForPreConfirmResult()
@@ -613,45 +616,6 @@ internal class IntentConfirmationHandler(
                 intentConfiguration.mode is PaymentSheet.IntentConfiguration.Mode.Payment
             }
         }
-
-    @Parcelize
-    internal data class Args(
-        val intent: StripeIntent,
-        val confirmationOption: PaymentConfirmationOption
-    ) : Parcelable
-
-    /**
-     * Defines the state types that [IntentConfirmationHandler] can be in with regards to payment confirmation.
-     */
-    sealed interface State {
-        /**
-         * Indicates that the handler is currently idle. This is normally the initial state of the handler unless the
-         * handler is reloaded after being destroyed by process death while confirming an intent.
-         */
-        data object Idle : State
-
-        /**
-         * Indicates the the handler is currently performing pre-confirmation steps before starting confirmation of
-         * a payment.
-         */
-        data class Preconfirming(
-            val confirmationOption: PaymentConfirmationOption?,
-            val inPreconfirmFlow: Boolean,
-        ) : State
-
-        /**
-         * Indicates the the handler is currently confirming a payment.
-         */
-        data object Confirming : State
-
-        /**
-         * Indicates that the handler has completed confirming a payment and contains a [PaymentConfirmationResult]
-         * regarding the confirmation process final result.
-         */
-        data class Complete(
-            val result: PaymentConfirmationResult,
-        ) : State
-    }
 
     class Factory(
         private val intentConfirmationInterceptor: IntentConfirmationInterceptor,

@@ -26,7 +26,7 @@ class PaymentConfirmationMediatorTest {
         )
 
         val canConfirm = mediator.canConfirm(
-            confirmationOption = PaymentConfirmationOption.PaymentMethod.Saved(
+            confirmationOption = ConfirmationHandler.Option.PaymentMethod.Saved(
                 initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                     clientSecret = "pi_123_secret_123",
                 ),
@@ -47,7 +47,7 @@ class PaymentConfirmationMediatorTest {
         )
 
         val canConfirm = mediator.canConfirm(
-            confirmationOption = PaymentConfirmationOption.ExternalPaymentMethod(
+            confirmationOption = ConfirmationHandler.Option.ExternalPaymentMethod(
                 type = "paypal",
                 billingDetails = null,
             ),
@@ -84,7 +84,7 @@ class PaymentConfirmationMediatorTest {
         )
 
         val action = mediator.action(
-            option = PaymentConfirmationOption.ExternalPaymentMethod(
+            option = ConfirmationHandler.Option.ExternalPaymentMethod(
                 type = "paypal",
                 billingDetails = null,
             ),
@@ -209,7 +209,7 @@ class PaymentConfirmationMediatorTest {
         assertThat(launchCall.launcher).isEqualTo(launcher)
 
         val parameters = savedStateHandle
-            .get<PaymentConfirmationMediator.Parameters<PaymentConfirmationOption.PaymentMethod.Saved>>(
+            .get<PaymentConfirmationMediator.Parameters<ConfirmationHandler.Option.PaymentMethod.Saved>>(
                 "TestParameters"
             )
 
@@ -295,7 +295,7 @@ class PaymentConfirmationMediatorTest {
         )
         val deferredIntentConfirmationType = DeferredIntentConfirmationType.Client
         val launcherResult = FakePaymentConfirmationDefinition.LauncherResult(amount = 50)
-        val confirmationResult = PaymentConfirmationResult.Succeeded(
+        val confirmationResult = ConfirmationHandler.Result.Succeeded(
             intent = intent,
             deferredIntentConfirmationType = deferredIntentConfirmationType,
         )
@@ -315,7 +315,7 @@ class PaymentConfirmationMediatorTest {
             definition = definition,
         )
 
-        val confirmationOption = PaymentConfirmationOption.PaymentMethod.Saved(
+        val confirmationOption = ConfirmationHandler.Option.PaymentMethod.Saved(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "pi_123_secret_123",
             ),
@@ -324,7 +324,7 @@ class PaymentConfirmationMediatorTest {
             paymentMethod = PaymentMethodFactory.card(),
         )
 
-        var receivedResult: PaymentConfirmationResult? = null
+        var receivedResult: ConfirmationHandler.Result? = null
 
         mediator.register(
             activityResultCaller = mock(),
@@ -377,7 +377,7 @@ class PaymentConfirmationMediatorTest {
         mediator.register(
             activityResultCaller = activityResultCaller,
             onResult = { result ->
-                assertThat(result).isInstanceOf<PaymentConfirmationResult.Failed>()
+                assertThat(result).isInstanceOf<ConfirmationHandler.Result.Failed>()
 
                 val failAction = result.asFailed()
 
@@ -401,8 +401,8 @@ class PaymentConfirmationMediatorTest {
         countDownLatch.await(2, TimeUnit.SECONDS)
     }
 
-    private fun PaymentConfirmationResult.asFailed(): PaymentConfirmationResult.Failed {
-        return this as PaymentConfirmationResult.Failed
+    private fun ConfirmationHandler.Result.asFailed(): ConfirmationHandler.Result.Failed {
+        return this as ConfirmationHandler.Result.Failed
     }
 
     private fun PaymentConfirmationMediator.Action.asFail(): PaymentConfirmationMediator.Action.Fail {
@@ -418,7 +418,7 @@ class PaymentConfirmationMediatorTest {
     }
 
     private companion object {
-        private val SAVED_CONFIRMATION_OPTION = PaymentConfirmationOption.PaymentMethod.Saved(
+        private val SAVED_CONFIRMATION_OPTION = ConfirmationHandler.Option.PaymentMethod.Saved(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(clientSecret = "pi_123"),
             shippingDetails = null,
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
