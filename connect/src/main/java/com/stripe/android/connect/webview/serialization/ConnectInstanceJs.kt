@@ -15,12 +15,12 @@ data class ConnectInstanceJs(
 @PrivateBetaConnectSDK
 @Serializable
 data class AppearanceJs(
-    val variables: AppearanceJsVariables,
+    val variables: AppearanceVariablesJs,
 )
 
 @PrivateBetaConnectSDK
 @Serializable
-data class AppearanceJsVariables(
+data class AppearanceVariablesJs(
     /**
      * The font family value used throughout embedded components. If an embedded component inherits a font-family value
      * from an element on your site in which it’s placed, this setting overrides that inheritance.
@@ -373,7 +373,7 @@ data class AppearanceJsVariables(
 @Suppress("LongMethod")
 internal fun Appearance.toJs(): AppearanceJs {
     return AppearanceJs(
-        variables = AppearanceJsVariables(
+        variables = AppearanceVariablesJs(
             fontFamily = null,
             fontSizeBase = typography.fontSizeBase,
             spacingUnit = null,

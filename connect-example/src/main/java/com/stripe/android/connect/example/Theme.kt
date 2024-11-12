@@ -73,7 +73,7 @@ fun MainContent(
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun BasicComponentContent(
+fun BasicComponentExampleContent(
     title: String,
     navigationIcon: @Composable (() -> Unit)? = null,
     content: @Composable () -> Unit,

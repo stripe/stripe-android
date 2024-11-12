@@ -12,7 +12,7 @@ import com.stripe.android.core.Logger
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.io.IOException
@@ -36,14 +36,11 @@ class EmbeddedComponentManagerProvider @Inject constructor(
     private val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG)
     private val ioScope: CoroutineScope by lazy { CoroutineScope(Dispatchers.IO) }
 
-    init {
-        @Suppress("OPT_IN_USAGE")
-        GlobalScope.launch {
-            settingsService.getAppearanceIdFlow()
-                .collectLatest { appearanceId ->
-                    embeddedComponentManager?.update(getAppearance(context, appearanceId))
-                }
-        }
+    fun initialize(scope: CoroutineScope): Job = scope.launch {
+        settingsService.getAppearanceIdFlow()
+            .collectLatest { appearanceId ->
+                embeddedComponentManager?.update(getAppearance(context, appearanceId))
+            }
     }
 
     /**

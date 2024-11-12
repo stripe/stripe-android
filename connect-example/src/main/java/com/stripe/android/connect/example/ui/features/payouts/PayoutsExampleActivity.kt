@@ -12,7 +12,7 @@ import androidx.fragment.app.FragmentActivity
 import com.stripe.android.connect.BuildConfig
 import com.stripe.android.connect.EmbeddedComponentManager
 import com.stripe.android.connect.PrivateBetaConnectSDK
-import com.stripe.android.connect.example.BasicComponentContent
+import com.stripe.android.connect.example.BasicComponentExampleContent
 import com.stripe.android.connect.example.ConnectSdkExampleTheme
 import com.stripe.android.connect.example.R
 import com.stripe.android.connect.example.data.EmbeddedComponentManagerProvider
@@ -42,7 +42,7 @@ class PayoutsExampleActivity : FragmentActivity() {
 
         setContent {
             ConnectSdkExampleTheme {
-                BasicComponentContent(
+                BasicComponentExampleContent(
                     title = stringResource(R.string.payouts),
                     navigationIcon = {
                         BackIconButton(onClick = this@PayoutsExampleActivity::finish)
