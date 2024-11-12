@@ -61,6 +61,14 @@ class LauncherActivity : AppCompatActivity() {
                 CustomerSessionActivity::class.java
             ),
             Item(
+                activity.getString(R.string.launch_payment_session),
+                PaymentSessionActivity::class.java
+            ),
+            Item(
+                activity.getString(R.string.launch_payment_session_from_fragment),
+                FragmentExamplesActivity::class.java
+            ),
+            Item(
                 activity.getString(R.string.googlepaylauncher_example),
                 GooglePayLauncherIntegrationActivity::class.java
             ),

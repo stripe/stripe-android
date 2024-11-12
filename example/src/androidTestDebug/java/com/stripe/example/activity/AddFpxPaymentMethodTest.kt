@@ -60,7 +60,7 @@ class AddFpxPaymentMethodTest {
     private fun launchBankSelector() {
         // launch FPX selection activity
         onView(withId(R.id.examples)).perform(
-            RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(12, click())
+            RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(13, click())
         )
 
         // click select payment method button

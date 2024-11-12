@@ -66,7 +66,7 @@ class AddNetbankingPaymentMethodTest {
     private fun launchBankSelector() {
         // launch Netbanking selection activity
         onView(withId(R.id.examples)).perform(
-            RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(11, click())
+            RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(13, click())
         )
 
         // click select payment method button
