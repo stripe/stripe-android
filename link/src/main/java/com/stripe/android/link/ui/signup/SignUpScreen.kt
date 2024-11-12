@@ -42,6 +42,7 @@ import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.NameConfig
 import com.stripe.android.uicore.elements.PhoneNumberCollectionSection
 import com.stripe.android.uicore.elements.PhoneNumberController
+import com.stripe.android.uicore.elements.TextField
 import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.elements.TextFieldSection
 import com.stripe.android.uicore.utils.collectAsState
@@ -144,15 +145,21 @@ private fun EmailCollectionSection(
     ) {
         TextFieldSection(
             textFieldController = emailController,
-            imeAction = if (signUpScreenState.signUpState == SignUpState.InputtingRemainingFields) {
-                ImeAction.Next
-            } else {
-                ImeAction.Done
-            },
-            enabled = enabled && signUpScreenState.signUpState != SignUpState.VerifyingEmail,
             modifier = Modifier
-                .focusRequester(focusRequester)
-        )
+                .padding(vertical = 8.dp),
+        ) {
+            TextField(
+                modifier = Modifier
+                    .focusRequester(focusRequester),
+                textFieldController = emailController,
+                imeAction = if (signUpScreenState.signUpState == SignUpState.InputtingRemainingFields) {
+                    ImeAction.Next
+                } else {
+                    ImeAction.Done
+                },
+                enabled = enabled && signUpScreenState.signUpState != SignUpState.VerifyingEmail,
+            )
+        }
         if (signUpScreenState.signUpState == SignUpState.VerifyingEmail) {
             CircularProgressIndicator(
                 modifier = Modifier
@@ -196,10 +203,15 @@ private fun SecondaryFields(
 
             if (signUpScreenState.requiresNameCollection) {
                 TextFieldSection(
+                    modifier = Modifier.padding(vertical = 8.dp),
                     textFieldController = nameController,
-                    imeAction = ImeAction.Done,
-                    enabled = true
-                )
+                ) {
+                    TextField(
+                        textFieldController = nameController,
+                        imeAction = ImeAction.Done,
+                        enabled = true,
+                    )
+                }
             }
 
             LinkTerms(
