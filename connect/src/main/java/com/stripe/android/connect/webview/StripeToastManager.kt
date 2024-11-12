@@ -6,11 +6,11 @@ import android.widget.Toast
 /**
  * Provides an interface for various download and file operations. Useful for mocking in tests.
  */
-interface StripeToastManager {
+internal interface StripeToastManager {
     fun showToast(toastString: String)
 }
 
-class StripeToastManagerImpl(private val context: Context) : StripeToastManager {
+internal class StripeToastManagerImpl(private val context: Context) : StripeToastManager {
     override fun showToast(toastString: String) {
         Toast.makeText(context, toastString, Toast.LENGTH_LONG).show()
     }

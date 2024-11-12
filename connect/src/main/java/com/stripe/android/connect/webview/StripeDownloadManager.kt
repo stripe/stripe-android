@@ -9,7 +9,7 @@ import android.webkit.URLUtil
 /**
  * Provides an interface for various download and file operations. Useful for mocking in tests.
  */
-interface StripeDownloadManager {
+internal interface StripeDownloadManager {
     /**
      * Returns the ID of the download, or null if the download could not be started.
      */
@@ -36,7 +36,7 @@ interface StripeDownloadManager {
     fun query(query: DownloadManager.Query): Cursor?
 }
 
-class StripeDownloadManagerImpl(context: Context) : StripeDownloadManager {
+internal class StripeDownloadManagerImpl(context: Context) : StripeDownloadManager {
     private val downloadManager: DownloadManager? =
         context.getSystemService(Context.DOWNLOAD_SERVICE) as? DownloadManager
 
