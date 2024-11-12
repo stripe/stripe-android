@@ -61,7 +61,7 @@ class IntentConfirmationDefinitionTest {
             val shippingDetails = AddressDetails(name = "John Doe")
 
             definition.action(
-                confirmationOption = PaymentConfirmationOption.PaymentMethod.New(
+                confirmationOption = ConfirmationHandler.Option.PaymentMethod.New(
                     initializationMode = initializationMode,
                     createParams = createParams,
                     optionsParams = null,
@@ -400,20 +400,20 @@ class IntentConfirmationDefinitionTest {
         return this as PaymentConfirmationDefinition.ConfirmationAction.Launch<T>
     }
 
-    private fun PaymentConfirmationResult.asSucceeded(): PaymentConfirmationResult.Succeeded {
-        return this as PaymentConfirmationResult.Succeeded
+    private fun ConfirmationHandler.Result.asSucceeded(): ConfirmationHandler.Result.Succeeded {
+        return this as ConfirmationHandler.Result.Succeeded
     }
 
-    private fun PaymentConfirmationResult.asFailed(): PaymentConfirmationResult.Failed {
-        return this as PaymentConfirmationResult.Failed
+    private fun ConfirmationHandler.Result.asFailed(): ConfirmationHandler.Result.Failed {
+        return this as ConfirmationHandler.Result.Failed
     }
 
-    private fun PaymentConfirmationResult.asCanceled(): PaymentConfirmationResult.Canceled {
-        return this as PaymentConfirmationResult.Canceled
+    private fun ConfirmationHandler.Result.asCanceled(): ConfirmationHandler.Result.Canceled {
+        return this as ConfirmationHandler.Result.Canceled
     }
 
     private companion object {
-        private val SAVED_PAYMENT_CONFIRMATION_OPTION = PaymentConfirmationOption.PaymentMethod.Saved(
+        private val SAVED_PAYMENT_CONFIRMATION_OPTION = ConfirmationHandler.Option.PaymentMethod.Saved(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "pi_123"
             ),

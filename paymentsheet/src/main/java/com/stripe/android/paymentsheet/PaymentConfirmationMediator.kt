@@ -10,7 +10,7 @@ import com.stripe.android.model.StripeIntent
 import kotlinx.parcelize.Parcelize
 
 internal class PaymentConfirmationMediator<
-    TConfirmationOption : PaymentConfirmationOption,
+    TConfirmationOption : ConfirmationHandler.Option,
     TLauncher,
     TLauncherArgs,
     TLauncherResult : Parcelable
@@ -28,13 +28,13 @@ internal class PaymentConfirmationMediator<
             savedStateHandle[parametersKey] = value
         }
 
-    fun canConfirm(confirmationOption: PaymentConfirmationOption): Boolean {
+    fun canConfirm(confirmationOption: ConfirmationHandler.Option): Boolean {
         return definition.option(confirmationOption) != null
     }
 
     fun register(
         activityResultCaller: ActivityResultCaller,
-        onResult: (PaymentConfirmationResult) -> Unit,
+        onResult: (ConfirmationHandler.Result) -> Unit,
     ) {
         launcher = definition.createLauncher(
             activityResultCaller
@@ -51,7 +51,7 @@ internal class PaymentConfirmationMediator<
                     "Arguments should have been initialized before handling result!"
                 )
 
-                PaymentConfirmationResult.Failed(
+                ConfirmationHandler.Result.Failed(
                     cause = exception,
                     message = exception.stripeErrorMessage(),
                     type = PaymentConfirmationErrorType.Internal,
@@ -67,7 +67,7 @@ internal class PaymentConfirmationMediator<
     }
 
     suspend fun action(
-        option: PaymentConfirmationOption,
+        option: ConfirmationHandler.Option,
         intent: StripeIntent
     ): Action {
         val confirmationOption = definition.option(option)
@@ -141,13 +141,13 @@ internal class PaymentConfirmationMediator<
 
         data class Complete(
             val intent: StripeIntent,
-            val confirmationOption: PaymentConfirmationOption,
+            val confirmationOption: ConfirmationHandler.Option,
             val deferredIntentConfirmationType: DeferredIntentConfirmationType? = null,
         ) : Action
     }
 
     @Parcelize
-    internal data class Parameters<TConfirmationOption : PaymentConfirmationOption>(
+    internal data class Parameters<TConfirmationOption : ConfirmationHandler.Option>(
         val confirmationOption: TConfirmationOption,
         val intent: StripeIntent,
         val deferredIntentConfirmationType: DeferredIntentConfirmationType?,

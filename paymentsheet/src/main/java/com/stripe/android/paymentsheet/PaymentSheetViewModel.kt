@@ -306,7 +306,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private suspend fun handlePaymentSheetStateLoaded(state: PaymentSheetState.Full) {
         val pendingResult = intentConfirmationHandler.awaitIntentResult()
 
-        if (pendingResult is PaymentConfirmationResult.Succeeded) {
+        if (pendingResult is ConfirmationHandler.Result.Succeeded) {
             // If we just received a transaction result after process death, we don't error. Instead, we dismiss
             // PaymentSheet and return a `Completed` result to the caller.
             handlePaymentCompleted(
@@ -331,7 +331,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         linkHandler.setupLink(state.linkState)
 
         val pendingFailedPaymentResult = intentConfirmationHandler.awaitIntentResult()
-            as? PaymentConfirmationResult.Failed
+            as? ConfirmationHandler.Result.Failed
         val errorMessage = pendingFailedPaymentResult?.cause?.stripeErrorMessage()
 
         resetViewState(errorMessage)
@@ -345,11 +345,11 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         viewModelScope.launch {
             intentConfirmationHandler.state.collectLatest { state ->
                 when (state) {
-                    is IntentConfirmationHandler.State.Idle -> Unit
-                    is IntentConfirmationHandler.State.Preconfirming -> {
+                    is ConfirmationHandler.State.Idle -> Unit
+                    is ConfirmationHandler.State.Preconfirming -> {
                         if (
                             state.inPreconfirmFlow &&
-                            state.confirmationOption is PaymentConfirmationOption.GooglePay
+                            state.confirmationOption is ConfirmationHandler.Option.GooglePay
                         ) {
                             setContentVisible(false)
                         } else {
@@ -358,14 +358,14 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
                         startProcessing(checkoutIdentifier)
                     }
-                    is IntentConfirmationHandler.State.Confirming -> {
+                    is ConfirmationHandler.State.Confirming -> {
                         setContentVisible(true)
 
                         if (viewState.value !is PaymentSheetViewState.StartProcessing) {
                             startProcessing(checkoutIdentifier)
                         }
                     }
-                    is IntentConfirmationHandler.State.Complete -> {
+                    is ConfirmationHandler.State.Complete -> {
                         setContentVisible(true)
                         processIntentResult(state.result)
                     }
@@ -508,13 +508,13 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private fun confirmPaymentSelection(paymentSelection: PaymentSelection?) {
         viewModelScope.launch(workContext) {
             val confirmationOption = paymentSelectionWithCvcIfEnabled(paymentSelection)
-                ?.toPaymentConfirmationOption(args.initializationMode, config.asCommonConfiguration())
+                ?.toConfirmationOption(args.initializationMode, config.asCommonConfiguration())
 
             confirmationOption?.let { option ->
                 val stripeIntent = awaitStripeIntent()
 
                 intentConfirmationHandler.start(
-                    arguments = IntentConfirmationHandler.Args(
+                    arguments = ConfirmationHandler.Args(
                         intent = stripeIntent,
                         confirmationOption = option,
                     ),
@@ -533,7 +533,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 errorReporter.report(event, StripeException.create(exception))
 
                 processIntentResult(
-                    PaymentConfirmationResult.Failed(
+                    ConfirmationHandler.Result.Failed(
                         cause = exception,
                         message = exception.stripeErrorMessage(),
                         type = PaymentConfirmationErrorType.Internal,
@@ -605,20 +605,20 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
-    private fun processIntentResult(result: PaymentConfirmationResult?) {
+    private fun processIntentResult(result: ConfirmationHandler.Result?) {
         when (result) {
-            is PaymentConfirmationResult.Succeeded -> handlePaymentCompleted(
+            is ConfirmationHandler.Result.Succeeded -> handlePaymentCompleted(
                 intent = result.intent,
                 deferredIntentConfirmationType = result.deferredIntentConfirmationType,
                 finishImmediately = false,
             )
-            is PaymentConfirmationResult.Failed -> processIntentFailure(result)
-            is PaymentConfirmationResult.Canceled,
+            is ConfirmationHandler.Result.Failed -> processIntentFailure(result)
+            is ConfirmationHandler.Result.Canceled,
             null -> resetViewState()
         }
     }
 
-    private fun processIntentFailure(failure: PaymentConfirmationResult.Failed) {
+    private fun processIntentFailure(failure: ConfirmationHandler.Result.Failed) {
         when (failure.type) {
             PaymentConfirmationErrorType.Payment -> handlePaymentFailed(
                 error = PaymentSheetConfirmationError.Stripe(failure.cause),

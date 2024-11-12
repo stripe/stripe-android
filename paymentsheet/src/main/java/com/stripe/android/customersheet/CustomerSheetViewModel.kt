@@ -49,9 +49,8 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.paymentsheet.ConfirmationHandler
 import com.stripe.android.paymentsheet.IntentConfirmationHandler
-import com.stripe.android.paymentsheet.PaymentConfirmationOption
-import com.stripe.android.paymentsheet.PaymentConfirmationResult
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
 import com.stripe.android.paymentsheet.forms.FormFieldValues
@@ -995,9 +994,9 @@ internal class CustomerSheetViewModel(
         paymentMethod: PaymentMethod
     ) {
         intentConfirmationHandler.start(
-            arguments = IntentConfirmationHandler.Args(
+            arguments = ConfirmationHandler.Args(
                 intent = stripeIntent,
-                confirmationOption = PaymentConfirmationOption.PaymentMethod.Saved(
+                confirmationOption = ConfirmationHandler.Option.PaymentMethod.Saved(
                     initializationMode = PaymentElementLoader.InitializationMode.SetupIntent(
                         clientSecret = clientSecret
                     ),
@@ -1009,14 +1008,14 @@ internal class CustomerSheetViewModel(
         )
 
         when (val result = intentConfirmationHandler.awaitIntentResult()) {
-            is PaymentConfirmationResult.Succeeded -> {
+            is ConfirmationHandler.Result.Succeeded -> {
                 eventReporter.onAttachPaymentMethodSucceeded(
                     style = CustomerSheetEventReporter.AddPaymentMethodStyle.SetupIntent
                 )
 
                 refreshAndUpdatePaymentMethods(paymentMethod)
             }
-            is PaymentConfirmationResult.Failed -> {
+            is ConfirmationHandler.Result.Failed -> {
                 eventReporter.onAttachPaymentMethodFailed(
                     style = CustomerSheetEventReporter.AddPaymentMethodStyle.SetupIntent
                 )
@@ -1034,7 +1033,7 @@ internal class CustomerSheetViewModel(
                     )
                 }
             }
-            is PaymentConfirmationResult.Canceled,
+            is ConfirmationHandler.Result.Canceled,
             null -> {
                 updateViewState<CustomerSheetViewState.AddPaymentMethod> {
                     it.copy(

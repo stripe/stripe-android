@@ -2927,7 +2927,7 @@ internal class PaymentSheetViewModelTest {
                 "AwaitingPaymentResult" to true,
                 "IntentConfirmationParameters" to PaymentConfirmationMediator.Parameters(
                     intent = PAYMENT_INTENT,
-                    confirmationOption = PaymentConfirmationOption.PaymentMethod.Saved(
+                    confirmationOption = ConfirmationHandler.Option.PaymentMethod.Saved(
                         initializationMode = ARGS_CUSTOMER_WITH_GOOGLEPAY.initializationMode,
                         paymentMethod = CARD_PAYMENT_METHOD,
                         optionsParams = null,

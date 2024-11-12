@@ -18,7 +18,7 @@ import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.PaymentMethodFactory
 import org.junit.Test
 
-class PaymentConfirmationOptionKtxTest {
+class ConfirmationHandlerOptionKtxTest {
     @Test
     fun `On new selection, should convert to new confirmation option properly`() {
         val paymentSelection = createNewPaymentSelection(
@@ -28,12 +28,12 @@ class PaymentConfirmationOptionKtxTest {
         )
 
         assertThat(
-            paymentSelection.toPaymentConfirmationOption(
+            paymentSelection.toConfirmationOption(
                 initializationMode = PI_INITIALIZATION_MODE,
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
             )
         ).isEqualTo(
-            PaymentConfirmationOption.PaymentMethod.New(
+            ConfirmationHandler.Option.PaymentMethod.New(
                 initializationMode = PI_INITIALIZATION_MODE,
                 shippingDetails = null,
                 createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
@@ -50,12 +50,12 @@ class PaymentConfirmationOptionKtxTest {
         )
 
         assertThat(
-            paymentSelection.toPaymentConfirmationOption(
+            paymentSelection.toConfirmationOption(
                 initializationMode = SI_INITIALIZATION_MODE,
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
             )
         ).isEqualTo(
-            PaymentConfirmationOption.PaymentMethod.New(
+            ConfirmationHandler.Option.PaymentMethod.New(
                 initializationMode = SI_INITIALIZATION_MODE,
                 shippingDetails = null,
                 createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
@@ -72,12 +72,12 @@ class PaymentConfirmationOptionKtxTest {
         )
 
         assertThat(
-            paymentSelection.toPaymentConfirmationOption(
+            paymentSelection.toConfirmationOption(
                 initializationMode = PI_INITIALIZATION_MODE,
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
             )
         ).isEqualTo(
-            PaymentConfirmationOption.PaymentMethod.New(
+            ConfirmationHandler.Option.PaymentMethod.New(
                 initializationMode = PI_INITIALIZATION_MODE,
                 shippingDetails = null,
                 createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
@@ -105,12 +105,12 @@ class PaymentConfirmationOptionKtxTest {
         )
 
         assertThat(
-            paymentSelection.toPaymentConfirmationOption(
+            paymentSelection.toConfirmationOption(
                 initializationMode = PI_INITIALIZATION_MODE,
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration()
             )
         ).isEqualTo(
-            PaymentConfirmationOption.BacsPaymentMethod(
+            ConfirmationHandler.Option.BacsPaymentMethod(
                 initializationMode = PI_INITIALIZATION_MODE,
                 shippingDetails = null,
                 createParams = bacsDebitParams,
@@ -127,12 +127,12 @@ class PaymentConfirmationOptionKtxTest {
         )
 
         assertThat(
-            paymentSelection.toPaymentConfirmationOption(
+            paymentSelection.toConfirmationOption(
                 initializationMode = SI_INITIALIZATION_MODE,
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
             )
         ).isEqualTo(
-            PaymentConfirmationOption.PaymentMethod.New(
+            ConfirmationHandler.Option.PaymentMethod.New(
                 initializationMode = SI_INITIALIZATION_MODE,
                 shippingDetails = null,
                 createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
@@ -152,12 +152,12 @@ class PaymentConfirmationOptionKtxTest {
         )
 
         assertThat(
-            paymentSelection.toPaymentConfirmationOption(
+            paymentSelection.toConfirmationOption(
                 initializationMode = PI_INITIALIZATION_MODE,
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
             )
         ).isEqualTo(
-            PaymentConfirmationOption.PaymentMethod.Saved(
+            ConfirmationHandler.Option.PaymentMethod.Saved(
                 initializationMode = PI_INITIALIZATION_MODE,
                 shippingDetails = null,
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
@@ -185,12 +185,12 @@ class PaymentConfirmationOptionKtxTest {
         )
 
         assertThat(
-            paymentSelection.toPaymentConfirmationOption(
+            paymentSelection.toConfirmationOption(
                 initializationMode = PI_INITIALIZATION_MODE,
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
             )
         ).isEqualTo(
-            PaymentConfirmationOption.ExternalPaymentMethod(
+            ConfirmationHandler.Option.ExternalPaymentMethod(
                 type = "paypal",
                 billingDetails = PaymentMethod.BillingDetails(
                     name = "John Doe",
@@ -205,7 +205,7 @@ class PaymentConfirmationOptionKtxTest {
     @Test
     fun `On Google Pay selection with config with null google pay config, should return null`() {
         assertThat(
-            PaymentSelection.GooglePay.toPaymentConfirmationOption(
+            PaymentSelection.GooglePay.toConfirmationOption(
                 initializationMode = PI_INITIALIZATION_MODE,
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
             )
@@ -215,7 +215,7 @@ class PaymentConfirmationOptionKtxTest {
     @Test
     fun `On Google Pay selection with config with google pay config, should return expected option`() {
         assertThat(
-            PaymentSelection.GooglePay.toPaymentConfirmationOption(
+            PaymentSelection.GooglePay.toConfirmationOption(
                 initializationMode = SI_INITIALIZATION_MODE,
                 configuration = PaymentSheetFixtures.CONFIG_GOOGLEPAY.copy(
                     googlePay = PaymentSheetFixtures.CONFIG_GOOGLEPAY.googlePay?.copy(
@@ -226,10 +226,10 @@ class PaymentConfirmationOptionKtxTest {
                 ).asCommonConfiguration()
             )
         ).isEqualTo(
-            PaymentConfirmationOption.GooglePay(
+            ConfirmationHandler.Option.GooglePay(
                 initializationMode = SI_INITIALIZATION_MODE,
                 shippingDetails = null,
-                config = PaymentConfirmationOption.GooglePay.Config(
+                config = ConfirmationHandler.Option.GooglePay.Config(
                     environment = PaymentSheet.GooglePayConfiguration.Environment.Production,
                     merchantName = "Merchant, Inc.",
                     merchantCountryCode = "US",
@@ -248,7 +248,7 @@ class PaymentConfirmationOptionKtxTest {
     @Test
     fun `On Link selection, should return null`() {
         assertThat(
-            PaymentSelection.Link.toPaymentConfirmationOption(
+            PaymentSelection.Link.toConfirmationOption(
                 initializationMode = PI_INITIALIZATION_MODE,
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
             )
@@ -262,12 +262,12 @@ class PaymentConfirmationOptionKtxTest {
         val expectedPaymentMethod = PaymentMethodFactory.instantDebits()
 
         assertThat(
-            paymentSelection.toPaymentConfirmationOption(
+            paymentSelection.toConfirmationOption(
                 initializationMode = PI_INITIALIZATION_MODE,
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
             )
         ).isEqualTo(
-            PaymentConfirmationOption.PaymentMethod.Saved(
+            ConfirmationHandler.Option.PaymentMethod.Saved(
                 initializationMode = PI_INITIALIZATION_MODE,
                 shippingDetails = null,
                 optionsParams = null,
@@ -283,12 +283,12 @@ class PaymentConfirmationOptionKtxTest {
         val expectedPaymentMethod = PaymentMethodFactory.instantDebits()
 
         assertThat(
-            paymentSelection.toPaymentConfirmationOption(
+            paymentSelection.toConfirmationOption(
                 initializationMode = PI_INITIALIZATION_MODE,
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
             )
         ).isEqualTo(
-            PaymentConfirmationOption.PaymentMethod.Saved(
+            ConfirmationHandler.Option.PaymentMethod.Saved(
                 initializationMode = PI_INITIALIZATION_MODE,
                 shippingDetails = null,
                 optionsParams = null,

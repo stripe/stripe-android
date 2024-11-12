@@ -3,10 +3,10 @@ package com.stripe.android.paymentsheet
 import com.stripe.android.paymentsheet.addresselement.toConfirmPaymentIntentShipping
 
 internal suspend fun IntentConfirmationInterceptor.intercept(
-    confirmationOption: PaymentConfirmationOption.PaymentMethod,
+    confirmationOption: ConfirmationHandler.Option.PaymentMethod,
 ): IntentConfirmationInterceptor.NextStep {
     return when (confirmationOption) {
-        is PaymentConfirmationOption.PaymentMethod.New -> {
+        is ConfirmationHandler.Option.PaymentMethod.New -> {
             intercept(
                 initializationMode = confirmationOption.initializationMode,
                 paymentMethodOptionsParams = confirmationOption.optionsParams,
@@ -15,7 +15,7 @@ internal suspend fun IntentConfirmationInterceptor.intercept(
                 customerRequestedSave = confirmationOption.shouldSave,
             )
         }
-        is PaymentConfirmationOption.PaymentMethod.Saved -> {
+        is ConfirmationHandler.Option.PaymentMethod.Saved -> {
             intercept(
                 initializationMode = confirmationOption.initializationMode,
                 paymentMethod = confirmationOption.paymentMethod,
