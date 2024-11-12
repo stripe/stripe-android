@@ -36,7 +36,7 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
-import com.stripe.android.paymentsheet.IntentConfirmationHandler
+import com.stripe.android.paymentsheet.DefaultConfirmationHandler
 import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.FakeBacsMandateConfirmationLauncher
@@ -118,7 +118,7 @@ internal object CustomerSheetTestHelper {
             integrationType = integrationType,
             isLiveModeProvider = { isLiveMode },
             logger = Logger.noop(),
-            intentConfirmationHandlerFactory = IntentConfirmationHandler.Factory(
+            defaultConfirmationHandlerFactory = DefaultConfirmationHandler.Factory(
                 intentConfirmationInterceptor = intentConfirmationInterceptor,
                 paymentConfigurationProvider = { paymentConfiguration },
                 bacsMandateConfirmationLauncherFactory = {

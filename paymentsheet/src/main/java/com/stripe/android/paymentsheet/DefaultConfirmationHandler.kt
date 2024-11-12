@@ -45,7 +45,7 @@ import kotlin.time.Duration.Companion.seconds
  * This interface handles the process of confirming a [StripeIntent]. This interface can only handle confirming one
  * intent at a time.
  */
-internal class IntentConfirmationHandler(
+internal class DefaultConfirmationHandler(
     private val intentConfirmationInterceptor: IntentConfirmationInterceptor,
     private val paymentLauncherFactory: (ActivityResultLauncher<PaymentLauncherContract.Args>) -> PaymentLauncher,
     private val bacsMandateConfirmationLauncherFactory: BacsMandateConfirmationLauncherFactory,
@@ -628,8 +628,8 @@ internal class IntentConfirmationHandler(
         private val errorReporter: ErrorReporter,
         private val logger: UserFacingLogger?
     ) {
-        fun create(scope: CoroutineScope): IntentConfirmationHandler {
-            return IntentConfirmationHandler(
+        fun create(scope: CoroutineScope): DefaultConfirmationHandler {
+            return DefaultConfirmationHandler(
                 bacsMandateConfirmationLauncherFactory = bacsMandateConfirmationLauncherFactory,
                 googlePayPaymentMethodLauncherFactory = googlePayPaymentMethodLauncherFactory,
                 paymentLauncherFactory = { hostActivityLauncher ->

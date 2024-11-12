@@ -81,7 +81,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     @IOContext workContext: CoroutineContext,
     savedStateHandle: SavedStateHandle,
     linkHandler: LinkHandler,
-    intentConfirmationHandlerFactory: IntentConfirmationHandler.Factory,
+    defaultConfirmationHandlerFactory: DefaultConfirmationHandler.Factory,
     cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
     editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory,
     private val errorReporter: ErrorReporter,
@@ -211,7 +211,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
-    private val intentConfirmationHandler = intentConfirmationHandlerFactory.create(viewModelScope.plus(workContext))
+    private val intentConfirmationHandler = defaultConfirmationHandlerFactory.create(viewModelScope.plus(workContext))
 
     init {
         SessionSavedStateHandler.attachTo(this, savedStateHandle)

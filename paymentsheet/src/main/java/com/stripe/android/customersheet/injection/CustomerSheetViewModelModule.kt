@@ -28,8 +28,8 @@ import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnectionsAvailable
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
+import com.stripe.android.paymentsheet.DefaultConfirmationHandler
 import com.stripe.android.paymentsheet.DefaultIntentConfirmationInterceptor
-import com.stripe.android.paymentsheet.IntentConfirmationHandler
 import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.injection.IS_FLOW_CONTROLLER
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -147,8 +147,8 @@ internal interface CustomerSheetViewModelModule {
             statusBarColor: Int?,
             intentConfirmationInterceptor: IntentConfirmationInterceptor,
             errorReporter: ErrorReporter
-        ): IntentConfirmationHandler.Factory {
-            return IntentConfirmationHandler.Factory(
+        ): DefaultConfirmationHandler.Factory {
+            return DefaultConfirmationHandler.Factory(
                 intentConfirmationInterceptor = intentConfirmationInterceptor,
                 paymentConfigurationProvider = paymentConfigurationProvider,
                 stripePaymentLauncherAssistedFactory = stripePaymentLauncherAssistedFactory,

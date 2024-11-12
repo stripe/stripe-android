@@ -29,10 +29,10 @@ import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.ConfirmationHandler
+import com.stripe.android.paymentsheet.DefaultConfirmationHandler
 import com.stripe.android.paymentsheet.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.ExternalPaymentMethodInterceptor
 import com.stripe.android.paymentsheet.InitializedViaCompose
-import com.stripe.android.paymentsheet.IntentConfirmationHandler
 import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.PaymentCancellationAction
 import com.stripe.android.paymentsheet.PaymentConfirmationErrorType
@@ -122,7 +122,7 @@ internal class DefaultFlowController @Inject internal constructor(
      */
     lateinit var flowControllerComponent: FlowControllerComponent
 
-    private val intentConfirmationHandler = IntentConfirmationHandler.Factory(
+    private val defaultConfirmationHandler = DefaultConfirmationHandler.Factory(
         intentConfirmationInterceptor = intentConfirmationInterceptor,
         paymentConfigurationProvider = lazyPaymentConfiguration,
         statusBarColor = { null },
@@ -151,7 +151,7 @@ internal class DefaultFlowController @Inject internal constructor(
         }
 
     init {
-        intentConfirmationHandler.register(activityResultCaller, lifecycleOwner)
+        defaultConfirmationHandler.register(activityResultCaller, lifecycleOwner)
 
         paymentOptionActivityLauncher = activityResultCaller.registerForActivityResult(
             PaymentOptionContract(),
@@ -196,7 +196,7 @@ internal class DefaultFlowController @Inject internal constructor(
         )
 
         lifecycleOwner.lifecycleScope.launch {
-            intentConfirmationHandler.state.collectLatest { state ->
+            defaultConfirmationHandler.state.collectLatest { state ->
                 when (state) {
                     is ConfirmationHandler.State.Idle,
                     is ConfirmationHandler.State.Preconfirming,
@@ -396,7 +396,7 @@ internal class DefaultFlowController @Inject internal constructor(
             confirmationOption?.let { option ->
                 val stripeIntent = requireNotNull(state.stripeIntent)
 
-                intentConfirmationHandler.start(
+                defaultConfirmationHandler.start(
                     arguments = ConfirmationHandler.Args(
                         confirmationOption = option,
                         intent = stripeIntent,

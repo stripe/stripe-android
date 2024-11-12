@@ -58,7 +58,7 @@ import kotlin.time.Duration.Companion.seconds
 import com.stripe.android.R as PaymentsCoreR
 
 @RunWith(AndroidJUnit4::class)
-class IntentConfirmationHandlerTest {
+class DefaultConfirmationHandlerTest {
     @Test
     fun `On 'init', state should be idle`() = runTest {
         val intentConfirmationHandler = createIntentConfirmationHandler()
@@ -1946,8 +1946,8 @@ class IntentConfirmationHandlerTest {
         logger: UserFacingLogger = FakeUserFacingLogger(),
         shouldRegister: Boolean = true,
         coroutineScope: CoroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
-    ): IntentConfirmationHandler {
-        return IntentConfirmationHandler(
+    ): DefaultConfirmationHandler {
+        return DefaultConfirmationHandler(
             intentConfirmationInterceptor = intentConfirmationInterceptor,
             paymentLauncherFactory = { paymentLauncher },
             bacsMandateConfirmationLauncherFactory = { bacsMandateConfirmationLauncher },
@@ -2110,7 +2110,7 @@ class IntentConfirmationHandlerTest {
         /**
          * The external payment method confirm handler is not used in [ExternalPaymentMethodInterceptor] which is
          * not tested here but is instead meant to be used in the launched activity the interceptor attempts to launch.
-         * Since we only care that [IntentConfirmationHandler] is actually attempting to launch the EPM handler as well
+         * Since we only care that [DefaultConfirmationHandler] is actually attempting to launch the EPM handler as well
          * as its interactions, we don't do anything here except for using the handler to validate that we can launch
          * the EPM handler.
          */

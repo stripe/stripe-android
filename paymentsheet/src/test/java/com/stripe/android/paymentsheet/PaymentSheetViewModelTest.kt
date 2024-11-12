@@ -3092,7 +3092,7 @@ internal class PaymentSheetViewModelTest {
                 workContext = testDispatcher,
                 savedStateHandle = thisSavedStateHandle,
                 linkHandler = linkHandler,
-                intentConfirmationHandlerFactory = IntentConfirmationHandler.Factory(
+                defaultConfirmationHandlerFactory = DefaultConfirmationHandler.Factory(
                     intentConfirmationInterceptor = intentConfirmationInterceptor,
                     savedStateHandle = thisSavedStateHandle,
                     bacsMandateConfirmationLauncherFactory = bacsMandateConfirmationLauncherFactory,
