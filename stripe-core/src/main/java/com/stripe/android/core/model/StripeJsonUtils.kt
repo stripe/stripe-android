@@ -69,6 +69,14 @@ object StripeJsonUtils {
         }
     }
 
+    @JvmSynthetic
+    fun optDouble(
+        jsonObject: JSONObject,
+        @Size(min = 1) fieldName: String
+    ): Double? {
+        return jsonObject.optDouble(fieldName).takeUnless { it.isNaN() }
+    }
+
     /**
      * Calls through to [JSONObject.optString] while safely
      * converting the raw string "null" and the empty string to `null`. Will not throw
