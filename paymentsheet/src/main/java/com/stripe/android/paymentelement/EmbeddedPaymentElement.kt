@@ -7,7 +7,6 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.AnnotatedString
-import androidx.lifecycle.SavedStateViewModelFactory
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.ExperimentalCardBrandFilteringApi
@@ -336,7 +335,7 @@ class EmbeddedPaymentElement internal constructor(
         @Poko
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @ExperimentalEmbeddedPaymentElementApi
-        class Failed internal constructor(val error: Exception) : ConfigureResult
+        class Failed internal constructor(val error: Throwable) : ConfigureResult
     }
 
     @Poko
@@ -382,7 +381,7 @@ class EmbeddedPaymentElement internal constructor(
         fun create(activity: ComponentActivity): EmbeddedPaymentElement {
             val sharedViewModel = ViewModelProvider(
                 owner = activity,
-                factory = SavedStateViewModelFactory()
+                factory = SharedPaymentElementViewModel.Factory()
             )[SharedPaymentElementViewModel::class.java]
             return EmbeddedPaymentElement(sharedViewModel)
         }
