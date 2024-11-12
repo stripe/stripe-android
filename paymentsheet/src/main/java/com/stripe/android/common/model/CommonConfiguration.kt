@@ -3,6 +3,8 @@ package com.stripe.android.common.model
 import android.os.Parcelable
 import com.stripe.android.common.validation.CustomerSessionClientSecretValidator
 import com.stripe.android.model.CardBrand
+import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import kotlinx.parcelize.Parcelize
@@ -84,6 +86,25 @@ internal data class CommonConfiguration(
 }
 
 internal fun PaymentSheet.Configuration.asCommonConfiguration(): CommonConfiguration = CommonConfiguration(
+    merchantDisplayName = merchantDisplayName,
+    customer = customer,
+    googlePay = googlePay,
+    defaultBillingDetails = defaultBillingDetails,
+    shippingDetails = shippingDetails,
+    allowsDelayedPaymentMethods = allowsDelayedPaymentMethods,
+    allowsPaymentMethodsRequiringShippingAddress = allowsPaymentMethodsRequiringShippingAddress,
+    appearance = appearance,
+    primaryButtonLabel = primaryButtonLabel,
+    billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+    preferredNetworks = preferredNetworks,
+    allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod,
+    paymentMethodOrder = paymentMethodOrder,
+    externalPaymentMethods = externalPaymentMethods,
+    cardBrandAcceptance = cardBrandAcceptance,
+)
+
+@ExperimentalEmbeddedPaymentElementApi
+internal fun EmbeddedPaymentElement.Configuration.asCommonConfiguration(): CommonConfiguration = CommonConfiguration(
     merchantDisplayName = merchantDisplayName,
     customer = customer,
     googlePay = googlePay,
