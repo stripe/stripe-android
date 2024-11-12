@@ -49,7 +49,7 @@ internal class PaymentMethodVerticalLayoutUITest {
     }
 
     @Test
-    fun oneSavedPm_canBeRemoved_buttonIsEdit_transitionsToManageScreen() = runScenario(
+    fun oneSavedPm_canBeRemoved_buttonIsEdit_callsOnManageOneSavedPm() = runScenario(
         PaymentMethodVerticalLayoutInteractor.State(
             displayablePaymentMethods = emptyList(),
             isProcessing = false,
@@ -62,7 +62,9 @@ internal class PaymentMethodVerticalLayoutUITest {
         assertThat(viewActionRecorder.viewActions).isEmpty()
         composeRule.onNodeWithTag(TEST_TAG_EDIT_SAVED_CARD).performClick()
         viewActionRecorder.consume(
-            PaymentMethodVerticalLayoutInteractor.ViewAction.TransitionToManageOneSavedPaymentMethod
+            PaymentMethodVerticalLayoutInteractor.ViewAction.OnManageOneSavedPaymentMethod(
+                PaymentMethodFixtures.displayableCard()
+            )
         )
         assertThat(viewActionRecorder.viewActions).isEmpty()
     }
