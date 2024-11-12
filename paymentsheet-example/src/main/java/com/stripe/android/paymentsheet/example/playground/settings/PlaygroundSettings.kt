@@ -6,6 +6,7 @@ import android.os.Parcelable
 import android.util.Log
 import androidx.compose.runtime.Stable
 import androidx.core.content.edit
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
@@ -423,7 +424,7 @@ internal class PlaygroundSettings private constructor(
             CustomerSettingsDefinition,
             CheckoutModeSettingsDefinition,
             LinkSettingsDefinition,
-            NativeLinkSettingsDefinition,
+            FeatureFlagSettingsDefinition(FeatureFlags.nativeLinkEnabled),
             CountrySettingsDefinition,
             CurrencySettingsDefinition,
             GooglePaySettingsDefinition,
@@ -446,7 +447,7 @@ internal class PlaygroundSettings private constructor(
             ExternalPaymentMethodSettingsDefinition,
             LayoutSettingsDefinition,
             CardBrandAcceptanceSettingsDefinition,
-            NewUpdateCardScreenDefinition,
+            FeatureFlagSettingsDefinition(FeatureFlags.useNewUpdateCardScreen),
         )
 
         private val nonUiSettingDefinitions: List<PlaygroundSettingDefinition<*>> = listOf(
