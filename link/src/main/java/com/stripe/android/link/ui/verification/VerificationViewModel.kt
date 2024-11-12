@@ -87,9 +87,7 @@ internal class VerificationViewModel @Inject constructor(
                 navigateAndClearStack(LinkScreen.Wallet)
             },
             onFailure = {
-                for (i in 0 until otpElement.controller.otpLength) {
-                    otpElement.controller.reset()
-                }
+                otpElement.controller.reset()
                 onError(it)
             }
         )
