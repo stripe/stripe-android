@@ -25,8 +25,8 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class PayoutsExampleActivity : FragmentActivity() {
 
-    @Inject
-    lateinit var embeddedComponentManagerProvider: EmbeddedComponentManagerProvider
+    @Inject lateinit var embeddedComponentManagerProvider: EmbeddedComponentManagerProvider
+
     private val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG)
 
     override fun onCreate(savedInstanceState: Bundle?) {

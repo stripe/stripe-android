@@ -37,6 +37,7 @@ class EmbeddedComponentManagerProvider @Inject constructor(
     private val ioScope: CoroutineScope by lazy { CoroutineScope(Dispatchers.IO) }
 
     fun initialize(scope: CoroutineScope): Job = scope.launch {
+        // Update appearance in the SDK whenever the appearance setting changes.
         settingsService.getAppearanceIdFlow()
             .collectLatest { appearanceId ->
                 embeddedComponentManager?.update(getAppearance(context, appearanceId))

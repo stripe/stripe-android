@@ -16,10 +16,9 @@ import kotlin.coroutines.resume
 class EmbeddedComponentManager(
     private val configuration: Configuration,
     private val fetchClientSecretCallback: FetchClientSecretCallback,
-    appearance: Appearance? = null,
+    appearance: Appearance = Appearance(),
 ) {
-
-    private val _appearanceFlow = MutableStateFlow(appearance ?: Appearance())
+    private val _appearanceFlow = MutableStateFlow(appearance)
     internal val appearanceFlow: StateFlow<Appearance> get() = _appearanceFlow.asStateFlow()
 
     /**

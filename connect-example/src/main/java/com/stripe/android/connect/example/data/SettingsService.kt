@@ -108,6 +108,9 @@ class SettingsService @Inject constructor(@ApplicationContext context: Context) 
         sharedPreferences.edit { putString(SELECTED_MERCHANT_KEY, accountId) }
     }
 
+    /**
+     * Returns a [Flow] that emits the current and changed values of the given [key].
+     */
     private inline fun <T> observePref(
         key: String,
         crossinline getter: (sharedPrefs: SharedPreferences, key: String) -> T

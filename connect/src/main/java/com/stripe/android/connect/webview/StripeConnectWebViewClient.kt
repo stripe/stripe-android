@@ -20,6 +20,7 @@ import com.stripe.android.connect.webview.serialization.toJs
 import com.stripe.android.core.Logger
 import com.stripe.android.core.version.StripeSdkVersion
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
@@ -114,6 +115,7 @@ internal class StripeConnectWebViewClient(
         private var isPageLoaded: Boolean = false
 
         init {
+            // Bind appearance changes in the manager to the WebView (only when page is loaded).
             webView.doOnAttach { view ->
                 val lifecycleOwner = view.findViewTreeLifecycleOwner()
                 lifecycleOwner?.lifecycleScope?.launch {

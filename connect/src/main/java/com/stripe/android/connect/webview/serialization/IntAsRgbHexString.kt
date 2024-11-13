@@ -8,8 +8,14 @@ import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 
+/**
+ * Indicates that the integer should be serialized as a hex color string, e.g. "#FF0000".
+ */
 typealias IntAsRgbHexString = @Serializable(IntAsRgbHexStringSerializer::class) Int
 
+/**
+ * A [KSerializer] for serializing an [Int] as a hex color string, e.g. "#FF0000".
+ */
 object IntAsRgbHexStringSerializer : KSerializer<Int> {
 
     override val descriptor: SerialDescriptor =
