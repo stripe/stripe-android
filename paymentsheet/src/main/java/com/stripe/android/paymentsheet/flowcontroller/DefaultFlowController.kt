@@ -34,7 +34,6 @@ import com.stripe.android.paymentsheet.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.ExternalPaymentMethodInterceptor
 import com.stripe.android.paymentsheet.InitializedViaCompose
 import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
-import com.stripe.android.paymentsheet.PaymentCancellationAction
 import com.stripe.android.paymentsheet.PaymentConfirmationErrorType
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionContract
@@ -607,15 +606,15 @@ internal class DefaultFlowController @Inject internal constructor(
 
     private fun handleCancellation(canceled: ConfirmationHandler.Result.Canceled) {
         when (canceled.action) {
-            PaymentCancellationAction.InformCancellation -> {
+            ConfirmationHandler.CancellationAction.InformCancellation -> {
                 onPaymentResult(
                     paymentResult = PaymentResult.Canceled,
                     deferredIntentConfirmationType = null,
                     shouldLog = false,
                 )
             }
-            PaymentCancellationAction.ModifyPaymentDetails -> presentPaymentOptions()
-            PaymentCancellationAction.None -> Unit
+            ConfirmationHandler.CancellationAction.ModifyPaymentDetails -> presentPaymentOptions()
+            ConfirmationHandler.CancellationAction.None -> Unit
         }
     }
 

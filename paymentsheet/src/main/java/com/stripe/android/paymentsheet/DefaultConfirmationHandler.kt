@@ -106,7 +106,11 @@ internal class DefaultConfirmationHandler(
                 delay(1.seconds)
 
                 if (_state.value is ConfirmationHandler.State.Confirming) {
-                    onIntentResult(ConfirmationHandler.Result.Canceled(action = PaymentCancellationAction.None))
+                    onIntentResult(
+                        ConfirmationHandler.Result.Canceled(
+                            action = ConfirmationHandler.CancellationAction.None,
+                        )
+                    )
                 }
             }
         }
@@ -478,12 +482,12 @@ internal class DefaultConfirmationHandler(
                 }
                 is BacsMandateConfirmationResult.ModifyDetails -> onIntentResult(
                     ConfirmationHandler.Result.Canceled(
-                        action = PaymentCancellationAction.ModifyPaymentDetails
+                        action = ConfirmationHandler.CancellationAction.ModifyPaymentDetails,
                     )
                 )
                 is BacsMandateConfirmationResult.Cancelled -> onIntentResult(
                     ConfirmationHandler.Result.Canceled(
-                        action = PaymentCancellationAction.None
+                        action = ConfirmationHandler.CancellationAction.None,
                     )
                 )
             }
@@ -503,7 +507,7 @@ internal class DefaultConfirmationHandler(
                     type = PaymentConfirmationErrorType.ExternalPaymentMethod,
                 )
                 is PaymentResult.Canceled -> ConfirmationHandler.Result.Canceled(
-                    action = PaymentCancellationAction.None
+                    action = ConfirmationHandler.CancellationAction.None,
                 )
             }
         } ?: run {
@@ -557,7 +561,7 @@ internal class DefaultConfirmationHandler(
                 is GooglePayPaymentMethodLauncher.Result.Canceled -> {
                     onIntentResult(
                         ConfirmationHandler.Result.Canceled(
-                            action = PaymentCancellationAction.InformCancellation
+                            action = ConfirmationHandler.CancellationAction.InformCancellation,
                         )
                     )
                 }
