@@ -374,8 +374,8 @@
 |    \--- androidx.fragment:fragment:1.8.4 (c)
 +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0 (*)
 +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0 (*)
-+--- org.bouncycastle:bcprov-jdk15to18:1.78.1
-+--- com.nimbusds:nimbus-jose-jwt:9.40
++--- org.bouncycastle:bcprov-jdk15to18:1.79
++--- com.nimbusds:nimbus-jose-jwt:9.46
 \--- org.jetbrains.kotlin:kotlin-parcelize-runtime:2.0.21
      +--- org.jetbrains.kotlin:kotlin-stdlib:2.0.21 (*)
      \--- org.jetbrains.kotlin:kotlin-android-extensions-runtime:2.0.21
