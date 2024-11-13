@@ -118,7 +118,7 @@ internal object CustomerSheetTestHelper {
             integrationType = integrationType,
             isLiveModeProvider = { isLiveMode },
             logger = Logger.noop(),
-            defaultConfirmationHandlerFactory = DefaultConfirmationHandler.Factory(
+            confirmationHandlerFactory = DefaultConfirmationHandler.Factory(
                 intentConfirmationInterceptor = intentConfirmationInterceptor,
                 paymentConfigurationProvider = { paymentConfiguration },
                 bacsMandateConfirmationLauncherFactory = {

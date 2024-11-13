@@ -122,7 +122,7 @@ internal class DefaultFlowController @Inject internal constructor(
      */
     lateinit var flowControllerComponent: FlowControllerComponent
 
-    private val defaultConfirmationHandler = DefaultConfirmationHandler.Factory(
+    private val confirmationHandler = DefaultConfirmationHandler.Factory(
         intentConfirmationInterceptor = intentConfirmationInterceptor,
         paymentConfigurationProvider = lazyPaymentConfiguration,
         statusBarColor = { null },
@@ -151,7 +151,7 @@ internal class DefaultFlowController @Inject internal constructor(
         }
 
     init {
-        defaultConfirmationHandler.register(activityResultCaller, lifecycleOwner)
+        confirmationHandler.register(activityResultCaller, lifecycleOwner)
 
         paymentOptionActivityLauncher = activityResultCaller.registerForActivityResult(
             PaymentOptionContract(),
@@ -196,7 +196,7 @@ internal class DefaultFlowController @Inject internal constructor(
         )
 
         lifecycleOwner.lifecycleScope.launch {
-            defaultConfirmationHandler.state.collectLatest { state ->
+            confirmationHandler.state.collectLatest { state ->
                 when (state) {
                     is ConfirmationHandler.State.Idle,
                     is ConfirmationHandler.State.Preconfirming,
@@ -396,7 +396,7 @@ internal class DefaultFlowController @Inject internal constructor(
             confirmationOption?.let { option ->
                 val stripeIntent = requireNotNull(state.stripeIntent)
 
-                defaultConfirmationHandler.start(
+                confirmationHandler.start(
                     arguments = ConfirmationHandler.Args(
                         confirmationOption = option,
                         intent = stripeIntent,

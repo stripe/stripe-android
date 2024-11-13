@@ -99,7 +99,7 @@ internal class CustomerSheetViewModel(
     private val eventReporter: CustomerSheetEventReporter,
     private val workContext: CoroutineContext = Dispatchers.IO,
     @Named(IS_LIVE_MODE) private val isLiveModeProvider: () -> Boolean,
-    defaultConfirmationHandlerFactory: DefaultConfirmationHandler.Factory,
+    confirmationHandlerFactory: DefaultConfirmationHandler.Factory,
     private val customerSheetLoader: CustomerSheetLoader,
     private val editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory,
     private val errorReporter: ErrorReporter,
@@ -116,7 +116,7 @@ internal class CustomerSheetViewModel(
         eventReporter: CustomerSheetEventReporter,
         workContext: CoroutineContext = Dispatchers.IO,
         @Named(IS_LIVE_MODE) isLiveModeProvider: () -> Boolean,
-        defaultConfirmationHandlerFactory: DefaultConfirmationHandler.Factory,
+        confirmationHandlerFactory: DefaultConfirmationHandler.Factory,
         customerSheetLoader: CustomerSheetLoader,
         editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory,
         errorReporter: ErrorReporter,
@@ -134,7 +134,7 @@ internal class CustomerSheetViewModel(
         eventReporter = eventReporter,
         workContext = workContext,
         isLiveModeProvider = isLiveModeProvider,
-        defaultConfirmationHandlerFactory = defaultConfirmationHandlerFactory,
+        confirmationHandlerFactory = confirmationHandlerFactory,
         customerSheetLoader = customerSheetLoader,
         editInteractorFactory = editInteractorFactory,
         errorReporter = errorReporter,
@@ -154,7 +154,7 @@ internal class CustomerSheetViewModel(
     private val _result = MutableStateFlow<InternalCustomerSheetResult?>(null)
     val result: StateFlow<InternalCustomerSheetResult?> = _result
 
-    private val intentConfirmationHandler = defaultConfirmationHandlerFactory.create(
+    private val confirmationHandler = confirmationHandlerFactory.create(
         scope = viewModelScope.plus(workContext)
     )
 
@@ -320,7 +320,7 @@ internal class CustomerSheetViewModel(
         activityResultCaller: ActivityResultCaller,
         lifecycleOwner: LifecycleOwner
     ) {
-        intentConfirmationHandler.register(
+        confirmationHandler.register(
             activityResultCaller = activityResultCaller,
             lifecycleOwner = lifecycleOwner,
         )
@@ -993,7 +993,7 @@ internal class CustomerSheetViewModel(
         clientSecret: String,
         paymentMethod: PaymentMethod
     ) {
-        intentConfirmationHandler.start(
+        confirmationHandler.start(
             arguments = ConfirmationHandler.Args(
                 intent = stripeIntent,
                 confirmationOption = ConfirmationHandler.Option.PaymentMethod.Saved(
@@ -1007,7 +1007,7 @@ internal class CustomerSheetViewModel(
             )
         )
 
-        when (val result = intentConfirmationHandler.awaitIntentResult()) {
+        when (val result = confirmationHandler.awaitIntentResult()) {
             is ConfirmationHandler.Result.Succeeded -> {
                 eventReporter.onAttachPaymentMethodSucceeded(
                     style = CustomerSheetEventReporter.AddPaymentMethodStyle.SetupIntent

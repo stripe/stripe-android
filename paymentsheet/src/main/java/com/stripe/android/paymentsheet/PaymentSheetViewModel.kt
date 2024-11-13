@@ -81,7 +81,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     @IOContext workContext: CoroutineContext,
     savedStateHandle: SavedStateHandle,
     linkHandler: LinkHandler,
-    defaultConfirmationHandlerFactory: DefaultConfirmationHandler.Factory,
+    confirmationHandlerFactory: DefaultConfirmationHandler.Factory,
     cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
     editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory,
     private val errorReporter: ErrorReporter,
@@ -211,7 +211,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
-    private val intentConfirmationHandler = defaultConfirmationHandlerFactory.create(viewModelScope.plus(workContext))
+    private val confirmationHandler = confirmationHandlerFactory.create(viewModelScope.plus(workContext))
 
     init {
         SessionSavedStateHandler.attachTo(this, savedStateHandle)
@@ -287,7 +287,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             paymentElementLoader.load(
                 initializationMode = args.initializationMode,
                 configuration = args.config.asCommonConfiguration(),
-                isReloadingAfterProcessDeath = intentConfirmationHandler.hasReloadedFromProcessDeath,
+                isReloadingAfterProcessDeath = confirmationHandler.hasReloadedFromProcessDeath,
                 initializedViaCompose = args.initializedViaCompose,
             )
         }
@@ -304,7 +304,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     private suspend fun handlePaymentSheetStateLoaded(state: PaymentSheetState.Full) {
-        val pendingResult = intentConfirmationHandler.awaitIntentResult()
+        val pendingResult = confirmationHandler.awaitIntentResult()
 
         if (pendingResult is ConfirmationHandler.Result.Succeeded) {
             // If we just received a transaction result after process death, we don't error. Instead, we dismiss
@@ -330,7 +330,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
         linkHandler.setupLink(state.linkState)
 
-        val pendingFailedPaymentResult = intentConfirmationHandler.awaitIntentResult()
+        val pendingFailedPaymentResult = confirmationHandler.awaitIntentResult()
             as? ConfirmationHandler.Result.Failed
         val errorMessage = pendingFailedPaymentResult?.cause?.stripeErrorMessage()
 
@@ -343,7 +343,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         )
 
         viewModelScope.launch {
-            intentConfirmationHandler.state.collectLatest { state ->
+            confirmationHandler.state.collectLatest { state ->
                 when (state) {
                     is ConfirmationHandler.State.Idle -> Unit
                     is ConfirmationHandler.State.Preconfirming -> {
@@ -474,7 +474,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     ) {
         linkHandler.registerFromActivity(activityResultCaller)
 
-        intentConfirmationHandler.register(activityResultCaller, lifecycleOwner)
+        confirmationHandler.register(activityResultCaller, lifecycleOwner)
 
         lifecycleOwner.lifecycle.addObserver(
             object : DefaultLifecycleObserver {
@@ -513,7 +513,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             confirmationOption?.let { option ->
                 val stripeIntent = awaitStripeIntent()
 
-                intentConfirmationHandler.start(
+                confirmationHandler.start(
                     arguments = ConfirmationHandler.Args(
                         intent = stripeIntent,
                         confirmationOption = option,

@@ -1150,7 +1150,7 @@ internal class PaymentSheetActivityTest {
                 workContext = testDispatcher,
                 savedStateHandle = savedStateHandle,
                 linkHandler = linkHandler,
-                defaultConfirmationHandlerFactory = DefaultConfirmationHandler.Factory(
+                confirmationHandlerFactory = DefaultConfirmationHandler.Factory(
                     intentConfirmationInterceptor = fakeIntentConfirmationInterceptor,
                     savedStateHandle = savedStateHandle,
                     stripePaymentLauncherAssistedFactory = stripePaymentLauncherAssistedFactory,
