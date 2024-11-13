@@ -198,6 +198,6 @@ class StripeThreeDs2ServiceImpl @VisibleForTesting internal constructor(
     }
 
     private companion object {
-        private const val STRIPE_SDK_REFERENCE_NUMBER = "3DS_LOA_SDK_STIN_020100_00142"
+        private const val STRIPE_SDK_REFERENCE_NUMBER = "3DS_LOA_SDK_STIN_020200_00960"
     }
 }
