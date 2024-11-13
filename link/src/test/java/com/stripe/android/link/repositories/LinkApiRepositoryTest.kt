@@ -494,6 +494,31 @@ class LinkApiRepositoryTest {
         assertThat(result.isFailure).isTrue()
     }
 
+    @Test
+    fun `listPaymentDetails sends correct parameters`() = runTest {
+        val secret = "secret"
+        val consumerKey = "key"
+        linkRepository.listPaymentDetails(secret, consumerKey)
+
+        verify(stripeRepository).listPaymentDetails(
+            eq(secret),
+            eq(emptySet()),
+            eq(ApiRequest.Options(consumerKey))
+        )
+    }
+
+    @Test
+    fun `listPaymentDetails without consumerPublishableKey sends correct parameters`() = runTest {
+        val secret = "secret"
+        linkRepository.listPaymentDetails(secret, null)
+
+        verify(stripeRepository).listPaymentDetails(
+            eq(secret),
+            eq(emptySet()),
+            eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID))
+        )
+    }
+
     private val cardPaymentMethodCreateParams =
         FieldValuesToParamsMapConverter.transformToPaymentMethodCreateParams(
             mapOf(

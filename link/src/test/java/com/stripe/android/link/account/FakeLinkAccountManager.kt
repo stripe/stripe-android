@@ -1,6 +1,7 @@
 package com.stripe.android.link.account
 
 import com.stripe.android.link.LinkPaymentDetails
+import com.stripe.android.link.TestFactory
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.inline.SignUpConsentAction
@@ -36,6 +37,7 @@ internal open class FakeLinkAccountManager : LinkAccountManager {
             paymentMethodCreateParams = mock(),
         )
     )
+    var listPaymentDetailsResult: Result<ConsumerPaymentDetails> = Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS)
     var linkAccountFromLookupResult: LinkAccount? = null
     override var consumerPublishableKey: String? = null
 
@@ -85,5 +87,9 @@ internal open class FakeLinkAccountManager : LinkAccountManager {
 
     override suspend fun confirmVerification(code: String): Result<LinkAccount> {
         return confirmVerificationResult
+    }
+
+    override suspend fun listPaymentDetails(): Result<ConsumerPaymentDetails> {
+        return listPaymentDetailsResult
     }
 }

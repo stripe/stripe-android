@@ -699,6 +699,35 @@ class DefaultLinkAccountManagerTest {
         assertThat(linkEventsReporter.callCount).isEqualTo(1)
     }
 
+    @Test
+    fun `listPaymentDetails returns error when repository call fails`() = runSuspendTest {
+        val error = AuthenticationException(StripeError())
+        val linkRepository = FakeLinkRepository()
+
+        val accountManager = accountManager(linkRepository = linkRepository)
+        accountManager.setAccountNullable(TestFactory.CONSUMER_SESSION, TestFactory.PUBLISHABLE_KEY)
+
+        linkRepository.listPaymentDetailsResult = Result.failure(error)
+
+        val result = accountManager.listPaymentDetails()
+
+        assertThat(result.exceptionOrNull()).isEqualTo(error)
+    }
+
+    @Test
+    fun `listPaymentDetails returns success when repository call succeeds`() = runSuspendTest {
+        val linkRepository = FakeLinkRepository()
+
+        val accountManager = accountManager(linkRepository = linkRepository)
+        accountManager.setAccountNullable(TestFactory.CONSUMER_SESSION, TestFactory.PUBLISHABLE_KEY)
+
+        linkRepository.listPaymentDetailsResult = Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS)
+
+        val result = accountManager.listPaymentDetails()
+
+        assertThat(result.getOrNull()).isEqualTo(TestFactory.CONSUMER_PAYMENT_DETAILS)
+    }
+
     private fun runSuspendTest(testBody: suspend TestScope.() -> Unit) = runTest {
         testBody()
     }

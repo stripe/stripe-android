@@ -24,7 +24,7 @@ import com.stripe.android.link.LinkAction
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkActivityViewModel
 import com.stripe.android.link.LinkScreen
-import com.stripe.android.link.NoLinkAccountFound
+import com.stripe.android.link.NoLinkAccountFoundException
 import com.stripe.android.link.linkViewModel
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.theme.DefaultLinkTheme
@@ -142,7 +142,7 @@ private fun Screens(
 
         composable(LinkScreen.Verification.route) {
             val linkAccount = getLinkAccount()
-                ?: return@composable dismissWithResult(LinkActivityResult.Failed(NoLinkAccountFound()))
+                ?: return@composable dismissWithResult(LinkActivityResult.Failed(NoLinkAccountFoundException()))
             val viewModel: VerificationViewModel = linkViewModel { parentComponent ->
                 VerificationViewModel.factory(
                     parentComponent = parentComponent,

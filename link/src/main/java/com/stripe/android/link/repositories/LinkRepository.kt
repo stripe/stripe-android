@@ -1,6 +1,7 @@
 package com.stripe.android.link.repositories
 
 import com.stripe.android.link.LinkPaymentDetails
+import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSessionSignup
@@ -71,4 +72,12 @@ internal interface LinkRepository {
         consumerSessionClientSecret: String,
         consumerPublishableKey: String?,
     ): Result<ConsumerSession>
+
+    /**
+     * Fetch all saved payment methods for the signed in consumer.
+     */
+    suspend fun listPaymentDetails(
+        consumerSessionClientSecret: String,
+        consumerPublishableKey: String?
+    ): Result<ConsumerPaymentDetails>
 }
