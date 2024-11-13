@@ -105,7 +105,7 @@ internal fun USBankAccountForm(
         sameAsShippingElement = viewModel.sameAsShippingElement,
         saveForFutureUseElement = viewModel.saveForFutureUseElement,
         onRemoveAccount = viewModel::reset,
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier,
     )
 }
 
