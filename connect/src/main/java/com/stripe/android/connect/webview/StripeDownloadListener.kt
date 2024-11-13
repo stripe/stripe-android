@@ -20,7 +20,6 @@ internal class StripeDownloadListener(
     private val stripeDownloadManager: StripeDownloadManager = StripeDownloadManagerImpl(context),
     private val stripeToastManager: StripeToastManager = StripeToastManagerImpl(context),
     private val ioScope: CoroutineScope = CoroutineScope(Dispatchers.IO),
-    private val mainScope: CoroutineScope = MainScope(),
 ) : DownloadListener {
 
     override fun onDownloadStart(
@@ -75,15 +74,11 @@ internal class StripeDownloadListener(
     }
 
     private fun showErrorToast() {
-        mainScope.launch {
-            stripeToastManager.showToast(context.getString(R.string.stripe_unable_to_download_file))
-        }
+        stripeToastManager.showToast(context.getString(R.string.stripe_unable_to_download_file))
     }
 
     private fun showOpenFileToast() {
-        mainScope.launch {
-            stripeToastManager.showToast(context.getString(R.string.stripe_download_complete))
-        }
+        stripeToastManager.showToast(context.getString(R.string.stripe_download_complete))
     }
 
     internal companion object {
