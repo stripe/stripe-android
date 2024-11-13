@@ -5,11 +5,13 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.webkit.PermissionRequest
 import android.webkit.WebChromeClient
+import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.checkSelfPermission
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * A [WebChromeClient] that handles permission requests for the Stripe Connect WebView.
@@ -30,17 +32,19 @@ internal class StripeConnectWebChromeClient(
         }
 
         if (checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
-            request.grant(request.resources)
+            request.grant(arrayOf(PermissionRequest.RESOURCE_VIDEO_CAPTURE))
         } else {
             val scope = permissionScopeBuilder().also {
                 inProgressRequests[request] = it
             }
             scope.launch {
-                val granted = requestPermissionFromUser(Manifest.permission.CAMERA)
-                if (granted) {
-                    request.grant(arrayOf(PermissionRequest.RESOURCE_VIDEO_CAPTURE))
-                } else {
-                    request.deny()
+                val isGranted = requestPermissionFromUser(Manifest.permission.CAMERA)
+                withContext(Dispatchers.Main) {
+                    if (isGranted) {
+                        request.grant(arrayOf(PermissionRequest.RESOURCE_VIDEO_CAPTURE))
+                    } else {
+                        request.deny()
+                    }
                 }
                 inProgressRequests.remove(request)
             }
