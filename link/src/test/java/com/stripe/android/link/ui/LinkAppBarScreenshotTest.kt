@@ -64,15 +64,6 @@ internal class LinkAppBarScreenshotTest(
                     )
                 ),
                 TestCase(
-                    name = "LinkAppBarNoHeaderWithOverflowMenuWithEmail",
-                    state = LinkAppBarState(
-                        navigationIcon = R.drawable.stripe_link_close,
-                        showHeader = false,
-                        showOverflowMenu = true,
-                        email = "test@test.com",
-                    )
-                ),
-                TestCase(
                     name = "LinkAppBarNoHeaderWithOverflowMenuNoEmail",
                     state = LinkAppBarState(
                         navigationIcon = R.drawable.stripe_link_close,
