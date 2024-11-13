@@ -15,10 +15,10 @@
     <ID>LargeClass:CustomerAdapterTest.kt$CustomerAdapterTest</ID>
     <ID>LargeClass:CustomerSheetViewModel.kt$CustomerSheetViewModel : ViewModel</ID>
     <ID>LargeClass:CustomerSheetViewModelTest.kt$CustomerSheetViewModelTest</ID>
+    <ID>LargeClass:DefaultConfirmationHandlerTest.kt$DefaultConfirmationHandlerTest</ID>
     <ID>LargeClass:DefaultEventReporterTest.kt$DefaultEventReporterTest</ID>
     <ID>LargeClass:DefaultFlowControllerTest.kt$DefaultFlowControllerTest</ID>
     <ID>LargeClass:DefaultPaymentElementLoaderTest.kt$DefaultPaymentElementLoaderTest</ID>
-    <ID>LargeClass:IntentConfirmationHandlerTest.kt$IntentConfirmationHandlerTest</ID>
     <ID>LargeClass:PaymentMethodMetadataTest.kt$PaymentMethodMetadataTest</ID>
     <ID>LargeClass:PaymentOptionsViewModelTest.kt$PaymentOptionsViewModelTest</ID>
     <ID>LargeClass:PaymentSheetActivityTest.kt$PaymentSheetActivityTest</ID>
