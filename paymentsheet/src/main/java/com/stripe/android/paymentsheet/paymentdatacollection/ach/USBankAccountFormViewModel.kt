@@ -35,7 +35,7 @@ import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
-import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormScreenState.ResultIdentifier
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.BankFormScreenState.ResultIdentifier
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.di.DaggerUSBankAccountFormComponent
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.uicore.elements.AddressElement
@@ -55,7 +55,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Provider
-import com.stripe.android.ui.core.R as StripeUiCoreR
 
 internal class USBankAccountFormViewModel @Inject internal constructor(
     private val args: Args,
@@ -203,14 +202,17 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         PaymentMethod.BillingDetails(address, email, name, phone)
     }
 
-    val currentScreenState: StateFlow<USBankAccountFormScreenState> = combineAsStateFlow(
+    val currentScreenState: StateFlow<BankFormScreenState> = combineAsStateFlow(
         screenStateWithoutSaveForFutureUse,
         saveForFutureUse,
     ) { state, saveForFutureUse ->
-        val mandateText = buildMandateText(
-            isVerifyWithMicrodeposits = state is USBankAccountFormScreenState.VerifyWithMicrodeposits,
-            isSaveForFutureUseSelected = saveForFutureUse,
-        )
+        val mandateText = state.linkedBankAccount?.let {
+            buildMandateText(
+                isVerifyWithMicrodeposits = it.isVerifyingWithMicrodeposits,
+                isSaveForFutureUseSelected = saveForFutureUse,
+            )
+        }
+
         state.updateWithMandate(mandateText)
     }
 
@@ -341,13 +343,16 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         result: CollectBankAccountForInstantDebitsResult.Completed,
     ) {
         screenStateWithoutSaveForFutureUse.update {
-            USBankAccountFormScreenState.MandateCollection(
-                resultIdentifier = ResultIdentifier.PaymentMethod(result.paymentMethod),
-                bankName = result.bankName,
-                last4 = result.last4,
-                intentId = result.intent?.id,
-                primaryButtonText = buildPrimaryButtonText(),
-                mandateText = buildMandateText(isVerifyWithMicrodeposits = false),
+            it.updateWithLinkedBankAccount(
+                account = BankFormScreenState.LinkedBankAccount(
+                    resultIdentifier = ResultIdentifier.PaymentMethod(result.paymentMethod),
+                    bankName = result.bankName,
+                    last4 = result.last4,
+                    intentId = result.intent?.id,
+                    financialConnectionsSessionId = null,
+                    mandateText = buildMandateText(isVerifyWithMicrodeposits = false),
+                    isVerifyingWithMicrodeposits = false,
+                )
             )
         }
     }
@@ -359,27 +364,36 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         when (val paymentAccount = usBankAccountData.financialConnectionsSession.paymentAccount) {
             is BankAccount -> {
                 screenStateWithoutSaveForFutureUse.update {
-                    USBankAccountFormScreenState.VerifyWithMicrodeposits(
-                        paymentAccount = paymentAccount,
-                        financialConnectionsSessionId = usBankAccountData.financialConnectionsSession.id,
-                        intentId = intentId,
-                        primaryButtonText = buildPrimaryButtonText(),
-                        mandateText = buildMandateText(isVerifyWithMicrodeposits = true),
+                    it.updateWithLinkedBankAccount(
+                        account = BankFormScreenState.LinkedBankAccount(
+                            resultIdentifier = ResultIdentifier.Session(
+                                id = usBankAccountData.financialConnectionsSession.id,
+                            ),
+                            bankName = paymentAccount.bankName,
+                            last4 = paymentAccount.last4,
+                            intentId = intentId,
+                            financialConnectionsSessionId = usBankAccountData.financialConnectionsSession.id,
+                            mandateText = buildMandateText(isVerifyWithMicrodeposits = true),
+                            isVerifyingWithMicrodeposits = true,
+                        )
                     )
                 }
             }
 
             is FinancialConnectionsAccount -> {
                 screenStateWithoutSaveForFutureUse.update {
-                    USBankAccountFormScreenState.MandateCollection(
-                        resultIdentifier = ResultIdentifier.Session(
-                            id = usBankAccountData.financialConnectionsSession.id,
-                        ),
-                        bankName = paymentAccount.institutionName,
-                        last4 = paymentAccount.last4,
-                        intentId = intentId,
-                        primaryButtonText = buildPrimaryButtonText(),
-                        mandateText = buildMandateText(isVerifyWithMicrodeposits = false),
+                    it.updateWithLinkedBankAccount(
+                        account = BankFormScreenState.LinkedBankAccount(
+                            resultIdentifier = ResultIdentifier.Session(
+                                id = usBankAccountData.financialConnectionsSession.id,
+                            ),
+                            bankName = paymentAccount.institutionName,
+                            last4 = paymentAccount.last4,
+                            intentId = intentId,
+                            financialConnectionsSessionId = usBankAccountData.financialConnectionsSession.id,
+                            mandateText = buildMandateText(isVerifyWithMicrodeposits = false),
+                            isVerifyingWithMicrodeposits = false,
+                        )
                     )
                 }
             }
@@ -392,9 +406,9 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
     fun handlePrimaryButtonClick() {
         val screenState = currentScreenState.value
-        if (screenState is USBankAccountFormScreenState.BillingDetailsCollection) {
+        if (screenState.linkedBankAccount == null) {
             screenStateWithoutSaveForFutureUse.update {
-                screenState.copy(isProcessing = true)
+                it.processing()
             }
 
             collectBankAccount(args.clientSecret)
@@ -404,13 +418,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     fun reset(error: ResolvableString? = null) {
         hasLaunched = false
         shouldReset = false
-        screenStateWithoutSaveForFutureUse.update {
-            USBankAccountFormScreenState.BillingDetailsCollection(
-                error = error,
-                primaryButtonText = StripeUiCoreR.string.stripe_continue_button_label.resolvableString,
-                isProcessing = false,
-            )
-        }
+        screenStateWithoutSaveForFutureUse.value = BankFormScreenState(error = error)
         saveForFutureUseElement.controller.onValueChange(true)
     }
 
@@ -426,14 +434,11 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         return args.formArgs.merchantName.trimEnd { it == '.' }
     }
 
-    private fun determineInitialState(): USBankAccountFormScreenState {
+    private fun determineInitialState(): BankFormScreenState {
         return if (args.savedPaymentMethod != null) {
             args.savedPaymentMethod.screenState
         } else {
-            USBankAccountFormScreenState.BillingDetailsCollection(
-                primaryButtonText = StripeUiCoreR.string.stripe_continue_button_label.resolvableString,
-                isProcessing = false,
-            )
+            BankFormScreenState()
         }
     }
 
@@ -571,7 +576,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         }
     }
 
-    private fun USBankAccountFormScreenState.createNewPaymentSelection(
+    private fun createNewPaymentSelection(
         resultIdentifier: ResultIdentifier,
         last4: String?,
         bankName: String?,
@@ -637,7 +642,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             paymentMethodCreateParams = paymentMethodCreateParams,
             paymentMethodOptionsParams = paymentMethodOptionsParams,
             customerRequestedSave = customerRequestedSave,
-            screenState = this,
+            screenState = currentScreenState.value,
             instantDebits = instantDebitsInfo,
             input = PaymentSelection.New.USBankAccount.Input(
                 name = billingDetails.name.orEmpty(),
@@ -647,20 +652,6 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                 saveForFutureUse = saveForFutureUse.value,
             ),
         )
-    }
-
-    private fun buildPrimaryButtonText(): ResolvableString {
-        return when {
-            args.isCompleteFlow -> {
-                if (args.isPaymentFlow) {
-                    args.formArgs.amount!!.buildPayButtonLabel()
-                } else {
-                    StripeUiCoreR.string.stripe_setup_button_label.resolvableString
-                }
-            }
-
-            else -> StripeUiCoreR.string.stripe_continue_button_label.resolvableString
-        }
     }
 
     private fun buildMandateText(
@@ -676,40 +667,17 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         )
     }
 
-    private fun USBankAccountFormScreenState.toPaymentSelection(
+    private fun BankFormScreenState.toPaymentSelection(
         billingDetails: PaymentMethod.BillingDetails,
     ): PaymentSelection.New.USBankAccount? {
-        return when (this) {
-            is USBankAccountFormScreenState.BillingDetailsCollection -> {
-                null
-            }
-            is USBankAccountFormScreenState.MandateCollection -> {
-                createNewPaymentSelection(
-                    resultIdentifier = resultIdentifier,
-                    bankName = bankName,
-                    last4 = last4,
-                    billingDetails = billingDetails,
-                )
-            }
-            is USBankAccountFormScreenState.VerifyWithMicrodeposits -> {
-                createNewPaymentSelection(
-                    resultIdentifier = ResultIdentifier.Session(financialConnectionsSessionId),
-                    bankName = paymentAccount.bankName,
-                    last4 = paymentAccount.last4,
-                    billingDetails = billingDetails,
-                )
-            }
-            is USBankAccountFormScreenState.SavedAccount -> {
-                financialConnectionsSessionId?.let { linkAccountId ->
-                    createNewPaymentSelection(
-                        resultIdentifier = ResultIdentifier.Session(linkAccountId),
-                        bankName = bankName,
-                        last4 = last4,
-                        billingDetails = billingDetails,
-                    )
-                }
-            }
-        }
+        val linkedAccount = linkedBankAccount ?: return null
+
+        return createNewPaymentSelection(
+            resultIdentifier = linkedAccount.resultIdentifier,
+            bankName = linkedBankAccount.bankName,
+            last4 = linkedAccount.last4,
+            billingDetails = billingDetails,
+        )
     }
 
     internal class Factory(
