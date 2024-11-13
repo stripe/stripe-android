@@ -42,7 +42,7 @@ class DefaultIntentConfirmationInterceptorTest {
             stripeRepository = object : AbsFakeStripeRepository() {},
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
-            isFlowController = false,
+            allowsManualConfirmation = false,
         )
 
         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
@@ -67,7 +67,7 @@ class DefaultIntentConfirmationInterceptorTest {
             stripeRepository = object : AbsFakeStripeRepository() {},
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
-            isFlowController = false,
+            allowsManualConfirmation = false,
         )
 
         val createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD
@@ -120,7 +120,7 @@ class DefaultIntentConfirmationInterceptorTest {
             stripeRepository = object : AbsFakeStripeRepository() {},
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
-            isFlowController = false,
+            allowsManualConfirmation = false,
         )
 
         val error = assertFailsWith<IllegalStateException> {
@@ -157,7 +157,7 @@ class DefaultIntentConfirmationInterceptorTest {
             },
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
-            isFlowController = false,
+            allowsManualConfirmation = false,
         )
 
         val error = assertFailsWith<IllegalStateException> {
@@ -193,7 +193,7 @@ class DefaultIntentConfirmationInterceptorTest {
             },
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
-            isFlowController = false,
+            allowsManualConfirmation = false,
         )
 
         val nextStep = interceptor.intercept(
@@ -233,7 +233,7 @@ class DefaultIntentConfirmationInterceptorTest {
             },
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
-            isFlowController = false,
+            allowsManualConfirmation = false,
         )
 
         IntentConfirmationInterceptor.createIntentCallback = succeedingCreateIntentCallback(paymentMethod)
@@ -259,7 +259,7 @@ class DefaultIntentConfirmationInterceptorTest {
             stripeRepository = mock(),
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
-            isFlowController = false,
+            allowsManualConfirmation = false,
         )
 
         IntentConfirmationInterceptor.createIntentCallback = failingCreateIntentCallback(
@@ -287,7 +287,7 @@ class DefaultIntentConfirmationInterceptorTest {
             stripeRepository = mock(),
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
-            isFlowController = false,
+            allowsManualConfirmation = false,
         )
 
         IntentConfirmationInterceptor.createIntentCallback = failingCreateIntentCallback()
@@ -327,7 +327,7 @@ class DefaultIntentConfirmationInterceptorTest {
             },
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
-            isFlowController = false,
+            allowsManualConfirmation = false,
         )
 
         IntentConfirmationInterceptor.createIntentCallback = succeedingCreateIntentCallback(paymentMethod)
@@ -365,7 +365,7 @@ class DefaultIntentConfirmationInterceptorTest {
             },
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
-            isFlowController = false,
+            allowsManualConfirmation = false,
         )
 
         IntentConfirmationInterceptor.createIntentCallback = succeedingCreateIntentCallback(paymentMethod)
@@ -410,7 +410,7 @@ class DefaultIntentConfirmationInterceptorTest {
             },
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
-            isFlowController = false,
+            allowsManualConfirmation = false,
         )
 
         IntentConfirmationInterceptor.createIntentCallback = succeedingCreateIntentCallback(paymentMethod)
@@ -451,7 +451,7 @@ class DefaultIntentConfirmationInterceptorTest {
             },
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
-            isFlowController = false,
+            allowsManualConfirmation = false,
         )
 
         val inputs = listOf(true, false)
@@ -492,7 +492,7 @@ class DefaultIntentConfirmationInterceptorTest {
             stripeRepository = stripeRepository,
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
-            isFlowController = false,
+            allowsManualConfirmation = false,
         )
 
         IntentConfirmationInterceptor.createIntentCallback = CreateIntentCallback { _, _ ->
@@ -532,7 +532,7 @@ class DefaultIntentConfirmationInterceptorTest {
                 ),
                 publishableKeyProvider = { "pk" },
                 stripeAccountIdProvider = { null },
-                isFlowController = false,
+                allowsManualConfirmation = false,
             )
 
             IntentConfirmationInterceptor.createIntentCallback = CreateIntentCallback { _, _ ->
@@ -586,7 +586,7 @@ class DefaultIntentConfirmationInterceptorTest {
             stripeRepository = object : AbsFakeStripeRepository() {},
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
-            isFlowController = false,
+            allowsManualConfirmation = false,
         )
     }
 

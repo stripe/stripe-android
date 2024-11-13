@@ -230,7 +230,7 @@ internal class IntentConfirmationFlowTest {
     ): IntentConfirmationDefinition {
         return IntentConfirmationDefinition(
             intentConfirmationInterceptor = DefaultIntentConfirmationInterceptor(
-                isFlowController = false,
+                allowsManualConfirmation = false,
                 publishableKeyProvider = {
                     "pk_123"
                 },
