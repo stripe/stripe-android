@@ -11,8 +11,8 @@
     <ID>ForbiddenComment:PaymentOptionFactory.kt$PaymentOptionFactory$// TODO: Should use labelResource paymentMethodCreateParams or extension function</ID>
     <ID>FunctionNaming:PaymentSheetTopBar.kt$@Preview @Composable internal fun PaymentSheetTopBar_Preview()</ID>
     <ID>FunctionNaming:PaymentSheetTopBar.kt$@Preview @Composable internal fun TestModeBadge_Preview()</ID>
-    <ID>FunctionOnlyReturningConstant:FlowControllerModule.kt$FlowControllerModule$@Provides @Singleton @Named(IS_FLOW_CONTROLLER) fun provideIsFlowController()</ID>
-    <ID>FunctionOnlyReturningConstant:PaymentSheetLauncherModule.kt$PaymentSheetLauncherModule.Companion$@Provides @Singleton @Named(IS_FLOW_CONTROLLER) fun provideIsFlowController()</ID>
+    <ID>FunctionOnlyReturningConstant:FlowControllerModule.kt$FlowControllerModule$@Provides @Singleton @Named(ALLOWS_MANUAL_CONFIRMATION) fun provideAllowsManualConfirmation()</ID>
+    <ID>FunctionOnlyReturningConstant:PaymentSheetLauncherModule.kt$PaymentSheetLauncherModule.Companion$@Provides @Singleton @Named(ALLOWS_MANUAL_CONFIRMATION) fun provideAllowsManualConfirmation()</ID>
     <ID>LargeClass:CustomerAdapterTest.kt$CustomerAdapterTest</ID>
     <ID>LargeClass:CustomerSheetViewModel.kt$CustomerSheetViewModel : ViewModel</ID>
     <ID>LargeClass:CustomerSheetViewModelTest.kt$CustomerSheetViewModelTest</ID>

@@ -31,7 +31,7 @@ import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssisted
 import com.stripe.android.paymentsheet.DefaultConfirmationHandler
 import com.stripe.android.paymentsheet.DefaultIntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
-import com.stripe.android.paymentsheet.injection.IS_FLOW_CONTROLLER
+import com.stripe.android.paymentsheet.injection.ALLOWS_MANUAL_CONFIRMATION
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncherFactory
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.DefaultBacsMandateConfirmationLauncherFactory
@@ -200,8 +200,8 @@ internal interface CustomerSheetViewModelModule {
             LocaleListCompat.getAdjustedDefault().takeUnless { it.isEmpty }?.get(0)
 
         @Provides
-        @Named(IS_FLOW_CONTROLLER)
-        fun provideIsFlowController() = false
+        @Named(ALLOWS_MANUAL_CONFIRMATION)
+        fun provideAllowsManualConfirmation() = false
 
         @Provides
         fun savedPaymentSelection(): PaymentSelection? = savedPaymentSelection

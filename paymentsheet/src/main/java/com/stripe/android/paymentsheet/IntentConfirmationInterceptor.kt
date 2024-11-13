@@ -16,7 +16,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.setupFutureUsage
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentsheet.IntentConfirmationInterceptor.NextStep
-import com.stripe.android.paymentsheet.injection.IS_FLOW_CONTROLLER
+import com.stripe.android.paymentsheet.injection.ALLOWS_MANUAL_CONFIRMATION
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import javax.inject.Inject
 import javax.inject.Named
@@ -101,7 +101,7 @@ internal class InvalidDeferredIntentUsageException : StripeException() {
 
 internal class DefaultIntentConfirmationInterceptor @Inject constructor(
     private val stripeRepository: StripeRepository,
-    @Named(IS_FLOW_CONTROLLER) private val isFlowController: Boolean,
+    @Named(ALLOWS_MANUAL_CONFIRMATION) private val allowsManualConfirmation: Boolean,
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
     @Named(STRIPE_ACCOUNT_ID) private val stripeAccountIdProvider: () -> String?,
 ) : IntentConfirmationInterceptor {
@@ -323,7 +323,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                     NextStep.HandleNextAction(clientSecret)
                 }
             } else {
-                DeferredIntentValidator.validate(intent, intentConfiguration, isFlowController)
+                DeferredIntentValidator.validate(intent, intentConfiguration, allowsManualConfirmation)
                 createConfirmStep(
                     clientSecret,
                     shippingValues,
