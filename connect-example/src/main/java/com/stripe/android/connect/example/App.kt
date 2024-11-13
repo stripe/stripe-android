@@ -18,6 +18,7 @@ import javax.inject.Inject
 class App : Application() {
 
     @Inject lateinit var embeddedComponentService: EmbeddedComponentService
+
     @Inject lateinit var embeddedComponentManagerProvider: EmbeddedComponentManagerProvider
 
     private val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG)
