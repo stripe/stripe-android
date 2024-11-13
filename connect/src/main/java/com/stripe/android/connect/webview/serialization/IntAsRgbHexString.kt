@@ -10,6 +10,8 @@ import kotlinx.serialization.encoding.Encoder
 
 /**
  * Indicates that the integer should be serialized as a hex color string, e.g. "#FF0000".
+ * Note that typealias's such as this are only serializable when in a class, and cannot be
+ * directly serialized on their own. See https://youtrack.jetbrains.com/issue/KT-64920/Json.encodeToString-yields-different-results-depending-on-whether-typealias-is-used#focus=Comments-27-9092520.0-0.
  */
 typealias IntAsRgbHexString = @Serializable(IntAsRgbHexStringSerializer::class) Int
 
