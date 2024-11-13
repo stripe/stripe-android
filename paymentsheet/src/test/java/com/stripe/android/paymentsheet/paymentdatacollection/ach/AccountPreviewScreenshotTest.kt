@@ -119,6 +119,79 @@ internal class AccountPreviewScreenshotTest {
         }
     }
 
+    @Test
+    fun testWithMissingLast4() {
+        paparazzi.snapshot {
+            BankAccountForm(
+                state = BankFormScreenStateFactory.createWithSession(
+                    sessionId = "session_1234",
+                    last4 = null,
+                ),
+                instantDebits = false,
+                isPaymentFlow = true,
+                formArgs = formArguments,
+                nameController = createNameController(),
+                emailController = createEmailController(),
+                phoneController = createPhoneNumberController(),
+                addressController = createAddressController(),
+                sameAsShippingElement = sameAsShippingElement,
+                saveForFutureUseElement = saveForFutureUseElement,
+                showCheckbox = false,
+                lastTextFieldIdentifier = null,
+                onRemoveAccount = {},
+            )
+        }
+    }
+
+    @Test
+    fun testWithMissingBankName() {
+        paparazzi.snapshot {
+            BankAccountForm(
+                state = BankFormScreenStateFactory.createWithSession(
+                    sessionId = "session_1234",
+                    bankName = null,
+                ),
+                instantDebits = false,
+                isPaymentFlow = true,
+                formArgs = formArguments,
+                nameController = createNameController(),
+                emailController = createEmailController(),
+                phoneController = createPhoneNumberController(),
+                addressController = createAddressController(),
+                sameAsShippingElement = sameAsShippingElement,
+                saveForFutureUseElement = saveForFutureUseElement,
+                showCheckbox = false,
+                lastTextFieldIdentifier = null,
+                onRemoveAccount = {},
+            )
+        }
+    }
+
+    @Test
+    fun testWithMissingBankNameAndLast4() {
+        paparazzi.snapshot {
+            BankAccountForm(
+                state = BankFormScreenStateFactory.createWithSession(
+                    sessionId = "session_1234",
+                    bankName = null,
+                    last4 = null,
+                ),
+                instantDebits = false,
+                isPaymentFlow = true,
+                formArgs = formArguments,
+                nameController = createNameController(),
+                emailController = createEmailController(),
+                phoneController = createPhoneNumberController(),
+                addressController = createAddressController(),
+                sameAsShippingElement = sameAsShippingElement,
+                saveForFutureUseElement = saveForFutureUseElement,
+                showCheckbox = false,
+                lastTextFieldIdentifier = null,
+                onRemoveAccount = {},
+            )
+        }
+    }
+
     private fun createNameController(): TextFieldController {
         return NameConfig.createController("John Doe")
     }
