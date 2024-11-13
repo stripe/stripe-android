@@ -77,6 +77,7 @@ internal interface LinkRepository {
      * Fetch all saved payment methods for the signed in consumer.
      */
     suspend fun listPaymentDetails(
+        paymentMethodTypes: Set<String>,
         consumerSessionClientSecret: String,
         consumerPublishableKey: String?
     ): Result<ConsumerPaymentDetails>

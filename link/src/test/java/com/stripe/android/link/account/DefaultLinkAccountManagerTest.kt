@@ -14,6 +14,7 @@ import com.stripe.android.link.repositories.FakeLinkRepository
 import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
+import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSessionSignup
@@ -702,30 +703,48 @@ class DefaultLinkAccountManagerTest {
     @Test
     fun `listPaymentDetails returns error when repository call fails`() = runSuspendTest {
         val error = AuthenticationException(StripeError())
-        val linkRepository = FakeLinkRepository()
+        val linkRepository = object : FakeLinkRepository() {
+            var paymentMethodTypes: Set<String>? = null
+            override suspend fun listPaymentDetails(
+                paymentMethodTypes: Set<String>,
+                consumerSessionClientSecret: String,
+                consumerPublishableKey: String?
+            ): Result<ConsumerPaymentDetails> {
+                this.paymentMethodTypes = paymentMethodTypes
+                return Result.failure(error)
+            }
+        }
 
         val accountManager = accountManager(linkRepository = linkRepository)
         accountManager.setAccountNullable(TestFactory.CONSUMER_SESSION, TestFactory.PUBLISHABLE_KEY)
 
-        linkRepository.listPaymentDetailsResult = Result.failure(error)
-
-        val result = accountManager.listPaymentDetails()
+        val result = accountManager.listPaymentDetails(setOf("card"))
 
         assertThat(result.exceptionOrNull()).isEqualTo(error)
+        assertThat(linkRepository.paymentMethodTypes).isEqualTo(setOf("card"))
     }
 
     @Test
     fun `listPaymentDetails returns success when repository call succeeds`() = runSuspendTest {
-        val linkRepository = FakeLinkRepository()
+        val linkRepository = object : FakeLinkRepository() {
+            var paymentMethodTypes: Set<String>? = null
+            override suspend fun listPaymentDetails(
+                paymentMethodTypes: Set<String>,
+                consumerSessionClientSecret: String,
+                consumerPublishableKey: String?
+            ): Result<ConsumerPaymentDetails> {
+                this.paymentMethodTypes = paymentMethodTypes
+                return Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS)
+            }
+        }
 
         val accountManager = accountManager(linkRepository = linkRepository)
         accountManager.setAccountNullable(TestFactory.CONSUMER_SESSION, TestFactory.PUBLISHABLE_KEY)
 
-        linkRepository.listPaymentDetailsResult = Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS)
-
-        val result = accountManager.listPaymentDetails()
+        val result = accountManager.listPaymentDetails(setOf("card"))
 
         assertThat(result.getOrNull()).isEqualTo(TestFactory.CONSUMER_PAYMENT_DETAILS)
+        assertThat(linkRepository.paymentMethodTypes).isEqualTo(setOf("card"))
     }
 
     private fun runSuspendTest(testBody: suspend TestScope.() -> Unit) = runTest {

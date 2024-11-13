@@ -89,7 +89,7 @@ internal open class FakeLinkAccountManager : LinkAccountManager {
         return confirmVerificationResult
     }
 
-    override suspend fun listPaymentDetails(): Result<ConsumerPaymentDetails> {
+    override suspend fun listPaymentDetails(paymentMethodTypes: Set<String>): Result<ConsumerPaymentDetails> {
         return listPaymentDetailsResult
     }
 }

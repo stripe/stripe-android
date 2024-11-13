@@ -498,11 +498,11 @@ class LinkApiRepositoryTest {
     fun `listPaymentDetails sends correct parameters`() = runTest {
         val secret = "secret"
         val consumerKey = "key"
-        linkRepository.listPaymentDetails(secret, consumerKey)
+        linkRepository.listPaymentDetails(setOf("card"), secret, consumerKey)
 
         verify(stripeRepository).listPaymentDetails(
             eq(secret),
-            eq(emptySet()),
+            eq(setOf("card")),
             eq(ApiRequest.Options(consumerKey))
         )
     }
@@ -510,11 +510,11 @@ class LinkApiRepositoryTest {
     @Test
     fun `listPaymentDetails without consumerPublishableKey sends correct parameters`() = runTest {
         val secret = "secret"
-        linkRepository.listPaymentDetails(secret, null)
+        linkRepository.listPaymentDetails(setOf("card"), secret, null)
 
         verify(stripeRepository).listPaymentDetails(
             eq(secret),
-            eq(emptySet()),
+            eq(setOf("card")),
             eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID))
         )
     }
