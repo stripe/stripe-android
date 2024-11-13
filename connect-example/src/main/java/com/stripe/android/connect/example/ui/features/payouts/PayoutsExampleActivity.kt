@@ -21,8 +21,10 @@ import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.example.R
 import com.stripe.android.connect.example.ui.common.BasicComponentExampleActivity
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @OptIn(PrivateBetaConnectSDK::class)
@@ -37,7 +39,9 @@ class PayoutsExampleActivity : BasicComponentExampleActivity() {
         requestPermissionLauncher = registerForActivityResult(
             ActivityResultContracts.RequestPermission()
         ) { isGranted ->
-            requestPermissionFlow.tryEmit(isGranted)
+            MainScope().launch {
+                requestPermissionFlow.emit(isGranted)
+            }
         }
     }
 
