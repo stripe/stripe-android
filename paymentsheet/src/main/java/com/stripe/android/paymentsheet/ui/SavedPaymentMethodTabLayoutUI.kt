@@ -75,6 +75,7 @@ import com.stripe.android.R as StripeR
 internal fun SavedPaymentMethodTabLayoutUI(
     interactor: SelectSavedPaymentMethodsInteractor,
     cvcRecollectionState: CvcRecollectionState,
+    useUpdatePaymentMethodScreen: Boolean,
     modifier: Modifier,
 ) {
     val state by interactor.state.collectAsState()
@@ -106,6 +107,7 @@ internal fun SavedPaymentMethodTabLayoutUI(
                 SelectSavedPaymentMethodsInteractor.ViewAction.DeletePaymentMethod(it)
             )
         },
+        useUpdatePaymentMethodScreen = useUpdatePaymentMethodScreen,
         modifier = modifier,
     )
 
@@ -130,8 +132,9 @@ internal fun SavedPaymentMethodTabLayoutUI(
     isProcessing: Boolean,
     onAddCardPressed: () -> Unit,
     onItemSelected: (PaymentSelection?) -> Unit,
-    onModifyItem: (PaymentMethod) -> Unit,
+    onModifyItem: (DisplayableSavedPaymentMethod) -> Unit,
     onItemRemoved: (PaymentMethod) -> Unit,
+    useUpdatePaymentMethodScreen: Boolean,
     modifier: Modifier = Modifier,
     scrollState: LazyListState = rememberLazyListState(),
 ) {
@@ -147,7 +150,8 @@ internal fun SavedPaymentMethodTabLayoutUI(
                 items = paymentOptionsItems,
                 key = { it.key },
             ) { item ->
-                val isEnabled = !isProcessing && (!isEditing || item.isEnabledDuringEditing)
+                val isEnabled =
+                    !isProcessing && (!isEditing || item.isEnabledDuringEditing(useUpdatePaymentMethodScreen))
                 val isSelected = item == selectedPaymentOptionsItem && !isEditing
 
                 SavedPaymentMethodTab(
@@ -160,6 +164,7 @@ internal fun SavedPaymentMethodTabLayoutUI(
                     onItemSelected = onItemSelected,
                     onItemRemoved = onItemRemoved,
                     onModifyItem = onModifyItem,
+                    useUpdatePaymentMethodScreen = useUpdatePaymentMethodScreen,
                     modifier = Modifier
                         .semantics { testTagsAsResourceId = true }
                         .testTag(item.viewType.name)
@@ -217,6 +222,7 @@ private fun SavedPaymentMethodsTabLayoutPreview() {
             onItemSelected = { },
             onModifyItem = { },
             onItemRemoved = { },
+            useUpdatePaymentMethodScreen = false,
         )
     }
 }
@@ -239,7 +245,8 @@ private fun SavedPaymentMethodTab(
     isSelected: Boolean,
     onAddCardPressed: () -> Unit,
     onItemSelected: (PaymentSelection?) -> Unit,
-    onModifyItem: (PaymentMethod) -> Unit,
+    onModifyItem: (DisplayableSavedPaymentMethod) -> Unit,
+    useUpdatePaymentMethodScreen: Boolean,
     onItemRemoved: (PaymentMethod) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -281,6 +288,7 @@ private fun SavedPaymentMethodTab(
                 onItemSelected = onItemSelected,
                 onModifyItem = onModifyItem,
                 onItemRemoved = onItemRemoved,
+                useUpdatePaymentMethodScreen = useUpdatePaymentMethodScreen,
                 modifier = modifier,
             )
         }
@@ -365,8 +373,9 @@ private fun SavedPaymentMethodTab(
     isModifiable: Boolean,
     isSelected: Boolean,
     onItemSelected: (PaymentSelection?) -> Unit,
-    onModifyItem: (PaymentMethod) -> Unit,
+    onModifyItem: (DisplayableSavedPaymentMethod) -> Unit,
     onItemRemoved: (PaymentMethod) -> Unit,
+    useUpdatePaymentMethodScreen: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val labelIcon = paymentMethod.paymentMethod.getLabelIcon()
@@ -386,7 +395,8 @@ private fun SavedPaymentMethodTab(
         SavedPaymentMethodTab(
             viewWidth = width,
             editState = when {
-                isEnabled && isEditing && isModifiable -> PaymentOptionEditState.Modifiable
+                isEnabled && isEditing && (isModifiable || useUpdatePaymentMethodScreen) ->
+                    PaymentOptionEditState.Modifiable
                 isEnabled && isEditing -> PaymentOptionEditState.Removable
                 else -> PaymentOptionEditState.None
             },
@@ -402,7 +412,7 @@ private fun SavedPaymentMethodTab(
                 .getDescription()
                 .resolve()
                 .readNumbersAsIndividualDigits(),
-            onModifyListener = { onModifyItem(paymentMethod.paymentMethod) },
+            onModifyListener = { onModifyItem(paymentMethod.displayableSavedPaymentMethod) },
             onModifyAccessibilityDescription = paymentMethod
                 .displayableSavedPaymentMethod
                 .getModifyDescription()

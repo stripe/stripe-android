@@ -30,6 +30,7 @@ class PaymentOptionsScreenshotTest {
                 onItemSelected = {},
                 onModifyItem = {},
                 onItemRemoved = {},
+                useUpdatePaymentMethodScreen = false,
             )
         }
     }
@@ -72,6 +73,7 @@ class PaymentOptionsScreenshotTest {
                 onItemSelected = {},
                 onModifyItem = {},
                 onItemRemoved = {},
+                useUpdatePaymentMethodScreen = false,
             )
         }
     }
@@ -115,40 +117,16 @@ class PaymentOptionsScreenshotTest {
                 onModifyItem = {},
                 onItemRemoved = {},
                 scrollState = LazyListState(firstVisibleItemIndex = 2),
+                useUpdatePaymentMethodScreen = false,
             )
         }
     }
 
     @Test
     fun testEditingAndRemoveDisabledWithModifiableItems() {
-        val paymentOptionsItems = listOf(
-            PaymentOptionsItem.SavedPaymentMethod(
-                DisplayableSavedPaymentMethod(
-                    displayName = "Card".resolvableString,
-                    paymentMethod = createCard("4242"),
-                ),
-                canRemovePaymentMethods = false,
-            ),
-            PaymentOptionsItem.SavedPaymentMethod(
-                DisplayableSavedPaymentMethod(
-                    displayName = "Card".resolvableString,
-                    paymentMethod = createCard("4000"),
-                ),
-                canRemovePaymentMethods = false,
-            ),
-            PaymentOptionsItem.SavedPaymentMethod(
-                DisplayableSavedPaymentMethod(
-                    displayName = "Card".resolvableString,
-                    paymentMethod = createCard("1234", addNetworks = true),
-                    isCbcEligible = true,
-                ),
-                canRemovePaymentMethods = false,
-            ),
-        )
-
         paparazziRule.snapshot {
             SavedPaymentMethodTabLayoutUI(
-                paymentOptionsItems = paymentOptionsItems,
+                paymentOptionsItems = paymentOptionsItemsWithRemoveDisabledAndModifiableCard,
                 selectedPaymentOptionsItem = null,
                 isEditing = true,
                 isProcessing = false,
@@ -157,9 +135,53 @@ class PaymentOptionsScreenshotTest {
                 onModifyItem = {},
                 onItemRemoved = {},
                 scrollState = LazyListState(firstVisibleItemIndex = 2),
+                useUpdatePaymentMethodScreen = false,
             )
         }
     }
+
+    @Test
+    fun testEditingAndRemoveDisabledWithModifiableItems_usingUpdatePaymentMethodScreen() {
+        paparazziRule.snapshot {
+            SavedPaymentMethodTabLayoutUI(
+                paymentOptionsItems = paymentOptionsItemsWithRemoveDisabledAndModifiableCard,
+                selectedPaymentOptionsItem = null,
+                isEditing = true,
+                isProcessing = false,
+                onAddCardPressed = {},
+                onItemSelected = {},
+                onModifyItem = {},
+                onItemRemoved = {},
+                scrollState = LazyListState(firstVisibleItemIndex = 2),
+                useUpdatePaymentMethodScreen = true,
+            )
+        }
+    }
+
+    private val paymentOptionsItemsWithRemoveDisabledAndModifiableCard = listOf(
+        PaymentOptionsItem.SavedPaymentMethod(
+            DisplayableSavedPaymentMethod(
+                displayName = "Card".resolvableString,
+                paymentMethod = createCard("4242"),
+            ),
+            canRemovePaymentMethods = false,
+        ),
+        PaymentOptionsItem.SavedPaymentMethod(
+            DisplayableSavedPaymentMethod(
+                displayName = "Card".resolvableString,
+                paymentMethod = createCard("4000"),
+            ),
+            canRemovePaymentMethods = false,
+        ),
+        PaymentOptionsItem.SavedPaymentMethod(
+            DisplayableSavedPaymentMethod(
+                displayName = "Card".resolvableString,
+                paymentMethod = createCard("1234", addNetworks = true),
+                isCbcEligible = true,
+            ),
+            canRemovePaymentMethods = false,
+        ),
+    )
 
     private fun createCard(last4: String, addNetworks: Boolean = false): PaymentMethod {
         val original = PaymentMethodFixtures.createCard()

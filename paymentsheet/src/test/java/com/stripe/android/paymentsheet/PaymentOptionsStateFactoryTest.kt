@@ -78,6 +78,15 @@ class PaymentOptionsStateFactoryTest {
 
     @Test
     fun `isEnabledDuringEditing is true for all saved payment methods when remove is enabled`() {
+        testIsEnabledDuringEditingTrueForAllSavedPmsWhenRemoveIsEnabled(useUpdatePaymentMethodScreen = false)
+    }
+
+    @Test
+    fun `isEnabledDuringEditing is true for all saved payment methods when remove is enabled, using updatePM screen`() {
+        testIsEnabledDuringEditingTrueForAllSavedPmsWhenRemoveIsEnabled(useUpdatePaymentMethodScreen = true)
+    }
+
+    private fun testIsEnabledDuringEditingTrueForAllSavedPmsWhenRemoveIsEnabled(useUpdatePaymentMethodScreen: Boolean) {
         val state = createPaymentOptionsState(
             paymentMethods = PaymentMethodFixtures.createCards(3),
             canRemovePaymentMethods = true,
@@ -85,13 +94,13 @@ class PaymentOptionsStateFactoryTest {
 
         val options = state.items.filterIsInstance<PaymentOptionsItem.SavedPaymentMethod>()
 
-        assertThat(options[1].isEnabledDuringEditing).isTrue()
-        assertThat(options[2].isEnabledDuringEditing).isTrue()
-        assertThat(options[2].isEnabledDuringEditing).isTrue()
+        assertThat(options[1].isEnabledDuringEditing(useUpdatePaymentMethodScreen)).isTrue()
+        assertThat(options[2].isEnabledDuringEditing(useUpdatePaymentMethodScreen)).isTrue()
+        assertThat(options[2].isEnabledDuringEditing(useUpdatePaymentMethodScreen)).isTrue()
     }
 
     @Test
-    fun `canRemovePaymentMethods is false for all saved payment methods`() {
+    fun `canRemovePaymentMethods is false for all saved payment methods when not using updatePM screen`() {
         val state = createPaymentOptionsState(
             paymentMethods = PaymentMethodFixtures.createCards(3),
             canRemovePaymentMethods = false,
@@ -99,9 +108,9 @@ class PaymentOptionsStateFactoryTest {
 
         val options = state.items.filterIsInstance<PaymentOptionsItem.SavedPaymentMethod>()
 
-        assertThat(options[0].isEnabledDuringEditing).isFalse()
-        assertThat(options[1].isEnabledDuringEditing).isFalse()
-        assertThat(options[2].isEnabledDuringEditing).isFalse()
+        assertThat(options[0].isEnabledDuringEditing(useUpdatePaymentMethodScreen = false)).isFalse()
+        assertThat(options[1].isEnabledDuringEditing(useUpdatePaymentMethodScreen = false)).isFalse()
+        assertThat(options[2].isEnabledDuringEditing(useUpdatePaymentMethodScreen = false)).isFalse()
     }
 
     @Test
@@ -130,9 +139,23 @@ class PaymentOptionsStateFactoryTest {
 
         val options = state.items.filterIsInstance<PaymentOptionsItem.SavedPaymentMethod>()
 
-        assertThat(options[0].isEnabledDuringEditing).isFalse()
-        assertThat(options[1].isEnabledDuringEditing).isFalse()
-        assertThat(options[2].isEnabledDuringEditing).isTrue()
+        assertThat(options[0].isEnabledDuringEditing(useUpdatePaymentMethodScreen = false)).isFalse()
+        assertThat(options[1].isEnabledDuringEditing(useUpdatePaymentMethodScreen = false)).isFalse()
+        assertThat(options[2].isEnabledDuringEditing(useUpdatePaymentMethodScreen = false)).isTrue()
+    }
+
+    @Test
+    fun `saved payment methods are enabled even when cannot remove when using updatePM screen`() {
+        val state = createPaymentOptionsState(
+            paymentMethods = PaymentMethodFixtures.createCards(3),
+            canRemovePaymentMethods = false,
+        )
+
+        val options = state.items.filterIsInstance<PaymentOptionsItem.SavedPaymentMethod>()
+
+        assertThat(options[0].isEnabledDuringEditing(useUpdatePaymentMethodScreen = true)).isTrue()
+        assertThat(options[1].isEnabledDuringEditing(useUpdatePaymentMethodScreen = true)).isTrue()
+        assertThat(options[2].isEnabledDuringEditing(useUpdatePaymentMethodScreen = true)).isTrue()
     }
 
     private fun createPaymentOptionsState(
