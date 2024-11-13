@@ -28,6 +28,8 @@ def publish_to_sonatype
     nexus_pass = server_element.xpath("//password").first.content
     gnupg_key_id = fetch_password("bindings/gnupg/fingerprint").strip
 
+    rputs "gnupg key id in gradle opts: #{gnupg_key_id}"
+
     gradle_opts = \
     "-Dorg.gradle.project.NEXUS_USERNAME=#{nexus_user} " \
     "-Dorg.gradle.project.NEXUS_PASSWORD=#{nexus_pass} " \
@@ -49,6 +51,8 @@ def publish_to_sonatype
         else
             publish_to_sonatype_commands = ['./gradlew', 'publishToSonatype', 'closeAndReleaseSonatypeStagingRepository', '--stacktrace']
         end
+
+        rputs "Using GPG home: #{env['GNUPGHOME']}"
 
         Subprocess.check_call(
             publish_to_sonatype_commands,

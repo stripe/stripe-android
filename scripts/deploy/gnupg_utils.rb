@@ -69,14 +69,18 @@ def gnupg_env
       # Copy the GPG files onto the ramdisk
       pubkey = fetch_password("bindings/gnupg/pubkey")
       privkey = fetch_password("bindings/gnupg/privkey")
+      rputs "importing keys"
       import = Subprocess.popen(['gpg', '--import', '--batch'],
         stdin: Subprocess::PIPE,
         env: env)
       import.communicate(pubkey + privkey)
 
+      rputs "verifying we have signing key"
       # Make sure we have the signing key loaded
       Subprocess.check_call(['gpg', '--list-keys', gnupg_key_id],
         env: env)
+
+      rputs "gnupg key id: #{gnupg_key_id}"
 
       # Determine the keygrip
       output = Subprocess.check_output(%W{gpg --list-secret-keys --batch --with-colons #{gnupg_key_id}},
@@ -85,8 +89,15 @@ def gnupg_env
       keygrips = lines.map {|l| l.split(":")[9]}.each_slice(2)
       keygrip = keygrips.find {|fpr, _| fpr == gnupg_key_id}.last
 
+      rputs "secret key: #{output}"
+
+      gpg_version = Subprocess.check_output(['gpg', '--version'], env: env)
+      rputs "gpg version: #{gpg_version}"
+
       # Set up the passphrase for automatic operation
       passphrase = fetch_password("bindings/gnupg/passphrase").strip
+
+      rputs "passphrase: #{passphrase}"
 
       # This presets the passphrase without checking any return values.
       # It could fail but probably won't?
