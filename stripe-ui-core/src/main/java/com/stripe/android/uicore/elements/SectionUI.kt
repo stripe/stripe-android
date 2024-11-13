@@ -32,14 +32,13 @@ fun Section(
     isSelected: Boolean = false,
     content: @Composable () -> Unit
 ) {
-    Column {
-        Column(modifier = modifier) {
-            SectionTitle(title)
-            SectionCard(
-                isSelected = isSelected,
-                content = content,
-            )
-        }
+    Column(modifier) {
+        SectionTitle(title)
+        SectionCard(
+            isSelected = isSelected,
+            content = content,
+        )
+
         if (error != null) {
             SectionError(error)
         }
@@ -100,6 +99,8 @@ fun SectionError(error: String) {
         text = error,
         color = MaterialTheme.colors.error,
         style = MaterialTheme.typography.h6,
-        modifier = Modifier.semantics(mergeDescendants = true) { }
+        modifier = Modifier
+            .padding(top = 2.dp)
+            .semantics(mergeDescendants = true) { }
     )
 }

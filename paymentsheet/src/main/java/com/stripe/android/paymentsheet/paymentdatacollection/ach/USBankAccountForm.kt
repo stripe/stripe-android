@@ -142,6 +142,7 @@ internal fun BankAccountForm(
 
         state.linkedBankAccount?.let { linkedBankAccount ->
             AccountDetailsForm(
+                modifier = Modifier.padding(top = 16.dp),
                 showCheckbox = showCheckbox,
                 isProcessing = state.isProcessing,
                 bankName = linkedBankAccount.bankName,
@@ -173,7 +174,6 @@ private fun BillingDetailsForm(
             } else {
                 stringResource(R.string.stripe_paymentsheet_save_bank_title)
             },
-            modifier = Modifier.padding(vertical = 8.dp)
         )
 
         val showName = if (instantDebits) {
@@ -191,7 +191,7 @@ private fun BillingDetailsForm(
                 contentAlignment = Alignment.CenterEnd
             ) {
                 TextFieldSection(
-                    modifier = Modifier.padding(vertical = 8.dp),
+                    modifier = Modifier.padding(top = 16.dp),
                     textFieldController = nameController,
                 ) {
                     TextField(
@@ -210,7 +210,7 @@ private fun BillingDetailsForm(
                 contentAlignment = Alignment.CenterEnd
             ) {
                 TextFieldSection(
-                    modifier = Modifier.padding(vertical = 8.dp),
+                    modifier = Modifier.padding(top = 16.dp),
                     textFieldController = emailController,
                 ) {
                     TextField(
@@ -234,6 +234,7 @@ private fun BillingDetailsForm(
                 } else {
                     ImeAction.Next
                 },
+                modifier = Modifier.padding(top = 16.dp)
             )
         }
         if (formArgs.billingDetailsCollectionConfiguration.address == AddressCollectionMode.Full) {
@@ -242,6 +243,7 @@ private fun BillingDetailsForm(
                 addressController = addressController,
                 lastTextFieldIdentifier = lastTextFieldIdentifier,
                 sameAsShippingElement = sameAsShippingElement,
+                modifier = Modifier.padding(top = 16.dp)
             )
         }
     }
@@ -253,6 +255,7 @@ private fun PhoneSection(
     isProcessing: Boolean,
     phoneController: PhoneNumberController,
     imeAction: ImeAction,
+    modifier: Modifier = Modifier,
 ) {
     val error by phoneController.error.collectAsState()
 
@@ -272,7 +275,7 @@ private fun PhoneSection(
         contentAlignment = Alignment.CenterEnd
     ) {
         Section(
-            modifier = Modifier.padding(vertical = 8.dp),
+            modifier = modifier,
             title = null,
             error = sectionErrorString,
         ) {
@@ -292,6 +295,7 @@ private fun AddressSection(
     addressController: AddressController,
     lastTextFieldIdentifier: IdentifierSpec?,
     sameAsShippingElement: SameAsShippingElement?,
+    modifier: Modifier = Modifier,
 ) {
     val error by addressController.error.collectAsState()
 
@@ -310,9 +314,8 @@ private fun AddressSection(
             .padding(0.dp),
         contentAlignment = Alignment.CenterEnd
     ) {
-        Column {
+        Column(modifier) {
             Section(
-                modifier = Modifier.padding(vertical = 8.dp),
                 title = PaymentsUiCoreR.string.stripe_billing_details,
                 error = sectionErrorString,
             ) {
@@ -324,7 +327,7 @@ private fun AddressSection(
                 )
             }
             sameAsShippingElement?.let {
-                SameAsShippingElementUI(it.controller, Modifier.padding(vertical = 4.dp))
+                SameAsShippingElementUI(it.controller, Modifier.padding(top = 12.dp))
             }
         }
     }
@@ -332,6 +335,7 @@ private fun AddressSection(
 
 @Composable
 private fun AccountDetailsForm(
+    modifier: Modifier = Modifier,
     showCheckbox: Boolean,
     isProcessing: Boolean,
     bankName: String?,
@@ -343,14 +347,13 @@ private fun AccountDetailsForm(
     val bankIcon = remember(bankName) { TransformToBankIcon(bankName) }
 
     Column(
-        Modifier
+        modifier
             .fillMaxWidth()
-            .padding(bottom = 8.dp)
             .testTag(TEST_TAG_ACCOUNT_DETAILS)
     ) {
         H6Text(
             text = stringResource(StripeR.string.stripe_title_bank_account),
-            modifier = Modifier.padding(vertical = 8.dp)
+            modifier = Modifier.padding(bottom = 8.dp)
         )
 
         SectionCard(modifier = Modifier.fillMaxWidth()) {

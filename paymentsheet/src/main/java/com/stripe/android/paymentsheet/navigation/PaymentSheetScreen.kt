@@ -38,8 +38,7 @@ import kotlinx.coroutines.flow.StateFlow
 import java.io.Closeable
 import com.stripe.android.R as PaymentsCoreR
 
-internal val verticalModeBottomContentPadding = 20.dp
-internal val horizontalModeBottomContentPadding = 8.dp
+internal val formBottomContentPadding = 20.dp
 internal val horizontalModeWalletsDividerSpacing = 16.dp
 internal val verticalModeWalletsDividerSpacing = 24.dp
 
@@ -190,7 +189,7 @@ internal sealed interface PaymentSheetScreen {
         )
         override val showsContinueButton: Boolean = true
         override val topContentPadding: Dp = 0.dp
-        override val bottomContentPadding: Dp = horizontalModeBottomContentPadding
+        override val bottomContentPadding: Dp = formBottomContentPadding
         override val walletsDividerSpacing: Dp = horizontalModeWalletsDividerSpacing
         override val animationStyle: AnimationStyle = AnimationStyle.PrimaryButtonAnchored
         override val showsMandates: Boolean = true
@@ -242,7 +241,7 @@ internal sealed interface PaymentSheetScreen {
         )
         override val showsContinueButton: Boolean = true
         override val topContentPadding: Dp = 0.dp
-        override val bottomContentPadding: Dp = horizontalModeBottomContentPadding
+        override val bottomContentPadding: Dp = formBottomContentPadding
         override val walletsDividerSpacing: Dp = horizontalModeWalletsDividerSpacing
         override val showsMandates: Boolean = true
 
@@ -334,7 +333,7 @@ internal sealed interface PaymentSheetScreen {
         )
         override val showsContinueButton: Boolean = true
         override val topContentPadding: Dp = 0.dp
-        override val bottomContentPadding: Dp = verticalModeBottomContentPadding
+        override val bottomContentPadding: Dp = formBottomContentPadding
         override val walletsDividerSpacing: Dp = verticalModeWalletsDividerSpacing
         override val showsMandates: Boolean = true
 
@@ -380,7 +379,7 @@ internal sealed interface PaymentSheetScreen {
         )
         override val showsContinueButton: Boolean = true
         override val topContentPadding: Dp = 0.dp
-        override val bottomContentPadding: Dp = verticalModeBottomContentPadding
+        override val bottomContentPadding: Dp = formBottomContentPadding
         override val walletsDividerSpacing: Dp = verticalModeWalletsDividerSpacing
         override val showsMandates: Boolean = true
 
@@ -404,7 +403,7 @@ internal sealed interface PaymentSheetScreen {
 
         @Composable
         override fun Content(modifier: Modifier) {
-            VerticalModeFormUI(interactor)
+            VerticalModeFormUI(interactor, modifier)
         }
 
         override fun close() {
@@ -509,7 +508,7 @@ internal sealed interface PaymentSheetScreen {
         )
         override val showsContinueButton: Boolean = false
         override val topContentPadding: Dp = 0.dp
-        override val bottomContentPadding: Dp = verticalModeBottomContentPadding
+        override val bottomContentPadding: Dp = formBottomContentPadding
         override val walletsDividerSpacing: Dp = verticalModeWalletsDividerSpacing
         override val showsMandates: Boolean = false
 
@@ -545,7 +544,7 @@ internal sealed interface PaymentSheetScreen {
         )
         override val showsContinueButton: Boolean = false
         override val topContentPadding: Dp = 0.dp
-        override val bottomContentPadding: Dp = verticalModeBottomContentPadding
+        override val bottomContentPadding: Dp = formBottomContentPadding
         override val walletsDividerSpacing: Dp = verticalModeWalletsDividerSpacing
         override val showsMandates: Boolean = false
 

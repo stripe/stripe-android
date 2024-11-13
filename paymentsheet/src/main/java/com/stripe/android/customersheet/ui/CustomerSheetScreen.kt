@@ -239,7 +239,7 @@ internal fun AddPaymentMethod(
         }
     }
 
-    Spacer(modifier = Modifier.padding(top = 16.dp))
+    Spacer(modifier = Modifier.padding(top = 24.dp))
 
     viewState.errorMessage?.let { error ->
         ErrorMessage(
