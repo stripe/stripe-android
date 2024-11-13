@@ -84,7 +84,7 @@ fun FormUI(
                 element = element,
                 enabled = enabled,
                 index = index,
-                size = visibleElements.size,
+                maxIndex = visibleElements.size - 1,
                 lastTextFieldIdentifier = lastTextFieldIdentifier,
                 hiddenIdentifiers = hiddenIdentifiers,
             )
@@ -96,15 +96,15 @@ fun FormUI(
 private fun FormUIElement(
     element: FormElement,
     index: Int,
-    size: Int,
+    maxIndex: Int,
     enabled: Boolean,
     hiddenIdentifiers: Set<IdentifierSpec>,
     lastTextFieldIdentifier: IdentifierSpec?,
 ) {
     when (element) {
         is SectionElement -> SectionElementUI(
-            modifier = Modifier.addFormVerticalPadding(
-                size = size,
+            modifier = Modifier.formVerticalPadding(
+                maxIndex = maxIndex,
                 index = index,
                 vertical = 8.dp,
             ),
@@ -114,8 +114,8 @@ private fun FormUIElement(
             lastTextFieldIdentifier = lastTextFieldIdentifier,
         )
         is CheckboxFieldElement -> CheckboxFieldUI(
-            modifier = Modifier.addFormVerticalPadding(
-                size = size,
+            modifier = Modifier.formVerticalPadding(
+                maxIndex = maxIndex,
                 index = index,
                 vertical = 4.dp,
             ),
@@ -124,15 +124,15 @@ private fun FormUIElement(
         )
         is StaticTextElement -> StaticTextElementUI(
             element = element,
-            modifier = Modifier.addFormVerticalPadding(
-                size = size,
+            modifier = Modifier.formVerticalPadding(
+                maxIndex = maxIndex,
                 index = index,
                 vertical = 8.dp,
             ),
         )
         is SaveForFutureUseElement -> SaveForFutureUseElementUI(
-            modifier = Modifier.addFormVerticalPadding(
-                size = size,
+            modifier = Modifier.formVerticalPadding(
+                maxIndex = maxIndex,
                 index = index,
                 vertical = 4.dp,
             ),
@@ -141,8 +141,8 @@ private fun FormUIElement(
         )
         is SameAsShippingElement -> SameAsShippingElementUI(
             controller = element.controller,
-            modifier = Modifier.addFormVerticalPadding(
-                size = size,
+            modifier = Modifier.formVerticalPadding(
+                maxIndex = maxIndex,
                 index = index,
                 vertical = 4.dp,
             ),
@@ -150,8 +150,8 @@ private fun FormUIElement(
         is AfterpayClearpayHeaderElement -> AfterpayClearpayElementUI(
             enabled = enabled,
             element = element,
-            modifier = Modifier.addFormVerticalPadding(
-                size = size,
+            modifier = Modifier.formVerticalPadding(
+                maxIndex = maxIndex,
                 index = index,
                 start = 4.dp,
                 end = 4.dp,
@@ -161,23 +161,23 @@ private fun FormUIElement(
         )
         is AuBecsDebitMandateTextElement -> AuBecsDebitMandateElementUI(
             element = element,
-            modifier = Modifier.addFormVerticalPadding(
-                size = size,
+            modifier = Modifier.formVerticalPadding(
+                maxIndex = maxIndex,
                 index = index,
                 vertical = 8.dp,
             ),
         )
         is AffirmHeaderElement -> AffirmElementUI(
-            modifier = Modifier.addFormVerticalPadding(
-                size = size,
+            modifier = Modifier.formVerticalPadding(
+                maxIndex = maxIndex,
                 index = index,
                 vertical = 8.dp,
             ),
         )
         is MandateTextElement -> MandateTextUI(
             element = element,
-            modifier = Modifier.addFormVerticalPadding(
-                size = size,
+            modifier = Modifier.formVerticalPadding(
+                maxIndex = maxIndex,
                 index = index,
                 top = element.topPadding,
                 bottom = 8.dp,
@@ -188,8 +188,8 @@ private fun FormUIElement(
             controller = element.controller,
             hiddenIdentifiers = hiddenIdentifiers,
             lastTextFieldIdentifier = lastTextFieldIdentifier,
-            modifier = Modifier.addFormVerticalPadding(
-                size = size,
+            modifier = Modifier.formVerticalPadding(
+                maxIndex = maxIndex,
                 index = index,
                 vertical = 8.dp,
             ),
@@ -198,8 +198,8 @@ private fun FormUIElement(
             enabled = enabled,
             element = element,
             lastTextFieldIdentifier = lastTextFieldIdentifier,
-            modifier = Modifier.addFormVerticalPadding(
-                size = size,
+            modifier = Modifier.formVerticalPadding(
+                maxIndex = maxIndex,
                 index = index,
                 vertical = 8.dp,
             ),
@@ -209,27 +209,27 @@ private fun FormUIElement(
     }
 }
 
-private fun Modifier.addFormVerticalPadding(
+private fun Modifier.formVerticalPadding(
     index: Int,
-    size: Int,
+    maxIndex: Int,
     vertical: Dp,
-) = addFormVerticalPadding(
+) = formVerticalPadding(
     index = index,
-    size = size,
+    maxIndex = maxIndex,
     top = vertical,
     bottom = vertical
 )
 
-private fun Modifier.addFormVerticalPadding(
+private fun Modifier.formVerticalPadding(
     index: Int,
-    size: Int,
+    maxIndex: Int,
     top: Dp,
     bottom: Dp,
     start: Dp = 0.dp,
     end: Dp = 0.dp,
 ) = when {
-    index == 0 && size == 1 -> this.padding(top = 0.dp, bottom = 0.dp, start = start, end = end)
+    maxIndex == 0 -> this.padding(top = 0.dp, bottom = 0.dp, start = start, end = end)
     index == 0 -> this.padding(top = 0.dp, bottom = bottom, start = start, end = end)
-    index == size - 1 -> this.padding(top = top, bottom = 0.dp, start = start, end = end)
+    index == maxIndex -> this.padding(top = top, bottom = 0.dp, start = start, end = end)
     else -> this.padding(top = top, bottom = bottom, start = start, end = end)
 }
