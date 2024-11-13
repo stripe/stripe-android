@@ -20,7 +20,6 @@ import com.stripe.android.connect.webview.serialization.toJs
 import com.stripe.android.core.Logger
 import com.stripe.android.core.version.StripeSdkVersion
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
