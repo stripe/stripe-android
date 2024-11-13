@@ -32,7 +32,7 @@ internal data class WalletUiState(
     ): WalletUiState {
         return copy(
             paymentDetailsList = response.paymentDetails,
-            selectedItem = response.paymentDetails.firstOrNull(),
+            selectedItem = paymentDetailsList.firstOrNull { supportedTypes.contains(it.type) },
             isProcessing = false
         )
     }
