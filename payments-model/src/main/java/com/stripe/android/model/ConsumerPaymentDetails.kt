@@ -26,14 +26,22 @@ data class ConsumerPaymentDetails(
     data class Card(
         override val id: String,
         override val last4: String,
-    ) : PaymentDetails(id, type = "card")
+    ) : PaymentDetails(id, type = TYPE) {
+        companion object {
+            const val TYPE = "card"
+        }
+    }
 
     @Parcelize
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Passthrough(
         override val id: String,
         override val last4: String,
-    ) : PaymentDetails(id, type = "card")
+    ) : PaymentDetails(id, type = TYPE) {
+        companion object {
+            const val TYPE = "card"
+        }
+    }
 
     @Parcelize
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -41,7 +49,11 @@ data class ConsumerPaymentDetails(
         override val id: String,
         override val last4: String,
         val bankName: String?,
-    ) : PaymentDetails(id, type = "bank_account")
+    ) : PaymentDetails(id, type = TYPE) {
+        companion object {
+            const val TYPE = "bank_account"
+        }
+    }
 
     @Parcelize
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
