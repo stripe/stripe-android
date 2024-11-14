@@ -74,7 +74,7 @@ internal fun SavedPaymentMethodRowButton(
 @Preview
 @Composable
 internal fun PreviewCardSavedPaymentMethodRowButton() {
-    val cardSavedPaymentMethod = DisplayableSavedPaymentMethod(
+    val cardSavedPaymentMethod = DisplayableSavedPaymentMethod.create(
         displayName = "4242".resolvableString,
         paymentMethod = PaymentMethod(
             id = "001",

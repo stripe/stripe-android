@@ -11,7 +11,7 @@ internal fun PaymentMethod.toDisplayableSavedPaymentMethod(
     providePaymentMethodName: (PaymentMethodCode?) -> ResolvableString,
     paymentMethodMetadata: PaymentMethodMetadata?,
 ): DisplayableSavedPaymentMethod {
-    return DisplayableSavedPaymentMethod(
+    return DisplayableSavedPaymentMethod.create(
         displayName = providePaymentMethodName(type?.code),
         paymentMethod = this,
         isCbcEligible = paymentMethodMetadata?.cbcEligibility is CardBrandChoiceEligibility.Eligible,

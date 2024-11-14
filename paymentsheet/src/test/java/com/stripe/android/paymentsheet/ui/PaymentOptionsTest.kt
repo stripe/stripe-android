@@ -161,14 +161,14 @@ class PaymentOptionsTest {
             SavedPaymentMethodTabLayoutUI(
                 paymentOptionsItems = listOf(
                     PaymentOptionsItem.SavedPaymentMethod(
-                        displayableSavedPaymentMethod = DisplayableSavedPaymentMethod(
+                        displayableSavedPaymentMethod = DisplayableSavedPaymentMethod.create(
                             displayName = resolvableString("4242"),
                             paymentMethod = createCard(last4 = "4242"),
                         ),
                         canRemovePaymentMethods = false,
                     ),
                     PaymentOptionsItem.SavedPaymentMethod(
-                        displayableSavedPaymentMethod = DisplayableSavedPaymentMethod(
+                        displayableSavedPaymentMethod = DisplayableSavedPaymentMethod.create(
                             displayName = resolvableString("5555"),
                             paymentMethod = createCard(last4 = "5555"),
                         ),
@@ -198,14 +198,14 @@ class PaymentOptionsTest {
             SavedPaymentMethodTabLayoutUI(
                 paymentOptionsItems = listOf(
                     PaymentOptionsItem.SavedPaymentMethod(
-                        displayableSavedPaymentMethod = DisplayableSavedPaymentMethod(
+                        displayableSavedPaymentMethod = DisplayableSavedPaymentMethod.create(
                             displayName = resolvableString("4242"),
                             paymentMethod = createCard(last4 = "4242"),
                         ),
                         canRemovePaymentMethods = false,
                     ),
                     PaymentOptionsItem.SavedPaymentMethod(
-                        displayableSavedPaymentMethod = DisplayableSavedPaymentMethod(
+                        displayableSavedPaymentMethod = DisplayableSavedPaymentMethod.create(
                             displayName = resolvableString("5555"),
                             paymentMethod = createCard(last4 = "5555"),
                         ),

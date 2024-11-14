@@ -32,7 +32,7 @@ internal class PaymentSheetScreenManageSavedPaymentMethodsScreenshotTest {
         listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
             .plus(PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD)
             .map {
-                DisplayableSavedPaymentMethod(
+                DisplayableSavedPaymentMethod.create(
                     displayName = it.card!!.last4!!.resolvableString,
                     paymentMethod = it,
                     isCbcEligible = true

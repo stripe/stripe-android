@@ -5,36 +5,44 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 
-internal data class DisplayableSavedPaymentMethod(
+internal data class DisplayableSavedPaymentMethod private constructor(
     val displayName: ResolvableString,
     val paymentMethod: PaymentMethod,
+    val savedPaymentMethod: SavedPaymentMethod,
     val isCbcEligible: Boolean = false,
 ) {
     fun isModifiable(): Boolean {
-        val hasMultipleNetworks = paymentMethod.card?.networks?.available?.let { available ->
-            available.size > 1
-        } ?: false
+        return when (savedPaymentMethod) {
+            is SavedPaymentMethod.Card -> {
+                val hasMultipleNetworks = savedPaymentMethod.card.networks?.available?.let { available ->
+                    available.size > 1
+                } ?: false
 
-        return isCbcEligible && hasMultipleNetworks
+                return isCbcEligible && hasMultipleNetworks
+            }
+            is SavedPaymentMethod.SepaDebit,
+            is SavedPaymentMethod.USBankAccount,
+            SavedPaymentMethod.Unexpected -> false
+        }
     }
 
-    fun getDescription() = when (paymentMethod.type) {
-        PaymentMethod.Type.Card -> {
+    fun getDescription() = when (savedPaymentMethod) {
+        is SavedPaymentMethod.Card -> {
             resolvableString(
                 com.stripe.android.R.string.stripe_card_ending_in,
                 brandDisplayName(),
-                paymentMethod.card?.last4
+                savedPaymentMethod.card.last4
             )
         }
-        PaymentMethod.Type.SepaDebit -> resolvableString(
+        is SavedPaymentMethod.SepaDebit -> resolvableString(
             R.string.stripe_bank_account_ending_in,
-            paymentMethod.sepaDebit?.last4
+            savedPaymentMethod.sepaDebit.last4
         )
-        PaymentMethod.Type.USBankAccount -> resolvableString(
+        is SavedPaymentMethod.USBankAccount -> resolvableString(
             R.string.stripe_bank_account_ending_in,
-            paymentMethod.usBankAccount?.last4
+            savedPaymentMethod.usBankAccount.last4
         )
-        else -> resolvableString("")
+        is SavedPaymentMethod.Unexpected -> resolvableString("")
     }
 
     fun getModifyDescription() = resolvableString(
@@ -50,8 +58,48 @@ internal data class DisplayableSavedPaymentMethod(
     }
 
     fun brandDisplayName(): String? {
-        val brand = paymentMethod.card?.displayBrand?.let { CardBrand.fromCode(it) }
-            ?: paymentMethod.card?.brand
-        return brand?.displayName
+        return when (savedPaymentMethod) {
+            is SavedPaymentMethod.Card -> {
+                val brand = savedPaymentMethod.card.displayBrand?.let { CardBrand.fromCode(it) }
+                    ?: savedPaymentMethod.card.brand
+                return brand.displayName
+            }
+            is SavedPaymentMethod.USBankAccount,
+            is SavedPaymentMethod.SepaDebit,
+            is SavedPaymentMethod.Unexpected -> null
+        }
     }
+
+    companion object {
+        fun create(
+            displayName: ResolvableString,
+            paymentMethod: PaymentMethod,
+            isCbcEligible: Boolean = false,
+        ): DisplayableSavedPaymentMethod {
+            val savedPaymentMethod = when (paymentMethod.type) {
+                PaymentMethod.Type.Card -> paymentMethod.card?.let { SavedPaymentMethod.Card(it) }
+                PaymentMethod.Type.USBankAccount -> paymentMethod.usBankAccount?.let {
+                    SavedPaymentMethod.USBankAccount(
+                        it
+                    )
+                }
+                PaymentMethod.Type.SepaDebit -> paymentMethod.sepaDebit?.let { SavedPaymentMethod.SepaDebit(it) }
+                else -> null
+            }
+
+            return DisplayableSavedPaymentMethod(
+                displayName = displayName,
+                paymentMethod = paymentMethod,
+                savedPaymentMethod = savedPaymentMethod ?: SavedPaymentMethod.Unexpected,
+                isCbcEligible = isCbcEligible,
+            )
+        }
+    }
+}
+
+internal sealed interface SavedPaymentMethod {
+    data class Card(val card: PaymentMethod.Card) : SavedPaymentMethod
+    data class USBankAccount(val usBankAccount: PaymentMethod.USBankAccount) : SavedPaymentMethod
+    data class SepaDebit(val sepaDebit: PaymentMethod.SepaDebit) : SavedPaymentMethod
+    data object Unexpected : SavedPaymentMethod
 }

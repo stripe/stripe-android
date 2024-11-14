@@ -182,7 +182,7 @@ private fun SavedPaymentMethodsTabLayoutPreview() {
                 PaymentOptionsItem.Link,
                 PaymentOptionsItem.GooglePay,
                 PaymentOptionsItem.SavedPaymentMethod(
-                    DisplayableSavedPaymentMethod(
+                    DisplayableSavedPaymentMethod.create(
                         displayName = "4242".resolvableString,
                         paymentMethod = PaymentMethod(
                             id = "001",
@@ -199,7 +199,7 @@ private fun SavedPaymentMethodsTabLayoutPreview() {
                     canRemovePaymentMethods = true,
                 ),
                 PaymentOptionsItem.SavedPaymentMethod(
-                    DisplayableSavedPaymentMethod(
+                    DisplayableSavedPaymentMethod.create(
                         displayName = "4242".resolvableString,
                         paymentMethod = PaymentMethod(
                             id = "002",
