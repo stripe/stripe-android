@@ -37,8 +37,6 @@ class EmbeddedPaymentElement internal constructor(
      *
      * This ensures the appropriate payment methods are displayed, collect the right fields, etc.
      * - Note: Upon completion, [paymentOption] may become null if it's no longer available.
-     * - Note: If you call [configure] while a previous call to [configure] is still in progress, the previous call
-     *      returns [ConfigureResult.Cancelled].
      */
     suspend fun configure(
         intentConfiguration: PaymentSheet.IntentConfiguration,
@@ -319,13 +317,6 @@ class EmbeddedPaymentElement internal constructor(
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @ExperimentalEmbeddedPaymentElementApi
         class Succeeded internal constructor() : ConfigureResult
-
-        /**
-         * The configure was cancelled. This is only returned when a subsequent configure call cancels previous ones.
-         */
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        @ExperimentalEmbeddedPaymentElementApi
-        class Cancelled internal constructor() : ConfigureResult
 
         /**
          * The configure call failed e.g. due to network failure or because of an invalid IntentConfiguration.

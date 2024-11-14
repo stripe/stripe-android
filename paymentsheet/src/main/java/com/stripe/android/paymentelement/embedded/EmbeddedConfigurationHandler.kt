@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.embedded
 
 import android.os.Parcelable
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.common.coroutines.CoalescingOrchestrator
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
@@ -33,15 +34,28 @@ internal class DefaultEmbeddedConfigurationHandler @Inject constructor(
             savedStateHandle[ConfigurationCache.KEY] = value
         }
 
+    @Volatile
+    private var inFlightRequest: InFlightRequest? = null
+
     override suspend fun configure(
         intentConfiguration: PaymentSheet.IntentConfiguration,
         configuration: EmbeddedPaymentElement.Configuration,
     ): Result<PaymentElementLoader.State> {
         val targetConfiguration = configuration.asCommonConfiguration()
+        val arguments = Arguments(
+            intentConfiguration = intentConfiguration,
+            configuration = targetConfiguration,
+        )
 
         cache?.let { cache ->
-            if (intentConfiguration == cache.intentConfiguration && targetConfiguration == cache.configuration) {
+            if (cache.arguments == arguments) {
                 return Result.success(cache.resultState)
+            }
+        }
+
+        inFlightRequest?.let { inFlightRequest ->
+            if (inFlightRequest.arguments == arguments) {
+                return inFlightRequest.result()
             }
         }
 
@@ -53,28 +67,51 @@ internal class DefaultEmbeddedConfigurationHandler @Inject constructor(
             return Result.failure(e)
         }
 
-        return paymentElementLoader.load(
-            initializationMode = initializationMode,
-            configuration = targetConfiguration,
-            isReloadingAfterProcessDeath = false,
-            initializedViaCompose = true,
-        ).onSuccess { state ->
-            cache = ConfigurationCache(
-                intentConfiguration = intentConfiguration,
-                configuration = targetConfiguration,
-                resultState = state,
-            )
-        }
+        val coalescingOrchestrator = CoalescingOrchestrator<Result<PaymentElementLoader.State>>(
+            factory = {
+                paymentElementLoader.load(
+                    initializationMode = initializationMode,
+                    configuration = targetConfiguration,
+                    isReloadingAfterProcessDeath = false,
+                    initializedViaCompose = true,
+                ).onSuccess { state ->
+                    cache = ConfigurationCache(
+                        arguments = Arguments(
+                            intentConfiguration = intentConfiguration,
+                            configuration = targetConfiguration,
+                        ),
+                        resultState = state,
+                    )
+                }
+            },
+        )
+
+        inFlightRequest = InFlightRequest(
+            arguments = arguments,
+            result = coalescingOrchestrator::get,
+        )
+
+        return coalescingOrchestrator.get()
     }
 
     @Parcelize
-    data class ConfigurationCache(
+    data class Arguments(
         val intentConfiguration: PaymentSheet.IntentConfiguration,
         val configuration: CommonConfiguration,
+    ) : Parcelable
+
+    @Parcelize
+    data class ConfigurationCache(
+        val arguments: Arguments,
         val resultState: PaymentElementLoader.State,
     ) : Parcelable {
         companion object {
             const val KEY = "ConfigurationCache"
         }
     }
+
+    private data class InFlightRequest(
+        val arguments: Arguments,
+        val result: suspend () -> Result<PaymentElementLoader.State>,
+    )
 }
