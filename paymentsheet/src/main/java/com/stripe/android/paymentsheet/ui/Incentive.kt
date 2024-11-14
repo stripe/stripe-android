@@ -10,7 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.stripe.android.model.PaymentMethodIncentive
+import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 
 @Composable
 internal fun PaymentMethodIncentive.Content(

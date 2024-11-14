@@ -6,11 +6,10 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.PaymentMethodIncentive
-import com.stripe.android.model.toPaymentMethodIncentive
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -81,6 +80,7 @@ internal class USBankAccountFormArguments(
                 ?.intentConfiguration
                 ?.onBehalfOf
             val stripeIntent = paymentMethodMetadata.stripeIntent
+            val supportedPaymentMethod = paymentMethodMetadata.supportedPaymentMethodForCode(selectedPaymentMethodCode)
             return USBankAccountFormArguments(
                 showCheckbox = isSaveForFutureUseValueChangeable &&
                     // Instant Debits does not support saving for future use
@@ -100,10 +100,7 @@ internal class USBankAccountFormArguments(
                 onUpdatePrimaryButtonUIState = { viewModel.customPrimaryButtonUiState.update(it) },
                 onUpdatePrimaryButtonState = viewModel::updatePrimaryButtonState,
                 onError = viewModel::onError,
-                incentive = paymentMethodMetadata.consumerIncentive?.toPaymentMethodIncentive()?.takeIf {
-                    // TODO
-                    true
-                },
+                incentive = supportedPaymentMethod?.incentive,
             )
         }
     }

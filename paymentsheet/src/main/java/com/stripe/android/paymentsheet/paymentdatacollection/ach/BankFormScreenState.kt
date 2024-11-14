@@ -2,7 +2,7 @@ package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
 import android.os.Parcelable
 import com.stripe.android.core.strings.ResolvableString
-import com.stripe.android.model.PaymentMethodIncentive
+import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import kotlinx.parcelize.Parcelize
 import com.stripe.android.model.PaymentMethod as PaymentMethodModel
 
