@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.ui
 
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.strings.ResolvableString
-import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.uicore.utils.mapAsStateFlow
@@ -42,7 +41,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
     workContext: CoroutineContext = Dispatchers.Default,
 ) : UpdatePaymentMethodInteractor {
     private val coroutineScope = CoroutineScope(workContext + SupervisorJob())
-    private val error = MutableStateFlow<ResolvableString?>("Example error".resolvableString)
+    private val error = MutableStateFlow<ResolvableString?>(null)
 
     private val _state = error.mapAsStateFlow {
         UpdatePaymentMethodInteractor.State(error = it)
