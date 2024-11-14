@@ -41,18 +41,15 @@ internal fun PrimaryButton(
     modifier: Modifier = Modifier,
     isLoading: Boolean = false,
     displayLockIcon: Boolean = false,
-    overrideBackgroundColor: Color? = null,
-    overrideOnBackgroundColor: Color? = null,
-    overrideBorderColor: Color? = null,
 ) {
     // We need to use PaymentsTheme.primaryButtonStyle instead of MaterialTheme
     // because of the rules API for primary button.
     val context = LocalContext.current
-    val background = overrideBackgroundColor ?: Color(StripeTheme.primaryButtonStyle.getBackgroundColor(context))
-    val onBackground = overrideOnBackgroundColor ?: Color(StripeTheme.primaryButtonStyle.getOnBackgroundColor(context))
+    val background = Color(StripeTheme.primaryButtonStyle.getBackgroundColor(context))
+    val onBackground = Color(StripeTheme.primaryButtonStyle.getOnBackgroundColor(context))
     val borderStroke = BorderStroke(
         StripeTheme.primaryButtonStyle.shape.borderStrokeWidth.dp,
-        overrideBorderColor ?: Color(StripeTheme.primaryButtonStyle.getBorderStrokeColor(context))
+        Color(StripeTheme.primaryButtonStyle.getBorderStrokeColor(context))
     )
     val shape = RoundedCornerShape(
         StripeTheme.primaryButtonStyle.shape.cornerRadius.dp

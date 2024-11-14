@@ -18,6 +18,8 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -31,6 +33,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.R
 import com.stripe.android.core.strings.resolvableString
@@ -41,64 +44,38 @@ import com.stripe.android.uicore.elements.TextFieldColors
 import com.stripe.android.uicore.getBorderStroke
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.stripeShapes
-import com.stripe.android.common.ui.PrimaryButton as PrimaryButton
+import com.stripe.android.uicore.utils.collectAsState
 
 @Composable
 internal fun UpdatePaymentMethodUI(interactor: UpdatePaymentMethodInteractor, modifier: Modifier) {
+    val context = LocalContext.current
     val horizontalPadding = dimensionResource(
         id = com.stripe.android.paymentsheet.R.dimen.stripe_paymentsheet_outer_spacing_horizontal
     )
     val dividerHeight = remember { mutableStateOf(0.dp) }
+    val state by interactor.state.collectAsState()
 
     Column(
         modifier = modifier.padding(horizontal = horizontalPadding),
     ) {
-        Card(
-            border = MaterialTheme.getBorderStroke(false),
-            elevation = 0.dp
-        ) {
-            Column {
-                CardNumberField(
-                    last4 = interactor.card.last4,
-                    savedPaymentMethodIcon = interactor
-                        .displayableSavedPaymentMethod
-                        .paymentMethod
-                        .getSavedPaymentMethodIcon(forVerticalMode = true),
-                )
-                Divider(
-                    color = MaterialTheme.stripeColors.componentDivider,
-                    thickness = MaterialTheme.stripeShapes.borderStrokeWidth.dp,
-                )
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    ExpiryField(
-                        expiryMonth = interactor.card.expiryMonth,
-                        expiryYear = interactor.card.expiryYear,
-                        modifier = Modifier
-                            .weight(1F)
-                            .onSizeChanged {
-                                dividerHeight.value =
-                                    (it.height / Resources.getSystem().displayMetrics.density).dp
-                            },
-                    )
-                    Divider(
-                        modifier = Modifier
-                            .height(dividerHeight.value)
-                            .width(MaterialTheme.stripeShapes.borderStrokeWidth.dp),
-                        color = MaterialTheme.stripeColors.componentDivider,
-                    )
-                    CvcField(cardBrand = interactor.card.brand, modifier = Modifier.weight(1F))
-                }
-            }
-        }
+        CardDetailsUI(interactor, dividerHeight)
+
         Text(
             text = resolvableString(
                 com.stripe.android.paymentsheet.R.string.stripe_paymentsheet_card_details_cannot_be_changed
-            ).resolve(LocalContext.current),
+            ).resolve(context),
             style = MaterialTheme.typography.caption,
             color = MaterialTheme.stripeColors.subtitle,
             fontWeight = FontWeight.Normal,
             modifier = Modifier.padding(top = 12.dp)
         )
+
+        state.error?.let {
+            ErrorMessage(
+                error = it.resolve(context),
+                modifier = Modifier.padding(top = 12.dp).testTag(UPDATE_PM_ERROR_MESSAGE_TEST_TAG)
+            )
+        }
 
         if (interactor.canRemove) {
             DeletePaymentMethodUi(interactor)
@@ -107,30 +84,70 @@ internal fun UpdatePaymentMethodUI(interactor: UpdatePaymentMethodInteractor, mo
 }
 
 @Composable
+private fun CardDetailsUI(
+    interactor: UpdatePaymentMethodInteractor,
+    dividerHeight: MutableState<Dp>
+) {
+    Card(
+        border = MaterialTheme.getBorderStroke(false),
+        elevation = 0.dp
+    ) {
+        Column {
+            CardNumberField(
+                last4 = interactor.card.last4,
+                savedPaymentMethodIcon = interactor
+                    .displayableSavedPaymentMethod
+                    .paymentMethod
+                    .getSavedPaymentMethodIcon(forVerticalMode = true),
+            )
+            Divider(
+                color = MaterialTheme.stripeColors.componentDivider,
+                thickness = MaterialTheme.stripeShapes.borderStrokeWidth.dp,
+            )
+            Row(modifier = Modifier.fillMaxWidth()) {
+                ExpiryField(
+                    expiryMonth = interactor.card.expiryMonth,
+                    expiryYear = interactor.card.expiryYear,
+                    modifier = Modifier
+                        .weight(1F)
+                        .onSizeChanged {
+                            dividerHeight.value =
+                                (it.height / Resources.getSystem().displayMetrics.density).dp
+                        },
+                )
+                Divider(
+                    modifier = Modifier
+                        .height(dividerHeight.value)
+                        .width(MaterialTheme.stripeShapes.borderStrokeWidth.dp),
+                    color = MaterialTheme.stripeColors.componentDivider,
+                )
+                CvcField(cardBrand = interactor.card.brand, modifier = Modifier.weight(1F))
+            }
+        }
+    }
+}
+
+@Composable
 private fun DeletePaymentMethodUi(interactor: UpdatePaymentMethodInteractor) {
-    val openRemoveDialog = rememberSaveable { mutableStateOf(false) }
+    val removing = rememberSaveable { mutableStateOf(false) }
 
     Spacer(modifier = Modifier.requiredHeight(32.dp))
 
-    PrimaryButton(
-        label = stringResource(id = R.string.stripe_remove),
-        isLoading = false,
-        isEnabled = true,
-        onButtonClick = {
-            openRemoveDialog.value = true
-        },
-        overrideBackgroundColor = MaterialTheme.colors.background,
-        overrideBorderColor = MaterialTheme.colors.error,
-        overrideOnBackgroundColor = MaterialTheme.colors.error,
-        modifier = Modifier.testTag(UPDATE_PM_REMOVE_BUTTON_TEST_TAG)
+    RemoveButton(
+        title = R.string.stripe_remove.resolvableString,
+        borderColor = MaterialTheme.colors.error,
+        idle = true,
+        removing = removing.value,
+        onRemove = { removing.value = true },
+        testTag = UPDATE_PM_REMOVE_BUTTON_TEST_TAG,
     )
 
-    if (openRemoveDialog.value) {
+    if (removing.value) {
         RemovePaymentMethodDialogUI(paymentMethod = interactor.displayableSavedPaymentMethod, onConfirmListener = {
-            openRemoveDialog.value = false
+            removing.value = false
             interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.RemovePaymentMethod)
         }, onDismissListener = {
-            openRemoveDialog.value = false
+            removing.value = false
         })
     }
 }
@@ -281,8 +298,7 @@ private fun PreviewUpdatePaymentMethodUI() {
             canRemove = true,
             displayableSavedPaymentMethod = exampleCard,
             card = exampleCard.paymentMethod.card!!,
-            onRemovePaymentMethod = {},
-            navigateBack = {},
+            removeExecutor = { null },
         ),
         modifier = Modifier
     )
@@ -297,3 +313,4 @@ private const val YEAR_2100 = 2100
 internal const val UPDATE_PM_EXPIRY_FIELD_TEST_TAG = "update_payment_method_expiry_date"
 internal const val UPDATE_PM_CVC_FIELD_TEST_TAG = "update_payment_method_cvc"
 internal const val UPDATE_PM_REMOVE_BUTTON_TEST_TAG = "update_payment_method_remove_button"
+internal const val UPDATE_PM_ERROR_MESSAGE_TEST_TAG = "update_payment_method_error_message"

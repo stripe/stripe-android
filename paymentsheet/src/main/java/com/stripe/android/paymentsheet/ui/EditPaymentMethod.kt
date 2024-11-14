@@ -11,23 +11,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.material.ContentAlpha
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
-import androidx.compose.material.LocalContentAlpha
-import androidx.compose.material.LocalMinimumInteractiveComponentEnforcement
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.material.TextButton
 import androidx.compose.material.TextField
-import androidx.compose.material.ripple.LocalRippleTheme
-import androidx.compose.material.ripple.RippleAlpha
-import androidx.compose.material.ripple.RippleTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,7 +34,6 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.stripe.android.common.ui.LoadingIndicator
 import com.stripe.android.common.ui.PrimaryButton
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
@@ -58,10 +48,8 @@ import com.stripe.android.uicore.elements.DROPDOWN_MENU_CLICKABLE_TEST_TAG
 import com.stripe.android.uicore.elements.SectionCard
 import com.stripe.android.uicore.elements.SingleChoiceDropdown
 import com.stripe.android.uicore.elements.TextFieldColors
-import com.stripe.android.uicore.getComposeTextStyle
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
-import com.stripe.android.uicore.stripeShapes
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.R as PaymentsCoreR
 import com.stripe.android.R as StripeR
@@ -138,9 +126,12 @@ internal fun EditPaymentMethodUi(
 
         if (viewState.canRemove) {
             RemoveButton(
+                title = R.string.stripe_paymentsheet_remove_card.resolvableString,
+                borderColor = Color.Transparent,
                 idle = isIdle,
                 removing = viewState.status == EditPaymentMethodViewState.Status.Removing,
                 onRemove = { viewActionHandler(OnRemovePressed) },
+                testTag = PAYMENT_SHEET_EDIT_SCREEN_REMOVE_BUTTON,
             )
         }
     }
@@ -180,52 +171,6 @@ private fun Label(
         color = MaterialTheme.stripeColors.placeholderText.copy(alpha = ContentAlpha.disabled),
         style = MaterialTheme.typography.subtitle1
     )
-}
-
-@OptIn(ExperimentalMaterialApi::class)
-@Composable
-private fun RemoveButton(
-    idle: Boolean,
-    removing: Boolean,
-    onRemove: () -> Unit
-) {
-    CompositionLocalProvider(
-        LocalContentAlpha provides if (removing) ContentAlpha.disabled else ContentAlpha.high,
-        LocalRippleTheme provides ErrorRippleTheme
-    ) {
-        Box(
-            modifier = Modifier
-                .testTag(PAYMENT_SHEET_EDIT_SCREEN_REMOVE_BUTTON)
-                .fillMaxWidth()
-                .padding(
-                    start = 8.dp,
-                    end = 8.dp
-                )
-                .offset(y = 8.dp),
-        ) {
-            CompositionLocalProvider(LocalMinimumInteractiveComponentEnforcement provides false) {
-                TextButton(
-                    modifier = Modifier.align(Alignment.Center),
-                    shape = MaterialTheme.stripeShapes.roundedCornerShape,
-                    enabled = idle && !removing,
-                    onClick = onRemove,
-                ) {
-                    Text(
-                        text = stringResource(id = R.string.stripe_paymentsheet_remove_card),
-                        color = MaterialTheme.colors.error.copy(LocalContentAlpha.current),
-                        style = StripeTheme.primaryButtonStyle.getComposeTextStyle(),
-                    )
-                }
-            }
-
-            if (removing) {
-                LoadingIndicator(
-                    modifier = Modifier.align(Alignment.CenterEnd),
-                    color = MaterialTheme.colors.error,
-                )
-            }
-        }
-    }
 }
 
 @Composable
@@ -288,24 +233,6 @@ private fun Dropdown(
 
                 viewActionHandler.invoke(EditPaymentMethodViewAction.OnBrandChoiceOptionsDismissed)
             }
-        )
-    }
-}
-
-private object ErrorRippleTheme : RippleTheme {
-    @Composable
-    override fun defaultColor(): Color {
-        return RippleTheme.defaultRippleColor(
-            MaterialTheme.colors.error,
-            lightTheme = MaterialTheme.colors.isLight
-        )
-    }
-
-    @Composable
-    override fun rippleAlpha(): RippleAlpha {
-        return RippleTheme.defaultRippleAlpha(
-            MaterialTheme.colors.error.copy(alpha = 0.25f),
-            lightTheme = MaterialTheme.colors.isLight
         )
     }
 }

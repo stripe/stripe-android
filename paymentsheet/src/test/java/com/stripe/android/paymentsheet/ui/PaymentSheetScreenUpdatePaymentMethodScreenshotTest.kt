@@ -27,17 +27,27 @@ class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
         }
     }
 
+    @Test
+    fun updatePaymentMethodScreen_forCard_withRemoveButton_withError() {
+        paparazziRule.snapshot {
+            PaymentSheetScreenOnUpdatePaymentMethod(
+                canRemove = true,
+                removePaymentMethodError = IllegalStateException("Generic error"),
+            )
+        }
+    }
+
     @Composable
     fun PaymentSheetScreenOnUpdatePaymentMethod(
         canRemove: Boolean,
+        removePaymentMethodError: Throwable? = null,
     ) {
         val paymentMethod = PaymentMethodFactory.visaCard().toDisplayableSavedPaymentMethod()
         val interactor = DefaultUpdatePaymentMethodInteractor(
             isLiveMode = true,
             displayableSavedPaymentMethod = paymentMethod,
             card = paymentMethod.paymentMethod.card!!,
-            onRemovePaymentMethod = {},
-            navigateBack = {},
+            removeExecutor = { removePaymentMethodError },
             canRemove = canRemove,
         )
         val screen = com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.UpdatePaymentMethod(interactor)
