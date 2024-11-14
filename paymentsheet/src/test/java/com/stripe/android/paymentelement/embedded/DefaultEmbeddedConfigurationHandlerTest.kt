@@ -15,7 +15,13 @@ import com.stripe.android.paymentelement.embedded.DefaultEmbeddedConfigurationHa
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 import kotlin.test.Test
 
 @ExperimentalEmbeddedPaymentElementApi
@@ -129,8 +135,10 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
         )
         val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
         savedStateHandle[ConfigurationCache.KEY] = ConfigurationCache(
-            intentConfiguration = intentConfiguration,
-            configuration = configuration.asCommonConfiguration(),
+            arguments = DefaultEmbeddedConfigurationHandler.Arguments(
+                intentConfiguration = intentConfiguration,
+                configuration = configuration.asCommonConfiguration(),
+            ),
             resultState = loader.createSuccess(configuration.asCommonConfiguration()).getOrThrow(),
         )
         val result = handler.configure(
@@ -158,8 +166,10 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
         assertThat(result.getOrThrow()).isEqualTo(configurationCache!!.resultState)
         assertThat(configurationCache).isEqualTo(
             ConfigurationCache(
-                intentConfiguration = intentConfiguration,
-                configuration = configuration.asCommonConfiguration(),
+                DefaultEmbeddedConfigurationHandler.Arguments(
+                    intentConfiguration = intentConfiguration,
+                    configuration = configuration.asCommonConfiguration(),
+                ),
                 resultState = loaderResult.getOrThrow(),
             )
         )
@@ -182,6 +192,40 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
         assertThat(configurationCache).isNull()
     }
 
+    @Test
+    fun `parallel calls to configure with the same arguments results in a single call to the loader`() = runScenario {
+        val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
+        val intentConfiguration = PaymentSheet.IntentConfiguration(
+            mode = PaymentSheet.IntentConfiguration.Mode.Setup(currency = "USD"),
+        )
+        val countDownLatch = CountDownLatch(2)
+        val testDispatcher = UnconfinedTestDispatcher()
+
+        val first = testScope.async(testDispatcher) {
+            countDownLatch.countDown()
+            handler.configure(
+                intentConfiguration = intentConfiguration,
+                configuration = configuration,
+            ).getOrThrow()
+        }
+
+        val second = testScope.async(testDispatcher) {
+            countDownLatch.countDown()
+            handler.configure(
+                intentConfiguration = intentConfiguration,
+                configuration = configuration,
+            ).getOrThrow()
+        }
+
+        assertThat(countDownLatch.await(3, TimeUnit.SECONDS)).isTrue()
+
+        loader.emit(loader.createSuccess(configuration.asCommonConfiguration()))
+
+        listOf(first, second).awaitAll()
+
+        assertThat(first.await()).isEqualTo(second.await())
+    }
+
     private fun runScenario(block: suspend Scenario.() -> Unit) {
         runTest {
             val loader = FakePaymentElementLoader()
@@ -191,6 +235,7 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
                 loader = loader,
                 savedStateHandle = savedStateHandle,
                 handler = handler,
+                testScope = this
             ).apply {
                 block()
             }
@@ -202,6 +247,7 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
         val loader: FakePaymentElementLoader,
         val savedStateHandle: SavedStateHandle,
         val handler: DefaultEmbeddedConfigurationHandler,
+        val testScope: TestScope,
     )
 
     private class FakePaymentElementLoader : PaymentElementLoader {
