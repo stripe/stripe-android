@@ -26,6 +26,7 @@ import com.stripe.android.paymentsheet.state.PaymentElementLoader.Initialization
 import com.stripe.android.uicore.PRIMARY_BUTTON_SUCCESS_BACKGROUND_COLOR
 import com.stripe.android.uicore.StripeThemeDefaults
 import com.stripe.android.uicore.getRawValueFromDimenResource
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 
@@ -349,6 +350,7 @@ class PaymentSheet internal constructor(
              * @param captureMethod Controls when the funds will be captured from the customer's
              * account. See [our docs](https://stripe.com/docs/api/payment_intents/create#create_payment_intent-capture_method) for more info.
              */
+            @Poko
             @Parcelize
             class Payment @JvmOverloads constructor(
                 val amount: Long,
@@ -365,6 +367,7 @@ class PaymentSheet internal constructor(
              * @param setupFutureUse Indicates that you intend to make future payments. See
              * [our docs](https://stripe.com/docs/api/payment_intents/create#create_payment_intent-setup_future_usage) for more info.
              */
+            @Poko
             @Parcelize
             class Setup @JvmOverloads constructor(
                 val currency: String? = null,
