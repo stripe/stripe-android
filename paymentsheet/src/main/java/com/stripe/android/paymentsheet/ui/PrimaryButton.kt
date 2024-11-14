@@ -12,9 +12,12 @@ import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.withStyledAttributes
@@ -283,6 +286,7 @@ internal class PrimaryButton @JvmOverloads constructor(
 }
 
 @Composable
+@OptIn(ExperimentalComposeUiApi::class)
 private fun LabelUI(label: String, color: Int?) {
     StripeTheme {
         Text(
@@ -292,6 +296,7 @@ private fun LabelUI(label: String, color: Int?) {
             style = StripeTheme.primaryButtonStyle.getComposeTextStyle(),
             modifier = Modifier
                 .padding(start = 4.dp, end = 4.dp, top = 4.dp, bottom = 5.dp)
+                .semantics { testTagsAsResourceId = true }
         )
     }
 }
