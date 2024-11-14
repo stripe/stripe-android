@@ -84,7 +84,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     confirmationHandlerFactory: DefaultConfirmationHandler.Factory,
     cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
     editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory,
-    private val errorReporter: ErrorReporter,
+    errorReporter: ErrorReporter,
     internal val cvcRecollectionHandler: CvcRecollectionHandler,
     private val cvcRecollectionInteractorFactory: CvcRecollectionInteractor.Factory
 ) : BaseSheetViewModel(
@@ -97,6 +97,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
     editInteractorFactory = editInteractorFactory,
     isCompleteFlow = true,
+    errorReporter = errorReporter,
 ) {
 
     private val _contentVisible = MutableStateFlow(true)

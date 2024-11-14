@@ -222,6 +222,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         CUSTOMER_SESSION_ON_CUSTOMER_SHEET_ELEMENTS_SESSION_NO_CUSTOMER_FIELD(
             partialEventName = "customersheet.customer_session.elements_session.no_customer_field"
         ),
+        UNSUPPORTED_SAVED_PAYMENT_METHOD_TYPE(
+            partialEventName = "saved_payment_methods.unsupported_payment_method_type"
+        )
         ;
 
         override val eventName: String

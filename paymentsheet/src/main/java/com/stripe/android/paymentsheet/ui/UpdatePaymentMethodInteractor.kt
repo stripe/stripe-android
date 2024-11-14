@@ -7,7 +7,7 @@ internal interface UpdatePaymentMethodInteractor {
     val isLiveMode: Boolean
     val canRemove: Boolean
     val displayableSavedPaymentMethod: DisplayableSavedPaymentMethod
-    val card: PaymentMethod.Card
+    val paymentMethod: UpdateablePaymentMethod
 
     fun handleViewAction(viewAction: ViewAction)
 
@@ -16,11 +16,17 @@ internal interface UpdatePaymentMethodInteractor {
     }
 }
 
+internal sealed interface UpdateablePaymentMethod {
+    data class Card(val card: PaymentMethod.Card): UpdateablePaymentMethod
+    data class UsBankAccount(val usBankAccount: PaymentMethod.USBankAccount): UpdateablePaymentMethod
+    data class SepaDebit(val sepaDebit: PaymentMethod.SepaDebit): UpdateablePaymentMethod
+}
+
 internal class DefaultUpdatePaymentMethodInteractor(
     override val isLiveMode: Boolean,
     override val canRemove: Boolean,
     override val displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
-    override val card: PaymentMethod.Card,
+    override val paymentMethod: UpdateablePaymentMethod,
     val onRemovePaymentMethod: (PaymentMethod) -> Unit,
     val navigateBack: () -> Unit,
 ) : UpdatePaymentMethodInteractor {

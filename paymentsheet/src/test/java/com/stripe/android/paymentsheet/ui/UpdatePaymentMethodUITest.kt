@@ -8,7 +8,6 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.CardBrand
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
@@ -164,6 +163,42 @@ class UpdatePaymentMethodUITest {
         composeRule.onNodeWithTag(TEST_TAG_SIMPLE_DIALOG).assertDoesNotExist()
     }
 
+    @Test
+    fun cardPaymentMethod_cardUIIsShown() {
+        val card = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+
+        runScenario(
+            displayableSavedPaymentMethod = card.toDisplayableSavedPaymentMethod(),
+            updateablePaymentMethod = UpdateablePaymentMethod.Card(card.card!!)
+        ) {
+            composeRule.onNodeWithTag(UPDATE_PM_CARD_TEST_TAG).assertExists()
+        }
+    }
+
+    @Test
+    fun usBankAccountPaymentMethod_usBankAccountUIIsShown() {
+        val usBankAccount = PaymentMethodFixtures.US_BANK_ACCOUNT
+
+        runScenario(
+            displayableSavedPaymentMethod = usBankAccount.toDisplayableSavedPaymentMethod(),
+            updateablePaymentMethod = UpdateablePaymentMethod.UsBankAccount(usBankAccount.usBankAccount!!)
+        ) {
+            composeRule.onNodeWithTag(UPDATE_PM_US_BANK_ACCOUNT_TEST_TAG).assertExists()
+        }
+    }
+
+    @Test
+    fun sepaDebitPaymentMethod_sepaDebitUIIsShown() {
+        val sepaDebit = PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD
+
+        runScenario(
+            displayableSavedPaymentMethod = sepaDebit.toDisplayableSavedPaymentMethod(),
+            updateablePaymentMethod = UpdateablePaymentMethod.SepaDebit(sepaDebit.sepaDebit!!)
+        ) {
+            composeRule.onNodeWithTag(UPDATE_PM_SEPA_DEBIT_TEST_TAG).assertExists()
+        }
+    }
+
     private fun assertExpiryDateEquals(text: String) {
         composeRule.onNodeWithTag(UPDATE_PM_EXPIRY_FIELD_TEST_TAG).assertTextContains(
             text
@@ -178,11 +213,11 @@ class UpdatePaymentMethodUITest {
 
     private class FakeUpdatePaymentMethodInteractor(
         override val displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
+        override val paymentMethod: UpdateablePaymentMethod,
         override val canRemove: Boolean,
         val viewActionRecorder: ViewActionRecorder<UpdatePaymentMethodInteractor.ViewAction>,
     ) : UpdatePaymentMethodInteractor {
         override val isLiveMode: Boolean = false
-        override val card: PaymentMethod.Card = displayableSavedPaymentMethod.paymentMethod.card!!
 
         override fun handleViewAction(viewAction: UpdatePaymentMethodInteractor.ViewAction) {
             viewActionRecorder.record(viewAction)
@@ -191,12 +226,16 @@ class UpdatePaymentMethodUITest {
 
     private fun runScenario(
         displayableSavedPaymentMethod: DisplayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
+        updateablePaymentMethod: UpdateablePaymentMethod = UpdateablePaymentMethod.Card(
+            displayableSavedPaymentMethod.paymentMethod.card!!
+        ),
         canRemove: Boolean = true,
         testBlock: Scenario.() -> Unit,
     ) {
         val viewActionRecorder = ViewActionRecorder<UpdatePaymentMethodInteractor.ViewAction>()
         val interactor = FakeUpdatePaymentMethodInteractor(
             displayableSavedPaymentMethod = displayableSavedPaymentMethod,
+            paymentMethod = updateablePaymentMethod,
             canRemove = canRemove,
             viewActionRecorder = viewActionRecorder,
         )

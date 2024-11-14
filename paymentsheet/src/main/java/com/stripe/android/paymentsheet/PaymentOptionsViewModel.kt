@@ -15,6 +15,7 @@ import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.DaggerPaymentOptionsViewModelFactoryComponent
@@ -55,7 +56,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     linkHandler: LinkHandler,
     cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
-    editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory
+    editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory,
+    errorReporter: ErrorReporter,
 ) : BaseSheetViewModel(
     config = args.configuration,
     eventReporter = eventReporter,
@@ -66,6 +68,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     editInteractorFactory = editInteractorFactory,
     cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
     isCompleteFlow = false,
+    errorReporter = errorReporter,
 ) {
 
     private val primaryButtonUiStateMapper = PrimaryButtonUiStateMapper(

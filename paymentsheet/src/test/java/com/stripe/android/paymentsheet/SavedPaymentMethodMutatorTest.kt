@@ -17,6 +17,7 @@ import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.verticalmode.FakeManageScreenInteractor
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor
+import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.FakeCustomerRepository
@@ -32,6 +33,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
 
+// TODO: add tests for updateable PM constructor
 class SavedPaymentMethodMutatorTest {
     @Test
     fun `canRemove is correct when no payment methods for customer`() = runScenario(
@@ -572,7 +574,8 @@ class SavedPaymentMethodMutatorTest {
                 isNotPaymentFlow = true,
                 isLiveModeProvider = { true },
                 currentScreen = currentScreen,
-                cardBrandFilter = DefaultCardBrandFilter
+                cardBrandFilter = DefaultCardBrandFilter,
+                errorReporter = FakeErrorReporter(),
             )
             Scenario(
                 savedPaymentMethodMutator = savedPaymentMethodMutator,

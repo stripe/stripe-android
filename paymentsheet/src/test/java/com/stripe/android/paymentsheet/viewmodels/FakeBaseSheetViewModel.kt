@@ -15,6 +15,7 @@ import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.ThrowingEditPaymentMethodViewInteractorFactory
+import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
@@ -49,6 +50,7 @@ internal class FakeBaseSheetViewModel private constructor(
     cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
     editInteractorFactory = ThrowingEditPaymentMethodViewInteractorFactory,
     isCompleteFlow = true,
+    errorReporter = FakeErrorReporter(),
 ) {
     companion object {
         fun create(

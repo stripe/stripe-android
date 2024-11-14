@@ -9,6 +9,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodUpdateParams
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.NavigationHandler
@@ -19,6 +20,7 @@ import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.PaymentMethodRemovalDelayMillis
+import com.stripe.android.paymentsheet.ui.UpdateablePaymentMethod
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.PaymentOptionsItemsMapper
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
@@ -48,6 +50,7 @@ internal class SavedPaymentMethodMutator(
     private val customerStateHolder: CustomerStateHolder,
     private val currentScreen: StateFlow<PaymentSheetScreen>,
     private val cardBrandFilter: CardBrandFilter,
+    private val errorReporter: ErrorReporter,
     isCbcEligible: () -> Boolean,
     isGooglePayReady: StateFlow<Boolean>,
     isLinkEnabled: StateFlow<Boolean?>,
@@ -236,20 +239,47 @@ internal class SavedPaymentMethodMutator(
     }
 
     fun updatePaymentMethod(displayableSavedPaymentMethod: DisplayableSavedPaymentMethod) {
-        displayableSavedPaymentMethod.paymentMethod.card?.let {
+        val updateablePaymentMethod = createUpdateablePaymentMethod(displayableSavedPaymentMethod)
+
+        updateablePaymentMethod?.let {
             navigationHandler.transitionTo(
                 PaymentSheetScreen.UpdatePaymentMethod(
                     DefaultUpdatePaymentMethodInteractor(
                         isLiveMode = isLiveModeProvider(),
                         canRemove = canRemove.value,
-                        displayableSavedPaymentMethod,
-                        card = it,
+                        displayableSavedPaymentMethod = displayableSavedPaymentMethod,
+                        paymentMethod = it,
                         onRemovePaymentMethod = ::removePaymentMethod,
                         navigateBack = { navigationHandler.pop() },
                     )
                 )
             )
         }
+    }
+
+    private fun createUpdateablePaymentMethod(
+        displayableSavedPaymentMethod: DisplayableSavedPaymentMethod
+    ): UpdateablePaymentMethod? {
+        val paymentMethod = displayableSavedPaymentMethod.paymentMethod
+        val updateablePaymentMethod = when (paymentMethod.type) {
+            PaymentMethod.Type.Card -> paymentMethod.card?.let { UpdateablePaymentMethod.Card(it) }
+            PaymentMethod.Type.USBankAccount -> paymentMethod.usBankAccount?.let {
+                UpdateablePaymentMethod.UsBankAccount(
+                    it
+                )
+            }
+            PaymentMethod.Type.SepaDebit -> paymentMethod.sepaDebit?.let { UpdateablePaymentMethod.SepaDebit(it) }
+            else -> null
+        }
+
+        if (updateablePaymentMethod == null) {
+            errorReporter.report(
+                ErrorReporter.UnexpectedErrorEvent.UNSUPPORTED_SAVED_PAYMENT_METHOD_TYPE,
+                additionalNonPiiParams = mapOf("payment_method_type" to paymentMethod.type?.code.toString())
+            )
+        }
+
+        return updateablePaymentMethod
     }
 
     private suspend fun removePaymentMethodInEditScreen(paymentMethod: PaymentMethod): Throwable? {
@@ -354,7 +384,8 @@ internal class SavedPaymentMethodMutator(
                 isNotPaymentFlow = !viewModel.isCompleteFlow,
                 isLiveModeProvider = { requireNotNull(viewModel.paymentMethodMetadata.value).stripeIntent.isLiveMode },
                 currentScreen = viewModel.navigationHandler.currentScreen,
-                cardBrandFilter = PaymentSheetCardBrandFilter(viewModel.config.cardBrandAcceptance)
+                cardBrandFilter = PaymentSheetCardBrandFilter(viewModel.config.cardBrandAcceptance),
+                errorReporter = viewModel.errorReporter,
             )
         }
     }

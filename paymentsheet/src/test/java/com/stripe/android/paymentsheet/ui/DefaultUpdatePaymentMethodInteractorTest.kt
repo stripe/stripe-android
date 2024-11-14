@@ -26,6 +26,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
         runScenario(
             canRemove = true,
             displayableSavedPaymentMethod = paymentMethod,
+            updateablePaymentMethod = UpdateablePaymentMethod.Card(paymentMethod.paymentMethod.card!!),
             onRemovePaymentMethod = ::onRemovePaymentMethod,
             navigateBack = ::navigateBack,
         ) {
@@ -41,6 +42,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
     private fun runScenario(
         canRemove: Boolean = false,
         displayableSavedPaymentMethod: DisplayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
+        updateablePaymentMethod: UpdateablePaymentMethod,
         onRemovePaymentMethod: (PaymentMethod) -> Unit = { notImplemented() },
         navigateBack: () -> Unit = { notImplemented() },
         testBlock: suspend TestParams.() -> Unit
@@ -49,7 +51,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
             isLiveMode = false,
             canRemove = canRemove,
             displayableSavedPaymentMethod = displayableSavedPaymentMethod,
-            card = displayableSavedPaymentMethod.paymentMethod.card!!,
+            paymentMethod = updateablePaymentMethod,
             onRemovePaymentMethod = onRemovePaymentMethod,
             navigateBack = navigateBack,
         )
