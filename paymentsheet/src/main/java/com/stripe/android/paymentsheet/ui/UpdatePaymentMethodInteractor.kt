@@ -4,7 +4,7 @@ import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
-import com.stripe.android.uicore.utils.mapAsStateFlow
+import com.stripe.android.uicore.utils.combineAsStateFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -23,6 +23,7 @@ internal interface UpdatePaymentMethodInteractor {
 
     data class State(
         val error: ResolvableString?,
+        val isRemoving: Boolean,
     )
 
     fun handleViewAction(viewAction: ViewAction)
@@ -42,9 +43,16 @@ internal class DefaultUpdatePaymentMethodInteractor(
 ) : UpdatePaymentMethodInteractor {
     private val coroutineScope = CoroutineScope(workContext + SupervisorJob())
     private val error = MutableStateFlow<ResolvableString?>(null)
+    private val isRemoving = MutableStateFlow(false)
 
-    private val _state = error.mapAsStateFlow {
-        UpdatePaymentMethodInteractor.State(error = it)
+    private val _state = combineAsStateFlow(
+        error,
+        isRemoving,
+    ) { error, isRemoving ->
+        UpdatePaymentMethodInteractor.State(
+            error = error,
+            isRemoving = isRemoving,
+        )
     }
     override val state = _state
 
@@ -53,9 +61,11 @@ internal class DefaultUpdatePaymentMethodInteractor(
             UpdatePaymentMethodInteractor.ViewAction.RemovePaymentMethod -> {
                 coroutineScope.launch {
                     error.emit(null)
+                    isRemoving.emit(true)
 
                     val removeError = removeExecutor(displayableSavedPaymentMethod.paymentMethod)
 
+                    isRemoving.emit(false)
                     error.emit(removeError?.stripeErrorMessage())
                 }
             }

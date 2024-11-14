@@ -11,15 +11,12 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.ViewActionRecorder
 import com.stripe.android.ui.core.elements.TEST_TAG_DIALOG_CONFIRM_BUTTON
 import com.stripe.android.ui.core.elements.TEST_TAG_SIMPLE_DIALOG
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -201,7 +198,10 @@ class UpdatePaymentMethodUITest {
             displayableSavedPaymentMethod = displayableSavedPaymentMethod,
             canRemove = canRemove,
             viewActionRecorder = viewActionRecorder,
-            initialState = UpdatePaymentMethodInteractor.State(error = errorMessage),
+            initialState = UpdatePaymentMethodInteractor.State(
+                error = errorMessage,
+                isRemoving = false,
+            ),
         )
 
         composeRule.setContent {

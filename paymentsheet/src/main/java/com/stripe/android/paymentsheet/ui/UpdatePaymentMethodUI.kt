@@ -45,6 +45,7 @@ import com.stripe.android.uicore.getBorderStroke
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.stripeShapes
 import com.stripe.android.uicore.utils.collectAsState
+import com.stripe.android.uicore.utils.mapAsStateFlow
 
 @Composable
 internal fun UpdatePaymentMethodUI(interactor: UpdatePaymentMethodInteractor, modifier: Modifier) {
@@ -129,7 +130,8 @@ private fun CardDetailsUI(
 
 @Composable
 private fun DeletePaymentMethodUi(interactor: UpdatePaymentMethodInteractor) {
-    val removing = rememberSaveable { mutableStateOf(false) }
+    val openDialogValue = rememberSaveable { mutableStateOf(false) }
+    val isRemoving by interactor.state.mapAsStateFlow { it.isRemoving }.collectAsState()
 
     Spacer(modifier = Modifier.requiredHeight(32.dp))
 
@@ -137,17 +139,17 @@ private fun DeletePaymentMethodUi(interactor: UpdatePaymentMethodInteractor) {
         title = R.string.stripe_remove.resolvableString,
         borderColor = MaterialTheme.colors.error,
         idle = true,
-        removing = removing.value,
-        onRemove = { removing.value = true },
+        removing = openDialogValue.value || isRemoving,
+        onRemove = { openDialogValue.value = true },
         testTag = UPDATE_PM_REMOVE_BUTTON_TEST_TAG,
     )
 
-    if (removing.value) {
+    if (openDialogValue.value) {
         RemovePaymentMethodDialogUI(paymentMethod = interactor.displayableSavedPaymentMethod, onConfirmListener = {
-            removing.value = false
+            openDialogValue.value = false
             interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.RemovePaymentMethod)
         }, onDismissListener = {
-            removing.value = false
+            openDialogValue.value = false
         })
     }
 }
