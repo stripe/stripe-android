@@ -167,14 +167,14 @@ public final class com/stripe/android/stripe3ds2/init/Warning : android/os/Parce
 	public final fun component3 ()Lcom/stripe/android/stripe3ds2/init/Warning$Severity;
 	public final fun copy (Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/stripe3ds2/init/Warning$Severity;)Lcom/stripe/android/stripe3ds2/init/Warning;
 	public static synthetic fun copy$default (Lcom/stripe/android/stripe3ds2/init/Warning;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/stripe3ds2/init/Warning$Severity;ILjava/lang/Object;)Lcom/stripe/android/stripe3ds2/init/Warning;
-	public fun describeContents ()I
+	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getId ()Ljava/lang/String;
 	public final fun getMessage ()Ljava/lang/String;
 	public final fun getSeverity ()Lcom/stripe/android/stripe3ds2/init/Warning$Severity;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class com/stripe/android/stripe3ds2/init/Warning$Creator : android/os/Parcelable$Creator {
@@ -444,7 +444,7 @@ public final class com/stripe/android/stripe3ds2/transaction/AuthenticationReque
 	public final fun component6 ()Ljava/lang/String;
 	public final fun copy (Ljava/lang/String;Lcom/stripe/android/stripe3ds2/transaction/SdkTransactionId;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/stripe3ds2/transaction/AuthenticationRequestParameters;
 	public static synthetic fun copy$default (Lcom/stripe/android/stripe3ds2/transaction/AuthenticationRequestParameters;Ljava/lang/String;Lcom/stripe/android/stripe3ds2/transaction/SdkTransactionId;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/stripe3ds2/transaction/AuthenticationRequestParameters;
-	public fun describeContents ()I
+	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getDeviceData ()Ljava/lang/String;
 	public final fun getMessageVersion ()Ljava/lang/String;
@@ -454,7 +454,7 @@ public final class com/stripe/android/stripe3ds2/transaction/AuthenticationReque
 	public final fun getSdkTransactionId ()Lcom/stripe/android/stripe3ds2/transaction/SdkTransactionId;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class com/stripe/android/stripe3ds2/transaction/AuthenticationRequestParameters$Creator : android/os/Parcelable$Creator {
@@ -525,7 +525,7 @@ public final class com/stripe/android/stripe3ds2/transaction/ChallengeParameters
 	public final fun component5 ()Ljava/lang/String;
 	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/stripe3ds2/transaction/ChallengeParameters;
 	public static synthetic fun copy$default (Lcom/stripe/android/stripe3ds2/transaction/ChallengeParameters;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/stripe3ds2/transaction/ChallengeParameters;
-	public fun describeContents ()I
+	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAcsRefNumber ()Ljava/lang/String;
 	public final fun getAcsSignedContent ()Ljava/lang/String;
@@ -539,7 +539,7 @@ public final class com/stripe/android/stripe3ds2/transaction/ChallengeParameters
 	public final fun setThreeDSRequestorAppURL (Ljava/lang/String;)V
 	public final fun setThreeDsServerTransactionId (Ljava/lang/String;)V
 	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class com/stripe/android/stripe3ds2/transaction/ChallengeParameters$Creator : android/os/Parcelable$Creator {
@@ -559,11 +559,11 @@ public final class com/stripe/android/stripe3ds2/transaction/ChallengeRequestExe
 	public fun <init> (Lcom/stripe/android/stripe3ds2/security/MessageTransformer;Ljava/lang/String;Lcom/stripe/android/stripe3ds2/transactions/ChallengeRequestData;Ljava/lang/String;Lcom/stripe/android/stripe3ds2/transaction/ChallengeRequestExecutor$Config$Keys;)V
 	public final fun copy (Lcom/stripe/android/stripe3ds2/security/MessageTransformer;Ljava/lang/String;Lcom/stripe/android/stripe3ds2/transactions/ChallengeRequestData;Ljava/lang/String;Lcom/stripe/android/stripe3ds2/transaction/ChallengeRequestExecutor$Config$Keys;)Lcom/stripe/android/stripe3ds2/transaction/ChallengeRequestExecutor$Config;
 	public static synthetic fun copy$default (Lcom/stripe/android/stripe3ds2/transaction/ChallengeRequestExecutor$Config;Lcom/stripe/android/stripe3ds2/security/MessageTransformer;Ljava/lang/String;Lcom/stripe/android/stripe3ds2/transactions/ChallengeRequestData;Ljava/lang/String;Lcom/stripe/android/stripe3ds2/transaction/ChallengeRequestExecutor$Config$Keys;ILjava/lang/Object;)Lcom/stripe/android/stripe3ds2/transaction/ChallengeRequestExecutor$Config;
-	public fun describeContents ()I
+	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class com/stripe/android/stripe3ds2/transaction/ChallengeRequestExecutor$Config$Creator : android/os/Parcelable$Creator {
@@ -579,11 +579,11 @@ public final class com/stripe/android/stripe3ds2/transaction/ChallengeRequestExe
 	public fun <init> ([B[B)V
 	public final fun copy ([B[B)Lcom/stripe/android/stripe3ds2/transaction/ChallengeRequestExecutor$Config$Keys;
 	public static synthetic fun copy$default (Lcom/stripe/android/stripe3ds2/transaction/ChallengeRequestExecutor$Config$Keys;[B[BILjava/lang/Object;)Lcom/stripe/android/stripe3ds2/transaction/ChallengeRequestExecutor$Config$Keys;
-	public fun describeContents ()I
+	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class com/stripe/android/stripe3ds2/transaction/ChallengeRequestExecutor$Config$Keys$Creator : android/os/Parcelable$Creator {
@@ -610,12 +610,12 @@ public final class com/stripe/android/stripe3ds2/transaction/ChallengeRequestRes
 	public final fun component1 ()Lcom/stripe/android/stripe3ds2/transactions/ErrorData;
 	public final fun copy (Lcom/stripe/android/stripe3ds2/transactions/ErrorData;)Lcom/stripe/android/stripe3ds2/transaction/ChallengeRequestResult$ProtocolError;
 	public static synthetic fun copy$default (Lcom/stripe/android/stripe3ds2/transaction/ChallengeRequestResult$ProtocolError;Lcom/stripe/android/stripe3ds2/transactions/ErrorData;ILjava/lang/Object;)Lcom/stripe/android/stripe3ds2/transaction/ChallengeRequestResult$ProtocolError;
-	public fun describeContents ()I
+	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getData ()Lcom/stripe/android/stripe3ds2/transactions/ErrorData;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class com/stripe/android/stripe3ds2/transaction/ChallengeRequestResult$ProtocolError$Creator : android/os/Parcelable$Creator {
@@ -632,12 +632,12 @@ public final class com/stripe/android/stripe3ds2/transaction/ChallengeRequestRes
 	public final fun component1 ()Ljava/lang/Throwable;
 	public final fun copy (Ljava/lang/Throwable;)Lcom/stripe/android/stripe3ds2/transaction/ChallengeRequestResult$RuntimeError;
 	public static synthetic fun copy$default (Lcom/stripe/android/stripe3ds2/transaction/ChallengeRequestResult$RuntimeError;Ljava/lang/Throwable;ILjava/lang/Object;)Lcom/stripe/android/stripe3ds2/transaction/ChallengeRequestResult$RuntimeError;
-	public fun describeContents ()I
+	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getThrowable ()Ljava/lang/Throwable;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class com/stripe/android/stripe3ds2/transaction/ChallengeRequestResult$RuntimeError$Creator : android/os/Parcelable$Creator {
@@ -655,13 +655,13 @@ public final class com/stripe/android/stripe3ds2/transaction/ChallengeRequestRes
 	public final fun component2 ()Lcom/stripe/android/stripe3ds2/transactions/ChallengeResponseData;
 	public final fun copy (Lcom/stripe/android/stripe3ds2/transactions/ChallengeRequestData;Lcom/stripe/android/stripe3ds2/transactions/ChallengeResponseData;Lcom/stripe/android/stripe3ds2/transaction/ChallengeRequestExecutor$Config;)Lcom/stripe/android/stripe3ds2/transaction/ChallengeRequestResult$Success;
 	public static synthetic fun copy$default (Lcom/stripe/android/stripe3ds2/transaction/ChallengeRequestResult$Success;Lcom/stripe/android/stripe3ds2/transactions/ChallengeRequestData;Lcom/stripe/android/stripe3ds2/transactions/ChallengeResponseData;Lcom/stripe/android/stripe3ds2/transaction/ChallengeRequestExecutor$Config;ILjava/lang/Object;)Lcom/stripe/android/stripe3ds2/transaction/ChallengeRequestResult$Success;
-	public fun describeContents ()I
+	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getCreqData ()Lcom/stripe/android/stripe3ds2/transactions/ChallengeRequestData;
 	public final fun getCresData ()Lcom/stripe/android/stripe3ds2/transactions/ChallengeResponseData;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class com/stripe/android/stripe3ds2/transaction/ChallengeRequestResult$Success$Creator : android/os/Parcelable$Creator {
@@ -678,12 +678,12 @@ public final class com/stripe/android/stripe3ds2/transaction/ChallengeRequestRes
 	public final fun component1 ()Lcom/stripe/android/stripe3ds2/transactions/ErrorData;
 	public final fun copy (Lcom/stripe/android/stripe3ds2/transactions/ErrorData;)Lcom/stripe/android/stripe3ds2/transaction/ChallengeRequestResult$Timeout;
 	public static synthetic fun copy$default (Lcom/stripe/android/stripe3ds2/transaction/ChallengeRequestResult$Timeout;Lcom/stripe/android/stripe3ds2/transactions/ErrorData;ILjava/lang/Object;)Lcom/stripe/android/stripe3ds2/transaction/ChallengeRequestResult$Timeout;
-	public fun describeContents ()I
+	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getData ()Lcom/stripe/android/stripe3ds2/transactions/ErrorData;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class com/stripe/android/stripe3ds2/transaction/ChallengeRequestResult$Timeout$Creator : android/os/Parcelable$Creator {
@@ -708,14 +708,14 @@ public final class com/stripe/android/stripe3ds2/transaction/ChallengeResult$Can
 	public final fun component3 ()Lcom/stripe/android/stripe3ds2/transaction/IntentData;
 	public final fun copy (Ljava/lang/String;Lcom/stripe/android/stripe3ds2/transactions/UiType;Lcom/stripe/android/stripe3ds2/transaction/IntentData;)Lcom/stripe/android/stripe3ds2/transaction/ChallengeResult$Canceled;
 	public static synthetic fun copy$default (Lcom/stripe/android/stripe3ds2/transaction/ChallengeResult$Canceled;Ljava/lang/String;Lcom/stripe/android/stripe3ds2/transactions/UiType;Lcom/stripe/android/stripe3ds2/transaction/IntentData;ILjava/lang/Object;)Lcom/stripe/android/stripe3ds2/transaction/ChallengeResult$Canceled;
-	public fun describeContents ()I
+	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public fun getInitialUiType ()Lcom/stripe/android/stripe3ds2/transactions/UiType;
 	public fun getIntentData ()Lcom/stripe/android/stripe3ds2/transaction/IntentData;
 	public final fun getUiTypeCode ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class com/stripe/android/stripe3ds2/transaction/ChallengeResult$Canceled$Creator : android/os/Parcelable$Creator {
@@ -738,14 +738,14 @@ public final class com/stripe/android/stripe3ds2/transaction/ChallengeResult$Fai
 	public final fun component3 ()Lcom/stripe/android/stripe3ds2/transaction/IntentData;
 	public final fun copy (Ljava/lang/String;Lcom/stripe/android/stripe3ds2/transactions/UiType;Lcom/stripe/android/stripe3ds2/transaction/IntentData;)Lcom/stripe/android/stripe3ds2/transaction/ChallengeResult$Failed;
 	public static synthetic fun copy$default (Lcom/stripe/android/stripe3ds2/transaction/ChallengeResult$Failed;Ljava/lang/String;Lcom/stripe/android/stripe3ds2/transactions/UiType;Lcom/stripe/android/stripe3ds2/transaction/IntentData;ILjava/lang/Object;)Lcom/stripe/android/stripe3ds2/transaction/ChallengeResult$Failed;
-	public fun describeContents ()I
+	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public fun getInitialUiType ()Lcom/stripe/android/stripe3ds2/transactions/UiType;
 	public fun getIntentData ()Lcom/stripe/android/stripe3ds2/transaction/IntentData;
 	public final fun getUiTypeCode ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class com/stripe/android/stripe3ds2/transaction/ChallengeResult$Failed$Creator : android/os/Parcelable$Creator {
@@ -764,14 +764,14 @@ public final class com/stripe/android/stripe3ds2/transaction/ChallengeResult$Pro
 	public final fun component3 ()Lcom/stripe/android/stripe3ds2/transaction/IntentData;
 	public final fun copy (Lcom/stripe/android/stripe3ds2/transactions/ErrorData;Lcom/stripe/android/stripe3ds2/transactions/UiType;Lcom/stripe/android/stripe3ds2/transaction/IntentData;)Lcom/stripe/android/stripe3ds2/transaction/ChallengeResult$ProtocolError;
 	public static synthetic fun copy$default (Lcom/stripe/android/stripe3ds2/transaction/ChallengeResult$ProtocolError;Lcom/stripe/android/stripe3ds2/transactions/ErrorData;Lcom/stripe/android/stripe3ds2/transactions/UiType;Lcom/stripe/android/stripe3ds2/transaction/IntentData;ILjava/lang/Object;)Lcom/stripe/android/stripe3ds2/transaction/ChallengeResult$ProtocolError;
-	public fun describeContents ()I
+	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getData ()Lcom/stripe/android/stripe3ds2/transactions/ErrorData;
 	public fun getInitialUiType ()Lcom/stripe/android/stripe3ds2/transactions/UiType;
 	public fun getIntentData ()Lcom/stripe/android/stripe3ds2/transaction/IntentData;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class com/stripe/android/stripe3ds2/transaction/ChallengeResult$ProtocolError$Creator : android/os/Parcelable$Creator {
@@ -790,14 +790,14 @@ public final class com/stripe/android/stripe3ds2/transaction/ChallengeResult$Run
 	public final fun component3 ()Lcom/stripe/android/stripe3ds2/transaction/IntentData;
 	public final fun copy (Ljava/lang/Throwable;Lcom/stripe/android/stripe3ds2/transactions/UiType;Lcom/stripe/android/stripe3ds2/transaction/IntentData;)Lcom/stripe/android/stripe3ds2/transaction/ChallengeResult$RuntimeError;
 	public static synthetic fun copy$default (Lcom/stripe/android/stripe3ds2/transaction/ChallengeResult$RuntimeError;Ljava/lang/Throwable;Lcom/stripe/android/stripe3ds2/transactions/UiType;Lcom/stripe/android/stripe3ds2/transaction/IntentData;ILjava/lang/Object;)Lcom/stripe/android/stripe3ds2/transaction/ChallengeResult$RuntimeError;
-	public fun describeContents ()I
+	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public fun getInitialUiType ()Lcom/stripe/android/stripe3ds2/transactions/UiType;
 	public fun getIntentData ()Lcom/stripe/android/stripe3ds2/transaction/IntentData;
 	public final fun getThrowable ()Ljava/lang/Throwable;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class com/stripe/android/stripe3ds2/transaction/ChallengeResult$RuntimeError$Creator : android/os/Parcelable$Creator {
@@ -816,14 +816,14 @@ public final class com/stripe/android/stripe3ds2/transaction/ChallengeResult$Suc
 	public final fun component3 ()Lcom/stripe/android/stripe3ds2/transaction/IntentData;
 	public final fun copy (Ljava/lang/String;Lcom/stripe/android/stripe3ds2/transactions/UiType;Lcom/stripe/android/stripe3ds2/transaction/IntentData;)Lcom/stripe/android/stripe3ds2/transaction/ChallengeResult$Succeeded;
 	public static synthetic fun copy$default (Lcom/stripe/android/stripe3ds2/transaction/ChallengeResult$Succeeded;Ljava/lang/String;Lcom/stripe/android/stripe3ds2/transactions/UiType;Lcom/stripe/android/stripe3ds2/transaction/IntentData;ILjava/lang/Object;)Lcom/stripe/android/stripe3ds2/transaction/ChallengeResult$Succeeded;
-	public fun describeContents ()I
+	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public fun getInitialUiType ()Lcom/stripe/android/stripe3ds2/transactions/UiType;
 	public fun getIntentData ()Lcom/stripe/android/stripe3ds2/transaction/IntentData;
 	public final fun getUiTypeCode ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class com/stripe/android/stripe3ds2/transaction/ChallengeResult$Succeeded$Creator : android/os/Parcelable$Creator {
@@ -842,14 +842,14 @@ public final class com/stripe/android/stripe3ds2/transaction/ChallengeResult$Tim
 	public final fun component3 ()Lcom/stripe/android/stripe3ds2/transaction/IntentData;
 	public final fun copy (Ljava/lang/String;Lcom/stripe/android/stripe3ds2/transactions/UiType;Lcom/stripe/android/stripe3ds2/transaction/IntentData;)Lcom/stripe/android/stripe3ds2/transaction/ChallengeResult$Timeout;
 	public static synthetic fun copy$default (Lcom/stripe/android/stripe3ds2/transaction/ChallengeResult$Timeout;Ljava/lang/String;Lcom/stripe/android/stripe3ds2/transactions/UiType;Lcom/stripe/android/stripe3ds2/transaction/IntentData;ILjava/lang/Object;)Lcom/stripe/android/stripe3ds2/transaction/ChallengeResult$Timeout;
-	public fun describeContents ()I
+	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public fun getInitialUiType ()Lcom/stripe/android/stripe3ds2/transactions/UiType;
 	public fun getIntentData ()Lcom/stripe/android/stripe3ds2/transaction/IntentData;
 	public final fun getUiTypeCode ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class com/stripe/android/stripe3ds2/transaction/ChallengeResult$Timeout$Creator : android/os/Parcelable$Creator {
@@ -869,7 +869,7 @@ public final class com/stripe/android/stripe3ds2/transaction/ErrorMessage : andr
 	public final fun component4 ()Ljava/lang/String;
 	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/stripe3ds2/transaction/ErrorMessage;
 	public static synthetic fun copy$default (Lcom/stripe/android/stripe3ds2/transaction/ErrorMessage;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/stripe3ds2/transaction/ErrorMessage;
-	public fun describeContents ()I
+	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getErrorCode ()Ljava/lang/String;
 	public final fun getErrorDescription ()Ljava/lang/String;
@@ -877,7 +877,7 @@ public final class com/stripe/android/stripe3ds2/transaction/ErrorMessage : andr
 	public final fun getTransactionId ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class com/stripe/android/stripe3ds2/transaction/ErrorMessage$Creator : android/os/Parcelable$Creator {
@@ -893,11 +893,11 @@ public final class com/stripe/android/stripe3ds2/transaction/InitChallengeArgs :
 	public fun <init> (Ljava/lang/String;Ljava/security/KeyPair;Lcom/stripe/android/stripe3ds2/transaction/ChallengeParameters;ILcom/stripe/android/stripe3ds2/transaction/IntentData;)V
 	public final fun copy (Ljava/lang/String;Ljava/security/KeyPair;Lcom/stripe/android/stripe3ds2/transaction/ChallengeParameters;ILcom/stripe/android/stripe3ds2/transaction/IntentData;)Lcom/stripe/android/stripe3ds2/transaction/InitChallengeArgs;
 	public static synthetic fun copy$default (Lcom/stripe/android/stripe3ds2/transaction/InitChallengeArgs;Ljava/lang/String;Ljava/security/KeyPair;Lcom/stripe/android/stripe3ds2/transaction/ChallengeParameters;ILcom/stripe/android/stripe3ds2/transaction/IntentData;ILjava/lang/Object;)Lcom/stripe/android/stripe3ds2/transaction/InitChallengeArgs;
-	public fun describeContents ()I
+	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class com/stripe/android/stripe3ds2/transaction/InitChallengeArgs$Creator : android/os/Parcelable$Creator {
@@ -932,12 +932,12 @@ public final class com/stripe/android/stripe3ds2/transaction/InitChallengeResult
 	public final fun component1 ()Lcom/stripe/android/stripe3ds2/transaction/ChallengeResult;
 	public final fun copy (Lcom/stripe/android/stripe3ds2/transaction/ChallengeResult;)Lcom/stripe/android/stripe3ds2/transaction/InitChallengeResult$End;
 	public static synthetic fun copy$default (Lcom/stripe/android/stripe3ds2/transaction/InitChallengeResult$End;Lcom/stripe/android/stripe3ds2/transaction/ChallengeResult;ILjava/lang/Object;)Lcom/stripe/android/stripe3ds2/transaction/InitChallengeResult$End;
-	public fun describeContents ()I
+	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getChallengeResult ()Lcom/stripe/android/stripe3ds2/transaction/ChallengeResult;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class com/stripe/android/stripe3ds2/transaction/InitChallengeResult$End$Creator : android/os/Parcelable$Creator {
@@ -954,12 +954,12 @@ public final class com/stripe/android/stripe3ds2/transaction/InitChallengeResult
 	public final fun component1 ()Lcom/stripe/android/stripe3ds2/views/ChallengeViewArgs;
 	public final fun copy (Lcom/stripe/android/stripe3ds2/views/ChallengeViewArgs;)Lcom/stripe/android/stripe3ds2/transaction/InitChallengeResult$Start;
 	public static synthetic fun copy$default (Lcom/stripe/android/stripe3ds2/transaction/InitChallengeResult$Start;Lcom/stripe/android/stripe3ds2/views/ChallengeViewArgs;ILjava/lang/Object;)Lcom/stripe/android/stripe3ds2/transaction/InitChallengeResult$Start;
-	public fun describeContents ()I
+	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getChallengeViewArgs ()Lcom/stripe/android/stripe3ds2/views/ChallengeViewArgs;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class com/stripe/android/stripe3ds2/transaction/InitChallengeResult$Start$Creator : android/os/Parcelable$Creator {
@@ -980,7 +980,7 @@ public final class com/stripe/android/stripe3ds2/transaction/IntentData : androi
 	public final fun component4 ()Ljava/lang/String;
 	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/stripe3ds2/transaction/IntentData;
 	public static synthetic fun copy$default (Lcom/stripe/android/stripe3ds2/transaction/IntentData;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/stripe3ds2/transaction/IntentData;
-	public fun describeContents ()I
+	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAccountId ()Ljava/lang/String;
 	public final fun getClientSecret ()Ljava/lang/String;
@@ -988,7 +988,7 @@ public final class com/stripe/android/stripe3ds2/transaction/IntentData : androi
 	public final fun getSourceId ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class com/stripe/android/stripe3ds2/transaction/IntentData$Creator : android/os/Parcelable$Creator {
@@ -1012,13 +1012,13 @@ public final class com/stripe/android/stripe3ds2/transaction/ProtocolErrorEvent 
 	public final fun component2 ()Lcom/stripe/android/stripe3ds2/transaction/ErrorMessage;
 	public final fun copy (Lcom/stripe/android/stripe3ds2/transaction/SdkTransactionId;Lcom/stripe/android/stripe3ds2/transaction/ErrorMessage;)Lcom/stripe/android/stripe3ds2/transaction/ProtocolErrorEvent;
 	public static synthetic fun copy$default (Lcom/stripe/android/stripe3ds2/transaction/ProtocolErrorEvent;Lcom/stripe/android/stripe3ds2/transaction/SdkTransactionId;Lcom/stripe/android/stripe3ds2/transaction/ErrorMessage;ILjava/lang/Object;)Lcom/stripe/android/stripe3ds2/transaction/ProtocolErrorEvent;
-	public fun describeContents ()I
+	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getErrorMessage ()Lcom/stripe/android/stripe3ds2/transaction/ErrorMessage;
 	public final fun getSdkTransactionId ()Lcom/stripe/android/stripe3ds2/transaction/SdkTransactionId;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class com/stripe/android/stripe3ds2/transaction/ProtocolErrorEvent$Creator : android/os/Parcelable$Creator {
@@ -1041,13 +1041,13 @@ public final class com/stripe/android/stripe3ds2/transaction/RuntimeErrorEvent :
 	public final fun component2 ()Ljava/lang/String;
 	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/stripe3ds2/transaction/RuntimeErrorEvent;
 	public static synthetic fun copy$default (Lcom/stripe/android/stripe3ds2/transaction/RuntimeErrorEvent;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/stripe3ds2/transaction/RuntimeErrorEvent;
-	public fun describeContents ()I
+	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getErrorCode ()Ljava/lang/String;
 	public final fun getErrorMessage ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class com/stripe/android/stripe3ds2/transaction/RuntimeErrorEvent$Creator : android/os/Parcelable$Creator {
@@ -1062,14 +1062,12 @@ public final class com/stripe/android/stripe3ds2/transaction/SdkTransactionId : 
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public static final field Companion Lcom/stripe/android/stripe3ds2/transaction/SdkTransactionId$Companion;
 	public final fun component1 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;)Lcom/stripe/android/stripe3ds2/transaction/SdkTransactionId;
-	public static synthetic fun copy$default (Lcom/stripe/android/stripe3ds2/transaction/SdkTransactionId;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/stripe3ds2/transaction/SdkTransactionId;
-	public fun describeContents ()I
+	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getValue ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class com/stripe/android/stripe3ds2/transaction/SdkTransactionId$Companion {
@@ -1134,6 +1132,13 @@ public final class com/stripe/android/stripe3ds2/transactions/ChallengeRequestDa
 	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/stripe3ds2/transaction/SdkTransactionId;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/stripe3ds2/transactions/ChallengeRequestData$CancelReason;Ljava/lang/String;Ljava/util/List;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;)Lcom/stripe/android/stripe3ds2/transactions/ChallengeRequestData;
 	public static synthetic fun copy$default (Lcom/stripe/android/stripe3ds2/transactions/ChallengeRequestData;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/stripe3ds2/transaction/SdkTransactionId;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/stripe3ds2/transactions/ChallengeRequestData$CancelReason;Ljava/lang/String;Ljava/util/List;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;ILjava/lang/Object;)Lcom/stripe/android/stripe3ds2/transactions/ChallengeRequestData;
 	public fun describeContents ()I
+	public final fun component6 ()Lcom/stripe/android/stripe3ds2/transactions/ChallengeRequestData$CancelReason;
+	public final fun component7 ()Ljava/lang/String;
+	public final fun component8 ()Ljava/util/List;
+	public final fun component9 ()Ljava/lang/Boolean;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/stripe3ds2/transaction/SdkTransactionId;Ljava/lang/String;Lcom/stripe/android/stripe3ds2/transactions/ChallengeRequestData$CancelReason;Ljava/lang/String;Ljava/util/List;Ljava/lang/Boolean;Ljava/lang/Boolean;)Lcom/stripe/android/stripe3ds2/transactions/ChallengeRequestData;
+	public static synthetic fun copy$default (Lcom/stripe/android/stripe3ds2/transactions/ChallengeRequestData;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/stripe3ds2/transaction/SdkTransactionId;Ljava/lang/String;Lcom/stripe/android/stripe3ds2/transactions/ChallengeRequestData$CancelReason;Ljava/lang/String;Ljava/util/List;Ljava/lang/Boolean;Ljava/lang/Boolean;ILjava/lang/Object;)Lcom/stripe/android/stripe3ds2/transactions/ChallengeRequestData;
+	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAcsTransId ()Ljava/lang/String;
 	public final fun getCancelReason ()Lcom/stripe/android/stripe3ds2/transactions/ChallengeRequestData$CancelReason;
@@ -1149,7 +1154,7 @@ public final class com/stripe/android/stripe3ds2/transactions/ChallengeRequestDa
 	public final fun getWhitelistingDataEntry ()Ljava/lang/Boolean;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class com/stripe/android/stripe3ds2/transactions/ChallengeRequestData$CancelReason : java/lang/Enum {
@@ -1208,7 +1213,7 @@ public final class com/stripe/android/stripe3ds2/transactions/ChallengeResponseD
 	public final fun component9 ()Ljava/lang/String;
 	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/stripe3ds2/transactions/UiType;ZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/stripe3ds2/transactions/ChallengeResponseData$Image;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/stripe3ds2/transactions/ChallengeResponseData$Image;Ljava/lang/String;Lcom/stripe/android/stripe3ds2/transaction/SdkTransactionId;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/stripe3ds2/transactions/ChallengeResponseData;
 	public static synthetic fun copy$default (Lcom/stripe/android/stripe3ds2/transactions/ChallengeResponseData;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/stripe3ds2/transactions/UiType;ZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/stripe3ds2/transactions/ChallengeResponseData$Image;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/stripe3ds2/transactions/ChallengeResponseData$Image;Ljava/lang/String;Lcom/stripe/android/stripe3ds2/transaction/SdkTransactionId;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/stripe3ds2/transactions/ChallengeResponseData;
-	public fun describeContents ()I
+	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAcsHtml ()Ljava/lang/String;
 	public final fun getAcsHtmlRefresh ()Ljava/lang/String;
@@ -1241,7 +1246,7 @@ public final class com/stripe/android/stripe3ds2/transactions/ChallengeResponseD
 	public final fun isChallengeCompleted ()Z
 	public final fun toJson ()Lorg/json/JSONObject;
 	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class com/stripe/android/stripe3ds2/transactions/ChallengeResponseData$ChallengeSelectOption : android/os/Parcelable {
@@ -1251,13 +1256,13 @@ public final class com/stripe/android/stripe3ds2/transactions/ChallengeResponseD
 	public final fun component2 ()Ljava/lang/String;
 	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/stripe3ds2/transactions/ChallengeResponseData$ChallengeSelectOption;
 	public static synthetic fun copy$default (Lcom/stripe/android/stripe3ds2/transactions/ChallengeResponseData$ChallengeSelectOption;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/stripe3ds2/transactions/ChallengeResponseData$ChallengeSelectOption;
-	public fun describeContents ()I
+	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getName ()Ljava/lang/String;
 	public final fun getText ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class com/stripe/android/stripe3ds2/transactions/ChallengeResponseData$ChallengeSelectOption$Creator : android/os/Parcelable$Creator {
@@ -1282,13 +1287,13 @@ public final class com/stripe/android/stripe3ds2/transactions/ChallengeResponseD
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/stripe3ds2/transactions/ChallengeResponseData$Image;
 	public static synthetic fun copy$default (Lcom/stripe/android/stripe3ds2/transactions/ChallengeResponseData$Image;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/stripe3ds2/transactions/ChallengeResponseData$Image;
-	public fun describeContents ()I
+	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getHighestFidelityImageUrl ()Ljava/lang/String;
 	public final fun getUrlForDensity (I)Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class com/stripe/android/stripe3ds2/transactions/ChallengeResponseData$Image$Creator : android/os/Parcelable$Creator {
@@ -1311,9 +1316,7 @@ public final class com/stripe/android/stripe3ds2/transactions/ErrorData : androi
 	public final fun component7 ()Ljava/lang/String;
 	public final fun component8 ()Ljava/lang/String;
 	public final fun component9 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/stripe3ds2/transactions/ErrorData$ErrorComponent;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/stripe3ds2/transaction/SdkTransactionId;)Lcom/stripe/android/stripe3ds2/transactions/ErrorData;
-	public static synthetic fun copy$default (Lcom/stripe/android/stripe3ds2/transactions/ErrorData;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/stripe3ds2/transactions/ErrorData$ErrorComponent;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/stripe3ds2/transaction/SdkTransactionId;ILjava/lang/Object;)Lcom/stripe/android/stripe3ds2/transactions/ErrorData;
-	public fun describeContents ()I
+	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAcsTransId ()Ljava/lang/String;
 	public final fun getDsTransId ()Ljava/lang/String;
@@ -1327,7 +1330,7 @@ public final class com/stripe/android/stripe3ds2/transactions/ErrorData : androi
 	public final fun getServerTransId ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class com/stripe/android/stripe3ds2/transactions/ErrorData$Creator : android/os/Parcelable$Creator {
@@ -1354,9 +1357,7 @@ public final class com/stripe/android/stripe3ds2/transactions/MessageExtension :
 	public static final field Companion Lcom/stripe/android/stripe3ds2/transactions/MessageExtension$Companion;
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component3 ()Z
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;ZLjava/util/Map;)Lcom/stripe/android/stripe3ds2/transactions/MessageExtension;
-	public static synthetic fun copy$default (Lcom/stripe/android/stripe3ds2/transactions/MessageExtension;Ljava/lang/String;Ljava/lang/String;ZLjava/util/Map;ILjava/lang/Object;)Lcom/stripe/android/stripe3ds2/transactions/MessageExtension;
-	public fun describeContents ()I
+	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public static final fun fromJson (Lorg/json/JSONArray;)Ljava/util/List;
 	public final fun getCriticalityIndicator ()Z
@@ -1365,7 +1366,7 @@ public final class com/stripe/android/stripe3ds2/transactions/MessageExtension :
 	public final fun isProcessable ()Z
 	public static final fun toJsonArray (Ljava/util/List;)Lorg/json/JSONArray;
 	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class com/stripe/android/stripe3ds2/transactions/MessageExtension$Companion {
@@ -1453,12 +1454,12 @@ public final class com/stripe/android/stripe3ds2/views/ChallengeViewArgs : andro
 	public fun <init> (Lcom/stripe/android/stripe3ds2/transactions/ChallengeResponseData;Lcom/stripe/android/stripe3ds2/transactions/ChallengeRequestData;Lcom/stripe/android/stripe3ds2/init/ui/StripeUiCustomization;Lcom/stripe/android/stripe3ds2/transaction/ChallengeRequestExecutor$Config;Lcom/stripe/android/stripe3ds2/transaction/ChallengeRequestExecutor$Factory;ILcom/stripe/android/stripe3ds2/transaction/IntentData;)V
 	public final fun copy (Lcom/stripe/android/stripe3ds2/transactions/ChallengeResponseData;Lcom/stripe/android/stripe3ds2/transactions/ChallengeRequestData;Lcom/stripe/android/stripe3ds2/init/ui/StripeUiCustomization;Lcom/stripe/android/stripe3ds2/transaction/ChallengeRequestExecutor$Config;Lcom/stripe/android/stripe3ds2/transaction/ChallengeRequestExecutor$Factory;ILcom/stripe/android/stripe3ds2/transaction/IntentData;)Lcom/stripe/android/stripe3ds2/views/ChallengeViewArgs;
 	public static synthetic fun copy$default (Lcom/stripe/android/stripe3ds2/views/ChallengeViewArgs;Lcom/stripe/android/stripe3ds2/transactions/ChallengeResponseData;Lcom/stripe/android/stripe3ds2/transactions/ChallengeRequestData;Lcom/stripe/android/stripe3ds2/init/ui/StripeUiCustomization;Lcom/stripe/android/stripe3ds2/transaction/ChallengeRequestExecutor$Config;Lcom/stripe/android/stripe3ds2/transaction/ChallengeRequestExecutor$Factory;ILcom/stripe/android/stripe3ds2/transaction/IntentData;ILjava/lang/Object;)Lcom/stripe/android/stripe3ds2/views/ChallengeViewArgs;
-	public fun describeContents ()I
+	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public fun hashCode ()I
 	public final fun toBundle ()Landroid/os/Bundle;
 	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class com/stripe/android/stripe3ds2/views/ChallengeViewArgs$Companion {

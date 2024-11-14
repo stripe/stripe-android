@@ -1,0 +1,75 @@
+appId: com.stripe.android.financialconnections.example
+tags:
+  - all
+  - edge
+  - testmode-payments
+---
+- startRecording: ${'/tmp/test_results/testmode-paymentintent-testinstitution-instantdebits-' + new Date().getTime()}
+- clearState
+- openLink: stripeconnectionsexample://playground?integration_type=Standalone&experience=InstantDebits&flow=PaymentIntent&financial_connections_override_native=native&merchant=networking&financial_connections_test_mode=true&permissions=transactions,payment_method&financial_connections_confirm_intent=false
+- tapOn:
+    id: "Customer email setting"
+- inputRandomEmail
+- hideKeyboard
+- tapOn:
+    id: "connect_accounts"
+# Wait until the consent button is visible
+- extendedWaitUntil:
+    visible:
+      id: "consent_cta"
+    timeout: 30000
+- tapOn:
+    id: "consent_cta"
+# Enter phone number once the consumer lookup is done
+- waitForAnimationToEnd
+- scrollUntilVisible:
+    element:
+      text: ".*555.*" # wait for placeholder to be visible
+- inputText: "6223115555"
+- tapOn: "Continue with Link"
+# Select "Payment Success" institution
+- tapOn:
+    id: "bcinst_QsDedeogZ5PA7V"
+# Bypass Chrome on-boarding screen
+- runFlow:
+    file: ../common/subflow-skip-chrome-welcome.yaml
+    env:
+      APP_ID: com.stripe.android.financialconnections.example
+# Select account and complete
+- scrollUntilVisible:
+    element:
+      text: "Success"
+    timeout: 60000
+- tapOn: "Success"
+- tapOn: "Connect account"
+- assertVisible: "Your account was connected."
+- tapOn:
+    id: "done_button"
+- scrollUntilVisible:
+    element:
+      text: "Session Completed!.*"
+# Reuse account as returning user
+- tapOn:
+    id: "connect_accounts"
+- extendedWaitUntil:
+    visible:
+      id: "consent_cta"
+    timeout: 30000
+- tapOn:
+    id: "consent_cta"
+# Continue with existing account
+- tapOn:
+    id: "existing_email-button"
+- assertVisible:
+    id: "OTP-0"
+- inputText: "111111"
+# Select previously networked account and complete
+- tapOn: "Success"
+- tapOn: "Connect account"
+- assertVisible: "Your account was connected."
+- tapOn:
+    id: "done_button"
+- scrollUntilVisible:
+    element:
+      text: "Session Completed!.*"
+- stopRecording

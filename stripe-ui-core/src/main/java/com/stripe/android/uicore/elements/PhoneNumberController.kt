@@ -77,8 +77,8 @@ class PhoneNumberController private constructor(
     override val isComplete = combineAsStateFlow(fieldValue, phoneNumberMinimumLength) { value, minLength ->
         value.length >= (minLength ?: 0) || acceptAnyInput
     }
-    override val formFieldValue = combineAsStateFlow(fieldValue, isComplete) { fieldValue, isComplete ->
-        FormFieldEntry(fieldValue, isComplete)
+    override val formFieldValue = combineAsStateFlow(rawFieldValue, isComplete) { rawFieldValue, isComplete ->
+        FormFieldEntry(rawFieldValue, isComplete)
     }
 
     override val error: StateFlow<FieldError?> = combineAsStateFlow(

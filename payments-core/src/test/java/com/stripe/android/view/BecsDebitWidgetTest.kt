@@ -7,6 +7,8 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.utils.createTestActivityRule
+import org.junit.Rule
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.BeforeTest
@@ -18,6 +20,9 @@ import kotlin.test.assertFailsWith
 internal class BecsDebitWidgetTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val activityScenarioFactory = ActivityScenarioFactory(context)
+
+    @get:Rule
+    val testActivityRule = createTestActivityRule<ActivityScenarioFactory.TestActivity>()
 
     private val becsDebitWidget: BecsDebitWidget by lazy {
         activityScenarioFactory.createView {

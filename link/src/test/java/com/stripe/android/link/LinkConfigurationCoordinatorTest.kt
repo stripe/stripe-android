@@ -1,21 +1,17 @@
 package com.stripe.android.link
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.link.account.LinkAccountManager
+import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.StripeIntentFixtures
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.link.utils.FakeAndroidKeyStore
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
-import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.stub
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 
@@ -34,6 +30,7 @@ class LinkConfigurationCoordinatorTest {
         shippingValues = null,
         passthroughModeEnabled = false,
         flags = emptyMap(),
+        cardBrandChoice = null,
     )
 
     private val linkComponentBuilder: LinkComponent.Builder = mock()
@@ -49,14 +46,10 @@ class LinkConfigurationCoordinatorTest {
             .thenReturn(linkComponentBuilder)
         whenever(linkComponentBuilder.build()).thenAnswer {
             val component = mock<LinkComponent>()
-            val linkAccountManager = mock<LinkAccountManager>()
+            val linkAccountManager = FakeLinkAccountManager()
             whenever(component.linkAccountManager).thenReturn(linkAccountManager)
-            whenever(linkAccountManager.accountStatus).thenReturn(flowOf(AccountStatus.Verified))
-            linkAccountManager.stub {
-                onBlocking { linkAccountManager.signInWithUserInput(any()) }.doReturn(
-                    Result.failure(IllegalStateException("Test"))
-                )
-            }
+            linkAccountManager.setAccountStatus(AccountStatus.Verified)
+            linkAccountManager.signInWithUserInputResult = Result.failure(IllegalStateException("Test"))
 
             whenever(component.configuration).thenReturn(configurationCapture.lastValue)
 
@@ -66,17 +59,20 @@ class LinkConfigurationCoordinatorTest {
 
     @Test
     fun `verify component is reused for same configuration`() = runTest {
+        val component = linkConfigurationCoordinator.getComponent(config)
+
         linkConfigurationCoordinator.getAccountStatusFlow(config)
-        val component = linkConfigurationCoordinator.component
         linkConfigurationCoordinator.signInWithUserInput(config, mock<UserInput.SignIn>())
-        assertThat(linkConfigurationCoordinator.component).isEqualTo(component)
+
+        assertThat(linkConfigurationCoordinator.getComponent(config)).isEqualTo(component)
     }
 
     @Test
     fun `verify component is recreated for different configuration`() {
-        val component = linkConfigurationCoordinator.component
-        linkConfigurationCoordinator.getAccountStatusFlow(config.copy(merchantName = "anotherName"))
-        assertThat(linkConfigurationCoordinator.component).isNotEqualTo(component)
+        val component = linkConfigurationCoordinator.getComponent(config)
+
+        assertThat(linkConfigurationCoordinator.getComponent(config.copy(merchantName = "anotherName")))
+            .isNotEqualTo(component)
     }
 
     companion object {

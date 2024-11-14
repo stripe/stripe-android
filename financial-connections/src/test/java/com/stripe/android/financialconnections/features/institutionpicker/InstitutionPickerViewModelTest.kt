@@ -1,5 +1,7 @@
 package com.stripe.android.financialconnections.features.institutionpicker
 
+import app.cash.turbine.test
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.CoroutineTestRule
@@ -132,6 +134,68 @@ internal class InstitutionPickerViewModelTest {
                 pane = Pane.INSTITUTION_PICKER,
                 displayErrorScreen = true
             )
+        }
+    }
+
+    @Test
+    fun `init - allows back navigation if coming from screen other than signup`() = runTest {
+        val featuredResults = InstitutionResponse(
+            showManualEntry = false,
+            data = listOf(
+                FinancialConnectionsInstitution(
+                    id = "featured_id",
+                    name = "featured_name",
+                    url = "featured_url",
+                    featured = true,
+                    featuredOrder = null,
+                    mobileHandoffCapable = false
+                )
+            )
+        )
+
+        givenManifestReturns(ApiKeyFixtures.sessionManifest())
+        givenFeaturedInstitutionsReturns(featuredResults)
+
+        nativeAuthFlowCoordinator().test {
+            buildViewModel(
+                state = InstitutionPickerState(
+                    referrer = Pane.CONSENT,
+                ),
+            )
+
+            val updateMessage = expectMostRecentItem() as NativeAuthFlowCoordinator.Message.UpdateTopAppBar
+            assertThat(updateMessage.update.allowBackNavigation).isTrue()
+        }
+    }
+
+    @Test
+    fun `init - does not allow back navigation if coming from signup`() = runTest {
+        val featuredResults = InstitutionResponse(
+            showManualEntry = false,
+            data = listOf(
+                FinancialConnectionsInstitution(
+                    id = "featured_id",
+                    name = "featured_name",
+                    url = "featured_url",
+                    featured = true,
+                    featuredOrder = null,
+                    mobileHandoffCapable = false
+                )
+            )
+        )
+
+        givenManifestReturns(ApiKeyFixtures.sessionManifest())
+        givenFeaturedInstitutionsReturns(featuredResults)
+
+        nativeAuthFlowCoordinator().test {
+            buildViewModel(
+                state = InstitutionPickerState(
+                    referrer = Pane.LINK_LOGIN,
+                ),
+            )
+
+            val updateMessage = expectMostRecentItem() as NativeAuthFlowCoordinator.Message.UpdateTopAppBar
+            assertThat(updateMessage.update.allowBackNavigation).isFalse()
         }
     }
 

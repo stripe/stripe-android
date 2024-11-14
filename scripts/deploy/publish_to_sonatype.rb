@@ -58,7 +58,7 @@ def publish_to_sonatype
         puts "Release succeeded!"
 
         if (@is_dry_run)
-            rputs "At the open link, verify that a new release was added to the staging repo. You can log in to sonatype using your credentials found at `fetch-password bindings/gnupg/fingerprint`"
+            rputs "At the open link, verify that a new release was added to the staging repo. You can log in to sonatype using your credentials found at `fetch-password bindings/java-maven-api-token`"
             open_url("https://oss.sonatype.org/#stagingRepositories")
             wait_for_user
         end

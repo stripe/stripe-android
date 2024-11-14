@@ -4,6 +4,7 @@ import androidx.annotation.StringRes
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.lpmfoundations.luxe.TransformSpecToElements
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
@@ -36,7 +37,6 @@ class FormControllerTest {
     private val transformSpecToElements = TransformSpecToElements(
         UiDefinitionFactory.Arguments(
             initialValues = emptyMap(),
-            amount = null,
             saveForFutureUseInitialValue = false,
             merchantName = "Merchant",
             cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
@@ -44,6 +44,9 @@ class FormControllerTest {
             cbcEligibility = CardBrandChoiceEligibility.Ineligible,
             billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
             requiresMandate = false,
+            linkConfigurationCoordinator = null,
+            onLinkInlineSignupStateChanged = { throw AssertionError("Not implemented") },
+            cardBrandFilter = DefaultCardBrandFilter
         )
     )
 

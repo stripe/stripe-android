@@ -12,7 +12,6 @@ internal object TestViewModelFactory {
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
         viewModelFactory: (
             linkHandler: LinkHandler,
-            linkConfigurationCoordinator: LinkConfigurationCoordinator,
             savedStateHandle: SavedStateHandle,
         ) -> T
     ): T {
@@ -23,6 +22,6 @@ internal object TestViewModelFactory {
             linkAnalyticsComponentBuilder = mock(),
             linkStore = mock(),
         )
-        return viewModelFactory(linkHandler, linkConfigurationCoordinator, savedStateHandle)
+        return viewModelFactory(linkHandler, savedStateHandle)
     }
 }

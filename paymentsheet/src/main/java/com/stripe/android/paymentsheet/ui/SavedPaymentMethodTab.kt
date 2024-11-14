@@ -52,7 +52,7 @@ const val SAVED_PAYMENT_METHOD_CARD_TEST_TAG = "SAVED_PAYMENT_METHOD_CARD_TEST_T
 internal const val TEST_TAG_REMOVE_BADGE = "remove_badge"
 internal const val TEST_TAG_MODIFY_BADGE = "modify_badge"
 
-private const val EDIT_ICON_SCALE = 0.6f
+private const val EDIT_ICON_SCALE = 0.9f
 private val editIconColorLight = Color(0x99000000)
 private val editIconColorDark = Color.White
 private val editIconBackgroundColorLight = Color(0xFFE5E5EA)
@@ -115,10 +115,7 @@ internal fun SavedPaymentMethodTab(
                     modifier = Modifier
                         .padding(top = 4.dp, start = 6.dp, end = 6.dp)
                         .semantics {
-                            // This makes the screen reader read out numbers digit by digit
-                            // one one one one vs one thousand one hundred eleven
-                            this.contentDescription =
-                                description.replace("\\d".toRegex(), "$0 ")
+                            contentDescription = description.readNumbersAsIndividualDigits()
                         }
                 )
             }

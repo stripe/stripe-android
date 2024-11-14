@@ -1,9 +1,12 @@
 package com.stripe.android.customersheet
 
 import androidx.activity.compose.LocalActivityResultRegistryOwner
+import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
+import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.utils.rememberActivity
 
 /**
@@ -11,15 +14,48 @@ import com.stripe.android.utils.rememberActivity
  *
  * This *must* be called unconditionally, as part of the initialization path.
  *
- * @param configuration An optional [CustomerSheet.Configuration]
  * @param customerAdapter The [CustomerAdapter] to fetch customer-related information
  * @param callback Called with the result of the operation after [CustomerSheet] is dismissed
  */
-@ExperimentalCustomerSheetApi
 @Composable
 fun rememberCustomerSheet(
-    configuration: CustomerSheet.Configuration,
     customerAdapter: CustomerAdapter,
+    callback: CustomerSheetResultCallback,
+): CustomerSheet {
+    return rememberCustomerSheet(
+        integration = remember(customerAdapter) {
+            CustomerSheetIntegration.Adapter(customerAdapter)
+        },
+        callback = callback,
+    )
+}
+
+/**
+* Creates a [CustomerSheet] with `CustomerSession` support that is remembered across compositions.
+*
+* This *must* be called unconditionally, as part of the initialization path.
+*
+* @param customerSessionProvider provider for providing customer session elements
+* @param callback Called with the result of the operation after [CustomerSheet] is dismissed
+*/
+@ExperimentalCustomerSessionApi
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@Composable
+fun rememberCustomerSheet(
+    customerSessionProvider: CustomerSheet.CustomerSessionProvider,
+    callback: CustomerSheetResultCallback,
+): CustomerSheet {
+    return rememberCustomerSheet(
+        integration = remember(customerSessionProvider) {
+            CustomerSheetIntegration.CustomerSession(customerSessionProvider)
+        },
+        callback = callback,
+    )
+}
+
+@Composable
+private fun rememberCustomerSheet(
+    integration: CustomerSheetIntegration,
     callback: CustomerSheetResultCallback,
 ): CustomerSheet {
     val activityResultRegistryOwner = requireNotNull(LocalActivityResultRegistryOwner.current) {
@@ -31,17 +67,20 @@ fun rememberCustomerSheet(
         "CustomerSheet must be created in the context of an Activity"
     }
 
+    val viewModelStoreOwner = requireNotNull(LocalViewModelStoreOwner.current) {
+        "CustomerSheet must be created with access to a ViewModelStoreOwner"
+    }
+
     return remember(
-        configuration,
-        customerAdapter,
+        integration,
         callback,
     ) {
         CustomerSheet.getInstance(
             application = activity.application,
             lifecycleOwner = lifecycleOwner,
             activityResultRegistryOwner = activityResultRegistryOwner,
-            configuration = configuration,
-            customerAdapter = customerAdapter,
+            viewModelStoreOwner = viewModelStoreOwner,
+            integration = integration,
             callback = callback,
             statusBarColor = { activity.window?.statusBarColor },
         )

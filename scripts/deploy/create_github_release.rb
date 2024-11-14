@@ -65,7 +65,7 @@ private def tag_release
 
     # There's no way to create a "draft" tag, so we skip pushing tags if this is a dry run.
     if(!@is_dry_run)
-        execute_or_fail("git push --tags")
+        execute_or_fail("git push origin #{tag_name}")
     end
 end
 

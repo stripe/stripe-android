@@ -3,9 +3,7 @@ package com.stripe.example
 import android.app.Application
 import android.os.Build
 import android.os.StrictMode
-import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentConfiguration
-import com.stripe.example.service.ExampleEphemeralKeyProvider
 
 class ExampleApplication : Application() {
 
@@ -42,12 +40,6 @@ class ExampleApplication : Application() {
         )
 
         super.onCreate()
-
-        CustomerSession.initCustomerSession(
-            this,
-            ExampleEphemeralKeyProvider(this),
-            false
-        )
     }
 
     private companion object {

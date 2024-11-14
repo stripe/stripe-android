@@ -9,6 +9,7 @@ import androidx.lifecycle.lifecycleScope
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration.InstantDebits
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration.USBankAccount
+import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration.USBankAccountInternal
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal.Failed
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect.FinishWithResult
@@ -61,6 +62,11 @@ internal class CollectBankAccountActivity : AppCompatActivity() {
                 activity = this,
                 onComplete = viewModel::onConnectionsForACHResult
             )
+
+            is USBankAccountInternal -> FinancialConnectionsPaymentsProxy.createForACH(
+                activity = this,
+                onComplete = viewModel::onConnectionsForACHResult
+            )
         }
     }
 
@@ -68,7 +74,8 @@ internal class CollectBankAccountActivity : AppCompatActivity() {
         financialConnectionsPaymentsProxy.present(
             financialConnectionsSessionClientSecret = financialConnectionsSessionSecret,
             publishableKey = publishableKey,
-            stripeAccountId = stripeAccountId
+            stripeAccountId = stripeAccountId,
+            elementsSessionContext = elementsSessionContext,
         )
     }
 

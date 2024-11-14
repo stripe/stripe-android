@@ -11,7 +11,6 @@ import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.analytics.LinkAnalyticsHelper
 import com.stripe.android.link.injection.LinkAnalyticsComponent
 import com.stripe.android.link.model.AccountStatus
-import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentMethod
@@ -35,7 +34,7 @@ import javax.inject.Inject
 
 internal class LinkHandler @Inject constructor(
     private val linkLauncher: LinkPaymentLauncher,
-    private val linkConfigurationCoordinator: LinkConfigurationCoordinator,
+    val linkConfigurationCoordinator: LinkConfigurationCoordinator,
     private val savedStateHandle: SavedStateHandle,
     private val linkStore: LinkStore,
     linkAnalyticsComponentBuilder: LinkAnalyticsComponent.Builder,
@@ -72,9 +71,6 @@ internal class LinkHandler @Inject constructor(
     private val _linkConfiguration = MutableStateFlow<LinkConfiguration?>(null)
     private val linkConfiguration: StateFlow<LinkConfiguration?> = _linkConfiguration.asStateFlow()
 
-    private val _linkSignupMode = MutableStateFlow<LinkSignupMode?>(null)
-    val linkSignupMode: StateFlow<LinkSignupMode?> = _linkSignupMode.asStateFlow()
-
     private val linkAnalyticsHelper: LinkAnalyticsHelper by lazy {
         linkAnalyticsComponentBuilder.build().linkAnalyticsHelper
     }
@@ -95,9 +91,7 @@ internal class LinkHandler @Inject constructor(
 
         if (state == null) return
 
-        linkConfigurationCoordinator.setConfiguration(state.configuration)
         _linkConfiguration.value = state.configuration
-        _linkSignupMode.value = state.signupMode
     }
 
     suspend fun payWithLinkInline(

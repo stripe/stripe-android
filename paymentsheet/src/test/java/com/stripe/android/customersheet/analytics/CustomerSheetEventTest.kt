@@ -2,18 +2,18 @@ package com.stripe.android.customersheet.analytics
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.customersheet.CustomerSheetFixtures
-import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
+import com.stripe.android.customersheet.CustomerSheetIntegration
 import kotlin.test.Test
 
-@OptIn(ExperimentalCustomerSheetApi::class)
 class CustomerSheetEventTest {
     @Test
     fun `Init event with full config should return expected params`() {
         val event = CustomerSheetEvent.Init(
             configuration = CustomerSheetFixtures.CONFIG_WITH_GOOGLE_PAY_ENABLED,
+            integrationType = CustomerSheetIntegration.Type.CustomerAdapter,
         )
 
-        assertThat(event.eventName).isEqualTo("cs_init")
+        assertThat(event.eventName).isEqualTo("cs_init_with_customer_adapter")
 
         val expectedConfigAnalyticsValue = mapOf(
             "google_pay_enabled" to true,
@@ -44,6 +44,7 @@ class CustomerSheetEventTest {
                 "address" to "Automatic",
             ),
             "preferred_networks" to null,
+            "card_brand_acceptance" to false,
         )
 
         assertThat(event.additionalParams)
@@ -54,9 +55,10 @@ class CustomerSheetEventTest {
     fun `Init event with minimum config should return expected params`() {
         val event = CustomerSheetEvent.Init(
             configuration = CustomerSheetFixtures.MINIMUM_CONFIG,
+            integrationType = CustomerSheetIntegration.Type.CustomerAdapter,
         )
 
-        assertThat(event.eventName).isEqualTo("cs_init")
+        assertThat(event.eventName).isEqualTo("cs_init_with_customer_adapter")
 
         val expectedConfigAnalyticsValue = mapOf(
             "google_pay_enabled" to false,
@@ -87,6 +89,7 @@ class CustomerSheetEventTest {
                 "address" to "Automatic",
             ),
             "preferred_networks" to null,
+            "card_brand_acceptance" to false,
         )
 
         assertThat(event.additionalParams)
@@ -130,15 +133,29 @@ class CustomerSheetEventTest {
             "payment_method_order" to listOf("klarna", "afterpay", "card"),
             "billing_details_collection_configuration" to expectedBillingDetailsCollection,
             "preferred_networks" to "cartes_bancaires, visa",
+            "card_brand_acceptance" to false,
         )
 
-        val event = CustomerSheetEvent.Init(CustomerSheetFixtures.CONFIG_WITH_EVERYTHING)
+        val event = CustomerSheetEvent.Init(
+            configuration = CustomerSheetFixtures.CONFIG_WITH_EVERYTHING,
+            integrationType = CustomerSheetIntegration.Type.CustomerAdapter,
+        )
 
         assertThat(event.additionalParams).isEqualTo(
             mapOf(
                 "cs_config" to expectedConfigMap,
             )
         )
+    }
+
+    @Test
+    fun `Init event should return expected name when integration is customer session`() {
+        val event = CustomerSheetEvent.Init(
+            configuration = CustomerSheetFixtures.MINIMUM_CONFIG,
+            integrationType = CustomerSheetIntegration.Type.CustomerSession,
+        )
+
+        assertThat(event.eventName).isEqualTo("cs_init_with_customer_session")
     }
 
     @Test

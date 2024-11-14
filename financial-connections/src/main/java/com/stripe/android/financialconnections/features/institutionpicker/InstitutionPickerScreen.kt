@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -56,6 +55,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavBackStackEntry
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.common.FullScreenGenericLoading
 import com.stripe.android.financialconnections.features.common.InstitutionIcon
@@ -84,8 +84,13 @@ import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.launch
 
 @Composable
-internal fun InstitutionPickerScreen() {
-    val viewModel: InstitutionPickerViewModel = paneViewModel { InstitutionPickerViewModel.factory(it) }
+internal fun InstitutionPickerScreen(
+    backStackEntry: NavBackStackEntry,
+) {
+    val viewModel: InstitutionPickerViewModel = paneViewModel {
+        InstitutionPickerViewModel.factory(parentComponent = it, backStackEntry.arguments)
+    }
+
     val state: InstitutionPickerState by viewModel.stateFlow.collectAsState()
     val listState = rememberLazyListState()
 
@@ -213,16 +218,15 @@ private fun LazyListScope.searchResults(
     when {
         // No input: Display featured institutions.
         isInputEmpty -> {
-            itemsIndexed(
+            items(
                 items = payload.featuredInstitutions.data,
-                key = { _, institution -> institution.id },
-                itemContent = { index, institution ->
+                key = { it.id },
+                itemContent = { institution ->
                     InstitutionResultTile(
                         modifier = Modifier.padding(8.dp),
                         loading = selectedInstitutionId == institution.id,
                         enabled = selectedInstitutionId?.let { it == institution.id } ?: true,
                         institution = institution,
-                        index = index,
                         onInstitutionSelected = { onInstitutionSelected(it, true) }
                     )
                 }
@@ -266,16 +270,15 @@ private fun LazyListScope.searchResults(
                 }
             } else {
                 // RESULTS CASE: Institution List + Manual Entry final row if needed.
-                itemsIndexed(
+                items(
                     items = institutions().data,
-                    key = { _, institution -> institution.id },
-                    itemContent = { index, institution ->
+                    key = { it.id },
+                    itemContent = { institution ->
                         InstitutionResultTile(
                             modifier = Modifier.padding(8.dp),
                             loading = selectedInstitutionId == institution.id,
                             enabled = selectedInstitutionId?.let { it == institution.id } ?: true,
                             institution = institution,
-                            index = index,
                             onInstitutionSelected = { onInstitutionSelected(it, false) }
                         )
                     }
@@ -496,7 +499,6 @@ private fun InstitutionResultTile(
     institution: FinancialConnectionsInstitution,
     loading: Boolean = false,
     enabled: Boolean = true,
-    index: Int,
     onInstitutionSelected: (FinancialConnectionsInstitution) -> Unit
 ) {
     val focusManager = LocalFocusManager.current
@@ -505,7 +507,7 @@ private fun InstitutionResultTile(
         modifier = modifier
             .fillMaxSize()
             .semantics { testTagsAsResourceId = true }
-            .testTag("search_result_$index")
+            .testTag(institution.id)
             .clickable(
                 enabled = enabled && loading.not(),
                 interactionSource = remember { MutableInteractionSource() },

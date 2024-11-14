@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
+import androidx.annotation.RestrictTo
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,6 +23,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -45,12 +47,16 @@ import com.stripe.android.uicore.elements.SameAsShippingElement
 import com.stripe.android.uicore.elements.SameAsShippingElementUI
 import com.stripe.android.uicore.elements.Section
 import com.stripe.android.uicore.elements.SectionCard
+import com.stripe.android.uicore.elements.TextField
 import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.elements.TextFieldSection
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.R as StripeR
 import com.stripe.android.ui.core.R as PaymentsUiCoreR
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val TEST_TAG_ACCOUNT_DETAILS = "TEST_TAG_ACCOUNT_DETAILS"
 
 @Composable
 internal fun USBankAccountForm(
@@ -62,6 +68,7 @@ internal fun USBankAccountForm(
         factory = USBankAccountFormViewModel.Factory {
             USBankAccountFormViewModel.Args(
                 instantDebits = usBankAccountFormArgs.instantDebits,
+                linkMode = usBankAccountFormArgs.linkMode,
                 formArgs = formArgs,
                 hostedSurface = usBankAccountFormArgs.hostedSurface,
                 showCheckbox = usBankAccountFormArgs.showCheckbox,
@@ -76,7 +83,7 @@ internal fun USBankAccountForm(
         },
     )
 
-    val currentScreenState by viewModel.currentScreenState.collectAsState()
+    val state by viewModel.currentScreenState.collectAsState()
     val lastTextFieldIdentifier by viewModel.lastTextFieldIdentifier.collectAsState()
 
     USBankAccountEmitters(
@@ -84,121 +91,31 @@ internal fun USBankAccountForm(
         usBankAccountFormArgs = usBankAccountFormArgs,
     )
 
-    Box(modifier) {
-        when (val screenState = currentScreenState) {
-            is USBankAccountFormScreenState.BillingDetailsCollection -> {
-                BillingDetailsCollectionScreen(
-                    instantDebits = usBankAccountFormArgs.instantDebits,
-                    formArgs = formArgs,
-                    isPaymentFlow = usBankAccountFormArgs.isPaymentFlow,
-                    isProcessing = screenState.isProcessing,
-                    nameController = viewModel.nameController,
-                    emailController = viewModel.emailController,
-                    phoneController = viewModel.phoneController,
-                    addressController = viewModel.addressElement.controller,
-                    lastTextFieldIdentifier = lastTextFieldIdentifier,
-                    sameAsShippingElement = viewModel.sameAsShippingElement,
-                )
-            }
-            is USBankAccountFormScreenState.MandateCollection -> {
-                AccountPreviewScreen(
-                    formArgs = formArgs,
-                    bankName = screenState.bankName,
-                    last4 = screenState.last4,
-                    showCheckbox = usBankAccountFormArgs.showCheckbox,
-                    instantDebits = usBankAccountFormArgs.instantDebits,
-                    isProcessing = screenState.isProcessing,
-                    isPaymentFlow = usBankAccountFormArgs.isPaymentFlow,
-                    nameController = viewModel.nameController,
-                    emailController = viewModel.emailController,
-                    phoneController = viewModel.phoneController,
-                    addressController = viewModel.addressElement.controller,
-                    lastTextFieldIdentifier = lastTextFieldIdentifier,
-                    sameAsShippingElement = viewModel.sameAsShippingElement,
-                    saveForFutureUseElement = viewModel.saveForFutureUseElement,
-                    onRemoveAccount = viewModel::reset,
-                )
-            }
-            is USBankAccountFormScreenState.VerifyWithMicrodeposits -> {
-                AccountPreviewScreen(
-                    formArgs = formArgs,
-                    bankName = screenState.paymentAccount.bankName,
-                    last4 = screenState.paymentAccount.last4,
-                    showCheckbox = usBankAccountFormArgs.showCheckbox,
-                    instantDebits = usBankAccountFormArgs.instantDebits,
-                    isProcessing = screenState.isProcessing,
-                    isPaymentFlow = usBankAccountFormArgs.isPaymentFlow,
-                    nameController = viewModel.nameController,
-                    emailController = viewModel.emailController,
-                    phoneController = viewModel.phoneController,
-                    addressController = viewModel.addressElement.controller,
-                    lastTextFieldIdentifier = lastTextFieldIdentifier,
-                    sameAsShippingElement = viewModel.sameAsShippingElement,
-                    saveForFutureUseElement = viewModel.saveForFutureUseElement,
-                    onRemoveAccount = viewModel::reset,
-                )
-            }
-            is USBankAccountFormScreenState.SavedAccount -> {
-                AccountPreviewScreen(
-                    formArgs = formArgs,
-                    bankName = screenState.bankName,
-                    last4 = screenState.last4,
-                    showCheckbox = usBankAccountFormArgs.showCheckbox,
-                    instantDebits = usBankAccountFormArgs.instantDebits,
-                    isProcessing = screenState.isProcessing,
-                    isPaymentFlow = usBankAccountFormArgs.isPaymentFlow,
-                    nameController = viewModel.nameController,
-                    emailController = viewModel.emailController,
-                    phoneController = viewModel.phoneController,
-                    addressController = viewModel.addressElement.controller,
-                    lastTextFieldIdentifier = lastTextFieldIdentifier,
-                    sameAsShippingElement = viewModel.sameAsShippingElement,
-                    saveForFutureUseElement = viewModel.saveForFutureUseElement,
-                    onRemoveAccount = viewModel::reset,
-                )
-            }
-        }
-    }
+    BankAccountForm(
+        state = state,
+        formArgs = formArgs,
+        instantDebits = usBankAccountFormArgs.instantDebits,
+        isPaymentFlow = usBankAccountFormArgs.isPaymentFlow,
+        showCheckbox = usBankAccountFormArgs.showCheckbox,
+        nameController = viewModel.nameController,
+        emailController = viewModel.emailController,
+        phoneController = viewModel.phoneController,
+        addressController = viewModel.addressElement.controller,
+        lastTextFieldIdentifier = lastTextFieldIdentifier,
+        sameAsShippingElement = viewModel.sameAsShippingElement,
+        saveForFutureUseElement = viewModel.saveForFutureUseElement,
+        onRemoveAccount = viewModel::reset,
+        modifier = modifier,
+    )
 }
 
 @Composable
-internal fun BillingDetailsCollectionScreen(
+internal fun BankAccountForm(
+    state: BankFormScreenState,
     formArgs: FormArguments,
     instantDebits: Boolean,
-    isProcessing: Boolean,
     isPaymentFlow: Boolean,
-    nameController: TextFieldController,
-    emailController: TextFieldController,
-    phoneController: PhoneNumberController,
-    addressController: AddressController,
-    lastTextFieldIdentifier: IdentifierSpec?,
-    sameAsShippingElement: SameAsShippingElement?,
-) {
-    Column(Modifier.fillMaxWidth()) {
-        BillingDetailsForm(
-            instantDebits = instantDebits,
-            formArgs = formArgs,
-            isProcessing = isProcessing,
-            isPaymentFlow = isPaymentFlow,
-            nameController = nameController,
-            emailController = emailController,
-            phoneController = phoneController,
-            addressController = addressController,
-            lastTextFieldIdentifier = lastTextFieldIdentifier,
-            sameAsShippingElement = sameAsShippingElement,
-        )
-    }
-}
-
-@Composable
-internal fun AccountPreviewScreen(
-    formArgs: FormArguments,
-    bankName: String?,
-    last4: String?,
     showCheckbox: Boolean,
-    instantDebits: Boolean,
-    isProcessing: Boolean,
-    isPaymentFlow: Boolean,
     nameController: TextFieldController,
     emailController: TextFieldController,
     phoneController: PhoneNumberController,
@@ -206,14 +123,15 @@ internal fun AccountPreviewScreen(
     lastTextFieldIdentifier: IdentifierSpec?,
     sameAsShippingElement: SameAsShippingElement?,
     saveForFutureUseElement: SaveForFutureUseElement,
+    modifier: Modifier = Modifier,
     onRemoveAccount: () -> Unit,
 ) {
-    Column(Modifier.fillMaxWidth()) {
+    Column(modifier.fillMaxWidth()) {
         BillingDetailsForm(
-            formArgs = formArgs,
             instantDebits = instantDebits,
-            isProcessing = isProcessing,
+            formArgs = formArgs,
             isPaymentFlow = isPaymentFlow,
+            isProcessing = state.isProcessing,
             nameController = nameController,
             emailController = emailController,
             phoneController = phoneController,
@@ -221,19 +139,23 @@ internal fun AccountPreviewScreen(
             lastTextFieldIdentifier = lastTextFieldIdentifier,
             sameAsShippingElement = sameAsShippingElement,
         )
-        AccountDetailsForm(
-            showCheckbox = showCheckbox,
-            isProcessing = isProcessing,
-            bankName = bankName,
-            last4 = last4,
-            saveForFutureUseElement = saveForFutureUseElement,
-            onRemoveAccount = onRemoveAccount,
-        )
+
+        state.linkedBankAccount?.let { linkedBankAccount ->
+            AccountDetailsForm(
+                modifier = Modifier.padding(top = 16.dp),
+                showCheckbox = showCheckbox,
+                isProcessing = state.isProcessing,
+                bankName = linkedBankAccount.bankName,
+                last4 = linkedBankAccount.last4,
+                saveForFutureUseElement = saveForFutureUseElement,
+                onRemoveAccount = onRemoveAccount,
+            )
+        }
     }
 }
 
 @Composable
-internal fun BillingDetailsForm(
+private fun BillingDetailsForm(
     instantDebits: Boolean,
     formArgs: FormArguments,
     isProcessing: Boolean,
@@ -252,7 +174,6 @@ internal fun BillingDetailsForm(
             } else {
                 stringResource(R.string.stripe_paymentsheet_save_bank_title)
             },
-            modifier = Modifier.padding(vertical = 8.dp)
         )
 
         val showName = if (instantDebits) {
@@ -270,10 +191,15 @@ internal fun BillingDetailsForm(
                 contentAlignment = Alignment.CenterEnd
             ) {
                 TextFieldSection(
+                    modifier = Modifier.padding(top = 16.dp),
                     textFieldController = nameController,
-                    imeAction = ImeAction.Next,
-                    enabled = !isProcessing
-                )
+                ) {
+                    TextField(
+                        textFieldController = nameController,
+                        enabled = !isProcessing,
+                        imeAction = ImeAction.Next,
+                    )
+                }
             }
         }
         if (formArgs.billingDetailsCollectionConfiguration.email != CollectionMode.Never) {
@@ -284,14 +210,19 @@ internal fun BillingDetailsForm(
                 contentAlignment = Alignment.CenterEnd
             ) {
                 TextFieldSection(
+                    modifier = Modifier.padding(top = 16.dp),
                     textFieldController = emailController,
-                    imeAction = if (lastTextFieldIdentifier == IdentifierSpec.Email) {
-                        ImeAction.Done
-                    } else {
-                        ImeAction.Next
-                    },
-                    enabled = !isProcessing
-                )
+                ) {
+                    TextField(
+                        textFieldController = emailController,
+                        enabled = !isProcessing,
+                        imeAction = if (lastTextFieldIdentifier == IdentifierSpec.Email) {
+                            ImeAction.Done
+                        } else {
+                            ImeAction.Next
+                        },
+                    )
+                }
             }
         }
         if (formArgs.billingDetailsCollectionConfiguration.phone == CollectionMode.Always) {
@@ -303,6 +234,7 @@ internal fun BillingDetailsForm(
                 } else {
                     ImeAction.Next
                 },
+                modifier = Modifier.padding(top = 16.dp)
             )
         }
         if (formArgs.billingDetailsCollectionConfiguration.address == AddressCollectionMode.Full) {
@@ -311,6 +243,7 @@ internal fun BillingDetailsForm(
                 addressController = addressController,
                 lastTextFieldIdentifier = lastTextFieldIdentifier,
                 sameAsShippingElement = sameAsShippingElement,
+                modifier = Modifier.padding(top = 16.dp)
             )
         }
     }
@@ -322,6 +255,7 @@ private fun PhoneSection(
     isProcessing: Boolean,
     phoneController: PhoneNumberController,
     imeAction: ImeAction,
+    modifier: Modifier = Modifier,
 ) {
     val error by phoneController.error.collectAsState()
 
@@ -340,7 +274,11 @@ private fun PhoneSection(
             .padding(0.dp),
         contentAlignment = Alignment.CenterEnd
     ) {
-        Section(null, sectionErrorString) {
+        Section(
+            modifier = modifier,
+            title = null,
+            error = sectionErrorString,
+        ) {
             PhoneNumberElementUI(
                 enabled = !isProcessing,
                 controller = phoneController,
@@ -357,6 +295,7 @@ private fun AddressSection(
     addressController: AddressController,
     lastTextFieldIdentifier: IdentifierSpec?,
     sameAsShippingElement: SameAsShippingElement?,
+    modifier: Modifier = Modifier,
 ) {
     val error by addressController.error.collectAsState()
 
@@ -375,8 +314,11 @@ private fun AddressSection(
             .padding(0.dp),
         contentAlignment = Alignment.CenterEnd
     ) {
-        Column {
-            Section(PaymentsUiCoreR.string.stripe_billing_details, sectionErrorString) {
+        Column(modifier) {
+            Section(
+                title = PaymentsUiCoreR.string.stripe_billing_details,
+                error = sectionErrorString,
+            ) {
                 AddressElementUI(
                     enabled = !isProcessing,
                     controller = addressController,
@@ -385,7 +327,7 @@ private fun AddressSection(
                 )
             }
             sameAsShippingElement?.let {
-                SameAsShippingElementUI(it.controller)
+                SameAsShippingElementUI(it.controller, Modifier.padding(top = 12.dp))
             }
         }
     }
@@ -393,6 +335,7 @@ private fun AddressSection(
 
 @Composable
 private fun AccountDetailsForm(
+    modifier: Modifier = Modifier,
     showCheckbox: Boolean,
     isProcessing: Boolean,
     bankName: String?,
@@ -404,13 +347,13 @@ private fun AccountDetailsForm(
     val bankIcon = remember(bankName) { TransformToBankIcon(bankName) }
 
     Column(
-        Modifier
+        modifier
             .fillMaxWidth()
-            .padding(bottom = 8.dp)
+            .testTag(TEST_TAG_ACCOUNT_DETAILS)
     ) {
         H6Text(
             text = stringResource(StripeR.string.stripe_title_bank_account),
-            modifier = Modifier.padding(vertical = 8.dp)
+            modifier = Modifier.padding(bottom = 8.dp)
         )
 
         SectionCard(modifier = Modifier.fillMaxWidth()) {

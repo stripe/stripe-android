@@ -1,8 +1,6 @@
 package com.stripe.android.view
 
 import android.content.Context
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffColorFilter
 import android.graphics.Typeface
 import android.os.Parcelable
 import android.util.AttributeSet
@@ -14,10 +12,13 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.ListPopupWindow
 import android.widget.TextView
+import androidx.annotation.VisibleForTesting
+import androidx.transition.TransitionManager
 import com.stripe.android.R
 import com.stripe.android.databinding.StripeCardBrandViewBinding
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardBrand.Unknown
+import com.stripe.android.model.Networks
 import com.stripe.android.model.PaymentMethodCreateParams
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
@@ -44,7 +45,6 @@ internal class CardBrandView @JvmOverloads constructor(
         val merchantPreferredNetworks: List<CardBrand> = emptyList(),
         val shouldShowCvc: Boolean = false,
         val shouldShowErrorIcon: Boolean = false,
-        val tintColor: Int = 0,
     ) : Parcelable
 
     private var stateFlow = MutableStateFlow(State())
@@ -59,7 +59,7 @@ internal class CardBrandView @JvmOverloads constructor(
         get() = state.isCbcEligible
         set(value) {
             stateFlow.update { it.copy(isCbcEligible = value) }
-            updateBrandSpinner()
+            updateBrandSpinner(animate = true)
         }
 
     var brand: CardBrand
@@ -67,7 +67,7 @@ internal class CardBrandView @JvmOverloads constructor(
         set(value) {
             stateFlow.update { it.copy(brand = value) }
             determineCardBrandToDisplay()
-            updateBrandSpinner()
+            updateBrandSpinner(animate = true)
         }
 
     var possibleBrands: List<CardBrand>
@@ -75,7 +75,7 @@ internal class CardBrandView @JvmOverloads constructor(
         set(value) {
             stateFlow.update { it.copy(possibleBrands = value) }
             determineCardBrandToDisplay()
-            updateBrandSpinner()
+            updateBrandSpinner(animate = true)
         }
 
     var merchantPreferredNetworks: List<CardBrand>
@@ -90,6 +90,7 @@ internal class CardBrandView @JvmOverloads constructor(
         set(value) {
             stateFlow.update { it.copy(shouldShowCvc = value) }
             setCardBrandIconAndTint()
+            updateBrandSpinner(animate = false)
         }
 
     var shouldShowErrorIcon: Boolean
@@ -99,29 +100,59 @@ internal class CardBrandView @JvmOverloads constructor(
             setCardBrandIconAndTint()
         }
 
-    internal var tintColorInt: Int
-        get() = state.tintColor
-        set(value) {
-            stateFlow.update { it.copy(tintColor = value) }
-        }
-
     init {
         isClickable = false
         isFocusable = false
 
         determineCardBrandToDisplay()
-        updateBrandSpinner()
+        updateBrandSpinner(animate = false)
     }
 
-    fun createNetworksParam(): PaymentMethodCreateParams.Card.Networks? {
+    fun paymentMethodCreateParamsNetworks(): PaymentMethodCreateParams.Card.Networks? {
+        val defaultNetworkParam = brandPaymentMethodCreateParamsNetworks()
+        if (defaultNetworkParam != null) return defaultNetworkParam
+        return merchantPreferredNetworks.firstOrNull()?.code?.let {
+            PaymentMethodCreateParams.Card.Networks(
+                preferred = it,
+            )
+        }
+    }
+
+    private fun brandPaymentMethodCreateParamsNetworks(): PaymentMethodCreateParams.Card.Networks? {
+        if (brand == Unknown) return null
         return PaymentMethodCreateParams.Card.Networks(
-            preferred = brand.takeIf { it != Unknown }?.code,
+            preferred = brand.code,
         ).takeIf {
             isCbcEligible && possibleBrands.size > 1
         }
     }
 
-    private fun handleBrandSelected(brand: CardBrand?) {
+    fun cardParamsNetworks(): Networks? {
+        val brandPreferredNetwork = brandCardParamsNetworks()
+        if (brandPreferredNetwork != null) return brandPreferredNetwork
+        return merchantPreferredNetworks.firstOrNull()
+            ?.takeIf { it != Unknown }?.code
+            ?.let { network ->
+                Networks(
+                    preferred = network
+                )
+            }
+    }
+
+    private fun brandCardParamsNetworks(): Networks? {
+        return brand
+            .takeIf { it != Unknown }?.code
+            ?.let { network ->
+                Networks(
+                    preferred = network
+                )
+            }.takeIf {
+                isCbcEligible && possibleBrands.size > 1
+            }
+    }
+
+    @VisibleForTesting
+    internal fun handleBrandSelected(brand: CardBrand?) {
         brand?.let {
             stateFlow.update { it.copy(userSelectedBrand = brand) }
             determineCardBrandToDisplay()
@@ -129,21 +160,13 @@ internal class CardBrandView @JvmOverloads constructor(
     }
 
     private fun setCardBrandIconAndTint() {
-        iconView.setBackgroundResource(
+        iconView.setImageResource(
             when {
                 shouldShowErrorIcon -> state.brand.errorIcon
                 shouldShowCvc -> state.brand.cvcIcon
                 else -> state.brand.icon
             }
         )
-
-        val tint = when {
-            shouldShowErrorIcon -> null
-            shouldShowCvc -> tintColorInt
-            else -> tintColorInt.takeIf { state.brand == Unknown }
-        }
-
-        iconView.colorFilter = tint?.let { PorterDuffColorFilter(it, PorterDuff.Mode.LIGHTEN) }
     }
 
     private fun determineCardBrandToDisplay() {
@@ -156,8 +179,10 @@ internal class CardBrandView @JvmOverloads constructor(
         setCardBrandIconAndTint()
     }
 
-    private fun updateBrandSpinner() {
+    private fun updateBrandSpinner(animate: Boolean) {
         val showDropdown = isCbcEligible && possibleBrands.size > 1 && !shouldShowCvc && !shouldShowErrorIcon
+        val parentViewGroup = parent as? ViewGroup
+
         if (showDropdown) {
             initListPopup()
             this.setOnClickListener {
@@ -167,9 +192,19 @@ internal class CardBrandView @JvmOverloads constructor(
                     listPopup.show()
                 }
             }
+
+            if (animate) {
+                parentViewGroup.animateNextChanges()
+            }
+
             chevron.visibility = View.VISIBLE
         } else {
             this.setOnClickListener(null)
+
+            if (animate) {
+                parentViewGroup.animateNextChanges()
+            }
+
             chevron.visibility = View.GONE
         }
     }
@@ -212,8 +247,15 @@ internal class CardBrandView @JvmOverloads constructor(
         val savedState = state as? SavedState
         this.state = savedState?.state ?: State()
         determineCardBrandToDisplay()
-        updateBrandSpinner()
+        updateBrandSpinner(animate = false)
         super.onRestoreInstanceState(savedState?.superState ?: state)
+    }
+
+    private fun ViewGroup?.animateNextChanges() {
+        this?.let {
+            TransitionManager.endTransitions(this)
+            TransitionManager.beginDelayedTransition(this)
+        }
     }
 
     @Parcelize
@@ -262,7 +304,7 @@ internal class BrandAdapter(
     private fun updateView(view: View, position: Int) {
         brands.getOrNull(position - 1)?.let { brand ->
             val isSelected = brand == selectedBrand
-            view.findViewById<ImageView>(R.id.brand_icon)?.setBackgroundResource(brand.icon)
+            view.findViewById<ImageView>(R.id.brand_icon)?.setImageResource(brand.icon)
             view.findViewById<ImageView>(R.id.brand_check).apply {
                 if (isSelected) {
                     visibility = View.VISIBLE

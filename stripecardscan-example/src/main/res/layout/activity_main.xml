@@ -20,12 +20,6 @@
         >
 
         <Button
-            android:id="@+id/button_card_image_verification"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/cardimageverificationsheet"/>
-
-        <Button
             android:id="@+id/button_card_scan"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

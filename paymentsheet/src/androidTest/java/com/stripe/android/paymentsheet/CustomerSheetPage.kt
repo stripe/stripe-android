@@ -15,6 +15,7 @@ import com.stripe.android.customersheet.ui.CUSTOMER_SHEET_SAVE_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_EDIT_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TEST_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_REMOVE_BADGE
+import com.stripe.android.paymentsheet.ui.readNumbersAsIndividualDigits
 import com.stripe.android.paymentsheet.utils.isPlaced
 import com.stripe.android.ui.core.elements.TEST_TAG_DIALOG_CONFIRM_BUTTON
 import com.stripe.android.uicore.elements.DROPDOWN_MENU_CLICKABLE_TEST_TAG
@@ -89,7 +90,7 @@ internal class CustomerSheetPage(
 
     fun clickDeleteButton(forEndsWith: String) {
         val deleteBadgeForSavedPmMatcher = hasTestTag(TEST_TAG_REMOVE_BADGE)
-            .and(hasContentDescription(forEndsWith, substring = true))
+            .and(hasContentDescription(forEndsWith.readNumbersAsIndividualDigits(), substring = true))
 
         waitUntil(deleteBadgeForSavedPmMatcher)
         click(deleteBadgeForSavedPmMatcher)

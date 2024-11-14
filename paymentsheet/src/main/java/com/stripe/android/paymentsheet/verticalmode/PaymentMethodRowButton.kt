@@ -13,9 +13,11 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.stripe.android.paymentsheet.ui.RowButton
 import com.stripe.android.uicore.stripeColors
 
@@ -28,6 +30,7 @@ internal fun PaymentMethodRowButton(
     title: String,
     subtitle: String?,
     onClick: () -> Unit,
+    contentDescription: String? = null,
     modifier: Modifier = Modifier,
     trailingContent: (@Composable RowScope.() -> Unit)? = null,
 ) {
@@ -52,7 +55,12 @@ internal fun PaymentMethodRowButton(
         ) {
             iconContent()
 
-            TitleContent(title = title, subtitle = subtitle, isEnabled = isEnabled)
+            TitleContent(
+                title = title,
+                subtitle = subtitle,
+                isEnabled = isEnabled,
+                contentDescription = contentDescription
+            )
 
             if (trailingContent != null) {
                 Spacer(modifier = Modifier.weight(1f))
@@ -63,24 +71,28 @@ internal fun PaymentMethodRowButton(
 }
 
 @Composable
-private fun TitleContent(title: String, subtitle: String?, isEnabled: Boolean,) {
+private fun TitleContent(title: String, subtitle: String?, isEnabled: Boolean, contentDescription: String?,) {
     val textColor = MaterialTheme.stripeColors.onComponent
 
     Column {
         Text(
             text = title,
-            style = MaterialTheme.typography.caption,
-            fontSize = 14.sp,
+            style = MaterialTheme.typography.body1.copy(fontWeight = FontWeight.Medium),
             color = if (isEnabled) textColor else textColor.copy(alpha = 0.6f),
             maxLines = 1,
-            overflow = TextOverflow.Ellipsis
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.semantics {
+                if (contentDescription != null) {
+                    this.contentDescription = contentDescription
+                }
+            }
         )
 
         if (subtitle != null) {
             val subtitleTextColor = MaterialTheme.stripeColors.subtitle
             Text(
                 text = subtitle,
-                style = MaterialTheme.typography.subtitle1.copy(fontSize = 12.sp),
+                style = MaterialTheme.typography.caption.copy(fontWeight = FontWeight.Normal),
                 color = if (isEnabled) subtitleTextColor else subtitleTextColor.copy(alpha = 0.6f),
             )
         }

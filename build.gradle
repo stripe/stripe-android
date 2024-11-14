@@ -14,6 +14,7 @@ buildscript {
     dependencies {
         classpath buildLibs.androidGradlePlugin
         classpath buildLibs.binaryCompatibilityValidator
+        classpath buildLibs.composeGradlePlugin
         classpath buildLibs.detektGradlePlugin
         classpath buildLibs.dokkaPlugin
         classpath buildLibs.firebaseAppDistribution
@@ -28,9 +29,11 @@ buildscript {
 plugins {
     id 'io.github.gradle-nexus.publish-plugin' version '1.3.0'
     id 'io.codearte.nexus-staging' version '0.30.0'
-    id 'com.google.devtools.ksp' version '1.9.22-1.0.17' apply false
-    id 'dev.drewhamilton.poko' version '0.15.2' apply false
-    id 'org.jetbrains.kotlin.jvm' version '1.9.22' apply false
+    id 'com.google.devtools.ksp' version '2.0.21-1.0.26' apply false
+    id 'dev.drewhamilton.poko' version '0.17.2' apply false
+    id 'org.jetbrains.kotlin.jvm' version '2.0.21' apply false
+    id 'com.emergetools.android' version '4.0.0' apply false
+    id 'com.google.dagger.hilt.android' version '2.51.1' apply false
 }
 
 apply plugin: "io.gitlab.arturbosch.detekt"
@@ -97,8 +100,11 @@ apiValidation {
             "payments-core-testing",
             "paymentsheet-example",
             "stripecardscan-example",
+            "connect-example",
             "screenshot-testing",
             "3ds2playground",
+            "dokka-stripe",
+            "stripe-test-e2e",
     ]
     nonPublicMarkers.add("androidx.annotation.RestrictTo")
     nonPublicMarkers.add("dagger.internal.DaggerGenerated")

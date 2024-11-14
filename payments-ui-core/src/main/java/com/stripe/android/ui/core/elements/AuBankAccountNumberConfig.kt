@@ -30,7 +30,7 @@ class AuBankAccountNumberConfig : TextFieldConfig {
     override val keyboard = KeyboardType.Number
 
     override fun filter(userTyped: String) =
-        userTyped.filter { VALID_INPUT_RANGES.contains(it) }.take(LENGTH)
+        userTyped.filter { VALID_INPUT_RANGES.contains(it) }.take(MAXIMUM_LENGTH)
 
     override fun convertToRaw(displayName: String) = displayName
 
@@ -41,17 +41,22 @@ class AuBankAccountNumberConfig : TextFieldConfig {
             return TextFieldStateConstants.Error.Blank
         }
 
-        if (input.length < LENGTH) {
+        if (input.length < MINIMUM_LENGTH) {
             return TextFieldStateConstants.Error.Incomplete(
                 StripeR.string.stripe_becs_widget_account_number_incomplete
             )
+        }
+
+        if (input.length < MAXIMUM_LENGTH) {
+            return TextFieldStateConstants.Valid.Limitless
         }
 
         return TextFieldStateConstants.Valid.Full
     }
 
     private companion object {
-        const val LENGTH = 9
+        const val MINIMUM_LENGTH = 4
+        const val MAXIMUM_LENGTH = 9
         val VALID_INPUT_RANGES = ('0'..'9')
     }
 }

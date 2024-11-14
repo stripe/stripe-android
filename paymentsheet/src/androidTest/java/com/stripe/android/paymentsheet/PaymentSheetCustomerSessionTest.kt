@@ -217,7 +217,7 @@ class PaymentSheetCustomerSessionTest {
     }
 
     private fun clickOnSaveForFutureUsage() {
-        page.clickOnSaveForFutureUsage("Merchant, Inc.")
+        page.clickOnSaveForFutureUsage()
     }
 
     @OptIn(ExperimentalCustomerSessionApi::class)

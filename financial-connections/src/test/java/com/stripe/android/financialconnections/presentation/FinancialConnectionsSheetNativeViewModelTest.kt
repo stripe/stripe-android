@@ -15,23 +15,28 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsEve
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Metadata
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
 import com.stripe.android.financialconnections.domain.CompleteFinancialConnectionsSession
+import com.stripe.android.financialconnections.domain.CreateInstantDebitsResult
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Complete
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Complete.EarlyTerminationCause
 import com.stripe.android.financialconnections.exception.CustomManualEntryRequiredError
+import com.stripe.android.financialconnections.exception.UnclassifiedError
 import com.stripe.android.financialconnections.financialConnectionsSessionWithNoMoreAccounts
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Canceled
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Completed
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Failed
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetNativeActivityArgs
+import com.stripe.android.financialconnections.launcher.InstantDebitsResult
+import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession.StatusDetails
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession.StatusDetails.Cancelled
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession.StatusDetails.Cancelled.Reason
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.Finish
+import com.stripe.android.financialconnections.ui.theme.Theme
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import com.stripe.android.financialconnections.utils.UriUtils
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -52,13 +57,14 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
     @get:Rule
     val rule: TestRule = CoroutineTestRule(UnconfinedTestDispatcher())
 
-    private val nativeAuthFlowCoordinator = mock<NativeAuthFlowCoordinator>()
+    private val nativeAuthFlowCoordinator = NativeAuthFlowCoordinator()
     private val completeFinancialConnectionsSession = mock<CompleteFinancialConnectionsSession>()
     private val applicationId = "com.sample.applicationid"
     private val configuration = FinancialConnectionsSheet.Configuration(
         financialConnectionsSessionClientSecret = ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
         publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
     )
+    private val encodedPaymentMethod = "{\"id\": \"pm_123\"}"
 
     private val liveEvents = mutableListOf<FinancialConnectionsEvent>()
 
@@ -70,7 +76,6 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
     @Test
     fun `nativeAuthFlowCoordinator - when manual entry termination, finish with CustomManualEntryRequiredError`() =
         runTest {
-            val messagesFlow = MutableSharedFlow<NativeAuthFlowCoordinator.Message>()
             val sessionWithCustomManualEntry = financialConnectionsSessionNoAccounts().copy(
                 statusDetails = StatusDetails(
                     cancelled = Cancelled(
@@ -78,8 +83,6 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
                     )
                 )
             )
-
-            whenever(nativeAuthFlowCoordinator()).thenReturn(messagesFlow)
 
             whenever(completeFinancialConnectionsSession(anyOrNull(), anyOrNull())).thenReturn(
                 CompleteFinancialConnectionsSession.Result(
@@ -90,7 +93,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
 
             val viewModel = createViewModel()
 
-            messagesFlow.emit(Complete(EarlyTerminationCause.USER_INITIATED_WITH_CUSTOM_MANUAL_ENTRY))
+            nativeAuthFlowCoordinator().emit(Complete(EarlyTerminationCause.USER_INITIATED_WITH_CUSTOM_MANUAL_ENTRY))
 
             withState(viewModel) {
                 require(it.viewEffect is Finish)
@@ -102,7 +105,6 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
     @Test
     fun `onCloseClick - when closing but linked accounts, finish with success`() = runTest {
         val sessionWithAccounts = financialConnectionsSessionWithNoMoreAccounts
-        whenever(nativeAuthFlowCoordinator()).thenReturn(MutableSharedFlow())
 
         whenever(completeFinancialConnectionsSession(anyOrNull(), anyOrNull())).thenReturn(
             CompleteFinancialConnectionsSession.Result(
@@ -111,12 +113,9 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
             )
         )
 
-        val messagesFlow = MutableSharedFlow<NativeAuthFlowCoordinator.Message>()
-        whenever(nativeAuthFlowCoordinator()).thenReturn(messagesFlow)
-
         val viewModel = createViewModel()
 
-        messagesFlow.emit(Complete(null))
+        nativeAuthFlowCoordinator().emit(Complete(null))
 
         withState(viewModel) {
             require(it.viewEffect is Finish)
@@ -142,12 +141,9 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
             )
         )
 
-        val messagesFlow = MutableSharedFlow<NativeAuthFlowCoordinator.Message>()
-        whenever(nativeAuthFlowCoordinator()).thenReturn(messagesFlow)
-
         val viewModel = createViewModel()
 
-        messagesFlow.emit(Complete(null))
+        nativeAuthFlowCoordinator().emit(Complete(null))
 
         withState(viewModel) {
             require(it.viewEffect is Finish)
@@ -179,12 +175,9 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
             )
         )
 
-        val messagesFlow = MutableSharedFlow<NativeAuthFlowCoordinator.Message>()
-        whenever(nativeAuthFlowCoordinator()).thenReturn(messagesFlow)
-
         val viewModel = createViewModel()
 
-        messagesFlow.emit(Complete(null))
+        nativeAuthFlowCoordinator().emit(Complete(null))
 
         withState(viewModel) {
             require(it.viewEffect is Finish)
@@ -202,7 +195,6 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
 
     @Test
     fun `handleOnNewIntent - when deeplink with success code received, webAuthFlow async succeeds`() {
-        whenever(nativeAuthFlowCoordinator()).thenReturn(MutableSharedFlow())
         val viewModel = createViewModel()
         val intent = intent("stripe://auth-redirect/$applicationId?status=success")
         viewModel.handleOnNewIntent(intent)
@@ -214,7 +206,6 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
 
     @Test
     fun `handleOnNewIntent - when deeplink with error code received, webAuthFlow async fails`() {
-        whenever(nativeAuthFlowCoordinator()).thenReturn(MutableSharedFlow())
         val viewModel = createViewModel()
         val errorReason = "random_reason"
         val intent = intent(
@@ -231,7 +222,6 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
 
     @Test
     fun `handleOnNewIntent - when app2app deeplink with error code received, webAuthFlow async fails`() {
-        whenever(nativeAuthFlowCoordinator()).thenReturn(MutableSharedFlow())
         val viewModel = createViewModel()
         val intent = intent(
             "stripe-auth://link-accounts/$applicationId/authentication_return#authSessionId=12345&code=failure"
@@ -246,7 +236,6 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
 
     @Test
     fun `handleOnNewIntent - when app2app deeplink with success, webAuthFlow async suceeds`() {
-        whenever(nativeAuthFlowCoordinator()).thenReturn(MutableSharedFlow())
         val viewModel = createViewModel()
         val intent = intent(
             "stripe-auth://link-accounts/$applicationId/authentication_return#authSessionId=12345&code=success"
@@ -261,7 +250,6 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
 
     @Test
     fun `handleOnNewIntent - when deeplink with unknown code received, webAuthFlow async cancelled`() {
-        whenever(nativeAuthFlowCoordinator()).thenReturn(MutableSharedFlow())
         val viewModel = createViewModel()
         val intent = intent("stripe://auth-redirect/$applicationId?status=unknown")
         viewModel.handleOnNewIntent(intent)
@@ -274,7 +262,6 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
 
     @Test
     fun `handleOnNewIntent - when deeplink with cancel code received, webAuthFlow async fails`() {
-        whenever(nativeAuthFlowCoordinator()).thenReturn(MutableSharedFlow())
         val viewModel = createViewModel()
         val intent = intent("stripe://auth-redirect/$applicationId?status=cancel")
         viewModel.handleOnNewIntent(intent)
@@ -287,7 +274,6 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
 
     @Test
     fun `handleOnNewIntent - when deeplink with unknown applicationId received, webAuthFlow async cancels`() {
-        whenever(nativeAuthFlowCoordinator()).thenReturn(MutableSharedFlow())
         val viewModel = createViewModel()
         val intent = intent("stripe://auth-redirect/other-app-id?code=success")
         viewModel.handleOnNewIntent(intent)
@@ -296,6 +282,160 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
             val webAuthFlow = it.webAuthFlow
             assertIs<WebAuthFlowState.Canceled>(webAuthFlow)
         }
+    }
+
+    @Test
+    fun `Returns Instant Debits Result when completing an Instant Debits flow`() = runTest {
+        val session = financialConnectionsSessionWithNoMoreAccounts.copy(
+            paymentAccount = FinancialConnectionsAccount(
+                id = "account_001",
+                supportedPaymentMethodTypes = emptyList(),
+                created = 123,
+                livemode = false,
+                institutionName = "Stripe Bank",
+            )
+        )
+
+        whenever(completeFinancialConnectionsSession(anyOrNull(), anyOrNull())).thenReturn(
+            CompleteFinancialConnectionsSession.Result(
+                session = session,
+                status = "completed",
+            )
+        )
+
+        val initialState = FinancialConnectionsSheetNativeState(
+            webAuthFlow = WebAuthFlowState.Uninitialized,
+            firstInit = true,
+            configuration = configuration,
+            reducedBranding = false,
+            testMode = true,
+            viewEffect = null,
+            completed = false,
+            initialPane = FinancialConnectionsSessionManifest.Pane.CONSENT,
+            theme = Theme.LinkLight,
+            isLinkWithStripe = true,
+            elementsSessionContext = null,
+        )
+
+        val viewModel = createViewModel(
+            initialState = initialState,
+            createInstantDebitsResult = {
+                InstantDebitsResult(
+                    encodedPaymentMethod = encodedPaymentMethod,
+                    last4 = "4242",
+                    bankName = "Stripe Bank",
+                )
+            },
+        )
+
+        nativeAuthFlowCoordinator().emit(Complete())
+
+        val expectedViewEffect = Finish(
+            result = Completed(
+                instantDebits = InstantDebitsResult(
+                    encodedPaymentMethod = encodedPaymentMethod,
+                    last4 = "4242",
+                    bankName = "Stripe Bank",
+                ),
+            )
+        )
+
+        val state = viewModel.stateFlow.value
+        assertThat(state.viewEffect).isEqualTo(expectedViewEffect)
+    }
+
+    @Test
+    fun `Returns a failed result on invalid state when creating PaymentMethod in Instant Debits flow`() = runTest {
+        val session = financialConnectionsSessionWithNoMoreAccounts.copy(
+            paymentAccount = null,
+        )
+
+        whenever(completeFinancialConnectionsSession(anyOrNull(), anyOrNull())).thenReturn(
+            CompleteFinancialConnectionsSession.Result(
+                session = session,
+                status = "completed",
+            )
+        )
+
+        val initialState = FinancialConnectionsSheetNativeState(
+            webAuthFlow = WebAuthFlowState.Uninitialized,
+            firstInit = true,
+            configuration = configuration,
+            reducedBranding = false,
+            testMode = true,
+            viewEffect = null,
+            completed = false,
+            initialPane = FinancialConnectionsSessionManifest.Pane.CONSENT,
+            theme = Theme.LinkLight,
+            isLinkWithStripe = true,
+            elementsSessionContext = null,
+        )
+
+        val viewModel = createViewModel(
+            initialState = initialState,
+            createInstantDebitsResult = {
+                InstantDebitsResult(
+                    encodedPaymentMethod = encodedPaymentMethod,
+                    last4 = "4242",
+                    bankName = "Stripe Bank",
+                )
+            },
+        )
+
+        nativeAuthFlowCoordinator().emit(Complete())
+
+        val state = viewModel.stateFlow.value
+        val finishViewEffect = state.viewEffect as? Finish
+        val failedResult = finishViewEffect?.result as? Failed
+        assertThat(failedResult?.error).isInstanceOf(UnclassifiedError::class.java)
+    }
+
+    @Test
+    fun `Returns a failed result when creating a PaymentMethod in Instant Debits flow fails`() = runTest {
+        val session = financialConnectionsSessionWithNoMoreAccounts.copy(
+            paymentAccount = FinancialConnectionsAccount(
+                id = "account_001",
+                supportedPaymentMethodTypes = emptyList(),
+                created = 123,
+                livemode = false,
+                institutionName = "Stripe Bank",
+            ),
+        )
+
+        whenever(completeFinancialConnectionsSession(anyOrNull(), anyOrNull())).thenReturn(
+            CompleteFinancialConnectionsSession.Result(
+                session = session,
+                status = "completed",
+            )
+        )
+
+        val initialState = FinancialConnectionsSheetNativeState(
+            webAuthFlow = WebAuthFlowState.Uninitialized,
+            firstInit = true,
+            configuration = configuration,
+            reducedBranding = false,
+            testMode = true,
+            viewEffect = null,
+            completed = false,
+            initialPane = FinancialConnectionsSessionManifest.Pane.CONSENT,
+            theme = Theme.LinkLight,
+            isLinkWithStripe = true,
+            elementsSessionContext = null,
+        )
+
+        val viewModel = createViewModel(
+            initialState = initialState,
+            createInstantDebitsResult = {
+                error("Something went wrong here")
+            },
+        )
+
+        nativeAuthFlowCoordinator().emit(Complete())
+
+        val state = viewModel.stateFlow.value
+        val finishViewEffect = state.viewEffect as? Finish
+        val failedResult = finishViewEffect?.result as? Failed
+        assertThat(failedResult?.error?.message).isEqualTo("Something went wrong here")
     }
 
     @After
@@ -312,7 +452,10 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
                 initialSyncResponse = ApiKeyFixtures.syncResponse(),
             ),
             savedState = null
-        )
+        ),
+        createInstantDebitsResult: CreateInstantDebitsResult = CreateInstantDebitsResult {
+            error("Unexpected call to create InstantDebitsResult")
+        },
     ) = FinancialConnectionsSheetNativeViewModel(
         eventTracker = mock(),
         activityRetainedComponent = mock(),
@@ -323,6 +466,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
         logger = mock(),
         navigationManager = TestNavigationManager(),
         savedStateHandle = SavedStateHandle(),
-        initialState = initialState
+        initialState = initialState,
+        createInstantDebitsResult = createInstantDebitsResult,
     )
 }

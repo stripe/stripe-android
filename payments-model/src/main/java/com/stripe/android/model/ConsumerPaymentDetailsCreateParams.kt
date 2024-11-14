@@ -72,6 +72,34 @@ sealed interface ConsumerPaymentDetailsCreateParams : StripeParamsModel, Parcela
                 }
         }
     }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @Parcelize
+    data class BankAccount(
+        private val bankAccountId: String,
+        private val billingAddress: Map<String, @RawValue Any>?,
+        private val billingEmailAddress: String?,
+    ) : ConsumerPaymentDetailsCreateParams {
+
+        override fun toParamMap(): Map<String, Any> {
+            val billingParams = buildMap {
+                billingEmailAddress?.let { put("billing_email_address", it) }
+
+                if (!billingAddress.isNullOrEmpty()) {
+                    put("billing_address", billingAddress)
+                }
+            }
+
+            val accountParams = mapOf(
+                "type" to "bank_account",
+                "bank_account" to mapOf(
+                    "account" to bankAccountId,
+                ),
+            )
+
+            return accountParams + billingParams
+        }
+    }
 }
 
 /**

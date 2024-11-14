@@ -45,6 +45,17 @@
             android:maxLines="1"
             android:textSize="13sp"
             android:fontFamily="monospace"/>
+
+        <TextView
+            android:id="@+id/pref_networks"
+            android:visibility="gone"
+            android:layout_width="0dp"
+            android:layout_weight="6"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textSize="13sp"
+            android:fontFamily="monospace"/>
     </LinearLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

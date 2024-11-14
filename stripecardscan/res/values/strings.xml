@@ -1,28 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="stripe_processing_card">Processing, please wait</string>
-
-    <string name="stripe_cannot_scan_card">I can\'t scan this card</string>
-
-    <string name="stripe_card_description">%1$s \u2022\u2022\u2022\u2022 %2$s</string>
-
     <string name="stripe_card_scan_title" description="Text displayed above the scan window for paymentsheet, instructing the user how to scan card">Position your card in the rectangle to scan</string>
     <string name="stripe_card_scan_instructions" description="Text displayed above the scan window, instructing the user how to scan card">Scan Your Card</string>
-    <string name="stripe_card_scan_security" description="Security notification displayed below the scan window">Your card info is secure</string>
     <string name="stripe_card_scan_privacy_link_text" description="Privacy link text in scan window. THIS STRING SHOULD NOT BE MODIFIED"><![CDATA[We use Stripe to verify your card details. Stripe may use and store your data according its privacy policy. <a href="https://support.stripe.com/questions/stripes-card-image-verification"><u>Learn more</u></a>]]></string>
-    <string name="stripe_scanned_wrong_card" description="Text displayed above the scan window when the wrong card is scanned">Card doesn\'t match</string>
 
-    <string name="stripe_camera_permission_denied_message" description="Message shown to the user when camera permission is denied">Please allow camera access to scan your card</string>
     <string name="stripe_camera_permission_settings_message" description="Message shown to the user when camera permission is denied in fragment">Please allow camera access in settings to scan your card</string>
-    <string name="stripe_camera_permission_denied_ok" description="Affirmative button shown as part of the permission denied dialog">OK</string>
-    <string name="stripe_camera_permission_denied_cancel" description="Negative button shown as part of the permission denied dialog">Cancel</string>
 
-    <string name="stripe_logo" description="Accessibility description of the Stripe logo">Stripe logo</string>
-    <string name="stripe_security_description" description="Accessibility description of the security notification lock icon">lock icon</string>
-    <string name="stripe_preview_description" description="Accessibility description of the camera preview window">card scanning window</string>
-    <string name="stripe_debug_description" description="Accessibility description of the debug preview window">card debug window</string>
     <string name="stripe_close_button_description" description="Text used to close the scan window">Close</string>
     <string name="stripe_torch_button_description" description="Text used to turn on the camera torch">Torch</string>
     <string name="stripe_swap_camera_button_description" description="Text used to swap the camera">Swap Camera</string>
-    <string name="stripe_card_view_finder_description" description="Accessibility description of the view finder window">card view finder</string>
 </resources>

@@ -4,7 +4,6 @@ internal enum class NetbankingBank(
     override val id: String,
     override val code: String,
     override val displayName: String,
-    override val brandIconResId: Int? = null
 ) : Bank {
     KotakBank(
         "162",

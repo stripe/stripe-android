@@ -9,8 +9,10 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentsheet.FakeCvcRecollectionInteractor
 import com.stripe.android.paymentsheet.FakeSelectSavedPaymentMethodsInteractor
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -39,7 +41,7 @@ class PrimaryButtonUiStateMapperTest {
             isProcessingPayment = true,
             currentScreenFlow = stateFlowOf(
                 PaymentSheetScreen.SelectSavedPaymentMethods(
-                    FakeSelectSavedPaymentMethodsInteractor
+                    FakeSelectSavedPaymentMethodsInteractor()
                 )
             ),
             buttonsEnabledFlow = stateFlowOf(true),
@@ -62,7 +64,7 @@ class PrimaryButtonUiStateMapperTest {
             isProcessingPayment = true,
             currentScreenFlow = stateFlowOf(
                 PaymentSheetScreen.SelectSavedPaymentMethods(
-                    FakeSelectSavedPaymentMethodsInteractor
+                    FakeSelectSavedPaymentMethodsInteractor()
                 )
             ),
             buttonsEnabledFlow = stateFlowOf(true),
@@ -85,7 +87,7 @@ class PrimaryButtonUiStateMapperTest {
             isProcessingPayment = true,
             currentScreenFlow = stateFlowOf(
                 PaymentSheetScreen.SelectSavedPaymentMethods(
-                    FakeSelectSavedPaymentMethodsInteractor
+                    FakeSelectSavedPaymentMethodsInteractor()
                 )
             ),
             buttonsEnabledFlow = stateFlowOf(true),
@@ -108,7 +110,7 @@ class PrimaryButtonUiStateMapperTest {
             isProcessingPayment = true,
             currentScreenFlow = stateFlowOf(
                 PaymentSheetScreen.SelectSavedPaymentMethods(
-                    FakeSelectSavedPaymentMethodsInteractor
+                    FakeSelectSavedPaymentMethodsInteractor()
                 )
             ),
             buttonsEnabledFlow = stateFlowOf(false),
@@ -150,7 +152,7 @@ class PrimaryButtonUiStateMapperTest {
             isProcessingPayment = true,
             currentScreenFlow = stateFlowOf(
                 PaymentSheetScreen.SelectSavedPaymentMethods(
-                    FakeSelectSavedPaymentMethodsInteractor
+                    FakeSelectSavedPaymentMethodsInteractor()
                 )
             ),
             buttonsEnabledFlow = stateFlowOf(false),
@@ -172,7 +174,7 @@ class PrimaryButtonUiStateMapperTest {
             isProcessingPayment = true,
             currentScreenFlow = stateFlowOf(
                 PaymentSheetScreen.SelectSavedPaymentMethods(
-                    FakeSelectSavedPaymentMethodsInteractor
+                    FakeSelectSavedPaymentMethodsInteractor()
                 )
             ),
             buttonsEnabledFlow = stateFlowOf(false),
@@ -194,7 +196,7 @@ class PrimaryButtonUiStateMapperTest {
             isProcessingPayment = true,
             currentScreenFlow = stateFlowOf(
                 PaymentSheetScreen.SelectSavedPaymentMethods(
-                    FakeSelectSavedPaymentMethodsInteractor
+                    FakeSelectSavedPaymentMethodsInteractor()
                 )
             ),
             buttonsEnabledFlow = stateFlowOf(false),
@@ -221,7 +223,7 @@ class PrimaryButtonUiStateMapperTest {
         val cvcFlow = stateFlowOf(CvcController(CvcConfig(), stateFlowOf(CardBrand.Unknown)))
         val screen = stateFlowOf(
             PaymentSheetScreen.SelectSavedPaymentMethods(
-                FakeSelectSavedPaymentMethodsInteractor,
+                FakeSelectSavedPaymentMethodsInteractor(),
                 PaymentSheetScreen.SelectSavedPaymentMethods.CvcRecollectionState.Required(cvcFlow)
             )
         )
@@ -249,7 +251,7 @@ class PrimaryButtonUiStateMapperTest {
         val cvcFlow = stateFlowOf(CvcController(CvcConfig(), stateFlowOf(CardBrand.Unknown)))
         val screen = stateFlowOf(
             PaymentSheetScreen.SelectSavedPaymentMethods(
-                FakeSelectSavedPaymentMethodsInteractor,
+                FakeSelectSavedPaymentMethodsInteractor(),
                 PaymentSheetScreen.SelectSavedPaymentMethods.CvcRecollectionState.Required(cvcFlow)
             )
         )
@@ -275,7 +277,7 @@ class PrimaryButtonUiStateMapperTest {
     @Test
     fun `Enables button if cvc is not required and input is incomplete`() = runTest {
         val screen = stateFlowOf(
-            PaymentSheetScreen.SelectSavedPaymentMethods(FakeSelectSavedPaymentMethodsInteractor)
+            PaymentSheetScreen.SelectSavedPaymentMethods(FakeSelectSavedPaymentMethodsInteractor())
         )
         val selection = PaymentSelection.Saved(
             paymentMethod = PaymentMethodFixtures.createCard()
@@ -301,7 +303,7 @@ class PrimaryButtonUiStateMapperTest {
         val cvcFlow = stateFlowOf(CvcController(CvcConfig(), stateFlowOf(CardBrand.Unknown)))
         val screen = stateFlowOf(
             PaymentSheetScreen.SelectSavedPaymentMethods(
-                FakeSelectSavedPaymentMethodsInteractor,
+                FakeSelectSavedPaymentMethodsInteractor(),
                 PaymentSheetScreen.SelectSavedPaymentMethods.CvcRecollectionState.Required(cvcFlow)
             )
         )
@@ -332,7 +334,7 @@ class PrimaryButtonUiStateMapperTest {
         val mapper = createMapper(
             isProcessingPayment = true,
             currentScreenFlow = stateFlowOf(
-                PaymentSheetScreen.SelectSavedPaymentMethods(FakeSelectSavedPaymentMethodsInteractor)
+                PaymentSheetScreen.SelectSavedPaymentMethods(FakeSelectSavedPaymentMethodsInteractor())
             ),
             buttonsEnabledFlow = stateFlowOf(true),
             amountFlow = stateFlowOf(Amount(value = 1234, currencyCode = "usd")),
@@ -344,14 +346,16 @@ class PrimaryButtonUiStateMapperTest {
         val result = mapper.forCompleteFlow()
 
         result.test {
+            val item = awaitItem()
             assertThat(
-                awaitItem()?.label
+                item?.label
             ).isEqualTo(
                 resolvableString(
                     id = com.stripe.android.ui.core.R.string.stripe_pay_button_amount,
                     formatArgs = arrayOf("12,34 \$US")
                 )
             )
+            assertThat(item?.lockVisible).isTrue()
         }
     }
 
@@ -360,7 +364,7 @@ class PrimaryButtonUiStateMapperTest {
         val mapper = createMapper(
             isProcessingPayment = true,
             currentScreenFlow = stateFlowOf(
-                PaymentSheetScreen.SelectSavedPaymentMethods(FakeSelectSavedPaymentMethodsInteractor)
+                PaymentSheetScreen.SelectSavedPaymentMethods(FakeSelectSavedPaymentMethodsInteractor())
             ),
             buttonsEnabledFlow = stateFlowOf(true),
             amountFlow = stateFlowOf(Amount(value = 1234, currencyCode = "usd")),
@@ -375,14 +379,97 @@ class PrimaryButtonUiStateMapperTest {
         assertThat(AppCompatDelegate.getApplicationLocales()).isEqualTo(LocaleListCompat.getEmptyLocaleList())
 
         result.test {
+            val item = awaitItem()
             assertThat(
-                awaitItem()?.label
+                item?.label
             ).isEqualTo(
                 resolvableString(
                     id = com.stripe.android.ui.core.R.string.stripe_pay_button_amount,
                     formatArgs = arrayOf("\$12.34")
                 )
             )
+            assertThat(item?.lockVisible).isTrue()
+        }
+    }
+
+    @Test
+    fun `screen buy button override should be used for complete flow when available`() = runTest {
+        val mapper = createMapper(
+            isProcessingPayment = true,
+            currentScreenFlow = stateFlowOf(
+                PaymentSheetScreen.CvcRecollection(FakeCvcRecollectionInteractor())
+            ),
+            buttonsEnabledFlow = stateFlowOf(true),
+            amountFlow = stateFlowOf(Amount(value = 1234, currencyCode = "usd")),
+            selectionFlow = stateFlowOf(null),
+            customPrimaryButtonUiStateFlow = stateFlowOf(null),
+            cvcFlow = stateFlowOf(false)
+        )
+
+        val result = mapper.forCompleteFlow()
+
+        result.test {
+            val item = awaitItem()
+            assertThat(item?.label).isEqualTo(resolvableString(R.string.stripe_paymentsheet_confirm))
+            assertThat(item?.lockVisible).isFalse()
+        }
+    }
+
+    @Test
+    fun `screen buy button override should not be used for complete flow when unavailable`() = runTest {
+        val mapper = createMapper(
+            isProcessingPayment = true,
+            currentScreenFlow = stateFlowOf(
+                PaymentSheetScreen.SelectSavedPaymentMethods(FakeSelectSavedPaymentMethodsInteractor())
+            ),
+            buttonsEnabledFlow = stateFlowOf(true),
+            amountFlow = stateFlowOf(Amount(value = 1234, currencyCode = "usd")),
+            selectionFlow = stateFlowOf(null),
+            customPrimaryButtonUiStateFlow = stateFlowOf(null),
+            cvcFlow = stateFlowOf(false)
+        )
+
+        val result = mapper.forCompleteFlow()
+
+        result.test {
+            val item = awaitItem()
+            assertThat(
+                item?.label
+            ).isEqualTo(
+                resolvableString(
+                    id = com.stripe.android.ui.core.R.string.stripe_pay_button_amount,
+                    formatArgs = arrayOf("\$12.34")
+                )
+            )
+            assertThat(item?.lockVisible).isTrue()
+        }
+    }
+
+    @Test
+    fun `screen buy button override should not be used for custom flow`() = runTest {
+        val usBankButton = PrimaryButton.UIState(
+            label = "US Bank Account FTW".resolvableString,
+            onClick = {},
+            enabled = false,
+            lockVisible = true,
+        )
+
+        val mapper = createMapper(
+            isProcessingPayment = true,
+            currentScreenFlow = stateFlowOf(
+                PaymentSheetScreen.CvcRecollection(FakeCvcRecollectionInteractor())
+            ),
+            buttonsEnabledFlow = stateFlowOf(true),
+            amountFlow = stateFlowOf(Amount(value = 1234, currencyCode = "usd")),
+            selectionFlow = stateFlowOf(null),
+            customPrimaryButtonUiStateFlow = stateFlowOf(usBankButton),
+            cvcFlow = stateFlowOf(false)
+        )
+
+        val result = mapper.forCustomFlow()
+
+        result.test {
+            assertThat(awaitItem()).isEqualTo(usBankButton)
         }
     }
 

@@ -6,6 +6,8 @@ import android.os.Parcelable
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.RestrictTo
 import androidx.core.os.bundleOf
+import com.stripe.android.CardBrandFilter
+import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.model.PaymentMethod
 import kotlinx.parcelize.Parcelize
 
@@ -47,6 +49,7 @@ class GooglePayPaymentMethodLauncherContractV2 :
         internal val amount: Long,
         internal val label: String? = null,
         internal val transactionId: String? = null,
+        internal val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter
     ) : Parcelable {
         internal fun toBundle() = bundleOf(EXTRA_ARGS to this)
 

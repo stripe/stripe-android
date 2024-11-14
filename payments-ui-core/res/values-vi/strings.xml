@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
+  <string name="stripe_afterpay_clearpay_marketing"><![CDATA[Mua ngay hoặc thanh toán sau bằng <img/>]]></string>
+  <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="stripe_afterpay_clearpay_message"><![CDATA[Trả bằng <num_installments/> khoản thanh toán không lãi suất là <installment_price/> bằng <img/>]]></string>
+  <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
+  <string name="stripe_afterpay_clearpay_subtitle">%1$d khoản thanh toán không lãi suất %2$s</string>
   <!-- Amazon Pay mandate text -->
   <string name="stripe_amazon_pay_mandate">Bằng việc xác nhận khoản thanh toán với Amazon Pay, bạn cho phép %s tính phí vào tài khoản Amazon Pay của bạn cho các khoản thanh toán trong tương lai căn cứ theo các điều khoản của họ.</string>
   <!-- Text for back button -->
@@ -91,6 +95,8 @@
   <string name="stripe_revolut_mandate">Khi xác nhận khoản thanh toán với RevolutPay, bạn cho phép %s tính phí vào tài khoản RevolutPay của bạn cho các khoản thanh toán trong tương lai căn cứ theo các điều khoản của họ.</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
   <string name="stripe_save_for_future_payments_with_merchant_name">Lưu để thanh toán %s sau này</string>
+  <!-- The label of a switch indicating whether to save the user's payment details for future payment -->
+  <string name="stripe_save_payment_details_to_merchant_name">Lưu thông tin thanh toán vào %s để mua hàng trong tương lai</string>
   <!-- Button title to open camera to scan credit/debit card -->
   <string name="stripe_scan_card">Quét thẻ</string>
   <!-- SEPA mandate text -->

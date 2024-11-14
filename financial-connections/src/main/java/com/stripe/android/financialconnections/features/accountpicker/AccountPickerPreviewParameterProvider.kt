@@ -4,7 +4,6 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.financialconnections.exception.AccountNoneEligibleForPaymentMethodError
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.SelectionMode
-import com.stripe.android.financialconnections.features.common.MerchantDataAccessModel
 import com.stripe.android.financialconnections.model.Bullet
 import com.stripe.android.financialconnections.model.ConnectedAccessNotice
 import com.stripe.android.financialconnections.model.DataAccessNotice
@@ -74,7 +73,8 @@ internal class AccountPickerPreviewParameterProvider :
                 accounts = partnerAccountList(),
                 dataAccessNotice = dataAccessNotice(),
                 selectionMode = SelectionMode.Multiple,
-                merchantDataAccess = accessibleCallout(),
+                dataAccessDisclaimer = "My business can access account details, balances, " +
+                    "account ownership details and transactions. <a href=\"https://stripe.com\">Learn more</a>",
                 singleAccount = false,
                 stripeDirect = false,
                 businessName = "Random business",
@@ -103,7 +103,7 @@ internal class AccountPickerPreviewParameterProvider :
                 accounts = partnerAccountList(),
                 dataAccessNotice = dataAccessNotice(),
                 selectionMode = SelectionMode.Single,
-                merchantDataAccess = accessibleCallout(),
+                dataAccessDisclaimer = null,
                 singleAccount = true,
                 stripeDirect = false,
                 businessName = "Random business",
@@ -201,16 +201,5 @@ internal class AccountPickerPreviewParameterProvider :
             subcategory = FinancialConnectionsAccount.Subcategory.CHECKING,
             supportedPaymentMethodTypes = emptyList()
         ),
-    )
-
-    private fun accessibleCallout() = MerchantDataAccessModel(
-        businessName = "My business",
-        permissions = listOf(
-            FinancialConnectionsAccount.Permissions.PAYMENT_METHOD,
-            FinancialConnectionsAccount.Permissions.BALANCES,
-            FinancialConnectionsAccount.Permissions.OWNERSHIP,
-            FinancialConnectionsAccount.Permissions.TRANSACTIONS
-        ),
-        isStripeDirect = false
     )
 }

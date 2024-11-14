@@ -4,12 +4,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.NameConfig
 import com.stripe.android.uicore.elements.PhoneNumberController
@@ -29,17 +31,23 @@ internal class BillingDetailsCollectionScreenshotTest {
     @Test
     fun testEmpty() {
         paparazzi.snapshot {
-            BillingDetailsCollectionScreen(
-                formArgs = createFormArguments(),
-                isProcessing = false,
-                isPaymentFlow = true,
+            BankAccountForm(
+                state = BankFormScreenState(),
                 instantDebits = false,
+                isPaymentFlow = true,
+                formArgs = createFormArguments(),
                 nameController = createNameController(),
                 emailController = createEmailController(),
                 phoneController = createPhoneNumberController(),
                 addressController = createAddressController(),
+                sameAsShippingElement = null,
+                saveForFutureUseElement = SaveForFutureUseElement(
+                    initialValue = false,
+                    merchantName = "Test Merchant",
+                ),
+                showCheckbox = false,
                 lastTextFieldIdentifier = null,
-                sameAsShippingElement = null
+                onRemoveAccount = {},
             )
         }
     }
@@ -47,17 +55,23 @@ internal class BillingDetailsCollectionScreenshotTest {
     @Test
     fun testEmptySetupFlow() {
         paparazzi.snapshot {
-            BillingDetailsCollectionScreen(
-                formArgs = createFormArguments(),
-                isProcessing = false,
-                isPaymentFlow = false,
+            BankAccountForm(
+                state = BankFormScreenState(),
                 instantDebits = false,
+                isPaymentFlow = false,
+                formArgs = createFormArguments(),
                 nameController = createNameController(),
                 emailController = createEmailController(),
                 phoneController = createPhoneNumberController(),
                 addressController = createAddressController(),
+                sameAsShippingElement = null,
+                saveForFutureUseElement = SaveForFutureUseElement(
+                    initialValue = false,
+                    merchantName = "Test Merchant",
+                ),
+                showCheckbox = false,
                 lastTextFieldIdentifier = null,
-                sameAsShippingElement = null
+                onRemoveAccount = {},
             )
         }
     }
@@ -65,17 +79,23 @@ internal class BillingDetailsCollectionScreenshotTest {
     @Test
     fun testFilled() {
         paparazzi.snapshot {
-            BillingDetailsCollectionScreen(
-                formArgs = createFormArguments(),
-                isProcessing = false,
-                isPaymentFlow = true,
+            BankAccountForm(
+                state = BankFormScreenState(),
                 instantDebits = false,
+                isPaymentFlow = true,
+                formArgs = createFormArguments(),
                 nameController = createNameController("John Doe"),
                 emailController = createEmailController("email@email.com"),
                 phoneController = createPhoneNumberController(),
                 addressController = createAddressController(),
+                sameAsShippingElement = null,
+                saveForFutureUseElement = SaveForFutureUseElement(
+                    initialValue = false,
+                    merchantName = "Test Merchant",
+                ),
+                showCheckbox = false,
                 lastTextFieldIdentifier = null,
-                sameAsShippingElement = null
+                onRemoveAccount = {},
             )
         }
     }
@@ -83,21 +103,27 @@ internal class BillingDetailsCollectionScreenshotTest {
     @Test
     fun testEmptyWithBillingAddress() {
         paparazzi.snapshot {
-            BillingDetailsCollectionScreen(
+            BankAccountForm(
+                state = BankFormScreenState(),
+                instantDebits = false,
+                isPaymentFlow = true,
                 formArgs = createFormArguments(
                     billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
                         address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
                     ),
                 ),
-                isProcessing = false,
-                isPaymentFlow = true,
-                instantDebits = false,
                 nameController = createNameController(),
                 emailController = createEmailController(),
                 phoneController = createPhoneNumberController(),
                 addressController = createAddressController(),
+                sameAsShippingElement = null,
+                saveForFutureUseElement = SaveForFutureUseElement(
+                    initialValue = false,
+                    merchantName = "Test Merchant",
+                ),
+                showCheckbox = false,
                 lastTextFieldIdentifier = null,
-                sameAsShippingElement = null
+                onRemoveAccount = {},
             )
         }
     }
@@ -105,21 +131,27 @@ internal class BillingDetailsCollectionScreenshotTest {
     @Test
     fun testFilledWithBillingAddress() {
         paparazzi.snapshot {
-            BillingDetailsCollectionScreen(
+            BankAccountForm(
+                state = BankFormScreenState(),
                 formArgs = createFormArguments(
                     billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
                         address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
                     ),
                 ),
-                isProcessing = false,
-                isPaymentFlow = true,
                 instantDebits = false,
+                isPaymentFlow = true,
                 nameController = createNameController("John Doe"),
                 emailController = createEmailController("email@email.com"),
                 phoneController = createPhoneNumberController(),
                 addressController = createAddressController(fillAddress = true),
+                sameAsShippingElement = null,
+                saveForFutureUseElement = SaveForFutureUseElement(
+                    initialValue = false,
+                    merchantName = "Test Merchant",
+                ),
+                showCheckbox = false,
                 lastTextFieldIdentifier = null,
-                sameAsShippingElement = null
+                onRemoveAccount = {},
             )
         }
     }
@@ -135,6 +167,8 @@ internal class BillingDetailsCollectionScreenshotTest {
             billingDetails = null,
             billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
             cbcEligibility = CardBrandChoiceEligibility.Ineligible,
+            hasIntentToSetup = false,
+            paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
         )
     }
 

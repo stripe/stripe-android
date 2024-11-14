@@ -24,9 +24,6 @@ internal interface PaymentMethodDefinition {
 }
 
 internal fun PaymentMethodDefinition.isSupported(metadata: PaymentMethodMetadata): Boolean {
-    if (type.code !in metadata.stripeIntent.paymentMethodTypes) {
-        return false
-    }
     return requirementsToBeUsedAsNewPaymentMethod(metadata.hasIntentToSetup()).all { requirement ->
         requirement.isMetBy(metadata)
     }

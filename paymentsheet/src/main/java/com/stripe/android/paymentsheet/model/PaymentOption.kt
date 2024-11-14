@@ -39,7 +39,7 @@ data class PaymentOption internal constructor(
     /**
      * A label that describes the payment option.
      *
-     * For example, "····4242" for a Visa ending in 4242.
+     * For example, "···· 4242" for a Visa ending in 4242.
      */
     val label: String,
     internal val lightThemeIconUrl: String?,

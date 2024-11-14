@@ -5,7 +5,9 @@
  */
 apply plugin: "com.android.library"
 apply plugin: "kotlin-android"
-apply plugin: "org.jetbrains.dokka"
+if (project.hasProperty("enable_dokka") && project.enable_dokka) {
+    apply plugin: "org.jetbrains.dokka"
+}
 
 apply from: rootProject.file('build-configuration/detekt.gradle')
 apply from: rootProject.file('build-configuration/ktlint.gradle')
@@ -61,8 +63,10 @@ android {
         disable 'MissingTranslation'
     }
 
-    dokkaHtml {
-        outputDirectory = new File("${project.rootDir}/docs/$project.name")
+    if (project.hasProperty("enable_dokka") && project.enable_dokka) {
+        dokkaHtml {
+            outputDirectory = new File("${project.rootDir}/docs/$project.name")
+        }
     }
 
     compileOptions {
@@ -74,9 +78,17 @@ android {
         jvmTarget = "11"
     }
 
-    kotlin {
-        jvmToolchain {
-            languageVersion.set(JavaLanguageVersion.of("11"))
+    if (JavaVersion.current() < JavaVersion.VERSION_17) {
+        kotlin {
+            jvmToolchain {
+                languageVersion.set(JavaLanguageVersion.of("17"))
+            }
         }
+    }
+}
+
+if (project.hasProperty("enable_dokka") && project.enable_dokka) {
+    dependencies {
+        dokkaPlugin(project(":dokka-stripe"))
     }
 }

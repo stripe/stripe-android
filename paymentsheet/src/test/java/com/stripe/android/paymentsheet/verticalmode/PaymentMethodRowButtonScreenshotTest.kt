@@ -7,6 +7,7 @@ import androidx.compose.material.Text
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.ui.core.R
 import org.junit.Rule
@@ -16,6 +17,7 @@ internal class PaymentMethodRowButtonScreenshotTest {
 
     @get:Rule
     val paparazziRule = PaparazziRule(
+        FontSize.entries,
         boxModifier = Modifier
             .padding(16.dp)
             .fillMaxWidth()

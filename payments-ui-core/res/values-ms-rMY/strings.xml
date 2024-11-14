@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
+  <string name="stripe_afterpay_clearpay_marketing"><![CDATA[Beli sekarang atau bayar kemudian dengan <img/>]]></string>
+  <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="stripe_afterpay_clearpay_message"><![CDATA[Bayar dalam <num_installments/> kali pembayaran tanpa faedah sebanyak <installment_price/> dengan <img/>]]></string>
+  <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
+  <string name="stripe_afterpay_clearpay_subtitle">%1$d pembayaran tanpa faedah sebanyak %2$s</string>
   <!-- Amazon Pay mandate text -->
   <string name="stripe_amazon_pay_mandate">Dengan mengesahkan pembayaran anda menggunakan Amazon Pay, anda membenarkan %s mengecaj akaun Amazon Pay anda bagi pembayaran masa hadapan menurut terma mereka.</string>
   <!-- Text for back button -->
@@ -91,6 +95,8 @@
   <string name="stripe_revolut_mandate">Dengan mengesahkan pembayaran anda menggunakan RevolutPay, anda membenarkan %s mengecaj akaun RevolutPay anda bagi pembayaran masa hadapan menurut terma mereka.</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
   <string name="stripe_save_for_future_payments_with_merchant_name">Simpan untuk pembayaran %s masa hadapan</string>
+  <!-- The label of a switch indicating whether to save the user's payment details for future payment -->
+  <string name="stripe_save_payment_details_to_merchant_name">Simpan butiran pembayaran di %s untuk pembelian yang akan datang</string>
   <!-- Button title to open camera to scan credit/debit card -->
   <string name="stripe_scan_card">Imbas kad</string>
   <!-- SEPA mandate text -->

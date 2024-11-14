@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
+  <string name="stripe_afterpay_clearpay_marketing"><![CDATA[Paiement fractionné avec <img/>]]></string>
+  <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="stripe_afterpay_clearpay_message"><![CDATA[Payer en <num_installments/> versements sans intérêts de <installment_price/> avec <img/>]]></string>
+  <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
+  <string name="stripe_afterpay_clearpay_subtitle">%1$d versements de %2$s, sans intérêts</string>
   <!-- Amazon Pay mandate text -->
   <string name="stripe_amazon_pay_mandate">En confirmant votre paiement avec Amazon Pay, vous autorisez %s à débiter votre compte Amazon Pay pour les paiements à venir, conformément à ses conditions.</string>
   <!-- Text for back button -->
@@ -91,6 +95,8 @@
   <string name="stripe_revolut_mandate">En confirmant votre paiement avec Revolut Pay, vous autorisez %s à débiter votre compte Revolut Pay pour les paiements à venir, conformément à ses conditions.</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
   <string name="stripe_save_for_future_payments_with_merchant_name">Enregistrer pour mes prochains paiements auprès de %s</string>
+  <!-- The label of a switch indicating whether to save the user's payment details for future payment -->
+  <string name="stripe_save_payment_details_to_merchant_name">Enregistrer les informations de paiement sur %s pour vos prochains achats</string>
   <!-- Button title to open camera to scan credit/debit card -->
   <string name="stripe_scan_card">Scanner la carte</string>
   <!-- SEPA mandate text -->

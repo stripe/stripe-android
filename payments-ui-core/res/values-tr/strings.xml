@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
+  <string name="stripe_afterpay_clearpay_marketing"><![CDATA[Şimdi satın alın veya daha sonra <img/> ile ödeyin.]]></string>
+  <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="stripe_afterpay_clearpay_message"><![CDATA[<img/> ile <installment_price/> tutarında faizsiz <num_installments/> taksitle ödeyin]]></string>
+  <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
+  <string name="stripe_afterpay_clearpay_subtitle">%1$d tutarında %2$s faizsiz ödeme</string>
   <!-- Amazon Pay mandate text -->
   <string name="stripe_amazon_pay_mandate">AmazonPay ile ödemenizi doğrulayarak %s tarafından AmazonPay hesabınızdan, kendi koşulları doğrultusunda gelecekteki ödemelerinizin tahsil edilmesine izin vermektesiniz.</string>
   <!-- Text for back button -->
@@ -91,6 +95,8 @@
   <string name="stripe_revolut_mandate">RevolutPay ile ödemenizi doğrulayarak, %s tarafından RevolutPay hesabınızdan, kendi koşulları doğrultusunda gelecekteki ödemelerinizin tahsil edilmesine izin vermektesiniz.</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
   <string name="stripe_save_for_future_payments_with_merchant_name">Gelecekteki %s ödemeleri için kaydedilsin</string>
+  <!-- The label of a switch indicating whether to save the user's payment details for future payment -->
+  <string name="stripe_save_payment_details_to_merchant_name">Ödeme bilgilerini gelecekteki satın almalar için %s işletmesine kaydet</string>
   <!-- Button title to open camera to scan credit/debit card -->
   <string name="stripe_scan_card">Kartı tara</string>
   <!-- SEPA mandate text -->

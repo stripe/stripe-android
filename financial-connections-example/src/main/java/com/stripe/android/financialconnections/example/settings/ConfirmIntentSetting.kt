@@ -34,7 +34,9 @@ data class ConfirmIntentSetting(
         flow: Flow,
         experience: Experience,
     ): Boolean {
-        return experience == Experience.InstantDebits || flow == Flow.PaymentIntent
+        return experience == Experience.InstantDebits ||
+            experience == Experience.LinkCardBrand ||
+            flow == Flow.PaymentIntent
     }
 
     override fun convertToValue(value: String): Boolean = value.toBoolean()

@@ -1,13 +1,12 @@
 package com.stripe.android.customersheet
 
 import com.stripe.android.core.strings.ResolvableString
-import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
-import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
 import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
@@ -20,80 +19,76 @@ import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.FormElement
 
 internal sealed class CustomerSheetViewState(
-    open val savedPaymentMethods: List<PaymentMethod>,
     open val isLiveMode: Boolean,
     open val isProcessing: Boolean,
-    open val isEditing: Boolean,
     open val canNavigateBack: Boolean,
-    open val cbcEligibility: CardBrandChoiceEligibility,
-    open val allowsRemovalOfLastSavedPaymentMethod: Boolean,
-    open val canRemovePaymentMethods: Boolean,
 ) {
-    fun topBarState(onEditIconPressed: () -> Unit): PaymentSheetTopBarState {
-        return PaymentSheetTopBarStateFactory.create(
-            hasBackStack = canNavigateBack,
-            isLiveMode = isLiveMode,
-            editable = PaymentSheetTopBarState.Editable.Maybe(
-                isEditing = isEditing,
-                canEdit = canEdit(allowsRemovalOfLastSavedPaymentMethod, savedPaymentMethods, cbcEligibility),
-                onEditIconPressed = onEditIconPressed,
-            ),
-        )
-    }
+    abstract fun topBarState(onEditIconPressed: () -> Unit): PaymentSheetTopBarState
 
-    fun shouldDisplayDismissConfirmationModal(
-        isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable,
-    ): Boolean {
-        return this is AddPaymentMethod &&
-            paymentMethodCode == PaymentMethod.Type.USBankAccount.code &&
-            isFinancialConnectionsAvailable() &&
-            bankAccountResult is CollectBankAccountResultInternal.Completed &&
-            bankAccountResult.response.usBankAccountData
-                ?.financialConnectionsSession
-                ?.paymentAccount is FinancialConnectionsAccount
+    fun shouldDisplayDismissConfirmationModal(): Boolean {
+        return when (this) {
+            is Loading,
+            is EditPaymentMethod,
+            is SelectPaymentMethod -> {
+                false
+            }
+            is AddPaymentMethod -> {
+                paymentMethodCode == PaymentMethod.Type.USBankAccount.code && bankAccountSelection != null
+            }
+        }
     }
 
     data class Loading(
         override val isLiveMode: Boolean,
     ) : CustomerSheetViewState(
-        savedPaymentMethods = emptyList(),
         isLiveMode = isLiveMode,
         isProcessing = false,
-        isEditing = false,
         canNavigateBack = false,
-        cbcEligibility = CardBrandChoiceEligibility.Ineligible,
-        allowsRemovalOfLastSavedPaymentMethod = true,
-        canRemovePaymentMethods = false,
-    )
+    ) {
+        override fun topBarState(onEditIconPressed: () -> Unit): PaymentSheetTopBarState {
+            return PaymentSheetTopBarStateFactory.create(
+                hasBackStack = canNavigateBack,
+                isLiveMode = isLiveMode,
+                editable = PaymentSheetTopBarState.Editable.Never,
+            )
+        }
+    }
 
     data class SelectPaymentMethod(
         val title: String?,
-        override val savedPaymentMethods: List<PaymentMethod>,
+        val savedPaymentMethods: List<PaymentMethod>,
         val paymentSelection: PaymentSelection?,
         override val isLiveMode: Boolean,
         override val isProcessing: Boolean,
-        override val isEditing: Boolean,
+        val isEditing: Boolean,
         val isGooglePayEnabled: Boolean,
         val primaryButtonVisible: Boolean,
-        val primaryButtonLabel: String?,
-        override val allowsRemovalOfLastSavedPaymentMethod: Boolean,
-        override val canRemovePaymentMethods: Boolean,
+        val canEdit: Boolean,
+        val canRemovePaymentMethods: Boolean,
         val errorMessage: String? = null,
-        val unconfirmedPaymentMethod: PaymentMethod? = null,
         val mandateText: ResolvableString? = null,
-        override val cbcEligibility: CardBrandChoiceEligibility,
+        val isCbcEligible: Boolean,
     ) : CustomerSheetViewState(
-        savedPaymentMethods = savedPaymentMethods,
         isLiveMode = isLiveMode,
         isProcessing = isProcessing,
-        isEditing = isEditing,
         canNavigateBack = false,
-        cbcEligibility = cbcEligibility,
-        allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod,
-        canRemovePaymentMethods = canRemovePaymentMethods,
     ) {
+        val primaryButtonLabel: ResolvableString = R.string.stripe_paymentsheet_confirm.resolvableString
+
         val primaryButtonEnabled: Boolean
             get() = !isProcessing
+
+        override fun topBarState(onEditIconPressed: () -> Unit): PaymentSheetTopBarState {
+            return PaymentSheetTopBarStateFactory.create(
+                hasBackStack = canNavigateBack,
+                isLiveMode = isLiveMode,
+                editable = PaymentSheetTopBarState.Editable.Maybe(
+                    isEditing = isEditing,
+                    canEdit = canEdit,
+                    onEditIconPressed = onEditIconPressed,
+                ),
+            )
+        }
     }
 
     data class AddPaymentMethod(
@@ -115,37 +110,38 @@ internal sealed class CustomerSheetViewState(
         val mandateText: ResolvableString? = null,
         val showMandateAbovePrimaryButton: Boolean = false,
         val displayDismissConfirmationModal: Boolean = false,
-        val bankAccountResult: CollectBankAccountResultInternal?,
-        override val cbcEligibility: CardBrandChoiceEligibility,
+        val bankAccountSelection: PaymentSelection.New.USBankAccount?,
         val errorReporter: ErrorReporter,
     ) : CustomerSheetViewState(
-        savedPaymentMethods = emptyList(),
         isLiveMode = isLiveMode,
         isProcessing = isProcessing,
-        isEditing = false,
         canNavigateBack = !isFirstPaymentMethod,
-        cbcEligibility = cbcEligibility,
-        allowsRemovalOfLastSavedPaymentMethod = true,
-        canRemovePaymentMethods = false,
-    )
+    ) {
+        override fun topBarState(onEditIconPressed: () -> Unit): PaymentSheetTopBarState {
+            return PaymentSheetTopBarStateFactory.create(
+                hasBackStack = canNavigateBack,
+                isLiveMode = isLiveMode,
+                editable = PaymentSheetTopBarState.Editable.Never,
+            )
+        }
+    }
 
     data class EditPaymentMethod(
         val editPaymentMethodInteractor: ModifiableEditPaymentMethodViewInteractor,
         override val isLiveMode: Boolean,
-        override val cbcEligibility: CardBrandChoiceEligibility,
-        override val savedPaymentMethods: List<PaymentMethod>,
-        override val allowsRemovalOfLastSavedPaymentMethod: Boolean,
-        override val canRemovePaymentMethods: Boolean,
     ) : CustomerSheetViewState(
-        savedPaymentMethods = savedPaymentMethods,
         isLiveMode = isLiveMode,
         isProcessing = false,
-        isEditing = false,
         canNavigateBack = true,
-        cbcEligibility = cbcEligibility,
-        allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod,
-        canRemovePaymentMethods = canRemovePaymentMethods,
-    )
+    ) {
+        override fun topBarState(onEditIconPressed: () -> Unit): PaymentSheetTopBarState {
+            return PaymentSheetTopBarStateFactory.create(
+                hasBackStack = canNavigateBack,
+                isLiveMode = isLiveMode,
+                editable = PaymentSheetTopBarState.Editable.Never,
+            )
+        }
+    }
 }
 
 internal fun canEdit(
@@ -164,7 +160,7 @@ internal fun canEdit(
     }
 }
 
-private fun isModifiable(paymentMethod: PaymentMethod, cbcEligibility: CardBrandChoiceEligibility): Boolean {
+internal fun isModifiable(paymentMethod: PaymentMethod, cbcEligibility: CardBrandChoiceEligibility): Boolean {
     val hasMultipleNetworks = paymentMethod.card?.networks?.available?.let { available ->
         available.size > 1
     } ?: false

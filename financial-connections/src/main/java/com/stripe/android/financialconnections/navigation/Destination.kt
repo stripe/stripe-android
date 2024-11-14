@@ -95,7 +95,7 @@ internal sealed class Destination(
         route = Pane.INSTITUTION_PICKER.value,
         closeWithoutConfirmation = false,
         logPaneLaunched = true,
-        composable = { InstitutionPickerScreen() }
+        composable = { InstitutionPickerScreen(it) },
     )
 
     data object Consent : Destination(

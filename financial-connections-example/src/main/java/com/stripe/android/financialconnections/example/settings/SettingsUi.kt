@@ -44,7 +44,7 @@ internal fun SettingsUi(
     onSettingsChanged: (PlaygroundSettings) -> Unit,
 ) {
     Column(
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier.animateContentSize(),
     ) {
         for (setting in playgroundSettings.displayableSettings) {
@@ -214,7 +214,7 @@ private fun TextSetting(
     )
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalLayoutApi::class, ExperimentalComposeUiApi::class)
 @Composable
 private fun <T> RadioButtonSetting(
     name: String,
@@ -231,7 +231,7 @@ private fun <T> RadioButtonSetting(
             )
         }
 
-        Row {
+        FlowRow {
             val selectedOption = remember(value) { options.firstOrNull { it.value == value } }
             options.forEach { option ->
                 Row(

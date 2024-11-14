@@ -63,8 +63,14 @@ internal class MaskedCardView @JvmOverloads constructor(
     }
 
     fun setPaymentMethod(paymentMethod: PaymentMethod) {
-        cardBrand = paymentMethod.card?.brand ?: CardBrand.Unknown
-        last4 = paymentMethod.card?.last4
+        val card = paymentMethod.card
+
+        cardBrand = CardBrand.fromCode(card?.displayBrand).takeIf { brand ->
+            brand != CardBrand.Unknown
+        } ?: card?.brand ?: CardBrand.Unknown
+
+        last4 = card?.last4
+
         updateUi()
     }
 

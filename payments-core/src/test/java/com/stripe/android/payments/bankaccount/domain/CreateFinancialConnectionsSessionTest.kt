@@ -58,7 +58,8 @@ class CreateFinancialConnectionsSessionTest {
                     clientSecret = clientSecret,
                     customerName = customerName,
                     hostedSurface = "payment_element",
-                    customerEmailAddress = null
+                    customerEmailAddress = null,
+                    linkMode = null,
                 ),
                 requestOptions = ApiRequest.Options(publishableKey)
             )
@@ -96,7 +97,8 @@ class CreateFinancialConnectionsSessionTest {
                     clientSecret = clientSecret,
                     customerName = customerName,
                     hostedSurface = "payment_element",
-                    customerEmailAddress = null
+                    customerEmailAddress = null,
+                    linkMode = null,
                 ),
                 requestOptions = ApiRequest.Options(publishableKey)
             )
@@ -159,7 +161,8 @@ class CreateFinancialConnectionsSessionTest {
                     clientSecret = clientSecret,
                     customerName = customerName,
                     customerEmailAddress = null,
-                    hostedSurface = "payment_element"
+                    hostedSurface = "payment_element",
+                    linkMode = null,
                 ),
                 requestOptions = ApiRequest.Options(
                     apiKey = publishableKey,
@@ -199,7 +202,8 @@ class CreateFinancialConnectionsSessionTest {
                     clientSecret = clientSecret,
                     customerName = customerName,
                     customerEmailAddress = null,
-                    hostedSurface = "payment_element"
+                    hostedSurface = "payment_element",
+                    linkMode = null,
                 ),
                 requestOptions = ApiRequest.Options(publishableKey)
             )
@@ -248,15 +252,17 @@ class CreateFinancialConnectionsSessionTest {
 
             // When
             val deferredIntent: Result<FinancialConnectionsSession> =
-                createFinancialConnectionsSession.forDeferredPayments(
+                createFinancialConnectionsSession.forDeferredIntent(
                     publishableKey = publishableKey,
                     stripeAccountId = stripeAccountId,
                     elementsSessionId = elementsSessionId,
                     customerId = customerId,
                     hostedSurface = "payment_element",
                     onBehalfOf = onBehalfOf,
+                    linkMode = null,
                     amount = amount,
-                    currency = currency
+                    currency = currency,
+                    product = null,
                 )
 
             // Then
@@ -271,8 +277,10 @@ class CreateFinancialConnectionsSessionTest {
                         customer = customerId,
                         hostedSurface = "payment_element",
                         onBehalfOf = onBehalfOf,
+                        linkMode = null,
                         amount = amount,
-                        currency = currency
+                        currency = currency,
+                        product = null,
                     )
                 ),
                 requestOptions = eq(
@@ -302,15 +310,17 @@ class CreateFinancialConnectionsSessionTest {
 
             // When
             val paymentIntent: Result<FinancialConnectionsSession> =
-                createFinancialConnectionsSession.forDeferredPayments(
+                createFinancialConnectionsSession.forDeferredIntent(
                     publishableKey = publishableKey,
                     stripeAccountId = null,
                     elementsSessionId = elementsSessionId,
                     customerId = customerId,
                     onBehalfOf = onBehalfOf,
+                    linkMode = null,
                     amount = amount,
                     currency = currency,
-                    hostedSurface = "payment_element"
+                    hostedSurface = "payment_element",
+                    product = null,
                 )
 
             // Then
@@ -324,9 +334,11 @@ class CreateFinancialConnectionsSessionTest {
                         verificationMethod = VerificationMethodParam.Automatic,
                         customer = customerId,
                         onBehalfOf = onBehalfOf,
+                        linkMode = null,
                         amount = amount,
                         currency = currency,
-                        hostedSurface = "payment_element"
+                        hostedSurface = "payment_element",
+                        product = null,
                     )
                 ),
                 requestOptions = eq(

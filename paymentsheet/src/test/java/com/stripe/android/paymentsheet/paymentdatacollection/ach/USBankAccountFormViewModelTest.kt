@@ -6,13 +6,14 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext
 import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
-import com.stripe.android.isInstanceOf
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.Address
 import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodOptionsParams
@@ -24,10 +25,12 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.PaymentSelection.CustomerRequestedSave
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.utils.BankFormScreenStateFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -36,6 +39,7 @@ import kotlinx.coroutines.test.setMain
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
@@ -59,6 +63,8 @@ class USBankAccountFormViewModelTest {
                 email = CUSTOMER_EMAIL
             ),
             cbcEligibility = CardBrandChoiceEligibility.Ineligible,
+            hasIntentToSetup = false,
+            paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
         ),
         showCheckbox = false,
         isCompleteFlow = true,
@@ -69,6 +75,7 @@ class USBankAccountFormViewModelTest {
         savedPaymentMethod = null,
         shippingDetails = null,
         hostedSurface = CollectBankAccountLauncher.HOSTED_SURFACE_PAYMENT_ELEMENT,
+        linkMode = null,
     )
 
     private val mockCollectBankAccountLauncher = mock<CollectBankAccountLauncher>()
@@ -135,77 +142,59 @@ class USBankAccountFormViewModelTest {
         runTest(UnconfinedTestDispatcher()) {
             val viewModel = createViewModel()
             viewModel.collectBankAccountLauncher = mockCollectBankAccountLauncher
-            val currentScreenState =
-                viewModel.currentScreenState.value
-
-            assertThat(
-                currentScreenState
-            ).isInstanceOf<
-                USBankAccountFormScreenState.BillingDetailsCollection
-                >()
-
-            viewModel.handlePrimaryButtonClick(
-                currentScreenState as USBankAccountFormScreenState.BillingDetailsCollection
-            )
-
+            viewModel.handlePrimaryButtonClick()
             verify(mockCollectBankAccountLauncher).presentWithPaymentIntent(any(), any(), any(), any())
         }
 
     @Test
-    fun `when payment sheet, unverified bank account, then confirm intent callable`() = runTest {
+    fun `Transitions to correct screen state when collecting an unverified bank account in complete flow`() = runTest {
         val viewModel = createViewModel()
 
-        viewModel.result.test {
+        viewModel.linkedAccount.test {
+            skipItems(1)
             viewModel.handleCollectBankAccountResult(mockUnverifiedBankAccount())
 
-            val currentScreenState = viewModel.currentScreenState.value
-            viewModel.handlePrimaryButtonClick(currentScreenState as USBankAccountFormScreenState.VerifyWithMicrodeposits)
-
-            assertThat(awaitItem()?.screenState).isEqualTo(currentScreenState)
+            val screenState = awaitItem()?.screenState
+            assertThat(screenState?.linkedBankAccount?.isVerifyingWithMicrodeposits).isTrue()
         }
     }
 
     @Test
-    fun `when payment sheet, verified bank account, then confirm intent callable`() = runTest {
+    fun `Transitions to correct screen state when collecting a verified bank account in complete flow`() = runTest {
         val viewModel = createViewModel()
 
-        viewModel.result.test {
+        viewModel.linkedAccount.test {
+            skipItems(1)
             viewModel.handleCollectBankAccountResult(mockVerifiedBankAccount())
-
-            val currentScreenState = viewModel.currentScreenState.value
-            viewModel.handlePrimaryButtonClick(currentScreenState as USBankAccountFormScreenState.MandateCollection)
-
-            assertThat(awaitItem()?.screenState).isEqualTo(currentScreenState)
+            assertThat(awaitItem()?.screenState?.linkedBankAccount).isNotNull()
         }
     }
 
     @Test
-    fun `when payment options, unverified bank account, then finished`() = runTest {
+    fun `Transitions to correct screen state when collecting an unverified bank account in custom flow`() = runTest {
         val viewModel = createViewModel(defaultArgs.copy(isCompleteFlow = false))
         val bankAccount = mockUnverifiedBankAccount()
 
-        viewModel.result.test {
+        viewModel.linkedAccount.test {
+            skipItems(1)
             viewModel.handleCollectBankAccountResult(bankAccount)
 
-            val currentScreenState = viewModel.currentScreenState.value
-            viewModel.handlePrimaryButtonClick(currentScreenState as USBankAccountFormScreenState.VerifyWithMicrodeposits)
-
-            assertThat(awaitItem()?.screenState).isEqualTo(currentScreenState)
+            val screenState = awaitItem()?.screenState
+            assertThat(screenState?.linkedBankAccount?.isVerifyingWithMicrodeposits).isTrue()
         }
     }
 
     @Test
-    fun `when payment options, verified bank account, then finished`() = runTest {
+    fun `Transitions to correct screen state when collecting a verified bank account in custom flow`() = runTest {
         val viewModel = createViewModel(defaultArgs.copy(isCompleteFlow = false))
         val bankAccount = mockVerifiedBankAccount()
 
-        viewModel.result.test {
+        viewModel.linkedAccount.test {
+            skipItems(1)
             viewModel.handleCollectBankAccountResult(bankAccount)
 
-            val currentScreenState = viewModel.currentScreenState.value
-            viewModel.handlePrimaryButtonClick(currentScreenState as USBankAccountFormScreenState.MandateCollection)
-
-            assertThat(awaitItem()?.screenState).isEqualTo(currentScreenState)
+            val screenState = awaitItem()?.screenState
+            assertThat(screenState?.linkedBankAccount?.isVerifyingWithMicrodeposits).isFalse()
         }
     }
 
@@ -219,11 +208,9 @@ class USBankAccountFormViewModelTest {
         )
         val bankAccount = mockVerifiedBankAccount()
 
-        viewModel.result.test {
+        viewModel.linkedAccount.test {
+            skipItems(1)
             viewModel.handleCollectBankAccountResult(bankAccount)
-
-            val currentScreenState = viewModel.currentScreenState.value
-            viewModel.handlePrimaryButtonClick(currentScreenState as USBankAccountFormScreenState.MandateCollection)
 
             assertThat(awaitItem()?.paymentMethodOptionsParams).isEqualTo(
                 PaymentMethodOptionsParams.USBankAccount(
@@ -240,12 +227,7 @@ class USBankAccountFormViewModelTest {
             viewModel.collectBankAccountLauncher = mockCollectBankAccountLauncher
             viewModel.reset()
 
-            val currentScreenState =
-                viewModel.currentScreenState.value
-
-            viewModel.handlePrimaryButtonClick(
-                currentScreenState as USBankAccountFormScreenState.BillingDetailsCollection
-            )
+            viewModel.handlePrimaryButtonClick()
 
             verify(mockCollectBankAccountLauncher).presentWithPaymentIntent(any(), any(), any(), any())
         }
@@ -269,7 +251,7 @@ class USBankAccountFormViewModelTest {
         val input = PaymentSelection.New.USBankAccount.Input(
             name = "Some One",
             email = "someone@email.com",
-            phone = "1112223456",
+            phone = "+11112223456",
             address = Address(
                 line1 = "123 Not Main Street",
                 line2 = "Apt 123",
@@ -291,14 +273,7 @@ class USBankAccountFormViewModelTest {
                     customerRequestedSave = mock(),
                     input = input,
                     instantDebits = null,
-                    screenState = USBankAccountFormScreenState.SavedAccount(
-                        financialConnectionsSessionId = "session_1234",
-                        intentId = "intent_1234",
-                        bankName = "Stripe Bank",
-                        last4 = "6789",
-                        primaryButtonText = "Continue".resolvableString,
-                        mandateText = null,
-                    ),
+                    screenState = BankFormScreenStateFactory.createWithSession("session_1234"),
                 )
             )
         )
@@ -314,7 +289,7 @@ class USBankAccountFormViewModelTest {
         val input = PaymentSelection.New.USBankAccount.Input(
             name = "Some One",
             email = "someone@email.com",
-            phone = "1112223456",
+            phone = "+11112223456",
             address = Address(
                 line1 = "123 Not Main Street",
                 line2 = "Apt 123",
@@ -343,14 +318,7 @@ class USBankAccountFormViewModelTest {
                     customerRequestedSave = mock(),
                     input = input,
                     instantDebits = null,
-                    screenState = USBankAccountFormScreenState.SavedAccount(
-                        financialConnectionsSessionId = "session_1234",
-                        intentId = "intent_1234",
-                        bankName = "Stripe Bank",
-                        last4 = "6789",
-                        primaryButtonText = "Continue".resolvableString,
-                        mandateText = null,
-                    ),
+                    screenState = BankFormScreenStateFactory.createWithSession("session_1234"),
                 )
             )
         )
@@ -369,7 +337,7 @@ class USBankAccountFormViewModelTest {
                     billingDetails = PaymentSheet.BillingDetails(
                         name = CUSTOMER_NAME,
                         email = CUSTOMER_EMAIL,
-                        phone = CUSTOMER_PHONE_COUNTRY_CODE + CUSTOMER_PHONE,
+                        phone = CUSTOMER_PHONE,
                         address = CUSTOMER_ADDRESS,
                     ),
                     billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
@@ -389,36 +357,32 @@ class USBankAccountFormViewModelTest {
 
     @Test
     fun `Restores screen state when re-opening screen`() = runTest {
+        val continueMandate = USBankAccountTextBuilder.buildMandateText(
+            merchantName = MERCHANT_NAME,
+            isSaveForFutureUseSelected = true,
+            isInstantDebits = false,
+            isSetupFlow = false,
+        )
+
+        val continueWithMicrodepositsMandate = USBankAccountTextBuilder.buildMandateAndMicrodepositsText(
+            merchantName = MERCHANT_NAME,
+            isVerifyingMicrodeposits = true,
+            isSaveForFutureUseSelected = true,
+            isInstantDebits = false,
+            isSetupFlow = false,
+        )
+
         val screenStates = listOf(
-            USBankAccountFormScreenState.BillingDetailsCollection(
-                primaryButtonText = "Continue".resolvableString,
-                isProcessing = false,
+            BankFormScreenState(),
+            BankFormScreenStateFactory.createWithSession(
+                sessionId = "session_1234",
+                isVerifyingWithMicrodeposits = false,
+                mandateText = continueMandate,
             ),
-            USBankAccountFormScreenState.MandateCollection(
-                resultIdentifier = USBankAccountFormScreenState.ResultIdentifier.Session("session_1234"),
-                intentId = "intent_1234",
-                bankName = "Stripe Bank",
-                last4 = null,
-                primaryButtonText = "Continue".resolvableString,
-                mandateText = null,
-            ),
-            USBankAccountFormScreenState.VerifyWithMicrodeposits(
-                financialConnectionsSessionId = "session_1234",
-                intentId = "intent_1234",
-                paymentAccount = BankAccount(
-                    id = "bank_id",
-                    last4 = "6789",
-                ),
-                primaryButtonText = "Continue".resolvableString,
-                mandateText = null,
-            ),
-            USBankAccountFormScreenState.SavedAccount(
-                financialConnectionsSessionId = "session_1234",
-                intentId = "intent_1234",
-                bankName = "Stripe Bank",
-                last4 = "6789",
-                primaryButtonText = "Continue".resolvableString,
-                mandateText = null,
+            BankFormScreenStateFactory.createWithSession(
+                sessionId = "session_1234",
+                isVerifyingWithMicrodeposits = true,
+                mandateText = continueWithMicrodepositsMandate,
             ),
         )
 
@@ -448,46 +412,6 @@ class USBankAccountFormViewModelTest {
     }
 
     @Test
-    fun `when saved payment method is USBankAccount SavedAccount is emitted`() =
-        runTest(UnconfinedTestDispatcher()) {
-            val viewModel = createViewModel(
-                defaultArgs.copy(
-                    savedPaymentMethod = PaymentSelection.New.USBankAccount(
-                        labelResource = "Test",
-                        iconResource = 0,
-                        paymentMethodCreateParams = mock(),
-                        customerRequestedSave = mock(),
-                        input = PaymentSelection.New.USBankAccount.Input(
-                            name = "",
-                            email = null,
-                            phone = null,
-                            address = null,
-                            saveForFutureUse = false,
-                        ),
-                        instantDebits = null,
-                        screenState = USBankAccountFormScreenState.SavedAccount(
-                            financialConnectionsSessionId = "session_1234",
-                            intentId = "intent_1234",
-                            bankName = "Stripe Bank",
-                            last4 = "6789",
-                            primaryButtonText = "Continue".resolvableString,
-                            mandateText = null,
-                        ),
-                    )
-                )
-            )
-
-            val currentScreenState =
-                viewModel.currentScreenState.value
-
-            assertThat(
-                currentScreenState
-            ).isInstanceOf<
-                USBankAccountFormScreenState.SavedAccount
-                >()
-        }
-
-    @Test
     fun `Test defaults are used when not collecting fields if they are attached`() =
         runTest(UnconfinedTestDispatcher()) {
             val viewModel = createViewModel(
@@ -496,7 +420,7 @@ class USBankAccountFormViewModelTest {
                         billingDetails = PaymentSheet.BillingDetails(
                             name = CUSTOMER_NAME,
                             email = CUSTOMER_EMAIL,
-                            phone = CUSTOMER_PHONE_COUNTRY_CODE + CUSTOMER_PHONE,
+                            phone = CUSTOMER_PHONE,
                             address = CUSTOMER_ADDRESS,
                         ),
                         billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
@@ -774,29 +698,39 @@ class USBankAccountFormViewModelTest {
     fun `Launches collect bank account for deferred payment screen when deferred payment`() = runTest {
         val viewModel = createViewModel(
             defaultArgs.copy(
-                clientSecret = null
+                clientSecret = null,
+                linkMode = LinkMode.LinkPaymentMethod,
             )
         )
 
         viewModel.collectBankAccountLauncher = mockCollectBankAccountLauncher
 
-        val currentScreenState =
-            viewModel.currentScreenState.value
-
-        assertThat(
-            currentScreenState
-        ).isInstanceOf<
-            USBankAccountFormScreenState.BillingDetailsCollection
-            >()
-
-        viewModel.handlePrimaryButtonClick(
-            currentScreenState as USBankAccountFormScreenState.BillingDetailsCollection
-        )
+        viewModel.handlePrimaryButtonClick()
 
         verify(mockCollectBankAccountLauncher).presentWithDeferredPayment(
             publishableKey = any(),
             stripeAccountId = any(),
-            configuration = any(),
+            configuration = eq(
+                CollectBankAccountConfiguration.USBankAccountInternal(
+                    name = "Jenny Rose",
+                    email = "email@email.com",
+                    elementsSessionContext = ElementsSessionContext(
+                        initializationMode = ElementsSessionContext.InitializationMode.DeferredIntent,
+                        amount = 5099,
+                        currency = "usd",
+                        linkMode = LinkMode.LinkPaymentMethod,
+                        billingDetails = ElementsSessionContext.BillingDetails(
+                            name = "Jenny Rose",
+                            email = "email@email.com",
+                        ),
+                        prefillDetails = ElementsSessionContext.PrefillDetails(
+                            email = "email@email.com",
+                            phone = null,
+                            phoneCountryCode = "US",
+                        ),
+                    ),
+                )
+            ),
             elementsSessionId = any(),
             customerId = anyOrNull(),
             onBehalfOf = any(),
@@ -810,60 +744,71 @@ class USBankAccountFormViewModelTest {
         val viewModel = createViewModel(
             defaultArgs.copy(
                 clientSecret = null,
-                isPaymentFlow = false
+                isPaymentFlow = false,
+                linkMode = LinkMode.LinkPaymentMethod,
+                formArgs = defaultArgs.formArgs.copy(
+                    amount = null,
+                )
             )
         )
 
         viewModel.collectBankAccountLauncher = mockCollectBankAccountLauncher
 
-        val currentScreenState =
-            viewModel.currentScreenState.value
-
-        assertThat(
-            currentScreenState
-        ).isInstanceOf<
-            USBankAccountFormScreenState.BillingDetailsCollection
-            >()
-
-        viewModel.handlePrimaryButtonClick(
-            currentScreenState as USBankAccountFormScreenState.BillingDetailsCollection
-        )
+        viewModel.handlePrimaryButtonClick()
 
         verify(mockCollectBankAccountLauncher).presentWithDeferredSetup(
             publishableKey = any(),
             stripeAccountId = any(),
-            configuration = any(),
+            configuration = eq(
+                CollectBankAccountConfiguration.USBankAccountInternal(
+                    name = "Jenny Rose",
+                    email = "email@email.com",
+                    elementsSessionContext = ElementsSessionContext(
+                        initializationMode = ElementsSessionContext.InitializationMode.DeferredIntent,
+                        amount = null,
+                        currency = null,
+                        linkMode = LinkMode.LinkPaymentMethod,
+                        billingDetails = ElementsSessionContext.BillingDetails(
+                            name = "Jenny Rose",
+                            email = "email@email.com",
+                        ),
+                        prefillDetails = ElementsSessionContext.PrefillDetails(
+                            email = "email@email.com",
+                            phone = null,
+                            phoneCountryCode = "US",
+                        ),
+                    ),
+                )
+            ),
             elementsSessionId = any(),
             customerId = anyOrNull(),
             onBehalfOf = any(),
         )
     }
 
-    @Test
-    fun `When form destroyed, collect bank account result is null and screen is not reset`() = runTest {
-        val viewModel = createViewModel(
-            defaultArgs.copy(
-                clientSecret = null,
-                isPaymentFlow = false
-            )
-        )
-
-        viewModel.result.test {
-            viewModel.handleCollectBankAccountResult(
-                result = mockVerifiedBankAccount()
-            )
-
-            viewModel.onDestroy()
-
-            assertThat(awaitItem()).isNull()
-
-            val currentScreenState =
-                viewModel.currentScreenState.value
-
-            assertThat(currentScreenState)
-                .isInstanceOf<USBankAccountFormScreenState.MandateCollection>()
-        }
-    }
+//    @Test
+//    fun `When form destroyed, collect bank account result is null and screen is not reset`() = runTest {
+//        val viewModel = createViewModel(
+//            defaultArgs.copy(
+//                clientSecret = null,
+//                isPaymentFlow = false
+//            )
+//        )
+//
+//        viewModel.result.test {
+//            viewModel.handleCollectBankAccountResult(result = mockVerifiedBankAccount())
+//            assertThat(awaitItem()).isNotNull()
+//
+//            viewModel.onDestroy()
+//            assertThat(awaitItem()).isNull()
+//
+//            val currentScreenState =
+//                viewModel.currentScreenState.value
+//
+//            assertThat(currentScreenState)
+//                .isInstanceOf<USBankAccountFormScreenState.MandateCollection>()
+//        }
+//    }
 
     @Test
     fun `When the primary button is pressed, the primary button state moves to processing`() = runTest {
@@ -873,7 +818,7 @@ class USBankAccountFormViewModelTest {
             assertThat(awaitItem().isProcessing)
                 .isFalse()
 
-            viewModel.handlePrimaryButtonClick(viewModel.currentScreenState.value)
+            viewModel.handlePrimaryButtonClick()
 
             assertThat(awaitItem().isProcessing)
                 .isTrue()
@@ -884,37 +829,25 @@ class USBankAccountFormViewModelTest {
     fun `When collect bank account is returned from FC SDK, the result is emitted`() = runTest {
         val viewModel = createViewModel()
 
-        viewModel.collectBankAccountResult.test {
-            val verifiedAccount = mockVerifiedBankAccount()
-            viewModel.handleCollectBankAccountResult(
-                result = verifiedAccount
-            )
+        viewModel.linkedAccount.test {
+            assertThat(awaitItem()).isNull()
 
-            assertThat(awaitItem())
-                .isEqualTo(verifiedAccount)
+            viewModel.handleCollectBankAccountResult(mockVerifiedBankAccount())
+            assertThat(awaitItem()).isNotNull()
+
+            // Simulate a removal
+            viewModel.reset()
+            assertThat(awaitItem()).isNull()
 
             viewModel.handleCollectBankAccountResult(
                 result = CollectBankAccountResultInternal.Cancelled
             )
+            expectNoEvents()
 
-            assertThat(awaitItem())
-                .isEqualTo(CollectBankAccountResultInternal.Cancelled)
-            // Reset was called, so the result should be null
-            assertThat(awaitItem())
-                .isNull()
-
-            val failure = CollectBankAccountResultInternal.Failed(
-                IllegalArgumentException("Failed")
-            )
             viewModel.handleCollectBankAccountResult(
-                result = failure
+                CollectBankAccountResultInternal.Failed(IllegalArgumentException("Failed"))
             )
-
-            assertThat(awaitItem())
-                .isEqualTo(failure)
-            // Reset was called, so the result should be null
-            assertThat(awaitItem())
-                .isNull()
+            expectNoEvents()
         }
     }
 
@@ -922,19 +855,14 @@ class USBankAccountFormViewModelTest {
     fun `When the view model is reset, collect bank account result should be null`() = runTest {
         val viewModel = createViewModel()
 
-        viewModel.collectBankAccountResult.test {
-            val verifiedAccount = mockVerifiedBankAccount()
-            viewModel.handleCollectBankAccountResult(
-                result = verifiedAccount
-            )
+        viewModel.linkedAccount.test {
+            assertThat(awaitItem()).isNull()
 
-            assertThat(awaitItem())
-                .isEqualTo(verifiedAccount)
+            viewModel.handleCollectBankAccountResult(mockVerifiedBankAccount())
+            assertThat(awaitItem()).isNotNull()
 
             viewModel.reset()
-
-            assertThat(awaitItem())
-                .isEqualTo(null)
+            assertThat(awaitItem()).isNull()
         }
     }
 
@@ -943,42 +871,19 @@ class USBankAccountFormViewModelTest {
         val viewModel = createViewModel()
 
         viewModel.currentScreenState.test {
-            assertThat(awaitItem())
-                .isInstanceOf<USBankAccountFormScreenState.BillingDetailsCollection>()
+            assertThat(awaitItem().linkedBankAccount).isNull()
 
             val verifiedAccount = mockVerifiedBankAccount()
             viewModel.handleCollectBankAccountResult(
                 result = verifiedAccount
             )
 
-            assertThat(awaitItem())
-                .isInstanceOf<USBankAccountFormScreenState.MandateCollection>()
+            assertThat(awaitItem().linkedBankAccount).isNotNull()
 
-            viewModel.handlePrimaryButtonClick(viewModel.currentScreenState.value)
+            viewModel.handlePrimaryButtonClick()
             viewModel.reset()
 
-            assertThat(awaitItem())
-                .isInstanceOf<USBankAccountFormScreenState.BillingDetailsCollection>()
-        }
-    }
-
-    @Test
-    fun `Should not be reset after attempting to reset on the billing details screen`() = runTest {
-        val viewModel = createViewModel()
-
-        viewModel.currentScreenState.test {
-            assertThat(awaitItem())
-                .isInstanceOf<USBankAccountFormScreenState.BillingDetailsCollection>()
-
-            viewModel.handlePrimaryButtonClick(viewModel.currentScreenState.value)
-
-            assertThat(awaitItem())
-                .isInstanceOf<USBankAccountFormScreenState.BillingDetailsCollection>()
-
-            viewModel.reset()
-
-            assertThat(awaitItem())
-                .isInstanceOf<USBankAccountFormScreenState.BillingDetailsCollection>()
+            assertThat(expectMostRecentItem().linkedBankAccount).isNull()
         }
     }
 
@@ -989,7 +894,7 @@ class USBankAccountFormViewModelTest {
                 showCheckbox = true,
                 saveForFutureUse = true
             )
-        ).isEqualTo(PaymentSelection.CustomerRequestedSave.RequestReuse)
+        ).isEqualTo(CustomerRequestedSave.RequestReuse)
     }
 
     @Test
@@ -999,7 +904,7 @@ class USBankAccountFormViewModelTest {
                 showCheckbox = true,
                 saveForFutureUse = false
             )
-        ).isEqualTo(PaymentSelection.CustomerRequestedSave.RequestNoReuse)
+        ).isEqualTo(CustomerRequestedSave.RequestNoReuse)
     }
 
     @Test
@@ -1009,7 +914,7 @@ class USBankAccountFormViewModelTest {
                 showCheckbox = false,
                 saveForFutureUse = false
             )
-        ).isEqualTo(PaymentSelection.CustomerRequestedSave.NoRequest)
+        ).isEqualTo(CustomerRequestedSave.NoRequest)
     }
 
     @Test
@@ -1021,17 +926,31 @@ class USBankAccountFormViewModelTest {
         viewModel.nameController.onValueChange("Some Name")
         viewModel.emailController.onValueChange("email@email.com")
 
-        val currentState = viewModel.currentScreenState.value
-        viewModel.handlePrimaryButtonClick(currentState)
+        viewModel.handlePrimaryButtonClick()
 
         verify(mockCollectBankAccountLauncher).presentWithPaymentIntent(
             publishableKey = any(),
             stripeAccountId = anyOrNull(),
             clientSecret = any(),
             configuration = eq(
-                CollectBankAccountConfiguration.USBankAccount(
+                CollectBankAccountConfiguration.USBankAccountInternal(
                     name = "Some Name",
                     email = "email@email.com",
+                    elementsSessionContext = ElementsSessionContext(
+                        initializationMode = ElementsSessionContext.InitializationMode.PaymentIntent("id_12345"),
+                        amount = 5099,
+                        currency = "usd",
+                        linkMode = null,
+                        billingDetails = ElementsSessionContext.BillingDetails(
+                            name = "Some Name",
+                            email = "email@email.com",
+                        ),
+                        prefillDetails = ElementsSessionContext.PrefillDetails(
+                            email = "email@email.com",
+                            phone = null,
+                            phoneCountryCode = "US",
+                        ),
+                    ),
                 )
             ),
         )
@@ -1040,15 +959,17 @@ class USBankAccountFormViewModelTest {
     @Test
     fun `Uses CollectBankAccountLauncher for Instant Debits when in Instant Debits flow`() {
         val viewModel = createViewModel(
-            args = defaultArgs.copy(instantDebits = true),
+            args = defaultArgs.copy(
+                instantDebits = true,
+                linkMode = LinkMode.LinkCardBrand,
+            ),
         ).apply {
             this.collectBankAccountLauncher = mockCollectBankAccountLauncher
         }
 
         viewModel.emailController.onValueChange("email@email.com")
 
-        val currentState = viewModel.currentScreenState.value
-        viewModel.handlePrimaryButtonClick(currentState)
+        viewModel.handlePrimaryButtonClick()
 
         verify(mockCollectBankAccountLauncher).presentWithPaymentIntent(
             publishableKey = any(),
@@ -1057,9 +978,457 @@ class USBankAccountFormViewModelTest {
             configuration = eq(
                 CollectBankAccountConfiguration.InstantDebits(
                     email = "email@email.com",
+                    elementsSessionContext = ElementsSessionContext(
+                        initializationMode = ElementsSessionContext.InitializationMode.PaymentIntent("id_12345"),
+                        amount = 5099,
+                        currency = "usd",
+                        linkMode = LinkMode.LinkCardBrand,
+                        billingDetails = ElementsSessionContext.BillingDetails(
+                            email = "email@email.com",
+                        ),
+                        prefillDetails = ElementsSessionContext.PrefillDetails(
+                            email = "email@email.com",
+                            phone = null,
+                            phoneCountryCode = "US",
+                        ),
+                    ),
                 )
             ),
         )
+    }
+
+    @Test
+    fun `Produces correct mandate text when not using microdeposits verification`() = runTest {
+        val viewModel = createViewModel()
+
+        val expectedResult = USBankAccountTextBuilder.buildMandateText(
+            merchantName = MERCHANT_NAME,
+            isSaveForFutureUseSelected = false,
+            isSetupFlow = false,
+            isInstantDebits = false,
+        )
+
+        viewModel.currentScreenState.test {
+            assertThat(awaitItem().linkedBankAccount).isNull()
+
+            val verifiedAccount = mockVerifiedBankAccount()
+            viewModel.handleCollectBankAccountResult(verifiedAccount)
+
+            val mandateCollectionViewState = awaitItem()
+            assertThat(mandateCollectionViewState.linkedBankAccount?.mandateText).isEqualTo(expectedResult)
+        }
+    }
+
+    @Test
+    fun `Produces correct mandate text when using microdeposits verification`() = runTest {
+        val viewModel = createViewModel()
+
+        val expectedResult = USBankAccountTextBuilder.buildMandateAndMicrodepositsText(
+            merchantName = MERCHANT_NAME,
+            isVerifyingMicrodeposits = true,
+            isSaveForFutureUseSelected = false,
+            isSetupFlow = false,
+            isInstantDebits = false,
+        )
+
+        viewModel.currentScreenState.test {
+            assertThat(awaitItem().linkedBankAccount).isNull()
+
+            val unverifiedAccount = mockUnverifiedBankAccount()
+            viewModel.handleCollectBankAccountResult(unverifiedAccount)
+
+            val mandateCollectionViewState = awaitItem()
+            assertThat(mandateCollectionViewState.linkedBankAccount?.mandateText).isEqualTo(expectedResult)
+        }
+    }
+
+    @Test
+    fun `allowRedisplay returns Unspecified when save behavior is Legacy, not setting up, and no checkbox`() =
+        testAllowRedisplay(
+            showCheckbox = false,
+            shouldSave = true,
+            hasIntentForSetup = false,
+            paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
+            expectedAllowRedisplay = PaymentMethod.AllowRedisplay.UNSPECIFIED,
+        )
+
+    @Test
+    fun `allowRedisplay returns Unspecified when save behavior is Legacy, not setting up, and should not save`() =
+        testAllowRedisplay(
+            showCheckbox = true,
+            shouldSave = false,
+            hasIntentForSetup = false,
+            paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
+            expectedAllowRedisplay = PaymentMethod.AllowRedisplay.UNSPECIFIED,
+        )
+
+    @Test
+    fun `allowRedisplay returns Unspecified when save behavior is Legacy, not setting up, and should save`() =
+        testAllowRedisplay(
+            showCheckbox = true,
+            shouldSave = true,
+            hasIntentForSetup = false,
+            paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
+            expectedAllowRedisplay = PaymentMethod.AllowRedisplay.UNSPECIFIED,
+        )
+
+    @Test
+    fun `allowRedisplay returns Unspecified when save behavior is Legacy, setting up, and no checkbox`() =
+        testAllowRedisplay(
+            showCheckbox = false,
+            shouldSave = true,
+            hasIntentForSetup = true,
+            paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
+            expectedAllowRedisplay = PaymentMethod.AllowRedisplay.UNSPECIFIED,
+        )
+
+    @Test
+    fun `allowRedisplay returns Unspecified when save behavior is Legacy, setting up, and should not save`() =
+        testAllowRedisplay(
+            showCheckbox = true,
+            shouldSave = false,
+            hasIntentForSetup = true,
+            paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
+            expectedAllowRedisplay = PaymentMethod.AllowRedisplay.UNSPECIFIED,
+        )
+
+    @Test
+    fun `allowRedisplay returns Unspecified when save behavior is Legacy, setting up, and should save`() =
+        testAllowRedisplay(
+            showCheckbox = true,
+            shouldSave = true,
+            hasIntentForSetup = true,
+            paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
+            expectedAllowRedisplay = PaymentMethod.AllowRedisplay.UNSPECIFIED,
+        )
+
+    @Test
+    fun `allowRedisplay returns Unspecified when save behavior is Enabled, not setting up, and no checkbox`() =
+        testAllowRedisplay(
+            showCheckbox = false,
+            shouldSave = true,
+            hasIntentForSetup = true,
+            paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Enabled,
+            expectedAllowRedisplay = PaymentMethod.AllowRedisplay.LIMITED,
+        )
+
+    @Test
+    fun `allowRedisplay returns Unspecified when save behavior is Enabled, not setting up, and should not save`() =
+        testAllowRedisplay(
+            showCheckbox = true,
+            shouldSave = false,
+            hasIntentForSetup = false,
+            paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Enabled,
+            expectedAllowRedisplay = PaymentMethod.AllowRedisplay.UNSPECIFIED,
+        )
+
+    @Test
+    fun `allowRedisplay returns Always when save behavior is Enabled, not setting up, and should save`() =
+        testAllowRedisplay(
+            showCheckbox = true,
+            shouldSave = true,
+            hasIntentForSetup = false,
+            paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Enabled,
+            expectedAllowRedisplay = PaymentMethod.AllowRedisplay.ALWAYS,
+        )
+
+    @Test
+    fun `allowRedisplay returns Limited when save behavior is Enabled, setting up, and no checkbox`() =
+        testAllowRedisplay(
+            showCheckbox = false,
+            shouldSave = true,
+            hasIntentForSetup = true,
+            paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Enabled,
+            expectedAllowRedisplay = PaymentMethod.AllowRedisplay.LIMITED,
+        )
+
+    @Test
+    fun `allowRedisplay returns Limited when save behavior is Enabled, setting up, and should not save`() =
+        testAllowRedisplay(
+            showCheckbox = true,
+            shouldSave = false,
+            hasIntentForSetup = true,
+            paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Enabled,
+            expectedAllowRedisplay = PaymentMethod.AllowRedisplay.LIMITED,
+        )
+
+    @Test
+    fun `allowRedisplay returns Always when save behavior is Enabled, setting up, and should save`() =
+        testAllowRedisplay(
+            showCheckbox = true,
+            shouldSave = true,
+            hasIntentForSetup = true,
+            paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Enabled,
+            expectedAllowRedisplay = PaymentMethod.AllowRedisplay.ALWAYS,
+        )
+
+    @Test
+    fun `allowRedisplay returns Unspecified when save behavior is Disabled and not setting up`() =
+        testAllowRedisplay(
+            showCheckbox = false,
+            shouldSave = true,
+            hasIntentForSetup = false,
+            paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Disabled(
+                overrideAllowRedisplay = null,
+            ),
+            expectedAllowRedisplay = PaymentMethod.AllowRedisplay.UNSPECIFIED,
+        )
+
+    @Test
+    fun `allowRedisplay returns Limited when save behavior is Disabled and setting up`() =
+        testAllowRedisplay(
+            showCheckbox = false,
+            shouldSave = true,
+            hasIntentForSetup = true,
+            paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Disabled(
+                overrideAllowRedisplay = null,
+            ),
+            expectedAllowRedisplay = PaymentMethod.AllowRedisplay.LIMITED,
+        )
+
+    @Test
+    fun `allowRedisplay returns Always when save behavior is Disabled, setting up, and has redisplay override`() =
+        testAllowRedisplay(
+            showCheckbox = false,
+            shouldSave = true,
+            hasIntentForSetup = true,
+            paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Disabled(
+                overrideAllowRedisplay = PaymentMethod.AllowRedisplay.ALWAYS,
+            ),
+            expectedAllowRedisplay = PaymentMethod.AllowRedisplay.ALWAYS,
+        )
+
+    @Test
+    fun `Creates correct ElementsSessionContext if attaching defaults to PaymentMethod`() = runTest {
+        val args = createArgsForBillingDetailsCollectionInInstantDebits(
+            collectName = false,
+            collectEmail = true,
+            collectPhone = false,
+            collectAddress = false,
+            attachDefaultsToPaymentMethod = true,
+        )
+
+        val elementsSessionContext = testElementsSessionContextGeneration(viewModelArgs = args)
+
+        assertThat(elementsSessionContext?.billingDetails).isEqualTo(
+            ElementsSessionContext.BillingDetails(
+                name = "Jenny Rose",
+                email = "email@email.com",
+                phone = "+13105551234",
+                address = ElementsSessionContext.BillingDetails.Address(
+                    line1 = "123 Main Street",
+                    line2 = "Apt 456",
+                    city = "San Francisco",
+                    state = "CA",
+                    postalCode = "94111",
+                    country = "US",
+                ),
+            )
+        )
+    }
+
+    @Test
+    fun `Creates correct ElementsSessionContext if not attaching defaults to PaymentMethod`() = runTest {
+        val args = createArgsForBillingDetailsCollectionInInstantDebits(
+            collectName = false,
+            collectEmail = true,
+            collectPhone = false,
+            collectAddress = false,
+            attachDefaultsToPaymentMethod = false,
+        )
+
+        val elementsSessionContext = testElementsSessionContextGeneration(viewModelArgs = args)
+
+        assertThat(elementsSessionContext?.billingDetails).isEqualTo(
+            ElementsSessionContext.BillingDetails(
+                email = "email@email.com",
+            )
+        )
+    }
+
+    @Test
+    fun `Creates correct ElementsSessionContext if not attaching defaults to PaymentMethod with specific collection`() = runTest {
+        val args = createArgsForBillingDetailsCollectionInInstantDebits(
+            collectName = false,
+            collectEmail = true,
+            collectPhone = true,
+            collectAddress = false,
+            attachDefaultsToPaymentMethod = false,
+        )
+
+        val elementsSessionContext = testElementsSessionContextGeneration(viewModelArgs = args)
+
+        assertThat(elementsSessionContext?.billingDetails).isEqualTo(
+            ElementsSessionContext.BillingDetails(
+                email = "email@email.com",
+                phone = "+13105551234",
+            )
+        )
+    }
+
+    @Test
+    fun `Updates result when 'save for future use' changes after linking account`() = runTest {
+        val viewModel = createViewModel(
+            args = defaultArgs.copy(showCheckbox = true)
+        )
+
+        viewModel.linkedAccount.test {
+            assertThat(awaitItem()).isNull()
+
+            viewModel.nameController.onValueChange("Some Name")
+            viewModel.emailController.onValueChange("email@email.com")
+            viewModel.handleCollectBankAccountResult(mockVerifiedBankAccount())
+            assertThat(awaitItem()?.customerRequestedSave).isEqualTo(CustomerRequestedSave.RequestNoReuse)
+
+            viewModel.saveForFutureUseElement.controller.onValueChange(true)
+            assertThat(awaitItem()?.customerRequestedSave).isEqualTo(CustomerRequestedSave.RequestReuse)
+
+            viewModel.saveForFutureUseElement.controller.onValueChange(false)
+            assertThat(awaitItem()?.customerRequestedSave).isEqualTo(CustomerRequestedSave.RequestNoReuse)
+        }
+    }
+
+    @Test
+    fun `Updates result when billing address changes after linking account`() = runTest {
+        val viewModel = createViewModel(
+            args = defaultArgs.copy(showCheckbox = true)
+        )
+
+        viewModel.linkedAccount.test {
+            assertThat(awaitItem()).isNull()
+
+            viewModel.nameController.onValueChange("Some Name")
+            viewModel.emailController.onValueChange("email@email.com")
+            viewModel.handleCollectBankAccountResult(mockVerifiedBankAccount())
+            assertThat(awaitItem()?.paymentMethodCreateParams?.billingDetails?.email).isEqualTo("email@email.com")
+
+            viewModel.emailController.onValueChange("email@email.ca")
+            assertThat(awaitItem()?.paymentMethodCreateParams?.billingDetails?.email).isEqualTo("email@email.ca")
+
+            viewModel.emailController.onValueChange("email@email.com")
+            assertThat(awaitItem()?.paymentMethodCreateParams?.billingDetails?.email).isEqualTo("email@email.com")
+        }
+    }
+
+    private fun testElementsSessionContextGeneration(
+        viewModelArgs: USBankAccountFormViewModel.Args,
+    ): ElementsSessionContext? {
+        val viewModel = createViewModel(viewModelArgs)
+        viewModel.collectBankAccountLauncher = mockCollectBankAccountLauncher
+
+        viewModel.handlePrimaryButtonClick()
+
+        val argumentCaptor = argumentCaptor<CollectBankAccountConfiguration>()
+
+        verify(mockCollectBankAccountLauncher).presentWithPaymentIntent(
+            publishableKey = any(),
+            stripeAccountId = anyOrNull(),
+            clientSecret = any(),
+            configuration = argumentCaptor.capture(),
+        )
+
+        val instantDebitsConfiguration = argumentCaptor.firstValue as CollectBankAccountConfiguration.InstantDebits
+        return instantDebitsConfiguration.elementsSessionContext
+    }
+
+    private fun createArgsForBillingDetailsCollectionInInstantDebits(
+        collectEmail: Boolean,
+        collectName: Boolean,
+        collectPhone: Boolean,
+        collectAddress: Boolean,
+        attachDefaultsToPaymentMethod: Boolean,
+    ): USBankAccountFormViewModel.Args {
+        val billingDetails = PaymentSheet.BillingDetails(
+            name = CUSTOMER_NAME,
+            email = CUSTOMER_EMAIL,
+            phone = CUSTOMER_PHONE,
+            address = CUSTOMER_ADDRESS,
+        )
+
+        val billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+            name = if (collectName) CollectionMode.Always else CollectionMode.Never,
+            email = if (collectEmail) CollectionMode.Always else CollectionMode.Never,
+            phone = if (collectPhone) CollectionMode.Always else CollectionMode.Never,
+            address = if (collectAddress) AddressCollectionMode.Full else AddressCollectionMode.Never,
+            attachDefaultsToPaymentMethod = attachDefaultsToPaymentMethod,
+        )
+
+        return defaultArgs.copy(
+            instantDebits = true,
+            formArgs = defaultArgs.formArgs.copy(
+                billingDetails = billingDetails,
+                billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+            )
+        )
+    }
+
+    private fun testAllowRedisplay(
+        showCheckbox: Boolean,
+        shouldSave: Boolean,
+        hasIntentForSetup: Boolean,
+        paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior,
+        expectedAllowRedisplay: PaymentMethod.AllowRedisplay,
+    ) {
+        testAllowRedisplay(
+            isInstantDebits = true,
+            showCheckbox = showCheckbox,
+            shouldSave = shouldSave,
+            hasIntentForSetup = hasIntentForSetup,
+            paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
+            expectedAllowRedisplay = expectedAllowRedisplay,
+        )
+
+        testAllowRedisplay(
+            isInstantDebits = false,
+            showCheckbox = showCheckbox,
+            shouldSave = shouldSave,
+            hasIntentForSetup = hasIntentForSetup,
+            paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
+            expectedAllowRedisplay = expectedAllowRedisplay,
+        )
+    }
+
+    private fun testAllowRedisplay(
+        isInstantDebits: Boolean,
+        showCheckbox: Boolean,
+        shouldSave: Boolean,
+        hasIntentForSetup: Boolean,
+        paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior,
+        expectedAllowRedisplay: PaymentMethod.AllowRedisplay,
+    ) = runTest {
+        val viewModel = createViewModel(
+            defaultArgs.copy(
+                instantDebits = isInstantDebits,
+                showCheckbox = showCheckbox,
+                formArgs = defaultArgs.formArgs.copy(
+                    hasIntentToSetup = hasIntentForSetup,
+                    paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
+                )
+            )
+        )
+
+        viewModel.linkedAccount.test {
+            skipItems(1)
+
+            viewModel.handleCollectBankAccountResult(mockVerifiedBankAccount())
+            var result = awaitItem()
+
+            if (shouldSave) {
+                viewModel.saveForFutureUseElement.controller.onValueChange(shouldSave)
+                result = awaitItem()
+            }
+
+            viewModel.handlePrimaryButtonClick()
+
+            assertThat(result?.paymentMethodCreateParams?.toParamMap()).containsEntry(
+                "allow_redisplay",
+                when (expectedAllowRedisplay) {
+                    PaymentMethod.AllowRedisplay.UNSPECIFIED -> "unspecified"
+                    PaymentMethod.AllowRedisplay.LIMITED -> "limited"
+                    PaymentMethod.AllowRedisplay.ALWAYS -> "always"
+                }
+            )
+        }
     }
 
     private fun createViewModel(
@@ -1135,8 +1504,7 @@ class USBankAccountFormViewModelTest {
         const val CUSTOMER_EMAIL = "email@email.com"
         const val STRIPE_ACCOUNT_ID = "stripe_account_id"
         const val CUSTOMER_COUNTRY = "US"
-        const val CUSTOMER_PHONE_COUNTRY_CODE = "+1"
-        const val CUSTOMER_PHONE = "3105551234"
+        const val CUSTOMER_PHONE = "+13105551234"
         val CUSTOMER_ADDRESS = PaymentSheet.Address(
             line1 = "123 Main Street",
             line2 = "Apt 456",

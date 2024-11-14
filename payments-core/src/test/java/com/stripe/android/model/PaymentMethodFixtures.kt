@@ -376,6 +376,8 @@ internal object PaymentMethodFixtures {
         """.trimIndent()
     )
 
+    internal val CARD_WITH_DISPLAY_BRAND = PaymentMethodJsonParser().parse(CARD_WITH_DISPLAY_BRAND_JSON)
+
     val IDEAL_JSON = JSONObject(
         """
             {

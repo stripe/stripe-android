@@ -5,6 +5,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.test.espresso.intent.rule.IntentsTestRule
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
+import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.googlepaylauncher.utils.LauncherIntegrationType
 import com.stripe.android.googlepaylauncher.utils.runGooglePayPaymentMethodLauncherTest
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
@@ -54,6 +55,7 @@ class GooglePayPaymentMethodLauncherTest {
                     publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
                 ),
                 analyticsRequestExecutor = { firedEvents += it.params["event"].toString() },
+                cardBrandFilter = DefaultCardBrandFilter
             )
             launcher.present(currencyCode = "usd")
 

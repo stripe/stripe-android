@@ -21,6 +21,7 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CardNumberFixtures
 import com.stripe.android.CardNumberFixtures.AMEX_NO_SPACES
 import com.stripe.android.CardNumberFixtures.AMEX_WITH_SPACES
+import com.stripe.android.CardNumberFixtures.CO_BRAND_CARTES_MASTERCARD_WITH_SPACES
 import com.stripe.android.CardNumberFixtures.DINERS_CLUB_14_NO_SPACES
 import com.stripe.android.CardNumberFixtures.DINERS_CLUB_14_WITH_SPACES
 import com.stripe.android.CardNumberFixtures.VISA_NO_SPACES
@@ -33,6 +34,7 @@ import com.stripe.android.model.Address
 import com.stripe.android.model.BinFixtures
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
+import com.stripe.android.model.Networks
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.testharness.ViewTestUtils
@@ -139,6 +141,24 @@ internal class CardInputWidgetTest {
                         )
                     )
                 )
+        }
+
+    @Test
+    fun getCard_whenInputIsCoBrandedCard_withPreNetworks_returnsCardObjectWithPrefNetworks() =
+        runCardInputWidgetTest {
+            postalCodeEnabled = false
+
+            updateCardNumberAndIdle(CO_BRAND_CARTES_MASTERCARD_WITH_SPACES)
+            expiryDateEditText.append("12")
+            expiryDateEditText.append("50")
+            cvcEditText.append(CVC_VALUE_COMMON)
+            setPreferredNetworks(listOf(CardBrand.CartesBancaires))
+
+            assertThat(cardParams?.networks)
+                .isEqualTo(Networks(CardBrand.CartesBancaires.code))
+
+            assertThat(paymentMethodCreateParams?.card?.networks?.preferred)
+                .isEqualTo(CardBrand.CartesBancaires.code)
         }
 
     @Test
@@ -1708,10 +1728,8 @@ internal class CardInputWidgetTest {
             expiryDateEditText.append("50")
             cvcEditText.append("123")
 
-            val expectedNetworks = PaymentMethodCreateParams.Card.Networks(preferred = null)
-
             val createCardParams = paymentMethodCreateParams?.card
-            assertThat(createCardParams?.networks).isEqualTo(expectedNetworks)
+            assertThat(createCardParams?.networks).isEqualTo(null)
         }
     }
 
@@ -1724,6 +1742,7 @@ internal class CardInputWidgetTest {
             expiryDateEditText.append("12")
             expiryDateEditText.append("50")
             cvcEditText.append("123")
+            cardNumberEditText.requestFocus()
 
             onView(withId(R.id.card_brand_view)).perform(click())
             onData(anything()).inRoot(isPlatformPopup()).atPosition(1).perform(click())
@@ -1774,8 +1793,8 @@ internal class CardInputWidgetTest {
     fun `Re-fetches card brands when first eight are deleted and re-entered`() = runCardInputWidgetTest(
         true
     ) {
-        cardNumberEditText.setText("4000 0025 0000 1001")
-        assertThat(cardBrandView.possibleBrands.size).isEqualTo(2)
+        cardNumberEditText.setText("4000 0026 0000 1001")
+        assertThat(cardBrandView.possibleBrands.size).isEqualTo(0)
         updateCardNumberAndIdle("0000 1001")
         assertThat(cardBrandView.possibleBrands.size).isEqualTo(0)
         cardNumberEditText.setText("4000 0025 0000 1001")

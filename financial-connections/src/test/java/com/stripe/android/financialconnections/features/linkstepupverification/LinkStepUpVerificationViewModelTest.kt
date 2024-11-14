@@ -1,9 +1,8 @@
 package com.stripe.android.financialconnections.features.linkstepupverification
 
-import app.cash.turbine.test
-import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ApiKeyFixtures
+import com.stripe.android.financialconnections.ApiKeyFixtures.cachedConsumerSession
 import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
 import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
 import com.stripe.android.financialconnections.CoroutineTestRule
@@ -11,24 +10,21 @@ import com.stripe.android.financialconnections.TestFinancialConnectionsAnalytics
 import com.stripe.android.financialconnections.domain.ConfirmVerification
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
-import com.stripe.android.financialconnections.domain.LookupConsumerAndStartVerification
 import com.stripe.android.financialconnections.domain.MarkLinkStepUpVerified
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.SelectNetworkedAccounts
+import com.stripe.android.financialconnections.domain.StartVerification
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
+import com.stripe.android.financialconnections.model.ShareNetworkedAccountsResponse
+import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.navigation.Destination
-import com.stripe.android.financialconnections.presentation.Async.Loading
 import com.stripe.android.financialconnections.utils.TestNavigationManager
-import com.stripe.android.model.ConsumerSession
-import com.stripe.android.model.VerificationType
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.kotlin.any
-import org.mockito.kotlin.anyOrNull
-import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
@@ -43,164 +39,105 @@ class LinkStepUpVerificationViewModelTest {
     private val navigationManager = TestNavigationManager()
     private val confirmVerification = mock<ConfirmVerification>()
     private val getCachedAccounts = mock<GetCachedAccounts>()
-    private val lookupConsumerAndStartVerification = mock<LookupConsumerAndStartVerification>()
     private val selectNetworkedAccounts = mock<SelectNetworkedAccounts>()
     private val markLinkVerified = mock<MarkLinkStepUpVerified>()
+    private val startVerification = mock<StartVerification>()
     private val eventTracker = TestFinancialConnectionsAnalyticsTracker()
     private val nativeAuthFlowCoordinator = NativeAuthFlowCoordinator()
 
+    private val cachedConsumerSession = cachedConsumerSession()
+
     private fun buildViewModel(
         state: LinkStepUpVerificationState = LinkStepUpVerificationState()
-    ) = LinkStepUpVerificationViewModel(
-        getOrFetchSync = getOrFetchSync,
-        navigationManager = navigationManager,
-        eventTracker = eventTracker,
-        confirmVerification = confirmVerification,
-        markLinkStepUpVerified = markLinkVerified,
-        getCachedAccounts = getCachedAccounts,
-        selectNetworkedAccounts = selectNetworkedAccounts,
-        lookupConsumerAndStartVerification = lookupConsumerAndStartVerification,
-        logger = Logger.noop(),
-        initialState = state,
-        nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
-    )
-
-    @Test
-    fun `init - starts EMAIL verification with consumer session secret`() = runTest {
-        val email = "test@test.com"
-        val consumerSession = ApiKeyFixtures.consumerSession()
-        getManifestReturnsManifestWithEmail(email)
-
-        val onStartVerificationCaptor = argumentCaptor<suspend () -> Unit>()
-        val onVerificationStartedCaptor = argumentCaptor<suspend (ConsumerSession) -> Unit>()
-
-        val viewModel = buildViewModel()
-
-        verify(lookupConsumerAndStartVerification).invoke(
-            email = eq(email),
-            businessName = anyOrNull(),
-            verificationType = eq(VerificationType.EMAIL),
-            onConsumerNotFound = any(),
-            onLookupError = any(),
-            onStartVerification = onStartVerificationCaptor.capture(),
-            onVerificationStarted = onVerificationStartedCaptor.capture(),
-            onStartVerificationError = any()
+    ): LinkStepUpVerificationViewModel {
+        return LinkStepUpVerificationViewModel(
+            getOrFetchSync = getOrFetchSync,
+            navigationManager = navigationManager,
+            eventTracker = eventTracker,
+            confirmVerification = confirmVerification,
+            markLinkStepUpVerified = markLinkVerified,
+            getCachedAccounts = getCachedAccounts,
+            selectNetworkedAccounts = selectNetworkedAccounts,
+            startVerification = startVerification,
+            consumerSessionProvider = { cachedConsumerSession },
+            logger = Logger.noop(),
+            initialState = state,
+            nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
         )
-
-        onStartVerificationCaptor.firstValue()
-        onVerificationStartedCaptor.firstValue(consumerSession)
-
-        val state = viewModel.stateFlow.value
-
-        assertThat(state.payload()!!.consumerSessionClientSecret)
-            .isEqualTo(consumerSession.clientSecret)
     }
 
     @Test
-    fun `init - ConsumerNotFound sends analytics and navigates to institution picker`() = runTest {
-        val email = "test@test.com"
-        val onConsumerNotFoundCaptor = argumentCaptor<suspend () -> Unit>()
+    fun `init - starts EMAIL verification with existing consumer session secret`() = runTest {
+        val syncResponse = syncResponse()
+        givenGetSyncReturns(syncResponse)
 
-        getManifestReturnsManifestWithEmail(email)
+        buildViewModel()
 
-        buildViewModel().stateFlow.test {
-            assertThat(awaitItem().payload).isInstanceOf(Loading::class.java)
-
-            verify(lookupConsumerAndStartVerification).invoke(
-                email = eq(email),
-                businessName = anyOrNull(),
-                verificationType = eq(VerificationType.EMAIL),
-                onConsumerNotFound = onConsumerNotFoundCaptor.capture(),
-                onLookupError = any(),
-                onStartVerification = any(),
-                onVerificationStarted = any(),
-                onStartVerificationError = any()
-            )
-
-            onConsumerNotFoundCaptor.firstValue()
-
-            // we don't expect any state updates if the consumer is not found
-            expectNoEvents()
-
-            navigationManager.assertNavigatedTo(
-                destination = Destination.InstitutionPicker,
-                pane = Pane.LINK_STEP_UP_VERIFICATION
-            )
-
-            eventTracker.assertContainsEvent(
-                "linked_accounts.networking.verification.step_up.error",
-                mapOf(
-                    "pane" to "networking_link_step_up_verification",
-                    "error" to "ConsumerNotFoundError"
-                )
-            )
-        }
+        verify(startVerification).email(
+            consumerSessionClientSecret = eq(cachedConsumerSession.clientSecret),
+            businessName = eq(syncResponse.manifest.businessName)
+        )
     }
 
     @Test
-    fun `otpEntered - on valid OTP confirms, verifies, selects account and navigates to success`() =
-        runTest {
-            val email = "test@test.com"
-            val consumerSession = ApiKeyFixtures.consumerSession()
-            val onStartVerificationCaptor = argumentCaptor<suspend () -> Unit>()
-            val onVerificationStartedCaptor = argumentCaptor<suspend (ConsumerSession) -> Unit>()
-            val linkVerifiedManifest = sessionManifest().copy(nextPane = Pane.INSTITUTION_PICKER)
-            val selectedAccount = ApiKeyFixtures.cachedPartnerAccount()
+    fun `otpEntered - on valid OTP confirms, verifies, selects account and navigates to success`() = runTest {
+        val syncResponse = syncResponse()
+        val consumerSession = ApiKeyFixtures.consumerSession()
+        val linkVerifiedManifest = sessionManifest().copy(nextPane = Pane.INSTITUTION_PICKER)
+        val selectedAccount = ApiKeyFixtures.cachedPartnerAccount()
 
-            // verify succeeds
-            getManifestReturnsManifestWithEmail(email)
+        // verify succeeds
+        givenGetSyncReturns(syncResponse)
+        whenever(startVerification.email(any(), any())).thenReturn(consumerSession)
 
-            // cached accounts are available.
-            whenever(getCachedAccounts()).thenReturn(listOf(selectedAccount))
-            // link succeeds
-            markLinkVerifiedReturns(linkVerifiedManifest)
-
-            val viewModel = buildViewModel()
-
-            verify(lookupConsumerAndStartVerification).invoke(
-                email = eq(email),
-                businessName = anyOrNull(),
-                verificationType = eq(VerificationType.EMAIL),
-                onConsumerNotFound = any(),
-                onLookupError = any(),
-                onStartVerification = onStartVerificationCaptor.capture(),
-                onVerificationStarted = onVerificationStartedCaptor.capture(),
-                onStartVerificationError = any()
-            )
-
-            onStartVerificationCaptor.firstValue()
-            onVerificationStartedCaptor.firstValue(consumerSession)
-
-            val otpController = viewModel.stateFlow.value.payload()!!.otpElement.controller
-
-            // enters valid OTP
-            for (i in 0 until otpController.otpLength) {
-                otpController.onValueChanged(i, "1")
-            }
-
-            verify(confirmVerification).email(any(), eq("111111"))
-            verify(markLinkVerified).invoke()
-            verify(selectNetworkedAccounts).invoke(
+        // cached accounts are available.
+        whenever(getCachedAccounts()).thenReturn(listOf(selectedAccount))
+        whenever(
+            selectNetworkedAccounts.invoke(
                 consumerSessionClientSecret = consumerSession.clientSecret,
                 selectedAccountIds = setOf(selectedAccount.id),
                 consentAcquired = null
             )
-            navigationManager.assertNavigatedTo(
-                Destination.Success,
-                pane = Pane.LINK_STEP_UP_VERIFICATION
-            )
-        }
-
-    private suspend fun getManifestReturnsManifestWithEmail(
-        email: String
-    ) {
-        whenever(getOrFetchSync(any())).thenReturn(
-            syncResponse(
-                sessionManifest().copy(
-                    accountholderCustomerEmailAddress = email
-                )
+        ).thenReturn(
+            ShareNetworkedAccountsResponse(
+                nextPane = null,
+                display = null
             )
         )
+        // link succeeds
+        markLinkVerifiedReturns(linkVerifiedManifest)
+
+        val viewModel = buildViewModel()
+
+        verify(startVerification).email(
+            consumerSessionClientSecret = eq(cachedConsumerSession.clientSecret),
+            businessName = eq(syncResponse.manifest.businessName)
+        )
+
+        val otpController = viewModel.stateFlow.value.payload()!!.otpElement.controller
+
+        // enters valid OTP
+        for (i in 0 until otpController.otpLength) {
+            otpController.onValueChanged(i, "1")
+        }
+
+        verify(confirmVerification).email(any(), eq("111111"))
+        verify(markLinkVerified).invoke()
+        verify(selectNetworkedAccounts).invoke(
+            consumerSessionClientSecret = consumerSession.clientSecret,
+            selectedAccountIds = setOf(selectedAccount.id),
+            consentAcquired = null
+        )
+        navigationManager.assertNavigatedTo(
+            Destination.Success,
+            pane = Pane.LINK_STEP_UP_VERIFICATION
+        )
+    }
+
+    private suspend fun givenGetSyncReturns(
+        syncResponse: SynchronizeSessionResponse = syncResponse()
+    ) {
+        whenever(getOrFetchSync(any())).thenReturn(syncResponse)
     }
 
     private suspend fun markLinkVerifiedReturns(

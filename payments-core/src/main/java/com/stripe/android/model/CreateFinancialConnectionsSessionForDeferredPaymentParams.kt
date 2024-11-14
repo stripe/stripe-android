@@ -12,7 +12,8 @@ data class CreateFinancialConnectionsSessionForDeferredPaymentParams(
     val hostedSurface: String?,
     val customer: String?,
     val onBehalfOf: String?,
-
+    val linkMode: LinkMode?,
+    val product: String?,
     // PaymentIntent only params
     val amount: Int?,
     val currency: String?,
@@ -27,8 +28,10 @@ data class CreateFinancialConnectionsSessionForDeferredPaymentParams(
             PARAM_CUSTOMER to customer,
             PARAM_ON_BEHALF_OF to onBehalfOf,
             PARAM_HOSTED_SURFACE to hostedSurface,
+            PARAM_LINK_MODE to (linkMode?.value ?: "LINK_DISABLED"),
             PARAM_AMOUNT to amount,
-            PARAM_CURRENCY to currency
+            PARAM_CURRENCY to currency,
+            PARAM_PRODUCT to product,
         )
     }
 
@@ -41,8 +44,10 @@ data class CreateFinancialConnectionsSessionForDeferredPaymentParams(
         const val PARAM_VERIFICATION_METHOD = "verification_method"
         const val PARAM_CUSTOMER = "customer"
         const val PARAM_ON_BEHALF_OF = "on_behalf_of"
+        const val PARAM_LINK_MODE = "link_mode"
         const val PARAM_AMOUNT = "amount"
         const val PARAM_CURRENCY = "currency"
+        const val PARAM_PRODUCT = "product"
     }
 }
 

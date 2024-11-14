@@ -1,7 +1,11 @@
 apply from: configs.androidApplication
 
+apply plugin: 'com.emergetools.android'
+apply plugin: 'com.google.firebase.appdistribution'
 apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
+apply plugin: "org.jetbrains.kotlin.plugin.parcelize"
 apply plugin: 'shot'
+apply plugin: 'org.jetbrains.kotlin.plugin.compose'
 
 // Read values from gradle.properties or system environment variable
 def getBackendUrl() {
@@ -12,11 +16,27 @@ def getGooglePlacesApiKey() {
     return findProperty('STRIPE_PAYMENTSHEET_EXAMPLE_GOOGLE_PLACES_API_KEY') ?: ""
 }
 
+emerge {
+    // Api token is implicitly set to the EMERGE_API_TOKEN env variable
+
+    size {
+        tag.set(System.getenv("EMERGE_TAG"))
+    }
+
+    vcs {
+        gitHub {
+            repoOwner.set("stripe")
+            repoName.set("stripe-android")
+        }
+    }
+}
+
 dependencies {
     implementation project(':payments')
     implementation project(':stripecardscan')
     implementation project(':financial-connections')
 
+    implementation 'androidx.compose.foundation:foundation:1.7.4'
     implementation libs.androidx.activity
     implementation libs.androidx.appCompat
     implementation libs.androidx.constraintLayout
@@ -98,7 +118,12 @@ android {
         viewBinding true
         compose true
     }
-    composeOptions {
-        kotlinCompilerExtensionVersion "${versions.androidxComposeCompiler}"
+    buildTypes {
+        release {
+            firebaseAppDistribution {
+                appId = "1:577365562050:android:5b7e92d18f8ca8d1e9a15b"
+                groups = "elements-mobile"
+            }
+        }
     }
 }

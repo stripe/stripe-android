@@ -2,11 +2,16 @@ package com.stripe.android.lpmfoundations.paymentmethod
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement.InstantDebits
+import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement.LinkCardBrand
 import com.stripe.android.model.Address
+import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration
+import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
 import com.stripe.android.testing.PaymentIntentFactory
 import org.junit.Test
 
@@ -200,6 +205,75 @@ internal class AddPaymentMethodRequirementTest {
         )
 
         assertThat(InstantDebits.isMetBy(metadata)).isFalse()
+    }
+
+    @Test
+    fun testInstantDebitsReturnsFalseIfLinkCardBrand() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = createValidInstantDebitsPaymentIntent(),
+            linkMode = LinkMode.LinkCardBrand,
+        )
+
+        assertThat(InstantDebits.isMetBy(metadata)).isFalse()
+    }
+
+    @Test
+    fun testLinkCardBrandReturnsTrueForCorrectLinkMode() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = createValidInstantDebitsPaymentIntent(),
+            linkMode = LinkMode.LinkCardBrand,
+        )
+
+        assertThat(LinkCardBrand.isMetBy(metadata)).isTrue()
+    }
+
+    @Test
+    fun testLinkCardBrandReturnsFalseIfNotCollectingEmailAndNotProvidingAttachableDefault() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = createValidInstantDebitsPaymentIntent(),
+            linkMode = LinkMode.LinkCardBrand,
+            billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                email = CollectionMode.Never,
+                attachDefaultsToPaymentMethod = true,
+            ),
+            defaultBillingDetails = PaymentSheet.BillingDetails(),
+        )
+
+        assertThat(LinkCardBrand.isMetBy(metadata)).isFalse()
+    }
+
+    @Test
+    fun testLinkCardBrandReturnsFalseIfNotCollectingEmailAndProvidingDefaultThatsNotBeingAttached() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = createValidInstantDebitsPaymentIntent(),
+            linkMode = LinkMode.LinkCardBrand,
+            billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                email = CollectionMode.Never,
+                attachDefaultsToPaymentMethod = false,
+            ),
+            defaultBillingDetails = PaymentSheet.BillingDetails(
+                email = "a_totally_valid_email@email.com",
+            ),
+        )
+
+        assertThat(LinkCardBrand.isMetBy(metadata)).isFalse()
+    }
+
+    @Test
+    fun testLinkCardBrandReturnsTrueIfNotCollectingEmailButProvidingAttachableDefault() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = createValidInstantDebitsPaymentIntent(),
+            linkMode = LinkMode.LinkCardBrand,
+            billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                email = CollectionMode.Never,
+                attachDefaultsToPaymentMethod = true,
+            ),
+            defaultBillingDetails = PaymentSheet.BillingDetails(
+                email = "a_totally_valid_email@email.com",
+            ),
+        )
+
+        assertThat(LinkCardBrand.isMetBy(metadata)).isTrue()
     }
 
     private fun createValidInstantDebitsPaymentIntent(): PaymentIntent {

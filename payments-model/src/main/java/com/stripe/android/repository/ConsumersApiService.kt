@@ -16,12 +16,14 @@ import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSessionSignup
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.CustomEmailType
+import com.stripe.android.model.SharePaymentDetails
 import com.stripe.android.model.VerificationType
 import com.stripe.android.model.parsers.AttachConsumerToLinkAccountSessionJsonParser
 import com.stripe.android.model.parsers.ConsumerPaymentDetailsJsonParser
 import com.stripe.android.model.parsers.ConsumerSessionJsonParser
 import com.stripe.android.model.parsers.ConsumerSessionLookupJsonParser
 import com.stripe.android.model.parsers.ConsumerSessionSignupJsonParser
+import com.stripe.android.model.parsers.SharePaymentDetailsJsonParser
 import java.util.Locale
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
@@ -33,6 +35,10 @@ interface ConsumersApiService {
         country: String,
         name: String?,
         locale: Locale?,
+        amount: Long?,
+        currency: String?,
+        paymentIntentId: String?,
+        setupIntentId: String?,
         requestSurface: String,
         consentAction: ConsumerSignUpConsentAction,
         requestOptions: ApiRequest.Options,
@@ -75,6 +81,16 @@ interface ConsumersApiService {
         requestSurface: String,
         requestOptions: ApiRequest.Options,
     ): Result<ConsumerPaymentDetails>
+
+    suspend fun sharePaymentDetails(
+        consumerSessionClientSecret: String,
+        paymentDetailsId: String,
+        expectedPaymentMethodType: String,
+        billingPhone: String?,
+        requestSurface: String,
+        requestOptions: ApiRequest.Options,
+        extraParams: Map<String, Any?>,
+    ): Result<SharePaymentDetails>
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
@@ -99,6 +115,10 @@ class ConsumersApiServiceImpl(
         country: String,
         name: String?,
         locale: Locale?,
+        amount: Long?,
+        currency: String?,
+        paymentIntentId: String?,
+        setupIntentId: String?,
         requestSurface: String,
         consentAction: ConsumerSignUpConsentAction,
         requestOptions: ApiRequest.Options,
@@ -114,6 +134,8 @@ class ConsumersApiServiceImpl(
                     "phone_number" to phoneNumber,
                     "country" to country,
                     "country_inferring_method" to "PHONE_NUMBER",
+                    "amount" to amount,
+                    "currency" to currency,
                     "consent_action" to consentAction.value,
                     "request_surface" to requestSurface,
                 ).plus(
@@ -124,6 +146,14 @@ class ConsumersApiServiceImpl(
                     name?.let {
                         mapOf("legal_name" to it)
                     } ?: emptyMap()
+                ).plus(
+                    paymentIntentId?.let {
+                        mapOf("financial_incentive[payment_intent]" to it)
+                    }.orEmpty()
+                ).plus(
+                    setupIntentId?.let {
+                        mapOf("financial_incentive[setup_intent]" to it)
+                    }.orEmpty()
                 ),
             ),
             responseJsonParser = ConsumerSessionSignupJsonParser,
@@ -262,6 +292,35 @@ class ConsumersApiServiceImpl(
         )
     }
 
+    override suspend fun sharePaymentDetails(
+        consumerSessionClientSecret: String,
+        paymentDetailsId: String,
+        expectedPaymentMethodType: String,
+        billingPhone: String?,
+        requestSurface: String,
+        requestOptions: ApiRequest.Options,
+        extraParams: Map<String, Any?>,
+    ): Result<SharePaymentDetails> {
+        return executeRequestWithResultParser(
+            stripeErrorJsonParser = stripeErrorJsonParser,
+            stripeNetworkClient = stripeNetworkClient,
+            request = apiRequestFactory.createPost(
+                url = sharePaymentDetails,
+                options = requestOptions,
+                params = mapOf(
+                    "request_surface" to requestSurface,
+                    "id" to paymentDetailsId,
+                    "expected_payment_method_type" to expectedPaymentMethodType,
+                    "credentials" to mapOf(
+                        "consumer_session_client_secret" to consumerSessionClientSecret
+                    ),
+                    "billing_phone" to billingPhone,
+                ) + extraParams,
+            ),
+            responseJsonParser = SharePaymentDetailsJsonParser,
+        )
+    }
+
     internal companion object {
 
         /**
@@ -298,6 +357,11 @@ class ConsumersApiServiceImpl(
          * @return `https://api.stripe.com/v1/consumers/payment_details`
          */
         private val createPaymentDetails: String = getApiUrl("consumers/payment_details")
+
+        /**
+         * @return `https://api.stripe.com/v1/consumers/payment_details/share`
+         */
+        private val sharePaymentDetails: String = getApiUrl("consumers/payment_details/share")
 
         private fun getApiUrl(path: String): String {
             return "${ApiRequest.API_HOST}/v1/$path"

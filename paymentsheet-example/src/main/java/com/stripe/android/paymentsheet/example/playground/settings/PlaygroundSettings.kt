@@ -1,11 +1,15 @@
 package com.stripe.android.paymentsheet.example.playground.settings
 
 import android.content.Context
+import android.os.Parcel
+import android.os.Parcelable
 import android.util.Log
 import androidx.compose.runtime.Stable
 import androidx.core.content.edit
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.customersheet.CustomerSheet
-import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
+import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
@@ -16,6 +20,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationException
+import kotlinx.serialization.builtins.MapSerializer
+import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
@@ -100,7 +106,18 @@ internal class PlaygroundSettings private constructor(
     class Snapshot private constructor(
         val configurationData: PlaygroundConfigurationData,
         private val settings: Map<PlaygroundSettingDefinition<*>, Any?>
-    ) {
+    ) : Parcelable {
+        constructor(parcel: Parcel) : this(
+            configurationData = parcel.readParcelable<PlaygroundConfigurationData>(
+                PlaygroundConfigurationData::class.java.classLoader
+            ) ?: throw IllegalStateException("Playground Configuration Data couldn't be un-parceled!"),
+            settings = Json.decodeFromString(
+                deserializer = MapSerializer(String.serializer(), String.serializer()),
+                string = parcel.readString()
+                    ?: throw IllegalStateException("Playground Settings couldn't be un-parceled!"),
+            ).toPlaygroundSettingsSnapshot()
+        )
+
         constructor(playgroundSettings: PlaygroundSettings) : this(
             playgroundSettings.configurationData.value,
             playgroundSettings.settings.map { it.key to it.value.value }.toMap()
@@ -132,7 +149,20 @@ internal class PlaygroundSettings private constructor(
             return builder.build()
         }
 
-        @OptIn(ExperimentalCustomerSheetApi::class)
+        @ExperimentalEmbeddedPaymentElementApi
+        fun embeddedConfiguration(
+            playgroundState: PlaygroundState.Payment
+        ): EmbeddedPaymentElement.Configuration {
+            val builder = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
+            val embeddedConfigurationData = PlaygroundSettingDefinition.EmbeddedConfigurationData(builder)
+            settings.filter { (definition, _) ->
+                definition.applicable(configurationData)
+            }.onEach { (settingDefinition, value) ->
+                settingDefinition.configure(value, builder, playgroundState, embeddedConfigurationData)
+            }
+            return builder.build()
+        }
+
         fun customerSheetConfiguration(
             playgroundState: PlaygroundState.Customer
         ): CustomerSheet.Configuration {
@@ -162,7 +192,22 @@ internal class PlaygroundSettings private constructor(
             )
         }
 
-        @OptIn(ExperimentalCustomerSheetApi::class)
+        @ExperimentalEmbeddedPaymentElementApi
+        private fun <T> PlaygroundSettingDefinition<T>.configure(
+            value: Any?,
+            configurationBuilder: EmbeddedPaymentElement.Configuration.Builder,
+            playgroundState: PlaygroundState.Payment,
+            configurationData: PlaygroundSettingDefinition.EmbeddedConfigurationData,
+        ) {
+            @Suppress("UNCHECKED_CAST")
+            configure(
+                value = value as T,
+                configurationBuilder = configurationBuilder,
+                playgroundState = playgroundState,
+                configurationData = configurationData,
+            )
+        }
+
         private fun <T> PlaygroundSettingDefinition<T>.configure(
             value: Any?,
             configurationBuilder: CustomerSheet.Configuration.Builder,
@@ -215,20 +260,26 @@ internal class PlaygroundSettings private constructor(
         }
 
         private fun asJsonString(filter: (PlaygroundSettingDefinition<*>) -> Boolean): String {
-            val settingsMap = settings.filterKeys(filter).map {
-                val saveable = it.key.saveable()
-                if (saveable != null) {
-                    saveable.key to saveable.convertToString(it.value)
-                } else {
-                    null
-                }
-            }.filterNotNull().toMap()
+            val settingsMap = settings.filterKeys(filter).mapToStringMap()
             return Json.encodeToString(
                 SerializableSettings(
                     configurationData = configurationData,
                     settings = settingsMap,
                 )
             )
+        }
+
+        fun setValues() {
+            settings.forEach { (setting, value) ->
+                setting.setValue(value)
+            }
+        }
+
+        private fun <T> PlaygroundSettingDefinition<T>.setValue(
+            value: Any?,
+        ) {
+            @Suppress("UNCHECKED_CAST")
+            (this.setValue(value as T))
         }
 
         fun saveToSharedPreferences(context: Context) {
@@ -254,6 +305,36 @@ internal class PlaygroundSettings private constructor(
         ): String {
             @Suppress("UNCHECKED_CAST")
             return convertToString(value as T)
+        }
+
+        private fun Map<PlaygroundSettingDefinition<*>, Any?>.mapToStringMap(): Map<String, String> {
+            return map {
+                val saveable = it.key.saveable()
+                if (saveable != null) {
+                    saveable.key to saveable.convertToString(it.value)
+                } else {
+                    null
+                }
+            }.filterNotNull().toMap()
+        }
+
+        override fun writeToParcel(parcel: Parcel, flags: Int) {
+            parcel.writeParcelable(configurationData, flags)
+            parcel.writeString(Json.encodeToString(settings.mapToStringMap()))
+        }
+
+        override fun describeContents(): Int {
+            return 0
+        }
+
+        companion object CREATOR : Parcelable.Creator<Snapshot> {
+            override fun createFromParcel(parcel: Parcel): Snapshot {
+                return Snapshot(parcel)
+            }
+
+            override fun newArray(size: Int): Array<Snapshot?> {
+                return arrayOfNulls(size)
+            }
         }
     }
 
@@ -313,6 +394,24 @@ internal class PlaygroundSettings private constructor(
             return createFromJsonString(jsonString)
         }
 
+        private fun Map<String, String>.toPlaygroundSettingsSnapshot(): Map<PlaygroundSettingDefinition<*>, Any?> {
+            val settings = mutableMapOf<PlaygroundSettingDefinition<*>, Any?>()
+
+            for (settingDefinition in allSettingDefinitions) {
+                settingDefinition.saveable()?.let { saveable ->
+                    val value = this[saveable.key]?.let { stringValue ->
+                        saveable.convertToValue(stringValue)
+                    } ?: saveable.defaultValue
+
+                    settings[settingDefinition] = value
+                } ?: run {
+                    settings[settingDefinition] = settingDefinition.defaultValue
+                }
+            }
+
+            return settings
+        }
+
         private val uiSettingDefinitions: List<PlaygroundSettingDefinition.Displayable<*>> = listOf(
             InitializationTypeSettingsDefinition,
             CustomerSheetPaymentMethodModeDefinition,
@@ -325,6 +424,7 @@ internal class PlaygroundSettings private constructor(
             CustomerSettingsDefinition,
             CheckoutModeSettingsDefinition,
             LinkSettingsDefinition,
+            FeatureFlagSettingsDefinition(FeatureFlags.nativeLinkEnabled),
             CountrySettingsDefinition,
             CurrencySettingsDefinition,
             GooglePaySettingsDefinition,
@@ -339,7 +439,6 @@ internal class PlaygroundSettings private constructor(
             AutomaticPaymentMethodsSettingsDefinition,
             SupportedPaymentMethodsSettingsDefinition,
             RequireCvcRecollectionDefinition,
-            CvcRecollectionEnabledCallbackValue,
             PrimaryButtonLabelSettingsDefinition,
             PaymentMethodConfigurationSettingsDefinition,
             PreferredNetworkSettingsDefinition,
@@ -347,6 +446,9 @@ internal class PlaygroundSettings private constructor(
             PaymentMethodOrderSettingsDefinition,
             ExternalPaymentMethodSettingsDefinition,
             LayoutSettingsDefinition,
+            CardBrandAcceptanceSettingsDefinition,
+            FeatureFlagSettingsDefinition(FeatureFlags.useNewUpdateCardScreen),
+            FeatureFlagSettingsDefinition(FeatureFlags.instantDebitsDeferredIntent),
         )
 
         private val nonUiSettingDefinitions: List<PlaygroundSettingDefinition<*>> = listOf(

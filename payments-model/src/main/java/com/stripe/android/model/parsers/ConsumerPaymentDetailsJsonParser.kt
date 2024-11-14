@@ -13,6 +13,7 @@ private const val FIELD_CARD_DETAILS = "card_details"
 private const val FIELD_CARD_LAST_4 = "last4"
 private const val FIELD_BANK_ACCOUNT_DETAILS = "bank_account_details"
 private const val FIELD_BANK_ACCOUNT_LAST_4 = "last4"
+private const val FIELD_BANK_ACCOUNT_BANK_NAME = "bank_name"
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 object ConsumerPaymentDetailsJsonParser : ModelJsonParser<ConsumerPaymentDetails> {
@@ -42,8 +43,9 @@ object ConsumerPaymentDetailsJsonParser : ModelJsonParser<ConsumerPaymentDetails
                 "bank_account" -> {
                     val bankAccountDetails = json.getJSONObject(FIELD_BANK_ACCOUNT_DETAILS)
                     ConsumerPaymentDetails.BankAccount(
-                        json.getString(FIELD_ID),
-                        bankAccountDetails.getString(FIELD_BANK_ACCOUNT_LAST_4)
+                        id = json.getString(FIELD_ID),
+                        last4 = bankAccountDetails.getString(FIELD_BANK_ACCOUNT_LAST_4),
+                        bankName = optString(bankAccountDetails, FIELD_BANK_ACCOUNT_BANK_NAME),
                     )
                 }
                 else -> null

@@ -5,7 +5,6 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.analytics.SessionSavedStateHandler
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.state.PaymentSheetState
 
 internal class FlowControllerViewModel(
     application: Application,
@@ -26,7 +25,7 @@ internal class FlowControllerViewModel(
     @Volatile
     var previousConfigureRequest: FlowControllerConfigurationHandler.ConfigureRequest? = null
 
-    var state: PaymentSheetState.Full?
+    var state: DefaultFlowController.State?
         get() = handle[STATE_KEY]
         set(value) {
             handle[STATE_KEY] = value

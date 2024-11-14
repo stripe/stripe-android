@@ -51,7 +51,6 @@ internal class PollAttachPaymentAccountTest {
         )
         val paymentAccount = LinkAccountSessionPaymentAccount(
             id = "acct_123",
-            eligibleForNetworking = true,
             microdepositVerificationMethod = DESCRIPTOR_CODE,
         )
 

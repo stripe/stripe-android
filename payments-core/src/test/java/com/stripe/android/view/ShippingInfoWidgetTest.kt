@@ -1,22 +1,21 @@
 package com.stripe.android.view
 
+import android.app.Activity
 import android.content.Context
+import android.os.Bundle
 import android.view.View
+import android.widget.LinearLayout
+import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.google.android.material.textfield.TextInputLayout
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.ApiKeyFixtures
-import com.stripe.android.CustomerSession
-import com.stripe.android.EphemeralKeyProvider
-import com.stripe.android.PaymentConfiguration
-import com.stripe.android.PaymentSessionData
-import com.stripe.android.PaymentSessionFixtures
 import com.stripe.android.R
 import com.stripe.android.core.model.getCountryCode
 import com.stripe.android.model.Address
 import com.stripe.android.model.ShippingInformation
+import com.stripe.android.utils.createTestActivityRule
+import org.junit.Rule
 import org.junit.runner.RunWith
-import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
 import java.util.Locale
 import kotlin.test.BeforeTest
@@ -45,31 +44,21 @@ class ShippingInfoWidgetTest {
     private lateinit var phoneEditText: StripeEditText
     private lateinit var countryTextInputLayout: CountryTextInputLayout
 
-    private val ephemeralKeyProvider: EphemeralKeyProvider = mock()
-
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val res = context.resources
-    private val activityScenarioFactory = ActivityScenarioFactory(context)
+
+    @get:Rule
+    internal val testActivityRule = createTestActivityRule<TestActivity>()
 
     @BeforeTest
     fun setup() {
         Locale.setDefault(Locale.US)
 
-        PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
-        CustomerSession.initCustomerSession(context, ephemeralKeyProvider)
-
-        val config = PaymentSessionFixtures.CONFIG.copy(
-            prepopulatedShippingInfo = null,
-            allowedShippingCountryCodes = emptySet()
-        )
-        activityScenarioFactory.create<PaymentFlowActivity>(
-            PaymentFlowActivityStarter.Args(
-                paymentSessionConfig = config,
-                paymentSessionData = PaymentSessionData(config)
-            )
-        ).use { activityScenario ->
+        ActivityScenario.launch(TestActivity::class.java).use { activityScenario ->
             activityScenario.onActivity {
-                shippingInfoWidget = it.findViewById(R.id.shipping_info_widget)
+                shippingInfoWidget = ShippingInfoWidget(it)
+                it.layout.addView(shippingInfoWidget)
+
                 addressLine1TextInputLayout =
                     shippingInfoWidget.findViewById(R.id.tl_address_line1_aaw)
                 addressLine2TextInputLayout =
@@ -182,6 +171,7 @@ class ShippingInfoWidgetTest {
         cityEditText.setText("Fake City")
         postalEditText.setText("12345")
         stateEditText.setText("CA")
+        phoneEditText.setText("8675555309")
 
         assertThat(shippingInfoWidget.validateAllFields())
             .isTrue()
@@ -391,5 +381,16 @@ class ShippingInfoWidgetTest {
             "Fake Name",
             "416-759-0260"
         )
+    }
+
+    internal class TestActivity : Activity() {
+        lateinit var layout: LinearLayout
+
+        override fun onCreate(savedInstanceState: Bundle?) {
+            super.onCreate(savedInstanceState)
+
+            layout = LinearLayout(this)
+            setContentView(layout)
+        }
     }
 }

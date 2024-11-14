@@ -8,6 +8,8 @@
   <string name="stripe_inline_sign_up_header">保存您的信息，用 Link 安全地一键结账</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">退出 Link</string>
+  <!-- Text for the 'Pay with Link' button. 'Link' is a Stripe brand, please do not translate the word 'Link'. -->
+  <string name="stripe_pay_with_link">用 Link 支付</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">设置为默认支付方式</string>
   <!-- Accessibility label for an action or a button that shows a menu. -->

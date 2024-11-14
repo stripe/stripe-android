@@ -495,6 +495,33 @@ class AddressElementTest {
         assertThat(country()).isEqualTo("US")
     }
 
+    @Test
+    fun `when phone number is required, should not be complete until fully entered`() = runTest {
+        val addressElement = AddressElement(
+            IdentifierSpec.Generic("address"),
+            mapOf(
+                IdentifierSpec.Country to "CA"
+            ),
+            countryDropdownFieldController = countryDropdownFieldController,
+            addressType = AddressType.Normal(
+                phoneNumberState = PhoneNumberState.REQUIRED
+            ),
+            sameAsShippingElement = null,
+            shippingValuesMap = null,
+        )
+
+        val phoneNumberController = addressElement.phoneNumberElement.controller
+
+        phoneNumberController.onRawValueChange("123")
+        assertThat(phoneNumberController.isComplete.value).isFalse()
+
+        phoneNumberController.onRawValueChange("123456")
+        assertThat(phoneNumberController.isComplete.value).isFalse()
+
+        phoneNumberController.onRawValueChange("1234567890")
+        assertThat(phoneNumberController.isComplete.value).isTrue()
+    }
+
     private fun createAddressElement(initialValues: Map<IdentifierSpec, String>): AddressElement {
         return AddressElement(
             IdentifierSpec.Generic("address"),

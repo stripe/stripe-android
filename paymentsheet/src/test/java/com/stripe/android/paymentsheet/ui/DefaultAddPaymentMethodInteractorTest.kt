@@ -2,10 +2,8 @@ package com.stripe.android.paymentsheet.ui
 
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.link.LinkConfigurationCoordinator
-import com.stripe.android.link.ui.inline.InlineSignupViewState
-import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.forms.FormFieldValues
@@ -15,7 +13,6 @@ import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFo
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.FormElement
-import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -27,35 +24,6 @@ import org.mockito.Mockito.mock
 import kotlin.test.Test
 
 class DefaultAddPaymentMethodInteractorTest {
-
-    @Test
-    fun handleViewAction_OnLinkSignUpStateUpdated_updatesLinkState() {
-        var updatedLinkSignupState: InlineSignupViewState? = null
-        fun onLinkSignupStateUpdated(inlineSignupViewState: InlineSignupViewState) {
-            updatedLinkSignupState = inlineSignupViewState
-        }
-
-        val inlineSignUpState = InlineSignupViewState(
-            userInput = null,
-            merchantName = "Example merchant",
-            signupMode = LinkSignupMode.AlongsideSaveForFutureUse,
-            fields = emptyList(),
-            prefillEligibleFields = emptySet(),
-        )
-
-        runScenario(
-            onLinkSignUpStateUpdated = ::onLinkSignupStateUpdated,
-        ) {
-            interactor.handleViewAction(
-                AddPaymentMethodInteractor.ViewAction.OnLinkSignUpStateUpdated(
-                    inlineSignUpState
-                )
-            )
-
-            assertThat(updatedLinkSignupState).isEqualTo(inlineSignUpState)
-        }
-    }
-
     @Test
     fun handleViewAction_ReportFieldInteraction_reportsFieldInteraction() {
         var latestCodeWithInteraction: PaymentMethodCode? = null
@@ -157,7 +125,6 @@ class DefaultAddPaymentMethodInteractorTest {
         val expectedSelection = PaymentSelection.Saved(
             paymentMethod = PaymentMethodFactory.usBankAccount(),
         )
-        val expectedLinkSignupMode = LinkSignupMode.AlongsideSaveForFutureUse
         val expectedProcessing = false
 
         var formArgumentsCreatedForCode: PaymentMethodCode? = null
@@ -175,7 +142,6 @@ class DefaultAddPaymentMethodInteractorTest {
         runScenario(
             initiallySelectedPaymentMethodType = expectedSelectedPaymentMethodCode,
             selection = MutableStateFlow(expectedSelection),
-            linkSignupMode = MutableStateFlow(expectedLinkSignupMode),
             processing = MutableStateFlow(expectedProcessing),
             createFormArguments = ::createFormArguments,
             formElementsForCode = ::formElementsForCode,
@@ -184,7 +150,6 @@ class DefaultAddPaymentMethodInteractorTest {
                 awaitItem().run {
                     assertThat(selectedPaymentMethodCode).isEqualTo(expectedSelectedPaymentMethodCode)
                     assertThat(paymentSelection).isEqualTo(expectedSelection)
-                    assertThat(linkSignupMode).isEqualTo(expectedLinkSignupMode)
                     assertThat(processing).isEqualTo(expectedProcessing)
 
                     assertThat(formArgumentsCreatedForCode).isEqualTo(expectedSelectedPaymentMethodCode)
@@ -236,38 +201,6 @@ class DefaultAddPaymentMethodInteractorTest {
     }
 
     @Test
-    fun linkInlineSignupMode_existsIfSelectedPaymentMethodIsCard() {
-        val expectedLinkInlineSignupMode = LinkSignupMode.AlongsideSaveForFutureUse
-        runScenario(
-            initiallySelectedPaymentMethodType = PaymentMethod.Type.Card.code,
-            linkSignupMode = MutableStateFlow(expectedLinkInlineSignupMode),
-        ) {
-            interactor.state.test {
-                awaitItem().run {
-                    assertThat(linkSignupMode).isEqualTo(expectedLinkInlineSignupMode)
-                    assertThat(linkInlineSignupMode).isEqualTo(expectedLinkInlineSignupMode)
-                }
-            }
-        }
-    }
-
-    @Test
-    fun linkInlineSignupMode_nullIfSelectedPaymentMethodIsNotCard() {
-        val expectedLinkSignupMode = LinkSignupMode.AlongsideSaveForFutureUse
-        runScenario(
-            initiallySelectedPaymentMethodType = PaymentMethod.Type.CashAppPay.code,
-            linkSignupMode = MutableStateFlow(expectedLinkSignupMode),
-        ) {
-            interactor.state.test {
-                awaitItem().run {
-                    assertThat(linkSignupMode).isEqualTo(expectedLinkSignupMode)
-                    assertThat(linkInlineSignupMode).isEqualTo(null)
-                }
-            }
-        }
-    }
-
-    @Test
     fun changingSelectedPaymentMethod_clearsErrorMessages() {
         var errorMessagesHaveBeenCleared = false
         fun clearErrorMessages() {
@@ -295,9 +228,7 @@ class DefaultAddPaymentMethodInteractorTest {
 
     private fun runScenario(
         initiallySelectedPaymentMethodType: PaymentMethodCode = PaymentMethod.Type.Card.code,
-        linkConfigurationCoordinator: LinkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
         selection: StateFlow<PaymentSelection?> = MutableStateFlow(null),
-        linkSignupMode: StateFlow<LinkSignupMode?> = MutableStateFlow(null),
         processing: StateFlow<Boolean> = MutableStateFlow(false),
         supportedPaymentMethods: List<SupportedPaymentMethod> = emptyList(),
         createFormArguments: (PaymentMethodCode) -> FormArguments = {
@@ -308,11 +239,12 @@ class DefaultAddPaymentMethodInteractorTest {
                     preferredNetworks = emptyList(),
                 ),
                 merchantName = "Example, Inc.",
+                hasIntentToSetup = false,
+                paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
             )
         },
         formElementsForCode: (PaymentMethodCode) -> List<FormElement> = { emptyList() },
         clearErrorMessages: () -> Unit = { notImplemented() },
-        onLinkSignUpStateUpdated: (InlineSignupViewState) -> Unit = { notImplemented() },
         reportFieldInteraction: (PaymentMethodCode) -> Unit = { notImplemented() },
         onFormFieldValuesChanged: (FormFieldValues?, String) -> Unit = { _, _ -> notImplemented() },
         reportPaymentMethodTypeSelected: (PaymentMethodCode) -> Unit = { notImplemented() },
@@ -323,15 +255,12 @@ class DefaultAddPaymentMethodInteractorTest {
 
         val interactor = DefaultAddPaymentMethodInteractor(
             initiallySelectedPaymentMethodType = initiallySelectedPaymentMethodType,
-            linkConfigurationCoordinator = linkConfigurationCoordinator,
             selection = selection,
-            linkSignupMode = linkSignupMode,
             processing = processing,
             supportedPaymentMethods = supportedPaymentMethods,
             createFormArguments = createFormArguments,
             formElementsForCode = formElementsForCode,
             clearErrorMessages = clearErrorMessages,
-            onLinkSignUpStateUpdated = onLinkSignUpStateUpdated,
             reportFieldInteraction = reportFieldInteraction,
             onFormFieldValuesChanged = onFormFieldValuesChanged,
             reportPaymentMethodTypeSelected = reportPaymentMethodTypeSelected,

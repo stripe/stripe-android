@@ -20,7 +20,7 @@ internal class DeferredIntentValidatorTest {
             DeferredIntentValidator.validate(
                 stripeIntent = paymentIntent,
                 intentConfiguration = intentConfiguration,
-                isFlowController = false,
+                allowsManualConfirmation = false,
             )
         }
 
@@ -39,7 +39,7 @@ internal class DeferredIntentValidatorTest {
             DeferredIntentValidator.validate(
                 stripeIntent = paymentIntent,
                 intentConfiguration = intentConfiguration,
-                isFlowController = false,
+                allowsManualConfirmation = false,
             )
         }
 
@@ -62,7 +62,7 @@ internal class DeferredIntentValidatorTest {
             DeferredIntentValidator.validate(
                 stripeIntent = paymentIntent,
                 intentConfiguration = intentConfiguration,
-                isFlowController = false,
+                allowsManualConfirmation = false,
             )
         }
 
@@ -83,7 +83,7 @@ internal class DeferredIntentValidatorTest {
             DeferredIntentValidator.validate(
                 stripeIntent = paymentIntent,
                 intentConfiguration = intentConfiguration,
-                isFlowController = false,
+                allowsManualConfirmation = false,
             )
         }
 
@@ -105,7 +105,7 @@ internal class DeferredIntentValidatorTest {
             DeferredIntentValidator.validate(
                 stripeIntent = paymentIntent,
                 intentConfiguration = intentConfiguration,
-                isFlowController = false,
+                allowsManualConfirmation = false,
             )
         }
 
@@ -126,7 +126,7 @@ internal class DeferredIntentValidatorTest {
         val result = DeferredIntentValidator.validate(
             stripeIntent = paymentIntent,
             intentConfiguration = intentConfiguration,
-            isFlowController = true,
+            allowsManualConfirmation = true,
         )
 
         assertThat(result).isEqualTo(paymentIntent)
@@ -140,7 +140,7 @@ internal class DeferredIntentValidatorTest {
         val result = DeferredIntentValidator.validate(
             stripeIntent = paymentIntent,
             intentConfiguration = intentConfiguration,
-            isFlowController = true,
+            allowsManualConfirmation = true,
         )
 
         assertThat(result).isEqualTo(paymentIntent)
@@ -156,7 +156,7 @@ internal class DeferredIntentValidatorTest {
         val result = DeferredIntentValidator.validate(
             stripeIntent = paymentIntent,
             intentConfiguration = intentConfiguration,
-            isFlowController = true,
+            allowsManualConfirmation = true,
         )
 
         assertThat(result).isEqualTo(paymentIntent)
@@ -171,7 +171,7 @@ internal class DeferredIntentValidatorTest {
             DeferredIntentValidator.validate(
                 stripeIntent = setupIntent,
                 intentConfiguration = intentConfiguration,
-                isFlowController = false,
+                allowsManualConfirmation = false,
             )
         }
 
@@ -192,7 +192,7 @@ internal class DeferredIntentValidatorTest {
             DeferredIntentValidator.validate(
                 stripeIntent = setupIntent,
                 intentConfiguration = intentConfiguration,
-                isFlowController = false,
+                allowsManualConfirmation = false,
             )
         }
 
@@ -210,7 +210,7 @@ internal class DeferredIntentValidatorTest {
         val result = DeferredIntentValidator.validate(
             stripeIntent = setupIntent,
             intentConfiguration = intentConfiguration,
-            isFlowController = true,
+            allowsManualConfirmation = true,
         )
 
         assertThat(result).isEqualTo(setupIntent)

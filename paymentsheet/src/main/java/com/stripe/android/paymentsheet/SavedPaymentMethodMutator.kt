@@ -1,8 +1,10 @@
 package com.stripe.android.paymentsheet
 
 import androidx.lifecycle.viewModelScope
+import com.stripe.android.CardBrandFilter
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.orEmpty
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
@@ -13,6 +15,7 @@ import com.stripe.android.paymentsheet.navigation.NavigationHandler
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.ui.DefaultAddPaymentMethodInteractor
+import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.PaymentMethodRemovalDelayMillis
@@ -43,6 +46,8 @@ internal class SavedPaymentMethodMutator(
     private val clearSelection: () -> Unit,
     private val isLiveModeProvider: () -> Boolean,
     private val customerStateHolder: CustomerStateHolder,
+    private val currentScreen: StateFlow<PaymentSheetScreen>,
+    private val cardBrandFilter: CardBrandFilter,
     isCbcEligible: () -> Boolean,
     isGooglePayReady: StateFlow<Boolean>,
     isLinkEnabled: StateFlow<Boolean?>,
@@ -107,6 +112,20 @@ internal class SavedPaymentMethodMutator(
             customerStateHolder.paymentMethods.collect { paymentMethods ->
                 if (paymentMethods.isEmpty() && editing.value) {
                     _editing.value = false
+                }
+            }
+        }
+
+        coroutineScope.launch {
+            currentScreen.collect { currentScreen ->
+                when (currentScreen) {
+                    is PaymentSheetScreen.VerticalMode -> {
+                        // When returning to the vertical mode screen, reset editing to false.
+                        _editing.value = false
+                    }
+                    else -> {
+                        // Do nothing.
+                    }
                 }
             }
         }
@@ -210,10 +229,27 @@ internal class SavedPaymentMethodMutator(
                     },
                     canRemove = canRemove.value,
                     isLiveMode = isLiveModeProvider(),
+                    cardBrandFilter = cardBrandFilter
                 ),
-                isLiveMode = isLiveModeProvider(),
             )
         )
+    }
+
+    fun updatePaymentMethod(displayableSavedPaymentMethod: DisplayableSavedPaymentMethod) {
+        displayableSavedPaymentMethod.paymentMethod.card?.let {
+            navigationHandler.transitionTo(
+                PaymentSheetScreen.UpdatePaymentMethod(
+                    DefaultUpdatePaymentMethodInteractor(
+                        isLiveMode = isLiveModeProvider(),
+                        canRemove = canRemove.value,
+                        displayableSavedPaymentMethod,
+                        card = it,
+                        onRemovePaymentMethod = ::removePaymentMethod,
+                        navigateBack = { navigationHandler.pop() },
+                    )
+                )
+            )
+        }
     }
 
     private suspend fun removePaymentMethodInEditScreen(paymentMethod: PaymentMethod): Throwable? {
@@ -256,6 +292,7 @@ internal class SavedPaymentMethodMutator(
                 productUsageTokens = setOf("PaymentSheet"),
             )
         ).onSuccess { updatedMethod ->
+            customerStateHolder.updateMostRecentlySelectedSavedPaymentMethod(updatedMethod)
             customerStateHolder.setCustomerState(
                 currentCustomer.copy(
                     paymentMethods = currentCustomer.paymentMethods.map { savedMethod ->
@@ -315,7 +352,9 @@ internal class SavedPaymentMethodMutator(
                 isGooglePayReady = viewModel.paymentMethodMetadata.mapAsStateFlow { it?.isGooglePayReady == true },
                 isLinkEnabled = viewModel.linkHandler.isLinkEnabled,
                 isNotPaymentFlow = !viewModel.isCompleteFlow,
-                isLiveModeProvider = { requireNotNull(viewModel.paymentMethodMetadata.value).stripeIntent.isLiveMode }
+                isLiveModeProvider = { requireNotNull(viewModel.paymentMethodMetadata.value).stripeIntent.isLiveMode },
+                currentScreen = viewModel.navigationHandler.currentScreen,
+                cardBrandFilter = PaymentSheetCardBrandFilter(viewModel.config.cardBrandAcceptance)
             )
         }
     }

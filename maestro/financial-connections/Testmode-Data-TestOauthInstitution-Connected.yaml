@@ -1,0 +1,53 @@
+appId: com.stripe.android.financialconnections.example
+tags:
+  - all
+  - testmode-data
+---
+- startRecording: ${'/tmp/test_results/testmode-data-testoauthinstitution-connected-' + new Date().getTime()}
+- clearState
+- openLink: "stripeconnectionsexample://playground\
+    ?integration_type=Standalone\
+    &experience=FinancialConnections\
+    &flow=Data\
+    &financial_connections_override_native=native\
+    &merchant=networking\
+    &financial_connections_test_mode=true\
+    &stripe_account_id=acct_1PnnD9CY58qxxwvr"
+- scrollUntilVisible:
+    element:
+      id: "connect_accounts"
+- tapOn:
+    id: "connect_accounts"
+# Wait until the consent button is visible
+- extendedWaitUntil:
+    visible:
+      id: "consent_cta"
+    timeout: 30000
+# Common: web AuthFlow - connect OAuth institution
+- tapOn: "Agree and continue"
+# SELECT OAUTH INSTITUTION
+- tapOn:
+    id: "bcinst_LLQZzmKZMjl0j0"
+- tapOn:
+    id: "prepane_cta"
+####### Bypass Chrome on-boarding screen #######
+- runFlow:
+    file: ../common/subflow-skip-chrome-welcome.yaml
+###############################################
+# SELECT ALL ACCOUNTS (they're preselected)
+- extendedWaitUntil:
+    visible: "Connect accounts"
+    timeout: 60000
+- tapOn: "Connect accounts" # select all accounts
+# SKIP NETWORKING
+- tapOn:
+    id: "skip_cta"
+# CONFIRM AND COMPLETE
+- assertVisible: "Your accounts were connected."
+- tapOn:
+    id: "done_button"
+- scrollUntilVisible:
+    element:
+      text: ".*Completed!.*"
+    timeout: 60000
+- stopRecording

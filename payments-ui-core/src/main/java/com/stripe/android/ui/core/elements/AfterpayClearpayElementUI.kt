@@ -3,7 +3,6 @@ package com.stripe.android.ui.core.elements
 import android.content.Intent
 import android.net.Uri
 import androidx.annotation.RestrictTo
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -12,7 +11,6 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.unit.dp
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.AfterpayClearpayHeaderElement.Companion.isClearpay
 import com.stripe.android.uicore.shouldUseDarkDynamicColor
@@ -24,7 +22,8 @@ import com.stripe.android.uicore.text.Html
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun AfterpayClearpayElementUI(
     enabled: Boolean,
-    element: AfterpayClearpayHeaderElement
+    element: AfterpayClearpayHeaderElement,
+    modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
     val messageFormatString = element.getLabel(context.resources)
@@ -52,7 +51,7 @@ fun AfterpayClearpayElementUI(
                 }
             )
         ),
-        modifier = Modifier.padding(4.dp, 8.dp, 4.dp, 4.dp),
+        modifier = modifier,
         color = MaterialTheme.stripeColors.subtitle,
         style = MaterialTheme.typography.h6,
         urlSpanStyle = SpanStyle(),

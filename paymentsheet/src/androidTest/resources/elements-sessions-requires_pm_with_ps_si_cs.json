@@ -21,7 +21,7 @@
       "api_key_expiry": 1899787184,
       "customer": "cus_12345",
       "components": {
-        "payment_sheet": {
+        "mobile_payment_element": {
           "enabled": true,
           "features": {
             "payment_method_save": "enabled",

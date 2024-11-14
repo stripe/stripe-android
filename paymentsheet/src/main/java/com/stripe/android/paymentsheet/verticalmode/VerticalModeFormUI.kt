@@ -19,7 +19,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.stripe.android.link.ui.inline.LinkElement
 import com.stripe.android.lpmfoundations.FormHeaderInformation
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.FormElement
@@ -32,7 +31,7 @@ import com.stripe.android.uicore.utils.collectAsState
 internal const val TEST_TAG_HEADER_TITLE = "TEST_TAG_HEADER_TITLE"
 
 @Composable
-internal fun VerticalModeFormUI(interactor: VerticalModeFormInteractor) {
+internal fun VerticalModeFormUI(interactor: VerticalModeFormInteractor, modifier: Modifier = Modifier) {
     val horizontalPadding = dimensionResource(
         id = R.dimen.stripe_paymentsheet_outer_spacing_horizontal
     )
@@ -40,7 +39,7 @@ internal fun VerticalModeFormUI(interactor: VerticalModeFormInteractor) {
     var hasSentInteractionEvent by remember { mutableStateOf(false) }
     val state by interactor.state.collectAsState()
 
-    Column {
+    Column(modifier) {
         val headerInformation = state.headerInformation
         val enabled = !state.isProcessing
         if (headerInformation != null) {
@@ -64,16 +63,6 @@ internal fun VerticalModeFormUI(interactor: VerticalModeFormInteractor) {
                     interactor.handleViewAction(VerticalModeFormInteractor.ViewAction.FieldInteraction)
                     hasSentInteractionEvent = true
                 }
-            },
-        )
-
-        LinkElement(
-            linkConfigurationCoordinator = state.linkConfigurationCoordinator,
-            linkSignupMode = state.linkSignupMode,
-            enabled = enabled,
-            horizontalPadding = horizontalPadding,
-            onLinkSignupStateChanged = {
-                interactor.handleViewAction(VerticalModeFormInteractor.ViewAction.LinkSignupStateChanged(it))
             },
         )
     }

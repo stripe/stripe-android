@@ -55,4 +55,21 @@ class LinearRetryDelaySupplierTest {
             )
         ).isEqualTo((3L).toDuration(DurationUnit.SECONDS))
     }
+
+    @Test
+    fun `maxDuration() should return expected value`() {
+        val supplier = LinearRetryDelaySupplier()
+
+        assertThat(
+            supplier.maxDuration(
+                maxRetries = 3,
+            )
+        ).isEqualTo((9L).toDuration(DurationUnit.SECONDS))
+
+        assertThat(
+            supplier.maxDuration(
+                maxRetries = 5,
+            )
+        ).isEqualTo((15L).toDuration(DurationUnit.SECONDS))
+    }
 }

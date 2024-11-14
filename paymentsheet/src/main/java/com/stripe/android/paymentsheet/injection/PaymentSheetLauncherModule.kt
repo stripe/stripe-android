@@ -31,7 +31,7 @@ internal abstract class PaymentSheetLauncherModule {
 
         @Provides
         @Singleton
-        @Named(IS_FLOW_CONTROLLER)
-        fun provideIsFlowController() = false
+        @Named(ALLOWS_MANUAL_CONFIRMATION)
+        fun provideAllowsManualConfirmation() = false
     }
 }

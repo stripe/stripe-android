@@ -57,6 +57,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.getBorderStrokeWidth
+import com.stripe.android.uicore.moveFocusSafely
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.text.autofill
 import com.stripe.android.uicore.utils.collectAsState
@@ -159,7 +160,7 @@ fun OTPElementUI(
                             value.isEmpty()
                         ) {
                             // If the current field is empty, move to the previous one and delete
-                            focusManager.moveFocus(FocusDirection.Previous)
+                            focusManager.moveFocusSafely(FocusDirection.Previous)
                             element.controller.onValueChanged(index - 1, "")
                             return@onPreviewKeyEvent true
                         }
@@ -223,7 +224,7 @@ private fun OTPInputBox(
                     it.text
                 }
             val inputLength = element.controller.onValueChanged(index, newValue)
-            (0 until inputLength).forEach { _ -> focusManager.moveFocus(FocusDirection.Next) }
+            (0 until inputLength).forEach { _ -> focusManager.moveFocusSafely(FocusDirection.Next) }
         },
         modifier = modifier,
         enabled = enabled,
@@ -233,7 +234,7 @@ private fun OTPInputBox(
             keyboardType = element.controller.keyboardType
         ),
         keyboardActions = KeyboardActions(
-            onNext = { focusManager.moveFocus(FocusDirection.Next) },
+            onNext = { focusManager.moveFocusSafely(FocusDirection.Next) },
             onDone = { focusManager.clearFocus(true) }
         ),
         singleLine = true,

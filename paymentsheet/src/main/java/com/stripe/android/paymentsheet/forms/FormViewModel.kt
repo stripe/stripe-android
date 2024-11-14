@@ -20,7 +20,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 /**
  * This class stores the visual field layout for the [Form] and then sets up the controller
@@ -30,7 +29,7 @@ import javax.inject.Inject
  * @param: layout - this contains the visual layout of the fields on the screen used by [Form]
  * to display the UI fields on screen.  It also informs us of the backing fields to be created.
  */
-internal class FormViewModel @Inject internal constructor(
+internal class FormViewModel(
     val elements: List<FormElement>,
     val formArguments: FormArguments,
 ) : ViewModel() {

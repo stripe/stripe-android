@@ -6,7 +6,7 @@ import com.android.tools.lint.detector.api.CURRENT_API
 
 internal class StripeIssueRegistry : IssueRegistry() {
     override val api = CURRENT_API
-    override val issues = listOf(ComposeCollectAsStateUsageDetector.ISSUE)
+    override val issues = listOf(ComposeCollectAsStateUsageDetector.ISSUE, DangerousManifestConfigurationDetector.ISSUE)
 
     override val vendor = Vendor(
         vendorName = "Stripe Android SDK",

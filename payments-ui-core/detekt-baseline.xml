@@ -7,14 +7,13 @@
     <ID>CyclomaticComplexMethod:FormItemSpec.kt$FormItemSpecSerializer$override fun selectDeserializer(element: JsonElement): DeserializationStrategy&lt;FormItemSpec></ID>
     <ID>CyclomaticComplexMethod:TransformGoogleToStripeAddress.kt$@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun Place.transformGoogleToStripeAddress( context: Context ): com.stripe.android.model.Address</ID>
     <ID>ForbiddenComment:Menu.kt$// TODO: Make sure this gets the rounded corner values</ID>
+    <ID>LongMethod:FormUI.kt$@Composable private fun FormUIElement( element: FormElement, index: Int, maxIndex: Int, enabled: Boolean, hiddenIdentifiers: Set&lt;IdentifierSpec>, lastTextFieldIdentifier: IdentifierSpec?, )</ID>
     <ID>LongMethod:Menu.kt$@Suppress("ModifierParameter") @Composable internal fun DropdownMenuContent( expandedStates: MutableTransitionState&lt;Boolean>, transformOriginState: MutableState&lt;TransformOrigin>, initialFirstVisibleItemIndex: Int, modifier: Modifier = Modifier, content: LazyListScope.() -> Unit )</ID>
     <ID>LongMethod:TransformGoogleToStripeAddress.kt$@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun Place.transformGoogleToStripeAddress( context: Context ): com.stripe.android.model.Address</ID>
     <ID>LongMethod:TransformGoogleToStripeAddressTest.kt$TransformGoogleToStripeAddressTest$@Test fun `test JP address`()</ID>
     <ID>LongMethod:TransformGoogleToStripeAddressTest.kt$TransformGoogleToStripeAddressTest$@Test fun `test US address with sublocality`()</ID>
     <ID>LongMethod:TransformGoogleToStripeAddressTest.kt$TransformGoogleToStripeAddressTest$@Test fun `test US address without sublocality`()</ID>
     <ID>LongMethod:TransformGoogleToStripeAddressTest.kt$TransformGoogleToStripeAddressTest$@Test fun `test should not combine dependent locality - US`()</ID>
-    <ID>MagicNumber:AfterpayClearpayHeaderElement.kt$AfterpayClearpayHeaderElement$3</ID>
-    <ID>MagicNumber:AfterpayClearpayHeaderElement.kt$AfterpayClearpayHeaderElement$4</ID>
     <ID>MagicNumber:CardDetailsElement.kt$2000</ID>
     <ID>MagicNumber:CardDetailsElement.kt$4</ID>
     <ID>MagicNumber:CardNumberVisualTransformation.kt$CardNumberVisualTransformation$14</ID>
@@ -38,7 +37,6 @@
     <ID>MaxLineLength:AddressElementTest.kt$AddressElementTest$fun</ID>
     <ID>MaxLineLength:AndroidMenu.kt$*</ID>
     <ID>MaxLineLength:CardDetailsControllerTest.kt$CardDetailsControllerTest$fun</ID>
-    <ID>MaxLineLength:CardNumberConfigTest.kt$CardNumberConfigTest$Truth.assertThat(cardNumberConfig.determineState(CardBrand.Visa, "", CardBrand.Visa.getMaxLengthForCardNumber("")))</ID>
     <ID>MaxLineLength:CardNumberConfigTest.kt$CardNumberConfigTest$Truth.assertThat(cardNumberConfig.visualTransformation.filter(AnnotatedString(CardNumberFixtures.AMEX_NO_SPACES)).text)</ID>
     <ID>MaxLineLength:CardNumberConfigTest.kt$CardNumberConfigTest$Truth.assertThat(cardNumberConfig.visualTransformation.filter(AnnotatedString(CardNumberFixtures.DINERS_CLUB_14_NO_SPACES)).text)</ID>
     <ID>MaxLineLength:CardNumberConfigTest.kt$CardNumberConfigTest$Truth.assertThat(cardNumberConfig.visualTransformation.filter(AnnotatedString(CardNumberFixtures.DINERS_CLUB_16_NO_SPACES)).text)</ID>
@@ -46,11 +44,6 @@
     <ID>MaxLineLength:CardNumberConfigTest.kt$CardNumberConfigTest$Truth.assertThat(cardNumberConfig.visualTransformation.filter(AnnotatedString(CardNumberFixtures.JCB_NO_SPACES)).text)</ID>
     <ID>MaxLineLength:CardNumberConfigTest.kt$CardNumberConfigTest$Truth.assertThat(cardNumberConfig.visualTransformation.filter(AnnotatedString(CardNumberFixtures.UNIONPAY_NO_SPACES)).text)</ID>
     <ID>MaxLineLength:CardNumberConfigTest.kt$CardNumberConfigTest$Truth.assertThat(cardNumberConfig.visualTransformation.filter(AnnotatedString(CardNumberFixtures.VISA_NO_SPACES)).text)</ID>
-    <ID>MaxLineLength:CardNumberConfigTest.kt$CardNumberConfigTest$val state = cardNumberConfig.determineState(CardBrand.Unknown, "0", CardBrand.Unknown.getMaxLengthForCardNumber("0"))</ID>
-    <ID>MaxLineLength:CardNumberConfigTest.kt$CardNumberConfigTest$val state = cardNumberConfig.determineState(CardBrand.Visa, "12", CardBrand.Visa.getMaxLengthForCardNumber("12"))</ID>
-    <ID>MaxLineLength:CardNumberConfigTest.kt$CardNumberConfigTest$val state = cardNumberConfig.determineState(CardBrand.Visa, "1234567890123456789", CardBrand.Visa.getMaxLengthForCardNumber("1234567890123456789"))</ID>
-    <ID>MaxLineLength:CardNumberConfigTest.kt$CardNumberConfigTest$val state = cardNumberConfig.determineState(CardBrand.Visa, "4242424242424242", CardBrand.Visa.getMaxLengthForCardNumber("4242424242424242"))</ID>
-    <ID>MaxLineLength:CardNumberConfigTest.kt$CardNumberConfigTest$val state = cardNumberConfig.determineState(CardBrand.Visa, "4242424242424243", CardBrand.Visa.getMaxLengthForCardNumber("4242424242424243"))</ID>
     <ID>MaxLineLength:CardNumberControllerTest.kt$CardNumberControllerTest$fun</ID>
     <ID>SpreadOperator:BsbElementUI.kt$( it.errorMessage, *args )</ID>
     <ID>SpreadOperator:MandateTextElement.kt$MandateTextElement$(stringResId, *args.toTypedArray())</ID>

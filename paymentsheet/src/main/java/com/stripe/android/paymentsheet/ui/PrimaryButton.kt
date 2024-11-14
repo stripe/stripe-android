@@ -218,6 +218,7 @@ internal class PrimaryButton @JvmOverloads constructor(
 
             isEnabled = uiState.enabled
             lockVisible = uiState.lockVisible
+            viewBinding.lockIcon.isVisible = lockVisible
             setOnClickListener { uiState.onClick() }
         }
     }
