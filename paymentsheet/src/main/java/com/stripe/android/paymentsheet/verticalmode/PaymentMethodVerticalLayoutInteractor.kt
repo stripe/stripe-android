@@ -69,8 +69,8 @@ internal interface PaymentMethodVerticalLayoutInteractor {
 internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val paymentMethodMetadata: PaymentMethodMetadata,
     processing: StateFlow<Boolean>,
-    selection: StateFlow<PaymentSelection?>,
-    promoBadgesState: StateFlow<PromoBadgesState>,
+    private val selection: StateFlow<PaymentSelection?>,
+    private val bankFormInteractor: BankFormInteractor,
     private val formElementsForCode: (code: String) -> List<FormElement>,
     private val requiresFormScreen: (code: String) -> Boolean,
     private val transitionTo: (screen: PaymentSheetScreen) -> Unit,
@@ -104,11 +104,12 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         ): PaymentMethodVerticalLayoutInteractor {
             val linkInlineHandler = LinkInlineHandler.create(viewModel, viewModel.viewModelScope)
             val formHelper = FormHelper.create(viewModel, linkInlineHandler, paymentMethodMetadata)
+
             return DefaultPaymentMethodVerticalLayoutInteractor(
                 paymentMethodMetadata = paymentMethodMetadata,
                 processing = viewModel.processing,
                 selection = viewModel.selection,
-                promoBadgesState = viewModel.promoBadgesState,
+                bankFormInteractor = bankFormInteractor,
                 formElementsForCode = formHelper::formElementsForCode,
                 requiresFormScreen = formHelper::requiresFormScreen,
                 transitionTo = viewModel.navigationHandler::transitionToWithDelay,
@@ -199,7 +200,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val displayedPaymentMethods = combineAsStateFlow(
         paymentMethods,
         walletsState,
-        promoBadgesState,
+        bankFormInteractor.promoBadgesState,
     ) { paymentMethods, walletsState, promoBadgesState ->
         getDisplayablePaymentMethods(paymentMethods, walletsState, promoBadgesState)
     }

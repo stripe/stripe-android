@@ -83,14 +83,12 @@ internal class DefaultAddPaymentMethodInteractor(
                 linkInlineHandler = linkInlineHandler,
                 paymentMethodMetadata = paymentMethodMetadata
             )
-            val bankFormInteractor = BankFormInteractor(
-                updateSelection = viewModel::updateSelection,
-            )
+            val bankFormInteractor = BankFormInteractor.create(viewModel)
 
             return DefaultAddPaymentMethodInteractor(
                 initiallySelectedPaymentMethodType = viewModel.initiallySelectedPaymentMethodType,
                 selection = viewModel.selection,
-                promoBadgesState = viewModel.promoBadgesState,
+                promoBadgesState = bankFormInteractor.promoBadgesState,
                 processing = viewModel.processing,
                 supportedPaymentMethods = paymentMethodMetadata.sortedSupportedPaymentMethods(),
                 createFormArguments = formHelper::createFormArguments,
