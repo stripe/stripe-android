@@ -36,8 +36,8 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
-import com.stripe.android.paymentsheet.DefaultConfirmationHandler
-import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
+import com.stripe.android.paymentsheet.confirmation.DefaultConfirmationHandler
+import com.stripe.android.paymentsheet.confirmation.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.FakeBacsMandateConfirmationLauncher
 import com.stripe.android.paymentsheet.ui.DefaultEditPaymentMethodViewInteractor

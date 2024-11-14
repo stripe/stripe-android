@@ -22,13 +22,13 @@ import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
 import com.stripe.android.paymentsheet.BuildConfig
-import com.stripe.android.paymentsheet.DefaultIntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
-import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.confirmation.DefaultIntentConfirmationInterceptor
+import com.stripe.android.paymentsheet.confirmation.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandlerImpl
 import com.stripe.android.paymentsheet.flowcontroller.DefaultPaymentSelectionUpdater

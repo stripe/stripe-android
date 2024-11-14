@@ -28,9 +28,9 @@ import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnectionsAvailable
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
-import com.stripe.android.paymentsheet.DefaultConfirmationHandler
-import com.stripe.android.paymentsheet.DefaultIntentConfirmationInterceptor
-import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
+import com.stripe.android.paymentsheet.confirmation.DefaultConfirmationHandler
+import com.stripe.android.paymentsheet.confirmation.DefaultIntentConfirmationInterceptor
+import com.stripe.android.paymentsheet.confirmation.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.injection.ALLOWS_MANUAL_CONFIRMATION
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncherFactory

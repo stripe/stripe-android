@@ -1,7 +1,7 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.bacs
 
 import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.paymentsheet.ConfirmationHandler
+import com.stripe.android.paymentsheet.confirmation.ConfirmationHandler
 
 internal data class BacsMandateData(
     val name: String,

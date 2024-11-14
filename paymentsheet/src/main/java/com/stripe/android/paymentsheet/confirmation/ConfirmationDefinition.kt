@@ -1,11 +1,11 @@
-package com.stripe.android.paymentsheet
+package com.stripe.android.paymentsheet.confirmation
 
 import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.model.StripeIntent
 
-internal interface PaymentConfirmationDefinition<
+internal interface ConfirmationDefinition<
     TConfirmationOption : ConfirmationHandler.Option,
     TLauncher,
     TLauncherArgs,

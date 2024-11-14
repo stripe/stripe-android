@@ -67,6 +67,12 @@ import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
+import com.stripe.android.paymentsheet.confirmation.ConfirmationHandler
+import com.stripe.android.paymentsheet.confirmation.ConfirmationMediator
+import com.stripe.android.paymentsheet.confirmation.DefaultConfirmationHandler
+import com.stripe.android.paymentsheet.confirmation.DeferredIntentConfirmationType
+import com.stripe.android.paymentsheet.confirmation.IntentConfirmationInterceptor
+import com.stripe.android.paymentsheet.confirmation.InvalidDeferredIntentUsageException
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
 import com.stripe.android.paymentsheet.cvcrecollection.FakeCvcRecollectionHandler
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
@@ -2918,7 +2924,7 @@ internal class PaymentSheetViewModelTest {
         val savedStateHandle = SavedStateHandle(
             initialState = mapOf(
                 "AwaitingPaymentResult" to true,
-                "IntentConfirmationParameters" to PaymentConfirmationMediator.Parameters(
+                "IntentConfirmationParameters" to ConfirmationMediator.Parameters(
                     intent = PAYMENT_INTENT,
                     confirmationOption = ConfirmationHandler.Option.PaymentMethod.Saved(
                         initializationMode = ARGS_CUSTOMER_WITH_GOOGLEPAY.initializationMode,

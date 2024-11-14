@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet
+package com.stripe.android.paymentsheet.confirmation
 
 import com.stripe.android.ConfirmStripeIntentParamsFactory
 import com.stripe.android.core.exception.StripeException
@@ -15,7 +15,12 @@ import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.setupFutureUsage
 import com.stripe.android.networking.StripeRepository
-import com.stripe.android.paymentsheet.IntentConfirmationInterceptor.NextStep
+import com.stripe.android.paymentsheet.CreateIntentCallback
+import com.stripe.android.paymentsheet.CreateIntentResult
+import com.stripe.android.paymentsheet.DeferredIntentValidator
+import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.confirmation.IntentConfirmationInterceptor.NextStep
 import com.stripe.android.paymentsheet.injection.ALLOWS_MANUAL_CONFIRMATION
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import javax.inject.Inject

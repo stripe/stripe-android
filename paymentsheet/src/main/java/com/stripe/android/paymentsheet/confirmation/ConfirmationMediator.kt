@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet
+package com.stripe.android.paymentsheet.confirmation
 
 import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
@@ -7,9 +7,10 @@ import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentsheet.R
 import kotlinx.parcelize.Parcelize
 
-internal class PaymentConfirmationMediator<
+internal class ConfirmationMediator<
     TConfirmationOption : ConfirmationHandler.Option,
     TLauncher,
     TLauncherArgs,
@@ -17,7 +18,7 @@ internal class PaymentConfirmationMediator<
     >(
     private val savedStateHandle: SavedStateHandle,
     private val definition:
-    PaymentConfirmationDefinition<TConfirmationOption, TLauncher, TLauncherArgs, TLauncherResult>,
+    ConfirmationDefinition<TConfirmationOption, TLauncher, TLauncherArgs, TLauncherResult>,
 ) {
     private var launcher: TLauncher? = null
 
@@ -81,7 +82,7 @@ internal class PaymentConfirmationMediator<
             )
 
         return when (val action = definition.action(confirmationOption, intent)) {
-            is PaymentConfirmationDefinition.ConfirmationAction.Launch -> {
+            is ConfirmationDefinition.ConfirmationAction.Launch -> {
                 launcher?.let {
                     Action.Launch(
                         launch = {
@@ -111,14 +112,14 @@ internal class PaymentConfirmationMediator<
                     )
                 }
             }
-            is PaymentConfirmationDefinition.ConfirmationAction.Complete -> {
+            is ConfirmationDefinition.ConfirmationAction.Complete -> {
                 Action.Complete(
                     intent = action.intent,
                     confirmationOption = action.confirmationOption,
                     deferredIntentConfirmationType = action.deferredIntentConfirmationType,
                 )
             }
-            is PaymentConfirmationDefinition.ConfirmationAction.Fail -> {
+            is ConfirmationDefinition.ConfirmationAction.Fail -> {
                 Action.Fail(
                     cause = action.cause,
                     message = action.message,

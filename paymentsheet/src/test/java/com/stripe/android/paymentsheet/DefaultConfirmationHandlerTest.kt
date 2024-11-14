@@ -31,6 +31,12 @@ import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.paymentsheet.confirmation.ConfirmationHandler
+import com.stripe.android.paymentsheet.confirmation.ConfirmationMediator
+import com.stripe.android.paymentsheet.confirmation.DefaultConfirmationHandler
+import com.stripe.android.paymentsheet.confirmation.DeferredIntentConfirmationType
+import com.stripe.android.paymentsheet.confirmation.IntentConfirmationInterceptor
+import com.stripe.android.paymentsheet.confirmation.InvalidDeferredIntentUsageException
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncher
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationResult
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateData
@@ -826,7 +832,7 @@ class DefaultConfirmationHandlerTest {
             set("AwaitingPaymentResult", true)
             set(
                 "IntentConfirmationParameters",
-                PaymentConfirmationMediator.Parameters(
+                ConfirmationMediator.Parameters(
                     confirmationOption = DEFAULT_ARGUMENTS.confirmationOption,
                     intent = DEFAULT_ARGUMENTS.intent,
                     deferredIntentConfirmationType = null,

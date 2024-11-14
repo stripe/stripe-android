@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet
+package com.stripe.android.paymentsheet.confirmation
 
 import android.app.Activity
 import androidx.activity.result.ActivityResultCaller
@@ -24,6 +24,11 @@ import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
+import com.stripe.android.paymentsheet.ExternalPaymentMethodContract
+import com.stripe.android.paymentsheet.ExternalPaymentMethodInput
+import com.stripe.android.paymentsheet.ExternalPaymentMethodInterceptor
+import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationContract
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncher
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncherFactory
@@ -55,7 +60,7 @@ internal class DefaultConfirmationHandler(
     private val errorReporter: ErrorReporter,
     private val logger: UserFacingLogger?
 ) : ConfirmationHandler {
-    private val intentConfirmationRegistry = PaymentConfirmationRegistry(
+    private val intentConfirmationRegistry = ConfirmationRegistry(
         confirmationDefinitions = listOf(
             IntentConfirmationDefinition(
                 intentConfirmationInterceptor,
@@ -275,12 +280,12 @@ internal class DefaultConfirmationHandler(
         }
 
         when (val action = mediator.action(confirmationOption, intent)) {
-            is PaymentConfirmationMediator.Action.Launch -> {
+            is ConfirmationMediator.Action.Launch -> {
                 storeIsAwaitingForPaymentResult()
 
                 action.launch()
             }
-            is PaymentConfirmationMediator.Action.Fail -> {
+            is ConfirmationMediator.Action.Fail -> {
                 onIntentResult(
                     ConfirmationHandler.Result.Failed(
                         cause = action.cause,
@@ -289,7 +294,7 @@ internal class DefaultConfirmationHandler(
                     )
                 )
             }
-            is PaymentConfirmationMediator.Action.Complete -> {
+            is ConfirmationMediator.Action.Complete -> {
                 onIntentResult(
                     ConfirmationHandler.Result.Succeeded(
                         intent = intent,

@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet
+package com.stripe.android.paymentsheet.confirmation
 
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
@@ -16,7 +16,7 @@ import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 internal class IntentConfirmationDefinition(
     private val intentConfirmationInterceptor: IntentConfirmationInterceptor,
     private val paymentLauncherFactory: (ActivityResultLauncher<PaymentLauncherContract.Args>) -> PaymentLauncher,
-) : PaymentConfirmationDefinition<
+) : ConfirmationDefinition<
     ConfirmationHandler.Option.PaymentMethod,
     PaymentLauncher,
     IntentConfirmationDefinition.Args,
@@ -31,33 +31,33 @@ internal class IntentConfirmationDefinition(
     override suspend fun action(
         confirmationOption: ConfirmationHandler.Option.PaymentMethod,
         intent: StripeIntent
-    ): PaymentConfirmationDefinition.ConfirmationAction<Args> {
+    ): ConfirmationDefinition.ConfirmationAction<Args> {
         val nextStep = intentConfirmationInterceptor.intercept(confirmationOption = confirmationOption)
 
         val deferredIntentConfirmationType = nextStep.deferredIntentConfirmationType
 
         return when (nextStep) {
             is IntentConfirmationInterceptor.NextStep.HandleNextAction -> {
-                PaymentConfirmationDefinition.ConfirmationAction.Launch(
+                ConfirmationDefinition.ConfirmationAction.Launch(
                     launcherArguments = Args.NextAction(nextStep.clientSecret),
                     deferredIntentConfirmationType = deferredIntentConfirmationType,
                 )
             }
             is IntentConfirmationInterceptor.NextStep.Confirm -> {
-                PaymentConfirmationDefinition.ConfirmationAction.Launch(
+                ConfirmationDefinition.ConfirmationAction.Launch(
                     launcherArguments = Args.Confirm(nextStep.confirmParams),
                     deferredIntentConfirmationType = deferredIntentConfirmationType,
                 )
             }
             is IntentConfirmationInterceptor.NextStep.Fail -> {
-                PaymentConfirmationDefinition.ConfirmationAction.Fail(
+                ConfirmationDefinition.ConfirmationAction.Fail(
                     cause = nextStep.cause,
                     message = nextStep.message,
                     errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
                 )
             }
             is IntentConfirmationInterceptor.NextStep.Complete -> {
-                PaymentConfirmationDefinition.ConfirmationAction.Complete(
+                ConfirmationDefinition.ConfirmationAction.Complete(
                     intent = intent,
                     confirmationOption = confirmationOption,
                     deferredIntentConfirmationType = deferredIntentConfirmationType,

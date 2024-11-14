@@ -30,6 +30,10 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
+import com.stripe.android.paymentsheet.confirmation.ConfirmationHandler
+import com.stripe.android.paymentsheet.confirmation.DefaultConfirmationHandler
+import com.stripe.android.paymentsheet.confirmation.DeferredIntentConfirmationType
+import com.stripe.android.paymentsheet.confirmation.toConfirmationOption
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
 import com.stripe.android.paymentsheet.injection.DaggerPaymentSheetLauncherComponent
 import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelModule

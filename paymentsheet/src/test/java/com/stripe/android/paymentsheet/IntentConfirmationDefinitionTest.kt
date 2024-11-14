@@ -15,6 +15,11 @@ import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.toConfirmPaymentIntentShipping
+import com.stripe.android.paymentsheet.confirmation.ConfirmationDefinition
+import com.stripe.android.paymentsheet.confirmation.ConfirmationHandler
+import com.stripe.android.paymentsheet.confirmation.DeferredIntentConfirmationType
+import com.stripe.android.paymentsheet.confirmation.IntentConfirmationDefinition
+import com.stripe.android.paymentsheet.confirmation.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.FakePaymentLauncher
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
@@ -385,19 +390,19 @@ class IntentConfirmationDefinitionTest {
         return calls.awaitItem() as T
     }
 
-    private inline fun <reified T> PaymentConfirmationDefinition.ConfirmationAction<T>.asComplete():
-        PaymentConfirmationDefinition.ConfirmationAction.Complete<T> {
-        return this as PaymentConfirmationDefinition.ConfirmationAction.Complete<T>
+    private inline fun <reified T> ConfirmationDefinition.ConfirmationAction<T>.asComplete():
+        ConfirmationDefinition.ConfirmationAction.Complete<T> {
+        return this as ConfirmationDefinition.ConfirmationAction.Complete<T>
     }
 
-    private inline fun <reified T> PaymentConfirmationDefinition.ConfirmationAction<T>.asFail():
-        PaymentConfirmationDefinition.ConfirmationAction.Fail<T> {
-        return this as PaymentConfirmationDefinition.ConfirmationAction.Fail<T>
+    private inline fun <reified T> ConfirmationDefinition.ConfirmationAction<T>.asFail():
+        ConfirmationDefinition.ConfirmationAction.Fail<T> {
+        return this as ConfirmationDefinition.ConfirmationAction.Fail<T>
     }
 
-    private inline fun <reified T> PaymentConfirmationDefinition.ConfirmationAction<T>.asLaunch():
-        PaymentConfirmationDefinition.ConfirmationAction.Launch<T> {
-        return this as PaymentConfirmationDefinition.ConfirmationAction.Launch<T>
+    private inline fun <reified T> ConfirmationDefinition.ConfirmationAction<T>.asLaunch():
+        ConfirmationDefinition.ConfirmationAction.Launch<T> {
+        return this as ConfirmationDefinition.ConfirmationAction.Launch<T>
     }
 
     private fun ConfirmationHandler.Result.asSucceeded(): ConfirmationHandler.Result.Succeeded {

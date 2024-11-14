@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet
+package com.stripe.android.paymentsheet.confirmation
 
 import com.stripe.android.paymentsheet.addresselement.toConfirmPaymentIntentShipping
 

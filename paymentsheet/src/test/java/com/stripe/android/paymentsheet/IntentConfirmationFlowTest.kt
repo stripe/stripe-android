@@ -14,6 +14,12 @@ import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.paymentsheet.confirmation.ConfirmationDefinition
+import com.stripe.android.paymentsheet.confirmation.ConfirmationHandler
+import com.stripe.android.paymentsheet.confirmation.DefaultIntentConfirmationInterceptor
+import com.stripe.android.paymentsheet.confirmation.DeferredIntentConfirmationType
+import com.stripe.android.paymentsheet.confirmation.IntentConfirmationDefinition
+import com.stripe.android.paymentsheet.confirmation.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.FakePaymentLauncher
 import kotlinx.coroutines.test.runTest
@@ -256,18 +262,18 @@ internal class IntentConfirmationFlowTest {
         return this as IntentConfirmationDefinition.Args.Confirm
     }
 
-    private fun <TLauncherArgs> PaymentConfirmationDefinition.ConfirmationAction<TLauncherArgs>.asFail():
-        PaymentConfirmationDefinition.ConfirmationAction.Fail<TLauncherArgs> {
-        return this as PaymentConfirmationDefinition.ConfirmationAction.Fail<TLauncherArgs>
+    private fun <TLauncherArgs> ConfirmationDefinition.ConfirmationAction<TLauncherArgs>.asFail():
+        ConfirmationDefinition.ConfirmationAction.Fail<TLauncherArgs> {
+        return this as ConfirmationDefinition.ConfirmationAction.Fail<TLauncherArgs>
     }
 
-    private fun <TLauncherArgs> PaymentConfirmationDefinition.ConfirmationAction<TLauncherArgs>.asComplete():
-        PaymentConfirmationDefinition.ConfirmationAction.Complete<TLauncherArgs> {
-        return this as PaymentConfirmationDefinition.ConfirmationAction.Complete<TLauncherArgs>
+    private fun <TLauncherArgs> ConfirmationDefinition.ConfirmationAction<TLauncherArgs>.asComplete():
+        ConfirmationDefinition.ConfirmationAction.Complete<TLauncherArgs> {
+        return this as ConfirmationDefinition.ConfirmationAction.Complete<TLauncherArgs>
     }
 
-    private fun <TLauncherArgs> PaymentConfirmationDefinition.ConfirmationAction<TLauncherArgs>.asLaunch():
-        PaymentConfirmationDefinition.ConfirmationAction.Launch<TLauncherArgs> {
-        return this as PaymentConfirmationDefinition.ConfirmationAction.Launch<TLauncherArgs>
+    private fun <TLauncherArgs> ConfirmationDefinition.ConfirmationAction<TLauncherArgs>.asLaunch():
+        ConfirmationDefinition.ConfirmationAction.Launch<TLauncherArgs> {
+        return this as ConfirmationDefinition.ConfirmationAction.Launch<TLauncherArgs>
     }
 }
