@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet
+package com.stripe.android.paymentelement.confirmation
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.exception.APIException
@@ -14,11 +14,10 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
-import com.stripe.android.paymentsheet.confirmation.ConfirmationHandler
-import com.stripe.android.paymentsheet.confirmation.DefaultIntentConfirmationInterceptor
-import com.stripe.android.paymentsheet.confirmation.IntentConfirmationInterceptor
-import com.stripe.android.paymentsheet.confirmation.InvalidDeferredIntentUsageException
-import com.stripe.android.paymentsheet.confirmation.intercept
+import com.stripe.android.paymentsheet.CreateIntentCallback
+import com.stripe.android.paymentsheet.CreateIntentResult
+import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.state.PaymentElementLoader.InitializationMode
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.PaymentMethodFactory

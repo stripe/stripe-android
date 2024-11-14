@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet
+package com.stripe.android.paymentelement.confirmation
 
 import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.SavedStateHandle
@@ -7,12 +7,8 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.paymentsheet.confirmation.ConfirmationDefinition
-import com.stripe.android.paymentsheet.confirmation.ConfirmationHandler
-import com.stripe.android.paymentsheet.confirmation.ConfirmationMediator
-import com.stripe.android.paymentsheet.confirmation.DeferredIntentConfirmationType
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
-import com.stripe.android.paymentsheet.utils.FakeConfirmationDefinition
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.SetupIntentFactory
 import kotlinx.coroutines.test.runTest
@@ -100,7 +96,7 @@ class ConfirmationMediatorTest {
         assertThat(failAction.cause).isInstanceOf(IllegalArgumentException::class.java)
         assertThat(failAction.cause.message).isEqualTo(
             "Parameter type of 'ExternalPaymentMethod' cannot be used with " +
-                "PaymentConfirmationMediator to read a result"
+                "ConfirmationMediator to read a result"
         )
         assertThat(failAction.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
         assertThat(failAction.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Internal)
@@ -247,7 +243,7 @@ class ConfirmationMediatorTest {
 
         assertThat(failAction.cause).isInstanceOf(IllegalStateException::class.java)
         assertThat(failAction.cause.message).isEqualTo(
-            "No launcher for FakePaymentConfirmationDefinition was found, did you call register?"
+            "No launcher for FakeConfirmationDefinition was found, did you call register?"
         )
         assertThat(failAction.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
         assertThat(failAction.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Fatal)
@@ -284,7 +280,7 @@ class ConfirmationMediatorTest {
 
         assertThat(failAction.cause).isInstanceOf(IllegalStateException::class.java)
         assertThat(failAction.cause.message).isEqualTo(
-            "No launcher for FakePaymentConfirmationDefinition was found, did you call register?"
+            "No launcher for FakeConfirmationDefinition was found, did you call register?"
         )
         assertThat(failAction.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
         assertThat(failAction.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Fatal)

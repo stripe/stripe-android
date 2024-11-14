@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.utils
+package com.stripe.android.paymentelement.confirmation
 
 import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
@@ -6,9 +6,6 @@ import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.paymentsheet.confirmation.ConfirmationDefinition
-import com.stripe.android.paymentsheet.confirmation.ConfirmationHandler
-import com.stripe.android.paymentsheet.confirmation.DeferredIntentConfirmationType
 import kotlinx.parcelize.Parcelize
 
 internal class FakeConfirmationDefinition(

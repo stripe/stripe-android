@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.confirmation
+package com.stripe.android.paymentelement.confirmation
 
 import android.app.Activity
 import androidx.activity.result.ActivityResultCaller

@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet
+package com.stripe.android.paymentelement.confirmation
 
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultLauncher
@@ -30,13 +30,13 @@ import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 import com.stripe.android.payments.paymentlauncher.PaymentResult
+import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
+import com.stripe.android.paymentsheet.ExternalPaymentMethodInput
+import com.stripe.android.paymentsheet.ExternalPaymentMethodInterceptor
+import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheetFixtures
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
-import com.stripe.android.paymentsheet.confirmation.ConfirmationHandler
-import com.stripe.android.paymentsheet.confirmation.ConfirmationMediator
-import com.stripe.android.paymentsheet.confirmation.DefaultConfirmationHandler
-import com.stripe.android.paymentsheet.confirmation.DeferredIntentConfirmationType
-import com.stripe.android.paymentsheet.confirmation.IntentConfirmationInterceptor
-import com.stripe.android.paymentsheet.confirmation.InvalidDeferredIntentUsageException
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncher
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationResult
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateData

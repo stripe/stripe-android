@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.confirmation
+package com.stripe.android.paymentelement.confirmation
 
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter

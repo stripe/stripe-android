@@ -9,7 +9,7 @@ import androidx.core.app.ActivityOptionsCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
-import com.stripe.android.paymentsheet.confirmation.IntentConfirmationInterceptor
+import com.stripe.android.paymentelement.confirmation.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.uicore.utils.AnimationConstants
 import org.jetbrains.annotations.TestOnly
