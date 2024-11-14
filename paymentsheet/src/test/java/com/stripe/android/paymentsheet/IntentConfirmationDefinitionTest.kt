@@ -157,7 +157,7 @@ class IntentConfirmationDefinitionTest {
 
         assertThat(failAction.cause).isEqualTo(cause)
         assertThat(failAction.message).isEqualTo(message.resolvableString)
-        assertThat(failAction.errorType).isEqualTo(PaymentConfirmationErrorType.Payment)
+        assertThat(failAction.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Payment)
     }
 
     @Test
@@ -347,7 +347,7 @@ class IntentConfirmationDefinitionTest {
 
         assertThat(failedResult.cause).isEqualTo(exception)
         assertThat(failedResult.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
-        assertThat(failedResult.type).isEqualTo(PaymentConfirmationErrorType.Payment)
+        assertThat(failedResult.type).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Payment)
     }
 
     @Test

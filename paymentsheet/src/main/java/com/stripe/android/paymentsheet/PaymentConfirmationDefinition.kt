@@ -51,7 +51,7 @@ internal interface PaymentConfirmationDefinition<
         data class Fail<TLauncherArgs>(
             val cause: Throwable,
             val message: ResolvableString,
-            val errorType: PaymentConfirmationErrorType,
+            val errorType: ConfirmationHandler.Result.Failed.ErrorType,
         ) : ConfirmationAction<TLauncherArgs>
 
         data class Launch<TLauncherArgs>(

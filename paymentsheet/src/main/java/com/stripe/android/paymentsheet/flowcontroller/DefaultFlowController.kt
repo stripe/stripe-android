@@ -34,7 +34,6 @@ import com.stripe.android.paymentsheet.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.ExternalPaymentMethodInterceptor
 import com.stripe.android.paymentsheet.InitializedViaCompose
 import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
-import com.stripe.android.paymentsheet.PaymentConfirmationErrorType
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionContract
 import com.stripe.android.paymentsheet.PaymentOptionResult
@@ -428,7 +427,7 @@ internal class DefaultFlowController @Inject internal constructor(
                     ConfirmationHandler.Result.Failed(
                         cause = exception,
                         message = exception.stripeErrorMessage(),
-                        type = PaymentConfirmationErrorType.Internal,
+                        type = ConfirmationHandler.Result.Failed.ErrorType.Internal,
                     )
                 )
             }
@@ -707,16 +706,19 @@ internal class DefaultFlowController @Inject internal constructor(
         }
     }
 
-    private fun PaymentConfirmationErrorType.toConfirmationError(
+    private fun ConfirmationHandler.Result.Failed.ErrorType.toConfirmationError(
         cause: Throwable
     ): PaymentSheetConfirmationError? {
         return when (this) {
-            PaymentConfirmationErrorType.ExternalPaymentMethod -> PaymentSheetConfirmationError.ExternalPaymentMethod
-            PaymentConfirmationErrorType.Payment -> PaymentSheetConfirmationError.Stripe(cause)
-            is PaymentConfirmationErrorType.GooglePay -> PaymentSheetConfirmationError.GooglePay(errorCode)
-            PaymentConfirmationErrorType.Internal,
-            PaymentConfirmationErrorType.MerchantIntegration,
-            PaymentConfirmationErrorType.Fatal -> null
+            ConfirmationHandler.Result.Failed.ErrorType.ExternalPaymentMethod ->
+                PaymentSheetConfirmationError.ExternalPaymentMethod
+            ConfirmationHandler.Result.Failed.ErrorType.Payment ->
+                PaymentSheetConfirmationError.Stripe(cause)
+            is ConfirmationHandler.Result.Failed.ErrorType.GooglePay ->
+                PaymentSheetConfirmationError.GooglePay(errorCode)
+            ConfirmationHandler.Result.Failed.ErrorType.Internal,
+            ConfirmationHandler.Result.Failed.ErrorType.MerchantIntegration,
+            ConfirmationHandler.Result.Failed.ErrorType.Fatal -> null
         }
     }
 

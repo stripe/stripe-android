@@ -328,7 +328,7 @@ class DefaultConfirmationHandlerTest {
             ConfirmationHandler.Result.Failed(
                 cause = cause,
                 message = message.resolvableString,
-                type = PaymentConfirmationErrorType.Payment,
+                type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
             )
         )
     }
@@ -360,7 +360,7 @@ class DefaultConfirmationHandlerTest {
             assertThat(failedResult.cause).isInstanceOf(IllegalStateException::class.java)
             assertThat(failedResult.cause.message).isEqualTo(message)
             assertThat(failedResult.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
-            assertThat(failedResult.type).isEqualTo(PaymentConfirmationErrorType.Fatal)
+            assertThat(failedResult.type).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Fatal)
         }
 
     @Test
@@ -604,7 +604,7 @@ class DefaultConfirmationHandlerTest {
             val expectedResult = ConfirmationHandler.Result.Failed(
                 cause = cause,
                 message = R.string.stripe_something_went_wrong.resolvableString,
-                type = PaymentConfirmationErrorType.Payment,
+                type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
             )
 
             assertThat(defaultConfirmationHandler.awaitIntentResult()).isEqualTo(expectedResult)
@@ -817,7 +817,7 @@ class DefaultConfirmationHandlerTest {
 
         val failedResult = defaultConfirmationHandler.awaitIntentResult().asFailed()
 
-        assertThat(failedResult.type).isEqualTo(PaymentConfirmationErrorType.Internal)
+        assertThat(failedResult.type).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Internal)
     }
 
     @Test
@@ -876,7 +876,7 @@ class DefaultConfirmationHandlerTest {
         val failedResult = defaultConfirmationHandler.awaitIntentResult().asFailed()
 
         assertThat(failedResult.cause).isInstanceOf(InvalidDeferredIntentUsageException::class.java)
-        assertThat(failedResult.type).isEqualTo(PaymentConfirmationErrorType.Payment)
+        assertThat(failedResult.type).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Payment)
         assertThat(failedResult.message).isEqualTo("An error occurred!".resolvableString)
     }
 
@@ -1023,7 +1023,7 @@ class DefaultConfirmationHandlerTest {
             "externalPaymentMethodConfirmHandler is null. Cannot process payment for payment selection: paypal"
         )
         assertThat(intentResult.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
-        assertThat(intentResult.type).isEqualTo(PaymentConfirmationErrorType.ExternalPaymentMethod)
+        assertThat(intentResult.type).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.ExternalPaymentMethod)
     }
 
     @Test
@@ -1046,7 +1046,7 @@ class DefaultConfirmationHandlerTest {
             "externalPaymentMethodLauncher is null. Cannot process payment for payment selection: paypal"
         )
         assertThat(intentResult.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
-        assertThat(intentResult.type).isEqualTo(PaymentConfirmationErrorType.ExternalPaymentMethod)
+        assertThat(intentResult.type).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.ExternalPaymentMethod)
     }
 
     @Test
@@ -1128,7 +1128,7 @@ class DefaultConfirmationHandlerTest {
             val expectedResult = ConfirmationHandler.Result.Failed(
                 cause = exception,
                 message = R.string.stripe_something_went_wrong.resolvableString,
-                type = PaymentConfirmationErrorType.ExternalPaymentMethod,
+                type = ConfirmationHandler.Result.Failed.ErrorType.ExternalPaymentMethod,
             )
 
             assertThat(defaultConfirmationHandler.awaitIntentResult()).isEqualTo(expectedResult)
@@ -1235,7 +1235,7 @@ class DefaultConfirmationHandlerTest {
         val result = defaultConfirmationHandler.awaitIntentResult().asFailed()
 
         assertThat(result.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
-        assertThat(result.type).isEqualTo(PaymentConfirmationErrorType.Internal)
+        assertThat(result.type).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Internal)
         assertThat(result.cause.message).isEqualTo("Required value was null.")
     }
 
@@ -1260,7 +1260,7 @@ class DefaultConfirmationHandlerTest {
         val result = defaultConfirmationHandler.awaitIntentResult().asFailed()
 
         assertThat(result.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
-        assertThat(result.type).isEqualTo(PaymentConfirmationErrorType.Internal)
+        assertThat(result.type).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Internal)
         assertThat(result.cause.message).isEqualTo(
             "Given payment selection could not be converted to Bacs data!"
         )
@@ -1287,7 +1287,7 @@ class DefaultConfirmationHandlerTest {
         val result = defaultConfirmationHandler.awaitIntentResult().asFailed()
 
         assertThat(result.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
-        assertThat(result.type).isEqualTo(PaymentConfirmationErrorType.Internal)
+        assertThat(result.type).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Internal)
         assertThat(result.cause.message).isEqualTo(
             "Given payment selection could not be converted to Bacs data!"
         )
@@ -1466,7 +1466,7 @@ class DefaultConfirmationHandlerTest {
             "Google Pay when processing a Setup Intent"
 
         assertThat(result.cause.message).isEqualTo(message)
-        assertThat(result.type).isEqualTo(PaymentConfirmationErrorType.MerchantIntegration)
+        assertThat(result.type).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.MerchantIntegration)
         assertThat(result.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
 
         assertThat(logger.getLoggedMessages()).contains(message)
@@ -1667,7 +1667,9 @@ class DefaultConfirmationHandlerTest {
         assertThat(failedResult.message)
             .isEqualTo(PaymentsCoreR.string.stripe_failure_connection_error.resolvableString)
         assertThat(failedResult.type)
-            .isEqualTo(PaymentConfirmationErrorType.GooglePay(GooglePayPaymentMethodLauncher.NETWORK_ERROR))
+            .isEqualTo(
+                ConfirmationHandler.Result.Failed.ErrorType.GooglePay(GooglePayPaymentMethodLauncher.NETWORK_ERROR)
+            )
     }
 
     @Test
@@ -1686,7 +1688,9 @@ class DefaultConfirmationHandlerTest {
         assertThat(failedResult.message)
             .isEqualTo(PaymentsCoreR.string.stripe_internal_error.resolvableString)
         assertThat(failedResult.type)
-            .isEqualTo(PaymentConfirmationErrorType.GooglePay(GooglePayPaymentMethodLauncher.INTERNAL_ERROR))
+            .isEqualTo(
+                ConfirmationHandler.Result.Failed.ErrorType.GooglePay(GooglePayPaymentMethodLauncher.INTERNAL_ERROR)
+            )
     }
 
     @Test
@@ -1719,7 +1723,7 @@ class DefaultConfirmationHandlerTest {
         assertThat(failedResult.message)
             .isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
         assertThat(failedResult.type)
-            .isEqualTo(PaymentConfirmationErrorType.Payment)
+            .isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Payment)
     }
 
     @Test
@@ -1792,7 +1796,7 @@ class DefaultConfirmationHandlerTest {
         assertThat(failedResult.message)
             .isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
         assertThat(failedResult.type)
-            .isEqualTo(PaymentConfirmationErrorType.Payment)
+            .isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Payment)
     }
 
     private fun runGooglePayTest(

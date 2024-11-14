@@ -267,7 +267,7 @@ internal class DefaultConfirmationHandler(
                         "Attempted to confirm invalid ${confirmationOption::class.qualifiedName} confirmation type"
                     ),
                     message = R.string.stripe_something_went_wrong.resolvableString,
-                    type = PaymentConfirmationErrorType.Internal,
+                    type = ConfirmationHandler.Result.Failed.ErrorType.Internal,
                 )
             )
 
@@ -332,7 +332,7 @@ internal class DefaultConfirmationHandler(
                 ConfirmationHandler.Result.Failed(
                     cause = IllegalStateException(message),
                     message = R.string.stripe_something_went_wrong.resolvableString,
-                    type = PaymentConfirmationErrorType.MerchantIntegration,
+                    type = ConfirmationHandler.Result.Failed.ErrorType.MerchantIntegration,
                 )
             )
 
@@ -346,7 +346,7 @@ internal class DefaultConfirmationHandler(
                 ConfirmationHandler.Result.Failed(
                     cause = it,
                     message = R.string.stripe_something_went_wrong.resolvableString,
-                    type = PaymentConfirmationErrorType.Internal
+                    type = ConfirmationHandler.Result.Failed.ErrorType.Internal
                 )
             )
 
@@ -360,7 +360,7 @@ internal class DefaultConfirmationHandler(
                 ConfirmationHandler.Result.Failed(
                     cause = it,
                     message = R.string.stripe_something_went_wrong.resolvableString,
-                    type = PaymentConfirmationErrorType.Internal
+                    type = ConfirmationHandler.Result.Failed.ErrorType.Internal
                 )
             )
 
@@ -440,7 +440,7 @@ internal class DefaultConfirmationHandler(
                     ConfirmationHandler.Result.Failed(
                         cause = cause,
                         message = R.string.stripe_something_went_wrong.resolvableString,
-                        type = PaymentConfirmationErrorType.Internal
+                        type = ConfirmationHandler.Result.Failed.ErrorType.Internal
                     )
                 )
             }
@@ -451,7 +451,7 @@ internal class DefaultConfirmationHandler(
                         "Given payment selection could not be converted to Bacs data!"
                     ),
                     message = R.string.stripe_something_went_wrong.resolvableString,
-                    type = PaymentConfirmationErrorType.Internal
+                    type = ConfirmationHandler.Result.Failed.ErrorType.Internal
                 )
             )
         }
@@ -504,7 +504,7 @@ internal class DefaultConfirmationHandler(
                 is PaymentResult.Failed -> ConfirmationHandler.Result.Failed(
                     cause = result.throwable,
                     message = result.throwable.stripeErrorMessage(),
-                    type = PaymentConfirmationErrorType.ExternalPaymentMethod,
+                    type = ConfirmationHandler.Result.Failed.ErrorType.ExternalPaymentMethod,
                 )
                 is PaymentResult.Canceled -> ConfirmationHandler.Result.Canceled(
                     action = ConfirmationHandler.Result.Canceled.Action.None,
@@ -516,7 +516,7 @@ internal class DefaultConfirmationHandler(
             ConfirmationHandler.Result.Failed(
                 cause = cause,
                 message = cause.stripeErrorMessage(),
-                type = PaymentConfirmationErrorType.ExternalPaymentMethod,
+                type = ConfirmationHandler.Result.Failed.ErrorType.ExternalPaymentMethod,
             )
         }
 
@@ -554,7 +554,7 @@ internal class DefaultConfirmationHandler(
                                     com.stripe.android.R.string.stripe_failure_connection_error.resolvableString
                                 else -> com.stripe.android.R.string.stripe_internal_error.resolvableString
                             },
-                            type = PaymentConfirmationErrorType.GooglePay(result.errorCode),
+                            type = ConfirmationHandler.Result.Failed.ErrorType.GooglePay(result.errorCode),
                         )
                     )
                 }

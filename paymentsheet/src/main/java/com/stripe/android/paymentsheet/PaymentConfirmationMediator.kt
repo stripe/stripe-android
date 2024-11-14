@@ -54,7 +54,7 @@ internal class PaymentConfirmationMediator<
                 ConfirmationHandler.Result.Failed(
                     cause = exception,
                     message = exception.stripeErrorMessage(),
-                    type = PaymentConfirmationErrorType.Internal,
+                    type = ConfirmationHandler.Result.Failed.ErrorType.Internal,
                 )
             }
 
@@ -77,7 +77,7 @@ internal class PaymentConfirmationMediator<
                         "${this::class.simpleName} to read a result"
                 ),
                 message = R.string.stripe_something_went_wrong.resolvableString,
-                errorType = PaymentConfirmationErrorType.Internal,
+                errorType = ConfirmationHandler.Result.Failed.ErrorType.Internal,
             )
 
         return when (val action = definition.action(confirmationOption, intent)) {
@@ -107,7 +107,7 @@ internal class PaymentConfirmationMediator<
                     Action.Fail(
                         cause = exception,
                         message = exception.stripeErrorMessage(),
-                        errorType = PaymentConfirmationErrorType.Fatal,
+                        errorType = ConfirmationHandler.Result.Failed.ErrorType.Fatal,
                     )
                 }
             }
@@ -136,7 +136,7 @@ internal class PaymentConfirmationMediator<
         data class Fail(
             val cause: Throwable,
             val message: ResolvableString,
-            val errorType: PaymentConfirmationErrorType,
+            val errorType: ConfirmationHandler.Result.Failed.ErrorType,
         ) : Action
 
         data class Complete(

@@ -142,8 +142,43 @@ internal interface ConfirmationHandler {
         data class Failed(
             val cause: Throwable,
             val message: ResolvableString,
-            val type: PaymentConfirmationErrorType,
-        ) : Result
+            val type: ErrorType,
+        ) : Result {
+            /**
+             * Types of errors that can occur when confirming a payment.
+             */
+            sealed interface ErrorType {
+                /**
+                 * Fatal confirmation error that occurred while confirming a payment. This should never happen.
+                 */
+                data object Fatal : ErrorType
+
+                /**
+                 * Indicates an error when processing a payment during the confirmation process.
+                 */
+                data object Payment : ErrorType
+
+                /**
+                 * Indicates an internal process error occurred during the confirmation process.
+                 */
+                data object Internal : ErrorType
+
+                /**
+                 * Indicates a merchant integration error occurred during the confirmation process.
+                 */
+                data object MerchantIntegration : ErrorType
+
+                /**
+                 * Indicates an error occurred when confirming with external payment methods
+                 */
+                data object ExternalPaymentMethod : ErrorType
+
+                /**
+                 * Indicates an error occurred when confirming with Google Pay
+                 */
+                data class GooglePay(val errorCode: Int) : ErrorType
+            }
+        }
     }
 
     sealed interface Option : Parcelable {

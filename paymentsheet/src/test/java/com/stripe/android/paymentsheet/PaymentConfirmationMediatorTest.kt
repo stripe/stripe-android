@@ -99,7 +99,7 @@ class PaymentConfirmationMediatorTest {
                 "PaymentConfirmationMediator to read a result"
         )
         assertThat(failAction.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
-        assertThat(failAction.errorType).isEqualTo(PaymentConfirmationErrorType.Internal)
+        assertThat(failAction.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Internal)
     }
 
     @Test
@@ -135,7 +135,7 @@ class PaymentConfirmationMediatorTest {
     fun `On failed confirmation action, should return mediator fail action`() = runTest {
         val exception = IllegalStateException("Failed!")
         val message = R.string.stripe_something_went_wrong.resolvableString
-        val errorType = PaymentConfirmationErrorType.Fatal
+        val errorType = ConfirmationHandler.Result.Failed.ErrorType.Fatal
 
         val definition = FakePaymentConfirmationDefinition(
             onAction = { _, _ ->
@@ -246,7 +246,7 @@ class PaymentConfirmationMediatorTest {
             "No launcher for FakePaymentConfirmationDefinition was found, did you call register?"
         )
         assertThat(failAction.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
-        assertThat(failAction.errorType).isEqualTo(PaymentConfirmationErrorType.Fatal)
+        assertThat(failAction.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Fatal)
     }
 
     @Test
@@ -283,7 +283,7 @@ class PaymentConfirmationMediatorTest {
             "No launcher for FakePaymentConfirmationDefinition was found, did you call register?"
         )
         assertThat(failAction.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
-        assertThat(failAction.errorType).isEqualTo(PaymentConfirmationErrorType.Fatal)
+        assertThat(failAction.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Fatal)
     }
 
     @Test
@@ -386,7 +386,7 @@ class PaymentConfirmationMediatorTest {
                     "Arguments should have been initialized before handling result!"
                 )
                 assertThat(failAction.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
-                assertThat(failAction.type).isEqualTo(PaymentConfirmationErrorType.Internal)
+                assertThat(failAction.type).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Internal)
 
                 countDownLatch.countDown()
             },

@@ -53,7 +53,7 @@ internal class IntentConfirmationDefinition(
                 PaymentConfirmationDefinition.ConfirmationAction.Fail(
                     cause = nextStep.cause,
                     message = nextStep.message,
-                    errorType = PaymentConfirmationErrorType.Payment,
+                    errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
                 )
             }
             is IntentConfirmationInterceptor.NextStep.Complete -> {
@@ -104,7 +104,7 @@ internal class IntentConfirmationDefinition(
             is InternalPaymentResult.Failed -> ConfirmationHandler.Result.Failed(
                 cause = result.throwable,
                 message = result.throwable.stripeErrorMessage(),
-                type = PaymentConfirmationErrorType.Payment,
+                type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
             )
             is InternalPaymentResult.Canceled -> ConfirmationHandler.Result.Canceled(
                 action = ConfirmationHandler.Result.Canceled.Action.InformCancellation,
