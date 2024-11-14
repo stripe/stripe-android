@@ -26,7 +26,7 @@
     <ID>LargeClass:PaymentSheetViewModelTest.kt$PaymentSheetViewModelTest</ID>
     <ID>LargeClass:USBankAccountFormViewModelTest.kt$USBankAccountFormViewModelTest</ID>
     <ID>LongMethod:AutocompleteScreen.kt$@Composable internal fun AutocompleteScreenUI(viewModel: AutocompleteViewModel)</ID>
-    <ID>LongMethod:ConfirmationHandlerOptionKtx.kt$internal fun PaymentSelection.toConfirmationOption( initializationMode: PaymentElementLoader.InitializationMode, configuration: CommonConfiguration, ): ConfirmationHandler.Option?</ID>
+    <ID>LongMethod:ConfirmationHandlerOptionKtx.kt$internal fun PaymentSelection.toConfirmationOption( initializationMode: PaymentElementLoader.InitializationMode, configuration: CommonConfiguration, appearance: PaymentSheet.Appearance, ): ConfirmationHandler.Option?</ID>
     <ID>LongMethod:CustomerSheetScreen.kt$@Composable internal fun SelectPaymentMethod( viewState: CustomerSheetViewState.SelectPaymentMethod, viewActionHandler: (CustomerSheetViewAction) -> Unit, paymentMethodNameProvider: (PaymentMethodCode?) -> ResolvableString, modifier: Modifier = Modifier, )</ID>
     <ID>LongMethod:EditPaymentMethod.kt$@Composable internal fun EditPaymentMethodUi( viewState: EditPaymentMethodViewState, viewActionHandler: (action: EditPaymentMethodViewAction) -> Unit, modifier: Modifier = Modifier )</ID>
     <ID>LongMethod:FormViewModelTest.kt$FormViewModelTest$@Test fun `Verify params are set when element address fields are complete`()</ID>

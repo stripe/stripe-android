@@ -336,18 +336,27 @@ internal class DefaultFlowController @Inject internal constructor(
 
         when (val paymentSelection = viewModel.paymentSelection) {
             is PaymentSelection.Link,
-            is PaymentSelection.New.LinkInline -> confirmLink(paymentSelection, state.paymentSheetState)
+            is PaymentSelection.New.LinkInline -> confirmLink(
+                paymentSelection = paymentSelection,
+                state = state.paymentSheetState,
+                appearance = state.config.appearance,
+            )
             is PaymentSelection.GooglePay,
             is PaymentSelection.ExternalPaymentMethod,
             is PaymentSelection.New,
-            null -> confirmPaymentSelection(paymentSelection, state.paymentSheetState)
-            is PaymentSelection.Saved -> confirmSavedPaymentMethod(paymentSelection, state.paymentSheetState)
+            null -> confirmPaymentSelection(paymentSelection, state.paymentSheetState, state.config.appearance)
+            is PaymentSelection.Saved -> confirmSavedPaymentMethod(
+                paymentSelection = paymentSelection,
+                state = state.paymentSheetState,
+                appearance = state.config.appearance,
+            )
         }
     }
 
     private fun confirmSavedPaymentMethod(
         paymentSelection: PaymentSelection.Saved,
-        state: PaymentSheetState.Full
+        state: PaymentSheetState.Full,
+        appearance: PaymentSheet.Appearance,
     ) {
         if (paymentSelection.paymentMethod.type == PaymentMethod.Type.SepaDebit &&
             viewModel.paymentSelection?.hasAcknowledgedSepaMandate == false
@@ -375,7 +384,7 @@ internal class DefaultFlowController @Inject internal constructor(
                 )
             }
         } else {
-            confirmPaymentSelection(paymentSelection, state)
+            confirmPaymentSelection(paymentSelection, state, appearance)
         }
     }
 
@@ -383,6 +392,7 @@ internal class DefaultFlowController @Inject internal constructor(
     fun confirmPaymentSelection(
         paymentSelection: PaymentSelection?,
         state: PaymentSheetState.Full,
+        appearance: PaymentSheet.Appearance,
     ) {
         viewModelScope.launch {
             val initializationMode = requireNotNull(initializationMode)
@@ -390,6 +400,7 @@ internal class DefaultFlowController @Inject internal constructor(
             val confirmationOption = paymentSelection?.toConfirmationOption(
                 initializationMode = initializationMode,
                 configuration = state.config,
+                appearance = appearance,
             )
 
             confirmationOption?.let { option ->
@@ -443,7 +454,7 @@ internal class DefaultFlowController @Inject internal constructor(
                                 )
                             )
                             viewModel.paymentSelection = selection
-                            confirmPaymentSelection(selection, state.paymentSheetState)
+                            confirmPaymentSelection(selection, state.paymentSheetState, state.config.appearance)
                         } ?: paymentResultCallback.onPaymentSheetResult(
                             PaymentSheetResult.Failed(
                                 CvcRecollectionException(
@@ -481,6 +492,7 @@ internal class DefaultFlowController @Inject internal constructor(
                     confirmPaymentSelection(
                         paymentSelection,
                         state.paymentSheetState,
+                        state.config.appearance,
                     )
                 },
                 onFailure = { error ->
@@ -681,7 +693,8 @@ internal class DefaultFlowController @Inject internal constructor(
 
     private fun confirmLink(
         paymentSelection: PaymentSelection,
-        state: PaymentSheetState.Full
+        state: PaymentSheetState.Full,
+        appearance: PaymentSheet.Appearance,
     ) {
         val linkConfig = requireNotNull(state.linkState).configuration
 
@@ -690,7 +703,7 @@ internal class DefaultFlowController @Inject internal constructor(
             linkLauncher.present(linkConfig)
         } else {
             // New user paying inline, complete without launching Link
-            confirmPaymentSelection(paymentSelection, state)
+            confirmPaymentSelection(paymentSelection, state, appearance)
         }
     }
 

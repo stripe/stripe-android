@@ -9,6 +9,7 @@ import com.stripe.android.paymentsheet.state.PaymentElementLoader
 internal fun PaymentSelection.toConfirmationOption(
     initializationMode: PaymentElementLoader.InitializationMode,
     configuration: CommonConfiguration,
+    appearance: PaymentSheet.Appearance,
 ): ConfirmationHandler.Option? {
     return when (this) {
         is PaymentSelection.Saved -> ConfirmationHandler.Option.PaymentMethod.Saved(
@@ -48,7 +49,7 @@ internal fun PaymentSelection.toConfirmationOption(
                     shippingDetails = configuration.shippingDetails,
                     createParams = paymentMethodCreateParams,
                     optionsParams = paymentMethodOptionsParams,
-                    appearance = configuration.appearance,
+                    appearance = appearance,
                 )
             } else {
                 ConfirmationHandler.Option.PaymentMethod.New(

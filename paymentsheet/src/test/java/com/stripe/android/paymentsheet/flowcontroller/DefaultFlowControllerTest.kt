@@ -664,8 +664,8 @@ internal class DefaultFlowControllerTest {
         )
 
         flowController.confirmPaymentSelection(
-            NEW_CARD_PAYMENT_SELECTION,
-            PaymentSheetState.Full(
+            paymentSelection = NEW_CARD_PAYMENT_SELECTION,
+            state = PaymentSheetState.Full(
                 PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
                     paymentMethods = PAYMENT_METHODS
@@ -674,7 +674,8 @@ internal class DefaultFlowControllerTest {
                 paymentSelection = initialSelection,
                 validationError = null,
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
-            )
+            ),
+            appearance = PaymentSheetFixtures.CONFIG_CUSTOMER.appearance,
         )
 
         verifyPaymentSelection(
@@ -703,8 +704,8 @@ internal class DefaultFlowControllerTest {
         )
 
         flowController.confirmPaymentSelection(
-            GENERIC_PAYMENT_SELECTION,
-            PaymentSheetState.Full(
+            paymentSelection = GENERIC_PAYMENT_SELECTION,
+            state = PaymentSheetState.Full(
                 PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
                     paymentMethods = PAYMENT_METHODS
@@ -713,7 +714,8 @@ internal class DefaultFlowControllerTest {
                 paymentSelection = initialSelection,
                 validationError = null,
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
-            )
+            ),
+            appearance = PaymentSheetFixtures.CONFIG_CUSTOMER.appearance,
         )
 
         verifyPaymentSelection(
@@ -745,8 +747,8 @@ internal class DefaultFlowControllerTest {
         )
 
         flowController.confirmPaymentSelection(
-            paymentSelection,
-            PaymentSheetState.Full(
+            paymentSelection = paymentSelection,
+            state = PaymentSheetState.Full(
                 PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
                     paymentMethods = PAYMENT_METHODS
@@ -755,7 +757,8 @@ internal class DefaultFlowControllerTest {
                 paymentSelection = initialSelection,
                 validationError = null,
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
-            )
+            ),
+            appearance = PaymentSheetFixtures.CONFIG_CUSTOMER.appearance,
         )
 
         verifyPaymentSelection(
@@ -779,6 +782,7 @@ internal class DefaultFlowControllerTest {
         flowController.confirmPaymentSelection(
             paymentSelection = null,
             state = PAYMENT_SHEET_STATE_FULL,
+            appearance = PaymentSheetFixtures.CONFIG_CUSTOMER.appearance,
         )
 
         assertThat(errorReporter.getLoggedErrors()).isEmpty()
@@ -800,6 +804,7 @@ internal class DefaultFlowControllerTest {
         flowController.confirmPaymentSelection(
             paymentSelection = PaymentSelection.Link,
             state = PAYMENT_SHEET_STATE_FULL,
+            appearance = PaymentSheetFixtures.CONFIG_CUSTOMER.appearance,
         )
 
         assertThat(errorReporter.getLoggedErrors()).contains(
