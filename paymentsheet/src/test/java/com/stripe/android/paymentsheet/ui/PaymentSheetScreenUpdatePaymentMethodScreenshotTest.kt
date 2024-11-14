@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.ui
 
 import androidx.compose.runtime.Composable
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.viewmodels.FakeBaseSheetViewModel
@@ -32,7 +33,7 @@ class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
         paparazziRule.snapshot {
             PaymentSheetScreenOnUpdatePaymentMethod(
                 canRemove = true,
-                removePaymentMethodError = IllegalStateException("Generic error"),
+                error = "Something went wrong",
             )
         }
     }
@@ -40,15 +41,14 @@ class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
     @Composable
     fun PaymentSheetScreenOnUpdatePaymentMethod(
         canRemove: Boolean,
-        removePaymentMethodError: Throwable? = null,
+        error: String? = null,
     ) {
         val paymentMethod = PaymentMethodFactory.visaCard().toDisplayableSavedPaymentMethod()
-        val interactor = DefaultUpdatePaymentMethodInteractor(
-            isLiveMode = true,
+        val interactor = FakeUpdatePaymentMethodInteractor(
             displayableSavedPaymentMethod = paymentMethod,
-            card = paymentMethod.paymentMethod.card!!,
-            removeExecutor = { removePaymentMethodError },
             canRemove = canRemove,
+            viewActionRecorder = null,
+            initialState = UpdatePaymentMethodInteractor.State(error = error?.resolvableString),
         )
         val screen = com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.UpdatePaymentMethod(interactor)
         val metadata = PaymentMethodMetadataFactory.create()

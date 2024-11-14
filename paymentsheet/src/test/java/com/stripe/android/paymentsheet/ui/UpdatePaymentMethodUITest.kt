@@ -190,21 +190,6 @@ class UpdatePaymentMethodUITest {
         )
     }
 
-    private class FakeUpdatePaymentMethodInteractor(
-        override val displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
-        override val canRemove: Boolean,
-        val viewActionRecorder: ViewActionRecorder<UpdatePaymentMethodInteractor.ViewAction>,
-        initialState: UpdatePaymentMethodInteractor.State,
-    ) : UpdatePaymentMethodInteractor {
-        override val isLiveMode: Boolean = false
-        override val card: PaymentMethod.Card = displayableSavedPaymentMethod.paymentMethod.card!!
-        override val state: StateFlow<UpdatePaymentMethodInteractor.State> = MutableStateFlow(initialState)
-
-        override fun handleViewAction(viewAction: UpdatePaymentMethodInteractor.ViewAction) {
-            viewActionRecorder.record(viewAction)
-        }
-    }
-
     private fun runScenario(
         displayableSavedPaymentMethod: DisplayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
         errorMessage: ResolvableString? = null,
