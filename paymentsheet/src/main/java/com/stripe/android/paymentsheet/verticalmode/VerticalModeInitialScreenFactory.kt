@@ -16,6 +16,7 @@ internal object VerticalModeInitialScreenFactory {
         customerStateHolder: CustomerStateHolder,
     ): List<PaymentSheetScreen> {
         val supportedPaymentMethodTypes = paymentMethodMetadata.supportedPaymentMethodTypes()
+        val bankFormInteractor = BankFormInteractor.create(viewModel)
 
         if (supportedPaymentMethodTypes.size == 1 && customerStateHolder.paymentMethods.value.isEmpty()) {
             return listOf(
@@ -25,6 +26,7 @@ internal object VerticalModeInitialScreenFactory {
                         viewModel = viewModel,
                         paymentMethodMetadata = paymentMethodMetadata,
                         customerStateHolder = customerStateHolder,
+                        bankFormInteractor = bankFormInteractor,
                     ),
                     showsWalletHeader = true,
                 )
@@ -36,6 +38,7 @@ internal object VerticalModeInitialScreenFactory {
                 viewModel = viewModel,
                 paymentMethodMetadata = paymentMethodMetadata,
                 customerStateHolder = customerStateHolder,
+                bankFormInteractor = bankFormInteractor,
             )
             val verticalModeScreen = PaymentSheetScreen.VerticalMode(interactor = interactor)
             add(verticalModeScreen)
@@ -54,6 +57,7 @@ internal object VerticalModeInitialScreenFactory {
                                 viewModel = viewModel,
                                 paymentMethodMetadata = paymentMethodMetadata,
                                 customerStateHolder = customerStateHolder,
+                                bankFormInteractor = bankFormInteractor,
                             ),
                         )
                     )

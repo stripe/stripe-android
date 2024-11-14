@@ -10,6 +10,7 @@ import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
+import com.stripe.android.paymentsheet.verticalmode.BankFormInteractor
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.elements.FormElement
 import kotlinx.coroutines.CoroutineScope
@@ -78,6 +79,10 @@ internal class DefaultAddPaymentMethodInteractor(
                 linkInlineHandler = linkInlineHandler,
                 paymentMethodMetadata = paymentMethodMetadata
             )
+            val bankFormInteractor = BankFormInteractor(
+                updateSelection = viewModel::updateSelection,
+            )
+
             return DefaultAddPaymentMethodInteractor(
                 initiallySelectedPaymentMethodType = viewModel.initiallySelectedPaymentMethodType,
                 selection = viewModel.selection,
@@ -95,6 +100,7 @@ internal class DefaultAddPaymentMethodInteractor(
                         paymentMethodMetadata = paymentMethodMetadata,
                         hostedSurface = CollectBankAccountLauncher.HOSTED_SURFACE_PAYMENT_ELEMENT,
                         selectedPaymentMethodCode = it,
+                        bankFormInteractor = bankFormInteractor,
                     )
                 },
                 coroutineScope = coroutineScope,
