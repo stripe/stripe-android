@@ -367,7 +367,7 @@ class IntentConfirmationDefinitionTest {
 
         val canceledResult = result.asCanceled()
 
-        assertThat(canceledResult.action).isEqualTo(PaymentCancellationAction.InformCancellation)
+        assertThat(canceledResult.action).isEqualTo(ConfirmationHandler.Result.Canceled.Action.InformCancellation)
     }
 
     private fun createIntentConfirmationDefinition(

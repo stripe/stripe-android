@@ -8,7 +8,6 @@ import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.ConfirmationHandler
 import com.stripe.android.paymentsheet.DeferredIntentConfirmationType
-import com.stripe.android.paymentsheet.PaymentCancellationAction
 import com.stripe.android.paymentsheet.PaymentConfirmationDefinition
 import com.stripe.android.paymentsheet.PaymentConfirmationErrorType
 import kotlinx.parcelize.Parcelize
@@ -27,7 +26,7 @@ internal class FakePaymentConfirmationDefinition(
         )
     },
     private val confirmationResult: ConfirmationHandler.Result = ConfirmationHandler.Result.Canceled(
-        action = PaymentCancellationAction.InformCancellation,
+        action = ConfirmationHandler.Result.Canceled.Action.InformCancellation,
     ),
     private val launcher: Launcher = Launcher(),
 ) : PaymentConfirmationDefinition<

@@ -555,7 +555,7 @@ class DefaultConfirmationHandlerTest {
             paymentResultCallbackHandler.onResult(InternalPaymentResult.Canceled)
 
             val expectedResult = ConfirmationHandler.Result.Canceled(
-                action = PaymentCancellationAction.InformCancellation,
+                action = ConfirmationHandler.Result.Canceled.Action.InformCancellation,
             )
 
             assertThat(defaultConfirmationHandler.awaitIntentResult()).isEqualTo(expectedResult)
@@ -729,7 +729,7 @@ class DefaultConfirmationHandlerTest {
             dispatcher.scheduler.advanceTimeBy(delayTime = 1.01.seconds)
 
             val expectedResult = ConfirmationHandler.Result.Canceled(
-                action = PaymentCancellationAction.None
+                action = ConfirmationHandler.Result.Canceled.Action.None
             )
 
             assertThat(defaultConfirmationHandler.awaitIntentResult()).isEqualTo(expectedResult)
@@ -1170,7 +1170,7 @@ class DefaultConfirmationHandlerTest {
             epmsCallbackHandler.onResult(PaymentResult.Canceled)
 
             val expectedResult = ConfirmationHandler.Result.Canceled(
-                action = PaymentCancellationAction.None,
+                action = ConfirmationHandler.Result.Canceled.Action.None,
             )
 
             assertThat(defaultConfirmationHandler.awaitIntentResult()).isEqualTo(expectedResult)
@@ -1376,7 +1376,7 @@ class DefaultConfirmationHandlerTest {
             interceptor.calls.expectNoEvents()
 
             val expectedResult = ConfirmationHandler.Result.Canceled(
-                action = PaymentCancellationAction.ModifyPaymentDetails,
+                action = ConfirmationHandler.Result.Canceled.Action.ModifyPaymentDetails,
             )
 
             assertThat(defaultConfirmationHandler.awaitIntentResult()).isEqualTo(expectedResult)
@@ -1430,7 +1430,7 @@ class DefaultConfirmationHandlerTest {
             interceptor.calls.expectNoEvents()
 
             val expectedResult = ConfirmationHandler.Result.Canceled(
-                action = PaymentCancellationAction.None,
+                action = ConfirmationHandler.Result.Canceled.Action.None,
             )
 
             assertThat(defaultConfirmationHandler.awaitIntentResult()).isEqualTo(expectedResult)
@@ -1697,7 +1697,7 @@ class DefaultConfirmationHandlerTest {
     ) { result ->
         assertThat(result).isEqualTo(
             ConfirmationHandler.Result.Canceled(
-                action = PaymentCancellationAction.InformCancellation
+                action = ConfirmationHandler.Result.Canceled.Action.InformCancellation
             )
         )
     }
@@ -1732,7 +1732,7 @@ class DefaultConfirmationHandlerTest {
     ) { result ->
         assertThat(result).isEqualTo(
             ConfirmationHandler.Result.Canceled(
-                action = PaymentCancellationAction.InformCancellation
+                action = ConfirmationHandler.Result.Canceled.Action.InformCancellation
             )
         )
     }
@@ -1759,7 +1759,7 @@ class DefaultConfirmationHandlerTest {
     ) { result ->
         assertThat(result).isEqualTo(
             ConfirmationHandler.Result.Canceled(
-                action = PaymentCancellationAction.ModifyPaymentDetails,
+                action = ConfirmationHandler.Result.Canceled.Action.ModifyPaymentDetails,
             )
         )
     }
@@ -1772,7 +1772,7 @@ class DefaultConfirmationHandlerTest {
     ) { result ->
         assertThat(result).isEqualTo(
             ConfirmationHandler.Result.Canceled(
-                action = PaymentCancellationAction.None,
+                action = ConfirmationHandler.Result.Canceled.Action.None,
             )
         )
     }
