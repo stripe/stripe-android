@@ -107,7 +107,7 @@ internal class IntentConfirmationDefinition(
                 type = PaymentConfirmationErrorType.Payment,
             )
             is InternalPaymentResult.Canceled -> ConfirmationHandler.Result.Canceled(
-                action = ConfirmationHandler.CancellationAction.InformCancellation,
+                action = ConfirmationHandler.Result.Canceled.Action.InformCancellation,
             )
         }
     }

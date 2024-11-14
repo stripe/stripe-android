@@ -101,8 +101,30 @@ internal interface ConfirmationHandler {
          * Indicates that the confirmation process was canceled by the customer.
          */
         data class Canceled(
-            val action: CancellationAction,
-        ) : Result
+            val action: Action,
+        ) : Result {
+            /**
+             * Action to perform if a user cancels a running confirmation process.
+             */
+            enum class Action {
+                /**
+                 * This actions means the user has cancels a critical confirmation step and that the user should
+                 * be notified of the cancellation if relevant.
+                 */
+                InformCancellation,
+
+                /**
+                 * This action means that the user has asked to modify the payment details of their selected
+                 * payment option.
+                 */
+                ModifyPaymentDetails,
+
+                /**
+                 * Means no action should be taken if the user cancels a step in the confirmation process.
+                 */
+                None,
+            }
+        }
 
         /**
          * Indicates that the confirmation process has been successfully completed. A [StripeIntent] with an updated
@@ -122,27 +144,6 @@ internal interface ConfirmationHandler {
             val message: ResolvableString,
             val type: PaymentConfirmationErrorType,
         ) : Result
-    }
-
-    /**
-     * Action to perform if a user cancels a running confirmation process.
-     */
-    enum class CancellationAction {
-        /**
-         * This actions means the user has cancels a critical confirmation step and that the user should be notified
-         * of the cancellation if relevant.
-         */
-        InformCancellation,
-
-        /**
-         * This action means that the user has asked to modify the payment details of their selected payment option.
-         */
-        ModifyPaymentDetails,
-
-        /**
-         * Means no action should be taken if the user cancels a step in the confirmation process.
-         */
-        None,
     }
 
     sealed interface Option : Parcelable {

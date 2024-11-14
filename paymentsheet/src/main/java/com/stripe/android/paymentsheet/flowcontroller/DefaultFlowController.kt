@@ -606,15 +606,15 @@ internal class DefaultFlowController @Inject internal constructor(
 
     private fun handleCancellation(canceled: ConfirmationHandler.Result.Canceled) {
         when (canceled.action) {
-            ConfirmationHandler.CancellationAction.InformCancellation -> {
+            ConfirmationHandler.Result.Canceled.Action.InformCancellation -> {
                 onPaymentResult(
                     paymentResult = PaymentResult.Canceled,
                     deferredIntentConfirmationType = null,
                     shouldLog = false,
                 )
             }
-            ConfirmationHandler.CancellationAction.ModifyPaymentDetails -> presentPaymentOptions()
-            ConfirmationHandler.CancellationAction.None -> Unit
+            ConfirmationHandler.Result.Canceled.Action.ModifyPaymentDetails -> presentPaymentOptions()
+            ConfirmationHandler.Result.Canceled.Action.None -> Unit
         }
     }
 

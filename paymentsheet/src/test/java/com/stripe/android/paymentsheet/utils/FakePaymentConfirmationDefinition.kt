@@ -26,7 +26,7 @@ internal class FakePaymentConfirmationDefinition(
         )
     },
     private val confirmationResult: ConfirmationHandler.Result = ConfirmationHandler.Result.Canceled(
-        action = ConfirmationHandler.CancellationAction.InformCancellation,
+        action = ConfirmationHandler.Result.Canceled.Action.InformCancellation,
     ),
     private val launcher: Launcher = Launcher(),
 ) : PaymentConfirmationDefinition<
