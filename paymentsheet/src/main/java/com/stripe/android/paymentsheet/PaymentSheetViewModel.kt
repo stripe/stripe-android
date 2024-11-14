@@ -536,7 +536,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     ConfirmationHandler.Result.Failed(
                         cause = exception,
                         message = exception.stripeErrorMessage(),
-                        type = PaymentConfirmationErrorType.Internal,
+                        type = ConfirmationHandler.Result.Failed.ErrorType.Internal,
                     )
                 )
             }
@@ -620,21 +620,21 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     private fun processIntentFailure(failure: ConfirmationHandler.Result.Failed) {
         when (failure.type) {
-            PaymentConfirmationErrorType.Payment -> handlePaymentFailed(
+            ConfirmationHandler.Result.Failed.ErrorType.Payment -> handlePaymentFailed(
                 error = PaymentSheetConfirmationError.Stripe(failure.cause),
                 message = failure.message,
             )
-            PaymentConfirmationErrorType.ExternalPaymentMethod -> handlePaymentFailed(
+            ConfirmationHandler.Result.Failed.ErrorType.ExternalPaymentMethod -> handlePaymentFailed(
                 error = PaymentSheetConfirmationError.ExternalPaymentMethod,
                 message = failure.message,
             )
-            is PaymentConfirmationErrorType.GooglePay -> handlePaymentFailed(
+            is ConfirmationHandler.Result.Failed.ErrorType.GooglePay -> handlePaymentFailed(
                 error = PaymentSheetConfirmationError.GooglePay(failure.type.errorCode),
                 message = failure.message,
             )
-            PaymentConfirmationErrorType.Fatal -> onFatal(failure.cause)
-            PaymentConfirmationErrorType.MerchantIntegration,
-            PaymentConfirmationErrorType.Internal -> onError(failure.message)
+            ConfirmationHandler.Result.Failed.ErrorType.Fatal -> onFatal(failure.cause)
+            ConfirmationHandler.Result.Failed.ErrorType.MerchantIntegration,
+            ConfirmationHandler.Result.Failed.ErrorType.Internal -> onError(failure.message)
         }
     }
 
