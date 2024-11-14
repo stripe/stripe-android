@@ -20,7 +20,6 @@ import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnec
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
-import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.toPaymentMethodIncentive
 import com.stripe.android.ui.core.Amount
@@ -99,8 +98,9 @@ internal data class PaymentMethodMetadata(
         } else {
             val definition = supportedPaymentMethodDefinitions().firstOrNull { it.type.code == code } ?: return null
 
-            val paymentMethodIncentive = consumerIncentive?.toPaymentMethodIncentive()
-            val incentive = paymentMethodIncentive?.takeIf { it.appliesTo(definition) }
+            val incentive = consumerIncentive
+                ?.takeIf { it.appliesTo(definition) }
+                ?.toPaymentMethodIncentive()
 
             definition.uiDefinitionFactory().supportedPaymentMethod(
                 definition = definition,
@@ -305,6 +305,6 @@ internal data class PaymentMethodMetadata(
     }
 }
 
-internal fun PaymentMethodIncentive.appliesTo(definition: PaymentMethodDefinition): Boolean {
-    return definition.incentiveType == identifier
+private fun LinkConsumerIncentive.appliesTo(definition: PaymentMethodDefinition): Boolean {
+    return definition.incentiveType == incentiveParams.paymentMethod
 }
