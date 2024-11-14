@@ -7,7 +7,6 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.common.ui.BottomSheetLoadingIndicator
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcCompletionState
@@ -172,7 +171,6 @@ internal sealed interface PaymentSheetScreen {
             SavedPaymentMethodTabLayoutUI(
                 interactor = interactor,
                 cvcRecollectionState = cvcRecollectionState,
-                useUpdatePaymentMethodScreen = FeatureFlags.useNewUpdateCardScreen.isEnabled,
                 modifier = modifier,
             )
         }

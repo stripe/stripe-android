@@ -137,7 +137,6 @@ internal fun SelectPaymentMethod(
             onItemSelected = { viewActionHandler(CustomerSheetViewAction.OnItemSelected(it)) },
             onModifyItem = { viewActionHandler(CustomerSheetViewAction.OnModifyItem(it.paymentMethod)) },
             onItemRemoved = { viewActionHandler(CustomerSheetViewAction.OnItemRemoved(it)) },
-            useUpdatePaymentMethodScreen = false,
             modifier = Modifier.padding(bottom = 2.dp),
         )
 

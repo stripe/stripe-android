@@ -14,9 +14,11 @@ import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentOptionsItem
+import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentMethodFactory
 import org.junit.Rule
 import org.junit.Test
@@ -27,6 +29,12 @@ import kotlin.math.roundToInt
 @RunWith(AndroidJUnit4::class)
 @Config(sdk = [Build.VERSION_CODES.S])
 class PaymentOptionsTest {
+
+    @get:Rule
+    val featureFlagTestRule = FeatureFlagTestRule(
+        featureFlag = FeatureFlags.useNewUpdateCardScreen,
+        isEnabled = false
+    )
 
     @get:Rule
     val composeTestRule = createComposeRule()
@@ -42,6 +50,7 @@ class PaymentOptionsTest {
     }
 
     private fun testNavigatesToAddAnotherPaymentMethodWhenAddCardIsPressed(useUpdatePaymentMethodScreen: Boolean) {
+        featureFlagTestRule.setEnabled(useUpdatePaymentMethodScreen)
         var didCallOnAddCardPressed = false
 
         composeTestRule.setContent {
@@ -54,7 +63,6 @@ class PaymentOptionsTest {
                 onItemSelected = {},
                 onModifyItem = {},
                 onItemRemoved = {},
-                useUpdatePaymentMethodScreen = useUpdatePaymentMethodScreen,
             )
         }
 
@@ -81,6 +89,7 @@ class PaymentOptionsTest {
     }
 
     private fun testUpdatesSelectionWhenItemIsPressed(useUpdatePaymentMethodScreen: Boolean) {
+        featureFlagTestRule.setEnabled(useUpdatePaymentMethodScreen)
         var didCallOnItemSelected = false
 
         composeTestRule.setContent {
@@ -93,7 +102,6 @@ class PaymentOptionsTest {
                 onItemSelected = { didCallOnItemSelected = true },
                 onModifyItem = {},
                 onItemRemoved = {},
-                useUpdatePaymentMethodScreen = useUpdatePaymentMethodScreen,
             )
         }
 
@@ -119,6 +127,7 @@ class PaymentOptionsTest {
     }
 
     private fun testDoesNotUpdateSelectWhenItemIsPressedInEditMode(useUpdatePaymentMethodScreen: Boolean) {
+        featureFlagTestRule.setEnabled(useUpdatePaymentMethodScreen)
         var didCallOnItemSelected = false
 
         composeTestRule.setContent {
@@ -131,7 +140,6 @@ class PaymentOptionsTest {
                 onItemSelected = { didCallOnItemSelected = true },
                 onModifyItem = {},
                 onItemRemoved = {},
-                useUpdatePaymentMethodScreen = useUpdatePaymentMethodScreen,
             )
         }
 
@@ -148,6 +156,7 @@ class PaymentOptionsTest {
 
     @Test
     fun `If saved payment methods are disabled, all tabs should be disabled as well`() {
+        featureFlagTestRule.setEnabled(false)
         composeTestRule.setContent {
             SavedPaymentMethodTabLayoutUI(
                 paymentOptionsItems = listOf(
@@ -173,7 +182,6 @@ class PaymentOptionsTest {
                 onItemSelected = {},
                 onModifyItem = {},
                 onItemRemoved = {},
-                useUpdatePaymentMethodScreen = false,
             )
         }
 
@@ -185,6 +193,7 @@ class PaymentOptionsTest {
     fun `If is editing and using update payment method screen, tabs should be enabled`() {
         // This isn't a realistic scenario -- usually a user would not be able to get into "edit" mode unless at least
         // one card was also modifiable.
+        featureFlagTestRule.setEnabled(true)
         composeTestRule.setContent {
             SavedPaymentMethodTabLayoutUI(
                 paymentOptionsItems = listOf(
@@ -210,7 +219,6 @@ class PaymentOptionsTest {
                 onItemSelected = {},
                 onModifyItem = {},
                 onItemRemoved = {},
-                useUpdatePaymentMethodScreen = true,
             )
         }
 

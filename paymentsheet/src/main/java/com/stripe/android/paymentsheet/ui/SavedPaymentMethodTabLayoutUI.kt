@@ -48,6 +48,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
@@ -75,7 +76,6 @@ import com.stripe.android.R as StripeR
 internal fun SavedPaymentMethodTabLayoutUI(
     interactor: SelectSavedPaymentMethodsInteractor,
     cvcRecollectionState: CvcRecollectionState,
-    useUpdatePaymentMethodScreen: Boolean,
     modifier: Modifier,
 ) {
     val state by interactor.state.collectAsState()
@@ -107,7 +107,6 @@ internal fun SavedPaymentMethodTabLayoutUI(
                 SelectSavedPaymentMethodsInteractor.ViewAction.DeletePaymentMethod(it)
             )
         },
-        useUpdatePaymentMethodScreen = useUpdatePaymentMethodScreen,
         modifier = modifier,
     )
 
@@ -134,7 +133,6 @@ internal fun SavedPaymentMethodTabLayoutUI(
     onItemSelected: (PaymentSelection?) -> Unit,
     onModifyItem: (DisplayableSavedPaymentMethod) -> Unit,
     onItemRemoved: (PaymentMethod) -> Unit,
-    useUpdatePaymentMethodScreen: Boolean,
     modifier: Modifier = Modifier,
     scrollState: LazyListState = rememberLazyListState(),
 ) {
@@ -151,7 +149,7 @@ internal fun SavedPaymentMethodTabLayoutUI(
                 key = { it.key },
             ) { item ->
                 val isEnabled =
-                    !isProcessing && (!isEditing || item.isEnabledDuringEditing(useUpdatePaymentMethodScreen))
+                    !isProcessing && (!isEditing || item.isEnabledDuringEditing)
                 val isSelected = item == selectedPaymentOptionsItem && !isEditing
 
                 SavedPaymentMethodTab(
@@ -164,7 +162,6 @@ internal fun SavedPaymentMethodTabLayoutUI(
                     onItemSelected = onItemSelected,
                     onItemRemoved = onItemRemoved,
                     onModifyItem = onModifyItem,
-                    useUpdatePaymentMethodScreen = useUpdatePaymentMethodScreen,
                     modifier = Modifier
                         .semantics { testTagsAsResourceId = true }
                         .testTag(item.viewType.name)
@@ -222,7 +219,6 @@ private fun SavedPaymentMethodsTabLayoutPreview() {
             onItemSelected = { },
             onModifyItem = { },
             onItemRemoved = { },
-            useUpdatePaymentMethodScreen = false,
         )
     }
 }
@@ -246,7 +242,6 @@ private fun SavedPaymentMethodTab(
     onAddCardPressed: () -> Unit,
     onItemSelected: (PaymentSelection?) -> Unit,
     onModifyItem: (DisplayableSavedPaymentMethod) -> Unit,
-    useUpdatePaymentMethodScreen: Boolean,
     onItemRemoved: (PaymentMethod) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -288,7 +283,6 @@ private fun SavedPaymentMethodTab(
                 onItemSelected = onItemSelected,
                 onModifyItem = onModifyItem,
                 onItemRemoved = onItemRemoved,
-                useUpdatePaymentMethodScreen = useUpdatePaymentMethodScreen,
                 modifier = modifier,
             )
         }
@@ -375,7 +369,6 @@ private fun SavedPaymentMethodTab(
     onItemSelected: (PaymentSelection?) -> Unit,
     onModifyItem: (DisplayableSavedPaymentMethod) -> Unit,
     onItemRemoved: (PaymentMethod) -> Unit,
-    useUpdatePaymentMethodScreen: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val labelIcon = paymentMethod.paymentMethod.getLabelIcon()
@@ -395,7 +388,7 @@ private fun SavedPaymentMethodTab(
         SavedPaymentMethodTab(
             viewWidth = width,
             editState = when {
-                isEnabled && isEditing && (isModifiable || useUpdatePaymentMethodScreen) ->
+                isEnabled && isEditing && (isModifiable || FeatureFlags.useNewUpdateCardScreen.isEnabled) ->
                     PaymentOptionEditState.Modifiable
                 isEnabled && isEditing -> PaymentOptionEditState.Removable
                 else -> PaymentOptionEditState.None

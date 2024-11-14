@@ -2,21 +2,30 @@ package com.stripe.android.paymentsheet.ui
 
 import androidx.compose.foundation.lazy.LazyListState
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentOptionsItem
 import com.stripe.android.screenshottesting.PaparazziRule
+import com.stripe.android.testing.FeatureFlagTestRule
 import org.junit.Rule
 import org.junit.Test
 
 class PaymentOptionsScreenshotTest {
 
     @get:Rule
+    val featureFlagTestRule = FeatureFlagTestRule(
+        featureFlag = FeatureFlags.useNewUpdateCardScreen,
+        isEnabled = false
+    )
+
+    @get:Rule
     val paparazziRule = PaparazziRule()
 
     @Test
     fun testWidthLessThanScreen() {
+        featureFlagTestRule.setEnabled(false)
         paparazziRule.snapshot {
             SavedPaymentMethodTabLayoutUI(
                 paymentOptionsItems = listOf(
@@ -30,13 +39,13 @@ class PaymentOptionsScreenshotTest {
                 onItemSelected = {},
                 onModifyItem = {},
                 onItemRemoved = {},
-                useUpdatePaymentMethodScreen = false,
             )
         }
     }
 
     @Test
     fun testWidthMoreThanScreen() {
+        featureFlagTestRule.setEnabled(false)
         val paymentOptionsItems = listOf(
             PaymentOptionsItem.AddCard,
             PaymentOptionsItem.GooglePay,
@@ -73,13 +82,13 @@ class PaymentOptionsScreenshotTest {
                 onItemSelected = {},
                 onModifyItem = {},
                 onItemRemoved = {},
-                useUpdatePaymentMethodScreen = false,
             )
         }
     }
 
     @Test
     fun testWidthMoreThanScreenAndScrollToEnd() {
+        featureFlagTestRule.setEnabled(false)
         val paymentOptionsItems = listOf(
             PaymentOptionsItem.AddCard,
             PaymentOptionsItem.GooglePay,
@@ -117,13 +126,13 @@ class PaymentOptionsScreenshotTest {
                 onModifyItem = {},
                 onItemRemoved = {},
                 scrollState = LazyListState(firstVisibleItemIndex = 2),
-                useUpdatePaymentMethodScreen = false,
             )
         }
     }
 
     @Test
     fun testEditingAndRemoveDisabledWithModifiableItems() {
+        featureFlagTestRule.setEnabled(false)
         paparazziRule.snapshot {
             SavedPaymentMethodTabLayoutUI(
                 paymentOptionsItems = paymentOptionsItemsWithRemoveDisabledAndModifiableCard,
@@ -135,13 +144,13 @@ class PaymentOptionsScreenshotTest {
                 onModifyItem = {},
                 onItemRemoved = {},
                 scrollState = LazyListState(firstVisibleItemIndex = 2),
-                useUpdatePaymentMethodScreen = false,
             )
         }
     }
 
     @Test
     fun testEditingAndRemoveDisabledWithModifiableItems_usingUpdatePaymentMethodScreen() {
+        featureFlagTestRule.setEnabled(true)
         paparazziRule.snapshot {
             SavedPaymentMethodTabLayoutUI(
                 paymentOptionsItems = paymentOptionsItemsWithRemoveDisabledAndModifiableCard,
@@ -153,7 +162,6 @@ class PaymentOptionsScreenshotTest {
                 onModifyItem = {},
                 onItemRemoved = {},
                 scrollState = LazyListState(firstVisibleItemIndex = 2),
-                useUpdatePaymentMethodScreen = true,
             )
         }
     }

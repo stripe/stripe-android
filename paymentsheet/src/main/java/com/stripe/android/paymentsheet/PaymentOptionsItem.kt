@@ -1,25 +1,26 @@
 package com.stripe.android.paymentsheet
 
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.PaymentMethod
 
 internal sealed class PaymentOptionsItem {
 
     abstract val viewType: ViewType
-    abstract fun isEnabledDuringEditing(useUpdatePaymentMethodScreen: Boolean): Boolean
+    abstract val isEnabledDuringEditing: Boolean
 
     object AddCard : PaymentOptionsItem() {
         override val viewType: ViewType = ViewType.AddCard
-        override fun isEnabledDuringEditing(useUpdatePaymentMethodScreen: Boolean): Boolean = false
+        override val isEnabledDuringEditing: Boolean = false
     }
 
     object GooglePay : PaymentOptionsItem() {
         override val viewType: ViewType = ViewType.GooglePay
-        override fun isEnabledDuringEditing(useUpdatePaymentMethodScreen: Boolean): Boolean = false
+        override val isEnabledDuringEditing: Boolean = false
     }
 
     object Link : PaymentOptionsItem() {
         override val viewType: ViewType = ViewType.Link
-        override fun isEnabledDuringEditing(useUpdatePaymentMethodScreen: Boolean): Boolean = false
+        override val isEnabledDuringEditing: Boolean = false
     }
 
     /**
@@ -35,10 +36,8 @@ internal sealed class PaymentOptionsItem {
         val paymentMethod = displayableSavedPaymentMethod.paymentMethod
         val isModifiable: Boolean by lazy { displayableSavedPaymentMethod.isModifiable() }
 
-        override fun isEnabledDuringEditing(useUpdatePaymentMethodScreen: Boolean): Boolean {
-            // When using the update payment method screen, we should allow users to access the update payment method
-            // screen to see their card details.
-            return useUpdatePaymentMethodScreen || isModifiable || canRemovePaymentMethods
+        override val isEnabledDuringEditing: Boolean by lazy {
+            FeatureFlags.useNewUpdateCardScreen.isEnabled || isModifiable || canRemovePaymentMethods
         }
     }
 
