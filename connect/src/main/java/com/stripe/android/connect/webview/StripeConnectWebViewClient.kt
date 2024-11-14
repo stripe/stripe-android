@@ -5,15 +5,28 @@ import android.graphics.Bitmap
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.core.view.doOnAttach
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.findViewTreeLifecycleOwner
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.stripe.android.connect.BuildConfig
 import com.stripe.android.connect.EmbeddedComponentManager
 import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.StripeEmbeddedComponent
+import com.stripe.android.connect.appearance.Appearance
+import com.stripe.android.connect.webview.serialization.ConnectInstanceJs
+import com.stripe.android.connect.webview.serialization.toJs
 import com.stripe.android.core.Logger
 import com.stripe.android.core.version.StripeSdkVersion
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.encodeToJsonElement
+import kotlinx.serialization.json.jsonObject
 
 @OptIn(PrivateBetaConnectSDK::class)
 internal class StripeConnectWebViewClient(
@@ -22,6 +35,7 @@ internal class StripeConnectWebViewClient(
     private val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG),
     private val jsonSerializer: Json = Json {
         ignoreUnknownKeys = true
+        explicitNulls = false
     }
 ) : WebViewClient() {
 
@@ -41,13 +55,14 @@ internal class StripeConnectWebViewClient(
                 userAgentString = "$userAgentString - stripe-android/${StripeSdkVersion.VERSION_NAME}"
             }
             addJavascriptInterface(StripeJsInterface(), ANDROID_JS_INTERFACE)
-            addJavascriptInterface(StripeJsInterfaceInternal(), ANDROID_JS_INTERNAL_INTERFACE)
+            addJavascriptInterface(StripeJsInterfaceInternal(this), ANDROID_JS_INTERNAL_INTERFACE)
 
             loadUrl(embeddedComponentManager.getStripeURL(connectComponent))
         }
     }
 
     private fun initJavascriptBridge(webView: WebView) {
+        logger.debug("Initializing Javascript Bridge")
         webView.evaluateJavascript(
             """
                 $ANDROID_JS_INTERFACE.accountSessionClaimed = (message) => {
@@ -95,7 +110,26 @@ internal class StripeConnectWebViewClient(
         }
     }
 
-    private inner class StripeJsInterfaceInternal {
+    private inner class StripeJsInterfaceInternal(private val webView: WebView) {
+        private var isPageLoaded: Boolean = false
+
+        init {
+            // Bind appearance changes in the manager to the WebView (only when page is loaded).
+            webView.doOnAttach { view ->
+                val lifecycleOwner = view.findViewTreeLifecycleOwner()
+                lifecycleOwner?.lifecycleScope?.launch {
+                    lifecycleOwner.repeatOnLifecycle(Lifecycle.State.CREATED) {
+                        embeddedComponentManager.appearanceFlow
+                            .collectLatest { appearance ->
+                                if (isPageLoaded) {
+                                    updateConnectInstance(appearance)
+                                }
+                            }
+                    }
+                }
+            }
+        }
+
         @JavascriptInterface
         fun log(message: String) {
             logger.debug("Log from JS: $message")
@@ -117,6 +151,9 @@ internal class StripeConnectWebViewClient(
         fun pageDidLoad(message: String) {
             val pageLoadMessage = jsonSerializer.decodeFromString<PageLoadMessage>(message)
             logger.debug("Page did load: $pageLoadMessage")
+
+            isPageLoaded = true
+            updateConnectInstance(embeddedComponentManager.appearanceFlow.value)
         }
 
         @JavascriptInterface
@@ -130,6 +167,14 @@ internal class StripeConnectWebViewClient(
             return runBlocking {
                 checkNotNull(embeddedComponentManager.fetchClientSecret())
             }
+        }
+
+        private fun updateConnectInstance(appearance: Appearance) {
+            val payload = ConnectInstanceJs(appearance = appearance.toJs())
+            webView.evaluateSdkJs(
+                "updateConnectInstance",
+                jsonSerializer.encodeToJsonElement(payload).jsonObject
+            )
         }
     }
 
@@ -160,6 +205,14 @@ internal class StripeConnectWebViewClient(
         val id: String,
         val url: String
     )
+
+    private fun WebView.evaluateSdkJs(function: String, payload: JsonObject) {
+        val command = "$ANDROID_JS_INTERFACE.$function($payload)"
+        post {
+            logger.debug("Evaluating JS: $command")
+            evaluateJavascript(command, null)
+        }
+    }
 
     internal companion object {
         private const val ANDROID_JS_INTERFACE = "Android"

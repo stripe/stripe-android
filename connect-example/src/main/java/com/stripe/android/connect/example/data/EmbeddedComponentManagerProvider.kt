@@ -1,13 +1,19 @@
 package com.stripe.android.connect.example.data
 
+import android.content.Context
 import com.github.kittinunf.fuel.core.FuelError
 import com.stripe.android.connect.EmbeddedComponentManager
 import com.stripe.android.connect.FetchClientSecretCallback.ClientSecretResultCallback
 import com.stripe.android.connect.PrivateBetaConnectSDK
+import com.stripe.android.connect.appearance.Appearance
+import com.stripe.android.connect.example.ui.appearance.AppearanceInfo
 import com.stripe.android.core.BuildConfig
 import com.stripe.android.core.Logger
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.io.IOException
 import javax.inject.Inject
@@ -16,6 +22,7 @@ import javax.inject.Singleton
 @OptIn(PrivateBetaConnectSDK::class)
 @Singleton
 class EmbeddedComponentManagerProvider @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val embeddedComponentService: EmbeddedComponentService,
     private val settingsService: SettingsService,
 ) {
@@ -28,6 +35,14 @@ class EmbeddedComponentManagerProvider @Inject constructor(
     private val loggingTag = this::class.java.name
     private val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG)
     private val ioScope: CoroutineScope by lazy { CoroutineScope(Dispatchers.IO) }
+
+    fun initialize(scope: CoroutineScope): Job = scope.launch {
+        // Update appearance in the SDK whenever the appearance setting changes.
+        settingsService.getAppearanceIdFlow()
+            .collectLatest { appearanceId ->
+                embeddedComponentManager?.update(getAppearance(context, appearanceId))
+            }
+    }
 
     /**
      * Provides the EmbeddedComponentManager instance, creating it if it doesn't exist.
@@ -47,6 +62,7 @@ class EmbeddedComponentManagerProvider @Inject constructor(
                 publishableKey = publishableKey,
             ),
             fetchClientSecretCallback = ::fetchClientSecret,
+            appearance = getAppearance(context, settingsService.getAppearanceId())
         ).also {
             embeddedComponentManager = it
         }
@@ -72,5 +88,11 @@ class EmbeddedComponentManagerProvider @Inject constructor(
                 clientSecretResultCallback.onResult(null)
             }
         }
+    }
+
+    private fun getAppearance(context: Context, appearanceId: AppearanceInfo.AppearanceId?): Appearance {
+        return appearanceId
+            ?.let { AppearanceInfo.getAppearance(it, context).appearance }
+            ?: Appearance()
     }
 }
