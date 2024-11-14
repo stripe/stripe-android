@@ -31,6 +31,7 @@ class ConfirmationHandlerOptionKtxTest {
             paymentSelection.toConfirmationOption(
                 initializationMode = PI_INITIALIZATION_MODE,
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
+                appearance = PaymentSheetFixtures.CONFIG_CUSTOMER.appearance,
             )
         ).isEqualTo(
             ConfirmationHandler.Option.PaymentMethod.New(
@@ -53,6 +54,7 @@ class ConfirmationHandlerOptionKtxTest {
             paymentSelection.toConfirmationOption(
                 initializationMode = SI_INITIALIZATION_MODE,
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
+                appearance = PaymentSheetFixtures.CONFIG_CUSTOMER.appearance,
             )
         ).isEqualTo(
             ConfirmationHandler.Option.PaymentMethod.New(
@@ -75,6 +77,7 @@ class ConfirmationHandlerOptionKtxTest {
             paymentSelection.toConfirmationOption(
                 initializationMode = PI_INITIALIZATION_MODE,
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
+                appearance = PaymentSheetFixtures.CONFIG_CUSTOMER.appearance,
             )
         ).isEqualTo(
             ConfirmationHandler.Option.PaymentMethod.New(
@@ -107,7 +110,8 @@ class ConfirmationHandlerOptionKtxTest {
         assertThat(
             paymentSelection.toConfirmationOption(
                 initializationMode = PI_INITIALIZATION_MODE,
-                configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration()
+                configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
+                appearance = PaymentSheetFixtures.CONFIG_CUSTOMER.appearance,
             )
         ).isEqualTo(
             ConfirmationHandler.Option.BacsPaymentMethod(
@@ -130,6 +134,7 @@ class ConfirmationHandlerOptionKtxTest {
             paymentSelection.toConfirmationOption(
                 initializationMode = SI_INITIALIZATION_MODE,
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
+                appearance = PaymentSheetFixtures.CONFIG_CUSTOMER.appearance,
             )
         ).isEqualTo(
             ConfirmationHandler.Option.PaymentMethod.New(
@@ -155,6 +160,7 @@ class ConfirmationHandlerOptionKtxTest {
             paymentSelection.toConfirmationOption(
                 initializationMode = PI_INITIALIZATION_MODE,
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
+                appearance = PaymentSheetFixtures.CONFIG_CUSTOMER.appearance,
             )
         ).isEqualTo(
             ConfirmationHandler.Option.PaymentMethod.Saved(
@@ -188,6 +194,7 @@ class ConfirmationHandlerOptionKtxTest {
             paymentSelection.toConfirmationOption(
                 initializationMode = PI_INITIALIZATION_MODE,
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
+                appearance = PaymentSheetFixtures.CONFIG_CUSTOMER.appearance,
             )
         ).isEqualTo(
             ConfirmationHandler.Option.ExternalPaymentMethod(
@@ -208,6 +215,7 @@ class ConfirmationHandlerOptionKtxTest {
             PaymentSelection.GooglePay.toConfirmationOption(
                 initializationMode = PI_INITIALIZATION_MODE,
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
+                appearance = PaymentSheetFixtures.CONFIG_CUSTOMER.appearance,
             )
         ).isNull()
     }
@@ -223,7 +231,8 @@ class ConfirmationHandlerOptionKtxTest {
                         amount = 5000,
                         environment = PaymentSheet.GooglePayConfiguration.Environment.Production
                     )
-                ).asCommonConfiguration()
+                ).asCommonConfiguration(),
+                appearance = PaymentSheetFixtures.CONFIG_CUSTOMER.appearance,
             )
         ).isEqualTo(
             ConfirmationHandler.Option.GooglePay(
@@ -251,6 +260,7 @@ class ConfirmationHandlerOptionKtxTest {
             PaymentSelection.Link.toConfirmationOption(
                 initializationMode = PI_INITIALIZATION_MODE,
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
+                appearance = PaymentSheetFixtures.CONFIG_CUSTOMER.appearance,
             )
         ).isNull()
     }
@@ -265,6 +275,7 @@ class ConfirmationHandlerOptionKtxTest {
             paymentSelection.toConfirmationOption(
                 initializationMode = PI_INITIALIZATION_MODE,
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
+                appearance = PaymentSheetFixtures.CONFIG_CUSTOMER.appearance,
             )
         ).isEqualTo(
             ConfirmationHandler.Option.PaymentMethod.Saved(
@@ -286,6 +297,7 @@ class ConfirmationHandlerOptionKtxTest {
             paymentSelection.toConfirmationOption(
                 initializationMode = PI_INITIALIZATION_MODE,
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
+                appearance = PaymentSheetFixtures.CONFIG_CUSTOMER.appearance,
             )
         ).isEqualTo(
             ConfirmationHandler.Option.PaymentMethod.Saved(

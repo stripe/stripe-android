@@ -76,7 +76,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
     }
 
     private fun initializeStarterArgs(): PaymentOptionContract.Args? {
-        starterArgs?.state?.config?.appearance?.parseAppearance()
+        starterArgs?.configuration?.appearance?.parseAppearance()
         earlyExitDueToIllegalState = starterArgs == null
         return starterArgs
     }
