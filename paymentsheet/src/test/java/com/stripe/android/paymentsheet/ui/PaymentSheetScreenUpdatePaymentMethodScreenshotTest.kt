@@ -48,7 +48,10 @@ class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
             displayableSavedPaymentMethod = paymentMethod,
             canRemove = canRemove,
             viewActionRecorder = null,
-            initialState = UpdatePaymentMethodInteractor.State(error = error?.resolvableString),
+            initialState = UpdatePaymentMethodInteractor.State(
+                error = error?.resolvableString,
+                isRemoving = false,
+            ),
         )
         val screen = com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.UpdatePaymentMethod(interactor)
         val metadata = PaymentMethodMetadataFactory.create()
