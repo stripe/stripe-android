@@ -35,3 +35,15 @@ enum class FontSize(val scaleFactor: Float) : PaparazziConfigOption {
         )
     }
 }
+
+enum class Locale(val locale: String) : PaparazziConfigOption {
+    UnitedStates(locale = "us"),
+    France(locale = "fr"),
+    Finland(locale = "fi");
+
+    override fun apply(deviceConfig: DeviceConfig): DeviceConfig {
+        return deviceConfig.copy(
+            locale = locale
+        )
+    }
+}

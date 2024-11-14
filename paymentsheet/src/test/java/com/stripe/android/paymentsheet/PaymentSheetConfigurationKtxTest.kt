@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet
 import android.content.res.ColorStateList
 import android.graphics.Color
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import org.junit.Test
 import java.lang.IllegalArgumentException
@@ -99,7 +100,7 @@ class PaymentSheetConfigurationKtxTest {
                 id = "cus_1",
                 ephemeralKeySecret = "   "
             ),
-        )
+        ).asCommonConfiguration()
 
         assertFailsWith(
             IllegalArgumentException::class,
@@ -118,7 +119,7 @@ class PaymentSheetConfigurationKtxTest {
                 id = "cus_1",
                 clientSecret = "   "
             ),
-        )
+        ).asCommonConfiguration()
 
         assertFailsWith(
             IllegalArgumentException::class,
@@ -137,7 +138,7 @@ class PaymentSheetConfigurationKtxTest {
                 id = "cus_1",
                 clientSecret = "ek_12345"
             ),
-        )
+        ).asCommonConfiguration()
 
         assertFailsWith(
             IllegalArgumentException::class,
@@ -156,7 +157,7 @@ class PaymentSheetConfigurationKtxTest {
                 id = "cus_1",
                 clientSecret = "total_12345"
             ),
-        )
+        ).asCommonConfiguration()
 
         assertFailsWith(
             IllegalArgumentException::class,

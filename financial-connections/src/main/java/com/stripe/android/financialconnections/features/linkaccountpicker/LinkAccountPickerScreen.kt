@@ -308,14 +308,14 @@ fun SelectNewAccountIcon(
         modifier = Modifier
             .size(56.dp)
             .clip(RoundedCornerShape(12.dp))
-            .background(colors.backgroundOffset)
+            .background(colors.iconBackground)
     ) {
         val iconModifier = Modifier.size(20.dp)
         val placeholderImage = @Composable {
             Image(
                 painter = painterResource(R.drawable.stripe_ic_add),
                 modifier = iconModifier,
-                colorFilter = ColorFilter.tint(colors.textBrand),
+                colorFilter = ColorFilter.tint(colors.iconBrand),
                 contentDescription = contentDescription
             )
         }

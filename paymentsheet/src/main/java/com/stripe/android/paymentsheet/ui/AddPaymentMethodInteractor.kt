@@ -1,11 +1,7 @@
 package com.stripe.android.paymentsheet.ui
 
-import com.stripe.android.link.LinkConfigurationCoordinator
-import com.stripe.android.link.ui.inline.InlineSignupViewState
-import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.paymentsheet.FormHelper
@@ -39,16 +35,12 @@ internal interface AddPaymentMethodInteractor {
         val arguments: FormArguments,
         val formElements: List<FormElement>,
         val paymentSelection: PaymentSelection?,
-        val linkSignupMode: LinkSignupMode?,
-        val linkInlineSignupMode: LinkSignupMode?,
         val processing: Boolean,
         val usBankAccountFormArguments: USBankAccountFormArguments,
-        val linkConfigurationCoordinator: LinkConfigurationCoordinator,
     )
 
     sealed class ViewAction {
         data class OnPaymentMethodSelected(val code: PaymentMethodCode) : ViewAction()
-        data class OnLinkSignUpStateUpdated(val state: InlineSignupViewState) : ViewAction()
         data class OnFormFieldValuesChanged(
             val formValues: FormFieldValues?,
             val selectedPaymentMethodCode: PaymentMethodCode
@@ -60,15 +52,12 @@ internal interface AddPaymentMethodInteractor {
 
 internal class DefaultAddPaymentMethodInteractor(
     private val initiallySelectedPaymentMethodType: PaymentMethodCode,
-    private val linkConfigurationCoordinator: LinkConfigurationCoordinator,
     private val selection: StateFlow<PaymentSelection?>,
-    private val linkSignupMode: StateFlow<LinkSignupMode?>,
     private val processing: StateFlow<Boolean>,
     private val supportedPaymentMethods: List<SupportedPaymentMethod>,
     private val createFormArguments: (PaymentMethodCode) -> FormArguments,
     private val formElementsForCode: (PaymentMethodCode) -> List<FormElement>,
     private val clearErrorMessages: () -> Unit,
-    private val onLinkSignUpStateUpdated: (InlineSignupViewState) -> Unit,
     private val reportFieldInteraction: (PaymentMethodCode) -> Unit,
     private val onFormFieldValuesChanged: (FormFieldValues?, String) -> Unit,
     private val reportPaymentMethodTypeSelected: (PaymentMethodCode) -> Unit,
@@ -83,19 +72,20 @@ internal class DefaultAddPaymentMethodInteractor(
             paymentMethodMetadata: PaymentMethodMetadata,
         ): AddPaymentMethodInteractor {
             val coroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
-            val formHelper = FormHelper.create(viewModel = viewModel, paymentMethodMetadata = paymentMethodMetadata)
             val linkInlineHandler = LinkInlineHandler.create(viewModel, coroutineScope)
+            val formHelper = FormHelper.create(
+                viewModel = viewModel,
+                linkInlineHandler = linkInlineHandler,
+                paymentMethodMetadata = paymentMethodMetadata
+            )
             return DefaultAddPaymentMethodInteractor(
                 initiallySelectedPaymentMethodType = viewModel.initiallySelectedPaymentMethodType,
-                linkConfigurationCoordinator = viewModel.linkConfigurationCoordinator,
                 selection = viewModel.selection,
-                linkSignupMode = viewModel.linkHandler.linkSignupMode,
                 processing = viewModel.processing,
                 supportedPaymentMethods = paymentMethodMetadata.sortedSupportedPaymentMethods(),
                 createFormArguments = formHelper::createFormArguments,
                 formElementsForCode = formHelper::formElementsForCode,
                 clearErrorMessages = viewModel::clearErrorMessages,
-                onLinkSignUpStateUpdated = linkInlineHandler::onStateUpdated,
                 reportFieldInteraction = viewModel.analyticsListener::reportFieldInteraction,
                 onFormFieldValuesChanged = formHelper::onFormFieldValuesChanged,
                 reportPaymentMethodTypeSelected = viewModel.eventReporter::onSelectPaymentMethod,
@@ -124,7 +114,6 @@ internal class DefaultAddPaymentMethodInteractor(
 
     private fun getInitialState(): AddPaymentMethodInteractor.State {
         val selectedPaymentMethodCode = selectedPaymentMethodCode.value
-        val linkSignupMode = linkSignupMode.value
 
         return AddPaymentMethodInteractor.State(
             selectedPaymentMethodCode = selectedPaymentMethodCode,
@@ -132,13 +121,8 @@ internal class DefaultAddPaymentMethodInteractor(
             arguments = createFormArguments(selectedPaymentMethodCode),
             formElements = formElementsForCode(selectedPaymentMethodCode),
             paymentSelection = selection.value,
-            linkSignupMode = linkSignupMode,
-            linkInlineSignupMode = linkSignupMode.takeIf {
-                shouldHaveLinkInlineSignup(selectedPaymentMethodCode)
-            },
             processing = processing.value,
             usBankAccountFormArguments = createUSBankAccountFormArguments(selectedPaymentMethodCode),
-            linkConfigurationCoordinator = linkConfigurationCoordinator,
         )
     }
 
@@ -153,16 +137,12 @@ internal class DefaultAddPaymentMethodInteractor(
             selectedPaymentMethodCode.collect { newSelectedPaymentMethodCode ->
                 val newFormArguments = createFormArguments(newSelectedPaymentMethodCode)
                 val newFormElements = formElementsForCode(newSelectedPaymentMethodCode)
-                val newLinkInlineSignupMode = linkSignupMode.value.takeIf {
-                    shouldHaveLinkInlineSignup(newSelectedPaymentMethodCode)
-                }
                 val newUsBankAccountFormArguments = createUSBankAccountFormArguments(newSelectedPaymentMethodCode)
 
                 _state.value = _state.value.copy(
                     selectedPaymentMethodCode = newSelectedPaymentMethodCode,
                     arguments = newFormArguments,
                     formElements = newFormElements,
-                    linkInlineSignupMode = newLinkInlineSignupMode,
                     usBankAccountFormArguments = newUsBankAccountFormArguments
                 )
             }
@@ -172,17 +152,6 @@ internal class DefaultAddPaymentMethodInteractor(
             selection.collect {
                 _state.value = _state.value.copy(
                     paymentSelection = it
-                )
-            }
-        }
-
-        coroutineScope.launch {
-            linkSignupMode.collect {
-                _state.value = _state.value.copy(
-                    linkSignupMode = it,
-                    linkInlineSignupMode = it.takeIf {
-                        shouldHaveLinkInlineSignup(_state.value.selectedPaymentMethodCode)
-                    }
                 )
             }
         }
@@ -198,9 +167,6 @@ internal class DefaultAddPaymentMethodInteractor(
 
     override fun handleViewAction(viewAction: AddPaymentMethodInteractor.ViewAction) {
         when (viewAction) {
-            is AddPaymentMethodInteractor.ViewAction.OnLinkSignUpStateUpdated -> onLinkSignUpStateUpdated(
-                viewAction.state
-            )
             is AddPaymentMethodInteractor.ViewAction.ReportFieldInteraction -> reportFieldInteraction(
                 viewAction.code
             )
@@ -219,9 +185,5 @@ internal class DefaultAddPaymentMethodInteractor(
 
     override fun close() {
         coroutineScope.cancel()
-    }
-
-    private fun shouldHaveLinkInlineSignup(selectedPaymentMethodCode: PaymentMethodCode): Boolean {
-        return selectedPaymentMethodCode == PaymentMethod.Type.Card.code
     }
 }

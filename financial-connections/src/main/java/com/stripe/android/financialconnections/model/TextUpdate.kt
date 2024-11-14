@@ -11,6 +11,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 @Parcelize
 internal data class TextUpdate(
+    @SerialName("account_picker_pane")
+    val accountPicker: AccountPickerPane? = null,
     @SerialName("consent_pane")
     val consent: ConsentPane? = null,
     @SerialName("link_login_pane")
@@ -23,6 +25,14 @@ internal data class TextUpdate(
     val returningNetworkingUserAccountPicker: ReturningNetworkingUserAccountPicker? = null,
     @SerialName("success_pane")
     val successPane: SuccessPane? = null,
+) : Parcelable
+
+@Serializable
+@Parcelize
+internal data class AccountPickerPane(
+    @SerialName("data_access_notice")
+    @Serializable(with = MarkdownToHtmlSerializer::class)
+    val dataAccessNotice: String,
 ) : Parcelable
 
 @Serializable

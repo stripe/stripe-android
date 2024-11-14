@@ -2,10 +2,18 @@
 <resources>
   <!-- Used for accessibility to describe the button on the payment sheet list of options to add a new payment method. -->
   <string name="stripe_add_new_payment_method">Een nieuwe betaalmethode toevoegen</string>
+  <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
+  <string name="stripe_afterpay_subtitle">Koop nu of betaal later met Afterpay</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
-  <string name="stripe_bank_account_ending_in">Bankrekening verwijderen die eindigt op %s</string>
+  <string name="stripe_bank_account_ending_in">Bankrekening eindigend op %s</string>
+  <!-- Concise description of a saved bank account. E.g. 'Bank account ···· 4242' -->
+  <string name="stripe_bank_account_plus_last_4">Bankrekening ···· %s</string>
+  <!-- Concise description of a saved bank account. E.g. 'Bank account ····4242' -->
+  <string name="stripe_bank_account_with_last_4">Bankrekening ····%s</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">Bevestig de betaling in de app van je bank binnen %s om de aankoop af te ronden.</string>
+  <!-- This shows the message on Buy Now Pay Later LPM, clearpay. -->
+  <string name="stripe_clearpay_subtitle">Koop nu of betaal later met Clearpay</string>
   <!-- Used as the title for prompting the user if they want to close the sheet -->
   <string name="stripe_confirm_close_form_body">Je betaalgegevens worden niet opgeslagen.</string>
   <!-- Used as the title for prompting the user if they want to close the sheet -->
@@ -36,6 +44,8 @@
   <string name="stripe_paymentsheet_bacs_notice_mandate">Daarnaast ontvang je twee dagen vooraf via e-mail een melding van elk bedrag dat vanwege deze opdracht wordt afgeschreven. Betalingen worden op je bankafschrift weergegeven als \'%s\'.</string>
   <!-- Message shown as part of overall Bacs Mandate indicating that their payments are protected by a defined guarantee -->
   <string name="stripe_paymentsheet_bacs_protection_mandate">Je betalingen worden beschermd door %s.</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
+  <string name="stripe_paymentsheet_card_mandate">Door je kaartgegevens te verstrekken geef je %s toestemming om toekomstige betalingen af te schrijven van je betaalkaart in overeenstemming met hun voorwaarden.</string>
   <!-- Title shown above a carousel containing available payment methods -->
   <string name="stripe_paymentsheet_choose_payment_method">Een betaalmethode kiezen</string>
   <string name="stripe_paymentsheet_close">Sluiten</string>
@@ -53,6 +63,8 @@
   <string name="stripe_paymentsheet_microdeposit">Binnen 1-2 werkdagen stort Stripe $ 0,01 op je rekening. Daarna krijg je een e-mail met instructies over hoe je de betaling aan %s kunt voltooien.</string>
   <!-- Content for alert popup prompting to confirm modifying saved payment method. -->
   <string name="stripe_paymentsheet_modify_pm">%s bewerken</string>
+  <!-- Label of a button that appears on a checkout screen. When tapped, it displays a credit card form. This button is shown next to another button representing the customer's saved card; the word 'new' is meant to differentiate this button's action with the saved card button. -->
+  <string name="stripe_paymentsheet_new_card">Nieuwe betaalkaart</string>
   <!-- Title shown above a section containing payment methods that a customer can choose to pay with e.g. card, bank account, etc. -->
   <string name="stripe_paymentsheet_new_pm">Nieuwe betaalmethode</string>
   <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
@@ -72,9 +84,13 @@
   <!-- Label of a button that, when tapped, initiates payment, becomes disabled, and displays this text -->
   <string name="stripe_paymentsheet_primary_button_processing">Verwerken...</string>
   <!-- Title for confirmation alert to remove a saved bank account payment method -->
+  <string name="stripe_paymentsheet_remove_bank_account_question_title">Bankrekening verwijderen?</string>
+  <!-- Title for confirmation alert to remove a saved bank account payment method -->
   <string name="stripe_paymentsheet_remove_bank_account_title">Bankrekening verwijderen</string>
   <!-- Title for a button that when tapped removes a saved card. -->
   <string name="stripe_paymentsheet_remove_card">Betaalkaart verwijderen</string>
+  <!-- Title for confirmation alert to remove a card -->
+  <string name="stripe_paymentsheet_remove_card_title">Betaalkaart verwijderen?</string>
   <!-- Content for alert popup prompting to confirm removing saved payment method. -->
   <string name="stripe_paymentsheet_remove_pm">%s verwijderen</string>
   <!-- Title shown above a view containing a customer's payment method that they can delete -->
@@ -97,6 +113,8 @@
   <string name="stripe_paymentsheet_select_your_payment_method">Betaalmethode selecteren</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">Totaal: %s</string>
+  <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
+  <string name="stripe_remove_bank_account_ending_in">Bankrekening verwijderen die eindigt op %s</string>
   <!-- Generic failure message -->
   <string name="stripe_something_went_wrong">Er is iets misgegaan</string>
   <!-- Button text on a screen asking the user to approve a payment -->

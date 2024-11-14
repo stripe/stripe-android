@@ -106,7 +106,7 @@ private fun IntegrationTypeConfigurableSetting(
     configurationData: PlaygroundConfigurationData,
     updateConfigurationData: (updater: (PlaygroundConfigurationData) -> PlaygroundConfigurationData) -> Unit
 ) {
-    RadioButtonSetting(
+    DropdownSetting(
         name = "Integration Type",
         options = listOf(
             PlaygroundSettingDefinition.Displayable.Option(
@@ -116,6 +116,10 @@ private fun IntegrationTypeConfigurableSetting(
             PlaygroundSettingDefinition.Displayable.Option(
                 name = "Flow Controller",
                 value = PlaygroundConfigurationData.IntegrationType.FlowController
+            ),
+            PlaygroundSettingDefinition.Displayable.Option(
+                name = "Embedded",
+                value = PlaygroundConfigurationData.IntegrationType.Embedded
             ),
             PlaygroundSettingDefinition.Displayable.Option(
                 name = "Customer Sheet",

@@ -43,6 +43,7 @@ import com.stripe.android.uicore.elements.bottomsheet.BottomSheetContentTestTag
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.InjectableActivityScenario
+import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
 import com.stripe.android.utils.injectableActivityScenario
@@ -409,9 +410,9 @@ internal class PaymentOptionsActivityTest {
     fun `mandate text is shown above primary button when in vertical mode`() {
         val args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
             paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
-            config = PAYMENT_OPTIONS_CONTRACT_ARGS.state.config.copy(
+            config = PAYMENT_OPTIONS_CONTRACT_ARGS.configuration.copy(
                 paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
-            )
+            ),
         )
         runActivityScenario(args) { scenario ->
             scenario.onActivity { activity ->
@@ -447,16 +448,15 @@ internal class PaymentOptionsActivityTest {
 
         val viewModel = TestViewModelFactory.create(
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
-        ) { linkHandler, linkInteractor, savedStateHandle ->
+        ) { linkHandler, savedStateHandle ->
             PaymentOptionsViewModel(
                 args = args,
                 eventReporter = eventReporter,
                 customerRepository = FakeCustomerRepository(),
                 workContext = testDispatcher,
-                application = ApplicationProvider.getApplicationContext(),
                 savedStateHandle = savedStateHandle,
                 linkHandler = linkHandler,
-                linkConfigurationCoordinator = linkInteractor,
+                cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
                 editInteractorFactory = mock()
             )
         }

@@ -5,6 +5,7 @@ apply plugin: 'checkstyle'
 apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
 apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
 apply plugin: 'app.cash.paparazzi'
+apply plugin: 'org.jetbrains.kotlin.plugin.compose'
 
 ext {
     artifactId = "stripe-ui-core"
@@ -26,10 +27,6 @@ android {
             }
         }
     }
-
-    composeOptions {
-        kotlinCompilerExtensionVersion "${versions.androidxComposeCompiler}"
-    }
 }
 
 dependencies {
@@ -39,6 +36,7 @@ dependencies {
     implementation libs.androidx.coreKtx
     implementation libs.compose.foundation
     implementation libs.compose.material
+    implementation libs.compose.materialIcons
     implementation libs.compose.ui
     implementation libs.compose.uiToolingPreview
     implementation libs.diskLruCache

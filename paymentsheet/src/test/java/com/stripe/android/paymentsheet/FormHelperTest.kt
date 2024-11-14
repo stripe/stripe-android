@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet
 
-import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
@@ -16,6 +15,8 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
+import com.stripe.android.utils.FakeLinkConfigurationCoordinator
+import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
@@ -127,6 +128,7 @@ internal class FormHelperTest {
                     value = 1099,
                     currencyCode = "usd",
                 ),
+                hasIntentToSetup = true,
                 billingDetails = PaymentSheet.BillingDetails(),
             )
         )
@@ -157,15 +159,68 @@ internal class FormHelperTest {
         assertThat(hasCalledSelectionUpdater).isTrue()
     }
 
+    @Test
+    fun `requiresFormScreen returns false for an LPM with no fields`() {
+        val formHelper = createFormHelper(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    paymentMethodTypes = listOf("card", "cashapp"),
+                )
+            ),
+            newPaymentSelectionProvider = { null },
+        )
+        assertThat(formHelper.requiresFormScreen("cashapp")).isFalse()
+    }
+
+    @Test
+    fun `requiresFormScreen returns true for an LPM with no fields, but requires name`() {
+        val formHelper = createFormHelper(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    paymentMethodTypes = listOf("card", "cashapp"),
+                ),
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                ),
+            ),
+            newPaymentSelectionProvider = { null },
+        )
+        assertThat(formHelper.requiresFormScreen("cashapp")).isTrue()
+    }
+
+    @Test
+    fun `requiresFormScreen returns true for an LPM with fields`() {
+        val formHelper = createFormHelper(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    paymentMethodTypes = listOf("card", "klarna"),
+                ),
+            ),
+            newPaymentSelectionProvider = { null },
+        )
+        assertThat(formHelper.requiresFormScreen("klarna")).isTrue()
+    }
+
+    @Test
+    fun `requiresFormScreen returns true for non form field based LPM us_bank_account`() {
+        val formHelper = createFormHelper(
+            newPaymentSelectionProvider = { null },
+        )
+        assertThat(formHelper.requiresFormScreen("us_bank_account")).isTrue()
+        assertThat(formHelper.requiresFormScreen("link")).isTrue()
+    }
+
     private fun createFormHelper(
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         newPaymentSelectionProvider: () -> NewOrExternalPaymentSelection? = { throw AssertionError("Not implemented") },
         selectionUpdater: (PaymentSelection?) -> Unit = { throw AssertionError("Not implemented") },
     ): FormHelper {
         return FormHelper(
-            context = ApplicationProvider.getApplicationContext(),
+            cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
             paymentMethodMetadata = paymentMethodMetadata,
             newPaymentSelectionProvider = newPaymentSelectionProvider,
+            linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
+            onLinkInlineSignupStateChanged = { throw AssertionError("Not implemented") },
             selectionUpdater = selectionUpdater,
         )
     }

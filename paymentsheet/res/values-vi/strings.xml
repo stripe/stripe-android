@@ -2,10 +2,18 @@
 <resources>
   <!-- Used for accessibility to describe the button on the payment sheet list of options to add a new payment method. -->
   <string name="stripe_add_new_payment_method">Thêm phương thức thanh toán mới</string>
+  <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
+  <string name="stripe_afterpay_subtitle">Mua ngay hoặc thanh toán sau bằng Afterpay</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
-  <string name="stripe_bank_account_ending_in">Gỡ bỏ tài khoản ngân hàng có đuôi là %s</string>
+  <string name="stripe_bank_account_ending_in">Tài khoản ngân hàng có số cuối là %s</string>
+  <!-- Concise description of a saved bank account. E.g. 'Bank account ···· 4242' -->
+  <string name="stripe_bank_account_plus_last_4">Tài khoản ngân hàng ···· %s</string>
+  <!-- Concise description of a saved bank account. E.g. 'Bank account ····4242' -->
+  <string name="stripe_bank_account_with_last_4">Tài khoản ngân hàng ····%s</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">Hãy xác nhận thanh toán trong ứng dụng ngân hàng của quý vị trong vòng %s để hoàn tất giao dịch mua.</string>
+  <!-- This shows the message on Buy Now Pay Later LPM, clearpay. -->
+  <string name="stripe_clearpay_subtitle">Mua ngay hoặc thanh toán sau bằng Clearpay</string>
   <!-- Used as the title for prompting the user if they want to close the sheet -->
   <string name="stripe_confirm_close_form_body">Thông tin thanh toán của bạn sẽ không lưu lại.</string>
   <!-- Used as the title for prompting the user if they want to close the sheet -->
@@ -36,6 +44,8 @@
   <string name="stripe_paymentsheet_bacs_notice_mandate">Ngoài ra, bạn sẽ nhận được thông báo trước qua email về bất kỳ khoản tiền nào sẽ được ghi nợ theo hướng dẫn này. Các khoản thanh toán sẽ hiển thị là \'%s\' trên bảng sao kê ngân hàng của bạn.</string>
   <!-- Message shown as part of overall Bacs Mandate indicating that their payments are protected by a defined guarantee -->
   <string name="stripe_paymentsheet_bacs_protection_mandate">Các khoản thanh toán của bạn được bảo vệ bởi %s.</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
+  <string name="stripe_paymentsheet_card_mandate">Bằng việc cung cấp thông tin thẻ, bạn cho phép %s tính phí thẻ của bạn cho các khoản thanh toán trong tương lai theo điều khoản của họ.</string>
   <!-- Title shown above a carousel containing available payment methods -->
   <string name="stripe_paymentsheet_choose_payment_method">Chọn phương thức thanh toán</string>
   <string name="stripe_paymentsheet_close">Đóng</string>
@@ -53,6 +63,8 @@
   <string name="stripe_paymentsheet_microdeposit">Stripe sẽ gửi $0.01 vào tài khoản của bạn trong 1-2 ngày làm việc. Khi đó bạn sẽ nhận được một email chứa hướng dẫn để hoàn tất thanh toán cho %s.</string>
   <!-- Content for alert popup prompting to confirm modifying saved payment method. -->
   <string name="stripe_paymentsheet_modify_pm">Sửa %s</string>
+  <!-- Label of a button that appears on a checkout screen. When tapped, it displays a credit card form. This button is shown next to another button representing the customer's saved card; the word 'new' is meant to differentiate this button's action with the saved card button. -->
+  <string name="stripe_paymentsheet_new_card">Thẻ mới</string>
   <!-- Title shown above a section containing payment methods that a customer can choose to pay with e.g. card, bank account, etc. -->
   <string name="stripe_paymentsheet_new_pm">Phương thức thanh toán mới</string>
   <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
@@ -72,9 +84,13 @@
   <!-- Label of a button that, when tapped, initiates payment, becomes disabled, and displays this text -->
   <string name="stripe_paymentsheet_primary_button_processing">Đang xử lý...</string>
   <!-- Title for confirmation alert to remove a saved bank account payment method -->
+  <string name="stripe_paymentsheet_remove_bank_account_question_title">Bỏ tài khoản ngân hàng?</string>
+  <!-- Title for confirmation alert to remove a saved bank account payment method -->
   <string name="stripe_paymentsheet_remove_bank_account_title">Bỏ tài khoản ngân hàng</string>
   <!-- Title for a button that when tapped removes a saved card. -->
   <string name="stripe_paymentsheet_remove_card">Xóa thẻ</string>
+  <!-- Title for confirmation alert to remove a card -->
+  <string name="stripe_paymentsheet_remove_card_title">Xóa thẻ?</string>
   <!-- Content for alert popup prompting to confirm removing saved payment method. -->
   <string name="stripe_paymentsheet_remove_pm">Xóa %s</string>
   <!-- Title shown above a view containing a customer's payment method that they can delete -->
@@ -97,6 +113,8 @@
   <string name="stripe_paymentsheet_select_your_payment_method">Chọn phương thức thanh toán của bạn</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">Tổng cộng: %s</string>
+  <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
+  <string name="stripe_remove_bank_account_ending_in">Gỡ bỏ tài khoản ngân hàng có đuôi là %s</string>
   <!-- Generic failure message -->
   <string name="stripe_something_went_wrong">Đã xảy ra sự cố</string>
   <!-- Button text on a screen asking the user to approve a payment -->

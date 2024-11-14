@@ -6,7 +6,6 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.ConfirmPaymentIntentParams
-import com.stripe.android.model.MandateDataParams
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -15,8 +14,9 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
-import com.stripe.android.paymentsheet.PaymentSheet.InitializationMode
+import com.stripe.android.paymentsheet.state.PaymentElementLoader.InitializationMode
 import com.stripe.android.testing.AbsFakeStripeRepository
+import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.utils.IntentConfirmationInterceptorTestRule
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -92,7 +92,7 @@ class DefaultIntentConfirmationInterceptorTest {
             val interceptor = createIntentConfirmationInterceptor()
 
             val nextStep = interceptor.intercept(
-                confirmationOption = PaymentConfirmationOption.PaymentMethod.Saved(
+                confirmationOption = ConfirmationHandler.Option.PaymentMethod.Saved(
                     initializationMode = InitializationMode.PaymentIntent("pi_1234_secret_4321"),
                     shippingDetails = null,
                     paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
@@ -401,8 +401,9 @@ class DefaultIntentConfirmationInterceptorTest {
                     expandFields: List<String>
                 ): Result<StripeIntent> {
                     return Result.success(
-                        PaymentIntentFixtures.PI_SUCCEEDED.copy(
-                            status = StripeIntent.Status.RequiresAction,
+                        PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2.copy(
+                            paymentMethodId = paymentMethod.id,
+                            paymentMethod = paymentMethod,
                         )
                     )
                 }
@@ -520,44 +521,45 @@ class DefaultIntentConfirmationInterceptorTest {
     }
 
     @Test
-    fun `Creates correct confirm step when confirming Instant Debits transaction`() = runTest {
-        val paymentMethodId = PaymentMethodFixtures.CARD_PAYMENT_METHOD.id!!
-        val clientSecret = "pi_1234_secret_4321"
+    fun `If requires next action with an attached payment method different then the created one, throw error`() =
+        runTest {
+            val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
 
-        val interceptor = DefaultIntentConfirmationInterceptor(
-            stripeRepository = mock(),
-            publishableKeyProvider = { "pk" },
-            stripeAccountIdProvider = { null },
-            isFlowController = false,
-        )
-
-        val createParams = PaymentMethodCreateParams.createInstantDebits(
-            paymentMethodId = paymentMethodId,
-            requiresMandate = false,
-            productUsage = emptySet(),
-        )
-
-        val nextStep = interceptor.intercept(
-            initializationMode = InitializationMode.PaymentIntent(clientSecret),
-            paymentMethodCreateParams = createParams,
-            paymentMethodOptionsParams = null,
-            shippingValues = null,
-            customerRequestedSave = false,
-        )
-
-        val expectedConfirmParams = ConfirmPaymentIntentParams.createWithPaymentMethodId(
-            paymentMethodId = paymentMethodId,
-            clientSecret = clientSecret,
-            mandateData = MandateDataParams(MandateDataParams.Type.Online.DEFAULT),
-        )
-
-        assertThat(nextStep).isEqualTo(
-            IntentConfirmationInterceptor.NextStep.Confirm(
-                confirmParams = expectedConfirmParams,
-                isDeferred = false,
+            val interceptor = DefaultIntentConfirmationInterceptor(
+                stripeRepository = stripeRepositoryReturning(
+                    onCreatePaymentMethodId = "pm_1234",
+                    onRetrievePaymentMethodId = "pm_5678"
+                ),
+                publishableKeyProvider = { "pk" },
+                stripeAccountIdProvider = { null },
+                isFlowController = false,
             )
-        )
-    }
+
+            IntentConfirmationInterceptor.createIntentCallback = CreateIntentCallback { _, _ ->
+                CreateIntentResult.Success(clientSecret = "pi_123")
+            }
+
+            val nextStep = interceptor.intercept(
+                initializationMode = InitializationMode.DeferredIntent(
+                    intentConfiguration = PaymentSheet.IntentConfiguration(
+                        mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                            amount = 1099L,
+                            currency = "usd",
+                        ),
+                    ),
+                ),
+                paymentMethod = paymentMethod,
+                paymentMethodOptionsParams = null,
+                shippingValues = null,
+            )
+
+            val failedStep = nextStep.asFail()
+
+            assertThat(failedStep.cause).isInstanceOf(InvalidDeferredIntentUsageException::class.java)
+            assertThat(failedStep.message).isEqualTo(
+                R.string.stripe_paymentsheet_invalid_deferred_intent_usage.resolvableString
+            )
+        }
 
     private fun succeedingCreateIntentCallback(
         expectedPaymentMethod: PaymentMethod,
@@ -586,6 +588,40 @@ class DefaultIntentConfirmationInterceptorTest {
             stripeAccountIdProvider = { null },
             isFlowController = false,
         )
+    }
+
+    private fun stripeRepositoryReturning(
+        onCreatePaymentMethodId: String,
+        onRetrievePaymentMethodId: String,
+    ): StripeRepository {
+        return object : AbsFakeStripeRepository() {
+            override suspend fun createPaymentMethod(
+                paymentMethodCreateParams: PaymentMethodCreateParams,
+                options: ApiRequest.Options
+            ): Result<PaymentMethod> {
+                return Result.success(
+                    PaymentMethodFactory.card(random = true).copy(
+                        id = onCreatePaymentMethodId
+                    )
+                )
+            }
+
+            override suspend fun retrieveStripeIntent(
+                clientSecret: String,
+                options: ApiRequest.Options,
+                expandFields: List<String>
+            ): Result<StripeIntent> {
+                return Result.success(
+                    PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2.copy(
+                        paymentMethodId = onRetrievePaymentMethodId
+                    )
+                )
+            }
+        }
+    }
+
+    private fun IntentConfirmationInterceptor.NextStep.asFail(): IntentConfirmationInterceptor.NextStep.Fail {
+        return this as IntentConfirmationInterceptor.NextStep.Fail
     }
 
     private class TestException(message: String? = null) : Exception(message) {

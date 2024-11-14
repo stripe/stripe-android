@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
+  <string name="stripe_afterpay_clearpay_marketing"><![CDATA[Bumili ngayon o magbayad sa ibang pagkakataon gamit ang <img/>]]></string>
+  <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="stripe_afterpay_clearpay_message"><![CDATA[Magbayad ng <num_installments/> na walang interes na pagbabayad ng <installment_price/> gamit ang <img/>]]></string>
+  <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
+  <string name="stripe_afterpay_clearpay_subtitle">%1$d walang interes na mga pagbabayad ng %2$s</string>
   <!-- Amazon Pay mandate text -->
   <string name="stripe_amazon_pay_mandate">Sa pagkumpirma sa iyong pagbabayad sa AmazonPay, pinapayagan mo ang %s na singilin ang iyong AmazonPay account para sa mga pagbabayad sa hinaharap alinsunod sa kanilang mga tuntunin.</string>
   <!-- Text for back button -->
@@ -91,6 +95,8 @@
   <string name="stripe_revolut_mandate">Sa pagkumpirma sa iyong pagbabayad sa RevolutPay, pinapayagan mo ang %s na singilin ang iyong RevolutPay account para sa mga pagbabayad sa hinaharap alinsunod sa kanilang mga tuntunin.</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
   <string name="stripe_save_for_future_payments_with_merchant_name">I-save para sa mga pagbabayad sa %s sa hinaharap</string>
+  <!-- The label of a switch indicating whether to save the user's payment details for future payment -->
+  <string name="stripe_save_payment_details_to_merchant_name">I-save ang mga detalye ng pababayad sa %s para sa mga pagbili sa hinaharap</string>
   <!-- Button title to open camera to scan credit/debit card -->
   <string name="stripe_scan_card">I-scan ang kard</string>
   <!-- SEPA mandate text -->

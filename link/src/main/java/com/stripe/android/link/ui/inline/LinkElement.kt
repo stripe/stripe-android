@@ -6,51 +6,59 @@ import androidx.annotation.RestrictTo
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkConfigurationCoordinator
+import java.util.UUID
 
 @Composable
 fun LinkElement(
-    linkConfigurationCoordinator: LinkConfigurationCoordinator?,
-    linkSignupMode: LinkSignupMode?,
+    linkConfigurationCoordinator: LinkConfigurationCoordinator,
+    configuration: LinkConfiguration,
+    linkSignupMode: LinkSignupMode,
     enabled: Boolean,
-    horizontalPadding: Dp,
     onLinkSignupStateChanged: (InlineSignupViewState) -> Unit,
 ) {
-    val component = linkConfigurationCoordinator?.component
+    val component = remember(linkConfigurationCoordinator, configuration) {
+        linkConfigurationCoordinator.getComponent(configuration)
+    }
 
-    if (component != null && linkSignupMode != null) {
-        val viewModel: InlineSignupViewModel = viewModel(
-            factory = InlineSignupViewModel.Factory(
-                signupMode = linkSignupMode,
-                linkComponent = component,
-            )
+    val uuid = rememberSaveable(linkConfigurationCoordinator, configuration) {
+        UUID.randomUUID().toString()
+    }
+
+    val viewModel: InlineSignupViewModel = viewModel(
+        key = uuid,
+        factory = InlineSignupViewModel.Factory(
+            signupMode = linkSignupMode,
+            linkComponent = component,
         )
+    )
 
-        when (viewModel.signupMode) {
-            LinkSignupMode.InsteadOfSaveForFutureUse -> {
-                LinkInlineSignup(
-                    viewModel = viewModel,
-                    enabled = enabled,
-                    onStateChanged = onLinkSignupStateChanged,
-                    modifier = Modifier
-                        .padding(horizontal = horizontalPadding, vertical = 6.dp)
-                        .fillMaxWidth(),
-                )
-            }
-            LinkSignupMode.AlongsideSaveForFutureUse -> {
-                LinkOptionalInlineSignup(
-                    viewModel = viewModel,
-                    enabled = enabled,
-                    onStateChanged = onLinkSignupStateChanged,
-                    modifier = Modifier
-                        .padding(horizontal = horizontalPadding, vertical = 6.dp)
-                        .fillMaxWidth(),
-                )
-            }
+    when (viewModel.signupMode) {
+        LinkSignupMode.InsteadOfSaveForFutureUse -> {
+            LinkInlineSignup(
+                viewModel = viewModel,
+                enabled = enabled,
+                onStateChanged = onLinkSignupStateChanged,
+                modifier = Modifier
+                    .padding(vertical = 6.dp)
+                    .fillMaxWidth(),
+            )
+        }
+        LinkSignupMode.AlongsideSaveForFutureUse -> {
+            LinkOptionalInlineSignup(
+                viewModel = viewModel,
+                enabled = enabled,
+                onStateChanged = onLinkSignupStateChanged,
+                modifier = Modifier
+                    .padding(vertical = 6.dp)
+                    .fillMaxWidth(),
+            )
         }
     }
 }

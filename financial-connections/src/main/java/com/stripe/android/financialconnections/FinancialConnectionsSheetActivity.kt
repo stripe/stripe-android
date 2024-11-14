@@ -151,7 +151,8 @@ internal class FinancialConnectionsSheetActivity : AppCompatActivity() {
                 context = this,
                 args = FinancialConnectionsSheetNativeActivityArgs(
                     initialSyncResponse = viewEffect.initialSyncResponse,
-                    configuration = viewEffect.configuration
+                    configuration = viewEffect.configuration,
+                    elementsSessionContext = viewEffect.elementsSessionContext,
                 )
             )
         )

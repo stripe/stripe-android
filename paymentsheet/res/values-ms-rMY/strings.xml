@@ -2,10 +2,18 @@
 <resources>
   <!-- Used for accessibility to describe the button on the payment sheet list of options to add a new payment method. -->
   <string name="stripe_add_new_payment_method">Tambah kaedah pembayaran baharu</string>
+  <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
+  <string name="stripe_afterpay_subtitle">Beli sekarang atau bayar kemudian dengan Afterpay</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
-  <string name="stripe_bank_account_ending_in">Alih keluar akaun bank yang berakhir dengan %s</string>
+  <string name="stripe_bank_account_ending_in">Akaun bank yang berakhir dengan %s</string>
+  <!-- Concise description of a saved bank account. E.g. 'Bank account ···· 4242' -->
+  <string name="stripe_bank_account_plus_last_4">Akaun bank ···· %s</string>
+  <!-- Concise description of a saved bank account. E.g. 'Bank account ····4242' -->
+  <string name="stripe_bank_account_with_last_4">Akaun bank ····%s</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">Sahkan pembayaran dalam aplikasi bank anda dalam %s untuk menyelesaikan pembelian.</string>
+  <!-- This shows the message on Buy Now Pay Later LPM, clearpay. -->
+  <string name="stripe_clearpay_subtitle">Beli sekarang atau bayar kemudian dengan Clearpay</string>
   <!-- Used as the title for prompting the user if they want to close the sheet -->
   <string name="stripe_confirm_close_form_body">Maklumat pembayaran anda tidak akan disimpan.</string>
   <!-- Used as the title for prompting the user if they want to close the sheet -->
@@ -36,6 +44,8 @@
   <string name="stripe_paymentsheet_bacs_notice_mandate">Selain itu, anda akan menerima notis pendahuluan dua hari melalui e-mel mengenai sebarang amaun yang akan didebitkan di bawah arahan ini. Pembayaran akan dipaparkan sebagai \"%s\" pada penyata bank anda.</string>
   <!-- Message shown as part of overall Bacs Mandate indicating that their payments are protected by a defined guarantee -->
   <string name="stripe_paymentsheet_bacs_protection_mandate">Pembayaran anda dilindungi oleh %s.</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
+  <string name="stripe_paymentsheet_card_mandate">Dengan memberikan maklumat kad anda, anda membenarkan %s mengecaj kad anda bagi pembayaran masa hadapan menurut terma mereka.</string>
   <!-- Title shown above a carousel containing available payment methods -->
   <string name="stripe_paymentsheet_choose_payment_method">Pilih kaedah pembayaran</string>
   <string name="stripe_paymentsheet_close">Tutup</string>
@@ -53,6 +63,8 @@
   <string name="stripe_paymentsheet_microdeposit">Stripe akan mendepositkan sebanyak $0.01 ke dalam akaun anda dalam masa 1–2 hari bekerja. Kemudian anda akan mendapat e-mel dengan arahan untuk menyelesaikan pembayaran kepada %s.</string>
   <!-- Content for alert popup prompting to confirm modifying saved payment method. -->
   <string name="stripe_paymentsheet_modify_pm">Edit %s</string>
+  <!-- Label of a button that appears on a checkout screen. When tapped, it displays a credit card form. This button is shown next to another button representing the customer's saved card; the word 'new' is meant to differentiate this button's action with the saved card button. -->
+  <string name="stripe_paymentsheet_new_card">Kad baharu</string>
   <!-- Title shown above a section containing payment methods that a customer can choose to pay with e.g. card, bank account, etc. -->
   <string name="stripe_paymentsheet_new_pm">Kaedah pembayaran baharu</string>
   <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
@@ -72,9 +84,13 @@
   <!-- Label of a button that, when tapped, initiates payment, becomes disabled, and displays this text -->
   <string name="stripe_paymentsheet_primary_button_processing">Sedang diproses...</string>
   <!-- Title for confirmation alert to remove a saved bank account payment method -->
+  <string name="stripe_paymentsheet_remove_bank_account_question_title">Alih keluar akaun bank?</string>
+  <!-- Title for confirmation alert to remove a saved bank account payment method -->
   <string name="stripe_paymentsheet_remove_bank_account_title">Alih keluar akaun bank</string>
   <!-- Title for a button that when tapped removes a saved card. -->
   <string name="stripe_paymentsheet_remove_card">Alih keluar kad</string>
+  <!-- Title for confirmation alert to remove a card -->
+  <string name="stripe_paymentsheet_remove_card_title">Alih keluar kad?</string>
   <!-- Content for alert popup prompting to confirm removing saved payment method. -->
   <string name="stripe_paymentsheet_remove_pm">Alih keluar %s</string>
   <!-- Title shown above a view containing a customer's payment method that they can delete -->
@@ -97,6 +113,8 @@
   <string name="stripe_paymentsheet_select_your_payment_method">Pilih kaedah pembayaran anda</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">Jumlah: %s</string>
+  <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
+  <string name="stripe_remove_bank_account_ending_in">Alih keluar akaun bank yang berakhir dengan %s</string>
   <!-- Generic failure message -->
   <string name="stripe_something_went_wrong">Ada sesuatu yang tidak kena</string>
   <!-- Button text on a screen asking the user to approve a payment -->

@@ -12,7 +12,7 @@ import org.json.JSONObject
 class DeferredPaymentIntentJsonParser(
     private val elementsSessionId: String?,
     private val paymentMode: DeferredIntentParams.Mode.Payment,
-    private val apiKey: String,
+    private val isLiveMode: Boolean,
     private val timeProvider: () -> Long
 ) : ModelJsonParser<PaymentIntent> {
     override fun parse(json: JSONObject): PaymentIntent {
@@ -22,7 +22,7 @@ class DeferredPaymentIntentJsonParser(
 
         val unactivatedPaymentMethods = jsonArrayToList(
             json.optJSONArray(FIELD_UNACTIVATED_PAYMENT_METHOD_TYPES)
-        )
+        ).map { it.lowercase() }
 
         val linkFundingSources = jsonArrayToList(json.optJSONArray(FIELD_LINK_FUNDING_SOURCES))
             .map { it.lowercase() }
@@ -43,7 +43,7 @@ class DeferredPaymentIntentJsonParser(
             countryCode = countryCode,
             linkFundingSources = linkFundingSources,
             unactivatedPaymentMethods = unactivatedPaymentMethods,
-            isLiveMode = apiKey.contains("live"),
+            isLiveMode = isLiveMode,
             created = timeProvider(),
             setupFutureUsage = paymentMode.setupFutureUsage,
             amount = paymentMode.amount,

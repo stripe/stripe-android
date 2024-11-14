@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
+  <string name="stripe_afterpay_clearpay_marketing"><![CDATA[用 <img/> 先买后付]]></string>
+  <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="stripe_afterpay_clearpay_message"><![CDATA[用 <img/> 分 <num_installments/> 支付，无利息，每期 <installment_price/>]]></string>
+  <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
+  <string name="stripe_afterpay_clearpay_subtitle">%1$d免费支付 %2$s</string>
   <!-- Amazon Pay mandate text -->
   <string name="stripe_amazon_pay_mandate">确认您的 Amazon Pay 付款即表示您允许 %s 按照其条款从您的 Amazon Pay 账户扣取未来款项。</string>
   <!-- Text for back button -->
@@ -91,6 +95,8 @@
   <string name="stripe_revolut_mandate">确认您的 RevolutPay 付款即表示您允许 %s 按照其条款从您的 RevolutPay 账户扣取未来款项。</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
   <string name="stripe_save_for_future_payments_with_merchant_name">保存以用于未来的 %s 付款</string>
+  <!-- The label of a switch indicating whether to save the user's payment details for future payment -->
+  <string name="stripe_save_payment_details_to_merchant_name">将支付详情保存到 %s 以备将来购物时使用</string>
   <!-- Button title to open camera to scan credit/debit card -->
   <string name="stripe_scan_card">扫描卡</string>
   <!-- SEPA mandate text -->

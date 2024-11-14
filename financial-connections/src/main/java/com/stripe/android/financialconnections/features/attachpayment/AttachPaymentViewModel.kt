@@ -63,7 +63,7 @@ internal class AttachPaymentViewModel @AssistedInject constructor(
             if (manifest.isNetworkingUserFlow == true && manifest.accountholderIsLinkConsumer == true) {
                 result.networkingSuccessful?.let {
                     successContentRepository.set(
-                        customSuccessMessage = PluralId(
+                        message = PluralId(
                             value = R.plurals.stripe_success_pane_desc_link_success,
                             count = accounts.size
                         )

@@ -1,5 +1,9 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
+import com.stripe.android.CardBrandFilter
+import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.lpmfoundations.paymentmethod.link.LinkInlineConfiguration
+import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -26,6 +30,10 @@ internal object PaymentMethodMetadataFactory {
         externalPaymentMethodSpecs: List<ExternalPaymentMethodSpec> = emptyList(),
         isGooglePayReady: Boolean = false,
         paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
+        linkInlineConfiguration: LinkInlineConfiguration? = null,
+        linkMode: LinkMode? = LinkMode.LinkPaymentMethod,
+        cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
+        defaultBillingDetails: PaymentSheet.BillingDetails = PaymentSheet.BillingDetails(),
     ): PaymentMethodMetadata {
         return PaymentMethodMetadata(
             stripeIntent = stripeIntent,
@@ -36,13 +44,16 @@ internal object PaymentMethodMetadataFactory {
             paymentMethodOrder = paymentMethodOrder,
             cbcEligibility = cbcEligibility,
             merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
-            defaultBillingDetails = PaymentSheet.BillingDetails(),
+            defaultBillingDetails = defaultBillingDetails,
             shippingDetails = shippingDetails,
             hasCustomerConfiguration = hasCustomerConfiguration,
             sharedDataSpecs = sharedDataSpecs,
             paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
             externalPaymentMethodSpecs = externalPaymentMethodSpecs,
             isGooglePayReady = isGooglePayReady,
+            linkInlineConfiguration = linkInlineConfiguration,
+            linkMode = linkMode,
+            cardBrandFilter = cardBrandFilter
         )
     }
 

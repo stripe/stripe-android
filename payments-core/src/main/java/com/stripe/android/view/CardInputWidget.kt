@@ -194,7 +194,7 @@ class CardInputWidget @JvmOverloads constructor(
                     expiryMonth = params.expMonth,
                     expiryYear = params.expYear,
                     attribution = params.attribution,
-                    networks = cardBrandView.createNetworksParam(),
+                    networks = cardBrandView.paymentMethodCreateParamsNetworks(),
                 )
             }
         }
@@ -271,7 +271,8 @@ class CardInputWidget @JvmOverloads constructor(
                         cvc = cvc.value,
                         address = Address.Builder()
                             .setPostalCode(postalCodeValue.takeUnless { it.isNullOrBlank() })
-                            .build()
+                            .build(),
+                        networks = cardBrandView.cardParamsNetworks()
                     )
                 }
             }
@@ -710,7 +711,6 @@ class CardInputWidget @JvmOverloads constructor(
         isShowingFullCard = true
 
         @ColorInt var errorColorInt = cardNumberEditText.defaultErrorColorInt
-        cardBrandView.tintColorInt = cardNumberEditText.hintTextColors.defaultColor
         var cardHintText: String? = null
         var shouldRequestFocus = true
 
@@ -718,11 +718,6 @@ class CardInputWidget @JvmOverloads constructor(
             attrs,
             R.styleable.CardInputView
         ) {
-            cardBrandView.tintColorInt = getColor(
-                R.styleable.CardInputView_cardTint,
-                cardBrandView.tintColorInt
-            )
-
             errorColorInt = getColor(
                 R.styleable.CardInputView_cardTextErrorColor,
                 errorColorInt

@@ -11,6 +11,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
@@ -47,7 +48,7 @@ class DefaultPaymentSheetLauncherTest {
                 }
 
                 moveToState(Lifecycle.State.RESUMED)
-                launcher.present(mode = PaymentSheet.InitializationMode.PaymentIntent("pi_fake"))
+                launcher.present(mode = PaymentElementLoader.InitializationMode.PaymentIntent("pi_fake"))
                 assertThat(results).containsExactly(PaymentSheetResult.Completed)
             }
         }
@@ -72,7 +73,7 @@ class DefaultPaymentSheetLauncherTest {
                 }
 
                 moveToState(Lifecycle.State.DESTROYED)
-                launcher.present(mode = PaymentSheet.InitializationMode.PaymentIntent("pi_fake"))
+                launcher.present(mode = PaymentElementLoader.InitializationMode.PaymentIntent("pi_fake"))
                 assertThat(results).hasSize(1)
                 assertThat((results.first() as PaymentSheetResult.Failed).error).hasMessageThat().isEqualTo(
                     "The host activity is not in a valid state (INITIALIZED)."
@@ -132,32 +133,6 @@ class DefaultPaymentSheetLauncherTest {
 
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
         assertThat(ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler).isNull()
-    }
-
-    @OptIn(ExperimentalCvcRecollectionApi::class)
-    @Test
-    fun `Clears out isCvcRecollectionEnabledCallback when lifecycle owner is destroyed`() {
-        CvcRecollectionCallbackHandler.isCvcRecollectionEnabledCallback =
-            CvcRecollectionEnabledCallback { true }
-
-        val lifecycleOwner = TestLifecycleOwner()
-
-        DefaultPaymentSheetLauncher(
-            activityResultLauncher = mock(),
-            activity = mock(),
-            lifecycleOwner = lifecycleOwner,
-            application = ApplicationProvider.getApplicationContext(),
-            callback = mock(),
-        )
-
-        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
-        assertThat(CvcRecollectionCallbackHandler.isCvcRecollectionEnabledCallback).isNotNull()
-
-        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
-        assertThat(CvcRecollectionCallbackHandler.isCvcRecollectionEnabledCallback).isNotNull()
-
-        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-        assertThat(CvcRecollectionCallbackHandler.isCvcRecollectionEnabledCallback).isNull()
     }
 
     private class FakeActivityResultRegistry(

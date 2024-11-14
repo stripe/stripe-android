@@ -34,10 +34,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.disabled
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
@@ -135,7 +135,7 @@ internal fun SavedPaymentMethodTabLayoutUI(
     modifier: Modifier = Modifier,
     scrollState: LazyListState = rememberLazyListState(),
 ) {
-    BoxWithConstraints(modifier = modifier.fillMaxWidth()) {
+    BoxWithConstraints(modifier = modifier.fillMaxWidth().testTag(SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG)) {
         val width = rememberItemWidth(maxWidth)
 
         LazyRow(
@@ -369,7 +369,6 @@ private fun SavedPaymentMethodTab(
     onItemRemoved: (PaymentMethod) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val context = LocalContext.current
     val labelIcon = paymentMethod.paymentMethod.getLabelIcon()
     val labelText = paymentMethod.paymentMethod.getLabel()?.resolve() ?: return
 
@@ -378,6 +377,10 @@ private fun SavedPaymentMethodTab(
             testTag = SAVED_PAYMENT_OPTION_TEST_TAG
             selected = isSelected
             text = AnnotatedString(labelText)
+
+            if (!isEnabled) {
+                disabled()
+            }
         }
     ) {
         SavedPaymentMethodTab(
@@ -394,11 +397,23 @@ private fun SavedPaymentMethodTab(
             labelIcon = labelIcon,
             labelText = labelText,
             paymentMethod = paymentMethod.displayableSavedPaymentMethod,
-            description = paymentMethod.displayableSavedPaymentMethod.getDescription(context.resources),
+            description = paymentMethod
+                .displayableSavedPaymentMethod
+                .getDescription()
+                .resolve()
+                .readNumbersAsIndividualDigits(),
             onModifyListener = { onModifyItem(paymentMethod.paymentMethod) },
-            onModifyAccessibilityDescription = paymentMethod.getModifyDescription(context.resources),
+            onModifyAccessibilityDescription = paymentMethod
+                .displayableSavedPaymentMethod
+                .getModifyDescription()
+                .resolve()
+                .readNumbersAsIndividualDigits(),
             onRemoveListener = { onItemRemoved(paymentMethod.paymentMethod) },
-            onRemoveAccessibilityDescription = paymentMethod.getRemoveDescription(context.resources),
+            onRemoveAccessibilityDescription = paymentMethod
+                .displayableSavedPaymentMethod
+                .getRemoveDescription()
+                .resolve()
+                .readNumbersAsIndividualDigits(),
             onItemSelectedListener = {
                 onItemSelected(paymentMethod.toPaymentSelection())
             },
@@ -474,6 +489,8 @@ internal fun CvcRecollectionField(
         }
     }
 }
+
+internal const val SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG = "PaymentSheetSavedPaymentOptionTabLayout"
 
 @VisibleForTesting
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

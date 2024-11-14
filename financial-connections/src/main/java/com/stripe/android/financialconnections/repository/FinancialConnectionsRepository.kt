@@ -4,7 +4,9 @@ import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.exception.AuthenticationException
 import com.stripe.android.core.exception.InvalidRequestException
+import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext.BillingDetails
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccountList
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.GetFinancialConnectionsAcccountsParams
@@ -13,6 +15,7 @@ import com.stripe.android.financialconnections.network.FinancialConnectionsReque
 import com.stripe.android.financialconnections.network.NetworkConstants
 import com.stripe.android.financialconnections.repository.api.ProvideApiRequestOptions
 import com.stripe.android.financialconnections.utils.filterNotNullValues
+import com.stripe.android.financialconnections.utils.toApiParams
 import javax.inject.Inject
 
 internal interface FinancialConnectionsRepository {
@@ -51,12 +54,19 @@ internal interface FinancialConnectionsRepository {
         clientSecret: String,
         sessionId: String
     ): MixedOAuthParams
+
+    suspend fun createPaymentMethod(
+        paymentDetailsId: String,
+        consumerSessionClientSecret: String,
+        billingDetails: BillingDetails?,
+    ): String
 }
 
 internal class FinancialConnectionsRepositoryImpl @Inject constructor(
     private val requestExecutor: FinancialConnectionsRequestExecutor,
     private val provideApiRequestOptions: ProvideApiRequestOptions,
-    private val apiRequestFactory: ApiRequest.Factory
+    private val fraudDetectionDataRepository: FraudDetectionDataRepository,
+    private val apiRequestFactory: ApiRequest.Factory,
 ) : FinancialConnectionsRepository {
 
     override suspend fun getFinancialConnectionsAccounts(
@@ -113,7 +123,7 @@ internal class FinancialConnectionsRepositoryImpl @Inject constructor(
     ): MixedOAuthParams {
         val request = apiRequestFactory.createPost(
             url = authorizationSessionOAuthResultsUrl,
-            options = provideApiRequestOptions(useConsumerPublishableKey = false),
+            options = provideApiRequestOptions(useConsumerPublishableKey = true),
             params = mapOf(
                 NetworkConstants.PARAMS_ID to sessionId,
                 NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret
@@ -125,24 +135,57 @@ internal class FinancialConnectionsRepositoryImpl @Inject constructor(
         )
     }
 
+    override suspend fun createPaymentMethod(
+        paymentDetailsId: String,
+        consumerSessionClientSecret: String,
+        billingDetails: BillingDetails?,
+    ): String {
+        val linkParams = mapOf(
+            "type" to "link",
+            "link" to mapOf(
+                "credentials" to mapOf(
+                    "consumer_session_client_secret" to consumerSessionClientSecret,
+                ),
+                "payment_details_id" to paymentDetailsId,
+            ),
+        )
+
+        val billingParams = billingDetails?.let {
+            mapOf("billing_details" to billingDetails.toApiParams())
+        }.orEmpty()
+
+        val fraudDetectionParams = fraudDetectionDataRepository.getCached()?.params.orEmpty()
+
+        val request = apiRequestFactory.createPost(
+            url = paymentMethodsUrl,
+            options = provideApiRequestOptions(useConsumerPublishableKey = false),
+            params = linkParams + billingParams + fraudDetectionParams,
+        )
+
+        return requestExecutor.execute(request)
+    }
+
     internal companion object {
 
-        internal const val listAccountsUrl: String =
+        private const val listAccountsUrl: String =
             "${ApiRequest.API_HOST}/v1/link_account_sessions/list_accounts"
 
-        internal const val sessionReceiptUrl: String =
+        private const val sessionReceiptUrl: String =
             "${ApiRequest.API_HOST}/v1/link_account_sessions/session_receipt"
 
         internal const val authorizationSessionUrl: String =
             "${ApiRequest.API_HOST}/v1/connections/auth_sessions"
 
-        internal const val completeUrl: String =
+        private const val completeUrl: String =
             "${ApiRequest.API_HOST}/v1/link_account_sessions/complete"
 
-        internal const val authorizationSessionOAuthResultsUrl: String =
+        private const val authorizationSessionOAuthResultsUrl: String =
             "${ApiRequest.API_HOST}/v1/connections/auth_sessions/oauth_results"
 
         internal const val authorizeSessionUrl: String =
             "${ApiRequest.API_HOST}/v1/connections/auth_sessions/authorized"
+
+        private const val paymentMethodsUrl: String =
+            "${ApiRequest.API_HOST}/v1/payment_methods"
     }
 }

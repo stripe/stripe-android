@@ -8,14 +8,12 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetActivity
 import com.stripe.android.customersheet.CustomerSheetResultCallback
-import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.paymentsheet.MainActivity
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
-@OptIn(ExperimentalCustomerSheetApi::class)
 internal class CustomerSheetTestRunnerContext(
     internal val scenario: ActivityScenario<MainActivity>,
     private val customerSheet: CustomerSheet,
@@ -35,7 +33,6 @@ internal class CustomerSheetTestRunnerContext(
     }
 }
 
-@OptIn(ExperimentalCustomerSheetApi::class)
 internal fun runCustomerSheetTest(
     networkRule: NetworkRule,
     integrationType: IntegrationType,
@@ -66,7 +63,6 @@ internal fun runCustomerSheetTest(
     )
 }
 
-@OptIn(ExperimentalCustomerSheetApi::class)
 private fun runCustomerSheetTest(
     networkRule: NetworkRule,
     countDownLatch: CountDownLatch,

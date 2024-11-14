@@ -6,7 +6,7 @@ tags:
 ---
 - startRecording: ${'/tmp/test_results/testmode-paymentintent-testinstitution-networking-' + new Date().getTime()}
 - clearState
-- openLink: stripeconnectionsexample://playground?experience=FinancialConnections&flow=PaymentIntent&financial_connections_override_native=native&financial_connections_test_mode=true&merchant=testmode&permissions=payment_method
+- openLink: stripeconnectionsexample://playground?integration_type=Standalone&experience=FinancialConnections&flow=PaymentIntent&financial_connections_override_native=native&financial_connections_test_mode=true&merchant=testmode&permissions=payment_method
 - tapOn:
     id: "connect_accounts"
 # Wait until the consent button is visible
@@ -17,11 +17,11 @@ tags:
 - tapOn:
     id: "consent_cta"
 # Select Down institution
-- tapOn: "Down Bank (unscheduled)"
+- tapOn: "Down Bank (Unscheduled)"
 # Selecting another bank resets the flow
 - tapOn: "Select another bank"
 # Assert flow correctly returns to institution picker
-- tapOn: "Down Bank (unscheduled)"
+- tapOn: "Down Bank (Unscheduled)"
 # Close flow from error page
 - tapOn: "Close icon"
 - scrollUntilVisible:

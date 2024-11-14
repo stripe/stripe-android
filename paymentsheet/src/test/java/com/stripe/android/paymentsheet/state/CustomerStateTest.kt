@@ -17,7 +17,7 @@ class CustomerStateTest {
             customerId = "cus_1",
             ephemeralKeySecret = "ek_1",
             paymentMethods = paymentMethods,
-            paymentSheetComponent = ElementsSession.Customer.Components.PaymentSheet.Disabled
+            mobilePaymentElementComponent = ElementsSession.Customer.Components.MobilePaymentElement.Disabled
         )
 
         val customerState = CustomerState.createForCustomerSession(
@@ -46,7 +46,7 @@ class CustomerStateTest {
             customerId = "cus_1",
             ephemeralKeySecret = "ek_1",
             paymentMethods = paymentMethods,
-            paymentSheetComponent = ElementsSession.Customer.Components.PaymentSheet.Enabled(
+            mobilePaymentElementComponent = ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
                 isPaymentMethodSaveEnabled = false,
                 isPaymentMethodRemoveEnabled = true,
                 allowRedisplayOverride = null,
@@ -79,7 +79,7 @@ class CustomerStateTest {
             customerId = "cus_3",
             ephemeralKeySecret = "ek_3",
             paymentMethods = paymentMethods,
-            paymentSheetComponent = ElementsSession.Customer.Components.PaymentSheet.Enabled(
+            mobilePaymentElementComponent = ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
                 isPaymentMethodSaveEnabled = false,
                 isPaymentMethodRemoveEnabled = false,
                 allowRedisplayOverride = null,
@@ -142,7 +142,7 @@ class CustomerStateTest {
                     PaymentMethodFixtures.LINK_PAYMENT_METHOD,
                     PaymentMethodFixtures.AU_BECS_DEBIT,
                 ),
-                paymentSheetComponent = ElementsSession.Customer.Components.PaymentSheet.Enabled(
+                mobilePaymentElementComponent = ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
                     isPaymentMethodSaveEnabled = false,
                     isPaymentMethodRemoveEnabled = false,
                     allowRedisplayOverride = null,
@@ -161,7 +161,7 @@ class CustomerStateTest {
         customerId: String = "cus_1",
         ephemeralKeySecret: String = "ek_1",
         paymentMethods: List<PaymentMethod>,
-        paymentSheetComponent: ElementsSession.Customer.Components.PaymentSheet
+        mobilePaymentElementComponent: ElementsSession.Customer.Components.MobilePaymentElement
     ): ElementsSession.Customer {
         return ElementsSession.Customer(
             paymentMethods = paymentMethods,
@@ -174,7 +174,7 @@ class CustomerStateTest {
                 liveMode = false,
                 components = ElementsSession.Customer.Components(
                     customerSheet = ElementsSession.Customer.Components.CustomerSheet.Disabled,
-                    paymentSheet = paymentSheetComponent
+                    mobilePaymentElement = mobilePaymentElementComponent
                 )
             ),
         )

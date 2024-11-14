@@ -29,14 +29,11 @@ class FakeLinkConfigurationCoordinator(
     private val accountStatus: AccountStatus = AccountStatus.SignedOut,
 ) : LinkConfigurationCoordinator {
 
-    override val component: LinkComponent
-        get() = mock()
-
     override val emailFlow: StateFlow<String?>
         get() = stateFlowOf(null)
 
-    override fun setConfiguration(configuration: LinkConfiguration) {
-        // No-op
+    override fun getComponent(configuration: LinkConfiguration): LinkComponent {
+        return mock()
     }
 
     override fun getAccountStatusFlow(configuration: LinkConfiguration): Flow<AccountStatus> {

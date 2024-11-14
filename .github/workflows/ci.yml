@@ -20,7 +20,7 @@ jobs:
       - uses: ./.github/actions/stripe_setup
       - name: End-to-end tests
         run: ./gradlew :stripe-test-e2e:testDebugUnitTest
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: unit-test-report
@@ -35,7 +35,7 @@ jobs:
       - uses: ./.github/actions/stripe_setup
       - name: Build example projects
         run: ./gradlew :paymentsheet-example:assembleAndroidTest
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: test-failures
@@ -48,14 +48,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/stripe_setup
-      - name: Generate Android release bundle
-        run: ./gradlew :paymentsheet-example:bundleRelease
-      - name: Upload artifact to Emerge
-        uses: EmergeTools/emerge-upload-action@3477b597fc62054136eb6f499e0ba78144f8a999
-        with:
-          artifact_path: paymentsheet-example/build/outputs/bundle/release/paymentsheet-example-release.aab
-          emerge_api_key: ${{ secrets.EMERGE_API_KEY }}
-          build_type: pull_request
+      - name: Upload release bundle to Emerge
+        run: ./gradlew :paymentsheet-example:emergeUploadReleaseAab
+        env:
+          EMERGE_API_TOKEN: ${{ secrets.EMERGE_API_KEY }}
+          EMERGE_TAG: pull_request
 
   check-for-untranslated-strings:
     name: Check for untranslated strings

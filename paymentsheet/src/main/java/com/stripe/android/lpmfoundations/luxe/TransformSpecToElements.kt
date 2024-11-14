@@ -50,35 +50,32 @@ internal class TransformSpecToElements(
             placeholderOverrideList = placeholderOverrideList,
             requiresMandate = arguments.requiresMandate,
             specs = specs,
-        ).mapNotNull {
-            when (it) {
-                is StaticTextSpec -> it.transform()
-                is AfterpayClearpayTextSpec -> it.transform(requireNotNull(arguments.amount))
-                is AffirmTextSpec -> it.transform()
-                is EmptyFormSpec -> EmptyFormElement()
-                is MandateTextSpec -> it.transform(arguments.merchantName)
-                is AuBecsDebitMandateTextSpec -> it.transform(arguments.merchantName)
-                is BacsDebitBankAccountSpec -> it.transform(arguments.initialValues)
-                is BacsDebitConfirmSpec -> it.transform(arguments.merchantName, arguments.initialValues)
-                is BsbSpec -> it.transform(arguments.initialValues)
-                is OTPSpec -> it.transform()
-                is NameSpec -> it.transform(arguments.initialValues)
-                is EmailSpec -> it.transform(arguments.initialValues)
-                is PhoneSpec -> it.transform(arguments.initialValues)
-                is SimpleTextSpec -> it.transform(arguments.initialValues)
-                is AuBankAccountNumberSpec -> it.transform(arguments.initialValues)
-                is IbanSpec -> it.transform(arguments.initialValues)
-                is KlarnaHeaderStaticTextSpec -> it.transform()
-                is DropdownSpec -> it.transform(arguments.initialValues)
-                is CountrySpec -> it.transform(arguments.initialValues)
-                is AddressSpec -> it.transform(
-                    arguments.initialValues,
-                    arguments.shippingValues
-                )
-                is SepaMandateTextSpec -> it.transform(arguments.merchantName)
-                is PlaceholderSpec -> null // Placeholders should be processed before calling transform.
-                is CashAppPayMandateTextSpec -> it.transform(arguments.merchantName)
-                is KlarnaMandateTextSpec -> it.transform(arguments.merchantName)
+        ).flatMap { spec ->
+            when (spec) {
+                is StaticTextSpec -> listOf(spec.transform())
+                is AfterpayClearpayTextSpec -> listOf(spec.transform())
+                is AffirmTextSpec -> listOf(spec.transform())
+                is EmptyFormSpec -> listOf(EmptyFormElement())
+                is MandateTextSpec -> listOf(spec.transform(arguments.merchantName))
+                is AuBecsDebitMandateTextSpec -> listOf(spec.transform(arguments.merchantName))
+                is BacsDebitBankAccountSpec -> listOf(spec.transform(arguments.initialValues))
+                is BacsDebitConfirmSpec -> listOf(spec.transform(arguments.merchantName, arguments.initialValues))
+                is BsbSpec -> listOf(spec.transform(arguments.initialValues))
+                is OTPSpec -> listOf(spec.transform())
+                is NameSpec -> listOf(spec.transform(arguments.initialValues))
+                is EmailSpec -> listOf(spec.transform(arguments.initialValues))
+                is PhoneSpec -> listOf(spec.transform(arguments.initialValues))
+                is SimpleTextSpec -> listOf(spec.transform(arguments.initialValues))
+                is AuBankAccountNumberSpec -> listOf(spec.transform(arguments.initialValues))
+                is IbanSpec -> listOf(spec.transform(arguments.initialValues))
+                is KlarnaHeaderStaticTextSpec -> listOf(spec.transform())
+                is DropdownSpec -> listOf(spec.transform(arguments.initialValues))
+                is CountrySpec -> listOf(spec.transform(arguments.initialValues))
+                is AddressSpec -> spec.transform(arguments.initialValues, arguments.shippingValues)
+                is SepaMandateTextSpec -> listOf(spec.transform(arguments.merchantName))
+                is PlaceholderSpec -> listOf() // Placeholders should be processed before calling transform.
+                is CashAppPayMandateTextSpec -> listOf(spec.transform(arguments.merchantName))
+                is KlarnaMandateTextSpec -> listOf(spec.transform(arguments.merchantName))
             }
         }
     }

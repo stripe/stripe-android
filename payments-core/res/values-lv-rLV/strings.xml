@@ -112,11 +112,17 @@
   <string name="stripe_card_declined">Karte tika noraidīta</string>
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
   <string name="stripe_card_ending_in">%1$s, kuras numura pēdējie cipari ir %2$s</string>
+  <!-- Concise details of a saved card. &apos;{card brand} ···· {last 4}&apos; e.g. &apos;VISA ···· 4242&apos; -->
+  <string name="stripe_card_plus_last_4">%1$s ···· %2$s</string>
+  <!-- Concise details of a saved card. &apos;{card brand} ····{last 4}&apos; e.g. &apos;VISA ····4242&apos; -->
+  <string name="stripe_card_with_last_4">%1$s ····%2$s</string>
   <!-- Text for close button -->
   <string name="stripe_close">Aizvērt</string>
   <!-- Accessibility action for deleting a payment method -->
   <string name="stripe_delete_payment_method">Dzēst maksājuma metodi</string>
   <string name="stripe_delete_payment_method_prompt_title">Vai dzēst maksājuma metodi?</string>
+  <!-- Error message for card entry form when a user enters a card with a brand that is not accepted. -->
+  <string name="stripe_disallowed_card_brand">%s netiek pieņemts</string>
   <!-- Done button title -->
   <string name="stripe_done">Gatavs</string>
   <!-- Button title to enter editing mode -->

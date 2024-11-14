@@ -15,6 +15,7 @@ import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.toConfirmPaymentIntentShipping
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.FakePaymentLauncher
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import kotlinx.coroutines.test.runTest
@@ -55,12 +56,12 @@ class IntentConfirmationDefinitionTest {
                 intentConfirmationInterceptor = intentConfirmationInterceptor,
             )
 
-            val initializationMode = PaymentSheet.InitializationMode.PaymentIntent(clientSecret = "pi_123")
+            val initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(clientSecret = "pi_123")
             val createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD
             val shippingDetails = AddressDetails(name = "John Doe")
 
             definition.action(
-                confirmationOption = PaymentConfirmationOption.PaymentMethod.New(
+                confirmationOption = ConfirmationHandler.Option.PaymentMethod.New(
                     initializationMode = initializationMode,
                     createParams = createParams,
                     optionsParams = null,
@@ -156,7 +157,7 @@ class IntentConfirmationDefinitionTest {
 
         assertThat(failAction.cause).isEqualTo(cause)
         assertThat(failAction.message).isEqualTo(message.resolvableString)
-        assertThat(failAction.errorType).isEqualTo(PaymentConfirmationErrorType.Internal)
+        assertThat(failAction.errorType).isEqualTo(PaymentConfirmationErrorType.Payment)
     }
 
     @Test
@@ -322,7 +323,6 @@ class IntentConfirmationDefinitionTest {
         val succeededResult = result.asSucceeded()
 
         assertThat(succeededResult.intent).isEqualTo(PaymentIntentFixtures.PI_SUCCEEDED)
-        assertThat(succeededResult.confirmationOption).isEqualTo(SAVED_PAYMENT_CONFIRMATION_OPTION)
         assertThat(succeededResult.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Client)
     }
 
@@ -400,21 +400,21 @@ class IntentConfirmationDefinitionTest {
         return this as PaymentConfirmationDefinition.ConfirmationAction.Launch<T>
     }
 
-    private fun PaymentConfirmationResult.asSucceeded(): PaymentConfirmationResult.Succeeded {
-        return this as PaymentConfirmationResult.Succeeded
+    private fun ConfirmationHandler.Result.asSucceeded(): ConfirmationHandler.Result.Succeeded {
+        return this as ConfirmationHandler.Result.Succeeded
     }
 
-    private fun PaymentConfirmationResult.asFailed(): PaymentConfirmationResult.Failed {
-        return this as PaymentConfirmationResult.Failed
+    private fun ConfirmationHandler.Result.asFailed(): ConfirmationHandler.Result.Failed {
+        return this as ConfirmationHandler.Result.Failed
     }
 
-    private fun PaymentConfirmationResult.asCanceled(): PaymentConfirmationResult.Canceled {
-        return this as PaymentConfirmationResult.Canceled
+    private fun ConfirmationHandler.Result.asCanceled(): ConfirmationHandler.Result.Canceled {
+        return this as ConfirmationHandler.Result.Canceled
     }
 
     private companion object {
-        private val SAVED_PAYMENT_CONFIRMATION_OPTION = PaymentConfirmationOption.PaymentMethod.Saved(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+        private val SAVED_PAYMENT_CONFIRMATION_OPTION = ConfirmationHandler.Option.PaymentMethod.Saved(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "pi_123"
             ),
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,

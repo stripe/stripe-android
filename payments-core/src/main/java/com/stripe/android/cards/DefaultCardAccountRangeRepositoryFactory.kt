@@ -13,6 +13,7 @@ import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.StateFlow
+import javax.inject.Inject
 
 /**
  * A [CardAccountRangeRepository.Factory] that returns a [DefaultCardAccountRangeRepositoryFactory].
@@ -20,7 +21,7 @@ import kotlinx.coroutines.flow.StateFlow
  * Will throw an exception if [PaymentConfiguration] has not been instantiated.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class DefaultCardAccountRangeRepositoryFactory(
+class DefaultCardAccountRangeRepositoryFactory @Inject constructor(
     context: Context,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor
 ) : CardAccountRangeRepository.Factory {

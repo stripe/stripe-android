@@ -5,7 +5,7 @@ tags:
 ---
 - startRecording: ${'/tmp/test_results/livemode-data-finbank-' + new Date().getTime()}
 - clearState
-- openLink: stripeconnectionsexample://playground?experience=FinancialConnections&flow=Data&financial_connections_override_native=native&merchant=live_testing&financial_connections_test_mode=false
+- openLink: stripeconnectionsexample://playground?integration_type=Standalone&experience=FinancialConnections&flow=Data&financial_connections_override_native=native&merchant=live_testing&financial_connections_test_mode=false
 - tapOn:
     id: "connect_accounts"
 # Wait until the consent button is visible
@@ -19,7 +19,7 @@ tags:
 - tapOn: "Search"
 - inputText: "finbank"
 - tapOn:
-    id: "search_result_0"
+    id: "bcinst_JFqgSnbqNULPX5"
 ####### Bypass Chrome on-boarding screen #######
 - runFlow:
     file: ../common/subflow-skip-chrome-welcome.yaml
@@ -44,6 +44,10 @@ tags:
 - assertVisible: "Your accounts were connected."
 - tapOn:
     id: "done_button"
-- assertVisible: ".*Completed!.*"
-- assertVisible: ".*FinBank.*"
+- scrollUntilVisible:
+    element:
+      text: ".*Completed!.*"
+- scrollUntilVisible:
+    element:
+      text: ".*FinBank.*"
 - stopRecording

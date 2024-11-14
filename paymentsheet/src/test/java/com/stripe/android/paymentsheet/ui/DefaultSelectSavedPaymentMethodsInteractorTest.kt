@@ -8,7 +8,7 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentOptionsItem
 import com.stripe.android.paymentsheet.PaymentOptionsStateFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormScreenState
+import com.stripe.android.utils.BankFormScreenStateFactory
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.runTest
@@ -460,14 +460,7 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
                 saveForFutureUse = false,
             ),
             instantDebits = null,
-            screenState = USBankAccountFormScreenState.SavedAccount(
-                financialConnectionsSessionId = "session_1234",
-                intentId = "intent_1234",
-                bankName = "Stripe Bank",
-                last4 = "6789",
-                primaryButtonText = "Continue".resolvableString,
-                mandateText = null,
-            ),
+            screenState = BankFormScreenStateFactory.createWithSession("session_1234"),
         )
     }
 

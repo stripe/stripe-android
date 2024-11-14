@@ -117,7 +117,7 @@ internal object ElementsSessionFixtures {
         """.trimIndent()
     )
 
-    val EXPANDED_SETUP_INTENT_JSON_WITH_CBC_ELIGIBLE = JSONObject(
+    val EXPANDED_SETUP_INTENT_JSON_WITH_CBC_ELIGIBLE_BUT_NO_NETWORKS = JSONObject(
         """
         {
           "business_name": "Mybusiness",
@@ -246,7 +246,7 @@ internal object ElementsSessionFixtures {
                       "enabled": false,
                       "features": null
                     },
-                    "payment_sheet": {
+                    "mobile_payment_element": {
                       "enabled": true,
                       "features": {
                         "payment_method_remove": "enabled",
@@ -377,7 +377,7 @@ internal object ElementsSessionFixtures {
                   "enabled": false,
                   "features": null
                 },
-                "payment_sheet": {
+                "mobile_payment_element": {
                   "enabled": false,
                   "features": null
                 },
@@ -433,7 +433,8 @@ internal object ElementsSessionFixtures {
         {
           "business_name": "Mybusiness",
           "card_brand_choice": {
-            "eligible": true
+            "eligible": true,
+            "preferred_networks": ["cartes_bancaires"]
           },
           "link_settings": {
             "link_bank_enabled": false,
@@ -503,7 +504,8 @@ internal object ElementsSessionFixtures {
         {
           "business_name": "Mybusiness",
           "card_brand_choice": {
-            "eligible": false
+            "eligible": false,
+            "preferred_networks": ["cartes_bancaires"]
           },
           "link_settings": {
             "link_bank_enabled": false,
@@ -914,7 +916,7 @@ internal object ElementsSessionFixtures {
                   "currency": "aud",
                   "description": null,
                   "last_payment_error": null,
-                  "livemode": false,
+                  "livemode": true,
                   "next_action": null,
                   "payment_method": null,
                   "payment_method_types": [
@@ -1379,7 +1381,6 @@ internal object ElementsSessionFixtures {
                     "elements_enable_south_korea_market_underlying_pms": false,
                     "elements_enable_use_last_used_payment_method": false,
                     "elements_enable_write_allow_redisplay": false,
-                    "elements_luxe_qr_ui_on_web_enabled": false,
                     "elements_saved_payment_methods": true,
                     "elements_stop_move_focus_to_first_errored_field": true,
                     "elements_web_lpm_server_driven_ui": true,

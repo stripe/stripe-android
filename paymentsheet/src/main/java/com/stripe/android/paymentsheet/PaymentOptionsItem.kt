@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet
 
-import android.content.res.Resources
 import com.stripe.android.model.PaymentMethod
 
 internal sealed class PaymentOptionsItem {
@@ -39,16 +38,6 @@ internal sealed class PaymentOptionsItem {
         override val isEnabledDuringEditing: Boolean by lazy {
             isModifiable || canRemovePaymentMethods
         }
-
-        fun getModifyDescription(resources: Resources) = resources.getString(
-            R.string.stripe_paymentsheet_modify_pm,
-            displayableSavedPaymentMethod.getDescription(resources)
-        )
-
-        fun getRemoveDescription(resources: Resources) = resources.getString(
-            R.string.stripe_paymentsheet_remove_pm,
-            displayableSavedPaymentMethod.getDescription(resources)
-        )
     }
 
     enum class ViewType {

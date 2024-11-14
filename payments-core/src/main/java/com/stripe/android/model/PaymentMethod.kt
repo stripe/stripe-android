@@ -256,6 +256,11 @@ constructor(
             isVoucher = false,
             requiresMandate = false,
             hasDelayedSettlement = false,
+            // We are intentionally polling for P24 even though it uses the redirect trampoline.
+            // About 20% of the time, the intent is still in `requires_action` status
+            // after redirecting following a successful payment.
+            // This allows time for the intent to transition to its terminal state.
+            afterRedirectAction = AfterRedirectAction.Poll(),
         ),
         Bancontact(
             "bancontact",
@@ -355,6 +360,7 @@ constructor(
             isVoucher = false,
             requiresMandate = false,
             hasDelayedSettlement = false,
+            afterRedirectAction = AfterRedirectAction.Poll(),
         ),
         Sunbit(
             "sunbit",
@@ -383,6 +389,7 @@ constructor(
             isVoucher = false,
             requiresMandate = false,
             hasDelayedSettlement = false,
+            afterRedirectAction = AfterRedirectAction.Poll(),
         ),
         Alma(
             "alma",
@@ -963,7 +970,7 @@ constructor(
      * Requires the FPX payment method enabled on your account via
      * https://dashboard.stripe.com/account/payments/settings.
      *
-     * To obtain the FPX bank's display name and icon, see [com.stripe.android.view.FpxBank].
+     * To obtain the FPX bank's display name, see [com.stripe.android.view.FpxBank].
      */
     @Parcelize
     data class Fpx internal constructor(
@@ -1125,20 +1132,6 @@ constructor(
          */
         @JvmField val routingNumber: String?,
     ) : TypeData() {
-        /**
-         * The token of the Linked Account used to create the payment method
-         *
-         * [us_bank_account.linkedAccount](https://stripe.com/docs/api/payment_methods/object#payment_method_object-us_bank_account-linked_account)
-         */
-        @Deprecated(
-            message = "Renamed to 'financialConnectionsAccount', " +
-                "'linkedAccount' will be removed in a future major update",
-            replaceWith = ReplaceWith(expression = "financialConnectionsAccount")
-        )
-        @IgnoredOnParcel
-        @JvmField
-        val linkedAccount: String? = financialConnectionsAccount
-
         override val type: Type get() = Type.USBankAccount
 
         @Parcelize

@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 internal class CvcRecollectionViewModel(args: Args) : ViewModel() {
@@ -18,11 +19,13 @@ internal class CvcRecollectionViewModel(args: Args) : ViewModel() {
 
     private val _viewState = MutableStateFlow(
         CvcRecollectionViewState(
-            cardBrand = args.cardBrand,
             lastFour = args.lastFour,
-            cvc = null,
             isTestMode = args.isTestMode,
-            controller = controller
+            cvcState = CvcState(
+                cvc = args.cvc,
+                cardBrand = args.cardBrand
+            ),
+            isEnabled = true,
         )
     )
     val viewState: StateFlow<CvcRecollectionViewState>
@@ -33,8 +36,9 @@ internal class CvcRecollectionViewModel(args: Args) : ViewModel() {
 
     fun handleViewAction(action: CvcRecollectionViewAction) {
         when (action) {
-            is CvcRecollectionViewAction.OnConfirmPressed -> onConfirmPress(action.cvc)
+            is CvcRecollectionViewAction.OnConfirmPressed -> onConfirmPress(viewState.value.cvcState.cvc)
             is CvcRecollectionViewAction.OnBackPressed -> onBackPress()
+            is CvcRecollectionViewAction.OnCvcChanged -> onCvcChanged(action.cvc)
         }
     }
 
@@ -50,6 +54,14 @@ internal class CvcRecollectionViewModel(args: Args) : ViewModel() {
         }
     }
 
+    private fun onCvcChanged(cvc: String) {
+        _viewState.update { oldState ->
+            oldState.copy(
+                cvcState = oldState.cvcState.updateCvc(cvc)
+            )
+        }
+    }
+
     class Factory(
         private val args: CvcRecollectionContract.Args,
     ) : ViewModelProvider.Factory {
@@ -59,8 +71,8 @@ internal class CvcRecollectionViewModel(args: Args) : ViewModel() {
                 args = Args(
                     lastFour = args.lastFour,
                     cardBrand = args.cardBrand,
-                    cvc = null,
-                    isTestMode = args.isTestMode
+                    cvc = "",
+                    isTestMode = args.isTestMode,
                 )
             ) as T
         }

@@ -29,27 +29,44 @@
                 style="@style/Header"
                 android:text="@string/create_payment_method_header" />
 
+            <Spinner
+                android:id="@+id/spinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/preferred_network_switch"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Set Cartes Bancaires as preferred network" />
+
+            <com.stripe.android.view.CardInputWidget
+                android:id="@+id/card_input_widget"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone" />
+
+            <com.stripe.android.view.CardMultilineWidget
+                android:id="@+id/card_multiline_widget"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone" />
+
             <!-- The style and background color for CardFormView are customizable,
             please refer to the doc for more details-->
             <com.stripe.android.view.CardFormView
                 android:id="@+id/card_form_view"
-                style="@style/StripeCardFormView.Borderless"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:backgroundColorStateList="@color/card_form_view_bg_color_overriden" />
+
 
             <Button
                 android:id="@+id/create_button"
                 android:layout_height="wrap_content"
                 android:layout_width="320dp"
-                android:enabled="false"
+                android:enabled="true"
                 android:text="@string/create_payment_method" />
-
-            <Button
-                android:id="@+id/toggle_card_form_view"
-                android:layout_height="wrap_content"
-                android:layout_width="320dp"
-                android:text="@string/toggle_card_form_view" />
 
             <TextView
                 style="@style/Header"

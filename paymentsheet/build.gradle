@@ -3,6 +3,7 @@ apply from: configs.androidLibrary
 apply plugin: 'com.google.devtools.ksp'
 apply plugin: "org.jetbrains.kotlin.plugin.parcelize"
 apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
+apply plugin: 'org.jetbrains.kotlin.plugin.compose'
 apply plugin: 'app.cash.paparazzi'
 apply plugin: 'dev.drewhamilton.poko'
 
@@ -25,6 +26,7 @@ dependencies {
     implementation libs.androidx.browser
     implementation libs.androidx.fragment
     implementation libs.androidx.lifecycle
+    implementation libs.androidx.lifecycleCompose
     implementation libs.androidx.savedState
     implementation libs.androidx.viewModel
 
@@ -54,6 +56,7 @@ dependencies {
 
     testImplementation project(':link')
     testImplementation project(':financial-connections')
+    testImplementation project(':network-testing')
     testImplementation project(':payments-core-testing')
     testImplementation project(':screenshot-testing')
 
@@ -77,6 +80,7 @@ dependencies {
     testImplementation testLibs.robolectric
     testImplementation testLibs.truth
     testImplementation testLibs.turbine
+    testImplementation testLibs.espresso.intents
 
     // temporary fix for running compose test in RobolectricTestRunner, see https://github.com/robolectric/robolectric/issues/6593
     testImplementation testLibs.espresso.core
@@ -100,10 +104,12 @@ dependencies {
     androidTestImplementation testLibs.mockito.core
     androidTestImplementation testLibs.mockito.inline
     androidTestImplementation testLibs.mockito.kotlin
+    androidTestImplementation testLibs.espresso.intents
     androidTestImplementation libs.leakCanary
     androidTestImplementation testLibs.leakCanaryInstrumentation
     androidTestImplementation testLibs.testParameterInjector
     androidTestImplementation testLibs.truth
+    androidTestImplementation testLibs.turbine
 
     androidTestUtil testLibs.testOrchestrator
 }
@@ -142,14 +148,11 @@ android {
         }
     }
 
-    composeOptions {
-        kotlinCompilerExtensionVersion "${versions.androidxComposeCompiler}"
-    }
-
     kotlinOptions {
         freeCompilerArgs += [
                 "-opt-in=kotlinx.coroutines.FlowPreview",
                 "-Xcontext-receivers",
+                "-Xconsistent-data-class-copy-visibility"
         ]
         if (gradle.ext.isCi) {
             kotlinOptions.allWarningsAsErrors = true

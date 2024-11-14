@@ -2,10 +2,18 @@
 <resources>
   <!-- Used for accessibility to describe the button on the payment sheet list of options to add a new payment method. -->
   <string name="stripe_add_new_payment_method">添加新支付方式</string>
+  <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
+  <string name="stripe_afterpay_subtitle">用 Afterpay 先買後付</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
-  <string name="stripe_bank_account_ending_in">移除尾號為 %s 的銀行帳戶</string>
+  <string name="stripe_bank_account_ending_in">尾號為 %s 的銀行賬戶</string>
+  <!-- Concise description of a saved bank account. E.g. 'Bank account ···· 4242' -->
+  <string name="stripe_bank_account_plus_last_4">銀行帳戶 ···· %s</string>
+  <!-- Concise description of a saved bank account. E.g. 'Bank account ····4242' -->
+  <string name="stripe_bank_account_with_last_4">銀行帳戶 ···· %s</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">%s内在您的銀行應用中確認付款，完成購物。</string>
+  <!-- This shows the message on Buy Now Pay Later LPM, clearpay. -->
+  <string name="stripe_clearpay_subtitle">用 Clearpay 先買後付</string>
   <!-- Used as the title for prompting the user if they want to close the sheet -->
   <string name="stripe_confirm_close_form_body">不會保存您的付款資訊。</string>
   <!-- Used as the title for prompting the user if they want to close the sheet -->
@@ -36,6 +44,8 @@
   <string name="stripe_paymentsheet_bacs_notice_mandate">此外，您將提前兩天透過郵件收到根據該指令要扣款的金額的通知。付款將在您的銀行對帳單上顯示為「%s」。</string>
   <!-- Message shown as part of overall Bacs Mandate indicating that their payments are protected by a defined guarantee -->
   <string name="stripe_paymentsheet_bacs_protection_mandate">您的付款受 %s 保護。</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
+  <string name="stripe_paymentsheet_card_mandate">提供您的金融卡資訊，即表示您允許 %s 按照他們的條款從您的金融卡扣取未來款項。</string>
   <!-- Title shown above a carousel containing available payment methods -->
   <string name="stripe_paymentsheet_choose_payment_method">選擇一個支付方式</string>
   <string name="stripe_paymentsheet_close">關閉</string>
@@ -53,6 +63,8 @@
   <string name="stripe_paymentsheet_microdeposit">Stripe 會在 1-2 個工作日向您的帳戶存入 0.01 美元。然後您會收到一封郵件，指導您完成向 %s 的付款。</string>
   <!-- Content for alert popup prompting to confirm modifying saved payment method. -->
   <string name="stripe_paymentsheet_modify_pm">編輯 %s</string>
+  <!-- Label of a button that appears on a checkout screen. When tapped, it displays a credit card form. This button is shown next to another button representing the customer's saved card; the word 'new' is meant to differentiate this button's action with the saved card button. -->
+  <string name="stripe_paymentsheet_new_card">添加新卡</string>
   <!-- Title shown above a section containing payment methods that a customer can choose to pay with e.g. card, bank account, etc. -->
   <string name="stripe_paymentsheet_new_pm">新支付方式</string>
   <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
@@ -72,9 +84,13 @@
   <!-- Label of a button that, when tapped, initiates payment, becomes disabled, and displays this text -->
   <string name="stripe_paymentsheet_primary_button_processing">處理中...</string>
   <!-- Title for confirmation alert to remove a saved bank account payment method -->
+  <string name="stripe_paymentsheet_remove_bank_account_question_title">移除銀行帳戶？</string>
+  <!-- Title for confirmation alert to remove a saved bank account payment method -->
   <string name="stripe_paymentsheet_remove_bank_account_title">移除銀行帳戶</string>
   <!-- Title for a button that when tapped removes a saved card. -->
   <string name="stripe_paymentsheet_remove_card">解除綁定</string>
+  <!-- Title for confirmation alert to remove a card -->
+  <string name="stripe_paymentsheet_remove_card_title">移除卡？</string>
   <!-- Content for alert popup prompting to confirm removing saved payment method. -->
   <string name="stripe_paymentsheet_remove_pm">移除 %s</string>
   <!-- Title shown above a view containing a customer's payment method that they can delete -->
@@ -97,6 +113,8 @@
   <string name="stripe_paymentsheet_select_your_payment_method">選擇您的支付方式</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">合計：%s</string>
+  <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
+  <string name="stripe_remove_bank_account_ending_in">移除尾號為 %s 的銀行帳戶</string>
   <!-- Generic failure message -->
   <string name="stripe_something_went_wrong">出錯了</string>
   <!-- Button text on a screen asking the user to approve a payment -->

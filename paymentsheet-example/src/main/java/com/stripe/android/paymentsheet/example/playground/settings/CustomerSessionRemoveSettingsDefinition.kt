@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.example.playground.settings
 
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
+import com.stripe.android.paymentsheet.example.playground.model.CustomerEphemeralKeyRequest
 import com.stripe.android.paymentsheet.example.playground.model.FeatureState
 
 internal object CustomerSessionRemoveSettingsDefinition : BooleanSettingsDefinition(
@@ -8,10 +9,6 @@ internal object CustomerSessionRemoveSettingsDefinition : BooleanSettingsDefinit
     displayName = "Customer Session Remove",
     key = "customer_session_payment_method_remove"
 ) {
-    override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
-        return configurationData.integrationType.isPaymentFlow()
-    }
-
     override fun createOptions(
         configurationData: PlaygroundConfigurationData
     ) = listOf(
@@ -24,6 +21,17 @@ internal object CustomerSessionRemoveSettingsDefinition : BooleanSettingsDefinit
             checkoutRequestBuilder.paymentMethodRemoveFeature(FeatureState.Enabled)
         } else {
             checkoutRequestBuilder.paymentMethodRemoveFeature(FeatureState.Disabled)
+        }
+    }
+
+    override fun configure(
+        value: Boolean,
+        customerEphemeralKeyRequestBuilder: CustomerEphemeralKeyRequest.Builder
+    ) {
+        if (value) {
+            customerEphemeralKeyRequestBuilder.paymentMethodRemoveFeature(FeatureState.Enabled)
+        } else {
+            customerEphemeralKeyRequestBuilder.paymentMethodRemoveFeature(FeatureState.Disabled)
         }
     }
 }

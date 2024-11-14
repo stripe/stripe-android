@@ -3,22 +3,24 @@ package com.stripe.android.paymentsheet.navigation
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
-import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
-import com.stripe.android.model.PaymentMethod
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.ui.AddPaymentMethodInteractor
-import com.stripe.android.uicore.utils.stateFlowOf
+import com.stripe.android.paymentsheet.ui.FakeAddPaymentMethodInteractor
+import com.stripe.android.paymentsheet.ui.FakeAddPaymentMethodInteractor.Companion.createState
+import com.stripe.android.testing.CoroutineTestRule
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.junit.Test
-import org.mockito.kotlin.mock
 import com.stripe.android.R as PaymentsCoreR
 
 internal class PaymentSheetScreenAddFirstPaymentMethodTest {
+    @get:Rule
+    val coroutineRule = CoroutineTestRule()
 
     @Test
     fun `title returns null when isWalletEnabled`() = runTest {
-        val interactor = FakeAddPaymentMethodInteractor(stateFlowOf(createState()))
+        val interactor = FakeAddPaymentMethodInteractor(createState())
         PaymentSheetScreen.AddFirstPaymentMethod(interactor)
             .title(isCompleteFlow = false, isWalletEnabled = true).test {
                 assertThat(awaitItem()).isNull()
@@ -27,7 +29,7 @@ internal class PaymentSheetScreenAddFirstPaymentMethodTest {
 
     @Test
     fun `title returns add payment method when isCompleteFlow`() = runTest {
-        val interactor = FakeAddPaymentMethodInteractor(stateFlowOf(createState()))
+        val interactor = FakeAddPaymentMethodInteractor(createState())
         PaymentSheetScreen.AddFirstPaymentMethod(interactor)
             .title(isCompleteFlow = true, isWalletEnabled = false).test {
                 assertThat(awaitItem())
@@ -37,8 +39,14 @@ internal class PaymentSheetScreenAddFirstPaymentMethodTest {
 
     @Test
     fun `title returns add card with one supported payment method`() = runTest {
-        val state = createState(supportedPaymentMethods = listOf(LpmRepositoryTestHelpers.card))
-        val interactor = FakeAddPaymentMethodInteractor(stateFlowOf(state))
+        val state = createState(
+            metadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    paymentMethodTypes = listOf("card")
+                )
+            )
+        )
+        val interactor = FakeAddPaymentMethodInteractor(state)
         PaymentSheetScreen.AddFirstPaymentMethod(interactor)
             .title(isCompleteFlow = false, isWalletEnabled = false).test {
                 assertThat(awaitItem()).isEqualTo(PaymentsCoreR.string.stripe_title_add_a_card.resolvableString)
@@ -47,8 +55,15 @@ internal class PaymentSheetScreenAddFirstPaymentMethodTest {
 
     @Test
     fun `title returns choose payment method with non card one supported payment method`() = runTest {
-        val state = createState(supportedPaymentMethods = listOf(LpmRepositoryTestHelpers.usBankAccount))
-        val interactor = FakeAddPaymentMethodInteractor(stateFlowOf(state))
+        val state = createState(
+            metadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    paymentMethodTypes = listOf("us_bank_account"),
+                    clientSecret = null,
+                ),
+            )
+        )
+        val interactor = FakeAddPaymentMethodInteractor(state)
         PaymentSheetScreen.AddFirstPaymentMethod(interactor)
             .title(isCompleteFlow = false, isWalletEnabled = false).test {
                 assertThat(awaitItem()).isEqualTo(R.string.stripe_paymentsheet_choose_payment_method.resolvableString)
@@ -57,30 +72,10 @@ internal class PaymentSheetScreenAddFirstPaymentMethodTest {
 
     @Test
     fun `title returns choose payment method with more than one supported payment method`() = runTest {
-        val interactor = FakeAddPaymentMethodInteractor(stateFlowOf(createState()))
+        val interactor = FakeAddPaymentMethodInteractor(createState())
         PaymentSheetScreen.AddFirstPaymentMethod(interactor)
             .title(isCompleteFlow = false, isWalletEnabled = false).test {
                 assertThat(awaitItem()).isEqualTo(R.string.stripe_paymentsheet_choose_payment_method.resolvableString)
             }
-    }
-
-    private fun createState(
-        supportedPaymentMethods: List<SupportedPaymentMethod> = listOf(
-            LpmRepositoryTestHelpers.card,
-            LpmRepositoryTestHelpers.usBankAccount,
-        ),
-    ): AddPaymentMethodInteractor.State {
-        return AddPaymentMethodInteractor.State(
-            selectedPaymentMethodCode = PaymentMethod.Type.Card.code,
-            supportedPaymentMethods = supportedPaymentMethods,
-            arguments = mock(),
-            formElements = emptyList(),
-            paymentSelection = null,
-            linkSignupMode = null,
-            linkInlineSignupMode = null,
-            processing = false,
-            usBankAccountFormArguments = mock(),
-            linkConfigurationCoordinator = mock(),
-        )
     }
 }

@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
+  <string name="stripe_afterpay_clearpay_marketing"><![CDATA[Osta praegu või maksa <img/> abil hiljem]]></string>
+  <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="stripe_afterpay_clearpay_message"><![CDATA[Makske <num_installments/> <installment_price/> suuruse intressivaba osamaksega <img/> abil]]></string>
+  <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
+  <string name="stripe_afterpay_clearpay_subtitle">%1$d intressivaba makset summas %2$s</string>
   <!-- Amazon Pay mandate text -->
   <string name="stripe_amazon_pay_mandate">AmazonPay makse kinnitamisega lubate ettevõttel %s oma AmazonPay kontot vastavalt tema tingimustele tulevasteks makseteks debiteerida.</string>
   <!-- Text for back button -->
@@ -91,6 +95,8 @@
   <string name="stripe_revolut_mandate">Revolut Pay makse kinnitamisega lubate ettevõttel %s oma Revolut Pay kontot tulevasteks makseteks vastavalt nende tingimustele debiteerida.</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
   <string name="stripe_save_for_future_payments_with_merchant_name">Salvestage tulevasteks %s makseteks</string>
+  <!-- The label of a switch indicating whether to save the user's payment details for future payment -->
+  <string name="stripe_save_payment_details_to_merchant_name">Salvesta makseandmed %s tulevaste ostude jaoks</string>
   <!-- Button title to open camera to scan credit/debit card -->
   <string name="stripe_scan_card">Skanni kaart</string>
   <!-- SEPA mandate text -->

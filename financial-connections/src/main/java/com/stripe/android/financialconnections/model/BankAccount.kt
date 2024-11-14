@@ -12,7 +12,7 @@ import kotlinx.serialization.Serializable
 data class BankAccount(
 
     @SerialName(value = "id") @Required
-    val id: String,
+    override val id: String,
 
     @SerialName(value = "last4") @Required
     val last4: String,

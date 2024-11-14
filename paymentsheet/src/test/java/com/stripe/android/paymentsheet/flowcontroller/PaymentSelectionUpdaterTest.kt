@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.flowcontroller
 import android.content.res.ColorStateList
 import android.graphics.Color
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -36,6 +37,7 @@ class PaymentSelectionUpdaterTest {
             currentSelection = null,
             previousConfig = null,
             newState = newState,
+            newConfig = defaultPaymentSheetConfiguration,
         )
         assertThat(result).isEqualTo(PaymentSelection.GooglePay)
     }
@@ -51,12 +53,13 @@ class PaymentSelectionUpdaterTest {
             customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
         )
 
+        val newConfig = PaymentSheet.Configuration(
+            merchantDisplayName = "Example, Inc.",
+            allowsDelayedPaymentMethods = true,
+        )
         val newState = mockPaymentSheetStateWithPaymentIntent(
             paymentMethodTypes = listOf("card", "sofort"),
-            config = PaymentSheet.Configuration(
-                merchantDisplayName = "Example, Inc.",
-                allowsDelayedPaymentMethods = true,
-            )
+            config = newConfig
         )
 
         val updater = createUpdater()
@@ -68,6 +71,7 @@ class PaymentSelectionUpdaterTest {
                 allowsDelayedPaymentMethods = true,
             ),
             newState = newState,
+            newConfig = newConfig,
         )
         assertThat(result).isEqualTo(existingSelection)
     }
@@ -87,6 +91,7 @@ class PaymentSelectionUpdaterTest {
             currentSelection = existingSelection,
             previousConfig = defaultPaymentSheetConfiguration,
             newState = newState,
+            newConfig = defaultPaymentSheetConfiguration,
         )
         assertThat(result).isEqualTo(existingSelection)
     }
@@ -101,6 +106,7 @@ class PaymentSelectionUpdaterTest {
             currentSelection = existing,
             previousConfig = null,
             newState = newState,
+            newConfig = defaultPaymentSheetConfiguration,
         )
         assertThat(result).isNull()
     }
@@ -117,6 +123,7 @@ class PaymentSelectionUpdaterTest {
             currentSelection = existing,
             previousConfig = null,
             newState = newState,
+            newConfig = defaultPaymentSheetConfiguration,
         )
         assertThat(result).isNull()
     }
@@ -136,6 +143,7 @@ class PaymentSelectionUpdaterTest {
             currentSelection = existingSelection,
             previousConfig = null,
             newState = newState,
+            newConfig = defaultPaymentSheetConfiguration,
         )
         assertThat(result).isNull()
     }
@@ -154,6 +162,7 @@ class PaymentSelectionUpdaterTest {
             currentSelection = paymentSelection,
             previousConfig = null,
             newState = newState,
+            newConfig = defaultPaymentSheetConfiguration,
         )
         assertThat(result).isEqualTo(paymentSelection)
     }
@@ -172,6 +181,7 @@ class PaymentSelectionUpdaterTest {
             currentSelection = paymentSelection,
             previousConfig = null,
             newState = newState,
+            newConfig = defaultPaymentSheetConfiguration,
         )
         assertThat(result).isNull()
     }
@@ -199,6 +209,7 @@ class PaymentSelectionUpdaterTest {
             currentSelection = existingSelection,
             previousConfig = null,
             newState = newState,
+            newConfig = defaultPaymentSheetConfiguration,
         )
 
         assertThat(result).isEqualTo(null)
@@ -229,6 +240,7 @@ class PaymentSelectionUpdaterTest {
             currentSelection = existingSelection,
             previousConfig = defaultPaymentSheetConfiguration,
             newState = newState,
+            newConfig = defaultPaymentSheetConfiguration,
         )
 
         assertThat(result).isEqualTo(existingSelection)
@@ -259,6 +271,7 @@ class PaymentSelectionUpdaterTest {
             currentSelection = existingSelection,
             previousConfig = defaultPaymentSheetConfiguration,
             newState = newState,
+            newConfig = defaultPaymentSheetConfiguration,
         )
 
         assertThat(result).isEqualTo(existingSelection)
@@ -268,22 +281,23 @@ class PaymentSelectionUpdaterTest {
     fun `PaymentSelection is preserved when config changes are not volatile`() {
         val existingSelection = PaymentSelection.GooglePay
 
-        val newState = mockPaymentSheetStateWithPaymentIntent(
-            config = defaultPaymentSheetConfiguration.copy(
-                merchantDisplayName = "Some other change",
-                googlePay = PaymentSheet.GooglePayConfiguration(
-                    environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
-                    countryCode = CountryCode.US.value,
-                    amount = 5099,
-                    currencyCode = "USD",
-                    label = "Some product",
-                    buttonType = PaymentSheet.GooglePayConfiguration.ButtonType.Checkout,
-                ),
-                primaryButtonColor = ColorStateList.valueOf(Color.BLACK),
-                appearance = PaymentSheet.Appearance(
-                    colorsLight = PaymentSheet.Colors.defaultDark
-                )
+        val newConfig = defaultPaymentSheetConfiguration.copy(
+            merchantDisplayName = "Some other change",
+            googlePay = PaymentSheet.GooglePayConfiguration(
+                environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                countryCode = CountryCode.US.value,
+                amount = 5099,
+                currencyCode = "USD",
+                label = "Some product",
+                buttonType = PaymentSheet.GooglePayConfiguration.ButtonType.Checkout,
+            ),
+            primaryButtonColor = ColorStateList.valueOf(Color.BLACK),
+            appearance = PaymentSheet.Appearance(
+                colorsLight = PaymentSheet.Colors.defaultDark
             )
+        )
+        val newState = mockPaymentSheetStateWithPaymentIntent(
+            config = newConfig
         )
 
         val updater = createUpdater()
@@ -301,6 +315,7 @@ class PaymentSelectionUpdaterTest {
                 )
             ),
             newState = newState,
+            newConfig = newConfig,
         )
 
         assertThat(result).isEqualTo(existingSelection)
@@ -310,13 +325,14 @@ class PaymentSelectionUpdaterTest {
     fun `PaymentSelection is not preserved when config changes are volatile`() {
         val existingSelection = PaymentSelection.GooglePay
 
-        val newState = mockPaymentSheetStateWithPaymentIntent(
-            config = defaultPaymentSheetConfiguration.copy(
-                customer = PaymentSheet.CustomerConfiguration(
-                    id = "id1",
-                    ephemeralKeySecret = "000"
-                )
+        val newConfig = defaultPaymentSheetConfiguration.copy(
+            customer = PaymentSheet.CustomerConfiguration(
+                id = "id1",
+                ephemeralKeySecret = "000"
             )
+        )
+        val newState = mockPaymentSheetStateWithPaymentIntent(
+            config = newConfig
         )
 
         val updater = createUpdater()
@@ -325,6 +341,7 @@ class PaymentSelectionUpdaterTest {
             currentSelection = existingSelection,
             previousConfig = defaultPaymentSheetConfiguration,
             newState = newState,
+            newConfig = newConfig
         )
 
         assertThat(result).isEqualTo(null)
@@ -340,7 +357,7 @@ class PaymentSelectionUpdaterTest {
         val intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
 
         return PaymentSheetState.Full(
-            config = config,
+            config = config.asCommonConfiguration(),
             customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
                 paymentMethods = customerPaymentMethods
             ),
@@ -371,7 +388,7 @@ class PaymentSelectionUpdaterTest {
         val intent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD
 
         return PaymentSheetState.Full(
-            config = config,
+            config = config.asCommonConfiguration(),
             customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
                 paymentMethods = customerPaymentMethods
             ),

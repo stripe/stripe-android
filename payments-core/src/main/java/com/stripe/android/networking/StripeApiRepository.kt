@@ -5,7 +5,6 @@ import android.net.http.HttpResponseCache
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.DefaultFraudDetectionDataRepository
-import com.stripe.android.FraudDetectionDataRepository
 import com.stripe.android.Stripe
 import com.stripe.android.StripeApiBeta
 import com.stripe.android.cards.Bin
@@ -23,6 +22,9 @@ import com.stripe.android.core.exception.PermissionException
 import com.stripe.android.core.exception.RateLimitException
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.exception.safeAnalyticsMessage
+import com.stripe.android.core.frauddetection.FraudDetectionData
+import com.stripe.android.core.frauddetection.FraudDetectionDataParamsUtils
+import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.model.StripeFile
@@ -1447,7 +1449,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
 
         val parser = ElementsSessionJsonParser(
             params = params,
-            apiKey = options.apiKey
+            isLiveMode = options.apiKeyIsLiveMode
         )
 
         val requestParams = buildMap {

@@ -8,6 +8,6 @@ package com.stripe.android.core.version
  *
  */
 object StripeSdkVersion {
-    const val VERSION_NAME = "20.48.4"
+    const val VERSION_NAME = "21.0.1"
     const val VERSION: String = "AndroidBindings/$VERSION_NAME"
 }

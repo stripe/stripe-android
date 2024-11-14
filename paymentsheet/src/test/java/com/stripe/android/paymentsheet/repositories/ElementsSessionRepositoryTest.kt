@@ -11,6 +11,7 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
@@ -47,7 +48,7 @@ internal class ElementsSessionRepositoryTest {
         val locale = Locale.GERMANY
         val session = withLocale(locale) {
             createRepository().get(
-                initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                     clientSecret = "client_secret",
                 ),
                 customer = null,
@@ -76,7 +77,7 @@ internal class ElementsSessionRepositoryTest {
 
             val session = withLocale(Locale.ITALY) {
                 createRepository().get(
-                    initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                    initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                         clientSecret = "client_secret",
                     ),
                     customer = null,
@@ -102,7 +103,7 @@ internal class ElementsSessionRepositoryTest {
 
             val session = withLocale(Locale.ITALY) {
                 createRepository().get(
-                    initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                    initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                         clientSecret = "client_secret",
                     ),
                     customer = null,
@@ -134,7 +135,7 @@ internal class ElementsSessionRepositoryTest {
             { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
             testDispatcher,
         ).get(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "client_secret",
             ),
             customer = null,
@@ -153,7 +154,7 @@ internal class ElementsSessionRepositoryTest {
     }
 
     @Test
-    fun `Returns the Elements Session endpoint's exception if there's no fallback`() = runTest {
+    fun `Handles deferred intent elements session lookup failure gracefully`() = runTest {
         val endpointException = APIException(message = "this didn't work")
         whenever(
             stripeRepository.retrieveElementsSession(any(), any())
@@ -166,7 +167,7 @@ internal class ElementsSessionRepositoryTest {
             { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
             testDispatcher,
         ).get(
-            initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 1234,
@@ -179,8 +180,41 @@ internal class ElementsSessionRepositoryTest {
             defaultPaymentMethodId = null,
         )
 
-        assertThat(session.getOrNull()).isNull()
-        assertThat(session.exceptionOrNull()).isEqualTo(endpointException)
+        assertThat(session.isSuccess).isTrue()
+        assertThat(session.getOrNull()?.stripeIntent?.paymentMethodTypes).containsExactly("card")
+    }
+
+    @Test
+    fun `Deferred intent elements session failure uses payment method types if specified`() = runTest {
+        val endpointException = APIException(message = "this didn't work")
+        whenever(
+            stripeRepository.retrieveElementsSession(any(), any())
+        ).thenReturn(
+            Result.failure(endpointException)
+        )
+        val expectedPaymentMethodTypes = listOf("card", "amazon_pay")
+
+        val session = RealElementsSessionRepository(
+            stripeRepository,
+            { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
+            testDispatcher,
+        ).get(
+            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 1234,
+                        currency = "cad",
+                    ),
+                    paymentMethodTypes = expectedPaymentMethodTypes
+                )
+            ),
+            customer = null,
+            externalPaymentMethods = emptyList(),
+            defaultPaymentMethodId = null,
+        )
+
+        assertThat(session.isSuccess).isTrue()
+        assertThat(session.getOrNull()?.stripeIntent?.paymentMethodTypes).isEqualTo(expectedPaymentMethodTypes)
     }
 
     @OptIn(ExperimentalCustomerSessionApi::class)
@@ -204,7 +238,7 @@ internal class ElementsSessionRepositoryTest {
         )
 
         repository.get(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "client_secret"
             ),
             customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
@@ -248,7 +282,7 @@ internal class ElementsSessionRepositoryTest {
         )
 
         repository.get(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "client_secret"
             ),
             customer = null,

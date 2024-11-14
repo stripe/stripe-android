@@ -1,0 +1,88 @@
+public final class com/stripe/android/connect/BuildConfig {
+	public static final field BUILD_TYPE Ljava/lang/String;
+	public static final field DEBUG Z
+	public static final field LIBRARY_PACKAGE_NAME Ljava/lang/String;
+	public fun <init> ()V
+}
+
+public final class com/stripe/android/connect/EmbeddedComponentManager$Appearance$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/connect/EmbeddedComponentManager$Appearance;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/connect/EmbeddedComponentManager$Appearance;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/connect/EmbeddedComponentManager$Badge$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/connect/EmbeddedComponentManager$Badge;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/connect/EmbeddedComponentManager$Badge;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/connect/EmbeddedComponentManager$Button$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/connect/EmbeddedComponentManager$Button;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/connect/EmbeddedComponentManager$Button;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/connect/EmbeddedComponentManager$Colors$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/connect/EmbeddedComponentManager$Colors;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/connect/EmbeddedComponentManager$Colors;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/connect/EmbeddedComponentManager$Configuration$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/connect/EmbeddedComponentManager$Configuration;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/connect/EmbeddedComponentManager$Configuration;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/connect/EmbeddedComponentManager$CornerRadius$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/connect/EmbeddedComponentManager$CornerRadius;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/connect/EmbeddedComponentManager$CornerRadius;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/connect/EmbeddedComponentManager$Typography$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/connect/EmbeddedComponentManager$Typography;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/connect/EmbeddedComponentManager$Typography;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/connect/EmbeddedComponentManager$Typography$Style$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/connect/EmbeddedComponentManager$Typography$Style;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/connect/EmbeddedComponentManager$Typography$Style;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/connect/databinding/StripeConnectWebviewBinding : androidx/viewbinding/ViewBinding {
+	public final field stripeWebView Landroid/webkit/WebView;
+	public static fun bind (Landroid/view/View;)Lcom/stripe/android/connect/databinding/StripeConnectWebviewBinding;
+	public synthetic fun getRoot ()Landroid/view/View;
+	public fun getRoot ()Landroid/widget/FrameLayout;
+	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/connect/databinding/StripeConnectWebviewBinding;
+	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/connect/databinding/StripeConnectWebviewBinding;
+}
+
+public final class com/stripe/android/connect/databinding/StripeNotBuiltYetBinding : androidx/viewbinding/ViewBinding {
+	public static fun bind (Landroid/view/View;)Lcom/stripe/android/connect/databinding/StripeNotBuiltYetBinding;
+	public synthetic fun getRoot ()Landroid/view/View;
+	public fun getRoot ()Landroidx/constraintlayout/widget/ConstraintLayout;
+	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/connect/databinding/StripeNotBuiltYetBinding;
+	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/connect/databinding/StripeNotBuiltYetBinding;
+}
+

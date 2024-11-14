@@ -9,6 +9,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
 import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
+import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext
 import com.stripe.android.financialconnections.FinancialConnectionsSheetState.AuthFlowStatus
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.FinishWithResult
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenAuthFlowWithUrl
@@ -31,6 +32,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession.StatusDetails
 import com.stripe.android.financialconnections.presentation.withState
+import com.stripe.android.model.LinkMode
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -140,18 +142,192 @@ class FinancialConnectionsSheetViewModelTest {
             // When
             val viewModel = createViewModel(
                 defaultInitialState.copy(
-                    initialArgs = ForInstantDebits(configuration)
+                    initialArgs = ForInstantDebits(
+                        configuration = configuration,
+                        elementsSessionContext = ElementsSessionContext(
+                            initializationMode = ElementsSessionContext.InitializationMode.PaymentIntent("pi_123"),
+                            amount = 123,
+                            currency = "usd",
+                            linkMode = LinkMode.LinkPaymentMethod,
+                            billingDetails = null,
+                            prefillDetails = ElementsSessionContext.PrefillDetails(
+                                email = null,
+                                phone = null,
+                                phoneCountryCode = null,
+                            )
+                        ),
+                    )
                 )
             )
 
             // Then
             withState(viewModel) {
                 val viewEffect = it.viewEffect as OpenAuthFlowWithUrl
-                assertThat(viewEffect.url).isEqualTo(
-                    "${syncResponse.manifest.hostedAuthUrl}&return_payment_method=true"
-                )
+                assertThat(viewEffect.url).contains("return_payment_method=true")
             }
         }
+
+    @Test
+    fun `init - when instant debits flow, hosted auth url expands the payment method`() =
+        runTest {
+            // Given
+            whenever(browserManager.canOpenHttpsUrl()).thenReturn(true)
+            whenever(getOrFetchSync(any())).thenReturn(syncResponse)
+            whenever(nativeRouter.nativeAuthFlowEnabled(any())).thenReturn(false)
+
+            // When
+            val viewModel = createViewModel(
+                defaultInitialState.copy(
+                    initialArgs = ForInstantDebits(
+                        configuration = configuration,
+                        elementsSessionContext = ElementsSessionContext(
+                            initializationMode = ElementsSessionContext.InitializationMode.PaymentIntent("pi_123"),
+                            amount = 123,
+                            currency = "usd",
+                            linkMode = LinkMode.LinkPaymentMethod,
+                            billingDetails = null,
+                            prefillDetails = ElementsSessionContext.PrefillDetails(
+                                email = null,
+                                phone = null,
+                                phoneCountryCode = null,
+                            )
+                        ),
+                    )
+                )
+            )
+
+            // Then
+            withState(viewModel) {
+                val viewEffect = it.viewEffect as OpenAuthFlowWithUrl
+                assertThat(viewEffect.url).contains("expand_payment_method=true")
+            }
+        }
+
+    @Test
+    fun `init - when instant debits flow, hosted auth url doesn't contain link_mode if unknown`() = runTest {
+        // Given
+        whenever(browserManager.canOpenHttpsUrl()).thenReturn(true)
+        whenever(getOrFetchSync(any())).thenReturn(syncResponse)
+        whenever(nativeRouter.nativeAuthFlowEnabled(any())).thenReturn(false)
+
+        // When
+        val viewModel = createViewModel(
+            defaultInitialState.copy(
+                initialArgs = ForInstantDebits(
+                    configuration = configuration,
+                    elementsSessionContext = ElementsSessionContext(
+                        initializationMode = ElementsSessionContext.InitializationMode.PaymentIntent("pi_123"),
+                        amount = 123,
+                        currency = "usd",
+                        linkMode = null,
+                        billingDetails = null,
+                        prefillDetails = ElementsSessionContext.PrefillDetails(
+                            email = null,
+                            phone = null,
+                            phoneCountryCode = null,
+                        )
+                    ),
+                )
+            )
+        )
+
+        // Then
+        withState(viewModel) {
+            val viewEffect = it.viewEffect as OpenAuthFlowWithUrl
+            assertThat(viewEffect.url).doesNotContain("link_mode")
+        }
+    }
+
+    @Test
+    fun `init - hosted auth url contains prefill details`() = runTest {
+        // Given
+        whenever(browserManager.canOpenHttpsUrl()).thenReturn(true)
+        whenever(getOrFetchSync(any())).thenReturn(syncResponse)
+        whenever(nativeRouter.nativeAuthFlowEnabled(any())).thenReturn(false)
+
+        // When
+        val viewModel = createViewModel(
+            defaultInitialState.copy(
+                initialArgs = ForInstantDebits(
+                    configuration = configuration,
+                    elementsSessionContext = ElementsSessionContext(
+                        initializationMode = ElementsSessionContext.InitializationMode.PaymentIntent("pi_123"),
+                        amount = 123,
+                        currency = "usd",
+                        linkMode = null,
+                        billingDetails = null,
+                        prefillDetails = ElementsSessionContext.PrefillDetails(
+                            email = "email@email.com",
+                            phone = "5555551234",
+                            phoneCountryCode = "US",
+                        )
+                    ),
+                )
+            )
+        )
+
+        // Then
+        withState(viewModel) {
+            val viewEffect = it.viewEffect as OpenAuthFlowWithUrl
+            assertThat(viewEffect.url).contains("email=email@email.com")
+            assertThat(viewEffect.url).contains("linkMobilePhone=5555551234")
+            assertThat(viewEffect.url).contains("linkMobilePhoneCountry=US")
+        }
+    }
+
+    @Test
+    fun `init - hosted auth url contains billing details`() = runTest {
+        // Given
+        whenever(browserManager.canOpenHttpsUrl()).thenReturn(true)
+        whenever(getOrFetchSync(any())).thenReturn(syncResponse)
+        whenever(nativeRouter.nativeAuthFlowEnabled(any())).thenReturn(false)
+
+        // When
+        val viewModel = createViewModel(
+            defaultInitialState.copy(
+                initialArgs = ForInstantDebits(
+                    configuration = configuration,
+                    elementsSessionContext = ElementsSessionContext(
+                        initializationMode = ElementsSessionContext.InitializationMode.PaymentIntent("pi_123"),
+                        amount = 123,
+                        currency = "usd",
+                        linkMode = null,
+                        billingDetails = ElementsSessionContext.BillingDetails(
+                            name = "John Doe",
+                            address = ElementsSessionContext.BillingDetails.Address(
+                                line1 = "123 Main St",
+                                line2 = "",
+                                city = "Toronto",
+                                state = "ON",
+                                postalCode = "A1B 2C3",
+                                country = "CA",
+                            ),
+                            email = "email@email.com",
+                            phone = null,
+                        ),
+                        prefillDetails = ElementsSessionContext.PrefillDetails(
+                            email = null,
+                            phone = null,
+                            phoneCountryCode = null,
+                        )
+                    ),
+                )
+            )
+        )
+
+        // Then
+        withState(viewModel) {
+            val viewEffect = it.viewEffect as OpenAuthFlowWithUrl
+            assertThat(viewEffect.url).contains("billingDetails%5Bname%5D=John+Doe")
+            assertThat(viewEffect.url).contains("billingDetails%5Bemail%5D=email%40email.com")
+            assertThat(viewEffect.url).contains("billingDetails%5Baddress%5D%5Bline1%5D=123+Main+St")
+            assertThat(viewEffect.url).contains("billingDetails%5Baddress%5D%5Bcity%5D=Toronto")
+            assertThat(viewEffect.url).contains("billingDetails%5Baddress%5D%5Bstate%5D=ON")
+            assertThat(viewEffect.url).contains("billingDetails%5Baddress%5D%5Bpostal_code%5D=A1B+2C3")
+            assertThat(viewEffect.url).contains("billingDetails%5Baddress%5D%5Bcountry%5D=CA")
+            assertThat(viewEffect.url).doesNotContain("billingDetails%5Baddress%5D%5Bline2%5D")
+        }
+    }
 
     @Test
     fun `init - when data flow and non-native, hosted auth url without query params is launched`() = runTest {

@@ -4,6 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import com.stripe.android.CardBrandFilter
+import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.model.CardBrand
 import com.stripe.android.ui.core.R
@@ -30,6 +32,7 @@ internal class CardDetailsController(
     cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
     uiContext: CoroutineContext = Dispatchers.Main,
     workContext: CoroutineContext = Dispatchers.IO,
+    cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter
 ) : SectionFieldErrorController, SectionFieldComposable {
 
     val nameElement = if (collectName) {
@@ -52,7 +55,10 @@ internal class CardDetailsController(
     val numberElement = CardNumberElement(
         IdentifierSpec.CardNumber,
         DefaultCardNumberController(
-            cardTextFieldConfig = CardNumberConfig(),
+            cardTextFieldConfig = CardNumberConfig(
+                isCardBrandChoiceEligible = cbcEligibility != CardBrandChoiceEligibility.Ineligible,
+                cardBrandFilter = cardBrandFilter
+            ),
             cardAccountRangeRepository = cardAccountRangeRepositoryFactory.create(),
             uiContext = uiContext,
             workContext = workContext,
@@ -68,6 +74,7 @@ internal class CardDetailsController(
                 )
                 is CardBrandChoiceEligibility.Ineligible -> CardBrandChoiceConfig.Ineligible
             },
+            cardBrandFilter = cardBrandFilter
         )
     )
 

@@ -14,20 +14,14 @@
     <ID>CyclomaticComplexMethod:SourceJsonParser.kt$SourceJsonParser.Companion$private inline fun &lt;reified T : StripeModel> optStripeJsonModel( jsonObject: JSONObject, @Size(min = 1) key: String ): T?</ID>
     <ID>CyclomaticComplexMethod:StripeErrorMapping.kt$internal fun Context.mapErrorCodeToLocalizedMessage(code: String?): String?</ID>
     <ID>EmptyFunctionBlock:CardWidgetProgressView.kt$CardWidgetProgressView.&lt;no name provided>${ }</ID>
-    <ID>EmptyFunctionBlock:CustomerSessionTest.kt$CustomerSessionTest.&lt;no name provided>${ }</ID>
-    <ID>EmptyFunctionBlock:DeletePaymentMethodDialogFactory.kt$DeletePaymentMethodDialogFactory.PaymentMethodDeleteListener${ }</ID>
     <ID>EmptyFunctionBlock:FakeFraudDetectionDataRepository.kt$FakeFraudDetectionDataRepository${ }</ID>
     <ID>EmptyFunctionBlock:InMemoryCardAccountRangeSourceTest.kt$InMemoryCardAccountRangeSourceTest.FakeStore${ }</ID>
-    <ID>EmptyFunctionBlock:PaymentFlowActivity.kt$PaymentFlowActivity.&lt;no name provided>${ }</ID>
-    <ID>EmptyFunctionBlock:PaymentFlowActivity.kt$PaymentFlowActivity.&lt;no name provided>${}</ID>
-    <ID>EmptyFunctionBlock:PaymentSessionViewModel.kt$PaymentSessionViewModel${ }</ID>
     <ID>EmptyFunctionBlock:StripeTextWatcher.kt$StripeTextWatcher${ }</ID>
     <ID>ExplicitGarbageCollectionCall:WeakMapInjectorRegistryTest.kt$WeakMapInjectorRegistryTest$gc()</ID>
     <ID>LargeClass:CardInputWidget.kt$CardInputWidget : LinearLayoutCardWidget</ID>
     <ID>LargeClass:CardInputWidgetTest.kt$CardInputWidgetTest</ID>
     <ID>LargeClass:CardMultilineWidgetTest.kt$CardMultilineWidgetTest</ID>
     <ID>LargeClass:CardNumberEditTextTest.kt$CardNumberEditTextTest</ID>
-    <ID>LargeClass:CustomerSessionTest.kt$CustomerSessionTest</ID>
     <ID>LargeClass:ElementsSessionJsonParserTest.kt$ElementsSessionJsonParserTest</ID>
     <ID>LargeClass:PaymentIntentFixtures.kt$PaymentIntentFixtures</ID>
     <ID>LargeClass:SetupIntentFixtures.kt$SetupIntentFixtures</ID>
@@ -39,9 +33,7 @@
     <ID>LongMethod:CardFormView.kt$CardFormView$private fun setupCardWidget()</ID>
     <ID>LongMethod:CardFormViewTest.kt$CardFormViewTest$@Test fun testCardValidCallback()</ID>
     <ID>LongMethod:CardInputWidget.kt$CardInputWidget$private fun initView(attrs: AttributeSet?)</ID>
-    <ID>LongMethod:CustomerSessionOperationExecutor.kt$CustomerSessionOperationExecutor$@JvmSynthetic internal suspend fun execute( ephemeralKey: EphemeralKey, operation: EphemeralOperation )</ID>
-    <ID>LongMethod:CustomerSessionTest.kt$CustomerSessionTest$@BeforeTest fun setup()</ID>
-    <ID>LongMethod:CustomerSessionTest.kt$CustomerSessionTest$private suspend fun setupErrorProxy()</ID>
+    <ID>LongMethod:CollectBankAccountViewModel.kt$CollectBankAccountViewModel$private suspend fun createFinancialConnectionsSession()</ID>
     <ID>LongMethod:ElementsSessionFixtures.kt$ElementsSessionFixtures$fun createPaymentIntentWithCustomerSession( allowRedisplay: String? = "limited" ): JSONObject</ID>
     <ID>LongMethod:ElementsSessionJsonParserTest.kt$ElementsSessionJsonParserTest$@Test fun `ElementsSession has expected customer session information in the response`()</ID>
     <ID>LongMethod:GooglePayJsonFactoryTest.kt$GooglePayJsonFactoryTest$@Test fun testCreatePaymentMethodRequestJson()</ID>
@@ -70,7 +62,6 @@
     <ID>MagicNumber:DateUtils.kt$DateUtils$20</ID>
     <ID>MagicNumber:DateUtils.kt$DateUtils$80</ID>
     <ID>MagicNumber:ExpirationDate.kt$ExpirationDate.Unvalidated$3</ID>
-    <ID>MagicNumber:FraudDetectionDataRequestParamsFactory.kt$FraudDetectionDataRequestParamsFactory.Companion$60</ID>
     <ID>MagicNumber:PaymentAuthConfig.kt$PaymentAuthConfig.Stripe3ds2Config$5</ID>
     <ID>MagicNumber:PaymentAuthConfig.kt$PaymentAuthConfig.Stripe3ds2Config$99</ID>
     <ID>MagicNumber:PaymentMethodCreateParams.kt$PaymentMethodCreateParams$4</ID>
@@ -102,7 +93,6 @@
     <ID>MaxLineLength:ConfirmPaymentIntentParams.kt$ConfirmPaymentIntentParams.SetupFutureUsage$*</ID>
     <ID>MaxLineLength:ConfirmPaymentIntentParamsFactoryTest.kt$ConfirmPaymentIntentParamsFactoryTest$fun</ID>
     <ID>MaxLineLength:ConfirmSetupIntentParams.kt$ConfirmSetupIntentParams.Companion$*</ID>
-    <ID>MaxLineLength:CustomerSessionOperationExecutorTest.kt$CustomerSessionOperationExecutorTest$fun</ID>
     <ID>MaxLineLength:DefaultAlipayRepositoryTest.kt$DefaultAlipayRepositoryTest$"https://hooks.stripe.com/adapter/alipay/redirect/complete/src_1HDEFWKlwPmebFhp6tcpln8T/src_client_secret_S6H9mVMKK6qxk9YxsUvbH55K"</ID>
     <ID>MaxLineLength:EphemeralKeyManagerTest.kt$EphemeralKeyManagerTest$"Received an ephemeral key that could not be parsed. See https://stripe.com/docs/mobile/android/basic for more details."</ID>
     <ID>MaxLineLength:ExpiryDateEditTextTest.kt$ExpiryDateEditTextTest$verify(errorMessageListener).displayErrorMessage(context.getString(UiCoreR.string.stripe_incomplete_expiry_date))</ID>
@@ -136,8 +126,6 @@
     <ID>MaxLineLength:PaymentMethod.kt$PaymentMethod.SepaDebit$*</ID>
     <ID>MaxLineLength:PaymentMethodMessageJsonParserTest.kt$PaymentMethodMessageJsonParserTest$.</ID>
     <ID>MaxLineLength:PaymentRelayContract.kt$PaymentRelayContract$internal</ID>
-    <ID>MaxLineLength:PaymentSessionConfigTest.kt$PaymentSessionConfigTest$fun</ID>
-    <ID>MaxLineLength:PaymentSessionViewModelTest.kt$PaymentSessionViewModelTest$fun</ID>
     <ID>MaxLineLength:PersonTokenParams.kt$PersonTokenParams.Verification$*</ID>
     <ID>MaxLineLength:RemoteCardAccountRangeSourceTest.kt$RemoteCardAccountRangeSourceTest$fun</ID>
     <ID>MaxLineLength:SourceJsonParserTest.kt$SourceJsonParserTest$payLaterAssetUrlsDescriptive = "https://x.klarnacdn.net/payment-method/assets/badges/generic/klarna.svg"</ID>
@@ -165,22 +153,18 @@
     <ID>SwallowedException:ActivityUtils.kt$e: IllegalArgumentException</ID>
     <ID>SwallowedException:PaymentUtils.kt$PaymentUtils$e: ClassCastException</ID>
     <ID>ThrowsCount:StripeApiRepository.kt$StripeApiRepository$@Throws( InvalidRequestException::class, AuthenticationException::class, CardException::class, APIException::class ) private fun handleApiError(response: StripeResponse&lt;String>)</ID>
+    <ID>TooGenericExceptionCaught:CollectBankAccountViewModel.kt$CollectBankAccountViewModel$e: Exception</ID>
     <ID>TooGenericExceptionThrown:DefaultAlipayRepository.kt$DefaultAlipayRepository$throw RuntimeException("Unable to authenticate Payment Intent with Alipay SDK")</ID>
-    <ID>TooGenericExceptionThrown:PaymentFlowViewModelTest.kt$PaymentFlowViewModelTest.ThrowingShippingMethodsFactory$throw RuntimeException("Always throws an exception")</ID>
     <ID>TooManyFunctions:AccountParams.kt$AccountParams.BusinessTypeParams.Company$Builder</ID>
     <ID>TooManyFunctions:AccountParams.kt$AccountParams.BusinessTypeParams.Individual$Builder</ID>
     <ID>TooManyFunctions:CardInputWidget.kt$CardInputWidget : LinearLayoutCardWidget</ID>
     <ID>TooManyFunctions:CardMultilineWidget.kt$CardMultilineWidget : LinearLayoutCardWidget</ID>
     <ID>TooManyFunctions:CardWidget.kt$CardWidget</ID>
     <ID>TooManyFunctions:CountryTextInputLayout.kt$CountryTextInputLayout : TextInputLayout</ID>
-    <ID>TooManyFunctions:CustomerSession.kt$CustomerSession</ID>
     <ID>TooManyFunctions:PaymentAnalyticsRequestFactory.kt$PaymentAnalyticsRequestFactory : AnalyticsRequestFactory</ID>
     <ID>TooManyFunctions:PaymentController.kt$PaymentController</ID>
     <ID>TooManyFunctions:PaymentMethod.kt$PaymentMethod$Builder</ID>
     <ID>TooManyFunctions:PaymentMethodCreateParams.kt$PaymentMethodCreateParams$Companion</ID>
-    <ID>TooManyFunctions:PaymentMethodsActivityStarter.kt$PaymentMethodsActivityStarter.Args$Builder</ID>
-    <ID>TooManyFunctions:PaymentMethodsAdapter.kt$PaymentMethodsAdapter : Adapter</ID>
-    <ID>TooManyFunctions:PaymentSessionConfig.kt$PaymentSessionConfig$Builder</ID>
     <ID>TooManyFunctions:PersonTokenParams.kt$PersonTokenParams$Builder</ID>
     <ID>TooManyFunctions:SourceParams.kt$SourceParams$Companion</ID>
     <ID>TooManyFunctions:Stripe.kt$Stripe</ID>
@@ -190,9 +174,7 @@
     <ID>TooManyFunctions:StripeKtx.kt$com.stripe.android.StripeKtx.kt</ID>
     <ID>TooManyFunctions:StripePaymentController.kt$StripePaymentController : PaymentController</ID>
     <ID>TooManyFunctions:StripeRepository.kt$StripeRepository</ID>
-    <ID>UnusedPrivateMember:CustomerSession.kt$CustomerSession$private fun &lt;L : RetrievalListener?> getListener(operationId: String): L?</ID>
     <ID>UnusedPrivateProperty:PayWithGoogleUtils.kt$PayWithGoogleUtils$i</ID>
-    <ID>UnusedPrivateProperty:PaymentFlowActivityStarter.kt$PaymentFlowActivityStarter$config: PaymentSessionConfig</ID>
     <ID>UnusedPrivateProperty:PersonTokenParams.kt$PersonTokenParams.Companion$// top level param private const val PARAM_PERSON = "person"</ID>
     <ID>UnusedPrivateProperty:Stripe3ds2Fixtures.kt$Stripe3ds2Fixtures$private val SDK_TRANSACTION_ID = UUID.randomUUID().toString()</ID>
   </CurrentIssues>

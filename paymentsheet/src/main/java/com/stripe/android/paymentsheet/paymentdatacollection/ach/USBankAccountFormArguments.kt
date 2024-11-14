@@ -3,13 +3,14 @@ package com.stripe.android.paymentsheet.paymentdatacollection.ach
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.lpmfoundations.luxe.isSaveForFutureUseValueChangeable
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import kotlinx.coroutines.flow.update
@@ -38,6 +39,7 @@ import kotlinx.coroutines.flow.update
  */
 internal class USBankAccountFormArguments(
     val instantDebits: Boolean,
+    val linkMode: LinkMode?,
     val onBehalfOf: String?,
     val showCheckbox: Boolean,
     val isCompleteFlow: Boolean,
@@ -48,8 +50,7 @@ internal class USBankAccountFormArguments(
     val shippingDetails: AddressDetails?,
     val draftPaymentSelection: PaymentSelection?,
     val onMandateTextChanged: (mandate: ResolvableString?, showAbove: Boolean) -> Unit,
-    val onConfirmUSBankAccount: (PaymentSelection.New.USBankAccount) -> Unit,
-    val onCollectBankAccountResult: ((CollectBankAccountResultInternal) -> Unit)?,
+    val onLinkedBankAccountChanged: (PaymentSelection.New.USBankAccount?) -> Unit,
     val onUpdatePrimaryButtonUIState: ((PrimaryButton.UIState?) -> (PrimaryButton.UIState?)) -> Unit,
     val onUpdatePrimaryButtonState: (PrimaryButton.State) -> Unit,
     val onError: (ResolvableString?) -> Unit,
@@ -71,7 +72,7 @@ internal class USBankAccountFormArguments(
             val initializationMode = (viewModel as? PaymentSheetViewModel)
                 ?.args
                 ?.initializationMode
-            val onBehalfOf = (initializationMode as? PaymentSheet.InitializationMode.DeferredIntent)
+            val onBehalfOf = (initializationMode as? PaymentElementLoader.InitializationMode.DeferredIntent)
                 ?.intentConfiguration
                 ?.onBehalfOf
             val stripeIntent = paymentMethodMetadata.stripeIntent
@@ -81,6 +82,7 @@ internal class USBankAccountFormArguments(
                     instantDebits.not(),
                 hostedSurface = hostedSurface,
                 instantDebits = instantDebits,
+                linkMode = paymentMethodMetadata.linkMode,
                 onBehalfOf = onBehalfOf,
                 isCompleteFlow = viewModel.isCompleteFlow,
                 isPaymentFlow = stripeIntent is PaymentIntent,
@@ -89,8 +91,7 @@ internal class USBankAccountFormArguments(
                 shippingDetails = viewModel.config.shippingDetails,
                 draftPaymentSelection = viewModel.newPaymentSelection?.paymentSelection,
                 onMandateTextChanged = viewModel.mandateHandler::updateMandateText,
-                onConfirmUSBankAccount = viewModel::handleConfirmUSBankAccount,
-                onCollectBankAccountResult = null,
+                onLinkedBankAccountChanged = viewModel::handleLinkedBankAccountChanged,
                 onUpdatePrimaryButtonUIState = { viewModel.customPrimaryButtonUiState.update(it) },
                 onUpdatePrimaryButtonState = viewModel::updatePrimaryButtonState,
                 onError = viewModel::onError

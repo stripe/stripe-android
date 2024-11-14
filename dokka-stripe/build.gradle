@@ -1,0 +1,6 @@
+apply plugin: "org.jetbrains.kotlin.jvm"
+
+dependencies {
+    compileOnly "org.jetbrains.dokka:dokka-base:${versions.dokka}"
+    compileOnly "org.jetbrains.dokka:dokka-core:${versions.dokka}"
+}

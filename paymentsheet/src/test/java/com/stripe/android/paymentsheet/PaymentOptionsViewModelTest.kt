@@ -2,11 +2,11 @@ package com.stripe.android.paymentsheet
 
 import androidx.appcompat.app.AppCompatActivity
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.R
+import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
@@ -39,6 +39,7 @@ import com.stripe.android.paymentsheet.utils.LinkTestUtils
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
+import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -185,7 +186,7 @@ internal class PaymentOptionsViewModelTest {
         viewModel.navigationHandler.currentScreen.test {
             assertThat(awaitItem()).isInstanceOf<PaymentSheetScreen.AddAnotherPaymentMethod>()
 
-            verify(eventReporter).onShowNewPaymentOptionForm()
+            verify(eventReporter).onShowNewPaymentOptions()
 
             viewModel.handleBackPressed()
             assertThat(awaitItem()).isInstanceOf<SelectSavedPaymentMethods>()
@@ -329,6 +330,72 @@ internal class PaymentOptionsViewModelTest {
                 args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
                     config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.copy(
                         paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+                    ),
+                    paymentMethods = listOf(),
+                    isGooglePayReady = false,
+                    linkState = null,
+                    stripeIntent = PaymentIntentFixtures.PI_WITH_PAYMENT_METHOD!!.copy(
+                        paymentMethodTypes = listOf("card", "cashapp")
+                    ),
+                )
+            )
+
+            viewModel.navigationHandler.currentScreen.test {
+                assertThat(awaitItem()).isInstanceOf<PaymentSheetScreen.VerticalMode>()
+            }
+        }
+
+    @Test
+    fun `currentScreen is Form if payment methods is empty and supportedPaymentMethods contains one in automatic`() =
+        runTest {
+            val viewModel = createViewModel(
+                args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
+                    config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.copy(
+                        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Automatic,
+                    ),
+                    paymentMethods = listOf(),
+                    isGooglePayReady = false,
+                    linkState = null,
+                    stripeIntent = PaymentIntentFixtures.PI_WITH_PAYMENT_METHOD!!.copy(
+                        paymentMethodTypes = listOf("card")
+                    ),
+                )
+            )
+
+            viewModel.navigationHandler.currentScreen.test {
+                assertThat(awaitItem()).isInstanceOf<PaymentSheetScreen.VerticalModeForm>()
+            }
+        }
+
+    @Test
+    fun `currentScreen is VerticalMode if payment methods is not empty in automatic`() =
+        runTest {
+            val viewModel = createViewModel(
+                args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
+                    config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.copy(
+                        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Automatic,
+                    ),
+                    paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+                    isGooglePayReady = false,
+                    linkState = null,
+                    stripeIntent = PaymentIntentFixtures.PI_WITH_PAYMENT_METHOD!!.copy(
+                        paymentMethodTypes = listOf("card")
+                    ),
+                )
+            )
+
+            viewModel.navigationHandler.currentScreen.test {
+                assertThat(awaitItem()).isInstanceOf<PaymentSheetScreen.VerticalMode>()
+            }
+        }
+
+    @Test
+    fun `currentScreen is VerticalMode if supportedPaymentMethods is greater than 1 in Automatic`() =
+        runTest {
+            val viewModel = createViewModel(
+                args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
+                    config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.copy(
+                        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Automatic,
                     ),
                     paymentMethods = listOf(),
                     isGooglePayReady = false,
@@ -760,16 +827,15 @@ internal class PaymentOptionsViewModelTest {
         linkState: LinkState? = args.state.linkState,
         editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory = mock(),
         linkConfigurationCoordinator: LinkConfigurationCoordinator = FakeLinkConfigurationCoordinator()
-    ) = TestViewModelFactory.create(linkConfigurationCoordinator) { linkHandler, linkInteractor, savedStateHandle ->
+    ) = TestViewModelFactory.create(linkConfigurationCoordinator) { linkHandler, savedStateHandle ->
         PaymentOptionsViewModel(
             args = args.copy(state = args.state.copy(linkState = linkState)),
             eventReporter = eventReporter,
             customerRepository = customerRepository,
             workContext = testDispatcher,
-            application = ApplicationProvider.getApplicationContext(),
             savedStateHandle = savedStateHandle,
             linkHandler = linkHandler,
-            linkConfigurationCoordinator = linkInteractor,
+            cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
             editInteractorFactory = editInteractorFactory,
         )
     }
@@ -813,7 +879,7 @@ internal class PaymentOptionsViewModelTest {
         private val PAYMENT_OPTION_CONTRACT_ARGS = PaymentOptionContract.Args(
             state = PaymentSheetState.Full(
                 customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
-                config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+                config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.asCommonConfiguration(),
                 paymentSelection = null,
                 linkState = null,
                 validationError = null,
@@ -822,6 +888,7 @@ internal class PaymentOptionsViewModelTest {
                     isGooglePayReady = true,
                 ),
             ),
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
             statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR,
             enableLogging = false,
             productUsage = mock()

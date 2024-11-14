@@ -11,6 +11,8 @@ import com.google.android.gms.wallet.PaymentsClient
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
+import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.testing.FakeErrorReporter
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -61,17 +63,23 @@ class GooglePayRepositoryTest {
     }
 
     @Test
-    fun `when google pay is ready request fails, 'isReady' should return false`() = runTest {
+    fun `when google pay is ready request fails, 'isReady' should be false & error should be reported`() = runTest {
         val paymentsClient = mock<PaymentsClient>()
+        val errorReporter = FakeErrorReporter()
 
         whenever(paymentsClient.isReadyToPay(any())) doReturn Tasks.forException(
             ApiException(Status.RESULT_INTERNAL_ERROR)
         )
 
-        val repository = createGooglePayRepository(paymentsClient)
+        val repository = createGooglePayRepository(paymentsClient, errorReporter)
 
         repository.isReady().test {
             assertEquals(false, awaitItem())
+
+            assertEquals(
+                ErrorReporter.ExpectedErrorEvent.GOOGLE_PAY_IS_READY_API_CALL.eventName,
+                errorReporter.getLoggedErrors().first(),
+            )
 
             cancelAndIgnoreRemainingEvents()
         }
@@ -79,6 +87,7 @@ class GooglePayRepositoryTest {
 
     private fun createGooglePayRepository(
         paymentsClient: PaymentsClient,
+        errorReporter: ErrorReporter = FakeErrorReporter()
     ): DefaultGooglePayRepository {
         return DefaultGooglePayRepository(
             context = context,
@@ -87,6 +96,7 @@ class GooglePayRepositoryTest {
             existingPaymentMethodRequired = true,
             allowCreditCards = true,
             paymentsClientFactory = { paymentsClient },
+            errorReporter = errorReporter,
             logger = Logger.noop(),
         )
     }

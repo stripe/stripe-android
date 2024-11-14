@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import com.stripe.android.ConfirmStripeIntentParamsFactory
+import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.networking.ApiRequest
@@ -16,6 +17,7 @@ import com.stripe.android.model.setupFutureUsage
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentsheet.IntentConfirmationInterceptor.NextStep
 import com.stripe.android.paymentsheet.injection.IS_FLOW_CONTROLLER
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -61,7 +63,7 @@ internal interface IntentConfirmationInterceptor {
     }
 
     suspend fun intercept(
-        initializationMode: PaymentSheet.InitializationMode,
+        initializationMode: PaymentElementLoader.InitializationMode,
         paymentMethodCreateParams: PaymentMethodCreateParams,
         paymentMethodOptionsParams: PaymentMethodOptionsParams? = null,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
@@ -69,7 +71,7 @@ internal interface IntentConfirmationInterceptor {
     ): NextStep
 
     suspend fun intercept(
-        initializationMode: PaymentSheet.InitializationMode,
+        initializationMode: PaymentElementLoader.InitializationMode,
         paymentMethod: PaymentMethod,
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
@@ -88,6 +90,15 @@ internal enum class DeferredIntentConfirmationType(val value: String) {
     None("none")
 }
 
+internal class InvalidDeferredIntentUsageException : StripeException() {
+    override fun analyticsValue(): String = "invalidDeferredIntentUsage"
+
+    override val message: String = """
+        It appears you are reusing an intent on every `createIntentCallback` call. You should either create a brand
+        new intent in `createIntentCallback` or update the existing intent with the new payment method ID.
+    """.trimIndent()
+}
+
 internal class DefaultIntentConfirmationInterceptor @Inject constructor(
     private val stripeRepository: StripeRepository,
     @Named(IS_FLOW_CONTROLLER) private val isFlowController: Boolean,
@@ -101,14 +112,14 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         )
 
     override suspend fun intercept(
-        initializationMode: PaymentSheet.InitializationMode,
+        initializationMode: PaymentElementLoader.InitializationMode,
         paymentMethodCreateParams: PaymentMethodCreateParams,
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         customerRequestedSave: Boolean,
     ): NextStep {
         return when (initializationMode) {
-            is PaymentSheet.InitializationMode.DeferredIntent -> {
+            is PaymentElementLoader.InitializationMode.DeferredIntent -> {
                 handleDeferredIntent(
                     intentConfiguration = initializationMode.intentConfiguration,
                     shippingValues = shippingValues,
@@ -118,7 +129,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                 )
             }
 
-            is PaymentSheet.InitializationMode.PaymentIntent -> {
+            is PaymentElementLoader.InitializationMode.PaymentIntent -> {
                 createConfirmStep(
                     clientSecret = initializationMode.clientSecret,
                     shippingValues = shippingValues,
@@ -127,7 +138,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                 )
             }
 
-            is PaymentSheet.InitializationMode.SetupIntent -> {
+            is PaymentElementLoader.InitializationMode.SetupIntent -> {
                 createConfirmStep(
                     clientSecret = initializationMode.clientSecret,
                     shippingValues = shippingValues,
@@ -138,13 +149,13 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
     }
 
     override suspend fun intercept(
-        initializationMode: PaymentSheet.InitializationMode,
+        initializationMode: PaymentElementLoader.InitializationMode,
         paymentMethod: PaymentMethod,
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
     ): NextStep {
         return when (initializationMode) {
-            is PaymentSheet.InitializationMode.DeferredIntent -> {
+            is PaymentElementLoader.InitializationMode.DeferredIntent -> {
                 val offSession = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
                 handleDeferredIntent(
                     intentConfiguration = initializationMode.intentConfiguration,
@@ -155,7 +166,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                 )
             }
 
-            is PaymentSheet.InitializationMode.PaymentIntent -> {
+            is PaymentElementLoader.InitializationMode.PaymentIntent -> {
                 createConfirmStep(
                     clientSecret = initializationMode.clientSecret,
                     shippingValues = shippingValues,
@@ -165,7 +176,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                 )
             }
 
-            is PaymentSheet.InitializationMode.SetupIntent -> {
+            is PaymentElementLoader.InitializationMode.SetupIntent -> {
                 createConfirmStep(
                     clientSecret = initializationMode.clientSecret,
                     shippingValues = shippingValues,
@@ -191,6 +202,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                 add("autopm")
             }
         }
+
         val params = paymentMethodCreateParams.copy(
             productUsage = productUsage,
         )
@@ -300,7 +312,16 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
             if (intent.isConfirmed) {
                 NextStep.Complete(isForceSuccess = false)
             } else if (intent.requiresAction()) {
-                NextStep.HandleNextAction(clientSecret)
+                val attachedPaymentMethodId = intent.paymentMethodId
+
+                if (attachedPaymentMethodId != null && attachedPaymentMethodId != paymentMethod.id) {
+                    NextStep.Fail(
+                        cause = InvalidDeferredIntentUsageException(),
+                        message = resolvableString(R.string.stripe_paymentsheet_invalid_deferred_intent_usage),
+                    )
+                } else {
+                    NextStep.HandleNextAction(clientSecret)
+                }
             } else {
                 DeferredIntentValidator.validate(intent, intentConfiguration, isFlowController)
                 createConfirmStep(
@@ -359,21 +380,10 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
             shipping = shippingValues,
         )
 
-        val instantDebitsPaymentMethodId = paymentMethodCreateParams.instantDebitsPaymentMethodId()
-
-        val confirmParams = if (instantDebitsPaymentMethodId != null) {
-            // Instant Debits is a new payment selection, but we need to confirm the intent with a PaymentMethod ID.
-            paramsFactory.create(
-                paymentMethodId = instantDebitsPaymentMethodId,
-                paymentMethodType = PaymentMethod.Type.Link,
-                optionsParams = paymentMethodOptionsParams,
-            )
-        } else {
-            paramsFactory.create(
-                paymentMethodCreateParams,
-                paymentMethodOptionsParams,
-            )
-        }
+        val confirmParams = paramsFactory.create(
+            paymentMethodCreateParams,
+            paymentMethodOptionsParams,
+        )
 
         return NextStep.Confirm(
             confirmParams = confirmParams,

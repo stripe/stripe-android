@@ -11,29 +11,32 @@ import java.security.InvalidParameterException
  * [com.stripe.android.financialconnections.FinancialConnectionsSheetActivity] and
  * instances of [com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetLauncher].
  */
-
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 sealed class FinancialConnectionsSheetActivityArgs(
-    open val configuration: FinancialConnectionsSheet.Configuration
+    open val configuration: FinancialConnectionsSheet.Configuration,
+    open val elementsSessionContext: FinancialConnectionsSheet.ElementsSessionContext?,
 ) : Parcelable {
 
     @Parcelize
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class ForData(
-        override val configuration: FinancialConnectionsSheet.Configuration
-    ) : FinancialConnectionsSheetActivityArgs(configuration)
+        override val configuration: FinancialConnectionsSheet.Configuration,
+        override val elementsSessionContext: FinancialConnectionsSheet.ElementsSessionContext? = null,
+    ) : FinancialConnectionsSheetActivityArgs(configuration, elementsSessionContext)
 
     @Parcelize
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class ForToken(
-        override val configuration: FinancialConnectionsSheet.Configuration
-    ) : FinancialConnectionsSheetActivityArgs(configuration)
+        override val configuration: FinancialConnectionsSheet.Configuration,
+        override val elementsSessionContext: FinancialConnectionsSheet.ElementsSessionContext? = null,
+    ) : FinancialConnectionsSheetActivityArgs(configuration, elementsSessionContext)
 
     @Parcelize
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class ForInstantDebits(
-        override val configuration: FinancialConnectionsSheet.Configuration
-    ) : FinancialConnectionsSheetActivityArgs(configuration)
+        override val configuration: FinancialConnectionsSheet.Configuration,
+        override val elementsSessionContext: FinancialConnectionsSheet.ElementsSessionContext? = null,
+    ) : FinancialConnectionsSheetActivityArgs(configuration, elementsSessionContext)
 
     internal fun validate() {
         if (configuration.financialConnectionsSessionClientSecret.isBlank()) {

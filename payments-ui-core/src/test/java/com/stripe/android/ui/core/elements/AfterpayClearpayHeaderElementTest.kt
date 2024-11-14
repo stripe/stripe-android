@@ -3,7 +3,6 @@ package com.stripe.android.ui.core.elements
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.elements.AfterpayClearpayHeaderElement.Companion.isClearpay
 import com.stripe.android.uicore.elements.IdentifierSpec
 import org.junit.Test
@@ -15,56 +14,20 @@ import java.util.Locale
 class AfterpayClearpayHeaderElementTest {
 
     @Test
-    fun `Verify label is correct for USD`() {
+    fun `Verify label is correct`() {
         val element = AfterpayClearpayHeaderElement(
             IdentifierSpec.Generic("test"),
-            Amount(20000, "USD")
         )
 
         assertThat(
             element.getLabel(ApplicationProvider.getApplicationContext<Application>().resources)
-        ).isEqualTo(
-            "Pay in 4 interest-free payments of $50.00 with <img/> " +
-                "<b>ⓘ</b>"
-        )
-    }
-
-    @Test
-    fun `Verify label is correct for EUR`() {
-        val element = AfterpayClearpayHeaderElement(
-            IdentifierSpec.Generic("test"),
-            Amount(20000, "EUR")
-        )
-
-        assertThat(
-            element.getLabel(ApplicationProvider.getApplicationContext<Application>().resources)
-        ).isEqualTo(
-            "Pay in 3 interest-free payments of €66.66 with <img/> " +
-                "<b>ⓘ</b>"
-        )
-    }
-
-    @Test
-    fun `Verify label amount is localized`() {
-        Locale.setDefault(Locale.CANADA)
-        val element = AfterpayClearpayHeaderElement(
-            IdentifierSpec.Generic("test"),
-            Amount(20000, "USD")
-        )
-
-        assertThat(
-            element.getLabel(ApplicationProvider.getApplicationContext<Application>().resources)
-        ).isEqualTo(
-            "Pay in 4 interest-free payments of US$50.00 with <img/> " +
-                "<b>ⓘ</b>"
-        )
+        ).isEqualTo("Buy now or pay later with <img/> <b>ⓘ</b>")
     }
 
     @Test
     fun `Verify infoUrl is correct`() {
         val element = AfterpayClearpayHeaderElement(
             IdentifierSpec.Generic("test"),
-            Amount(123, "USD")
         )
 
         assertThat(element.infoUrl)
@@ -76,7 +39,6 @@ class AfterpayClearpayHeaderElementTest {
         Locale.setDefault(Locale.UK)
         val element = AfterpayClearpayHeaderElement(
             IdentifierSpec.Generic("test"),
-            Amount(123, "USD")
         )
 
         assertThat(element.infoUrl)
@@ -92,7 +54,6 @@ class AfterpayClearpayHeaderElementTest {
         Locale.setDefault(Locale.UK)
         val element = AfterpayClearpayHeaderElement(
             IdentifierSpec.Generic("test"),
-            Amount(123, "USD")
         )
 
         assertThat(element.infoUrl)
@@ -104,7 +65,6 @@ class AfterpayClearpayHeaderElementTest {
         Locale.setDefault(Locale.FRANCE)
         val element = AfterpayClearpayHeaderElement(
             IdentifierSpec.Generic("test"),
-            Amount(123, "USD")
         )
 
         assertThat(element.infoUrl)

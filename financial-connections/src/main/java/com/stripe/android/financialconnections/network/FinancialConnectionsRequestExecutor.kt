@@ -31,9 +31,9 @@ internal class FinancialConnectionsRequestExecutor @Inject constructor(
         AuthenticationException::class,
         APIException::class
     )
-    suspend fun execute(request: StripeRequest) {
-        return executeInternal(request) {
-            // Nothing to decode here
+    suspend fun execute(request: StripeRequest): String {
+        return executeInternal(request) { body ->
+            body
         }
     }
 

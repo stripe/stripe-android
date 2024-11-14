@@ -8,6 +8,8 @@
   <string name="stripe_inline_sign_up_header">Išsaugokite savo informaciją saugiam atsiskaitymui vienu spustelėjimu su „Link“</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">Atsijungti nuo „Link“</string>
+  <!-- Text for the 'Pay with Link' button. 'Link' is a Stripe brand, please do not translate the word 'Link'. -->
+  <string name="stripe_pay_with_link">Mokėti naudojant „Link“</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">Nustatyti kaip numatytąjį mokėjimo būdą</string>
   <!-- Accessibility label for an action or a button that shows a menu. -->

@@ -11,6 +11,8 @@ import com.stripe.android.paymentsheet.example.playground.settings.CustomerSetti
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultShippingAddressSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.DelayedPaymentMethodsSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.Layout
+import com.stripe.android.paymentsheet.example.playground.settings.LayoutSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.LinkSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
 
@@ -22,6 +24,7 @@ internal data class TestParameters(
     val saveCheckboxValue: Boolean,
     val saveForFutureUseCheckboxVisible: Boolean,
     val useBrowser: Browser? = null,
+    val resetCustomer: Boolean = false,
     val authorizationAction: AuthorizeAction? = null,
     val executeInNightlyRun: Boolean = false,
     val playgroundSettingsSnapshot: PlaygroundSettings.Snapshot = playgroundSettings().snapshot(),
@@ -64,6 +67,7 @@ internal data class TestParameters(
             settings[DefaultShippingAddressSettingsDefinition] = false
             settings[DelayedPaymentMethodsSettingsDefinition] = false
             settings[AutomaticPaymentMethodsSettingsDefinition] = false
+            settings[LayoutSettingsDefinition] = Layout.HORIZONTAL
             block(settings)
             return settings
         }

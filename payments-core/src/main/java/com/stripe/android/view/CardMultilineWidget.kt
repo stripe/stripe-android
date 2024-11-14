@@ -175,7 +175,7 @@ class CardMultilineWidget @JvmOverloads constructor(
                     expiryMonth = it.expMonth,
                     expiryYear = it.expYear,
                     attribution = it.attribution,
-                    networks = cardBrandView.createNetworksParam(),
+                    networks = cardBrandView.paymentMethodCreateParamsNetworks(),
                 )
             }
         }
@@ -262,7 +262,8 @@ class CardMultilineWidget @JvmOverloads constructor(
                 cvc = cvcValue,
                 address = Address.Builder()
                     .setPostalCode(postalCode.takeUnless { it.isNullOrBlank() })
-                    .build()
+                    .build(),
+                networks = cardBrandView.cardParamsNetworks()
             )
         }
 
@@ -379,8 +380,6 @@ class CardMultilineWidget @JvmOverloads constructor(
 
         initFocusChangeListeners()
         initDeleteEmptyListeners()
-
-        cardBrandView.tintColorInt = cardNumberEditText.hintTextColors.defaultColor
 
         cardNumberEditText.completionCallback = {
             expiryDateEditText.requestFocus()

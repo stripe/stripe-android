@@ -2,14 +2,14 @@ package com.stripe.android.view
 
 import android.graphics.Color
 import androidx.annotation.ColorInt
+import androidx.appcompat.app.AppCompatActivity
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.CustomerSession
-import com.stripe.android.PaymentSessionFixtures
+import com.stripe.android.R
+import com.stripe.android.utils.createTestActivityRule
+import org.junit.Rule
 import org.junit.runner.RunWith
-import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -20,18 +20,15 @@ internal class StripeColorUtilsTest {
         ApplicationProvider.getApplicationContext()
     )
 
-    @BeforeTest
-    fun setup() {
-        CustomerSession.instance = mock()
-    }
+    @get:Rule
+    internal var testActivityRule = createTestActivityRule<TestActivity>()
 
     @Test
     fun getThemeAccentColor_getsNonzeroColor() {
-        activityScenarioFactory.create<PaymentFlowActivity>(
-            PaymentSessionFixtures.PAYMENT_FLOW_ARGS
-        ).use { activityScenario ->
-            activityScenario.onActivity {
-                assertThat(Color.alpha(StripeColorUtils(it).colorAccent))
+        activityScenarioFactory.create<TestActivity>().use { activityScenario ->
+            activityScenario.onActivity { activity ->
+                activity.setTheme(R.style.StripeDefaultTheme)
+                assertThat(Color.alpha(StripeColorUtils(activity).colorAccent))
                     .isGreaterThan(0)
             }
         }
@@ -39,11 +36,10 @@ internal class StripeColorUtilsTest {
 
     @Test
     fun getThemeColorControlNormal_getsNonzeroColor() {
-        activityScenarioFactory.create<PaymentFlowActivity>(
-            PaymentSessionFixtures.PAYMENT_FLOW_ARGS
-        ).use { activityScenario ->
-            activityScenario.onActivity {
-                assertThat(Color.alpha(StripeColorUtils(it).colorControlNormal))
+        activityScenarioFactory.create<TestActivity>().use { activityScenario ->
+            activityScenario.onActivity { activity ->
+                activity.setTheme(R.style.StripeDefaultTheme)
+                assertThat(Color.alpha(StripeColorUtils(activity).colorControlNormal))
                     .isGreaterThan(0)
             }
         }
@@ -110,4 +106,6 @@ internal class StripeColorUtilsTest {
         assertTrue(StripeColorUtils.isColorDark(darkishRed))
         assertTrue(StripeColorUtils.isColorDark(Color.BLACK))
     }
+
+    internal class TestActivity : AppCompatActivity()
 }

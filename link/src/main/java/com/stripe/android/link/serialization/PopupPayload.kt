@@ -47,6 +47,9 @@ internal data class PopupPayload(
     @SerialName("setupFutureUsage")
     val setupFutureUsage: Boolean,
 
+    @SerialName("cardBrandChoice")
+    val cardBrandChoice: CardBrandChoice?,
+
     @SerialName("flags")
     val flags: Map<String, Boolean>,
 ) {
@@ -89,6 +92,15 @@ internal data class PopupPayload(
 
         @SerialName("amount")
         val amount: Long,
+    )
+
+    @Serializable
+    data class CardBrandChoice(
+        @SerialName("isMerchantEligibleForCBC")
+        val eligible: Boolean,
+
+        @SerialName("stripePreferredNetworks")
+        val preferredNetworks: List<String>,
     )
 
     enum class IntentMode(val type: String) {
@@ -141,6 +153,12 @@ internal data class PopupPayload(
                     country = customerInfo.billingCountryCode
                         ?: context.currentLocale(),
                 ),
+                cardBrandChoice = cardBrandChoice?.run {
+                    CardBrandChoice(
+                        eligible = eligible,
+                        preferredNetworks = preferredNetworks,
+                    )
+                },
                 paymentInfo = stripeIntent.toPaymentInfo(),
                 appId = context.applicationInfo.packageName,
                 locale = context.currentLocale(),

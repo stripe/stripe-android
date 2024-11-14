@@ -1,7 +1,10 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
+import com.stripe.android.core.utils.FeatureFlags
+import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod.Type.USBankAccount
+import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
 
 internal enum class AddPaymentMethodRequirement {
     /** A special case that indicates the payment method is always unsupported by PaymentSheet. */
@@ -59,13 +62,34 @@ internal enum class AddPaymentMethodRequirement {
     /** Requires that Instant Debits are possible for this transaction. */
     InstantDebits {
         override fun isMetBy(metadata: PaymentMethodMetadata): Boolean {
-            val paymentMethodTypes = metadata.stripeIntent.paymentMethodTypes
-            val noUsBankAccount = USBankAccount.code !in paymentMethodTypes
-            val supportsBankAccounts = "bank_account" in metadata.stripeIntent.linkFundingSources
-            val isDeferred = metadata.stripeIntent.clientSecret == null
-            return noUsBankAccount && supportsBankAccounts && !isDeferred
+            return metadata.linkMode != LinkMode.LinkCardBrand && metadata.supportsMobileInstantDebitsFlow
+        }
+    },
+
+    /** Requires that LinkCardBrand is possible for this transaction. */
+    LinkCardBrand {
+        override fun isMetBy(metadata: PaymentMethodMetadata): Boolean {
+            return metadata.linkMode == LinkMode.LinkCardBrand && metadata.supportsMobileInstantDebitsFlow
         }
     };
 
     abstract fun isMetBy(metadata: PaymentMethodMetadata): Boolean
 }
+
+private val PaymentMethodMetadata.supportsMobileInstantDebitsFlow: Boolean
+    get() {
+        val paymentMethodTypes = stripeIntent.paymentMethodTypes
+        val noUsBankAccount = USBankAccount.code !in paymentMethodTypes
+        val supportsBankAccounts = "bank_account" in stripeIntent.linkFundingSources
+        val isDeferred = stripeIntent.clientSecret == null
+        return noUsBankAccount && supportsBankAccounts && canShowBankForm &&
+            (!isDeferred || FeatureFlags.instantDebitsDeferredIntent.isEnabled)
+    }
+
+private val PaymentMethodMetadata.canShowBankForm: Boolean
+    get() {
+        val collectsEmail = billingDetailsCollectionConfiguration.email != CollectionMode.Never
+        val attachDefaults = billingDetailsCollectionConfiguration.attachDefaultsToPaymentMethod
+        val hasDefaultValue = attachDefaults && !defaultBillingDetails?.email.isNullOrBlank()
+        return collectsEmail || hasDefaultValue
+    }

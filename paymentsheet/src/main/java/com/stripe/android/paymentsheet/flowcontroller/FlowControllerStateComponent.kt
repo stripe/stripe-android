@@ -6,7 +6,6 @@ import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel
-import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.injection.PaymentSheetCommonModule
 import com.stripe.android.ui.core.forms.resources.injection.ResourceRepositoryModule
 import dagger.BindsInstance
@@ -29,7 +28,6 @@ internal interface FlowControllerStateComponent {
     val flowControllerComponentBuilder: FlowControllerComponent.Builder
 
     fun inject(paymentOptionsViewModel: PaymentOptionsViewModel.Factory)
-    fun inject(factory: FormViewModel.Factory)
 
     @Component.Builder
     interface Builder {

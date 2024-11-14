@@ -4,6 +4,7 @@ import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 
 internal class FakeElementsSessionRepository(
     private val stripeIntent: StripeIntent,
@@ -12,11 +13,11 @@ internal class FakeElementsSessionRepository(
     private val linkSettings: ElementsSession.LinkSettings?,
     private val sessionsCustomer: ElementsSession.Customer? = null,
     private val isGooglePayEnabled: Boolean = true,
-    private val isCbcEligible: Boolean = false,
+    private val cardBrandChoice: ElementsSession.CardBrandChoice? = null,
     private val externalPaymentMethodData: String? = null,
 ) : ElementsSessionRepository {
     data class Params(
-        val initializationMode: PaymentSheet.InitializationMode,
+        val initializationMode: PaymentElementLoader.InitializationMode,
         val customer: PaymentSheet.CustomerConfiguration?,
         val externalPaymentMethods: List<String>,
         val defaultPaymentMethodId: String?
@@ -25,7 +26,7 @@ internal class FakeElementsSessionRepository(
     var lastParams: Params? = null
 
     override suspend fun get(
-        initializationMode: PaymentSheet.InitializationMode,
+        initializationMode: PaymentElementLoader.InitializationMode,
         customer: PaymentSheet.CustomerConfiguration?,
         externalPaymentMethods: List<String>,
         defaultPaymentMethodId: String?,
@@ -45,11 +46,11 @@ internal class FakeElementsSessionRepository(
                     paymentMethodSpecs = null,
                     stripeIntent = stripeIntent,
                     merchantCountry = null,
-                    isEligibleForCardBrandChoice = isCbcEligible,
                     isGooglePayEnabled = isGooglePayEnabled,
                     sessionsError = sessionsError,
                     externalPaymentMethodData = externalPaymentMethodData,
                     customer = sessionsCustomer,
+                    cardBrandChoice = cardBrandChoice,
                 )
             )
         }

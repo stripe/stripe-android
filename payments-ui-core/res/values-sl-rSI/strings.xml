@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
+  <string name="stripe_afterpay_clearpay_marketing"><![CDATA[Kupite zdaj ali pa plačajte pozneje s storitvijo <img/>]]></string>
+  <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="stripe_afterpay_clearpay_message"><![CDATA[Plačajte v <num_installments/> obrokih po <installment_price/> brez obresti s storitvijo <img/>.]]></string>
+  <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
+  <string name="stripe_afterpay_clearpay_subtitle">%1$d plačil brez obresti v znesku %2$s</string>
   <!-- Amazon Pay mandate text -->
   <string name="stripe_amazon_pay_mandate">S potrditvijo plačila s storitvijo AmazonPay pooblaščate podjetje %s, da bremeni vaš račun za AmazonPay s prihodnjimi plačili v skladu s pogoji podjetja.</string>
   <!-- Text for back button -->
@@ -91,6 +95,8 @@
   <string name="stripe_revolut_mandate">S potrditvijo plačila s storitvijo RevolutPay pooblaščate podjetje %s, da bremeni vaš račun za RevolutPay s prihodnjimi plačili v skladu s pogoji podjetja.</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
   <string name="stripe_save_for_future_payments_with_merchant_name">Shrani za prihodnja plačila trgovcu %s</string>
+  <!-- The label of a switch indicating whether to save the user's payment details for future payment -->
+  <string name="stripe_save_payment_details_to_merchant_name">Shranite podatke o plačilu podjetju %s za prihodnja plačila</string>
   <!-- Button title to open camera to scan credit/debit card -->
   <string name="stripe_scan_card">Optično preberi kartico</string>
   <!-- SEPA mandate text -->

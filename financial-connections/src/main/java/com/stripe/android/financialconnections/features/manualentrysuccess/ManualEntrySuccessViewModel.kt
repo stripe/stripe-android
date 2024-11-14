@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ClickDone
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLoaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
@@ -19,6 +20,7 @@ import com.stripe.android.financialconnections.presentation.Async.Loading
 import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.repository.SuccessContentRepository
+import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.utils.error
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -36,10 +38,17 @@ internal class ManualEntrySuccessViewModel @AssistedInject constructor(
     init {
         suspend {
             val manifest = getOrFetchSync().manifest
+            val successContent = successContentRepository.get()
+            val title = successContent?.heading ?: TextResource.StringId(R.string.stripe_success_pane_title)
+            val content = successContent?.message ?: TextResource.PluralId(
+                value = R.plurals.stripe_success_pane_desc,
+                // on manual entry just one account is connected.
+                count = 1,
+            )
             SuccessState.Payload(
                 businessName = manifest.businessName,
-                customSuccessMessage = successContentRepository.get()?.customSuccessMessage,
-                accountsCount = 1, // on manual entry just one account is connected,
+                title = title,
+                content = content,
                 skipSuccessPane = false
             ).also {
                 eventTracker.track(PaneLoaded(Pane.MANUAL_ENTRY_SUCCESS))

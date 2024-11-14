@@ -8,12 +8,10 @@ import com.stripe.android.networking.StripeRepository
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.AbsPaymentController
 import com.stripe.android.view.ActivityScenarioFactory
-import com.stripe.android.view.PaymentFlowActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import kotlin.test.BeforeTest
 import org.junit.Test
 import java.lang.RuntimeException
 
@@ -50,26 +48,12 @@ class RadarSessionTest {
             testDispatcher
         )
 
-    private val ephemeralKeyProvider: EphemeralKeyProvider =
-        EphemeralKeyProvider { _, _ -> }
-
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val activityScenarioFactory = ActivityScenarioFactory(context)
 
-    @BeforeTest
-    fun setup() {
-        PaymentConfiguration.init(
-            ApplicationProvider.getApplicationContext(),
-            FAKE_PUBLISHABLE_KEY
-        )
-        CustomerSession.initCustomerSession(context, ephemeralKeyProvider)
-    }
-
     @Test
     fun ensureRadarSessionsAttachHCaptchaToken(): Unit = runTest {
-        activityScenarioFactory.create<PaymentFlowActivity>(
-            PaymentSessionFixtures.PAYMENT_FLOW_ARGS
-        ).use { scenario ->
+        activityScenarioFactory.create<TestActivity>().use { scenario ->
             scenario.onActivity { activity ->
                 launch(Dispatchers.Main) {
                     stripe.createRadarSession(activity)

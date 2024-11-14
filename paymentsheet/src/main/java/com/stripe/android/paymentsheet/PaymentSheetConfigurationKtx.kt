@@ -11,61 +11,6 @@ import com.stripe.android.uicore.PrimaryButtonShape
 import com.stripe.android.uicore.PrimaryButtonTypography
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.StripeThemeDefaults
-import java.lang.IllegalArgumentException
-
-private const val EPHEMERAL_KEY_SECRET_PREFIX = "ek_"
-private const val CUSTOMER_SESSION_CLIENT_SECRET_KEY_PREFIX = "cuss_"
-
-internal fun PaymentSheet.Configuration.validate() {
-    // These are not localized as they are not intended to be displayed to a user.
-    when {
-        merchantDisplayName.isBlank() -> {
-            throw IllegalArgumentException(
-                "When a Configuration is passed to PaymentSheet," +
-                    " the Merchant display name cannot be an empty string."
-            )
-        }
-        customer?.id?.isBlank() == true -> {
-            throw IllegalArgumentException(
-                "When a CustomerConfiguration is passed to PaymentSheet," +
-                    " the Customer ID cannot be an empty string."
-            )
-        }
-    }
-
-    customer?.accessType?.let { customerAccessType ->
-        when (customerAccessType) {
-            is PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey -> {
-                if (customerAccessType.ephemeralKeySecret.isBlank() || customer.ephemeralKeySecret.isBlank()) {
-                    throw IllegalArgumentException(
-                        "When a CustomerConfiguration is passed to PaymentSheet, " +
-                            "the ephemeralKeySecret cannot be an empty string."
-                    )
-                }
-            }
-            is PaymentSheet.CustomerAccessType.CustomerSession -> {
-                val customerSessionClientSecret = customerAccessType.customerSessionClientSecret
-
-                if (customerSessionClientSecret.isBlank()) {
-                    throw IllegalArgumentException(
-                        "When a CustomerConfiguration is passed to PaymentSheet, " +
-                            "the customerSessionClientSecret cannot be an empty string."
-                    )
-                } else if (customerSessionClientSecret.startsWith(EPHEMERAL_KEY_SECRET_PREFIX)) {
-                    throw IllegalArgumentException(
-                        "Argument looks like an Ephemeral Key secret, but expecting a CustomerSession client " +
-                            "secret. See CustomerSession API: https://docs.stripe.com/api/customer_sessions/create"
-                    )
-                } else if (!customerSessionClientSecret.startsWith(CUSTOMER_SESSION_CLIENT_SECRET_KEY_PREFIX)) {
-                    throw IllegalArgumentException(
-                        "Argument does not look like a CustomerSession client secret. " +
-                            "See CustomerSession API: https://docs.stripe.com/api/customer_sessions/create"
-                    )
-                }
-            }
-        }
-    }
-}
 
 internal fun PaymentSheet.Configuration.containsVolatileDifferences(
     other: PaymentSheet.Configuration

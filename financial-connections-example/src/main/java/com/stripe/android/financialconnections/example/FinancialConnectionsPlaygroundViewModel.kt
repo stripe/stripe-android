@@ -11,21 +11,27 @@ import com.stripe.android.Stripe
 import com.stripe.android.confirmPaymentIntent
 import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext
+import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext.InitializationMode
 import com.stripe.android.financialconnections.FinancialConnectionsSheetForTokenResult
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
 import com.stripe.android.financialconnections.example.data.BackendRepository
 import com.stripe.android.financialconnections.example.data.Settings
 import com.stripe.android.financialconnections.example.settings.ConfirmIntentSetting
+import com.stripe.android.financialconnections.example.settings.EmailSetting
 import com.stripe.android.financialconnections.example.settings.ExperienceSetting
 import com.stripe.android.financialconnections.example.settings.FinancialConnectionsPlaygroundUrlHelper
 import com.stripe.android.financialconnections.example.settings.FlowSetting
+import com.stripe.android.financialconnections.example.settings.IntegrationTypeSetting
 import com.stripe.android.financialconnections.example.settings.PlaygroundSettings
+import com.stripe.android.financialconnections.example.settings.StripeAccountIdSetting
 import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountForInstantDebitsResult
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult
+import com.stripe.android.paymentsheet.PaymentSheetResult
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -63,7 +69,7 @@ internal class FinancialConnectionsPlaygroundViewModel(
         }
     }
 
-    fun startFinancialConnectionsSession() = with(state.value.settings) {
+    fun connectAccounts() = with(state.value.settings) {
         _state.update {
             it.copy(
                 status = emptyList(),
@@ -81,21 +87,29 @@ internal class FinancialConnectionsPlaygroundViewModel(
                 when (state.value.flow) {
                     Flow.Data -> startForData(this)
                     Flow.Token -> startForToken(this)
-                    Flow.PaymentIntent -> startWithPaymentIntent(this)
+                    Flow.PaymentIntent -> startWithPaymentIntent(this, experience = Experience.FinancialConnections)
                 }
             }
             Experience.InstantDebits -> {
-                startWithPaymentIntent(this)
+                startWithPaymentIntent(this, experience = Experience.InstantDebits)
+            }
+            Experience.LinkCardBrand -> {
+                startWithPaymentIntent(this, experience = Experience.LinkCardBrand)
             }
         }
     }
 
-    private fun startWithPaymentIntent(settings: PlaygroundSettings) {
+    private fun startWithPaymentIntent(
+        settings: PlaygroundSettings,
+        experience: Experience,
+    ) {
         viewModelScope.launch {
             showLoadingWithMessage("Fetching link account session from example backend!")
             kotlin.runCatching {
                 repository.createPaymentIntent(
-                    settings.paymentIntentRequest()
+                    settings.paymentIntentRequest(
+                        linkMode = experience.linkMode,
+                    )
                 )
             }
                 // Success creating session: open the financial connections sheet with received secret
@@ -103,6 +117,7 @@ internal class FinancialConnectionsPlaygroundViewModel(
                     _state.update { current ->
                         current.copy(
                             publishableKey = it.publishableKey,
+                            intentClientSecret = it.intentSecret,
                             loading = true,
                             status = current.status + buildString {
                                 append("Payment Intent created: ${it.intentSecret}")
@@ -115,7 +130,24 @@ internal class FinancialConnectionsPlaygroundViewModel(
                         FinancialConnectionsPlaygroundViewEffect.OpenForPaymentIntent(
                             paymentIntentSecret = it.intentSecret,
                             publishableKey = it.publishableKey,
+                            ephemeralKey = it.ephemeralKey,
+                            customerId = it.customerId,
+                            elementsSessionContext = ElementsSessionContext(
+                                initializationMode = InitializationMode.PaymentIntent(it.intentId),
+                                amount = it.amount,
+                                currency = it.currency,
+                                linkMode = LinkMode.LinkPaymentMethod,
+                                billingDetails = ElementsSessionContext.BillingDetails(
+                                    email = settings.get<EmailSetting>().selectedOption,
+                                ),
+                                prefillDetails = ElementsSessionContext.PrefillDetails(
+                                    email = settings.get<EmailSetting>().selectedOption,
+                                    phone = null,
+                                    phoneCountryCode = null,
+                                ),
+                            ),
                             experience = settings.get<ExperienceSetting>().selectedOption,
+                            integrationType = settings.get<IntegrationTypeSetting>().selectedOption,
                         )
                     )
                 }
@@ -137,8 +169,9 @@ internal class FinancialConnectionsPlaygroundViewModel(
                     _viewEffect.emit(
                         FinancialConnectionsPlaygroundViewEffect.OpenForData(
                             configuration = FinancialConnectionsSheet.Configuration(
-                                it.clientSecret,
-                                it.publishableKey
+                                financialConnectionsSessionClientSecret = it.clientSecret,
+                                publishableKey = it.publishableKey,
+                                stripeAccountId = _state.value.stripeAccountId
                             )
                         )
                     )
@@ -161,8 +194,8 @@ internal class FinancialConnectionsPlaygroundViewModel(
                     _viewEffect.emit(
                         FinancialConnectionsPlaygroundViewEffect.OpenForToken(
                             configuration = FinancialConnectionsSheet.Configuration(
-                                it.clientSecret,
-                                it.publishableKey
+                                financialConnectionsSessionClientSecret = it.clientSecret,
+                                publishableKey = it.publishableKey,
                             )
                         )
                     )
@@ -229,12 +262,12 @@ internal class FinancialConnectionsPlaygroundViewModel(
                     _state.update {
                         it.copy(
                             status = it.status + listOf(
-                                "Session Completed! ${result.intent.id} " +
+                                "Session Completed! ${result.intent?.id} " +
                                     "(account: ${result.bankName} •••• ${result.last4})"
                             )
                         )
                     }
-                    confirmIntentIfNeeded(result.intent)
+                    confirmIntentIfNeeded()
                 }.onSuccess {
                     _state.update {
                         it.copy(
@@ -282,7 +315,7 @@ internal class FinancialConnectionsPlaygroundViewModel(
                             )
                         )
                     }
-                    confirmIntentIfNeeded(result.response.intent)
+                    confirmIntentIfNeeded()
                 }.onSuccess {
                     _state.update {
                         it.copy(
@@ -315,13 +348,38 @@ internal class FinancialConnectionsPlaygroundViewModel(
         }
     }
 
-    private suspend fun confirmIntentIfNeeded(
-        intent: StripeIntent,
-    ) {
+    fun onPaymentSheetResult(result: PaymentSheetResult) {
+        when (result) {
+            is PaymentSheetResult.Canceled -> {
+                _state.update { it.copy(loading = false, status = it.status + "Cancelled!") }
+            }
+            is PaymentSheetResult.Completed -> {
+                _state.update {
+                    it.copy(
+                        status = it.status + listOf(
+                            "Elements Session Completed"
+                        )
+                    )
+                }
+            }
+            is PaymentSheetResult.Failed -> {
+                _state.update {
+                    it.copy(
+                        loading = false,
+                        status = it.status + "Failed! ${result.error}"
+                    )
+                }
+            }
+        }
+    }
+
+    private suspend fun confirmIntentIfNeeded() {
         val shouldConfirmIntent = state.value.settings.get<ConfirmIntentSetting>().selectedOption
-        if (shouldConfirmIntent) {
+        val clientSecret = state.value.intentClientSecret
+
+        if (shouldConfirmIntent && clientSecret != null) {
             val params = ConfirmPaymentIntentParams.create(
-                clientSecret = intent.clientSecret!!,
+                clientSecret = clientSecret,
                 paymentMethodType = PaymentMethod.Type.USBankAccount
             )
             stripe().confirmPaymentIntent(params)
@@ -407,11 +465,26 @@ enum class Flow(val apiValue: String) {
     }
 }
 
+enum class IntegrationType(
+    val displayName: String,
+) {
+    Standalone("Standalone"),
+    PaymentElement("Payment Element"),
+}
+
 enum class Experience(
     val displayName: String,
 ) {
     FinancialConnections("Financial Connections"),
     InstantDebits("Instant Debits"),
+    LinkCardBrand("Link Card Brand");
+
+    val linkMode: String?
+        get() = when (this) {
+            FinancialConnections -> null
+            InstantDebits -> "instant_debits"
+            LinkCardBrand -> "link_card_brand"
+        }
 }
 
 enum class NativeOverride(val apiValue: String) {
@@ -433,8 +506,12 @@ sealed class FinancialConnectionsPlaygroundViewEffect {
 
     data class OpenForPaymentIntent(
         val paymentIntentSecret: String,
+        val ephemeralKey: String?,
+        val customerId: String?,
         val publishableKey: String,
         val experience: Experience,
+        val integrationType: IntegrationType,
+        val elementsSessionContext: ElementsSessionContext,
     ) : FinancialConnectionsPlaygroundViewEffect()
 }
 
@@ -443,6 +520,7 @@ internal data class FinancialConnectionsPlaygroundState(
     val settings: PlaygroundSettings,
     val loading: Boolean = false,
     val publishableKey: String? = null,
+    val intentClientSecret: String? = null,
     val status: List<String> = emptyList(),
     val emittedEvents: List<String> = emptyList()
 ) {
@@ -454,4 +532,6 @@ internal data class FinancialConnectionsPlaygroundState(
 
     val experience: Experience = settings.get<ExperienceSetting>().selectedOption
     val flow: Flow = settings.get<FlowSetting>().selectedOption
+    val stripeAccountId: String? = settings.getOrNull<StripeAccountIdSetting>()?.selectedOption
+        ?.takeIf { it.isNotEmpty() }
 }

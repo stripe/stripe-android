@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.ui
 
+import androidx.annotation.RestrictTo
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -10,9 +11,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.semantics
 import com.google.pay.button.ButtonTheme
 import com.google.pay.button.ButtonType
 import com.google.pay.button.PayButton
+import com.stripe.android.CardBrandFilter
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
@@ -27,6 +31,7 @@ internal fun GooglePayButton(
     isEnabled: Boolean,
     onPressed: () -> Unit,
     modifier: Modifier = Modifier,
+    cardBrandFilter: CardBrandFilter
 ) {
     val context = LocalContext.current
     val isInspectionMode = LocalInspectionMode.current
@@ -41,7 +46,7 @@ internal fun GooglePayButton(
             ""
         } else {
             JSONArray().put(
-                GooglePayJsonFactory(context).createCardPaymentMethod(
+                GooglePayJsonFactory(context, cardBrandFilter = cardBrandFilter).createCardPaymentMethod(
                     billingAddressParameters = billingAddressParameters,
                     allowCreditCards = allowCreditCards
                 )
@@ -60,6 +65,13 @@ internal fun GooglePayButton(
         is PrimaryButton.State.Ready -> PayButton(
             modifier = modifier
                 .fillMaxWidth()
+                .semantics {
+                    onClick {
+                        onPressed()
+
+                        true
+                    }
+                }
                 .testTag(GOOGLE_PAY_BUTTON_TEST_TAG),
             allowedPaymentMethods = allowedPaymentMethods,
             type = buttonType.toComposeButtonType(),
@@ -132,5 +144,7 @@ private fun GooglePayButtonType.toComposeButtonType(): ButtonType {
     }
 }
 
-internal const val GOOGLE_PAY_BUTTON_TEST_TAG = "google-pay-button"
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val GOOGLE_PAY_BUTTON_TEST_TAG = "google-pay-button"
+
 internal const val GOOGLE_PAY_PRIMARY_BUTTON_TEST_TAG = "google-pay-primary-button"

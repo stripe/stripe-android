@@ -7,6 +7,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.googlepaylauncher.DefaultGooglePayRepository
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import dagger.Module
 import dagger.Provides
 
@@ -19,7 +20,8 @@ class GooglePayLauncherModule {
     @Provides
     fun provideGooglePayRepositoryFactory(
         appContext: Context,
-        logger: Logger
+        logger: Logger,
+        errorReporter: ErrorReporter,
     ): (GooglePayEnvironment) -> GooglePayRepository = { environment ->
         DefaultGooglePayRepository(
             appContext,
@@ -27,6 +29,7 @@ class GooglePayLauncherModule {
             GooglePayJsonFactory.BillingAddressParameters(),
             existingPaymentMethodRequired = true,
             allowCreditCards = true,
+            errorReporter = errorReporter,
             logger = logger
         )
     }

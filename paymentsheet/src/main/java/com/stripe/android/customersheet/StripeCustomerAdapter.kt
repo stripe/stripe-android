@@ -1,10 +1,10 @@
 package com.stripe.android.customersheet
 
 import android.content.Context
+import com.stripe.android.common.coroutines.CoalescingOrchestrator
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
-import com.stripe.android.customersheet.util.CustomerSheetHacks
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -23,7 +23,6 @@ import kotlin.coroutines.CoroutineContext
  * the customer's selected payment method to [SharedPreferences], which is used by [PaymentSheet]
  * to load the customer's default saved payment method.
  */
-@OptIn(ExperimentalCustomerSheetApi::class)
 @JvmSuppressWildcards
 internal class StripeCustomerAdapter @Inject internal constructor(
     private val context: Context,
@@ -38,6 +37,10 @@ internal class StripeCustomerAdapter @Inject internal constructor(
 
     @Volatile
     private var cachedCustomerEphemeralKey: CachedCustomerEphemeralKey? = null
+
+    private val customerEphemeralKeyCoalescingOrchestrator = CoalescingOrchestrator(
+        factory = customerEphemeralKeyProvider::provideCustomerEphemeralKey,
+    )
 
     override val canCreateSetupIntents: Boolean
         get() = setupIntentClientSecretProvider != null
@@ -162,7 +165,12 @@ internal class StripeCustomerAdapter @Inject internal constructor(
         return getCustomerEphemeralKey().mapCatching { customerEphemeralKey ->
             val prefsRepository = prefsRepositoryFactory(customerEphemeralKey)
             val savedSelection = prefsRepository.getSavedSelection(
-                isGooglePayAvailable = isGooglePayAvailable(),
+                /*
+                 * We don't calculate on `Google Pay` availability in this function. Instead, we check
+                 * within `CustomerSheet` similar to how we check if a saved payment option is still exists
+                 * within the user's payment methods from `retrievePaymentMethods`
+                 */
+                isGooglePayAvailable = true,
                 isLinkAvailable = false,
             )
             savedSelection.toPaymentOption()
@@ -186,7 +194,7 @@ internal class StripeCustomerAdapter @Inject internal constructor(
                 )
             }?.result ?: run {
                 val newCachedCustomerEphemeralKey = CachedCustomerEphemeralKey(
-                    result = customerEphemeralKeyProvider.provideCustomerEphemeralKey(),
+                    result = customerEphemeralKeyCoalescingOrchestrator.get(),
                     date = timeProvider(),
                 )
                 cachedCustomerEphemeralKey = newCachedCustomerEphemeralKey
@@ -200,10 +208,6 @@ internal class StripeCustomerAdapter @Inject internal constructor(
         return cacheDate + CACHED_CUSTOMER_MAX_AGE_MILLIS < nowInMillis
     }
 
-    private suspend fun isGooglePayAvailable(): Boolean {
-        return CustomerSheetHacks.configuration.await().googlePayEnabled
-    }
-
     internal companion object {
         // 30 minutes, server-side timeout is 60
         internal const val CACHED_CUSTOMER_MAX_AGE_MILLIS = 60 * 30 * 1000L
@@ -215,7 +219,6 @@ internal class StripeCustomerAdapter @Inject internal constructor(
     }
 }
 
-@OptIn(ExperimentalCustomerSheetApi::class)
 private data class CachedCustomerEphemeralKey(
     val result: CustomerAdapter.Result<CustomerEphemeralKey>,
     val date: Long,

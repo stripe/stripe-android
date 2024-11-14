@@ -4,13 +4,17 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.core.BuildConfig
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-@Suppress("unused")
 object FeatureFlags {
     // Add any feature flags here
+    val nativeLinkEnabled = FeatureFlag("Native Link")
+    val instantDebitsDeferredIntent = FeatureFlag("IBP Deferred")
+    val useNewUpdateCardScreen = FeatureFlag("Enable new update card screen")
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class FeatureFlag {
+class FeatureFlag(
+    val name: String,
+) {
 
     private var overrideEnabledValue: Boolean? = null
 

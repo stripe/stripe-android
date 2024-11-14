@@ -6,7 +6,6 @@ import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.link.LinkPaymentDetails
-import com.stripe.android.link.injection.LinkScope
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams.Card.Companion.extraConfirmationParams
@@ -16,6 +15,7 @@ import com.stripe.android.model.ConsumerSessionSignup
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.model.VerificationType
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.repository.ConsumersApiService
@@ -28,7 +28,6 @@ import kotlin.coroutines.CoroutineContext
 /**
  * Repository that uses [StripeRepository] for Link services.
  */
-@LinkScope
 internal class LinkApiRepository @Inject constructor(
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
     @Named(STRIPE_ACCOUNT_ID) private val stripeAccountIdProvider: () -> String?,
@@ -66,6 +65,10 @@ internal class LinkApiRepository @Inject constructor(
             country = country,
             name = name,
             locale = locale,
+            amount = null,
+            currency = null,
+            paymentIntentId = null,
+            setupIntentId = null,
             consentAction = consentAction,
             requestOptions = buildRequestOptions(),
             requestSurface = REQUEST_SURFACE,
@@ -148,6 +151,53 @@ internal class LinkApiRepository @Inject constructor(
             consumerAccountPublishableKey = consumerAccountPublishableKey,
             requestOptions = buildRequestOptions(consumerAccountPublishableKey),
         )
+    }
+
+    override suspend fun startVerification(
+        consumerSessionClientSecret: String,
+        consumerPublishableKey: String?,
+    ): Result<ConsumerSession> {
+        return runCatching {
+            requireNotNull(
+                consumersApiService.startConsumerVerification(
+                    consumerSessionClientSecret = consumerSessionClientSecret,
+                    locale = locale ?: Locale.US,
+                    requestSurface = REQUEST_SURFACE,
+                    type = VerificationType.SMS,
+                    customEmailType = null,
+                    connectionsMerchantName = null,
+                    requestOptions = consumerPublishableKey?.let {
+                        ApiRequest.Options(it)
+                    } ?: ApiRequest.Options(
+                        publishableKeyProvider(),
+                        stripeAccountIdProvider()
+                    )
+                )
+            )
+        }
+    }
+
+    override suspend fun confirmVerification(
+        verificationCode: String,
+        consumerSessionClientSecret: String,
+        consumerPublishableKey: String?
+    ): Result<ConsumerSession> {
+        return runCatching {
+            requireNotNull(
+                consumersApiService.confirmConsumerVerification(
+                    consumerSessionClientSecret = consumerSessionClientSecret,
+                    verificationCode = verificationCode,
+                    requestSurface = REQUEST_SURFACE,
+                    type = VerificationType.SMS,
+                    requestOptions = consumerPublishableKey?.let {
+                        ApiRequest.Options(it)
+                    } ?: ApiRequest.Options(
+                        publishableKeyProvider(),
+                        stripeAccountIdProvider()
+                    )
+                )
+            )
+        }
     }
 
     private fun buildRequestOptions(

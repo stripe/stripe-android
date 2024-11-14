@@ -8,13 +8,14 @@ import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethod.Type.USBankAccount
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormScreenState
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.BankFormScreenState
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountTextBuilder
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
@@ -107,8 +108,9 @@ internal sealed class PaymentSelection : Parcelable {
         ): ResolvableString? {
             return when (paymentMethod.type) {
                 USBankAccount -> {
-                    USBankAccountTextBuilder.getContinueMandateText(
+                    USBankAccountTextBuilder.buildMandateAndMicrodepositsText(
                         merchantName = merchantName,
+                        isVerifyingMicrodeposits = false,
                         isSaveForFutureUseSelected = false,
                         isInstantDebits = false,
                         isSetupFlow = isSetupFlow,
@@ -164,7 +166,7 @@ internal sealed class PaymentSelection : Parcelable {
             val labelResource: String,
             @DrawableRes val iconResource: Int,
             val input: Input,
-            val screenState: USBankAccountFormScreenState,
+            val screenState: BankFormScreenState,
             val instantDebits: InstantDebitsInfo?,
             override val paymentMethodCreateParams: PaymentMethodCreateParams,
             override val customerRequestedSave: CustomerRequestedSave,
@@ -176,12 +178,13 @@ internal sealed class PaymentSelection : Parcelable {
                 merchantName: String,
                 isSetupFlow: Boolean,
             ): ResolvableString? {
-                return screenState.mandateText
+                return screenState.linkedBankAccount?.mandateText
             }
 
             @Parcelize
             data class InstantDebitsInfo(
-                val paymentMethodId: String,
+                val paymentMethod: PaymentMethod,
+                val linkMode: LinkMode?,
             ) : Parcelable
 
             @Parcelize
@@ -218,7 +221,7 @@ internal sealed class PaymentSelection : Parcelable {
             val iconResource = R.drawable.stripe_ic_paymentsheet_link
 
             @IgnoredOnParcel
-            val label = "····${paymentDetails.last4}"
+            val label = "···· ${paymentDetails.last4}"
         }
 
         @Parcelize

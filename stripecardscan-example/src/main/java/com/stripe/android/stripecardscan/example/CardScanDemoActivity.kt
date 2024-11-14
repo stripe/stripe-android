@@ -11,13 +11,11 @@ class CardScanDemoActivity : AppCompatActivity() {
         ActivityCardScanDemoBinding.inflate(layoutInflater)
     }
 
-    private val settings by lazy { Settings(this) }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(viewBinding.root)
 
-        val cardScanSheet = CardScanSheet.create(this, settings.publishableKey, ::onScanFinished)
+        val cardScanSheet = CardScanSheet.create(this, ::onScanFinished)
 
         viewBinding.launchScanButton.setOnClickListener {
             cardScanSheet.present()

@@ -4,18 +4,21 @@ import com.stripe.android.common.analytics.toAnalyticsMap
 import com.stripe.android.common.analytics.toAnalyticsValue
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.customersheet.CustomerSheet
-import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
+import com.stripe.android.customersheet.CustomerSheetIntegration
 import com.stripe.android.model.CardBrand
 
 internal sealed class CustomerSheetEvent : AnalyticsEvent {
 
     abstract val additionalParams: Map<String, Any?>
 
-    @OptIn(ExperimentalCustomerSheetApi::class)
     class Init(
         private val configuration: CustomerSheet.Configuration,
+        integrationType: CustomerSheetIntegration.Type,
     ) : CustomerSheetEvent() {
-        override val eventName: String = CS_INIT
+        override val eventName: String = when (integrationType) {
+            CustomerSheetIntegration.Type.CustomerSession -> CS_INIT_WITH_CUSTOMER_SESSION
+            CustomerSheetIntegration.Type.CustomerAdapter -> CS_INIT_WITH_CUSTOMER_ADAPTER
+        }
         override val additionalParams: Map<String, Any?>
             get() {
                 val configurationMap = mapOf(
@@ -28,7 +31,8 @@ internal sealed class CustomerSheetEvent : AnalyticsEvent {
                     FIELD_BILLING_DETAILS_COLLECTION_CONFIGURATION to (
                         configuration.billingDetailsCollectionConfiguration.toAnalyticsMap()
                         ),
-                    FIELD_PREFERRED_NETWORKS to configuration.preferredNetworks.toAnalyticsValue()
+                    FIELD_PREFERRED_NETWORKS to configuration.preferredNetworks.toAnalyticsValue(),
+                    FIELD_CARD_BRAND_ACCEPTANCE to configuration.cardBrandAcceptance.toAnalyticsValue(),
                 )
                 return mapOf(
                     FIELD_CUSTOMER_SHEET_CONFIGURATION to configurationMap,
@@ -193,6 +197,16 @@ internal sealed class CustomerSheetEvent : AnalyticsEvent {
         )
     }
 
+    class CardBrandDisallowed(
+        cardBrand: CardBrand,
+    ) : CustomerSheetEvent() {
+        override val eventName: String = CS_DISALLOWED_CARD_BRAND
+
+        override val additionalParams: Map<String, Any?> = mapOf(
+            VALUE_CARD_BRAND to cardBrand.code
+        )
+    }
+
     class CardNumberCompleted : CustomerSheetEvent() {
         override val eventName: String = CS_CARD_NUMBER_COMPLETED
 
@@ -200,7 +214,8 @@ internal sealed class CustomerSheetEvent : AnalyticsEvent {
     }
 
     internal companion object {
-        const val CS_INIT = "cs_init"
+        const val CS_INIT_WITH_CUSTOMER_ADAPTER = "cs_init_with_customer_adapter"
+        const val CS_INIT_WITH_CUSTOMER_SESSION = "cs_init_with_customer_session"
 
         const val CS_ADD_PAYMENT_METHOD_SCREEN_PRESENTED =
             "cs_add_payment_method_screen_presented"
@@ -248,6 +263,7 @@ internal sealed class CustomerSheetEvent : AnalyticsEvent {
 
         const val CS_UPDATE_PAYMENT_METHOD = "cs_update_card"
         const val CS_UPDATE_PAYMENT_METHOD_FAILED = "cs_update_card_failed"
+        const val CS_DISALLOWED_CARD_BRAND = "cs_disallowed_card_brand"
 
         const val FIELD_GOOGLE_PAY_ENABLED = "google_pay_enabled"
         const val FIELD_BILLING = "default_billing_details"
@@ -262,8 +278,11 @@ internal sealed class CustomerSheetEvent : AnalyticsEvent {
         const val FIELD_ERROR_MESSAGE = "error_message"
         const val FIELD_PAYMENT_METHOD_TYPE = "payment_method_type"
         const val FIELD_SELECTED_LPM = "selected_lpm"
+        const val FIELD_CARD_BRAND_ACCEPTANCE = "card_brand_acceptance"
+        const val FIELD_CUSTOMER_ACCESS_PROVIDER = "customer_access_provider"
 
         const val VALUE_EDIT_CBC_EVENT_SOURCE = "edit"
         const val VALUE_ADD_CBC_EVENT_SOURCE = "add"
+        const val VALUE_CARD_BRAND = "brand"
     }
 }

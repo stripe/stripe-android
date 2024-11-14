@@ -5,5 +5,6 @@
     <ID>EmptyFunctionBlock:AbsPaymentController.kt$AbsPaymentController${ }</ID>
     <ID>TooManyFunctions:AbsFakeStripeRepository.kt$AbsFakeStripeRepository : StripeRepository</ID>
     <ID>TooManyFunctions:AbsPaymentController.kt$AbsPaymentController : PaymentController</ID>
+    <ID>TooManyFunctions:PaymentMethodFactory.kt$PaymentMethodFactory</ID>
   </CurrentIssues>
 </SmellBaseline>

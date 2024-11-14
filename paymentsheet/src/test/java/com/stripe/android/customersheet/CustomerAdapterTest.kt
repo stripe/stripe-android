@@ -1,7 +1,6 @@
 package com.stripe.android.customersheet
 
 import android.app.Application
-import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
@@ -9,7 +8,6 @@ import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
 import com.stripe.android.customersheet.StripeCustomerAdapter.Companion.CACHED_CUSTOMER_MAX_AGE_MILLIS
-import com.stripe.android.customersheet.util.CustomerSheetHacks
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
@@ -21,6 +19,9 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.utils.FakeCustomerRepository
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
@@ -33,11 +34,11 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
+import java.util.concurrent.CountDownLatch
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.test.assertFailsWith
 
 @RunWith(RobolectricTestRunner::class)
-@OptIn(ExperimentalCustomerSheetApi::class)
 class CustomerAdapterTest {
 
     private val application = ApplicationProvider.getApplicationContext<Application>()
@@ -98,6 +99,46 @@ class CustomerAdapterTest {
 
         customer = adapter.getCustomerEphemeralKey()
         assertThat(customer.getOrNull()?.customerId).isEqualTo("1")
+        assertThat(ephemeralKeyProviderCounter.get()).isEqualTo(1)
+    }
+
+    @Test
+    fun `customerEphemeralKeyProvider only called once when multiple async calls`() = runTest {
+        val ephemeralKeyProviderCounter = AtomicInteger(0)
+        val resultDeferred = CompletableDeferred<CustomerAdapter.Result<CustomerEphemeralKey>>()
+        val adapter = createAdapter(
+            customerEphemeralKeyProvider = {
+                ephemeralKeyProviderCounter.incrementAndGet()
+                resultDeferred.await()
+            },
+            timeProvider = { 1234 }
+        )
+
+        val countDownLatch = CountDownLatch(2)
+        val first = async(testDispatcher) {
+            countDownLatch.countDown()
+            val customer = adapter.getCustomerEphemeralKey()
+            assertThat(customer.getOrNull()?.customerId).isEqualTo("1234")
+        }
+        val second = async(testDispatcher) {
+            countDownLatch.countDown()
+            val customer = adapter.getCustomerEphemeralKey()
+            assertThat(customer.getOrNull()?.customerId).isEqualTo("1234")
+        }
+
+        countDownLatch.await()
+
+        resultDeferred.complete(
+            CustomerAdapter.Result.success(
+                CustomerEphemeralKey(
+                    customerId = "1234",
+                    ephemeralKey = "ek_123"
+                )
+            )
+        )
+
+        listOf(first, second).awaitAll()
+
         assertThat(ephemeralKeyProviderCounter.get()).isEqualTo(1)
     }
 
@@ -745,7 +786,7 @@ class CustomerAdapterTest {
     }
 
     @Test
-    fun `Google Pay is retrievable when it is available and selected`() = runTest {
+    fun `Google Pay is retrievable when selected`() = runTest {
         val adapter = createAdapter(
             prefsRepositoryFactory = {
                 DefaultPrefsRepository(
@@ -756,50 +797,12 @@ class CustomerAdapterTest {
                     setSavedSelection(SavedSelection.GooglePay)
                 }
             }
-        )
-
-        CustomerSheetHacks.initialize(
-            lifecycleOwner = TestLifecycleOwner(),
-            adapter = adapter,
-            configuration = CustomerSheet.Configuration(
-                merchantDisplayName = "Example",
-                googlePayEnabled = true
-            ),
         )
 
         val result = adapter.retrieveSelectedPaymentOption()
 
         assertThat(result.getOrNull())
             .isEqualTo(CustomerAdapter.PaymentOption.GooglePay)
-    }
-
-    @Test
-    fun `Google Pay is not retrievable when it is not available and selected`() = runTest {
-        val adapter = createAdapter(
-            prefsRepositoryFactory = {
-                DefaultPrefsRepository(
-                    context = application,
-                    customerId = it.customerId,
-                    workContext = testScheduler
-                ).apply {
-                    setSavedSelection(SavedSelection.GooglePay)
-                }
-            }
-        )
-
-        CustomerSheetHacks.initialize(
-            lifecycleOwner = TestLifecycleOwner(),
-            adapter = adapter,
-            configuration = CustomerSheet.Configuration(
-                merchantDisplayName = "Example",
-                googlePayEnabled = false,
-            ),
-        )
-
-        val result = adapter.retrieveSelectedPaymentOption()
-
-        assertThat(result.getOrNull())
-            .isNull()
     }
 
     private fun createAdapter(

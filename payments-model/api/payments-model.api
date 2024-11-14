@@ -50,7 +50,7 @@ public final class com/stripe/android/model/BankAccount : com/stripe/android/cor
 	public final fun component9 ()Ljava/lang/String;
 	public final fun copy (Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/BankAccount$Type;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/BankAccount$Status;)Lcom/stripe/android/model/BankAccount;
 	public static synthetic fun copy$default (Lcom/stripe/android/model/BankAccount;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/BankAccount$Type;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/BankAccount$Status;ILjava/lang/Object;)Lcom/stripe/android/model/BankAccount;
-	public fun describeContents ()I
+	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAccountHolderName ()Ljava/lang/String;
 	public final fun getAccountHolderType ()Lcom/stripe/android/model/BankAccount$Type;
@@ -64,7 +64,7 @@ public final class com/stripe/android/model/BankAccount : com/stripe/android/cor
 	public final fun getStatus ()Lcom/stripe/android/model/BankAccount$Status;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class com/stripe/android/model/BankAccount$Creator : android/os/Parcelable$Creator {
@@ -121,7 +121,7 @@ public final class com/stripe/android/model/Card : com/stripe/android/core/model
 	public final fun component9 ()Ljava/lang/String;
 	public final fun copy (Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/CardBrand;Lcom/stripe/android/model/CardFunding;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/TokenizationMethod;)Lcom/stripe/android/model/Card;
 	public static synthetic fun copy$default (Lcom/stripe/android/model/Card;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/CardBrand;Lcom/stripe/android/model/CardFunding;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/TokenizationMethod;ILjava/lang/Object;)Lcom/stripe/android/model/Card;
-	public fun describeContents ()I
+	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAddressCity ()Ljava/lang/String;
 	public final fun getAddressCountry ()Ljava/lang/String;
@@ -146,7 +146,7 @@ public final class com/stripe/android/model/Card : com/stripe/android/core/model
 	public final fun getTokenizationMethod ()Lcom/stripe/android/model/TokenizationMethod;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class com/stripe/android/model/Card$Creator : android/os/Parcelable$Creator {
@@ -238,6 +238,14 @@ public final class com/stripe/android/model/ConsumerPaymentDetails$Passthrough$C
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public final class com/stripe/android/model/ConsumerPaymentDetailsCreateParams$BankAccount$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/ConsumerPaymentDetailsCreateParams$BankAccount;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/model/ConsumerPaymentDetailsCreateParams$BankAccount;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public final class com/stripe/android/model/ConsumerPaymentDetailsCreateParams$Card$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/ConsumerPaymentDetailsCreateParams$Card;
@@ -246,13 +254,13 @@ public final class com/stripe/android/model/ConsumerPaymentDetailsCreateParams$C
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/model/ConsumerSession$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+public synthetic class com/stripe/android/model/ConsumerSession$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field INSTANCE Lcom/stripe/android/model/ConsumerSession$$serializer;
-	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
-	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/model/ConsumerSession;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/model/ConsumerSession;
 	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
-	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/model/ConsumerSession;)V
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/model/ConsumerSession;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
@@ -269,13 +277,13 @@ public final class com/stripe/android/model/ConsumerSession$Creator : android/os
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/model/ConsumerSession$VerificationSession$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+public synthetic class com/stripe/android/model/ConsumerSession$VerificationSession$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field INSTANCE Lcom/stripe/android/model/ConsumerSession$VerificationSession$$serializer;
-	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
-	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/model/ConsumerSession$VerificationSession;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/model/ConsumerSession$VerificationSession;
 	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
-	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/model/ConsumerSession$VerificationSession;)V
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/model/ConsumerSession$VerificationSession;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
@@ -308,13 +316,13 @@ public final class com/stripe/android/model/ConsumerSession$VerificationSession$
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/model/ConsumerSessionLookup$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+public synthetic class com/stripe/android/model/ConsumerSessionLookup$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field INSTANCE Lcom/stripe/android/model/ConsumerSessionLookup$$serializer;
-	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
-	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/model/ConsumerSessionLookup;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/model/ConsumerSessionLookup;
 	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
-	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/model/ConsumerSessionLookup;)V
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/model/ConsumerSessionLookup;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
@@ -331,13 +339,13 @@ public final class com/stripe/android/model/ConsumerSessionLookup$Creator : andr
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/model/ConsumerSessionSignup$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+public synthetic class com/stripe/android/model/ConsumerSessionSignup$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field INSTANCE Lcom/stripe/android/model/ConsumerSessionSignup$$serializer;
-	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
-	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/model/ConsumerSessionSignup;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/model/ConsumerSessionSignup;
 	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
-	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/model/ConsumerSessionSignup;)V
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/model/ConsumerSessionSignup;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
@@ -351,6 +359,14 @@ public final class com/stripe/android/model/ConsumerSessionSignup$Creator : andr
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/ConsumerSessionSignup;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/model/ConsumerSessionSignup;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/model/SharePaymentDetails$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/SharePaymentDetails;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/model/SharePaymentDetails;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
@@ -374,7 +390,7 @@ public final class com/stripe/android/model/Token : com/stripe/android/core/mode
 	public final fun component7 ()Lcom/stripe/android/model/Card;
 	public final fun copy (Ljava/lang/String;Lcom/stripe/android/model/Token$Type;Ljava/util/Date;ZZLcom/stripe/android/model/BankAccount;Lcom/stripe/android/model/Card;)Lcom/stripe/android/model/Token;
 	public static synthetic fun copy$default (Lcom/stripe/android/model/Token;Ljava/lang/String;Lcom/stripe/android/model/Token$Type;Ljava/util/Date;ZZLcom/stripe/android/model/BankAccount;Lcom/stripe/android/model/Card;ILjava/lang/Object;)Lcom/stripe/android/model/Token;
-	public fun describeContents ()I
+	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public static final fun fromJson (Lorg/json/JSONObject;)Lcom/stripe/android/model/Token;
 	public final fun getBankAccount ()Lcom/stripe/android/model/BankAccount;
@@ -386,7 +402,7 @@ public final class com/stripe/android/model/Token : com/stripe/android/core/mode
 	public final fun getUsed ()Z
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class com/stripe/android/model/Token$Companion {

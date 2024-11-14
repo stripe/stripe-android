@@ -1,8 +1,11 @@
 package com.stripe.android.paymentsheet.ui
 
+import androidx.annotation.RestrictTo
+import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.CardBrand
@@ -29,18 +32,11 @@ internal fun AddPaymentMethod(
         supportedPaymentMethods = state.supportedPaymentMethods,
         selectedItemCode = state.selectedPaymentMethodCode,
         formElements = state.formElements,
-        linkSignupMode = state.linkInlineSignupMode,
-        linkConfigurationCoordinator = state.linkConfigurationCoordinator,
         onItemSelectedListener = { selectedLpm ->
             interactor.handleViewAction(
                 AddPaymentMethodInteractor.ViewAction.OnPaymentMethodSelected(
                     selectedLpm.code
                 )
-            )
-        },
-        onLinkSignupStateChanged = {
-            interactor.handleViewAction(
-                AddPaymentMethodInteractor.ViewAction.OnLinkSignUpStateUpdated(it)
             )
         },
         formArguments = state.arguments,
@@ -53,7 +49,7 @@ internal fun AddPaymentMethod(
                 )
             )
         },
-        modifier = modifier,
+        modifier = modifier.testTag(PAYMENT_SHEET_FORM_TEST_TAG),
         onInteractionEvent = {
             interactor.handleViewAction(
                 AddPaymentMethodInteractor.ViewAction.ReportFieldInteraction(
@@ -132,3 +128,7 @@ internal fun FormFieldValues.transformToPaymentSelection(
         )
     }
 }
+
+@VisibleForTesting
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val PAYMENT_SHEET_FORM_TEST_TAG = "PaymentSheetAddPaymentMethodForm"

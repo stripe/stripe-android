@@ -44,7 +44,6 @@ class StripeCardScanProxyTest {
         assertTrue(
             StripeCardScanProxy.create(
                 fragment = mockFragment,
-                stripePublishableKey = "test",
                 onFinished = {},
                 isStripeCardScanAvailable = mockIsStripeCardScanAvailable,
                 errorReporter = FakeErrorReporter(),
@@ -53,7 +52,6 @@ class StripeCardScanProxyTest {
         assertTrue(
             StripeCardScanProxy.create(
                 activity = mockActivity,
-                stripePublishableKey = "test",
                 onFinished = {},
                 isStripeCardScanAvailable = mockIsStripeCardScanAvailable,
                 errorReporter = FakeErrorReporter(),
@@ -68,7 +66,6 @@ class StripeCardScanProxyTest {
         assertTrue(
             StripeCardScanProxy.create(
                 fragment = mockFragment,
-                stripePublishableKey = "test",
                 onFinished = {},
                 isStripeCardScanAvailable = mockIsStripeCardScanAvailable,
                 provider = { FakeProxy() },
@@ -78,7 +75,6 @@ class StripeCardScanProxyTest {
         assertTrue(
             StripeCardScanProxy.create(
                 activity = mockActivity,
-                stripePublishableKey = "test",
                 onFinished = {},
                 isStripeCardScanAvailable = mockIsStripeCardScanAvailable,
                 provider = { FakeProxy() },
@@ -92,7 +88,6 @@ class StripeCardScanProxyTest {
         assertFailsWith<IllegalStateException> {
             StripeCardScanProxy.create(
                 fragment = mockFragment,
-                stripePublishableKey = "",
                 onFinished = {},
                 isStripeCardScanAvailable = mockIsStripeCardScanAvailable,
                 errorReporter = FakeErrorReporter(),
@@ -101,7 +96,6 @@ class StripeCardScanProxyTest {
         assertFailsWith<IllegalStateException> {
             StripeCardScanProxy.create(
                 activity = mockActivity,
-                stripePublishableKey = "",
                 onFinished = {},
                 isStripeCardScanAvailable = mockIsStripeCardScanAvailable,
                 errorReporter = FakeErrorReporter(),

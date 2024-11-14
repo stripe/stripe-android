@@ -15,9 +15,9 @@ jobs:
       - name: Build base branch
         run: ./gradlew :identity-example:assembleRelease && mv identity-example/build/outputs/apk/theme1/release/identity-example-theme1-release.apk identity-example/build/outputs/apk/theme1/release/identity-example-release-base.apk
       - name: Upload APK
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: apk
+          name: identity-base-apk
           path: identity-example/build/outputs/apk/theme1/release/identity-example-release-base.apk
 
   # Checkout PR branch and build the APK
@@ -30,9 +30,9 @@ jobs:
       - name: Build PR branch
         run: ./gradlew :identity-example:assembleRelease && mv identity-example/build/outputs/apk/theme1/release/identity-example-theme1-release.apk identity-example/build/outputs/apk/theme1/release/identity-example-release-pr.apk
       - name: Upload APK
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: apk
+          name: identity-pr-apk
           path: identity-example/build/outputs/apk/theme1/release/identity-example-release-pr.apk
 
   # Execute Diffuse only when the two APKs are built successfully
@@ -44,12 +44,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Download APKs
-        uses: actions/download-artifact@v1
+        uses: actions/download-artifact@v4
         with:
-          name: apk
+          path: apk
+          pattern: identity-*-apk
+          merge-multiple: true
       - name: diffuse
         id: diffuse
-        uses: usefulness/diffuse-action@d816fd102c1f5f69519ee4bb8e0e12a42d005788
+        uses: usefulness/diffuse-action@41995fe8ff6be0a8847e63bdc5a4679c704b455c
         with:
           old-file-path: apk/identity-example-release-base.apk
           new-file-path: apk/identity-example-release-pr.apk
@@ -75,7 +77,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload diffuse output
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: diffuse-output
           path: ${{ steps.diffuse.outputs.diff-file }}
@@ -86,11 +88,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/stripe_setup
-      - name: Generate Android release bundle
-        run: ./gradlew :identity-example:bundleRelease
-      - name: Upload artifact to Emerge
-        uses: EmergeTools/emerge-upload-action@3477b597fc62054136eb6f499e0ba78144f8a999
-        with:
-          artifact_path: identity-example/build/outputs/bundle/theme1Release/identity-example-theme1-release.aab
-          emerge_api_key: ${{ secrets.EMERGE_API_KEY }}
-          build_type: pull_request
+      - name: Upload release bundle to Emerge
+        run: ./gradlew :identity-example:emergeUploadTheme1ReleaseAab
+        env:
+          EMERGE_API_TOKEN: ${{ secrets.EMERGE_API_KEY }}
+          EMERGE_TAG: pull_request

@@ -41,7 +41,7 @@ data class FinancialConnectionsAccount(
     @SerialName("created")
     val created: Int,
     @SerialName("id")
-    val id: String,
+    override val id: String,
     @SerialName("institution_name")
     val institutionName: String,
     @SerialName("livemode")

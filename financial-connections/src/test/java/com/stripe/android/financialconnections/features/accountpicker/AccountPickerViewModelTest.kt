@@ -3,6 +3,7 @@ package com.stripe.android.financialconnections.features.accountpicker
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ApiKeyFixtures.authorizationSession
+import com.stripe.android.financialconnections.ApiKeyFixtures.cachedConsumerSession
 import com.stripe.android.financialconnections.ApiKeyFixtures.partnerAccount
 import com.stripe.android.financialconnections.ApiKeyFixtures.partnerAccountList
 import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
@@ -10,7 +11,6 @@ import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
 import com.stripe.android.financialconnections.CoroutineTestRule
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.domain.CachedPartnerAccount
-import com.stripe.android.financialconnections.domain.GetCachedConsumerSession
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionAccounts
@@ -48,7 +48,6 @@ internal class AccountPickerViewModelTest {
     private val eventTracker = TestFinancialConnectionsAnalyticsTracker()
     private val nativeAuthFlowCoordinator = NativeAuthFlowCoordinator()
     private val saveAccountToLink = mock<SaveAccountToLink>()
-    private val getCachedConsumerSession = mock<GetCachedConsumerSession>()
 
     private fun buildViewModel(
         state: AccountPickerState
@@ -63,7 +62,7 @@ internal class AccountPickerViewModelTest {
         pollAuthorizationSessionAccounts = pollAuthorizationSessionAccounts,
         nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
         saveAccountToLink = saveAccountToLink,
-        getCachedConsumerSession = getCachedConsumerSession,
+        consumerSessionProvider = { cachedConsumerSession() },
         presentSheet = mock(),
     )
 
@@ -79,6 +78,7 @@ internal class AccountPickerViewModelTest {
             )
             givenPollAccountsReturns(
                 partnerAccountList().copy(
+                    data = listOf(partnerAccount()),
                     skipAccountSelection = true
                 )
             )
@@ -102,7 +102,8 @@ internal class AccountPickerViewModelTest {
 
         givenPollAccountsReturns(
             partnerAccountList().copy(
-                skipAccountSelection = null
+                data = listOf(partnerAccount()),
+                skipAccountSelection = true
             )
         )
 
@@ -222,7 +223,6 @@ internal class AccountPickerViewModelTest {
             )
         )
 
-        givenGetCachedConsumerSessionReturns(null)
         givenPollAccountsReturns(accounts)
         givenSelectAccountsReturns(accounts)
 
@@ -255,7 +255,6 @@ internal class AccountPickerViewModelTest {
             )
         )
 
-        givenGetCachedConsumerSessionReturns(null)
         givenPollAccountsReturns(accounts)
         givenSelectAccountsReturns(accounts)
 
@@ -297,7 +296,6 @@ internal class AccountPickerViewModelTest {
             )
         )
 
-        givenGetCachedConsumerSessionReturns(consumerSession)
         givenPollAccountsReturns(accounts)
         givenSelectAccountsReturns(accounts)
 
@@ -312,6 +310,19 @@ internal class AccountPickerViewModelTest {
 
         navigationManager.assertNavigatedTo(
             destination = Pane.SUCCESS.destination,
+            pane = Pane.ACCOUNT_PICKER,
+            popUpTo = null,
+        )
+    }
+
+    @Test
+    fun `onEnterDetailsManually - navigates to manual entry`() = runTest {
+        val viewModel = buildViewModel(AccountPickerState())
+
+        viewModel.onEnterDetailsManually()
+
+        navigationManager.assertNavigatedTo(
+            destination = Pane.MANUAL_ENTRY.destination,
             pane = Pane.ACCOUNT_PICKER,
             popUpTo = null,
         )
@@ -339,12 +350,7 @@ internal class AccountPickerViewModelTest {
             selectAccounts(
                 selectedAccountIds = any(),
                 sessionId = any(),
-                updateLocalCache = any(),
             )
         ).thenReturn(response)
-    }
-
-    private suspend fun givenGetCachedConsumerSessionReturns(response: CachedConsumerSession?) {
-        whenever(getCachedConsumerSession()).thenReturn(response)
     }
 }

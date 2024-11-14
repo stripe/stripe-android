@@ -18,7 +18,6 @@ import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.domain.AcceptConsent
 import com.stripe.android.financialconnections.domain.FetchNetworkedAccounts
-import com.stripe.android.financialconnections.domain.GetCachedConsumerSession
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.SelectNetworkedAccounts
@@ -44,7 +43,6 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.Image
 import com.stripe.android.financialconnections.model.NetworkedAccount
 import com.stripe.android.financialconnections.model.PartnerAccount
-import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.Destination.InstitutionPicker
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.PopUpToBehavior
@@ -54,6 +52,7 @@ import com.stripe.android.financialconnections.presentation.Async
 import com.stripe.android.financialconnections.presentation.Async.Success
 import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
+import com.stripe.android.financialconnections.repository.ConsumerSessionProvider
 import com.stripe.android.financialconnections.ui.HandleClickableUrl
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.utils.error
@@ -67,7 +66,7 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
     @Assisted initialState: LinkAccountPickerState,
     nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
-    private val getCachedConsumerSession: GetCachedConsumerSession,
+    private val consumerSessionProvider: ConsumerSessionProvider,
     private val handleClickableUrl: HandleClickableUrl,
     private val fetchNetworkedAccounts: FetchNetworkedAccounts,
     private val selectNetworkedAccounts: SelectNetworkedAccounts,
@@ -84,7 +83,7 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
         suspend {
             val sync = getSync()
             val manifest = sync.manifest
-            val consumerSession = requireNotNull(getCachedConsumerSession())
+            val consumerSession = requireNotNull(consumerSessionProvider.provideConsumerSession())
             val accountsResponse = fetchNetworkedAccounts(consumerSession.clientSecret)
             val display = requireNotNull(
                 accountsResponse
@@ -273,13 +272,15 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
         consumerSessionClientSecret: String,
         accountIds: Set<String>,
     ) {
-        selectNetworkedAccounts(
+        val response = selectNetworkedAccounts(
             consumerSessionClientSecret = consumerSessionClientSecret,
             selectedAccountIds = accountIds,
             consentAcquired = acquireConsentOnPrimaryCtaClick,
         )
         FinancialConnections.emitEvent(name = Name.ACCOUNTS_SELECTED)
-        navigationManager.tryNavigateTo(Destination.Success(referrer = PANE))
+        navigationManager.tryNavigateTo(
+            (response.nextPane ?: SUCCESS).destination(referrer = PANE)
+        )
     }
 
     private suspend fun handleNonSuccessNextPane(payload: LinkAccountPickerState.Payload, nextPane: Pane?) {

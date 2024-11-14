@@ -60,13 +60,10 @@ android {
         disable += "ResourceName"
     }
 
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_11
-        targetCompatibility JavaVersion.VERSION_11
-    }
-
     kotlinOptions {
-        jvmTarget = "11"
+        freeCompilerArgs += [
+                "-Xconsistent-data-class-copy-visibility"
+        ]
     }
 }
 
@@ -81,11 +78,9 @@ dependencies {
     implementation libs.kotlin.coroutines
     implementation libs.kotlin.coroutinesAndroid
 
-    // use bcprov-jdk15to18 (1.5 to 1.8) instead of bcprov-jdk15on (1.5 onwards)
-    // to avoid conflicts with newer Java versions
-    implementation "org.bouncycastle:bcprov-jdk15to18:1.69"
+    implementation libs.bouncyCastle
 
-    implementation "com.nimbusds:nimbus-jose-jwt:9.21"
+    implementation libs.nimbusJwt
 
     testImplementation testLibs.androidx.coreKtx
     testImplementation testLibs.androidx.fragment

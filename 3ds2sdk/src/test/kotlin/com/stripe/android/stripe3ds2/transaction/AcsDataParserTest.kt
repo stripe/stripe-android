@@ -79,7 +79,7 @@ class AcsDataParserTest {
         }
 
         assertThat(error.message)
-            .isEqualTo("JSON entity is not an object")
+            .isEqualTo("The key type to parse must not be null")
     }
 
     @Test

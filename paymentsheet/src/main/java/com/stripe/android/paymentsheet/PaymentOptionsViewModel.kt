@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet
 
-import android.app.Application
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -8,11 +7,11 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.analytics.SessionSavedStateHandler
+import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.requireApplication
-import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
@@ -53,21 +52,19 @@ internal class PaymentOptionsViewModel @Inject constructor(
     eventReporter: EventReporter,
     customerRepository: CustomerRepository,
     @IOContext workContext: CoroutineContext,
-    application: Application,
     savedStateHandle: SavedStateHandle,
     linkHandler: LinkHandler,
-    linkConfigurationCoordinator: LinkConfigurationCoordinator,
+    cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
     editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory
 ) : BaseSheetViewModel(
-    application = application,
-    config = args.state.config,
+    config = args.configuration,
     eventReporter = eventReporter,
     customerRepository = customerRepository,
     workContext = workContext,
     savedStateHandle = savedStateHandle,
     linkHandler = linkHandler,
-    linkConfigurationCoordinator = linkConfigurationCoordinator,
     editInteractorFactory = editInteractorFactory,
+    cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
     isCompleteFlow = false,
 ) {
 
@@ -96,7 +93,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
     override val walletsState: StateFlow<WalletsState?> = combineAsStateFlow(
         linkHandler.isLinkEnabled,
-        linkConfigurationCoordinator.emailFlow,
+        linkHandler.linkConfigurationCoordinator.emailFlow,
         buttonsEnabled,
     ) { isLinkAvailable, linkEmail, buttonsEnabled ->
         val paymentMethodMetadata = args.state.paymentMethodMetadata
@@ -266,12 +263,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
         }
     }
 
-    override fun handleConfirmUSBankAccount(paymentSelection: PaymentSelection.New.USBankAccount) {
-        updateSelection(paymentSelection)
-        eventReporter.onPressConfirmButton(selection.value)
-        onUserSelection()
-    }
-
     override fun clearErrorMessages() {
         _error.value = null
     }
@@ -298,14 +289,11 @@ internal class PaymentOptionsViewModel @Inject constructor(
         paymentMethodMetadata: PaymentMethodMetadata,
         customerStateHolder: CustomerStateHolder,
     ): List<PaymentSheetScreen> {
-        if (config.paymentMethodLayout == PaymentSheet.PaymentMethodLayout.Vertical) {
-            return listOf(
-                VerticalModeInitialScreenFactory.create(
-                    viewModel = this,
-                    paymentMethodMetadata = paymentMethodMetadata,
-                    customerStateHolder = customerStateHolder,
-                    savedPaymentMethodMutator = savedPaymentMethodMutator,
-                )
+        if (config.paymentMethodLayout != PaymentSheet.PaymentMethodLayout.Horizontal) {
+            return VerticalModeInitialScreenFactory.create(
+                viewModel = this,
+                paymentMethodMetadata = paymentMethodMetadata,
+                customerStateHolder = customerStateHolder,
             )
         }
         val target = if (args.state.showSavedPaymentMethods) {

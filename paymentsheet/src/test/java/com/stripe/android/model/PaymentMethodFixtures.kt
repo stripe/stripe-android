@@ -4,9 +4,9 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormScreenState
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
+import com.stripe.android.utils.BankFormScreenStateFactory
 import org.json.JSONObject
 import org.mockito.kotlin.mock
 import java.util.UUID
@@ -435,6 +435,19 @@ internal object PaymentMethodFixtures {
         darkThemeIconUrl = null,
     )
 
+    val CASHAPP_PAYMENT_SELECTION = PaymentSelection.New.GenericPaymentMethod(
+        label = "Cash App".resolvableString,
+        iconResource = 0,
+        lightThemeIconUrl = null,
+        darkThemeIconUrl = null,
+        paymentMethodCreateParams = PaymentMethodCreateParams.createCashAppPay(
+            billingDetails = PaymentMethod.BillingDetails(email = "example@email.com")
+        ),
+        customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+        paymentMethodOptionsParams = null,
+        paymentMethodExtraParams = null,
+    )
+
     val US_BANK_PAYMENT_SELECTION = PaymentSelection.New.USBankAccount(
         labelResource = "Test",
         iconResource = 0,
@@ -448,14 +461,7 @@ internal object PaymentMethodFixtures {
             saveForFutureUse = false,
         ),
         instantDebits = null,
-        screenState = USBankAccountFormScreenState.SavedAccount(
-            financialConnectionsSessionId = "session_1234",
-            intentId = "intent_1234",
-            bankName = "Stripe Bank",
-            last4 = "6789",
-            primaryButtonText = "Continue".resolvableString,
-            mandateText = null,
-        ),
+        screenState = BankFormScreenStateFactory.createWithSession("session_1234"),
     )
 
 //

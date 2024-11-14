@@ -39,6 +39,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.common.ui.LoadingIndicator
@@ -90,7 +92,9 @@ internal fun EditPaymentMethodUi(
     val isIdle = viewState.status == EditPaymentMethodViewState.Status.Idle
 
     Column(
-        modifier = modifier.padding(horizontal = padding)
+        modifier = modifier
+            .padding(horizontal = padding)
+            .testTag(TEST_TAG_PAYMENT_SHEET_EDIT_SCREEN)
     ) {
         SectionCard {
             val colors = TextFieldColors(false)
@@ -129,6 +133,7 @@ internal fun EditPaymentMethodUi(
             isLoading = viewState.status == EditPaymentMethodViewState.Status.Updating,
             isEnabled = viewState.canUpdate && isIdle,
             onButtonClick = { viewActionHandler.invoke(OnUpdatePressed) },
+            modifier = Modifier.testTag(TEST_TAG_EDIT_SCREEN_UPDATE_BUTTON)
         )
 
         if (viewState.canRemove) {
@@ -190,6 +195,7 @@ private fun RemoveButton(
     ) {
         Box(
             modifier = Modifier
+                .testTag(PAYMENT_SHEET_EDIT_SCREEN_REMOVE_BUTTON)
                 .fillMaxWidth()
                 .padding(
                     start = 8.dp,
@@ -239,6 +245,9 @@ private fun Dropdown(
 
                     viewActionHandler.invoke(EditPaymentMethodViewAction.OnBrandChoiceOptionsShown)
                 }
+            }
+            .semantics {
+                this.contentDescription = viewState.selectedBrand.brand.displayName
             }
             .testTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG)
     ) {
@@ -328,3 +337,7 @@ private fun EditPaymentMethodPreview() {
         )
     }
 }
+
+internal const val PAYMENT_SHEET_EDIT_SCREEN_REMOVE_BUTTON = "PaymentSheetEditScreenRemoveButton"
+internal const val TEST_TAG_PAYMENT_SHEET_EDIT_SCREEN = "TEST_TAG_PAYMENT_SHEET_EDIT_SCREEN"
+internal const val TEST_TAG_EDIT_SCREEN_UPDATE_BUTTON = "TEST_TAG_EDIT_SCREEN_UPDATE_BUTTON"

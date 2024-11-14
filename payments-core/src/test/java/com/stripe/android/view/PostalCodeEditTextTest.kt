@@ -6,13 +6,11 @@ import androidx.appcompat.view.ContextThemeWrapper
 import androidx.test.core.app.ApplicationProvider
 import com.google.android.material.textfield.TextInputLayout
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.CustomerSession
-import com.stripe.android.PaymentSessionFixtures
 import com.stripe.android.R
+import com.stripe.android.utils.createTestActivityRule
+import org.junit.Rule
 import org.junit.runner.RunWith
-import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
@@ -23,10 +21,8 @@ class PostalCodeEditTextTest {
     )
     private val postalCodeEditText = PostalCodeEditText(context)
 
-    @BeforeTest
-    fun setup() {
-        CustomerSession.instance = mock()
-    }
+    @get:Rule
+    internal val testActivityRule = createTestActivityRule<TestActivity>()
 
     @Test
     fun testConfigureForUs() {
@@ -94,10 +90,10 @@ class PostalCodeEditTextTest {
         }
     }
 
+    internal class TestActivity : Activity()
+
     private fun createActivity(onActivityCallback: (Activity) -> Unit) {
-        ActivityScenarioFactory(context).create<PaymentFlowActivity>(
-            PaymentSessionFixtures.PAYMENT_FLOW_ARGS
-        ).use { activityScenario ->
+        ActivityScenarioFactory(context).create<TestActivity>().use { activityScenario ->
             activityScenario.onActivity(onActivityCallback)
         }
     }

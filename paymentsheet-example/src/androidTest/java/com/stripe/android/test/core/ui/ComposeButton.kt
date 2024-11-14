@@ -30,7 +30,10 @@ internal class ComposeButton(
     fun waitFor(semanticsMatcher: SemanticsMatcher): ComposeButton {
         composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
             val combinedMatcher = matcher.and(semanticsMatcher)
-            composeTestRule.onAllNodes(combinedMatcher).fetchSemanticsNodes().isNotEmpty()
+            composeTestRule
+                .onAllNodes(combinedMatcher)
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .isNotEmpty()
         }
         return this
     }

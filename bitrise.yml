@@ -35,6 +35,7 @@ stages:
       - run-example-instrumentation-tests: { }
       - run-financial-connections-instrumentation-tests: { }
       - run-connections-e2e-payments-tests-on-push: { }
+      - run-connections-e2e-token-tests-on-push: { }
       - run-connections-e2e-data-tests-on-push: { }
       - run-cardscan-instrumentation-tests: { }
       - run-paymentsheet-end-to-end-tests: { }
@@ -50,6 +51,7 @@ stages:
     workflows:
       - run-connections-e2e-payments-tests: { }
       - run-connections-e2e-data-tests: { }
+      - run-connections-e2e-token-tests: { }
       - run-connections-e2e-livemode-tests: { }
   stage-notify-connections-e2e-failure:
     should_always_run: true
@@ -71,6 +73,7 @@ workflows:
       - opts:
           is_expand: false
         NEEDS_ROBOLECTRIC: true
+      - INCLUDE_PAPARAZZI_ON_FAILURE: true
     before_run:
       - prepare_all
     after_run:
@@ -79,7 +82,7 @@ workflows:
       - script@1:
           timeout: 1200
           inputs:
-            - content: ./gradlew testDebugUnitTest verifyPaparazziDebug -x :stripe-test-e2e:testDebugUnitTest
+            - content: ./gradlew testDebugUnitTest verifyPaparazziDebug -x :stripe-test-e2e:testDebugUnitTest --continue
   build-connections-debug:
     envs:
       - BUILD_VARIANT: debug
@@ -114,6 +117,11 @@ workflows:
       - MAESTRO_TAGS: testmode-data
     before_run:
       - _run-connections-e2e-tests
+  run-connections-e2e-token-tests:
+    envs:
+      - MAESTRO_TAGS: testmode-token
+    before_run:
+      - _run-connections-e2e-tests
   run-connections-e2e-payments-tests-on-push:
     envs:
       - MAESTRO_TAGS: testmode-payments
@@ -123,6 +131,12 @@ workflows:
   run-connections-e2e-data-tests-on-push:
     envs:
       - MAESTRO_TAGS: testmode-data
+    before_run:
+      - _build-connections
+      - _run-connections-e2e-tests
+  run-connections-e2e-token-tests-on-push:
+    envs:
+      - MAESTRO_TAGS: testmode-token
     before_run:
       - _build-connections
       - _run-connections-e2e-tests
@@ -152,10 +166,17 @@ workflows:
                 bash ./scripts/execute_maestro_tests.sh -t $MAESTRO_TAGS
   notify-connections-e2e-failure:
     steps:
+      # Notify all executions.
       - slack@4:
           inputs:
-            - webhook_url: $WEBHOOK_SLACK_CARLOSMUVI_MAESTRO
-            - webhook_url_on_error: $WEBHOOK_SLACK_CARLOSMUVI_MAESTRO
+            - webhook_url: $WEBHOOK_SLACK_CONNECTIONS_MOBILE
+            - webhook_url_on_error: $WEBHOOK_SLACK_CONNECTIONS_MOBILE
+      # Notify failures.
+      - slack@4:
+          run_if: '{{ getenv "BITRISEIO_PIPELINE_BUILD_STATUS" | eq "failed" }}'
+          inputs:
+            - webhook_url: $WEBHOOK_SLACK_CUX_BOTS
+            - webhook_url_on_error: $WEBHOOK_SLACK_CUX_BOTS
       - pagerduty@0:
           run_if: '{{ getenv "BITRISEIO_PIPELINE_BUILD_STATUS" | eq "failed" }}'
           inputs:
@@ -425,15 +446,9 @@ workflows:
       - git-clone@8: { }
       - cache-pull@2: { }
       - restore-gradle-cache@1: { }
-      - script-runner@0:
-          # Maven doesn't like java 17, so running it before.
-          run_if: '{{getenv "NEEDS_ROBOLECTRIC" | ne ""}}'
-          title: Download robolectric dependencies
-          inputs:
-            - file_path: ./scripts/download_robolectric.sh
       - set-java-version@1:
           inputs:
-            - set_java_version: 17
+            - set_java_version: 21
       - script@1:
           inputs:
             - content: mkdir -p ~/.gradle ; cp .bitrise/ci-gradle.properties ~/.gradle/gradle.properties
@@ -462,5 +477,5 @@ workflows:
       - save-gradle-cache@1: { }
 meta:
   bitrise.io:
-    stack: linux-docker-android-20.04
+    stack: linux-docker-android-22.04
     machine_type_id: elite

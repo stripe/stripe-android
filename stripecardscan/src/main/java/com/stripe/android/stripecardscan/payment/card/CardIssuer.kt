@@ -14,8 +14,3 @@ sealed class CardIssuer(open val displayName: String) {
     data object Unknown : CardIssuer("Unknown")
     data object Visa : CardIssuer("Visa")
 }
-
-/**
- * Format the card network as a human readable format.
- */
-internal fun formatIssuer(issuer: CardIssuer): String = issuer.displayName

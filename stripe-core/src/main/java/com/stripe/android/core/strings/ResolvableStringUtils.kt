@@ -65,3 +65,8 @@ val @receiver:StringRes Int.resolvableString: ResolvableString
 fun ResolvableString?.orEmpty(): ResolvableString {
     return this ?: "".resolvableString
 }
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+operator fun ResolvableString.plus(other: ResolvableString): ResolvableString {
+    return ConcatenatedResolvableString(this, other)
+}

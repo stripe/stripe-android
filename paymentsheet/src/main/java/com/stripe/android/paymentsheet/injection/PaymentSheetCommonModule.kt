@@ -2,6 +2,8 @@ package com.stripe.android.paymentsheet.injection
 
 import android.content.Context
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.cards.CardAccountRangeRepository
+import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
@@ -27,20 +29,24 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
+import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandlerImpl
 import com.stripe.android.paymentsheet.flowcontroller.DefaultPaymentSelectionUpdater
 import com.stripe.android.paymentsheet.flowcontroller.PaymentSelectionUpdater
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncherFactory
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.DefaultBacsMandateConfirmationLauncherFactory
+import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionInteractor
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionLauncherFactory
+import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.DefaultCvcRecollectionInteractor
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.DefaultCvcRecollectionLauncherFactory
 import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.repositories.RealElementsSessionRepository
 import com.stripe.android.paymentsheet.state.DefaultLinkAccountStatusProvider
-import com.stripe.android.paymentsheet.state.DefaultPaymentSheetLoader
+import com.stripe.android.paymentsheet.state.DefaultPaymentElementLoader
 import com.stripe.android.paymentsheet.state.LinkAccountStatusProvider
-import com.stripe.android.paymentsheet.state.PaymentSheetLoader
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.ui.DefaultEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import dagger.Binds
@@ -75,7 +81,7 @@ internal abstract class PaymentSheetCommonModule {
     ): ElementsSessionRepository
 
     @Binds
-    abstract fun bindsPaymentSheetLoader(impl: DefaultPaymentSheetLoader): PaymentSheetLoader
+    abstract fun bindsPaymentSheetLoader(impl: DefaultPaymentElementLoader): PaymentElementLoader
 
     @Binds
     abstract fun bindsUserFacingLogger(impl: RealUserFacingLogger): UserFacingLogger
@@ -98,6 +104,12 @@ internal abstract class PaymentSheetCommonModule {
     @Binds
     abstract fun bindsLinkConfigurationCoordinator(impl: RealLinkConfigurationCoordinator): LinkConfigurationCoordinator
 
+    @Binds
+    abstract fun bindsCardAccountRangeRepositoryFactory(
+        defaultCardAccountRangeRepositoryFactory: DefaultCardAccountRangeRepositoryFactory
+    ): CardAccountRangeRepository.Factory
+
+    @Suppress("TooManyFunctions")
     companion object {
         /**
          * Provides a non-singleton PaymentConfiguration.
@@ -156,6 +168,12 @@ internal abstract class PaymentSheetCommonModule {
 
         @Provides
         @Singleton
+        fun provideCVCRecollectionHandler(): CvcRecollectionHandler {
+            return CvcRecollectionHandlerImpl()
+        }
+
+        @Provides
+        @Singleton
         fun provideDurationProvider(): DurationProvider {
             return DefaultDurationProvider.instance
         }
@@ -177,5 +195,10 @@ internal abstract class PaymentSheetCommonModule {
             publishableKeyProvider = { paymentConfiguration.get().publishableKey },
             networkTypeProvider = NetworkTypeDetector(context)::invoke,
         )
+
+        @Provides
+        fun providesCvcRecollectionInteractorFactory(): CvcRecollectionInteractor.Factory {
+            return DefaultCvcRecollectionInteractor.Factory
+        }
     }
 }

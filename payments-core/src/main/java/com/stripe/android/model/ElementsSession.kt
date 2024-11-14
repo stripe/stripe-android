@@ -16,7 +16,7 @@ data class ElementsSession(
     val stripeIntent: StripeIntent,
     val customer: Customer?,
     val merchantCountry: String?,
-    val isEligibleForCardBrandChoice: Boolean,
+    val cardBrandChoice: CardBrandChoice?,
     val isGooglePayEnabled: Boolean,
     val sessionsError: Throwable? = null,
 ) : StripeModel {
@@ -42,8 +42,16 @@ data class ElementsSession(
     data class LinkSettings(
         val linkFundingSources: List<String>,
         val linkPassthroughModeEnabled: Boolean,
+        val linkMode: LinkMode?,
         val linkFlags: Map<String, Boolean>,
         val disableLinkSignup: Boolean,
+    ) : StripeModel
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @Parcelize
+    data class CardBrandChoice(
+        val eligible: Boolean,
+        val preferredNetworks: List<String>,
     ) : StripeModel
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -67,14 +75,14 @@ data class ElementsSession(
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Parcelize
         data class Components(
-            val paymentSheet: PaymentSheet,
+            val mobilePaymentElement: MobilePaymentElement,
             val customerSheet: CustomerSheet,
         ) : StripeModel {
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-            sealed interface PaymentSheet : StripeModel {
+            sealed interface MobilePaymentElement : StripeModel {
                 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                 @Parcelize
-                data object Disabled : PaymentSheet
+                data object Disabled : MobilePaymentElement
 
                 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                 @Parcelize
@@ -82,7 +90,7 @@ data class ElementsSession(
                     val isPaymentMethodSaveEnabled: Boolean,
                     val isPaymentMethodRemoveEnabled: Boolean,
                     val allowRedisplayOverride: PaymentMethod.AllowRedisplay?
-                ) : PaymentSheet
+                ) : MobilePaymentElement
             }
 
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -113,7 +121,7 @@ data class ElementsSession(
                 stripeIntent = stripeIntent,
                 customer = null,
                 merchantCountry = null,
-                isEligibleForCardBrandChoice = false,
+                cardBrandChoice = null,
                 isGooglePayEnabled = true,
                 sessionsError = sessionsError,
             )

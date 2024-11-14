@@ -1,11 +1,14 @@
 package com.stripe.android.paymentsheet
 
+import com.google.android.gms.wallet.IsReadyToPayRequest
+import com.google.android.gms.wallet.PaymentsClient
 import com.google.common.truth.Truth.assertThat
-import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.Stripe
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.googlepaylauncher.GooglePayAvailabilityClient
+import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatcher
 import com.stripe.android.networktesting.RequestMatchers.hasQueryParam
@@ -14,8 +17,6 @@ import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.testBodyFromFile
-import com.stripe.android.paymentsheet.utils.IntegrationType
-import com.stripe.android.paymentsheet.utils.IntegrationTypeProvider
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.runFlowControllerTest
@@ -41,23 +42,30 @@ internal class PaymentSheetAnalyticsTest {
 
     private val page: PaymentSheetPage = PaymentSheetPage(composeTestRule)
 
-    @TestParameter(valuesProvider = IntegrationTypeProvider::class)
-    lateinit var integrationType: IntegrationType
+    private val verticalModeConfiguration = PaymentSheet.Configuration.Builder("Example, Inc.")
+        .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
+        .build()
+
+    private val horizontalModeConfiguration = PaymentSheet.Configuration(
+        merchantDisplayName = "Example, Inc.",
+        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+    )
 
     @Before
     fun setup() {
         Stripe.advancedFraudSignalsEnabled = false
+        GooglePayRepository.googlePayAvailabilityClientFactory = createFakeGooglePayAvailabilityClient()
     }
 
     @After
     fun teardown() {
         Stripe.advancedFraudSignalsEnabled = true
+        GooglePayRepository.resetFactory()
     }
 
     @Test
     fun testSuccessfulCardPayment() = runPaymentSheetTest(
         networkRule = networkRule,
-        integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
         networkRule.enqueue(
@@ -77,7 +85,7 @@ internal class PaymentSheetAnalyticsTest {
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = null,
+                configuration = horizontalModeConfiguration,
             )
         }
 
@@ -116,10 +124,6 @@ internal class PaymentSheetAnalyticsTest {
     @Test
     fun testSuccessfulCardPaymentInFlowController() = runFlowControllerTest(
         networkRule = networkRule,
-        integrationType = integrationType,
-        paymentOptionCallback = { paymentOption ->
-            assertThat(paymentOption?.label).endsWith("4242")
-        },
         resultCallback = ::assertCompleted,
     ) { testContext ->
         networkRule.enqueue(
@@ -139,7 +143,7 @@ internal class PaymentSheetAnalyticsTest {
         testContext.configureFlowController {
             configureWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = null,
+                configuration = horizontalModeConfiguration,
                 callback = { success, error ->
                     assertThat(success).isTrue()
                     assertThat(error).isNull()
@@ -181,6 +185,132 @@ internal class PaymentSheetAnalyticsTest {
         page.clickPrimaryButton()
     }
 
+    @Test
+    fun testSuccessfulCardPaymentInVerticalMode() = runPaymentSheetTest(
+        networkRule = networkRule,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-requires_payment_method.json")
+        }
+
+        validateAnalyticsRequest(eventName = "mc_complete_init_default")
+        validateAnalyticsRequest(eventName = "mc_load_started")
+        validateAnalyticsRequest(eventName = "mc_load_succeeded")
+        validateAnalyticsRequest(eventName = "mc_complete_sheet_newpm_show")
+        validateAnalyticsRequest(eventName = "mc_carousel_payment_method_tapped")
+        validateAnalyticsRequest(eventName = "mc_form_shown")
+
+        testContext.presentPaymentSheet {
+            presentWithPaymentIntent(
+                paymentIntentClientSecret = "pi_example_secret_example",
+                configuration = verticalModeConfiguration,
+            )
+        }
+
+        validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
+        validateAnalyticsRequest(eventName = "mc_form_interacted")
+        validateAnalyticsRequest(eventName = "mc_card_number_completed")
+
+        page.clickOnLpm("card", forVerticalMode = true)
+        page.fillOutCardDetails()
+
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("POST"),
+            path("/v1/payment_intents/pi_example/confirm"),
+        ) { response ->
+            response.testBodyFromFile("payment-intent-confirm.json")
+        }
+
+        validateAnalyticsRequest(eventName = "mc_confirm_button_tapped")
+        validateAnalyticsRequest(
+            eventName = "stripe_android.paymenthandler.confirm.started",
+            query("intent_id", "pi_example"),
+            query("payment_method_type", "card"),
+        )
+        validateAnalyticsRequest(eventName = "stripe_android.confirm_returnurl_null")
+        validateAnalyticsRequest(eventName = "stripe_android.payment_intent_confirmation")
+        validateAnalyticsRequest(
+            eventName = "stripe_android.paymenthandler.confirm.finished",
+            query("intent_id", "pi_example"),
+            query("payment_method_type", "card"),
+        )
+        validateAnalyticsRequest(eventName = "mc_complete_payment_newpm_success", hasQueryParam("duration"))
+
+        page.clickPrimaryButton()
+    }
+
+    @Test
+    fun testSuccessfulCardPaymentInFlowControllerInVerticalMode() = runFlowControllerTest(
+        networkRule = networkRule,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-requires_payment_method.json")
+        }
+
+        validateAnalyticsRequest(eventName = "mc_custom_init_default")
+        validateAnalyticsRequest(eventName = "mc_load_started")
+        validateAnalyticsRequest(eventName = "mc_load_succeeded")
+        validateAnalyticsRequest(eventName = "mc_custom_sheet_newpm_show")
+        validateAnalyticsRequest(eventName = "mc_form_shown")
+
+        testContext.configureFlowController {
+            configureWithPaymentIntent(
+                paymentIntentClientSecret = "pi_example_secret_example",
+                configuration = verticalModeConfiguration,
+                callback = { success, error ->
+                    assertThat(success).isTrue()
+                    assertThat(error).isNull()
+                    presentPaymentOptions()
+                }
+            )
+        }
+
+        validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
+        validateAnalyticsRequest(eventName = "mc_carousel_payment_method_tapped")
+        validateAnalyticsRequest(eventName = "mc_custom_paymentoption_newpm_select")
+        validateAnalyticsRequest(eventName = "mc_form_interacted")
+        validateAnalyticsRequest(eventName = "mc_card_number_completed")
+
+        page.clickOnLpm("card", forVerticalMode = true)
+        page.fillOutCardDetails()
+
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("POST"),
+            path("/v1/payment_intents/pi_example/confirm"),
+        ) { response ->
+            response.testBodyFromFile("payment-intent-confirm.json")
+        }
+
+        validateAnalyticsRequest(eventName = "mc_confirm_button_tapped")
+        validateAnalyticsRequest(
+            eventName = "stripe_android.paymenthandler.confirm.started",
+            query("intent_id", "pi_example"),
+            query("payment_method_type", "card"),
+        )
+        validateAnalyticsRequest(eventName = "stripe_android.confirm_returnurl_null")
+        validateAnalyticsRequest(eventName = "stripe_android.payment_intent_confirmation")
+        validateAnalyticsRequest(
+            eventName = "stripe_android.paymenthandler.confirm.finished",
+            query("intent_id", "pi_example"),
+            query("payment_method_type", "card"),
+        )
+        validateAnalyticsRequest(eventName = "mc_custom_payment_newpm_success", hasQueryParam("duration"))
+
+        page.clickPrimaryButton()
+    }
+
     private fun validateAnalyticsRequest(
         eventName: String,
         vararg requestMatchers: RequestMatcher,
@@ -192,6 +322,18 @@ internal class PaymentSheetAnalyticsTest {
             *requestMatchers,
         ) { response ->
             response.status = "HTTP/1.1 200 OK"
+        }
+    }
+
+    private fun createFakeGooglePayAvailabilityClient(): GooglePayAvailabilityClient.Factory {
+        return object : GooglePayAvailabilityClient.Factory {
+            override fun create(paymentsClient: PaymentsClient): GooglePayAvailabilityClient {
+                return object : GooglePayAvailabilityClient {
+                    override suspend fun isReady(request: IsReadyToPayRequest): Boolean {
+                        return true
+                    }
+                }
+            }
         }
     }
 }

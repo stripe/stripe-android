@@ -19,6 +19,8 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CardNumberFixtures.AMEX_NO_SPACES
 import com.stripe.android.CardNumberFixtures.AMEX_WITH_SPACES
+import com.stripe.android.CardNumberFixtures.CO_BRAND_CARTES_MASTERCARD_NO_SPACES
+import com.stripe.android.CardNumberFixtures.CO_BRAND_CARTES_MASTERCARD_WITH_SPACES
 import com.stripe.android.CardNumberFixtures.DINERS_CLUB_14_NO_SPACES
 import com.stripe.android.CardNumberFixtures.DINERS_CLUB_14_WITH_SPACES
 import com.stripe.android.CardNumberFixtures.DISCOVER_NO_SPACES
@@ -26,7 +28,6 @@ import com.stripe.android.CardNumberFixtures.JCB_NO_SPACES
 import com.stripe.android.CardNumberFixtures.MASTERCARD_NO_SPACES
 import com.stripe.android.CardNumberFixtures.VISA_NO_SPACES
 import com.stripe.android.CardNumberFixtures.VISA_WITH_SPACES
-import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.cards.AccountRangeFixtures
@@ -35,6 +36,7 @@ import com.stripe.android.model.Address
 import com.stripe.android.model.BinFixtures
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
+import com.stripe.android.model.Networks
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.testharness.ViewTestUtils
@@ -68,7 +70,6 @@ internal class CardMultilineWidgetTest {
     private val noZipCardListener: CardInputListener = mock()
 
     private val context: Context = ApplicationProvider.getApplicationContext()
-    private val activityScenarioFactory = ActivityScenarioFactory(context)
 
     private val accountRangeStore = DefaultCardAccountRangeStore(context)
 
@@ -80,8 +81,6 @@ internal class CardMultilineWidgetTest {
         // The input date here will be invalid after 2050. Please update the test.
         assertThat(Calendar.getInstance().get(Calendar.YEAR) < 2050)
             .isTrue()
-
-        CustomerSession.instance = mock()
 
         PaymentConfiguration.init(context, ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
 
@@ -168,6 +167,34 @@ internal class CardMultilineWidgetTest {
                     address = Address.Builder()
                         .setPostalCode(POSTAL_CODE_VALUE)
                         .build()
+                )
+            )
+    }
+
+    @Test
+    fun getCard_whenInputHasPrefNewtworks_returnsCardObjectWithNetworks() = runCardMultilineWidgetTest {
+        cardMultilineWidget.cardNumberEditText.setText(CO_BRAND_CARTES_MASTERCARD_WITH_SPACES)
+        cardMultilineWidget.expiryDateEditText.append("12")
+        cardMultilineWidget.expiryDateEditText.append("50")
+        cardMultilineWidget.cvcEditText.append(CVC_VALUE_COMMON)
+        cardMultilineWidget.postalCodeEditText.append(POSTAL_CODE_VALUE)
+        cardMultilineWidget.setPreferredNetworks(listOf(CardBrand.CartesBancaires))
+
+        assertThat(cardMultilineWidget.cardParams)
+            .isEqualTo(
+                CardParams(
+                    brand = CardBrand.Unknown,
+                    loggingTokens = ATTRIBUTION,
+                    number = CO_BRAND_CARTES_MASTERCARD_NO_SPACES,
+                    expMonth = 12,
+                    expYear = 2050,
+                    cvc = CVC_VALUE_COMMON,
+                    address = Address.Builder()
+                        .setPostalCode(POSTAL_CODE_VALUE)
+                        .build(),
+                    networks = Networks(
+                        preferred = CardBrand.CartesBancaires.code
+                    )
                 )
             )
     }
@@ -310,6 +337,30 @@ internal class CardMultilineWidgetTest {
 
         assertThat(cardMultilineWidget.paymentMethodBillingDetails?.address?.postalCode)
             .isEqualTo(POSTAL_CODE_VALUE)
+    }
+
+    @Test
+    fun paymentMethodCard_whenInputHasPrefNewtworks_returnsCardObjectWithNetworks() = runCardMultilineWidgetTest {
+        cardMultilineWidget.cardNumberEditText.setText(CO_BRAND_CARTES_MASTERCARD_WITH_SPACES)
+        cardMultilineWidget.expiryDateEditText.append("12")
+        cardMultilineWidget.expiryDateEditText.append("50")
+        cardMultilineWidget.cvcEditText.append(CVC_VALUE_COMMON)
+        cardMultilineWidget.postalCodeEditText.append(POSTAL_CODE_VALUE)
+        cardMultilineWidget.setPreferredNetworks(listOf(CardBrand.CartesBancaires))
+
+        assertThat(cardMultilineWidget.paymentMethodCard)
+            .isEqualTo(
+                PaymentMethodCreateParams.Card(
+                    number = CO_BRAND_CARTES_MASTERCARD_NO_SPACES,
+                    cvc = CVC_VALUE_COMMON,
+                    expiryMonth = 12,
+                    expiryYear = 2050,
+                    attribution = ATTRIBUTION,
+                    networks = PaymentMethodCreateParams.Card.Networks(
+                        preferred = CardBrand.CartesBancaires.code
+                    )
+                )
+            )
     }
 
     @Test
@@ -801,15 +852,7 @@ internal class CardMultilineWidgetTest {
 
     @Test
     fun onFinishInflate_shouldSetPostalCodeInputLayoutHint() = runCardMultilineWidgetTest {
-        var inflatedCardMultilineWidget: CardMultilineWidget? = null
-        activityScenarioFactory
-            .createAddPaymentMethodActivity()
-            .use { activityScenario ->
-                activityScenario.onActivity { activity ->
-                    inflatedCardMultilineWidget = activity.findViewById(R.id.card_multiline_widget)
-                }
-            }
-        assertThat(requireNotNull(inflatedCardMultilineWidget).postalInputLayout.hint)
+        assertThat(cardMultilineWidget.postalInputLayout.hint)
             .isEqualTo("Postal code")
     }
 

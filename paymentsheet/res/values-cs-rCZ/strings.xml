@@ -2,10 +2,18 @@
 <resources>
   <!-- Used for accessibility to describe the button on the payment sheet list of options to add a new payment method. -->
   <string name="stripe_add_new_payment_method">Přidat novou platební metodu</string>
+  <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
+  <string name="stripe_afterpay_subtitle">Koupit nyní nebo zaplatit pomocí Afterpay</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
-  <string name="stripe_bank_account_ending_in">Odebrat bankovní účet končící na %s</string>
+  <string name="stripe_bank_account_ending_in">Bankovní účet končící na %s</string>
+  <!-- Concise description of a saved bank account. E.g. 'Bank account ···· 4242' -->
+  <string name="stripe_bank_account_plus_last_4">Bankovní účet ···· %s</string>
+  <!-- Concise description of a saved bank account. E.g. 'Bank account ····4242' -->
+  <string name="stripe_bank_account_with_last_4">Bankovní účet ····%s</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">Dokončete nákup potvrzením platby v bankovní aplikaci do  %s.</string>
+  <!-- This shows the message on Buy Now Pay Later LPM, clearpay. -->
+  <string name="stripe_clearpay_subtitle">Koupit nyní nebo zaplatit pomocí Clearpay</string>
   <!-- Used as the title for prompting the user if they want to close the sheet -->
   <string name="stripe_confirm_close_form_body">Vaše platební údaje nebudou uloženy.</string>
   <!-- Used as the title for prompting the user if they want to close the sheet -->
@@ -36,6 +44,8 @@
   <string name="stripe_paymentsheet_bacs_notice_mandate">Dále vám bude zaslán e-mail s avízem o jakékoli částce k odečtení v rámci tohoto pokynu, a to dva dny předem. Platby se na bankovním výpisu budou zobrazovat jako \'%s\'.</string>
   <!-- Message shown as part of overall Bacs Mandate indicating that their payments are protected by a defined guarantee -->
   <string name="stripe_paymentsheet_bacs_protection_mandate">Vaše platby jsou chráněny %s.</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
+  <string name="stripe_paymentsheet_card_mandate">Poskytnutím údajů o vaší kartě povolujete společnosti %s, aby si v souladu se svými podmínkami strhla z vaší karty poplatky za budoucí platby.</string>
   <!-- Title shown above a carousel containing available payment methods -->
   <string name="stripe_paymentsheet_choose_payment_method">Zvolte platební metodu</string>
   <string name="stripe_paymentsheet_close">Zavřít</string>
@@ -53,6 +63,8 @@
   <string name="stripe_paymentsheet_microdeposit">V průběhu 1 až 2 pracovních dnů vloží Stripe na váš účet vklad ve výšce 0,01 USD. Potom dostanete e-mail s instrukcemi k dokončení platby společnosti %s.</string>
   <!-- Content for alert popup prompting to confirm modifying saved payment method. -->
   <string name="stripe_paymentsheet_modify_pm">Upravit %s</string>
+  <!-- Label of a button that appears on a checkout screen. When tapped, it displays a credit card form. This button is shown next to another button representing the customer's saved card; the word 'new' is meant to differentiate this button's action with the saved card button. -->
+  <string name="stripe_paymentsheet_new_card">Nová karta</string>
   <!-- Title shown above a section containing payment methods that a customer can choose to pay with e.g. card, bank account, etc. -->
   <string name="stripe_paymentsheet_new_pm">Nová platební metoda</string>
   <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
@@ -72,9 +84,13 @@
   <!-- Label of a button that, when tapped, initiates payment, becomes disabled, and displays this text -->
   <string name="stripe_paymentsheet_primary_button_processing">Zpracování...</string>
   <!-- Title for confirmation alert to remove a saved bank account payment method -->
+  <string name="stripe_paymentsheet_remove_bank_account_question_title">Odebrat bankovní účet?</string>
+  <!-- Title for confirmation alert to remove a saved bank account payment method -->
   <string name="stripe_paymentsheet_remove_bank_account_title">Odebrat bankovní účet</string>
   <!-- Title for a button that when tapped removes a saved card. -->
   <string name="stripe_paymentsheet_remove_card">Odebrat kartu</string>
+  <!-- Title for confirmation alert to remove a card -->
+  <string name="stripe_paymentsheet_remove_card_title">Odebrat kartu?</string>
   <!-- Content for alert popup prompting to confirm removing saved payment method. -->
   <string name="stripe_paymentsheet_remove_pm">Odebrat %s</string>
   <!-- Title shown above a view containing a customer's payment method that they can delete -->
@@ -97,6 +113,8 @@
   <string name="stripe_paymentsheet_select_your_payment_method">Vyberte svou platební metodu</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">Celkem: %s</string>
+  <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
+  <string name="stripe_remove_bank_account_ending_in">Odebrat bankovní účet končící na %s</string>
   <!-- Generic failure message -->
   <string name="stripe_something_went_wrong">Něco se pokazilo</string>
   <!-- Button text on a screen asking the user to approve a payment -->

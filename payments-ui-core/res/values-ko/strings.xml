@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
+  <string name="stripe_afterpay_clearpay_marketing"><![CDATA[<img/>(으)로 지금 구매하거나 나중에 결제하십시오]]></string>
+  <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="stripe_afterpay_clearpay_message"><![CDATA[<img/>로 <installment_price/>의 <num_installments/>회 무이자 결제로 대금을 지급하십시오.]]></string>
+  <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
+  <string name="stripe_afterpay_clearpay_subtitle">%1$d%2$s회 무이자 결제</string>
   <!-- Amazon Pay mandate text -->
   <string name="stripe_amazon_pay_mandate">AmazonPay 결제를 확인하면 %s에서 해당 회사의 약관에 따라 향후 AmazonPay 계정에 결제 대금을 청구할 수 있습니다.</string>
   <!-- Text for back button -->
@@ -91,6 +95,8 @@
   <string name="stripe_revolut_mandate">RevolutPay 결제를 확인하면 %s에서 해당 회사의 약관에 따라 향후 결제에 대해 RevolutPay 계정에 대금을 청구하도록 허용하는 것입니다.</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
   <string name="stripe_save_for_future_payments_with_merchant_name">향후 %s 결제에 사용하도록 저장</string>
+  <!-- The label of a switch indicating whether to save the user's payment details for future payment -->
+  <string name="stripe_save_payment_details_to_merchant_name">향후 구매를 위해 결제 세부사항 %s에 저장</string>
   <!-- Button title to open camera to scan credit/debit card -->
   <string name="stripe_scan_card">카드 스캔</string>
   <!-- SEPA mandate text -->

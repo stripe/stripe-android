@@ -260,7 +260,7 @@ private class FinancialConnectionsManifestRepositoryImpl(
     ): FinancialConnectionsAuthorizationSession {
         val request = apiRequestFactory.createPost(
             url = FinancialConnectionsRepositoryImpl.authorizationSessionUrl,
-            options = provideApiRequestOptions(useConsumerPublishableKey = false),
+            options = provideApiRequestOptions(useConsumerPublishableKey = true),
             params = mapOf(
                 NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
                 "use_mobile_handoff" to false,
@@ -286,7 +286,7 @@ private class FinancialConnectionsManifestRepositoryImpl(
     ): FinancialConnectionsAuthorizationSession {
         val request = apiRequestFactory.createPost(
             url = eventsAuthSessionUrl,
-            options = provideApiRequestOptions(useConsumerPublishableKey = false),
+            options = provideApiRequestOptions(useConsumerPublishableKey = true),
             params = mapOf(
                 NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
                 "client_timestamp" to clientTimestamp.time.toString(),
@@ -307,7 +307,7 @@ private class FinancialConnectionsManifestRepositoryImpl(
     ): FinancialConnectionsAuthorizationSession {
         val request = apiRequestFactory.createPost(
             url = cancelAuthSessionUrl,
-            options = provideApiRequestOptions(useConsumerPublishableKey = false),
+            options = provideApiRequestOptions(useConsumerPublishableKey = true),
             params = mapOf(
                 NetworkConstants.PARAMS_ID to sessionId,
                 NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret
@@ -327,7 +327,7 @@ private class FinancialConnectionsManifestRepositoryImpl(
     ): FinancialConnectionsAuthorizationSession = requestExecutor.execute(
         request = apiRequestFactory.createPost(
             url = retrieveAuthSessionUrl,
-            options = provideApiRequestOptions(useConsumerPublishableKey = false),
+            options = provideApiRequestOptions(useConsumerPublishableKey = true),
             params = mapOf(
                 NetworkConstants.PARAMS_ID to sessionId,
                 NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
@@ -346,7 +346,7 @@ private class FinancialConnectionsManifestRepositoryImpl(
     ): FinancialConnectionsAuthorizationSession {
         val request = apiRequestFactory.createPost(
             url = FinancialConnectionsRepositoryImpl.authorizeSessionUrl,
-            options = provideApiRequestOptions(useConsumerPublishableKey = false),
+            options = provideApiRequestOptions(useConsumerPublishableKey = true),
             params = mapOf(
                 NetworkConstants.PARAMS_ID to sessionId,
                 NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
@@ -366,7 +366,7 @@ private class FinancialConnectionsManifestRepositoryImpl(
     ): FinancialConnectionsSessionManifest {
         val request = apiRequestFactory.createPost(
             url = linkMoreAccountsUrl,
-            options = provideApiRequestOptions(useConsumerPublishableKey = false),
+            options = provideApiRequestOptions(useConsumerPublishableKey = true),
             params = mapOf(
                 "expand" to listOf("active_auth_session"),
                 NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret

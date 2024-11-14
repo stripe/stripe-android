@@ -8,11 +8,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/stripe_setup
-      - name: Generate Android release bundle
-        run: ./gradlew :financial-connections-example:bundleRelease
-      - name: Upload artifact to Emerge
-        uses: EmergeTools/emerge-upload-action@3477b597fc62054136eb6f499e0ba78144f8a999
-        with:
-          artifact_path: financial-connections-example/build/outputs/bundle/release/financial-connections-example-release.aab
-          emerge_api_key: ${{ secrets.EMERGE_API_KEY }}
-          build_type: release
+      - name: Upload release bundle to Emerge
+        run: ./gradlew :financial-connections-example:emergeUploadReleaseAab
+        env:
+          EMERGE_API_TOKEN: ${{ secrets.EMERGE_API_KEY }}
+          EMERGE_TAG: release
+

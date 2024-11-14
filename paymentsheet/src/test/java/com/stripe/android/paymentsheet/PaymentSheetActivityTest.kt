@@ -1,12 +1,12 @@
 package com.stripe.android.paymentsheet
 
-import android.app.Application
 import android.content.Context
 import android.os.Build
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertAny
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
@@ -20,6 +20,7 @@ import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextInput
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.testing.TestLifecycleOwner
@@ -30,6 +31,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
+import com.stripe.android.CardBrandFilter
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
@@ -48,12 +50,14 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherFactory
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.cvcrecollection.FakeCvcRecollectionHandler
 import com.stripe.android.paymentsheet.databinding.StripePrimaryButtonBinding
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
@@ -61,7 +65,10 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddAnotherPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.FakeBacsMandateConfirmationLauncher
+import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.Args
+import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionInteractor
 import com.stripe.android.paymentsheet.state.LinkState
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.ui.GOOGLE_PAY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_EDIT_BUTTON_TEST_TAG
@@ -79,12 +86,14 @@ import com.stripe.android.uicore.elements.bottomsheet.BottomSheetContentTestTag
 import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
-import com.stripe.android.utils.FakePaymentSheetLoader
+import com.stripe.android.utils.FakePaymentElementLoader
 import com.stripe.android.utils.InjectableActivityScenario
+import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
 import com.stripe.android.utils.injectableActivityScenario
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -143,12 +152,14 @@ internal class PaymentSheetActivityTest {
 
     private val fakeIntentConfirmationInterceptor = FakeIntentConfirmationInterceptor()
 
+    private val cvcRecollectionHandler = FakeCvcRecollectionHandler()
+
     private val contract = PaymentSheetContractV2()
 
     private val intent = contract.createIntent(
         context,
         PaymentSheetContractV2.Args(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "pi_1234_secret_5678",
             ),
             config = PaymentSheetFixtures.CONFIG_CUSTOMER,
@@ -421,7 +432,7 @@ internal class PaymentSheetActivityTest {
 
         scenario.launch(intent).onActivity {
             composeTestRule.onNodeWithTag(
-                "SAVED_PAYMENT_METHOD_CARD_TEST_TAG_····4242",
+                "SAVED_PAYMENT_METHOD_CARD_TEST_TAG_···· 4242",
                 useUnmergedTree = true,
             ).assertIsSelected()
 
@@ -434,7 +445,7 @@ internal class PaymentSheetActivityTest {
             ).performClick()
 
             composeTestRule.onNodeWithTag(
-                "SAVED_PAYMENT_METHOD_CARD_TEST_TAG_····4242",
+                "SAVED_PAYMENT_METHOD_CARD_TEST_TAG_···· 4242",
                 useUnmergedTree = true,
             ).assertIsSelected()
         }
@@ -783,6 +794,38 @@ internal class PaymentSheetActivityTest {
         }
     }
 
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun `CVC recollection adds CVC to PaymentMethodOptionsParams`() {
+        cvcRecollectionHandler.cvcRecollectionEnabled = true
+        cvcRecollectionHandler.requiresCVCRecollection = true
+        val viewModel = createViewModel(
+            paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_CVC_RECOLLECTION,
+            paymentMethods = PAYMENT_METHODS.take(1)
+        )
+        val scenario = activityScenario(viewModel)
+        scenario.launch(intent).onActivity {
+            composeTestRule.onNodeWithTag(
+                "SAVED_PAYMENT_METHOD_CARD_TEST_TAG_···· 4242",
+                useUnmergedTree = true,
+            ).assertIsSelected()
+
+            composeTestRule.waitUntilAtLeastOneExists(
+                hasText("Confirm your CVC")
+            )
+
+            composeTestRule.onNodeWithText("CVC").performTextInput("123")
+
+            viewModel.checkout()
+
+            (viewModel.selection.value as PaymentSelection.Saved).let {
+                (it.paymentMethodOptionsParams as PaymentMethodOptionsParams.Card).let { card ->
+                    assertThat(card.cvc).isEqualTo("123")
+                }
+            }
+        }
+    }
+
     @Test
     fun `when checkout starts then error message is cleared`() {
         val viewModel = createViewModel(isGooglePayAvailable = true)
@@ -934,7 +977,7 @@ internal class PaymentSheetActivityTest {
         )
 
         val args = PaymentSheetContractV2.Args(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "abc",
             ),
             config = PaymentSheet.Configuration(
@@ -960,7 +1003,7 @@ internal class PaymentSheetActivityTest {
     @Test
     fun `Handles invalid client secret correctly`() {
         val args = PaymentSheetContractV2.Args(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(clientSecret = ""),
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(clientSecret = ""),
             config = PaymentSheet.Configuration(
                 merchantDisplayName = "Some name",
             ),
@@ -1084,14 +1127,11 @@ internal class PaymentSheetActivityTest {
                 onBlocking { getAccountStatusFlow(any()) }.thenReturn(flowOf(AccountStatus.SignedOut))
                 on { emailFlow } doReturn stateFlowOf("email@email.com")
             },
-        ) { linkHandler, linkInteractor, savedStateHandle ->
-            val application = ApplicationProvider.getApplicationContext<Application>()
-
+        ) { linkHandler, savedStateHandle ->
             PaymentSheetViewModel(
-                application = application,
                 args = args,
                 eventReporter = eventReporter,
-                paymentSheetLoader = FakePaymentSheetLoader(
+                paymentElementLoader = FakePaymentElementLoader(
                     stripeIntent = paymentIntent,
                     customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(paymentMethods = paymentMethods),
                     isGooglePayAvailable = isGooglePayAvailable,
@@ -1110,8 +1150,7 @@ internal class PaymentSheetActivityTest {
                 workContext = testDispatcher,
                 savedStateHandle = savedStateHandle,
                 linkHandler = linkHandler,
-                linkConfigurationCoordinator = linkInteractor,
-                intentConfirmationHandlerFactory = IntentConfirmationHandler.Factory(
+                confirmationHandlerFactory = DefaultConfirmationHandler.Factory(
                     intentConfirmationInterceptor = fakeIntentConfirmationInterceptor,
                     savedStateHandle = savedStateHandle,
                     stripePaymentLauncherAssistedFactory = stripePaymentLauncherAssistedFactory,
@@ -1122,8 +1161,19 @@ internal class PaymentSheetActivityTest {
                     errorReporter = FakeErrorReporter(),
                     logger = FakeUserFacingLogger(),
                 ),
+                cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
                 editInteractorFactory = FakeEditPaymentMethodInteractor.Factory(),
                 errorReporter = FakeErrorReporter(),
+                cvcRecollectionHandler = cvcRecollectionHandler,
+                cvcRecollectionInteractorFactory = object : CvcRecollectionInteractor.Factory {
+                    override fun create(
+                        args: Args,
+                        processing: StateFlow<Boolean>,
+                        coroutineScope: CoroutineScope,
+                    ): CvcRecollectionInteractor {
+                        return FakeCvcRecollectionInteractor()
+                    }
+                }
             )
         }
     }
@@ -1159,7 +1209,8 @@ internal class PaymentSheetActivityTest {
                 config: GooglePayPaymentMethodLauncher.Config,
                 readyCallback: GooglePayPaymentMethodLauncher.ReadyCallback,
                 activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>,
-                skipReadyCheck: Boolean
+                skipReadyCheck: Boolean,
+                cardBrandFilter: CardBrandFilter
             ): GooglePayPaymentMethodLauncher {
                 val googlePayPaymentMethodLauncher = mock<GooglePayPaymentMethodLauncher>()
                 readyCallback.onReady(true)

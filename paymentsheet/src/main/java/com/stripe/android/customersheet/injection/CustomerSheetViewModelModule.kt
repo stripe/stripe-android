@@ -19,7 +19,6 @@ import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.networking.NetworkTypeDetector
 import com.stripe.android.core.utils.ContextUtils.packageInfo
 import com.stripe.android.customersheet.CustomerSheetLoader
-import com.stripe.android.customersheet.CustomerSheetViewState
 import com.stripe.android.customersheet.DefaultCustomerSheetLoader
 import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
 import com.stripe.android.customersheet.analytics.DefaultCustomerSheetEventReporter
@@ -29,8 +28,8 @@ import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnectionsAvailable
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
+import com.stripe.android.paymentsheet.DefaultConfirmationHandler
 import com.stripe.android.paymentsheet.DefaultIntentConfirmationInterceptor
-import com.stripe.android.paymentsheet.IntentConfirmationHandler
 import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.injection.IS_FLOW_CONTROLLER
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -147,9 +146,9 @@ internal interface CustomerSheetViewModelModule {
             stripePaymentLauncherAssistedFactory: StripePaymentLauncherAssistedFactory,
             statusBarColor: Int?,
             intentConfirmationInterceptor: IntentConfirmationInterceptor,
-            errorReporter: ErrorReporter,
-        ): IntentConfirmationHandler.Factory {
-            return IntentConfirmationHandler.Factory(
+            errorReporter: ErrorReporter
+        ): DefaultConfirmationHandler.Factory {
+            return DefaultConfirmationHandler.Factory(
                 intentConfirmationInterceptor = intentConfirmationInterceptor,
                 paymentConfigurationProvider = paymentConfigurationProvider,
                 stripePaymentLauncherAssistedFactory = stripePaymentLauncherAssistedFactory,
@@ -158,7 +157,7 @@ internal interface CustomerSheetViewModelModule {
                 statusBarColor = { statusBarColor },
                 savedStateHandle = savedStateHandle,
                 errorReporter = errorReporter,
-                logger = null,
+                logger = null
             )
         }
 
@@ -199,15 +198,6 @@ internal interface CustomerSheetViewModelModule {
         @Provides
         fun provideLocale() =
             LocaleListCompat.getAdjustedDefault().takeUnless { it.isEmpty }?.get(0)
-
-        @Provides
-        fun backstack(
-            @Named(IS_LIVE_MODE) isLiveModeProvider: () -> Boolean
-        ): List<CustomerSheetViewState> = listOf(
-            CustomerSheetViewState.Loading(
-                isLiveMode = isLiveModeProvider()
-            )
-        )
 
         @Provides
         @Named(IS_FLOW_CONTROLLER)

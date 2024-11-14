@@ -57,18 +57,6 @@ class LauncherActivity : AppCompatActivity() {
                 CreateCardSourceActivity::class.java
             ),
             Item(
-                activity.getString(R.string.launch_customer_session),
-                CustomerSessionActivity::class.java
-            ),
-            Item(
-                activity.getString(R.string.launch_payment_session),
-                PaymentSessionActivity::class.java
-            ),
-            Item(
-                activity.getString(R.string.launch_payment_session_from_fragment),
-                FragmentExamplesActivity::class.java
-            ),
-            Item(
                 activity.getString(R.string.googlepaylauncher_example),
                 GooglePayLauncherIntegrationActivity::class.java
             ),
@@ -92,14 +80,6 @@ class LauncherActivity : AppCompatActivity() {
             Item(
                 activity.getString(R.string.launch_confirm_pm_sepa_debit),
                 ConfirmSepaDebitActivity::class.java
-            ),
-            Item(
-                activity.getString(R.string.netbanking_payment_example),
-                NetbankingListPaymentActivity::class.java
-            ),
-            Item(
-                activity.getString(R.string.fpx_payment_example),
-                FpxPaymentActivity::class.java
             ),
             Item(
                 activity.getString(R.string.klarna_source_example),

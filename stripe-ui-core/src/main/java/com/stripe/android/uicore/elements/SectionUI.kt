@@ -9,7 +9,6 @@ import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
@@ -31,25 +30,19 @@ fun Section(
     error: String?,
     modifier: Modifier = Modifier,
     isSelected: Boolean = false,
-    addVerticalPadding: Boolean = true,
-    contentOutsideCard: @Composable () -> Unit = {},
-    contentInCard: @Composable () -> Unit
+    content: @Composable () -> Unit
 ) {
-    val verticalPadding = remember(addVerticalPadding) {
-        if (addVerticalPadding) 8.dp else 0.dp
-    }
-
-    Column(modifier = modifier.padding(top = verticalPadding)) {
-        SectionTitle(title)
-        SectionCard(
-            isSelected = isSelected,
-            content = contentInCard,
-            modifier = Modifier.padding(bottom = verticalPadding)
-        )
+    Column {
+        Column(modifier = modifier) {
+            SectionTitle(title)
+            SectionCard(
+                isSelected = isSelected,
+                content = content,
+            )
+        }
         if (error != null) {
             SectionError(error)
         }
-        contentOutsideCard()
     }
 }
 

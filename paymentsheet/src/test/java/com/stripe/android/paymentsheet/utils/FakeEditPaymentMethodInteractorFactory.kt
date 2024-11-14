@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.utils
 
+import com.stripe.android.CardBrandFilter
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.ui.DefaultEditPaymentMethodViewInteractor
@@ -21,6 +22,7 @@ internal class FakeEditPaymentMethodInteractorFactory(
         displayName: ResolvableString,
         canRemove: Boolean,
         isLiveMode: Boolean,
+        cardBrandFilter: CardBrandFilter
     ): ModifiableEditPaymentMethodViewInteractor {
         return DefaultEditPaymentMethodViewInteractor(
             initialPaymentMethod = initialPaymentMethod,
@@ -31,6 +33,7 @@ internal class FakeEditPaymentMethodInteractorFactory(
             workContext = context,
             canRemove = canRemove,
             isLiveMode = isLiveMode,
+            cardBrandFilter = cardBrandFilter
         )
     }
 }

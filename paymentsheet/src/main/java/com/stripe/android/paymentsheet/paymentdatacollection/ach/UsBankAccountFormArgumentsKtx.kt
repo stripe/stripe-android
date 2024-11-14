@@ -1,38 +1,32 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
-import android.content.Context
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormScreenState.BillingDetailsCollection
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.ui.core.R as StripeUiCoreR
 
 internal fun USBankAccountFormArguments.handleScreenStateChanged(
-    context: Context,
-    screenState: USBankAccountFormScreenState,
+    screenState: BankFormScreenState,
     enabled: Boolean,
-    merchantName: String,
-    onPrimaryButtonClick: (USBankAccountFormScreenState) -> Unit,
+    onPrimaryButtonClick: () -> Unit,
 ) {
     screenState.error?.let {
         onError(it)
     }
 
-    val showProcessingWhenClicked = screenState is BillingDetailsCollection || isCompleteFlow
+    if (screenState.linkedBankAccount == null) {
+        updatePrimaryButton(
+            text = resolvableString(StripeUiCoreR.string.stripe_continue_button_label),
+            onClick = onPrimaryButtonClick,
+            enabled = enabled,
+            shouldShowProcessingWhenClicked = isCompleteFlow,
+        )
+    } else {
+        // Clear the primary button
+        onUpdatePrimaryButtonUIState { null }
+    }
 
-    updatePrimaryButton(
-        text = screenState.primaryButtonText,
-        onClick = { onPrimaryButtonClick(screenState) },
-        enabled = enabled,
-        shouldShowProcessingWhenClicked = showProcessingWhenClicked
-    )
-
-    updateMandateText(
-        context = context,
-        screenState = screenState,
-        mandateText = screenState.mandateText,
-        merchantName = merchantName,
-    )
+    onMandateTextChanged(screenState.linkedBankAccount?.mandateText, false)
 }
 
 private fun USBankAccountFormArguments.updatePrimaryButton(
@@ -57,28 +51,4 @@ private fun USBankAccountFormArguments.updatePrimaryButton(
             lockVisible = isCompleteFlow,
         )
     }
-}
-
-internal fun USBankAccountFormArguments.updateMandateText(
-    context: Context,
-    screenState: USBankAccountFormScreenState,
-    mandateText: ResolvableString?,
-    merchantName: String,
-) {
-    val microdepositsText =
-        if (screenState is USBankAccountFormScreenState.VerifyWithMicrodeposits) {
-            context.getString(R.string.stripe_paymentsheet_microdeposit, merchantName)
-        } else {
-            ""
-        }
-
-    val updatedText = mandateText?.let {
-        """
-            $microdepositsText
-                
-            ${mandateText.resolve(context)}
-        """.trimIndent()
-    }?.resolvableString
-
-    onMandateTextChanged(updatedText, false)
 }

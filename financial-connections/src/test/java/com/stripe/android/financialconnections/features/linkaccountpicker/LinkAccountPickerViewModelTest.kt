@@ -3,6 +3,7 @@ package com.stripe.android.financialconnections.features.linkaccountpicker
 import FinancialConnectionsGenericInfoScreen
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.ApiKeyFixtures.cachedConsumerSession
 import com.stripe.android.financialconnections.ApiKeyFixtures.institution
 import com.stripe.android.financialconnections.ApiKeyFixtures.partnerAccount
 import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
@@ -10,7 +11,6 @@ import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
 import com.stripe.android.financialconnections.CoroutineTestRule
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.domain.FetchNetworkedAccounts
-import com.stripe.android.financialconnections.domain.GetCachedConsumerSession
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.SelectNetworkedAccounts
@@ -25,15 +25,14 @@ import com.stripe.android.financialconnections.model.DataAccessNoticeBody
 import com.stripe.android.financialconnections.model.Display
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.Image
-import com.stripe.android.financialconnections.model.InstitutionResponse
 import com.stripe.android.financialconnections.model.NetworkedAccount
 import com.stripe.android.financialconnections.model.NetworkedAccountsList
 import com.stripe.android.financialconnections.model.ReturningNetworkingUserAccountPicker
+import com.stripe.android.financialconnections.model.ShareNetworkedAccountsResponse
 import com.stripe.android.financialconnections.model.TextUpdate
 import com.stripe.android.financialconnections.navigation.Destination.LinkStepUpVerification
 import com.stripe.android.financialconnections.navigation.PopUpToBehavior
 import com.stripe.android.financialconnections.navigation.destination
-import com.stripe.android.financialconnections.repository.CachedConsumerSession
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
@@ -54,7 +53,6 @@ class LinkAccountPickerViewModelTest {
 
     private val getSync = mock<GetOrFetchSync>()
     private val navigationManager = TestNavigationManager()
-    private val getCachedConsumerSession = mock<GetCachedConsumerSession>()
     private val fetchNetworkedAccounts = mock<FetchNetworkedAccounts>()
     private val updateCachedAccounts = mock<UpdateCachedAccounts>()
     private val selectNetworkedAccounts = mock<SelectNetworkedAccounts>()
@@ -70,7 +68,7 @@ class LinkAccountPickerViewModelTest {
             getSync = getSync,
             logger = Logger.noop(),
             eventTracker = eventTracker,
-            getCachedConsumerSession = getCachedConsumerSession,
+            consumerSessionProvider = { cachedConsumerSession() },
             fetchNetworkedAccounts = fetchNetworkedAccounts,
             selectNetworkedAccounts = selectNetworkedAccounts,
             updateCachedAccounts = updateCachedAccounts,
@@ -85,7 +83,6 @@ class LinkAccountPickerViewModelTest {
     @Test
     fun `init - Fetches existing accounts and zips them by id`() = runTest {
         whenever(getSync()).thenReturn(syncResponse())
-        whenever(getCachedConsumerSession()).thenReturn(consumerSession())
         whenever(fetchNetworkedAccounts(any())).thenReturn(
             NetworkedAccountsList(
                 data = listOf(
@@ -127,7 +124,6 @@ class LinkAccountPickerViewModelTest {
     @Test
     fun `init - Redirects to nextPaneOnNewAccount if no bank accounts`() = runTest {
         whenever(getSync()).thenReturn(syncResponse())
-        whenever(getCachedConsumerSession()).thenReturn(consumerSession())
 
         whenever(fetchNetworkedAccounts(any())).thenReturn(
             NetworkedAccountsList(
@@ -152,7 +148,6 @@ class LinkAccountPickerViewModelTest {
     @Test
     fun `init - Redirects to institution picker if no bank accounts and no nextPaneOnAddAccount`() = runTest {
         whenever(getSync()).thenReturn(syncResponse())
-        whenever(getCachedConsumerSession()).thenReturn(consumerSession())
 
         whenever(fetchNetworkedAccounts(any())).thenReturn(
             NetworkedAccountsList(
@@ -180,7 +175,6 @@ class LinkAccountPickerViewModelTest {
             nextPaneOnAddAccount = Pane.INSTITUTION_PICKER
         )
         whenever(getSync()).thenReturn(syncResponse())
-        whenever(getCachedConsumerSession()).thenReturn(consumerSession())
         whenever(fetchNetworkedAccounts(any())).thenReturn(response)
 
         val viewModel = buildViewModel(LinkAccountPickerState())
@@ -210,7 +204,6 @@ class LinkAccountPickerViewModelTest {
         )
         val selectedAccount = accounts.data.first()
         whenever(getSync()).thenReturn(syncResponse())
-        whenever(getCachedConsumerSession()).thenReturn(consumerSession())
         whenever(fetchNetworkedAccounts(any())).thenReturn(accounts)
         whenever(
             selectNetworkedAccounts(
@@ -218,7 +211,12 @@ class LinkAccountPickerViewModelTest {
                 selectedAccountIds = any(),
                 consentAcquired = any()
             )
-        ).thenReturn(InstitutionResponse(showManualEntry = false, listOf(institution())))
+        ).thenReturn(
+            ShareNetworkedAccountsResponse(
+                nextPane = null,
+                display = null,
+            )
+        )
 
         val viewModel = buildViewModel(LinkAccountPickerState())
 
@@ -251,7 +249,6 @@ class LinkAccountPickerViewModelTest {
             )
             val selectedAccount = accounts.data.first()
             whenever(getSync()).thenReturn(syncResponse())
-            whenever(getCachedConsumerSession()).thenReturn(consumerSession())
             whenever(fetchNetworkedAccounts(any())).thenReturn(accounts)
             whenever(
                 selectNetworkedAccounts(
@@ -259,7 +256,12 @@ class LinkAccountPickerViewModelTest {
                     selectedAccountIds = any(),
                     consentAcquired = any()
                 )
-            ).thenReturn(InstitutionResponse(showManualEntry = false, listOf(institution())))
+            ).thenReturn(
+                ShareNetworkedAccountsResponse(
+                    nextPane = null,
+                    display = null,
+                )
+            )
 
             val viewModel = buildViewModel(LinkAccountPickerState())
 
@@ -285,7 +287,6 @@ class LinkAccountPickerViewModelTest {
             NetworkedAccount(id = "id3", allowSelection = true)
         )
         whenever(getSync()).thenReturn(syncResponse())
-        whenever(getCachedConsumerSession()).thenReturn(consumerSession())
         whenever(fetchNetworkedAccounts(any())).thenReturn(
             NetworkedAccountsList(
                 data = accountsData,
@@ -320,7 +321,6 @@ class LinkAccountPickerViewModelTest {
         whenever(getSync()).thenReturn(
             syncResponse().copy(manifest = sessionManifest().copy(singleAccount = false))
         )
-        whenever(getCachedConsumerSession()).thenReturn(consumerSession())
         whenever(fetchNetworkedAccounts(any())).thenReturn(
             NetworkedAccountsList(
                 data = accountsData,
@@ -354,7 +354,6 @@ class LinkAccountPickerViewModelTest {
             )
             val selectedAccount = accounts.data.first()
             whenever(getSync()).thenReturn(syncResponse())
-            whenever(getCachedConsumerSession()).thenReturn(consumerSession())
             whenever(fetchNetworkedAccounts(any())).thenReturn(accounts)
 
             val viewModel = buildViewModel(LinkAccountPickerState())
@@ -388,7 +387,6 @@ class LinkAccountPickerViewModelTest {
         )
         val selectedAccount = accounts.data.first()
         whenever(getSync()).thenReturn(syncResponse())
-        whenever(getCachedConsumerSession()).thenReturn(consumerSession())
         whenever(fetchNetworkedAccounts(any())).thenReturn(accounts)
 
         val viewModel = buildViewModel(LinkAccountPickerState())
@@ -419,7 +417,6 @@ class LinkAccountPickerViewModelTest {
             )
             val selectedAccount = accounts.data.first()
             whenever(getSync()).thenReturn(syncResponse())
-            whenever(getCachedConsumerSession()).thenReturn(consumerSession())
             whenever(fetchNetworkedAccounts(any())).thenReturn(accounts)
 
             val viewModel = buildViewModel(LinkAccountPickerState())
@@ -458,7 +455,6 @@ class LinkAccountPickerViewModelTest {
             )
             val selectedAccount = accounts.data.first()
             whenever(getSync()).thenReturn(syncResponse())
-            whenever(getCachedConsumerSession()).thenReturn(consumerSession())
             whenever(fetchNetworkedAccounts(any())).thenReturn(accounts)
 
             val viewModel = buildViewModel(LinkAccountPickerState())
@@ -491,7 +487,6 @@ class LinkAccountPickerViewModelTest {
         )
         val selectedAccount = accounts.data.first()
         whenever(getSync()).thenReturn(syncResponse())
-        whenever(getCachedConsumerSession()).thenReturn(consumerSession())
         whenever(fetchNetworkedAccounts(any())).thenReturn(accounts)
 
         val viewModel = buildViewModel(LinkAccountPickerState())
@@ -547,14 +542,4 @@ class LinkAccountPickerViewModelTest {
             )
         )
     )
-
-    private fun consumerSession(): CachedConsumerSession {
-        return CachedConsumerSession(
-            clientSecret = "clientSecret",
-            emailAddress = "test@test.com",
-            phoneNumber = "(***) *** **12",
-            isVerified = false,
-            publishableKey = null
-        )
-    }
 }

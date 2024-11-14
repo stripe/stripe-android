@@ -8,6 +8,8 @@
   <string name="stripe_inline_sign_up_header">Tallenna tiedot turvalliselle yhden napsautuksen maksamiselle Link-palvelulla</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">Kirjaudu ulos Link-palvelusta</string>
+  <!-- Text for the 'Pay with Link' button. 'Link' is a Stripe brand, please do not translate the word 'Link'. -->
+  <string name="stripe_pay_with_link">Maksa Link-palvelulla</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">Aseta oletusarvoiseksi maksutavaksi</string>
   <!-- Accessibility label for an action or a button that shows a menu. -->

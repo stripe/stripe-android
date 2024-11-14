@@ -12,6 +12,7 @@ internal fun interface PaymentSelectionUpdater {
         currentSelection: PaymentSelection?,
         previousConfig: PaymentSheet.Configuration?,
         newState: PaymentSheetState.Full,
+        newConfig: PaymentSheet.Configuration,
     ): PaymentSelection?
 }
 
@@ -21,10 +22,11 @@ internal class DefaultPaymentSelectionUpdater @Inject constructor() : PaymentSel
         currentSelection: PaymentSelection?,
         previousConfig: PaymentSheet.Configuration?,
         newState: PaymentSheetState.Full,
+        newConfig: PaymentSheet.Configuration,
     ): PaymentSelection? {
         return currentSelection?.takeIf { selection ->
             canUseSelection(selection, newState) && previousConfig?.let { previousConfig ->
-                !previousConfig.containsVolatileDifferences(newState.config)
+                !previousConfig.containsVolatileDifferences(newConfig)
             } ?: true
         } ?: newState.paymentSelection
     }

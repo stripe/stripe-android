@@ -1,11 +1,27 @@
 apply from: configs.androidApplication
 
+apply plugin: 'com.emergetools.android'
 apply plugin: 'com.google.firebase.appdistribution'
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
-
+apply plugin: 'org.jetbrains.kotlin.plugin.compose'
 
 def testEnvironment = System.getenv("test_environment") ?: "production"
+
+emerge {
+    // Api token is implicitly set to the EMERGE_API_TOKEN env variable
+
+    size {
+        tag.set(System.getenv("EMERGE_TAG"))
+    }
+
+    vcs {
+        gitHub {
+            repoOwner.set("stripe")
+            repoName.set("stripe-android")
+        }
+    }
+}
 
 android {
     defaultConfig {
@@ -34,10 +50,6 @@ android {
     buildFeatures {
         compose true
     }
-
-    composeOptions {
-        kotlinCompilerExtensionVersion "${versions.androidxComposeCompiler}"
-    }
 }
 
 // Read values from gradle.properties or system environment variable
@@ -48,6 +60,7 @@ def getBackendUrl() {
 dependencies {
     implementation project(':financial-connections')
     implementation project(':payments-core')
+    implementation project(':paymentsheet')
 
     implementation libs.androidx.activity
     implementation libs.androidx.appCompat
@@ -58,6 +71,7 @@ dependencies {
     implementation libs.androidx.workManager
     implementation libs.compose.activity
     implementation libs.compose.material
+    implementation libs.compose.materialIcons
     implementation libs.compose.liveData
     implementation libs.compose.ui
     implementation libs.compose.uiToolingPreview
