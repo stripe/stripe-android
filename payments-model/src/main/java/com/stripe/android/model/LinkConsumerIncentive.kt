@@ -43,5 +43,4 @@ fun LinkConsumerIncentive.toPaymentMethodIncentive(): PaymentMethodIncentive? {
 data class PaymentMethodIncentive(
     val identifier: String,
     val displayText: String,
-    val canShow: Boolean = true,
 ) : Parcelable

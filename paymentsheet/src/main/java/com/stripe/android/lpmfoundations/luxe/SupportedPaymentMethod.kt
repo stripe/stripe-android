@@ -10,6 +10,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.model.PromoBadgesState
 import com.stripe.android.paymentsheet.verticalmode.DisplayablePaymentMethod
 import com.stripe.android.ui.core.elements.SharedDataSpec
 
@@ -92,7 +93,7 @@ internal data class SupportedPaymentMethod(
 
     fun asDisplayablePaymentMethod(
         customerSavedPaymentMethods: List<PaymentMethod>,
-        incentiveVisible: Boolean,
+        promoBadgesState: PromoBadgesState,
         onClick: () -> Unit,
     ): DisplayablePaymentMethod {
         fun isTypeAndHasCustomerSavedPaymentMethodsOfType(type: PaymentMethod.Type): Boolean {
@@ -114,7 +115,7 @@ internal data class SupportedPaymentMethod(
             iconRequiresTinting = iconRequiresTinting,
             subtitle = subtitle,
             onClick = onClick,
-            incentive = incentive.takeIf { incentiveVisible },
+            incentive = incentive.takeIf { promoBadgesState[code] },
         )
     }
 }

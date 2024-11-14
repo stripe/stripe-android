@@ -24,6 +24,7 @@ import com.stripe.android.model.PaymentMethod.Type.USBankAccount
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.forms.FormFieldValues
+import com.stripe.android.paymentsheet.model.PromoBadgesState
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountForm
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
@@ -35,6 +36,7 @@ import java.util.UUID
 internal fun PaymentElement(
     enabled: Boolean,
     supportedPaymentMethods: List<SupportedPaymentMethod>,
+    promoBadgesState: PromoBadgesState,
     selectedItemCode: PaymentMethodCode,
     formElements: List<FormElement>,
     onItemSelectedListener: (SupportedPaymentMethod) -> Unit,
@@ -66,6 +68,7 @@ internal fun PaymentElement(
                 selectedIndex = selectedIndex,
                 isEnabled = enabled,
                 paymentMethods = supportedPaymentMethods,
+                promoBadgesState = promoBadgesState,
                 onItemSelectedListener = onItemSelectedListener,
                 imageLoader = imageLoader,
                 modifier = Modifier.padding(bottom = 12.dp),

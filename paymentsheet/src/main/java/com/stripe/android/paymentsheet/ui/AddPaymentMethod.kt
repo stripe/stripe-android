@@ -30,6 +30,7 @@ internal fun AddPaymentMethod(
     PaymentElement(
         enabled = !state.processing,
         supportedPaymentMethods = state.supportedPaymentMethods,
+        promoBadgesState = state.promoBadgesState,
         selectedItemCode = state.selectedPaymentMethodCode,
         formElements = state.formElements,
         onItemSelectedListener = { selectedLpm ->

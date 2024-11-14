@@ -71,9 +71,7 @@ internal fun NewPaymentMethodTab(
                     .widthIn(max = 36.dp),
             )
 
-            if (incentive != null && incentive.canShow) {
-                incentive.Content(tinyMode = true)
-            }
+            incentive?.Content(tinyMode = true)
         }
 
         LpmSelectorText(
