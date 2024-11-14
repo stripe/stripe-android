@@ -69,4 +69,13 @@ internal object TestFactory {
     )
 
     val LINK_ACCOUNT = LinkAccount(CONSUMER_SESSION)
+
+    val CONSUMER_PAYMENT_DETAILS: ConsumerPaymentDetails = ConsumerPaymentDetails(
+        paymentDetails = listOf(
+            ConsumerPaymentDetails.Card(
+                id = "pm_123",
+                last4 = "4242",
+            )
+        )
+    )
 }

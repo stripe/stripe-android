@@ -200,6 +200,23 @@ internal class LinkApiRepository @Inject constructor(
         }
     }
 
+    override suspend fun listPaymentDetails(
+        paymentMethodTypes: Set<String>,
+        consumerSessionClientSecret: String,
+        consumerPublishableKey: String?
+    ): Result<ConsumerPaymentDetails> {
+        return stripeRepository.listPaymentDetails(
+            clientSecret = consumerSessionClientSecret,
+            paymentMethodTypes = paymentMethodTypes,
+            requestOptions = consumerPublishableKey?.let {
+                ApiRequest.Options(it)
+            } ?: ApiRequest.Options(
+                publishableKeyProvider(),
+                stripeAccountIdProvider()
+            )
+        )
+    }
+
     private fun buildRequestOptions(
         consumerAccountPublishableKey: String? = null,
     ): ApiRequest.Options {

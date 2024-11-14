@@ -2717,6 +2717,40 @@ internal class StripeApiRepositoryTest {
         }
     }
 
+    @Test
+    fun `listPaymentDetails() sends all parameters`() =
+        runTest {
+            val stripeResponse = StripeResponse(
+                200,
+                ConsumerFixtures.CONSUMER_PAYMENT_DETAILS_JSON.toString(),
+                emptyMap()
+            )
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+                .thenReturn(stripeResponse)
+
+            val clientSecret = "secret"
+            val paymentMethodTypes = setOf("type1")
+            create().listPaymentDetails(
+                clientSecret,
+                paymentMethodTypes,
+                DEFAULT_OPTIONS
+            )
+
+            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+            val request = apiRequestArgumentCaptor.firstValue
+            val params = requireNotNull(request.params)
+
+            assertThat(
+                "https://api.stripe.com/v1/consumers/payment_details/list",
+            ).isEqualTo(request.baseUrl)
+            assertThat(request.method).isEqualTo(StripeRequest.Method.POST)
+
+            assertThat(params["request_surface"]).isEqualTo("android_payment_element")
+            val credentials = params["credentials"] as Map<*, *>
+            assertThat(credentials["consumer_session_client_secret"]).isEqualTo(clientSecret)
+            assertThat(params["types"] as? List<*>).containsExactlyElementsIn(paymentMethodTypes.toList())
+        }
+
     /**
      * Helper DSL to validate nested params.
      */
