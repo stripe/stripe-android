@@ -1,8 +1,8 @@
 package com.stripe.android.connect.appearance
 
 import android.os.Parcelable
-import com.stripe.android.connect.appearance.fonts.CustomFontSource
 import com.stripe.android.connect.PrivateBetaConnectSDK
+import com.stripe.android.connect.appearance.fonts.CustomFontSource
 import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 

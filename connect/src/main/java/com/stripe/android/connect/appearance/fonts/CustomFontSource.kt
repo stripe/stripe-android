@@ -30,6 +30,7 @@ class CustomFontSource(
     internal val weight: Int? = null,
 ) {
     init {
+        @Suppress("MagicNumber")
         require(weight == null || weight in 0..1000) {
             "Weight cannot be smaller than 0 or larger than 1000"
         }
