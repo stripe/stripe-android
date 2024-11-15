@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.Click
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLoaded
@@ -15,7 +16,6 @@ import com.stripe.android.financialconnections.domain.HandleError
 import com.stripe.android.financialconnections.domain.LookupAccount
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.features.common.getBusinessName
-import com.stripe.android.financialconnections.features.common.getRedactedEmail
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.Destination
@@ -33,6 +33,8 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 
+private const val EMAIL_LENGTH = 15
+
 internal class NetworkingLinkLoginWarmupViewModel @AssistedInject constructor(
     @Assisted initialState: NetworkingLinkLoginWarmupState,
     nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
@@ -42,6 +44,7 @@ internal class NetworkingLinkLoginWarmupViewModel @AssistedInject constructor(
     private val disableNetworking: DisableNetworking,
     private val navigationManager: NavigationManager,
     private val lookupAccount: LookupAccount,
+    private val prefillDetails: ElementsSessionContext.PrefillDetails?,
 ) : FinancialConnectionsViewModel<NetworkingLinkLoginWarmupState>(initialState, nativeAuthFlowCoordinator) {
 
     init {
@@ -49,10 +52,13 @@ internal class NetworkingLinkLoginWarmupViewModel @AssistedInject constructor(
         suspend {
             val manifest = getOrFetchSync().manifest
             eventTracker.track(PaneLoaded(PANE))
+
+            val email = requireNotNull(manifest.accountholderCustomerEmailAddress ?: prefillDetails?.email)
+
             NetworkingLinkLoginWarmupState.Payload(
                 merchantName = manifest.getBusinessName(),
-                redactedEmail = requireNotNull(manifest.getRedactedEmail()),
-                email = requireNotNull(manifest.accountholderCustomerEmailAddress),
+                redactedEmail = redactEmail(email),
+                email = email,
                 sessionId = manifest.id,
                 verifiedFlow = manifest.appVerificationEnabled
             )
@@ -188,6 +194,7 @@ internal class NetworkingLinkLoginWarmupViewModel @AssistedInject constructor(
 internal data class NetworkingLinkLoginWarmupState(
     val referrer: Pane? = null,
     val nextPaneOnDisableNetworking: String? = null,
+    val consumerEmail: String? = null,
     val payload: Async<Payload> = Uninitialized,
     val disableNetworkingAsync: Async<FinancialConnectionsSessionManifest> = Uninitialized,
     val continueAsync: Async<Unit> = Uninitialized,
@@ -219,4 +226,14 @@ internal data class NetworkingLinkLoginWarmupState(
         val verifiedFlow: Boolean,
         val sessionId: String
     )
+}
+
+private fun redactEmail(email: String): String {
+    val content = email.split('@')[0]
+    return if (content.length <= EMAIL_LENGTH) {
+        email
+    } else {
+        val domain = email.split('@')[1]
+        content.substring(0, EMAIL_LENGTH) + "•••@" + domain
+    }
 }

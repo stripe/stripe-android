@@ -197,5 +197,12 @@ internal interface FinancialConnectionsSheetNativeModule {
         ): ElementsSessionContext? {
             return initialState.elementsSessionContext
         }
+
+        @Provides
+        internal fun providePrefillDetails(
+            initialState: FinancialConnectionsSheetNativeState,
+        ): ElementsSessionContext.PrefillDetails? {
+            return initialState.elementsSessionContext?.prefillDetails
+        }
     }
 }
