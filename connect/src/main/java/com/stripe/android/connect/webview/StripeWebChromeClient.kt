@@ -10,4 +10,4 @@ import android.webkit.WebViewClient
  * Setting a [WebChromeClient] (even an empty one) is necessary for certain functionality, like
  * [WebViewClient.shouldOverrideUrlLoading] to work properly.
  */
-class StripeWebChromeClient : WebChromeClient()
+internal class StripeWebChromeClient : WebChromeClient()
