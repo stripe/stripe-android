@@ -19,8 +19,6 @@ import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.RealLinkConfigurationCoordinator
 import com.stripe.android.link.injection.LinkAnalyticsComponent
 import com.stripe.android.link.injection.LinkComponent
-import com.stripe.android.paymentelement.confirmation.DefaultIntentConfirmationInterceptor
-import com.stripe.android.paymentelement.confirmation.IntentConfirmationInterceptor
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
 import com.stripe.android.paymentsheet.BuildConfig
@@ -33,8 +31,6 @@ import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandlerImpl
 import com.stripe.android.paymentsheet.flowcontroller.DefaultPaymentSelectionUpdater
 import com.stripe.android.paymentsheet.flowcontroller.PaymentSelectionUpdater
-import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncherFactory
-import com.stripe.android.paymentsheet.paymentdatacollection.bacs.DefaultBacsMandateConfirmationLauncherFactory
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionInteractor
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionLauncherFactory
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.DefaultCvcRecollectionInteractor
@@ -92,11 +88,6 @@ internal abstract class PaymentSheetCommonModule {
     ): LinkAccountStatusProvider
 
     @Binds
-    abstract fun bindsIntentConfirmationInterceptor(
-        impl: DefaultIntentConfirmationInterceptor,
-    ): IntentConfirmationInterceptor
-
-    @Binds
     abstract fun bindsPaymentSheetUpdater(
         impl: DefaultPaymentSelectionUpdater,
     ): PaymentSelectionUpdater
@@ -152,12 +143,6 @@ internal abstract class PaymentSheetCommonModule {
                 customerConfig?.id,
                 workContext
             )
-        }
-
-        @Provides
-        @Singleton
-        fun provideBacsMandateConfirmationLauncherFactory(): BacsMandateConfirmationLauncherFactory {
-            return DefaultBacsMandateConfirmationLauncherFactory
         }
 
         @Provides

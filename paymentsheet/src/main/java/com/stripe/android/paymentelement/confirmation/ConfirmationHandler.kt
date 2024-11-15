@@ -11,6 +11,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.parcelize.Parcelize
 import com.stripe.android.model.PaymentMethod as PaymentMethodModel
@@ -20,6 +21,12 @@ import com.stripe.android.model.PaymentMethod as PaymentMethodModel
  * intended to run only one confirmation process at a time.
  */
 internal interface ConfirmationHandler {
+    /**
+     * Indicates if this handler has been reloaded from process death. This occurs if the handler was confirming
+     * an intent before did not complete the process before process death.
+     */
+    val hasReloadedFromProcessDeath: Boolean
+
     /**
      * An observable indicating the current confirmation state of the handler.
      */
@@ -46,6 +53,14 @@ internal interface ConfirmationHandler {
      * @return confirmation result or null if no confirmation process has been started
      */
     suspend fun awaitIntentResult(): Result?
+
+    /**
+     * A factory for creating a [ConfirmationHandler] instance using a provided [CoroutineScope]. This scope is
+     * used to launch confirmation tasks.
+     */
+    interface Factory {
+        fun create(scope: CoroutineScope): ConfirmationHandler
+    }
 
     /**
      * Defines the set of arguments requires for beginning the confirmation process
