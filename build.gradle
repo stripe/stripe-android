@@ -7,6 +7,7 @@ buildscript {
 
     repositories {
         mavenCentral()
+        maven { url "/Users/tjclawson/.m2/repository" }
         google()
         gradlePluginPortal()
     }
@@ -43,6 +44,7 @@ allprojects {
 
     repositories {
         mavenCentral()
+        maven { url "/Users/tjclawson/.m2/repository" }
         google()
         gradlePluginPortal()
     }

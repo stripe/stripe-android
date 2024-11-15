@@ -10,6 +10,7 @@ dependencies {
     api project(":payments-model")
     implementation project(":hcaptcha")
     implementation project(":stripe-ui-core")
+    implementation project(":3ds2sdk")
     compileOnly project(':financial-connections')
 
     implementation libs.accompanist.appCompatThemeAdapter
@@ -39,7 +40,7 @@ dependencies {
     implementation libs.instantApps
     // For instructions on replacing the BouncyCastle dependency used by the 3DS2 SDK, see
     // https://github.com/stripe/stripe-android/issues/3173#issuecomment-785176608
-    implementation libs.stripe3ds2
+    //implementation libs.stripe3ds2
 
     ksp libs.daggerCompiler
 
