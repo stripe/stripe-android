@@ -42,7 +42,7 @@ class SettingsService @Inject constructor(@ApplicationContext context: Context) 
     fun getAppearanceIdFlow(): Flow<AppearanceInfo.AppearanceId?> {
         return observePref(APPEARANCE_ID_KEY) { prefs, key ->
             val appearanceId = prefs.getString(key, null) ?: return@observePref null
-            AppearanceInfo.AppearanceId.valueOf(appearanceId)
+            AppearanceInfo.AppearanceId.entries.firstOrNull { it.name == appearanceId }
         }
     }
 
