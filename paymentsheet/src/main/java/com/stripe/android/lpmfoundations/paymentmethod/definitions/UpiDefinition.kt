@@ -30,9 +30,7 @@ internal object UpiDefinition : PaymentMethodDefinition {
 }
 
 private object UpiUiDefinitionFactory : UiDefinitionFactory.Simple {
-    override fun createSupportedPaymentMethod(
-        incentive: PaymentMethodIncentive?,
-    ) = SupportedPaymentMethod(
+    override fun createSupportedPaymentMethod() = SupportedPaymentMethod(
         paymentMethodDefinition = UpiDefinition,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_upi,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_upi,

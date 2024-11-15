@@ -21,7 +21,6 @@ import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAv
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.model.toPaymentMethodIncentive
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
@@ -98,14 +97,9 @@ internal data class PaymentMethodMetadata(
         } else {
             val definition = supportedPaymentMethodDefinitions().firstOrNull { it.type.code == code } ?: return null
 
-            val incentive = consumerIncentive
-                ?.takeIf { it.appliesTo(definition) }
-                ?.toPaymentMethodIncentive()
-
             definition.uiDefinitionFactory().supportedPaymentMethod(
                 definition = definition,
                 sharedDataSpecs = sharedDataSpecs,
-                incentive = incentive,
             )
         }
     }

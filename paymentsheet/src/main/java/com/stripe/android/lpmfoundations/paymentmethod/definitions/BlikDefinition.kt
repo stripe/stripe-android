@@ -30,9 +30,7 @@ internal object BlikDefinition : PaymentMethodDefinition {
 }
 
 private object BlikUiDefinitionFactory : UiDefinitionFactory.Simple {
-    override fun createSupportedPaymentMethod(
-        incentive: PaymentMethodIncentive?,
-    ) = SupportedPaymentMethod(
+    override fun createSupportedPaymentMethod() = SupportedPaymentMethod(
         paymentMethodDefinition = BlikDefinition,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_blik,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_blik,

@@ -12,9 +12,7 @@ import com.stripe.android.uicore.elements.FormElement
 internal class ExternalPaymentMethodUiDefinitionFactory(
     private val externalPaymentMethodSpec: ExternalPaymentMethodSpec
 ) : UiDefinitionFactory.Simple {
-    override fun createSupportedPaymentMethod(
-        incentive: PaymentMethodIncentive?,
-    ): SupportedPaymentMethod {
+    override fun createSupportedPaymentMethod(): SupportedPaymentMethod {
         return SupportedPaymentMethod(
             code = externalPaymentMethodSpec.type,
             displayName = externalPaymentMethodSpec.label.resolvableString,
@@ -22,7 +20,6 @@ internal class ExternalPaymentMethodUiDefinitionFactory(
             darkThemeIconUrl = externalPaymentMethodSpec.darkImageUrl,
             iconResource = 0,
             iconRequiresTinting = false,
-            incentive = incentive,
         )
     }
 

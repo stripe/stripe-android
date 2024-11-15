@@ -6,7 +6,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.ui.core.R as PaymentsUiCoreR
 
@@ -30,9 +29,7 @@ internal object LinkCardBrandDefinition : PaymentMethodDefinition {
 
 private object LinkCardBrandDefinitionFactory : UiDefinitionFactory.Simple {
 
-    override fun createSupportedPaymentMethod(
-        incentive: PaymentMethodIncentive?,
-    ): SupportedPaymentMethod {
+    override fun createSupportedPaymentMethod(): SupportedPaymentMethod {
         return SupportedPaymentMethod(
             code = InstantDebitsDefinition.type.code,
             displayNameResource = PaymentsUiCoreR.string.stripe_paymentsheet_payment_method_instant_debits,
@@ -40,7 +37,6 @@ private object LinkCardBrandDefinitionFactory : UiDefinitionFactory.Simple {
             iconRequiresTinting = true,
             lightThemeIconUrl = null,
             darkThemeIconUrl = null,
-            incentive = incentive,
         )
     }
 

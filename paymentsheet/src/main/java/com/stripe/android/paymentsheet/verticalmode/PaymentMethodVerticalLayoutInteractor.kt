@@ -14,8 +14,8 @@ import com.stripe.android.paymentsheet.LinkInlineHandler
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.code
 import com.stripe.android.paymentsheet.forms.FormFieldValues
+import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.model.PromoBadgesState
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor.ViewAction
@@ -70,7 +70,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val paymentMethodMetadata: PaymentMethodMetadata,
     processing: StateFlow<Boolean>,
     private val selection: StateFlow<PaymentSelection?>,
-    private val bankFormInteractor: BankFormInteractor,
+    promoBadgeInteractor: PromoBadgeInteractor,
     private val formElementsForCode: (code: String) -> List<FormElement>,
     private val requiresFormScreen: (code: String) -> Boolean,
     private val transitionTo: (screen: PaymentSheetScreen) -> Unit,
@@ -109,7 +109,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 paymentMethodMetadata = paymentMethodMetadata,
                 processing = viewModel.processing,
                 selection = viewModel.selection,
-                bankFormInteractor = bankFormInteractor,
+                promoBadgeInteractor = bankFormInteractor.promoBadgeInteractor,
                 formElementsForCode = formHelper::formElementsForCode,
                 requiresFormScreen = formHelper::requiresFormScreen,
                 transitionTo = viewModel.navigationHandler::transitionToWithDelay,
@@ -200,9 +200,9 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val displayedPaymentMethods = combineAsStateFlow(
         paymentMethods,
         walletsState,
-        bankFormInteractor.promoBadgesState,
-    ) { paymentMethods, walletsState, promoBadgesState ->
-        getDisplayablePaymentMethods(paymentMethods, walletsState, promoBadgesState)
+        promoBadgeInteractor.displayedIncentive,
+    ) { paymentMethods, walletsState, incentive ->
+        getDisplayablePaymentMethods(paymentMethods, walletsState, incentive)
     }
 
     override val state: StateFlow<PaymentMethodVerticalLayoutInteractor.State> = combineAsStateFlow(
@@ -267,10 +267,10 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private fun getDisplayablePaymentMethods(
         paymentMethods: List<PaymentMethod>,
         walletsState: WalletsState?,
-        promoBadgesState: PromoBadgesState,
+        incentive: PaymentMethodIncentive?,
     ): List<DisplayablePaymentMethod> {
         val lpms = supportedPaymentMethods.map { supportedPaymentMethod ->
-            supportedPaymentMethod.asDisplayablePaymentMethod(paymentMethods, promoBadgesState) {
+            supportedPaymentMethod.asDisplayablePaymentMethod(paymentMethods, incentive) {
                 handleViewAction(ViewAction.PaymentMethodSelected(supportedPaymentMethod.code))
             }
         }

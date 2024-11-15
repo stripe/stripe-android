@@ -23,7 +23,6 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.PaymentOptionsStateFactory
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.model.PromoBadgesState
 import com.stripe.android.paymentsheet.ui.EditPaymentMethod
 import com.stripe.android.paymentsheet.ui.ErrorMessage
 import com.stripe.android.paymentsheet.ui.Mandate
@@ -225,9 +224,9 @@ internal fun AddPaymentMethod(
             PaymentElement(
                 enabled = viewState.enabled,
                 supportedPaymentMethods = viewState.supportedPaymentMethods,
+                incentive = null,
                 selectedItemCode = viewState.paymentMethodCode,
                 formElements = viewState.formElements,
-                promoBadgesState = PromoBadgesState.empty(),
                 onItemSelectedListener = {
                     viewActionHandler(CustomerSheetViewAction.OnAddPaymentMethodItemChanged(it))
                 },

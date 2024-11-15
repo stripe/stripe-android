@@ -58,8 +58,8 @@ open class AnalyticsRequestFactory(
         AnalyticsFields.OS_VERSION to Build.VERSION.SDK_INT,
         AnalyticsFields.DEVICE_TYPE to DEVICE_TYPE,
         AnalyticsFields.BINDINGS_VERSION to StripeSdkVersion.VERSION_NAME,
-        AnalyticsFields.IS_DEVELOPMENT to BuildConfig.DEBUG,
         AnalyticsFields.SESSION_ID to sessionId,
+        AnalyticsFields.IS_DEVELOPMENT to BuildConfig.DEBUG,
         AnalyticsFields.LOCALE to Locale.getDefault().toString(),
     ) + networkType() + pluginType()
 

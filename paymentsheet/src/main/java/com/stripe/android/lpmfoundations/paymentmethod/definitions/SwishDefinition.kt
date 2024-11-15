@@ -28,9 +28,7 @@ internal object SwishDefinition : PaymentMethodDefinition {
 }
 
 private object SwishUiDefinitionFactory : UiDefinitionFactory.Simple {
-    override fun createSupportedPaymentMethod(
-        incentive: PaymentMethodIncentive?,
-    ) = SupportedPaymentMethod(
+    override fun createSupportedPaymentMethod() = SupportedPaymentMethod(
         paymentMethodDefinition = SwishDefinition,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_swish,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_swish,

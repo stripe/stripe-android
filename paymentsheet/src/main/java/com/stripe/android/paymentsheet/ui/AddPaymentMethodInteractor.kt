@@ -7,8 +7,8 @@ import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.LinkInlineHandler
 import com.stripe.android.paymentsheet.forms.FormFieldValues
+import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.model.PromoBadgesState
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.paymentsheet.verticalmode.BankFormInteractor
@@ -39,7 +39,7 @@ internal interface AddPaymentMethodInteractor {
         val formElements: List<FormElement>,
         val paymentSelection: PaymentSelection?,
         val processing: Boolean,
-        val promoBadgesState: PromoBadgesState,
+        val incentive: PaymentMethodIncentive?,
         val usBankAccountFormArguments: USBankAccountFormArguments,
     )
 
@@ -57,7 +57,8 @@ internal interface AddPaymentMethodInteractor {
 internal class DefaultAddPaymentMethodInteractor(
     private val initiallySelectedPaymentMethodType: PaymentMethodCode,
     private val selection: StateFlow<PaymentSelection?>,
-    private val promoBadgesState: StateFlow<PromoBadgesState>,
+//    private val promoBadgesState: StateFlow<PromoBadgesState>,
+    private val incentive: StateFlow<PaymentMethodIncentive?>,
     private val processing: StateFlow<Boolean>,
     private val supportedPaymentMethods: List<SupportedPaymentMethod>,
     private val createFormArguments: (PaymentMethodCode) -> FormArguments,
@@ -88,7 +89,7 @@ internal class DefaultAddPaymentMethodInteractor(
             return DefaultAddPaymentMethodInteractor(
                 initiallySelectedPaymentMethodType = viewModel.initiallySelectedPaymentMethodType,
                 selection = viewModel.selection,
-                promoBadgesState = bankFormInteractor.promoBadgesState,
+                incentive = bankFormInteractor.promoBadgeInteractor.displayedIncentive,
                 processing = viewModel.processing,
                 supportedPaymentMethods = paymentMethodMetadata.sortedSupportedPaymentMethods(),
                 createFormArguments = formHelper::createFormArguments,
@@ -131,7 +132,7 @@ internal class DefaultAddPaymentMethodInteractor(
             formElements = formElementsForCode(selectedPaymentMethodCode),
             paymentSelection = selection.value,
             processing = processing.value,
-            promoBadgesState = promoBadgesState.value,
+            incentive = incentive.value,
             usBankAccountFormArguments = createUSBankAccountFormArguments(selectedPaymentMethodCode),
         )
     }
@@ -175,11 +176,16 @@ internal class DefaultAddPaymentMethodInteractor(
         }
 
         coroutineScope.launch {
-            promoBadgesState.collect { promoBadgesState ->
+            incentive.collect { incentive ->
                 _state.update {
-                    it.copy(promoBadgesState = promoBadgesState)
+                    it.copy(incentive = incentive)
                 }
             }
+//            promoBadgesState.collect { promoBadgesState ->
+//                _state.update {
+//                    it.copy(promoBadgesState = promoBadgesState)
+//                }
+//            }
         }
     }
 
