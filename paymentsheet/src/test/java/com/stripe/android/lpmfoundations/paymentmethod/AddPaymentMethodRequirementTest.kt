@@ -175,17 +175,6 @@ internal class AddPaymentMethodRequirementTest {
     }
 
     @Test
-    fun testInstantDebitsReturnsFalseIfDeferredIntent() {
-        val metadata = PaymentMethodMetadataFactory.create(
-            stripeIntent = createValidInstantDebitsPaymentIntent().copy(
-                clientSecret = null,
-            ),
-        )
-
-        assertThat(InstantDebits.isMetBy(metadata)).isFalse()
-    }
-
-    @Test
     fun testInstantDebitsReturnsFalseIfShowingUsBankAccount() {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = createValidInstantDebitsPaymentIntent().copy(

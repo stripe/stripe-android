@@ -1,6 +1,5 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod.Type.USBankAccount
