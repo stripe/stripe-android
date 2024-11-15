@@ -20,6 +20,7 @@ import com.stripe.android.stripe3ds2.transaction.IntentDataFixtures
 import com.stripe.android.stripe3ds2.transaction.TransactionTimer
 import com.stripe.android.stripe3ds2.transactions.ChallengeResponseData
 import com.stripe.android.stripe3ds2.transactions.UiType
+import com.stripe.android.stripe3ds2.utils.FakeAnalyticsDelegate
 import kotlinx.coroutines.test.StandardTestDispatcher
 import org.junit.Rule
 import org.junit.runner.RunWith
@@ -281,6 +282,7 @@ class ChallengeFragmentTest {
             themeResId = R.style.Stripe3DS2Theme,
             factory = ChallengeFragmentFactory(
                 uiCustomization = UiCustomizationFixtures.DEFAULT,
+                analyticsDelegate = FakeAnalyticsDelegate(),
                 transactionTimer = transactionTimer,
                 errorRequestExecutor = mock(),
                 errorReporter = errorReporter,
