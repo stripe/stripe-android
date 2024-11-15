@@ -67,7 +67,6 @@ class DefaultUpdatePaymentMethodInteractorTest {
             isLiveMode = false,
             canRemove = canRemove,
             displayableSavedPaymentMethod = displayableSavedPaymentMethod,
-            card = displayableSavedPaymentMethod.paymentMethod.card!!,
             removeExecutor = onRemovePaymentMethod,
             workContext = UnconfinedTestDispatcher(),
         )

@@ -236,14 +236,13 @@ internal class SavedPaymentMethodMutator(
     }
 
     fun updatePaymentMethod(displayableSavedPaymentMethod: DisplayableSavedPaymentMethod) {
-        displayableSavedPaymentMethod.paymentMethod.card?.let {
+        if (displayableSavedPaymentMethod.savedPaymentMethod != SavedPaymentMethod.Unexpected) {
             navigationHandler.transitionTo(
                 PaymentSheetScreen.UpdatePaymentMethod(
                     DefaultUpdatePaymentMethodInteractor(
                         isLiveMode = isLiveModeProvider(),
                         canRemove = canRemove.value,
                         displayableSavedPaymentMethod,
-                        card = it,
                         removeExecutor = ::removePaymentMethodInEditScreen,
                     )
                 )

@@ -580,7 +580,9 @@ internal object PaymentMethodFixtures {
 
     fun PaymentMethod.toDisplayableSavedPaymentMethod(): DisplayableSavedPaymentMethod {
         return DisplayableSavedPaymentMethod.create(
-            displayName = (this.card?.last4 ?: this.usBankAccount?.last4 ?: "").resolvableString,
+            displayName = (
+                this.card?.last4 ?: this.usBankAccount?.last4 ?: this.sepaDebit?.last4 ?: ""
+                ).resolvableString,
             paymentMethod = this,
             isCbcEligible = true,
         )
