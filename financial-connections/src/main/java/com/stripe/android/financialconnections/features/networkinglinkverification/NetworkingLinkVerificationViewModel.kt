@@ -168,12 +168,6 @@ internal class NetworkingLinkVerificationViewModel @AssistedInject constructor(
         fun create(initialState: NetworkingLinkVerificationState): NetworkingLinkVerificationViewModel
     }
 
-    private data class InitData(
-        val businessName: String?,
-        val emailAddress: String,
-        val initialInstitution: FinancialConnectionsInstitution?,
-    )
-
     companion object {
 
         fun factory(parentComponent: FinancialConnectionsSheetNativeComponent): ViewModelProvider.Factory =
