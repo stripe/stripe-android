@@ -5,6 +5,7 @@
 ## 21.0.1 - 2024-11-11
 
 ### PaymentSheet
+- [ADDED][9635](https://github.com/stripe/stripe-android/pull/9635) Instant Bank Payments are now available when using deferred intents.
 - [FIXED][9571](https://github.com/stripe/stripe-android/pull/9571) Fixed country prefix not being added when adding a payment method when collecting phone numbers with `BillingDetailsCollectionConfiguration`.
 - [FIXED][9576](https://github.com/stripe/stripe-android/pull/9576) Fixed minimum and maximum account number length for `Au Becs Debit` LPM. Customers can now provide account numbers with a length of 4 to 9 digits.
 
@@ -15,7 +16,7 @@
 ## 21.0.0 - 2024-11-04
 
 ### PaymentSheet
-- [CHANGED] [9498](https://github.com/stripe/stripe-android/pull/9498) The default value of `PaymentSheet.Configuration.Builder.paymentMethodLayout` has changed from Horizontal to Automatic.
+- [CHANGED][9498](https://github.com/stripe/stripe-android/pull/9498) The default value of `PaymentSheet.Configuration.Builder.paymentMethodLayout` has changed from Horizontal to Automatic.
 
 ### Basic Integration
 * [REMOVED][9501](https://github.com/stripe/stripe-android/pull/9501) Basic Integration has been removed. [Please use Mobile Payment Element instead](https://docs.stripe.com/payments/mobile/migrating-to-mobile-payment-element-from-basic-integration).
@@ -30,7 +31,7 @@ Dependencies updated in [9512](https://github.com/stripe/stripe-android/pull/951
 ## 20.53.0 - 2024-10-21
 
 ### PaymentSheet
-* [ADDED] [9429](https://github.com/stripe/stripe-android/pull/9429) `PaymentSheet.PaymentMethodLayout` is now generally available. Configure the layout of payment methods in the sheet using `PaymentSheet.Configuration.Builder.paymentMethodLayout` to display them either horizontally, vertically, or let Stripe optimize the layout automatically.
+* [ADDED][9429](https://github.com/stripe/stripe-android/pull/9429) `PaymentSheet.PaymentMethodLayout` is now generally available. Configure the layout of payment methods in the sheet using `PaymentSheet.Configuration.Builder.paymentMethodLayout` to display them either horizontally, vertically, or let Stripe optimize the layout automatically.
 
 Dependencies updated in [9345](https://github.com/stripe/stripe-android/pull/9345) and [9469](https://github.com/stripe/stripe-android/pull/9469) and [9473](https://github.com/stripe/stripe-android/pull/9473):
 * Bumped Accompanist from 0.32.0 to 0.34.0.
