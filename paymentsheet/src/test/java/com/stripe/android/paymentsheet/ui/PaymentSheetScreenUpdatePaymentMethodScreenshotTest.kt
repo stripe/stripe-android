@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.ui
 
 import androidx.compose.runtime.Composable
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.viewmodels.FakeBaseSheetViewModel
@@ -27,18 +28,30 @@ class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
         }
     }
 
+    @Test
+    fun updatePaymentMethodScreen_forCard_withRemoveButton_withError() {
+        paparazziRule.snapshot {
+            PaymentSheetScreenOnUpdatePaymentMethod(
+                canRemove = true,
+                error = "Something went wrong",
+            )
+        }
+    }
+
     @Composable
     fun PaymentSheetScreenOnUpdatePaymentMethod(
         canRemove: Boolean,
+        error: String? = null,
     ) {
         val paymentMethod = PaymentMethodFactory.visaCard().toDisplayableSavedPaymentMethod()
-        val interactor = DefaultUpdatePaymentMethodInteractor(
-            isLiveMode = true,
+        val interactor = FakeUpdatePaymentMethodInteractor(
             displayableSavedPaymentMethod = paymentMethod,
-            card = paymentMethod.paymentMethod.card!!,
-            onRemovePaymentMethod = {},
-            navigateBack = {},
             canRemove = canRemove,
+            viewActionRecorder = null,
+            initialState = UpdatePaymentMethodInteractor.State(
+                error = error?.resolvableString,
+                isRemoving = false,
+            ),
         )
         val screen = com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.UpdatePaymentMethod(interactor)
         val metadata = PaymentMethodMetadataFactory.create()

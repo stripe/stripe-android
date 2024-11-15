@@ -244,8 +244,7 @@ internal class SavedPaymentMethodMutator(
                         canRemove = canRemove.value,
                         displayableSavedPaymentMethod,
                         card = it,
-                        onRemovePaymentMethod = ::removePaymentMethod,
-                        navigateBack = { navigationHandler.pop() },
+                        removeExecutor = ::removePaymentMethodInEditScreen,
                     )
                 )
             )

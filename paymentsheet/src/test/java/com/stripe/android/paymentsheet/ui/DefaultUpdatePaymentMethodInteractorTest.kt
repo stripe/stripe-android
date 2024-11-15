@@ -1,9 +1,12 @@
 package com.stripe.android.paymentsheet.ui
 
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
@@ -14,25 +17,41 @@ class DefaultUpdatePaymentMethodInteractorTest {
         val paymentMethod = PaymentMethodFixtures.displayableCard()
 
         var removedPm: PaymentMethod? = null
-        fun onRemovePaymentMethod(paymentMethod: PaymentMethod) {
+        fun onRemovePaymentMethod(paymentMethod: PaymentMethod): Throwable? {
             removedPm = paymentMethod
-        }
-
-        var navigatedBack = false
-        fun navigateBack() {
-            navigatedBack = true
+            return null
         }
 
         runScenario(
             canRemove = true,
             displayableSavedPaymentMethod = paymentMethod,
             onRemovePaymentMethod = ::onRemovePaymentMethod,
-            navigateBack = ::navigateBack,
         ) {
             interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.RemovePaymentMethod)
 
             assertThat(removedPm).isEqualTo(paymentMethod.paymentMethod)
-            assertThat(navigatedBack).isTrue()
+        }
+    }
+
+    @Test
+    fun removingPaymentMethodFails_errorMessageIsSet() {
+        val expectedError = IllegalStateException("Example error")
+
+        @Suppress("UnusedParameter")
+        fun onRemovePaymentMethod(paymentMethod: PaymentMethod): Throwable? {
+            return expectedError
+        }
+
+        runScenario(
+            canRemove = true,
+            displayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
+            onRemovePaymentMethod = ::onRemovePaymentMethod,
+        ) {
+            interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.RemovePaymentMethod)
+
+            interactor.state.test {
+                assertThat(awaitItem().error).isEqualTo(expectedError.stripeErrorMessage())
+            }
         }
     }
 
@@ -41,8 +60,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
     private fun runScenario(
         canRemove: Boolean = false,
         displayableSavedPaymentMethod: DisplayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
-        onRemovePaymentMethod: (PaymentMethod) -> Unit = { notImplemented() },
-        navigateBack: () -> Unit = { notImplemented() },
+        onRemovePaymentMethod: (PaymentMethod) -> Throwable? = { notImplemented() },
         testBlock: suspend TestParams.() -> Unit
     ) {
         val interactor = DefaultUpdatePaymentMethodInteractor(
@@ -50,8 +68,8 @@ class DefaultUpdatePaymentMethodInteractorTest {
             canRemove = canRemove,
             displayableSavedPaymentMethod = displayableSavedPaymentMethod,
             card = displayableSavedPaymentMethod.paymentMethod.card!!,
-            onRemovePaymentMethod = onRemovePaymentMethod,
-            navigateBack = navigateBack,
+            removeExecutor = onRemovePaymentMethod,
+            workContext = UnconfinedTestDispatcher(),
         )
 
         TestParams(interactor).apply { runTest { testBlock() } }

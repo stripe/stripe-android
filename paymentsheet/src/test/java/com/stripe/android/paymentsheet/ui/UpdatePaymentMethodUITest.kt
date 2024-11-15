@@ -3,12 +3,14 @@ package com.stripe.android.paymentsheet.ui
 import android.os.Build
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assertTextContains
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
@@ -164,6 +166,15 @@ class UpdatePaymentMethodUITest {
         composeRule.onNodeWithTag(TEST_TAG_SIMPLE_DIALOG).assertDoesNotExist()
     }
 
+    @Test
+    fun stateHasError_errorMessageIsDisplayed() {
+        val errorMessage = "Something went wrong"
+
+        runScenario(errorMessage = errorMessage.resolvableString) {
+            composeRule.onNodeWithTag(UPDATE_PM_ERROR_MESSAGE_TEST_TAG).assertTextEquals(errorMessage)
+        }
+    }
+
     private fun assertExpiryDateEquals(text: String) {
         composeRule.onNodeWithTag(UPDATE_PM_EXPIRY_FIELD_TEST_TAG).assertTextContains(
             text
@@ -176,21 +187,9 @@ class UpdatePaymentMethodUITest {
         )
     }
 
-    private class FakeUpdatePaymentMethodInteractor(
-        override val displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
-        override val canRemove: Boolean,
-        val viewActionRecorder: ViewActionRecorder<UpdatePaymentMethodInteractor.ViewAction>,
-    ) : UpdatePaymentMethodInteractor {
-        override val isLiveMode: Boolean = false
-        override val card: PaymentMethod.Card = displayableSavedPaymentMethod.paymentMethod.card!!
-
-        override fun handleViewAction(viewAction: UpdatePaymentMethodInteractor.ViewAction) {
-            viewActionRecorder.record(viewAction)
-        }
-    }
-
     private fun runScenario(
         displayableSavedPaymentMethod: DisplayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
+        errorMessage: ResolvableString? = null,
         canRemove: Boolean = true,
         testBlock: Scenario.() -> Unit,
     ) {
@@ -199,6 +198,10 @@ class UpdatePaymentMethodUITest {
             displayableSavedPaymentMethod = displayableSavedPaymentMethod,
             canRemove = canRemove,
             viewActionRecorder = viewActionRecorder,
+            initialState = UpdatePaymentMethodInteractor.State(
+                error = errorMessage,
+                isRemoving = false,
+            ),
         )
 
         composeRule.setContent {
