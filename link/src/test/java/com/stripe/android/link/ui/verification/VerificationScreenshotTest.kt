@@ -1,9 +1,8 @@
 package com.stripe.android.link.ui.verification
 
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.screenshottesting.FontSize
+import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.screenshottesting.PaparazziRule
-import com.stripe.android.screenshottesting.SystemAppearance
 import com.stripe.android.ui.core.elements.OTPSpec
 import com.stripe.android.uicore.elements.OTPElement
 import org.junit.Rule
@@ -17,21 +16,20 @@ internal class VerificationScreenshotTest(
 ) {
 
     @get:Rule
-    val paparazziRule = PaparazziRule(
-        listOf(SystemAppearance.DarkTheme),
-        listOf(FontSize.DefaultFont)
-    )
+    val paparazziRule = PaparazziRule()
 
     @Test
     fun testContent() {
         paparazziRule.snapshot {
-            VerificationBody(
-                state = testCase.content.state,
-                otpElement = testCase.content.otpElement,
-                onBack = {},
-                onResendCodeClick = {},
-                onChangeEmailClick = {}
-            )
+            DefaultLinkTheme {
+                VerificationBody(
+                    state = testCase.content.state,
+                    otpElement = testCase.content.otpElement,
+                    onBack = {},
+                    onResendCodeClick = {},
+                    onChangeEmailClick = {}
+                )
+            }
         }
     }
 

@@ -36,7 +36,6 @@ import com.stripe.android.link.theme.linkColors
 import com.stripe.android.link.theme.linkShapes
 import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.ScrollableTopLevelColumn
-import com.stripe.android.uicore.DefaultStripeTheme
 import com.stripe.android.uicore.elements.OTPElement
 import com.stripe.android.uicore.elements.OTPElementUI
 import com.stripe.android.uicore.utils.collectAsState
@@ -112,15 +111,14 @@ internal fun VerificationBody(
             style = MaterialTheme.typography.body1,
             color = MaterialTheme.colors.onSecondary
         )
-        DefaultStripeTheme {
-            OTPElementUI(
-                enabled = !state.isProcessing,
-                element = otpElement,
-                modifier = Modifier.padding(vertical = 10.dp),
-                colors = MaterialTheme.linkColors.otpElementColors,
-                focusRequester = focusRequester
-            )
-        }
+
+        OTPElementUI(
+            enabled = !state.isProcessing,
+            element = otpElement,
+            modifier = Modifier.padding(vertical = 10.dp),
+            colors = MaterialTheme.linkColors.otpElementColors,
+            focusRequester = focusRequester
+        )
 
         ChangeEmailRow(
             email = state.email,
