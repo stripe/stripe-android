@@ -31,7 +31,7 @@ internal class PaymentSheetScreenSelectSavedPaymentMethodsScreenshotTest {
     val coroutineRule = CoroutineTestRule()
 
     private val savedPaymentOptionItem = PaymentOptionsItem.SavedPaymentMethod(
-        displayableSavedPaymentMethod = DisplayableSavedPaymentMethod(
+        displayableSavedPaymentMethod = DisplayableSavedPaymentMethod.create(
             displayName = "Card 4242".resolvableString,
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             isCbcEligible = true,

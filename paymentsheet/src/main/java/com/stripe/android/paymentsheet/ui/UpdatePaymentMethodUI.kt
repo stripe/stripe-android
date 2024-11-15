@@ -264,7 +264,7 @@ private fun Label(
 @Preview
 @Composable
 private fun PreviewUpdatePaymentMethodUI() {
-    val exampleCard = DisplayableSavedPaymentMethod(
+    val exampleCard = DisplayableSavedPaymentMethod.create(
         displayName = "4242".resolvableString,
         paymentMethod = PaymentMethod(
             id = "002",

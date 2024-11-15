@@ -50,21 +50,21 @@ class PaymentOptionsScreenshotTest {
             PaymentOptionsItem.AddCard,
             PaymentOptionsItem.GooglePay,
             PaymentOptionsItem.SavedPaymentMethod(
-                DisplayableSavedPaymentMethod(
+                DisplayableSavedPaymentMethod.create(
                     displayName = "Card".resolvableString,
                     paymentMethod = createCard("4242"),
                 ),
                 canRemovePaymentMethods = true,
             ),
             PaymentOptionsItem.SavedPaymentMethod(
-                DisplayableSavedPaymentMethod(
+                DisplayableSavedPaymentMethod.create(
                     displayName = "Card".resolvableString,
                     paymentMethod = createCard("4000"),
                 ),
                 canRemovePaymentMethods = true,
             ),
             PaymentOptionsItem.SavedPaymentMethod(
-                DisplayableSavedPaymentMethod(
+                DisplayableSavedPaymentMethod.create(
                     displayName = "Card".resolvableString,
                     paymentMethod = createCard("1234"),
                 ),
@@ -93,21 +93,21 @@ class PaymentOptionsScreenshotTest {
             PaymentOptionsItem.AddCard,
             PaymentOptionsItem.GooglePay,
             PaymentOptionsItem.SavedPaymentMethod(
-                DisplayableSavedPaymentMethod(
+                DisplayableSavedPaymentMethod.create(
                     displayName = "Card".resolvableString,
                     paymentMethod = createCard("4242"),
                 ),
                 canRemovePaymentMethods = true,
             ),
             PaymentOptionsItem.SavedPaymentMethod(
-                DisplayableSavedPaymentMethod(
+                DisplayableSavedPaymentMethod.create(
                     displayName = "Card".resolvableString,
                     paymentMethod = createCard("4000"),
                 ),
                 canRemovePaymentMethods = true,
             ),
             PaymentOptionsItem.SavedPaymentMethod(
-                DisplayableSavedPaymentMethod(
+                DisplayableSavedPaymentMethod.create(
                     displayName = "Card".resolvableString,
                     paymentMethod = createCard("1234"),
                 ),
@@ -168,21 +168,21 @@ class PaymentOptionsScreenshotTest {
 
     private val paymentOptionsItemsWithRemoveDisabledAndModifiableCard = listOf(
         PaymentOptionsItem.SavedPaymentMethod(
-            DisplayableSavedPaymentMethod(
+            DisplayableSavedPaymentMethod.create(
                 displayName = "Card".resolvableString,
                 paymentMethod = createCard("4242"),
             ),
             canRemovePaymentMethods = false,
         ),
         PaymentOptionsItem.SavedPaymentMethod(
-            DisplayableSavedPaymentMethod(
+            DisplayableSavedPaymentMethod.create(
                 displayName = "Card".resolvableString,
                 paymentMethod = createCard("4000"),
             ),
             canRemovePaymentMethods = false,
         ),
         PaymentOptionsItem.SavedPaymentMethod(
-            DisplayableSavedPaymentMethod(
+            DisplayableSavedPaymentMethod.create(
                 displayName = "Card".resolvableString,
                 paymentMethod = createCard("1234", addNetworks = true),
                 isCbcEligible = true,
