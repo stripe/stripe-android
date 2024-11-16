@@ -27,6 +27,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -97,6 +98,7 @@ internal fun VerificationBody(
         Text(
             text = stringResource(R.string.stripe_verification_header),
             modifier = Modifier
+                .testTag(VERIFICATION_TITLE_TAG)
                 .padding(vertical = 4.dp),
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.h2,
@@ -105,6 +107,7 @@ internal fun VerificationBody(
         Text(
             text = stringResource(R.string.stripe_verification_message, state.redactedPhoneNumber),
             modifier = Modifier
+                .testTag(VERIFICATION_SUBTITLE_TAG)
                 .fillMaxWidth()
                 .padding(top = 4.dp, bottom = 20.dp),
             textAlign = TextAlign.Center,
@@ -115,7 +118,9 @@ internal fun VerificationBody(
         OTPElementUI(
             enabled = !state.isProcessing,
             element = otpElement,
-            modifier = Modifier.padding(vertical = 10.dp),
+            modifier = Modifier
+                .testTag(VERIFICATION_OTP_TAG)
+                .padding(vertical = 10.dp),
             colors = MaterialTheme.linkColors.otpElementColors,
             focusRequester = focusRequester
         )
@@ -129,7 +134,9 @@ internal fun VerificationBody(
         AnimatedVisibility(visible = state.errorMessage != null) {
             ErrorText(
                 text = state.errorMessage?.resolve(LocalContext.current).orEmpty(),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .testTag(VERIFICATION_ERROR_TAG)
+                    .fillMaxWidth()
             )
         }
 
@@ -162,6 +169,7 @@ private fun ChangeEmailRow(
         Text(
             text = stringResource(id = R.string.stripe_verification_change_email),
             modifier = Modifier
+                .testTag(VERIFICATION_CHANGE_EMAIL_TAG)
                 .padding(start = 4.dp)
                 .clickable(
                     enabled = !isProcessing,
@@ -182,6 +190,7 @@ private fun ResendCodeButton(
 ) {
     Box(
         modifier = Modifier
+            .testTag(VERIFICATION_RESEND_CODE_BUTTON_TAG)
             .padding(top = 12.dp)
             .border(
                 width = 1.dp,
@@ -219,8 +228,17 @@ private fun ResendCodeButton(
                 color = MaterialTheme.colors.onPrimary,
                 strokeWidth = 2.dp,
                 modifier = Modifier
+                    .testTag(VERIFICATION_RESEND_LOADER_TAG)
                     .size(18.dp)
             )
         }
     }
 }
+
+internal const val VERIFICATION_TITLE_TAG = "verification_title"
+internal const val VERIFICATION_SUBTITLE_TAG = "verification_subtitle"
+internal const val VERIFICATION_OTP_TAG = "verification_otp_tag"
+internal const val VERIFICATION_CHANGE_EMAIL_TAG = "verification_change_email_tag"
+internal const val VERIFICATION_ERROR_TAG = "verification_error_tag"
+internal const val VERIFICATION_RESEND_LOADER_TAG = "verification_resend_loader_tag"
+internal const val VERIFICATION_RESEND_CODE_BUTTON_TAG = "verification_resend_code_button_tag"
