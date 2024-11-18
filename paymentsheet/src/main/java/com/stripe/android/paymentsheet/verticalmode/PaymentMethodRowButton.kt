@@ -62,7 +62,7 @@ internal fun PaymentMethodRowButtonFloating(
         )
     ) {
         Card(
-            modifier = modifier.fillMaxWidth().heightIn(min = 52.dp)
+            modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp)
                 .alpha(alpha = if (isEnabled) 1.0F else 0.6F),
             shape = MaterialTheme.shapes.medium,
             backgroundColor = MaterialTheme.stripeColors.component,
@@ -295,7 +295,7 @@ private fun String?.paddingValues(): Dp = if (this != null) 8.dp else 12.dp
 @Preview
 internal fun ButtonPreview() {
     Row {
-        PaymentMethodRowButtonCheckmark(
+        PaymentMethodRowButtonFloating(
             isEnabled = true,
             isSelected = true,
             iconContent = {
