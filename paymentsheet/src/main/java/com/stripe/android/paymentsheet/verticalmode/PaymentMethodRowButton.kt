@@ -51,7 +51,7 @@ internal fun PaymentMethodRowButtonFloating(
     subtitle: String?,
     onClick: () -> Unit,
     contentDescription: String? = null,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier.fillMaxWidth(),
     trailingContent: (@Composable RowScope.() -> Unit)? = null,
 ) {
     Row(
@@ -98,7 +98,7 @@ internal fun PaymentMethodRowButtonRadio(
     subtitle: String?,
     onClick: () -> Unit,
     contentDescription: String? = null,
-    modifier: Modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
+    modifier: Modifier = Modifier.fillMaxWidth(),
     trailingContent: (@Composable RowScope.() -> Unit)? = null,
 ) {
     Row(
@@ -112,7 +112,7 @@ internal fun PaymentMethodRowButtonRadio(
         RadioButton(
             selected = isSelected,
             onClick = onClick,
-            modifier = Modifier.align(Alignment.CenterVertically).fillMaxHeight()
+            modifier = Modifier.align(Alignment.CenterVertically)
         )
         RowButtonContent(
             contentPaddingValues = PaddingValues(
@@ -146,7 +146,7 @@ internal fun PaymentMethodRowButtonCheckmark(
     title: String,
     subtitle: String?,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier.fillMaxWidth(),
     contentDescription: String? = null,
     trailingContent: (@Composable RowScope.() -> Unit)? = null,
 ) {
