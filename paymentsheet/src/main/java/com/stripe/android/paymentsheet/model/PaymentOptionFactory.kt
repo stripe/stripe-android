@@ -10,10 +10,14 @@ internal class PaymentOptionFactory @Inject constructor(
     fun create(selection: PaymentSelection): PaymentOption {
         return PaymentOption(
             drawableResourceId = selection.drawableResourceId,
-            lightThemeIconUrl = selection.lightThemeIconUrl,
-            darkThemeIconUrl = selection.darkThemeIconUrl,
             label = selection.label.resolve(context),
-            imageLoader = iconLoader::loadPaymentOption,
+            imageLoader = {
+                iconLoader.load(
+                    drawableResourceId = selection.drawableResourceId,
+                    lightThemeIconUrl = selection.lightThemeIconUrl,
+                    darkThemeIconUrl = selection.darkThemeIconUrl,
+                )
+            },
         )
     }
 }
