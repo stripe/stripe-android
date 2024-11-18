@@ -479,7 +479,7 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
 
     private fun newPaymentSelection(): PaymentSelection.New {
         return PaymentSelection.New.USBankAccount(
-            labelResource = "Test",
+            label = "Test",
             iconResource = 0,
             paymentMethodCreateParams = mock(),
             customerRequestedSave = mock(),

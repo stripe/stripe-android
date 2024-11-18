@@ -25,9 +25,11 @@ class StripeConnectWebViewClientTest {
     }
     private val mockWebView: WebView = mock {
         on { settings } doReturn mockSettings
+        on { context } doReturn mock()
     }
 
-    private lateinit var webViewClient: StripeConnectWebViewClient
+    private lateinit var container: StripeConnectWebViewContainerImpl
+    private val webViewClient get() = container.stripeWebViewClient
 
     @Before
     fun setup() {
@@ -36,9 +38,9 @@ class StripeConnectWebViewClientTest {
             fetchClientSecretCallback = { },
         )
 
-        webViewClient = StripeConnectWebViewClient(
+        container = StripeConnectWebViewContainerImpl(
+            embeddedComponent = StripeEmbeddedComponent.PAYOUTS,
             embeddedComponentManager = embeddedComponentManager,
-            connectComponent = StripeEmbeddedComponent.PAYOUTS,
             logger = Logger.getInstance(enableLogging = false),
             jsonSerializer = Json { ignoreUnknownKeys = true },
         )
@@ -52,18 +54,9 @@ class StripeConnectWebViewClientTest {
 
     @Test
     fun `configureAndLoadWebView sets user agent`() {
-        webViewClient.configureAndLoadWebView(mockWebView)
+        container.initializeWebView(mockWebView)
 
         verify(mockWebView).webViewClient = webViewClient
         verify(mockSettings).userAgentString = "user-agent - stripe-android/${StripeSdkVersion.VERSION_NAME}"
-    }
-
-    @Test
-    fun `configureAndLoadWebView sets publishable key in url`() {
-        webViewClient.configureAndLoadWebView(mockWebView)
-
-        verify(mockWebView).loadUrl(
-            "https://connect-js.stripe.com/v1.0/android_webview.html#component=payouts&publicKey=pk_test_123"
-        )
     }
 }

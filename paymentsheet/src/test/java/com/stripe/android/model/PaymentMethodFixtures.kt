@@ -449,7 +449,7 @@ internal object PaymentMethodFixtures {
     )
 
     val US_BANK_PAYMENT_SELECTION = PaymentSelection.New.USBankAccount(
-        labelResource = "Test",
+        label = "Test",
         iconResource = 0,
         paymentMethodCreateParams = mock(),
         customerRequestedSave = mock(),

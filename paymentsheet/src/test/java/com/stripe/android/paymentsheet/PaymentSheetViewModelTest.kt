@@ -2115,7 +2115,7 @@ internal class PaymentSheetViewModelTest {
 
         // Mock the filled out US Bank Account form by updating the selection
         val usBankAccount = PaymentSelection.New.USBankAccount(
-            labelResource = "Test",
+            label = "Test",
             iconResource = 0,
             paymentMethodCreateParams = mock(),
             customerRequestedSave = mock(),

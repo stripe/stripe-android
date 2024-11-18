@@ -4,6 +4,7 @@ import android.app.Application
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
+import com.stripe.android.paymentelement.confirmation.ConfirmationModule
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import com.stripe.android.paymentsheet.injection.PaymentSheetCommonModule
@@ -16,6 +17,7 @@ import javax.inject.Singleton
 @Component(
     modules = [
         StripeRepositoryModule::class,
+        ConfirmationModule::class,
         PaymentSheetCommonModule::class,
         FlowControllerModule::class,
         GooglePayLauncherModule::class,

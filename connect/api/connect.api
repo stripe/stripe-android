@@ -214,11 +214,10 @@ public final class com/stripe/android/connect/appearance/Typography$Style$Creato
 
 public final class com/stripe/android/connect/databinding/StripeConnectWebviewBinding : androidx/viewbinding/ViewBinding {
 	public final field stripeWebView Landroid/webkit/WebView;
+	public final field stripeWebViewProgressBar Landroid/widget/ProgressBar;
 	public static fun bind (Landroid/view/View;)Lcom/stripe/android/connect/databinding/StripeConnectWebviewBinding;
-	public synthetic fun getRoot ()Landroid/view/View;
-	public fun getRoot ()Landroid/widget/FrameLayout;
-	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/connect/databinding/StripeConnectWebviewBinding;
-	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/connect/databinding/StripeConnectWebviewBinding;
+	public fun getRoot ()Landroid/view/View;
+	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;)Lcom/stripe/android/connect/databinding/StripeConnectWebviewBinding;
 }
 
 public final class com/stripe/android/connect/databinding/StripeNotBuiltYetBinding : androidx/viewbinding/ViewBinding {

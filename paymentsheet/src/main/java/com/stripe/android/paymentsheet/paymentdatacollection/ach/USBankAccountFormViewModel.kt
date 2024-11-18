@@ -637,7 +637,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         }
 
         return PaymentSelection.New.USBankAccount(
-            labelResource = labelResource ?: "••••",
+            label = labelResource ?: "••••",
             iconResource = TransformToBankIcon(bankName),
             paymentMethodCreateParams = paymentMethodCreateParams,
             paymentMethodOptionsParams = paymentMethodOptionsParams,

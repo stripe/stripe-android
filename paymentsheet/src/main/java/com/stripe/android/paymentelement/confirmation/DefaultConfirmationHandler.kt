@@ -43,6 +43,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import javax.inject.Inject
+import javax.inject.Named
 import javax.inject.Provider
 import kotlin.time.Duration.Companion.seconds
 
@@ -89,7 +91,7 @@ internal class DefaultConfirmationHandler(
      * Indicates if this handler has been reloaded from process death. This occurs if the handler was confirming
      * an intent before did not complete the process before process death.
      */
-    val hasReloadedFromProcessDeath = hasReloadedWhileAwaitingPreConfirm || hasReloadedWhileAwaitingConfirm
+    override val hasReloadedFromProcessDeath = hasReloadedWhileAwaitingPreConfirm || hasReloadedWhileAwaitingConfirm
 
     private val _state = MutableStateFlow(
         if (hasReloadedWhileAwaitingPreConfirm) {
@@ -626,18 +628,18 @@ internal class DefaultConfirmationHandler(
             }
         }
 
-    class Factory(
+    class Factory @Inject constructor(
         private val intentConfirmationInterceptor: IntentConfirmationInterceptor,
         private val paymentConfigurationProvider: Provider<PaymentConfiguration>,
         private val bacsMandateConfirmationLauncherFactory: BacsMandateConfirmationLauncherFactory,
         private val stripePaymentLauncherAssistedFactory: StripePaymentLauncherAssistedFactory,
         private val googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory?,
         private val savedStateHandle: SavedStateHandle,
-        private val statusBarColor: () -> Int?,
+        @Named(STATUS_BAR_COLOR_PROVIDER) private val statusBarColor: () -> Int?,
         private val errorReporter: ErrorReporter,
         private val logger: UserFacingLogger?
-    ) {
-        fun create(scope: CoroutineScope): DefaultConfirmationHandler {
+    ) : ConfirmationHandler.Factory {
+        override fun create(scope: CoroutineScope): ConfirmationHandler {
             return DefaultConfirmationHandler(
                 bacsMandateConfirmationLauncherFactory = bacsMandateConfirmationLauncherFactory,
                 googlePayPaymentMethodLauncherFactory = googlePayPaymentMethodLauncherFactory,

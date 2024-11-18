@@ -209,6 +209,13 @@ public final class com/stripe/android/link/ui/signup/ComposableSingletons$SignUp
 	public final fun getLambda-2$link_release ()Lkotlin/jvm/functions/Function2;
 }
 
+public final class com/stripe/android/link/ui/verification/ComposableSingletons$VerificationScreenKt {
+	public static final field INSTANCE Lcom/stripe/android/link/ui/verification/ComposableSingletons$VerificationScreenKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function3;
+	public fun <init> ()V
+	public final fun getLambda-1$link_release ()Lkotlin/jvm/functions/Function3;
+}
+
 public final class com/stripe/android/link/utils/ComposableSingletons$InlineContentTemplateBuilderKt {
 	public static final field INSTANCE Lcom/stripe/android/link/utils/ComposableSingletons$InlineContentTemplateBuilderKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function2;

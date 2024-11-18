@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.StripeThemeDefaults
+import com.stripe.android.uicore.elements.OTPElementColors
 
 private val LinkTeal = Color(0xFF00D66F)
 private val ActionLightGreen = Color(0xFF00A355)
@@ -16,6 +17,7 @@ private val ButtonLabel = Color(0xFF011E0F)
 private val ErrorText = Color(0xFFFF2F4C)
 private val ErrorBackground = Color(0x2EFE87A1)
 
+private val LightComponentBorder = Color(0xFFE0E6EB)
 private val LightTextPrimary = Color(0xFF30313D)
 private val LightTextSecondary = Color(0xFF6A7383)
 private val LightTextDisabled = Color(0xFFA3ACBA)
@@ -26,7 +28,9 @@ private val LightSheetScrim = Color(0x1F0A2348)
 private val LightSecondaryButtonLabel = Color(0xFF1D3944)
 private val LightCloseButton = Color(0xFF30313D)
 private val LightLinkLogo = Color(0xFF1D3944)
+private val LightOtpPlaceholder = Color(0xFFEBEEF1)
 
+private val DarkComponentBorder = Color(0x5C787880)
 private val DarkTextPrimary = Color.White
 private val DarkTextSecondary = Color(0x99EBEBF5)
 private val DarkTextDisabled = Color(0x61FFFFFF)
@@ -35,8 +39,11 @@ private val DarkFill = Color(0x33787880)
 private val DarkCloseButton = Color(0x99EBEBF5)
 private val DarkLinkLogo = Color.White
 private val DarkProgressIndicator = LinkTeal
+private val DarkOtpPlaceholder = Color(0x61FFFFFF)
 
 internal data class LinkColors(
+    val componentBorder: Color,
+    val actionLabel: Color,
     val buttonLabel: Color,
     val actionLabelLight: Color,
     val errorText: Color,
@@ -48,6 +55,7 @@ internal data class LinkColors(
     val sheetScrim: Color,
     val closeButton: Color,
     val linkLogo: Color,
+    val otpElementColors: OTPElementColors,
 )
 
 internal object LinkThemeConfig {
@@ -56,6 +64,7 @@ internal object LinkThemeConfig {
     }
 
     private val colorsLight = LinkColors(
+        componentBorder = LightComponentBorder,
         buttonLabel = ButtonLabel,
         actionLabelLight = ActionLightGreen,
         errorText = ErrorText,
@@ -66,6 +75,11 @@ internal object LinkThemeConfig {
         linkLogo = LightLinkLogo,
         closeButton = LightCloseButton,
         disabledText = LightTextDisabled,
+        otpElementColors = OTPElementColors(
+            selectedBorder = LinkTeal,
+            placeholder = LightOtpPlaceholder
+        ),
+        actionLabel = ActionGreen,
         materialColors = lightColors(
             primary = LinkTeal,
             secondary = LightFill,
@@ -77,10 +91,15 @@ internal object LinkThemeConfig {
     )
 
     private val colorsDark = colorsLight.copy(
+        componentBorder = DarkComponentBorder,
         progressIndicator = DarkProgressIndicator,
         linkLogo = DarkLinkLogo,
         closeButton = DarkCloseButton,
         disabledText = DarkTextDisabled,
+        otpElementColors = OTPElementColors(
+            selectedBorder = LinkTeal,
+            placeholder = DarkOtpPlaceholder
+        ),
         materialColors = darkColors(
             primary = LinkTeal,
             secondary = DarkFill,
