@@ -1,8 +1,8 @@
 package com.stripe.android.paymentsheet.verticalmode
 
 import android.os.Build
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertAll
-import androidx.compose.ui.test.assertAny
 import androidx.compose.ui.test.isSelected
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onChildren
@@ -202,7 +202,7 @@ internal class PaymentMethodVerticalLayoutUITest {
         composeRule.onNodeWithTag(
             TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON + "_${PaymentMethodFixtures.displayableCard().paymentMethod.id}"
         ).assertExists()
-            .onChildren().assertAny(isSelected())
+            .assert(isSelected())
 
         composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_card")
             .assertExists()
@@ -251,7 +251,7 @@ internal class PaymentMethodVerticalLayoutUITest {
                 .onChildren().assertAll(isSelected().not())
             composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_cashapp")
                 .assertExists()
-                .onChildren().assertAny(isSelected())
+                .assert(isSelected())
             composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_klarna")
                 .assertExists()
                 .onChildren().assertAll(isSelected().not())

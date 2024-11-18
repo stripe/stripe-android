@@ -2,11 +2,10 @@ package com.stripe.android.paymentsheet.verticalmode
 
 import android.os.Build
 import androidx.compose.ui.test.SemanticsNodeInteraction
-import androidx.compose.ui.test.assertAny
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.hasContentDescriptionExactly
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onChild
 import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -78,7 +77,7 @@ class ManageScreenUITest {
         ) {
             composeRule.onNodeWithTag(
                 "${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_${savedCard.id}"
-            ).onChildren().assertAny(
+            ).assert(
                 hasContentDescriptionExactly("Visa ending in 4 2 4 2 ")
             )
         }
@@ -184,10 +183,7 @@ class ManageScreenUITest {
     ) {
         composeRule.onNodeWithTag(
             "${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_${displayableSavedPaymentMethods[1].paymentMethod.id}"
-        )
-            // The selected node is the PaymentMethodRowButton which is a child of the SavedPaymentMethodRowButton
-            .onChild()
-            .assertIsSelected()
+        ).assertIsSelected()
     }
 
     @Test
