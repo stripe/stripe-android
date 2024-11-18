@@ -154,7 +154,7 @@ internal class ChallengeFragment(
     override fun onResume() {
         super.onResume()
 
-        if (cresData.uiType == UiType.OutOfBand) {
+        if (this::cresData.isInitialized && cresData.uiType == UiType.OutOfBand) {
             analyticsDelegate?.oobFlowDidResume(cresData.serverTransId)
         }
     }
@@ -162,7 +162,7 @@ internal class ChallengeFragment(
     override fun onPause() {
         super.onPause()
 
-        if (cresData.uiType == UiType.OutOfBand) {
+        if (this::cresData.isInitialized && cresData.uiType == UiType.OutOfBand) {
             analyticsDelegate?.oobFlowDidPause(cresData.serverTransId)
         }
     }
