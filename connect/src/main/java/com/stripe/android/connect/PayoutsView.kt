@@ -27,6 +27,20 @@ class PayoutsView @JvmOverloads constructor(
     }
 
     /**
+     * Handles the back button press event.
+     * Returns true if the back press was handled by the [PayoutsView],
+     * false otherwise.
+     */
+    fun onBackPressed(): Boolean {
+        val webView = findViewById<WebView>(R.id.stripe_web_view)
+        return webView.canGoBack().also { canGoBack ->
+            if (canGoBack) {
+                webView.goBack()
+            }
+        }
+    }
+
+    /**
      * Set the [EmbeddedComponentManager] to use for this view.
      * Must be called when this view is created via XML.
      * Cannot be called more than once per instance.

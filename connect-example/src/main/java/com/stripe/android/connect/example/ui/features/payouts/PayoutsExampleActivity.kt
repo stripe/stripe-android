@@ -5,6 +5,7 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.viewinterop.AndroidView
@@ -63,9 +64,17 @@ class PayoutsExampleActivity : FragmentActivity() {
         embeddedComponentManager: EmbeddedComponentManager,
         onDismiss: () -> Unit,
     ) {
-        BackHandler(onBack = onDismiss)
+        var payoutsViewBackHandler: () -> Boolean = remember { { false} }
+        BackHandler {
+            val wasHandledByPayoutsView = payoutsViewBackHandler()
+            if (!wasHandledByPayoutsView) {
+                onDismiss() // call onDismiss if the payouts view didn't handle the back press
+            }
+        }
         AndroidView(modifier = Modifier.fillMaxSize(), factory = { context ->
-            embeddedComponentManager.createPayoutsView(context)
+            embeddedComponentManager.createPayoutsView(context).also { view ->
+                payoutsViewBackHandler = view::onBackPressed
+            }
         })
     }
 }
