@@ -8,7 +8,6 @@
     <ID>CyclomaticComplexMethod:TransformSpecToElements.kt$TransformSpecToElements$fun transform( specs: List&lt;FormItemSpec>, placeholderOverrideList: List&lt;IdentifierSpec> = emptyList(), ): List&lt;FormElement></ID>
     <ID>EmptyFunctionBlock:PrimaryButtonAnimator.kt$PrimaryButtonAnimator.&lt;no name provided>${ }</ID>
     <ID>EmptyFunctionBlock:VerticalModeFormUITest.kt$VerticalModeFormUITest.&lt;no name provided>${}</ID>
-    <ID>ForbiddenComment:PaymentOptionFactory.kt$PaymentOptionFactory$// TODO: Should use labelResource paymentMethodCreateParams or extension function</ID>
     <ID>FunctionNaming:PaymentSheetTopBar.kt$@Preview @Composable internal fun PaymentSheetTopBar_Preview()</ID>
     <ID>FunctionNaming:PaymentSheetTopBar.kt$@Preview @Composable internal fun TestModeBadge_Preview()</ID>
     <ID>FunctionOnlyReturningConstant:FlowControllerModule.kt$FlowControllerModule$@Provides @Singleton @Named(ALLOWS_MANUAL_CONFIRMATION) fun provideAllowsManualConfirmation()</ID>
@@ -32,7 +31,6 @@
     <ID>LongMethod:FormViewModelTest.kt$FormViewModelTest$@Test fun `Verify params are set when element address fields are complete`()</ID>
     <ID>LongMethod:FormViewModelTest.kt$FormViewModelTest$@Test fun `Verify params are set when required address fields are complete`()</ID>
     <ID>LongMethod:PaymentMethodVerticalLayoutInteractor.kt$DefaultPaymentMethodVerticalLayoutInteractor.Companion$fun create( viewModel: BaseSheetViewModel, paymentMethodMetadata: PaymentMethodMetadata, customerStateHolder: CustomerStateHolder, ): PaymentMethodVerticalLayoutInteractor</ID>
-    <ID>LongMethod:PaymentOptionFactory.kt$PaymentOptionFactory$fun create(selection: PaymentSelection): PaymentOption</ID>
     <ID>LongMethod:PaymentSheetConfigurationKtx.kt$internal fun PaymentSheet.Appearance.parseAppearance()</ID>
     <ID>LongMethod:PaymentSheetScreen.kt$@Composable private fun PaymentSheetContent( viewModel: BaseSheetViewModel, headerText: ResolvableString?, walletsState: WalletsState?, walletsProcessingState: WalletsProcessingState?, error: ResolvableString?, currentScreen: PaymentSheetScreen, mandateText: MandateText?, modifier: Modifier )</ID>
     <ID>LongMethod:PaymentSheetViewModelTest.kt$PaymentSheetViewModelTest$@Test fun `Can complete payment after switching to another LPM from card selection with inline Link signup state`()</ID>
@@ -75,10 +73,9 @@
     <ID>TooManyFunctions:DefaultCustomerSheetEventReporter.kt$DefaultCustomerSheetEventReporter : CustomerSheetEventReporter</ID>
     <ID>TooManyFunctions:DefaultEventReporter.kt$DefaultEventReporter : EventReporter</ID>
     <ID>TooManyFunctions:DefaultFlowController.kt$DefaultFlowController : FlowController</ID>
+    <ID>TooManyFunctions:DelegateDrawable.kt$DelegateDrawable : Drawable</ID>
     <ID>TooManyFunctions:EventReporter.kt$EventReporter</ID>
     <ID>TooManyFunctions:PaymentMethodMetadata.kt$PaymentMethodMetadata : Parcelable</ID>
-    <ID>TooManyFunctions:PaymentOption.kt$DelegateDrawable : Drawable</ID>
-    <ID>TooManyFunctions:PaymentSheetCommonModule.kt$PaymentSheetCommonModule</ID>
     <ID>UnusedPrivateClass:PaymentOptionsViewModelTest.kt$PaymentOptionsViewModelTest$MyHostActivity : AppCompatActivity</ID>
   </CurrentIssues>
 </SmellBaseline>

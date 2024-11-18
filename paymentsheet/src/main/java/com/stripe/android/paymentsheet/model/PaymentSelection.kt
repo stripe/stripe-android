@@ -257,13 +257,17 @@ internal sealed class PaymentSelection : Parcelable {
                 Configuration.UI_MODE_NIGHT_YES
         }
 
-        suspend fun loadPaymentOption(paymentOption: PaymentOption): Drawable {
+        suspend fun load(
+            @DrawableRes drawableResourceId: Int,
+            lightThemeIconUrl: String?,
+            darkThemeIconUrl: String?,
+        ): Drawable {
             fun loadResource(): Drawable {
                 @Suppress("DEPRECATION")
                 return runCatching {
                     ResourcesCompat.getDrawable(
                         resources,
-                        paymentOption.drawableResourceId,
+                        drawableResourceId,
                         null
                     )
                 }.getOrNull() ?: emptyDrawable
@@ -277,8 +281,6 @@ internal sealed class PaymentSelection : Parcelable {
 
             // If the payment option has an icon URL, we prefer it.
             // Some payment options don't have an icon URL, and are loaded locally via resource.
-            val lightThemeIconUrl = paymentOption.lightThemeIconUrl
-            val darkThemeIconUrl = paymentOption.darkThemeIconUrl
             return if (isDarkTheme() && darkThemeIconUrl != null) {
                 loadIcon(darkThemeIconUrl)
             } else if (lightThemeIconUrl != null) {

@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.model
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import android.graphics.drawable.ShapeDrawable
 import android.graphics.drawable.VectorDrawable
 import androidx.test.core.app.ApplicationProvider
@@ -10,9 +11,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.isInstanceOf
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.image.StripeImageLoader
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -31,100 +30,70 @@ internal class PaymentSelectionIconLoaderTest {
     private val testDispatcher = StandardTestDispatcher()
 
     @Test
-    fun loadPaymentOptionWithIconUrl_usesIconFromUrl() = runTest(testDispatcher) {
-        val paymentOptionIcon = createPaymentOptionForIconTesting(
-            iconUrl = workingUrl,
-            iconRes = R.drawable.stripe_ic_paymentsheet_link,
-            scope = this,
-            dispatcher = testDispatcher,
-        ).icon()
-
-        advanceUntilIdle()
-
-        assertThat(paymentOptionIcon.current).isInstanceOf<BitmapDrawable>()
-        assertThat((paymentOptionIcon.current as BitmapDrawable).bitmap).isEqualTo(simpleBitmap)
+    fun loadPaymentOptionWithIconUrl_usesIconFromUrl() = runScenario(
+        iconUrl = workingUrl,
+        iconRes = R.drawable.stripe_ic_paymentsheet_link,
+    ) {
+        assertThat(drawable.current).isInstanceOf<BitmapDrawable>()
+        assertThat((drawable.current as BitmapDrawable).bitmap).isEqualTo(simpleBitmap)
     }
 
     @Test
-    fun loadPaymentOptionWithIconUrl_failsToLoad_usesIconFromRes() = runTest(testDispatcher) {
-        val paymentOptionIcon = createPaymentOptionForIconTesting(
-            iconUrl = brokenUrl,
-            iconRes = R.drawable.stripe_ic_paymentsheet_link,
-            scope = this,
-            dispatcher = testDispatcher,
-        ).icon()
-
-        advanceUntilIdle()
-
-        assertThat(paymentOptionIcon.current).isInstanceOf<VectorDrawable>()
+    fun loadPaymentOptionWithIconUrl_failsToLoad_usesIconFromRes() = runScenario(
+        iconUrl = brokenUrl,
+        iconRes = R.drawable.stripe_ic_paymentsheet_link,
+    ) {
+        assertThat(drawable.current).isInstanceOf<VectorDrawable>()
     }
 
     @Test
-    fun loadPaymentOptionWithIconUrl_failsToLoad_missingIconRes_usesEmptyDrawable() = runTest(testDispatcher) {
-        val paymentOptionIcon = createPaymentOptionForIconTesting(
-            iconUrl = brokenUrl,
-            iconRes = null,
-            scope = this,
-            dispatcher = testDispatcher,
-        ).icon()
-
-        advanceUntilIdle()
-
-        assertThat(paymentOptionIcon.current).isInstanceOf<ShapeDrawable>()
-        assertThat(paymentOptionIcon.current).isEqualTo(PaymentSelection.IconLoader.emptyDrawable)
+    fun loadPaymentOptionWithIconUrl_failsToLoad_missingIconRes_usesEmptyDrawable() = runScenario(
+        iconUrl = brokenUrl,
+        iconRes = null,
+    ) {
+        assertThat(drawable.current).isInstanceOf<ShapeDrawable>()
+        assertThat(drawable.current).isEqualTo(PaymentSelection.IconLoader.emptyDrawable)
     }
 
     @Test
-    fun loadPaymentOptionWithoutIconUrl_usesIconFromRes() = runTest(testDispatcher) {
-        val paymentOptionIcon = createPaymentOptionForIconTesting(
-            iconUrl = null,
-            iconRes = R.drawable.stripe_ic_paymentsheet_link,
-            scope = this,
-            dispatcher = testDispatcher,
-        ).icon()
-
-        advanceUntilIdle()
-
-        assertThat(paymentOptionIcon.current).isInstanceOf<VectorDrawable>()
+    fun loadPaymentOptionWithoutIconUrl_usesIconFromRes() = runScenario(
+        iconUrl = null,
+        iconRes = R.drawable.stripe_ic_paymentsheet_link,
+    ) {
+        assertThat(drawable.current).isInstanceOf<VectorDrawable>()
     }
 
     @Test
-    fun loadPaymentOptionWithoutIconUrl_missingIconRes_usesEmptyDrawable() = runTest(testDispatcher) {
-        val paymentOptionIcon = createPaymentOptionForIconTesting(
-            iconUrl = null,
-            iconRes = null,
-            scope = this,
-            dispatcher = testDispatcher,
-        ).icon()
-
-        advanceUntilIdle()
-
-        assertThat(paymentOptionIcon.current).isInstanceOf<ShapeDrawable>()
-        assertThat(paymentOptionIcon.current).isEqualTo(PaymentSelection.IconLoader.emptyDrawable)
+    fun loadPaymentOptionWithoutIconUrl_missingIconRes_usesEmptyDrawable() = runScenario(
+        iconUrl = null,
+        iconRes = null,
+    ) {
+        assertThat(drawable.current).isInstanceOf<ShapeDrawable>()
+        assertThat(drawable.current).isEqualTo(PaymentSelection.IconLoader.emptyDrawable)
     }
 
-    private suspend fun createPaymentOptionForIconTesting(
+    private fun runScenario(
         iconUrl: String?,
         iconRes: Int?,
-        scope: CoroutineScope,
-        dispatcher: TestDispatcher,
-    ): PaymentOption {
-        val iconLoader = PaymentSelection.IconLoader(
+        block: Scenario.() -> Unit,
+    ) = runTest(testDispatcher) {
+        val drawable = PaymentSelection.IconLoader(
             resources = ApplicationProvider.getApplicationContext<Context>().resources,
             imageLoader = mock<StripeImageLoader>().also {
                 whenever(it.load(eq(workingUrl))).thenReturn(Result.success(simpleBitmap))
             }.also {
                 whenever(it.load(eq(brokenUrl))).thenReturn(Result.failure(Throwable()))
             },
-        )
-        return PaymentOption(
+        ).load(
             drawableResourceId = iconRes ?: 0,
             lightThemeIconUrl = iconUrl,
             darkThemeIconUrl = null,
-            label = "unused",
-            imageLoader = iconLoader::loadPaymentOption,
-            delegateDrawableScope = scope,
-            delegateDrawableDispatcher = dispatcher,
         )
+        advanceUntilIdle()
+        Scenario(drawable = drawable).apply { block() }
     }
+
+    private class Scenario(
+        val drawable: Drawable
+    )
 }
