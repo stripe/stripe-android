@@ -1,7 +1,14 @@
 package com.stripe.android.paymentsheet.model
 
+import android.content.res.Configuration
+import android.content.res.Resources
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
+import android.graphics.drawable.ShapeDrawable
 import android.os.Parcelable
 import androidx.annotation.DrawableRes
+import androidx.annotation.VisibleForTesting
+import androidx.core.content.res.ResourcesCompat
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.orEmpty
 import com.stripe.android.core.strings.resolvableString
@@ -22,8 +29,10 @@ import com.stripe.android.paymentsheet.ui.createCardLabel
 import com.stripe.android.paymentsheet.ui.getCardBrandIcon
 import com.stripe.android.paymentsheet.ui.getLabel
 import com.stripe.android.paymentsheet.ui.getSavedPaymentMethodIcon
+import com.stripe.android.uicore.image.StripeImageLoader
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
+import javax.inject.Inject
 import com.stripe.android.R as StripeR
 import com.stripe.android.ui.core.R as StripeUiCoreR
 
@@ -237,6 +246,52 @@ internal sealed class PaymentSelection : Parcelable {
             override val paymentMethodOptionsParams: PaymentMethodOptionsParams? = null,
             override val paymentMethodExtraParams: PaymentMethodExtraParams? = null,
         ) : New()
+    }
+
+    class IconLoader @Inject constructor(
+        private val resources: Resources,
+        private val imageLoader: StripeImageLoader,
+    ) {
+        private fun isDarkTheme(): Boolean {
+            return resources.configuration?.uiMode?.and(Configuration.UI_MODE_NIGHT_MASK) ==
+                Configuration.UI_MODE_NIGHT_YES
+        }
+
+        suspend fun loadPaymentOption(paymentOption: PaymentOption): Drawable {
+            fun loadResource(): Drawable {
+                @Suppress("DEPRECATION")
+                return runCatching {
+                    ResourcesCompat.getDrawable(
+                        resources,
+                        paymentOption.drawableResourceId,
+                        null
+                    )
+                }.getOrNull() ?: emptyDrawable
+            }
+
+            suspend fun loadIcon(url: String): Drawable {
+                return imageLoader.load(url).getOrNull()?.let {
+                    BitmapDrawable(resources, it)
+                } ?: loadResource()
+            }
+
+            // If the payment option has an icon URL, we prefer it.
+            // Some payment options don't have an icon URL, and are loaded locally via resource.
+            val lightThemeIconUrl = paymentOption.lightThemeIconUrl
+            val darkThemeIconUrl = paymentOption.darkThemeIconUrl
+            return if (isDarkTheme() && darkThemeIconUrl != null) {
+                loadIcon(darkThemeIconUrl)
+            } else if (lightThemeIconUrl != null) {
+                loadIcon(lightThemeIconUrl)
+            } else {
+                loadResource()
+            }
+        }
+
+        companion object {
+            @VisibleForTesting
+            val emptyDrawable = ShapeDrawable()
+        }
     }
 }
 

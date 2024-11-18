@@ -2377,8 +2377,10 @@ internal class DefaultFlowControllerTest {
         activityResultCaller = activityResultCaller,
         statusBarColor = { STATUS_BAR_COLOR },
         paymentOptionFactory = PaymentOptionFactory(
-            resources = context.resources,
-            imageLoader = StripeImageLoader(context),
+            iconLoader = PaymentSelection.IconLoader(
+                resources = context.resources,
+                imageLoader = StripeImageLoader(context),
+            ),
             context = context,
         ),
         paymentOptionCallback = paymentOptionCallback,
