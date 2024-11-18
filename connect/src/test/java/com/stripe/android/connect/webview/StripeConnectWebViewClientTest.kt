@@ -133,7 +133,7 @@ class StripeConnectWebViewClientTest {
         assert(result)
     }
 
-    private fun mockUri(scheme: String, host: String, path: String): Uri{
+    private fun mockUri(scheme: String, host: String, path: String): Uri {
         return mock<Uri> {
             on { this.scheme } doReturn scheme
             on { this.host } doReturn host
