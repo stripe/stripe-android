@@ -3340,7 +3340,7 @@ class CustomerSheetViewModelTest {
 
     private fun mockUSBankAccountPaymentSelection(): PaymentSelection.New.USBankAccount {
         return PaymentSelection.New.USBankAccount(
-            labelResource = "Test",
+            label = "Test",
             iconResource = 0,
             paymentMethodCreateParams = mock(),
             customerRequestedSave = mock(),
