@@ -5,7 +5,7 @@ import android.util.AttributeSet
 import android.widget.FrameLayout
 import androidx.annotation.RestrictTo
 import com.stripe.android.connect.webview.StripeConnectWebViewContainer
-import com.stripe.android.connect.webview.StripeConnectWebViewContainerBehavior
+import com.stripe.android.connect.webview.StripeConnectWebViewContainerImpl
 
 @PrivateBetaConnectSDK
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -13,7 +13,7 @@ class PayoutsView private constructor(
     context: Context,
     attrs: AttributeSet?,
     defStyleAttr: Int,
-    webViewContainerBehavior: StripeConnectWebViewContainerBehavior,
+    webViewContainerBehavior: StripeConnectWebViewContainerImpl,
 ) : FrameLayout(context, attrs, defStyleAttr),
     StripeConnectWebViewContainer by webViewContainerBehavior {
 
@@ -27,13 +27,13 @@ class PayoutsView private constructor(
         context,
         attrs,
         defStyleAttr,
-        StripeConnectWebViewContainerBehavior(
-            component = StripeEmbeddedComponent.PAYOUTS,
+        StripeConnectWebViewContainerImpl(
+            embeddedComponent = StripeEmbeddedComponent.PAYOUTS,
             embeddedComponentManager = embeddedComponentManager
         )
     )
 
     init {
-        webViewContainerBehavior.initialize(this)
+        webViewContainerBehavior.initializeView(this)
     }
 }
