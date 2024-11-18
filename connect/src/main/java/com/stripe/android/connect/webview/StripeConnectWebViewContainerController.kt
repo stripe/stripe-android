@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
-@PrivateBetaConnectSDK
+@OptIn(PrivateBetaConnectSDK::class)
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 internal class StripeConnectWebViewContainerController(
     private val view: StripeConnectWebViewContainerInternal,

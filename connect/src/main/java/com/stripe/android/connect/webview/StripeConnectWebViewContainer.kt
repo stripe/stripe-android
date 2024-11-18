@@ -47,7 +47,7 @@ interface StripeConnectWebViewContainer {
     fun setEmbeddedComponentManager(embeddedComponentManager: EmbeddedComponentManager)
 }
 
-@PrivateBetaConnectSDK
+@OptIn(PrivateBetaConnectSDK::class)
 internal interface StripeConnectWebViewContainerInternal {
     /**
      * Update the appearance of the Connect instance.
@@ -60,7 +60,7 @@ internal interface StripeConnectWebViewContainerInternal {
     fun loadUrl(url: String)
 }
 
-@PrivateBetaConnectSDK
+@OptIn(PrivateBetaConnectSDK::class)
 internal class StripeConnectWebViewContainerImpl(
     val embeddedComponent: StripeEmbeddedComponent,
     embeddedComponentManager: EmbeddedComponentManager?,

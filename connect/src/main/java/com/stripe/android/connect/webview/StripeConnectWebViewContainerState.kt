@@ -1,6 +1,6 @@
 package com.stripe.android.connect.webview
 
-data class StripeConnectWebViewContainerState(
+internal data class StripeConnectWebViewContainerState(
     /**
      * True if we received the 'pageDidLoad' message.
      */
