@@ -56,7 +56,7 @@ class WalletViewModelTest {
             WalletUiState(
                 supportedTypes = TestFactory.LINK_CONFIGURATION.stripeIntent.paymentMethodTypes.toSet(),
                 paymentDetailsList = TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails,
-                selectedItem = null,
+                selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails.firstOrNull(),
                 isProcessing = false
             )
         )
