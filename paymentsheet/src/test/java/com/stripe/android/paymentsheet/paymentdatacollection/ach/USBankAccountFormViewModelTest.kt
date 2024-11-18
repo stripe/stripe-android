@@ -267,7 +267,7 @@ class USBankAccountFormViewModelTest {
             defaultArgs.copy(
                 formArgs = defaultArgs.formArgs.copy(billingDetails = null),
                 savedPaymentMethod = PaymentSelection.New.USBankAccount(
-                    labelResource = "Test",
+                    label = "Test",
                     iconResource = 0,
                     paymentMethodCreateParams = mock(),
                     customerRequestedSave = mock(),
@@ -312,7 +312,7 @@ class USBankAccountFormViewModelTest {
                     ),
                 ),
                 savedPaymentMethod = PaymentSelection.New.USBankAccount(
-                    labelResource = "Test",
+                    label = "Test",
                     iconResource = 0,
                     paymentMethodCreateParams = mock(),
                     customerRequestedSave = mock(),
@@ -390,7 +390,7 @@ class USBankAccountFormViewModelTest {
             val viewModel = createViewModel(
                 defaultArgs.copy(
                     savedPaymentMethod = PaymentSelection.New.USBankAccount(
-                        labelResource = "Test",
+                        label = "Test",
                         iconResource = 0,
                         paymentMethodCreateParams = mock(),
                         customerRequestedSave = mock(),

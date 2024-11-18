@@ -330,7 +330,7 @@ class ConfirmationHandlerOptionKtxTest {
         linkMode: LinkMode?,
     ): PaymentSelection.New.USBankAccount {
         return PaymentSelection.New.USBankAccount(
-            labelResource = "•••• 4242",
+            label = "•••• 4242",
             iconResource = R.drawable.stripe_ic_paymentsheet_bank,
             paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.US_BANK_ACCOUNT,
             paymentMethodOptionsParams = null,
