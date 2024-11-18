@@ -198,6 +198,9 @@ public final class com/stripe/android/model/CardFunding : java/lang/Enum {
 	public static fun values ()[Lcom/stripe/android/model/CardFunding;
 }
 
+public final class com/stripe/android/model/ConsumerPaymentDetails$BankAccount$Companion {
+}
+
 public final class com/stripe/android/model/ConsumerPaymentDetails$BankAccount$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/ConsumerPaymentDetails$BankAccount;
@@ -214,6 +217,9 @@ public final class com/stripe/android/model/ConsumerPaymentDetails$BillingAddres
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public final class com/stripe/android/model/ConsumerPaymentDetails$Card$Companion {
+}
+
 public final class com/stripe/android/model/ConsumerPaymentDetails$Card$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/ConsumerPaymentDetails$Card;
@@ -228,6 +234,9 @@ public final class com/stripe/android/model/ConsumerPaymentDetails$Creator : and
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/model/ConsumerPaymentDetails;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/model/ConsumerPaymentDetails$Passthrough$Companion {
 }
 
 public final class com/stripe/android/model/ConsumerPaymentDetails$Passthrough$Creator : android/os/Parcelable$Creator {
