@@ -44,6 +44,8 @@
   <string name="stripe_paymentsheet_bacs_notice_mandate">Turklāt jūs e-pastā divas dienas iepriekš saņemsiet brīdinājumu par jebkādām debeta darbībām saistībā ar šo pieprasījumu. Bankas konta pārskatos šie maksājumi tiks rādīti ar atzīmi „%s”.</string>
   <!-- Message shown as part of overall Bacs Mandate indicating that their payments are protected by a defined guarantee -->
   <string name="stripe_paymentsheet_bacs_protection_mandate">Jūsu maksājumus aizsargā %s.</string>
+  <!-- Text displayed on manage card screen when card details are not editable. -->
+  <string name="stripe_paymentsheet_card_details_cannot_be_changed">Kartes informāciju nevar mainīt.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
   <string name="stripe_paymentsheet_card_mandate">Norādot savas kartes informāciju, jūs atļaujat uzņēmumam %s saskaņā ar viņu noteikumiem iekasēt no jūsu kartes turpmākus maksājumus.</string>
   <!-- Title shown above a carousel containing available payment methods -->
@@ -55,6 +57,8 @@
   <string name="stripe_paymentsheet_confirm_your_cvc">Apstiprināt CVC</string>
   <!-- Text for a button that allows manual entry of an address -->
   <string name="stripe_paymentsheet_enter_address_manually">Ievadīt adresi manuāli</string>
+  <!-- Title shown above a view containing a customer's card payment methods that they can delete or update -->
+  <string name="stripe_paymentsheet_manage_card">Pārvaldīt karti</string>
   <!-- Title shown above a view containing the customer's card payment methods that they can delete or update -->
   <string name="stripe_paymentsheet_manage_payment_methods">Pārvaldīt maksājuma veidus</string>
   <!-- Title shown above a carousel containing the customer's payment methods -->
