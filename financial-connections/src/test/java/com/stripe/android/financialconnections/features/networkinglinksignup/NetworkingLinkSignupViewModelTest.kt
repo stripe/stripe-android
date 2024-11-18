@@ -72,6 +72,7 @@ class NetworkingLinkSignupViewModelTest {
         initialState = state,
         navigationManager = navigationManager,
         lookupAccount = lookupAccount,
+        startVerification = mock(),
         uriUtils = UriUtils(Logger.noop(), eventTracker),
         nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
         presentSheet = mock(),
