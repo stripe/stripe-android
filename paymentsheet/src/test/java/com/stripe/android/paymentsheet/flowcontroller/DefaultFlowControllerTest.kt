@@ -38,6 +38,7 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.wallets.Wallet
+import com.stripe.android.paymentelement.confirmation.DefaultConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
 import com.stripe.android.paymentelement.confirmation.intent.InvalidDeferredIntentUsageException
@@ -464,7 +465,6 @@ internal class DefaultFlowControllerTest {
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(allowsDelayedPaymentMethods = false),
             ),
             configuration = PaymentSheet.Configuration("com.stripe.android.paymentsheet.test"),
-            statusBarColor = STATUS_BAR_COLOR,
             enableLogging = ENABLE_LOGGING,
             productUsage = PRODUCT_USAGE
         )
@@ -2384,7 +2384,6 @@ internal class DefaultFlowControllerTest {
         viewModelScope = testScope,
         lifecycleOwner = lifecycleOwner,
         activityResultCaller = activityResultCaller,
-        statusBarColor = { STATUS_BAR_COLOR },
         paymentOptionFactory = PaymentOptionFactory(
             iconLoader = PaymentSelection.IconLoader(
                 resources = context.resources,
@@ -2397,15 +2396,9 @@ internal class DefaultFlowControllerTest {
         context = context,
         eventReporter = eventReporter,
         viewModel = viewModel,
-        paymentLauncherFactory = paymentLauncherAssistedFactory,
-        lazyPaymentConfiguration = {
-            PaymentConfiguration.getInstance(context)
-        },
         enableLogging = ENABLE_LOGGING,
         productUsage = PRODUCT_USAGE,
-        googlePayPaymentMethodLauncherFactory = googlePayPaymentMethodLauncherFactory,
         prefsRepositoryFactory = { prefsRepository },
-        bacsMandateConfirmationLauncherFactory = bacsMandateConfirmationLauncherFactory,
         linkLauncher = linkPaymentLauncher,
         configurationHandler = FlowControllerConfigurationHandler(
             paymentElementLoader = paymentElementLoader,
@@ -2414,12 +2407,22 @@ internal class DefaultFlowControllerTest {
             viewModel = viewModel,
             paymentSelectionUpdater = { _, _, newState, _ -> newState.paymentSelection },
         ),
-        intentConfirmationInterceptor = fakeIntentConfirmationInterceptor,
         errorReporter = errorReporter,
         cvcRecollectionLauncherFactory = cvcRecollectionLauncherFactory,
         initializedViaCompose = false,
-        workContext = testScope.coroutineContext,
-        logger = FakeUserFacingLogger(),
+        confirmationHandler = DefaultConfirmationHandler.Factory(
+            bacsMandateConfirmationLauncherFactory = bacsMandateConfirmationLauncherFactory,
+            googlePayPaymentMethodLauncherFactory = googlePayPaymentMethodLauncherFactory,
+            intentConfirmationInterceptor = fakeIntentConfirmationInterceptor,
+            stripePaymentLauncherAssistedFactory = paymentLauncherAssistedFactory,
+            paymentConfigurationProvider = {
+                PaymentConfiguration.getInstance(context)
+            },
+            logger = FakeUserFacingLogger(),
+            errorReporter = errorReporter,
+            savedStateHandle = viewModel.handle,
+            statusBarColor = STATUS_BAR_COLOR,
+        ).create(testScope),
         cvcRecollectionHandler = CvcRecollectionHandlerImpl()
     )
 
@@ -2427,6 +2430,7 @@ internal class DefaultFlowControllerTest {
         return FlowControllerViewModel(
             application = ApplicationProvider.getApplicationContext(),
             handle = SavedStateHandle(),
+            statusBarColor = STATUS_BAR_COLOR,
         )
     }
 
