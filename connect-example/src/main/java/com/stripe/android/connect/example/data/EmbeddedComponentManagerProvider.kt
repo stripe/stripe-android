@@ -1,5 +1,6 @@
 package com.stripe.android.connect.example.data
 
+import androidx.appcompat.app.AppCompatActivity
 import android.content.Context
 import com.github.kittinunf.fuel.core.FuelError
 import com.stripe.android.connect.EmbeddedComponentManager
@@ -49,7 +50,7 @@ class EmbeddedComponentManagerProvider @Inject constructor(
      * Provides the EmbeddedComponentManager instance, creating it if it doesn't exist.
      * Throws [IllegalStateException] if an EmbeddedComponentManager cannot be created at this time.
      */
-    fun provideEmbeddedComponentManager(): EmbeddedComponentManager {
+    fun provideEmbeddedComponentManager(activity: AppCompatActivity): EmbeddedComponentManager {
         if (embeddedComponentManager != null) {
             return embeddedComponentManager!!
         }
@@ -59,6 +60,7 @@ class EmbeddedComponentManagerProvider @Inject constructor(
             ?: throw IllegalStateException("Publishable key must be set before creating EmbeddedComponentManager")
 
         return EmbeddedComponentManager(
+            activity = activity,
             configuration = EmbeddedComponentManager.Configuration(
                 publishableKey = publishableKey,
             ),

@@ -5,6 +5,7 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -32,27 +33,11 @@ import javax.inject.Inject
 class PayoutsExampleActivity : BasicComponentExampleActivity() {
     override val titleRes: Int = R.string.payouts
 
-    private lateinit var requestPermissionLauncher: ActivityResultLauncher<String>
-    private val requestPermissionFlow: MutableSharedFlow<Boolean> = MutableSharedFlow()
-
-    override fun onCreate() {
-        requestPermissionLauncher = registerForActivityResult(
-            ActivityResultContracts.RequestPermission()
-        ) { isGranted ->
-            MainScope().launch {
-                requestPermissionFlow.emit(isGranted)
-            }
-        }
-    }
-
     override fun createComponentView(context: Context): View {
         return embeddedComponentManager.createPayoutsView(
-            context = context,
+            activity = this@PayoutsExampleActivity,
             listener = Listener(),
-        )  { permission ->
-            requestPermissionLauncher.launch(permission)
-            requestPermissionFlow.first() // wait for the next result
-        }
+        )
     }
 
     private inner class Listener : PayoutsListener {

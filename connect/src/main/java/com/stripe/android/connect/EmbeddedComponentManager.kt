@@ -1,8 +1,14 @@
 package com.stripe.android.connect
 
-import android.content.Context
 import android.os.Parcelable
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.ColorInt
 import androidx.annotation.RestrictTo
+import androidx.appcompat.app.AppCompatActivity
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import com.stripe.android.connect.appearance.Appearance
 import com.stripe.android.connect.appearance.fonts.CustomFontSource
 import com.stripe.android.connect.webview.serialization.ConnectInstanceJs
@@ -17,6 +23,7 @@ import kotlin.coroutines.resume
 @PrivateBetaConnectSDK
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class EmbeddedComponentManager(
+    activity: AppCompatActivity,
     private val configuration: Configuration,
     private val fetchClientSecretCallback: FetchClientSecretCallback,
     appearance: Appearance = Appearance(),
@@ -24,6 +31,20 @@ class EmbeddedComponentManager(
 ) {
     private val _appearanceFlow = MutableStateFlow(appearance)
     internal val appearanceFlow: StateFlow<Appearance> get() = _appearanceFlow.asStateFlow()
+
+    private val permissionsFlow: MutableSharedFlow<Boolean> = MutableSharedFlow()
+    private val requestPermissionLauncher = activity.registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        MainScope().launch {
+            permissionsFlow.emit(isGranted)
+        }
+    }
+
+    internal suspend fun requestCameraPermission(): Boolean {
+        requestPermissionLauncher.launch(android.Manifest.permission.CAMERA)
+        return permissionsFlow.first()
+    }
 
     /**
      * Create a new [AccountOnboardingView] for inclusion in the view hierarchy.
@@ -43,15 +64,13 @@ class EmbeddedComponentManager(
      * Create a new [PayoutsView] for inclusion in the view hierarchy.
      */
     fun createPayoutsView(
-        context: Context,
-        requestPermissionFromUser = requestPermissionFromUser,
+        activity: AppCompatActivity,
         listener: PayoutsListener? = null,
     ): PayoutsView {
         return PayoutsView(
-            context = context,
+            context = activity,
             embeddedComponentManager = this,
             listener = listener,
-            requestPermissionFromUser = requestPermissionFromUser,
         )
     }
 
