@@ -51,6 +51,7 @@ class NetworkingLinkLoginWarmupViewModelTest {
         initialState = state,
         nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
         lookupAccount = lookupAccount,
+        prefillDetails = null,
     )
 
     @Test
