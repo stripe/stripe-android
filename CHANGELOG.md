@@ -2,6 +2,8 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+## 25.1.0 - 2024-11-18
+
 ## 21.1.0 - 2024-11-18
 ### PaymentSheet
 - [ADDED] Support for card brand filtering in private beta.
