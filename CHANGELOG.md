@@ -1,6 +1,8 @@
 # CHANGELOG
 
 ## XX.XX.XX - 20XX-XX-XX
+### PaymentSheet
+- [ADDED] Support for card brand filtering in private beta.
 
 ## 21.0.1 - 2024-11-11
 
