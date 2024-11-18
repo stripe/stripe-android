@@ -9,6 +9,7 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.SavedPaymentMethod
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcCompletionState
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionInteractor
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionPaymentSheetScreen
@@ -559,7 +560,15 @@ internal sealed interface PaymentSheetScreen {
         }
 
         override fun title(isCompleteFlow: Boolean, isWalletEnabled: Boolean): StateFlow<ResolvableString?> {
-            return stateFlowOf(resolvableString(R.string.stripe_paymentsheet_manage_card))
+            val title = (
+                when (interactor.displayableSavedPaymentMethod.savedPaymentMethod) {
+                    is SavedPaymentMethod.SepaDebit -> R.string.stripe_paymentsheet_manage_sepa_debit
+                    is SavedPaymentMethod.USBankAccount -> R.string.stripe_paymentsheet_manage_bank_account
+                    is SavedPaymentMethod.Card -> R.string.stripe_paymentsheet_manage_card
+                    SavedPaymentMethod.Unexpected -> null
+                }
+                )?.resolvableString
+            return stateFlowOf(title)
         }
 
         override fun showsWalletsHeader(isCompleteFlow: Boolean): StateFlow<Boolean> = stateFlowOf(false)

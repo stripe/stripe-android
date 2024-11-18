@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.ui
 
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.strings.ResolvableString
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import kotlinx.coroutines.CoroutineScope
@@ -17,7 +16,6 @@ internal interface UpdatePaymentMethodInteractor {
     val isLiveMode: Boolean
     val canRemove: Boolean
     val displayableSavedPaymentMethod: DisplayableSavedPaymentMethod
-    val card: PaymentMethod.Card
 
     val state: StateFlow<State>
 
@@ -37,7 +35,6 @@ internal class DefaultUpdatePaymentMethodInteractor(
     override val isLiveMode: Boolean,
     override val canRemove: Boolean,
     override val displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
-    override val card: PaymentMethod.Card,
     private val removeExecutor: PaymentMethodRemoveOperation,
     workContext: CoroutineContext = Dispatchers.Default,
 ) : UpdatePaymentMethodInteractor {

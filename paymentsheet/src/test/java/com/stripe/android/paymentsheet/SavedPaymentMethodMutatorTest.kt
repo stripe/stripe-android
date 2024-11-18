@@ -479,8 +479,8 @@ class SavedPaymentMethodMutatorTest {
     }
 
     @Test
-    fun `updatePaymentMethod for bank account does nothing`() {
-        val displayableSavedPaymentMethod = PaymentMethodFactory.usBankAccount().toDisplayableSavedPaymentMethod()
+    fun `updatePaymentMethod for unsupported SPM type does nothing`() {
+        val displayableSavedPaymentMethod = PaymentMethodFactory.amazonPay().toDisplayableSavedPaymentMethod()
         runScenario {
             savedPaymentMethodMutator.updatePaymentMethod(displayableSavedPaymentMethod)
 

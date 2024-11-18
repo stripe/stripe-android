@@ -61,7 +61,7 @@
   <string name="stripe_paymentsheet_enter_address_manually">Enter address manually</string>
   <!-- Title shown above a view containing a customer's bank account that they can delete or update -->
   <string name="stripe_paymentsheet_manage_bank_account">Manage US bank account</string>
-  <!-- Title shown above a view containing a customer's card payment methods that they can delete or update -->
+  <!-- Title shown above a view containing a customer's card that they can delete or update -->
   <string name="stripe_paymentsheet_manage_card">Manage card</string>
   <!-- Title shown above a view containing the customer's card payment methods that they can delete or update -->
   <string name="stripe_paymentsheet_manage_payment_methods">Manage payment methods</string>

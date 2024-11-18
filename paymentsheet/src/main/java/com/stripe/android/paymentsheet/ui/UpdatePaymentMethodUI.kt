@@ -18,7 +18,6 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,19 +32,21 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.R
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
+import com.stripe.android.paymentsheet.SavedPaymentMethod
 import com.stripe.android.uicore.elements.TextFieldColors
 import com.stripe.android.uicore.getBorderStroke
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.stripeShapes
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.mapAsStateFlow
+import com.stripe.android.paymentsheet.R as PaymentSheetR
 
 @Composable
 internal fun UpdatePaymentMethodUI(interactor: UpdatePaymentMethodInteractor, modifier: Modifier) {
@@ -53,28 +54,37 @@ internal fun UpdatePaymentMethodUI(interactor: UpdatePaymentMethodInteractor, mo
     val horizontalPadding = dimensionResource(
         id = com.stripe.android.paymentsheet.R.dimen.stripe_paymentsheet_outer_spacing_horizontal
     )
-    val dividerHeight = remember { mutableStateOf(0.dp) }
     val state by interactor.state.collectAsState()
 
     Column(
         modifier = modifier.padding(horizontal = horizontalPadding),
     ) {
-        CardDetailsUI(interactor, dividerHeight)
+        when (val savedPaymentMethod = interactor.displayableSavedPaymentMethod.savedPaymentMethod) {
+            is SavedPaymentMethod.Card -> CardDetailsUI(
+                displayableSavedPaymentMethod = interactor.displayableSavedPaymentMethod,
+                card = savedPaymentMethod.card,
+            )
+            is SavedPaymentMethod.SepaDebit -> SepaDebitUI()
+            is SavedPaymentMethod.USBankAccount -> USBankAccountUI()
+            SavedPaymentMethod.Unexpected -> {}
+        }
 
-        Text(
-            text = resolvableString(
-                com.stripe.android.paymentsheet.R.string.stripe_paymentsheet_card_details_cannot_be_changed
-            ).resolve(context),
-            style = MaterialTheme.typography.caption,
-            color = MaterialTheme.stripeColors.subtitle,
-            fontWeight = FontWeight.Normal,
-            modifier = Modifier.padding(top = 12.dp)
-        )
+        interactor.displayableSavedPaymentMethod.getDetailsCannotBeChangedText()?.let {
+            Text(
+                text = it.resolve(context),
+                style = MaterialTheme.typography.caption,
+                color = MaterialTheme.stripeColors.subtitle,
+                fontWeight = FontWeight.Normal,
+                modifier = Modifier.padding(top = 12.dp).testTag(UPDATE_PM_DETAILS_SUBTITLE_TEST_TAG)
+            )
+        }
 
         state.error?.let {
             ErrorMessage(
                 error = it.resolve(context),
-                modifier = Modifier.padding(top = 12.dp).testTag(UPDATE_PM_ERROR_MESSAGE_TEST_TAG)
+                modifier = Modifier
+                    .padding(top = 12.dp)
+                    .testTag(UPDATE_PM_ERROR_MESSAGE_TEST_TAG)
             )
         }
 
@@ -86,18 +96,20 @@ internal fun UpdatePaymentMethodUI(interactor: UpdatePaymentMethodInteractor, mo
 
 @Composable
 private fun CardDetailsUI(
-    interactor: UpdatePaymentMethodInteractor,
-    dividerHeight: MutableState<Dp>
+    displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
+    card: PaymentMethod.Card,
 ) {
+    val dividerHeight = remember { mutableStateOf(0.dp) }
+
     Card(
         border = MaterialTheme.getBorderStroke(false),
-        elevation = 0.dp
+        elevation = 0.dp,
+        modifier = Modifier.testTag(UPDATE_PM_CARD_TEST_TAG),
     ) {
         Column {
             CardNumberField(
-                last4 = interactor.card.last4,
-                savedPaymentMethodIcon = interactor
-                    .displayableSavedPaymentMethod
+                last4 = card.last4,
+                savedPaymentMethodIcon = displayableSavedPaymentMethod
                     .paymentMethod
                     .getSavedPaymentMethodIcon(forVerticalMode = true),
             )
@@ -107,8 +119,8 @@ private fun CardDetailsUI(
             )
             Row(modifier = Modifier.fillMaxWidth()) {
                 ExpiryField(
-                    expiryMonth = interactor.card.expiryMonth,
-                    expiryYear = interactor.card.expiryYear,
+                    expiryMonth = card.expiryMonth,
+                    expiryYear = card.expiryYear,
                     modifier = Modifier
                         .weight(1F)
                         .onSizeChanged {
@@ -122,10 +134,26 @@ private fun CardDetailsUI(
                         .width(MaterialTheme.stripeShapes.borderStrokeWidth.dp),
                     color = MaterialTheme.stripeColors.componentDivider,
                 )
-                CvcField(cardBrand = interactor.card.brand, modifier = Modifier.weight(1F))
+                CvcField(cardBrand = card.brand, modifier = Modifier.weight(1F))
             }
         }
     }
+}
+
+@Composable
+private fun USBankAccountUI() {
+    Text(
+        text = "This is a US bank account",
+        modifier = Modifier.testTag(UPDATE_PM_US_BANK_ACCOUNT_TEST_TAG),
+    )
+}
+
+@Composable
+private fun SepaDebitUI() {
+    Text(
+        text = "This is a SEPA debit account",
+        modifier = Modifier.testTag(UPDATE_PM_SEPA_DEBIT_TEST_TAG),
+    )
 }
 
 @Composable
@@ -299,11 +327,24 @@ private fun PreviewUpdatePaymentMethodUI() {
             isLiveMode = false,
             canRemove = true,
             displayableSavedPaymentMethod = exampleCard,
-            card = exampleCard.paymentMethod.card!!,
             removeExecutor = { null },
         ),
         modifier = Modifier
     )
+}
+
+private fun DisplayableSavedPaymentMethod.getDetailsCannotBeChangedText(): ResolvableString? {
+    return (
+        when (savedPaymentMethod) {
+            is SavedPaymentMethod.Card ->
+                PaymentSheetR.string.stripe_paymentsheet_card_details_cannot_be_changed
+            is SavedPaymentMethod.USBankAccount ->
+                PaymentSheetR.string.stripe_paymentsheet_bank_account_details_cannot_be_changed
+            is SavedPaymentMethod.SepaDebit ->
+                PaymentSheetR.string.stripe_paymentsheet_sepa_debit_details_cannot_be_changed
+            SavedPaymentMethod.Unexpected -> null
+        }
+        )?.resolvableString
 }
 
 private const val JANUARY = 1
@@ -316,3 +357,7 @@ internal const val UPDATE_PM_EXPIRY_FIELD_TEST_TAG = "update_payment_method_expi
 internal const val UPDATE_PM_CVC_FIELD_TEST_TAG = "update_payment_method_cvc"
 internal const val UPDATE_PM_REMOVE_BUTTON_TEST_TAG = "update_payment_method_remove_button"
 internal const val UPDATE_PM_ERROR_MESSAGE_TEST_TAG = "update_payment_method_error_message"
+internal const val UPDATE_PM_US_BANK_ACCOUNT_TEST_TAG = "update_payment_method_bank_account_ui"
+internal const val UPDATE_PM_SEPA_DEBIT_TEST_TAG = "update_payment_method_sepa_debit_ui"
+internal const val UPDATE_PM_CARD_TEST_TAG = "update_payment_method_card_ui"
+internal const val UPDATE_PM_DETAILS_SUBTITLE_TEST_TAG = "update_payment_method_subtitle"

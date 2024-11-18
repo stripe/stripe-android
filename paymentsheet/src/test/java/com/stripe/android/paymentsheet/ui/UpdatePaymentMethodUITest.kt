@@ -175,6 +175,74 @@ class UpdatePaymentMethodUITest {
         }
     }
 
+    @Test
+    fun cardPaymentMethod_cardUIIsShown() {
+        val card = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+
+        runScenario(
+            displayableSavedPaymentMethod = card.toDisplayableSavedPaymentMethod(),
+        ) {
+            composeRule.onNodeWithTag(UPDATE_PM_CARD_TEST_TAG).assertExists()
+        }
+    }
+
+    @Test
+    fun usBankAccountPaymentMethod_usBankAccountUIIsShown() {
+        val usBankAccount = PaymentMethodFixtures.US_BANK_ACCOUNT
+
+        runScenario(
+            displayableSavedPaymentMethod = usBankAccount.toDisplayableSavedPaymentMethod(),
+        ) {
+            composeRule.onNodeWithTag(UPDATE_PM_US_BANK_ACCOUNT_TEST_TAG).assertExists()
+        }
+    }
+
+    @Test
+    fun sepaDebitPaymentMethod_sepaDebitUIIsShown() {
+        val sepaDebit = PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD
+
+        runScenario(
+            displayableSavedPaymentMethod = sepaDebit.toDisplayableSavedPaymentMethod(),
+        ) {
+            composeRule.onNodeWithTag(UPDATE_PM_SEPA_DEBIT_TEST_TAG).assertExists()
+        }
+    }
+
+    @Test
+    fun cardPaymentMethod_cardDetailsCannotBeChangedTextShown() {
+        runScenario(
+            displayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard()
+        ) {
+            composeRule.onNodeWithTag(UPDATE_PM_DETAILS_SUBTITLE_TEST_TAG).assertTextEquals(
+                "Card details cannot be changed."
+            )
+        }
+    }
+
+    @Test
+    fun sepaPaymentMethod_sepaDetailsCannotBeChangedTextShown() {
+        runScenario(
+            displayableSavedPaymentMethod = PaymentMethodFixtures
+                .SEPA_DEBIT_PAYMENT_METHOD
+                .toDisplayableSavedPaymentMethod()
+        ) {
+            composeRule.onNodeWithTag(UPDATE_PM_DETAILS_SUBTITLE_TEST_TAG).assertTextEquals(
+                "SEPA debit details cannot be changed."
+            )
+        }
+    }
+
+    @Test
+    fun bankAccountPaymentMethod_bankAccountDetailsCannotBeChangedTextShown() {
+        runScenario(
+            displayableSavedPaymentMethod = PaymentMethodFixtures.US_BANK_ACCOUNT.toDisplayableSavedPaymentMethod()
+        ) {
+            composeRule.onNodeWithTag(UPDATE_PM_DETAILS_SUBTITLE_TEST_TAG).assertTextEquals(
+                "Bank account details cannot be changed."
+            )
+        }
+    }
+
     private fun assertExpiryDateEquals(text: String) {
         composeRule.onNodeWithTag(UPDATE_PM_EXPIRY_FIELD_TEST_TAG).assertTextContains(
             text
