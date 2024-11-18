@@ -118,6 +118,7 @@ private fun NetworkingLinkSignupContent(
                 lookupAccountSync = state.lookupAccount,
                 isLoading = state.saveAccountToLink is Loading,
                 showFullForm = state.showFullForm,
+                phoneError = state.phoneError,
                 onSaveToLink = onSaveToLink,
                 onClickableTextClick = onClickableTextClick,
                 onSkipClick = onSkipClick
@@ -135,6 +136,7 @@ private fun NetworkingLinkSignupLoaded(
     isLoading: Boolean,
     lookupAccountSync: Async<ConsumerSessionLookup>,
     showFullForm: Boolean,
+    phoneError: String?,
     onClickableTextClick: (String) -> Unit,
     onSaveToLink: () -> Unit,
     onSkipClick: () -> Unit,
@@ -189,6 +191,7 @@ private fun NetworkingLinkSignupLoaded(
                 PhoneNumberSection(
                     payload = payload,
                     focusRequester = phoneNumberFocusRequester,
+                    error = phoneError,
                 )
             }
         },
@@ -256,6 +259,7 @@ private fun NetworkingLinkSignupFooter(
 private fun PhoneNumberSection(
     payload: Payload,
     focusRequester: FocusRequester,
+    error: String? = null,
 ) {
     var focused by remember { mutableStateOf(false) }
     Column {
@@ -279,6 +283,7 @@ private fun PhoneNumberSection(
                 imeAction = ImeAction.Default,
                 focusRequester = focusRequester,
                 enabled = true,
+                error = error,
             )
         }
     }

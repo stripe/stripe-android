@@ -161,7 +161,11 @@ internal class NetworkingLinkSignupViewModel @AssistedInject constructor(
                 val destination = nextPane.destination(referrer = pane)
                 navigationManager.tryNavigateTo(destination)
             },
-            onFail = linkSignupHandler::handleSignupFailure,
+            onFail = { error ->
+                setState {
+                    linkSignupHandler.handleSignupFailure(this, error)
+                }
+            }
         )
     }
 
@@ -176,8 +180,13 @@ internal class NetworkingLinkSignupViewModel @AssistedInject constructor(
                         .collectLatest(::onEmailEntered)
                 }
                 viewModelScope.launch {
-                    payload.phoneController.validFormFieldState().collectLatest {
+                    payload.phoneController.validFormFieldState().collect {
                         setState { copy(validPhone = it) }
+                    }
+                }
+                viewModelScope.launch {
+                    payload.phoneController.fieldValue.collect {
+                        setState { copy(phoneError = null) }
                     }
                 }
             },
@@ -240,6 +249,7 @@ internal class NetworkingLinkSignupViewModel @AssistedInject constructor(
 
     private fun saveNewAccount() {
         suspend {
+            setState { copy(phoneError = null) }
             val state = stateFlow.value
             linkSignupHandler.performSignup(state)
         }.execute {
@@ -321,6 +331,7 @@ internal data class NetworkingLinkSignupState(
     val lookupAccount: Async<ConsumerSessionLookup> = Uninitialized,
     val viewEffect: ViewEffect? = null,
     val isInstantDebits: Boolean = false,
+    val phoneError: String? = null,
 ) {
 
     constructor(parentState: FinancialConnectionsSheetNativeState) : this(

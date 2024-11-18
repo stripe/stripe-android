@@ -1,6 +1,7 @@
 package com.stripe.android.financialconnections.features.networkinglinksignup
 
 import com.stripe.android.core.Logger
+import com.stripe.android.core.exception.StripeException
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.Click
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.logError
@@ -28,8 +29,9 @@ internal interface LinkSignupHandler {
     ): Pane
 
     fun handleSignupFailure(
+        state: NetworkingLinkSignupState,
         error: Throwable,
-    )
+    ): NetworkingLinkSignupState
 
     fun navigateToVerification()
 }
@@ -65,13 +67,26 @@ internal class LinkSignupHandlerForInstantDebits @Inject constructor(
         navigationManager.tryNavigateTo(NetworkingLinkVerification(referrer = LINK_LOGIN))
     }
 
-    override fun handleSignupFailure(error: Throwable) {
+    override fun handleSignupFailure(
+        state: NetworkingLinkSignupState,
+        error: Throwable,
+    ): NetworkingLinkSignupState {
+        val phoneError = error.extractPhoneNumberValidationError()
+
         handleError(
             extraMessage = "Error creating a Link account",
             error = error,
             pane = LINK_LOGIN,
-            displayErrorScreen = true,
+            displayErrorScreen = phoneError == null,
         )
+
+        return state.copy(phoneError = phoneError)
+    }
+
+    private fun Throwable.extractPhoneNumberValidationError(): String? {
+        return (this as? StripeException)?.stripeError?.message?.takeIf {
+            it.contains("phone")
+        }
     }
 }
 
@@ -107,7 +122,10 @@ internal class LinkSignupHandlerForNetworking @Inject constructor(
         navigationManager.tryNavigateTo(NetworkingSaveToLinkVerification(referrer = NETWORKING_LINK_SIGNUP_PANE))
     }
 
-    override fun handleSignupFailure(error: Throwable) {
+    override fun handleSignupFailure(
+        state: NetworkingLinkSignupState,
+        error: Throwable,
+    ): NetworkingLinkSignupState {
         eventTracker.logError(
             extraMessage = "Error saving account to Link",
             error = error,
@@ -116,5 +134,6 @@ internal class LinkSignupHandlerForNetworking @Inject constructor(
         )
 
         navigationManager.tryNavigateTo(Success(referrer = NETWORKING_LINK_SIGNUP_PANE))
+        return state
     }
 }
