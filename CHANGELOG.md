@@ -1,6 +1,8 @@
 # CHANGELOG
 
 ## XX.XX.XX - 20XX-XX-XX
+
+## 21.1.0 - 2024-11-18
 ### PaymentSheet
 - [ADDED] Support for card brand filtering in private beta.
 - [ADDED][9635](https://github.com/stripe/stripe-android/pull/9635) Instant Bank Payments are now available when using deferred intents.
