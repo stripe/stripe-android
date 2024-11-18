@@ -3,29 +3,29 @@ package com.stripe.android.connect.webview.serialization
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class AccountSessionClaimedMessage(
+internal data class AccountSessionClaimedMessage(
     val merchantId: String,
 )
 
 @Serializable
-data class PageLoadMessage(
+internal data class PageLoadMessage(
     val pageViewId: String
 )
 
 @Serializable
-data class SetterMessage(
+internal data class SetterMessage(
     val setter: String,
     val value: SetterMessageValue,
 )
 
 @Serializable
-data class SetterMessageValue(
+internal data class SetterMessageValue(
     val elementTagName: String,
     val message: String? = null,
 )
 
 @Serializable
-data class SecureWebViewMessage(
+internal data class SecureWebViewMessage(
     val id: String,
     val url: String
 )
