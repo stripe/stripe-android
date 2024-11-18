@@ -5,7 +5,6 @@ import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import java.util.Calendar
 
-@SuppressWarnings("MagicNumber")
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 object DateUtils {
 
