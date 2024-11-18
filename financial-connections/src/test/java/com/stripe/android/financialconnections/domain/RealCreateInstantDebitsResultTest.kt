@@ -174,6 +174,8 @@ class RealCreateInstantDebitsResultTest {
                     id = "ba_1234",
                     bankName = "Stripe Bank",
                     last4 = "4242",
+                    bankIconCode = null,
+                    isDefault = false,
                 )
             )
         )

@@ -1,12 +1,15 @@
 package com.stripe.android.link
 
+import com.stripe.android.core.model.CountryCode
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.StripeIntentFixtures
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSessionSignup
+import com.stripe.android.model.CvcCheck
 import com.stripe.android.model.PaymentMethodCreateParams
 import org.mockito.kotlin.mock
 
@@ -65,11 +68,22 @@ internal object TestFactory {
         )
     )
 
+    private val CONSUMER_PAYMENT_DETAILS_CARD = ConsumerPaymentDetails.Card(
+        id = "pm_123",
+        last4 = "4242",
+        expiryYear = 2023,
+        expiryMonth = 12,
+        brand = CardBrand.AmericanExpress,
+        cvcCheck = CvcCheck.Pass,
+        isDefault = true,
+        billingAddress = ConsumerPaymentDetails.BillingAddress(
+            countryCode = CountryCode.US,
+            postalCode = "12312"
+        )
+    )
+
     val LINK_NEW_PAYMENT_DETAILS = LinkPaymentDetails.New(
-        paymentDetails = ConsumerPaymentDetails.Card(
-            id = "pm_123",
-            last4 = "4242",
-        ),
+        paymentDetails = CONSUMER_PAYMENT_DETAILS_CARD,
         paymentMethodCreateParams = PAYMENT_METHOD_CREATE_PARAMS,
         originalParams = mock()
     )
@@ -78,10 +92,7 @@ internal object TestFactory {
 
     val CONSUMER_PAYMENT_DETAILS: ConsumerPaymentDetails = ConsumerPaymentDetails(
         paymentDetails = listOf(
-            ConsumerPaymentDetails.Card(
-                id = "pm_123",
-                last4 = "4242",
-            )
+            CONSUMER_PAYMENT_DETAILS_CARD
         )
     )
 

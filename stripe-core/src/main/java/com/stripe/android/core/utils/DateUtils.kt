@@ -1,10 +1,13 @@
-package com.stripe.android.view
+package com.stripe.android.core.utils
 
 import androidx.annotation.IntRange
+import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import java.util.Calendar
 
-internal object DateUtils {
+@SuppressWarnings("MagicNumber")
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+object DateUtils {
 
     private const val MAX_VALID_YEAR = 9980
 
