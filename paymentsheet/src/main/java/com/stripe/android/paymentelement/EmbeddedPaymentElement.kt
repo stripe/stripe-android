@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement
 
+import android.graphics.drawable.Drawable
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.annotation.RestrictTo
@@ -11,11 +12,13 @@ import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.ExperimentalCardBrandFilteringApi
 import com.stripe.android.common.configuration.ConfigurationDefaults
+import com.stripe.android.common.ui.DelegateDrawable
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentelement.embedded.SharedPaymentElementViewModel
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.uicore.image.rememberDrawablePainter
 import dev.drewhamilton.poko.Poko
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.parcelize.Parcelize
@@ -333,10 +336,7 @@ class EmbeddedPaymentElement internal constructor(
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @ExperimentalEmbeddedPaymentElementApi
     class PaymentOptionDisplayData internal constructor(
-        /**
-         * An image representing a payment method; e.g. the Google Pay logo or a VISA logo.
-         */
-        val iconPainter: Painter,
+        private val imageLoader: suspend () -> Drawable,
 
         /**
          * A user facing string representing the payment method; e.g. "Google Pay" or "···· 4242" for a card.
@@ -364,7 +364,18 @@ class EmbeddedPaymentElement internal constructor(
          *  button to comply with regulations.
          */
         val mandateText: AnnotatedString?,
-    )
+    ) {
+        private val iconDrawable: Drawable by lazy {
+            DelegateDrawable(imageLoader)
+        }
+
+        /**
+         * An image representing a payment method; e.g. the Google Pay logo or a VISA logo.
+         */
+        val iconPainter: Painter
+            @Composable
+            get() = rememberDrawablePainter(iconDrawable)
+    }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {

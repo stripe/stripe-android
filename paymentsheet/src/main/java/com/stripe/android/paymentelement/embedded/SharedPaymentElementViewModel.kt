@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.embedded
 
 import android.content.Context
+import android.content.res.Resources
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -49,6 +50,7 @@ import com.stripe.android.paymentsheet.state.DefaultLinkAccountStatusProvider
 import com.stripe.android.paymentsheet.state.DefaultPaymentElementLoader
 import com.stripe.android.paymentsheet.state.LinkAccountStatusProvider
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.uicore.image.StripeImageLoader
 import dagger.Binds
 import dagger.BindsInstance
 import dagger.Component
@@ -68,6 +70,7 @@ import kotlin.reflect.KClass
 @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 internal class SharedPaymentElementViewModel @Inject constructor(
     private val configurationHandler: EmbeddedConfigurationHandler,
+    private val paymentOptionDisplayDataFactory: PaymentOptionDisplayDataFactory,
 ) : ViewModel() {
     private val _paymentOption: MutableStateFlow<PaymentOptionDisplayData?> = MutableStateFlow(null)
     val paymentOption: StateFlow<PaymentOptionDisplayData?> = _paymentOption.asStateFlow()
@@ -80,7 +83,8 @@ internal class SharedPaymentElementViewModel @Inject constructor(
             intentConfiguration = intentConfiguration,
             configuration = configuration,
         ).fold(
-            onSuccess = {
+            onSuccess = { state ->
+                _paymentOption.value = paymentOptionDisplayDataFactory.create(state.paymentSelection)
                 ConfigureResult.Succeeded()
             },
             onFailure = { error ->
@@ -243,6 +247,17 @@ internal interface SharedPaymentElementViewModelModule {
         @IOContext
         fun ioContext(): CoroutineContext {
             return Dispatchers.IO
+        }
+
+        @Provides
+        fun provideResources(context: Context): Resources {
+            return context.resources
+        }
+
+        @Provides
+        @Singleton
+        fun provideStripeImageLoader(context: Context): StripeImageLoader {
+            return StripeImageLoader(context)
         }
     }
 }

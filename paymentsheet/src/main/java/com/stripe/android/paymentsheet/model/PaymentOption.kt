@@ -6,16 +6,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
 import com.stripe.android.common.ui.DelegateDrawable
 import com.stripe.android.uicore.image.rememberDrawablePainter
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 
 /**
  * The customer's selected payment option.
  */
-@OptIn(DelicateCoroutinesApi::class)
 data class PaymentOption internal constructor(
     /**
      * The drawable resource id of the icon that represents the payment option.
@@ -29,8 +23,6 @@ data class PaymentOption internal constructor(
      */
     val label: String,
     private val imageLoader: suspend () -> Drawable,
-    private val delegateDrawableScope: CoroutineScope = GlobalScope,
-    private val delegateDrawableDispatcher: CoroutineDispatcher = Dispatchers.Main,
 ) {
     @Deprecated("Not intended for public use.")
     constructor(
@@ -55,9 +47,7 @@ data class PaymentOption internal constructor(
      */
     fun icon(): Drawable {
         return DelegateDrawable(
-            imageLoader,
-            delegateDrawableScope,
-            delegateDrawableDispatcher
+            imageLoader = imageLoader,
         )
     }
 }

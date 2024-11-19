@@ -383,3 +383,15 @@ private fun getSavedLabel(selection: PaymentSelection.Saved): ResolvableString? 
         }
     }
 }
+
+internal val PaymentSelection.paymentMethodType: String
+    get() = when (this) {
+        is PaymentSelection.ExternalPaymentMethod -> type
+        PaymentSelection.GooglePay -> "google_pay"
+        PaymentSelection.Link -> "link"
+        is PaymentSelection.New.Card -> paymentMethodCreateParams.typeCode
+        is PaymentSelection.New.GenericPaymentMethod -> paymentMethodCreateParams.typeCode
+        is PaymentSelection.New.LinkInline -> linkPaymentDetails.paymentMethodCreateParams.typeCode
+        is PaymentSelection.New.USBankAccount -> paymentMethodCreateParams.typeCode
+        is PaymentSelection.Saved -> paymentMethod.type?.name ?: "card"
+    }
