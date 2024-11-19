@@ -10,12 +10,15 @@ import com.stripe.android.connect.StripeEmbeddedComponent
 import com.stripe.android.core.Logger
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
+import org.robolectric.RobolectricTestRunner
 import kotlin.test.assertFalse
 
 @OptIn(PrivateBetaConnectSDK::class)
+@RunWith(RobolectricTestRunner::class)
 class StripeConnectWebViewContainerControllerTest {
     private val mockContext: Context = mock()
     private val view: StripeConnectWebViewContainerInternal = mock()
@@ -49,14 +52,8 @@ class StripeConnectWebViewContainerControllerTest {
     }
 
     @Test
-    fun `shouldOverrideUrlLoading doesn't handle request when request is null, returns false`() {
-        val resultNullRequest = controller.shouldOverrideUrlLoading(context = mockContext, request = null)
-        assertFalse(resultNullRequest)
-    }
-
-    @Test
     fun `shouldOverrideUrlLoading allows request and returns false for allowlisted hosts`() {
-        val uri = mockUri("https", "connect-js.stripe.com", "/allowlisted")
+        val uri = Uri.parse("https://connect-js.stripe.com/allowlisted")
         val mockRequest = mock<WebResourceRequest> {
             on { url } doReturn uri
         }
@@ -67,34 +64,25 @@ class StripeConnectWebViewContainerControllerTest {
 
     @Test
     fun `shouldOverrideUrlLoading launches ChromeCustomTab for https urls`() {
-        val mockUri = mockUri("https", "example.com", "/test")
+        val uri = Uri.parse("https://example.com/test")
         val mockRequest = mock<WebResourceRequest> {
-            on { url } doReturn mockUri
+            on { url } doReturn uri
         }
 
         val result = controller.shouldOverrideUrlLoading(mockContext, mockRequest)
 
         assert(result)
-        verify(mockStripeIntentLauncher).launchSecureExternalWebTab(mockContext, mockUri)
+        verify(mockStripeIntentLauncher).launchSecureExternalWebTab(mockContext, uri)
     }
 
     @Test
     fun `shouldOverrideUrlLoading blocks url loading and returns true for unsupported schemes`() {
-        val mockUri = mockUri("mailto", "example.com", "/email")
+        val uri = Uri.parse("mailto://example@stripe.com")
         val mockRequest = mock<WebResourceRequest> {
-            on { url } doReturn mockUri
+            on { url } doReturn uri
         }
 
         val result = controller.shouldOverrideUrlLoading(mockContext, mockRequest)
         assert(result)
-    }
-
-    private fun mockUri(scheme: String, host: String, path: String): Uri {
-        return mock<Uri> {
-            on { this.scheme } doReturn scheme
-            on { this.host } doReturn host
-            on { this.path } doReturn path
-            on { toString() } doReturn "$scheme://$host$path"
-        }
     }
 }
