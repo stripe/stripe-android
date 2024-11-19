@@ -1,6 +1,7 @@
 package com.stripe.android.connect.appearance
 
 import android.os.Parcelable
+import com.stripe.android.connect.appearance.fonts.CustomFontSource
 import com.stripe.android.connect.PrivateBetaConnectSDK
 import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
@@ -9,6 +10,12 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 @Poko
 class Typography(
+    /**
+     * The font family used throughout the application. Refers to the [CustomFontSource] field.
+     * If null the default will be used.
+     */
+    val fontFamily: String? = null,
+
     /**
      * The base font size used for typography in sp.
      * This scales the value of other font size variables. If null the default will be used.

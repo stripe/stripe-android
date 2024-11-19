@@ -188,6 +188,10 @@ internal class StripeConnectWebViewContainerImpl(
                     $ANDROID_JS_INTERFACE.pageDidLoad = (message) => {
                         $ANDROID_JS_INTERNAL_INTERFACE.pageDidLoad(JSON.stringify(message));
                     };
+                    $ANDROID_JS_INTERFACE.fetchInitParams = () => {
+                        let params = $ANDROID_JS_INTERNAL_INTERFACE.fetchInitParams();
+                        return Promise.resolve(JSON.parse(params));
+                    };
                     $ANDROID_JS_INTERFACE.fetchClientSecret = () => {
                         return new Promise((resolve, reject) => {
                             try {
@@ -205,7 +209,7 @@ internal class StripeConnectWebViewContainerImpl(
                         $ANDROID_JS_INTERNAL_INTERFACE.openSecureWebView(JSON.stringify(message));
                     };
                 """.trimIndent(),
-                null
+                { resultString -> logger.debug("Javascript Bridge initialized. Result: \"$resultString\"") }
             )
         }
     }

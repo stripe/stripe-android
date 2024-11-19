@@ -10,6 +10,7 @@ import com.stripe.android.connect.appearance.Badge
 import com.stripe.android.connect.appearance.Button
 import com.stripe.android.connect.appearance.Colors
 import com.stripe.android.connect.appearance.CornerRadius
+import com.stripe.android.connect.appearance.Typography
 import com.stripe.android.connect.example.R
 import kotlinx.parcelize.Parcelize
 
@@ -26,6 +27,7 @@ data class AppearanceInfo(
         HotDog(R.string.appearance_hot_dog),
         OceanBreeze(R.string.appearance_ocean_breeze),
         Link(R.string.appearance_link),
+        CustomFont(R.string.custom_font)
     }
 
     companion object {
@@ -36,6 +38,7 @@ data class AppearanceInfo(
                 AppearanceId.HotDog -> hotDogAppearance(context)
                 AppearanceId.OceanBreeze -> oceanBreezeAppearance(context)
                 AppearanceId.Link -> linkAppearance(context)
+                AppearanceId.CustomFont -> customFont()
             }
         }
 
@@ -142,6 +145,15 @@ data class AppearanceInfo(
                     colorText = ContextCompat.getColor(context, R.color.link_badge_neutral_text)
                 ),
                 cornerRadius = CornerRadius(base = 5f)
+            )
+        )
+
+        private fun customFont() = AppearanceInfo(
+            appearanceId = AppearanceId.Link,
+            appearance = Appearance(
+                typography = Typography(
+                    fontFamily = "doto",
+                )
             )
         )
     }
