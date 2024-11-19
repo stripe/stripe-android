@@ -2,7 +2,6 @@ package com.stripe.android.model
 
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
-import com.stripe.android.core.utils.DateUtils
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.core.utils.DateUtils
