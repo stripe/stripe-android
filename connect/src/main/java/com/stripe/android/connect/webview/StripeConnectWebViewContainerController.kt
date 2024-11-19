@@ -56,18 +56,20 @@ internal class StripeConnectWebViewContainerController(
     fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
         view ?: return false // the view shouldn't be null, but if it is then don't handle the request
         val url = request?.url ?: return false // if the request isn't for a url, then don't handle it
+
         return if (url.host in ALLOWLISTED_HOSTS) {
+            // TODO - add an analytic event here to track this unexpected behavior
             logger.warning("(StripeConnectWebViewClient) Received pop-up for allow-listed host: $url")
             false // Allow the request to propagate so we open URL in WebView, but this is not an expected operation
         } else if (url.scheme == "https" || url.scheme == "http") {
             // open the URL in an external browser for safety and to preserve back navigation
             logger.debug("(StripeConnectWebViewClient) Opening URL in external browser: $url")
             stripeIntentLauncher.launchSecureExternalWebTab(view.context, url)
-            true // block the request since we're opening it in a chrome tab
+            true // block the request since we're opening it in a secure external tab
         } else {
-            // don't launch if it's an unsupported scheme (ie. not http/https)
+            // TODO - support non-http/https schemes.
             logger.debug("(StripeConnectWebViewClient) Received unsupported pop-up request: $url")
-            true // block the request as it's unsupported
+            true // block the request as it's currently unsupported
         }
     }
 
