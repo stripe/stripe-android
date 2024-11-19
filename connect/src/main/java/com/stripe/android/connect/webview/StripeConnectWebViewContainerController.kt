@@ -12,8 +12,8 @@ import com.stripe.android.connect.BuildConfig
 import com.stripe.android.connect.EmbeddedComponentManager
 import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.StripeEmbeddedComponent
-import com.stripe.android.core.Logger
 import com.stripe.android.connect.webview.serialization.ConnectInstanceJs
+import com.stripe.android.core.Logger
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
