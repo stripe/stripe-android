@@ -13,9 +13,16 @@ internal interface ConfirmationDefinition<
     > {
     val key: String
 
+    val confirmationFlow: ConfirmationFlow
+
     fun option(
         confirmationOption: ConfirmationHandler.Option,
     ): TConfirmationOption?
+
+    fun canConfirm(
+        confirmationOption: TConfirmationOption,
+        intent: StripeIntent,
+    ): Boolean
 
     suspend fun action(
         confirmationOption: TConfirmationOption,
@@ -34,12 +41,35 @@ internal interface ConfirmationDefinition<
         onResult: (TLauncherResult) -> Unit,
     ): TLauncher
 
-    fun toPaymentConfirmationResult(
+    fun toResult(
         confirmationOption: TConfirmationOption,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
         intent: StripeIntent,
         result: TLauncherResult,
-    ): ConfirmationHandler.Result
+    ): Result
+
+    enum class ConfirmationFlow {
+        Preconfirm,
+        Confirm,
+    }
+
+    sealed interface Result {
+        data class Canceled(
+            val action: ConfirmationHandler.Result.Canceled.Action,
+        ) : Result
+
+        data class Succeeded(
+            val intent: StripeIntent,
+            val confirmationOption: ConfirmationHandler.Option,
+            val deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+        ) : Result
+
+        data class Failed(
+            val cause: Throwable,
+            val message: ResolvableString,
+            val type: ConfirmationHandler.Result.Failed.ErrorType,
+        ) : Result
+    }
 
     sealed interface ConfirmationAction<TLauncherArgs> {
         data class Complete<TLauncherArgs>(

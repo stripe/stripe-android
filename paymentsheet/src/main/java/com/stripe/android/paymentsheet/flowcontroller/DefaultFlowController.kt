@@ -9,30 +9,23 @@ import androidx.annotation.VisibleForTesting
 import androidx.core.app.ActivityOptionsCompat
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.SavedStateViewModelFactory
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.lifecycleScope
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.ENABLE_LOGGING
-import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.utils.UserFacingLogger
-import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
-import com.stripe.android.paymentelement.confirmation.DefaultConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.DeferredIntentConfirmationType
 import com.stripe.android.paymentelement.confirmation.IntentConfirmationInterceptor
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.paymentlauncher.PaymentResult
-import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.ExternalPaymentMethodInterceptor
 import com.stripe.android.paymentsheet.InitializedViaCompose
 import com.stripe.android.paymentsheet.PaymentOptionCallback
@@ -50,7 +43,6 @@ import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.isLink
-import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncherFactory
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionContract
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionLauncher
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionLauncherFactory
@@ -62,25 +54,20 @@ import com.stripe.android.paymentsheet.ui.SepaMandateContract
 import com.stripe.android.paymentsheet.ui.SepaMandateResult
 import com.stripe.android.paymentsheet.utils.canSave
 import com.stripe.android.uicore.utils.AnimationConstants
-import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.plus
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 import javax.inject.Named
-import javax.inject.Provider
-import kotlin.coroutines.CoroutineContext
 
 @FlowControllerScope
 internal class DefaultFlowController @Inject internal constructor(
     // Properties provided through FlowControllerComponent.Builder
     private val viewModelScope: CoroutineScope,
     private val lifecycleOwner: LifecycleOwner,
-    private val statusBarColor: () -> Int?,
     private val paymentOptionFactory: PaymentOptionFactory,
     private val paymentOptionCallback: PaymentOptionCallback,
     private val paymentResultCallback: PaymentSheetResultCallback,
@@ -90,24 +77,14 @@ internal class DefaultFlowController @Inject internal constructor(
     private val context: Context,
     private val eventReporter: EventReporter,
     private val viewModel: FlowControllerViewModel,
-    paymentLauncherFactory: StripePaymentLauncherAssistedFactory,
-    /**
-     * [PaymentConfiguration] is [Lazy] because the client might set publishableKey and
-     * stripeAccountId after creating a [DefaultFlowController].
-     */
-    lazyPaymentConfiguration: Provider<PaymentConfiguration>,
+    private val confirmationHandler: ConfirmationHandler,
     @Named(ENABLE_LOGGING) private val enableLogging: Boolean,
     @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
-    googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory,
-    bacsMandateConfirmationLauncherFactory: BacsMandateConfirmationLauncherFactory,
     cvcRecollectionLauncherFactory: CvcRecollectionLauncherFactory,
     private val linkLauncher: LinkPaymentLauncher,
     private val configurationHandler: FlowControllerConfigurationHandler,
-    intentConfirmationInterceptor: IntentConfirmationInterceptor,
     private val errorReporter: ErrorReporter,
     @InitializedViaCompose private val initializedViaCompose: Boolean,
-    @IOContext workContext: CoroutineContext,
-    logger: UserFacingLogger,
     private val cvcRecollectionHandler: CvcRecollectionHandler
 ) : PaymentSheet.FlowController {
     private val paymentOptionActivityLauncher: ActivityResultLauncher<PaymentOptionContract.Args>
@@ -119,18 +96,6 @@ internal class DefaultFlowController @Inject internal constructor(
      * after [DefaultFlowController].
      */
     lateinit var flowControllerComponent: FlowControllerComponent
-
-    private val confirmationHandler = DefaultConfirmationHandler.Factory(
-        intentConfirmationInterceptor = intentConfirmationInterceptor,
-        paymentConfigurationProvider = lazyPaymentConfiguration,
-        statusBarColor = { null },
-        savedStateHandle = viewModel.handle,
-        bacsMandateConfirmationLauncherFactory = bacsMandateConfirmationLauncherFactory,
-        stripePaymentLauncherAssistedFactory = paymentLauncherFactory,
-        googlePayPaymentMethodLauncherFactory = googlePayPaymentMethodLauncherFactory,
-        errorReporter = errorReporter,
-        logger = logger,
-    ).create(viewModelScope.plus(workContext))
 
     private val initializationMode: PaymentElementLoader.InitializationMode?
         get() = viewModel.previousConfigureRequest?.initializationMode
@@ -297,7 +262,6 @@ internal class DefaultFlowController @Inject internal constructor(
         val args = PaymentOptionContract.Args(
             state = state.paymentSheetState.copy(paymentSelection = viewModel.paymentSelection),
             configuration = state.config,
-            statusBarColor = statusBarColor(),
             enableLogging = enableLogging,
             productUsage = productUsage,
         )
@@ -778,7 +742,7 @@ internal class DefaultFlowController @Inject internal constructor(
         ): PaymentSheet.FlowController {
             val flowControllerViewModel = ViewModelProvider(
                 owner = viewModelStoreOwner,
-                factory = SavedStateViewModelFactory()
+                factory = FlowControllerViewModel.Factory(statusBarColor)
             )[FlowControllerViewModel::class.java]
 
             val flowControllerStateComponent = flowControllerViewModel.flowControllerStateComponent
@@ -787,7 +751,6 @@ internal class DefaultFlowController @Inject internal constructor(
                 flowControllerStateComponent.flowControllerComponentBuilder
                     .lifeCycleOwner(lifecycleOwner)
                     .activityResultCaller(activityResultCaller)
-                    .statusBarColor(statusBarColor)
                     .paymentOptionCallback(paymentOptionCallback)
                     .paymentResultCallback(paymentResultCallback)
                     .initializedViaCompose(initializedViaCompose)

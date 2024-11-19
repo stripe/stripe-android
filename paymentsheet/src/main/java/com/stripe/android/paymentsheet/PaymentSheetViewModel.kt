@@ -352,7 +352,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     is ConfirmationHandler.State.Preconfirming -> {
                         if (
                             state.inPreconfirmFlow &&
-                            state.confirmationOption is ConfirmationHandler.Option.GooglePay
+                            state.confirmationType == ConfirmationHandler.Option.Type.GooglePay
                         ) {
                             setContentVisible(false)
                         } else {

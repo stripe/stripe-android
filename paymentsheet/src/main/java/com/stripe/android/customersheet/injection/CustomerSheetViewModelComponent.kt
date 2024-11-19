@@ -7,6 +7,7 @@ import com.stripe.android.customersheet.CustomerSheetIntegration
 import com.stripe.android.customersheet.CustomerSheetViewModel
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
 import com.stripe.android.paymentelement.confirmation.ConfirmationModule
+import com.stripe.android.paymentelement.confirmation.IntentConfirmationModule
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import dagger.BindsInstance
 import dagger.Component
@@ -15,6 +16,7 @@ import dagger.Component
 @Component(
     modules = [
         ConfirmationModule::class,
+        IntentConfirmationModule::class,
         CustomerSheetViewModelModule::class,
         StripeRepositoryModule::class,
         GooglePayLauncherModule::class,

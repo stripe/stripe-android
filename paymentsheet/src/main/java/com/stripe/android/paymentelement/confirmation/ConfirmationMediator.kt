@@ -29,19 +29,26 @@ internal class ConfirmationMediator<
             savedStateHandle[parametersKey] = value
         }
 
-    fun canConfirm(confirmationOption: ConfirmationHandler.Option): Boolean {
-        return definition.option(confirmationOption) != null
+    val confirmationFlow = definition.confirmationFlow
+
+    fun canConfirm(
+        confirmationOption: ConfirmationHandler.Option,
+        intent: StripeIntent,
+    ): Boolean {
+        return definition.option(confirmationOption)?.let {
+            definition.canConfirm(it, intent)
+        } ?: false
     }
 
     fun register(
         activityResultCaller: ActivityResultCaller,
-        onResult: (ConfirmationHandler.Result) -> Unit,
+        onResult: (ConfirmationDefinition.Result) -> Unit,
     ) {
         launcher = definition.createLauncher(
             activityResultCaller
         ) { result ->
             val confirmationResult = persistedParameters?.let { params ->
-                definition.toPaymentConfirmationResult(
+                definition.toResult(
                     confirmationOption = params.confirmationOption,
                     intent = params.intent,
                     result = result,
@@ -52,7 +59,7 @@ internal class ConfirmationMediator<
                     "Arguments should have been initialized before handling result!"
                 )
 
-                ConfirmationHandler.Result.Failed(
+                ConfirmationDefinition.Result.Failed(
                     cause = exception,
                     message = exception.stripeErrorMessage(),
                     type = ConfirmationHandler.Result.Failed.ErrorType.Internal,

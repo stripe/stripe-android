@@ -24,9 +24,17 @@ internal class IntentConfirmationDefinition(
     > {
     override val key: String = "IntentConfirmation"
 
+    override val confirmationFlow: ConfirmationDefinition.ConfirmationFlow =
+        ConfirmationDefinition.ConfirmationFlow.Confirm
+
     override fun option(confirmationOption: ConfirmationHandler.Option): ConfirmationHandler.Option.PaymentMethod? {
         return confirmationOption as? ConfirmationHandler.Option.PaymentMethod
     }
+
+    override fun canConfirm(
+        confirmationOption: ConfirmationHandler.Option.PaymentMethod,
+        intent: StripeIntent
+    ): Boolean = true
 
     override suspend fun action(
         confirmationOption: ConfirmationHandler.Option.PaymentMethod,
@@ -90,23 +98,24 @@ internal class IntentConfirmationDefinition(
         }
     }
 
-    override fun toPaymentConfirmationResult(
+    override fun toResult(
         confirmationOption: ConfirmationHandler.Option.PaymentMethod,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
         intent: StripeIntent,
         result: InternalPaymentResult
-    ): ConfirmationHandler.Result {
+    ): ConfirmationDefinition.Result {
         return when (result) {
-            is InternalPaymentResult.Completed -> ConfirmationHandler.Result.Succeeded(
+            is InternalPaymentResult.Completed -> ConfirmationDefinition.Result.Succeeded(
                 intent = result.intent,
+                confirmationOption = confirmationOption,
                 deferredIntentConfirmationType = deferredIntentConfirmationType,
             )
-            is InternalPaymentResult.Failed -> ConfirmationHandler.Result.Failed(
+            is InternalPaymentResult.Failed -> ConfirmationDefinition.Result.Failed(
                 cause = result.throwable,
                 message = result.throwable.stripeErrorMessage(),
                 type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
             )
-            is InternalPaymentResult.Canceled -> ConfirmationHandler.Result.Canceled(
+            is InternalPaymentResult.Canceled -> ConfirmationDefinition.Result.Canceled(
                 action = ConfirmationHandler.Result.Canceled.Action.InformCancellation,
             )
         }

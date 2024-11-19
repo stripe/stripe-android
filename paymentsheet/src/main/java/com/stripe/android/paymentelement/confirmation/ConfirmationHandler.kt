@@ -91,7 +91,7 @@ internal interface ConfirmationHandler {
          * Indicates the the handler is currently performing pre-confirmation steps before starting confirmation.
          */
         data class Preconfirming(
-            val confirmationOption: Option?,
+            val confirmationType: Option.Type?,
             val inPreconfirmFlow: Boolean,
         ) : State
 
@@ -197,13 +197,21 @@ internal interface ConfirmationHandler {
         }
     }
 
-    sealed interface Option : Parcelable {
+    sealed class Option(val confirmationType: Type) : Parcelable {
+        enum class Type {
+            GooglePay,
+            ExternalPaymentMethod,
+            Bacs,
+            SavedPaymentMethod,
+            NewPaymentMethod
+        }
+
         @Parcelize
         data class GooglePay(
             val initializationMode: PaymentElementLoader.InitializationMode,
             val shippingDetails: AddressDetails?,
             val config: Config,
-        ) : Option {
+        ) : Option(Type.GooglePay) {
             @Parcelize
             data class Config(
                 val environment: PaymentSheet.GooglePayConfiguration.Environment?,
@@ -221,7 +229,7 @@ internal interface ConfirmationHandler {
         data class ExternalPaymentMethod(
             val type: String,
             val billingDetails: PaymentMethodModel.BillingDetails?,
-        ) : Option
+        ) : Option(Type.ExternalPaymentMethod)
 
         @Parcelize
         data class BacsPaymentMethod(
@@ -230,11 +238,11 @@ internal interface ConfirmationHandler {
             val createParams: PaymentMethodCreateParams,
             val optionsParams: PaymentMethodOptionsParams?,
             val appearance: PaymentSheet.Appearance,
-        ) : Option
+        ) : Option(Type.Bacs)
 
-        sealed interface PaymentMethod : Option {
-            val initializationMode: PaymentElementLoader.InitializationMode
-            val shippingDetails: AddressDetails?
+        sealed class PaymentMethod(type: Type) : Option(type) {
+            abstract val initializationMode: PaymentElementLoader.InitializationMode
+            abstract val shippingDetails: AddressDetails?
 
             @Parcelize
             data class Saved(
@@ -242,7 +250,7 @@ internal interface ConfirmationHandler {
                 override val shippingDetails: AddressDetails?,
                 val paymentMethod: com.stripe.android.model.PaymentMethod,
                 val optionsParams: PaymentMethodOptionsParams?,
-            ) : PaymentMethod
+            ) : PaymentMethod(Type.SavedPaymentMethod)
 
             @Parcelize
             data class New(
@@ -251,7 +259,7 @@ internal interface ConfirmationHandler {
                 val createParams: PaymentMethodCreateParams,
                 val optionsParams: PaymentMethodOptionsParams?,
                 val shouldSave: Boolean
-            ) : PaymentMethod
+            ) : PaymentMethod(Type.NewPaymentMethod)
         }
     }
 }
