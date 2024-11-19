@@ -79,13 +79,10 @@ internal object ElementsSessionFixtures {
             "link_bank_enabled": false,
             "link_bank_onboarding_enabled": false,
             "link_consumer_incentive": {
-              campaign: "bankaccountsignup",
               incentive_params: {
-                amount_flat: 500,
-                amount_percent: null,
-                currency: "usd",
                 payment_method: "link_instant_debits"
-              }
+              },
+              incentive_display_text: "$5"
             }
           },
           "merchant_country": "US",

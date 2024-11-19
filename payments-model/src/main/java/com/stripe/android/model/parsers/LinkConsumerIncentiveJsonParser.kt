@@ -1,8 +1,6 @@
 package com.stripe.android.model.parsers
 
 import androidx.annotation.RestrictTo
-import com.stripe.android.core.model.StripeJsonUtils.optDouble
-import com.stripe.android.core.model.StripeJsonUtils.optLong
 import com.stripe.android.core.model.StripeJsonUtils.optString
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.model.LinkConsumerIncentive
@@ -18,23 +16,15 @@ object LinkConsumerIncentiveJsonParser : ModelJsonParser<LinkConsumerIncentive> 
             )
 
             LinkConsumerIncentive(
-                campaign = incentive.optString("campaign"),
                 incentiveParams = incentiveParams,
+                incentiveDisplayText = optString(incentive, "incentive_display_text"),
             )
         }
     }
 
     private fun buildIncentiveParams(json: JSONObject): LinkConsumerIncentive.IncentiveParams {
-        val amountFlat = optLong(json, "amount_flat")
-        val amountPercent = optDouble(json, "amount_percent")?.toFloat()
-        val currency = optString(json, "currency")
-        val paymentMethod = optString(json, "payment_method")
-
         return LinkConsumerIncentive.IncentiveParams(
-            amountFlat = amountFlat,
-            amountPercent = amountPercent,
-            currency = currency,
-            paymentMethod = paymentMethod.orEmpty(),
+            paymentMethod = json.optString("payment_method"),
         )
     }
 }

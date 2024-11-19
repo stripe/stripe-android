@@ -728,13 +728,10 @@ class ElementsSessionJsonParserTest {
 
         assertThat(elementsSession?.linkSettings?.linkConsumerIncentive).isEqualTo(
             LinkConsumerIncentive(
-                campaign = "bankaccountsignup",
                 incentiveParams = LinkConsumerIncentive.IncentiveParams(
-                    amountFlat = 500,
-                    amountPercent = null,
-                    currency = "usd",
                     paymentMethod = "link_instant_debits",
-                )
+                ),
+                incentiveDisplayText = "$5",
             )
         )
     }
