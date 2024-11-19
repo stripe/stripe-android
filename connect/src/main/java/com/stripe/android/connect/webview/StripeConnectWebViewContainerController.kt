@@ -54,7 +54,6 @@ internal class StripeConnectWebViewContainerController(
 
     fun shouldOverrideUrlLoading(context: Context, request: WebResourceRequest): Boolean {
         val url = request.url
-
         return if (url.host?.lowercase() in ALLOWLISTED_HOSTS) {
             // TODO - add an analytic event here to track this unexpected behavior
             logger.warning("(StripeConnectWebViewClient) Received pop-up for allow-listed host: $url")
