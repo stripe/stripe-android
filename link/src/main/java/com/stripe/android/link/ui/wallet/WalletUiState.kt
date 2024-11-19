@@ -23,7 +23,7 @@ internal data class WalletUiState(
             return if (isProcessing) {
                 PrimaryButtonState.Processing
             } else {
-                PrimaryButtonState.Disabled
+                PrimaryButtonState.Enabled
             }
         }
 

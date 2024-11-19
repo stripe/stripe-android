@@ -40,6 +40,8 @@ import com.stripe.android.link.theme.HorizontalPadding
 import com.stripe.android.link.theme.linkColors
 import com.stripe.android.link.theme.linkShapes
 import com.stripe.android.link.ui.BottomSheetContent
+import com.stripe.android.link.ui.PrimaryButton
+import com.stripe.android.link.ui.SecondaryButton
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.uicore.text.Html
 
@@ -130,6 +132,21 @@ internal fun WalletScreen(
                 )
             )
         }
+
+        Spacer(Modifier.weight(1f))
+
+        PrimaryButton(
+            label = "Pay",
+            state = state.primaryButtonState,
+            onButtonClick = {  },
+            iconEnd = com.stripe.android.ui.core.R.drawable.stripe_ic_lock
+        )
+
+        SecondaryButton(
+            enabled = !state.primaryButtonState.isBlocking,
+            label = stringResource(id = R.string.stripe_wallet_pay_another_way),
+            onClick = {  }
+        )
     }
 }
 
@@ -167,7 +184,7 @@ internal fun CollapsedPaymentDetails(
             ),
             color = MaterialTheme.linkColors.disabledText
         )
-        PaymentDetails(paymentDetails = selectedPaymentMethod, enabled = true)
+        PaymentDetails(paymentDetails = selectedPaymentMethod)
         Icon(
             painter = painterResource(id = R.drawable.stripe_link_chevron),
             contentDescription = stringResource(id = R.string.stripe_wallet_expand_accessibility),
@@ -243,7 +260,6 @@ private fun ExpandedPaymentDetails(
             PaymentDetailsListItem(
                 paymentDetails = item,
                 enabled = isEnabled,
-                isSupported = uiState.supportedTypes.contains(item.type),
                 isSelected = uiState.selectedItem?.id == item.id,
                 //TODO: Fix this
                 isUpdating = false, // uiState.paymentMethodIdBeingUpdated == item.id,

@@ -24,6 +24,7 @@ internal class WalletViewModel @Inject constructor(
     private val configuration: LinkConfiguration,
     private val linkAccount: LinkAccount,
     private val linkAccountManager: LinkAccountManager,
+    private val intentConfirmationHandler: ConfirmationHandler,
     private val logger: Logger,
     private val navigate: (route: LinkScreen, clearStack: Boolean) -> Unit,
     private val dismissWithResult: (LinkActivityResult) -> Unit
