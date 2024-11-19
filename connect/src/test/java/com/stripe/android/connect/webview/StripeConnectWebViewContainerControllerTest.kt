@@ -7,6 +7,7 @@ import com.stripe.android.connect.EmbeddedComponentManager
 import com.stripe.android.connect.EmbeddedComponentManager.Configuration
 import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.StripeEmbeddedComponent
+import com.stripe.android.core.Logger
 import org.junit.Before
 import org.junit.Test
 import org.mockito.kotlin.doReturn
@@ -24,6 +25,7 @@ class StripeConnectWebViewContainerControllerTest {
     )
     private val embeddedComponent: StripeEmbeddedComponent = StripeEmbeddedComponent.PAYOUTS
     private val mockStripeIntentLauncher: StripeIntentLauncher = mock()
+    private val mockLogger: Logger = mock()
 
     private lateinit var controller: StripeConnectWebViewContainerController
 
@@ -33,6 +35,8 @@ class StripeConnectWebViewContainerControllerTest {
             view = view,
             embeddedComponentManager = embeddedComponentManager,
             embeddedComponent = embeddedComponent,
+            stripeIntentLauncher = mockStripeIntentLauncher,
+            logger = mockLogger,
         )
     }
 
