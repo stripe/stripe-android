@@ -31,6 +31,7 @@ import com.stripe.android.core.version.StripeSdkVersion
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.encodeToJsonElement
@@ -221,11 +222,6 @@ internal class StripeConnectWebViewContainerImpl(
         }
 
         @JavascriptInterface
-        fun fetchInitParams() {
-            logger.debug("InitParams fetched")
-        }
-
-        @JavascriptInterface
         fun fetchInitComponentProps() {
             logger.debug("InitComponentProps fetched")
         }
@@ -235,6 +231,14 @@ internal class StripeConnectWebViewContainerImpl(
         @JavascriptInterface
         fun log(message: String) {
             logger.debug("Log from JS: $message")
+        }
+
+        @JavascriptInterface
+        fun fetchInitParams(): String {
+            val context = checkNotNull(webView?.context)
+            val initialParams = checkNotNull(controller?.getInitialParams(context))
+            logger.debug("InitParams fetched: ${initialParams.toDebugString()}")
+            return jsonSerializer.encodeToString(initialParams)
         }
 
         @JavascriptInterface

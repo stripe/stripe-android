@@ -1,5 +1,6 @@
 package com.stripe.android.connect.webview
 
+import android.content.Context
 import androidx.annotation.RestrictTo
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
@@ -9,6 +10,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.stripe.android.connect.EmbeddedComponentManager
 import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.StripeEmbeddedComponent
+import com.stripe.android.connect.webview.serialization.ConnectInstanceJs
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -66,6 +68,10 @@ internal class StripeConnectWebViewContainerController(
      */
     suspend fun fetchClientSecret(): String? {
         return embeddedComponentManager.fetchClientSecret()
+    }
+
+    fun getInitialParams(context: Context): ConnectInstanceJs {
+        return embeddedComponentManager.getInitialParams(context)
     }
 
     /**
