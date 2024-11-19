@@ -69,6 +69,7 @@ internal class LinkApiRepository @Inject constructor(
             currency = null,
             paymentIntentId = null,
             setupIntentId = null,
+            sessionId = null,
             consentAction = consentAction,
             requestOptions = buildRequestOptions(),
             requestSurface = REQUEST_SURFACE,

@@ -14,12 +14,17 @@ internal object HostedAuthUrlBuilder {
         args: FinancialConnectionsSheetActivityArgs,
         manifest: FinancialConnectionsSessionManifest,
     ): String? {
+        val elementsSessionContext = args.elementsSessionContext
         return create(
             hostedAuthUrl = manifest.hostedAuthUrl,
             isInstantDebits = args is FinancialConnectionsSheetActivityArgs.ForInstantDebits,
-            linkMode = args.elementsSessionContext?.linkMode,
-            billingDetails = args.elementsSessionContext?.billingDetails,
-            prefillDetails = args.elementsSessionContext?.prefillDetails,
+            linkMode = elementsSessionContext?.linkMode,
+            billingDetails = elementsSessionContext?.billingDetails,
+            prefillDetails = elementsSessionContext?.prefillDetails,
+            incentive = elementsSessionContext?.incentive ?: false,
+            incentiveEligibilitySession = elementsSessionContext?.let {
+                it.paymentIntentId ?: it.setupIntentId ?: it.sessionId
+            },
         )
     }
 
@@ -29,6 +34,8 @@ internal object HostedAuthUrlBuilder {
         linkMode: LinkMode?,
         billingDetails: BillingDetails?,
         prefillDetails: PrefillDetails?,
+        incentive: Boolean,
+        incentiveEligibilitySession: String?,
     ): String? {
         if (hostedAuthUrl == null) {
             return null
@@ -42,6 +49,11 @@ internal object HostedAuthUrlBuilder {
             queryParams.add("expand_payment_method=true")
             linkMode?.let { queryParams.add("link_mode=${it.value}") }
             billingDetails?.let { queryParams.add(makeBillingDetailsQueryParams(it)) }
+
+            queryParams.add("instantDebitsIncentive=$incentive")
+            if (incentive) {
+                queryParams.add("incentiveEligibilitySession=$incentiveEligibilitySession")
+            }
         }
 
         prefillDetails?.run {

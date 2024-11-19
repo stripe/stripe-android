@@ -1,6 +1,7 @@
 package com.stripe.android.financialconnections.features.networkinglinksignup
 
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.Click
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.logError
@@ -42,6 +43,7 @@ internal class LinkSignupHandlerForInstantDebits @Inject constructor(
     private val navigationManager: NavigationManager,
     private val handleError: HandleError,
     private val confirmIncentiveRepository: ConfirmInstantDebitsIncentiveRepository,
+    private val elementsSessionContext: ElementsSessionContext?,
 ) : LinkSignupHandler {
 
     override suspend fun performSignup(

@@ -144,6 +144,11 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
         phoneNumber: String,
         country: String,
     ): ConsumerSessionSignup = mutex.withLock {
+        val incentive = elementsSessionContext?.incentive ?: false
+        val paymentIntentId = elementsSessionContext?.paymentIntentId.takeIf { incentive }
+        val setupIntentId = elementsSessionContext?.setupIntentId.takeIf { incentive }
+        val sessionId = elementsSessionContext?.sessionId.takeIf { incentive }
+
         consumersApiService.signUp(
             email = email,
             phoneNumber = phoneNumber,
@@ -152,8 +157,9 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
             locale = locale,
             amount = elementsSessionContext?.amount,
             currency = elementsSessionContext?.currency,
-            paymentIntentId = elementsSessionContext?.paymentIntentId,
-            setupIntentId = elementsSessionContext?.setupIntentId,
+            paymentIntentId = paymentIntentId,
+            setupIntentId = setupIntentId,
+            sessionId = sessionId,
             requestOptions = provideApiRequestOptions(useConsumerPublishableKey = false),
             requestSurface = requestSurface,
             consentAction = EnteredPhoneNumberClickedSaveToLink,

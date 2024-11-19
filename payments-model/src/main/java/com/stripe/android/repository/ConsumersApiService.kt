@@ -41,6 +41,7 @@ interface ConsumersApiService {
         currency: String?,
         paymentIntentId: String?,
         setupIntentId: String?,
+        sessionId: String?,
         requestSurface: String,
         consentAction: ConsumerSignUpConsentAction,
         requestOptions: ApiRequest.Options,
@@ -129,6 +130,7 @@ class ConsumersApiServiceImpl(
         currency: String?,
         paymentIntentId: String?,
         setupIntentId: String?,
+        sessionId: String?,
         requestSurface: String,
         consentAction: ConsumerSignUpConsentAction,
         requestOptions: ApiRequest.Options,
@@ -163,6 +165,10 @@ class ConsumersApiServiceImpl(
                 ).plus(
                     setupIntentId?.let {
                         mapOf("financial_incentive[setup_intent]" to it)
+                    }.orEmpty()
+                ).plus(
+                    sessionId?.let {
+                        mapOf("financial_incentive[elements_session_id]" to it)
                     }.orEmpty()
                 ),
             ),

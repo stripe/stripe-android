@@ -48,6 +48,7 @@ class FinancialConnectionsSheet internal constructor(
         val linkMode: LinkMode?,
         val billingDetails: BillingDetails?,
         val prefillDetails: PrefillDetails,
+        val incentive: Boolean,
     ) : Parcelable {
 
         val paymentIntentId: String?
@@ -55,6 +56,9 @@ class FinancialConnectionsSheet internal constructor(
 
         val setupIntentId: String?
             get() = (initializationMode as? InitializationMode.SetupIntent)?.setupIntentId
+
+        val sessionId: String?
+            get() = (initializationMode as? InitializationMode.DeferredIntent)?.sessionId
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         sealed interface InitializationMode : Parcelable {
@@ -69,7 +73,7 @@ class FinancialConnectionsSheet internal constructor(
 
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             @Parcelize
-            data object DeferredIntent : InitializationMode
+            data class DeferredIntent(val sessionId: String) : InitializationMode
         }
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

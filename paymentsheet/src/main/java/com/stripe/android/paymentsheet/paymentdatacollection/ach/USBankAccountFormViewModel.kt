@@ -27,13 +27,13 @@ import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountForInstantDebitsResult
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResponseInternal
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
-import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
+import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.BankFormScreenState.ResultIdentifier
@@ -500,12 +500,13 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     }
 
     private fun makeElementsSessionContext(): ElementsSessionContext {
+        val intentId = args.stripeIntentId!!
         val initializationMode = if (args.clientSecret == null) {
-            ElementsSessionContext.InitializationMode.DeferredIntent
+            ElementsSessionContext.InitializationMode.DeferredIntent(intentId)
         } else if (args.isPaymentFlow) {
-            ElementsSessionContext.InitializationMode.PaymentIntent(args.stripeIntentId!!)
+            ElementsSessionContext.InitializationMode.PaymentIntent(intentId)
         } else {
-            ElementsSessionContext.InitializationMode.SetupIntent(args.stripeIntentId!!)
+            ElementsSessionContext.InitializationMode.SetupIntent(intentId)
         }
 
         return ElementsSessionContext(
@@ -515,6 +516,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             linkMode = args.linkMode,
             billingDetails = makeElementsSessionContextBillingDetails(),
             prefillDetails = makePrefillDetails(),
+            incentive = args.incentive != null,
         )
     }
 

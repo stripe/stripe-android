@@ -145,6 +145,7 @@ internal class FinancialConnectionsPlaygroundViewModel(
                                     phone = null,
                                     phoneCountryCode = null,
                                 ),
+                                incentive = false,
                             ),
                             experience = settings.get<ExperienceSetting>().selectedOption,
                             integrationType = settings.get<IntegrationTypeSetting>().selectedOption,
