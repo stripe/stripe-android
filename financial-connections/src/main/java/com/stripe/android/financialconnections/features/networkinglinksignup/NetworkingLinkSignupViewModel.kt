@@ -180,13 +180,14 @@ internal class NetworkingLinkSignupViewModel @AssistedInject constructor(
                         .collectLatest(::onEmailEntered)
                 }
                 viewModelScope.launch {
-                    payload.phoneController.validFormFieldState().collect {
-                        setState { copy(validPhone = it) }
-                    }
-                }
-                viewModelScope.launch {
-                    payload.phoneController.fieldValue.collect {
-                        setState { copy(phoneError = null) }
+                    payload.phoneController.formFieldValue.collect { formField ->
+                        val completeValue = formField.value.takeIf { formField.isComplete }
+                        setState {
+                            copy(
+                                validPhone = completeValue,
+                                phoneError = null,
+                            )
+                        }
                     }
                 }
             },
@@ -204,9 +205,7 @@ internal class NetworkingLinkSignupViewModel @AssistedInject constructor(
     /**
      * @param validEmail valid email, or null if entered email is invalid.
      */
-    private suspend fun onEmailEntered(
-        validEmail: String?
-    ) {
+    private fun onEmailEntered(validEmail: String?) {
         setState { copy(validEmail = validEmail) }
         if (validEmail != null) {
             logger.debug("VALID EMAIL ADDRESS $validEmail.")
