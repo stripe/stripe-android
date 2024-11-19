@@ -1,5 +1,6 @@
 package com.stripe.android.connect.webview
 
+import android.webkit.ValueCallback
 import android.webkit.WebSettings
 import android.webkit.WebView
 import com.stripe.android.connect.EmbeddedComponentManager
@@ -12,10 +13,13 @@ import kotlinx.serialization.json.Json
 import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentMatchers.anyString
+import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doReturn
-import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 
 @OptIn(PrivateBetaConnectSDK::class)
 class StripeConnectWebViewClientTest {
@@ -33,6 +37,13 @@ class StripeConnectWebViewClientTest {
 
     @Before
     fun setup() {
+        val onLoadJsCallback = argumentCaptor<ValueCallback<String>>()
+        whenever(mockWebView.evaluateJavascript(any(), onLoadJsCallback.capture())).thenAnswer {
+            // Simulate successful JavaScript execution
+            onLoadJsCallback.lastValue.onReceiveValue("null")
+            null
+        }
+
         val embeddedComponentManager = EmbeddedComponentManager(
             configuration = Configuration(publishableKey = "pk_test_123"),
             fetchClientSecretCallback = { },
@@ -47,16 +58,17 @@ class StripeConnectWebViewClientTest {
     }
 
     @Test
-    fun `onPageStarted should initialize JavaScript bridge`() {
-        webViewClient.onPageStarted(mockWebView, "https://example.com", null)
-        verify(mockWebView).evaluateJavascript(anyString(), isNull())
-    }
-
-    @Test
     fun `configureAndLoadWebView sets user agent`() {
         container.initializeWebView(mockWebView)
 
         verify(mockWebView).webViewClient = webViewClient
         verify(mockSettings).userAgentString = "user-agent - stripe-android/${StripeSdkVersion.VERSION_NAME}"
+    }
+
+    @Test
+    fun `onPageStarted initializes javascript bridge`() {
+        webViewClient.onPageStarted(mockWebView, "https://example.com", null)
+
+        verify(mockWebView).evaluateJavascript(anyString(), anyOrNull())
     }
 }

@@ -6,6 +6,7 @@ import com.stripe.android.connect.EmbeddedComponentManager
 import com.stripe.android.connect.FetchClientSecretCallback.ClientSecretResultCallback
 import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.appearance.Appearance
+import com.stripe.android.connect.appearance.fonts.CustomFontSource
 import com.stripe.android.connect.example.ui.appearance.AppearanceInfo
 import com.stripe.android.core.BuildConfig
 import com.stripe.android.core.Logger
@@ -62,7 +63,14 @@ class EmbeddedComponentManagerProvider @Inject constructor(
                 publishableKey = publishableKey,
             ),
             fetchClientSecretCallback = ::fetchClientSecret,
-            appearance = getAppearance(context, settingsService.getAppearanceId())
+            appearance = getAppearance(context, settingsService.getAppearanceId()),
+            customFonts = listOf(
+                CustomFontSource(
+                    "fonts/doto.ttf",
+                    "doto",
+                    weight = 1000,
+                )
+            )
         ).also {
             embeddedComponentManager = it
         }

@@ -4,6 +4,9 @@ import android.content.Context
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
 import com.stripe.android.connect.appearance.Appearance
+import com.stripe.android.connect.appearance.fonts.CustomFontSource
+import com.stripe.android.connect.webview.serialization.ConnectInstanceJs
+import com.stripe.android.connect.webview.serialization.toJs
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,6 +20,7 @@ class EmbeddedComponentManager(
     private val configuration: Configuration,
     private val fetchClientSecretCallback: FetchClientSecretCallback,
     appearance: Appearance = Appearance(),
+    private val customFonts: List<CustomFontSource> = emptyList(),
 ) {
     private val _appearanceFlow = MutableStateFlow(appearance)
     internal val appearanceFlow: StateFlow<Appearance> get() = _appearanceFlow.asStateFlow()
@@ -26,6 +30,13 @@ class EmbeddedComponentManager(
      */
     fun createPayoutsView(context: Context): PayoutsView {
         return PayoutsView(context = context, embeddedComponentManager = this)
+    }
+
+    internal fun getInitialParams(context: Context): ConnectInstanceJs {
+        return ConnectInstanceJs(
+            appearance = _appearanceFlow.value.toJs(),
+            fonts = customFonts.map { it.toJs(context) },
+        )
     }
 
     /**

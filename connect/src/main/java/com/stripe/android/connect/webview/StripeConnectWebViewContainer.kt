@@ -31,6 +31,7 @@ import com.stripe.android.core.version.StripeSdkVersion
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.encodeToJsonElement
@@ -188,6 +189,10 @@ internal class StripeConnectWebViewContainerImpl(
                     $ANDROID_JS_INTERFACE.pageDidLoad = (message) => {
                         $ANDROID_JS_INTERNAL_INTERFACE.pageDidLoad(JSON.stringify(message));
                     };
+                    $ANDROID_JS_INTERFACE.fetchInitParams = () => {
+                        let params = $ANDROID_JS_INTERNAL_INTERFACE.fetchInitParams();
+                        return Promise.resolve(JSON.parse(params));
+                    };
                     $ANDROID_JS_INTERFACE.fetchClientSecret = () => {
                         return new Promise((resolve, reject) => {
                             try {
@@ -205,7 +210,7 @@ internal class StripeConnectWebViewContainerImpl(
                         $ANDROID_JS_INTERNAL_INTERFACE.openSecureWebView(JSON.stringify(message));
                     };
                 """.trimIndent(),
-                null
+                { resultString -> logger.debug("Javascript Bridge initialized. Result: \"$resultString\"") }
             )
         }
     }
@@ -214,11 +219,6 @@ internal class StripeConnectWebViewContainerImpl(
         @JavascriptInterface
         fun debug(message: String) {
             logger.debug("Debug log from JS: $message")
-        }
-
-        @JavascriptInterface
-        fun fetchInitParams() {
-            logger.debug("InitParams fetched")
         }
 
         @JavascriptInterface
@@ -231,6 +231,14 @@ internal class StripeConnectWebViewContainerImpl(
         @JavascriptInterface
         fun log(message: String) {
             logger.debug("Log from JS: $message")
+        }
+
+        @JavascriptInterface
+        fun fetchInitParams(): String {
+            val context = checkNotNull(webView?.context)
+            val initialParams = checkNotNull(controller?.getInitialParams(context))
+            logger.debug("InitParams fetched: ${initialParams.toDebugString()}")
+            return jsonSerializer.encodeToString(initialParams)
         }
 
         @JavascriptInterface

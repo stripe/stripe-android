@@ -7,7 +7,7 @@ package com.stripe.android.connect
  */
 internal enum class StripeEmbeddedComponent(val componentName: String) {
     /**
-     * Represents the Payouts component: https://docs.stripe.com/connect/supported-embedded-components/payouts
+     * Represents the Payouts component: [https://docs.stripe.com/connect/supported-embedded-components/payouts](https://docs.stripe.com/connect/supported-embedded-components/payouts)
      */
     PAYOUTS("payouts"),
 }
