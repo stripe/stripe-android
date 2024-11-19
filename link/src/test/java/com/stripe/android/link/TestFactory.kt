@@ -1,6 +1,7 @@
 package com.stripe.android.link
 
 import com.stripe.android.link.model.LinkAccount
+import com.stripe.android.link.model.StripeIntentFixtures
 import com.stripe.android.model.CardParams
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerSession
@@ -24,6 +25,11 @@ internal object TestFactory {
     const val EMAIL = "email@stripe.com"
     const val CLIENT_SECRET = "client_secret"
     const val PUBLISHABLE_KEY = "publishable_key"
+    const val MERCHANT_NAME = "merchantName"
+    const val CUSTOMER_EMAIL = "customer@email.com"
+    const val CUSTOMER_PHONE = "1234567890"
+    const val CUSTOMER_BILLING_COUNTRY_CODE = "US"
+    const val CUSTOMER_NAME = "Customer"
 
     val VERIFIED_SESSION = ConsumerSession.VerificationSession(
         type = ConsumerSession.VerificationSession.SessionType.Sms,
@@ -77,5 +83,21 @@ internal object TestFactory {
                 last4 = "4242",
             )
         )
+    )
+
+    val LINK_CONFIGURATION = LinkConfiguration(
+        stripeIntent = StripeIntentFixtures.PI_SUCCEEDED,
+        merchantName = MERCHANT_NAME,
+        merchantCountryCode = "",
+        customerInfo = LinkConfiguration.CustomerInfo(
+            name = CUSTOMER_NAME,
+            email = CUSTOMER_EMAIL,
+            phone = CUSTOMER_PHONE,
+            billingCountryCode = CUSTOMER_BILLING_COUNTRY_CODE
+        ),
+        shippingValues = null,
+        flags = emptyMap(),
+        cardBrandChoice = null,
+        passthroughModeEnabled = false
     )
 }

@@ -7,12 +7,13 @@ import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkScreen
+import com.stripe.android.link.TestFactory
+import com.stripe.android.link.TestFactory.CUSTOMER_EMAIL
 import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.FakeLinkEventsReporter
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.model.LinkAccount
-import com.stripe.android.link.model.StripeIntentFixtures
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.PaymentIntent
@@ -36,21 +37,6 @@ import kotlin.time.Duration.Companion.milliseconds
 @RunWith(RobolectricTestRunner::class)
 internal class SignUpViewModelTest {
     private val dispatcher = UnconfinedTestDispatcher()
-    private val config = LinkConfiguration(
-        stripeIntent = StripeIntentFixtures.PI_SUCCEEDED,
-        merchantName = MERCHANT_NAME,
-        merchantCountryCode = "",
-        customerInfo = LinkConfiguration.CustomerInfo(
-            name = CUSTOMER_NAME,
-            email = CUSTOMER_EMAIL,
-            phone = CUSTOMER_PHONE,
-            billingCountryCode = CUSTOMER_BILLING_COUNTRY_CODE
-        ),
-        shippingValues = null,
-        flags = emptyMap(),
-        cardBrandChoice = null,
-        passthroughModeEnabled = false
-    )
 
     private val navController: NavHostController = mock()
 
@@ -315,7 +301,7 @@ internal class SignUpViewModelTest {
 
     private fun createViewModel(
         prefilledEmail: String? = null,
-        configuration: LinkConfiguration = config,
+        configuration: LinkConfiguration = TestFactory.LINK_CONFIGURATION,
         countryCode: CountryCode = CountryCode.US,
         linkEventsReporter: LinkEventsReporter = SignUpLinkEventsReporter(),
         linkAccountManager: LinkAccountManager = FakeLinkAccountManager(),
@@ -358,14 +344,6 @@ internal class SignUpViewModelTest {
 
     private val SignUpViewModel.contentState: SignUpScreenState
         get() = state.value
-
-    private companion object {
-        const val MERCHANT_NAME = "merchantName"
-        const val CUSTOMER_EMAIL = "customer@email.com"
-        const val CUSTOMER_PHONE = "1234567890"
-        const val CUSTOMER_BILLING_COUNTRY_CODE = "US"
-        const val CUSTOMER_NAME = "Customer"
-    }
 }
 
 private open class SignUpLinkEventsReporter : FakeLinkEventsReporter() {

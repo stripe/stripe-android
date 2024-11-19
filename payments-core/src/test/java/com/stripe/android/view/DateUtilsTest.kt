@@ -1,6 +1,7 @@
 package com.stripe.android.view
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.utils.DateUtils
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.util.Calendar

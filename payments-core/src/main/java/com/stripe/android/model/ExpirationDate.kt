@@ -1,6 +1,6 @@
 package com.stripe.android.model
 
-import com.stripe.android.view.DateUtils
+import com.stripe.android.core.utils.DateUtils
 
 sealed class ExpirationDate {
     internal data class Unvalidated(
