@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.model.CountryCode
+import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.CvcCheck
@@ -32,20 +33,23 @@ internal class PaymentDetailsListItemScreenShotTest(
     @Test
     fun test() {
         paparazziRule.snapshot {
-            PaymentDetailsListItem(
-                paymentDetails = testCase.state.details,
-                enabled = testCase.state.enabled,
-                isSelected = testCase.state.isSelected,
-                isUpdating = testCase.state.isUpdating,
-                onClick = {},
-                onMenuButtonClick = {}
-            )
+            DefaultLinkTheme {
+                PaymentDetailsListItem(
+                    paymentDetails = testCase.state.details,
+                    enabled = testCase.state.enabled,
+                    isSelected = testCase.state.isSelected,
+                    isUpdating = testCase.state.isUpdating,
+                    onClick = {},
+                    onMenuButtonClick = {}
+                )
+            }
         }
     }
 
     companion object {
         @JvmStatic
         @Parameterized.Parameters(name = "{0}")
+        @SuppressWarnings("LongMethod")
         fun data(): List<TestCase> {
             return listOf(
                 TestCase(
@@ -70,7 +74,7 @@ internal class PaymentDetailsListItemScreenShotTest(
                     )
                 ),
                 TestCase(
-                    name = "CardEnabledSelected",
+                    name = "CardEnabledAndSelected",
                     state = State(
                         details = ConsumerPaymentDetails.Card(
                             id = "QAAAKJ6",
@@ -91,7 +95,7 @@ internal class PaymentDetailsListItemScreenShotTest(
                     )
                 ),
                 TestCase(
-                    name = "CardEnabledUpdating",
+                    name = "CardEnabledAndUpdating",
                     state = State(
                         details = ConsumerPaymentDetails.Card(
                             id = "QAAAKJ6",
@@ -107,12 +111,12 @@ internal class PaymentDetailsListItemScreenShotTest(
                             )
                         ),
                         enabled = true,
-                        isSelected = true,
-                        isUpdating = false
+                        isSelected = false,
+                        isUpdating = true
                     )
                 ),
                 TestCase(
-                    name = "CardDisabledSelected",
+                    name = "CardDisabledAndSelected",
                     state = State(
                         details = ConsumerPaymentDetails.Card(
                             id = "QAAAKJ6",
@@ -148,7 +152,7 @@ internal class PaymentDetailsListItemScreenShotTest(
                     )
                 ),
                 TestCase(
-                    name = "PassTThroughEnabled",
+                    name = "PassThroughEnabled",
                     state = State(
                         details = ConsumerPaymentDetails.Passthrough(
                             id = "wAAACGA",

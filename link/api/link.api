@@ -216,6 +216,13 @@ public final class com/stripe/android/link/ui/verification/ComposableSingletons$
 	public final fun getLambda-1$link_release ()Lkotlin/jvm/functions/Function3;
 }
 
+public final class com/stripe/android/link/ui/wallet/ComposableSingletons$PaymentDetailsKt {
+	public static final field INSTANCE Lcom/stripe/android/link/ui/wallet/ComposableSingletons$PaymentDetailsKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$link_release ()Lkotlin/jvm/functions/Function2;
+}
+
 public final class com/stripe/android/link/utils/ComposableSingletons$InlineContentTemplateBuilderKt {
 	public static final field INSTANCE Lcom/stripe/android/link/utils/ComposableSingletons$InlineContentTemplateBuilderKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function2;
