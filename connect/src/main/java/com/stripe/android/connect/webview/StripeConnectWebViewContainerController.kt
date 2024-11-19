@@ -2,7 +2,6 @@ package com.stripe.android.connect.webview
 
 import android.content.Context
 import android.webkit.WebResourceRequest
-import android.webkit.WebView
 import androidx.annotation.RestrictTo
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
@@ -53,8 +52,7 @@ internal class StripeConnectWebViewContainerController(
         updateState { copy(isNativeLoadingIndicatorVisible = !receivedSetOnLoaderStart) }
     }
 
-    fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
-        view ?: return false // the view shouldn't be null, but if it is then don't handle the request
+    fun shouldOverrideUrlLoading(context: Context, request: WebResourceRequest?): Boolean {
         val url = request?.url ?: return false // if the request isn't for a url, then don't handle it
 
         return if (url.host in ALLOWLISTED_HOSTS) {
@@ -64,7 +62,7 @@ internal class StripeConnectWebViewContainerController(
         } else if (url.scheme == "https" || url.scheme == "http") {
             // open the URL in an external browser for safety and to preserve back navigation
             logger.debug("(StripeConnectWebViewClient) Opening URL in external browser: $url")
-            stripeIntentLauncher.launchSecureExternalWebTab(view.context, url)
+            stripeIntentLauncher.launchSecureExternalWebTab(context, url)
             true // block the request since we're opening it in a secure external tab
         } else {
             // TODO - support non-http/https schemes.
