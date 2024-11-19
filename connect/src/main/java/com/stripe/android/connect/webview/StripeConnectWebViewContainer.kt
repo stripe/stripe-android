@@ -1,10 +1,14 @@
 package com.stripe.android.connect.webview
 
+import android.Manifest
 import android.annotation.SuppressLint
+import android.content.Context
+import android.content.pm.PackageManager
 import android.content.res.ColorStateList
 import android.graphics.Bitmap
 import android.view.LayoutInflater
 import android.webkit.JavascriptInterface
+import android.webkit.PermissionRequest
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
@@ -12,9 +16,11 @@ import android.webkit.WebViewClient
 import android.widget.FrameLayout
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
+import androidx.core.content.ContextCompat.checkSelfPermission
 import androidx.core.view.doOnAttach
 import androidx.core.view.doOnDetach
 import androidx.core.view.isVisible
+import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.connect.BuildConfig
@@ -34,9 +40,12 @@ import com.stripe.android.connect.webview.serialization.SetterFunctionCalledMess
 import com.stripe.android.connect.webview.serialization.toJs
 import com.stripe.android.core.Logger
 import com.stripe.android.core.version.StripeSdkVersion
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.encodeToJsonElement
@@ -86,7 +95,14 @@ internal class StripeConnectWebViewContainerImpl<Listener : StripeEmbeddedCompon
     internal val stripeWebViewClient = StripeConnectWebViewClient()
 
     @VisibleForTesting
-    internal val stripeWebChromeClient = StripeWebChromeClient()
+    internal val stripeWebChromeClient = StripeConnectWebChromeClient(
+        context = webView?.context ?: throw IllegalStateException("WebView is not initialized"),
+        embeddedComponentManager = embeddedComponentManager
+            ?: throw IllegalStateException("EmbeddedComponentManager is not initialized"),
+        viewScope = {
+            webView?.findViewTreeLifecycleOwner()?.lifecycleScope ?: throw IllegalStateException("View is not attached")
+        }
+    )
 
     private var controller: StripeConnectWebViewContainerController<Listener>? = null
 
@@ -244,6 +260,48 @@ internal class StripeConnectWebViewContainerImpl<Listener : StripeEmbeddedCompon
      * [WebViewClient.shouldOverrideUrlLoading] to work properly.
      */
     inner class StripeWebChromeClient : WebChromeClient()
+
+    internal class StripeConnectWebChromeClient(
+        private val context: Context,
+        private val embeddedComponentManager: EmbeddedComponentManager,
+        private val viewScope: () -> LifecycleCoroutineScope,
+    ) : WebChromeClient() {
+
+        private val inProgressRequests: MutableMap<PermissionRequest, Job> = mutableMapOf()
+
+        override fun onPermissionRequest(request: PermissionRequest) {
+            // we only care about camera permissions at this time (video/audio)
+            val permissionsRequested = request.resources.filter {
+                it in listOf(PermissionRequest.RESOURCE_VIDEO_CAPTURE, PermissionRequest.RESOURCE_AUDIO_CAPTURE)
+            }.toTypedArray()
+            if (permissionsRequested.isEmpty()) {
+                request.deny() // no supported permissions were requested, so reject the request
+                return
+            }
+
+            if (checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+                request.grant(permissionsRequested)
+            } else {
+                val job = viewScope().launch {
+                    val isGranted = embeddedComponentManager.requestCameraPermission()
+                    withContext(Dispatchers.Main) {
+                        if (isGranted) {
+                            request.grant(permissionsRequested)
+                        } else {
+                            request.deny()
+                        }
+                    }
+                    inProgressRequests.remove(request)
+                }
+                inProgressRequests[request] = job
+            }
+        }
+
+        override fun onPermissionRequestCanceled(request: PermissionRequest?) {
+            if (request == null) return
+            inProgressRequests.remove(request)?.also { it.cancel() }
+        }
+    }
 
     private inner class StripeJsInterface {
         @JavascriptInterface
