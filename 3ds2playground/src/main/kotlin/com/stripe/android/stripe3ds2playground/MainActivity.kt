@@ -77,7 +77,8 @@ class MainActivity : AppCompatActivity() {
             acsTransId = ACS_TRANS_ID,
             threeDsServerTransId = SERVER_TRANS_ID,
             sdkTransId = SDK_TRANS_ID,
-            messageVersion = "2.1.0"
+            messageVersion = "2.2.0",
+            threeDSRequestorAppURL = "threedsrequestorappurl"
         )
 
         val labelCustomization = StripeLabelCustomization()
@@ -471,7 +472,9 @@ class MainActivity : AppCompatActivity() {
                     acsTransId = acsTransId,
                     threeDsServerTransId = threeDsServerTransId,
                     sdkTransId = SDK_TRANS_ID,
-                    messageVersion = "2.1.0"
+                    messageVersion = "2.2.0",
+                    threeDSRequestorAppURL = "threeDSRequestorAppURL"
+
                 ),
                 cres,
                 ChallengeRequestExecutor.Config(

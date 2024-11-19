@@ -2,7 +2,6 @@ package com.stripe.android.stripe3ds2.init
 
 import android.os.Build
 import androidx.annotation.VisibleForTesting
-import com.stripe.android.stripe3ds2.utils.Supplier
 import java.util.HashMap
 
 /**
@@ -11,20 +10,17 @@ import java.util.HashMap
  */
 internal class DeviceParamNotAvailableFactoryImpl internal constructor(
     private val apiVersion: Int,
-    private val hardwareIdSupplier: Supplier<HardwareId>
 ) : DeviceParamNotAvailableFactory {
 
-    internal constructor(
-        hardwareIdSupplier: Supplier<HardwareId>
-    ) : this(
+    internal constructor() : this(
         Build.VERSION.SDK_INT,
-        hardwareIdSupplier
     )
 
     override fun create(): Map<String, String> {
         return marketOrRegionRestrictionParams
             .plus(platformVersionParams)
             .plus(permissionParams)
+            .plus(unavailableParams)
     }
 
     @VisibleForTesting
@@ -39,8 +35,26 @@ internal class DeviceParamNotAvailableFactoryImpl internal constructor(
                 DeviceParam.PARAM_OS_VERSION,
                 DeviceParam.PARAM_LOCALE,
                 DeviceParam.PARAM_TIME_ZONE,
-                DeviceParam.PARAM_HARDWARE_ID,
-                DeviceParam.PARAM_SCREEN_RESOLUTION
+                DeviceParam.PARAM_SCREEN_RESOLUTION,
+                DeviceParam.PARAM_SDK_APP_ID,
+                DeviceParam.PARAM_SDK_VERSION,
+                DeviceParam.PARAM_SDK_REF_NUMBER,
+                DeviceParam.PARAM_DATE_TIME,
+                DeviceParam.PARAM_SDK_TRANS_ID,
+                DeviceParam.PARAM_WEB_VIEW_USER_AGENT,
+                DeviceParam.PARAM_SIM_CARRIER_ID,
+                DeviceParam.PARAM_SECURE_FRP_MODE,
+                DeviceParam.PARAM_APPLY_RAMPING_RINGER,
+                DeviceParam.PARAM_HARDWARE_SKU,
+                DeviceParam.PARAM_SOC_MANUFACTURER,
+                DeviceParam.PARAM_SOC_MODEL,
+                DeviceParam.PARAM_SIM_CARRIER_ID_NAME,
+                DeviceParam.PARAM_MANUFACTURER_CODE,
+                DeviceParam.PARAM_SIM_SPECIFIC_CARRIER_ID,
+                DeviceParam.PARAM_SIM_SPECIFIC_CARRIER_ID_NAME,
+                DeviceParam.PARAM_MULTI_SIM_SUPPORTED,
+                DeviceParam.PARAM_SUBSCRIPTION_ID,
+                DeviceParam.PARAM_RTT_CALLING_MODE
             )
 
             DeviceParam.entries.forEach {
@@ -97,6 +111,44 @@ internal class DeviceParamNotAvailableFactoryImpl internal constructor(
                     Reason.PLATFORM_VERSION.toString()
             }
 
+            if (apiVersion < Build.VERSION_CODES.P) {
+                params[DeviceParam.PARAM_SIM_CARRIER_ID.toString()] =
+                    Reason.PLATFORM_VERSION.toString()
+                params[DeviceParam.PARAM_SIM_CARRIER_ID_NAME.toString()] =
+                    Reason.PLATFORM_VERSION.toString()
+                params[DeviceParam.PARAM_RTT_CALLING_MODE.toString()] =
+                    Reason.PLATFORM_VERSION.toString()
+            }
+
+            if (apiVersion < Build.VERSION_CODES.Q) {
+                params[DeviceParam.PARAM_SIM_SPECIFIC_CARRIER_ID.toString()] =
+                    Reason.PLATFORM_VERSION.toString()
+                params[DeviceParam.PARAM_SIM_SPECIFIC_CARRIER_ID_NAME.toString()] =
+                    Reason.PLATFORM_VERSION.toString()
+                params[DeviceParam.PARAM_MULTI_SIM_SUPPORTED.toString()] =
+                    Reason.PLATFORM_VERSION.toString()
+                params[DeviceParam.PARAM_APPLY_RAMPING_RINGER.toString()] =
+                    Reason.PLATFORM_VERSION.toString()
+            }
+
+            if (apiVersion < Build.VERSION_CODES.R) {
+                params[DeviceParam.PARAM_SUBSCRIPTION_ID.toString()] =
+                    Reason.PLATFORM_VERSION.toString()
+                params[DeviceParam.PARAM_BONDED_DEVICES_ALIAS.toString()] =
+                    Reason.PLATFORM_VERSION.toString()
+                params[DeviceParam.PARAM_SECURE_FRP_MODE.toString()] =
+                    Reason.PLATFORM_VERSION.toString()
+            }
+
+            if (apiVersion < Build.VERSION_CODES.S) {
+                params[DeviceParam.PARAM_HARDWARE_SKU.toString()] =
+                    Reason.PLATFORM_VERSION.toString()
+                params[DeviceParam.PARAM_SOC_MANUFACTURER.toString()] =
+                    Reason.PLATFORM_VERSION.toString()
+                params[DeviceParam.PARAM_SOC_MODEL.toString()] =
+                    Reason.PLATFORM_VERSION.toString()
+            }
+
             return params
         }
 
@@ -131,10 +183,6 @@ internal class DeviceParamNotAvailableFactoryImpl internal constructor(
             params[DeviceParam.PARAM_LATITUDE.toString()] = Reason.PERMISSION.toString()
             params[DeviceParam.PARAM_LONGITUDE.toString()] = Reason.PERMISSION.toString()
 
-            if (!hardwareIdSupplier.get().isPresent) {
-                params[DeviceParam.PARAM_HARDWARE_ID.toString()] = Reason.PLATFORM_VERSION.toString()
-            }
-
             params[DeviceParam.PARAM_DEVICE_NAME.toString()] =
                 Reason.PERMISSION.toString()
             params[DeviceParam.PARAM_BLUETOOTH_ADDRESS.toString()] =
@@ -168,13 +216,35 @@ internal class DeviceParamNotAvailableFactoryImpl internal constructor(
             params[DeviceParam.PARAM_SECURE_INSTALL_NON_MARKET_APPS.toString()] =
                 Reason.PERMISSION.toString()
 
+            params[DeviceParam.PARAM_MULTI_SIM_SUPPORTED.toString()] =
+                Reason.PERMISSION.toString()
+            params[DeviceParam.PARAM_6GHZ_BAND_SUPPORTED.toString()] =
+                Reason.PERMISSION.toString()
+            params[DeviceParam.PARAM_PASSPOINT_FQDN.toString()] =
+                Reason.PERMISSION.toString()
+            params[DeviceParam.PARAM_PASSPOINT_PROVIDER_FRIENDLY_NAME.toString()] =
+                Reason.PERMISSION.toString()
+            params[DeviceParam.PARAM_BONDED_DEVICES_ALIAS.toString()] =
+                Reason.PERMISSION.toString()
+
+            return params
+        }
+
+    private val unavailableParams: Map<String, String>
+        get() {
+            val params = HashMap<String, String>()
+
+            params[DeviceParam.PARAM_MANUFACTURER_CODE.toString()] =
+                Reason.UNAVAILABLE.toString()
+
             return params
         }
 
     internal enum class Reason(private val code: String) {
         MARKET_OR_REGION_RESTRICTION("RE01"),
         PLATFORM_VERSION("RE02"),
-        PERMISSION("RE03");
+        PERMISSION("RE03"),
+        UNAVAILABLE("RE04");
 
         override fun toString(): String {
             return code

@@ -40,22 +40,33 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/stripe_3ds2_challenge_zone_vertical_padding" />
 
-    <com.stripe.android.stripe3ds2.views.ThreeDS2Button
-        android:id="@+id/czv_submit_button"
-        style="@style/Stripe3DS2Button"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/stripe_3ds2_challenge_zone_vertical_padding"
-        tools:text="Submit" />
+        android:minHeight="48dp"
+        android:orientation="horizontal">
 
-    <com.stripe.android.stripe3ds2.views.ThreeDS2Button
-        android:id="@+id/czv_resend_button"
-        style="@style/Stripe3DS2TextButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        tools:text="Resend Code"
-        tools:visibility="visible" />
+        <com.stripe.android.stripe3ds2.views.ThreeDS2Button
+            android:id="@+id/czv_submit_button"
+            style="@style/Stripe3DS2Button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/stripe_3ds2_challenge_zone_vertical_padding"
+            android:layout_weight="1"
+            android:minHeight="48dp"
+            tools:text="Submit" />
+
+        <com.stripe.android.stripe3ds2.views.ThreeDS2Button
+            android:id="@+id/czv_resend_button"
+            style="@style/Stripe3DS2TextButton"
+            android:layout_width="0dp"
+            android:minHeight="48dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            tools:text="Resend Code"
+            tools:visibility="visible" />
+    </LinearLayout>
 
     <com.stripe.android.stripe3ds2.views.ThreeDS2TextView
         android:id="@+id/czv_whitelisting_label"

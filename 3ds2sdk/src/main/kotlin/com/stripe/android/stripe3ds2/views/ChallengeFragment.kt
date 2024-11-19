@@ -25,10 +25,12 @@ import com.stripe.android.stripe3ds2.transactions.ChallengeRequestData
 import com.stripe.android.stripe3ds2.transactions.ChallengeResponseData
 import com.stripe.android.stripe3ds2.transactions.ErrorData
 import com.stripe.android.stripe3ds2.transactions.UiType
+import com.stripe.android.stripe3ds2.utils.AnalyticsDelegate
 import kotlin.coroutines.CoroutineContext
 
 internal class ChallengeFragment(
     private val uiCustomization: StripeUiCustomization,
+    private val analyticsDelegate: AnalyticsDelegate?,
     private val transactionTimer: TransactionTimer,
     private val errorRequestExecutor: ErrorRequestExecutor,
     private val errorReporter: ErrorReporter,
@@ -40,7 +42,7 @@ internal class ChallengeFragment(
 
     private lateinit var cresData: ChallengeResponseData
 
-    private val uiTypeCode: String by lazy { cresData.uiType?.code.orEmpty() }
+    val uiTypeCode: String by lazy { cresData.uiType?.code.orEmpty() }
 
     internal val viewModel: ChallengeActivityViewModel by activityViewModels {
         ChallengeActivityViewModel.Factory(
@@ -58,61 +60,52 @@ internal class ChallengeFragment(
     private var _viewBinding: StripeChallengeFragmentBinding? = null
     internal val viewBinding get() = requireNotNull(_viewBinding)
 
-    private val challengeZoneView: ChallengeZoneView by lazy { viewBinding.caChallengeZone }
+    val challengeZoneView: ChallengeZoneView by lazy { viewBinding.caChallengeZone }
     private val brandZoneView: BrandZoneView by lazy { viewBinding.caBrandZone }
 
-    internal val challengeZoneTextView: ChallengeZoneTextView? by lazy {
-        if (cresData.uiType == UiType.Text) {
-            challengeEntryViewFactory.createChallengeEntryTextView(
+    val challengeZoneTextView: ChallengeZoneTextView by lazy {
+        challengeEntryViewFactory.createChallengeEntryTextView(
+            cresData,
+            uiCustomization
+        )
+    }
+
+    val challengeZoneSelectView: ChallengeZoneSelectView by lazy {
+        challengeEntryViewFactory
+            .createChallengeEntrySelectView(
                 cresData,
                 uiCustomization
             )
-        } else {
-            null
-        }
     }
-    internal val challengeZoneSelectView: ChallengeZoneSelectView? by lazy {
-        if (
-            cresData.uiType == UiType.SingleSelect ||
-            cresData.uiType == UiType.MultiSelect
-        ) {
-            challengeEntryViewFactory
-                .createChallengeEntrySelectView(
-                    cresData,
-                    uiCustomization
-                )
-        } else {
-            null
-        }
+
+    val challengeZoneWebView: ChallengeZoneWebView by lazy {
+        challengeEntryViewFactory.createChallengeEntryWebView(cresData)
     }
-    internal val challengeZoneWebView: ChallengeZoneWebView? by lazy {
-        if (cresData.uiType == UiType.Html) {
-            challengeEntryViewFactory.createChallengeEntryWebView(cresData)
-        } else {
-            null
-        }
+
+    val informationZoneView: InformationZoneView by lazy {
+        viewBinding.caInformationZone
     }
 
     internal val userEntry: String
         @VisibleForTesting
         get() {
             return when (cresData.uiType) {
-                UiType.Text -> challengeZoneTextView?.userEntry
+                UiType.Text -> challengeZoneTextView.userEntry
                 UiType.SingleSelect,
                 UiType.MultiSelect -> {
-                    challengeZoneSelectView?.userEntry
+                    challengeZoneSelectView.userEntry
                 }
-                UiType.Html -> challengeZoneWebView?.userEntry
+                UiType.Html -> challengeZoneWebView.userEntry
                 else -> ""
-            }.orEmpty()
+            }
         }
 
     private val challengeAction: ChallengeAction
         get() {
             return when (cresData.uiType) {
-                UiType.OutOfBand -> ChallengeAction.Oob
+                UiType.OutOfBand -> ChallengeAction.Oob(challengeZoneView.whitelistingSelection)
                 UiType.Html -> ChallengeAction.HtmlForm(userEntry)
-                else -> ChallengeAction.NativeForm(userEntry)
+                else -> ChallengeAction.NativeForm(userEntry, challengeZoneView.whitelistingSelection)
             }
         }
 
@@ -128,12 +121,14 @@ internal class ChallengeFragment(
             )
             return
         }
+
         cresData = nullableCres
+        analyticsDelegate?.didReceiveChallengeResponseWithTransactionId(cresData.serverTransId, uiTypeCode)
 
         _viewBinding = StripeChallengeFragmentBinding.bind(view)
 
         viewModel.challengeText.observe(viewLifecycleOwner) { challengeText ->
-            challengeZoneTextView?.setText(challengeText)
+            challengeZoneTextView.setText(challengeText)
         }
 
         viewModel.refreshUi.observe(viewLifecycleOwner) {
@@ -147,6 +142,7 @@ internal class ChallengeFragment(
         }
 
         updateBrandZoneImages()
+
         configure(
             challengeZoneTextView,
             challengeZoneSelectView,
@@ -155,18 +151,34 @@ internal class ChallengeFragment(
         configureInformationZoneView()
     }
 
+    override fun onResume() {
+        super.onResume()
+
+        if (this::cresData.isInitialized && cresData.uiType == UiType.OutOfBand) {
+            analyticsDelegate?.oobFlowDidResume(cresData.serverTransId)
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+
+        if (this::cresData.isInitialized && cresData.uiType == UiType.OutOfBand) {
+            analyticsDelegate?.oobFlowDidPause(cresData.serverTransId)
+        }
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _viewBinding = null
     }
 
     private fun configure(
-        challengeZoneTextView: ChallengeZoneTextView?,
-        challengeZoneSelectView: ChallengeZoneSelectView?,
-        challengeZoneWebView: ChallengeZoneWebView?
+        challengeZoneTextView: ChallengeZoneTextView,
+        challengeZoneSelectView: ChallengeZoneSelectView,
+        challengeZoneWebView: ChallengeZoneWebView
     ) {
-        when {
-            challengeZoneTextView != null -> {
+        when (cresData.uiType) {
+            UiType.Text -> {
                 challengeZoneView.setChallengeEntryView(challengeZoneTextView)
                 challengeZoneView.setSubmitButton(
                     cresData.submitAuthenticationLabel,
@@ -177,18 +189,14 @@ internal class ChallengeFragment(
                     uiCustomization.getButtonCustomization(UiCustomization.ButtonType.RESEND)
                 )
             }
-            challengeZoneSelectView != null -> {
+            UiType.SingleSelect, UiType.MultiSelect -> {
                 challengeZoneView.setChallengeEntryView(challengeZoneSelectView)
                 challengeZoneView.setSubmitButton(
                     cresData.submitAuthenticationLabel,
                     uiCustomization.getButtonCustomization(UiCustomization.ButtonType.NEXT)
                 )
-                challengeZoneView.setResendButtonLabel(
-                    cresData.resendInformationLabel,
-                    uiCustomization.getButtonCustomization(UiCustomization.ButtonType.RESEND)
-                )
             }
-            challengeZoneWebView != null -> {
+            UiType.Html -> {
                 challengeZoneView.setChallengeEntryView(challengeZoneWebView)
                 challengeZoneView.setInfoHeaderText(null, null)
                 challengeZoneView.setInfoText(null, null)
@@ -198,12 +206,13 @@ internal class ChallengeFragment(
                 }
                 brandZoneView.isGone = true
             }
-            cresData.uiType == UiType.OutOfBand -> {
+            UiType.OutOfBand -> {
                 challengeZoneView.setSubmitButton(
                     cresData.oobContinueLabel,
                     uiCustomization.getButtonCustomization(UiCustomization.ButtonType.CONTINUE)
                 )
             }
+            else -> { }
         }
 
         configureChallengeZoneView()
@@ -256,6 +265,14 @@ internal class ChallengeFragment(
             cresData.challengeInfoText,
             uiCustomization.labelCustomization
         )
+
+        if (cresData.uiType == UiType.OutOfBand) {
+            challengeZoneView.setInfoLabel(
+                cresData.challengeInfoLabel,
+                uiCustomization.labelCustomization
+            )
+        }
+
         challengeZoneView.setInfoTextIndicator(
             if (cresData.shouldShowChallengeInfoTextIndicator) {
                 R.drawable.stripe_3ds2_ic_indicator
@@ -272,6 +289,15 @@ internal class ChallengeFragment(
 
         challengeZoneView.setSubmitButtonClickListener {
             viewModel.onSubmitClicked(challengeAction)
+
+            when (cresData.uiType) {
+                UiType.Text ->
+                    analyticsDelegate?.otpSubmitButtonTappedWithTransactionID(cresData.serverTransId)
+                UiType.OutOfBand ->
+                    analyticsDelegate?.oobContinueButtonTappedWithTransactionID((cresData.serverTransId))
+                UiType.SingleSelect, UiType.MultiSelect, UiType.Html -> { }
+                null -> { }
+            }
         }
         challengeZoneView.setResendButtonClickListener {
             viewModel.submit(ChallengeAction.Resend)
@@ -282,7 +308,7 @@ internal class ChallengeFragment(
         if (cresData.uiType == UiType.Html &&
             !cresData.acsHtmlRefresh.isNullOrBlank()
         ) {
-            challengeZoneWebView?.loadHtml(cresData.acsHtmlRefresh)
+            challengeZoneWebView.loadHtml(cresData.acsHtmlRefresh)
         } else if (cresData.uiType == UiType.OutOfBand &&
             !cresData.challengeAdditionalInfoText.isNullOrBlank()
         ) {
@@ -343,6 +369,8 @@ internal class ChallengeFragment(
         } else {
             viewModel.onNextScreen(cresData)
         }
+
+        analyticsDelegate?.didReceiveChallengeResponseWithTransactionId(cresData.serverTransId, uiTypeCode)
     }
 
     private fun onError(data: ErrorData) {

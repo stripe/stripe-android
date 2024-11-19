@@ -41,7 +41,7 @@ class ChallengeActionHandlerTest {
 
     @Test
     fun submitNativeForm_shouldPopulateCorrectField() = runTest {
-        createChallengeActionHandler().submit(ChallengeAction.NativeForm("123456"))
+        createChallengeActionHandler().submit(ChallengeAction.NativeForm("123456", whitelistingValue = false))
         advanceTime()
         assertThat(getCreqPayload().optString(ChallengeRequestData.FIELD_CHALLENGE_DATA_ENTRY))
             .isEqualTo("123456")
@@ -49,7 +49,7 @@ class ChallengeActionHandlerTest {
 
     @Test
     fun submitNativeForm_withEmptyUserEntry_shouldPopulateCorrectField() = runTest {
-        createChallengeActionHandler().submit(ChallengeAction.NativeForm(""))
+        createChallengeActionHandler().submit(ChallengeAction.NativeForm("", whitelistingValue = false))
         advanceTime()
         assertThat(getCreqPayload().optString(ChallengeRequestData.FIELD_CHALLENGE_DATA_ENTRY))
             .isEmpty()
@@ -81,7 +81,7 @@ class ChallengeActionHandlerTest {
 
     @Test
     fun submitOob_shouldPopulateOobContinue() = runTest {
-        createChallengeActionHandler().submit(ChallengeAction.Oob)
+        createChallengeActionHandler().submit(ChallengeAction.Oob(false))
         advanceTime()
         assertThat(getCreqPayload().optBoolean(ChallengeRequestData.FIELD_OOB_CONTINUE))
             .isTrue()
