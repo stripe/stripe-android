@@ -18,6 +18,7 @@ internal class NetworkingLinkSignupPreviewParameterProvider :
         emailEntered(),
         invalidEmail(),
         instantDebits(),
+        instantDebitsInvalidPhoneNumber(),
     )
 
     private fun default() = NetworkingLinkSignupState(
@@ -107,6 +108,35 @@ internal class NetworkingLinkSignupPreviewParameterProvider :
         lookupAccount = Uninitialized,
         saveAccountToLink = Uninitialized,
         isInstantDebits = true,
+    )
+
+    private fun instantDebitsInvalidPhoneNumber() = NetworkingLinkSignupState(
+        payload = Success(
+            NetworkingLinkSignupState.Payload(
+                merchantName = "Test",
+                emailController = EmailConfig.createController(
+                    initialValue = "email@email.com",
+                ),
+                phoneController = PhoneNumberController.createPhoneNumberController(
+                    initialValue = "5555555555",
+                    initiallySelectedCountryCode = "US",
+                ),
+                isInstantDebits = true,
+                content = linkLoginPane(),
+            )
+        ),
+        validEmail = "email@email.com",
+        validPhone = "5555555555",
+        lookupAccount = Success(
+            ConsumerSessionLookup(
+                exists = false,
+                consumerSession = null,
+                errorMessage = null
+            )
+        ),
+        saveAccountToLink = Uninitialized,
+        isInstantDebits = true,
+        phoneError = "The phone number provided was invalid.",
     )
 
     private fun networkingLinkSignupPane() = NetworkingLinkSignupPane(
