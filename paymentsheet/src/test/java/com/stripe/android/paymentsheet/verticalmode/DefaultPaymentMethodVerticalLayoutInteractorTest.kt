@@ -19,7 +19,6 @@ import com.stripe.android.paymentsheet.analytics.code
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor.ViewAction
 import com.stripe.android.testing.FeatureFlagTestRule
@@ -611,7 +610,6 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     @Test
     fun handleViewAction_PaymentMethodSelected_transitionsToFormScreen_whenFieldsAllowUserInteraction() {
         var calledFormScreenFactory = false
-        var calledTransitionTo = false
         var reportedSelectedPaymentMethodType: PaymentMethodCode? = null
         var reportFormShownForPm: PaymentMethodCode? = null
         runScenario(
@@ -619,19 +617,14 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 formFieldsWhichRequireUserInteraction
             },
             requiresFormScreen = { true },
-            formScreenFactory = {
+            transitionToFormScreen = {
                 calledFormScreenFactory = true
-                mock()
-            },
-            transitionTo = {
-                calledTransitionTo = true
             },
             reportPaymentMethodTypeSelected = { reportedSelectedPaymentMethodType = it },
             reportFormShown = { reportFormShownForPm = it }
         ) {
             interactor.handleViewAction(ViewAction.PaymentMethodSelected("card"))
             assertThat(calledFormScreenFactory).isTrue()
-            assertThat(calledTransitionTo).isTrue()
             assertThat(reportedSelectedPaymentMethodType).isEqualTo("card")
             assertThat(reportFormShownForPm).isEqualTo("card")
         }
@@ -640,50 +633,38 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     @Test
     fun handleViewAction_PaymentMethodSelected_transitionsToFormScreen_whenSelectedIsUsBank() {
         var calledFormScreenFactory = false
-        var calledTransitionTo = false
         runScenario(
             formElementsForCode = {
                 listOf()
             },
             requiresFormScreen = { true },
-            formScreenFactory = {
+            transitionToFormScreen = {
                 calledFormScreenFactory = true
-                mock()
-            },
-            transitionTo = {
-                calledTransitionTo = true
             },
             reportPaymentMethodTypeSelected = {},
             reportFormShown = {},
         ) {
             interactor.handleViewAction(ViewAction.PaymentMethodSelected("us_bank_account"))
             assertThat(calledFormScreenFactory).isTrue()
-            assertThat(calledTransitionTo).isTrue()
         }
     }
 
     @Test
     fun handleViewAction_PaymentMethodSelected_transitionsToFormScreen_whenSelectedIsInstantDebits() {
         var calledFormScreenFactory = false
-        var calledTransitionTo = false
         runScenario(
             formElementsForCode = {
                 listOf()
             },
             requiresFormScreen = { true },
-            formScreenFactory = {
+            transitionToFormScreen = {
                 calledFormScreenFactory = true
-                mock()
-            },
-            transitionTo = {
-                calledTransitionTo = true
             },
             reportPaymentMethodTypeSelected = {},
             reportFormShown = {},
         ) {
             interactor.handleViewAction(ViewAction.PaymentMethodSelected("link"))
             assertThat(calledFormScreenFactory).isTrue()
-            assertThat(calledTransitionTo).isTrue()
         }
     }
 
@@ -792,34 +773,23 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     @Test
     fun handleViewAction_TransitionToManageSavedPaymentMethods_transitionsToManageScreen() {
         var calledManageScreenFactory = false
-        var calledTransitionTo = false
         runScenario(
-            manageScreenFactory = {
+            transitionToManageScreen = {
                 calledManageScreenFactory = true
-                mock()
             },
-            transitionTo = {
-                calledTransitionTo = true
-            }
         ) {
             interactor.handleViewAction(ViewAction.TransitionToManageSavedPaymentMethods)
             assertThat(calledManageScreenFactory).isTrue()
-            assertThat(calledTransitionTo).isTrue()
         }
     }
 
     @Test
     fun handleViewAction_OnManageOneSavedPaymentMethod_transitionsToManageOnSavedPMScreen() {
         var calledManageOneSavedPaymentMethodScreenFactory = false
-        var calledTransitionTo = false
         runScenario(
-            manageOneSavedPaymentMethodFactory = {
+            transitionToManageOneSavedPaymentMethodScreen = {
                 calledManageOneSavedPaymentMethodScreenFactory = true
-                mock()
             },
-            transitionTo = {
-                calledTransitionTo = true
-            }
         ) {
             interactor.handleViewAction(
                 ViewAction.OnManageOneSavedPaymentMethod(
@@ -827,7 +797,6 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 )
             )
             assertThat(calledManageOneSavedPaymentMethodScreenFactory).isTrue()
-            assertThat(calledTransitionTo).isTrue()
         }
     }
 
@@ -1045,13 +1014,12 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         initialIsCurrentScreen: Boolean = false,
         formElementsForCode: (code: String) -> List<FormElement> = { notImplemented() },
         requiresFormScreen: (String) -> Boolean = { false },
-        transitionTo: (screen: PaymentSheetScreen) -> Unit = { notImplemented() },
         onFormFieldValuesChanged: (formValues: FormFieldValues, selectedPaymentMethodCode: String) -> Unit = { _, _ ->
             notImplemented()
         },
-        manageScreenFactory: () -> PaymentSheetScreen = { notImplemented() },
-        manageOneSavedPaymentMethodFactory: () -> PaymentSheetScreen = { notImplemented() },
-        formScreenFactory: (selectedPaymentMethodCode: String) -> PaymentSheetScreen = { notImplemented() },
+        transitionToManageScreen: () -> Unit = { notImplemented() },
+        transitionToManageOneSavedPaymentMethodScreen: () -> Unit = { notImplemented() },
+        transitionToFormScreen: (selectedPaymentMethodCode: String) -> Unit = { notImplemented() },
         initialPaymentMethods: List<PaymentMethod> = emptyList(),
         initialMostRecentlySelectedSavedPaymentMethod: PaymentMethod? = null,
         onEditPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit = { notImplemented() },
@@ -1081,11 +1049,10 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             selection = selection,
             formElementsForCode = formElementsForCode,
             requiresFormScreen = requiresFormScreen,
-            transitionTo = transitionTo,
             onFormFieldValuesChanged = onFormFieldValuesChanged,
-            manageScreenFactory = manageScreenFactory,
-            manageOneSavedPaymentMethodFactory = manageOneSavedPaymentMethodFactory,
-            formScreenFactory = formScreenFactory,
+            transitionToManageScreen = transitionToManageScreen,
+            transitionToManageOneSavedPaymentMethodScreen = transitionToManageOneSavedPaymentMethodScreen,
+            transitionToFormScreen = transitionToFormScreen,
             paymentMethods = paymentMethods,
             mostRecentlySelectedSavedPaymentMethod = mostRecentlySelectedSavedPaymentMethod,
             providePaymentMethodName = { it!!.resolvableString },
