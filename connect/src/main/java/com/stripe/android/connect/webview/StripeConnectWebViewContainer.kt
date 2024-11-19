@@ -1,6 +1,7 @@
 package com.stripe.android.connect.webview
 
 import android.annotation.SuppressLint
+import android.content.res.ColorStateList
 import android.graphics.Bitmap
 import android.view.LayoutInflater
 import android.webkit.JavascriptInterface
@@ -175,7 +176,13 @@ internal class StripeConnectWebViewContainerImpl(
     }
 
     private fun bindViewState(state: StripeConnectWebViewContainerState) {
-        viewBinding?.stripeWebViewProgressBar?.isVisible = state.isNativeLoadingIndicatorVisible
+        val viewBinding = this.viewBinding ?: return
+        viewBinding.stripeWebView.setBackgroundColor(state.backgroundColor)
+        viewBinding.stripeWebViewProgressBar.isVisible = state.isNativeLoadingIndicatorVisible
+        if (state.isNativeLoadingIndicatorVisible) {
+            viewBinding.stripeWebViewProgressBar.indeterminateTintList =
+                ColorStateList.valueOf(state.nativeLoadingIndicatorColor)
+        }
     }
 
     @VisibleForTesting
