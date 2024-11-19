@@ -1,6 +1,7 @@
 package com.stripe.android.stripe3ds2.transactions
 
 import android.os.Parcelable
+import androidx.annotation.RestrictTo
 import com.stripe.android.stripe3ds2.exceptions.SDKRuntimeException
 import com.stripe.android.stripe3ds2.security.DefaultMessageTransformer
 import com.stripe.android.stripe3ds2.transaction.SdkTransactionId
@@ -14,6 +15,7 @@ import java.io.Serializable
  * Note:
  * - `sdkCounterStoA` will be added by [DefaultMessageTransformer]
  */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Parcelize
 data class ChallengeRequestData constructor(
     val messageVersion: String,
