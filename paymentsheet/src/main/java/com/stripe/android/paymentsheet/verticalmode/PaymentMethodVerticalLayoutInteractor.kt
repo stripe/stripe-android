@@ -19,7 +19,6 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor.ViewAction
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
-import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.CoroutineScope
@@ -69,8 +68,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     paymentMethodMetadata: PaymentMethodMetadata,
     processing: StateFlow<Boolean>,
     selection: StateFlow<PaymentSelection?>,
-    private val formElementsForCode: (code: String) -> List<FormElement>,
-    private val requiresFormScreen: (code: String) -> Boolean,
+    private val formTypeForCode: (code: String) -> FormType,
     private val onFormFieldValuesChanged: (formValues: FormFieldValues, selectedPaymentMethodCode: String) -> Unit,
     private val transitionToManageScreen: () -> Unit,
     private val transitionToManageOneSavedPaymentMethodScreen: () -> Unit,
@@ -92,6 +90,13 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     override val isLiveMode: Boolean,
     dispatcher: CoroutineContext = Dispatchers.Default,
 ) : PaymentMethodVerticalLayoutInteractor {
+
+    sealed interface FormType {
+        object Empty : FormType
+        data class MandateOnly(val mandate: ResolvableString) : FormType
+        object UserInteractionRequired : FormType
+    }
+
     companion object {
         fun create(
             viewModel: BaseSheetViewModel,
@@ -104,8 +109,18 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 paymentMethodMetadata = paymentMethodMetadata,
                 processing = viewModel.processing,
                 selection = viewModel.selection,
-                formElementsForCode = formHelper::formElementsForCode,
-                requiresFormScreen = formHelper::requiresFormScreen,
+                formTypeForCode = { code ->
+                    if (formHelper.requiresFormScreen(code)) {
+                        FormType.UserInteractionRequired
+                    } else {
+                        val mandate = formHelper.formElementsForCode(code).firstNotNullOfOrNull { it.mandateText }
+                        if (mandate == null) {
+                            FormType.Empty
+                        } else {
+                            FormType.MandateOnly(mandate)
+                        }
+                    }
+                },
                 onFormFieldValuesChanged = formHelper::onFormFieldValuesChanged,
                 transitionToManageScreen = {
                     val interactor = DefaultManageScreenInteractor.create(
@@ -222,7 +237,8 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
 
                 val paymentMethodCode = (it as? PaymentSelection.New).code()
                     ?: (it as? PaymentSelection.ExternalPaymentMethod).code()
-                val requiresFormScreen = paymentMethodCode != null && requiresFormScreen(paymentMethodCode)
+                val requiresFormScreen = paymentMethodCode != null &&
+                    formTypeForCode(paymentMethodCode) == FormType.UserInteractionRequired
                 if (!requiresFormScreen) {
                     _verticalModeScreenSelection.value = it
                 }
@@ -356,16 +372,16 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             is ViewAction.PaymentMethodSelected -> {
                 reportPaymentMethodTypeSelected(viewAction.selectedPaymentMethodCode)
 
-                if (requiresFormScreen(viewAction.selectedPaymentMethodCode)) {
+                val formType = formTypeForCode(viewAction.selectedPaymentMethodCode)
+                if (formType == FormType.UserInteractionRequired) {
                     reportFormShown(viewAction.selectedPaymentMethodCode)
                     transitionToFormScreen(viewAction.selectedPaymentMethodCode)
                 } else {
                     updateSelectedPaymentMethod(viewAction.selectedPaymentMethodCode)
 
-                    formElementsForCode(viewAction.selectedPaymentMethodCode)
-                        .firstNotNullOfOrNull { it.mandateText }?.let {
-                            onMandateTextUpdated(it)
-                        }
+                    if (formType is FormType.MandateOnly) {
+                        onMandateTextUpdated(formType.mandate)
+                    }
                 }
             }
             is ViewAction.SavedPaymentMethodSelected -> {
