@@ -14,23 +14,23 @@ import android.graphics.drawable.Drawable
 import android.graphics.drawable.ShapeDrawable
 import android.os.Build
 import androidx.annotation.RequiresApi
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 internal class DelegateDrawable(
     private val imageLoader: suspend () -> Drawable,
-    scope: CoroutineScope,
-    dispatcher: CoroutineDispatcher,
 ) : Drawable() {
     @Volatile
     private var delegate: Drawable = ShapeDrawable()
 
     init {
-        scope.launch {
+        @OptIn(DelicateCoroutinesApi::class)
+        GlobalScope.launch {
             delegate = imageLoader()
-            withContext(dispatcher) {
+            withContext(Dispatchers.Main) {
                 super.setBounds(0, 0, delegate.intrinsicWidth, delegate.intrinsicHeight)
                 invalidateSelf()
             }
