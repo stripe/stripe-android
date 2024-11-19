@@ -71,11 +71,10 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     selection: StateFlow<PaymentSelection?>,
     private val formElementsForCode: (code: String) -> List<FormElement>,
     private val requiresFormScreen: (code: String) -> Boolean,
-    private val transitionTo: (screen: PaymentSheetScreen) -> Unit,
     private val onFormFieldValuesChanged: (formValues: FormFieldValues, selectedPaymentMethodCode: String) -> Unit,
-    private val manageScreenFactory: () -> PaymentSheetScreen,
-    private val manageOneSavedPaymentMethodFactory: () -> PaymentSheetScreen,
-    private val formScreenFactory: (selectedPaymentMethodCode: String) -> PaymentSheetScreen,
+    private val transitionToManageScreen: () -> Unit,
+    private val transitionToManageOneSavedPaymentMethodScreen: () -> Unit,
+    private val transitionToFormScreen: (selectedPaymentMethodCode: String) -> Unit,
     paymentMethods: StateFlow<List<PaymentMethod>>,
     private val mostRecentlySelectedSavedPaymentMethod: StateFlow<PaymentMethod?>,
     private val providePaymentMethodName: (PaymentMethodCode?) -> ResolvableString,
@@ -107,34 +106,36 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 selection = viewModel.selection,
                 formElementsForCode = formHelper::formElementsForCode,
                 requiresFormScreen = formHelper::requiresFormScreen,
-                transitionTo = viewModel.navigationHandler::transitionToWithDelay,
                 onFormFieldValuesChanged = formHelper::onFormFieldValuesChanged,
-                manageScreenFactory = {
+                transitionToManageScreen = {
                     val interactor = DefaultManageScreenInteractor.create(
                         viewModel = viewModel,
                         paymentMethodMetadata = paymentMethodMetadata,
                         customerStateHolder = customerStateHolder,
                         savedPaymentMethodMutator = viewModel.savedPaymentMethodMutator,
                     )
-                    PaymentSheetScreen.ManageSavedPaymentMethods(interactor = interactor)
+                    val screen = PaymentSheetScreen.ManageSavedPaymentMethods(interactor = interactor)
+                    viewModel.navigationHandler.transitionToWithDelay(screen)
                 },
-                manageOneSavedPaymentMethodFactory = {
+                transitionToManageOneSavedPaymentMethodScreen = {
                     val interactor = DefaultManageOneSavedPaymentMethodInteractor.create(
                         viewModel = viewModel,
                         paymentMethodMetadata = paymentMethodMetadata,
                         customerStateHolder = customerStateHolder,
                         savedPaymentMethodMutator = viewModel.savedPaymentMethodMutator,
                     )
-                    PaymentSheetScreen.ManageOneSavedPaymentMethod(interactor = interactor)
+                    val screen = PaymentSheetScreen.ManageOneSavedPaymentMethod(interactor = interactor)
+                    viewModel.navigationHandler.transitionToWithDelay(screen)
                 },
-                formScreenFactory = { selectedPaymentMethodCode ->
+                transitionToFormScreen = { selectedPaymentMethodCode ->
                     val interactor = DefaultVerticalModeFormInteractor.create(
                         selectedPaymentMethodCode = selectedPaymentMethodCode,
                         viewModel = viewModel,
                         paymentMethodMetadata = paymentMethodMetadata,
                         customerStateHolder = customerStateHolder,
                     )
-                    PaymentSheetScreen.VerticalModeForm(interactor = interactor)
+                    val screen = PaymentSheetScreen.VerticalModeForm(interactor = interactor)
+                    viewModel.navigationHandler.transitionToWithDelay(screen)
                 },
                 paymentMethods = customerStateHolder.paymentMethods,
                 mostRecentlySelectedSavedPaymentMethod = customerStateHolder.mostRecentlySelectedSavedPaymentMethod,
@@ -357,7 +358,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
 
                 if (requiresFormScreen(viewAction.selectedPaymentMethodCode)) {
                     reportFormShown(viewAction.selectedPaymentMethodCode)
-                    transitionTo(formScreenFactory(viewAction.selectedPaymentMethodCode))
+                    transitionToFormScreen(viewAction.selectedPaymentMethodCode)
                 } else {
                     updateSelectedPaymentMethod(viewAction.selectedPaymentMethodCode)
 
@@ -372,13 +373,13 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 onSelectSavedPaymentMethod(viewAction.savedPaymentMethod)
             }
             ViewAction.TransitionToManageSavedPaymentMethods -> {
-                transitionTo(manageScreenFactory())
+                transitionToManageScreen()
             }
             is ViewAction.OnManageOneSavedPaymentMethod -> {
                 if (FeatureFlags.useNewUpdateCardScreen.isEnabled) {
                     onUpdatePaymentMethod(viewAction.savedPaymentMethod)
                 } else {
-                    transitionTo(manageOneSavedPaymentMethodFactory())
+                    transitionToManageOneSavedPaymentMethodScreen()
                 }
             }
             is ViewAction.EditPaymentMethod -> {
