@@ -27,6 +27,7 @@ internal class StripeConnectWebViewContainerController(
     private val view: StripeConnectWebViewContainerInternal,
     private val embeddedComponentManager: EmbeddedComponentManager,
     private val embeddedComponent: StripeEmbeddedComponent,
+    private val stripeIntentLauncher: StripeIntentLauncher = StripeIntentLauncherImpl(),
     private val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG),
 ) : DefaultLifecycleObserver {
 
@@ -61,7 +62,7 @@ internal class StripeConnectWebViewContainerController(
         } else if (url.scheme == "https" || url.scheme == "http") {
             // open the URL in an external browser for safety and to preserve back navigation
             logger.debug("(StripeConnectWebViewClient) Opening URL in external browser: $url")
-            launchChromeCustomTab(view.context, url)
+            stripeIntentLauncher.launchSecureExternalWebTab(view.context, url)
             true // block the request since we're opening it in a chrome tab
         } else {
             // don't launch if it's an unsupported scheme (ie. not http/https)

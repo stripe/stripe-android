@@ -58,8 +58,6 @@ class StripeConnectWebViewClientTest {
         container = StripeConnectWebViewContainerImpl(
             embeddedComponent = StripeEmbeddedComponent.PAYOUTS,
             embeddedComponentManager = embeddedComponentManager,
-            connectComponent = StripeEmbeddedComponent.PAYOUTS,
-            stripeIntentLauncher = mockStripeIntentLauncher,
             logger = Logger.getInstance(enableLogging = false),
             jsonSerializer = Json { ignoreUnknownKeys = true },
         )
