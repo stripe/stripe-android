@@ -1,5 +1,7 @@
 package com.stripe.android.paymentelement.confirmation
 
+import com.stripe.android.paymentelement.confirmation.intent.DefaultIntentConfirmationInterceptor
+import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncherFactory
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.DefaultBacsMandateConfirmationLauncherFactory
 import dagger.Binds

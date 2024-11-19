@@ -7,6 +7,8 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentelement.confirmation.epms.ExternalPaymentMethodConfirmationOption
+import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.PaymentMethodFactory
@@ -95,7 +97,7 @@ class ConfirmationMediatorTest {
 
         assertThat(failAction.cause).isInstanceOf(IllegalArgumentException::class.java)
         assertThat(failAction.cause.message).isEqualTo(
-            "Parameter type of 'ExternalPaymentMethod' cannot be used with " +
+            "Parameter type of 'ExternalPaymentMethodConfirmationOption' cannot be used with " +
                 "ConfirmationMediator to read a result"
         )
         assertThat(failAction.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)

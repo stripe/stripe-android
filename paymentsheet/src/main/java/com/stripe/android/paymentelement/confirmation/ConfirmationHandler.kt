@@ -5,6 +5,7 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.parcelize.Parcelize

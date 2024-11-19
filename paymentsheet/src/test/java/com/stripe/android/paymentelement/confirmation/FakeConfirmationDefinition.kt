@@ -6,6 +6,7 @@ import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import kotlinx.parcelize.Parcelize
 
 internal class FakeConfirmationDefinition(

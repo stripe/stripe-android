@@ -332,59 +332,59 @@ public final class com/stripe/android/paymentelement/confirmation/ConfirmationHa
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/paymentelement/confirmation/ConfirmationHandler$Option$BacsPaymentMethod$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentelement/confirmation/ConfirmationHandler$Option$BacsPaymentMethod;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/paymentelement/confirmation/ConfirmationHandler$Option$BacsPaymentMethod;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/paymentelement/confirmation/ConfirmationHandler$Option$ExternalPaymentMethod$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentelement/confirmation/ConfirmationHandler$Option$ExternalPaymentMethod;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/paymentelement/confirmation/ConfirmationHandler$Option$ExternalPaymentMethod;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/paymentelement/confirmation/ConfirmationHandler$Option$GooglePay$Config$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentelement/confirmation/ConfirmationHandler$Option$GooglePay$Config;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/paymentelement/confirmation/ConfirmationHandler$Option$GooglePay$Config;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/paymentelement/confirmation/ConfirmationHandler$Option$GooglePay$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentelement/confirmation/ConfirmationHandler$Option$GooglePay;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/paymentelement/confirmation/ConfirmationHandler$Option$GooglePay;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/paymentelement/confirmation/ConfirmationHandler$Option$PaymentMethod$New$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentelement/confirmation/ConfirmationHandler$Option$PaymentMethod$New;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/paymentelement/confirmation/ConfirmationHandler$Option$PaymentMethod$New;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/paymentelement/confirmation/ConfirmationHandler$Option$PaymentMethod$Saved$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentelement/confirmation/ConfirmationHandler$Option$PaymentMethod$Saved;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/paymentelement/confirmation/ConfirmationHandler$Option$PaymentMethod$Saved;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
 public final class com/stripe/android/paymentelement/confirmation/ConfirmationMediator$Parameters$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentelement/confirmation/ConfirmationMediator$Parameters;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/paymentelement/confirmation/ConfirmationMediator$Parameters;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/paymentelement/confirmation/PaymentMethodConfirmationOption$New$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentelement/confirmation/PaymentMethodConfirmationOption$New;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/paymentelement/confirmation/PaymentMethodConfirmationOption$New;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/paymentelement/confirmation/PaymentMethodConfirmationOption$Saved$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentelement/confirmation/PaymentMethodConfirmationOption$Saved;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/paymentelement/confirmation/PaymentMethodConfirmationOption$Saved;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/paymentelement/confirmation/bacs/BacsConfirmationOption$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentelement/confirmation/bacs/BacsConfirmationOption;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/paymentelement/confirmation/bacs/BacsConfirmationOption;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/paymentelement/confirmation/epms/ExternalPaymentMethodConfirmationOption$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentelement/confirmation/epms/ExternalPaymentMethodConfirmationOption;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/paymentelement/confirmation/epms/ExternalPaymentMethodConfirmationOption;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/paymentelement/confirmation/gpay/GooglePayConfirmationOption$Config$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentelement/confirmation/gpay/GooglePayConfirmationOption$Config;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/paymentelement/confirmation/gpay/GooglePayConfirmationOption$Config;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/paymentelement/confirmation/gpay/GooglePayConfirmationOption$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentelement/confirmation/gpay/GooglePayConfirmationOption;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/paymentelement/confirmation/gpay/GooglePayConfirmationOption;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 

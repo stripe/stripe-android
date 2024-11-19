@@ -1,7 +1,8 @@
-package com.stripe.android.paymentelement.confirmation
+package com.stripe.android.paymentelement.confirmation.gpay
 
 import android.os.Parcelable
 import com.stripe.android.CardBrandFilter
+import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.state.PaymentElementLoader

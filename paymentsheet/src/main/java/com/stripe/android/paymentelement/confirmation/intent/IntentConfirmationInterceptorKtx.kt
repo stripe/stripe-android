@@ -1,5 +1,6 @@
-package com.stripe.android.paymentelement.confirmation
+package com.stripe.android.paymentelement.confirmation.intent
 
+import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentsheet.addresselement.toConfirmPaymentIntentShipping
 
 internal suspend fun IntentConfirmationInterceptor.intercept(

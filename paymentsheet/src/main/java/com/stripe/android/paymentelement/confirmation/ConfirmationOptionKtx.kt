@@ -3,6 +3,9 @@ package com.stripe.android.paymentelement.confirmation
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentelement.confirmation.bacs.BacsConfirmationOption
+import com.stripe.android.paymentelement.confirmation.epms.ExternalPaymentMethodConfirmationOption
+import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
