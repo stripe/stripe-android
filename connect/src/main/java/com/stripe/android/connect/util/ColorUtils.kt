@@ -15,6 +15,7 @@ import kotlin.math.min
  * @param minimumRatio The minimum contrast ratio (defaults to WCAG minimum ratio of 4.5)
  * @return The adjusted color that meets the minimum contrast ratio
  */
+@Suppress("MagicNumber", "ComplexCondition")
 @ColorInt
 fun getContrastingColor(@ColorInt color: Int, minimumRatio: Float = 4.5f): Int {
     var adjustedColor = color
@@ -24,16 +25,18 @@ fun getContrastingColor(@ColorInt color: Int, minimumRatio: Float = 4.5f): Int {
     Color.colorToHSV(adjustedColor, hsv)
 
     while (
-        ColorUtils.calculateContrast(adjustedColor, color) < minimumRatio
-        && ((shouldLighten && hsv[2] < 1f) || (!shouldLighten && hsv[2] > 0f))
+        ColorUtils.calculateContrast(adjustedColor, color) < minimumRatio &&
+        ((shouldLighten && hsv[2] < 1f) || (!shouldLighten && hsv[2] > 0f))
     ) {
         if (shouldLighten) {
-            hsv[2] = min(1f, hsv[2] + 0.1f)
+            hsv[2] = min(1f, hsv[2] + HSV_VALUE_STEP_SIZE)
         } else {
-            hsv[2] = max(0f, hsv[2] - 0.1f)
+            hsv[2] = max(0f, hsv[2] - HSV_VALUE_STEP_SIZE)
         }
         adjustedColor = Color.HSVToColor(hsv)
     }
 
     return adjustedColor
 }
+
+private const val HSV_VALUE_STEP_SIZE = 0.1f
