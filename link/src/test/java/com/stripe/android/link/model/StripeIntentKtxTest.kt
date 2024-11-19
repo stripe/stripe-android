@@ -18,14 +18,14 @@ class StripeIntentKtxTest {
 
     @Test
     fun `When live mode and test account then uses intent funding sources`() {
-        val supportedTypes = stripeIntent(listOf("card"))
+        val supportedTypes = stripeIntent(fundingSources = listOf("card"))
             .supportedPaymentMethodTypes(linkAccount("test+multiple_funding_sources@test.abc"))
         assertThat(supportedTypes).containsExactly("card")
     }
 
     @Test
     fun `When test mode and not test account then uses intent funding sources`() {
-        val supportedTypes = stripeIntent(listOf("card"))
+        val supportedTypes = stripeIntent(fundingSources = listOf("card"))
             .supportedPaymentMethodTypes(linkAccount("test@test.abc"))
         assertThat(supportedTypes).containsExactly("card")
     }
@@ -39,14 +39,14 @@ class StripeIntentKtxTest {
 
     @Test
     fun `When funding sources contains invalid items then invalid items are ignored`() {
-        val supportedTypes = stripeIntent(listOf("invalid", "invalid2", "bank_account"))
+        val supportedTypes = stripeIntent(fundingSources = listOf("invalid", "invalid2", "bank_account"))
             .supportedPaymentMethodTypes(linkAccount("test+multiple_funding_sources@test.abc"))
         assertThat(supportedTypes).containsExactly("bank_account")
     }
 
     @Test
     fun `When funding sources contains only invalid items then default to card`() {
-        val supportedTypes = stripeIntent(listOf("invalid", "invalid2", "bank_acc0unt"))
+        val supportedTypes = stripeIntent(fundingSources = listOf("invalid", "invalid2", "bank_acc0unt"))
             .supportedPaymentMethodTypes(linkAccount("test+multiple_funding_sources@test.abc"))
         assertThat(supportedTypes).containsExactly("card")
     }
