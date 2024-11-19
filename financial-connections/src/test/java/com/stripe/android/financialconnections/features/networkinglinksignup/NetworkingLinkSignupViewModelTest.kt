@@ -14,6 +14,7 @@ import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
 import com.stripe.android.financialconnections.CoroutineTestRule
 import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext
 import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext.InitializationMode
+import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ConsentAgree.analyticsValue
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
@@ -35,6 +36,7 @@ import com.stripe.android.financialconnections.navigation.NavigationIntent
 import com.stripe.android.financialconnections.navigation.NavigationManagerImpl
 import com.stripe.android.financialconnections.presentation.Async
 import com.stripe.android.financialconnections.repository.FinancialConnectionsConsumerSessionRepository
+import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.utils.TestHandleError
 import com.stripe.android.financialconnections.utils.UriUtils
 import com.stripe.android.model.ConsumerSessionLookup
@@ -622,7 +624,9 @@ class NetworkingLinkSignupViewModelTest {
             assertThat(awaitItem().validPhone).isEqualTo("+15555555555")
 
             viewModel.onSaveAccount()
-            assertThat(awaitItem().phoneError).isEqualTo("The phone number provided was invalid.")
+            assertThat(awaitItem().phoneError).isEqualTo(
+                TextResource.StringId(R.string.stripe_networking_signup_invalid_phone_number)
+            )
 
             // Clears error on subsequent changes to phone number
             payload.phoneController.onValueChange("+1555555555")

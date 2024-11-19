@@ -2,6 +2,7 @@ package com.stripe.android.financialconnections.features.networkinglinksignup
 
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
+import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.Click
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.logError
@@ -20,6 +21,7 @@ import com.stripe.android.financialconnections.navigation.Destination.Networking
 import com.stripe.android.financialconnections.navigation.Destination.Success
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.repository.FinancialConnectionsConsumerSessionRepository
+import com.stripe.android.financialconnections.ui.TextResource
 import javax.inject.Inject
 
 internal interface LinkSignupHandler {
@@ -83,9 +85,13 @@ internal class LinkSignupHandlerForInstantDebits @Inject constructor(
         return state.copy(phoneError = phoneError)
     }
 
-    private fun Throwable.extractPhoneNumberValidationError(): String? {
-        return (this as? StripeException)?.stripeError?.message?.takeIf {
-            it.contains("phone")
+    private fun Throwable.extractPhoneNumberValidationError(): TextResource? {
+        val error = (this as? StripeException)?.stripeError?.message
+        val isPhoneError = error?.contains("phone") == true
+        return if (isPhoneError) {
+            TextResource.StringId(R.string.stripe_networking_signup_invalid_phone_number)
+        } else {
+            null
         }
     }
 }

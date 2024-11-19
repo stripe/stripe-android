@@ -78,6 +78,7 @@
 
     <!-- Networking signup -->
     <string name="stripe_networking_signup_email_label">Email address</string>
+    <string name="stripe_networking_signup_invalid_phone_number">Your mobile phone number is invalid.</string>
 
     <!-- Networking warmup -->
     <string name="stripe_networking_link_login_warmup_description">Use information you previously saved with your Link account.</string>

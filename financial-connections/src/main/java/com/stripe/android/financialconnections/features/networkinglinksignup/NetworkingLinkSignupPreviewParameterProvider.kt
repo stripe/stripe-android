@@ -7,6 +7,7 @@ import com.stripe.android.financialconnections.model.NetworkingLinkSignupBody
 import com.stripe.android.financialconnections.model.NetworkingLinkSignupPane
 import com.stripe.android.financialconnections.presentation.Async.Success
 import com.stripe.android.financialconnections.presentation.Async.Uninitialized
+import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.PhoneNumberController
@@ -136,7 +137,7 @@ internal class NetworkingLinkSignupPreviewParameterProvider :
         ),
         saveAccountToLink = Uninitialized,
         isInstantDebits = true,
-        phoneError = "The phone number provided was invalid.",
+        phoneError = TextResource.Text("Your mobile phone number is invalid."),
     )
 
     private fun networkingLinkSignupPane() = NetworkingLinkSignupPane(

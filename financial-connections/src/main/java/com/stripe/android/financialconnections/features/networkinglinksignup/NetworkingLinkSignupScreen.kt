@@ -118,7 +118,7 @@ private fun NetworkingLinkSignupContent(
                 lookupAccountSync = state.lookupAccount,
                 isLoading = state.saveAccountToLink is Loading,
                 showFullForm = state.showFullForm,
-                phoneError = state.phoneError,
+                phoneError = state.phoneError?.toText()?.toString(),
                 onSaveToLink = onSaveToLink,
                 onClickableTextClick = onClickableTextClick,
                 onSkipClick = onSkipClick
