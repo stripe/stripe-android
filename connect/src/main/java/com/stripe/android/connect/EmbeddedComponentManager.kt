@@ -26,6 +26,13 @@ class EmbeddedComponentManager(
     internal val appearanceFlow: StateFlow<Appearance> get() = _appearanceFlow.asStateFlow()
 
     /**
+     * Create a new [AccountOnboardingView] for inclusion in the view hierarchy.
+     */
+    fun createAccountOnboardingView(context: Context): AccountOnboardingView {
+        return AccountOnboardingView(context = context, embeddedComponentManager = this)
+    }
+
+    /**
      * Create a new [PayoutsView] for inclusion in the view hierarchy.
      */
     fun createPayoutsView(context: Context): PayoutsView {
