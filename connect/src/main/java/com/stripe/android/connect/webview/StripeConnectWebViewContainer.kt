@@ -95,14 +95,7 @@ internal class StripeConnectWebViewContainerImpl<Listener : StripeEmbeddedCompon
     internal val stripeWebViewClient = StripeConnectWebViewClient()
 
     @VisibleForTesting
-    internal val stripeWebChromeClient = StripeConnectWebChromeClient(
-        context = webView?.context ?: throw IllegalStateException("WebView is not initialized"),
-        embeddedComponentManager = embeddedComponentManager
-            ?: throw IllegalStateException("EmbeddedComponentManager is not initialized"),
-        viewScope = {
-            webView?.findViewTreeLifecycleOwner()?.lifecycleScope ?: throw IllegalStateException("View is not attached")
-        }
-    )
+    internal val stripeWebChromeClient = StripeConnectWebChromeClient()
 
     private var controller: StripeConnectWebViewContainerController<Listener>? = null
 
@@ -261,45 +254,14 @@ internal class StripeConnectWebViewContainerImpl<Listener : StripeEmbeddedCompon
      */
     inner class StripeWebChromeClient : WebChromeClient()
 
-    internal class StripeConnectWebChromeClient(
-        private val context: Context,
-        private val embeddedComponentManager: EmbeddedComponentManager,
-        private val viewScope: () -> LifecycleCoroutineScope,
-    ) : WebChromeClient() {
-
-        private val inProgressRequests: MutableMap<PermissionRequest, Job> = mutableMapOf()
-
+    internal inner class StripeConnectWebChromeClient : WebChromeClient() {
         override fun onPermissionRequest(request: PermissionRequest) {
-            // we only care about camera permissions at this time (video/audio)
-            val permissionsRequested = request.resources.filter {
-                it in listOf(PermissionRequest.RESOURCE_VIDEO_CAPTURE, PermissionRequest.RESOURCE_AUDIO_CAPTURE)
-            }.toTypedArray()
-            if (permissionsRequested.isEmpty()) {
-                request.deny() // no supported permissions were requested, so reject the request
-                return
-            }
-
-            if (checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
-                request.grant(permissionsRequested)
-            } else {
-                val job = viewScope().launch {
-                    val isGranted = embeddedComponentManager.requestCameraPermission()
-                    withContext(Dispatchers.Main) {
-                        if (isGranted) {
-                            request.grant(permissionsRequested)
-                        } else {
-                            request.deny()
-                        }
-                    }
-                    inProgressRequests.remove(request)
-                }
-                inProgressRequests[request] = job
-            }
+            controller?.onPermissionRequest(request)
         }
 
         override fun onPermissionRequestCanceled(request: PermissionRequest?) {
             if (request == null) return
-            inProgressRequests.remove(request)?.also { it.cancel() }
+            controller?.onPermissionRequestCanceled(request)
         }
     }
 

@@ -1,8 +1,12 @@
 package com.stripe.android.connect.webview
 
 import android.content.Context
+import android.Manifest
+import android.content.pm.PackageManager
+import android.webkit.PermissionRequest
 import android.webkit.WebResourceRequest
 import androidx.annotation.RestrictTo
+import androidx.core.content.ContextCompat.checkSelfPermission
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
@@ -19,11 +23,14 @@ import com.stripe.android.connect.webview.serialization.SetOnLoadError
 import com.stripe.android.connect.webview.serialization.SetOnLoaderStart
 import com.stripe.android.connect.webview.serialization.SetterFunctionCalledMessage
 import com.stripe.android.core.Logger
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @OptIn(PrivateBetaConnectSDK::class)
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -44,6 +51,8 @@ internal class StripeConnectWebViewContainerController<Listener : StripeEmbedded
      */
     val stateFlow: StateFlow<StripeConnectWebViewContainerState>
         get() = _stateFlow.asStateFlow()
+
+    private val inProgressRequests: MutableMap<PermissionRequest, Job> = mutableMapOf()
 
     /**
      * Callback to invoke when the view is attached.
@@ -109,6 +118,44 @@ internal class StripeConnectWebViewContainerController<Listener : StripeEmbedded
 
     fun getInitialParams(context: Context): ConnectInstanceJs {
         return embeddedComponentManager.getInitialParams(context)
+    }
+
+    /**
+     *
+     */
+    fun onPermissionRequest(request: PermissionRequest) {
+        // we only care about camera permissions at this time (video/audio)
+        val permissionsRequested = request.resources.filter {
+            it in listOf(PermissionRequest.RESOURCE_VIDEO_CAPTURE, PermissionRequest.RESOURCE_AUDIO_CAPTURE)
+        }.toTypedArray()
+        if (permissionsRequested.isEmpty()) {
+            request.deny() // no supported permissions were requested, so reject the request
+            return
+        }
+
+        if (checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+            request.grant(permissionsRequested)
+        } else {
+            val job = viewScope().launch {
+                val isGranted = embeddedComponentManager.requestCameraPermission()
+                withContext(Dispatchers.Main) {
+                    if (isGranted) {
+                        request.grant(permissionsRequested)
+                    } else {
+                        request.deny()
+                    }
+                }
+                inProgressRequests.remove(request)
+            }
+            inProgressRequests[request] = job
+        }
+    }
+
+    /**
+     *
+     */
+    fun onPermissionRequestCanceled(request: PermissionRequest) {
+        inProgressRequests.remove(request)?.also { it.cancel() }
     }
 
     /**
