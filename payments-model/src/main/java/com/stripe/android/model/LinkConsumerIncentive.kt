@@ -11,6 +11,7 @@ data class LinkConsumerIncentive(
     val incentiveDisplayText: String?,
 ) : StripeModel {
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
     data class IncentiveParams(
         val paymentMethod: String,
