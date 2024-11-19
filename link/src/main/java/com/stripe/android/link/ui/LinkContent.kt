@@ -37,6 +37,7 @@ import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.link.ui.verification.VerificationScreen
 import com.stripe.android.link.ui.verification.VerificationViewModel
 import com.stripe.android.link.ui.wallet.WalletScreen
+import com.stripe.android.link.ui.wallet.WalletViewModel
 import com.stripe.android.ui.core.CircularProgressIndicator
 import kotlinx.coroutines.launch
 
@@ -93,6 +94,7 @@ internal fun LinkContent(
                 Screens(
                     navController = navController,
                     goBack = viewModel::goBack,
+                    onUpdateSheetContent = onUpdateSheetContent,
                     navigateAndClearStack = { screen ->
                         viewModel.navigate(screen, clearStack = true)
                     },
@@ -112,6 +114,7 @@ internal fun LinkContent(
 private fun Screens(
     navController: NavHostController,
     getLinkAccount: () -> LinkAccount?,
+    onUpdateSheetContent: (BottomSheetContent?) -> Unit,
     goBack: () -> Unit,
     navigateAndClearStack: (route: LinkScreen) -> Unit,
     dismissWithResult: (LinkActivityResult) -> Unit
@@ -155,7 +158,20 @@ private fun Screens(
         }
 
         composable(LinkScreen.Wallet.route) {
-            WalletScreen()
+            val linkAccount = getLinkAccount()
+                ?: return@composable dismissWithResult(LinkActivityResult.Failed(NoLinkAccountFoundException()))
+            val viewModel: WalletViewModel = linkViewModel { parentComponent ->
+                WalletViewModel.factory(
+                    parentComponent = parentComponent,
+                    linkAccount = linkAccount,
+                    navigate = { _, _ -> },
+                    dismissWithResult = dismissWithResult
+                )
+            }
+            WalletScreen(
+                viewModel = viewModel,
+                showBottomSheetContent = onUpdateSheetContent
+            )
         }
 
         composable(LinkScreen.CardEdit.route) {

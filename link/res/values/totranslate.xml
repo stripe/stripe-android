@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
+    <string name="stripe_wallet_expand_accessibility">Change selection</string>
+    <string name="stripe_this_card_will_be_saved">This card will be saved to your Link account</string>
+    <string name="stripe_logout">Logout</string>
+</resources>

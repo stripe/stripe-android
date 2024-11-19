@@ -13,6 +13,7 @@ import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.supportedPaymentMethodTypes
+import com.stripe.android.model.ConsumerPaymentDetails
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -65,6 +66,20 @@ internal class WalletViewModel @Inject constructor(
                 // If we can't load the payment details there's nothing to see here
                 onFailure = ::onFatal
             )
+        }
+    }
+
+    fun setExpanded(expanded: Boolean) {
+        _uiState.update {
+            it.copy(isExpanded = expanded)
+        }
+    }
+
+    fun onItemSelected(item: ConsumerPaymentDetails.PaymentDetails) {
+        if (item == uiState.value.selectedItem) return
+
+        _uiState.update {
+            it.copy(selectedItem = item)
         }
     }
 
