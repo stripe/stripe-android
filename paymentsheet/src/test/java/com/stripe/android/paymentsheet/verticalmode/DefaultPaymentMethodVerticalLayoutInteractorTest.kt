@@ -457,7 +457,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 paymentMethodTypes = listOf("card", "cashapp")
             )
         ),
-        isFlowController = false,
+        canShowWalletsInline = false,
     ) {
         walletsState.value = WalletsState(
             link = WalletsState.Link("email@email.com"),
@@ -488,7 +488,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 paymentMethodTypes = listOf("card", "cashapp")
             )
         ),
-        isFlowController = true,
+        canShowWalletsInline = true,
     ) {
         walletsState.value = WalletsState(
             link = WalletsState.Link("email@email.com"),
@@ -522,7 +522,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                     paymentMethodTypes = listOf("card", "cashapp")
                 )
             ),
-            isFlowController = true,
+            canShowWalletsInline = true,
             updateSelection = { selectedWallet = it },
         ) {
             walletsState.value = WalletsState(
@@ -554,7 +554,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 paymentMethodTypes = listOf("card", "cashapp")
             )
         ),
-        isFlowController = true,
+        canShowWalletsInline = true,
     ) {
         walletsState.value = WalletsState(
             link = WalletsState.Link("email@email.com"),
@@ -582,7 +582,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 paymentMethodTypes = listOf("card", "cashapp")
             )
         ),
-        isFlowController = true,
+        canShowWalletsInline = true,
     ) {
         walletsState.value = WalletsState(
             link = null,
@@ -1025,7 +1025,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         onEditPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit = { notImplemented() },
         onSelectSavedPaymentMethod: (PaymentMethod) -> Unit = { notImplemented() },
         onUpdatePaymentMethod: (DisplayableSavedPaymentMethod) -> Unit = { notImplemented() },
-        isFlowController: Boolean = false,
+        canShowWalletsInline: Boolean = false,
         updateSelection: (PaymentSelection?) -> Unit = { notImplemented() },
         onMandateTextUpdated: (ResolvableString?) -> Unit = { notImplemented() },
         reportPaymentMethodTypeSelected: (PaymentMethodCode) -> Unit = { notImplemented() },
@@ -1059,7 +1059,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             onEditPaymentMethod = onEditPaymentMethod,
             onSelectSavedPaymentMethod = onSelectSavedPaymentMethod,
             walletsState = walletsState,
-            isFlowController = isFlowController,
+            canShowWalletsInline = canShowWalletsInline,
             onMandateTextUpdated = onMandateTextUpdated,
             updateSelection = { paymentSelection ->
                 selection.value = paymentSelection

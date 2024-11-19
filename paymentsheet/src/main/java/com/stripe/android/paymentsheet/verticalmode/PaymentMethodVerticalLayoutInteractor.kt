@@ -82,7 +82,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val onEditPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     private val onSelectSavedPaymentMethod: (PaymentMethod) -> Unit,
     private val walletsState: StateFlow<WalletsState?>,
-    private val isFlowController: Boolean,
+    private val canShowWalletsInline: Boolean,
     private val onMandateTextUpdated: (ResolvableString?) -> Unit,
     private val updateSelection: (PaymentSelection?) -> Unit,
     private val isCurrentScreen: StateFlow<Boolean>,
@@ -147,7 +147,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 },
                 onUpdatePaymentMethod = { viewModel.savedPaymentMethodMutator.updatePaymentMethod(it) },
                 walletsState = viewModel.walletsState,
-                isFlowController = !viewModel.isCompleteFlow,
+                canShowWalletsInline = !viewModel.isCompleteFlow,
                 updateSelection = viewModel::updateSelection,
                 isCurrentScreen = viewModel.navigationHandler.currentScreen.mapAsStateFlow {
                     it is PaymentSheetScreen.VerticalMode
@@ -303,7 +303,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     }
 
     private fun showsWalletsInline(walletsState: WalletsState?): Boolean {
-        return isFlowController && walletsState != null && walletsState.googlePay != null
+        return canShowWalletsInline && walletsState != null && walletsState.googlePay != null
     }
 
     private fun getDisplayedSavedPaymentMethod(
