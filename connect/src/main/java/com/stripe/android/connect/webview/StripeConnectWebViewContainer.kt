@@ -4,6 +4,8 @@ import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.view.LayoutInflater
 import android.webkit.JavascriptInterface
+import android.webkit.WebChromeClient
+import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.FrameLayout
@@ -80,6 +82,9 @@ internal class StripeConnectWebViewContainerImpl(
     @VisibleForTesting
     internal val stripeWebViewClient = StripeConnectWebViewClient()
 
+    @VisibleForTesting
+    internal val stripeWebChromeClient = StripeWebChromeClient()
+
     private var controller: StripeConnectWebViewContainerController? = null
 
     init {
@@ -106,6 +111,7 @@ internal class StripeConnectWebViewContainerImpl(
     internal fun initializeWebView(webView: WebView) {
         with(webView) {
             webViewClient = stripeWebViewClient
+            webChromeClient = stripeWebChromeClient
             settings.apply {
                 @SuppressLint("SetJavaScriptEnabled")
                 javaScriptEnabled = true
@@ -213,7 +219,20 @@ internal class StripeConnectWebViewContainerImpl(
                 { resultString -> logger.debug("Javascript Bridge initialized. Result: \"$resultString\"") }
             )
         }
+
+        override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
+            return controller?.shouldOverrideUrlLoading(view, request) ?: false
+        }
     }
+
+    /**
+     * A [WebChromeClient] that provides additional functionality for Stripe Connect Embedded Component WebViews.
+     *
+     * This class is currently empty, but it could be used to add additional functionality in the future
+     * Setting a [WebChromeClient] (even an empty one) is necessary for certain functionality, like
+     * [WebViewClient.shouldOverrideUrlLoading] to work properly.
+     */
+    inner class StripeWebChromeClient : WebChromeClient()
 
     private inner class StripeJsInterface {
         @JavascriptInterface
