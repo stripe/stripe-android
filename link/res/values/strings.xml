@@ -72,4 +72,6 @@
   <string name="stripe_wallet_update_card">Update card</string>
   <!-- A text notice shown when the user selects an expired card. -->
   <string name="stripe_wallet_update_expired_card_error">This card has expired. Update your card info or choose a different payment method.</string>
+  <!-- Title for a button that when tapped removes a saved card. -->
+  <string name="stripe_wallet_remove_card">Remove card</string>
 </resources>
