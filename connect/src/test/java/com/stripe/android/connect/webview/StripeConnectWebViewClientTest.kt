@@ -66,15 +66,9 @@ class StripeConnectWebViewClientTest {
     }
 
     @Test
-    fun `configureAndLoadWebView initializes javascript bridge`() {
-        webViewClient.configureAndLoadWebView(mockWebView)
-
-        verify(mockWebView).evaluateJavascript(anyString(), anyOrNull())
-    }
-
-    @Test
-    fun `onPageStarted should re-initialize JavaScript bridge`() {
+    fun `onPageStarted initializes javascript bridge`() {
         webViewClient.onPageStarted(mockWebView, "https://example.com", null)
+
         verify(mockWebView).evaluateJavascript(anyString(), anyOrNull())
     }
 }
