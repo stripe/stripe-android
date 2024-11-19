@@ -52,14 +52,15 @@ internal class StripeConnectWebViewContainerController(
         updateState { copy(isNativeLoadingIndicatorVisible = !receivedSetOnLoaderStart) }
     }
 
-    fun shouldOverrideUrlLoading(context: Context, request: WebResourceRequest?): Boolean {
-        val url = request?.url ?: return false // if the request isn't for a url, then don't handle it
-
-        return if (url.host in ALLOWLISTED_HOSTS) {
+    fun shouldOverrideUrlLoading(context: Context, request: WebResourceRequest): Boolean {
+        val url = request.url
+        return if (url.host?.lowercase() in ALLOWLISTED_HOSTS) {
             // TODO - add an analytic event here to track this unexpected behavior
             logger.warning("(StripeConnectWebViewClient) Received pop-up for allow-listed host: $url")
             false // Allow the request to propagate so we open URL in WebView, but this is not an expected operation
-        } else if (url.scheme == "https" || url.scheme == "http") {
+        } else if (
+            url.scheme.equals("https", ignoreCase = true) || url.scheme.equals("http", ignoreCase = true)
+        ) {
             // open the URL in an external browser for safety and to preserve back navigation
             logger.debug("(StripeConnectWebViewClient) Opening URL in external browser: $url")
             stripeIntentLauncher.launchSecureExternalWebTab(context, url)

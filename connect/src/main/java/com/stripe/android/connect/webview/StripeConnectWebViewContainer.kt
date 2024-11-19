@@ -220,8 +220,7 @@ internal class StripeConnectWebViewContainerImpl(
             )
         }
 
-        override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
-            view ?: return false // the view shouldn't be null, but if it is then don't handle the request
+        override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
             return controller?.shouldOverrideUrlLoading(view.context, request) ?: false
         }
     }
