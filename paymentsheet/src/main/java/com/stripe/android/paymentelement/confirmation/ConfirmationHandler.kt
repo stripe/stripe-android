@@ -3,18 +3,12 @@ package com.stripe.android.paymentelement.confirmation
 import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
-import com.stripe.android.CardBrandFilter
 import com.stripe.android.core.strings.ResolvableString
-import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.parcelize.Parcelize
-import com.stripe.android.model.PaymentMethod as PaymentMethodModel
 
 /**
  * This interface handles the confirmation process of a [StripeIntent] and/or external payment. This interface is
@@ -197,61 +191,5 @@ internal interface ConfirmationHandler {
         }
     }
 
-    sealed interface Option : Parcelable {
-        @Parcelize
-        data class GooglePay(
-            val initializationMode: PaymentElementLoader.InitializationMode,
-            val shippingDetails: AddressDetails?,
-            val config: Config,
-        ) : Option {
-            @Parcelize
-            data class Config(
-                val environment: PaymentSheet.GooglePayConfiguration.Environment?,
-                val merchantName: String,
-                val merchantCountryCode: String,
-                val merchantCurrencyCode: String?,
-                val customAmount: Long?,
-                val customLabel: String?,
-                val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
-                val cardBrandFilter: CardBrandFilter
-            ) : Parcelable
-        }
-
-        @Parcelize
-        data class ExternalPaymentMethod(
-            val type: String,
-            val billingDetails: PaymentMethodModel.BillingDetails?,
-        ) : Option
-
-        @Parcelize
-        data class BacsPaymentMethod(
-            val initializationMode: PaymentElementLoader.InitializationMode,
-            val shippingDetails: AddressDetails?,
-            val createParams: PaymentMethodCreateParams,
-            val optionsParams: PaymentMethodOptionsParams?,
-            val appearance: PaymentSheet.Appearance,
-        ) : Option
-
-        sealed interface PaymentMethod : Option {
-            val initializationMode: PaymentElementLoader.InitializationMode
-            val shippingDetails: AddressDetails?
-
-            @Parcelize
-            data class Saved(
-                override val initializationMode: PaymentElementLoader.InitializationMode,
-                override val shippingDetails: AddressDetails?,
-                val paymentMethod: com.stripe.android.model.PaymentMethod,
-                val optionsParams: PaymentMethodOptionsParams?,
-            ) : PaymentMethod
-
-            @Parcelize
-            data class New(
-                override val initializationMode: PaymentElementLoader.InitializationMode,
-                override val shippingDetails: AddressDetails?,
-                val createParams: PaymentMethodCreateParams,
-                val optionsParams: PaymentMethodOptionsParams?,
-                val shouldSave: Boolean
-            ) : PaymentMethod
-        }
-    }
+    interface Option : Parcelable
 }

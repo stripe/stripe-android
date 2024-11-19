@@ -13,6 +13,10 @@ import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentelement.confirmation.intent.DefaultIntentConfirmationInterceptor
+import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
+import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationDefinition
+import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -29,7 +33,7 @@ internal class IntentConfirmationFlowTest {
         val intentConfirmationDefinition = createIntentConfirmationDefinition()
 
         val action = intentConfirmationDefinition.action(
-            confirmationOption = ConfirmationHandler.Option.PaymentMethod.New(
+            confirmationOption = PaymentMethodConfirmationOption.New(
                 initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                     clientSecret = "pi_123_secret_123",
                 ),
@@ -68,7 +72,7 @@ internal class IntentConfirmationFlowTest {
         val intentConfirmationDefinition = createIntentConfirmationDefinition()
 
         val action = intentConfirmationDefinition.action(
-            confirmationOption = ConfirmationHandler.Option.PaymentMethod.New(
+            confirmationOption = PaymentMethodConfirmationOption.New(
                 initializationMode = PaymentElementLoader.InitializationMode.SetupIntent(
                     clientSecret = "pi_123_secret_123",
                 ),
@@ -208,8 +212,8 @@ internal class IntentConfirmationFlowTest {
         assertThat(failAction.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Payment)
     }
 
-    private fun createDeferredConfirmationOption(): ConfirmationHandler.Option.PaymentMethod.New {
-        return ConfirmationHandler.Option.PaymentMethod.New(
+    private fun createDeferredConfirmationOption(): PaymentMethodConfirmationOption.New {
+        return PaymentMethodConfirmationOption.New(
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Setup(

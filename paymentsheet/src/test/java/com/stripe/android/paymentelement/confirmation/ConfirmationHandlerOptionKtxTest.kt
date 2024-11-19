@@ -12,6 +12,9 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
+import com.stripe.android.paymentelement.confirmation.bacs.BacsConfirmationOption
+import com.stripe.android.paymentelement.confirmation.epms.ExternalPaymentMethodConfirmationOption
+import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.R
@@ -37,7 +40,7 @@ class ConfirmationHandlerOptionKtxTest {
                 appearance = PaymentSheetFixtures.CONFIG_CUSTOMER.appearance,
             )
         ).isEqualTo(
-            ConfirmationHandler.Option.PaymentMethod.New(
+            PaymentMethodConfirmationOption.New(
                 initializationMode = PI_INITIALIZATION_MODE,
                 shippingDetails = null,
                 createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
@@ -60,7 +63,7 @@ class ConfirmationHandlerOptionKtxTest {
                 appearance = PaymentSheetFixtures.CONFIG_CUSTOMER.appearance,
             )
         ).isEqualTo(
-            ConfirmationHandler.Option.PaymentMethod.New(
+            PaymentMethodConfirmationOption.New(
                 initializationMode = SI_INITIALIZATION_MODE,
                 shippingDetails = null,
                 createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
@@ -83,7 +86,7 @@ class ConfirmationHandlerOptionKtxTest {
                 appearance = PaymentSheetFixtures.CONFIG_CUSTOMER.appearance,
             )
         ).isEqualTo(
-            ConfirmationHandler.Option.PaymentMethod.New(
+            PaymentMethodConfirmationOption.New(
                 initializationMode = PI_INITIALIZATION_MODE,
                 shippingDetails = null,
                 createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
@@ -117,7 +120,7 @@ class ConfirmationHandlerOptionKtxTest {
                 appearance = PaymentSheetFixtures.CONFIG_CUSTOMER.appearance,
             )
         ).isEqualTo(
-            ConfirmationHandler.Option.BacsPaymentMethod(
+            BacsConfirmationOption(
                 initializationMode = PI_INITIALIZATION_MODE,
                 shippingDetails = null,
                 createParams = bacsDebitParams,
@@ -140,7 +143,7 @@ class ConfirmationHandlerOptionKtxTest {
                 appearance = PaymentSheetFixtures.CONFIG_CUSTOMER.appearance,
             )
         ).isEqualTo(
-            ConfirmationHandler.Option.PaymentMethod.New(
+            PaymentMethodConfirmationOption.New(
                 initializationMode = SI_INITIALIZATION_MODE,
                 shippingDetails = null,
                 createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
@@ -166,7 +169,7 @@ class ConfirmationHandlerOptionKtxTest {
                 appearance = PaymentSheetFixtures.CONFIG_CUSTOMER.appearance,
             )
         ).isEqualTo(
-            ConfirmationHandler.Option.PaymentMethod.Saved(
+            PaymentMethodConfirmationOption.Saved(
                 initializationMode = PI_INITIALIZATION_MODE,
                 shippingDetails = null,
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
@@ -200,7 +203,7 @@ class ConfirmationHandlerOptionKtxTest {
                 appearance = PaymentSheetFixtures.CONFIG_CUSTOMER.appearance,
             )
         ).isEqualTo(
-            ConfirmationHandler.Option.ExternalPaymentMethod(
+            ExternalPaymentMethodConfirmationOption(
                 type = "paypal",
                 billingDetails = PaymentMethod.BillingDetails(
                     name = "John Doe",
@@ -238,10 +241,10 @@ class ConfirmationHandlerOptionKtxTest {
                 appearance = PaymentSheetFixtures.CONFIG_CUSTOMER.appearance,
             )
         ).isEqualTo(
-            ConfirmationHandler.Option.GooglePay(
+            GooglePayConfirmationOption(
                 initializationMode = SI_INITIALIZATION_MODE,
                 shippingDetails = null,
-                config = ConfirmationHandler.Option.GooglePay.Config(
+                config = GooglePayConfirmationOption.Config(
                     environment = PaymentSheet.GooglePayConfiguration.Environment.Production,
                     merchantName = "Merchant, Inc.",
                     merchantCountryCode = "US",
@@ -281,7 +284,7 @@ class ConfirmationHandlerOptionKtxTest {
                 appearance = PaymentSheetFixtures.CONFIG_CUSTOMER.appearance,
             )
         ).isEqualTo(
-            ConfirmationHandler.Option.PaymentMethod.Saved(
+            PaymentMethodConfirmationOption.Saved(
                 initializationMode = PI_INITIALIZATION_MODE,
                 shippingDetails = null,
                 optionsParams = null,
@@ -303,7 +306,7 @@ class ConfirmationHandlerOptionKtxTest {
                 appearance = PaymentSheetFixtures.CONFIG_CUSTOMER.appearance,
             )
         ).isEqualTo(
-            ConfirmationHandler.Option.PaymentMethod.Saved(
+            PaymentMethodConfirmationOption.Saved(
                 initializationMode = PI_INITIALIZATION_MODE,
                 shippingDetails = null,
                 optionsParams = null,

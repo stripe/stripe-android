@@ -3,6 +3,9 @@ package com.stripe.android.paymentelement.confirmation
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentelement.confirmation.bacs.BacsConfirmationOption
+import com.stripe.android.paymentelement.confirmation.epms.ExternalPaymentMethodConfirmationOption
+import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
@@ -13,13 +16,13 @@ internal fun PaymentSelection.toConfirmationOption(
     appearance: PaymentSheet.Appearance,
 ): ConfirmationHandler.Option? {
     return when (this) {
-        is PaymentSelection.Saved -> ConfirmationHandler.Option.PaymentMethod.Saved(
+        is PaymentSelection.Saved -> PaymentMethodConfirmationOption.Saved(
             initializationMode = initializationMode,
             shippingDetails = configuration.shippingDetails,
             paymentMethod = paymentMethod,
             optionsParams = paymentMethodOptionsParams,
         )
-        is PaymentSelection.ExternalPaymentMethod -> ConfirmationHandler.Option.ExternalPaymentMethod(
+        is PaymentSelection.ExternalPaymentMethod -> ExternalPaymentMethodConfirmationOption(
             type = type,
             billingDetails = billingDetails,
         )
@@ -27,14 +30,14 @@ internal fun PaymentSelection.toConfirmationOption(
             if (instantDebits != null) {
                 // For Instant Debits, we create the PaymentMethod inside the bank auth flow. Therefore,
                 // we can just use the already created object here.
-                ConfirmationHandler.Option.PaymentMethod.Saved(
+                PaymentMethodConfirmationOption.Saved(
                     initializationMode = initializationMode,
                     shippingDetails = configuration.shippingDetails,
                     paymentMethod = instantDebits.paymentMethod,
                     optionsParams = paymentMethodOptionsParams,
                 )
             } else {
-                ConfirmationHandler.Option.PaymentMethod.New(
+                PaymentMethodConfirmationOption.New(
                     initializationMode = initializationMode,
                     shippingDetails = configuration.shippingDetails,
                     createParams = paymentMethodCreateParams,
@@ -45,7 +48,7 @@ internal fun PaymentSelection.toConfirmationOption(
         }
         is PaymentSelection.New -> {
             if (paymentMethodCreateParams.typeCode == PaymentMethod.Type.BacsDebit.code) {
-                ConfirmationHandler.Option.BacsPaymentMethod(
+                BacsConfirmationOption(
                     initializationMode = initializationMode,
                     shippingDetails = configuration.shippingDetails,
                     createParams = paymentMethodCreateParams,
@@ -53,7 +56,7 @@ internal fun PaymentSelection.toConfirmationOption(
                     appearance = appearance,
                 )
             } else {
-                ConfirmationHandler.Option.PaymentMethod.New(
+                PaymentMethodConfirmationOption.New(
                     initializationMode = initializationMode,
                     shippingDetails = configuration.shippingDetails,
                     createParams = paymentMethodCreateParams,
@@ -63,10 +66,10 @@ internal fun PaymentSelection.toConfirmationOption(
             }
         }
         is PaymentSelection.GooglePay -> configuration.googlePay?.let { googlePay ->
-            ConfirmationHandler.Option.GooglePay(
+            GooglePayConfirmationOption(
                 initializationMode = initializationMode,
                 shippingDetails = configuration.shippingDetails,
-                config = ConfirmationHandler.Option.GooglePay.Config(
+                config = GooglePayConfirmationOption.Config(
                     environment = googlePay.environment,
                     merchantName = configuration.merchantDisplayName,
                     merchantCountryCode = googlePay.countryCode,

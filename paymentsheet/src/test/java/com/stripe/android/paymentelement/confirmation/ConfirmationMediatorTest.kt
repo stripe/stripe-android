@@ -7,6 +7,8 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentelement.confirmation.epms.ExternalPaymentMethodConfirmationOption
+import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.PaymentMethodFactory
@@ -26,7 +28,7 @@ class ConfirmationMediatorTest {
         )
 
         val canConfirm = mediator.canConfirm(
-            confirmationOption = ConfirmationHandler.Option.PaymentMethod.Saved(
+            confirmationOption = PaymentMethodConfirmationOption.Saved(
                 initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                     clientSecret = "pi_123_secret_123",
                 ),
@@ -47,7 +49,7 @@ class ConfirmationMediatorTest {
         )
 
         val canConfirm = mediator.canConfirm(
-            confirmationOption = ConfirmationHandler.Option.ExternalPaymentMethod(
+            confirmationOption = ExternalPaymentMethodConfirmationOption(
                 type = "paypal",
                 billingDetails = null,
             ),
@@ -84,7 +86,7 @@ class ConfirmationMediatorTest {
         )
 
         val action = mediator.action(
-            option = ConfirmationHandler.Option.ExternalPaymentMethod(
+            option = ExternalPaymentMethodConfirmationOption(
                 type = "paypal",
                 billingDetails = null,
             ),
@@ -95,7 +97,7 @@ class ConfirmationMediatorTest {
 
         assertThat(failAction.cause).isInstanceOf(IllegalArgumentException::class.java)
         assertThat(failAction.cause.message).isEqualTo(
-            "Parameter type of 'ExternalPaymentMethod' cannot be used with " +
+            "Parameter type of 'ExternalPaymentMethodConfirmationOption' cannot be used with " +
                 "ConfirmationMediator to read a result"
         )
         assertThat(failAction.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
@@ -209,7 +211,7 @@ class ConfirmationMediatorTest {
         assertThat(launchCall.launcher).isEqualTo(launcher)
 
         val parameters = savedStateHandle
-            .get<ConfirmationMediator.Parameters<ConfirmationHandler.Option.PaymentMethod.Saved>>(
+            .get<ConfirmationMediator.Parameters<PaymentMethodConfirmationOption.Saved>>(
                 "TestParameters"
             )
 
@@ -315,7 +317,7 @@ class ConfirmationMediatorTest {
             definition = definition,
         )
 
-        val confirmationOption = ConfirmationHandler.Option.PaymentMethod.Saved(
+        val confirmationOption = PaymentMethodConfirmationOption.Saved(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "pi_123_secret_123",
             ),
@@ -418,7 +420,7 @@ class ConfirmationMediatorTest {
     }
 
     private companion object {
-        private val SAVED_CONFIRMATION_OPTION = ConfirmationHandler.Option.PaymentMethod.Saved(
+        private val SAVED_CONFIRMATION_OPTION = PaymentMethodConfirmationOption.Saved(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(clientSecret = "pi_123"),
             shippingDetails = null,
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
