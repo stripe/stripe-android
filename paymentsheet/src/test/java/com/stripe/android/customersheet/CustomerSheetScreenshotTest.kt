@@ -20,6 +20,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.paymentsheet.ui.DefaultEditPaymentMethodViewInteractor
+import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.utils.ViewModelStoreOwnerContext
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
@@ -373,6 +374,26 @@ internal class CustomerSheetScreenshotTest {
         paparazzi.snapshot {
             CustomerSheetScreen(
                 viewState = editPaymentMethod,
+                paymentMethodNameProvider = { it!!.resolvableString },
+            )
+        }
+    }
+
+    @Test
+    fun testUpdatePaymentMethodScreen() {
+        val updatePaymentMethod = CustomerSheetViewState.UpdatePaymentMethod(
+            updatePaymentMethodInteractor = DefaultUpdatePaymentMethodInteractor(
+                displayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
+                removeExecutor = { null },
+                canRemove = true,
+                isLiveMode = true,
+            ),
+            isLiveMode = true,
+        )
+
+        paparazzi.snapshot {
+            CustomerSheetScreen(
+                viewState = updatePaymentMethod,
                 paymentMethodNameProvider = { it!!.resolvableString },
             )
         }

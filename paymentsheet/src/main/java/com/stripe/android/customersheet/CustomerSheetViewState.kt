@@ -15,6 +15,7 @@ import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInterac
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarStateFactory
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.FormElement
 
@@ -29,6 +30,7 @@ internal sealed class CustomerSheetViewState(
         return when (this) {
             is Loading,
             is EditPaymentMethod,
+            is UpdatePaymentMethod,
             is SelectPaymentMethod -> {
                 false
             }
@@ -128,6 +130,23 @@ internal sealed class CustomerSheetViewState(
 
     data class EditPaymentMethod(
         val editPaymentMethodInteractor: ModifiableEditPaymentMethodViewInteractor,
+        override val isLiveMode: Boolean,
+    ) : CustomerSheetViewState(
+        isLiveMode = isLiveMode,
+        isProcessing = false,
+        canNavigateBack = true,
+    ) {
+        override fun topBarState(onEditIconPressed: () -> Unit): PaymentSheetTopBarState {
+            return PaymentSheetTopBarStateFactory.create(
+                hasBackStack = canNavigateBack,
+                isLiveMode = isLiveMode,
+                editable = PaymentSheetTopBarState.Editable.Never,
+            )
+        }
+    }
+
+    data class UpdatePaymentMethod(
+        val updatePaymentMethodInteractor: UpdatePaymentMethodInteractor,
         override val isLiveMode: Boolean,
     ) : CustomerSheetViewState(
         isLiveMode = isLiveMode,
