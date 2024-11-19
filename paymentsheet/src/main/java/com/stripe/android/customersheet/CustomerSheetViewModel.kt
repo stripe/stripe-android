@@ -48,6 +48,7 @@ import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.R
@@ -995,7 +996,7 @@ internal class CustomerSheetViewModel(
         confirmationHandler.start(
             arguments = ConfirmationHandler.Args(
                 intent = stripeIntent,
-                confirmationOption = ConfirmationHandler.Option.PaymentMethod.Saved(
+                confirmationOption = PaymentMethodConfirmationOption.Saved(
                     initializationMode = PaymentElementLoader.InitializationMode.SetupIntent(
                         clientSecret = clientSecret
                     ),

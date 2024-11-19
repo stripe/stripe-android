@@ -222,12 +222,12 @@ internal class DefaultConfirmationHandler(
     ) {
         val confirmationOption = arguments.confirmationOption
 
-        if (confirmationOption is ConfirmationHandler.Option.GooglePay) {
+        if (confirmationOption is GooglePayConfirmationOption) {
             launchGooglePay(
                 googlePay = confirmationOption,
                 intent = arguments.intent,
             )
-        } else if (confirmationOption is ConfirmationHandler.Option.BacsPaymentMethod) {
+        } else if (confirmationOption is BacsConfirmationOption) {
             launchBacsMandate(confirmationOption)
         } else {
             confirm(arguments)
@@ -243,7 +243,7 @@ internal class DefaultConfirmationHandler(
 
         val confirmationOption = arguments.confirmationOption
 
-        if (confirmationOption is ConfirmationHandler.Option.ExternalPaymentMethod) {
+        if (confirmationOption is ExternalPaymentMethodConfirmationOption) {
             confirmExternalPaymentMethod(confirmationOption)
         } else {
             confirm(confirmationOption, arguments.intent)
@@ -308,7 +308,7 @@ internal class DefaultConfirmationHandler(
     }
 
     private fun confirmExternalPaymentMethod(
-        confirmationOption: ConfirmationHandler.Option.ExternalPaymentMethod
+        confirmationOption: ExternalPaymentMethodConfirmationOption
     ) {
         /*
          * In case of process death, we should store that we waiting for a payment result to return from a
@@ -326,7 +326,7 @@ internal class DefaultConfirmationHandler(
     }
 
     private fun launchGooglePay(
-        googlePay: ConfirmationHandler.Option.GooglePay,
+        googlePay: GooglePayConfirmationOption,
         intent: StripeIntent,
     ) {
         if (googlePay.config.merchantCurrencyCode == null && !googlePay.initializationMode.isProcessingPayment) {
@@ -401,7 +401,7 @@ internal class DefaultConfirmationHandler(
     private fun createGooglePayLauncher(
         factory: GooglePayPaymentMethodLauncherFactory,
         activityLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>,
-        config: ConfirmationHandler.Option.GooglePay.Config,
+        config: GooglePayConfirmationOption.Config,
     ): GooglePayPaymentMethodLauncher {
         return factory.create(
             lifecycleScope = coroutineScope,
@@ -425,7 +425,7 @@ internal class DefaultConfirmationHandler(
     }
 
     private fun launchBacsMandate(
-        confirmationOption: ConfirmationHandler.Option.BacsPaymentMethod,
+        confirmationOption: BacsConfirmationOption,
     ) {
         BacsMandateData.fromConfirmationOption(confirmationOption)?.let { data ->
             runCatching {
@@ -471,12 +471,12 @@ internal class DefaultConfirmationHandler(
             when (result) {
                 is BacsMandateConfirmationResult.Confirmed -> {
                     val arguments = currentArguments
-                    val bacs = arguments?.confirmationOption as? ConfirmationHandler.Option.BacsPaymentMethod
+                    val bacs = arguments?.confirmationOption as? BacsConfirmationOption
 
                     bacs?.let { bacsPaymentMethod ->
                         confirm(
                             arguments.copy(
-                                confirmationOption = ConfirmationHandler.Option.PaymentMethod.New(
+                                confirmationOption = PaymentMethodConfirmationOption.New(
                                     initializationMode = bacsPaymentMethod.initializationMode,
                                     shippingDetails = bacsPaymentMethod.shippingDetails,
                                     createParams = bacsPaymentMethod.createParams,
@@ -535,10 +535,10 @@ internal class DefaultConfirmationHandler(
             when (result) {
                 is GooglePayPaymentMethodLauncher.Result.Completed -> {
                     val arguments = currentArguments
-                    val paymentMethod = arguments?.confirmationOption as? ConfirmationHandler.Option.GooglePay
+                    val paymentMethod = arguments?.confirmationOption as? GooglePayConfirmationOption
 
                     paymentMethod?.let { option ->
-                        val confirmationOption = ConfirmationHandler.Option.PaymentMethod.Saved(
+                        val confirmationOption = PaymentMethodConfirmationOption.Saved(
                             paymentMethod = result.paymentMethod,
                             initializationMode = option.initializationMode,
                             shippingDetails = option.shippingDetails,

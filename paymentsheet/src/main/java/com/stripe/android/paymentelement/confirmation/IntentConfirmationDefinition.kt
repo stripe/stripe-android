@@ -17,19 +17,19 @@ internal class IntentConfirmationDefinition(
     private val intentConfirmationInterceptor: IntentConfirmationInterceptor,
     private val paymentLauncherFactory: (ActivityResultLauncher<PaymentLauncherContract.Args>) -> PaymentLauncher,
 ) : ConfirmationDefinition<
-    ConfirmationHandler.Option.PaymentMethod,
+    PaymentMethodConfirmationOption,
     PaymentLauncher,
     IntentConfirmationDefinition.Args,
     InternalPaymentResult
     > {
     override val key: String = "IntentConfirmation"
 
-    override fun option(confirmationOption: ConfirmationHandler.Option): ConfirmationHandler.Option.PaymentMethod? {
-        return confirmationOption as? ConfirmationHandler.Option.PaymentMethod
+    override fun option(confirmationOption: ConfirmationHandler.Option): PaymentMethodConfirmationOption? {
+        return confirmationOption as? PaymentMethodConfirmationOption
     }
 
     override suspend fun action(
-        confirmationOption: ConfirmationHandler.Option.PaymentMethod,
+        confirmationOption: PaymentMethodConfirmationOption,
         intent: StripeIntent
     ): ConfirmationDefinition.ConfirmationAction<Args> {
         val nextStep = intentConfirmationInterceptor.intercept(confirmationOption = confirmationOption)
@@ -81,7 +81,7 @@ internal class IntentConfirmationDefinition(
     override fun launch(
         launcher: PaymentLauncher,
         arguments: Args,
-        confirmationOption: ConfirmationHandler.Option.PaymentMethod,
+        confirmationOption: PaymentMethodConfirmationOption,
         intent: StripeIntent,
     ) {
         when (arguments) {
@@ -91,7 +91,7 @@ internal class IntentConfirmationDefinition(
     }
 
     override fun toPaymentConfirmationResult(
-        confirmationOption: ConfirmationHandler.Option.PaymentMethod,
+        confirmationOption: PaymentMethodConfirmationOption,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
         intent: StripeIntent,
         result: InternalPaymentResult

@@ -29,7 +29,7 @@ internal class IntentConfirmationFlowTest {
         val intentConfirmationDefinition = createIntentConfirmationDefinition()
 
         val action = intentConfirmationDefinition.action(
-            confirmationOption = ConfirmationHandler.Option.PaymentMethod.New(
+            confirmationOption = PaymentMethodConfirmationOption.New(
                 initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                     clientSecret = "pi_123_secret_123",
                 ),
@@ -68,7 +68,7 @@ internal class IntentConfirmationFlowTest {
         val intentConfirmationDefinition = createIntentConfirmationDefinition()
 
         val action = intentConfirmationDefinition.action(
-            confirmationOption = ConfirmationHandler.Option.PaymentMethod.New(
+            confirmationOption = PaymentMethodConfirmationOption.New(
                 initializationMode = PaymentElementLoader.InitializationMode.SetupIntent(
                     clientSecret = "pi_123_secret_123",
                 ),
@@ -208,8 +208,8 @@ internal class IntentConfirmationFlowTest {
         assertThat(failAction.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Payment)
     }
 
-    private fun createDeferredConfirmationOption(): ConfirmationHandler.Option.PaymentMethod.New {
-        return ConfirmationHandler.Option.PaymentMethod.New(
+    private fun createDeferredConfirmationOption(): PaymentMethodConfirmationOption.New {
+        return PaymentMethodConfirmationOption.New(
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Setup(

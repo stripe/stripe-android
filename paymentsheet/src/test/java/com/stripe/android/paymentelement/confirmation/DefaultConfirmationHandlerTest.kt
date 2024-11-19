@@ -105,7 +105,7 @@ class DefaultConfirmationHandlerTest {
         defaultConfirmationHandler.start(
             arguments = ConfirmationHandler.Args(
                 intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                confirmationOption = ConfirmationHandler.Option.PaymentMethod.Saved(
+                confirmationOption = PaymentMethodConfirmationOption.Saved(
                     initializationMode = initializationMode,
                     shippingDetails = shippingDetails,
                     paymentMethod = savedPaymentMethod,
@@ -149,7 +149,7 @@ class DefaultConfirmationHandlerTest {
             defaultConfirmationHandler.start(
                 arguments = ConfirmationHandler.Args(
                     intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                    confirmationOption = ConfirmationHandler.Option.PaymentMethod.Saved(
+                    confirmationOption = PaymentMethodConfirmationOption.Saved(
                         initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                             clientSecret = "pi_456_secret_456"
                         ),
@@ -192,7 +192,7 @@ class DefaultConfirmationHandlerTest {
         defaultConfirmationHandler.start(
             arguments = ConfirmationHandler.Args(
                 intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                confirmationOption = ConfirmationHandler.Option.PaymentMethod.New(
+                confirmationOption = PaymentMethodConfirmationOption.New(
                     initializationMode = initializationMode,
                     shippingDetails = null,
                     createParams = newCard,
@@ -241,7 +241,7 @@ class DefaultConfirmationHandlerTest {
         defaultConfirmationHandler.start(
             arguments = ConfirmationHandler.Args(
                 intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                confirmationOption = ConfirmationHandler.Option.PaymentMethod.Saved(
+                confirmationOption = PaymentMethodConfirmationOption.Saved(
                     initializationMode = initializationMode,
                     shippingDetails = null,
                     paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
@@ -2041,8 +2041,8 @@ class DefaultConfirmationHandlerTest {
     private fun createBacsPaymentConfirmationOption(
         name: String? = "John Doe",
         email: String? = "johndoe@email.com",
-    ): ConfirmationHandler.Option.BacsPaymentMethod {
-        return ConfirmationHandler.Option.BacsPaymentMethod(
+    ): BacsConfirmationOption {
+        return BacsConfirmationOption(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "pi_456_secret_456"
             ),
@@ -2066,7 +2066,7 @@ class DefaultConfirmationHandlerTest {
         val APPEARANCE = PaymentSheetFixtures.CONFIG_WITH_EVERYTHING.appearance
         val DEFAULT_ARGUMENTS = ConfirmationHandler.Args(
             intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-            confirmationOption = ConfirmationHandler.Option.PaymentMethod.Saved(
+            confirmationOption = PaymentMethodConfirmationOption.Saved(
                 initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                     clientSecret = "pi_456_secret_456"
                 ),
@@ -2076,12 +2076,12 @@ class DefaultConfirmationHandlerTest {
             ),
         )
 
-        val EXTERNAL_PAYMENT_METHOD = ConfirmationHandler.Option.ExternalPaymentMethod(
+        val EXTERNAL_PAYMENT_METHOD = ExternalPaymentMethodConfirmationOption(
             type = "paypal",
             billingDetails = null
         )
 
-        val BACS_OPTION = ConfirmationHandler.Option.BacsPaymentMethod(
+        val BACS_OPTION = BacsConfirmationOption(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "pi_456_secret_456"
             ),
@@ -2100,12 +2100,12 @@ class DefaultConfirmationHandlerTest {
             optionsParams = null,
         )
 
-        val GOOGLE_PAY_OPTION = ConfirmationHandler.Option.GooglePay(
+        val GOOGLE_PAY_OPTION = GooglePayConfirmationOption(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "pi_456_secret_456"
             ),
             shippingDetails = null,
-            config = ConfirmationHandler.Option.GooglePay.Config(
+            config = GooglePayConfirmationOption.Config(
                 environment = PaymentSheet.GooglePayConfiguration.Environment.Production,
                 merchantName = "Merchant, Inc.",
                 merchantCurrencyCode = "USD",
