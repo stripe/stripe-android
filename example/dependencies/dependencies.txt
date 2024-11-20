@@ -3,9 +3,9 @@
 |         \--- androidx.annotation:annotation-jvm:1.9.0
 |              \--- org.jetbrains.kotlin:kotlin-stdlib:1.7.10 -> 2.0.21
 |                   +--- org.jetbrains:annotations:13.0 -> 23.0.0
-|                   +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.0 -> 1.9.10 (c)
+|                   +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.0 -> 1.8.22 (c)
 |                   +--- org.jetbrains.kotlin:kotlin-stdlib-common:2.0.21 (c)
-|                   \--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.0 -> 1.9.10 (c)
+|                   \--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.0 -> 1.8.22 (c)
 +--- org.jetbrains.kotlin:kotlin-stdlib:2.0.21 (*)
 +--- project :payments
 |    +--- project :payments-core
@@ -603,9 +603,9 @@
 |    |    |    |    \--- com.google.android.material:material:1.8.0 -> 1.12.0
 |    |    |    |         +--- org.jetbrains.kotlin:kotlin-bom:1.8.22
 |    |    |    |         |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 -> 2.0.21 (c)
-|    |    |    |         |    +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.22 -> 1.9.10 (c)
+|    |    |    |         |    +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.22 (c)
 |    |    |    |         |    +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.22 -> 2.0.21 (c)
-|    |    |    |         |    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.22 -> 1.9.10 (c)
+|    |    |    |         |    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.22 (c)
 |    |    |    |         +--- com.google.errorprone:error_prone_annotations:2.15.0 -> 2.27.0
 |    |    |    |         +--- androidx.activity:activity:1.8.0 -> 1.8.2 (*)
 |    |    |    |         +--- androidx.annotation:annotation:1.2.0 -> 1.9.0 (*)
@@ -764,11 +764,11 @@
 |    |    |    |    \--- com.google.android.gms:play-services-basement:18.0.0 -> 18.4.0 (*)
 |    |    |    \--- com.google.android.gms:play-services-tasks:18.2.0 (*)
 |    |    +--- com.google.android.instantapps:instantapps:1.1.0
-|    |    +--- com.stripe:stripe-3ds2-android:6.1.8
-|    |    |    +--- org.jetbrains.kotlin:kotlin-parcelize-runtime:1.9.10 -> 2.0.21 (*)
-|    |    |    +--- androidx.appcompat:appcompat:1.6.1 -> 1.7.0 (*)
-|    |    |    +--- com.google.android.material:material:1.11.0 -> 1.12.0 (*)
-|    |    |    +--- androidx.lifecycle:lifecycle-livedata-ktx:2.7.0 -> 2.8.6
+|    |    +--- com.stripe:stripe-3ds2-android:6.2.0
+|    |    |    +--- org.jetbrains.kotlin:kotlin-parcelize-runtime:2.0.21 (*)
+|    |    |    +--- androidx.appcompat:appcompat:1.7.0 (*)
+|    |    |    +--- com.google.android.material:material:1.12.0 (*)
+|    |    |    +--- androidx.lifecycle:lifecycle-livedata-ktx:2.8.6
 |    |    |    |    +--- androidx.lifecycle:lifecycle-livedata:2.8.6 (*)
 |    |    |    |    +--- androidx.lifecycle:lifecycle-livedata-core-ktx:2.8.6 (*)
 |    |    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 -> 2.0.21 (*)
@@ -785,19 +785,15 @@
 |    |    |    |    +--- androidx.lifecycle:lifecycle-viewmodel-compose:2.8.6 (c)
 |    |    |    |    +--- androidx.lifecycle:lifecycle-process:2.8.6 (c)
 |    |    |    |    \--- androidx.lifecycle:lifecycle-common:2.8.6 (c)
-|    |    |    +--- androidx.core:core-ktx:1.12.0 -> 1.13.1 (*)
+|    |    |    +--- androidx.core:core-ktx:1.13.1 (*)
 |    |    |    +--- androidx.activity:activity-ktx:1.8.2 (*)
-|    |    |    +--- androidx.fragment:fragment-ktx:1.6.2 -> 1.8.4 (*)
-|    |    |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3 -> 1.9.0 (*)
-|    |    |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3 -> 1.9.0 (*)
-|    |    |    +--- org.bouncycastle:bcprov-jdk15to18:1.69
-|    |    |    +--- com.nimbusds:nimbus-jose-jwt:9.21
-|    |    |    |    \--- com.github.stephenc.jcip:jcip-annotations:1.0-1
-|    |    |    +--- androidx.databinding:viewbinding:8.2.1 -> 8.7.1 (*)
-|    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.10
-|    |    |         +--- org.jetbrains.kotlin:kotlin-stdlib:1.9.10 -> 2.0.21 (*)
-|    |    |         \--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.9.10
-|    |    |              \--- org.jetbrains.kotlin:kotlin-stdlib:1.9.10 -> 2.0.21 (*)
+|    |    |    +--- androidx.fragment:fragment-ktx:1.8.4 (*)
+|    |    |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0 (*)
+|    |    |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0 (*)
+|    |    |    +--- org.bouncycastle:bcprov-jdk15to18:1.79
+|    |    |    +--- com.nimbusds:nimbus-jose-jwt:9.46
+|    |    |    +--- androidx.databinding:viewbinding:8.7.1 (*)
+|    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib:2.0.21 (*)
 |    |    \--- org.jetbrains.kotlin:kotlin-parcelize-runtime:2.0.21 (*)
 |    +--- project :paymentsheet
 |    |    +--- project :payments-core (*)
@@ -974,7 +970,10 @@
 |    |    |    +--- androidx.compose.ui:ui:1.5.4 -> 1.6.8 (*)
 |    |    |    +--- androidx.compose.material:material:1.5.4 -> 1.6.8 (*)
 |    |    |    +--- androidx.core:core-ktx:1.12.0 -> 1.13.1 (*)
-|    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.20 -> 1.9.10 (*)
+|    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.20 -> 1.8.22
+|    |    |         +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 -> 2.0.21 (*)
+|    |    |         \--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.22
+|    |    |              \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 -> 2.0.21 (*)
 |    |    +--- com.google.android.material:material:1.12.0 (*)
 |    |    +--- androidx.compose.ui:ui-tooling-preview:1.6.8 (*)
 |    |    +--- dev.drewhamilton.poko:poko-annotations:0.17.2
@@ -1002,7 +1001,7 @@
 |    +--- androidx.compose.ui:ui:1.6.8 (*)
 |    +--- androidx.compose.ui:ui-tooling-preview:1.6.8 (*)
 |    +--- com.airbnb.android:showkase-annotation:1.0.0-beta18
-|    |    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.7.10 -> 1.9.10 (*)
+|    |    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.7.10 -> 1.8.22 (*)
 |    +--- com.google.dagger:dagger:2.52 (*)
 |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0 (*)
 |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0 (*)
@@ -1052,8 +1051,8 @@
 |    |    +--- com.squareup.okio:okio:3.6.0 -> 3.9.1
 |    |    |    \--- com.squareup.okio:okio-jvm:3.9.1
 |    |    |         \--- org.jetbrains.kotlin:kotlin-stdlib:1.9.25 -> 2.0.21 (*)
-|    |    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.21 -> 1.9.10 (*)
-|    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.21 -> 1.9.10 (*)
+|    |    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.21 -> 1.8.22 (*)
+|    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.21 -> 1.8.22 (*)
 +--- com.google.android.material:material:1.12.0 (*)
 +--- com.google.android.gms:play-services-wallet:19.4.0 (*)
 +--- com.squareup.okio:okio:3.9.1 (*)
