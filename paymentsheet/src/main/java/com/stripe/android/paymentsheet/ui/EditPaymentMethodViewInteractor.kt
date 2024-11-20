@@ -160,7 +160,7 @@ internal class DefaultEditPaymentMethodViewInteractor(
         eventHandler(EditPaymentMethodViewInteractor.Event.HideBrands(brand = null))
     }
 
-    private fun onBrandChoiceChanged(choice: EditPaymentMethodViewState.CardBrandChoice) {
+    private fun onBrandChoiceChanged(choice: CardBrandChoice) {
         this.choice.value = choice
 
         eventHandler(EditPaymentMethodViewInteractor.Event.HideBrands(brand = choice.brand))
@@ -175,11 +175,11 @@ internal class DefaultEditPaymentMethodViewInteractor(
             ?: throw IllegalStateException("Card payment method must contain last 4 digits")
     }
 
-    private fun PaymentMethod.getPreferredChoice(): EditPaymentMethodViewState.CardBrandChoice {
+    private fun PaymentMethod.getPreferredChoice(): CardBrandChoice {
         return CardBrand.fromCode(getCard().displayBrand).toChoice()
     }
 
-    private fun PaymentMethod.getAvailableNetworks(): List<EditPaymentMethodViewState.CardBrandChoice> {
+    private fun PaymentMethod.getAvailableNetworks(): List<CardBrandChoice> {
         return getCard().networks?.available?.let { brandCodes ->
             brandCodes.map { code ->
                 CardBrand.fromCode(code).toChoice()
@@ -191,8 +191,8 @@ internal class DefaultEditPaymentMethodViewInteractor(
         return card ?: throw IllegalStateException("Payment method must be a card in order to be edited")
     }
 
-    private fun CardBrand.toChoice(): EditPaymentMethodViewState.CardBrandChoice {
-        return EditPaymentMethodViewState.CardBrandChoice(brand = this)
+    private fun CardBrand.toChoice(): CardBrandChoice {
+        return CardBrandChoice(brand = this)
     }
 
     object Factory : ModifiableEditPaymentMethodViewInteractor.Factory {

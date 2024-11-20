@@ -342,11 +342,11 @@ class DefaultEditPaymentMethodViewInteractorTest {
     private companion object {
         private val CARD_WITH_NETWORKS_PAYMENT_METHOD = PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD
 
-        val CARTES_BANCAIRES_BRAND_CHOICE = EditPaymentMethodViewState.CardBrandChoice(
+        val CARTES_BANCAIRES_BRAND_CHOICE = CardBrandChoice(
             brand = CardBrand.CartesBancaires
         )
 
-        private val VISA_BRAND_CHOICE = EditPaymentMethodViewState.CardBrandChoice(
+        private val VISA_BRAND_CHOICE = CardBrandChoice(
             brand = CardBrand.Visa
         )
     }

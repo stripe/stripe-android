@@ -28,10 +28,10 @@ import com.stripe.android.uicore.stripeColors
 
 @Composable
 internal fun CardBrandDropdown(
-    selectedBrand: EditPaymentMethodViewState.CardBrandChoice,
-    availableBrands: List<EditPaymentMethodViewState.CardBrandChoice>,
+    selectedBrand: CardBrandChoice,
+    availableBrands: List<CardBrandChoice>,
     onBrandOptionsShown: () -> Unit,
-    onBrandChoiceChanged: (EditPaymentMethodViewState.CardBrandChoice) -> Unit,
+    onBrandChoiceChanged: (CardBrandChoice) -> Unit,
     onBrandChoiceOptionsDismissed: () -> Unit,
 ) {
     var expanded by remember {

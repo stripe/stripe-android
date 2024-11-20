@@ -179,15 +179,15 @@ private fun EditPaymentMethodPreview() {
                 status = EditPaymentMethodViewState.Status.Idle,
                 last4 = "4242",
                 displayName = "Card".resolvableString,
-                selectedBrand = EditPaymentMethodViewState.CardBrandChoice(
+                selectedBrand = CardBrandChoice(
                     brand = CardBrand.CartesBancaires
                 ),
                 canUpdate = true,
                 availableBrands = listOf(
-                    EditPaymentMethodViewState.CardBrandChoice(
+                    CardBrandChoice(
                         brand = CardBrand.Visa
                     ),
-                    EditPaymentMethodViewState.CardBrandChoice(
+                    CardBrandChoice(
                         brand = CardBrand.CartesBancaires
                     )
                 ),
