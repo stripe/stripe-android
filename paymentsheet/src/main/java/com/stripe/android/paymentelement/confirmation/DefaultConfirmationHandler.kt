@@ -27,6 +27,7 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
+import com.stripe.android.paymentsheet.ExternalPaymentMethodInterceptor
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationContract
@@ -69,7 +70,10 @@ internal class DefaultConfirmationHandler(
                 paymentLauncherFactory,
             ),
             ExternalPaymentMethodConfirmationDefinition(
-                errorReporter,
+                externalPaymentMethodConfirmHandlerProvider = {
+                    ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler
+                },
+                errorReporter = errorReporter,
             )
         )
     )

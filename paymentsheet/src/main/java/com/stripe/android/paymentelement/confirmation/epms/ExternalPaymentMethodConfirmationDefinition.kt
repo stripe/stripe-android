@@ -9,12 +9,14 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.paymentlauncher.PaymentResult
+import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.ExternalPaymentMethodContract
 import com.stripe.android.paymentsheet.ExternalPaymentMethodInput
-import com.stripe.android.paymentsheet.ExternalPaymentMethodInterceptor
 import java.lang.IllegalStateException
+import javax.inject.Provider
 
 internal class ExternalPaymentMethodConfirmationDefinition(
+    private val externalPaymentMethodConfirmHandlerProvider: Provider<ExternalPaymentMethodConfirmHandler?>,
     private val errorReporter: ErrorReporter,
 ) : ConfirmationDefinition<
     ExternalPaymentMethodConfirmationOption,
@@ -35,8 +37,7 @@ internal class ExternalPaymentMethodConfirmationDefinition(
         intent: StripeIntent
     ): ConfirmationDefinition.ConfirmationAction<Unit> {
         val externalPaymentMethodType = confirmationOption.type
-        val externalPaymentMethodConfirmHandler =
-            ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler
+        val externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandlerProvider.get()
 
         return if (externalPaymentMethodConfirmHandler == null) {
             errorReporter.report(

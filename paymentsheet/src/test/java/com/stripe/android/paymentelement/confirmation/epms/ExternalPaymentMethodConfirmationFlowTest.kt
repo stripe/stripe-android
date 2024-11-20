@@ -12,31 +12,15 @@ import com.stripe.android.paymentelement.confirmation.asLaunch
 import com.stripe.android.paymentelement.confirmation.asSucceeded
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
-import com.stripe.android.paymentsheet.ExternalPaymentMethodInterceptor
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.utils.DummyActivityResultCaller
 import kotlinx.coroutines.test.runTest
-import org.junit.After
-import org.junit.Before
 import org.junit.Test
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 class ExternalPaymentMethodConfirmationFlowTest {
-    @Before
-    fun setup() {
-        ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler =
-            ExternalPaymentMethodConfirmHandler { _, _ ->
-                // Do nothing
-            }
-    }
-
-    @After
-    fun teardown() {
-        ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = null
-    }
-
     @Test
     fun `on launch, should persist parameters & launch using launcher as expected`() = runTest {
         val savedStateHandle = SavedStateHandle()
@@ -114,7 +98,14 @@ class ExternalPaymentMethodConfirmationFlowTest {
     private fun createExternalPaymentMethodConfirmationMediator(
         savedStateHandle: SavedStateHandle = SavedStateHandle()
     ) = ConfirmationMediator(
-        definition = ExternalPaymentMethodConfirmationDefinition(FakeErrorReporter()),
+        definition = ExternalPaymentMethodConfirmationDefinition(
+            externalPaymentMethodConfirmHandlerProvider = {
+                ExternalPaymentMethodConfirmHandler { _, _ ->
+                    error("Not implemented!")
+                }
+            },
+            errorReporter = FakeErrorReporter()
+        ),
         savedStateHandle = savedStateHandle
     )
 

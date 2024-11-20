@@ -20,7 +20,6 @@ import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.ExternalPaymentMethodContract
 import com.stripe.android.paymentsheet.ExternalPaymentMethodInput
-import com.stripe.android.paymentsheet.ExternalPaymentMethodInterceptor
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentIntentFactory
@@ -54,7 +53,7 @@ class ExternalPaymentMethodConfirmationDefinitionTest {
     @Test
     fun `'createLauncher' should register launcher properly for activity result`() = runTest {
         val errorReporter = FakeErrorReporter()
-        val definition = createExternalPaymentMethodConfirmationDefinition(errorReporter)
+        val definition = createExternalPaymentMethodConfirmationDefinition(errorReporter = errorReporter)
 
         var onResultCalled = false
         val onResult: (PaymentResult) -> Unit = { onResultCalled = true }
@@ -143,7 +142,9 @@ class ExternalPaymentMethodConfirmationDefinitionTest {
     @Test
     fun `'Fail' action should be returned if EPM handler is not set and report error`() = runTest {
         val errorReporter = FakeErrorReporter()
-        val definition = createExternalPaymentMethodConfirmationDefinition(errorReporter)
+        val definition = createExternalPaymentMethodConfirmationDefinition(
+            errorReporter = errorReporter,
+        )
 
         val action = definition.action(
             confirmationOption = EPM_CONFIRMATION_OPTION,
@@ -171,13 +172,15 @@ class ExternalPaymentMethodConfirmationDefinitionTest {
 
     @Test
     fun `'Launch' action should be returned if EPM handler is set & report launch`() = runTest {
-        ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler =
-            ExternalPaymentMethodConfirmHandler { _, _ ->
-                // Do nothing
-            }
-
         val errorReporter = FakeErrorReporter()
-        val definition = createExternalPaymentMethodConfirmationDefinition(errorReporter)
+        val definition = createExternalPaymentMethodConfirmationDefinition(
+            externalPaymentMethodConfirmHandler = { _, _ ->
+                ExternalPaymentMethodConfirmHandler { _, _ ->
+                    error("Not implemented!")
+                }
+            },
+            errorReporter = errorReporter
+        )
 
         val action = definition.action(
             confirmationOption = EPM_CONFIRMATION_OPTION,
@@ -190,14 +193,14 @@ class ExternalPaymentMethodConfirmationDefinitionTest {
 
         assertThat(launchAction.launcherArguments).isEqualTo(Unit)
         assertThat(launchAction.deferredIntentConfirmationType).isNull()
-
-        ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = null
     }
 
     @Test
     fun `On 'launch', should use launcher to launch and report event`() = runTest {
         val errorReporter = FakeErrorReporter()
-        val definition = createExternalPaymentMethodConfirmationDefinition(errorReporter)
+        val definition = createExternalPaymentMethodConfirmationDefinition(
+            errorReporter = errorReporter,
+        )
 
         val launcher = FakeActivityResultLauncher<ExternalPaymentMethodInput>()
 
@@ -229,9 +232,13 @@ class ExternalPaymentMethodConfirmationDefinitionTest {
     }
 
     private fun createExternalPaymentMethodConfirmationDefinition(
+        externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler? = null,
         errorReporter: ErrorReporter = FakeErrorReporter()
     ): ExternalPaymentMethodConfirmationDefinition {
-        return ExternalPaymentMethodConfirmationDefinition(errorReporter)
+        return ExternalPaymentMethodConfirmationDefinition(
+            externalPaymentMethodConfirmHandlerProvider = { externalPaymentMethodConfirmHandler },
+            errorReporter = errorReporter,
+        )
     }
 
     private fun ActivityResultContract<*, *>.asExternalPaymentMethodContract(): ExternalPaymentMethodContract {
