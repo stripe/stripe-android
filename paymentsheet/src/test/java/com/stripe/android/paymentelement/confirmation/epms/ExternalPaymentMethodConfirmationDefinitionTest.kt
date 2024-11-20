@@ -10,6 +10,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationOption
+import com.stripe.android.paymentelement.confirmation.asCallbackFor
 import com.stripe.android.paymentelement.confirmation.asCanceled
 import com.stripe.android.paymentelement.confirmation.asFail
 import com.stripe.android.paymentelement.confirmation.asFailed
@@ -71,7 +72,7 @@ class ExternalPaymentMethodConfirmationDefinitionTest {
 
             assertThat(call.callback).isInstanceOf<ActivityResultCallback<PaymentResult>>()
 
-            val callback = call.callback.asExternalPaymentMethodCallback()
+            val callback = call.callback.asCallbackFor<PaymentResult>()
 
             assertThat(externalPaymentMethodContract.errorReporter).isEqualTo(errorReporter)
 
