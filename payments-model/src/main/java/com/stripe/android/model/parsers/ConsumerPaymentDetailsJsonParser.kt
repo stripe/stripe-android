@@ -52,7 +52,7 @@ object ConsumerPaymentDetailsJsonParser : ModelJsonParser<ConsumerPaymentDetails
             when (it.lowercase()) {
                 "card" -> {
                     val cardDetails = json.getJSONObject(FIELD_CARD_DETAILS)
-                    val checks = cardDetails.getJSONObject(FIELD_CARD_CHECKS)
+                    val checks = cardDetails.optJSONObject(FIELD_CARD_CHECKS)
 
                     ConsumerPaymentDetails.Card(
                         id = json.getString(FIELD_ID),
@@ -60,9 +60,9 @@ object ConsumerPaymentDetailsJsonParser : ModelJsonParser<ConsumerPaymentDetails
                         expiryMonth = cardDetails.getInt(FIELD_CARD_EXPIRY_MONTH),
                         brand = CardBrand.fromCode(cardBrandFix(cardDetails.getString(FIELD_CARD_BRAND))),
                         last4 = cardDetails.getString(FIELD_CARD_LAST_4),
-                        cvcCheck = CvcCheck.fromCode(checks.getString(FIELD_CARD_CVC_CHECK)),
+                        cvcCheck = CvcCheck.fromCode(checks?.getString(FIELD_CARD_CVC_CHECK)),
                         billingAddress = parseBillingAddress(json),
-                        isDefault = json.getBoolean(FIELD_IS_DEFAULT),
+                        isDefault = json.optBoolean(FIELD_IS_DEFAULT),
                     )
                 }
                 "bank_account" -> {
@@ -72,7 +72,7 @@ object ConsumerPaymentDetailsJsonParser : ModelJsonParser<ConsumerPaymentDetails
                         last4 = bankAccountDetails.getString(FIELD_BANK_ACCOUNT_LAST_4),
                         bankName = optString(bankAccountDetails, FIELD_BANK_ACCOUNT_BANK_NAME),
                         bankIconCode = optString(bankAccountDetails, FIELD_BANK_ACCOUNT_BANK_ICON_CODE),
-                        isDefault = json.getBoolean(FIELD_IS_DEFAULT),
+                        isDefault = json.optBoolean(FIELD_IS_DEFAULT),
                     )
                 }
                 else -> null
@@ -80,7 +80,7 @@ object ConsumerPaymentDetailsJsonParser : ModelJsonParser<ConsumerPaymentDetails
         }
 
     private fun parseBillingAddress(json: JSONObject) =
-        json.getJSONObject(FIELD_BILLING_ADDRESS).let { address ->
+        json.optJSONObject(FIELD_BILLING_ADDRESS)?.let { address ->
             ConsumerPaymentDetails.BillingAddress(
                 optString(address, FIELD_ADDRESS_COUNTRY_CODE)?.let { CountryCode(it) },
                 optString(address, FIELD_ADDRESS_POSTAL_CODE)

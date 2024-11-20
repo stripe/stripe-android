@@ -37,6 +37,28 @@ class ConsumerPaymentDetailsJsonParserTest {
     }
 
     @Test
+    fun `parse optional card payment details correctly`() {
+        assertEquals(
+            ConsumerPaymentDetailsJsonParser
+                .parse(ConsumerFixtures.CONSUMER_SINGLE_CARD_PAYMENT_DETAILS_NULL_VALUES_JSON),
+            ConsumerPaymentDetails(
+                listOf(
+                    ConsumerPaymentDetails.Card(
+                        id = "QAAAKJ6",
+                        expiryYear = 2023,
+                        expiryMonth = 12,
+                        isDefault = false,
+                        brand = CardBrand.MasterCard,
+                        last4 = "4444",
+                        cvcCheck = CvcCheck.Unknown,
+                        billingAddress = null
+                    )
+                )
+            )
+        )
+    }
+
+    @Test
     fun `parse single bank account payment details`() {
         assertEquals(
             ConsumerPaymentDetails(
@@ -52,6 +74,25 @@ class ConsumerPaymentDetailsJsonParserTest {
             ),
             ConsumerPaymentDetailsJsonParser
                 .parse(ConsumerFixtures.CONSUMER_SINGLE_BANK_ACCOUNT_PAYMENT_DETAILS_JSON),
+        )
+    }
+
+    @Test
+    fun `parse optional bank account payment details correctly`() {
+        assertEquals(
+            ConsumerPaymentDetails(
+                listOf(
+                    ConsumerPaymentDetails.BankAccount(
+                        id = "wAAACGA",
+                        last4 = "6789",
+                        bankName = null,
+                        bankIconCode = null,
+                        isDefault = false,
+                    )
+                )
+            ),
+            ConsumerPaymentDetailsJsonParser
+                .parse(ConsumerFixtures.CONSUMER_SINGLE_BANK_ACCOUNT_PAYMENT_DETAILS_NULL_VALUES_JSON),
         )
     }
 

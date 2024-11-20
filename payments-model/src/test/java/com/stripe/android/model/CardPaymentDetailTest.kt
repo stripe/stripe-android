@@ -28,7 +28,7 @@ class CardPaymentDetailTest {
     }
 
     @Test
-    fun `isExpired should be false when expiry date is in the past`() {
+    fun `isExpired should be false when expiry date is in the future`() {
         assertThat(card.isExpired).isFalse()
     }
 
