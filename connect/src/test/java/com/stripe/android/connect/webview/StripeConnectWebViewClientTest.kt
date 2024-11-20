@@ -13,14 +13,17 @@ import com.stripe.android.core.version.StripeSdkVersion
 import kotlinx.serialization.json.Json
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import org.robolectric.RobolectricTestRunner
 
 @OptIn(PrivateBetaConnectSDK::class)
+@RunWith(RobolectricTestRunner::class)
 class StripeConnectWebViewClientTest {
 
     private val mockContext: Context = mock()
