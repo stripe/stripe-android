@@ -30,6 +30,7 @@ import com.stripe.android.paymentsheet.ui.PaymentElement
 import com.stripe.android.paymentsheet.ui.PaymentSheetScaffold
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBar
 import com.stripe.android.paymentsheet.ui.SavedPaymentMethodTabLayoutUI
+import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodUI
 import com.stripe.android.paymentsheet.utils.PaymentSheetContentPadding
 import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.ui.core.elements.SimpleDialogElementUI
@@ -90,6 +91,12 @@ internal fun CustomerSheetScreen(
                         )
                         PaymentSheetContentPadding()
                     }
+                    is CustomerSheetViewState.UpdatePaymentMethod -> {
+                        UpdatePaymentMethod(
+                            viewState = viewState,
+                        )
+                        PaymentSheetContentPadding()
+                    }
                 }
             }
         },
@@ -135,7 +142,7 @@ internal fun SelectPaymentMethod(
             isProcessing = viewState.isProcessing,
             onAddCardPressed = { viewActionHandler(CustomerSheetViewAction.OnAddCardPressed) },
             onItemSelected = { viewActionHandler(CustomerSheetViewAction.OnItemSelected(it)) },
-            onModifyItem = { viewActionHandler(CustomerSheetViewAction.OnModifyItem(it.paymentMethod)) },
+            onModifyItem = { viewActionHandler(CustomerSheetViewAction.OnModifyItem(it)) },
             onItemRemoved = { viewActionHandler(CustomerSheetViewAction.OnItemRemoved(it)) },
             modifier = Modifier.padding(bottom = 2.dp),
         )
@@ -304,6 +311,30 @@ private fun EditPaymentMethod(
 
         EditPaymentMethod(
             interactor = viewState.editPaymentMethodInteractor,
+            modifier = modifier,
+        )
+    }
+}
+
+@Composable
+private fun UpdatePaymentMethod(
+    viewState: CustomerSheetViewState.UpdatePaymentMethod,
+    modifier: Modifier = Modifier,
+) {
+    val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
+
+    Column(modifier) {
+        viewState.updatePaymentMethodInteractor.screenTitle?.let {
+            H4Text(
+                text = it.resolve(),
+                modifier = Modifier
+                    .padding(bottom = 20.dp)
+                    .padding(horizontal = horizontalPadding)
+            )
+        }
+
+        UpdatePaymentMethodUI(
+            interactor = viewState.updatePaymentMethodInteractor,
             modifier = modifier,
         )
     }

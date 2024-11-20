@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.ui
 
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.ViewActionRecorder
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,6 +14,9 @@ internal class FakeUpdatePaymentMethodInteractor(
 ) : UpdatePaymentMethodInteractor {
     override val isLiveMode: Boolean = false
     override val state: StateFlow<UpdatePaymentMethodInteractor.State> = MutableStateFlow(initialState)
+    override val screenTitle: ResolvableString? = UpdatePaymentMethodInteractor.screenTitle(
+        displayableSavedPaymentMethod
+    )
 
     override fun handleViewAction(viewAction: UpdatePaymentMethodInteractor.ViewAction) {
         viewActionRecorder?.record(viewAction)
