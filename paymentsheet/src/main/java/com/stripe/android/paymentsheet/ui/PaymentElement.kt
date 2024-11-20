@@ -24,6 +24,7 @@ import com.stripe.android.model.PaymentMethod.Type.USBankAccount
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.forms.FormFieldValues
+import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountForm
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
@@ -36,6 +37,7 @@ internal fun PaymentElement(
     enabled: Boolean,
     supportedPaymentMethods: List<SupportedPaymentMethod>,
     selectedItemCode: PaymentMethodCode,
+    incentive: PaymentMethodIncentive?,
     formElements: List<FormElement>,
     onItemSelectedListener: (SupportedPaymentMethod) -> Unit,
     formArguments: FormArguments,
@@ -66,6 +68,7 @@ internal fun PaymentElement(
                 selectedIndex = selectedIndex,
                 isEnabled = enabled,
                 paymentMethods = supportedPaymentMethods,
+                incentive = incentive,
                 onItemSelectedListener = onItemSelectedListener,
                 imageLoader = imageLoader,
                 modifier = Modifier.padding(bottom = 12.dp),

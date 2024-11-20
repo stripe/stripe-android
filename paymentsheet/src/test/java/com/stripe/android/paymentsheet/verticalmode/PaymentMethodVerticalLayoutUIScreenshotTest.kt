@@ -15,7 +15,13 @@ internal class PaymentMethodVerticalLayoutUIScreenshotTest {
     val paparazziRule = PaparazziRule(PaymentSheetAppearance.entries)
 
     private val paymentMethods: List<DisplayablePaymentMethod> by lazy {
-        MockPaymentMethodsFactory.create().map { it.asDisplayablePaymentMethod(emptyList()) { } }
+        MockPaymentMethodsFactory.create().map {
+            it.asDisplayablePaymentMethod(
+                customerSavedPaymentMethods = emptyList(),
+                incentive = null,
+                onClick = {},
+            )
+        }
     }
 
     private val savedPaymentMethod: DisplayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard()

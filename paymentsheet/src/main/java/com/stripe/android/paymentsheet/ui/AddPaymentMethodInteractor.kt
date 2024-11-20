@@ -7,9 +7,11 @@ import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.LinkInlineHandler
 import com.stripe.android.paymentsheet.forms.FormFieldValues
+import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
+import com.stripe.android.paymentsheet.verticalmode.BankFormInteractor
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.elements.FormElement
 import kotlinx.coroutines.CoroutineScope
@@ -36,6 +38,7 @@ internal interface AddPaymentMethodInteractor {
         val formElements: List<FormElement>,
         val paymentSelection: PaymentSelection?,
         val processing: Boolean,
+        val incentive: PaymentMethodIncentive?,
         val usBankAccountFormArguments: USBankAccountFormArguments,
     )
 
@@ -54,6 +57,7 @@ internal class DefaultAddPaymentMethodInteractor(
     private val initiallySelectedPaymentMethodType: PaymentMethodCode,
     private val selection: StateFlow<PaymentSelection?>,
     private val processing: StateFlow<Boolean>,
+    private val incentive: StateFlow<PaymentMethodIncentive?>,
     private val supportedPaymentMethods: List<SupportedPaymentMethod>,
     private val createFormArguments: (PaymentMethodCode) -> FormArguments,
     private val formElementsForCode: (PaymentMethodCode) -> List<FormElement>,
@@ -78,10 +82,13 @@ internal class DefaultAddPaymentMethodInteractor(
                 linkInlineHandler = linkInlineHandler,
                 paymentMethodMetadata = paymentMethodMetadata
             )
+            val bankFormInteractor = BankFormInteractor.create(viewModel)
+
             return DefaultAddPaymentMethodInteractor(
                 initiallySelectedPaymentMethodType = viewModel.initiallySelectedPaymentMethodType,
                 selection = viewModel.selection,
                 processing = viewModel.processing,
+                incentive = bankFormInteractor.paymentMethodIncentiveInteractor.displayedIncentive,
                 supportedPaymentMethods = paymentMethodMetadata.sortedSupportedPaymentMethods(),
                 createFormArguments = formHelper::createFormArguments,
                 formElementsForCode = formHelper::formElementsForCode,
@@ -95,6 +102,7 @@ internal class DefaultAddPaymentMethodInteractor(
                         paymentMethodMetadata = paymentMethodMetadata,
                         hostedSurface = CollectBankAccountLauncher.HOSTED_SURFACE_PAYMENT_ELEMENT,
                         selectedPaymentMethodCode = it,
+                        bankFormInteractor = bankFormInteractor,
                     )
                 },
                 coroutineScope = coroutineScope,
@@ -122,6 +130,7 @@ internal class DefaultAddPaymentMethodInteractor(
             formElements = formElementsForCode(selectedPaymentMethodCode),
             paymentSelection = selection.value,
             processing = processing.value,
+            incentive = incentive.value,
             usBankAccountFormArguments = createUSBankAccountFormArguments(selectedPaymentMethodCode),
         )
     }

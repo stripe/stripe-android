@@ -22,9 +22,11 @@ internal class FakePaymentMethodVerticalLayoutInteractor(
         ): FakePaymentMethodVerticalLayoutInteractor {
             val displayablePaymentMethods = paymentMethodMetadata.sortedSupportedPaymentMethods()
                 .map { supportedPaymentMethod ->
-                    supportedPaymentMethod.asDisplayablePaymentMethod(emptyList()) {
-                        throw AssertionError("Not expected.")
-                    }
+                    supportedPaymentMethod.asDisplayablePaymentMethod(
+                        customerSavedPaymentMethods = emptyList(),
+                        incentive = null,
+                        onClick = { throw AssertionError("Not expected.") },
+                    )
                 }
             val initialState = PaymentMethodVerticalLayoutInteractor.State(
                 displayablePaymentMethods = displayablePaymentMethods,
