@@ -16,6 +16,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 @OptIn(PrivateBetaConnectSDK::class)
 @RunWith(RobolectricTestRunner::class)
@@ -71,18 +72,31 @@ class StripeConnectWebViewContainerControllerTest {
 
         val result = controller.shouldOverrideUrlLoading(mockContext, mockRequest)
 
-        assert(result)
+        assertTrue(result)
         verify(mockStripeIntentLauncher).launchSecureExternalWebTab(mockContext, uri)
     }
 
     @Test
-    fun `shouldOverrideUrlLoading blocks url loading and returns true for unsupported schemes`() {
+    fun `shouldOverrideUrlLoading opens email client for mailto urls`() {
         val uri = Uri.parse("mailto://example@stripe.com")
         val mockRequest = mock<WebResourceRequest> {
             on { url } doReturn uri
         }
 
         val result = controller.shouldOverrideUrlLoading(mockContext, mockRequest)
-        assert(result)
+        verify(mockStripeIntentLauncher).launchEmailLink(mockContext, uri)
+        assertTrue(result)
+    }
+
+    @Test
+    fun `shouldOverrideUrlLoading opens system launcher for non-http urls`() {
+        val uri = Uri.parse("stripe://example@stripe.com")
+        val mockRequest = mock<WebResourceRequest> {
+            on { url } doReturn uri
+        }
+
+        val result = controller.shouldOverrideUrlLoading(mockContext, mockRequest)
+        verify(mockStripeIntentLauncher).launchUrlWithSystemHandler(mockContext, uri)
+        assertTrue(result)
     }
 }

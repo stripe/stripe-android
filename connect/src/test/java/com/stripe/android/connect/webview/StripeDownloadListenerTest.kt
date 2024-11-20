@@ -65,7 +65,7 @@ class StripeDownloadListenerTest {
         testScope.testScheduler.advanceUntilIdle()
 
         verify(stripeDownloadManager).enqueueDownload(url, contentDisposition, mimeType)
-        verify(stripeToastManager).showToast(any())
+        verify(stripeToastManager).showToast(any(), any())
     }
 
     @Test
@@ -74,7 +74,7 @@ class StripeDownloadListenerTest {
         testScope.testScheduler.advanceUntilIdle()
 
         verifyNoInteractions(stripeDownloadManager)
-        verify(stripeToastManager).showToast(any())
+        verify(stripeToastManager).showToast(any(), any())
     }
 
     @Test
@@ -90,6 +90,6 @@ class StripeDownloadListenerTest {
         stripeDownloadListener.onDownloadStart(url, userAgent, contentDisposition, mimeType, contentLength)
         testScope.testScheduler.advanceUntilIdle()
 
-        verify(stripeToastManager).showToast(any())
+        verify(stripeToastManager).showToast(any(), any())
     }
 }

@@ -66,9 +66,13 @@ internal class StripeConnectWebViewContainerController(
             stripeIntentLauncher.launchSecureExternalWebTab(context, url)
             true // block the request since we're opening it in a secure external tab
         } else {
-            // TODO - support non-http/https schemes.
-            logger.debug("(StripeConnectWebViewClient) Received unsupported pop-up request: $url")
-            true // block the request as it's currently unsupported
+            logger.debug("(StripeConnectWebViewClient) Opening non-http/https pop-up request: $url")
+            if (url.scheme.equals("mailto", ignoreCase = true)) {
+                stripeIntentLauncher.launchEmailLink(context, url)
+            } else {
+                stripeIntentLauncher.launchUrlWithSystemHandler(context, url)
+            }
+            true // block the request since we're opening it via the system handler
         }
     }
 
