@@ -616,6 +616,7 @@ internal class DefaultPaymentElementLoaderTest {
                 linkMode = LinkMode.Passthrough,
                 linkFlags = emptyMap(),
                 disableLinkSignup = false,
+                linkConsumerIncentive = null,
             )
         )
 
@@ -647,6 +648,7 @@ internal class DefaultPaymentElementLoaderTest {
                     "link_passthrough_mode_enabled" to true,
                 ),
                 disableLinkSignup = false,
+                linkConsumerIncentive = null,
             )
         )
 
@@ -722,6 +724,7 @@ internal class DefaultPaymentElementLoaderTest {
                 linkMode = LinkMode.LinkPaymentMethod,
                 linkFlags = mapOf(),
                 disableLinkSignup = false,
+                linkConsumerIncentive = null,
             ),
             linkStore = mock {
                 on { hasUsedLink() } doReturn true
@@ -748,6 +751,7 @@ internal class DefaultPaymentElementLoaderTest {
                 linkMode = LinkMode.LinkPaymentMethod,
                 linkFlags = mapOf(),
                 disableLinkSignup = true,
+                linkConsumerIncentive = null,
             )
         )
 
@@ -2168,6 +2172,7 @@ internal class DefaultPaymentElementLoaderTest {
             linkMode = if (passthroughModeEnabled) LinkMode.Passthrough else LinkMode.LinkPaymentMethod,
             linkFlags = mapOf(),
             disableLinkSignup = false,
+            linkConsumerIncentive = null,
         )
     }
 

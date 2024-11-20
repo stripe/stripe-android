@@ -3,6 +3,7 @@ package com.stripe.android.model.parsers
 import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.core.model.parsers.ModelJsonParser.Companion.jsonArrayToList
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.DeferredIntentParams
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSessionParams
@@ -148,12 +149,19 @@ internal class ElementsSessionJsonParser(
             parseLinkFlags(linkSettingsJson)
         } ?: emptyMap()
 
+        val linkConsumerIncentive = if (FeatureFlags.instantDebitsIncentives.isEnabled) {
+            json?.let { LinkConsumerIncentiveJsonParser.parse(it) }
+        } else {
+            null
+        }
+
         return ElementsSession.LinkSettings(
             linkFundingSources = jsonArrayToList(linkFundingSources),
             linkPassthroughModeEnabled = linkPassthroughModeEnabled,
             linkMode = linkMode,
             linkFlags = linkFlags,
             disableLinkSignup = disableLinkSignup,
+            linkConsumerIncentive = linkConsumerIncentive,
         )
     }
 

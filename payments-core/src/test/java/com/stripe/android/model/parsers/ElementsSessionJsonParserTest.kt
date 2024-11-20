@@ -2,20 +2,30 @@ package com.stripe.android.model.parsers
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.model.parsers.ModelJsonParser
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.DeferredIntentParams
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSessionFixtures
 import com.stripe.android.model.ElementsSessionFixtures.createPaymentIntentWithCustomerSession
 import com.stripe.android.model.ElementsSessionParams
+import com.stripe.android.model.LinkConsumerIncentive
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.testing.FeatureFlagTestRule
 import org.json.JSONObject
+import org.junit.Rule
 import org.junit.Test
 
 class ElementsSessionJsonParserTest {
+
+    @get:Rule
+    val incentivesFeatureFlagRule = FeatureFlagTestRule(
+        featureFlag = FeatureFlags.instantDebitsIncentives,
+        isEnabled = false,
+    )
 
     @Test
     fun parsePaymentIntent_shouldCreateObjectWithOrderedPaymentMethods() {
@@ -700,6 +710,47 @@ class ElementsSessionJsonParserTest {
         )
 
         assertThat(elementsSession?.stripeIntent?.unactivatedPaymentMethods).containsExactly("au_becs_debit")
+    }
+
+    @Test
+    fun `Parses Link consumer incentives if feature flag is enabled`() {
+        incentivesFeatureFlagRule.setEnabled(true)
+
+        val elementsSession = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret",
+                externalPaymentMethods = emptyList(),
+            ),
+            isLiveMode = true,
+        ).parse(
+            ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_WITH_LINK_INCENTIVE_JSON
+        )
+
+        assertThat(elementsSession?.linkSettings?.linkConsumerIncentive).isEqualTo(
+            LinkConsumerIncentive(
+                incentiveParams = LinkConsumerIncentive.IncentiveParams(
+                    paymentMethod = "link_instant_debits",
+                ),
+                incentiveDisplayText = "$5",
+            )
+        )
+    }
+
+    @Test
+    fun `Does not parse Link consumer incentives if feature flag is disabled`() {
+        incentivesFeatureFlagRule.setEnabled(false)
+
+        val elementsSession = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret",
+                externalPaymentMethods = emptyList(),
+            ),
+            isLiveMode = true,
+        ).parse(
+            ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_WITH_LINK_INCENTIVE_JSON
+        )
+
+        assertThat(elementsSession?.linkSettings?.linkConsumerIncentive).isNull()
     }
 
     private fun allowRedisplayTest(
