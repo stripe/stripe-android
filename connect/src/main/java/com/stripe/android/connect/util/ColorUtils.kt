@@ -17,7 +17,7 @@ import kotlin.math.min
  */
 @Suppress("MagicNumber", "ComplexCondition")
 @ColorInt
-fun getContrastingColor(@ColorInt color: Int, minimumRatio: Float = 4.5f): Int {
+internal fun getContrastingColor(@ColorInt color: Int, minimumRatio: Float = 4.5f): Int {
     var adjustedColor = color
 
     val shouldLighten = ColorUtils.calculateLuminance(color) < 0.5
