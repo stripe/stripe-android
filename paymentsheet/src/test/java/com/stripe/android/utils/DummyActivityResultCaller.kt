@@ -6,16 +6,24 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistry
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.app.ActivityOptionsCompat
+import app.cash.turbine.ReceiveTurbine
+import app.cash.turbine.Turbine
 
-class DummyActivityResultCaller : ActivityResultCaller {
+class DummyActivityResultCaller(
+    private val onLaunch: () -> Unit = { error("Not implemented") }
+) : ActivityResultCaller {
+    private val _calls = Turbine<Call<*, *>>()
+    val calls: ReceiveTurbine<Call<*, *>> = _calls
 
     override fun <I : Any?, O : Any?> registerForActivityResult(
         contract: ActivityResultContract<I, O>,
         callback: ActivityResultCallback<O>
     ): ActivityResultLauncher<I> {
+        _calls.add(Call(contract, callback))
+
         return object : ActivityResultLauncher<I>() {
             override fun launch(input: I, options: ActivityOptionsCompat?) {
-                error("Not implemented")
+                onLaunch()
             }
 
             override fun unregister() {
@@ -35,7 +43,7 @@ class DummyActivityResultCaller : ActivityResultCaller {
     ): ActivityResultLauncher<I> {
         return object : ActivityResultLauncher<I>() {
             override fun launch(input: I, options: ActivityOptionsCompat?) {
-                error("Not implemented")
+                onLaunch()
             }
 
             override fun unregister() {
@@ -47,4 +55,9 @@ class DummyActivityResultCaller : ActivityResultCaller {
             }
         }
     }
+
+    data class Call<I : Any?, O : Any?>(
+        val contract: ActivityResultContract<I, O>,
+        val callback: ActivityResultCallback<O>,
+    )
 }

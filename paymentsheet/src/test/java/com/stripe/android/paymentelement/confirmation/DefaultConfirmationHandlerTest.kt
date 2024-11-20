@@ -1055,10 +1055,10 @@ class DefaultConfirmationHandlerTest {
         val intentResult = defaultConfirmationHandler.awaitIntentResult().asFailed()
 
         assertThat(intentResult.cause.message).isEqualTo(
-            "externalPaymentMethodLauncher is null. Cannot process payment for payment selection: paypal"
+            "No launcher for ExternalPaymentMethodConfirmationDefinition was found, did you call register?"
         )
         assertThat(intentResult.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
-        assertThat(intentResult.type).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.ExternalPaymentMethod)
+        assertThat(intentResult.type).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Fatal)
     }
 
     @Test
