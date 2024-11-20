@@ -10,9 +10,11 @@ import com.stripe.android.paymentsheet.example.playground.settings.Currency
 import com.stripe.android.paymentsheet.example.playground.settings.CurrencySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.SupportedPaymentMethodsSettingsDefinition
 import com.stripe.android.test.core.TestParameters
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 
+@Ignore("Re-enable once Twint is supported again in our playground")
 @RunWith(AndroidJUnit4::class)
 internal class TestTwint : BasePlaygroundTest() {
     private val testParameters = TestParameters.create(
