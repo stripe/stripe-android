@@ -1,9 +1,6 @@
 package com.stripe.android.connect.webview
 
 import android.content.Context
-import android.net.Uri
-import android.webkit.WebResourceRequest
-import android.content.Context
 import android.webkit.ValueCallback
 import android.webkit.WebSettings
 import android.webkit.WebView
@@ -22,7 +19,6 @@ import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import kotlin.test.assertFalse
 
 @OptIn(PrivateBetaConnectSDK::class)
 class StripeConnectWebViewClientTest {
@@ -35,7 +31,6 @@ class StripeConnectWebViewClientTest {
         on { settings } doReturn mockSettings
         on { context } doReturn mockContext
     }
-    private val mockStripeIntentLauncher: StripeIntentLauncher = mock()
 
     private lateinit var container: StripeConnectWebViewContainerImpl
     private val webViewClient get() = container.stripeWebViewClient
@@ -57,8 +52,6 @@ class StripeConnectWebViewClientTest {
         container = StripeConnectWebViewContainerImpl(
             embeddedComponent = StripeEmbeddedComponent.PAYOUTS,
             embeddedComponentManager = embeddedComponentManager,
-            connectComponent = StripeEmbeddedComponent.PAYOUTS,
-            stripeIntentLauncher = mockStripeIntentLauncher,
             logger = Logger.getInstance(enableLogging = false),
             jsonSerializer = Json { ignoreUnknownKeys = true },
         )
