@@ -1,6 +1,8 @@
 # CHANGELOG
 
 ## XX.XX.XX - 20XX-XX-XX
+
+## 21.2.0 - 2024-11-19
 ### Payments
 - [ADDED][9672](https://github.com/stripe/stripe-android/pull/9672) Update `stripe-3ds2-android` to version 6.2.0 which upgrades 3DS spec from 2.1 to 2.2
 
