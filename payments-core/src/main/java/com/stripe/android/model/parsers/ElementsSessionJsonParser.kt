@@ -149,7 +149,11 @@ internal class ElementsSessionJsonParser(
             parseLinkFlags(linkSettingsJson)
         } ?: emptyMap()
 
-        val linkConsumerIncentive = json?.let { LinkConsumerIncentiveJsonParser.parse(it) }
+        val linkConsumerIncentive = if (FeatureFlags.instantDebitsIncentives.isEnabled) {
+            json?.let { LinkConsumerIncentiveJsonParser.parse(it) }
+        } else {
+            null
+        }
 
         return ElementsSession.LinkSettings(
             linkFundingSources = jsonArrayToList(linkFundingSources),
@@ -157,7 +161,7 @@ internal class ElementsSessionJsonParser(
             linkMode = linkMode,
             linkFlags = linkFlags,
             disableLinkSignup = disableLinkSignup,
-            linkConsumerIncentive = linkConsumerIncentive.takeIf { FeatureFlags.instantDebitsIncentives.isEnabled },
+            linkConsumerIncentive = linkConsumerIncentive,
         )
     }
 
