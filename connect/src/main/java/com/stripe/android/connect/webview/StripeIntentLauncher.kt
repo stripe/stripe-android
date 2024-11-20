@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.browser.customtabs.CustomTabsIntent
+import com.stripe.android.connect.R
 import com.stripe.android.core.BuildConfig
 import com.stripe.android.core.Logger
 
@@ -43,7 +44,7 @@ internal class StripeIntentLauncherImpl(
             context.startActivity(intent)
         } catch (e: Exception) {
             logger.error("Failed to open URL with system handler: ${e.message}")
-            toastManagerImpl.showToast(context, "Failed to open URL: $uri")
+            toastManagerImpl.showToast(context, context.getString(R.string.stripe_failed_to_open_url, uri.toString()))
         }
     }
 
