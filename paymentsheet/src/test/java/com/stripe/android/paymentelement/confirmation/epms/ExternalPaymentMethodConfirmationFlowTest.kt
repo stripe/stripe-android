@@ -26,33 +26,33 @@ class ExternalPaymentMethodConfirmationFlowTest {
         val savedStateHandle = SavedStateHandle()
         val mediator = createExternalPaymentMethodConfirmationMediator(savedStateHandle)
 
-        var called = false
-        mediator.register(
-            activityResultCaller = DummyActivityResultCaller(
-                onLaunch = { called = true }
-            ),
-            onResult = {}
-        )
+        DummyActivityResultCaller.test {
+            mediator.register(
+                activityResultCaller = activityResultCaller,
+                onResult = {}
+            )
 
-        val action = mediator.action(
-            option = EPM_CONFIRMATION_OPTION,
-            intent = PAYMENT_INTENT,
-        )
+            val action = mediator.action(
+                option = EPM_CONFIRMATION_OPTION,
+                intent = PAYMENT_INTENT,
+            )
 
-        assertThat(action).isInstanceOf<ConfirmationMediator.Action.Launch>()
+            assertThat(action).isInstanceOf<ConfirmationMediator.Action.Launch>()
 
-        val launchAction = action.asLaunch()
+            val launchAction = action.asLaunch()
 
-        launchAction.launch()
+            launchAction.launch()
 
-        val parameters = savedStateHandle
-            .get<Parameters<ExternalPaymentMethodConfirmationOption>>("ExternalPaymentMethodParameters")
+            val parameters = savedStateHandle
+                .get<Parameters<ExternalPaymentMethodConfirmationOption>>("ExternalPaymentMethodParameters")
 
-        assertThat(parameters?.confirmationOption).isEqualTo(EPM_CONFIRMATION_OPTION)
-        assertThat(parameters?.intent).isEqualTo(PAYMENT_INTENT)
-        assertThat(parameters?.deferredIntentConfirmationType).isNull()
+            assertThat(parameters?.confirmationOption).isEqualTo(EPM_CONFIRMATION_OPTION)
+            assertThat(parameters?.intent).isEqualTo(PAYMENT_INTENT)
+            assertThat(parameters?.deferredIntentConfirmationType).isNull()
 
-        assertThat(called).isTrue()
+            assertThat(awaitRegisterCall()).isNotNull()
+            assertThat(awaitLaunchCall()).isNotNull()
+        }
     }
 
     @Test
@@ -70,29 +70,29 @@ class ExternalPaymentMethodConfirmationFlowTest {
             )
         }
 
-        val mediator = createExternalPaymentMethodConfirmationMediator(savedStateHandle)
-        val caller = DummyActivityResultCaller()
+        DummyActivityResultCaller.test {
+            val mediator = createExternalPaymentMethodConfirmationMediator(savedStateHandle)
+            var result: ConfirmationHandler.Result? = null
 
-        var result: ConfirmationHandler.Result? = null
+            mediator.register(
+                activityResultCaller = activityResultCaller,
+                onResult = {
+                    result = it
+                }
+            )
 
-        mediator.register(
-            activityResultCaller = caller,
-            onResult = {
-                result = it
-            }
-        )
+            val call = awaitRegisterCall()
 
-        val call = caller.calls.awaitItem()
+            call.callback.asExternalPaymentMethodCallback().onActivityResult(PaymentResult.Completed)
 
-        call.callback.asExternalPaymentMethodCallback().onActivityResult(PaymentResult.Completed)
+            countDownLatch.await(5, TimeUnit.SECONDS)
 
-        countDownLatch.await(5, TimeUnit.SECONDS)
+            assertThat(result).isInstanceOf<ConfirmationHandler.Result.Succeeded>()
 
-        assertThat(result).isInstanceOf<ConfirmationHandler.Result.Succeeded>()
+            val successResult = result.asSucceeded()
 
-        val successResult = result.asSucceeded()
-
-        assertThat(successResult.intent).isEqualTo(PAYMENT_INTENT)
+            assertThat(successResult.intent).isEqualTo(PAYMENT_INTENT)
+        }
     }
 
     private fun createExternalPaymentMethodConfirmationMediator(

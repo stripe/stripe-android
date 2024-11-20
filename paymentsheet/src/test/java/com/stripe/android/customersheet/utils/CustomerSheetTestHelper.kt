@@ -155,7 +155,7 @@ internal object CustomerSheetTestHelper {
             editInteractorFactory = editInteractorFactory,
             errorReporter = errorReporter,
         ).apply {
-            registerFromActivity(DummyActivityResultCaller(), TestLifecycleOwner())
+            registerFromActivity(DummyActivityResultCaller.noOp(), TestLifecycleOwner())
         }
     }
 

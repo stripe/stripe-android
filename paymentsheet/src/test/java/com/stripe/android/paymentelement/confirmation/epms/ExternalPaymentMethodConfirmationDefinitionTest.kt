@@ -57,28 +57,28 @@ class ExternalPaymentMethodConfirmationDefinitionTest {
 
         var onResultCalled = false
         val onResult: (PaymentResult) -> Unit = { onResultCalled = true }
-        val activityResultCaller = DummyActivityResultCaller()
+        DummyActivityResultCaller.test {
+            definition.createLauncher(
+                activityResultCaller = activityResultCaller,
+                onResult = onResult,
+            )
 
-        definition.createLauncher(
-            activityResultCaller = activityResultCaller,
-            onResult = onResult,
-        )
+            val call = awaitRegisterCall()
 
-        val call = activityResultCaller.calls.awaitItem()
+            assertThat(call.contract).isInstanceOf<ExternalPaymentMethodContract>()
 
-        assertThat(call.contract).isInstanceOf<ExternalPaymentMethodContract>()
+            val externalPaymentMethodContract = call.contract.asExternalPaymentMethodContract()
 
-        val externalPaymentMethodContract = call.contract.asExternalPaymentMethodContract()
+            assertThat(call.callback).isInstanceOf<ActivityResultCallback<PaymentResult>>()
 
-        assertThat(call.callback).isInstanceOf<ActivityResultCallback<PaymentResult>>()
+            val callback = call.callback.asExternalPaymentMethodCallback()
 
-        val callback = call.callback.asExternalPaymentMethodCallback()
+            assertThat(externalPaymentMethodContract.errorReporter).isEqualTo(errorReporter)
 
-        assertThat(externalPaymentMethodContract.errorReporter).isEqualTo(errorReporter)
+            callback.onActivityResult(PaymentResult.Completed)
 
-        callback.onActivityResult(PaymentResult.Completed)
-
-        assertThat(onResultCalled).isTrue()
+            assertThat(onResultCalled).isTrue()
+        }
     }
 
     @Test
