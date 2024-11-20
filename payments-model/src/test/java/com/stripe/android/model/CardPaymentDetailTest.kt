@@ -3,8 +3,6 @@ package com.stripe.android.model
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.model.CountryCode
 import org.junit.Test
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.whenever
 
 class CardPaymentDetailTest {
 
@@ -34,12 +32,9 @@ class CardPaymentDetailTest {
 
     @Test
     fun `requiresCardDetailsRecollection should be true when isExpired and cvc needs collection`() {
-        val cvcCheck: CvcCheck = mock()
-        whenever(cvcCheck.requiresRecollection).thenReturn(true)
-
         assertThat(
             card.copy(
-                cvcCheck = cvcCheck,
+                cvcCheck = CvcCheck.Fail,
                 expiryYear = 2005
             ).requiresCardDetailsRecollection
         ).isTrue()
@@ -47,12 +42,9 @@ class CardPaymentDetailTest {
 
     @Test
     fun `requiresCardDetailsRecollection should be true when isExpired and cvc does not require collection`() {
-        val cvcCheck: CvcCheck = mock()
-        whenever(cvcCheck.requiresRecollection).thenReturn(false)
-
         assertThat(
             card.copy(
-                cvcCheck = cvcCheck,
+                cvcCheck = CvcCheck.Pass,
                 expiryYear = 2005
             ).requiresCardDetailsRecollection
         ).isTrue()
@@ -60,24 +52,18 @@ class CardPaymentDetailTest {
 
     @Test
     fun `requiresCardDetailsRecollection should be true when isNotExpired and cvc requires collection`() {
-        val cvcCheck: CvcCheck = mock()
-        whenever(cvcCheck.requiresRecollection).thenReturn(true)
-
         assertThat(
             card.copy(
-                cvcCheck = cvcCheck,
+                cvcCheck = CvcCheck.Fail,
             ).requiresCardDetailsRecollection
         ).isTrue()
     }
 
     @Test
     fun `requiresCardDetailsRecollection should be false when isNotExpired and cvc does not require collection`() {
-        val cvcCheck: CvcCheck = mock()
-        whenever(cvcCheck.requiresRecollection).thenReturn(false)
-
         assertThat(
             card.copy(
-                cvcCheck = cvcCheck,
+                cvcCheck = CvcCheck.Pass,
             ).requiresCardDetailsRecollection
         ).isFalse()
     }
