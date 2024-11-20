@@ -90,7 +90,7 @@ class StripeConnectWebViewContainerControllerTest {
 
     @Test
     fun `shouldOverrideUrlLoading opens system launcher for non-http urls`() {
-        val uri = Uri.parse("mailto://example@stripe.com")
+        val uri = Uri.parse("stripe://example@stripe.com")
         val mockRequest = mock<WebResourceRequest> {
             on { url } doReturn uri
         }

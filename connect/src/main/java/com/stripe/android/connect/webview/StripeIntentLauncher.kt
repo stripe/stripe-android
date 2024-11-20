@@ -1,5 +1,6 @@
 package com.stripe.android.connect.webview
 
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -42,7 +43,7 @@ internal class StripeIntentLauncherImpl(
 
         try {
             context.startActivity(intent)
-        } catch (e: Exception) {
+        } catch (e: ActivityNotFoundException) {
             logger.error("Failed to open URL with system handler: ${e.message}")
             toastManagerImpl.showToast(context, context.getString(R.string.stripe_failed_to_open_url, uri.toString()))
         }
@@ -55,7 +56,7 @@ internal class StripeIntentLauncherImpl(
 
         try {
             context.startActivity(intent)
-        } catch (e: Exception) {
+        } catch (e: ActivityNotFoundException) {
             // log an error and fall back to a generic system handler
             logger.error("Failed to open URL with email handler: ${e.message}")
             launchUrlWithSystemHandler(context, uri)
