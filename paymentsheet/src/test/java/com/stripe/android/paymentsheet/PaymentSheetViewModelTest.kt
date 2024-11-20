@@ -2921,17 +2921,21 @@ internal class PaymentSheetViewModelTest {
 
     private suspend fun testProcessDeathRestorationAfterPaymentSuccess(loadStateBeforePaymentResult: Boolean) {
         val stripeIntent = PaymentIntentFactory.create(status = StripeIntent.Status.Succeeded)
+        val option = PaymentMethodConfirmationOption.Saved(
+            initializationMode = ARGS_CUSTOMER_WITH_GOOGLEPAY.initializationMode,
+            paymentMethod = CARD_PAYMENT_METHOD,
+            optionsParams = null,
+            shippingDetails = null,
+        )
         val savedStateHandle = SavedStateHandle(
             initialState = mapOf(
-                "AwaitingPaymentResult" to true,
+                "AwaitingConfirmationResult" to DefaultConfirmationHandler.AwaitingConfirmationResultData(
+                    confirmationOption = option,
+                    receivesResultInProcess = false,
+                ),
                 "IntentConfirmationParameters" to ConfirmationMediator.Parameters(
                     intent = PAYMENT_INTENT,
-                    confirmationOption = PaymentMethodConfirmationOption.Saved(
-                        initializationMode = ARGS_CUSTOMER_WITH_GOOGLEPAY.initializationMode,
-                        paymentMethod = CARD_PAYMENT_METHOD,
-                        optionsParams = null,
-                        shippingDetails = null,
-                    ),
+                    confirmationOption = option,
                     deferredIntentConfirmationType = null,
                 )
             )
