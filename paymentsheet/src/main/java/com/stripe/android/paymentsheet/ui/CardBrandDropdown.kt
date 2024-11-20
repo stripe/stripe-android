@@ -27,7 +27,7 @@ import com.stripe.android.uicore.elements.SingleChoiceDropdown
 import com.stripe.android.uicore.stripeColors
 
 @Composable
-internal fun Dropdown(
+internal fun CardBrandDropdown(
     selectedBrand: EditPaymentMethodViewState.CardBrandChoice,
     availableBrands: List<EditPaymentMethodViewState.CardBrandChoice>,
     viewActionHandler: (action: EditPaymentMethodViewAction) -> Unit

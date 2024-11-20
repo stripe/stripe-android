@@ -82,7 +82,7 @@ internal fun EditPaymentMethodUi(
                     )
                 },
                 trailingIcon = {
-                    Dropdown(
+                    CardBrandDropdown(
                         selectedBrand = viewState.selectedBrand,
                         availableBrands = viewState.availableBrands,
                         viewActionHandler
