@@ -1,4 +1,4 @@
-package com.stripe.android.view
+package com.stripe.android.core.utils
 
 import com.google.common.truth.Truth.assertThat
 import org.junit.runner.RunWith

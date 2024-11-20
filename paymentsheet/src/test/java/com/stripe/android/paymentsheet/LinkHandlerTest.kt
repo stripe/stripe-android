@@ -5,6 +5,7 @@ import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.model.CountryCode
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
@@ -21,6 +22,7 @@ import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.CvcCheck
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodOptionsParams
@@ -513,6 +515,15 @@ private fun runLinkInlineTest(
             paymentDetails = ConsumerPaymentDetails.Card(
                 id = "pm_123",
                 last4 = "4242",
+                expiryYear = 2024,
+                expiryMonth = 4,
+                brand = CardBrand.DinersClub,
+                cvcCheck = CvcCheck.Fail,
+                isDefault = false,
+                billingAddress = ConsumerPaymentDetails.BillingAddress(
+                    countryCode = CountryCode.US,
+                    postalCode = "42424"
+                )
             ),
             paymentMethodCreateParams = mock(),
             originalParams = mock(),

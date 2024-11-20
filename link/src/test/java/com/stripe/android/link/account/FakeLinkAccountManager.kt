@@ -13,7 +13,6 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import org.mockito.kotlin.mock
 
 internal open class FakeLinkAccountManager : LinkAccountManager {
     private val _linkAccount = MutableStateFlow<LinkAccount?>(null)
@@ -29,13 +28,7 @@ internal open class FakeLinkAccountManager : LinkAccountManager {
     var signInWithUserInputResult: Result<LinkAccount> = Result.success(LinkAccount(ConsumerSession("", "", "", "")))
     var logOutResult: Result<ConsumerSession> = Result.success(ConsumerSession("", "", "", ""))
     var createCardPaymentDetailsResult: Result<LinkPaymentDetails> = Result.success(
-        value = LinkPaymentDetails.Saved(
-            paymentDetails = ConsumerPaymentDetails.Card(
-                id = "pm_123",
-                last4 = "4242",
-            ),
-            paymentMethodCreateParams = mock(),
-        )
+        value = TestFactory.LINK_NEW_PAYMENT_DETAILS
     )
     var listPaymentDetailsResult: Result<ConsumerPaymentDetails> = Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS)
     var linkAccountFromLookupResult: LinkAccount? = null
