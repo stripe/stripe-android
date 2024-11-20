@@ -9,21 +9,19 @@ import androidx.core.app.ActivityOptionsCompat
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 
-class DummyActivityResultCaller(
-    private val onLaunch: () -> Unit = { error("Not implemented") }
-) : ActivityResultCaller {
-    private val _calls = Turbine<Call<*, *>>()
-    val calls: ReceiveTurbine<Call<*, *>> = _calls
+class DummyActivityResultCaller private constructor() : ActivityResultCaller {
+    private val registerCalls = Turbine<RegisterCall<*, *>>()
+    private val launchCalls = Turbine<Any?>()
 
     override fun <I : Any?, O : Any?> registerForActivityResult(
         contract: ActivityResultContract<I, O>,
         callback: ActivityResultCallback<O>
     ): ActivityResultLauncher<I> {
-        _calls.add(Call(contract, callback))
+        registerCalls.add(RegisterCall(contract, callback))
 
         return object : ActivityResultLauncher<I>() {
             override fun launch(input: I, options: ActivityOptionsCompat?) {
-                onLaunch()
+                launchCalls.add(input)
             }
 
             override fun unregister() {
@@ -43,7 +41,7 @@ class DummyActivityResultCaller(
     ): ActivityResultLauncher<I> {
         return object : ActivityResultLauncher<I>() {
             override fun launch(input: I, options: ActivityOptionsCompat?) {
-                onLaunch()
+                launchCalls.add(input)
             }
 
             override fun unregister() {
@@ -56,8 +54,43 @@ class DummyActivityResultCaller(
         }
     }
 
-    data class Call<I : Any?, O : Any?>(
+    data class RegisterCall<I : Any?, O : Any?>(
         val contract: ActivityResultContract<I, O>,
         val callback: ActivityResultCallback<O>,
     )
+
+    class Scenario(
+        val activityResultCaller: ActivityResultCaller,
+        private val registerCalls: ReceiveTurbine<RegisterCall<*, *>>,
+        private val launchCalls: ReceiveTurbine<Any?>,
+    ) {
+        suspend fun awaitRegisterCall(): RegisterCall<*, *> {
+            return registerCalls.awaitItem()
+        }
+
+        suspend fun awaitLaunchCall(): Any? {
+            return launchCalls.awaitItem()
+        }
+    }
+
+    companion object {
+        suspend fun test(
+            block: suspend Scenario.() -> Unit
+        ) {
+            val activityResultCaller = DummyActivityResultCaller()
+            Scenario(
+                activityResultCaller = activityResultCaller,
+                registerCalls = activityResultCaller.registerCalls,
+                launchCalls = activityResultCaller.launchCalls,
+            ).apply {
+                block(this)
+                activityResultCaller.registerCalls.ensureAllEventsConsumed()
+                activityResultCaller.launchCalls.ensureAllEventsConsumed()
+            }
+        }
+
+        fun noOp(): ActivityResultCaller {
+            return DummyActivityResultCaller()
+        }
+    }
 }

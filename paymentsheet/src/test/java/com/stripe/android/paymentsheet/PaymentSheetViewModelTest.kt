@@ -1867,7 +1867,7 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `Confirms intent if intent confirmation interceptor returns an unconfirmed intent`() = runTest {
         val viewModel = createViewModelForDeferredIntent().apply {
-            registerFromActivity(DummyActivityResultCaller(), TestLifecycleOwner())
+            registerFromActivity(DummyActivityResultCaller.noOp(), TestLifecycleOwner())
         }
 
         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
@@ -1891,7 +1891,7 @@ internal class PaymentSheetViewModelTest {
     fun `Handles next action if intent confirmation interceptor returns an intent with an outstanding action`() =
         runTest {
             val viewModel = createViewModelForDeferredIntent().apply {
-                registerFromActivity(DummyActivityResultCaller(), TestLifecycleOwner())
+                registerFromActivity(DummyActivityResultCaller.noOp(), TestLifecycleOwner())
             }
 
             val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
