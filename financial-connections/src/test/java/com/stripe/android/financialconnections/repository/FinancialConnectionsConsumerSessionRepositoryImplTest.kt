@@ -147,7 +147,7 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
                 locale = anyOrNull(),
                 amount = eq(1234),
                 currency = eq("cad"),
-                paymentIntentId = eq("pi_123"),
+                paymentIntentId = isNull(),
                 setupIntentId = isNull(),
                 consentAction = anyOrNull(),
                 requestSurface = anyOrNull(),
