@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
 internal class StripeDownloadListener(
     private val context: Context,
     private val stripeDownloadManager: StripeDownloadManager = StripeDownloadManagerImpl(context),
-    private val stripeToastManager: StripeToastManager = StripeToastManagerImpl(context),
+    private val stripeToastManager: StripeToastManager = StripeToastManagerImpl(),
     private val ioScope: CoroutineScope = CoroutineScope(Dispatchers.IO),
 ) : DownloadListener {
 
@@ -55,11 +55,11 @@ internal class StripeDownloadListener(
     }
 
     private fun showErrorToast() {
-        stripeToastManager.showToast(context.getString(R.string.stripe_unable_to_download_file))
+        stripeToastManager.showToast(context, context.getString(R.string.stripe_unable_to_download_file))
     }
 
     private fun showOpenFileToast() {
-        stripeToastManager.showToast(context.getString(R.string.stripe_download_complete))
+        stripeToastManager.showToast(context, context.getString(R.string.stripe_download_complete))
     }
 
     internal companion object {

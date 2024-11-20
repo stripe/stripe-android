@@ -4,6 +4,8 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.browser.customtabs.CustomTabsIntent
+import com.stripe.android.core.BuildConfig
+import com.stripe.android.core.Logger
 
 internal interface StripeIntentLauncher {
     /**
@@ -22,50 +24,40 @@ internal interface StripeIntentLauncher {
     fun launchUrlWithSystemHandler(context: Context, uri: Uri)
 }
 
-internal class StripeIntentLauncherImpl : StripeIntentLauncher {
+internal class StripeIntentLauncherImpl(
+    private val toastManagerImpl: StripeToastManagerImpl = StripeToastManagerImpl(),
+    private val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG)
+) : StripeIntentLauncher {
+
     override fun launchSecureExternalWebTab(context: Context, uri: Uri) {
         val customTabsIntent = CustomTabsIntent.Builder().build()
         customTabsIntent.launchUrl(context, uri)
     }
 
     override fun launchUrlWithSystemHandler(context: Context, uri: Uri) {
-        val intent = Intent(Intent.ACTION_VIEW, uri)
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-
-        try {
-            context.startActivity(intent)
-        } catch (e: Exception) {
-//            logger.error("Failed to open URL with system handler: ${e.message}")
-            // Optionally, you could show a toast or snackbar to inform the user
-            // that the URL couldn't be opened
-        }
-    }
-
-    override fun launchEmailLink(context: Context, uri: Uri) {
-        val intent = Intent(Intent.ACTION_SENDTO).apply {
-            data = uri
+        val intent = Intent(Intent.ACTION_VIEW, uri).apply {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
 
         try {
             context.startActivity(intent)
         } catch (e: Exception) {
-//            logger.error("Failed to open mailto link: ${e.message}")
-            // Fallback to system handler
-            openUrlWithSystemHandler(context, uri)
+            logger.error("Failed to open URL with system handler: ${e.message}")
+            toastManagerImpl.showToast(context, "Failed to open URL: $uri")
         }
     }
 
-    private fun openUrlWithSystemHandler(context: Context, uri: Uri) {
-        val intent = Intent(Intent.ACTION_VIEW, uri)
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    override fun launchEmailLink(context: Context, uri: Uri) {
+        val intent = Intent(Intent.ACTION_SENDTO, uri).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
 
         try {
             context.startActivity(intent)
         } catch (e: Exception) {
-//            logger.error("Failed to open URL with system handler: ${e.message}")
-            // Optionally, you could show a toast or snackbar to inform the user
-            // that the URL couldn't be opened
+            // log an error and fall back to a generic system handler
+            logger.error("Failed to open URL with email handler: ${e.message}")
+            launchUrlWithSystemHandler(context, uri)
         }
     }
 }
