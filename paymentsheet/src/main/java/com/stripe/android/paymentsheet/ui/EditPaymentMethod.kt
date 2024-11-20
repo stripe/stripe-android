@@ -85,7 +85,17 @@ internal fun EditPaymentMethodUi(
                     CardBrandDropdown(
                         selectedBrand = viewState.selectedBrand,
                         availableBrands = viewState.availableBrands,
-                        viewActionHandler
+                        onBrandOptionsShown = {
+                            viewActionHandler.invoke(EditPaymentMethodViewAction.OnBrandChoiceOptionsShown)
+                        },
+                        onBrandChoiceChanged = {
+                            viewActionHandler.invoke(
+                                EditPaymentMethodViewAction.OnBrandChoiceChanged(it)
+                            )
+                        },
+                        onBrandChoiceOptionsDismissed = {
+                            viewActionHandler.invoke(EditPaymentMethodViewAction.OnBrandChoiceOptionsDismissed)
+                        }
                     )
                 },
                 onValueChange = {}

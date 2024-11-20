@@ -30,7 +30,9 @@ import com.stripe.android.uicore.stripeColors
 internal fun CardBrandDropdown(
     selectedBrand: EditPaymentMethodViewState.CardBrandChoice,
     availableBrands: List<EditPaymentMethodViewState.CardBrandChoice>,
-    viewActionHandler: (action: EditPaymentMethodViewAction) -> Unit
+    onBrandOptionsShown: () -> Unit,
+    onBrandChoiceChanged: (EditPaymentMethodViewState.CardBrandChoice) -> Unit,
+    onBrandChoiceOptionsDismissed: () -> Unit,
 ) {
     var expanded by remember {
         mutableStateOf(false)
@@ -42,7 +44,7 @@ internal fun CardBrandDropdown(
                 if (!expanded) {
                     expanded = true
 
-                    viewActionHandler.invoke(EditPaymentMethodViewAction.OnBrandChoiceOptionsShown)
+                    onBrandOptionsShown()
                 }
             }
             .semantics {
@@ -78,14 +80,12 @@ internal fun CardBrandDropdown(
             onChoiceSelected = { item ->
                 expanded = false
 
-                viewActionHandler.invoke(
-                    EditPaymentMethodViewAction.OnBrandChoiceChanged(item)
-                )
+                onBrandChoiceChanged(item)
             },
             onDismiss = {
                 expanded = false
 
-                viewActionHandler.invoke(EditPaymentMethodViewAction.OnBrandChoiceOptionsDismissed)
+                onBrandChoiceOptionsDismissed()
             }
         )
     }
