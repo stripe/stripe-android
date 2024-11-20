@@ -1,0 +1,257 @@
+package com.stripe.android.paymentelement.confirmation.epms
+
+import androidx.activity.result.ActivityResultCallback
+import androidx.activity.result.contract.ActivityResultContract
+import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.isInstanceOf
+import com.stripe.android.model.Address
+import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
+import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.FakeConfirmationOption
+import com.stripe.android.paymentelement.confirmation.asCanceled
+import com.stripe.android.paymentelement.confirmation.asFail
+import com.stripe.android.paymentelement.confirmation.asFailed
+import com.stripe.android.paymentelement.confirmation.asLaunch
+import com.stripe.android.paymentelement.confirmation.asSucceeded
+import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.payments.paymentlauncher.PaymentResult
+import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
+import com.stripe.android.paymentsheet.ExternalPaymentMethodContract
+import com.stripe.android.paymentsheet.ExternalPaymentMethodInput
+import com.stripe.android.paymentsheet.ExternalPaymentMethodInterceptor
+import com.stripe.android.paymentsheet.R
+import com.stripe.android.testing.FakeErrorReporter
+import com.stripe.android.testing.PaymentIntentFactory
+import com.stripe.android.utils.DummyActivityResultCaller
+import com.stripe.android.utils.FakeActivityResultLauncher
+import kotlinx.coroutines.test.runTest
+import org.junit.Test
+
+class ExternalPaymentMethodConfirmationDefinitionTest {
+    @Test
+    fun `'key' should be 'ExternalPaymentMethod`() {
+        val definition = createExternalPaymentMethodConfirmationDefinition()
+
+        assertThat(definition.key).isEqualTo("ExternalPaymentMethod")
+    }
+
+    @Test
+    fun `'option' return casted 'ExternalPaymentMethod'`() {
+        val definition = createExternalPaymentMethodConfirmationDefinition()
+
+        assertThat(definition.option(EPM_CONFIRMATION_OPTION)).isEqualTo(EPM_CONFIRMATION_OPTION)
+    }
+
+    @Test
+    fun `'option' return null for unknown option`() {
+        val definition = createExternalPaymentMethodConfirmationDefinition()
+
+        assertThat(definition.option(FakeConfirmationOption())).isNull()
+    }
+
+    @Test
+    fun `'createLauncher' should register launcher properly for activity result`() = runTest {
+        val errorReporter = FakeErrorReporter()
+        val definition = createExternalPaymentMethodConfirmationDefinition(errorReporter)
+
+        var onResultCalled = false
+        val onResult: (PaymentResult) -> Unit = { onResultCalled = true }
+        val activityResultCaller = DummyActivityResultCaller()
+
+        definition.createLauncher(
+            activityResultCaller = activityResultCaller,
+            onResult = onResult,
+        )
+
+        val call = activityResultCaller.calls.awaitItem()
+
+        assertThat(call.contract).isInstanceOf<ExternalPaymentMethodContract>()
+
+        val externalPaymentMethodContract = call.contract.asExternalPaymentMethodContract()
+
+        assertThat(call.callback).isInstanceOf<ActivityResultCallback<PaymentResult>>()
+
+        val callback = call.callback.asExternalPaymentMethodCallback()
+
+        assertThat(externalPaymentMethodContract.errorReporter).isEqualTo(errorReporter)
+
+        callback.onActivityResult(PaymentResult.Completed)
+
+        assertThat(onResultCalled).isTrue()
+    }
+
+    @Test
+    fun `'toPaymentConfirmationResult' should return 'Complete' when 'PaymentResult' is 'Complete'`() = runTest {
+        val definition = createExternalPaymentMethodConfirmationDefinition()
+
+        val result = definition.toPaymentConfirmationResult(
+            confirmationOption = EPM_CONFIRMATION_OPTION,
+            intent = PAYMENT_INTENT,
+            deferredIntentConfirmationType = null,
+            result = PaymentResult.Completed,
+        )
+
+        assertThat(result).isInstanceOf<ConfirmationHandler.Result.Succeeded>()
+
+        val successResult = result.asSucceeded()
+
+        assertThat(successResult.intent).isEqualTo(PAYMENT_INTENT)
+        assertThat(successResult.deferredIntentConfirmationType).isNull()
+    }
+
+    @Test
+    fun `'toPaymentConfirmationResult' should return 'Failed' when 'PaymentResult' is 'Failed'`() = runTest {
+        val definition = createExternalPaymentMethodConfirmationDefinition()
+
+        val exception = IllegalStateException("Failed!")
+        val result = definition.toPaymentConfirmationResult(
+            confirmationOption = EPM_CONFIRMATION_OPTION,
+            intent = PAYMENT_INTENT,
+            deferredIntentConfirmationType = null,
+            result = PaymentResult.Failed(exception),
+        )
+
+        assertThat(result).isInstanceOf<ConfirmationHandler.Result.Failed>()
+
+        val failedResult = result.asFailed()
+
+        assertThat(failedResult.cause).isEqualTo(exception)
+        assertThat(failedResult.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
+        assertThat(failedResult.type).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.ExternalPaymentMethod)
+    }
+
+    @Test
+    fun `'toPaymentConfirmationResult' should return 'Canceled' when 'PaymentResult' is 'Canceled'`() = runTest {
+        val definition = createExternalPaymentMethodConfirmationDefinition()
+
+        val result = definition.toPaymentConfirmationResult(
+            confirmationOption = EPM_CONFIRMATION_OPTION,
+            intent = PAYMENT_INTENT,
+            deferredIntentConfirmationType = null,
+            result = PaymentResult.Canceled,
+        )
+
+        assertThat(result).isInstanceOf<ConfirmationHandler.Result.Canceled>()
+
+        val canceledResult = result.asCanceled()
+
+        assertThat(canceledResult.action).isEqualTo(ConfirmationHandler.Result.Canceled.Action.None)
+    }
+
+    @Test
+    fun `'Fail' action should be returned if EPM handler is not set and report error`() = runTest {
+        val errorReporter = FakeErrorReporter()
+        val definition = createExternalPaymentMethodConfirmationDefinition(errorReporter)
+
+        val action = definition.action(
+            confirmationOption = EPM_CONFIRMATION_OPTION,
+            intent = PAYMENT_INTENT,
+        )
+
+        assertThat(action).isInstanceOf<ConfirmationDefinition.ConfirmationAction.Fail<Unit>>()
+
+        val failAction = action.asFail()
+
+        assertThat(failAction.cause).isInstanceOf<IllegalStateException>()
+        assertThat(failAction.cause.message).isEqualTo(
+            "externalPaymentMethodConfirmHandler is null." +
+                " Cannot process payment for payment selection: paypal"
+        )
+        assertThat(failAction.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
+        assertThat(failAction.errorType).isEqualTo(
+            ConfirmationHandler.Result.Failed.ErrorType.ExternalPaymentMethod,
+        )
+
+        assertThat(errorReporter.getLoggedErrors()).containsExactly(
+            ErrorReporter.ExpectedErrorEvent.EXTERNAL_PAYMENT_METHOD_CONFIRM_HANDLER_NULL.eventName
+        )
+    }
+
+    @Test
+    fun `'Launch' action should be returned if EPM handler is set & report launch`() = runTest {
+        ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler =
+            ExternalPaymentMethodConfirmHandler { _, _ ->
+                // Do nothing
+            }
+
+        val errorReporter = FakeErrorReporter()
+        val definition = createExternalPaymentMethodConfirmationDefinition(errorReporter)
+
+        val action = definition.action(
+            confirmationOption = EPM_CONFIRMATION_OPTION,
+            intent = PAYMENT_INTENT,
+        )
+
+        assertThat(action).isInstanceOf<ConfirmationDefinition.ConfirmationAction.Launch<Unit>>()
+
+        val launchAction = action.asLaunch()
+
+        assertThat(launchAction.launcherArguments).isEqualTo(Unit)
+        assertThat(launchAction.deferredIntentConfirmationType).isNull()
+
+        ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = null
+    }
+
+    @Test
+    fun `On 'launch', should use launcher to launch and report event`() = runTest {
+        val errorReporter = FakeErrorReporter()
+        val definition = createExternalPaymentMethodConfirmationDefinition(errorReporter)
+
+        val launcher = FakeActivityResultLauncher<ExternalPaymentMethodInput>()
+
+        definition.launch(
+            confirmationOption = EPM_CONFIRMATION_OPTION,
+            intent = PAYMENT_INTENT,
+            arguments = Unit,
+            launcher = launcher,
+        )
+
+        val input = launcher.calls.awaitItem().input
+
+        assertThat(input.type).isEqualTo("paypal")
+        assertThat(input.billingDetails).isEqualTo(
+            PaymentMethod.BillingDetails(
+                name = "John Doe",
+                address = Address(
+                    line1 = "123 Apple Street",
+                    city = "South San Francisco",
+                    state = "CA",
+                    country = "US",
+                ),
+            )
+        )
+
+        assertThat(errorReporter.getLoggedErrors()).containsExactly(
+            ErrorReporter.SuccessEvent.EXTERNAL_PAYMENT_METHODS_LAUNCH_SUCCESS.eventName
+        )
+    }
+
+    private fun createExternalPaymentMethodConfirmationDefinition(
+        errorReporter: ErrorReporter = FakeErrorReporter()
+    ): ExternalPaymentMethodConfirmationDefinition {
+        return ExternalPaymentMethodConfirmationDefinition(errorReporter)
+    }
+
+    private fun ActivityResultContract<*, *>.asExternalPaymentMethodContract(): ExternalPaymentMethodContract {
+        return this as ExternalPaymentMethodContract
+    }
+
+    private companion object {
+        private val EPM_CONFIRMATION_OPTION = ExternalPaymentMethodConfirmationOption(
+            type = "paypal",
+            billingDetails = PaymentMethod.BillingDetails(
+                name = "John Doe",
+                address = Address(
+                    line1 = "123 Apple Street",
+                    city = "South San Francisco",
+                    state = "CA",
+                    country = "US",
+                ),
+            )
+        )
+
+        private val PAYMENT_INTENT = PaymentIntentFactory.create()
+    }
+}

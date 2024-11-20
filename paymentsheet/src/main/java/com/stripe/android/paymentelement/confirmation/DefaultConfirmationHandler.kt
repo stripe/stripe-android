@@ -8,7 +8,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.UserFacingLogger
@@ -20,18 +19,14 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.bacs.BacsConfirmationOption
-import com.stripe.android.paymentelement.confirmation.epms.ExternalPaymentMethodConfirmationOption
+import com.stripe.android.paymentelement.confirmation.epms.ExternalPaymentMethodConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
-import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
-import com.stripe.android.paymentsheet.ExternalPaymentMethodContract
-import com.stripe.android.paymentsheet.ExternalPaymentMethodInput
-import com.stripe.android.paymentsheet.ExternalPaymentMethodInterceptor
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationContract
@@ -72,13 +67,15 @@ internal class DefaultConfirmationHandler(
             IntentConfirmationDefinition(
                 intentConfirmationInterceptor,
                 paymentLauncherFactory,
+            ),
+            ExternalPaymentMethodConfirmationDefinition(
+                errorReporter,
             )
         )
     )
 
     private val confirmationMediators = intentConfirmationRegistry.createConfirmationMediators(savedStateHandle)
 
-    private var externalPaymentMethodLauncher: ActivityResultLauncher<ExternalPaymentMethodInput>? = null
     private var bacsMandateConfirmationLauncher: BacsMandateConfirmationLauncher? = null
     private var googlePayPaymentMethodLauncher:
         ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>? = null
@@ -139,11 +136,6 @@ internal class DefaultConfirmationHandler(
             mediator.register(activityResultCaller, ::onIntentResult)
         }
 
-        externalPaymentMethodLauncher = activityResultCaller.registerForActivityResult(
-            ExternalPaymentMethodContract(errorReporter),
-            ::onExternalPaymentMethodResult
-        )
-
         val bacsActivityResultLauncher = activityResultCaller.registerForActivityResult(
             BacsMandateConfirmationContract(),
             ::onBacsMandateResult
@@ -162,7 +154,6 @@ internal class DefaultConfirmationHandler(
                     confirmationMediators.forEach { mediator ->
                         mediator.unregister()
                     }
-                    externalPaymentMethodLauncher = null
                     bacsMandateConfirmationLauncher = null
                     googlePayPaymentMethodLauncher = null
                     bacsActivityResultLauncher.unregister()
@@ -248,11 +239,7 @@ internal class DefaultConfirmationHandler(
 
         val confirmationOption = arguments.confirmationOption
 
-        if (confirmationOption is ExternalPaymentMethodConfirmationOption) {
-            confirmExternalPaymentMethod(confirmationOption)
-        } else {
-            confirm(confirmationOption, arguments.intent)
-        }
+        confirm(confirmationOption, arguments.intent)
     }
 
     private suspend fun confirm(
@@ -310,24 +297,6 @@ internal class DefaultConfirmationHandler(
                 )
             }
         }
-    }
-
-    private fun confirmExternalPaymentMethod(
-        confirmationOption: ExternalPaymentMethodConfirmationOption
-    ) {
-        /*
-         * In case of process death, we should store that we waiting for a payment result to return from a
-         * payment confirmation activity
-         */
-        storeIsAwaitingForPaymentResult()
-
-        ExternalPaymentMethodInterceptor.intercept(
-            externalPaymentMethodType = confirmationOption.type,
-            billingDetails = confirmationOption.billingDetails,
-            onPaymentResult = ::onExternalPaymentMethodResult,
-            externalPaymentMethodLauncher = externalPaymentMethodLauncher,
-            errorReporter = errorReporter,
-        )
     }
 
     private fun launchGooglePay(
@@ -504,35 +473,6 @@ internal class DefaultConfirmationHandler(
                 )
             }
         }
-    }
-
-    private fun onExternalPaymentMethodResult(result: PaymentResult) {
-        val intentResult = currentArguments?.let { arguments ->
-            when (result) {
-                is PaymentResult.Completed -> ConfirmationHandler.Result.Succeeded(
-                    intent = arguments.intent,
-                    deferredIntentConfirmationType = null,
-                )
-                is PaymentResult.Failed -> ConfirmationHandler.Result.Failed(
-                    cause = result.throwable,
-                    message = result.throwable.stripeErrorMessage(),
-                    type = ConfirmationHandler.Result.Failed.ErrorType.ExternalPaymentMethod,
-                )
-                is PaymentResult.Canceled -> ConfirmationHandler.Result.Canceled(
-                    action = ConfirmationHandler.Result.Canceled.Action.None,
-                )
-            }
-        } ?: run {
-            val cause = IllegalStateException("Arguments should have been initialized before handling EPM result!")
-
-            ConfirmationHandler.Result.Failed(
-                cause = cause,
-                message = cause.stripeErrorMessage(),
-                type = ConfirmationHandler.Result.Failed.ErrorType.ExternalPaymentMethod,
-            )
-        }
-
-        onIntentResult(intentResult)
     }
 
     private fun onGooglePayResult(result: GooglePayPaymentMethodLauncher.Result) {
