@@ -13,6 +13,8 @@ import com.stripe.android.connect.EmbeddedComponentManager
 import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.StripeEmbeddedComponent
 import com.stripe.android.connect.webview.serialization.ConnectInstanceJs
+import com.stripe.android.connect.webview.serialization.SetOnLoaderStart
+import com.stripe.android.connect.webview.serialization.SetterFunctionCalledMessage
 import com.stripe.android.core.Logger
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -113,14 +115,21 @@ internal class StripeConnectWebViewContainerController(
     }
 
     /**
-     * Callback to invoke upon receiving 'setOnLoaderStart' message.
+     * Callback to invoke upon receiving 'onSetterFunctionCalled' message.
      */
-    fun onReceivedSetOnLoaderStart() {
-        updateState {
-            copy(
-                receivedSetOnLoaderStart = true,
-                isNativeLoadingIndicatorVisible = false,
-            )
+    fun onReceivedSetterFunctionCalled(message: SetterFunctionCalledMessage) {
+        when (message.value) {
+            is SetOnLoaderStart -> {
+                updateState {
+                    copy(
+                        receivedSetOnLoaderStart = true,
+                        isNativeLoadingIndicatorVisible = false,
+                    )
+                }
+            }
+            else -> {
+                logger.debug("Received setter function: ${message.setter}")
+            }
         }
     }
 

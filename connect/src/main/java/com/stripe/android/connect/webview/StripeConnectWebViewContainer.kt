@@ -27,7 +27,7 @@ import com.stripe.android.connect.webview.serialization.AccountSessionClaimedMes
 import com.stripe.android.connect.webview.serialization.ConnectInstanceJs
 import com.stripe.android.connect.webview.serialization.PageLoadMessage
 import com.stripe.android.connect.webview.serialization.SecureWebViewMessage
-import com.stripe.android.connect.webview.serialization.SetterMessage
+import com.stripe.android.connect.webview.serialization.SetterFunctionCalledMessage
 import com.stripe.android.connect.webview.serialization.toJs
 import com.stripe.android.core.Logger
 import com.stripe.android.core.version.StripeSdkVersion
@@ -269,15 +269,10 @@ internal class StripeConnectWebViewContainerImpl(
 
         @JavascriptInterface
         fun onSetterFunctionCalled(message: String) {
-            val setterMessage = jsonSerializer.decodeFromString<SetterMessage>(message)
-            logger.debug("Setter function called: $setterMessage")
+            val parsed = jsonSerializer.decodeFromString<SetterFunctionCalledMessage>(message)
+            logger.debug("Setter function called: ${parsed.setter}")
 
-            when (setterMessage.setter) {
-                // Emitted when connect js has initialized and the component renders a loading state
-                "setOnLoaderStart" -> {
-                    controller?.onReceivedSetOnLoaderStart()
-                }
-            }
+            controller?.onReceivedSetterFunctionCalled(parsed)
         }
 
         @JavascriptInterface
