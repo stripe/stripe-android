@@ -59,6 +59,7 @@ internal class ExternalPaymentMethodConfirmationDefinition(
             ConfirmationDefinition.Action.Launch(
                 launcherArguments = Unit,
                 deferredIntentConfirmationType = null,
+                receivesResultInProcess = false,
             )
         }
     }

@@ -2,8 +2,10 @@ package com.stripe.android.paymentelement.confirmation.epms
 
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.runLaunchTest
 import com.stripe.android.paymentelement.confirmation.runResultTest
+import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentIntentFactory
@@ -36,6 +38,11 @@ class ExternalPaymentMethodConfirmationFlowTest {
             },
             errorReporter = FakeErrorReporter()
         ),
+        launcherResult = PaymentResult.Completed,
+        definitionResult = ConfirmationDefinition.Result.Succeeded(
+            intent = PAYMENT_INTENT,
+            deferredIntentConfirmationType = null,
+        )
     )
 
     private companion object {
