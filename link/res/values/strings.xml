@@ -78,4 +78,5 @@
   <string name="stripe_wallet_bank">Bank</string>
   <!-- Accessibility description for Passthrough payment method -->
   <string name="stripe_wallet_passthrough_description" translatable="false">Passthrough</string>
+  <string name="stripe_wallet_expand_accessibility">Change selection</string>
 </resources>
