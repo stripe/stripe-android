@@ -14,8 +14,12 @@ import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.StripeEmbeddedComponent
 import com.stripe.android.connect.appearance.Appearance
 import com.stripe.android.connect.appearance.Colors
+import com.stripe.android.connect.webview.serialization.SetOnLoadError
+import com.stripe.android.connect.webview.serialization.SetOnLoaderStart
+import com.stripe.android.connect.webview.serialization.SetterFunctionCalledMessage
 import com.stripe.android.core.Logger
 import kotlinx.coroutines.test.runTest
+import kotlinx.serialization.json.JsonNull
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -39,8 +43,12 @@ class StripeConnectWebViewContainerControllerTest {
         fetchClientSecretCallback = { },
     )
     private val embeddedComponent: StripeEmbeddedComponent = StripeEmbeddedComponent.PAYOUTS
+
+    private val delegateReceivedEvents = mutableListOf<SetterFunctionCalledMessage>()
     private val listener: PayoutsListener = mock()
-    private val listenerDelegate: ComponentListenerDelegate<PayoutsListener> = mock()
+    private val listenerDelegate: ComponentListenerDelegate<PayoutsListener> =
+        ComponentListenerDelegate { delegateReceivedEvents.add(it) }
+
     private val mockStripeIntentLauncher: StripeIntentLauncher = mock()
     private val mockLogger: Logger = mock()
 
@@ -116,6 +124,7 @@ class StripeConnectWebViewContainerControllerTest {
         assertTrue(result)
     }
 
+    @Test
     fun `should bind to appearance changes`() = runTest {
         assertThat(controller.stateFlow.value.appearance).isNull()
 
@@ -124,6 +133,37 @@ class StripeConnectWebViewContainerControllerTest {
         embeddedComponentManager.update(newAppearance)
 
         assertThat(controller.stateFlow.value.appearance).isEqualTo(newAppearance)
+    }
+
+    @Test
+    fun `should handle SetOnLoaderStart`() = runTest {
+        val message = SetterFunctionCalledMessage(SetOnLoaderStart(""))
+        controller.onPageStarted()
+        controller.onReceivedSetterFunctionCalled(message)
+
+        val state = controller.stateFlow.value
+        assertThat(state.receivedSetOnLoaderStart).isTrue()
+        assertThat(state.isNativeLoadingIndicatorVisible).isFalse()
+        verify(listener).onLoaderStart()
+    }
+
+    @Test
+    fun `should handle SetOnLoadError`() = runTest {
+        val message = SetterFunctionCalledMessage(SetOnLoadError("", null))
+        controller.onReceivedSetterFunctionCalled(message)
+
+        verify(listener).onLoadError(any())
+    }
+
+    @Test
+    fun `should handle other messages`() = runTest {
+        val message = SetterFunctionCalledMessage(
+            setter = "foo",
+            value = SetterFunctionCalledMessage.UnknownValue(JsonNull)
+        )
+        controller.onReceivedSetterFunctionCalled(message)
+
+        assertThat(delegateReceivedEvents).contains(message)
     }
 
     @Test

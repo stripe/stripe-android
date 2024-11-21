@@ -25,14 +25,10 @@ class SetterFunctionCalledMessageTest {
     @Test
     fun `should serialize and deserialize correctly`() {
         listOf(
-            SetterFunctionCalledMessage(
-                setter = "setOnLoaderStart",
-                value = SetOnLoaderStart(elementTagName = "foo")
-            ) to """{"setter":"setOnLoaderStart","value":{"elementTagName":"foo"}}""",
-            SetterFunctionCalledMessage(
-                setter = "setOnExit",
-                value = SetOnExit,
-            ) to """{"setter":"setOnExit","value":{}}""",
+            SetterFunctionCalledMessage(SetOnLoaderStart(elementTagName = "foo")) to
+                """{"setter":"setOnLoaderStart","value":{"elementTagName":"foo"}}""",
+            SetterFunctionCalledMessage(SetOnExit) to
+                """{"setter":"setOnExit","value":{}}""",
             SetterFunctionCalledMessage(
                 setter = "foo",
                 value = SetterFunctionCalledMessage.UnknownValue(value = JsonPrimitive("bar"))

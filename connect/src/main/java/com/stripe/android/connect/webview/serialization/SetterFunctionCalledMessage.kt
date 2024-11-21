@@ -22,12 +22,13 @@ internal data class SetterFunctionCalledMessage(
     val setter: String,
     val value: Value
 ) {
+    constructor(value: Value) : this(
+        setter = value.expectedSetterName,
+        value = value
+    )
+
     init {
-        require(
-            !BuildConfig.DEBUG ||
-                value is UnknownValue ||
-                setter == value.javaClass.simpleName.replaceFirstChar { it.lowercaseChar() }
-        ) {
+        require(!BuildConfig.DEBUG || value is UnknownValue || setter == value.expectedSetterName) {
             "Setter does not match value type: setter=$setter, value=$value"
         }
     }
@@ -38,6 +39,14 @@ internal data class SetterFunctionCalledMessage(
     data class UnknownValue(
         val value: JsonElement
     ) : Value
+
+    companion object {
+        val Value.expectedSetterName: String
+            get() {
+                require(this !is UnknownValue)
+                return javaClass.simpleName.replaceFirstChar { it.lowercaseChar() }
+            }
+    }
 }
 
 // Values
