@@ -246,14 +246,9 @@ internal class StripeConnectWebViewContainerImpl<Listener : StripeEmbeddedCompon
     }
 
     /**
-     * A [WebChromeClient] that provides additional functionality for Stripe Connect Embedded Component WebViews.
-     *
-     * This class is currently empty, but it could be used to add additional functionality in the future
-     * Setting a [WebChromeClient] (even an empty one) is necessary for certain functionality, like
-     * [WebViewClient.shouldOverrideUrlLoading] to work properly.
+     * A [WebChromeClient] that provides additional functionality for Stripe Connect Embedded Component WebViews,
+     * namely around permissions.
      */
-    inner class StripeWebChromeClient : WebChromeClient()
-
     internal inner class StripeConnectWebChromeClient : WebChromeClient() {
         override fun onPermissionRequest(request: PermissionRequest) {
             controller?.onPermissionRequest(request)
