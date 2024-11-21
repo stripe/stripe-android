@@ -175,24 +175,8 @@ internal class DefaultEditPaymentMethodViewInteractor(
             ?: throw IllegalStateException("Card payment method must contain last 4 digits")
     }
 
-    private fun PaymentMethod.Card.getPreferredChoice(): CardBrandChoice {
-        return CardBrand.fromCode(displayBrand).toChoice()
-    }
-
-    private fun PaymentMethod.Card.getAvailableNetworks(cardBrandFilter: CardBrandFilter): List<CardBrandChoice> {
-        return networks?.available?.let { brandCodes ->
-            brandCodes.map { code ->
-                CardBrand.fromCode(code).toChoice()
-            }.filter { cardBrandFilter.isAccepted(it.brand) }
-        } ?: listOf()
-    }
-
     private fun PaymentMethod.getCard(): PaymentMethod.Card {
         return card ?: throw IllegalStateException("Payment method must be a card in order to be edited")
-    }
-
-    private fun CardBrand.toChoice(): CardBrandChoice {
-        return CardBrandChoice(brand = this)
     }
 
     object Factory : ModifiableEditPaymentMethodViewInteractor.Factory {
