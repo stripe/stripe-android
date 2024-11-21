@@ -82,7 +82,7 @@ internal fun <
     DummyActivityResultCaller.test {
         val mediator = ConfirmationMediator(savedStateHandle, definition)
 
-        var result: ConfirmationHandler.Result? = null
+        var result: ConfirmationDefinition.Result? = null
 
         mediator.register(
             activityResultCaller = activityResultCaller,
@@ -99,7 +99,7 @@ internal fun <
 
         assertThat(countDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
 
-        assertThat(result).isInstanceOf<ConfirmationHandler.Result.Succeeded>()
+        assertThat(result).isInstanceOf<ConfirmationDefinition.Result.Succeeded>()
 
         val successResult = result.asSucceeded()
 
@@ -107,26 +107,24 @@ internal fun <
     }
 }
 
-internal fun ConfirmationHandler.Result?.asSucceeded(): ConfirmationHandler.Result.Succeeded {
-    return this as ConfirmationHandler.Result.Succeeded
+internal fun ConfirmationDefinition.Result?.asSucceeded(): ConfirmationDefinition.Result.Succeeded {
+    return this as ConfirmationDefinition.Result.Succeeded
 }
 
-internal fun ConfirmationHandler.Result?.asFailed(): ConfirmationHandler.Result.Failed {
-    return this as ConfirmationHandler.Result.Failed
+internal fun ConfirmationDefinition.Result?.asFailed(): ConfirmationDefinition.Result.Failed {
+    return this as ConfirmationDefinition.Result.Failed
 }
 
-internal fun ConfirmationHandler.Result?.asCanceled(): ConfirmationHandler.Result.Canceled {
-    return this as ConfirmationHandler.Result.Canceled
+internal fun ConfirmationDefinition.Result?.asCanceled(): ConfirmationDefinition.Result.Canceled {
+    return this as ConfirmationDefinition.Result.Canceled
 }
 
-internal fun <T> ConfirmationDefinition.ConfirmationAction<T>.asFail():
-    ConfirmationDefinition.ConfirmationAction.Fail<T> {
-    return this as ConfirmationDefinition.ConfirmationAction.Fail<T>
+internal fun <T> ConfirmationDefinition.Action<T>.asFail(): ConfirmationDefinition.Action.Fail<T> {
+    return this as ConfirmationDefinition.Action.Fail<T>
 }
 
-internal fun <T> ConfirmationDefinition.ConfirmationAction<T>.asLaunch():
-    ConfirmationDefinition.ConfirmationAction.Launch<T> {
-    return this as ConfirmationDefinition.ConfirmationAction.Launch<T>
+internal fun <T> ConfirmationDefinition.Action<T>.asLaunch(): ConfirmationDefinition.Action.Launch<T> {
+    return this as ConfirmationDefinition.Action.Launch<T>
 }
 
 internal fun ConfirmationMediator.Action.asLaunch(): ConfirmationMediator.Action.Launch {

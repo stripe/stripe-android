@@ -350,20 +350,14 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             confirmationHandler.state.collectLatest { state ->
                 when (state) {
                     is ConfirmationHandler.State.Idle -> Unit
-                    is ConfirmationHandler.State.Preconfirming -> {
-                        if (
-                            state.inPreconfirmFlow &&
-                            state.confirmationOption is GooglePayConfirmationOption
-                        ) {
+                    is ConfirmationHandler.State.Confirming -> {
+                        if (state.option is GooglePayConfirmationOption) {
                             setContentVisible(false)
                         } else {
                             setContentVisible(true)
                         }
 
                         startProcessing(checkoutIdentifier)
-                    }
-                    is ConfirmationHandler.State.Confirming -> {
-                        setContentVisible(true)
 
                         if (viewState.value !is PaymentSheetViewState.StartProcessing) {
                             startProcessing(checkoutIdentifier)

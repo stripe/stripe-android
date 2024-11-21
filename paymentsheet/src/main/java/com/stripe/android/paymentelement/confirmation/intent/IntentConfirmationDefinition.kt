@@ -34,33 +34,33 @@ internal class IntentConfirmationDefinition(
     override suspend fun action(
         confirmationOption: PaymentMethodConfirmationOption,
         intent: StripeIntent
-    ): ConfirmationDefinition.ConfirmationAction<Args> {
+    ): ConfirmationDefinition.Action<Args> {
         val nextStep = intentConfirmationInterceptor.intercept(confirmationOption = confirmationOption)
 
         val deferredIntentConfirmationType = nextStep.deferredIntentConfirmationType
 
         return when (nextStep) {
             is IntentConfirmationInterceptor.NextStep.HandleNextAction -> {
-                ConfirmationDefinition.ConfirmationAction.Launch(
+                ConfirmationDefinition.Action.Launch(
                     launcherArguments = Args.NextAction(nextStep.clientSecret),
                     deferredIntentConfirmationType = deferredIntentConfirmationType,
                 )
             }
             is IntentConfirmationInterceptor.NextStep.Confirm -> {
-                ConfirmationDefinition.ConfirmationAction.Launch(
+                ConfirmationDefinition.Action.Launch(
                     launcherArguments = Args.Confirm(nextStep.confirmParams),
                     deferredIntentConfirmationType = deferredIntentConfirmationType,
                 )
             }
             is IntentConfirmationInterceptor.NextStep.Fail -> {
-                ConfirmationDefinition.ConfirmationAction.Fail(
+                ConfirmationDefinition.Action.Fail(
                     cause = nextStep.cause,
                     message = nextStep.message,
                     errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
                 )
             }
             is IntentConfirmationInterceptor.NextStep.Complete -> {
-                ConfirmationDefinition.ConfirmationAction.Complete(
+                ConfirmationDefinition.Action.Complete(
                     intent = intent,
                     confirmationOption = confirmationOption,
                     deferredIntentConfirmationType = deferredIntentConfirmationType,
@@ -93,23 +93,23 @@ internal class IntentConfirmationDefinition(
         }
     }
 
-    override fun toPaymentConfirmationResult(
+    override fun toResult(
         confirmationOption: PaymentMethodConfirmationOption,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
         intent: StripeIntent,
         result: InternalPaymentResult
-    ): ConfirmationHandler.Result {
+    ): ConfirmationDefinition.Result {
         return when (result) {
-            is InternalPaymentResult.Completed -> ConfirmationHandler.Result.Succeeded(
+            is InternalPaymentResult.Completed -> ConfirmationDefinition.Result.Succeeded(
                 intent = result.intent,
                 deferredIntentConfirmationType = deferredIntentConfirmationType,
             )
-            is InternalPaymentResult.Failed -> ConfirmationHandler.Result.Failed(
+            is InternalPaymentResult.Failed -> ConfirmationDefinition.Result.Failed(
                 cause = result.throwable,
                 message = result.throwable.stripeErrorMessage(),
                 type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
             )
-            is InternalPaymentResult.Canceled -> ConfirmationHandler.Result.Canceled(
+            is InternalPaymentResult.Canceled -> ConfirmationDefinition.Result.Canceled(
                 action = ConfirmationHandler.Result.Canceled.Action.InformCancellation,
             )
         }

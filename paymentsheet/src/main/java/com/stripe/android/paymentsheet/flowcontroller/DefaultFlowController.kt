@@ -197,7 +197,6 @@ internal class DefaultFlowController @Inject internal constructor(
             confirmationHandler.state.collectLatest { state ->
                 when (state) {
                     is ConfirmationHandler.State.Idle,
-                    is ConfirmationHandler.State.Preconfirming,
                     is ConfirmationHandler.State.Confirming -> Unit
                     is ConfirmationHandler.State.Complete -> onIntentResult(state.result)
                 }

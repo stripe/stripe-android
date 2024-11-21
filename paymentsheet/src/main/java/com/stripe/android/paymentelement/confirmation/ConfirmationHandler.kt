@@ -82,17 +82,11 @@ internal interface ConfirmationHandler {
         data object Idle : State
 
         /**
-         * Indicates the the handler is currently performing pre-confirmation steps before starting confirmation.
-         */
-        data class Preconfirming(
-            val confirmationOption: Option?,
-            val inPreconfirmFlow: Boolean,
-        ) : State
-
-        /**
          * Indicates the the handler is currently confirming.
          */
-        data object Confirming : State
+        data class Confirming(
+            val option: Option,
+        ) : State
 
         /**
          * Indicates that the handler has completed confirming and contains a [Result] regarding the confirmation

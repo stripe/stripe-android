@@ -108,7 +108,7 @@ class ConfirmationMediatorTest {
     fun `On complete confirmation action, should return mediator complete action`() = runTest {
         val definition = FakeConfirmationDefinition(
             onAction = { confirmationOption, intent ->
-                ConfirmationDefinition.ConfirmationAction.Complete(
+                ConfirmationDefinition.Action.Complete(
                     confirmationOption = confirmationOption,
                     intent = intent,
                     deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
@@ -141,7 +141,7 @@ class ConfirmationMediatorTest {
 
         val definition = FakeConfirmationDefinition(
             onAction = { _, _ ->
-                ConfirmationDefinition.ConfirmationAction.Fail(
+                ConfirmationDefinition.Action.Fail(
                     cause = exception,
                     message = R.string.stripe_something_went_wrong.resolvableString,
                     errorType = errorType,
@@ -174,7 +174,7 @@ class ConfirmationMediatorTest {
 
         val definition = FakeConfirmationDefinition(
             onAction = { _, _ ->
-                ConfirmationDefinition.ConfirmationAction.Launch(
+                ConfirmationDefinition.Action.Launch(
                     launcherArguments = launcherArguments,
                     deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
                 )
@@ -224,7 +224,7 @@ class ConfirmationMediatorTest {
     fun `On confirmation action without registering, should return fail action`() = runTest {
         val definition = FakeConfirmationDefinition(
             onAction = { _, _ ->
-                ConfirmationDefinition.ConfirmationAction.Launch(
+                ConfirmationDefinition.Action.Launch(
                     launcherArguments = FakeConfirmationDefinition.LauncherArgs(amount = 5000),
                     deferredIntentConfirmationType = null,
                 )
@@ -255,7 +255,7 @@ class ConfirmationMediatorTest {
     fun `On confirmation action after un-registering, should return fail action`() = runTest {
         val definition = FakeConfirmationDefinition(
             onAction = { _, _ ->
-                ConfirmationDefinition.ConfirmationAction.Launch(
+                ConfirmationDefinition.Action.Launch(
                     launcherArguments = FakeConfirmationDefinition.LauncherArgs(amount = 5000),
                     deferredIntentConfirmationType = null,
                 )
@@ -297,15 +297,15 @@ class ConfirmationMediatorTest {
         )
         val deferredIntentConfirmationType = DeferredIntentConfirmationType.Client
         val launcherResult = FakeConfirmationDefinition.LauncherResult(amount = 50)
-        val confirmationResult = ConfirmationHandler.Result.Succeeded(
+        val confirmationResult = ConfirmationDefinition.Result.Succeeded(
             intent = intent,
             deferredIntentConfirmationType = deferredIntentConfirmationType,
         )
 
         val definition = FakeConfirmationDefinition(
-            confirmationResult = confirmationResult,
+            result = confirmationResult,
             onAction = { _, _ ->
-                ConfirmationDefinition.ConfirmationAction.Launch(
+                ConfirmationDefinition.Action.Launch(
                     launcherArguments = FakeConfirmationDefinition.LauncherArgs(amount = 5000),
                     deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
                 )
@@ -326,7 +326,7 @@ class ConfirmationMediatorTest {
             paymentMethod = PaymentMethodFactory.card(),
         )
 
-        var receivedResult: ConfirmationHandler.Result? = null
+        var receivedResult: ConfirmationDefinition.Result? = null
 
         mediator.register(
             activityResultCaller = mock(),
@@ -354,7 +354,7 @@ class ConfirmationMediatorTest {
 
         waitForResultLatch.await(2, TimeUnit.SECONDS)
 
-        val toPaymentConfirmationResultCall = definition.toPaymentConfirmationResultCalls.awaitItem()
+        val toPaymentConfirmationResultCall = definition.toResultCalls.awaitItem()
 
         assertThat(toPaymentConfirmationResultCall.confirmationOption).isEqualTo(confirmationOption)
         assertThat(toPaymentConfirmationResultCall.intent).isEqualTo(intent)
@@ -379,7 +379,7 @@ class ConfirmationMediatorTest {
         mediator.register(
             activityResultCaller = activityResultCaller,
             onResult = { result ->
-                assertThat(result).isInstanceOf<ConfirmationHandler.Result.Failed>()
+                assertThat(result).isInstanceOf<ConfirmationDefinition.Result.Failed>()
 
                 val failAction = result.asFailed()
 
