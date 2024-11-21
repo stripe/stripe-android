@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.ui
 
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
@@ -69,6 +70,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
             displayableSavedPaymentMethod = displayableSavedPaymentMethod,
             removeExecutor = onRemovePaymentMethod,
             workContext = UnconfinedTestDispatcher(),
+            cardBrandFilter = DefaultCardBrandFilter,
         )
 
         TestParams(interactor).apply { runTest { testBlock() } }

@@ -387,6 +387,7 @@ internal class CustomerSheetScreenshotTest {
                 removeExecutor = { null },
                 canRemove = true,
                 isLiveMode = true,
+                cardBrandFilter = DefaultCardBrandFilter,
             ),
             isLiveMode = true,
         )
