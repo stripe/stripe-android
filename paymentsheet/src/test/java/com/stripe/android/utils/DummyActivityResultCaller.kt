@@ -101,6 +101,7 @@ class DummyActivityResultCaller private constructor() : ActivityResultCaller {
                 block(this)
                 activityResultCaller.registerCalls.ensureAllEventsConsumed()
                 activityResultCaller.launchCalls.ensureAllEventsConsumed()
+                activityResultCaller.registeredLaunchers.ensureAllEventsConsumed()
             }
         }
 

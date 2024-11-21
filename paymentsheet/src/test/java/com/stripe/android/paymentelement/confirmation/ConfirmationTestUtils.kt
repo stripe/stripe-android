@@ -31,6 +31,8 @@ internal fun <
             onResult = {}
         )
 
+        assertThat(awaitNextRegisteredLauncher()).isNotNull()
+
         val action = mediator.action(
             option = confirmationOption,
             intent = intent,
@@ -94,6 +96,8 @@ internal fun <
         )
 
         val call = awaitRegisterCall()
+
+        assertThat(awaitNextRegisteredLauncher()).isNotNull()
 
         call.callback.asCallbackFor<TLauncherResult>().onActivityResult(launcherResult)
 

@@ -9,13 +9,12 @@ import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateCon
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.FakeBacsMandateConfirmationLauncher
 
 internal class FakeBacsMandateConfirmationLauncherFactory : BacsMandateConfirmationLauncherFactory {
-    private val _calls = Turbine<Call>()
-    val calls: ReceiveTurbine<Call> = _calls
+    private val calls = Turbine<Call>()
 
     override fun create(
         activityResultLauncher: ActivityResultLauncher<BacsMandateConfirmationContract.Args>
     ): BacsMandateConfirmationLauncher {
-        _calls.add(Call(activityResultLauncher))
+        calls.add(Call(activityResultLauncher))
 
         return FakeBacsMandateConfirmationLauncher()
     }
@@ -23,4 +22,28 @@ internal class FakeBacsMandateConfirmationLauncherFactory : BacsMandateConfirmat
     class Call(
         val activityResultLauncher: ActivityResultLauncher<BacsMandateConfirmationContract.Args>
     )
+
+    class Scenario(
+        val factory: BacsMandateConfirmationLauncherFactory,
+        private val calls: ReceiveTurbine<Call>,
+    ) {
+        suspend fun awaitCreateBacsLauncherCall(): Call {
+            return calls.awaitItem()
+        }
+    }
+
+    companion object {
+        suspend fun test(
+            block: suspend Scenario.() -> Unit
+        ) {
+            val factory = FakeBacsMandateConfirmationLauncherFactory()
+            Scenario(
+                factory = factory,
+                calls = factory.calls,
+            ).apply {
+                block(this)
+                factory.calls.ensureAllEventsConsumed()
+            }
+        }
+    }
 }

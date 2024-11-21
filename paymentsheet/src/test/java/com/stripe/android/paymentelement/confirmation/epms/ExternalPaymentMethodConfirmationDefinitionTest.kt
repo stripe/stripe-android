@@ -59,12 +59,13 @@ class ExternalPaymentMethodConfirmationDefinitionTest {
         var onResultCalled = false
         val onResult: (PaymentResult) -> Unit = { onResultCalled = true }
         DummyActivityResultCaller.test {
-            definition.createLauncher(
+            val launcher = definition.createLauncher(
                 activityResultCaller = activityResultCaller,
                 onResult = onResult,
             )
 
             val call = awaitRegisterCall()
+            val registeredLauncher = awaitNextRegisteredLauncher()
 
             assertThat(call.contract).isInstanceOf<ExternalPaymentMethodContract>()
 
@@ -79,6 +80,8 @@ class ExternalPaymentMethodConfirmationDefinitionTest {
             callback.onActivityResult(PaymentResult.Completed)
 
             assertThat(onResultCalled).isTrue()
+
+            assertThat(launcher).isEqualTo(registeredLauncher)
         }
     }
 

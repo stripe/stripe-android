@@ -53,34 +53,36 @@ class BacsConfirmationDefinitionTest {
 
     @Test
     fun `'createLauncher' should call factory with registered activity launcher`() = runTest {
-        val bacsMandateConfirmationLauncherFactory = FakeBacsMandateConfirmationLauncherFactory()
-        val definition = createBacsConfirmationDefinition(
-            bacsMandateConfirmationLauncherFactory = bacsMandateConfirmationLauncherFactory,
-        )
-
-        var onResultCalled = false
-        val onResult: (BacsMandateConfirmationResult) -> Unit = { onResultCalled = true }
         DummyActivityResultCaller.test {
-            definition.createLauncher(
-                activityResultCaller = activityResultCaller,
-                onResult = onResult,
-            )
+            FakeBacsMandateConfirmationLauncherFactory.test {
+                var onResultCalled = false
+                val onResult: (BacsMandateConfirmationResult) -> Unit = { onResultCalled = true }
 
-            val call = awaitRegisterCall()
-            val registeredLauncher = awaitNextRegisteredLauncher()
+                val definition = createBacsConfirmationDefinition(
+                    bacsMandateConfirmationLauncherFactory = factory,
+                )
 
-            assertThat(call.contract).isInstanceOf<BacsMandateConfirmationContract>()
-            assertThat(call.callback).isInstanceOf<ActivityResultCallback<BacsMandateConfirmationResult>>()
+                definition.createLauncher(
+                    activityResultCaller = activityResultCaller,
+                    onResult = onResult,
+                )
 
-            val callback = call.callback.asCallbackFor<BacsMandateConfirmationResult>()
+                val call = awaitRegisterCall()
+                val registeredLauncher = awaitNextRegisteredLauncher()
 
-            callback.onActivityResult(BacsMandateConfirmationResult.Confirmed)
+                assertThat(call.contract).isInstanceOf<BacsMandateConfirmationContract>()
+                assertThat(call.callback).isInstanceOf<ActivityResultCallback<BacsMandateConfirmationResult>>()
 
-            assertThat(onResultCalled).isTrue()
+                val callback = call.callback.asCallbackFor<BacsMandateConfirmationResult>()
 
-            val factoryCall = bacsMandateConfirmationLauncherFactory.calls.awaitItem()
+                callback.onActivityResult(BacsMandateConfirmationResult.Confirmed)
 
-            assertThat(factoryCall.activityResultLauncher).isEqualTo(registeredLauncher)
+                assertThat(onResultCalled).isTrue()
+
+                val factoryCall = awaitCreateBacsLauncherCall()
+
+                assertThat(factoryCall.activityResultLauncher).isEqualTo(registeredLauncher)
+            }
         }
     }
 
