@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.confirmation
 
 import android.app.Activity
+import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -44,6 +45,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Provider
@@ -90,35 +92,30 @@ internal class DefaultConfirmationHandler(
             savedStateHandle[ARGUMENTS_KEY] = value
         }
 
-    private val hasReloadedWhileAwaitingPreConfirm = isAwaitingForPreConfirmResult()
-    private val hasReloadedWhileAwaitingConfirm = isAwaitingForPaymentResult()
+    private val isAwaitingForResultData = retrieveIsAwaitingForResultData()
 
     /**
      * Indicates if this handler has been reloaded from process death. This occurs if the handler was confirming
      * an intent before did not complete the process before process death.
      */
-    override val hasReloadedFromProcessDeath = hasReloadedWhileAwaitingPreConfirm || hasReloadedWhileAwaitingConfirm
+    override val hasReloadedFromProcessDeath = isAwaitingForResultData != null
 
     private val _state = MutableStateFlow(
-        if (hasReloadedWhileAwaitingPreConfirm) {
-            ConfirmationHandler.State.Preconfirming(
-                confirmationOption = currentArguments?.confirmationOption,
-                inPreconfirmFlow = true,
-            )
-        } else if (hasReloadedWhileAwaitingConfirm) {
-            ConfirmationHandler.State.Confirming
-        } else {
-            ConfirmationHandler.State.Idle
-        }
+        isAwaitingForResultData?.let { data ->
+            ConfirmationHandler.State.Confirming(data.confirmationOption)
+        } ?: ConfirmationHandler.State.Idle
     )
     override val state: StateFlow<ConfirmationHandler.State> = _state.asStateFlow()
 
     init {
-        if (hasReloadedWhileAwaitingConfirm) {
+        if (hasReloadedFromProcessDeath) {
             coroutineScope.launch {
                 delay(1.seconds)
 
-                if (_state.value is ConfirmationHandler.State.Confirming) {
+                if (
+                    _state.value is ConfirmationHandler.State.Confirming &&
+                    isAwaitingForResultData?.receivesResultInProcess != true
+                ) {
                     onIntentResult(
                         ConfirmationHandler.Result.Canceled(
                             action = ConfirmationHandler.Result.Canceled.Action.None,
@@ -179,22 +176,16 @@ internal class DefaultConfirmationHandler(
     ) {
         val currentState = _state.value
 
-        if (
-            currentState is ConfirmationHandler.State.Preconfirming ||
-            currentState is ConfirmationHandler.State.Confirming
-        ) {
+        if (currentState is ConfirmationHandler.State.Confirming) {
             return
         }
 
-        _state.value = ConfirmationHandler.State.Preconfirming(
-            confirmationOption = arguments.confirmationOption,
-            inPreconfirmFlow = false,
-        )
+        _state.value = ConfirmationHandler.State.Confirming(arguments.confirmationOption)
 
         currentArguments = arguments
 
         coroutineScope.launch {
-            preconfirm(arguments)
+            confirm(arguments)
         }
     }
 
@@ -208,7 +199,6 @@ internal class DefaultConfirmationHandler(
         return when (val state = _state.value) {
             is ConfirmationHandler.State.Idle -> null
             is ConfirmationHandler.State.Complete -> state.result
-            is ConfirmationHandler.State.Preconfirming,
             is ConfirmationHandler.State.Confirming -> {
                 val complete = _state.firstInstanceOf<ConfirmationHandler.State.Complete>()
 
@@ -217,33 +207,21 @@ internal class DefaultConfirmationHandler(
         }
     }
 
-    private suspend fun preconfirm(
-        arguments: ConfirmationHandler.Args,
-    ) {
-        val confirmationOption = arguments.confirmationOption
-
-        if (confirmationOption is GooglePayConfirmationOption) {
-            launchGooglePay(
-                googlePay = confirmationOption,
-                intent = arguments.intent,
-            )
-        } else if (confirmationOption is BacsConfirmationOption) {
-            launchBacsMandate(confirmationOption)
-        } else {
-            confirm(arguments)
-        }
-    }
-
     private suspend fun confirm(
         arguments: ConfirmationHandler.Args,
     ) {
         currentArguments = arguments
 
-        _state.value = ConfirmationHandler.State.Confirming
+        _state.value = ConfirmationHandler.State.Confirming(arguments.confirmationOption)
 
-        val confirmationOption = arguments.confirmationOption
-
-        confirm(confirmationOption, arguments.intent)
+        when (val confirmationOption = arguments.confirmationOption) {
+            is GooglePayConfirmationOption -> launchGooglePay(
+                googlePay = confirmationOption,
+                intent = arguments.intent,
+            )
+            is BacsConfirmationOption -> launchBacsMandate(confirmationOption)
+            else -> confirm(confirmationOption, arguments.intent)
+        }
     }
 
     private suspend fun confirm(
@@ -279,7 +257,10 @@ internal class DefaultConfirmationHandler(
 
         when (val action = mediator.action(confirmationOption, intent)) {
             is ConfirmationMediator.Action.Launch -> {
-                storeIsAwaitingForPaymentResult()
+                storeIsAwaitingForResult(
+                    option = confirmationOption,
+                    receivesResultInProcess = false,
+                )
 
                 action.launch()
             }
@@ -360,9 +341,10 @@ internal class DefaultConfirmationHandler(
             config = config,
         )
 
-        storeIsAwaitingForPreConfirmResult()
-
-        _state.value = ConfirmationHandler.State.Preconfirming(confirmationOption = googlePay, inPreconfirmFlow = true)
+        storeIsAwaitingForResult(
+            option = googlePay,
+            receivesResultInProcess = true,
+        )
 
         launcher.present(
             currencyCode = intent.asPaymentIntent()?.currency
@@ -409,12 +391,10 @@ internal class DefaultConfirmationHandler(
             runCatching {
                 requireNotNull(bacsMandateConfirmationLauncher)
             }.onSuccess { launcher ->
-                _state.value = ConfirmationHandler.State.Preconfirming(
-                    confirmationOption = confirmationOption,
-                    inPreconfirmFlow = true,
+                storeIsAwaitingForResult(
+                    option = confirmationOption,
+                    receivesResultInProcess = true,
                 )
-
-                storeIsAwaitingForPreConfirmResult()
 
                 launcher.launch(
                     data = data,
@@ -444,7 +424,7 @@ internal class DefaultConfirmationHandler(
 
     private fun onBacsMandateResult(result: BacsMandateConfirmationResult) {
         coroutineScope.launch {
-            removeIsAwaitingForPreConfirmResult()
+            removeIsAwaitingForResult()
 
             when (result) {
                 is BacsMandateConfirmationResult.Confirmed -> {
@@ -481,6 +461,8 @@ internal class DefaultConfirmationHandler(
 
     private fun onGooglePayResult(result: GooglePayPaymentMethodLauncher.Result) {
         coroutineScope.launch {
+            removeIsAwaitingForResult()
+
             when (result) {
                 is GooglePayPaymentMethodLauncher.Result.Completed -> {
                     val arguments = currentArguments
@@ -530,32 +512,25 @@ internal class DefaultConfirmationHandler(
 
         _state.value = ConfirmationHandler.State.Complete(result)
 
-        removeIsAwaitingForPaymentResult()
-        removeIsAwaitingForPreConfirmResult()
+        removeIsAwaitingForResult()
     }
 
-    private fun storeIsAwaitingForPreConfirmResult() {
-        savedStateHandle[AWAITING_PRE_CONFIRM_RESULT_KEY] = true
+    private fun storeIsAwaitingForResult(
+        option: ConfirmationHandler.Option,
+        receivesResultInProcess: Boolean,
+    ) {
+        savedStateHandle[AWAITING_CONFIRMATION_RESULT_KEY] = AwaitingConfirmationResultData(
+            confirmationOption = option,
+            receivesResultInProcess = receivesResultInProcess,
+        )
     }
 
-    private fun removeIsAwaitingForPreConfirmResult() {
-        savedStateHandle.remove<Boolean>(AWAITING_PRE_CONFIRM_RESULT_KEY)
+    private fun removeIsAwaitingForResult() {
+        savedStateHandle.remove<AwaitingConfirmationResultData>(AWAITING_CONFIRMATION_RESULT_KEY)
     }
 
-    private fun isAwaitingForPreConfirmResult(): Boolean {
-        return savedStateHandle.get<Boolean>(AWAITING_PRE_CONFIRM_RESULT_KEY) ?: false
-    }
-
-    private fun storeIsAwaitingForPaymentResult() {
-        savedStateHandle[AWAITING_PAYMENT_RESULT_KEY] = true
-    }
-
-    private fun removeIsAwaitingForPaymentResult() {
-        savedStateHandle.remove<Boolean>(AWAITING_PAYMENT_RESULT_KEY)
-    }
-
-    private fun isAwaitingForPaymentResult(): Boolean {
-        return savedStateHandle.get<Boolean>(AWAITING_PAYMENT_RESULT_KEY) ?: false
+    private fun retrieveIsAwaitingForResultData(): AwaitingConfirmationResultData? {
+        return savedStateHandle.get<AwaitingConfirmationResultData>(AWAITING_CONFIRMATION_RESULT_KEY)
     }
 
     private fun StripeIntent.asPaymentIntent(): PaymentIntent? {
@@ -576,6 +551,18 @@ internal class DefaultConfirmationHandler(
                 intentConfiguration.mode is PaymentSheet.IntentConfiguration.Mode.Payment
             }
         }
+
+    @Parcelize
+    data class AwaitingConfirmationResultData(
+        val confirmationOption: ConfirmationHandler.Option,
+        /*
+         * Indicates the user receives the result within the process of the app. For example, Bacs & Google Pay open
+         * sheets in front of `PaymentSheet` and `FlowController`. During process death, these sheets and the activity
+         * hosting the products will be re-initialized, meaning we have to wait for the sheet to be closed and a result
+         * to be received before continuing the confirmation process since the result is guaranteed.
+         */
+        val receivesResultInProcess: Boolean,
+    ) : Parcelable
 
     class Factory @Inject constructor(
         private val intentConfirmationInterceptor: IntentConfirmationInterceptor,
@@ -611,8 +598,7 @@ internal class DefaultConfirmationHandler(
     }
 
     internal companion object {
-        private const val AWAITING_PRE_CONFIRM_RESULT_KEY = "AwaitingPreConfirmResult"
-        private const val AWAITING_PAYMENT_RESULT_KEY = "AwaitingPaymentResult"
+        private const val AWAITING_CONFIRMATION_RESULT_KEY = "AwaitingConfirmationResult"
         private const val ARGUMENTS_KEY = "PaymentConfirmationArguments"
     }
 }
