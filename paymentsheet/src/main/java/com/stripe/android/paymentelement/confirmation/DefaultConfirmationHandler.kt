@@ -555,6 +555,12 @@ internal class DefaultConfirmationHandler(
     @Parcelize
     data class AwaitingConfirmationResultData(
         val confirmationOption: ConfirmationHandler.Option,
+        /*
+         * Indicates the user receives the result within the process of the app. For example, Bacs & Google Pay open
+         * sheets in front of `PaymentSheet` and `FlowController`. During process death, these sheets and the activity
+         * hosting the products will be re-initialized, meaning we have to wait for the sheet to be closed and a result
+         * to be received before continuing the confirmation process since the result is guaranteed.
+         */
         val receivesResultInProcess: Boolean,
     ) : Parcelable
 
