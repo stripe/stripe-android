@@ -21,7 +21,6 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import com.stripe.android.uicore.utils.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,9 +38,9 @@ import com.stripe.android.link.R
 import com.stripe.android.link.theme.HorizontalPadding
 import com.stripe.android.link.theme.linkColors
 import com.stripe.android.link.theme.linkShapes
-import com.stripe.android.link.ui.BottomSheetContent
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.uicore.text.Html
+import com.stripe.android.uicore.utils.collectAsState
 
 @Composable
 internal fun WalletScreen(
@@ -221,8 +220,7 @@ private fun ExpandedPaymentDetails(
                 paymentDetails = item,
                 enabled = isEnabled,
                 isSelected = uiState.selectedItem?.id == item.id,
-                //TODO: Fix this
-                isUpdating = false, // uiState.paymentMethodIdBeingUpdated == item.id,
+                isUpdating = false,
                 onClick = {
                     onItemSelected(item)
                 },
