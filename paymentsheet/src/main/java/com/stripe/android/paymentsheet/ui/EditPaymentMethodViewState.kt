@@ -2,7 +2,7 @@ package com.stripe.android.paymentsheet.ui
 
 import com.stripe.android.core.strings.ResolvableString
 
-internal data class EditPaymentMethodViewState constructor(
+internal data class EditPaymentMethodViewState(
     val status: Status,
     val last4: String,
     val displayName: ResolvableString,
