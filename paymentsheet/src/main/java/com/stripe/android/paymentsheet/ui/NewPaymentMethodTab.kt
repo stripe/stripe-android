@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
@@ -29,9 +30,12 @@ internal fun NewPaymentMethodTab(
     isSelected: Boolean,
     isEnabled: Boolean,
     iconRequiresTinting: Boolean,
+    promoBadge: String?,
     modifier: Modifier = Modifier,
     onItemSelectedListener: () -> Unit
 ) {
+    val minContentWidth = minViewWidth - (PaymentMethodUISpacing.cardPadding * 2)
+
     RowButton(
         isEnabled = isEnabled,
         isSelected = isSelected,
@@ -42,20 +46,30 @@ internal fun NewPaymentMethodTab(
             top = PaymentMethodUISpacing.cardPadding,
         ),
         verticalArrangement = Arrangement.Top,
-        modifier = modifier
-            .height(60.dp)
-            .widthIn(min = minViewWidth),
+        modifier = modifier.height(60.dp),
     ) {
-        PaymentMethodIcon(
-            iconRes = iconRes,
-            iconUrl = iconUrl,
-            imageLoader = imageLoader,
-            iconRequiresTinting = iconRequiresTinting,
-            contentAlignment = Alignment.CenterStart,
-            modifier = Modifier
-                .height(PaymentMethodUISpacing.iconSize)
-                .widthIn(max = 36.dp),
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.widthIn(
+                min = minContentWidth,
+            ),
+        ) {
+            PaymentMethodIcon(
+                iconRes = iconRes,
+                iconUrl = iconUrl,
+                imageLoader = imageLoader,
+                iconRequiresTinting = iconRequiresTinting,
+                contentAlignment = Alignment.CenterStart,
+                modifier = Modifier
+                    .height(PaymentMethodUISpacing.iconSize)
+                    .widthIn(max = 36.dp),
+            )
+
+            promoBadge?.let {
+                PromoBadge(text = it, tinyMode = true)
+            }
+        }
 
         LpmSelectorText(
             text = title,

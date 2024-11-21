@@ -37,6 +37,7 @@ internal class PaymentMethodRowButtonScreenshotTest {
                 },
                 title = "**** 4242",
                 subtitle = null,
+                promoText = null,
                 onClick = {},
             )
         }
@@ -56,6 +57,7 @@ internal class PaymentMethodRowButtonScreenshotTest {
                 },
                 title = "**** 4242",
                 subtitle = null,
+                promoText = null,
                 onClick = {},
             )
         }
@@ -75,6 +77,7 @@ internal class PaymentMethodRowButtonScreenshotTest {
                 },
                 title = "**** 4242",
                 subtitle = null,
+                promoText = null,
                 onClick = {},
             )
         }
@@ -94,6 +97,7 @@ internal class PaymentMethodRowButtonScreenshotTest {
                 },
                 title = "**** 4242",
                 subtitle = "Please click me, I'm fancy",
+                promoText = null,
                 onClick = {},
             )
         }
@@ -114,6 +118,7 @@ internal class PaymentMethodRowButtonScreenshotTest {
                 title = "**** 4242",
                 subtitle = "Please click me, I'm fancy, but I shouldn't extend a a a a a a a a a a a a a a a a " +
                     "forever.",
+                promoText = null,
                 onClick = {},
             )
         }
@@ -133,10 +138,51 @@ internal class PaymentMethodRowButtonScreenshotTest {
                 },
                 title = "**** 4242",
                 subtitle = null,
+                promoText = null,
                 onClick = {},
                 trailingContent = {
                     Text(text = "View more")
                 }
+            )
+        }
+    }
+
+    @Test
+    fun testPromoText() {
+        paparazziRule.snapshot {
+            PaymentMethodRowButton(
+                isEnabled = true,
+                isSelected = false,
+                iconContent = {
+                    Image(
+                        painter = painterResource(id = R.drawable.stripe_ic_paymentsheet_pm_bank),
+                        contentDescription = null
+                    )
+                },
+                title = "Bank",
+                subtitle = null,
+                promoText = "$5",
+                onClick = {},
+            )
+        }
+    }
+
+    @Test
+    fun testPromoTextDisabled() {
+        paparazziRule.snapshot {
+            PaymentMethodRowButton(
+                isEnabled = false,
+                isSelected = false,
+                iconContent = {
+                    Image(
+                        painter = painterResource(id = R.drawable.stripe_ic_paymentsheet_pm_bank),
+                        contentDescription = null
+                    )
+                },
+                title = "Bank",
+                subtitle = null,
+                promoText = "$5",
+                onClick = {},
             )
         }
     }

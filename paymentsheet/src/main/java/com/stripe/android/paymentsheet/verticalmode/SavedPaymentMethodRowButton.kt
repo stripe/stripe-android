@@ -61,6 +61,7 @@ internal fun SavedPaymentMethodRowButton(
         },
         title = paymentMethodTitle.resolve(),
         subtitle = null,
+        promoText = null,
         onClick = onClick,
         modifier = modifier
             .testTag(

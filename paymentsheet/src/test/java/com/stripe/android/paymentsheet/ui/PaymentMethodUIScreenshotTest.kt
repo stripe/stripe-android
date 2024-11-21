@@ -34,6 +34,7 @@ internal class PaymentMethodUIScreenshotTest {
                 isSelected = true,
                 isEnabled = true,
                 iconRequiresTinting = true,
+                promoBadge = null,
                 modifier = Modifier,
                 onItemSelectedListener = {},
             )
@@ -52,6 +53,26 @@ internal class PaymentMethodUIScreenshotTest {
                 isSelected = false,
                 isEnabled = true,
                 iconRequiresTinting = true,
+                promoBadge = null,
+                modifier = Modifier,
+                onItemSelectedListener = {},
+            )
+        }
+    }
+
+    @Test
+    fun testUnselectedStateWithBadgeForTabMode() {
+        paparazziRule.snapshot {
+            NewPaymentMethodTab(
+                minViewWidth = 100.dp,
+                iconRes = R.drawable.stripe_ic_paymentsheet_pm_card,
+                iconUrl = null,
+                imageLoader = mock(),
+                title = "Card",
+                isSelected = false,
+                isEnabled = true,
+                iconRequiresTinting = true,
+                promoBadge = "$5",
                 modifier = Modifier,
                 onItemSelectedListener = {},
             )
@@ -70,6 +91,26 @@ internal class PaymentMethodUIScreenshotTest {
                 isSelected = false,
                 isEnabled = false,
                 iconRequiresTinting = true,
+                promoBadge = null,
+                modifier = Modifier,
+                onItemSelectedListener = {},
+            )
+        }
+    }
+
+    @Test
+    fun testDisabledWithBadgeForTabMode() {
+        paparazziRule.snapshot {
+            NewPaymentMethodTab(
+                minViewWidth = 100.dp,
+                iconRes = R.drawable.stripe_ic_paymentsheet_pm_card,
+                iconUrl = null,
+                imageLoader = mock(),
+                title = "Card",
+                isSelected = false,
+                isEnabled = false,
+                iconRequiresTinting = true,
+                promoBadge = "$5",
                 modifier = Modifier,
                 onItemSelectedListener = {},
             )
@@ -88,6 +129,7 @@ internal class PaymentMethodUIScreenshotTest {
                 isSelected = false,
                 isEnabled = false,
                 iconRequiresTinting = true,
+                promoBadge = null,
                 modifier = Modifier,
                 onItemSelectedListener = {},
             )

@@ -38,6 +38,7 @@ internal fun NewPaymentMethodRowButton(
         imageLoader = imageLoader,
         title = displayablePaymentMethod.displayName.resolve(),
         subtitle = displayablePaymentMethod.subtitle?.resolve(),
+        promoText = displayablePaymentMethod.promoBadge,
         iconRequiresTinting = displayablePaymentMethod.iconRequiresTinting,
         onClick = {
             displayablePaymentMethod.onClick()
@@ -55,6 +56,7 @@ internal fun NewPaymentMethodRowButton(
     imageLoader: StripeImageLoader,
     title: String,
     subtitle: String?,
+    promoText: String?,
     iconRequiresTinting: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -74,6 +76,7 @@ internal fun NewPaymentMethodRowButton(
         },
         title = title,
         subtitle = subtitle,
+        promoText = promoText,
         onClick = onClick,
         modifier = modifier,
     )

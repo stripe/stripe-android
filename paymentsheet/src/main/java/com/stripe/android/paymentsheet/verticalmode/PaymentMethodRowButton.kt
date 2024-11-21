@@ -28,6 +28,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.ui.PaymentMethodIcon
+import com.stripe.android.paymentsheet.ui.PromoBadge
 import com.stripe.android.uicore.getBorderStroke
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.stripeColors
@@ -40,6 +41,7 @@ internal fun PaymentMethodRowButton(
     iconContent: @Composable RowScope.() -> Unit,
     title: String,
     subtitle: String?,
+    promoText: String?,
     onClick: () -> Unit,
     contentDescription: String? = null,
     modifier: Modifier = Modifier,
@@ -71,8 +73,13 @@ internal fun PaymentMethodRowButton(
         ) {
             RowButtonInnerContent(isEnabled, iconContent, title, subtitle, contentDescription)
 
+            Spacer(modifier = Modifier.weight(1f))
+
+            if (promoText != null) {
+                PromoBadge(promoText)
+            }
+
             if (trailingContent != null) {
-                Spacer(modifier = Modifier.weight(1f))
                 trailingContent()
             }
         }
@@ -179,6 +186,7 @@ private fun ButtonPreview() {
             },
             title = "Card",
             subtitle = "This is a card",
+            promoText = null,
             onClick = {}
         )
     }
