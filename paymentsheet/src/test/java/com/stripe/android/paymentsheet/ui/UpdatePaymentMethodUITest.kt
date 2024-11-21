@@ -17,6 +17,7 @@ import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.ViewActionRecorder
 import com.stripe.android.ui.core.elements.TEST_TAG_DIALOG_CONFIRM_BUTTON
 import com.stripe.android.ui.core.elements.TEST_TAG_SIMPLE_DIALOG
+import com.stripe.android.uicore.elements.DROPDOWN_MENU_CLICKABLE_TEST_TAG
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -240,6 +241,35 @@ class UpdatePaymentMethodUITest {
             composeRule.onNodeWithTag(UPDATE_PM_DETAILS_SUBTITLE_TEST_TAG).assertTextEquals(
                 "Bank account details cannot be changed."
             )
+        }
+    }
+
+    @Test
+    fun modifiableCard_cbcDropdownIsShown() {
+        runScenario(
+            displayableSavedPaymentMethod = PaymentMethodFixtures
+                .CARD_WITH_NETWORKS_PAYMENT_METHOD
+                .toDisplayableSavedPaymentMethod()
+        ) {
+           composeRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG).assertExists()
+        }
+    }
+
+    @Test
+    fun notModifiableCard_cbcDropdownIsNotShown() {
+        runScenario(
+            displayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard()
+        ) {
+            composeRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG).assertDoesNotExist()
+        }
+    }
+
+    @Test
+    fun bankAccount_cbcDropdownIsNotShown() {
+        runScenario(
+            displayableSavedPaymentMethod = PaymentMethodFixtures.US_BANK_ACCOUNT.toDisplayableSavedPaymentMethod()
+        ) {
+            composeRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG).assertDoesNotExist()
         }
     }
 
