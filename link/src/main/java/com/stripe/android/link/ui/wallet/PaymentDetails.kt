@@ -154,7 +154,7 @@ private fun DefaultTag() {
 }
 
 @Composable
-private fun RowScope.PaymentDetails(
+internal fun RowScope.PaymentDetails(
     paymentDetails: ConsumerPaymentDetails.PaymentDetails,
 ) {
     when (paymentDetails) {
