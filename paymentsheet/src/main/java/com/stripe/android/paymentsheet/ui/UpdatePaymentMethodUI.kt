@@ -33,6 +33,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.stripe.android.CardBrandFilter
+import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.R
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
@@ -63,6 +65,7 @@ internal fun UpdatePaymentMethodUI(interactor: UpdatePaymentMethodInteractor, mo
             is SavedPaymentMethod.Card -> CardDetailsUI(
                 displayableSavedPaymentMethod = interactor.displayableSavedPaymentMethod,
                 card = savedPaymentMethod.card,
+                cardBrandFilter = interactor.cardBrandFilter,
             )
             is SavedPaymentMethod.SepaDebit -> SepaDebitUI()
             is SavedPaymentMethod.USBankAccount -> USBankAccountUI()
@@ -98,6 +101,7 @@ internal fun UpdatePaymentMethodUI(interactor: UpdatePaymentMethodInteractor, mo
 private fun CardDetailsUI(
     displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
     card: PaymentMethod.Card,
+    cardBrandFilter: CardBrandFilter,
 ) {
     val dividerHeight = remember { mutableStateOf(0.dp) }
 
@@ -108,7 +112,9 @@ private fun CardDetailsUI(
     ) {
         Column {
             CardNumberField(
-                last4 = card.last4,
+                card = card,
+                isModifiable = displayableSavedPaymentMethod.isModifiable(),
+                cardBrandFilter = cardBrandFilter,
                 savedPaymentMethodIcon = displayableSavedPaymentMethod
                     .paymentMethod
                     .getSavedPaymentMethodIcon(forVerticalMode = true),
@@ -183,10 +189,15 @@ private fun DeletePaymentMethodUi(interactor: UpdatePaymentMethodInteractor) {
 }
 
 @Composable
-private fun CardNumberField(last4: String?, savedPaymentMethodIcon: Int) {
+private fun CardNumberField(
+    card: PaymentMethod.Card,
+    cardBrandFilter: CardBrandFilter,
+    isModifiable: Boolean,
+    savedPaymentMethodIcon: Int,
+) {
     TextField(
         modifier = Modifier.fillMaxWidth(),
-        value = "•••• •••• •••• $last4",
+        value = "•••• •••• •••• ${card.last4}",
         enabled = false,
         label = {
             Label(
@@ -195,12 +206,22 @@ private fun CardNumberField(last4: String?, savedPaymentMethodIcon: Int) {
             )
         },
         trailingIcon = {
-            PaymentMethodIconFromResource(
-                iconRes = savedPaymentMethodIcon,
-                colorFilter = null,
-                alignment = Alignment.Center,
-                modifier = Modifier,
-            )
+            if (isModifiable) {
+                CardBrandDropdown(
+                    selectedBrand = card.getPreferredChoice(),
+                    availableBrands = card.getAvailableNetworks(cardBrandFilter),
+                    onBrandOptionsShown = {},
+                    onBrandChoiceChanged = {},
+                    onBrandChoiceOptionsDismissed = {},
+                )
+            } else {
+                PaymentMethodIconFromResource(
+                    iconRes = savedPaymentMethodIcon,
+                    colorFilter = null,
+                    alignment = Alignment.Center,
+                    modifier = Modifier,
+                )
+            }
         },
         colors = TextFieldColors(shouldShowError = false),
         onValueChange = {}
@@ -328,6 +349,7 @@ private fun PreviewUpdatePaymentMethodUI() {
             canRemove = true,
             displayableSavedPaymentMethod = exampleCard,
             removeExecutor = { null },
+            cardBrandFilter = DefaultCardBrandFilter,
         ),
         modifier = Modifier
     )

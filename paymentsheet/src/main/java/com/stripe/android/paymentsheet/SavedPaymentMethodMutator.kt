@@ -243,6 +243,7 @@ internal class SavedPaymentMethodMutator(
                         isLiveMode = isLiveModeProvider(),
                         canRemove = canRemove.value,
                         displayableSavedPaymentMethod,
+                        cardBrandFilter = cardBrandFilter,
                         removeExecutor = ::removePaymentMethodInEditScreen,
                     )
                 )
