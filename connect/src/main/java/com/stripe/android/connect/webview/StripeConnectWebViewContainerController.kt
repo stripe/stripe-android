@@ -135,7 +135,7 @@ internal class StripeConnectWebViewContainerController<Listener : StripeEmbedded
             }
             is SetOnLoadError -> {
                 // TODO - wrap error better
-                listener?.onLoadError(RuntimeException(value.type))
+                listener?.onLoadError(RuntimeException("${value.type}: ${value.message}"))
             }
             else -> {
                 with(listenerDelegate) {
