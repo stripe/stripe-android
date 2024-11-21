@@ -27,6 +27,18 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
     }
 
     @Test
+    fun updatePaymentMethodScreen_forCbcEligibleCard() {
+        paparazziRule.snapshot {
+            PaymentSheetScreenOnUpdatePaymentMethod(
+                paymentMethod = PaymentMethodFixtures
+                    .CARD_WITH_NETWORKS_PAYMENT_METHOD
+                    .toDisplayableSavedPaymentMethod(),
+                canRemove = true,
+            )
+        }
+    }
+
+    @Test
     fun updatePaymentMethodScreen_forCard_withRemoveButton() {
         paparazziRule.snapshot {
             PaymentSheetScreenOnUpdatePaymentMethod(
