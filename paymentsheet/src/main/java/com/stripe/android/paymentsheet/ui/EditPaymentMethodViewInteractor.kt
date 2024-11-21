@@ -65,7 +65,7 @@ internal class DefaultEditPaymentMethodViewInteractor(
     private val cardBrandFilter: CardBrandFilter,
     workContext: CoroutineContext = Dispatchers.Default,
 ) : ModifiableEditPaymentMethodViewInteractor {
-    private val choice = MutableStateFlow(initialPaymentMethod.getPreferredChoice())
+    private val choice = MutableStateFlow(initialPaymentMethod.getCard().getPreferredChoice())
     private val status = MutableStateFlow(EditPaymentMethodViewState.Status.Idle)
     private val paymentMethod = MutableStateFlow(initialPaymentMethod)
     private val confirmRemoval = MutableStateFlow(false)
@@ -79,8 +79,8 @@ internal class DefaultEditPaymentMethodViewInteractor(
         confirmRemoval,
         error,
     ) { paymentMethod, choice, status, confirmDeletion, error ->
-        val savedChoice = paymentMethod.getPreferredChoice()
-        val availableChoices = paymentMethod.getAvailableNetworks(cardBrandFilter)
+        val savedChoice = paymentMethod.getCard().getPreferredChoice()
+        val availableChoices = paymentMethod.getCard().getAvailableNetworks(cardBrandFilter)
 
         EditPaymentMethodViewState(
             last4 = paymentMethod.getLast4(),
@@ -134,7 +134,7 @@ internal class DefaultEditPaymentMethodViewInteractor(
         val currentPaymentMethod = paymentMethod.value
         val currentChoice = choice.value
 
-        if (currentPaymentMethod.getPreferredChoice() != currentChoice) {
+        if (currentPaymentMethod.getCard().getPreferredChoice() != currentChoice) {
             coroutineScope.launch {
                 error.emit(null)
                 status.emit(EditPaymentMethodViewState.Status.Updating)
@@ -175,12 +175,12 @@ internal class DefaultEditPaymentMethodViewInteractor(
             ?: throw IllegalStateException("Card payment method must contain last 4 digits")
     }
 
-    private fun PaymentMethod.getPreferredChoice(): CardBrandChoice {
-        return CardBrand.fromCode(getCard().displayBrand).toChoice()
+    private fun PaymentMethod.Card.getPreferredChoice(): CardBrandChoice {
+        return CardBrand.fromCode(displayBrand).toChoice()
     }
 
-    private fun PaymentMethod.getAvailableNetworks(cardBrandFilter: CardBrandFilter): List<CardBrandChoice> {
-        return getCard().networks?.available?.let { brandCodes ->
+    private fun PaymentMethod.Card.getAvailableNetworks(cardBrandFilter: CardBrandFilter): List<CardBrandChoice> {
+        return networks?.available?.let { brandCodes ->
             brandCodes.map { code ->
                 CardBrand.fromCode(code).toChoice()
             }.filter { cardBrandFilter.isAccepted(it.brand) }
