@@ -23,20 +23,24 @@ class SetterFunctionCalledMessageTest {
     }
 
     @Test
-    fun `should serialize and deserialize correct`() {
+    fun `should serialize and deserialize correctly`() {
         listOf(
             SetterFunctionCalledMessage(
                 setter = "setOnLoaderStart",
                 value = SetOnLoaderStart(elementTagName = "foo")
             ) to """{"setter":"setOnLoaderStart","value":{"elementTagName":"foo"}}""",
             SetterFunctionCalledMessage(
+                setter = "setOnExit",
+                value = SetOnExit,
+            ) to """{"setter":"setOnExit","value":{}}""",
+            SetterFunctionCalledMessage(
                 setter = "foo",
                 value = SetterFunctionCalledMessage.UnknownValue(value = JsonPrimitive("bar"))
             ) to """{"setter":"foo","value":"bar"}""",
         ).forEach { (obj, expectedJson) ->
-            val json = ConnectSdkJson.encodeToString(obj)
+            val json = ConnectJson.encodeToString(obj)
             assertThat(json).isEqualTo(expectedJson)
-            assertThat(ConnectSdkJson.decodeFromString<SetterFunctionCalledMessage>(json)).isEqualTo(obj)
+            assertThat(ConnectJson.decodeFromString<SetterFunctionCalledMessage>(json)).isEqualTo(obj)
         }
     }
 }

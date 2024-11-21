@@ -4,13 +4,14 @@ import android.content.Context
 import android.webkit.ValueCallback
 import android.webkit.WebSettings
 import android.webkit.WebView
+import com.stripe.android.connect.ComponentListenerDelegate
 import com.stripe.android.connect.EmbeddedComponentManager
 import com.stripe.android.connect.EmbeddedComponentManager.Configuration
+import com.stripe.android.connect.PayoutsListener
 import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.StripeEmbeddedComponent
 import com.stripe.android.core.Logger
 import com.stripe.android.core.version.StripeSdkVersion
-import kotlinx.serialization.json.Json
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -35,7 +36,7 @@ class StripeConnectWebViewClientTest {
         on { context } doReturn mockContext
     }
 
-    private lateinit var container: StripeConnectWebViewContainerImpl
+    private lateinit var container: StripeConnectWebViewContainerImpl<PayoutsListener>
     private val webViewClient get() = container.stripeWebViewClient
 
     @Before
@@ -55,8 +56,9 @@ class StripeConnectWebViewClientTest {
         container = StripeConnectWebViewContainerImpl(
             embeddedComponent = StripeEmbeddedComponent.PAYOUTS,
             embeddedComponentManager = embeddedComponentManager,
+            listener = null,
             logger = Logger.getInstance(enableLogging = false),
-            jsonSerializer = Json { ignoreUnknownKeys = true },
+            listenerDelegate = ComponentListenerDelegate.ignore()
         )
     }
 

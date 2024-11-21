@@ -50,6 +50,21 @@ internal data class SetOnLoaderStart(
     val elementTagName: String
 ) : SetterFunctionCalledMessage.Value
 
+/**
+ * The component executes this callback function when a load failure occurs.
+ */
+@Serializable
+internal data class SetOnLoadError(
+    val type: String, // TODO - possibly use an enum or sealed class here.
+    val message: String?,
+) : SetterFunctionCalledMessage.Value
+
+/**
+ * The connected account has exited the onboarding process.
+ */
+@Serializable
+internal data object SetOnExit : SetterFunctionCalledMessage.Value
+
 // Serialization
 
 internal object SetterFunctionCalledMessageSerializer : KSerializer<SetterFunctionCalledMessage> {

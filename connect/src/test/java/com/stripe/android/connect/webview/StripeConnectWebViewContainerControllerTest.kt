@@ -6,8 +6,10 @@ import android.net.Uri
 import android.webkit.WebResourceRequest
 import androidx.lifecycle.testing.TestLifecycleOwner
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.connect.ComponentListenerDelegate
 import com.stripe.android.connect.EmbeddedComponentManager
 import com.stripe.android.connect.EmbeddedComponentManager.Configuration
+import com.stripe.android.connect.PayoutsListener
 import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.StripeEmbeddedComponent
 import com.stripe.android.connect.appearance.Appearance
@@ -37,11 +39,13 @@ class StripeConnectWebViewContainerControllerTest {
         fetchClientSecretCallback = { },
     )
     private val embeddedComponent: StripeEmbeddedComponent = StripeEmbeddedComponent.PAYOUTS
+    private val listener: PayoutsListener = mock()
+    private val listenerDelegate: ComponentListenerDelegate<PayoutsListener> = mock()
     private val mockStripeIntentLauncher: StripeIntentLauncher = mock()
     private val mockLogger: Logger = mock()
 
     private val lifecycleOwner = TestLifecycleOwner()
-    private lateinit var controller: StripeConnectWebViewContainerController
+    private lateinit var controller: StripeConnectWebViewContainerController<PayoutsListener>
 
     @Before
     fun setup() {
@@ -49,6 +53,8 @@ class StripeConnectWebViewContainerControllerTest {
             view = view,
             embeddedComponentManager = embeddedComponentManager,
             embeddedComponent = embeddedComponent,
+            listener = listener,
+            listenerDelegate = listenerDelegate,
             stripeIntentLauncher = mockStripeIntentLauncher,
             logger = mockLogger,
         )

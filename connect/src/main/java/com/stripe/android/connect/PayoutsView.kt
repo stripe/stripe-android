@@ -13,9 +13,9 @@ class PayoutsView private constructor(
     context: Context,
     attrs: AttributeSet?,
     defStyleAttr: Int,
-    webViewContainerBehavior: StripeConnectWebViewContainerImpl,
+    webViewContainerBehavior: StripeConnectWebViewContainerImpl<PayoutsListener>,
 ) : FrameLayout(context, attrs, defStyleAttr),
-    StripeConnectWebViewContainer by webViewContainerBehavior {
+    StripeConnectWebViewContainer<PayoutsListener> by webViewContainerBehavior {
 
     @JvmOverloads
     constructor(
@@ -23,13 +23,16 @@ class PayoutsView private constructor(
         attrs: AttributeSet? = null,
         defStyleAttr: Int = 0,
         embeddedComponentManager: EmbeddedComponentManager? = null,
+        listener: PayoutsListener? = null,
     ) : this(
         context,
         attrs,
         defStyleAttr,
         StripeConnectWebViewContainerImpl(
             embeddedComponent = StripeEmbeddedComponent.PAYOUTS,
-            embeddedComponentManager = embeddedComponentManager
+            embeddedComponentManager = embeddedComponentManager,
+            listener = listener,
+            listenerDelegate = ComponentListenerDelegate.ignore(),
         )
     )
 
@@ -37,3 +40,6 @@ class PayoutsView private constructor(
         webViewContainerBehavior.initializeView(this)
     }
 }
+
+@PrivateBetaConnectSDK
+interface PayoutsListener : StripeEmbeddedComponentListener

@@ -18,13 +18,16 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.connect.BuildConfig
+import com.stripe.android.connect.ComponentListenerDelegate
 import com.stripe.android.connect.EmbeddedComponentManager
 import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.StripeEmbeddedComponent
+import com.stripe.android.connect.StripeEmbeddedComponentListener
 import com.stripe.android.connect.appearance.Appearance
 import com.stripe.android.connect.databinding.StripeConnectWebviewBinding
 import com.stripe.android.connect.webview.serialization.AccountSessionClaimedMessage
 import com.stripe.android.connect.webview.serialization.ConnectInstanceJs
+import com.stripe.android.connect.webview.serialization.ConnectJson
 import com.stripe.android.connect.webview.serialization.PageLoadMessage
 import com.stripe.android.connect.webview.serialization.SecureWebViewMessage
 import com.stripe.android.connect.webview.serialization.SetterFunctionCalledMessage
@@ -35,20 +38,22 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.json.jsonObject
 
 @PrivateBetaConnectSDK
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-interface StripeConnectWebViewContainer {
+interface StripeConnectWebViewContainer<Listener : StripeEmbeddedComponentListener> {
     /**
-     * Set the [EmbeddedComponentManager] to use for this view.
+     * Initializes the [EmbeddedComponentManager] and listener to use for this view.
      * Must be called when this view is created via XML.
      * Cannot be called more than once per instance.
      */
-    fun setEmbeddedComponentManager(embeddedComponentManager: EmbeddedComponentManager)
+    fun initialize(
+        embeddedComponentManager: EmbeddedComponentManager,
+        listener: Listener?,
+    )
 }
 
 @OptIn(PrivateBetaConnectSDK::class)
@@ -65,16 +70,13 @@ internal interface StripeConnectWebViewContainerInternal {
 }
 
 @OptIn(PrivateBetaConnectSDK::class)
-internal class StripeConnectWebViewContainerImpl(
+internal class StripeConnectWebViewContainerImpl<Listener : StripeEmbeddedComponentListener>(
     val embeddedComponent: StripeEmbeddedComponent,
     embeddedComponentManager: EmbeddedComponentManager?,
+    listener: Listener?,
+    private val listenerDelegate: ComponentListenerDelegate<Listener>,
     private val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG),
-    private val jsonSerializer: Json =
-        Json {
-            ignoreUnknownKeys = true
-            explicitNulls = false
-        }
-) : StripeConnectWebViewContainer,
+) : StripeConnectWebViewContainer<Listener>,
     StripeConnectWebViewContainerInternal {
 
     private var viewBinding: StripeConnectWebviewBinding? = null
@@ -86,15 +88,15 @@ internal class StripeConnectWebViewContainerImpl(
     @VisibleForTesting
     internal val stripeWebChromeClient = StripeWebChromeClient()
 
-    private var controller: StripeConnectWebViewContainerController? = null
+    private var controller: StripeConnectWebViewContainerController<Listener>? = null
 
     init {
         if (embeddedComponentManager != null) {
-            initializeController(embeddedComponentManager)
+            initialize(embeddedComponentManager, listener)
         }
     }
 
-    fun initializeView(view: FrameLayout) {
+    internal fun initializeView(view: FrameLayout) {
         val viewBinding = StripeConnectWebviewBinding.inflate(
             LayoutInflater.from(view.context),
             view
@@ -102,10 +104,6 @@ internal class StripeConnectWebViewContainerImpl(
             .also { this.viewBinding = it }
         initializeWebView(viewBinding.stripeWebView)
         bindViewToController()
-    }
-
-    override fun setEmbeddedComponentManager(embeddedComponentManager: EmbeddedComponentManager) {
-        initializeController(embeddedComponentManager)
     }
 
     @VisibleForTesting
@@ -130,14 +128,19 @@ internal class StripeConnectWebViewContainerImpl(
         }
     }
 
-    private fun initializeController(embeddedComponentManager: EmbeddedComponentManager) {
-        if (controller != null) {
+    override fun initialize(
+        embeddedComponentManager: EmbeddedComponentManager,
+        listener: Listener?
+    ) {
+        if (this.controller != null) {
             throw IllegalStateException("EmbeddedComponentManager is already set")
         }
-        controller = StripeConnectWebViewContainerController(
+        this.controller = StripeConnectWebViewContainerController(
             view = this,
             embeddedComponentManager = embeddedComponentManager,
             embeddedComponent = embeddedComponent,
+            listener = listener,
+            listenerDelegate = listenerDelegate,
         )
         bindViewToController()
     }
@@ -167,11 +170,12 @@ internal class StripeConnectWebViewContainerImpl(
             ConnectInstanceJs(appearance = appearance.toJs())
         webView?.evaluateSdkJs(
             "updateConnectInstance",
-            jsonSerializer.encodeToJsonElement(payload).jsonObject
+            ConnectJson.encodeToJsonElement(payload).jsonObject
         )
     }
 
     override fun loadUrl(url: String) {
+        webView?.clearCache(true)
         webView?.loadUrl(url)
     }
 
@@ -264,26 +268,26 @@ internal class StripeConnectWebViewContainerImpl(
             val context = checkNotNull(webView?.context)
             val initialParams = checkNotNull(controller?.getInitialParams(context))
             logger.debug("InitParams fetched: ${initialParams.toDebugString()}")
-            return jsonSerializer.encodeToString(initialParams)
+            return ConnectJson.encodeToString(initialParams)
         }
 
         @JavascriptInterface
         fun onSetterFunctionCalled(message: String) {
-            val parsed = jsonSerializer.decodeFromString<SetterFunctionCalledMessage>(message)
-            logger.debug("Setter function called: ${parsed.setter}")
+            val parsed = ConnectJson.decodeFromString<SetterFunctionCalledMessage>(message)
+            logger.debug("Setter function called: $parsed")
 
             controller?.onReceivedSetterFunctionCalled(parsed)
         }
 
         @JavascriptInterface
         fun openSecureWebView(message: String) {
-            val secureWebViewData = jsonSerializer.decodeFromString<SecureWebViewMessage>(message)
+            val secureWebViewData = ConnectJson.decodeFromString<SecureWebViewMessage>(message)
             logger.debug("Open secure web view with data: $secureWebViewData")
         }
 
         @JavascriptInterface
         fun pageDidLoad(message: String) {
-            val pageLoadMessage = jsonSerializer.decodeFromString<PageLoadMessage>(message)
+            val pageLoadMessage = ConnectJson.decodeFromString<PageLoadMessage>(message)
             logger.debug("Page did load: $pageLoadMessage")
 
             controller?.onReceivedPageDidLoad()
@@ -291,7 +295,7 @@ internal class StripeConnectWebViewContainerImpl(
 
         @JavascriptInterface
         fun accountSessionClaimed(message: String) {
-            val accountSessionClaimedMessage = jsonSerializer.decodeFromString<AccountSessionClaimedMessage>(message)
+            val accountSessionClaimedMessage = ConnectJson.decodeFromString<AccountSessionClaimedMessage>(message)
             logger.debug("Account session claimed: $accountSessionClaimedMessage")
         }
 
