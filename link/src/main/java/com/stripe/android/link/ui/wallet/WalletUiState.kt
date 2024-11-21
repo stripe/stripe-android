@@ -9,6 +9,7 @@ internal data class WalletUiState(
     val paymentDetailsList: List<ConsumerPaymentDetails.PaymentDetails>,
     val selectedItem: ConsumerPaymentDetails.PaymentDetails?,
     val isProcessing: Boolean,
+    val isExpanded: Boolean = false
 ) {
 
     val showBankAccountTerms = selectedItem is ConsumerPaymentDetails.BankAccount
