@@ -80,7 +80,7 @@ internal class DefaultEditPaymentMethodViewInteractor(
         error,
     ) { paymentMethod, choice, status, confirmDeletion, error ->
         val savedChoice = paymentMethod.getPreferredChoice()
-        val availableChoices = paymentMethod.getAvailableNetworks().filter { cardBrandFilter.isAccepted(it.brand) }
+        val availableChoices = paymentMethod.getAvailableNetworks(cardBrandFilter)
 
         EditPaymentMethodViewState(
             last4 = paymentMethod.getLast4(),
@@ -179,11 +179,11 @@ internal class DefaultEditPaymentMethodViewInteractor(
         return CardBrand.fromCode(getCard().displayBrand).toChoice()
     }
 
-    private fun PaymentMethod.getAvailableNetworks(): List<CardBrandChoice> {
+    private fun PaymentMethod.getAvailableNetworks(cardBrandFilter: CardBrandFilter): List<CardBrandChoice> {
         return getCard().networks?.available?.let { brandCodes ->
             brandCodes.map { code ->
                 CardBrand.fromCode(code).toChoice()
-            }
+            }.filter { cardBrandFilter.isAccepted(it.brand) }
         } ?: listOf()
     }
 
