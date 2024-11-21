@@ -24,6 +24,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -42,6 +43,7 @@ import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.SavedPaymentMethod
 import com.stripe.android.uicore.elements.TextFieldColors
 import com.stripe.android.uicore.getBorderStroke
+import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.stripeShapes
 import com.stripe.android.uicore.utils.collectAsState
@@ -52,7 +54,7 @@ import com.stripe.android.paymentsheet.R as PaymentSheetR
 internal fun UpdatePaymentMethodUI(interactor: UpdatePaymentMethodInteractor, modifier: Modifier) {
     val context = LocalContext.current
     val horizontalPadding = dimensionResource(
-        id = com.stripe.android.paymentsheet.R.dimen.stripe_paymentsheet_outer_spacing_horizontal
+        id = PaymentSheetR.dimen.stripe_paymentsheet_outer_spacing_horizontal
     )
     val state by interactor.state.collectAsState()
 
@@ -64,8 +66,16 @@ internal fun UpdatePaymentMethodUI(interactor: UpdatePaymentMethodInteractor, mo
                 displayableSavedPaymentMethod = interactor.displayableSavedPaymentMethod,
                 card = savedPaymentMethod.card,
             )
-            is SavedPaymentMethod.SepaDebit -> SepaDebitUI()
-            is SavedPaymentMethod.USBankAccount -> USBankAccountUI()
+            is SavedPaymentMethod.SepaDebit -> SepaDebitUI(
+                name = interactor.displayableSavedPaymentMethod.paymentMethod.billingDetails?.name,
+                email = interactor.displayableSavedPaymentMethod.paymentMethod.billingDetails?.email,
+                sepaDebit = savedPaymentMethod.sepaDebit,
+            )
+            is SavedPaymentMethod.USBankAccount -> USBankAccountUI(
+                name = interactor.displayableSavedPaymentMethod.paymentMethod.billingDetails?.name,
+                email = interactor.displayableSavedPaymentMethod.paymentMethod.billingDetails?.email,
+                usBankAccount = savedPaymentMethod.usBankAccount,
+            )
             SavedPaymentMethod.Unexpected -> {}
         }
 
@@ -141,19 +151,84 @@ private fun CardDetailsUI(
 }
 
 @Composable
-private fun USBankAccountUI() {
-    Text(
-        text = "This is a US bank account",
+private fun USBankAccountUI(
+    name: String?,
+    email: String?,
+    usBankAccount: PaymentMethod.USBankAccount,
+) {
+    BankAccountUI(
+        name = name,
+        email = email,
+        bankAccountFieldText = resolvableString(
+            PaymentSheetR.string.stripe_paymentsheet_bank_account_info,
+            usBankAccount.bankName,
+            usBankAccount.last4,
+        ).resolve(),
+        bankAccountFieldLabel = stringResource(R.string.stripe_title_bank_account),
         modifier = Modifier.testTag(UPDATE_PM_US_BANK_ACCOUNT_TEST_TAG),
     )
 }
 
 @Composable
-private fun SepaDebitUI() {
-    Text(
-        text = "This is a SEPA debit account",
+private fun SepaDebitUI(
+    name: String?,
+    email: String?,
+    sepaDebit: PaymentMethod.SepaDebit,
+) {
+    BankAccountUI(
+        name = name,
+        email = email,
+        bankAccountFieldText = resolvableString(
+            PaymentSheetR.string.stripe_paymentsheet_bank_account_last_4,
+            sepaDebit.last4,
+        ).resolve(),
+        bankAccountFieldLabel = stringResource(PaymentSheetR.string.stripe_paymentsheet_iban),
         modifier = Modifier.testTag(UPDATE_PM_SEPA_DEBIT_TEST_TAG),
     )
+}
+
+@Composable
+private fun BankAccountUI(
+    name: String?,
+    email: String?,
+    bankAccountFieldLabel: String,
+    bankAccountFieldText: String,
+    modifier: Modifier,
+) {
+    Column(
+        modifier = modifier,
+    ) {
+        BankAccountTextField(
+            value = name ?: "",
+            label = stringResource(id = com.stripe.android.core.R.string.stripe_address_label_full_name),
+        )
+        BankAccountTextField(
+            value = email ?: "",
+            label = stringResource(com.stripe.android.uicore.R.string.stripe_email),
+            modifier = Modifier.padding(vertical = 8.dp),
+        )
+        BankAccountTextField(
+            value = bankAccountFieldText,
+            label = bankAccountFieldLabel,
+        )
+    }
+}
+
+@Composable
+private fun BankAccountTextField(
+    value: String,
+    label: String,
+    modifier: Modifier = Modifier,
+) {
+    Card(
+        border = MaterialTheme.getBorderStroke(false),
+        modifier = modifier,
+    ) {
+        CommonTextField(
+            value = value,
+            label = label,
+        )
+    }
 }
 
 @Composable
@@ -184,16 +259,9 @@ private fun DeletePaymentMethodUi(interactor: UpdatePaymentMethodInteractor) {
 
 @Composable
 private fun CardNumberField(last4: String?, savedPaymentMethodIcon: Int) {
-    TextField(
-        modifier = Modifier.fillMaxWidth(),
+    CommonTextField(
         value = "•••• •••• •••• $last4",
-        enabled = false,
-        label = {
-            Label(
-                text = stringResource(id = R.string.stripe_acc_label_card_number),
-                modifier = Modifier
-            )
-        },
+        label = stringResource(id = R.string.stripe_acc_label_card_number),
         trailingIcon = {
             PaymentMethodIconFromResource(
                 iconRes = savedPaymentMethodIcon,
@@ -202,30 +270,20 @@ private fun CardNumberField(last4: String?, savedPaymentMethodIcon: Int) {
                 modifier = Modifier,
             )
         },
-        colors = TextFieldColors(shouldShowError = false),
-        onValueChange = {}
     )
 }
 
 @Composable
 private fun ExpiryField(expiryMonth: Int?, expiryYear: Int?, modifier: Modifier) {
-    TextField(
+    CommonTextField(
         modifier = modifier.testTag(UPDATE_PM_EXPIRY_FIELD_TEST_TAG),
         value = formattedExpiryDate(expiryMonth = expiryMonth, expiryYear = expiryYear),
-        enabled = false,
-        label = {
-            Label(
-                text = stringResource(id = com.stripe.android.uicore.R.string.stripe_expiration_date_hint),
-                modifier = Modifier
-            )
-        },
-        colors = TextFieldColors(shouldShowError = false),
+        label = stringResource(id = com.stripe.android.uicore.R.string.stripe_expiration_date_hint),
         shape = MaterialTheme.shapes.small.copy(
             topStart = ZeroCornerSize,
             topEnd = ZeroCornerSize,
             bottomEnd = ZeroCornerSize,
         ),
-        onValueChange = {},
     )
 }
 
@@ -269,17 +327,10 @@ private fun CvcField(cardBrand: CardBrand, modifier: Modifier) {
             append("•")
         }
     }
-    TextField(
+    CommonTextField(
         modifier = modifier.testTag(UPDATE_PM_CVC_FIELD_TEST_TAG),
         value = cvc,
-        enabled = false,
-        label = {
-            Label(
-                text = stringResource(id = R.string.stripe_cvc_number_hint),
-                modifier = Modifier
-            )
-        },
-        colors = TextFieldColors(shouldShowError = false),
+        label = stringResource(id = R.string.stripe_cvc_number_hint),
         shape = MaterialTheme.shapes.small.copy(
             topStart = ZeroCornerSize,
             topEnd = ZeroCornerSize,
@@ -291,18 +342,42 @@ private fun CvcField(cardBrand: CardBrand, modifier: Modifier) {
                 contentDescription = null,
             )
         },
-        onValueChange = {}
+    )
+}
+
+@Composable
+private fun CommonTextField(
+    value: String,
+    label: String,
+    modifier: Modifier = Modifier,
+    trailingIcon: @Composable (() -> Unit)? = null,
+    shape: Shape =
+        MaterialTheme.shapes.small.copy(bottomEnd = ZeroCornerSize, bottomStart = ZeroCornerSize),
+) {
+    TextField(
+        modifier = modifier.fillMaxWidth(),
+        value = value,
+        enabled = false,
+        label = {
+            Label(
+                text = label,
+            )
+        },
+        trailingIcon = trailingIcon,
+        shape = shape,
+        colors = TextFieldColors(
+            shouldShowError = false,
+        ),
+        onValueChange = {},
     )
 }
 
 @Composable
 private fun Label(
     text: String,
-    modifier: Modifier
 ) {
     Text(
         text = text,
-        modifier = modifier,
         color = MaterialTheme.stripeColors.placeholderText.copy(alpha = ContentAlpha.disabled),
         style = MaterialTheme.typography.subtitle1
     )
