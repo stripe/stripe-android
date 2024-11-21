@@ -251,7 +251,7 @@ class UpdatePaymentMethodUITest {
                 .CARD_WITH_NETWORKS_PAYMENT_METHOD
                 .toDisplayableSavedPaymentMethod()
         ) {
-           composeRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG).assertExists()
+            composeRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG).assertExists()
         }
     }
 
