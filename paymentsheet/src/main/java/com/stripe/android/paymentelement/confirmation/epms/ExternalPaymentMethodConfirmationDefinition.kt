@@ -35,7 +35,7 @@ internal class ExternalPaymentMethodConfirmationDefinition(
     override suspend fun action(
         confirmationOption: ExternalPaymentMethodConfirmationOption,
         intent: StripeIntent
-    ): ConfirmationDefinition.ConfirmationAction<Unit> {
+    ): ConfirmationDefinition.Action<Unit> {
         val externalPaymentMethodType = confirmationOption.type
         val externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandlerProvider.get()
 
@@ -50,13 +50,13 @@ internal class ExternalPaymentMethodConfirmationDefinition(
                     " Cannot process payment for payment selection: $externalPaymentMethodType"
             )
 
-            ConfirmationDefinition.ConfirmationAction.Fail(
+            ConfirmationDefinition.Action.Fail(
                 cause = error,
                 message = error.stripeErrorMessage(),
                 errorType = ConfirmationHandler.Result.Failed.ErrorType.ExternalPaymentMethod,
             )
         } else {
-            ConfirmationDefinition.ConfirmationAction.Launch(
+            ConfirmationDefinition.Action.Launch(
                 launcherArguments = Unit,
                 deferredIntentConfirmationType = null,
             )
@@ -92,23 +92,23 @@ internal class ExternalPaymentMethodConfirmationDefinition(
         )
     }
 
-    override fun toPaymentConfirmationResult(
+    override fun toResult(
         confirmationOption: ExternalPaymentMethodConfirmationOption,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
         intent: StripeIntent,
         result: PaymentResult
-    ): ConfirmationHandler.Result {
+    ): ConfirmationDefinition.Result {
         return when (result) {
-            is PaymentResult.Completed -> ConfirmationHandler.Result.Succeeded(
+            is PaymentResult.Completed -> ConfirmationDefinition.Result.Succeeded(
                 intent = intent,
                 deferredIntentConfirmationType = null,
             )
-            is PaymentResult.Failed -> ConfirmationHandler.Result.Failed(
+            is PaymentResult.Failed -> ConfirmationDefinition.Result.Failed(
                 cause = result.throwable,
                 message = result.throwable.stripeErrorMessage(),
                 type = ConfirmationHandler.Result.Failed.ErrorType.ExternalPaymentMethod,
             )
-            is PaymentResult.Canceled -> ConfirmationHandler.Result.Canceled(
+            is PaymentResult.Canceled -> ConfirmationDefinition.Result.Canceled(
                 action = ConfirmationHandler.Result.Canceled.Action.None,
             )
         }

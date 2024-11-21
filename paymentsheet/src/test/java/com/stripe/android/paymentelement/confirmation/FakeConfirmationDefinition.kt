@@ -13,16 +13,16 @@ internal class FakeConfirmationDefinition(
     private val onAction: (
         confirmationOption: PaymentMethodConfirmationOption.Saved,
         intent: StripeIntent
-    ) -> ConfirmationDefinition.ConfirmationAction<LauncherArgs> = { _, _ ->
+    ) -> ConfirmationDefinition.Action<LauncherArgs> = { _, _ ->
         val exception = IllegalStateException("Failed!")
 
-        ConfirmationDefinition.ConfirmationAction.Fail(
+        ConfirmationDefinition.Action.Fail(
             cause = exception,
             message = exception.stripeErrorMessage(),
             errorType = ConfirmationHandler.Result.Failed.ErrorType.Internal,
         )
     },
-    private val confirmationResult: ConfirmationHandler.Result = ConfirmationHandler.Result.Canceled(
+    private val result: ConfirmationDefinition.Result = ConfirmationDefinition.Result.Canceled(
         action = ConfirmationHandler.Result.Canceled.Action.InformCancellation,
     ),
     private val launcher: Launcher = Launcher(),
@@ -38,9 +38,9 @@ internal class FakeConfirmationDefinition(
     private val _createLauncherCalls = Turbine<CreateLauncherCall>()
     val createLauncherCalls: ReceiveTurbine<CreateLauncherCall> = _createLauncherCalls
 
-    private val _toPaymentConfirmationResultCalls = Turbine<ToPaymentConfirmationResultCall>()
-    val toPaymentConfirmationResultCalls: ReceiveTurbine<ToPaymentConfirmationResultCall> =
-        _toPaymentConfirmationResultCalls
+    private val _toResultCalls = Turbine<ToResultCall>()
+    val toResultCalls: ReceiveTurbine<ToResultCall> =
+        _toResultCalls
 
     override val key: String = "Test"
 
@@ -53,7 +53,7 @@ internal class FakeConfirmationDefinition(
     override suspend fun action(
         confirmationOption: PaymentMethodConfirmationOption.Saved,
         intent: StripeIntent
-    ): ConfirmationDefinition.ConfirmationAction<LauncherArgs> {
+    ): ConfirmationDefinition.Action<LauncherArgs> {
         return onAction(confirmationOption, intent)
     }
 
@@ -87,14 +87,14 @@ internal class FakeConfirmationDefinition(
         return launcher
     }
 
-    override fun toPaymentConfirmationResult(
+    override fun toResult(
         confirmationOption: PaymentMethodConfirmationOption.Saved,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
         intent: StripeIntent,
         result: LauncherResult
-    ): ConfirmationHandler.Result {
-        _toPaymentConfirmationResultCalls.add(
-            ToPaymentConfirmationResultCall(
+    ): ConfirmationDefinition.Result {
+        _toResultCalls.add(
+            ToResultCall(
                 confirmationOption = confirmationOption,
                 deferredIntentConfirmationType = deferredIntentConfirmationType,
                 intent = intent,
@@ -102,7 +102,7 @@ internal class FakeConfirmationDefinition(
             )
         )
 
-        return confirmationResult
+        return this.result
     }
 
     class LaunchCall(
@@ -117,7 +117,7 @@ internal class FakeConfirmationDefinition(
         val onResult: (LauncherResult) -> Unit
     )
 
-    class ToPaymentConfirmationResultCall(
+    class ToResultCall(
         val confirmationOption: PaymentMethodConfirmationOption.Saved,
         val deferredIntentConfirmationType: DeferredIntentConfirmationType?,
         val intent: StripeIntent,

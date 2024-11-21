@@ -21,7 +21,7 @@ internal interface ConfirmationDefinition<
     suspend fun action(
         confirmationOption: TConfirmationOption,
         intent: StripeIntent,
-    ): ConfirmationAction<TLauncherArgs>
+    ): Action<TLauncherArgs>
 
     fun launch(
         launcher: TLauncher,
@@ -35,29 +35,46 @@ internal interface ConfirmationDefinition<
         onResult: (TLauncherResult) -> Unit,
     ): TLauncher
 
-    fun toPaymentConfirmationResult(
+    fun toResult(
         confirmationOption: TConfirmationOption,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
         intent: StripeIntent,
         result: TLauncherResult,
-    ): ConfirmationHandler.Result
+    ): Result
 
-    sealed interface ConfirmationAction<TLauncherArgs> {
+    sealed interface Result {
+        data class Canceled(
+            val action: ConfirmationHandler.Result.Canceled.Action,
+        ) : Result
+
+        data class Succeeded(
+            val intent: StripeIntent,
+            val deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+        ) : Result
+
+        data class Failed(
+            val cause: Throwable,
+            val message: ResolvableString,
+            val type: ConfirmationHandler.Result.Failed.ErrorType,
+        ) : Result
+    }
+
+    sealed interface Action<TLauncherArgs> {
         data class Complete<TLauncherArgs>(
             val intent: StripeIntent,
             val confirmationOption: ConfirmationHandler.Option,
             val deferredIntentConfirmationType: DeferredIntentConfirmationType?,
-        ) : ConfirmationAction<TLauncherArgs>
+        ) : Action<TLauncherArgs>
 
         data class Fail<TLauncherArgs>(
             val cause: Throwable,
             val message: ResolvableString,
             val errorType: ConfirmationHandler.Result.Failed.ErrorType,
-        ) : ConfirmationAction<TLauncherArgs>
+        ) : Action<TLauncherArgs>
 
         data class Launch<TLauncherArgs>(
             val launcherArguments: TLauncherArgs,
             val deferredIntentConfirmationType: DeferredIntentConfirmationType?,
-        ) : ConfirmationAction<TLauncherArgs>
+        ) : Action<TLauncherArgs>
     }
 }

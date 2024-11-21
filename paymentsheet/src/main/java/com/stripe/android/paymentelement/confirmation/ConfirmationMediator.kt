@@ -36,13 +36,13 @@ internal class ConfirmationMediator<
 
     fun register(
         activityResultCaller: ActivityResultCaller,
-        onResult: (ConfirmationHandler.Result) -> Unit,
+        onResult: (ConfirmationDefinition.Result) -> Unit,
     ) {
         launcher = definition.createLauncher(
             activityResultCaller
         ) { result ->
             val confirmationResult = persistedParameters?.let { params ->
-                definition.toPaymentConfirmationResult(
+                definition.toResult(
                     confirmationOption = params.confirmationOption,
                     intent = params.intent,
                     result = result,
@@ -53,7 +53,7 @@ internal class ConfirmationMediator<
                     "Arguments should have been initialized before handling result!"
                 )
 
-                ConfirmationHandler.Result.Failed(
+                ConfirmationDefinition.Result.Failed(
                     cause = exception,
                     message = exception.stripeErrorMessage(),
                     type = ConfirmationHandler.Result.Failed.ErrorType.Internal,
@@ -83,7 +83,7 @@ internal class ConfirmationMediator<
             )
 
         return when (val action = definition.action(confirmationOption, intent)) {
-            is ConfirmationDefinition.ConfirmationAction.Launch -> {
+            is ConfirmationDefinition.Action.Launch -> {
                 launcher?.let {
                     Action.Launch(
                         launch = {
@@ -113,14 +113,14 @@ internal class ConfirmationMediator<
                     )
                 }
             }
-            is ConfirmationDefinition.ConfirmationAction.Complete -> {
+            is ConfirmationDefinition.Action.Complete -> {
                 Action.Complete(
                     intent = action.intent,
                     confirmationOption = action.confirmationOption,
                     deferredIntentConfirmationType = action.deferredIntentConfirmationType,
                 )
             }
-            is ConfirmationDefinition.ConfirmationAction.Fail -> {
+            is ConfirmationDefinition.Action.Fail -> {
                 Action.Fail(
                     cause = action.cause,
                     message = action.message,
