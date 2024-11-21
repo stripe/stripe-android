@@ -317,7 +317,7 @@ class IntentConfirmationDefinitionTest {
             paymentLauncher = launcher,
         )
 
-        val result = definition.toPaymentConfirmationResult(
+        val result = definition.toResult(
             confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
             intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
@@ -340,7 +340,7 @@ class IntentConfirmationDefinitionTest {
 
         val exception = IllegalStateException("Failed!")
 
-        val result = definition.toPaymentConfirmationResult(
+        val result = definition.toResult(
             confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
             intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             deferredIntentConfirmationType = null,
@@ -362,7 +362,7 @@ class IntentConfirmationDefinitionTest {
             paymentLauncher = launcher,
         )
 
-        val result = definition.toPaymentConfirmationResult(
+        val result = definition.toResult(
             confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
             intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             deferredIntentConfirmationType = null,
@@ -389,31 +389,29 @@ class IntentConfirmationDefinitionTest {
         return calls.awaitItem() as T
     }
 
-    private inline fun <reified T> ConfirmationDefinition.ConfirmationAction<T>.asComplete():
-        ConfirmationDefinition.ConfirmationAction.Complete<T> {
-        return this as ConfirmationDefinition.ConfirmationAction.Complete<T>
+    private inline fun <reified T> ConfirmationDefinition.Action<T>.asComplete():
+        ConfirmationDefinition.Action.Complete<T> {
+        return this as ConfirmationDefinition.Action.Complete<T>
     }
 
-    private inline fun <reified T> ConfirmationDefinition.ConfirmationAction<T>.asFail():
-        ConfirmationDefinition.ConfirmationAction.Fail<T> {
-        return this as ConfirmationDefinition.ConfirmationAction.Fail<T>
+    private inline fun <reified T> ConfirmationDefinition.Action<T>.asFail(): ConfirmationDefinition.Action.Fail<T> {
+        return this as ConfirmationDefinition.Action.Fail<T>
     }
 
-    private inline fun <reified T> ConfirmationDefinition.ConfirmationAction<T>.asLaunch():
-        ConfirmationDefinition.ConfirmationAction.Launch<T> {
-        return this as ConfirmationDefinition.ConfirmationAction.Launch<T>
+    private inline fun <reified T> ConfirmationDefinition.Action<T>.asLaunch(): ConfirmationDefinition.Action.Launch<T> {
+        return this as ConfirmationDefinition.Action.Launch<T>
     }
 
-    private fun ConfirmationHandler.Result.asSucceeded(): ConfirmationHandler.Result.Succeeded {
-        return this as ConfirmationHandler.Result.Succeeded
+    private fun ConfirmationDefinition.Result.asSucceeded(): ConfirmationDefinition.Result.Succeeded {
+        return this as ConfirmationDefinition.Result.Succeeded
     }
 
-    private fun ConfirmationHandler.Result.asFailed(): ConfirmationHandler.Result.Failed {
-        return this as ConfirmationHandler.Result.Failed
+    private fun ConfirmationDefinition.Result.asFailed(): ConfirmationDefinition.Result.Failed {
+        return this as ConfirmationDefinition.Result.Failed
     }
 
-    private fun ConfirmationHandler.Result.asCanceled(): ConfirmationHandler.Result.Canceled {
-        return this as ConfirmationHandler.Result.Canceled
+    private fun ConfirmationDefinition.Result.asCanceled(): ConfirmationDefinition.Result.Canceled {
+        return this as ConfirmationDefinition.Result.Canceled
     }
 
     private companion object {

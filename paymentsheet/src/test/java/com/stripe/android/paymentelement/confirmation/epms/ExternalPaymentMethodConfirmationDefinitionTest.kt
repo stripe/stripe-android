@@ -83,17 +83,17 @@ class ExternalPaymentMethodConfirmationDefinitionTest {
     }
 
     @Test
-    fun `'toPaymentConfirmationResult' should return 'Complete' when 'PaymentResult' is 'Complete'`() = runTest {
+    fun `'toResult' should return 'Complete' when 'PaymentResult' is 'Complete'`() = runTest {
         val definition = createExternalPaymentMethodConfirmationDefinition()
 
-        val result = definition.toPaymentConfirmationResult(
+        val result = definition.toResult(
             confirmationOption = EPM_CONFIRMATION_OPTION,
             intent = PAYMENT_INTENT,
             deferredIntentConfirmationType = null,
             result = PaymentResult.Completed,
         )
 
-        assertThat(result).isInstanceOf<ConfirmationHandler.Result.Succeeded>()
+        assertThat(result).isInstanceOf<ConfirmationDefinition.Result.Succeeded>()
 
         val successResult = result.asSucceeded()
 
@@ -102,18 +102,18 @@ class ExternalPaymentMethodConfirmationDefinitionTest {
     }
 
     @Test
-    fun `'toPaymentConfirmationResult' should return 'Failed' when 'PaymentResult' is 'Failed'`() = runTest {
+    fun `'toResult' should return 'Failed' when 'PaymentResult' is 'Failed'`() = runTest {
         val definition = createExternalPaymentMethodConfirmationDefinition()
 
         val exception = IllegalStateException("Failed!")
-        val result = definition.toPaymentConfirmationResult(
+        val result = definition.toResult(
             confirmationOption = EPM_CONFIRMATION_OPTION,
             intent = PAYMENT_INTENT,
             deferredIntentConfirmationType = null,
             result = PaymentResult.Failed(exception),
         )
 
-        assertThat(result).isInstanceOf<ConfirmationHandler.Result.Failed>()
+        assertThat(result).isInstanceOf<ConfirmationDefinition.Result.Failed>()
 
         val failedResult = result.asFailed()
 
@@ -123,17 +123,17 @@ class ExternalPaymentMethodConfirmationDefinitionTest {
     }
 
     @Test
-    fun `'toPaymentConfirmationResult' should return 'Canceled' when 'PaymentResult' is 'Canceled'`() = runTest {
+    fun `'toResult' should return 'Canceled' when 'PaymentResult' is 'Canceled'`() = runTest {
         val definition = createExternalPaymentMethodConfirmationDefinition()
 
-        val result = definition.toPaymentConfirmationResult(
+        val result = definition.toResult(
             confirmationOption = EPM_CONFIRMATION_OPTION,
             intent = PAYMENT_INTENT,
             deferredIntentConfirmationType = null,
             result = PaymentResult.Canceled,
         )
 
-        assertThat(result).isInstanceOf<ConfirmationHandler.Result.Canceled>()
+        assertThat(result).isInstanceOf<ConfirmationDefinition.Result.Canceled>()
 
         val canceledResult = result.asCanceled()
 
@@ -152,7 +152,7 @@ class ExternalPaymentMethodConfirmationDefinitionTest {
             intent = PAYMENT_INTENT,
         )
 
-        assertThat(action).isInstanceOf<ConfirmationDefinition.ConfirmationAction.Fail<Unit>>()
+        assertThat(action).isInstanceOf<ConfirmationDefinition.Action.Fail<Unit>>()
 
         val failAction = action.asFail()
 
@@ -188,7 +188,7 @@ class ExternalPaymentMethodConfirmationDefinitionTest {
             intent = PAYMENT_INTENT,
         )
 
-        assertThat(action).isInstanceOf<ConfirmationDefinition.ConfirmationAction.Launch<Unit>>()
+        assertThat(action).isInstanceOf<ConfirmationDefinition.Action.Launch<Unit>>()
 
         val launchAction = action.asLaunch()
 

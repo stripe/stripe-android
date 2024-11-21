@@ -134,7 +134,7 @@ internal class DefaultConfirmationHandler(
      */
     override fun register(activityResultCaller: ActivityResultCaller, lifecycleOwner: LifecycleOwner) {
         confirmationMediators.forEach { mediator ->
-            mediator.register(activityResultCaller, ::onIntentResult)
+            mediator.register(activityResultCaller, ::onResult)
         }
 
         val bacsActivityResultLauncher = activityResultCaller.registerForActivityResult(
@@ -505,6 +505,25 @@ internal class DefaultConfirmationHandler(
                 }
             }
         }
+    }
+
+    private fun onResult(result: ConfirmationDefinition.Result) {
+        val confirmationResult = when (result) {
+            is ConfirmationDefinition.Result.Succeeded -> ConfirmationHandler.Result.Succeeded(
+                intent = result.intent,
+                deferredIntentConfirmationType = result.deferredIntentConfirmationType,
+            )
+            is ConfirmationDefinition.Result.Failed -> ConfirmationHandler.Result.Failed(
+                cause = result.cause,
+                type = result.type,
+                message = result.message,
+            )
+            is ConfirmationDefinition.Result.Canceled -> ConfirmationHandler.Result.Canceled(
+                action = result.action,
+            )
+        }
+
+        onIntentResult(confirmationResult)
     }
 
     private fun onIntentResult(result: ConfirmationHandler.Result) {

@@ -264,18 +264,18 @@ internal class IntentConfirmationFlowTest {
         return this as IntentConfirmationDefinition.Args.Confirm
     }
 
-    private fun <TLauncherArgs> ConfirmationDefinition.ConfirmationAction<TLauncherArgs>.asFail():
-        ConfirmationDefinition.ConfirmationAction.Fail<TLauncherArgs> {
-        return this as ConfirmationDefinition.ConfirmationAction.Fail<TLauncherArgs>
+    private fun <TLauncherArgs> ConfirmationDefinition.Action<TLauncherArgs>.asFail():
+        ConfirmationDefinition.Action.Fail<TLauncherArgs> {
+        return this as ConfirmationDefinition.Action.Fail<TLauncherArgs>
     }
 
-    private fun <TLauncherArgs> ConfirmationDefinition.ConfirmationAction<TLauncherArgs>.asComplete():
-        ConfirmationDefinition.ConfirmationAction.Complete<TLauncherArgs> {
-        return this as ConfirmationDefinition.ConfirmationAction.Complete<TLauncherArgs>
+    private fun <TLauncherArgs> ConfirmationDefinition.Action<TLauncherArgs>.asComplete():
+        ConfirmationDefinition.Action.Complete<TLauncherArgs> {
+        return this as ConfirmationDefinition.Action.Complete<TLauncherArgs>
     }
 
-    private fun <TLauncherArgs> ConfirmationDefinition.ConfirmationAction<TLauncherArgs>.asLaunch():
-        ConfirmationDefinition.ConfirmationAction.Launch<TLauncherArgs> {
-        return this as ConfirmationDefinition.ConfirmationAction.Launch<TLauncherArgs>
+    private fun <TLauncherArgs> ConfirmationDefinition.Action<TLauncherArgs>.asLaunch():
+        ConfirmationDefinition.Action.Launch<TLauncherArgs> {
+        return this as ConfirmationDefinition.Action.Launch<TLauncherArgs>
     }
 }
