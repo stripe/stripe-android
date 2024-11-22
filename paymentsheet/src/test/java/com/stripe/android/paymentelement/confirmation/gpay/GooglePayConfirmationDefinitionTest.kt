@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.confirmation.gpay
 
 import androidx.activity.result.ActivityResultCallback
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.UserFacingLogger
@@ -10,6 +11,7 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
 import com.stripe.android.isInstanceOf
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.wallets.Wallet
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -32,6 +34,7 @@ import com.stripe.android.testing.SetupIntentFactory
 import com.stripe.android.utils.DummyActivityResultCaller
 import com.stripe.android.utils.FakeActivityResultLauncher
 import kotlinx.coroutines.test.runTest
+import kotlinx.parcelize.Parcelize
 import org.junit.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
@@ -77,7 +80,7 @@ class GooglePayConfirmationDefinitionTest {
             assertThat(awaitNextRegisteredLauncher()).isNotNull()
 
             assertThat(call.contract).isInstanceOf<GooglePayPaymentMethodLauncherContractV2>()
-            assertThat(call.callback).isInstanceOf<ActivityResultCallback<GooglePayPaymentMethodLauncher.Result>>()
+            assertThat(call.callback).isInstanceOf<ActivityResultCallback<*>>()
 
             val callback = call.callback.asCallbackFor<GooglePayPaymentMethodLauncher.Result>()
 
@@ -88,7 +91,7 @@ class GooglePayConfirmationDefinitionTest {
     }
 
     @Test
-    fun `'toResult' should return 'NextStep' when ' GooglePayLauncherResult' is 'Completed'`() = runTest {
+    fun `'toResult' should return 'NextStep' when 'GooglePayLauncherResult' is 'Completed'`() = runTest {
         val definition = createGooglePayConfirmationDefinition()
 
         val paymentMethod = PaymentMethodFactory.card().run {
@@ -190,8 +193,8 @@ class GooglePayConfirmationDefinitionTest {
             initializationMode = PaymentElementLoader.InitializationMode.SetupIntent(
                 clientSecret = "si_123_secret_123",
             ),
-            shouldHaveCurrencyCodeFailure = true,
             merchantCurrencyCode = null,
+            test = ::assertFailActionFromCurrencyFailure,
         )
 
     @Test
@@ -202,8 +205,8 @@ class GooglePayConfirmationDefinitionTest {
                     mode = PaymentSheet.IntentConfiguration.Mode.Setup(),
                 ),
             ),
-            shouldHaveCurrencyCodeFailure = true,
             merchantCurrencyCode = null,
+            test = ::assertFailActionFromCurrencyFailure,
         )
 
     @Test
@@ -212,8 +215,8 @@ class GooglePayConfirmationDefinitionTest {
             initializationMode = PaymentElementLoader.InitializationMode.SetupIntent(
                 clientSecret = "si_123_secret_123",
             ),
-            shouldHaveCurrencyCodeFailure = false,
             merchantCurrencyCode = "USD",
+            test = ::assertLaunchAction,
         )
 
     @Test
@@ -224,8 +227,8 @@ class GooglePayConfirmationDefinitionTest {
                     mode = PaymentSheet.IntentConfiguration.Mode.Setup(),
                 ),
             ),
-            shouldHaveCurrencyCodeFailure = false,
             merchantCurrencyCode = "USD",
+            test = ::assertLaunchAction,
         )
 
     @Test
@@ -234,8 +237,8 @@ class GooglePayConfirmationDefinitionTest {
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "pi_123_secret_123",
             ),
-            shouldHaveCurrencyCodeFailure = false,
             merchantCurrencyCode = null,
+            test = ::assertLaunchAction,
         )
 
     @Test
@@ -244,8 +247,8 @@ class GooglePayConfirmationDefinitionTest {
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "pi_123_secret_123",
             ),
-            shouldHaveCurrencyCodeFailure = false,
             merchantCurrencyCode = "USD",
+            test = ::assertLaunchAction,
         )
 
     @Test
@@ -259,8 +262,8 @@ class GooglePayConfirmationDefinitionTest {
                     ),
                 ),
             ),
-            shouldHaveCurrencyCodeFailure = false,
             merchantCurrencyCode = null,
+            test = ::assertLaunchAction,
         )
 
     @Test
@@ -274,8 +277,8 @@ class GooglePayConfirmationDefinitionTest {
                     ),
                 ),
             ),
-            shouldHaveCurrencyCodeFailure = false,
             merchantCurrencyCode = "USD",
+            test = ::assertLaunchAction,
         )
 
     @Test
@@ -309,6 +312,64 @@ class GooglePayConfirmationDefinitionTest {
                 .isEqualTo(GooglePayPaymentMethodLauncher.BillingAddressConfig.Format.Full)
         }
     }
+
+    @Test
+    fun `On 'launch', should create google pay launcher properly with excepted parameters`() =
+        runLaunchParametersTest(
+            confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION,
+            merchantNameShouldBe = "Test merchant Inc.",
+            merchantCountryCodeShouldBe = "US",
+            emailShouldBeRequired = false,
+            billingAddressShouldBeRequired = true,
+            phoneNumberShouldBeRequired = false,
+            billingAddressFormatShouldBe = GooglePayPaymentMethodLauncher.BillingAddressConfig.Format.Full,
+            environmentShouldBe = GooglePayEnvironment.Test,
+            cardBrandFilterShouldBe = DefaultCardBrandFilter,
+        )
+
+    @Test
+    fun `On 'launch', should create launcher with required billing parameters, prod env, and expected card filter`() =
+        runLaunchParametersTest(
+            confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION.copy(
+                config = GOOGLE_PAY_CONFIRMATION_OPTION.config.copy(
+                    merchantName = "Another merchant Inc.",
+                    merchantCountryCode = "CA",
+                    environment = PaymentSheet.GooglePayConfiguration.Environment.Production,
+                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                        email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                        phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                        address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
+                    ),
+                    cardBrandFilter = FakeCardBrandFilter,
+                )
+            ),
+            merchantNameShouldBe = "Another merchant Inc.",
+            merchantCountryCodeShouldBe = "CA",
+            emailShouldBeRequired = true,
+            billingAddressShouldBeRequired = true,
+            phoneNumberShouldBeRequired = true,
+            billingAddressFormatShouldBe = GooglePayPaymentMethodLauncher.BillingAddressConfig.Format.Min,
+            environmentShouldBe = GooglePayEnvironment.Production,
+            cardBrandFilterShouldBe = FakeCardBrandFilter,
+        )
+
+    @Test
+    fun `On 'launch', should create google pay launcher properly with no billing parameters`() =
+        runLaunchParametersTest(
+            confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION.copy(
+                config = GOOGLE_PAY_CONFIRMATION_OPTION.config.copy(
+                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
+                )
+            ),
+            merchantNameShouldBe = "Test merchant Inc.",
+            merchantCountryCodeShouldBe = "US",
+            emailShouldBeRequired = false,
+            billingAddressShouldBeRequired = false,
+            phoneNumberShouldBeRequired = false,
+            billingAddressFormatShouldBe = GooglePayPaymentMethodLauncher.BillingAddressConfig.Format.Min,
+            environmentShouldBe = GooglePayEnvironment.Test,
+            cardBrandFilterShouldBe = DefaultCardBrandFilter,
+        )
 
     @Test
     fun `On 'launch', should use payment intent currency code if available`() = runTest {
@@ -406,7 +467,7 @@ class GooglePayConfirmationDefinitionTest {
     private fun runActionTest(
         initializationMode: PaymentElementLoader.InitializationMode,
         merchantCurrencyCode: String?,
-        shouldHaveCurrencyCodeFailure: Boolean,
+        test: (scenario: ActionScenario) -> Unit,
     ) = runTest {
         val userFacingLogger = FakeUserFacingLogger()
         val definition = createGooglePayConfirmationDefinition(userFacingLogger = userFacingLogger)
@@ -421,36 +482,96 @@ class GooglePayConfirmationDefinitionTest {
             intent = SetupIntentFactory.create(),
         )
 
-        if (shouldHaveCurrencyCodeFailure) {
-            assertThat(action).isInstanceOf<ConfirmationDefinition.Action.Fail<Unit>>()
+        test(
+            ActionScenario(
+                action = action,
+                userFacingLogger = userFacingLogger,
+            )
+        )
+    }
 
-            val failAction = action.asFail()
-            val failureMessage = "GooglePayConfig.currencyCode is required in order to use " +
-                "Google Pay when processing a Setup Intent"
+    private fun runLaunchParametersTest(
+        confirmationOption: GooglePayConfirmationOption,
+        environmentShouldBe: GooglePayEnvironment,
+        merchantNameShouldBe: String,
+        merchantCountryCodeShouldBe: String?,
+        billingAddressShouldBeRequired: Boolean,
+        phoneNumberShouldBeRequired: Boolean,
+        emailShouldBeRequired: Boolean,
+        billingAddressFormatShouldBe: GooglePayPaymentMethodLauncher.BillingAddressConfig.Format,
+        cardBrandFilterShouldBe: CardBrandFilter
+    ) {
+        RecordingGooglePayPaymentMethodLauncherFactory.test(mock()) {
+            val definition = createGooglePayConfirmationDefinition(factory)
+            val launcher = FakeActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>()
 
-            assertThat(userFacingLogger.getLoggedMessages()).containsExactly(failureMessage)
+            definition.launch(
+                confirmationOption = confirmationOption,
+                intent = PAYMENT_INTENT,
+                arguments = Unit,
+                launcher = launcher,
+            )
 
-            assertThat(failAction.cause).isInstanceOf<IllegalStateException>()
-            assertThat(failAction.cause.message).isEqualTo(failureMessage)
-            assertThat(failAction.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
-            assertThat(failAction.errorType)
-                .isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.MerchantIntegration)
-        } else {
-            assertThat(action).isInstanceOf<ConfirmationDefinition.Action.Launch<Unit>>()
+            val createGooglePayLauncherCall = createGooglePayPaymentMethodLauncherCalls.awaitItem()
 
-            val launchAction = action.asLaunch()
+            // Should always be the same value
+            assertThat(createGooglePayLauncherCall.activityResultLauncher).isEqualTo(launcher)
+            assertThat(createGooglePayLauncherCall.skipReadyCheck).isTrue()
+            assertThat(createGooglePayLauncherCall.config.allowCreditCards).isTrue()
+            assertThat(createGooglePayLauncherCall.config.existingPaymentMethodRequired).isTrue()
 
-            assertThat(launchAction.receivesResultInProcess).isTrue()
-            assertThat(launchAction.deferredIntentConfirmationType).isNull()
-            assertThat(launchAction.launcherArguments).isEqualTo(Unit)
+            // Can vary on merchant's config
+            assertThat(createGooglePayLauncherCall.cardBrandFilter).isEqualTo(cardBrandFilterShouldBe)
+            assertThat(createGooglePayLauncherCall.config.environment).isEqualTo(environmentShouldBe)
+            assertThat(createGooglePayLauncherCall.config.merchantName).isEqualTo(merchantNameShouldBe)
+            assertThat(createGooglePayLauncherCall.config.merchantCountryCode).isEqualTo(merchantCountryCodeShouldBe)
+            assertThat(createGooglePayLauncherCall.config.isEmailRequired).isEqualTo(emailShouldBeRequired)
+            assertThat(createGooglePayLauncherCall.config.billingAddressConfig.isRequired)
+                .isEqualTo(billingAddressShouldBeRequired)
+            assertThat(createGooglePayLauncherCall.config.billingAddressConfig.isPhoneNumberRequired)
+                .isEqualTo(phoneNumberShouldBeRequired)
+            assertThat(createGooglePayLauncherCall.config.billingAddressConfig.format)
+                .isEqualTo(billingAddressFormatShouldBe)
         }
+    }
+
+    private fun assertFailActionFromCurrencyFailure(
+        scenario: ActionScenario,
+    ) {
+        val action = scenario.action
+
+        assertThat(action).isInstanceOf<ConfirmationDefinition.Action.Fail<Unit>>()
+
+        val failAction = action.asFail()
+        val failureMessage = "GooglePayConfig.currencyCode is required in order to use " +
+            "Google Pay when processing a Setup Intent"
+
+        assertThat(scenario.userFacingLogger.getLoggedMessages()).containsExactly(failureMessage)
+
+        assertThat(failAction.cause).isInstanceOf<IllegalStateException>()
+        assertThat(failAction.cause.message).isEqualTo(failureMessage)
+        assertThat(failAction.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
+        assertThat(failAction.errorType)
+            .isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.MerchantIntegration)
+    }
+
+    private fun assertLaunchAction(
+        scenario: ActionScenario,
+    ) {
+        val action = scenario.action
+
+        assertThat(action).isInstanceOf<ConfirmationDefinition.Action.Launch<Unit>>()
+
+        val launchAction = action.asLaunch()
+
+        assertThat(launchAction.receivesResultInProcess).isTrue()
+        assertThat(launchAction.deferredIntentConfirmationType).isNull()
+        assertThat(launchAction.launcherArguments).isEqualTo(Unit)
     }
 
     private fun createGooglePayConfirmationDefinition(
         googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory =
-            RecordingGooglePayPaymentMethodLauncherFactory(
-                googlePayPaymentMethodLauncher = mock()
-            ),
+            RecordingGooglePayPaymentMethodLauncherFactory.noOp(launcher = mock()),
         userFacingLogger: UserFacingLogger = FakeUserFacingLogger()
     ): GooglePayConfirmationDefinition {
         return GooglePayConfirmationDefinition(
@@ -458,6 +579,18 @@ class GooglePayConfirmationDefinitionTest {
             userFacingLogger = userFacingLogger,
         )
     }
+
+    @Parcelize
+    private object FakeCardBrandFilter : CardBrandFilter {
+        override fun isAccepted(cardBrand: CardBrand): Boolean {
+            return false
+        }
+    }
+
+    private class ActionScenario(
+        val action: ConfirmationDefinition.Action<Unit>,
+        val userFacingLogger: FakeUserFacingLogger,
+    )
 
     private companion object {
         private val GOOGLE_PAY_CONFIRMATION_OPTION = GooglePayConfirmationOption(

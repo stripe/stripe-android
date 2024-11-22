@@ -10,7 +10,7 @@ import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLaun
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.runTest
 
-internal class RecordingGooglePayPaymentMethodLauncherFactory(
+internal class RecordingGooglePayPaymentMethodLauncherFactory private constructor(
     private val googlePayPaymentMethodLauncher: GooglePayPaymentMethodLauncher,
 ) : GooglePayPaymentMethodLauncherFactory {
     private val calls = Turbine<Call>()
@@ -66,6 +66,10 @@ internal class RecordingGooglePayPaymentMethodLauncherFactory(
             )
 
             factory.calls.ensureAllEventsConsumed()
+        }
+
+        fun noOp(launcher: GooglePayPaymentMethodLauncher): RecordingGooglePayPaymentMethodLauncherFactory {
+            return RecordingGooglePayPaymentMethodLauncherFactory(launcher)
         }
     }
 }

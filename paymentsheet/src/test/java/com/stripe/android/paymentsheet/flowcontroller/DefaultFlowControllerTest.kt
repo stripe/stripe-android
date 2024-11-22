@@ -150,7 +150,7 @@ internal class DefaultFlowControllerTest {
     private val googlePayPaymentMethodLauncher = mock<GooglePayPaymentMethodLauncher>()
 
     private val googlePayPaymentMethodLauncherFactory =
-        RecordingGooglePayPaymentMethodLauncherFactory(googlePayPaymentMethodLauncher)
+        RecordingGooglePayPaymentMethodLauncherFactory.noOp(googlePayPaymentMethodLauncher)
 
     private val linkActivityResultLauncher =
         mock<ActivityResultLauncher<LinkActivityContract.Args>>()

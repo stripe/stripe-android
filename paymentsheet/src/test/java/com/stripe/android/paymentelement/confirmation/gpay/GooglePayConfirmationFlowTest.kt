@@ -27,50 +27,53 @@ class GooglePayConfirmationFlowTest {
     @Test
     fun `on launch, should persist parameters & launch using launcher as expected`() = runTest {
         val googlePayPaymentMethodLauncher = mock<GooglePayPaymentMethodLauncher>()
-        val savedStateHandle = SavedStateHandle()
-        val mediator = ConfirmationMediator(
-            savedStateHandle = savedStateHandle,
-            definition = GooglePayConfirmationDefinition(
-                googlePayPaymentMethodLauncherFactory = RecordingGooglePayPaymentMethodLauncherFactory(
-                    googlePayPaymentMethodLauncher = googlePayPaymentMethodLauncher,
-                ),
-                userFacingLogger = null,
-            ),
-        )
 
-        DummyActivityResultCaller.test {
-            mediator.register(
-                activityResultCaller = activityResultCaller,
-                onResult = {}
-            )
+        RecordingGooglePayPaymentMethodLauncherFactory.test(googlePayPaymentMethodLauncher) {
+            DummyActivityResultCaller.test {
+                val savedStateHandle = SavedStateHandle()
+                val mediator = ConfirmationMediator(
+                    savedStateHandle = savedStateHandle,
+                    definition = GooglePayConfirmationDefinition(
+                        googlePayPaymentMethodLauncherFactory = factory,
+                        userFacingLogger = null,
+                    ),
+                )
 
-            assertThat(awaitRegisterCall()).isNotNull()
-            assertThat(awaitNextRegisteredLauncher()).isNotNull()
+                mediator.register(
+                    activityResultCaller = activityResultCaller,
+                    onResult = {}
+                )
 
-            val action = mediator.action(
-                option = GOOGLE_PAY_CONFIRMATION_OPTION,
-                intent = PAYMENT_INTENT,
-            )
+                assertThat(awaitRegisterCall()).isNotNull()
+                assertThat(awaitNextRegisteredLauncher()).isNotNull()
 
-            assertThat(action).isInstanceOf<ConfirmationMediator.Action.Launch>()
+                val action = mediator.action(
+                    option = GOOGLE_PAY_CONFIRMATION_OPTION,
+                    intent = PAYMENT_INTENT,
+                )
 
-            val launchAction = action.asLaunch()
+                assertThat(action).isInstanceOf<ConfirmationMediator.Action.Launch>()
 
-            launchAction.launch()
+                val launchAction = action.asLaunch()
 
-            val parameters = savedStateHandle
-                .get<Parameters<GooglePayConfirmationOption>>("GooglePayParameters")
+                launchAction.launch()
 
-            assertThat(parameters?.confirmationOption).isEqualTo(GOOGLE_PAY_CONFIRMATION_OPTION)
-            assertThat(parameters?.intent).isEqualTo(PAYMENT_INTENT)
-            assertThat(parameters?.deferredIntentConfirmationType).isNull()
+                assertThat(createGooglePayPaymentMethodLauncherCalls.awaitItem()).isNotNull()
 
-            verify(googlePayPaymentMethodLauncher, times(1)).present(
-                currencyCode = "usd",
-                amount = 1000L,
-                transactionId = "pi_12345",
-                label = null,
-            )
+                val parameters = savedStateHandle
+                    .get<Parameters<GooglePayConfirmationOption>>("GooglePayParameters")
+
+                assertThat(parameters?.confirmationOption).isEqualTo(GOOGLE_PAY_CONFIRMATION_OPTION)
+                assertThat(parameters?.intent).isEqualTo(PAYMENT_INTENT)
+                assertThat(parameters?.deferredIntentConfirmationType).isNull()
+
+                verify(googlePayPaymentMethodLauncher, times(1)).present(
+                    currencyCode = "usd",
+                    amount = 1000L,
+                    transactionId = "pi_12345",
+                    label = null,
+                )
+            }
         }
     }
 
@@ -79,7 +82,7 @@ class GooglePayConfirmationFlowTest {
         confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION,
         intent = PAYMENT_INTENT,
         definition = GooglePayConfirmationDefinition(
-            googlePayPaymentMethodLauncherFactory = RecordingGooglePayPaymentMethodLauncherFactory(mock()),
+            googlePayPaymentMethodLauncherFactory = RecordingGooglePayPaymentMethodLauncherFactory.noOp(mock()),
             userFacingLogger = null,
         ),
         launcherResult = GooglePayPaymentMethodLauncher.Result.Completed(PAYMENT_METHOD),
