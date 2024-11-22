@@ -162,7 +162,7 @@ private fun TitleContent(title: String, subtitle: String?, isEnabled: Boolean, c
 
 @Composable
 @Preview
-internal fun ButtonPreview() {
+private fun ButtonPreview() {
     Row {
         PaymentMethodRowButton(
             isEnabled = true,

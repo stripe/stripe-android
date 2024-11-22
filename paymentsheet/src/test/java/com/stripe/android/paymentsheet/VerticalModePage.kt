@@ -45,9 +45,7 @@ internal class VerticalModePage(
 
     fun assertLpmIsSelected(paymentMethodCode: PaymentMethodCode) {
         composeTestRule.onNode(
-            hasTestTag("${TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON}_$paymentMethodCode").and(
-                hasAnyDescendant(isSelected())
-            )
+            hasTestTag("${TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON}_$paymentMethodCode").and(isSelected())
         ).assertExists()
     }
 
@@ -79,8 +77,7 @@ internal class VerticalModePage(
 
     fun assertHasSelectedSavedPaymentMethod(paymentMethodId: String, cardBrand: String? = null) {
         composeTestRule.onNode(
-            hasTestTag("${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_$paymentMethodId")
-                .and(hasAnyDescendant(isSelected()))
+            hasTestTag("${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_$paymentMethodId").and(isSelected())
         ).assertExists()
 
         if (cardBrand != null) {
