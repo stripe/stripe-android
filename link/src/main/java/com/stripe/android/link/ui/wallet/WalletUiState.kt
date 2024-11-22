@@ -6,11 +6,10 @@ import com.stripe.android.model.ConsumerPaymentDetails
 
 @Immutable
 internal data class WalletUiState(
-    val supportedTypes: Set<String>,
     val paymentDetailsList: List<ConsumerPaymentDetails.PaymentDetails>,
     val selectedItem: ConsumerPaymentDetails.PaymentDetails?,
     val isProcessing: Boolean,
-    val isExpanded: Boolean = false
+    val isExpanded: Boolean
 ) {
 
     val showBankAccountTerms = selectedItem is ConsumerPaymentDetails.BankAccount

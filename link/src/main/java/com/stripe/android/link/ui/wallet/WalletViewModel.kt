@@ -32,10 +32,10 @@ internal class WalletViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(
         value = WalletUiState(
-            supportedTypes = stripeIntent.supportedPaymentMethodTypes(linkAccount),
             paymentDetailsList = emptyList(),
             selectedItem = null,
-            isProcessing = false
+            isProcessing = false,
+            isExpanded = false
         )
     )
 
@@ -52,7 +52,7 @@ internal class WalletViewModel @Inject constructor(
 
         viewModelScope.launch {
             linkAccountManager.listPaymentDetails(
-                paymentMethodTypes = _uiState.value.supportedTypes
+                paymentMethodTypes = stripeIntent.supportedPaymentMethodTypes(linkAccount)
             ).fold(
                 onSuccess = { response ->
                     _uiState.update {
@@ -79,6 +79,12 @@ internal class WalletViewModel @Inject constructor(
 
         _uiState.update {
             it.copy(selectedItem = item)
+        }
+    }
+
+    fun setExpanded(expanded: Boolean) {
+        _uiState.update {
+            it.copy(isExpanded = expanded)
         }
     }
 

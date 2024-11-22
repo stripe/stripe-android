@@ -82,6 +82,19 @@ internal object TestFactory {
         )
     )
 
+    private val CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT = ConsumerPaymentDetails.BankAccount(
+        id = "pm_124",
+        last4 = "4242",
+        isDefault = false,
+        bankName = "Stripe Test Bank",
+        bankIconCode = null
+    )
+
+    private val CONSUMER_PAYMENT_DETAILS_PASSTHROUGH = ConsumerPaymentDetails.Passthrough(
+        id = "pm_125",
+        last4 = "4242",
+    )
+
     val LINK_NEW_PAYMENT_DETAILS = LinkPaymentDetails.New(
         paymentDetails = CONSUMER_PAYMENT_DETAILS_CARD,
         paymentMethodCreateParams = PAYMENT_METHOD_CREATE_PARAMS,
@@ -92,7 +105,9 @@ internal object TestFactory {
 
     val CONSUMER_PAYMENT_DETAILS: ConsumerPaymentDetails = ConsumerPaymentDetails(
         paymentDetails = listOf(
-            CONSUMER_PAYMENT_DETAILS_CARD
+            CONSUMER_PAYMENT_DETAILS_CARD,
+            CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT,
+            CONSUMER_PAYMENT_DETAILS_PASSTHROUGH,
         )
     )
 

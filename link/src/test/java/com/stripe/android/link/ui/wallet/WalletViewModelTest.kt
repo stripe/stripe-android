@@ -54,10 +54,10 @@ class WalletViewModelTest {
 
         assertThat(viewModel.uiState.value).isEqualTo(
             WalletUiState(
-                supportedTypes = TestFactory.LINK_CONFIGURATION.stripeIntent.paymentMethodTypes.toSet(),
                 paymentDetailsList = TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails,
                 selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails.firstOrNull(),
-                isProcessing = false
+                isProcessing = false,
+                isExpanded = false
             )
         )
         assertThat(viewModel.uiState.value.primaryButtonState).isEqualTo(PrimaryButtonState.Disabled)

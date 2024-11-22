@@ -48,6 +48,19 @@ internal fun WalletScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
 
+    WalletBody(
+        state = state,
+        onItemSelected = viewModel::onItemSelected,
+        onExpandedChanged = viewModel::setExpanded
+    )
+}
+
+@Composable
+internal fun WalletBody(
+    state: WalletUiState,
+    onItemSelected: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
+    onExpandedChanged: (Boolean) -> Unit,
+) {
     if (state.paymentDetailsList.isEmpty()) {
         Box(
             modifier = Modifier
@@ -56,6 +69,7 @@ internal fun WalletScreen(
         ) {
             CircularProgressIndicator()
         }
+        return
     }
 
     val focusManager = LocalFocusManager.current
@@ -79,32 +93,26 @@ internal fun WalletScreen(
             if (state.isExpanded || selectedItem == null) {
                 ExpandedPaymentDetails(
                     uiState = state,
-                    onItemSelected = viewModel::onItemSelected,
+                    onItemSelected = onItemSelected,
                     onMenuButtonClick = {},
                     onAddNewPaymentMethodClick = {},
-                    onCollapse = {}
+                    onCollapse = {
+                        onExpandedChanged(false)
+                    }
                 )
             } else {
                 CollapsedPaymentDetails(
                     selectedPaymentMethod = selectedItem,
                     enabled = !state.primaryButtonState.isBlocking,
-                    onClick = {}
+                    onClick = {
+                        onExpandedChanged(true)
+                    }
                 )
             }
         }
 
         AnimatedVisibility(state.showBankAccountTerms) {
-            Html(
-                html = stringResource(R.string.stripe_wallet_bank_account_terms).replaceHyperlinks(),
-                color = MaterialTheme.colors.onSecondary,
-                style = MaterialTheme.typography.caption,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 12.dp),
-                urlSpanStyle = SpanStyle(
-                    color = MaterialTheme.colors.primary
-                )
-            )
+            BankAccountTerms()
         }
     }
 }
@@ -182,32 +190,10 @@ private fun ExpandedPaymentDetails(
             )
     ) {
         item {
-            Row(
-                modifier = Modifier
-                    .height(44.dp)
-                    .clickable(enabled = isEnabled, onClick = onCollapse),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = stringResource(id = R.string.stripe_wallet_expanded_title),
-                    modifier = Modifier
-                        .padding(start = HorizontalPadding, top = 20.dp),
-                    color = MaterialTheme.colors.onPrimary,
-                    style = MaterialTheme.typography.button
-                )
-                Spacer(modifier = Modifier.weight(1f))
-                Icon(
-                    painter = painterResource(id = R.drawable.stripe_link_chevron),
-                    contentDescription = stringResource(id = R.string.stripe_wallet_expand_accessibility),
-                    modifier = Modifier
-                        .padding(top = 20.dp, end = 22.dp)
-                        .rotate(180f)
-                        .semantics {
-                            testTag = "ChevronIcon"
-                        },
-                    tint = MaterialTheme.colors.onPrimary
-                )
-            }
+            ExpandedRowHeader(
+                isEnabled = isEnabled,
+                onCollapse = onCollapse
+            )
         }
 
         items(
@@ -231,31 +217,92 @@ private fun ExpandedPaymentDetails(
         }
 
         item {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(60.dp)
-                    .clickable(enabled = isEnabled, onClick = onAddNewPaymentMethodClick),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.stripe_link_add_green),
-                    contentDescription = null,
-                    modifier = Modifier.padding(start = HorizontalPadding, end = 12.dp),
-                    tint = Color.Unspecified
-                )
-                Text(
-                    text = stringResource(id = R.string.stripe_add_payment_method),
-                    modifier = Modifier.padding(end = HorizontalPadding),
-                    color = MaterialTheme.linkColors.actionLabel,
-                    style = MaterialTheme.typography.button
-                )
-            }
+            AddPaymentMethodRow(
+                isEnabled = isEnabled,
+                onAddNewPaymentMethodClick = onAddNewPaymentMethodClick
+            )
         }
     }
+}
+
+@Composable
+private fun ExpandedRowHeader(
+    isEnabled: Boolean,
+    onCollapse: () -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .height(44.dp)
+            .clickable(enabled = isEnabled, onClick = onCollapse),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = stringResource(id = R.string.stripe_wallet_expanded_title),
+            modifier = Modifier
+                .padding(start = HorizontalPadding, top = 20.dp),
+            color = MaterialTheme.colors.onPrimary,
+            style = MaterialTheme.typography.button
+        )
+        Spacer(modifier = Modifier.weight(1f))
+        Icon(
+            painter = painterResource(id = R.drawable.stripe_link_chevron),
+            contentDescription = stringResource(id = R.string.stripe_wallet_expand_accessibility),
+            modifier = Modifier
+                .padding(top = 20.dp, end = 22.dp)
+                .rotate(CHEVRON_ICON_ROTATION)
+                .semantics {
+                    testTag = "ChevronIcon"
+                },
+            tint = MaterialTheme.colors.onPrimary
+        )
+    }
+}
+
+@Composable
+private fun AddPaymentMethodRow(
+    isEnabled: Boolean,
+    onAddNewPaymentMethodClick: () -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(60.dp)
+            .clickable(enabled = isEnabled, onClick = onAddNewPaymentMethodClick),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            painter = painterResource(id = R.drawable.stripe_link_add_green),
+            contentDescription = null,
+            modifier = Modifier.padding(start = HorizontalPadding, end = 12.dp),
+            tint = Color.Unspecified
+        )
+        Text(
+            text = stringResource(id = R.string.stripe_add_payment_method),
+            modifier = Modifier.padding(end = HorizontalPadding),
+            color = MaterialTheme.linkColors.actionLabel,
+            style = MaterialTheme.typography.button
+        )
+    }
+}
+
+@Composable
+private fun BankAccountTerms() {
+    Html(
+        html = stringResource(R.string.stripe_wallet_bank_account_terms).replaceHyperlinks(),
+        color = MaterialTheme.colors.onSecondary,
+        style = MaterialTheme.typography.caption,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 12.dp),
+        urlSpanStyle = SpanStyle(
+            color = MaterialTheme.colors.primary
+        )
+    )
 }
 
 private fun String.replaceHyperlinks() = this.replace(
     "<terms>",
     "<a href=\"https://stripe.com/legal/ach-payments/authorization\">"
 ).replace("</terms>", "</a>")
+
+private const val CHEVRON_ICON_ROTATION = 180f
