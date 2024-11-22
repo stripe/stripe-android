@@ -35,7 +35,7 @@ internal interface ConfirmationHandler {
     fun register(activityResultCaller: ActivityResultCaller, lifecycleOwner: LifecycleOwner)
 
     /**
-     * Starts the confirmation process. Results can be received through [state] or through [awaitIntentResult].
+     * Starts the confirmation process. Results can be received through [state] or through [awaitResult].
      *
      * @param arguments required set of arguments in order to start the confirmation process
      */
@@ -46,7 +46,7 @@ internal interface ConfirmationHandler {
      *
      * @return confirmation result or null if no confirmation process has been started
      */
-    suspend fun awaitIntentResult(): Result?
+    suspend fun awaitResult(): Result?
 
     /**
      * A factory for creating a [ConfirmationHandler] instance using a provided [CoroutineScope]. This scope is

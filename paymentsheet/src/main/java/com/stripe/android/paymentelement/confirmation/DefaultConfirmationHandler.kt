@@ -1,11 +1,9 @@
 package com.stripe.android.paymentelement.confirmation
 
-import android.app.Activity
 import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.DefaultLifecycleObserver
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.PaymentConfiguration
@@ -40,10 +38,6 @@ import javax.inject.Named
 import javax.inject.Provider
 import kotlin.time.Duration.Companion.seconds
 
-/**
- * This interface handles the process of confirming a [StripeIntent]. This interface can only handle confirming one
- * intent at a time.
- */
 internal class DefaultConfirmationHandler(
     private val intentConfirmationInterceptor: IntentConfirmationInterceptor,
     private val paymentLauncherFactory: (ActivityResultLauncher<PaymentLauncherContract.Args>) -> PaymentLauncher,
@@ -82,10 +76,6 @@ internal class DefaultConfirmationHandler(
 
     private val isAwaitingForResultData = retrieveIsAwaitingForResultData()
 
-    /**
-     * Indicates if this handler has been reloaded from process death. This occurs if the handler was confirming
-     * an intent before did not complete the process before process death.
-     */
     override val hasReloadedFromProcessDeath = isAwaitingForResultData != null
 
     private val _state = MutableStateFlow(
@@ -114,12 +104,6 @@ internal class DefaultConfirmationHandler(
         }
     }
 
-    /**
-     * Registers activities tied to confirmation process to the lifecycle.
-     *
-     * @param activityResultCaller a class that can call [Activity.startActivityForResult]-style APIs
-     * @param lifecycleOwner a class tied to an Android [Lifecycle]
-     */
     override fun register(activityResultCaller: ActivityResultCaller, lifecycleOwner: LifecycleOwner) {
         confirmationMediators.forEach { mediator ->
             mediator.register(activityResultCaller, ::onResult)
@@ -137,13 +121,6 @@ internal class DefaultConfirmationHandler(
         )
     }
 
-    /**
-     * Starts the confirmation process with a given [ConfirmationHandler.Args] instance. Result from this method can
-     * be received from [awaitIntentResult]. This method cannot return a result since the confirmation process can be
-     * handed off to another [Activity] to handle after starting it.
-     *
-     * @param arguments arguments required to confirm a Stripe intent
-     */
     override fun start(
         arguments: ConfirmationHandler.Args,
     ) {
@@ -163,13 +140,7 @@ internal class DefaultConfirmationHandler(
         }
     }
 
-    /**
-     * Waits for an intent result to be returned following a call to start an intent confirmation process through the
-     * [start] method. If no such call has been made, will return null.
-     *
-     * @return result of intent confirmation process or null if not started.
-     */
-    override suspend fun awaitIntentResult(): ConfirmationHandler.Result? {
+    override suspend fun awaitResult(): ConfirmationHandler.Result? {
         return when (val state = _state.value) {
             is ConfirmationHandler.State.Idle -> null
             is ConfirmationHandler.State.Complete -> state.result
