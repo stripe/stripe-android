@@ -4,8 +4,10 @@ import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.lifecycle.Lifecycle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.FinancialConnectionsSheetInternalResult
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import com.stripe.android.financialconnections.financialConnectionsSessionWithNoMoreAccounts
+import com.stripe.android.financialconnections.toPublicResult
 import com.stripe.android.financialconnections.utils.FakeActivityResultRegistry
 import com.stripe.android.financialconnections.utils.TestFragment
 import org.junit.Test
@@ -20,7 +22,7 @@ class FinancialConnectionsSheetForDataLauncherTest {
     @Test
     fun `create and present should return expected ConnectionsSheetResult#Completed`() {
         val testRegistry = FakeActivityResultRegistry(
-            FinancialConnectionsSheetResult.Completed(
+            FinancialConnectionsSheetInternalResult.Completed(
                 financialConnectionsSession = financialConnectionsSessionWithNoMoreAccounts,
                 manualEntryUsesMicrodeposits = false,
             )
@@ -35,7 +37,7 @@ class FinancialConnectionsSheetForDataLauncherTest {
                     fragment,
                     testRegistry
                 ) {
-                    results.add(it)
+                    results.add(it.toPublicResult())
                 }
 
                 moveToState(Lifecycle.State.RESUMED)
@@ -43,8 +45,7 @@ class FinancialConnectionsSheetForDataLauncherTest {
                 assertThat(results)
                     .containsExactly(
                         FinancialConnectionsSheetResult.Completed(
-                            financialConnectionsSessionWithNoMoreAccounts,
-                            manualEntryUsesMicrodeposits = false,
+                            financialConnectionsSessionWithNoMoreAccounts
                         )
                     )
             }
@@ -53,7 +54,7 @@ class FinancialConnectionsSheetForDataLauncherTest {
 
     @Test
     fun `create and present should return expected ConnectionsSheetResult#Cancelled`() {
-        val testRegistry = FakeActivityResultRegistry(FinancialConnectionsSheetResult.Canceled)
+        val testRegistry = FakeActivityResultRegistry(FinancialConnectionsSheetInternalResult.Canceled)
 
         with(
             launchFragmentInContainer(initialState = Lifecycle.State.CREATED) { TestFragment() }
@@ -64,7 +65,7 @@ class FinancialConnectionsSheetForDataLauncherTest {
                     fragment,
                     testRegistry
                 ) {
-                    results.add(it)
+                    results.add(it.toPublicResult())
                 }
 
                 moveToState(Lifecycle.State.RESUMED)

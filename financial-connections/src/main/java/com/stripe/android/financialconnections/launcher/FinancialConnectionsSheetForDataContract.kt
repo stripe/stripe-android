@@ -4,11 +4,11 @@ import android.content.Context
 import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
 import com.stripe.android.financialconnections.FinancialConnectionsSheetActivity
-import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
+import com.stripe.android.financialconnections.FinancialConnectionsSheetInternalResult
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Companion.EXTRA_RESULT
 
 internal class FinancialConnectionsSheetForDataContract :
-    ActivityResultContract<FinancialConnectionsSheetActivityArgs.ForData, FinancialConnectionsSheetResult>() {
+    ActivityResultContract<FinancialConnectionsSheetActivityArgs.ForData, FinancialConnectionsSheetInternalResult>() {
 
     override fun createIntent(
         context: Context,
@@ -23,29 +23,29 @@ internal class FinancialConnectionsSheetForDataContract :
     override fun parseResult(
         resultCode: Int,
         intent: Intent?
-    ): FinancialConnectionsSheetResult {
+    ): FinancialConnectionsSheetInternalResult {
         return intent
             ?.getParcelableExtra<FinancialConnectionsSheetActivityResult>(EXTRA_RESULT)
-            ?.toExposedResult()
-            ?: FinancialConnectionsSheetResult.Failed(
+            ?.toResult()
+            ?: FinancialConnectionsSheetInternalResult.Failed(
                 IllegalArgumentException("Failed to retrieve a ConnectionsSheetResult.")
             )
     }
 
-    private fun FinancialConnectionsSheetActivityResult.toExposedResult(): FinancialConnectionsSheetResult =
+    private fun FinancialConnectionsSheetActivityResult.toResult(): FinancialConnectionsSheetInternalResult =
         when (this) {
-            is FinancialConnectionsSheetActivityResult.Canceled -> FinancialConnectionsSheetResult.Canceled
-            is FinancialConnectionsSheetActivityResult.Failed -> FinancialConnectionsSheetResult.Failed(
+            is FinancialConnectionsSheetActivityResult.Canceled -> FinancialConnectionsSheetInternalResult.Canceled
+            is FinancialConnectionsSheetActivityResult.Failed -> FinancialConnectionsSheetInternalResult.Failed(
                 error
             )
 
             is FinancialConnectionsSheetActivityResult.Completed ->
                 when (financialConnectionsSession) {
-                    null -> FinancialConnectionsSheetResult.Failed(
+                    null -> FinancialConnectionsSheetInternalResult.Failed(
                         IllegalArgumentException("financialConnectionsSession not set.")
                     )
 
-                    else -> FinancialConnectionsSheetResult.Completed(
+                    else -> FinancialConnectionsSheetInternalResult.Completed(
                         financialConnectionsSession = financialConnectionsSession,
                         manualEntryUsesMicrodeposits = manualEntryUsesMicrodeposits,
                     )

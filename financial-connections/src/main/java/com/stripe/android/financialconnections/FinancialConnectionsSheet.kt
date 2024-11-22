@@ -129,7 +129,9 @@ class FinancialConnectionsSheet internal constructor(
             callback: FinancialConnectionsSheetResultCallback
         ): FinancialConnectionsSheet {
             return FinancialConnectionsSheet(
-                FinancialConnectionsSheetForDataLauncher(activity, callback)
+                FinancialConnectionsSheetForDataLauncher(activity) {
+                    callback.onFinancialConnectionsSheetResult(it.toPublicResult())
+                }
             )
         }
 
@@ -145,7 +147,9 @@ class FinancialConnectionsSheet internal constructor(
             callback: FinancialConnectionsSheetResultCallback
         ): FinancialConnectionsSheet {
             return FinancialConnectionsSheet(
-                FinancialConnectionsSheetForDataLauncher(fragment, callback)
+                FinancialConnectionsSheetForDataLauncher(fragment) {
+                    callback.onFinancialConnectionsSheetResult(it.toPublicResult())
+                }
             )
         }
 

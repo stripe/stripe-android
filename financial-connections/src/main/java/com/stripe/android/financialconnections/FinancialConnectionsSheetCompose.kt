@@ -25,7 +25,7 @@ fun rememberFinancialConnectionsSheet(
 ): FinancialConnectionsSheet {
     val activityResultLauncher = rememberLauncherForActivityResult(
         FinancialConnectionsSheetForDataContract()
-    ) { callback(it) }
+    ) { callback(it.toPublicResult()) }
     return remember {
         FinancialConnectionsSheet(
             FinancialConnectionsSheetForDataLauncher(

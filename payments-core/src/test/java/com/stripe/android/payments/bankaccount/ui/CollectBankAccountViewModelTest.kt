@@ -4,7 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
-import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
+import com.stripe.android.financialconnections.FinancialConnectionsSheetInternalResult
 import com.stripe.android.model.FinancialConnectionsSession
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
@@ -161,7 +161,7 @@ class CollectBankAccountViewModelTest {
             // When
             val viewModel = buildViewModel(viewEffect, paymentIntentConfiguration(attachToIntent = false))
             viewModel.onConnectionsForACHResult(
-                FinancialConnectionsSheetResult.Completed(
+                FinancialConnectionsSheetInternalResult.Completed(
                     financialConnectionsSession = paymentsFinancialConnectionsSession,
                     manualEntryUsesMicrodeposits = false,
                 )
@@ -189,7 +189,7 @@ class CollectBankAccountViewModelTest {
             // When
             val viewModel = buildViewModel(viewEffect, setupIntentConfiguration(attachToIntent = false))
             viewModel.onConnectionsForACHResult(
-                FinancialConnectionsSheetResult.Completed(
+                FinancialConnectionsSheetInternalResult.Completed(
                     financialConnectionsSession = paymentsFinancialConnectionsSession,
                     manualEntryUsesMicrodeposits = false,
                 )
@@ -239,7 +239,7 @@ class CollectBankAccountViewModelTest {
             val viewModel = buildViewModel(viewEffect, paymentIntentConfiguration())
 
             viewModel.onConnectionsForACHResult(
-                FinancialConnectionsSheetResult.Completed(
+                FinancialConnectionsSheetInternalResult.Completed(
                     financialConnectionsSession = paymentsFinancialConnectionsSession,
                     manualEntryUsesMicrodeposits = false,
                 )
@@ -275,7 +275,7 @@ class CollectBankAccountViewModelTest {
             // When
             val viewModel = buildViewModel(viewEffect, setupIntentConfiguration())
             viewModel.onConnectionsForACHResult(
-                FinancialConnectionsSheetResult.Completed(
+                FinancialConnectionsSheetInternalResult.Completed(
                     financialConnectionsSession = paymentsFinancialConnectionsSession,
                     manualEntryUsesMicrodeposits = false,
                 )
@@ -311,7 +311,7 @@ class CollectBankAccountViewModelTest {
             // When
             val viewModel = buildViewModel(viewEffect, deferredPaymentIntentConfiguration())
             viewModel.onConnectionsForACHResult(
-                FinancialConnectionsSheetResult.Completed(
+                FinancialConnectionsSheetInternalResult.Completed(
                     financialConnectionsSession = paymentsFinancialConnectionsSession,
                     manualEntryUsesMicrodeposits = false,
                 )
@@ -347,7 +347,7 @@ class CollectBankAccountViewModelTest {
             // When
             val viewModel = buildViewModel(viewEffect, deferredSetupIntentConfiguration())
             viewModel.onConnectionsForACHResult(
-                FinancialConnectionsSheetResult.Completed(
+                FinancialConnectionsSheetInternalResult.Completed(
                     financialConnectionsSession = paymentsFinancialConnectionsSession,
                     manualEntryUsesMicrodeposits = false,
                 )
@@ -383,7 +383,7 @@ class CollectBankAccountViewModelTest {
             // When
             val viewModel = buildViewModel(viewEffect, setupIntentConfiguration())
             viewModel.onConnectionsForACHResult(
-                FinancialConnectionsSheetResult.Completed(
+                FinancialConnectionsSheetInternalResult.Completed(
                     financialConnectionsSession = paymentsFinancialConnectionsSession,
                     manualEntryUsesMicrodeposits = false,
                 )
