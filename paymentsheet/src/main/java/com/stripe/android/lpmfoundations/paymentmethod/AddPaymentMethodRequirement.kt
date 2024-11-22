@@ -50,11 +50,18 @@ internal enum class AddPaymentMethodRequirement {
     /** Requires a valid us bank verification method. */
     ValidUsBankVerificationMethod {
         override fun isMetBy(metadata: PaymentMethodMetadata): Boolean {
+            // Verification method is always 'automatic' for deferred intents
+            val isDeferred = metadata.stripeIntent.clientSecret == null
+            return isDeferred || supportedVerificationMethodForNonDeferredIntent(metadata)
+        }
+
+        private fun supportedVerificationMethodForNonDeferredIntent(
+            metadata: PaymentMethodMetadata,
+        ): Boolean {
             val pmo = metadata.stripeIntent.getPaymentMethodOptions()[USBankAccount.code]
             val verificationMethod = (pmo as? Map<*, *>)?.get("verification_method") as? String
-            val supportsVerificationMethod = verificationMethod in setOf("instant", "automatic")
-            val isDeferred = metadata.stripeIntent.clientSecret == null
-            return supportsVerificationMethod || isDeferred
+            val supportsVerificationMethod = verificationMethod in setOf("automatic", "instant", "instant_or_skip")
+            return supportsVerificationMethod
         }
     },
 

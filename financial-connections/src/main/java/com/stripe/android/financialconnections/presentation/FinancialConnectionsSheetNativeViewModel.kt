@@ -334,7 +334,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                         if (state.isLinkWithStripe) {
                             handleInstantDebitsCompletion(session)
                         } else {
-                            handleFinancialConnectionsCompletion(session)
+                            handleFinancialConnectionsCompletion(session, state.manualEntryUsesMicrodeposits)
                         }
                     }
 
@@ -364,7 +364,10 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
         }
     }
 
-    private fun handleFinancialConnectionsCompletion(session: FinancialConnectionsSession) {
+    private fun handleFinancialConnectionsCompletion(
+        session: FinancialConnectionsSession,
+        manualEntryUsesMicrodeposits: Boolean,
+    ) {
         FinancialConnections.emitEvent(
             name = Name.SUCCESS,
             metadata = Metadata(
@@ -374,7 +377,8 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
         finishWithResult(
             Completed(
                 financialConnectionsSession = session,
-                token = session.parsedToken
+                token = session.parsedToken,
+                manualEntryUsesMicrodeposits = manualEntryUsesMicrodeposits,
             )
         )
     }
@@ -385,7 +389,10 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
         }
 
         val result = if (instantDebits != null) {
-            Completed(instantDebits = instantDebits)
+            Completed(
+                instantDebits = instantDebits,
+                manualEntryUsesMicrodeposits = false,
+            )
         } else {
             Failed(
                 error = UnclassifiedError(
@@ -514,6 +521,7 @@ internal data class FinancialConnectionsSheetNativeState(
     val initialPane: Pane,
     val theme: Theme,
     val isLinkWithStripe: Boolean,
+    val manualEntryUsesMicrodeposits: Boolean,
     val elementsSessionContext: ElementsSessionContext?,
 ) {
 
@@ -535,6 +543,7 @@ internal data class FinancialConnectionsSheetNativeState(
         theme = args.initialSyncResponse.manifest.theme?.toLocalTheme() ?: Theme.default,
         viewEffect = null,
         isLinkWithStripe = args.initialSyncResponse.manifest.isLinkWithStripe ?: false,
+        manualEntryUsesMicrodeposits = args.initialSyncResponse.manifest.manualEntryUsesMicrodeposits,
         elementsSessionContext = args.elementsSessionContext,
     )
 

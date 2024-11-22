@@ -300,7 +300,10 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
             }.onSuccess {
                 finishWithResult(
                     state = state,
-                    result = Completed(financialConnectionsSession = it)
+                    result = Completed(
+                        financialConnectionsSession = it,
+                        manualEntryUsesMicrodeposits = state.manifest?.manualEntryUsesMicrodeposits ?: false,
+                    )
                 )
             }.onFailure { error ->
                 finishWithResult(stateFlow.value, Failed(error))
@@ -322,7 +325,11 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
             }.onSuccess { (las, token) ->
                 finishWithResult(
                     state = state,
-                    result = Completed(financialConnectionsSession = las, token = token)
+                    result = Completed(
+                        financialConnectionsSession = las,
+                        token = token,
+                        manualEntryUsesMicrodeposits = state.manifest?.manualEntryUsesMicrodeposits ?: false,
+                    )
                 )
             }.onFailure { error ->
                 finishWithResult(stateFlow.value, Failed(error))
@@ -458,7 +465,8 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                                 bankName = url.getQueryParameter(QUERY_BANK_NAME)
                             ),
                             financialConnectionsSession = null,
-                            token = null
+                            token = null,
+                            manualEntryUsesMicrodeposits = false,
                         )
                     )
                 }

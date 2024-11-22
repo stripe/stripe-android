@@ -46,7 +46,8 @@ data class CollectBankAccountResponseInternal(
     @Parcelize
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class USBankAccountData(
-        val financialConnectionsSession: FinancialConnectionsSession
+        val financialConnectionsSession: FinancialConnectionsSession,
+        val manualEntryUsesMicrodeposits: Boolean,
     ) : StripeModel
 
     @Parcelize

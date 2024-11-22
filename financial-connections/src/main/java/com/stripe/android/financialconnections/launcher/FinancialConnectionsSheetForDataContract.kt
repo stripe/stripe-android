@@ -46,7 +46,8 @@ internal class FinancialConnectionsSheetForDataContract :
                     )
 
                     else -> FinancialConnectionsSheetResult.Completed(
-                        financialConnectionsSession = financialConnectionsSession
+                        financialConnectionsSession = financialConnectionsSession,
+                        manualEntryUsesMicrodeposits = manualEntryUsesMicrodeposits,
                     )
                 }
         }

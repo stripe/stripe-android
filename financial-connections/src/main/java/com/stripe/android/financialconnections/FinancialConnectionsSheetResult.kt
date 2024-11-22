@@ -14,7 +14,8 @@ sealed class FinancialConnectionsSheetResult : Parcelable {
      */
     @Parcelize
     data class Completed(
-        val financialConnectionsSession: FinancialConnectionsSession
+        val financialConnectionsSession: FinancialConnectionsSession,
+        val manualEntryUsesMicrodeposits: Boolean,
     ) : FinancialConnectionsSheetResult()
 
     /**

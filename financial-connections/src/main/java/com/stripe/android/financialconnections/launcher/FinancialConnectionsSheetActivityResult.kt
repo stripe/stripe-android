@@ -18,13 +18,15 @@ internal sealed class FinancialConnectionsSheetActivityResult : Parcelable {
      * @param financialConnectionsSession The financial connections session connected
      */
     @Parcelize
-    data class Completed(
+    data class Completed constructor(
         // Instant Debits sessions: return payment method id and bank details.
         val instantDebits: InstantDebitsResult? = null,
         // non-Link sessions: return full LinkedAccountSession
         val financialConnectionsSession: FinancialConnectionsSession? = null,
         // Bank account Token sessions: session + token.
-        val token: Token? = null
+        val token: Token? = null,
+        // Temporary field to expose to callers whether the session used microdeposits.
+        val manualEntryUsesMicrodeposits: Boolean,
     ) : FinancialConnectionsSheetActivityResult()
 
     /**

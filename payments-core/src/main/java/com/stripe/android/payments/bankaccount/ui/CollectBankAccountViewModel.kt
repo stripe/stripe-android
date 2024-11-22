@@ -144,8 +144,11 @@ internal class CollectBankAccountViewModel @Inject constructor(
                 is FinancialConnectionsSheetResult.Failed -> finishWithError(result.error)
 
                 is FinancialConnectionsSheetResult.Completed -> when {
-                    args.attachToIntent -> attachSessionToIntent(result.financialConnectionsSession)
-                    else -> finishWithSession(result.financialConnectionsSession)
+                    args.attachToIntent -> attachSessionToIntent(
+                        financialConnectionsSession = result.financialConnectionsSession,
+                        usesMicrodeposits = result.manualEntryUsesMicrodeposits,
+                    )
+                    else -> finishWithSession(result.financialConnectionsSession, result.manualEntryUsesMicrodeposits)
                 }
             }
         }
@@ -173,13 +176,15 @@ internal class CollectBankAccountViewModel @Inject constructor(
     }
 
     private fun finishWithSession(
-        financialConnectionsSession: FinancialConnectionsSession
+        financialConnectionsSession: FinancialConnectionsSession,
+        usesMicrodeposits: Boolean,
     ) {
         finishWithRefreshedIntent { intent ->
             CollectBankAccountResponseInternal(
                 intent = intent,
                 usBankAccountData = USBankAccountData(
-                    financialConnectionsSession
+                    financialConnectionsSession = financialConnectionsSession,
+                    manualEntryUsesMicrodeposits = usesMicrodeposits,
                 ),
                 instantDebitsData = null,
             )
@@ -237,7 +242,10 @@ internal class CollectBankAccountViewModel @Inject constructor(
         }
     }
 
-    private fun attachSessionToIntent(financialConnectionsSession: FinancialConnectionsSession) {
+    private fun attachSessionToIntent(
+        financialConnectionsSession: FinancialConnectionsSession,
+        usesMicrodeposits: Boolean,
+    ) {
         viewModelScope.launch {
             when (args) {
                 is CollectBankAccountContract.Args.ForDeferredPaymentIntent,
@@ -264,7 +272,10 @@ internal class CollectBankAccountViewModel @Inject constructor(
                     Completed(
                         CollectBankAccountResponseInternal(
                             intent = stripeIntent,
-                            usBankAccountData = USBankAccountData(financialConnectionsSession),
+                            usBankAccountData = USBankAccountData(
+                                financialConnectionsSession = financialConnectionsSession,
+                                manualEntryUsesMicrodeposits = usesMicrodeposits,
+                            ),
                             instantDebitsData = null
                         )
                     )
