@@ -150,7 +150,7 @@ internal class DefaultFlowControllerTest {
     private val googlePayPaymentMethodLauncher = mock<GooglePayPaymentMethodLauncher>()
 
     private val googlePayPaymentMethodLauncherFactory =
-        RecordingGooglePayPaymentMethodLauncherFactory(googlePayPaymentMethodLauncher)
+        RecordingGooglePayPaymentMethodLauncherFactory.noOp(googlePayPaymentMethodLauncher)
 
     private val linkActivityResultLauncher =
         mock<ActivityResultLauncher<LinkActivityContract.Args>>()
@@ -357,9 +357,13 @@ internal class DefaultFlowControllerTest {
         val viewModel = createViewModel()
         val flowController = createFlowController(viewModel = viewModel)
 
-        flowController.configureExpectingSuccess()
+        flowController.configureExpectingSuccess(
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+        )
 
         viewModel.paymentSelection = PaymentSelection.GooglePay
+
+        flowController.confirm()
 
         val errorCode = GooglePayPaymentMethodLauncher.INTERNAL_ERROR
 
@@ -1113,11 +1117,16 @@ internal class DefaultFlowControllerTest {
     fun `onGooglePayResult() when canceled should invoke callback with canceled result`() = runTest {
         verifyNoInteractions(eventReporter)
 
-        val flowController = createFlowController()
+        val viewModel = createViewModel()
+        val flowController = createFlowController(viewModel = viewModel)
 
         flowController.configureExpectingSuccess(
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
         )
+
+        viewModel.paymentSelection = PaymentSelection.GooglePay
+
+        flowController.confirm()
 
         googlePayLauncherResultCallback?.invoke(
             GooglePayPaymentMethodLauncher.Result.Canceled
