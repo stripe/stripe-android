@@ -17,7 +17,8 @@ internal class WalletScreenScreenshotTest {
             state = WalletUiState(
                 paymentDetailsList = emptyList(),
                 selectedItem = null,
-                isProcessing = false
+                isProcessing = false,
+                isExpanded = false
             )
         )
     }
@@ -28,7 +29,8 @@ internal class WalletScreenScreenshotTest {
             state = WalletUiState(
                 paymentDetailsList = TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails,
                 selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails.firstOrNull(),
-                isProcessing = false
+                isProcessing = false,
+                isExpanded = false
             )
         )
     }
@@ -39,9 +41,9 @@ internal class WalletScreenScreenshotTest {
             state = WalletUiState(
                 paymentDetailsList = TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails,
                 selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails.firstOrNull(),
-                isProcessing = false
-            ),
-            isExpanded = true
+                isProcessing = false,
+                isExpanded = true
+            )
         )
     }
 
@@ -53,21 +55,19 @@ internal class WalletScreenScreenshotTest {
                 selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails.firstOrNull {
                     it is ConsumerPaymentDetails.BankAccount
                 },
-                isProcessing = false
-            ),
-            isExpanded = true
+                isProcessing = false,
+                isExpanded = true
+            )
         )
     }
 
     private fun snapshot(
-        state: WalletUiState,
-        isExpanded: Boolean = false
+        state: WalletUiState
     ) {
         paparazziRule.snapshot {
             DefaultLinkTheme {
                 WalletBody(
                     state = state,
-                    isExpanded = isExpanded,
                     onItemSelected = {},
                     onExpandedChanged = {}
                 )

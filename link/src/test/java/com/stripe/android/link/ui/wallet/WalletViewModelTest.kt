@@ -56,7 +56,8 @@ class WalletViewModelTest {
             WalletUiState(
                 paymentDetailsList = TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails,
                 selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails.firstOrNull(),
-                isProcessing = false
+                isProcessing = false,
+                isExpanded = false
             )
         )
         assertThat(viewModel.uiState.value.primaryButtonState).isEqualTo(PrimaryButtonState.Disabled)

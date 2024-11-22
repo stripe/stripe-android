@@ -162,7 +162,7 @@ private fun Screens(
                 WalletViewModel.factory(
                     parentComponent = parentComponent,
                     linkAccount = linkAccount,
-                    navigateAndClearStack = navigateAndClearStack,
+                    navigate = { _, _ -> },
                     dismissWithResult = dismissWithResult
                 )
             }

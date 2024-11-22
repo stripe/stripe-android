@@ -25,7 +25,7 @@ internal class WalletViewModel @Inject constructor(
     private val linkAccount: LinkAccount,
     private val linkAccountManager: LinkAccountManager,
     private val logger: Logger,
-    private val navigateAndClearStack: (route: LinkScreen) -> Unit,
+    private val navigate: (route: LinkScreen, clearStack: Boolean) -> Unit,
     private val dismissWithResult: (LinkActivityResult) -> Unit
 ) : ViewModel() {
     private val stripeIntent = configuration.stripeIntent
@@ -35,6 +35,7 @@ internal class WalletViewModel @Inject constructor(
             paymentDetailsList = emptyList(),
             selectedItem = null,
             isProcessing = false,
+            isExpanded = false
         )
     )
 
@@ -59,7 +60,7 @@ internal class WalletViewModel @Inject constructor(
                     }
 
                     if (response.paymentDetails.isEmpty()) {
-                        navigateAndClearStack(LinkScreen.PaymentMethod)
+                        navigate(LinkScreen.PaymentMethod, true)
                     }
                 },
                 // If we can't load the payment details there's nothing to see here
@@ -81,11 +82,17 @@ internal class WalletViewModel @Inject constructor(
         }
     }
 
+    fun setExpanded(expanded: Boolean) {
+        _uiState.update {
+            it.copy(isExpanded = expanded)
+        }
+    }
+
     companion object {
         fun factory(
             parentComponent: NativeLinkComponent,
             linkAccount: LinkAccount,
-            navigateAndClearStack: (route: LinkScreen) -> Unit,
+            navigate: (route: LinkScreen, clearStack: Boolean) -> Unit,
             dismissWithResult: (LinkActivityResult) -> Unit
         ): ViewModelProvider.Factory {
             return viewModelFactory {
@@ -95,7 +102,7 @@ internal class WalletViewModel @Inject constructor(
                         linkAccountManager = parentComponent.linkAccountManager,
                         logger = parentComponent.logger,
                         linkAccount = linkAccount,
-                        navigateAndClearStack = navigateAndClearStack,
+                        navigate = navigate,
                         dismissWithResult = dismissWithResult
                     )
                 }
