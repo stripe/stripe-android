@@ -100,6 +100,7 @@ internal class ConfirmationMediator<
                                 intent = intent,
                             )
                         },
+                        receivesResultInProcess = action.receivesResultInProcess,
                     )
                 } ?: run {
                     val exception = IllegalStateException(
@@ -133,6 +134,7 @@ internal class ConfirmationMediator<
     sealed interface Action {
         class Launch(
             val launch: () -> Unit,
+            val receivesResultInProcess: Boolean,
         ) : Action
 
         data class Fail(

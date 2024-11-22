@@ -44,12 +44,14 @@ internal class IntentConfirmationDefinition(
                 ConfirmationDefinition.Action.Launch(
                     launcherArguments = Args.NextAction(nextStep.clientSecret),
                     deferredIntentConfirmationType = deferredIntentConfirmationType,
+                    receivesResultInProcess = false,
                 )
             }
             is IntentConfirmationInterceptor.NextStep.Confirm -> {
                 ConfirmationDefinition.Action.Launch(
                     launcherArguments = Args.Confirm(nextStep.confirmParams),
                     deferredIntentConfirmationType = deferredIntentConfirmationType,
+                    receivesResultInProcess = false,
                 )
             }
             is IntentConfirmationInterceptor.NextStep.Fail -> {

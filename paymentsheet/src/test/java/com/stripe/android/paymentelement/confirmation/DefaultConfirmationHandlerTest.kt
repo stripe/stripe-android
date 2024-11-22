@@ -776,8 +776,10 @@ class DefaultConfirmationHandlerTest {
             enqueueCompleteStep()
         }
 
-        val bacsArguments = DEFAULT_ARGUMENTS.copy(
+        val bacsParameters = ConfirmationMediator.Parameters(
             confirmationOption = BACS_OPTION,
+            intent = DEFAULT_ARGUMENTS.intent,
+            deferredIntentConfirmationType = null,
         )
 
         val savedStateHandle = SavedStateHandle().apply {
@@ -788,7 +790,7 @@ class DefaultConfirmationHandlerTest {
                     receivesResultInProcess = true,
                 ),
             )
-            set("PaymentConfirmationArguments", bacsArguments)
+            set("BacsParameters", bacsParameters)
         }
 
         val defaultConfirmationHandler = createDefaultConfirmationHandler(
@@ -1273,8 +1275,9 @@ class DefaultConfirmationHandlerTest {
         val result = defaultConfirmationHandler.awaitIntentResult().asFailed()
 
         assertThat(result.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
-        assertThat(result.type).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Internal)
-        assertThat(result.cause.message).isEqualTo("Required value was null.")
+        assertThat(result.type).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Fatal)
+        assertThat(result.cause.message)
+            .isEqualTo("No launcher for BacsConfirmationDefinition was found, did you call register?")
     }
 
     @Test
@@ -1300,7 +1303,7 @@ class DefaultConfirmationHandlerTest {
         assertThat(result.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
         assertThat(result.type).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Internal)
         assertThat(result.cause.message).isEqualTo(
-            "Given payment selection could not be converted to Bacs data!"
+            "Given confirmation option does not have expected Bacs data!"
         )
     }
 
@@ -1327,7 +1330,7 @@ class DefaultConfirmationHandlerTest {
         assertThat(result.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
         assertThat(result.type).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Internal)
         assertThat(result.cause.message).isEqualTo(
-            "Given payment selection could not be converted to Bacs data!"
+            "Given confirmation option does not have expected Bacs data!"
         )
     }
 

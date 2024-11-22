@@ -177,6 +177,7 @@ class ConfirmationMediatorTest {
                 ConfirmationDefinition.Action.Launch(
                     launcherArguments = launcherArguments,
                     deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
+                    receivesResultInProcess = false,
                 )
             },
             launcher = launcher,
@@ -201,6 +202,8 @@ class ConfirmationMediatorTest {
 
         val launchAction = action.asLaunch()
 
+        assertThat(launchAction.receivesResultInProcess).isFalse()
+
         launchAction.launch()
 
         val launchCall = definition.launchCalls.awaitItem()
@@ -221,12 +224,47 @@ class ConfirmationMediatorTest {
     }
 
     @Test
+    fun `On launch definition action where result is received in process, 'receivesResultInProcess' should be true`() =
+        runTest {
+            val definition = FakeConfirmationDefinition(
+                onAction = { _, _ ->
+                    ConfirmationDefinition.Action.Launch(
+                        launcherArguments = FakeConfirmationDefinition.LauncherArgs(amount = 5000),
+                        deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
+                        receivesResultInProcess = true,
+                    )
+                },
+                launcher = FakeConfirmationDefinition.Launcher(),
+            )
+
+            val mediator = ConfirmationMediator(
+                savedStateHandle = SavedStateHandle(),
+                definition = definition
+            ).apply {
+                register(
+                    activityResultCaller = mock(),
+                    onResult = {}
+                )
+            }
+
+            val action = mediator.action(
+                option = SAVED_CONFIRMATION_OPTION,
+                intent = INTENT,
+            )
+
+            val launchAction = action.asLaunch()
+
+            assertThat(launchAction.receivesResultInProcess).isTrue()
+        }
+
+    @Test
     fun `On confirmation action without registering, should return fail action`() = runTest {
         val definition = FakeConfirmationDefinition(
             onAction = { _, _ ->
                 ConfirmationDefinition.Action.Launch(
                     launcherArguments = FakeConfirmationDefinition.LauncherArgs(amount = 5000),
                     deferredIntentConfirmationType = null,
+                    receivesResultInProcess = false,
                 )
             },
         )
@@ -258,6 +296,7 @@ class ConfirmationMediatorTest {
                 ConfirmationDefinition.Action.Launch(
                     launcherArguments = FakeConfirmationDefinition.LauncherArgs(amount = 5000),
                     deferredIntentConfirmationType = null,
+                    receivesResultInProcess = false,
                 )
             },
         )
@@ -308,6 +347,7 @@ class ConfirmationMediatorTest {
                 ConfirmationDefinition.Action.Launch(
                     launcherArguments = FakeConfirmationDefinition.LauncherArgs(amount = 5000),
                     deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
+                    receivesResultInProcess = false,
                 )
             },
         )
