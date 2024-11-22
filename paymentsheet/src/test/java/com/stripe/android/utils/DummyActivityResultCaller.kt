@@ -10,6 +10,7 @@ import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 
 class DummyActivityResultCaller private constructor() : ActivityResultCaller {
+    private val registeredLaunchers = Turbine<ActivityResultLauncher<*>>()
     private val registerCalls = Turbine<RegisterCall<*, *>>()
     private val launchCalls = Turbine<Any?>()
 
@@ -19,7 +20,7 @@ class DummyActivityResultCaller private constructor() : ActivityResultCaller {
     ): ActivityResultLauncher<I> {
         registerCalls.add(RegisterCall(contract, callback))
 
-        return object : ActivityResultLauncher<I>() {
+        val launcher = object : ActivityResultLauncher<I>() {
             override fun launch(input: I, options: ActivityOptionsCompat?) {
                 launchCalls.add(input)
             }
@@ -32,6 +33,10 @@ class DummyActivityResultCaller private constructor() : ActivityResultCaller {
                 error("Not implemented")
             }
         }
+
+        registeredLaunchers.add(launcher)
+
+        return launcher
     }
 
     override fun <I : Any?, O : Any?> registerForActivityResult(
@@ -39,7 +44,7 @@ class DummyActivityResultCaller private constructor() : ActivityResultCaller {
         registry: ActivityResultRegistry,
         callback: ActivityResultCallback<O>
     ): ActivityResultLauncher<I> {
-        return object : ActivityResultLauncher<I>() {
+        val launcher = object : ActivityResultLauncher<I>() {
             override fun launch(input: I, options: ActivityOptionsCompat?) {
                 launchCalls.add(input)
             }
@@ -52,6 +57,10 @@ class DummyActivityResultCaller private constructor() : ActivityResultCaller {
                 error("Not implemented")
             }
         }
+
+        registeredLaunchers.add(launcher)
+
+        return launcher
     }
 
     data class RegisterCall<I : Any?, O : Any?>(
@@ -63,7 +72,12 @@ class DummyActivityResultCaller private constructor() : ActivityResultCaller {
         val activityResultCaller: ActivityResultCaller,
         private val registerCalls: ReceiveTurbine<RegisterCall<*, *>>,
         private val launchCalls: ReceiveTurbine<Any?>,
+        private val registeredLaunchers: ReceiveTurbine<ActivityResultLauncher<*>>,
     ) {
+        suspend fun awaitNextRegisteredLauncher(): ActivityResultLauncher<*> {
+            return registeredLaunchers.awaitItem()
+        }
+
         suspend fun awaitRegisterCall(): RegisterCall<*, *> {
             return registerCalls.awaitItem()
         }
@@ -82,10 +96,12 @@ class DummyActivityResultCaller private constructor() : ActivityResultCaller {
                 activityResultCaller = activityResultCaller,
                 registerCalls = activityResultCaller.registerCalls,
                 launchCalls = activityResultCaller.launchCalls,
+                registeredLaunchers = activityResultCaller.registeredLaunchers,
             ).apply {
                 block(this)
                 activityResultCaller.registerCalls.ensureAllEventsConsumed()
                 activityResultCaller.launchCalls.ensureAllEventsConsumed()
+                activityResultCaller.registeredLaunchers.ensureAllEventsConsumed()
             }
         }
 

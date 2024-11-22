@@ -52,6 +52,11 @@ internal interface ConfirmationDefinition<
             val deferredIntentConfirmationType: DeferredIntentConfirmationType?,
         ) : Result
 
+        data class NextStep(
+            val intent: StripeIntent,
+            val confirmationOption: ConfirmationHandler.Option,
+        ) : Result
+
         data class Failed(
             val cause: Throwable,
             val message: ResolvableString,
@@ -74,6 +79,7 @@ internal interface ConfirmationDefinition<
 
         data class Launch<TLauncherArgs>(
             val launcherArguments: TLauncherArgs,
+            val receivesResultInProcess: Boolean,
             val deferredIntentConfirmationType: DeferredIntentConfirmationType?,
         ) : Action<TLauncherArgs>
     }

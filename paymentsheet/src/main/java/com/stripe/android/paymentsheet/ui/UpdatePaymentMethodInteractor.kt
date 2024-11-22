@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.ui
 
+import com.stripe.android.CardBrandFilter
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
@@ -20,6 +21,7 @@ internal interface UpdatePaymentMethodInteractor {
     val canRemove: Boolean
     val displayableSavedPaymentMethod: DisplayableSavedPaymentMethod
     val screenTitle: ResolvableString?
+    val cardBrandFilter: CardBrandFilter
     val isExpiredCard: Boolean
 
     val state: StateFlow<State>
@@ -53,6 +55,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
     override val isLiveMode: Boolean,
     override val canRemove: Boolean,
     override val displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
+    override val cardBrandFilter: CardBrandFilter,
     private val removeExecutor: PaymentMethodRemoveOperation,
     workContext: CoroutineContext = Dispatchers.Default,
 ) : UpdatePaymentMethodInteractor {

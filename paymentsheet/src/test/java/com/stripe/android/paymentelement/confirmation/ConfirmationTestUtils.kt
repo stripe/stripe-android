@@ -7,8 +7,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.ConfirmationMediator.Parameters
-import com.stripe.android.paymentelement.confirmation.epms.ExternalPaymentMethodConfirmationOption
-import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.utils.DummyActivityResultCaller
 import kotlinx.coroutines.test.runTest
 import java.util.concurrent.CountDownLatch
@@ -33,6 +31,8 @@ internal fun <
             onResult = {}
         )
 
+        assertThat(awaitNextRegisteredLauncher()).isNotNull()
+
         val action = mediator.action(
             option = confirmationOption,
             intent = intent,
@@ -45,7 +45,7 @@ internal fun <
         launchAction.launch()
 
         val parameters = savedStateHandle
-            .get<Parameters<ExternalPaymentMethodConfirmationOption>>("ExternalPaymentMethodParameters")
+            .get<Parameters<TConfirmationOption>>("${definition.key}Parameters")
 
         assertThat(parameters?.confirmationOption).isEqualTo(confirmationOption)
         assertThat(parameters?.intent).isEqualTo(intent)
@@ -65,6 +65,8 @@ internal fun <
     definition: ConfirmationDefinition<TConfirmationOption, TLauncher, TLauncherArgs, TLauncherResult>,
     confirmationOption: ConfirmationHandler.Option,
     intent: StripeIntent,
+    launcherResult: TLauncherResult,
+    definitionResult: ConfirmationDefinition.Result,
 ) = runTest {
     val countDownLatch = CountDownLatch(1)
 
@@ -95,20 +97,22 @@ internal fun <
 
         val call = awaitRegisterCall()
 
-        call.callback.asCallbackFor<PaymentResult>().onActivityResult(PaymentResult.Completed)
+        assertThat(awaitNextRegisteredLauncher()).isNotNull()
+
+        call.callback.asCallbackFor<TLauncherResult>().onActivityResult(launcherResult)
 
         assertThat(countDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
 
-        assertThat(result).isInstanceOf<ConfirmationDefinition.Result.Succeeded>()
-
-        val successResult = result.asSucceeded()
-
-        assertThat(successResult.intent).isEqualTo(intent)
+        assertThat(result).isEqualTo(definitionResult)
     }
 }
 
 internal fun ConfirmationDefinition.Result?.asSucceeded(): ConfirmationDefinition.Result.Succeeded {
     return this as ConfirmationDefinition.Result.Succeeded
+}
+
+internal fun ConfirmationDefinition.Result?.asNextStep(): ConfirmationDefinition.Result.NextStep {
+    return this as ConfirmationDefinition.Result.NextStep
 }
 
 internal fun ConfirmationDefinition.Result?.asFailed(): ConfirmationDefinition.Result.Failed {

@@ -572,6 +572,7 @@ internal class CustomerSheetViewModel(
                         isLiveMode = isLiveModeProvider(),
                         canRemove = customerState.canRemove,
                         displayableSavedPaymentMethod = paymentMethod,
+                        cardBrandFilter = PaymentSheetCardBrandFilter(customerState.configuration.cardBrandAcceptance),
                         removeExecutor = ::removeExecutor,
                     ),
                     isLiveMode = isLiveModeProvider(),
@@ -1026,7 +1027,7 @@ internal class CustomerSheetViewModel(
             )
         )
 
-        when (val result = confirmationHandler.awaitIntentResult()) {
+        when (val result = confirmationHandler.awaitResult()) {
             is ConfirmationHandler.Result.Succeeded -> {
                 eventReporter.onAttachPaymentMethodSucceeded(
                     style = CustomerSheetEventReporter.AddPaymentMethodStyle.SetupIntent

@@ -3,35 +3,22 @@
 package com.stripe.android.paymentsheet.ui
 
 import androidx.annotation.RestrictTo
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.material.ContentAlpha
-import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.common.ui.PrimaryButton
@@ -44,16 +31,12 @@ import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewAction.OnRemovePr
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewAction.OnUpdatePressed
 import com.stripe.android.ui.core.elements.SimpleDialogElementUI
 import com.stripe.android.uicore.StripeTheme
-import com.stripe.android.uicore.elements.DROPDOWN_MENU_CLICKABLE_TEST_TAG
 import com.stripe.android.uicore.elements.SectionCard
-import com.stripe.android.uicore.elements.SingleChoiceDropdown
 import com.stripe.android.uicore.elements.TextFieldColors
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.utils.collectAsState
-import com.stripe.android.R as PaymentsCoreR
 import com.stripe.android.R as StripeR
-import com.stripe.android.uicore.R as UiCoreR
 
 @Composable
 internal fun EditPaymentMethod(
@@ -99,7 +82,21 @@ internal fun EditPaymentMethodUi(
                     )
                 },
                 trailingIcon = {
-                    Dropdown(viewState, viewActionHandler)
+                    CardBrandDropdown(
+                        selectedBrand = viewState.selectedBrand,
+                        availableBrands = viewState.availableBrands,
+                        onBrandOptionsShown = {
+                            viewActionHandler.invoke(EditPaymentMethodViewAction.OnBrandChoiceOptionsShown)
+                        },
+                        onBrandChoiceChanged = {
+                            viewActionHandler.invoke(
+                                EditPaymentMethodViewAction.OnBrandChoiceChanged(it)
+                            )
+                        },
+                        onBrandChoiceOptionsDismissed = {
+                            viewActionHandler.invoke(EditPaymentMethodViewAction.OnBrandChoiceOptionsDismissed)
+                        }
+                    )
                 },
                 onValueChange = {}
             )
@@ -174,70 +171,6 @@ private fun Label(
 }
 
 @Composable
-private fun Dropdown(
-    viewState: EditPaymentMethodViewState,
-    viewActionHandler: (action: EditPaymentMethodViewAction) -> Unit
-) {
-    var expanded by remember {
-        mutableStateOf(false)
-    }
-
-    Box(
-        modifier = Modifier
-            .clickable {
-                if (!expanded) {
-                    expanded = true
-
-                    viewActionHandler.invoke(EditPaymentMethodViewAction.OnBrandChoiceOptionsShown)
-                }
-            }
-            .semantics {
-                this.contentDescription = viewState.selectedBrand.brand.displayName
-            }
-            .testTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG)
-    ) {
-        Row(
-            modifier = Modifier.padding(10.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            Image(
-                painter = painterResource(id = viewState.selectedBrand.icon),
-                contentDescription = null
-            )
-
-            Icon(
-                painter = painterResource(
-                    id = UiCoreR.drawable.stripe_ic_chevron_down
-                ),
-                contentDescription = null
-            )
-        }
-
-        SingleChoiceDropdown(
-            expanded = expanded,
-            title = PaymentsCoreR.string.stripe_card_brand_choice_selection_header.resolvableString,
-            currentChoice = viewState.selectedBrand,
-            choices = viewState.availableBrands,
-            headerTextColor = MaterialTheme.stripeColors.subtitle,
-            optionTextColor = MaterialTheme.stripeColors.onComponent,
-            onChoiceSelected = { item ->
-                expanded = false
-
-                viewActionHandler.invoke(
-                    EditPaymentMethodViewAction.OnBrandChoiceChanged(item)
-                )
-            },
-            onDismiss = {
-                expanded = false
-
-                viewActionHandler.invoke(EditPaymentMethodViewAction.OnBrandChoiceOptionsDismissed)
-            }
-        )
-    }
-}
-
-@Composable
 @Preview(showBackground = true)
 private fun EditPaymentMethodPreview() {
     StripeTheme {
@@ -246,15 +179,15 @@ private fun EditPaymentMethodPreview() {
                 status = EditPaymentMethodViewState.Status.Idle,
                 last4 = "4242",
                 displayName = "Card".resolvableString,
-                selectedBrand = EditPaymentMethodViewState.CardBrandChoice(
+                selectedBrand = CardBrandChoice(
                     brand = CardBrand.CartesBancaires
                 ),
                 canUpdate = true,
                 availableBrands = listOf(
-                    EditPaymentMethodViewState.CardBrandChoice(
+                    CardBrandChoice(
                         brand = CardBrand.Visa
                     ),
-                    EditPaymentMethodViewState.CardBrandChoice(
+                    CardBrandChoice(
                         brand = CardBrand.CartesBancaires
                     )
                 ),

@@ -100,8 +100,8 @@ import com.stripe.android.paymentsheet.state.PaymentElementLoader.Initialization
 import com.stripe.android.paymentsheet.state.PaymentSheetLoadingException
 import com.stripe.android.paymentsheet.state.PaymentSheetLoadingException.PaymentIntentInTerminalState
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
+import com.stripe.android.paymentsheet.ui.CardBrandChoice
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewAction
-import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.utils.FakeEditPaymentMethodInteractorFactory
 import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
@@ -296,7 +296,7 @@ internal class PaymentSheetViewModelTest {
 
                 interactor.handleViewAction(
                     EditPaymentMethodViewAction.OnBrandChoiceChanged(
-                        EditPaymentMethodViewState.CardBrandChoice(CardBrand.Visa)
+                        CardBrandChoice(CardBrand.Visa)
                     )
                 )
 
@@ -354,7 +354,7 @@ internal class PaymentSheetViewModelTest {
 
                 interactor.handleViewAction(
                     EditPaymentMethodViewAction.OnBrandChoiceChanged(
-                        EditPaymentMethodViewState.CardBrandChoice(CardBrand.Visa)
+                        CardBrandChoice(CardBrand.Visa)
                     )
                 )
 
@@ -420,7 +420,7 @@ internal class PaymentSheetViewModelTest {
 
                 interactor.handleViewAction(
                     EditPaymentMethodViewAction.OnBrandChoiceChanged(
-                        EditPaymentMethodViewState.CardBrandChoice(CardBrand.Visa)
+                        CardBrandChoice(CardBrand.Visa)
                     )
                 )
 
@@ -490,7 +490,7 @@ internal class PaymentSheetViewModelTest {
 
                 interactor.handleViewAction(
                     EditPaymentMethodViewAction.OnBrandChoiceChanged(
-                        EditPaymentMethodViewState.CardBrandChoice(CardBrand.Visa)
+                        CardBrandChoice(CardBrand.Visa)
                     )
                 )
 
@@ -2614,7 +2614,7 @@ internal class PaymentSheetViewModelTest {
 
                 interactor.handleViewAction(
                     EditPaymentMethodViewAction.OnBrandChoiceChanged(
-                        EditPaymentMethodViewState.CardBrandChoice(CardBrand.Visa)
+                        CardBrandChoice(CardBrand.Visa)
                     )
                 )
 
