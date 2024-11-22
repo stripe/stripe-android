@@ -42,7 +42,7 @@ internal fun SavedPaymentMethodRowButton(
             ?: displayableSavedPaymentMethod.displayName
 
     val paymentMethodId = displayableSavedPaymentMethod.paymentMethod.id
-    PaymentMethodRowButton(
+    PaymentMethodRowButtonFloating(
         isEnabled = isEnabled,
         isSelected = isSelected,
         isClickable = isClickable,

@@ -59,7 +59,7 @@ internal fun NewPaymentMethodRowButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    PaymentMethodRowButton(
+    PaymentMethodRowButtonFloating(
         isEnabled = isEnabled,
         isSelected = isSelected,
         iconContent = {

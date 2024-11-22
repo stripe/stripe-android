@@ -5,7 +5,6 @@ package com.stripe.android.paymentsheet
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
-import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isEnabled
@@ -268,7 +267,7 @@ internal class PaymentSheetPage(
     fun assertLpmSelected(code: String) {
         composeTestRule.waitUntil {
             composeTestRule
-                .onAllNodes(hasTestTag("${TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON}_$code").and(hasAnyDescendant(isSelected())))
+                .onAllNodes(hasTestTag("${TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON}_$code").and(isSelected()))
                 .fetchSemanticsNodes()
                 .isNotEmpty()
         }
