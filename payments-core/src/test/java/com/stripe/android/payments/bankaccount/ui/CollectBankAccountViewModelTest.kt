@@ -161,7 +161,10 @@ class CollectBankAccountViewModelTest {
             // When
             val viewModel = buildViewModel(viewEffect, paymentIntentConfiguration(attachToIntent = false))
             viewModel.onConnectionsForACHResult(
-                FinancialConnectionsSheetResult.Completed(paymentsFinancialConnectionsSession)
+                FinancialConnectionsSheetResult.Completed(
+                    financialConnectionsSession = paymentsFinancialConnectionsSession,
+                    manualEntryUsesMicrodeposits = false,
+                )
             )
 
             // Then
@@ -186,7 +189,10 @@ class CollectBankAccountViewModelTest {
             // When
             val viewModel = buildViewModel(viewEffect, setupIntentConfiguration(attachToIntent = false))
             viewModel.onConnectionsForACHResult(
-                FinancialConnectionsSheetResult.Completed(paymentsFinancialConnectionsSession)
+                FinancialConnectionsSheetResult.Completed(
+                    financialConnectionsSession = paymentsFinancialConnectionsSession,
+                    manualEntryUsesMicrodeposits = false,
+                )
             )
 
             // Then
@@ -233,7 +239,10 @@ class CollectBankAccountViewModelTest {
             val viewModel = buildViewModel(viewEffect, paymentIntentConfiguration())
 
             viewModel.onConnectionsForACHResult(
-                FinancialConnectionsSheetResult.Completed(paymentsFinancialConnectionsSession)
+                FinancialConnectionsSheetResult.Completed(
+                    financialConnectionsSession = paymentsFinancialConnectionsSession,
+                    manualEntryUsesMicrodeposits = false,
+                )
             )
 
             // Then
@@ -242,7 +251,10 @@ class CollectBankAccountViewModelTest {
                     CollectBankAccountResultInternal.Completed(
                         CollectBankAccountResponseInternal(
                             paymentIntent,
-                            usBankAccountData = USBankAccountData(paymentsFinancialConnectionsSession),
+                            usBankAccountData = USBankAccountData(
+                                financialConnectionsSession = paymentsFinancialConnectionsSession,
+                                manualEntryUsesMicrodeposits = false,
+                            ),
                             instantDebitsData = null
                         )
                     )
@@ -263,7 +275,10 @@ class CollectBankAccountViewModelTest {
             // When
             val viewModel = buildViewModel(viewEffect, setupIntentConfiguration())
             viewModel.onConnectionsForACHResult(
-                FinancialConnectionsSheetResult.Completed(paymentsFinancialConnectionsSession)
+                FinancialConnectionsSheetResult.Completed(
+                    financialConnectionsSession = paymentsFinancialConnectionsSession,
+                    manualEntryUsesMicrodeposits = false,
+                )
             )
 
             // Then
@@ -272,7 +287,10 @@ class CollectBankAccountViewModelTest {
                     CollectBankAccountResultInternal.Completed(
                         CollectBankAccountResponseInternal(
                             setupIntent,
-                            usBankAccountData = USBankAccountData(paymentsFinancialConnectionsSession),
+                            usBankAccountData = USBankAccountData(
+                                financialConnectionsSession = paymentsFinancialConnectionsSession,
+                                manualEntryUsesMicrodeposits = false,
+                            ),
                             instantDebitsData = null
                         )
                     )
@@ -293,7 +311,10 @@ class CollectBankAccountViewModelTest {
             // When
             val viewModel = buildViewModel(viewEffect, deferredPaymentIntentConfiguration())
             viewModel.onConnectionsForACHResult(
-                FinancialConnectionsSheetResult.Completed(paymentsFinancialConnectionsSession)
+                FinancialConnectionsSheetResult.Completed(
+                    financialConnectionsSession = paymentsFinancialConnectionsSession,
+                    manualEntryUsesMicrodeposits = false,
+                )
             )
 
             // Then
@@ -302,7 +323,10 @@ class CollectBankAccountViewModelTest {
                     CollectBankAccountResultInternal.Completed(
                         CollectBankAccountResponseInternal(
                             null,
-                            usBankAccountData = USBankAccountData(paymentsFinancialConnectionsSession),
+                            usBankAccountData = USBankAccountData(
+                                financialConnectionsSession = paymentsFinancialConnectionsSession,
+                                manualEntryUsesMicrodeposits = false,
+                            ),
                             instantDebitsData = null
                         )
                     )
@@ -323,7 +347,10 @@ class CollectBankAccountViewModelTest {
             // When
             val viewModel = buildViewModel(viewEffect, deferredSetupIntentConfiguration())
             viewModel.onConnectionsForACHResult(
-                FinancialConnectionsSheetResult.Completed(paymentsFinancialConnectionsSession)
+                FinancialConnectionsSheetResult.Completed(
+                    financialConnectionsSession = paymentsFinancialConnectionsSession,
+                    manualEntryUsesMicrodeposits = false,
+                )
             )
 
             // Then
@@ -332,7 +359,10 @@ class CollectBankAccountViewModelTest {
                     CollectBankAccountResultInternal.Completed(
                         CollectBankAccountResponseInternal(
                             null,
-                            usBankAccountData = USBankAccountData(paymentsFinancialConnectionsSession),
+                            usBankAccountData = USBankAccountData(
+                                financialConnectionsSession = paymentsFinancialConnectionsSession,
+                                manualEntryUsesMicrodeposits = false,
+                            ),
                             instantDebitsData = null
                         )
                     )
@@ -353,7 +383,10 @@ class CollectBankAccountViewModelTest {
             // When
             val viewModel = buildViewModel(viewEffect, setupIntentConfiguration())
             viewModel.onConnectionsForACHResult(
-                FinancialConnectionsSheetResult.Completed(paymentsFinancialConnectionsSession)
+                FinancialConnectionsSheetResult.Completed(
+                    financialConnectionsSession = paymentsFinancialConnectionsSession,
+                    manualEntryUsesMicrodeposits = false,
+                )
             )
 
             // Then
