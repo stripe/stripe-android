@@ -14,13 +14,8 @@ import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.junit.runners.Parameterized
 
-@RunWith(Parameterized::class)
-internal class PaymentDetailsListItemScreenShotTest(
-    private val testCase: TestCase
-) {
+internal class PaymentDetailsListItemScreenShotTest {
     @get:Rule
     val paparazziRule = PaparazziRule(
         SystemAppearance.entries,
@@ -31,144 +26,147 @@ internal class PaymentDetailsListItemScreenShotTest(
     )
 
     @Test
-    fun test() {
+    fun testCardEnabled() {
+        snapshot(
+            state = State(
+                details = ConsumerPaymentDetails.Card(
+                    id = "QAAAKJ6",
+                    expiryYear = 2023,
+                    expiryMonth = 12,
+                    isDefault = true,
+                    brand = CardBrand.MasterCard,
+                    last4 = "4444",
+                    cvcCheck = CvcCheck.Pass,
+                    billingAddress = ConsumerPaymentDetails.BillingAddress(
+                        countryCode = CountryCode.US,
+                        postalCode = "12312"
+                    )
+                ),
+                enabled = true,
+                isSelected = false,
+                isUpdating = false
+            )
+        )
+    }
+
+    @Test
+    fun testCardEnabledAndSelected() {
+        snapshot(
+            state = State(
+                details = ConsumerPaymentDetails.Card(
+                    id = "QAAAKJ6",
+                    expiryYear = 2023,
+                    expiryMonth = 12,
+                    isDefault = true,
+                    brand = CardBrand.MasterCard,
+                    last4 = "4444",
+                    cvcCheck = CvcCheck.Pass,
+                    billingAddress = ConsumerPaymentDetails.BillingAddress(
+                        countryCode = CountryCode.US,
+                        postalCode = "12312"
+                    )
+                ),
+                enabled = true,
+                isSelected = true,
+                isUpdating = false
+            )
+        )
+    }
+
+    @Test
+    fun testCardEnabledAndUpdating() {
+        snapshot(
+            state = State(
+                details = ConsumerPaymentDetails.Card(
+                    id = "QAAAKJ6",
+                    expiryYear = 2023,
+                    expiryMonth = 12,
+                    isDefault = true,
+                    brand = CardBrand.MasterCard,
+                    last4 = "4444",
+                    cvcCheck = CvcCheck.Pass,
+                    billingAddress = ConsumerPaymentDetails.BillingAddress(
+                        countryCode = CountryCode.US,
+                        postalCode = "12312"
+                    )
+                ),
+                enabled = true,
+                isSelected = false,
+                isUpdating = true
+            )
+        )
+    }
+
+    @Test
+    fun testCardDisabledAndSelected() {
+        snapshot(
+            state = State(
+                details = ConsumerPaymentDetails.Card(
+                    id = "QAAAKJ6",
+                    expiryYear = 2023,
+                    expiryMonth = 12,
+                    isDefault = true,
+                    brand = CardBrand.MasterCard,
+                    last4 = "4444",
+                    cvcCheck = CvcCheck.Pass,
+                    billingAddress = ConsumerPaymentDetails.BillingAddress(
+                        countryCode = CountryCode.US,
+                        postalCode = "12312"
+                    )
+                ),
+                enabled = false,
+                isSelected = true,
+                isUpdating = false
+            )
+        )
+    }
+
+    @Test
+    fun testBankAccountEnabled() {
+        snapshot(
+            state = State(
+                details = ConsumerPaymentDetails.BankAccount(
+                    id = "wAAACGA",
+                    last4 = "6789",
+                    bankName = "STRIPE TEST BANK",
+                    bankIconCode = null,
+                    isDefault = false,
+                ),
+                enabled = true,
+                isSelected = false,
+                isUpdating = false
+            )
+        )
+    }
+
+    @Test
+    fun testPassThroughEnabled() {
+        snapshot(
+            state = State(
+                details = ConsumerPaymentDetails.Passthrough(
+                    id = "wAAACGA",
+                    last4 = "6789",
+                ),
+                enabled = true,
+                isSelected = false,
+                isUpdating = false
+            )
+        )
+    }
+
+    private fun snapshot(state: State) {
         paparazziRule.snapshot {
             DefaultLinkTheme {
                 PaymentDetailsListItem(
-                    paymentDetails = testCase.state.details,
-                    enabled = testCase.state.enabled,
-                    isSelected = testCase.state.isSelected,
-                    isUpdating = testCase.state.isUpdating,
+                    paymentDetails = state.details,
+                    enabled = state.enabled,
+                    isSelected = state.isSelected,
+                    isUpdating = state.isUpdating,
                     onClick = {},
                     onMenuButtonClick = {}
                 )
             }
         }
-    }
-
-    companion object {
-        @JvmStatic
-        @Parameterized.Parameters(name = "{0}")
-        @SuppressWarnings("LongMethod")
-        fun data(): List<TestCase> {
-            return listOf(
-                TestCase(
-                    name = "CardEnabled",
-                    state = State(
-                        details = ConsumerPaymentDetails.Card(
-                            id = "QAAAKJ6",
-                            expiryYear = 2023,
-                            expiryMonth = 12,
-                            isDefault = true,
-                            brand = CardBrand.MasterCard,
-                            last4 = "4444",
-                            cvcCheck = CvcCheck.Pass,
-                            billingAddress = ConsumerPaymentDetails.BillingAddress(
-                                countryCode = CountryCode.US,
-                                postalCode = "12312"
-                            )
-                        ),
-                        enabled = true,
-                        isSelected = false,
-                        isUpdating = false
-                    )
-                ),
-                TestCase(
-                    name = "CardEnabledAndSelected",
-                    state = State(
-                        details = ConsumerPaymentDetails.Card(
-                            id = "QAAAKJ6",
-                            expiryYear = 2023,
-                            expiryMonth = 12,
-                            isDefault = true,
-                            brand = CardBrand.MasterCard,
-                            last4 = "4444",
-                            cvcCheck = CvcCheck.Pass,
-                            billingAddress = ConsumerPaymentDetails.BillingAddress(
-                                countryCode = CountryCode.US,
-                                postalCode = "12312"
-                            )
-                        ),
-                        enabled = true,
-                        isSelected = true,
-                        isUpdating = false
-                    )
-                ),
-                TestCase(
-                    name = "CardEnabledAndUpdating",
-                    state = State(
-                        details = ConsumerPaymentDetails.Card(
-                            id = "QAAAKJ6",
-                            expiryYear = 2023,
-                            expiryMonth = 12,
-                            isDefault = true,
-                            brand = CardBrand.MasterCard,
-                            last4 = "4444",
-                            cvcCheck = CvcCheck.Pass,
-                            billingAddress = ConsumerPaymentDetails.BillingAddress(
-                                countryCode = CountryCode.US,
-                                postalCode = "12312"
-                            )
-                        ),
-                        enabled = true,
-                        isSelected = false,
-                        isUpdating = true
-                    )
-                ),
-                TestCase(
-                    name = "CardDisabledAndSelected",
-                    state = State(
-                        details = ConsumerPaymentDetails.Card(
-                            id = "QAAAKJ6",
-                            expiryYear = 2023,
-                            expiryMonth = 12,
-                            isDefault = true,
-                            brand = CardBrand.MasterCard,
-                            last4 = "4444",
-                            cvcCheck = CvcCheck.Pass,
-                            billingAddress = ConsumerPaymentDetails.BillingAddress(
-                                countryCode = CountryCode.US,
-                                postalCode = "12312"
-                            )
-                        ),
-                        enabled = false,
-                        isSelected = true,
-                        isUpdating = false
-                    )
-                ),
-                TestCase(
-                    name = "BankAccountEnabled",
-                    state = State(
-                        details = ConsumerPaymentDetails.BankAccount(
-                            id = "wAAACGA",
-                            last4 = "6789",
-                            bankName = "STRIPE TEST BANK",
-                            bankIconCode = null,
-                            isDefault = false,
-                        ),
-                        enabled = true,
-                        isSelected = false,
-                        isUpdating = false
-                    )
-                ),
-                TestCase(
-                    name = "PassThroughEnabled",
-                    state = State(
-                        details = ConsumerPaymentDetails.Passthrough(
-                            id = "wAAACGA",
-                            last4 = "6789",
-                        ),
-                        enabled = true,
-                        isSelected = false,
-                        isUpdating = false
-                    )
-                )
-            )
-        }
-    }
-
-    internal data class TestCase(val name: String, val state: State) {
-        override fun toString(): String = name
     }
 
     internal data class State(

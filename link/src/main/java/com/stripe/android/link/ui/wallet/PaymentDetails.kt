@@ -49,60 +49,53 @@ internal fun PaymentDetailsListItem(
     onClick: () -> Unit,
     onMenuButtonClick: () -> Unit
 ) {
-    Column {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .defaultMinSize(minHeight = 56.dp)
-                .clickable(enabled = enabled, onClick = onClick),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            RadioButton(
-                selected = isSelected,
-                onClick = null,
-                modifier = Modifier.padding(start = 20.dp, end = 6.dp),
-                colors = RadioButtonDefaults.colors(
-                    selectedColor = MaterialTheme.linkColors.actionLabelLight,
-                    unselectedColor = MaterialTheme.linkColors.disabledText
-                )
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .defaultMinSize(minHeight = 56.dp)
+            .clickable(enabled = enabled, onClick = onClick),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        RadioButton(
+            selected = isSelected,
+            onClick = null,
+            modifier = Modifier.padding(start = 20.dp, end = 6.dp),
+            colors = RadioButtonDefaults.colors(
+                selectedColor = MaterialTheme.linkColors.actionLabelLight,
+                unselectedColor = MaterialTheme.linkColors.disabledText
             )
-            Column(
-                modifier = Modifier
-                    .padding(vertical = 8.dp)
-                    .weight(1f)
+        )
+        Column(
+            modifier = Modifier
+                .padding(vertical = 8.dp)
+                .weight(1f)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    PaymentDetails(paymentDetails = paymentDetails)
+                PaymentDetails(paymentDetails = paymentDetails)
 
-                    if (paymentDetails.isDefault) {
-                        DefaultTag()
-                    }
+                if (paymentDetails.isDefault) {
+                    DefaultTag()
+                }
 
-                    val showWarning = (paymentDetails as? Card)?.isExpired ?: false
-                    if (showWarning && !isSelected) {
-                        Icon(
-                            painter = painterResource(R.drawable.stripe_link_error),
-                            contentDescription = null,
-                            modifier = Modifier.size(20.dp),
-                            tint = MaterialTheme.linkColors.errorText
-                        )
-                    }
+                val showWarning = (paymentDetails as? Card)?.isExpired ?: false
+                if (showWarning) {
+                    Icon(
+                        painter = painterResource(R.drawable.stripe_link_error),
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp),
+                        tint = MaterialTheme.linkColors.errorText
+                    )
                 }
             }
-
-            MenuAndLoader(
-                enabled = enabled,
-                isUpdating = isUpdating,
-                onMenuButtonClick = onMenuButtonClick
-            )
         }
-        TabRowDefaults.Divider(
-            modifier = Modifier.padding(horizontal = 20.dp),
-            color = MaterialTheme.linkColors.componentDivider,
-            thickness = 1.dp
+
+        MenuAndLoader(
+            enabled = enabled,
+            isUpdating = isUpdating,
+            onMenuButtonClick = onMenuButtonClick
         )
     }
 }

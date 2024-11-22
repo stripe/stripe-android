@@ -73,5 +73,5 @@
   <!-- Default name for bank account payment method when bank name is unavailable -->
   <string name="stripe_wallet_bank">Bank</string>
   <!-- Accessibility description for Passthrough payment method -->
-  <string name="stripe_wallet_passthrough_description" translatable="false">Passthrough</string>
+  <string name="stripe_wallet_passthrough_description">Passthrough</string>
 </resources>
