@@ -502,7 +502,10 @@ class FinancialConnectionsSheetViewModelTest {
                 assertThat(it.webAuthFlowStatus).isEqualTo(AuthFlowStatus.NONE)
                 val viewEffect = it.viewEffect as FinishWithResult
                 assertThat(viewEffect.result).isEqualTo(
-                    Completed(financialConnectionsSession = expectedSession)
+                    Completed(
+                        financialConnectionsSession = expectedSession,
+                        manualEntryUsesMicrodeposits = true,
+                    )
                 )
             }
         }
@@ -654,6 +657,29 @@ class FinancialConnectionsSheetViewModelTest {
                 val viewEffect = it.viewEffect as FinishWithResult
                 assertThat(viewEffect.result).isEqualTo(Canceled)
                 verify(eventReporter).onResult(eq(configuration), any<Canceled>())
+            }
+        }
+    }
+
+    @Test
+    fun `Returns correct result when manual entry does not use microdeposits`() {
+        runTest {
+            // Given
+            val viewModel = createViewModel(
+                defaultInitialState.copy(
+                    manifest = syncResponse.manifest.copy(manualEntryUsesMicrodeposits = false),
+                    webAuthFlowStatus = AuthFlowStatus.ON_EXTERNAL_ACTIVITY,
+                )
+            )
+
+            // When
+            // simulate success
+            viewModel.handleOnNewIntent(successIntent())
+
+            withState(viewModel) {
+                val viewEffect = it.viewEffect as FinishWithResult
+                val success = viewEffect.result as Completed
+                assertThat(success.manualEntryUsesMicrodeposits).isFalse()
             }
         }
     }

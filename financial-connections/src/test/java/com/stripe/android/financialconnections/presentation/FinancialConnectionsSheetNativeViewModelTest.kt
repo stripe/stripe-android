@@ -314,6 +314,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
             initialPane = FinancialConnectionsSessionManifest.Pane.CONSENT,
             theme = Theme.LinkLight,
             isLinkWithStripe = true,
+            manualEntryUsesMicrodeposits = false,
             elementsSessionContext = null,
         )
 
@@ -337,6 +338,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
                     last4 = "4242",
                     bankName = "Stripe Bank",
                 ),
+                manualEntryUsesMicrodeposits = false,
             )
         )
 
@@ -368,6 +370,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
             initialPane = FinancialConnectionsSessionManifest.Pane.CONSENT,
             theme = Theme.LinkLight,
             isLinkWithStripe = true,
+            manualEntryUsesMicrodeposits = false,
             elementsSessionContext = null,
         )
 
@@ -420,6 +423,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
             initialPane = FinancialConnectionsSessionManifest.Pane.CONSENT,
             theme = Theme.LinkLight,
             isLinkWithStripe = true,
+            manualEntryUsesMicrodeposits = false,
             elementsSessionContext = null,
         )
 
@@ -436,6 +440,50 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
         val finishViewEffect = state.viewEffect as? Finish
         val failedResult = finishViewEffect?.result as? Failed
         assertThat(failedResult?.error?.message).isEqualTo("Something went wrong here")
+    }
+
+    @Test
+    fun `Returns correct result when manual entry does not use microdeposits`() = runTest {
+        val session = financialConnectionsSessionWithNoMoreAccounts.copy(
+            paymentAccount = FinancialConnectionsAccount(
+                id = "account_001",
+                supportedPaymentMethodTypes = emptyList(),
+                created = 123,
+                livemode = false,
+                institutionName = "Stripe Bank",
+            ),
+        )
+
+        whenever(completeFinancialConnectionsSession(anyOrNull(), anyOrNull())).thenReturn(
+            CompleteFinancialConnectionsSession.Result(
+                session = session,
+                status = "completed",
+            )
+        )
+
+        val initialState = FinancialConnectionsSheetNativeState(
+            webAuthFlow = WebAuthFlowState.Uninitialized,
+            firstInit = true,
+            configuration = configuration,
+            reducedBranding = false,
+            testMode = true,
+            viewEffect = null,
+            completed = false,
+            initialPane = FinancialConnectionsSessionManifest.Pane.CONSENT,
+            theme = Theme.DefaultLight,
+            isLinkWithStripe = false,
+            manualEntryUsesMicrodeposits = false,
+            elementsSessionContext = null,
+        )
+
+        val viewModel = createViewModel(initialState)
+
+        nativeAuthFlowCoordinator().emit(Complete())
+
+        val state = viewModel.stateFlow.value
+        val finishViewEffect = state.viewEffect as? Finish
+        val completedResult = finishViewEffect?.result as? Completed
+        assertThat(completedResult?.manualEntryUsesMicrodeposits).isFalse()
     }
 
     @After
