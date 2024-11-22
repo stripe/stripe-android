@@ -65,6 +65,7 @@ internal fun UpdatePaymentMethodUI(interactor: UpdatePaymentMethodInteractor, mo
             is SavedPaymentMethod.Card -> CardDetailsUI(
                 displayableSavedPaymentMethod = interactor.displayableSavedPaymentMethod,
                 card = savedPaymentMethod.card,
+                isExpiredCard = interactor.isExpiredCard,
             )
             is SavedPaymentMethod.SepaDebit -> SepaDebitUI(
                 name = interactor.displayableSavedPaymentMethod.paymentMethod.billingDetails?.name,
@@ -79,14 +80,16 @@ internal fun UpdatePaymentMethodUI(interactor: UpdatePaymentMethodInteractor, mo
             SavedPaymentMethod.Unexpected -> {}
         }
 
-        interactor.displayableSavedPaymentMethod.getDetailsCannotBeChangedText()?.let {
-            Text(
-                text = it.resolve(context),
-                style = MaterialTheme.typography.caption,
-                color = MaterialTheme.stripeColors.subtitle,
-                fontWeight = FontWeight.Normal,
-                modifier = Modifier.padding(top = 12.dp).testTag(UPDATE_PM_DETAILS_SUBTITLE_TEST_TAG)
-            )
+        if (!interactor.isExpiredCard) {
+            interactor.displayableSavedPaymentMethod.getDetailsCannotBeChangedText()?.let {
+                Text(
+                    text = it.resolve(context),
+                    style = MaterialTheme.typography.caption,
+                    color = MaterialTheme.stripeColors.subtitle,
+                    fontWeight = FontWeight.Normal,
+                    modifier = Modifier.padding(top = 12.dp).testTag(UPDATE_PM_DETAILS_SUBTITLE_TEST_TAG)
+                )
+            }
         }
 
         state.error?.let {
@@ -108,6 +111,7 @@ internal fun UpdatePaymentMethodUI(interactor: UpdatePaymentMethodInteractor, mo
 private fun CardDetailsUI(
     displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
     card: PaymentMethod.Card,
+    isExpiredCard: Boolean,
 ) {
     val dividerHeight = remember { mutableStateOf(0.dp) }
 
@@ -131,6 +135,7 @@ private fun CardDetailsUI(
                 ExpiryField(
                     expiryMonth = card.expiryMonth,
                     expiryYear = card.expiryYear,
+                    isExpired = isExpiredCard,
                     modifier = Modifier
                         .weight(1F)
                         .onSizeChanged {
@@ -274,7 +279,12 @@ private fun CardNumberField(last4: String?, savedPaymentMethodIcon: Int) {
 }
 
 @Composable
-private fun ExpiryField(expiryMonth: Int?, expiryYear: Int?, modifier: Modifier) {
+private fun ExpiryField(
+    expiryMonth: Int?,
+    expiryYear: Int?,
+    isExpired: Boolean,
+    modifier: Modifier
+) {
     CommonTextField(
         modifier = modifier.testTag(UPDATE_PM_EXPIRY_FIELD_TEST_TAG),
         value = formattedExpiryDate(expiryMonth = expiryMonth, expiryYear = expiryYear),
@@ -284,6 +294,7 @@ private fun ExpiryField(expiryMonth: Int?, expiryYear: Int?, modifier: Modifier)
             topEnd = ZeroCornerSize,
             bottomEnd = ZeroCornerSize,
         ),
+        shouldShowError = isExpired,
     )
 }
 
@@ -351,6 +362,7 @@ private fun CommonTextField(
     label: String,
     modifier: Modifier = Modifier,
     trailingIcon: @Composable (() -> Unit)? = null,
+    shouldShowError: Boolean = false,
     shape: Shape =
         MaterialTheme.shapes.small.copy(bottomEnd = ZeroCornerSize, bottomStart = ZeroCornerSize),
 ) {
@@ -366,7 +378,7 @@ private fun CommonTextField(
         trailingIcon = trailingIcon,
         shape = shape,
         colors = TextFieldColors(
-            shouldShowError = false,
+            shouldShowError = shouldShowError,
         ),
         onValueChange = {},
     )

@@ -5,6 +5,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -51,6 +52,32 @@ class DefaultUpdatePaymentMethodInteractorTest {
 
             interactor.state.test {
                 assertThat(awaitItem().error).isEqualTo(expectedError.stripeErrorMessage())
+            }
+        }
+    }
+
+    @Test
+    fun expiredCard_displaysExpiredCardError() {
+        runScenario(
+            displayableSavedPaymentMethod = PaymentMethodFixtures
+                .EXPIRED_CARD_PAYMENT_METHOD
+                .toDisplayableSavedPaymentMethod()
+        ) {
+            interactor.state.test {
+                assertThat(awaitItem().error).isEqualTo(
+                    UpdatePaymentMethodInteractor.expiredErrorMessage
+                )
+            }
+        }
+    }
+
+    @Test
+    fun nonExpiredCard_hasNoInitialError() {
+        runScenario(
+            displayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard()
+        ) {
+            interactor.state.test {
+                assertThat(awaitItem().error).isNull()
             }
         }
     }
