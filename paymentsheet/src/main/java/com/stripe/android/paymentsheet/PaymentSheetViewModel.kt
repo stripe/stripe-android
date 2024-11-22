@@ -308,7 +308,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     private suspend fun handlePaymentSheetStateLoaded(state: PaymentSheetState.Full) {
-        val pendingResult = confirmationHandler.awaitIntentResult()
+        val pendingResult = confirmationHandler.awaitResult()
 
         if (pendingResult is ConfirmationHandler.Result.Succeeded) {
             // If we just received a transaction result after process death, we don't error. Instead, we dismiss
@@ -334,7 +334,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
         linkHandler.setupLink(state.linkState)
 
-        val pendingFailedPaymentResult = confirmationHandler.awaitIntentResult()
+        val pendingFailedPaymentResult = confirmationHandler.awaitResult()
             as? ConfirmationHandler.Result.Failed
         val errorMessage = pendingFailedPaymentResult?.cause?.stripeErrorMessage()
 

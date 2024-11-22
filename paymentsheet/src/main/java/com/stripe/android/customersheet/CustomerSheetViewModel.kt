@@ -1027,7 +1027,7 @@ internal class CustomerSheetViewModel(
             )
         )
 
-        when (val result = confirmationHandler.awaitIntentResult()) {
+        when (val result = confirmationHandler.awaitResult()) {
             is ConfirmationHandler.Result.Succeeded -> {
                 eventReporter.onAttachPaymentMethodSucceeded(
                     style = CustomerSheetEventReporter.AddPaymentMethodStyle.SetupIntent
