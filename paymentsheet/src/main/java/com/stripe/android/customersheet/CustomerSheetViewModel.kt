@@ -572,6 +572,7 @@ internal class CustomerSheetViewModel(
                         isLiveMode = isLiveModeProvider(),
                         canRemove = customerState.canRemove,
                         displayableSavedPaymentMethod = paymentMethod,
+                        cardBrandFilter = PaymentSheetCardBrandFilter(customerState.configuration.cardBrandAcceptance),
                         removeExecutor = ::removeExecutor,
                     ),
                     isLiveMode = isLiveModeProvider(),

@@ -37,12 +37,12 @@ import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.paymentsheet.ui.CardBrandChoice
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewAction
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewAction.OnBrandChoiceChanged
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewAction.OnRemoveConfirmed
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewAction.OnRemovePressed
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewAction.OnUpdatePressed
-import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
@@ -2710,7 +2710,7 @@ class CustomerSheetViewModelTest {
                 val editViewState = awaitViewState<CustomerSheetViewState.EditPaymentMethod>()
                 editViewState.editPaymentMethodInteractor.handleViewAction(
                     OnBrandChoiceChanged(
-                        EditPaymentMethodViewState.CardBrandChoice(
+                        CardBrandChoice(
                             brand = CardBrand.Visa
                         )
                     )
@@ -2898,7 +2898,7 @@ class CustomerSheetViewModelTest {
             val editViewState = awaitViewState<CustomerSheetViewState.EditPaymentMethod>()
             editViewState.editPaymentMethodInteractor.handleViewAction(
                 OnBrandChoiceChanged(
-                    EditPaymentMethodViewState.CardBrandChoice(
+                    CardBrandChoice(
                         brand = CardBrand.Visa
                     )
                 )
@@ -2992,7 +2992,7 @@ class CustomerSheetViewModelTest {
             val editViewState = awaitViewState<CustomerSheetViewState.EditPaymentMethod>()
             editViewState.editPaymentMethodInteractor.handleViewAction(
                 OnBrandChoiceChanged(
-                    EditPaymentMethodViewState.CardBrandChoice(brand = CardBrand.Visa)
+                    CardBrandChoice(brand = CardBrand.Visa)
                 )
             )
 
@@ -3023,7 +3023,7 @@ class CustomerSheetViewModelTest {
             val editViewState = awaitViewState<CustomerSheetViewState.EditPaymentMethod>()
             editViewState.editPaymentMethodInteractor.handleViewAction(
                 OnBrandChoiceChanged(
-                    EditPaymentMethodViewState.CardBrandChoice(brand = CardBrand.Visa)
+                    CardBrandChoice(brand = CardBrand.Visa)
                 )
             )
 
@@ -3519,7 +3519,7 @@ class CustomerSheetViewModelTest {
             val editViewState = awaitViewState<CustomerSheetViewState.EditPaymentMethod>()
             editViewState.editPaymentMethodInteractor.handleViewAction(
                 OnBrandChoiceChanged(
-                    EditPaymentMethodViewState.CardBrandChoice(
+                    CardBrandChoice(
                         brand = CardBrand.Visa
                     )
                 )
