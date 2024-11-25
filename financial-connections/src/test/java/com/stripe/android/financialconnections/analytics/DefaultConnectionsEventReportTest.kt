@@ -72,8 +72,7 @@ class DefaultConnectionsEventReportTest {
         eventReporter.onResult(
             configuration,
             FinancialConnectionsSheetActivityResult.Completed(
-                financialConnectionsSession = financialConnectionsSession,
-                manualEntryUsesMicrodeposits = true,
+                financialConnectionsSession = financialConnectionsSession
             )
         )
         verify(analyticsRequestExecutor).executeAsync(

@@ -4,6 +4,7 @@ import android.content.Intent
 import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ApiKeyFixtures
@@ -27,6 +28,7 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Failed
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetNativeActivityArgs
 import com.stripe.android.financialconnections.launcher.InstantDebitsResult
+import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession.StatusDetails
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession.StatusDetails.Cancelled
@@ -338,7 +340,6 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
                     last4 = "4242",
                     bankName = "Stripe Bank",
                 ),
-                manualEntryUsesMicrodeposits = false,
             )
         )
 
@@ -445,12 +446,9 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
     @Test
     fun `Returns correct result when manual entry does not use microdeposits`() = runTest {
         val session = financialConnectionsSessionWithNoMoreAccounts.copy(
-            paymentAccount = FinancialConnectionsAccount(
-                id = "account_001",
-                supportedPaymentMethodTypes = emptyList(),
-                created = 123,
-                livemode = false,
-                institutionName = "Stripe Bank",
+            paymentAccount = BankAccount(
+                id = "id_1234",
+                last4 = "4242",
             ),
         )
 
@@ -478,12 +476,16 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
 
         val viewModel = createViewModel(initialState)
 
-        nativeAuthFlowCoordinator().emit(Complete())
+        viewModel.stateFlow.test {
+            val state = awaitItem()
+            assertThat(state.viewEffect).isNull()
 
-        val state = viewModel.stateFlow.value
-        val finishViewEffect = state.viewEffect as? Finish
-        val completedResult = finishViewEffect?.result as? Completed
-        assertThat(completedResult?.manualEntryUsesMicrodeposits).isFalse()
+            nativeAuthFlowCoordinator().emit(Complete())
+
+            val result = (awaitItem().viewEffect as Finish).result as Completed
+            val bankAccount = result.financialConnectionsSession?.paymentAccount as BankAccount
+            assertThat(bankAccount.usesMicrodeposits).isFalse()
+        }
     }
 
     @After

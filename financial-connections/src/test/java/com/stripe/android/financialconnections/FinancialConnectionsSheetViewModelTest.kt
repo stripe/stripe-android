@@ -4,6 +4,7 @@ import android.content.Intent
 import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIException
@@ -27,6 +28,7 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Canceled
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Completed
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Failed
+import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccountFixtures
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccountList
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
@@ -502,10 +504,7 @@ class FinancialConnectionsSheetViewModelTest {
                 assertThat(it.webAuthFlowStatus).isEqualTo(AuthFlowStatus.NONE)
                 val viewEffect = it.viewEffect as FinishWithResult
                 assertThat(viewEffect.result).isEqualTo(
-                    Completed(
-                        financialConnectionsSession = expectedSession,
-                        manualEntryUsesMicrodeposits = true,
-                    )
+                    Completed(financialConnectionsSession = expectedSession)
                 )
             }
         }
@@ -665,6 +664,15 @@ class FinancialConnectionsSheetViewModelTest {
     fun `Returns correct result when manual entry does not use microdeposits`() {
         runTest {
             // Given
+            whenever(fetchFinancialConnectionsSession(any())).thenReturn(
+                financialConnectionsSession().copy(
+                    paymentAccount = BankAccount(
+                        id = "id_1234",
+                        last4 = "4242",
+                    )
+                )
+            )
+
             val viewModel = createViewModel(
                 defaultInitialState.copy(
                     manifest = syncResponse.manifest.copy(manualEntryUsesMicrodeposits = false),
@@ -672,14 +680,16 @@ class FinancialConnectionsSheetViewModelTest {
                 )
             )
 
-            // When
-            // simulate success
-            viewModel.handleOnNewIntent(successIntent())
+            viewModel.stateFlow.test {
+                assertThat(awaitItem().viewEffect).isNull()
 
-            withState(viewModel) {
-                val viewEffect = it.viewEffect as FinishWithResult
-                val success = viewEffect.result as Completed
-                assertThat(success.manualEntryUsesMicrodeposits).isFalse()
+                viewModel.handleOnNewIntent(successIntent())
+                assertThat(awaitItem().webAuthFlowStatus).isEqualTo(AuthFlowStatus.NONE)
+
+                val state = awaitItem()
+                val result = (state.viewEffect as FinishWithResult).result as Completed
+                val bankAccount = result.financialConnectionsSession?.paymentAccount as BankAccount
+                assertThat(bankAccount.usesMicrodeposits).isFalse()
             }
         }
     }

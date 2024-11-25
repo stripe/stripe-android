@@ -4,7 +4,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.stripe.android.BuildConfig
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext
-import com.stripe.android.financialconnections.FinancialConnectionsSheetInternalResult
+import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForDataLauncher
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForInstantDebitsLauncher
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetInstantDebitsResult
@@ -46,7 +46,7 @@ internal interface FinancialConnectionsPaymentsProxy {
 
         fun createForACH(
             activity: AppCompatActivity,
-            onComplete: (FinancialConnectionsSheetInternalResult) -> Unit,
+            onComplete: (FinancialConnectionsSheetResult) -> Unit,
             provider: () -> FinancialConnectionsPaymentsProxy = {
                 FinancialConnectionsLauncherProxy(
                     FinancialConnectionsSheetForDataLauncher(

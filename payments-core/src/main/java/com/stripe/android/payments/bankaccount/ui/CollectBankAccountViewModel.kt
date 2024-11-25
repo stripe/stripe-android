@@ -9,7 +9,7 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.core.Logger
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext
-import com.stripe.android.financialconnections.FinancialConnectionsSheetInternalResult
+import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetInstantDebitsResult
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.model.PaymentMethod
@@ -135,20 +135,17 @@ internal class CollectBankAccountViewModel @Inject constructor(
             .onFailure { finishWithError(it) }
     }
 
-    fun onConnectionsForACHResult(result: FinancialConnectionsSheetInternalResult) {
+    fun onConnectionsForACHResult(result: FinancialConnectionsSheetResult) {
         hasLaunched = false
         viewModelScope.launch {
             when (result) {
-                is FinancialConnectionsSheetInternalResult.Canceled -> finishWithResult(Cancelled)
+                is FinancialConnectionsSheetResult.Canceled -> finishWithResult(Cancelled)
 
-                is FinancialConnectionsSheetInternalResult.Failed -> finishWithError(result.error)
+                is FinancialConnectionsSheetResult.Failed -> finishWithError(result.error)
 
-                is FinancialConnectionsSheetInternalResult.Completed -> when {
-                    args.attachToIntent -> attachSessionToIntent(
-                        financialConnectionsSession = result.financialConnectionsSession,
-                        usesMicrodeposits = result.manualEntryUsesMicrodeposits,
-                    )
-                    else -> finishWithSession(result.financialConnectionsSession, result.manualEntryUsesMicrodeposits)
+                is FinancialConnectionsSheetResult.Completed -> when {
+                    args.attachToIntent -> attachSessionToIntent(result.financialConnectionsSession)
+                    else -> finishWithSession(result.financialConnectionsSession)
                 }
             }
         }
@@ -176,15 +173,13 @@ internal class CollectBankAccountViewModel @Inject constructor(
     }
 
     private fun finishWithSession(
-        financialConnectionsSession: FinancialConnectionsSession,
-        usesMicrodeposits: Boolean,
+        financialConnectionsSession: FinancialConnectionsSession
     ) {
         finishWithRefreshedIntent { intent ->
             CollectBankAccountResponseInternal(
                 intent = intent,
                 usBankAccountData = USBankAccountData(
-                    financialConnectionsSession = financialConnectionsSession,
-                    manualEntryUsesMicrodeposits = usesMicrodeposits,
+                    financialConnectionsSession
                 ),
                 instantDebitsData = null,
             )
@@ -242,10 +237,7 @@ internal class CollectBankAccountViewModel @Inject constructor(
         }
     }
 
-    private fun attachSessionToIntent(
-        financialConnectionsSession: FinancialConnectionsSession,
-        usesMicrodeposits: Boolean,
-    ) {
+    private fun attachSessionToIntent(financialConnectionsSession: FinancialConnectionsSession) {
         viewModelScope.launch {
             when (args) {
                 is CollectBankAccountContract.Args.ForDeferredPaymentIntent,
@@ -272,10 +264,7 @@ internal class CollectBankAccountViewModel @Inject constructor(
                     Completed(
                         CollectBankAccountResponseInternal(
                             intent = stripeIntent,
-                            usBankAccountData = USBankAccountData(
-                                financialConnectionsSession = financialConnectionsSession,
-                                manualEntryUsesMicrodeposits = usesMicrodeposits,
-                            ),
+                            usBankAccountData = USBankAccountData(financialConnectionsSession),
                             instantDebitsData = null
                         )
                     )

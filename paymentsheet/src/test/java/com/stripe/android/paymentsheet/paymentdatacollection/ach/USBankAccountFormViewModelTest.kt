@@ -1479,7 +1479,8 @@ class USBankAccountFormViewModelTest {
                 id = "123",
                 last4 = "4567",
                 bankName = "Test",
-                routingNumber = "123"
+                routingNumber = "123",
+                usesMicrodeposits = usesMicrodeposits,
             )
         )
 
@@ -1487,8 +1488,7 @@ class USBankAccountFormViewModelTest {
             CollectBankAccountResponseInternal(
                 intent = paymentIntent,
                 usBankAccountData = CollectBankAccountResponseInternal.USBankAccountData(
-                    financialConnectionsSession = financialConnectionsSession,
-                    manualEntryUsesMicrodeposits = usesMicrodeposits,
+                    financialConnectionsSession = financialConnectionsSession
                 ),
                 instantDebitsData = null
             )
@@ -1515,8 +1515,7 @@ class USBankAccountFormViewModelTest {
             CollectBankAccountResponseInternal(
                 intent = paymentIntent,
                 usBankAccountData = CollectBankAccountResponseInternal.USBankAccountData(
-                    financialConnectionsSession = financialConnectionsSession,
-                    manualEntryUsesMicrodeposits = false,
+                    financialConnectionsSession = financialConnectionsSession
                 ),
                 instantDebitsData = null
             )

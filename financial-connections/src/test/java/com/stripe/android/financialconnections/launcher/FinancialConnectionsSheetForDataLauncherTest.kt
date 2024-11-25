@@ -4,10 +4,8 @@ import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.lifecycle.Lifecycle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
-import com.stripe.android.financialconnections.FinancialConnectionsSheetInternalResult
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import com.stripe.android.financialconnections.financialConnectionsSessionWithNoMoreAccounts
-import com.stripe.android.financialconnections.toPublicResult
 import com.stripe.android.financialconnections.utils.FakeActivityResultRegistry
 import com.stripe.android.financialconnections.utils.TestFragment
 import org.junit.Test
@@ -22,9 +20,8 @@ class FinancialConnectionsSheetForDataLauncherTest {
     @Test
     fun `create and present should return expected ConnectionsSheetResult#Completed`() {
         val testRegistry = FakeActivityResultRegistry(
-            FinancialConnectionsSheetInternalResult.Completed(
-                financialConnectionsSession = financialConnectionsSessionWithNoMoreAccounts,
-                manualEntryUsesMicrodeposits = false,
+            FinancialConnectionsSheetResult.Completed(
+                financialConnectionsSession = financialConnectionsSessionWithNoMoreAccounts
             )
         )
 
@@ -37,7 +34,7 @@ class FinancialConnectionsSheetForDataLauncherTest {
                     fragment,
                     testRegistry
                 ) {
-                    results.add(it.toPublicResult())
+                    results.add(it)
                 }
 
                 moveToState(Lifecycle.State.RESUMED)
@@ -54,7 +51,7 @@ class FinancialConnectionsSheetForDataLauncherTest {
 
     @Test
     fun `create and present should return expected ConnectionsSheetResult#Cancelled`() {
-        val testRegistry = FakeActivityResultRegistry(FinancialConnectionsSheetInternalResult.Canceled)
+        val testRegistry = FakeActivityResultRegistry(FinancialConnectionsSheetResult.Canceled)
 
         with(
             launchFragmentInContainer(initialState = Lifecycle.State.CREATED) { TestFragment() }
@@ -65,7 +62,7 @@ class FinancialConnectionsSheetForDataLauncherTest {
                     fragment,
                     testRegistry
                 ) {
-                    results.add(it.toPublicResult())
+                    results.add(it)
                 }
 
                 moveToState(Lifecycle.State.RESUMED)

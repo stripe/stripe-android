@@ -45,6 +45,7 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
 import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
+import com.stripe.android.financialconnections.model.update
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.destination
@@ -334,7 +335,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                         if (state.isLinkWithStripe) {
                             handleInstantDebitsCompletion(session)
                         } else {
-                            handleFinancialConnectionsCompletion(session, state.manualEntryUsesMicrodeposits)
+                            handleFinancialConnectionsCompletion(session)
                         }
                     }
 
@@ -364,21 +365,21 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
         }
     }
 
-    private fun handleFinancialConnectionsCompletion(
-        session: FinancialConnectionsSession,
-        manualEntryUsesMicrodeposits: Boolean,
-    ) {
+    private fun handleFinancialConnectionsCompletion(session: FinancialConnectionsSession) {
         FinancialConnections.emitEvent(
             name = Name.SUCCESS,
             metadata = Metadata(
                 manualEntry = session.paymentAccount is BankAccount,
             )
         )
+
+        val usesMicrodeposits = stateFlow.value.manualEntryUsesMicrodeposits
+        val updatedSession = session.update(usesMicrodeposits = usesMicrodeposits)
+
         finishWithResult(
             Completed(
-                financialConnectionsSession = session,
-                token = session.parsedToken,
-                manualEntryUsesMicrodeposits = manualEntryUsesMicrodeposits,
+                financialConnectionsSession = updatedSession,
+                token = updatedSession.parsedToken,
             )
         )
     }
@@ -391,7 +392,6 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
         val result = if (instantDebits != null) {
             Completed(
                 instantDebits = instantDebits,
-                manualEntryUsesMicrodeposits = false,
             )
         } else {
             Failed(

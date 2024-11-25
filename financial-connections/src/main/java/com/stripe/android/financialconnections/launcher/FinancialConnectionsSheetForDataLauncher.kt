@@ -6,7 +6,7 @@ import androidx.activity.result.ActivityResultRegistry
 import androidx.annotation.RestrictTo
 import androidx.fragment.app.Fragment
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
-import com.stripe.android.financialconnections.FinancialConnectionsSheetInternalResultCallback
+import com.stripe.android.financialconnections.FinancialConnectionsSheetResultCallback
 import org.jetbrains.annotations.TestOnly
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -16,7 +16,7 @@ class FinancialConnectionsSheetForDataLauncher(
 
     constructor(
         activity: ComponentActivity,
-        callback: FinancialConnectionsSheetInternalResultCallback
+        callback: FinancialConnectionsSheetResultCallback
     ) : this(
         activity.registerForActivityResult(
             FinancialConnectionsSheetForDataContract()
@@ -27,7 +27,7 @@ class FinancialConnectionsSheetForDataLauncher(
 
     constructor(
         fragment: Fragment,
-        callback: FinancialConnectionsSheetInternalResultCallback
+        callback: FinancialConnectionsSheetResultCallback
     ) : this(
         fragment.registerForActivityResult(
             FinancialConnectionsSheetForDataContract()
@@ -40,7 +40,7 @@ class FinancialConnectionsSheetForDataLauncher(
     constructor(
         fragment: Fragment,
         registry: ActivityResultRegistry,
-        callback: FinancialConnectionsSheetInternalResultCallback
+        callback: FinancialConnectionsSheetResultCallback
     ) : this(
         fragment.registerForActivityResult(
             FinancialConnectionsSheetForDataContract(),
