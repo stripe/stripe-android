@@ -562,6 +562,7 @@ internal class CustomerSheetViewModel(
         }
     }
 
+    @Suppress("LongMethod") // Suppressing because this is only due to a temporary feature flag.
     private fun onModifyItem(paymentMethod: DisplayableSavedPaymentMethod) {
         val customerState = customerState.value
 

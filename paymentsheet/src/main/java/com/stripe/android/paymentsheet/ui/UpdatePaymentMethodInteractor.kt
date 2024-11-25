@@ -92,13 +92,15 @@ internal class DefaultUpdatePaymentMethodInteractor(
     override fun handleViewAction(viewAction: UpdatePaymentMethodInteractor.ViewAction) {
         when (viewAction) {
             UpdatePaymentMethodInteractor.ViewAction.RemovePaymentMethod -> removePaymentMethod()
-            is UpdatePaymentMethodInteractor.ViewAction.BrandChoiceOptionsShown -> onBrandChoiceOptionsShown(
+            UpdatePaymentMethodInteractor.ViewAction.BrandChoiceOptionsShown -> onBrandChoiceOptionsShown(
                 cardBrandChoice.value.brand
             )
-            is UpdatePaymentMethodInteractor.ViewAction.BrandChoiceOptionsDismissed -> onBrandChoiceOptionsDismissed(
+            UpdatePaymentMethodInteractor.ViewAction.BrandChoiceOptionsDismissed -> onBrandChoiceOptionsDismissed(
                 cardBrandChoice.value.brand
             )
-            is UpdatePaymentMethodInteractor.ViewAction.BrandChoiceChanged -> onBrandChoiceChanged(viewAction.cardBrandChoice)
+            is UpdatePaymentMethodInteractor.ViewAction.BrandChoiceChanged -> onBrandChoiceChanged(
+                viewAction.cardBrandChoice
+            )
         }
     }
 

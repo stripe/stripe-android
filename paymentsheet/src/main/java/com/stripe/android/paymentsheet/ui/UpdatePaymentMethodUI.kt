@@ -68,17 +68,7 @@ internal fun UpdatePaymentMethodUI(interactor: UpdatePaymentMethodInteractor, mo
                 displayableSavedPaymentMethod = interactor.displayableSavedPaymentMethod,
                 selectedBrand = state.cardBrandChoice,
                 card = savedPaymentMethod.card,
-                cardBrandFilter = interactor.cardBrandFilter,
-                isExpiredCard = interactor.isExpiredCard,
-                onBrandOptionsShown = {
-                    interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.BrandChoiceOptionsShown)
-                },
-                onBrandChoiceChanged = {
-                    interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.BrandChoiceChanged(it))
-                },
-                onBrandChoiceOptionsDismissed = {
-                    interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.BrandChoiceOptionsDismissed)
-                }
+                interactor = interactor,
             )
             is SavedPaymentMethod.SepaDebit -> SepaDebitUI(
                 name = interactor.displayableSavedPaymentMethod.paymentMethod.billingDetails?.name,
@@ -125,11 +115,7 @@ private fun CardDetailsUI(
     displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
     selectedBrand: CardBrandChoice,
     card: PaymentMethod.Card,
-    cardBrandFilter: CardBrandFilter,
-    isExpiredCard: Boolean,
-    onBrandOptionsShown: () -> Unit,
-    onBrandChoiceChanged: (CardBrandChoice) -> Unit,
-    onBrandChoiceOptionsDismissed: () -> Unit,
+    interactor: UpdatePaymentMethodInteractor,
 ) {
     val dividerHeight = remember { mutableStateOf(0.dp) }
 
@@ -143,13 +129,19 @@ private fun CardDetailsUI(
                 card = card,
                 selectedBrand = selectedBrand,
                 isModifiable = displayableSavedPaymentMethod.isModifiable(),
-                cardBrandFilter = cardBrandFilter,
+                cardBrandFilter = interactor.cardBrandFilter,
                 savedPaymentMethodIcon = displayableSavedPaymentMethod
                     .paymentMethod
                     .getSavedPaymentMethodIcon(forVerticalMode = true),
-                onBrandOptionsShown = onBrandOptionsShown,
-                onBrandChoiceChanged = onBrandChoiceChanged,
-                onBrandChoiceOptionsDismissed = onBrandChoiceOptionsDismissed,
+                onBrandOptionsShown = {
+                    interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.BrandChoiceOptionsShown)
+                },
+                onBrandChoiceChanged = {
+                    interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.BrandChoiceChanged(it))
+                },
+                onBrandChoiceOptionsDismissed = {
+                    interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.BrandChoiceOptionsDismissed)
+                },
             )
             Divider(
                 color = MaterialTheme.stripeColors.componentDivider,
@@ -159,7 +151,7 @@ private fun CardDetailsUI(
                 ExpiryField(
                     expiryMonth = card.expiryMonth,
                     expiryYear = card.expiryYear,
-                    isExpired = isExpiredCard,
+                    isExpired = interactor.isExpiredCard,
                     modifier = Modifier
                         .weight(1F)
                         .onSizeChanged {
