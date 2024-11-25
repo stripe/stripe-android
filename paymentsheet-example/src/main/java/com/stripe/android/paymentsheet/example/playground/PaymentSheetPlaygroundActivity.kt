@@ -39,13 +39,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.stripe.android.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetResult
 import com.stripe.android.customersheet.rememberCustomerSheet
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
-import com.stripe.android.paymentsheet.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressLauncher
@@ -86,29 +84,10 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
         )
     }
 
-    //@OptIn(ExperimentalCustomerSessionApi::class, ExperimentalEmbeddedPaymentElementApi::class)
-    //@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
-    //@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
-    @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
+    @OptIn(ExperimentalCustomerSessionApi::class)
     @Suppress("LongMethod")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-val flatWithRadioStyle = PaymentSheet.Appearance.Embedded.RowStyle.FlatWithRadio(
-    separatorThicknessDp = 8.0f,
-    separatorColor = getColor(R.colors.border),
-    separatorInsetsDp = 4.0f,
-    topSeparatorEnabled = true,
-    bottomSeparatorEnabled = false,
-    selectedColor = getColor(R.colors.primary),
-    unselectedColor = getColor(R.colors.secondary),
-    additionalInsetsDp = 12f
-)
-val embeddedAppearance = PaymentSheet.Appearance.Embedded(
-    style = flatWithRadioStyle,
-)
-
-val appBuilder = PaymentSheet.Appearance.Builder().embeddedAppearance(embeddedAppearance).build()
 
         setContent {
             val paymentSheet = PaymentSheet.Builder(viewModel::onPaymentSheetResult)

@@ -133,12 +133,6 @@ data class EmbeddedFlatStyle(
 )
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-data class EmbeddedRadioStyle(
-    val selectedColor: Color,
-    val unselectedColor: Color
-)
-
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class EmbeddedInsets(
     val checkmarkInsetDp: Float,
     val additionalInsetsDp: Float
