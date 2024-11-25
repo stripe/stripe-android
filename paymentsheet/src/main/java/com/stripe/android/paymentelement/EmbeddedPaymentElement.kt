@@ -2,13 +2,13 @@ package com.stripe.android.paymentelement
 
 import android.graphics.drawable.Drawable
 import android.os.Parcelable
-import androidx.activity.ComponentActivity
 import androidx.annotation.RestrictTo
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.AnnotatedString
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.ExperimentalCardBrandFilteringApi
 import com.stripe.android.common.configuration.ConfigurationDefaults
@@ -25,7 +25,7 @@ import kotlinx.parcelize.Parcelize
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @ExperimentalEmbeddedPaymentElementApi
-class EmbeddedPaymentElement internal constructor(
+class EmbeddedPaymentElement private constructor(
     private val sharedViewModel: SharedPaymentElementViewModel
 ) {
     /**
@@ -377,12 +377,11 @@ class EmbeddedPaymentElement internal constructor(
             get() = rememberDrawablePainter(iconDrawable)
     }
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    companion object {
+    internal companion object {
         @ExperimentalEmbeddedPaymentElementApi
-        fun create(activity: ComponentActivity): EmbeddedPaymentElement {
+        fun create(viewModelStoreOwner: ViewModelStoreOwner): EmbeddedPaymentElement {
             val sharedViewModel = ViewModelProvider(
-                owner = activity,
+                owner = viewModelStoreOwner,
                 factory = SharedPaymentElementViewModel.Factory()
             )[SharedPaymentElementViewModel::class.java]
             return EmbeddedPaymentElement(sharedViewModel)
