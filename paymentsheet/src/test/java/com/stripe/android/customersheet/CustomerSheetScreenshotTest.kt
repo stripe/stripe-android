@@ -388,6 +388,8 @@ internal class CustomerSheetScreenshotTest {
                 canRemove = true,
                 isLiveMode = true,
                 cardBrandFilter = DefaultCardBrandFilter,
+                onBrandChoiceOptionsDismissed = {},
+                onBrandChoiceOptionsShown = {},
             ),
             isLiveMode = true,
         )

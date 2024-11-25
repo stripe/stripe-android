@@ -66,9 +66,9 @@ internal fun UpdatePaymentMethodUI(interactor: UpdatePaymentMethodInteractor, mo
         when (val savedPaymentMethod = interactor.displayableSavedPaymentMethod.savedPaymentMethod) {
             is SavedPaymentMethod.Card -> CardDetailsUI(
                 displayableSavedPaymentMethod = interactor.displayableSavedPaymentMethod,
+                selectedBrand = state.cardBrandChoice,
                 card = savedPaymentMethod.card,
-                cardBrandFilter = interactor.cardBrandFilter,
-                isExpiredCard = interactor.isExpiredCard,
+                interactor = interactor,
             )
             is SavedPaymentMethod.SepaDebit -> SepaDebitUI(
                 name = interactor.displayableSavedPaymentMethod.paymentMethod.billingDetails?.name,
@@ -113,9 +113,9 @@ internal fun UpdatePaymentMethodUI(interactor: UpdatePaymentMethodInteractor, mo
 @Composable
 private fun CardDetailsUI(
     displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
+    selectedBrand: CardBrandChoice,
     card: PaymentMethod.Card,
-    cardBrandFilter: CardBrandFilter,
-    isExpiredCard: Boolean,
+    interactor: UpdatePaymentMethodInteractor,
 ) {
     val dividerHeight = remember { mutableStateOf(0.dp) }
 
@@ -127,11 +127,21 @@ private fun CardDetailsUI(
         Column {
             CardNumberField(
                 card = card,
+                selectedBrand = selectedBrand,
                 isModifiable = displayableSavedPaymentMethod.isModifiable(),
-                cardBrandFilter = cardBrandFilter,
+                cardBrandFilter = interactor.cardBrandFilter,
                 savedPaymentMethodIcon = displayableSavedPaymentMethod
                     .paymentMethod
                     .getSavedPaymentMethodIcon(forVerticalMode = true),
+                onBrandOptionsShown = {
+                    interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.BrandChoiceOptionsShown)
+                },
+                onBrandChoiceChanged = {
+                    interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.BrandChoiceChanged(it))
+                },
+                onBrandChoiceOptionsDismissed = {
+                    interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.BrandChoiceOptionsDismissed)
+                },
             )
             Divider(
                 color = MaterialTheme.stripeColors.componentDivider,
@@ -141,7 +151,7 @@ private fun CardDetailsUI(
                 ExpiryField(
                     expiryMonth = card.expiryMonth,
                     expiryYear = card.expiryYear,
-                    isExpired = isExpiredCard,
+                    isExpired = interactor.isExpiredCard,
                     modifier = Modifier
                         .weight(1F)
                         .onSizeChanged {
@@ -271,9 +281,13 @@ private fun DeletePaymentMethodUi(interactor: UpdatePaymentMethodInteractor) {
 @Composable
 private fun CardNumberField(
     card: PaymentMethod.Card,
+    selectedBrand: CardBrandChoice,
     cardBrandFilter: CardBrandFilter,
     isModifiable: Boolean,
     savedPaymentMethodIcon: Int,
+    onBrandOptionsShown: () -> Unit,
+    onBrandChoiceChanged: (CardBrandChoice) -> Unit,
+    onBrandChoiceOptionsDismissed: () -> Unit,
 ) {
     CommonTextField(
         value = "•••• •••• •••• ${card.last4}",
@@ -281,11 +295,11 @@ private fun CardNumberField(
         trailingIcon = {
             if (isModifiable) {
                 CardBrandDropdown(
-                    selectedBrand = card.getPreferredChoice(),
+                    selectedBrand = selectedBrand,
                     availableBrands = card.getAvailableNetworks(cardBrandFilter),
-                    onBrandOptionsShown = {},
-                    onBrandChoiceChanged = {},
-                    onBrandChoiceOptionsDismissed = {},
+                    onBrandOptionsShown = onBrandOptionsShown,
+                    onBrandChoiceChanged = onBrandChoiceChanged,
+                    onBrandChoiceOptionsDismissed = onBrandChoiceOptionsDismissed,
                 )
             } else {
                 PaymentMethodIconFromResource(
@@ -437,6 +451,8 @@ private fun PreviewUpdatePaymentMethodUI() {
             displayableSavedPaymentMethod = exampleCard,
             removeExecutor = { null },
             cardBrandFilter = DefaultCardBrandFilter,
+            onBrandChoiceOptionsShown = {},
+            onBrandChoiceOptionsDismissed = {},
         ),
         modifier = Modifier
     )

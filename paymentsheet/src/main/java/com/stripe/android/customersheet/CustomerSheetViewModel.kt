@@ -562,6 +562,7 @@ internal class CustomerSheetViewModel(
         }
     }
 
+    @Suppress("LongMethod") // Suppressing because this is only due to a temporary feature flag.
     private fun onModifyItem(paymentMethod: DisplayableSavedPaymentMethod) {
         val customerState = customerState.value
 
@@ -574,6 +575,18 @@ internal class CustomerSheetViewModel(
                         displayableSavedPaymentMethod = paymentMethod,
                         cardBrandFilter = PaymentSheetCardBrandFilter(customerState.configuration.cardBrandAcceptance),
                         removeExecutor = ::removeExecutor,
+                        onBrandChoiceOptionsShown = {
+                            eventReporter.onShowPaymentOptionBrands(
+                                source = CustomerSheetEventReporter.CardBrandChoiceEventSource.Edit,
+                                selectedBrand = it
+                            )
+                        },
+                        onBrandChoiceOptionsDismissed = {
+                            eventReporter.onHidePaymentOptionBrands(
+                                source = CustomerSheetEventReporter.CardBrandChoiceEventSource.Edit,
+                                selectedBrand = it
+                            )
+                        },
                     ),
                     isLiveMode = isLiveModeProvider(),
                 )

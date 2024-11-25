@@ -18,6 +18,7 @@ import com.stripe.android.paymentsheet.ViewActionRecorder
 import com.stripe.android.ui.core.elements.TEST_TAG_DIALOG_CONFIRM_BUTTON
 import com.stripe.android.ui.core.elements.TEST_TAG_SIMPLE_DIALOG
 import com.stripe.android.uicore.elements.DROPDOWN_MENU_CLICKABLE_TEST_TAG
+import com.stripe.android.uicore.elements.TEST_TAG_DROP_DOWN_CHOICE
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -284,6 +285,66 @@ class UpdatePaymentMethodUITest {
         }
     }
 
+    @Test
+    fun openingCardBrandDropdown_sendsOnBrandChoicesShownAction() {
+        runScenario(
+            displayableSavedPaymentMethod = PaymentMethodFixtures
+                .CARD_WITH_NETWORKS_PAYMENT_METHOD
+                .toDisplayableSavedPaymentMethod()
+        ) {
+            assertThat(viewActionRecorder.viewActions).isEmpty()
+            composeRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG).performClick()
+
+            viewActionRecorder.consume(UpdatePaymentMethodInteractor.ViewAction.BrandChoiceOptionsShown)
+            assertThat(viewActionRecorder.viewActions).isEmpty()
+        }
+    }
+
+    @Test
+    fun closingCardBrandDropdown_sendsOnBrandChoicesDismissedAction() {
+        runScenario(
+            displayableSavedPaymentMethod = PaymentMethodFixtures
+                .CARD_WITH_NETWORKS_PAYMENT_METHOD
+                .toDisplayableSavedPaymentMethod()
+        ) {
+            assertThat(viewActionRecorder.viewActions).isEmpty()
+            composeRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG).performClick()
+
+            viewActionRecorder.consume(UpdatePaymentMethodInteractor.ViewAction.BrandChoiceOptionsShown)
+            assertThat(viewActionRecorder.viewActions).isEmpty()
+
+            // Click the card brand dropdown again to dismiss it.
+            composeRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG).performClick()
+
+            viewActionRecorder.consume(UpdatePaymentMethodInteractor.ViewAction.BrandChoiceOptionsDismissed)
+            assertThat(viewActionRecorder.viewActions).isEmpty()
+        }
+    }
+
+    @Test
+    fun selectingCardBrandDropdown_sendsOnBrandChoiceChangedAction() {
+        runScenario(
+            displayableSavedPaymentMethod = PaymentMethodFixtures
+                .CARD_WITH_NETWORKS_PAYMENT_METHOD
+                .toDisplayableSavedPaymentMethod()
+        ) {
+            assertThat(viewActionRecorder.viewActions).isEmpty()
+            composeRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG).performClick()
+
+            viewActionRecorder.consume(UpdatePaymentMethodInteractor.ViewAction.BrandChoiceOptionsShown)
+            assertThat(viewActionRecorder.viewActions).isEmpty()
+
+            composeRule.onNodeWithTag("${TEST_TAG_DROP_DOWN_CHOICE}_Visa").performClick()
+
+            viewActionRecorder.consume(
+                UpdatePaymentMethodInteractor.ViewAction.BrandChoiceChanged(
+                    cardBrandChoice = CardBrandChoice(brand = CardBrand.Visa)
+                )
+            )
+            assertThat(viewActionRecorder.viewActions).isEmpty()
+        }
+    }
+
     private fun assertExpiryDateEquals(text: String) {
         composeRule.onNodeWithTag(UPDATE_PM_EXPIRY_FIELD_TEST_TAG).assertTextContains(
             text
@@ -300,6 +361,7 @@ class UpdatePaymentMethodUITest {
         displayableSavedPaymentMethod: DisplayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
         isExpiredCard: Boolean = false,
         errorMessage: ResolvableString? = null,
+        initialCardBrand: CardBrand = CardBrand.Unknown,
         canRemove: Boolean = true,
         testBlock: Scenario.() -> Unit,
     ) {
@@ -312,6 +374,7 @@ class UpdatePaymentMethodUITest {
             initialState = UpdatePaymentMethodInteractor.State(
                 error = errorMessage,
                 isRemoving = false,
+                cardBrandChoice = CardBrandChoice(brand = initialCardBrand)
             ),
         )
 

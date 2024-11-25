@@ -4,6 +4,7 @@ import com.stripe.android.CardBrandFilter
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.SavedPaymentMethod
@@ -29,12 +30,16 @@ internal interface UpdatePaymentMethodInteractor {
     data class State(
         val error: ResolvableString?,
         val isRemoving: Boolean,
+        val cardBrandChoice: CardBrandChoice,
     )
 
     fun handleViewAction(viewAction: ViewAction)
 
     sealed class ViewAction {
         data object RemovePaymentMethod : ViewAction()
+        data object BrandChoiceOptionsShown : ViewAction()
+        data class BrandChoiceChanged(val cardBrandChoice: CardBrandChoice) : ViewAction()
+        data object BrandChoiceOptionsDismissed : ViewAction()
     }
 
     companion object {
@@ -57,11 +62,14 @@ internal class DefaultUpdatePaymentMethodInteractor(
     override val displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
     override val cardBrandFilter: CardBrandFilter,
     private val removeExecutor: PaymentMethodRemoveOperation,
+    private val onBrandChoiceOptionsShown: (CardBrand) -> Unit,
+    private val onBrandChoiceOptionsDismissed: (CardBrand) -> Unit,
     workContext: CoroutineContext = Dispatchers.Default,
 ) : UpdatePaymentMethodInteractor {
     private val coroutineScope = CoroutineScope(workContext + SupervisorJob())
     private val error = MutableStateFlow(getInitialError())
     private val isRemoving = MutableStateFlow(false)
+    private val cardBrandChoice = MutableStateFlow(getInitialCardBrandChoice())
 
     override val isExpiredCard = paymentMethodIsExpiredCard()
     override val screenTitle: ResolvableString? = UpdatePaymentMethodInteractor.screenTitle(
@@ -71,27 +79,53 @@ internal class DefaultUpdatePaymentMethodInteractor(
     private val _state = combineAsStateFlow(
         error,
         isRemoving,
-    ) { error, isRemoving ->
+        cardBrandChoice,
+    ) { error, isRemoving, cardBrandChoice ->
         UpdatePaymentMethodInteractor.State(
             error = error,
             isRemoving = isRemoving,
+            cardBrandChoice = cardBrandChoice
         )
     }
     override val state = _state
 
     override fun handleViewAction(viewAction: UpdatePaymentMethodInteractor.ViewAction) {
         when (viewAction) {
-            UpdatePaymentMethodInteractor.ViewAction.RemovePaymentMethod -> {
-                coroutineScope.launch {
-                    error.emit(getInitialError())
-                    isRemoving.emit(true)
+            UpdatePaymentMethodInteractor.ViewAction.RemovePaymentMethod -> removePaymentMethod()
+            UpdatePaymentMethodInteractor.ViewAction.BrandChoiceOptionsShown -> onBrandChoiceOptionsShown(
+                cardBrandChoice.value.brand
+            )
+            UpdatePaymentMethodInteractor.ViewAction.BrandChoiceOptionsDismissed -> onBrandChoiceOptionsDismissed(
+                cardBrandChoice.value.brand
+            )
+            is UpdatePaymentMethodInteractor.ViewAction.BrandChoiceChanged -> onBrandChoiceChanged(
+                viewAction.cardBrandChoice
+            )
+        }
+    }
 
-                    val removeError = removeExecutor(displayableSavedPaymentMethod.paymentMethod)
+    private fun removePaymentMethod() {
+        coroutineScope.launch {
+            error.emit(getInitialError())
+            isRemoving.emit(true)
 
-                    isRemoving.emit(false)
-                    error.emit(removeError?.stripeErrorMessage() ?: getInitialError())
-                }
-            }
+            val removeError = removeExecutor(displayableSavedPaymentMethod.paymentMethod)
+
+            isRemoving.emit(false)
+            error.emit(removeError?.stripeErrorMessage() ?: getInitialError())
+        }
+    }
+
+    private fun onBrandChoiceChanged(cardBrandChoice: CardBrandChoice) {
+        this.cardBrandChoice.value = cardBrandChoice
+
+        onBrandChoiceOptionsDismissed(cardBrandChoice.brand)
+    }
+
+    private fun getInitialCardBrandChoice(): CardBrandChoice {
+        return when (val savedPaymentMethod = displayableSavedPaymentMethod.savedPaymentMethod) {
+            is SavedPaymentMethod.Card -> savedPaymentMethod.card.getPreferredChoice()
+            else -> CardBrandChoice(brand = CardBrand.Unknown)
         }
     }
 
