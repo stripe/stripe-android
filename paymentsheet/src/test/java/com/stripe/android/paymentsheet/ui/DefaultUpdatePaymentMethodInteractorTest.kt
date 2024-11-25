@@ -57,7 +57,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
             }
         }
     }
-    
+
     @Test
     fun expiredCard_displaysExpiredCardError() {
         runScenario(
@@ -72,7 +72,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
             }
         }
     }
-    
+
     @Test
     fun nonExpiredCard_hasNoInitialError() {
         runScenario(
@@ -111,9 +111,11 @@ class DefaultUpdatePaymentMethodInteractorTest {
                 assertThat(awaitItem().cardBrandChoice.brand).isEqualTo(initialCardBrand)
             }
 
-            interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.BrandChoiceChanged(
-                cardBrandChoice = CardBrandChoice(brand = updatedCardBrand)
-            ))
+            interactor.handleViewAction(
+                UpdatePaymentMethodInteractor.ViewAction.BrandChoiceChanged(
+                    cardBrandChoice = CardBrandChoice(brand = updatedCardBrand)
+                )
+            )
 
             interactor.state.test {
                 assertThat(awaitItem().cardBrandChoice.brand).isEqualTo(updatedCardBrand)
