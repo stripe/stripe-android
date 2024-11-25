@@ -5,11 +5,21 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
+import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentMethodSelector
+import com.stripe.android.uicore.utils.collectAsState
 
 @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 internal class EmbeddedPlaygroundActivity : AppCompatActivity() {
@@ -41,7 +51,28 @@ internal class EmbeddedPlaygroundActivity : AppCompatActivity() {
                     configuration = playgroundState.embeddedConfiguration(),
                 )
             }
-            embeddedPaymentElement.Content()
+
+            val scrollState = rememberScrollState()
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(scrollState)
+                    .padding(16.dp)
+            ) {
+                embeddedPaymentElement.Content()
+
+                val selectedPaymentOption by embeddedPaymentElement.paymentOption.collectAsState()
+
+                selectedPaymentOption?.let { selectedPaymentOption ->
+                    PaymentMethodSelector(
+                        isEnabled = true,
+                        paymentMethodLabel = selectedPaymentOption.label,
+                        paymentMethodPainter = selectedPaymentOption.iconPainter,
+                        clickable = false,
+                        onClick = { },
+                    )
+                }
+            }
         }
     }
 }
