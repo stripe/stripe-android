@@ -81,6 +81,7 @@ fun PhoneNumberCollectionSection(
     }
 
     Section(
+        modifier = Modifier.padding(vertical = 8.dp),
         title = sectionTitle,
         error = sectionErrorString,
         isSelected = isSelected

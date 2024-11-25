@@ -9,7 +9,7 @@ internal object LayoutSettingsDefinition :
     PlaygroundSettingDefinition.Saveable<Layout> by EnumSaveable(
         key = "layout",
         values = Layout.entries.toTypedArray(),
-        defaultValue = Layout.HORIZONTAL,
+        defaultValue = Layout.AUTOMATIC,
     ),
     PlaygroundSettingDefinition.Displayable<Layout> {
     override val displayName: String = "Payment Method Layout"
@@ -32,7 +32,10 @@ internal object LayoutSettingsDefinition :
     }
 
     override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
-        return configurationData.integrationType.isPaymentFlow()
+        return configurationData.integrationType in setOf(
+            PlaygroundConfigurationData.IntegrationType.PaymentSheet,
+            PlaygroundConfigurationData.IntegrationType.FlowController,
+        )
     }
 
     override fun configure(

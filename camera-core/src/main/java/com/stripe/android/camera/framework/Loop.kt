@@ -116,26 +116,21 @@ sealed class AnalyzerLoop<DataFrame, State, Output>(
         analyzer: Analyzer<DataFrame, in State, Output>
     ) {
         flow.collect { frame ->
-            val stat = statsName?.let { Stats.trackRepeatingTask(it) }
             try {
                 val analyzerResult = analyzer.analyze(frame, getState())
 
                 try {
                     finished = onResult(analyzerResult, frame)
                 } catch (t: Throwable) {
-                    stat?.trackResult("result_failure")
                     handleResultFailure(t)
                 }
             } catch (t: Throwable) {
-                stat?.trackResult("analyzer_failure")
                 handleAnalyzerFailure(t)
             }
 
             if (finished) {
                 unsubscribeFromFlow()
             }
-
-            stat?.trackResult("success")
         }
     }
 

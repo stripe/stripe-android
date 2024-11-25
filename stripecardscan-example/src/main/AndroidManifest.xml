@@ -30,10 +30,6 @@
         </activity>
 
         <activity
-            android:name=".CardImageVerificationDemoActivity"
-            android:exported="false" />
-
-        <activity
             android:name=".CardScanDemoActivity"
             android:exported="false" />
 

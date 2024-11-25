@@ -28,16 +28,5 @@
     <dimen name="stripePanTextSize" description="The size of the card number text displayed in the middle of the view finder window">20sp</dimen>
     <item name="stripePanStrokeSize" format="float" type="dimen" description="The size of the outline of the card number text displayed in the middle of the view finder window">2.5</item>
 
-    <dimen name="stripeNameTextSize" description="The size of the cardholder name text displayed in the middle of the view finder window">16sp</dimen>
-    <item name="stripeNameStrokeSize" format="float" type="dimen" description="The size of the outline of the cardholder name text displayed in the middle of the view finder window">2.5</item>
-
-    <dimen name="stripeExpiryTextSize" description="The size of the expiry text displayed in the middle of the view finder window">16sp</dimen>
-    <item name="stripeExpiryStrokeSize" format="float" type="dimen" description="The size of the outline of the expiry text displayed in the middle of the view finder window">2.5</item>
-
-    <dimen name="stripeInstructionsTextSize" description="The size of the instructions text above the view finder window">22sp</dimen>
-    <dimen name="stripePrivacyLinkTextSize" description="The size of the privacy link text below the view finder window">14sp</dimen>
-    <dimen name="stripeSecurityTextSize" description="The size of the security text below the view finder window">14sp</dimen>
-
-    <dimen name="stripeLogoMargin" description="The minimum amount of space surrounding the logo">16dp</dimen>
     <item name="stripeIconStrokeWidth" type="integer" description="The width of the lines of the close and torch buttons">2</item>
 </resources>

@@ -22,9 +22,7 @@ import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
 import com.stripe.android.paymentsheet.BuildConfig
-import com.stripe.android.paymentsheet.DefaultIntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
-import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
@@ -33,8 +31,6 @@ import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandlerImpl
 import com.stripe.android.paymentsheet.flowcontroller.DefaultPaymentSelectionUpdater
 import com.stripe.android.paymentsheet.flowcontroller.PaymentSelectionUpdater
-import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncherFactory
-import com.stripe.android.paymentsheet.paymentdatacollection.bacs.DefaultBacsMandateConfirmationLauncherFactory
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionInteractor
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionLauncherFactory
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.DefaultCvcRecollectionInteractor
@@ -44,9 +40,9 @@ import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.repositories.RealElementsSessionRepository
 import com.stripe.android.paymentsheet.state.DefaultLinkAccountStatusProvider
-import com.stripe.android.paymentsheet.state.DefaultPaymentSheetLoader
+import com.stripe.android.paymentsheet.state.DefaultPaymentElementLoader
 import com.stripe.android.paymentsheet.state.LinkAccountStatusProvider
-import com.stripe.android.paymentsheet.state.PaymentSheetLoader
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.ui.DefaultEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import dagger.Binds
@@ -81,7 +77,7 @@ internal abstract class PaymentSheetCommonModule {
     ): ElementsSessionRepository
 
     @Binds
-    abstract fun bindsPaymentSheetLoader(impl: DefaultPaymentSheetLoader): PaymentSheetLoader
+    abstract fun bindsPaymentSheetLoader(impl: DefaultPaymentElementLoader): PaymentElementLoader
 
     @Binds
     abstract fun bindsUserFacingLogger(impl: RealUserFacingLogger): UserFacingLogger
@@ -90,11 +86,6 @@ internal abstract class PaymentSheetCommonModule {
     abstract fun bindsLinkAccountStatusProvider(
         impl: DefaultLinkAccountStatusProvider,
     ): LinkAccountStatusProvider
-
-    @Binds
-    abstract fun bindsIntentConfirmationInterceptor(
-        impl: DefaultIntentConfirmationInterceptor,
-    ): IntentConfirmationInterceptor
 
     @Binds
     abstract fun bindsPaymentSheetUpdater(
@@ -152,12 +143,6 @@ internal abstract class PaymentSheetCommonModule {
                 customerConfig?.id,
                 workContext
             )
-        }
-
-        @Provides
-        @Singleton
-        fun provideBacsMandateConfirmationLauncherFactory(): BacsMandateConfirmationLauncherFactory {
-            return DefaultBacsMandateConfirmationLauncherFactory
         }
 
         @Provides

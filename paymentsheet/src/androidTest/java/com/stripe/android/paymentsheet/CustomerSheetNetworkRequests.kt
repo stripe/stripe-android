@@ -51,7 +51,7 @@ internal fun billingDetailsParams(): RequestMatcher {
 internal fun fullBillingDetailsParams(): RequestMatcher {
     return RequestMatchers.composite(
         bodyPart(urlEncode("billing_details[name]"), urlEncode(CustomerSheetPage.NAME)),
-        bodyPart(urlEncode("billing_details[phone]"), CustomerSheetPage.PHONE_NUMBER),
+        bodyPart(urlEncode("billing_details[phone]"), urlEncode("+1${CustomerSheetPage.PHONE_NUMBER}")),
         bodyPart(urlEncode("billing_details[email]"), urlEncode(CustomerSheetPage.EMAIL)),
         bodyPart(urlEncode("billing_details[address][line1]"), urlEncode(CustomerSheetPage.ADDRESS_LINE_ONE)),
         bodyPart(urlEncode("billing_details[address][line2]"), urlEncode(CustomerSheetPage.ADDRESS_LINE_TWO)),

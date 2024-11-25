@@ -6,7 +6,6 @@ import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.annotation.ColorInt
 import androidx.annotation.FontRes
-import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
@@ -19,14 +18,15 @@ import com.stripe.android.link.account.LinkStore
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
+import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerFactory
-import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentOption
-import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
+import com.stripe.android.paymentsheet.state.PaymentElementLoader.InitializationMode
 import com.stripe.android.uicore.PRIMARY_BUTTON_SUCCESS_BACKGROUND_COLOR
 import com.stripe.android.uicore.StripeThemeDefaults
 import com.stripe.android.uicore.getRawValueFromDimenResource
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 
@@ -305,41 +305,6 @@ class PaymentSheet internal constructor(
         )
     }
 
-    internal sealed class InitializationMode : Parcelable {
-
-        internal abstract fun validate()
-
-        @Parcelize
-        internal data class PaymentIntent(
-            val clientSecret: String,
-        ) : InitializationMode() {
-
-            override fun validate() {
-                PaymentIntentClientSecret(clientSecret).validate()
-            }
-        }
-
-        @Parcelize
-        internal data class SetupIntent(
-            val clientSecret: String,
-        ) : InitializationMode() {
-
-            override fun validate() {
-                SetupIntentClientSecret(clientSecret).validate()
-            }
-        }
-
-        @Parcelize
-        internal data class DeferredIntent(
-            val intentConfiguration: IntentConfiguration,
-        ) : InitializationMode() {
-
-            override fun validate() {
-                // Nothing to do here
-            }
-        }
-    }
-
     /**
      * Contains information needed to render [PaymentSheet]. The values are used to calculate
      * the payment methods displayed and influence the UI.
@@ -385,6 +350,7 @@ class PaymentSheet internal constructor(
              * @param captureMethod Controls when the funds will be captured from the customer's
              * account. See [our docs](https://stripe.com/docs/api/payment_intents/create#create_payment_intent-capture_method) for more info.
              */
+            @Poko
             @Parcelize
             class Payment @JvmOverloads constructor(
                 val amount: Long,
@@ -401,6 +367,7 @@ class PaymentSheet internal constructor(
              * @param setupFutureUse Indicates that you intend to make future payments. See
              * [our docs](https://stripe.com/docs/api/payment_intents/create#create_payment_intent-setup_future_usage) for more info.
              */
+            @Poko
             @Parcelize
             class Setup @JvmOverloads constructor(
                 val currency: String? = null,
@@ -598,7 +565,7 @@ class PaymentSheet internal constructor(
 
         internal val externalPaymentMethods: List<String> = ConfigurationDefaults.externalPaymentMethods,
 
-        internal val paymentMethodLayout: PaymentMethodLayout = PaymentMethodLayout.default,
+        internal val paymentMethodLayout: PaymentMethodLayout = ConfigurationDefaults.paymentMethodLayout,
 
         internal val cardBrandAcceptance: CardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance,
     ) : Parcelable {
@@ -749,7 +716,7 @@ class PaymentSheet internal constructor(
                 ConfigurationDefaults.allowsRemovalOfLastSavedPaymentMethod
             private var paymentMethodOrder: List<String> = ConfigurationDefaults.paymentMethodOrder
             private var externalPaymentMethods: List<String> = ConfigurationDefaults.externalPaymentMethods
-            private var paymentMethodLayout: PaymentMethodLayout = PaymentMethodLayout.default
+            private var paymentMethodLayout: PaymentMethodLayout = ConfigurationDefaults.paymentMethodLayout
             private var cardBrandAcceptance: CardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance
 
             fun merchantDisplayName(merchantDisplayName: String) =
@@ -856,7 +823,6 @@ class PaymentSheet internal constructor(
              * **Note**: Card brand filtering is not currently supported in Link.
              */
             @ExperimentalCardBrandFilteringApi
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun cardBrandAcceptance(
                 cardBrandAcceptance: CardBrandAcceptance
             ) = apply {
@@ -911,11 +877,7 @@ class PaymentSheet internal constructor(
         /**
          * This lets Stripe choose the best layout for payment methods in the sheet.
          */
-        Automatic;
-
-        internal companion object {
-            internal val default: PaymentMethodLayout = Horizontal
-        }
+        Automatic
     }
 
     @Parcelize
@@ -2015,7 +1977,6 @@ class PaymentSheet internal constructor(
     /**
      * Options to block certain card brands on the client
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     sealed class CardBrandAcceptance : Parcelable {
 
         /**
@@ -2023,7 +1984,6 @@ class PaymentSheet internal constructor(
          */
         @Parcelize
         @ExperimentalCardBrandFilteringApi
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         enum class BrandCategory : Parcelable {
             /**
              * Visa branded cards
@@ -2047,14 +2007,12 @@ class PaymentSheet internal constructor(
             Discover
         }
 
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         companion object {
             /**
              * Accept all card brands supported by Stripe
              */
             @JvmStatic
             @ExperimentalCardBrandFilteringApi
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun all(): CardBrandAcceptance = All
 
             /**
@@ -2063,7 +2021,6 @@ class PaymentSheet internal constructor(
              */
             @JvmStatic
             @ExperimentalCardBrandFilteringApi
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun allowed(brands: List<BrandCategory>): CardBrandAcceptance =
                 Allowed(brands)
 
@@ -2074,7 +2031,6 @@ class PaymentSheet internal constructor(
              */
             @JvmStatic
             @ExperimentalCardBrandFilteringApi
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun disallowed(brands: List<BrandCategory>): CardBrandAcceptance =
                 Disallowed(brands)
         }

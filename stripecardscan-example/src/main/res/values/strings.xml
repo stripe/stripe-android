@@ -1,17 +1,5 @@
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
     <string name="app_name">StripeCardScan Example</string>
-    <string name="cardimageverificationsheet">CardImageVerificationSheet</string>
     <string name="cardscansheet">CardScanSheet</string>
     <string name="cardscanfragment">CardScanFragment</string>
-
-    <string name="getPublishableKey">Use Test Publishable Key</string>
-    <string name="stripePublishableKey">Stripe Publishable Key</string>
-
-    <string name="requiredIin">Required Card IIN (first 6)</string>
-    <string name="requiredLastFour">Required Card Last 4</string>
-
-    <string name="generate_civ">Generate CIV Intent</string>
-
-    <string name="civ_id">CIV Intent ID</string>
-    <string name="civ_secret">CIV Client Secret</string>
 </resources>

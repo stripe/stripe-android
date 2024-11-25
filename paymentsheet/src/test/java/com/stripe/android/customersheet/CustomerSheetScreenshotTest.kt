@@ -20,6 +20,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.paymentsheet.ui.DefaultEditPaymentMethodViewInteractor
+import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.utils.ViewModelStoreOwnerContext
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
@@ -61,8 +62,7 @@ internal class CustomerSheetScreenshotTest {
         draftPaymentSelection = null,
         hostedSurface = CollectBankAccountLauncher.HOSTED_SURFACE_CUSTOMER_SHEET,
         onMandateTextChanged = { _, _ -> },
-        onConfirmUSBankAccount = { },
-        onCollectBankAccountResult = { },
+        onLinkedBankAccountChanged = { },
         onUpdatePrimaryButtonState = { },
         onUpdatePrimaryButtonUIState = { },
         onError = { },
@@ -117,7 +117,7 @@ internal class CustomerSheetScreenshotTest {
         primaryButtonLabel = "Save".resolvableString,
         primaryButtonEnabled = false,
         customPrimaryButtonUiState = null,
-        bankAccountResult = null,
+        bankAccountSelection = null,
         draftPaymentSelection = null,
         errorReporter = FakeErrorReporter(),
     )
@@ -374,6 +374,27 @@ internal class CustomerSheetScreenshotTest {
         paparazzi.snapshot {
             CustomerSheetScreen(
                 viewState = editPaymentMethod,
+                paymentMethodNameProvider = { it!!.resolvableString },
+            )
+        }
+    }
+
+    @Test
+    fun testUpdatePaymentMethodScreen() {
+        val updatePaymentMethod = CustomerSheetViewState.UpdatePaymentMethod(
+            updatePaymentMethodInteractor = DefaultUpdatePaymentMethodInteractor(
+                displayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
+                removeExecutor = { null },
+                canRemove = true,
+                isLiveMode = true,
+                cardBrandFilter = DefaultCardBrandFilter,
+            ),
+            isLiveMode = true,
+        )
+
+        paparazzi.snapshot {
+            CustomerSheetScreen(
+                viewState = updatePaymentMethod,
                 paymentMethodNameProvider = { it!!.resolvableString },
             )
         }

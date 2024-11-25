@@ -44,6 +44,10 @@
   <string name="stripe_paymentsheet_bacs_notice_mandate">Additionally, you will receive two days advance notice via email of any amount to be debited under this instruction. Payments will show as \'%s\' on your bank statement.</string>
   <!-- Message shown as part of overall Bacs Mandate indicating that their payments are protected by a defined guarantee -->
   <string name="stripe_paymentsheet_bacs_protection_mandate">Your payments are protected by the %s.</string>
+  <!-- Text displayed on manage bank account screen when bank account details are not editable. -->
+  <string name="stripe_paymentsheet_bank_account_details_cannot_be_changed">Bank account details cannot be changed.</string>
+  <!-- Text displayed on manage card screen when card details are not editable. -->
+  <string name="stripe_paymentsheet_card_details_cannot_be_changed">Card details cannot be changed.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
   <string name="stripe_paymentsheet_card_mandate">By providing your card information, you allow %s to charge your card for future payments in accordance with their terms.</string>
   <!-- Title shown above a carousel containing available payment methods -->
@@ -55,8 +59,14 @@
   <string name="stripe_paymentsheet_confirm_your_cvc">Confirm your CVC</string>
   <!-- Text for a button that allows manual entry of an address -->
   <string name="stripe_paymentsheet_enter_address_manually">Enter address manually</string>
+  <!-- Title shown above a view containing a customer's bank account that they can delete or update -->
+  <string name="stripe_paymentsheet_manage_bank_account">Manage US bank account</string>
+  <!-- Title shown above a view containing a customer's card payment methods that they can delete or update -->
+  <string name="stripe_paymentsheet_manage_card">Manage card</string>
   <!-- Title shown above a view containing the customer's card payment methods that they can delete or update -->
   <string name="stripe_paymentsheet_manage_payment_methods">Manage payment methods</string>
+  <!-- Title shown above a view containing a customer's SEPA debit account that they can delete or update -->
+  <string name="stripe_paymentsheet_manage_sepa_debit">Manage SEPA debit</string>
   <!-- Title shown above a carousel containing the customer's payment methods -->
   <string name="stripe_paymentsheet_manage_your_payment_methods">Manage your payment methods</string>
   <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->
@@ -111,6 +121,8 @@
   <string name="stripe_paymentsheet_select_payment_method">Select payment method</string>
   <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
   <string name="stripe_paymentsheet_select_your_payment_method">Select your payment method</string>
+  <!-- Text displayed on manage SEPA debit screen when SEPA debit details are not editable. -->
+  <string name="stripe_paymentsheet_sepa_debit_details_cannot_be_changed">SEPA debit details cannot be changed.</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">Total: %s</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->

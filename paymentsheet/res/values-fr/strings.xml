@@ -44,6 +44,10 @@
   <string name="stripe_paymentsheet_bacs_notice_mandate">En outre, vous recevrez par e-mail un préavis de deux jours pour tout prélèvement effectué en vertu de cet ordre. Les paiements apparaîtront sur votre relevé bancaire sous le libellé \'\'%s\'\'.</string>
   <!-- Message shown as part of overall Bacs Mandate indicating that their payments are protected by a defined guarantee -->
   <string name="stripe_paymentsheet_bacs_protection_mandate">Vos paiements sont protégés par la %s.</string>
+  <!-- Text displayed on manage bank account screen when bank account details are not editable. -->
+  <string name="stripe_paymentsheet_bank_account_details_cannot_be_changed">Vous ne pouvez pas modifier les coordonnées bancaires.</string>
+  <!-- Text displayed on manage card screen when card details are not editable. -->
+  <string name="stripe_paymentsheet_card_details_cannot_be_changed">Vous ne pouvez pas modifier les informations de la carte.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
   <string name="stripe_paymentsheet_card_mandate">En fournissant vos informations de carte bancaire, vous autorisez %s à débiter votre carte pour les paiements futurs, conformément à ses conditions.</string>
   <!-- Title shown above a carousel containing available payment methods -->
@@ -55,8 +59,14 @@
   <string name="stripe_paymentsheet_confirm_your_cvc">Confirmez votre CVC</string>
   <!-- Text for a button that allows manual entry of an address -->
   <string name="stripe_paymentsheet_enter_address_manually">Saisir l\'adresse manuellement</string>
+  <!-- Title shown above a view containing a customer's bank account that they can delete or update -->
+  <string name="stripe_paymentsheet_manage_bank_account">Gérer le compte bancaire américain</string>
+  <!-- Title shown above a view containing a customer's card payment methods that they can delete or update -->
+  <string name="stripe_paymentsheet_manage_card">Gérer la carte</string>
   <!-- Title shown above a view containing the customer's card payment methods that they can delete or update -->
   <string name="stripe_paymentsheet_manage_payment_methods">Gérer vos moyens de paiement</string>
+  <!-- Title shown above a view containing a customer's SEPA debit account that they can delete or update -->
+  <string name="stripe_paymentsheet_manage_sepa_debit">Gérer le prélèvement SEPA</string>
   <!-- Title shown above a carousel containing the customer's payment methods -->
   <string name="stripe_paymentsheet_manage_your_payment_methods">Gérer vos moyens de paiement</string>
   <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->
@@ -111,6 +121,8 @@
   <string name="stripe_paymentsheet_select_payment_method">Sélectionner un moyen de paiement</string>
   <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
   <string name="stripe_paymentsheet_select_your_payment_method">Sélectionnez votre moyen de paiement</string>
+  <!-- Text displayed on manage SEPA debit screen when SEPA debit details are not editable. -->
+  <string name="stripe_paymentsheet_sepa_debit_details_cannot_be_changed">Vous ne pouvez pas modifier les informations de prélèvement SEPA.</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">Total : %s</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->

@@ -17,7 +17,8 @@ import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormScreenState
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.utils.FakeDurationProvider
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.json.JSONException
@@ -525,6 +526,22 @@ class DefaultEventReporterTest {
     }
 
     @Test
+    fun `onDisallowedCardBrandEntered(brand) should fire analytics request with expected event value`() {
+        val customEventReporter = createEventReporter(EventReporter.Mode.Custom) {
+            simulateSuccessfulSetup()
+        }
+
+        customEventReporter.onDisallowedCardBrandEntered(CardBrand.AmericanExpress)
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_disallowed_card_brand" &&
+                    req.params["brand"] == "amex"
+            }
+        )
+    }
+
+    @Test
     fun `constructor does not read from PaymentConfiguration`() {
         PaymentConfiguration.clearInstance()
         // Would crash if it tries to read from the uninitialized PaymentConfiguration
@@ -797,9 +814,10 @@ class DefaultEventReporterTest {
         linkMode: LinkMode? = LinkMode.LinkPaymentMethod,
         googlePayReady: Boolean = true,
         currency: String? = "usd",
-        initializationMode: PaymentSheet.InitializationMode = PaymentSheet.InitializationMode.PaymentIntent(
-            clientSecret = "cs_example"
-        ),
+        initializationMode: PaymentElementLoader.InitializationMode =
+            PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = "cs_example"
+            ),
         requireCvcRecollection: Boolean = false
     ) {
         onInit(configuration, isDeferred = false)
@@ -817,7 +835,7 @@ class DefaultEventReporterTest {
 
     private fun mockUSBankAccountPaymentSelection(linkMode: LinkMode?): PaymentSelection.New.USBankAccount {
         return PaymentSelection.New.USBankAccount(
-            labelResource = "Test",
+            label = "Test",
             iconResource = 0,
             paymentMethodCreateParams = mock(),
             customerRequestedSave = mock(),
@@ -829,17 +847,10 @@ class DefaultEventReporterTest {
                 saveForFutureUse = false,
             ),
             instantDebits = PaymentSelection.New.USBankAccount.InstantDebitsInfo(
-                paymentMethodId = "pm_123456789",
+                paymentMethod = PaymentMethodFactory.instantDebits(),
                 linkMode = linkMode,
             ).takeIf { it.linkMode != null },
-            screenState = USBankAccountFormScreenState.MandateCollection(
-                resultIdentifier = USBankAccountFormScreenState.ResultIdentifier.PaymentMethod("pm_123456789"),
-                intentId = "intent_1234",
-                bankName = "Stripe Bank",
-                last4 = "6789",
-                primaryButtonText = "Continue".resolvableString,
-                mandateText = null,
-            ),
+            screenState = mock(),
         )
     }
 }

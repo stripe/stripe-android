@@ -4,6 +4,8 @@ package com.stripe.android.paymentsheet.example.playground.settings
 
 import com.stripe.android.ExperimentalCardBrandFilteringApi
 import com.stripe.android.customersheet.CustomerSheet
+import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 
@@ -19,7 +21,7 @@ internal object CardBrandAcceptanceSettingsDefinition :
     ): List<PlaygroundSettingDefinition.Displayable.Option<CardBrandAcceptanceType>> {
         return listOf(
             option("All", CardBrandAcceptanceType.All),
-            option("Disallow Amex", CardBrandAcceptanceType.DisallowAmex),
+            option("Disallow Visa", CardBrandAcceptanceType.DisallowVisa),
             option("Allow Visa", CardBrandAcceptanceType.AllowVisa)
         )
     }
@@ -29,6 +31,16 @@ internal object CardBrandAcceptanceSettingsDefinition :
         configurationBuilder: PaymentSheet.Configuration.Builder,
         playgroundState: PlaygroundState.Payment,
         configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData,
+    ) {
+        configurationBuilder.cardBrandAcceptance(value.cardBrandAcceptance)
+    }
+
+    @ExperimentalEmbeddedPaymentElementApi
+    override fun configure(
+        value: CardBrandAcceptanceType,
+        configurationBuilder: EmbeddedPaymentElement.Configuration.Builder,
+        playgroundState: PlaygroundState.Payment,
+        configurationData: PlaygroundSettingDefinition.EmbeddedConfigurationData
     ) {
         configurationBuilder.cardBrandAcceptance(value.cardBrandAcceptance)
     }
@@ -48,7 +60,7 @@ internal object CardBrandAcceptanceSettingsDefinition :
     override fun convertToValue(value: String): CardBrandAcceptanceType {
         return when (value) {
             CardBrandAcceptanceType.All.value -> CardBrandAcceptanceType.All
-            CardBrandAcceptanceType.DisallowAmex.value -> CardBrandAcceptanceType.DisallowAmex
+            CardBrandAcceptanceType.DisallowVisa.value -> CardBrandAcceptanceType.DisallowVisa
             CardBrandAcceptanceType.AllowVisa.value -> CardBrandAcceptanceType.AllowVisa
             else -> defaultValue
         }
@@ -62,10 +74,10 @@ internal object CardBrandAcceptanceSettingsDefinition :
 sealed class CardBrandAcceptanceType(val value: String, val cardBrandAcceptance: PaymentSheet.CardBrandAcceptance) {
     object All : CardBrandAcceptanceType("all", PaymentSheet.CardBrandAcceptance.all())
 
-    object DisallowAmex : CardBrandAcceptanceType(
-        "disallow_amex",
+    object DisallowVisa : CardBrandAcceptanceType(
+        "disallow_visa",
         PaymentSheet.CardBrandAcceptance.disallowed(
-            brands = listOf(PaymentSheet.CardBrandAcceptance.BrandCategory.Amex)
+            brands = listOf(PaymentSheet.CardBrandAcceptance.BrandCategory.Visa)
         )
     )
 

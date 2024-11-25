@@ -4,9 +4,9 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormScreenState
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
+import com.stripe.android.utils.BankFormScreenStateFactory
 import org.json.JSONObject
 import org.mockito.kotlin.mock
 import java.util.UUID
@@ -22,7 +22,7 @@ internal object PaymentMethodFixtures {
         ),
         country = "US",
         expiryMonth = 8,
-        expiryYear = 2022,
+        expiryYear = 2029,
         fingerprint = "fingerprint123",
         funding = "credit",
         last4 = "4242",
@@ -73,6 +73,20 @@ internal object PaymentMethodFixtures {
         billingDetails = BILLING_DETAILS,
         customerId = "cus_AQsHpvKfKwJDrF",
         card = CARD_WITH_NETWORKS,
+        code = "card"
+    )
+
+    val EXPIRED_CARD_PAYMENT_METHOD = PaymentMethod(
+        id = "pm_123456789",
+        created = 1550757934255L,
+        liveMode = true,
+        type = PaymentMethod.Type.Card,
+        billingDetails = BILLING_DETAILS,
+        customerId = "cus_AQsHpvKfKwJDrF",
+        card = CARD.copy(
+            expiryMonth = 4,
+            expiryYear = 2024,
+        ),
         code = "card"
     )
 
@@ -449,7 +463,7 @@ internal object PaymentMethodFixtures {
     )
 
     val US_BANK_PAYMENT_SELECTION = PaymentSelection.New.USBankAccount(
-        labelResource = "Test",
+        label = "Test",
         iconResource = 0,
         paymentMethodCreateParams = mock(),
         customerRequestedSave = mock(),
@@ -461,14 +475,7 @@ internal object PaymentMethodFixtures {
             saveForFutureUse = false,
         ),
         instantDebits = null,
-        screenState = USBankAccountFormScreenState.SavedAccount(
-            financialConnectionsSessionId = "session_1234",
-            intentId = "intent_1234",
-            bankName = "Stripe Bank",
-            last4 = "6789",
-            primaryButtonText = "Continue".resolvableString,
-            mandateText = null,
-        ),
+        screenState = BankFormScreenStateFactory.createWithSession("session_1234"),
     )
 
 //
@@ -586,8 +593,10 @@ internal object PaymentMethodFixtures {
     }
 
     fun PaymentMethod.toDisplayableSavedPaymentMethod(): DisplayableSavedPaymentMethod {
-        return DisplayableSavedPaymentMethod(
-            displayName = (this.card?.last4 ?: this.usBankAccount?.last4 ?: "").resolvableString,
+        return DisplayableSavedPaymentMethod.create(
+            displayName = (
+                this.card?.last4 ?: this.usBankAccount?.last4 ?: this.sepaDebit?.last4 ?: ""
+                ).resolvableString,
             paymentMethod = this,
             isCbcEligible = true,
         )

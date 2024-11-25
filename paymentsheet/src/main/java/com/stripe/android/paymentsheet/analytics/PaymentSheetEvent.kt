@@ -7,10 +7,11 @@ import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.analyticsValue
+import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.android.paymentsheet.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.asPaymentSheetLoadingException
 import com.stripe.android.utils.filterNotNullValues
 import kotlin.time.Duration
@@ -38,7 +39,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
 
     class LoadSucceeded(
         paymentSelection: PaymentSelection?,
-        initializationMode: PaymentSheet.InitializationMode,
+        initializationMode: PaymentElementLoader.InitializationMode,
         orderedLpms: List<String>,
         duration: Duration?,
         linkMode: LinkMode?,
@@ -68,16 +69,16 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
                 else -> "none"
             }
 
-        private val PaymentSheet.InitializationMode.defaultAnalyticsValue: String
+        private val PaymentElementLoader.InitializationMode.defaultAnalyticsValue: String
             get() = when (this) {
-                is PaymentSheet.InitializationMode.DeferredIntent -> {
+                is PaymentElementLoader.InitializationMode.DeferredIntent -> {
                     when (this.intentConfiguration.mode) {
                         is PaymentSheet.IntentConfiguration.Mode.Payment -> "deferred_payment_intent"
                         is PaymentSheet.IntentConfiguration.Mode.Setup -> "deferred_setup_intent"
                     }
                 }
-                is PaymentSheet.InitializationMode.PaymentIntent -> "payment_intent"
-                is PaymentSheet.InitializationMode.SetupIntent -> "setup_intent"
+                is PaymentElementLoader.InitializationMode.PaymentIntent -> "payment_intent"
+                is PaymentElementLoader.InitializationMode.SetupIntent -> "setup_intent"
             }
     }
 
@@ -252,6 +253,19 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
     ) : PaymentSheetEvent() {
         override val eventName: String = "mc_card_number_completed"
         override val additionalParams: Map<String, Any?> = mapOf()
+    }
+
+    class CardBrandDisallowed(
+        cardBrand: CardBrand,
+        override val isDeferred: Boolean,
+        override val linkEnabled: Boolean,
+        override val googlePaySupported: Boolean,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "mc_disallowed_card_brand"
+
+        override val additionalParams: Map<String, Any?> = mapOf(
+            VALUE_CARD_BRAND to cardBrand.code
+        )
     }
 
     class PressConfirmButton(
@@ -509,6 +523,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
 
         const val VALUE_EDIT_CBC_EVENT_SOURCE = "edit"
         const val VALUE_ADD_CBC_EVENT_SOURCE = "add"
+        const val VALUE_CARD_BRAND = "brand"
 
         const val MAX_EXTERNAL_PAYMENT_METHODS = 10
     }

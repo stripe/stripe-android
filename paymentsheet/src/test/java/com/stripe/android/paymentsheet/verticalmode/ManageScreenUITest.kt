@@ -2,20 +2,21 @@ package com.stripe.android.paymentsheet.verticalmode
 
 import android.os.Build
 import androidx.compose.ui.test.SemanticsNodeInteraction
-import androidx.compose.ui.test.assertAny
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.hasContentDescriptionExactly
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onChild
 import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.ViewActionRecorder
+import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.ui.core.elements.TEST_TAG_DIALOG_CONFIRM_BUTTON
 import com.stripe.android.ui.core.elements.TEST_TAG_DIALOG_DISMISS_BUTTON
@@ -29,6 +30,12 @@ import kotlin.test.Test
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.Q])
 class ManageScreenUITest {
+
+    @get:Rule
+    val featureFlagTestRule = FeatureFlagTestRule(
+        featureFlag = FeatureFlags.useNewUpdateCardScreen,
+        isEnabled = false
+    )
 
     @get:Rule
     val composeRule = createComposeRule()
@@ -70,7 +77,7 @@ class ManageScreenUITest {
         ) {
             composeRule.onNodeWithTag(
                 "${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_${savedCard.id}"
-            ).onChildren().assertAny(
+            ).assert(
                 hasContentDescriptionExactly("Visa ending in 4 2 4 2 ")
             )
         }
@@ -121,26 +128,6 @@ class ManageScreenUITest {
         }
 
     @Test
-    fun clickingPaymentMethod_whenInEditMode_doesNothing() =
-        runScenario(
-            initialState = ManageScreenInteractor.State(
-                paymentMethods = displayableSavedPaymentMethods,
-                currentSelection = null,
-                isEditing = true,
-                canRemove = true,
-                canEdit = true,
-            )
-        ) {
-            assertThat(viewActionRecorder.viewActions).isEmpty()
-
-            composeRule.onNodeWithTag(
-                "${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_${displayableSavedPaymentMethods[0].paymentMethod.id}"
-            ).performClick()
-
-            assertThat(viewActionRecorder.viewActions).isEmpty()
-        }
-
-    @Test
     fun clickingPaymentMethod_inEditMode_doesNothing() =
         runScenario(
             initialState = ManageScreenInteractor.State(
@@ -161,6 +148,30 @@ class ManageScreenUITest {
         }
 
     @Test
+    fun clickingPaymentMethod_inEditMode_useNewUpdateCardScreen_updatesCard() =
+        runScenario(
+            initialState = ManageScreenInteractor.State(
+                paymentMethods = displayableSavedPaymentMethods,
+                currentSelection = null,
+                isEditing = true,
+                canRemove = true,
+                canEdit = true,
+            ),
+            enableUseNewUpdateScreen = true,
+        ) {
+            assertThat(viewActionRecorder.viewActions).isEmpty()
+
+            composeRule.onNodeWithTag(
+                "${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_${displayableSavedPaymentMethods[0].paymentMethod.id}"
+            ).performClick()
+
+            viewActionRecorder.consume(
+                ManageScreenInteractor.ViewAction.UpdatePaymentMethod(displayableSavedPaymentMethods[0])
+            )
+            assertThat(viewActionRecorder.viewActions).isEmpty()
+        }
+
+    @Test
     fun initiallySelectedPm_isSelectedInUi() = runScenario(
         initialState = ManageScreenInteractor.State(
             paymentMethods = displayableSavedPaymentMethods,
@@ -174,7 +185,6 @@ class ManageScreenUITest {
             "${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_${displayableSavedPaymentMethods[1].paymentMethod.id}"
         )
             // The selected node is the PaymentMethodRowButton which is a child of the SavedPaymentMethodRowButton
-            .onChild()
             .assertIsSelected()
     }
 
@@ -195,6 +205,22 @@ class ManageScreenUITest {
         getEditIcon(displayableSavedPaymentMethods[0]).assertDoesNotExist()
         getEditIcon(displayableSavedPaymentMethods[1]).assertDoesNotExist()
         getEditIcon(displayableSavedPaymentMethods[2]).assertExists()
+    }
+
+    @Test
+    fun correctIconsAreShown_usesNewUpdateScreen_inEditMode() = runScenario(
+        initialState = ManageScreenInteractor.State(
+            paymentMethods = displayableSavedPaymentMethods,
+            currentSelection = null,
+            isEditing = true,
+            canRemove = true,
+            canEdit = true,
+        ),
+        enableUseNewUpdateScreen = true,
+    ) {
+        getChevronIcon(displayableSavedPaymentMethods[0]).assertExists()
+        getChevronIcon(displayableSavedPaymentMethods[1]).assertExists()
+        getChevronIcon(displayableSavedPaymentMethods[2]).assertExists()
     }
 
     @Test
@@ -286,11 +312,18 @@ class ManageScreenUITest {
         )
     }
 
+    private fun getChevronIcon(paymentMethod: DisplayableSavedPaymentMethod): SemanticsNodeInteraction {
+        return composeRule.onNodeWithTag(
+            "${TEST_TAG_MANAGE_SCREEN_CHEVRON_ICON}_${paymentMethod.paymentMethod.id}",
+            useUnmergedTree = true,
+        )
+    }
+
     private val displayableSavedPaymentMethods =
         PaymentMethodFixtures.createCards(2)
             .plus(PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD)
             .map {
-                DisplayableSavedPaymentMethod(
+                DisplayableSavedPaymentMethod.create(
                     displayName = it.card!!.last4!!.resolvableString,
                     paymentMethod = it,
                     isCbcEligible = true
@@ -301,8 +334,10 @@ class ManageScreenUITest {
 
     private fun runScenario(
         initialState: ManageScreenInteractor.State,
+        enableUseNewUpdateScreen: Boolean = false,
         block: Scenario.() -> Unit
     ) {
+        featureFlagTestRule.setEnabled(enableUseNewUpdateScreen)
         val viewActionRecorder = ViewActionRecorder<ManageScreenInteractor.ViewAction>()
 
         val manageScreenInteractor = FakeManageScreenInteractor(

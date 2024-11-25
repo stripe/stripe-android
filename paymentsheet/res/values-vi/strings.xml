@@ -44,6 +44,10 @@
   <string name="stripe_paymentsheet_bacs_notice_mandate">Ngoài ra, bạn sẽ nhận được thông báo trước qua email về bất kỳ khoản tiền nào sẽ được ghi nợ theo hướng dẫn này. Các khoản thanh toán sẽ hiển thị là \'%s\' trên bảng sao kê ngân hàng của bạn.</string>
   <!-- Message shown as part of overall Bacs Mandate indicating that their payments are protected by a defined guarantee -->
   <string name="stripe_paymentsheet_bacs_protection_mandate">Các khoản thanh toán của bạn được bảo vệ bởi %s.</string>
+  <!-- Text displayed on manage bank account screen when bank account details are not editable. -->
+  <string name="stripe_paymentsheet_bank_account_details_cannot_be_changed">Không thể thay đổi thông tin tài khoản ngân hàng.</string>
+  <!-- Text displayed on manage card screen when card details are not editable. -->
+  <string name="stripe_paymentsheet_card_details_cannot_be_changed">Không thể thay đổi thông tin thẻ.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
   <string name="stripe_paymentsheet_card_mandate">Bằng việc cung cấp thông tin thẻ, bạn cho phép %s tính phí thẻ của bạn cho các khoản thanh toán trong tương lai theo điều khoản của họ.</string>
   <!-- Title shown above a carousel containing available payment methods -->
@@ -55,8 +59,14 @@
   <string name="stripe_paymentsheet_confirm_your_cvc">Xác nhận CVC của bạn</string>
   <!-- Text for a button that allows manual entry of an address -->
   <string name="stripe_paymentsheet_enter_address_manually">Nhập địa chỉ thủ công</string>
+  <!-- Title shown above a view containing a customer's bank account that they can delete or update -->
+  <string name="stripe_paymentsheet_manage_bank_account">Quản lý tài khoản ngân hàng Hoa Kỳ</string>
+  <!-- Title shown above a view containing a customer's card payment methods that they can delete or update -->
+  <string name="stripe_paymentsheet_manage_card">Quản lý thẻ</string>
   <!-- Title shown above a view containing the customer's card payment methods that they can delete or update -->
   <string name="stripe_paymentsheet_manage_payment_methods">Quản lý các phương thức thanh toán</string>
+  <!-- Title shown above a view containing a customer's SEPA debit account that they can delete or update -->
+  <string name="stripe_paymentsheet_manage_sepa_debit">Quản lý Ghi nợ SEPA</string>
   <!-- Title shown above a carousel containing the customer's payment methods -->
   <string name="stripe_paymentsheet_manage_your_payment_methods">Quản lý các phương thức thanh toán của bạn</string>
   <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->
@@ -111,6 +121,8 @@
   <string name="stripe_paymentsheet_select_payment_method">Chọn phương thức thanh toán</string>
   <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
   <string name="stripe_paymentsheet_select_your_payment_method">Chọn phương thức thanh toán của bạn</string>
+  <!-- Text displayed on manage SEPA debit screen when SEPA debit details are not editable. -->
+  <string name="stripe_paymentsheet_sepa_debit_details_cannot_be_changed">Không thể thay đổi thông tin Ghi nợ SEPA.</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">Tổng cộng: %s</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->

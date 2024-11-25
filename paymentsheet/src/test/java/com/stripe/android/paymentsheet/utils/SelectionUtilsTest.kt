@@ -5,6 +5,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import org.junit.Test
 
 class SelectionUtilsTest {
@@ -12,7 +13,7 @@ class SelectionUtilsTest {
     fun `should not be able to save if mode is payment intent`() {
         assertThat(
             NEW_SELECTION.canSave(
-                PaymentSheet.InitializationMode.PaymentIntent(clientSecret = "pi_12345")
+                PaymentElementLoader.InitializationMode.PaymentIntent(clientSecret = "pi_12345")
             )
         ).isFalse()
     }
@@ -21,7 +22,7 @@ class SelectionUtilsTest {
     fun `should be able to save if mode is payment intent but customer requested it`() {
         assertThat(
             NEW_SELECTION_WITH_CUSTOMER_REQUEST.canSave(
-                PaymentSheet.InitializationMode.PaymentIntent(clientSecret = "pi_12345")
+                PaymentElementLoader.InitializationMode.PaymentIntent(clientSecret = "pi_12345")
             )
         ).isTrue()
     }
@@ -30,7 +31,7 @@ class SelectionUtilsTest {
     fun `should be able to save if initialization mode is setup intent`() {
         assertThat(
             NEW_SELECTION.canSave(
-                PaymentSheet.InitializationMode.SetupIntent(clientSecret = "si_12345")
+                PaymentElementLoader.InitializationMode.SetupIntent(clientSecret = "si_12345")
             )
         ).isTrue()
     }
@@ -39,7 +40,7 @@ class SelectionUtilsTest {
     fun `should be able to save if initialization mode is PI deferred with future setup`() {
         assertThat(
             NEW_SELECTION.canSave(
-                PaymentSheet.InitializationMode.DeferredIntent(
+                PaymentElementLoader.InitializationMode.DeferredIntent(
                     intentConfiguration = PaymentSheet.IntentConfiguration(
                         mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                             amount = 10L,
@@ -56,7 +57,7 @@ class SelectionUtilsTest {
     fun `should not be able to save if initialization mode is PI deferred without future setup`() {
         assertThat(
             NEW_SELECTION.canSave(
-                PaymentSheet.InitializationMode.DeferredIntent(
+                PaymentElementLoader.InitializationMode.DeferredIntent(
                     intentConfiguration = PaymentSheet.IntentConfiguration(
                         mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                             amount = 10L,
@@ -73,7 +74,7 @@ class SelectionUtilsTest {
     fun `should be able to save if customer requested in PI deferred without future setup mode`() {
         assertThat(
             NEW_SELECTION_WITH_CUSTOMER_REQUEST.canSave(
-                PaymentSheet.InitializationMode.DeferredIntent(
+                PaymentElementLoader.InitializationMode.DeferredIntent(
                     intentConfiguration = PaymentSheet.IntentConfiguration(
                         mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                             amount = 10L,
@@ -90,7 +91,7 @@ class SelectionUtilsTest {
     fun `should be able to save if customer requested in SI deferred mode`() {
         assertThat(
             NEW_SELECTION_WITH_CUSTOMER_REQUEST.canSave(
-                PaymentSheet.InitializationMode.DeferredIntent(
+                PaymentElementLoader.InitializationMode.DeferredIntent(
                     intentConfiguration = PaymentSheet.IntentConfiguration(
                         mode = PaymentSheet.IntentConfiguration.Mode.Setup()
                     ),

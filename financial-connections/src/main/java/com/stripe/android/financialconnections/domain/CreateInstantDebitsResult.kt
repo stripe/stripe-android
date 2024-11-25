@@ -26,32 +26,40 @@ internal class RealCreateInstantDebitsResult @Inject constructor(
         bankAccountId: String,
     ): InstantDebitsResult {
         val consumerSession = consumerSessionProvider.provideConsumerSession()
+
         val clientSecret = requireNotNull(consumerSession?.clientSecret) {
             "Consumer session client secret cannot be null"
         }
 
+        val billingDetails = elementsSessionContext?.billingDetails
+
         val response = consumerRepository.createPaymentDetails(
             consumerSessionClientSecret = clientSecret,
             bankAccountId = bankAccountId,
+            billingDetails = billingDetails,
         )
 
         val paymentDetails = response.paymentDetails.filterIsInstance<BankAccount>().first()
 
-        val paymentMethodId = if (elementsSessionContext?.linkMode == LinkMode.LinkCardBrand) {
-            consumerRepository.sharePaymentDetails(
+        val paymentMethod = if (elementsSessionContext?.linkMode == LinkMode.LinkCardBrand) {
+            val sharePaymentDetails = consumerRepository.sharePaymentDetails(
                 paymentDetailsId = paymentDetails.id,
                 consumerSessionClientSecret = clientSecret,
                 expectedPaymentMethodType = elementsSessionContext.linkMode.expectedPaymentMethodType,
-            ).paymentMethodId
+                billingPhone = elementsSessionContext.billingDetails?.phone,
+            )
+
+            sharePaymentDetails.encodedPaymentMethod
         } else {
             repository.createPaymentMethod(
                 paymentDetailsId = paymentDetails.id,
                 consumerSessionClientSecret = clientSecret,
-            ).id
+                billingDetails = billingDetails,
+            )
         }
 
         return InstantDebitsResult(
-            paymentMethodId = paymentMethodId,
+            encodedPaymentMethod = paymentMethod,
             bankName = paymentDetails.bankName,
             last4 = paymentDetails.last4,
         )

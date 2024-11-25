@@ -45,6 +45,7 @@ data class ElementsSession(
         val linkMode: LinkMode?,
         val linkFlags: Map<String, Boolean>,
         val disableLinkSignup: Boolean,
+        val linkConsumerIncentive: LinkConsumerIncentive?,
     ) : StripeModel
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

@@ -7,9 +7,10 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
-import com.stripe.android.paymentsheet.DeferredIntentConfirmationType
+import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -60,7 +61,7 @@ internal class DefaultEventReporter @Inject internal constructor(
         linkMode: LinkMode?,
         googlePaySupported: Boolean,
         currency: String?,
-        initializationMode: PaymentSheet.InitializationMode,
+        initializationMode: PaymentElementLoader.InitializationMode,
         orderedLpms: List<String>,
         requireCvcRecollection: Boolean
     ) {
@@ -203,6 +204,17 @@ internal class DefaultEventReporter @Inject internal constructor(
                 mode = mode,
                 paymentSelection = paymentSelection,
                 currency = currency,
+                isDeferred = isDeferred,
+                linkEnabled = linkEnabled,
+                googlePaySupported = googlePaySupported,
+            )
+        )
+    }
+
+    override fun onDisallowedCardBrandEntered(brand: CardBrand) {
+        fireEvent(
+            PaymentSheetEvent.CardBrandDisallowed(
+                cardBrand = brand,
                 isDeferred = isDeferred,
                 linkEnabled = linkEnabled,
                 googlePaySupported = googlePaySupported,

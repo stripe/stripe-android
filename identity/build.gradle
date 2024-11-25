@@ -3,6 +3,7 @@ apply from: configs.androidLibrary
 apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
 apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
 apply plugin: 'com.google.devtools.ksp'
+apply plugin: 'org.jetbrains.kotlin.plugin.compose'
 
 dependencies {
     implementation project(":camera-core")
@@ -18,6 +19,7 @@ dependencies {
     implementation libs.androidx.coreKtx
     implementation libs.androidx.fragment
     implementation libs.androidx.lifecycle
+    implementation libs.androidx.lifecycleCompose
     implementation libs.androidx.liveDataKtx
     implementation libs.androidx.legacySupport
     implementation libs.androidx.navigationFragment
@@ -77,10 +79,6 @@ android {
     buildFeatures {
         viewBinding true
         compose true
-    }
-
-    composeOptions {
-        kotlinCompilerExtensionVersion "${versions.androidxComposeCompiler}"
     }
 }
 

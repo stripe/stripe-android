@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -19,6 +21,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.R
@@ -77,6 +80,18 @@ internal fun EditIcon(
 }
 
 @Composable
+internal fun ChevronIcon(paymentMethodId: String?,) {
+    Icon(
+        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+        contentDescription = null,
+        tint = Color.Gray,
+        modifier = Modifier.size(24.dp).semantics {
+            this.testTag = "${TEST_TAG_MANAGE_SCREEN_CHEVRON_ICON}_$paymentMethodId"
+        }
+    )
+}
+
+@Composable
 private fun TrailingIcon(
     backgroundColor: Color,
     icon: Painter,
@@ -107,3 +122,4 @@ private fun TrailingIcon(
 
 internal const val TEST_TAG_MANAGE_SCREEN_EDIT_ICON = "manage_screen_edit_icon"
 internal const val TEST_TAG_MANAGE_SCREEN_DELETE_ICON = "manage_screen_delete_icon"
+internal const val TEST_TAG_MANAGE_SCREEN_CHEVRON_ICON = "manage_screen_chevron_icon"

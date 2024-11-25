@@ -3,9 +3,9 @@ package com.stripe.android.paymentsheet.flowcontroller
 import android.app.Application
 import android.content.Context
 import androidx.lifecycle.viewModelScope
+import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.injection.IS_FLOW_CONTROLLER
 import com.stripe.android.paymentsheet.injection.PaymentOptionsViewModelSubcomponent
 import com.stripe.android.uicore.image.StripeImageLoader
 import dagger.Module
@@ -47,6 +47,6 @@ internal object FlowControllerModule {
 
     @Provides
     @Singleton
-    @Named(IS_FLOW_CONTROLLER)
-    fun provideIsFlowController() = true
+    @Named(ALLOWS_MANUAL_CONFIRMATION)
+    fun provideAllowsManualConfirmation() = true
 }

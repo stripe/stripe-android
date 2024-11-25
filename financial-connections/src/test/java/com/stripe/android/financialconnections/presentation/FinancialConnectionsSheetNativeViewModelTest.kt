@@ -64,6 +64,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
         financialConnectionsSessionClientSecret = ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
         publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
     )
+    private val encodedPaymentMethod = "{\"id\": \"pm_123\"}"
 
     private val liveEvents = mutableListOf<FinancialConnectionsEvent>()
 
@@ -320,7 +321,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
             initialState = initialState,
             createInstantDebitsResult = {
                 InstantDebitsResult(
-                    paymentMethodId = "pm_123",
+                    encodedPaymentMethod = encodedPaymentMethod,
                     last4 = "4242",
                     bankName = "Stripe Bank",
                 )
@@ -332,7 +333,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
         val expectedViewEffect = Finish(
             result = Completed(
                 instantDebits = InstantDebitsResult(
-                    paymentMethodId = "pm_123",
+                    encodedPaymentMethod = encodedPaymentMethod,
                     last4 = "4242",
                     bankName = "Stripe Bank",
                 ),
@@ -374,7 +375,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
             initialState = initialState,
             createInstantDebitsResult = {
                 InstantDebitsResult(
-                    paymentMethodId = "pm_123",
+                    encodedPaymentMethod = encodedPaymentMethod,
                     last4 = "4242",
                     bankName = "Stripe Bank",
                 )

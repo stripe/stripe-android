@@ -31,6 +31,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
+import com.stripe.android.CardBrandFilter
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
@@ -50,6 +51,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
+import com.stripe.android.paymentelement.confirmation.DefaultConfirmationHandler
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherFactory
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
@@ -67,6 +69,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.bacs.FakeBacsMandat
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.Args
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionInteractor
 import com.stripe.android.paymentsheet.state.LinkState
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.ui.GOOGLE_PAY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_EDIT_BUTTON_TEST_TAG
@@ -84,7 +87,7 @@ import com.stripe.android.uicore.elements.bottomsheet.BottomSheetContentTestTag
 import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
-import com.stripe.android.utils.FakePaymentSheetLoader
+import com.stripe.android.utils.FakePaymentElementLoader
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
@@ -157,7 +160,7 @@ internal class PaymentSheetActivityTest {
     private val intent = contract.createIntent(
         context,
         PaymentSheetContractV2.Args(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "pi_1234_secret_5678",
             ),
             config = PaymentSheetFixtures.CONFIG_CUSTOMER,
@@ -430,7 +433,7 @@ internal class PaymentSheetActivityTest {
 
         scenario.launch(intent).onActivity {
             composeTestRule.onNodeWithTag(
-                "SAVED_PAYMENT_METHOD_CARD_TEST_TAG_····4242",
+                "SAVED_PAYMENT_METHOD_CARD_TEST_TAG_···· 4242",
                 useUnmergedTree = true,
             ).assertIsSelected()
 
@@ -443,7 +446,7 @@ internal class PaymentSheetActivityTest {
             ).performClick()
 
             composeTestRule.onNodeWithTag(
-                "SAVED_PAYMENT_METHOD_CARD_TEST_TAG_····4242",
+                "SAVED_PAYMENT_METHOD_CARD_TEST_TAG_···· 4242",
                 useUnmergedTree = true,
             ).assertIsSelected()
         }
@@ -804,7 +807,7 @@ internal class PaymentSheetActivityTest {
         val scenario = activityScenario(viewModel)
         scenario.launch(intent).onActivity {
             composeTestRule.onNodeWithTag(
-                "SAVED_PAYMENT_METHOD_CARD_TEST_TAG_····4242",
+                "SAVED_PAYMENT_METHOD_CARD_TEST_TAG_···· 4242",
                 useUnmergedTree = true,
             ).assertIsSelected()
 
@@ -975,7 +978,7 @@ internal class PaymentSheetActivityTest {
         )
 
         val args = PaymentSheetContractV2.Args(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "abc",
             ),
             config = PaymentSheet.Configuration(
@@ -1001,7 +1004,7 @@ internal class PaymentSheetActivityTest {
     @Test
     fun `Handles invalid client secret correctly`() {
         val args = PaymentSheetContractV2.Args(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(clientSecret = ""),
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(clientSecret = ""),
             config = PaymentSheet.Configuration(
                 merchantDisplayName = "Some name",
             ),
@@ -1129,7 +1132,7 @@ internal class PaymentSheetActivityTest {
             PaymentSheetViewModel(
                 args = args,
                 eventReporter = eventReporter,
-                paymentSheetLoader = FakePaymentSheetLoader(
+                paymentElementLoader = FakePaymentElementLoader(
                     stripeIntent = paymentIntent,
                     customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(paymentMethods = paymentMethods),
                     isGooglePayAvailable = isGooglePayAvailable,
@@ -1148,7 +1151,7 @@ internal class PaymentSheetActivityTest {
                 workContext = testDispatcher,
                 savedStateHandle = savedStateHandle,
                 linkHandler = linkHandler,
-                intentConfirmationHandlerFactory = IntentConfirmationHandler.Factory(
+                confirmationHandlerFactory = DefaultConfirmationHandler.Factory(
                     intentConfirmationInterceptor = fakeIntentConfirmationInterceptor,
                     savedStateHandle = savedStateHandle,
                     stripePaymentLauncherAssistedFactory = stripePaymentLauncherAssistedFactory,
@@ -1207,7 +1210,8 @@ internal class PaymentSheetActivityTest {
                 config: GooglePayPaymentMethodLauncher.Config,
                 readyCallback: GooglePayPaymentMethodLauncher.ReadyCallback,
                 activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>,
-                skipReadyCheck: Boolean
+                skipReadyCheck: Boolean,
+                cardBrandFilter: CardBrandFilter
             ): GooglePayPaymentMethodLauncher {
                 val googlePayPaymentMethodLauncher = mock<GooglePayPaymentMethodLauncher>()
                 readyCallback.onReady(true)

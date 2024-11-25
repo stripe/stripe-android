@@ -19,6 +19,7 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsEve
 import com.stripe.android.financialconnections.example.data.BackendRepository
 import com.stripe.android.financialconnections.example.data.Settings
 import com.stripe.android.financialconnections.example.settings.ConfirmIntentSetting
+import com.stripe.android.financialconnections.example.settings.EmailSetting
 import com.stripe.android.financialconnections.example.settings.ExperienceSetting
 import com.stripe.android.financialconnections.example.settings.FinancialConnectionsPlaygroundUrlHelper
 import com.stripe.android.financialconnections.example.settings.FlowSetting
@@ -28,7 +29,6 @@ import com.stripe.android.financialconnections.example.settings.StripeAccountIdS
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountForInstantDebitsResult
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult
 import com.stripe.android.paymentsheet.PaymentSheetResult
@@ -117,6 +117,7 @@ internal class FinancialConnectionsPlaygroundViewModel(
                     _state.update { current ->
                         current.copy(
                             publishableKey = it.publishableKey,
+                            intentClientSecret = it.intentSecret,
                             loading = true,
                             status = current.status + buildString {
                                 append("Payment Intent created: ${it.intentSecret}")
@@ -136,6 +137,14 @@ internal class FinancialConnectionsPlaygroundViewModel(
                                 amount = it.amount,
                                 currency = it.currency,
                                 linkMode = LinkMode.LinkPaymentMethod,
+                                billingDetails = ElementsSessionContext.BillingDetails(
+                                    email = settings.get<EmailSetting>().selectedOption,
+                                ),
+                                prefillDetails = ElementsSessionContext.PrefillDetails(
+                                    email = settings.get<EmailSetting>().selectedOption,
+                                    phone = null,
+                                    phoneCountryCode = null,
+                                ),
                             ),
                             experience = settings.get<ExperienceSetting>().selectedOption,
                             integrationType = settings.get<IntegrationTypeSetting>().selectedOption,
@@ -253,12 +262,12 @@ internal class FinancialConnectionsPlaygroundViewModel(
                     _state.update {
                         it.copy(
                             status = it.status + listOf(
-                                "Session Completed! ${result.intent.id} " +
+                                "Session Completed! ${result.intent?.id} " +
                                     "(account: ${result.bankName} •••• ${result.last4})"
                             )
                         )
                     }
-                    confirmIntentIfNeeded(result.intent)
+                    confirmIntentIfNeeded()
                 }.onSuccess {
                     _state.update {
                         it.copy(
@@ -306,7 +315,7 @@ internal class FinancialConnectionsPlaygroundViewModel(
                             )
                         )
                     }
-                    confirmIntentIfNeeded(result.response.intent)
+                    confirmIntentIfNeeded()
                 }.onSuccess {
                     _state.update {
                         it.copy(
@@ -364,13 +373,13 @@ internal class FinancialConnectionsPlaygroundViewModel(
         }
     }
 
-    private suspend fun confirmIntentIfNeeded(
-        intent: StripeIntent,
-    ) {
+    private suspend fun confirmIntentIfNeeded() {
         val shouldConfirmIntent = state.value.settings.get<ConfirmIntentSetting>().selectedOption
-        if (shouldConfirmIntent) {
+        val clientSecret = state.value.intentClientSecret
+
+        if (shouldConfirmIntent && clientSecret != null) {
             val params = ConfirmPaymentIntentParams.create(
-                clientSecret = intent.clientSecret!!,
+                clientSecret = clientSecret,
                 paymentMethodType = PaymentMethod.Type.USBankAccount
             )
             stripe().confirmPaymentIntent(params)
@@ -511,6 +520,7 @@ internal data class FinancialConnectionsPlaygroundState(
     val settings: PlaygroundSettings,
     val loading: Boolean = false,
     val publishableKey: String? = null,
+    val intentClientSecret: String? = null,
     val status: List<String> = emptyList(),
     val emittedEvents: List<String> = emptyList()
 ) {

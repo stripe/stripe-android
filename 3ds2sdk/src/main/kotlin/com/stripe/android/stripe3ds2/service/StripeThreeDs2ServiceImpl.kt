@@ -4,11 +4,11 @@ import android.content.Context
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.stripe3ds2.exceptions.InvalidInputException
 import com.stripe.android.stripe3ds2.exceptions.SDKRuntimeException
+import com.stripe.android.stripe3ds2.init.AppInfoRepository
 import com.stripe.android.stripe3ds2.init.DefaultAppInfoRepository
 import com.stripe.android.stripe3ds2.init.DefaultSecurityChecker
 import com.stripe.android.stripe3ds2.init.DeviceDataFactoryImpl
 import com.stripe.android.stripe3ds2.init.DeviceParamNotAvailableFactoryImpl
-import com.stripe.android.stripe3ds2.init.HardwareIdSupplier
 import com.stripe.android.stripe3ds2.init.SecurityChecker
 import com.stripe.android.stripe3ds2.init.Warning
 import com.stripe.android.stripe3ds2.init.ui.StripeUiCustomization
@@ -38,6 +38,7 @@ class StripeThreeDs2ServiceImpl @VisibleForTesting internal constructor(
     private val publicKeyFactory: PublicKeyFactory,
     override val warnings: List<Warning>,
 ) : StripeThreeDs2Service {
+
     @JvmOverloads
     constructor(
         context: Context,
@@ -93,9 +94,9 @@ class StripeThreeDs2ServiceImpl @VisibleForTesting internal constructor(
         sdkReferenceNumber,
         errorReporter,
         StripeEphemeralKeyPairGenerator(errorReporter),
-        HardwareIdSupplier(context),
         DefaultSecurityChecker(),
         MessageVersionRegistry(),
+        DefaultAppInfoRepository(context, workContext),
         workContext
     )
 
@@ -105,9 +106,9 @@ class StripeThreeDs2ServiceImpl @VisibleForTesting internal constructor(
         sdkReferenceNumber: String,
         errorReporter: ErrorReporter,
         ephemeralKeyPairGenerator: EphemeralKeyPairGenerator,
-        hardwareIdSupplier: HardwareIdSupplier,
         securityChecker: SecurityChecker,
         messageVersionRegistry: MessageVersionRegistry,
+        appInfoRepository: AppInfoRepository,
         workContext: CoroutineContext
     ) : this(
         messageVersionRegistry = messageVersionRegistry,
@@ -117,14 +118,13 @@ class StripeThreeDs2ServiceImpl @VisibleForTesting internal constructor(
             DefaultAuthenticationRequestParametersFactory(
                 DeviceDataFactoryImpl(
                     context = context.applicationContext,
-                    hardwareIdSupplier = hardwareIdSupplier
+                    appInfoRepository = appInfoRepository,
+                    messageVersionRegistry = messageVersionRegistry
                 ),
-                DeviceParamNotAvailableFactoryImpl(
-                    hardwareIdSupplier
-                ),
+                DeviceParamNotAvailableFactoryImpl(),
                 securityChecker,
                 ephemeralKeyPairGenerator,
-                DefaultAppInfoRepository(context, workContext),
+                appInfoRepository,
                 messageVersionRegistry,
                 sdkReferenceNumber,
                 errorReporter,
@@ -198,6 +198,6 @@ class StripeThreeDs2ServiceImpl @VisibleForTesting internal constructor(
     }
 
     private companion object {
-        private const val STRIPE_SDK_REFERENCE_NUMBER = "3DS_LOA_SDK_STIN_020100_00142"
+        private const val STRIPE_SDK_REFERENCE_NUMBER = "3DS_LOA_SDK_STIN_020200_00960"
     }
 }

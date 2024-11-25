@@ -15,7 +15,7 @@ internal object DeferredIntentValidator {
     fun validate(
         stripeIntent: StripeIntent,
         intentConfiguration: PaymentSheet.IntentConfiguration,
-        isFlowController: Boolean,
+        allowsManualConfirmation: Boolean,
     ): StripeIntent {
         val params = intentConfiguration.toDeferredIntentParams()
 
@@ -48,7 +48,7 @@ internal object DeferredIntentValidator {
                 // the final step of confirmation. Showing a successful payment in the complete flow
                 // may be misleading when merchants still need to do a final confirmation which
                 // could fail.
-                require(stripeIntent.confirmationMethod != Manual || isFlowController) {
+                require(stripeIntent.confirmationMethod != Manual || allowsManualConfirmation) {
                     "Your PaymentIntent confirmationMethod (${stripeIntent.confirmationMethod}) " +
                         "can only be used with PaymentSheet.FlowController."
                 }

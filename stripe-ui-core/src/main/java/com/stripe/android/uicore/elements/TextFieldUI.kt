@@ -90,11 +90,9 @@ private fun defaultAutofillEventReporter(): (String) -> Unit {
 fun TextFieldSection(
     modifier: Modifier = Modifier,
     textFieldController: TextFieldController,
-    imeAction: ImeAction,
-    enabled: Boolean,
     isSelected: Boolean = false,
     @StringRes sectionTitle: Int? = null,
-    onTextStateChanged: (TextFieldState?) -> Unit = {}
+    content: @Composable () -> Unit,
 ) {
     val error by textFieldController.error.collectAsState()
 
@@ -107,15 +105,13 @@ fun TextFieldSection(
         } ?: stringResource(it.errorMessage)
     }
 
-    Section(title = sectionTitle, error = sectionErrorString, isSelected = isSelected) {
-        TextField(
-            textFieldController = textFieldController,
-            enabled = enabled,
-            imeAction = imeAction,
-            modifier = modifier,
-            onTextStateChanged = onTextStateChanged
-        )
-    }
+    Section(
+        modifier = modifier,
+        title = sectionTitle,
+        error = sectionErrorString,
+        isSelected = isSelected,
+        content = content,
+    )
 }
 
 /**
@@ -322,6 +318,7 @@ fun AnimatedIcons(
 
     val isRunningInTestHarness = LocalInstrumentationTest.current
 
+    @SuppressLint("ProduceStateDoesNotAssignValue")
     val target by produceState(initialValue = icons.first()) {
         if (!isRunningInTestHarness) {
             composableScope.launch {

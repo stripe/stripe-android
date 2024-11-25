@@ -44,10 +44,10 @@ class EditPaymentMethodTest {
                 last4 = "4242",
                 displayName = "Visa".resolvableString,
                 canUpdate = true,
-                selectedBrand = EditPaymentMethodViewState.CardBrandChoice(selectedBrand),
+                selectedBrand = CardBrandChoice(selectedBrand),
                 availableBrands = listOf(
-                    EditPaymentMethodViewState.CardBrandChoice(CardBrand.Visa),
-                    EditPaymentMethodViewState.CardBrandChoice(CardBrand.CartesBancaires)
+                    CardBrandChoice(CardBrand.Visa),
+                    CardBrandChoice(CardBrand.CartesBancaires)
                 ),
                 canRemove = true,
             )

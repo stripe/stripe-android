@@ -15,6 +15,7 @@ import com.stripe.android.paymentsheet.navigation.NavigationHandler
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.ui.DefaultAddPaymentMethodInteractor
+import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.PaymentMethodRemovalDelayMillis
@@ -232,6 +233,22 @@ internal class SavedPaymentMethodMutator(
                 ),
             )
         )
+    }
+
+    fun updatePaymentMethod(displayableSavedPaymentMethod: DisplayableSavedPaymentMethod) {
+        if (displayableSavedPaymentMethod.savedPaymentMethod != SavedPaymentMethod.Unexpected) {
+            navigationHandler.transitionTo(
+                PaymentSheetScreen.UpdatePaymentMethod(
+                    DefaultUpdatePaymentMethodInteractor(
+                        isLiveMode = isLiveModeProvider(),
+                        canRemove = canRemove.value,
+                        displayableSavedPaymentMethod,
+                        cardBrandFilter = cardBrandFilter,
+                        removeExecutor = ::removePaymentMethodInEditScreen,
+                    )
+                )
+            )
+        }
     }
 
     private suspend fun removePaymentMethodInEditScreen(paymentMethod: PaymentMethod): Throwable? {

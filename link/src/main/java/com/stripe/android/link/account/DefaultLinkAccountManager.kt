@@ -6,12 +6,14 @@ import com.stripe.android.core.exception.StripeException
 import com.stripe.android.link.BuildConfig
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkPaymentDetails
+import com.stripe.android.link.NoLinkAccountFoundException
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
+import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSignUpConsentAction
@@ -219,8 +221,40 @@ internal class DefaultLinkAccountManager @Inject constructor(
         }
     }
 
+    override suspend fun startVerification(): Result<LinkAccount> {
+        val clientSecret = linkAccount.value?.clientSecret ?: return Result.failure(Throwable("no link account found"))
+        linkEventsReporter.on2FAStart()
+        return linkRepository.startVerification(clientSecret, consumerPublishableKey)
+            .onFailure {
+                linkEventsReporter.on2FAStartFailure()
+            }.map { consumerSession ->
+                setAccount(consumerSession, null)
+            }
+    }
+
+    override suspend fun confirmVerification(code: String): Result<LinkAccount> {
+        val clientSecret = linkAccount.value?.clientSecret ?: return Result.failure(Throwable("no link account found"))
+        return linkRepository.confirmVerification(code, clientSecret, consumerPublishableKey)
+            .onSuccess {
+                linkEventsReporter.on2FAComplete()
+            }.onFailure {
+                linkEventsReporter.on2FAFailure()
+            }.map { consumerSession ->
+                setAccount(consumerSession, null)
+            }
+    }
+
+    override suspend fun listPaymentDetails(paymentMethodTypes: Set<String>): Result<ConsumerPaymentDetails> {
+        val clientSecret = linkAccount.value?.clientSecret ?: return Result.failure(NoLinkAccountFoundException())
+        return linkRepository.listPaymentDetails(
+            paymentMethodTypes = paymentMethodTypes,
+            consumerSessionClientSecret = clientSecret,
+            consumerPublishableKey = consumerPublishableKey
+        )
+    }
+
     @VisibleForTesting
-    private fun setAccountNullable(
+    internal fun setAccountNullable(
         consumerSession: ConsumerSession?,
         publishableKey: String?,
     ): LinkAccount? {

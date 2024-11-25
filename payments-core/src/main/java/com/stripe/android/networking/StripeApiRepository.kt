@@ -52,6 +52,7 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT_SECRET
+import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.CreateFinancialConnectionsSessionForDeferredPaymentParams
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
@@ -77,6 +78,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.Token
 import com.stripe.android.model.TokenParams
 import com.stripe.android.model.parsers.CardMetadataJsonParser
+import com.stripe.android.model.parsers.ConsumerPaymentDetailsJsonParser
 import com.stripe.android.model.parsers.ConsumerPaymentDetailsShareJsonParser
 import com.stripe.android.model.parsers.ConsumerSessionJsonParser
 import com.stripe.android.model.parsers.CustomerJsonParser
@@ -1432,6 +1434,27 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 params = params,
             ),
             jsonParser = MobileCardElementConfigParser(),
+        )
+    }
+
+    override suspend fun listPaymentDetails(
+        clientSecret: String,
+        paymentMethodTypes: Set<String>,
+        requestOptions: ApiRequest.Options
+    ): Result<ConsumerPaymentDetails> {
+        return fetchStripeModelResult(
+            apiRequestFactory.createPost(
+                listConsumerPaymentDetailsUrl,
+                requestOptions,
+                mapOf(
+                    "request_surface" to "android_payment_element",
+                    "credentials" to mapOf(
+                        "consumer_session_client_secret" to clientSecret
+                    ),
+                    "types" to paymentMethodTypes.toList()
+                )
+            ),
+            ConsumerPaymentDetailsJsonParser
         )
     }
 

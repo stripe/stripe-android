@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.core.Logger
+import com.stripe.android.core.exception.LocalStripeException
 import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.AccountSelected
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.AccountsAutoSelected
@@ -23,6 +24,7 @@ import com.stripe.android.financialconnections.domain.PollAuthorizationSessionAc
 import com.stripe.android.financialconnections.domain.SaveAccountToLink
 import com.stripe.android.financialconnections.domain.SelectAccounts
 import com.stripe.android.financialconnections.domain.toCachedPartnerAccounts
+import com.stripe.android.financialconnections.exception.AccountLoadError
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerClickableText.DATA
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.SelectionMode
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.ViewEffect
@@ -32,6 +34,7 @@ import com.stripe.android.financialconnections.features.notice.NoticeSheetState.
 import com.stripe.android.financialconnections.features.notice.PresentSheet
 import com.stripe.android.financialconnections.model.DataAccessNotice
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.model.PartnerAccountsList
@@ -120,6 +123,9 @@ internal class AccountPickerViewModel @AssistedInject constructor(
             val accounts = partnerAccountList.data.sortedBy { it.allowSelection.not() }
             val dataAccessDisclaimer = sync.text?.accountPicker?.dataAccessNotice
 
+            // Ensure there's available accounts to select.
+            throwErrorIfNoSelectableAccounts(accounts, manifest)
+
             AccountPickerState.Payload(
                 // note that this uses ?? instead of ||, we do NOT want to skip account selection
                 // if EITHER of these are true, we only want to skip account selection when
@@ -144,13 +150,33 @@ internal class AccountPickerViewModel @AssistedInject constructor(
         }.execute { copy(payload = it) }
     }
 
+    private fun throwErrorIfNoSelectableAccounts(
+        accounts: List<PartnerAccount>,
+        manifest: FinancialConnectionsSessionManifest
+    ) {
+        if (accounts.none { it.allowSelection }) {
+            throw AccountLoadError(
+                showManualEntry = manifest.allowManualEntry,
+                canRetry = true,
+                institution = requireNotNull(manifest.activeInstitution),
+                stripeException = LocalStripeException(
+                    displayMessage = "No accounts available to select.",
+                    analyticsValue = null
+                )
+            )
+        }
+    }
+
     private fun onPayloadLoaded() {
         onAsync(AccountPickerState::payload, onSuccess = { payload ->
             when {
                 // If account selection has to be skipped, submit all selectable accounts.
                 payload.skipAccountSelection -> submitAccounts(
-                    selectedIds = payload.selectableAccounts.map { it.id }.toSet(),
-                    updateLocalCache = false,
+                    selectedIds = payload.selectableAccounts
+                        // ensure just one account is selected on single account flows.
+                        .let { accounts -> if (payload.singleAccount) accounts.take(1) else accounts }
+                        .map { account -> account.id }
+                        .toSet(),
                     isSkipAccountSelection = true
                 )
                 // the user saw an OAuth account selection screen and selected
@@ -158,7 +184,6 @@ internal class AccountPickerViewModel @AssistedInject constructor(
                 // we had done account selection, and submit.
                 payload.userSelectedSingleAccountInInstitution -> submitAccounts(
                     selectedIds = setOf(payload.accounts.first().id),
-                    updateLocalCache = true,
                     isSkipAccountSelection = true
                 )
 
@@ -278,7 +303,6 @@ internal class AccountPickerViewModel @AssistedInject constructor(
             state.payload()?.let {
                 submitAccounts(
                     selectedIds = state.selectedIds,
-                    updateLocalCache = true,
                     isSkipAccountSelection = false
                 )
             } ?: run {
@@ -289,7 +313,6 @@ internal class AccountPickerViewModel @AssistedInject constructor(
 
     private fun submitAccounts(
         selectedIds: Set<String>,
-        updateLocalCache: Boolean,
         isSkipAccountSelection: Boolean
     ) {
         suspend {
@@ -304,7 +327,6 @@ internal class AccountPickerViewModel @AssistedInject constructor(
             val accountsList: PartnerAccountsList = selectAccounts(
                 selectedAccountIds = selectedIds,
                 sessionId = requireNotNull(manifest.activeAuthSession).id,
-                updateLocalCache = updateLocalCache
             )
 
             val consumerSessionClientSecret = consumerSessionProvider.provideConsumerSession()?.clientSecret

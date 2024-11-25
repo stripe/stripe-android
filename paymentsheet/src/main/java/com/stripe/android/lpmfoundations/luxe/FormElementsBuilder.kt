@@ -75,13 +75,12 @@ internal class FormElementsBuilder(
             addAll(uiFormElements)
 
             if (requireBillingAddressCollection) {
-                val addressElement = AddressSpec(allowedCountryCodes = availableCountries).transform(
+                val elements = AddressSpec(allowedCountryCodes = availableCountries).transform(
                     initialValues = arguments.initialValues,
                     shippingValues = arguments.shippingValues,
                 )
-                if (addressElement != null) {
-                    add(addressElement)
-                }
+
+                addAll(elements)
             }
 
             addAll(footerFormElements) // Order footers last.

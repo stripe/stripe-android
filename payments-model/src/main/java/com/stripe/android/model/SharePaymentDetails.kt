@@ -8,4 +8,5 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 data class SharePaymentDetails(
     val paymentMethodId: String,
+    val encodedPaymentMethod: String,
 ) : StripeModel

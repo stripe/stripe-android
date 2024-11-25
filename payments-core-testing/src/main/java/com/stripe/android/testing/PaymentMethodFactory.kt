@@ -60,7 +60,17 @@ object PaymentMethodFactory {
             code = PaymentMethod.Type.Card.code,
             card = PaymentMethod.Card(
                 last4 = "4242",
+                expiryMonth = 3,
+                expiryYear = 2027,
             ),
+        )
+    }
+
+    fun visaCard(): PaymentMethod {
+        return card(random = false).update(
+            last4 = "4242",
+            addCbcNetworks = false,
+            brand = CardBrand.Visa,
         )
     }
 
@@ -104,6 +114,16 @@ object PaymentMethodFactory {
                 ),
                 routingNumber = "110000000",
             )
+        )
+    }
+
+    fun instantDebits(): PaymentMethod {
+        return PaymentMethod(
+            id = "pm_1234",
+            created = 123456789L,
+            liveMode = false,
+            type = PaymentMethod.Type.Link,
+            code = PaymentMethod.Type.Link.code,
         )
     }
 
@@ -177,7 +197,6 @@ object PaymentMethodFactory {
         usBankAccountJson.put("financial_connections_account", usBankAccount.financialConnectionsAccount)
         usBankAccountJson.put("fingerprint", usBankAccount.fingerprint)
         usBankAccountJson.put("last4", usBankAccount.last4)
-        usBankAccountJson.put("linked_account", usBankAccount.linkedAccount)
         usBankAccountJson.put("routing_number", usBankAccount.routingNumber)
 
         val networksJson = JSONObject()

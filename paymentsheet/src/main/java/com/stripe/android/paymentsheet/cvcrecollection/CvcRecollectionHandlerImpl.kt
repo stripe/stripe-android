@@ -6,6 +6,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionData
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 
 internal class CvcRecollectionHandlerImpl : CvcRecollectionHandler {
 
@@ -17,7 +18,7 @@ internal class CvcRecollectionHandlerImpl : CvcRecollectionHandler {
 
     override fun cvcRecollectionEnabled(
         stripeIntent: StripeIntent?,
-        initializationMode: PaymentSheet.InitializationMode?
+        initializationMode: PaymentElementLoader.InitializationMode?
     ): Boolean {
         return deferredIntentRequiresCVCRecollection(initializationMode) ||
             paymentIntentRequiresCVCRecollection(stripeIntent, initializationMode)
@@ -26,25 +27,27 @@ internal class CvcRecollectionHandlerImpl : CvcRecollectionHandler {
     override fun requiresCVCRecollection(
         stripeIntent: StripeIntent?,
         paymentSelection: PaymentSelection?,
-        initializationMode: PaymentSheet.InitializationMode?,
+        initializationMode: PaymentElementLoader.InitializationMode?,
         extraRequirements: () -> Boolean
     ): Boolean {
         return paymentSelectionIsSavedCard(paymentSelection) &&
             cvcRecollectionEnabled(stripeIntent, initializationMode) && extraRequirements()
     }
 
-    private fun deferredIntentRequiresCVCRecollection(initializationMode: PaymentSheet.InitializationMode?): Boolean {
-        return (initializationMode as? PaymentSheet.InitializationMode.DeferredIntent)
+    private fun deferredIntentRequiresCVCRecollection(
+        initializationMode: PaymentElementLoader.InitializationMode?
+    ): Boolean {
+        return (initializationMode as? PaymentElementLoader.InitializationMode.DeferredIntent)
             ?.intentConfiguration?.requireCvcRecollection == true &&
             initializationMode.intentConfiguration.mode is PaymentSheet.IntentConfiguration.Mode.Payment
     }
 
     private fun paymentIntentRequiresCVCRecollection(
         stripeIntent: StripeIntent?,
-        initializationMode: PaymentSheet.InitializationMode?
+        initializationMode: PaymentElementLoader.InitializationMode?
     ): Boolean {
         return (stripeIntent as? PaymentIntent)?.requireCvcRecollection == true &&
-            initializationMode is PaymentSheet.InitializationMode.PaymentIntent
+            initializationMode is PaymentElementLoader.InitializationMode.PaymentIntent
     }
 
     private fun paymentSelectionIsSavedCard(paymentSelection: PaymentSelection?): Boolean {

@@ -1,6 +1,8 @@
 package com.stripe.android.paymentsheet.example.playground.settings
 
 import com.stripe.android.customersheet.CustomerSheet
+import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 
@@ -24,6 +26,18 @@ internal object PaymentMethodOrderSettingsDefinition :
         configurationBuilder: PaymentSheet.Configuration.Builder,
         playgroundState: PlaygroundState.Payment,
         configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData
+    ) {
+        if (value.isNotEmpty()) {
+            configurationBuilder.paymentMethodOrder(value.split(",").map { it.trim() })
+        }
+    }
+
+    @ExperimentalEmbeddedPaymentElementApi
+    override fun configure(
+        value: String,
+        configurationBuilder: EmbeddedPaymentElement.Configuration.Builder,
+        playgroundState: PlaygroundState.Payment,
+        configurationData: PlaygroundSettingDefinition.EmbeddedConfigurationData
     ) {
         if (value.isNotEmpty()) {
             configurationBuilder.paymentMethodOrder(value.split(",").map { it.trim() })

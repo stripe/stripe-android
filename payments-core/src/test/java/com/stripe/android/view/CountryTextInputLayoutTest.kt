@@ -1,15 +1,7 @@
 package com.stripe.android.view
 
-import android.content.Context
 import android.widget.AutoCompleteTextView
 import androidx.test.core.app.ApplicationProvider
-import com.stripe.android.ApiKeyFixtures
-import com.stripe.android.CustomerSession
-import com.stripe.android.EphemeralKeyProvider
-import com.stripe.android.PaymentConfiguration
-import com.stripe.android.PaymentSessionData
-import com.stripe.android.PaymentSessionFixtures
-import com.stripe.android.R
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.core.model.getCountryCode
@@ -17,7 +9,6 @@ import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.createTestActivityRule
 import org.junit.Rule
 import org.junit.runner.RunWith
-import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
 import java.util.Locale
 import kotlin.test.AfterTest
@@ -38,8 +29,6 @@ class CountryTextInputLayoutTest {
     private lateinit var countryTextInputLayout: CountryTextInputLayout
     private lateinit var autoCompleteTextView: AutoCompleteTextView
 
-    private val ephemeralKeyProvider: EphemeralKeyProvider = mock()
-
     private val activityScenarioFactory = ActivityScenarioFactory(
         ApplicationProvider.getApplicationContext()
     )
@@ -51,25 +40,10 @@ class CountryTextInputLayoutTest {
     fun setup() {
         Locale.setDefault(Locale.US)
 
-        val context: Context = ApplicationProvider.getApplicationContext()
-        PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
-        CustomerSession.initCustomerSession(context, ephemeralKeyProvider)
-
-        val config = PaymentSessionFixtures.CONFIG.copy(
-            prepopulatedShippingInfo = null,
-            allowedShippingCountryCodes = emptySet()
-        )
-        activityScenarioFactory.create<PaymentFlowActivity>(
-            PaymentFlowActivityStarter.Args(
-                paymentSessionConfig = config,
-                paymentSessionData = PaymentSessionData(config)
-            )
-        ).use { activityScenario ->
-            activityScenario.onActivity {
-                countryTextInputLayout = it
-                    .findViewById(R.id.country_autocomplete_aaw)
-                autoCompleteTextView = countryTextInputLayout.countryAutocomplete
-            }
+        activityScenarioFactory.createView {
+            countryTextInputLayout = CountryTextInputLayout(it)
+            autoCompleteTextView = countryTextInputLayout.countryAutocomplete
+            countryTextInputLayout
         }
     }
 

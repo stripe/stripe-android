@@ -11,6 +11,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.coroutines.withContext
 import java.lang.IllegalArgumentException
 import javax.inject.Inject
@@ -77,7 +78,7 @@ internal class DefaultCustomerSessionElementsSessionManager @Inject constructor(
                 ) as? SavedSelection.PaymentMethod
 
                 elementsSessionRepository.get(
-                    initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
+                    initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
                         intentConfiguration = PaymentSheet.IntentConfiguration(
                             mode = PaymentSheet.IntentConfiguration.Mode.Setup(),
                             paymentMethodTypes = intentConfiguration.paymentMethodTypes,

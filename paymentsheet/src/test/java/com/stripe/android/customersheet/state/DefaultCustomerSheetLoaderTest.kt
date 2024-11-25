@@ -2,6 +2,7 @@ package com.stripe.android.customersheet.state
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ExperimentalCardBrandFilteringApi
+import com.stripe.android.common.coroutines.Single
 import com.stripe.android.customersheet.CustomerPermissions
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetLoader
@@ -32,9 +33,9 @@ import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.PaymentMethodFactory.update
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import com.stripe.android.utils.CompletableSingle
 import com.stripe.android.utils.FakeElementsSessionRepository
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -333,7 +334,7 @@ class DefaultCustomerSheetLoaderTest {
 
     @Test
     fun `Awaits InitializationDataSource if InitializationDataSource is provided after loading started`() = runTest {
-        val initDataSource = CompletableDeferred<CustomerSheetInitializationDataSource>()
+        val initDataSource = CompletableSingle<CustomerSheetInitializationDataSource>()
 
         val configuration = CustomerSheet.Configuration(merchantDisplayName = "Merchant, Inc.")
         val loader = DefaultCustomerSheetLoader(
@@ -395,7 +396,7 @@ class DefaultCustomerSheetLoaderTest {
         val errorReporter = FakeErrorReporter()
 
         val loader = createCustomerSheetLoader(
-            initializationDataSourceProvider = CompletableDeferred(),
+            initializationDataSourceProvider = CompletableSingle(),
             errorReporter = errorReporter,
         )
 
@@ -482,7 +483,7 @@ class DefaultCustomerSheetLoaderTest {
         errorReporter: ErrorReporter = FakeErrorReporter(),
     ): CustomerSheetLoader {
         return createCustomerSheetLoader(
-            initializationDataSourceProvider = CompletableDeferred(initializationDataSource),
+            initializationDataSourceProvider = CompletableSingle(initializationDataSource),
             isGooglePayReady = isGooglePayReady,
             isLiveModeProvider = isLiveModeProvider,
             isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
@@ -492,7 +493,7 @@ class DefaultCustomerSheetLoaderTest {
     }
 
     private fun createCustomerSheetLoader(
-        initializationDataSourceProvider: Deferred<CustomerSheetInitializationDataSource>,
+        initializationDataSourceProvider: Single<CustomerSheetInitializationDataSource>,
         isGooglePayReady: Boolean = true,
         isLiveModeProvider: () -> Boolean = { false },
         isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable = IsFinancialConnectionsAvailable { false },

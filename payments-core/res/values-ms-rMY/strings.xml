@@ -121,6 +121,8 @@
   <!-- Accessibility action for deleting a payment method -->
   <string name="stripe_delete_payment_method">Hapuskan Kaedah Pembayaran</string>
   <string name="stripe_delete_payment_method_prompt_title">Hapuskan kaedah pembayaran?</string>
+  <!-- Error message for card entry form when a user enters a card with a brand that is not accepted. -->
+  <string name="stripe_disallowed_card_brand">%s tidak diterima</string>
   <!-- Done button title -->
   <string name="stripe_done">Selesai</string>
   <!-- Button title to enter editing mode -->
@@ -160,7 +162,7 @@
   <!-- Label for free shipping method -->
   <string name="stripe_price_free">Percuma</string>
   <!-- Error when there is a problem processing the credit card -->
-  <string name="stripe_processing_error">Ada ralat semasa memproses kad anda -- cuba lagi dalam masa beberapa saat</string>
+  <string name="stripe_processing_error">Ada ralat ketika memproses kad anda -- cuba lagi dalam masa beberapa saat</string>
   <!-- Button title for confirmation alert to remove a saved payment method
    Text for remove button -->
   <string name="stripe_remove">Alih Keluar</string>

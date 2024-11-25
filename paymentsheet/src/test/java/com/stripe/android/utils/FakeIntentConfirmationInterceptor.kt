@@ -8,8 +8,8 @@ import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodOptionsParams
-import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
-import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.coroutines.channels.Channel
 
 internal class FakeIntentConfirmationInterceptor : IntentConfirmationInterceptor {
@@ -49,7 +49,7 @@ internal class FakeIntentConfirmationInterceptor : IntentConfirmationInterceptor
     }
 
     override suspend fun intercept(
-        initializationMode: PaymentSheet.InitializationMode,
+        initializationMode: PaymentElementLoader.InitializationMode,
         paymentMethodCreateParams: PaymentMethodCreateParams,
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
@@ -69,7 +69,7 @@ internal class FakeIntentConfirmationInterceptor : IntentConfirmationInterceptor
     }
 
     override suspend fun intercept(
-        initializationMode: PaymentSheet.InitializationMode,
+        initializationMode: PaymentElementLoader.InitializationMode,
         paymentMethod: PaymentMethod,
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
@@ -88,7 +88,7 @@ internal class FakeIntentConfirmationInterceptor : IntentConfirmationInterceptor
 
     sealed interface InterceptCall {
         data class WithNewPaymentMethod(
-            val initializationMode: PaymentSheet.InitializationMode,
+            val initializationMode: PaymentElementLoader.InitializationMode,
             val paymentMethodCreateParams: PaymentMethodCreateParams,
             val paymentMethodOptionsParams: PaymentMethodOptionsParams?,
             val shippingValues: ConfirmPaymentIntentParams.Shipping?,
@@ -96,7 +96,7 @@ internal class FakeIntentConfirmationInterceptor : IntentConfirmationInterceptor
         ) : InterceptCall
 
         data class WithExistingPaymentMethod(
-            val initializationMode: PaymentSheet.InitializationMode,
+            val initializationMode: PaymentElementLoader.InitializationMode,
             val paymentMethod: PaymentMethod,
             val paymentMethodOptionsParams: PaymentMethodOptionsParams?,
             val shippingValues: ConfirmPaymentIntentParams.Shipping?,

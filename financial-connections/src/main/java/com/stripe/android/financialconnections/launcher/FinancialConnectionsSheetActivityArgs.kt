@@ -20,14 +20,16 @@ sealed class FinancialConnectionsSheetActivityArgs(
     @Parcelize
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class ForData(
-        override val configuration: FinancialConnectionsSheet.Configuration
-    ) : FinancialConnectionsSheetActivityArgs(configuration, elementsSessionContext = null)
+        override val configuration: FinancialConnectionsSheet.Configuration,
+        override val elementsSessionContext: FinancialConnectionsSheet.ElementsSessionContext? = null,
+    ) : FinancialConnectionsSheetActivityArgs(configuration, elementsSessionContext)
 
     @Parcelize
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class ForToken(
-        override val configuration: FinancialConnectionsSheet.Configuration
-    ) : FinancialConnectionsSheetActivityArgs(configuration, elementsSessionContext = null)
+        override val configuration: FinancialConnectionsSheet.Configuration,
+        override val elementsSessionContext: FinancialConnectionsSheet.ElementsSessionContext? = null,
+    ) : FinancialConnectionsSheetActivityArgs(configuration, elementsSessionContext)
 
     @Parcelize
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

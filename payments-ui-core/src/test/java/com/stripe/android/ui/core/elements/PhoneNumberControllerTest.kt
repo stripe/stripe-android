@@ -167,4 +167,17 @@ internal class PhoneNumberControllerTest {
             assertThat(awaitItem()).isTrue()
         }
     }
+
+    @Test
+    fun `when phone number is entered, form field value should contain prefix`() = runTest {
+        val phoneNumberController = PhoneNumberController.createPhoneNumberController(
+            initiallySelectedCountryCode = "CA",
+        )
+
+        phoneNumberController.onValueChange("(122) 252-5252")
+
+        phoneNumberController.formFieldValue.test {
+            assertThat(awaitItem().value).isEqualTo("+11222525252")
+        }
+    }
 }

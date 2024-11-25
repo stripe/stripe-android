@@ -10,6 +10,7 @@ import com.stripe.android.model.BankStatuses
 import com.stripe.android.model.CardMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
+import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.CreateFinancialConnectionsSessionForDeferredPaymentParams
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
@@ -379,6 +380,13 @@ interface StripeRepository {
         requestOptions: ApiRequest.Options,
         params: Map<String, String>? = null
     ): Result<MobileCardElementConfig>
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    suspend fun listPaymentDetails(
+        clientSecret: String,
+        paymentMethodTypes: Set<String>,
+        requestOptions: ApiRequest.Options
+    ): Result<ConsumerPaymentDetails>
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun buildPaymentUserAgent(attribution: Set<String> = emptySet()): String

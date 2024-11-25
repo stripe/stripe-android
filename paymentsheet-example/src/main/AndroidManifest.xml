@@ -45,6 +45,7 @@
         <activity android:name="com.stripe.android.paymentsheet.example.samples.ui.addresselement.AddressElementExampleActivity" />
         <activity android:name="com.stripe.android.paymentsheet.example.playground.activity.QrCodeActivity" />
         <activity android:name="com.stripe.android.paymentsheet.example.playground.activity.FawryActivity" />
+        <activity android:name="com.stripe.android.paymentsheet.example.playground.embedded.EmbeddedPlaygroundActivity" />
         <activity
             android:name="com.stripe.android.paymentsheet.example.playground.PaymentSheetPlaygroundActivity"
             android:exported="true"

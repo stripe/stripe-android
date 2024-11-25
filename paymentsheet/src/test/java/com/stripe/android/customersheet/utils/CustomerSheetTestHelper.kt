@@ -32,13 +32,12 @@ import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.paymentelement.confirmation.DefaultConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
 import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
-import com.stripe.android.paymentsheet.IntentConfirmationHandler
-import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.FakeBacsMandateConfirmationLauncher
 import com.stripe.android.paymentsheet.ui.DefaultEditPaymentMethodViewInteractor
@@ -49,9 +48,9 @@ import com.stripe.android.paymentsheet.ui.PaymentMethodUpdateOperation
 import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import com.stripe.android.utils.CompletableSingle
 import com.stripe.android.utils.DummyActivityResultCaller
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.StandardTestDispatcher
 import org.mockito.kotlin.mock
@@ -62,7 +61,6 @@ internal object CustomerSheetTestHelper {
     internal val application = ApplicationProvider.getApplicationContext<Application>()
 
     internal fun createViewModel(
-        isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable = IsFinancialConnectionsAvailable { true },
         isLiveMode: Boolean = false,
         workContext: CoroutineContext = EmptyCoroutineContext,
         integrationType: CustomerSheetIntegration.Type = CustomerSheetIntegration.Type.CustomerAdapter,
@@ -112,15 +110,15 @@ internal object CustomerSheetTestHelper {
             workContext = workContext,
             originalPaymentSelection = savedPaymentSelection,
             paymentConfigurationProvider = { paymentConfiguration },
-            paymentMethodDataSourceProvider = CompletableDeferred(paymentMethodDataSource),
-            intentDataSourceProvider = CompletableDeferred(intentDataSource),
-            savedSelectionDataSourceProvider = CompletableDeferred(savedSelectionDataSource),
+            paymentMethodDataSourceProvider = CompletableSingle(paymentMethodDataSource),
+            intentDataSourceProvider = CompletableSingle(intentDataSource),
+            savedSelectionDataSourceProvider = CompletableSingle(savedSelectionDataSource),
             stripeRepository = stripeRepository,
             configuration = configuration,
             integrationType = integrationType,
             isLiveModeProvider = { isLiveMode },
             logger = Logger.noop(),
-            intentConfirmationHandlerFactory = IntentConfirmationHandler.Factory(
+            confirmationHandlerFactory = DefaultConfirmationHandler.Factory(
                 intentConfirmationInterceptor = intentConfirmationInterceptor,
                 paymentConfigurationProvider = { paymentConfiguration },
                 bacsMandateConfirmationLauncherFactory = {
@@ -143,7 +141,8 @@ internal object CustomerSheetTestHelper {
                         config: GooglePayPaymentMethodLauncher.Config,
                         readyCallback: GooglePayPaymentMethodLauncher.ReadyCallback,
                         activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>,
-                        skipReadyCheck: Boolean
+                        skipReadyCheck: Boolean,
+                        cardBrandFilter: CardBrandFilter
                     ): GooglePayPaymentMethodLauncher = mock()
                 },
                 statusBarColor = { null },
@@ -153,11 +152,10 @@ internal object CustomerSheetTestHelper {
             ),
             eventReporter = eventReporter,
             customerSheetLoader = customerSheetLoader,
-            isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
             editInteractorFactory = editInteractorFactory,
             errorReporter = errorReporter,
         ).apply {
-            registerFromActivity(DummyActivityResultCaller(), TestLifecycleOwner())
+            registerFromActivity(DummyActivityResultCaller.noOp(), TestLifecycleOwner())
         }
     }
 

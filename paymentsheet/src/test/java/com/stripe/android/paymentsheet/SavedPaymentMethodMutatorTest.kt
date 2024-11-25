@@ -8,6 +8,7 @@ import com.stripe.android.core.strings.orEmpty
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.NavigationHandler
@@ -26,6 +27,9 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.verify
+import org.mockito.kotlin.any
+import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
 
 class SavedPaymentMethodMutatorTest {
@@ -464,6 +468,26 @@ class SavedPaymentMethodMutatorTest {
         removeDuplicatesTest(shouldRemoveDuplicates = true)
     }
 
+    @Test
+    fun `updatePaymentMethod for card navigates to update payment method screen`() {
+        val displayableSavedPaymentMethod = PaymentMethodFactory.cards(1).first().toDisplayableSavedPaymentMethod()
+        runScenario {
+            savedPaymentMethodMutator.updatePaymentMethod(displayableSavedPaymentMethod)
+
+            verify(navigationHandler).transitionTo(any())
+        }
+    }
+
+    @Test
+    fun `updatePaymentMethod for unsupported SPM type does nothing`() {
+        val displayableSavedPaymentMethod = PaymentMethodFactory.amazonPay().toDisplayableSavedPaymentMethod()
+        runScenario {
+            savedPaymentMethodMutator.updatePaymentMethod(displayableSavedPaymentMethod)
+
+            verifyNoInteractions(navigationHandler)
+        }
+    }
+
     private fun createCustomerState(
         paymentMethods: List<PaymentMethod>,
         isRemoveEnabled: Boolean,
@@ -556,6 +580,7 @@ class SavedPaymentMethodMutatorTest {
                 selectionSource = selection,
                 editPaymentMethodInteractorFactory = editPaymentMethodInteractorFactory,
                 currentScreen = currentScreen,
+                navigationHandler = navigationHandler,
             ).apply {
                 block()
             }
@@ -568,5 +593,6 @@ class SavedPaymentMethodMutatorTest {
         val selectionSource: MutableStateFlow<PaymentSelection?>,
         val editPaymentMethodInteractorFactory: FakeEditPaymentMethodInteractor.Factory,
         val currentScreen: MutableStateFlow<PaymentSheetScreen>,
+        val navigationHandler: NavigationHandler,
     )
 }

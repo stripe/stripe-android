@@ -1,6 +1,7 @@
 package com.stripe.android.identity.ui
 
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
@@ -120,6 +121,7 @@ private fun AddressSectionContent(
     navController: NavController
 ) {
     SectionElementUI(
+        modifier = Modifier.padding(vertical = 8.dp),
         enabled = enabled,
         element = sectionElement,
         hiddenIdentifiers = emptySet(),

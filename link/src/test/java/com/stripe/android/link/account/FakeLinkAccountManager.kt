@@ -1,6 +1,7 @@
 package com.stripe.android.link.account
 
 import com.stripe.android.link.LinkPaymentDetails
+import com.stripe.android.link.TestFactory
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.inline.SignUpConsentAction
@@ -12,7 +13,6 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import org.mockito.kotlin.mock
 
 internal open class FakeLinkAccountManager : LinkAccountManager {
     private val _linkAccount = MutableStateFlow<LinkAccount?>(null)
@@ -22,18 +22,15 @@ internal open class FakeLinkAccountManager : LinkAccountManager {
     override val accountStatus: Flow<AccountStatus> = _accountStatus
 
     var lookupConsumerResult: Result<LinkAccount?> = Result.success(null)
+    var startVerificationResult: Result<LinkAccount> = Result.success(LinkAccount(ConsumerSession("", "", "", "")))
+    var confirmVerificationResult: Result<LinkAccount> = Result.success(LinkAccount(ConsumerSession("", "", "", "")))
     var signUpResult: Result<LinkAccount> = Result.success(LinkAccount(ConsumerSession("", "", "", "")))
     var signInWithUserInputResult: Result<LinkAccount> = Result.success(LinkAccount(ConsumerSession("", "", "", "")))
     var logOutResult: Result<ConsumerSession> = Result.success(ConsumerSession("", "", "", ""))
     var createCardPaymentDetailsResult: Result<LinkPaymentDetails> = Result.success(
-        value = LinkPaymentDetails.Saved(
-            paymentDetails = ConsumerPaymentDetails.Card(
-                id = "pm_123",
-                last4 = "4242",
-            ),
-            paymentMethodCreateParams = mock(),
-        )
+        value = TestFactory.LINK_NEW_PAYMENT_DETAILS
     )
+    var listPaymentDetailsResult: Result<ConsumerPaymentDetails> = Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS)
     var linkAccountFromLookupResult: LinkAccount? = null
     override var consumerPublishableKey: String? = null
 
@@ -75,5 +72,17 @@ internal open class FakeLinkAccountManager : LinkAccountManager {
 
     override fun setLinkAccountFromLookupResult(lookup: ConsumerSessionLookup, startSession: Boolean): LinkAccount? {
         return linkAccountFromLookupResult
+    }
+
+    override suspend fun startVerification(): Result<LinkAccount> {
+        return startVerificationResult
+    }
+
+    override suspend fun confirmVerification(code: String): Result<LinkAccount> {
+        return confirmVerificationResult
+    }
+
+    override suspend fun listPaymentDetails(paymentMethodTypes: Set<String>): Result<ConsumerPaymentDetails> {
+        return listPaymentDetailsResult
     }
 }

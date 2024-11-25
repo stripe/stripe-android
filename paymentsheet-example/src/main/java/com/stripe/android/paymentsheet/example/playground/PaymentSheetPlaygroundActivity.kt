@@ -55,6 +55,7 @@ import com.stripe.android.paymentsheet.example.playground.activity.AppearanceBot
 import com.stripe.android.paymentsheet.example.playground.activity.AppearanceStore
 import com.stripe.android.paymentsheet.example.playground.activity.FawryActivity
 import com.stripe.android.paymentsheet.example.playground.activity.QrCodeActivity
+import com.stripe.android.paymentsheet.example.playground.embedded.EmbeddedPlaygroundActivity
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationType
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
@@ -295,13 +296,16 @@ val appBuilder = PaymentSheet.Appearance.Builder().embeddedAppearance(embeddedAp
         if (playgroundState == null) {
             return
         }
+        playgroundState.snapshot.setValues()
 
         when (playgroundState) {
             is PlaygroundState.Payment -> {
-                ShippingAddressButton(
-                    addressLauncher = addressLauncher,
-                    playgroundState = playgroundState,
-                )
+                if (playgroundState.displaysShippingAddressButton()) {
+                    ShippingAddressButton(
+                        addressLauncher = addressLauncher,
+                        playgroundState = playgroundState,
+                    )
+                }
 
                 when (playgroundState.integrationType) {
                     PlaygroundConfigurationData.IntegrationType.PaymentSheet -> {
@@ -317,6 +321,13 @@ val appBuilder = PaymentSheet.Appearance.Builder().embeddedAppearance(embeddedAp
                             playgroundState = playgroundState,
                         )
                     }
+
+                    PlaygroundConfigurationData.IntegrationType.Embedded -> {
+                        EmbeddedUi(
+                            playgroundState = playgroundState,
+                        )
+                    }
+
                     else -> Unit
                 }
             }
@@ -383,6 +394,24 @@ val appBuilder = PaymentSheet.Appearance.Builder().embeddedAppearance(embeddedAp
         BuyButton(
             buyButtonEnabled = flowControllerState?.selectedPaymentOption != null,
             onClick = flowController::confirm
+        )
+    }
+
+    @Composable
+    fun EmbeddedUi(
+        playgroundState: PlaygroundState.Payment,
+    ) {
+        val context = LocalContext.current
+        BuyButton(
+            buyButtonEnabled = true,
+            onClick = {
+                context.startActivity(
+                    EmbeddedPlaygroundActivity.create(
+                        context = context,
+                        playgroundState = playgroundState,
+                    )
+                )
+            }
         )
     }
 
@@ -465,12 +494,7 @@ val appBuilder = PaymentSheet.Appearance.Builder().embeddedAppearance(embeddedAp
             }
         } else {
             paymentSheet.presentWithIntentConfiguration(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = playgroundState.checkoutMode.intentConfigurationMode(playgroundState),
-                    paymentMethodTypes = playgroundState.paymentMethodTypes,
-                    paymentMethodConfigurationId = playgroundState.paymentMethodConfigurationId,
-                    requireCvcRecollection = playgroundState.requireCvcRecollectionForDeferred
-                ),
+                intentConfiguration = playgroundState.intentConfiguration(),
                 configuration = playgroundState.paymentSheetConfiguration(),
             )
         }
@@ -496,12 +520,7 @@ val appBuilder = PaymentSheet.Appearance.Builder().embeddedAppearance(embeddedAp
             }
         } else {
             flowController.configureWithIntentConfiguration(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = playgroundState.checkoutMode.intentConfigurationMode(playgroundState),
-                    paymentMethodTypes = playgroundState.paymentMethodTypes,
-                    paymentMethodConfigurationId = playgroundState.paymentMethodConfigurationId,
-                    requireCvcRecollection = playgroundState.requireCvcRecollectionForDeferred
-                ),
+                intentConfiguration = playgroundState.intentConfiguration(),
                 configuration = playgroundState.paymentSheetConfiguration(),
                 callback = viewModel::onFlowControllerConfigured,
             )
