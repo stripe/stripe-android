@@ -44,8 +44,8 @@
   <string name="stripe_paymentsheet_bacs_notice_mandate">또한, 본 지침에 따라 인출해야 할 금액에 대해 2일 전 사전 통지를 이메일로 받으실 수 있습니다. 결제는 은행 계좌에 \'%s\'(으)로 표시됩니다.</string>
   <!-- Message shown as part of overall Bacs Mandate indicating that their payments are protected by a defined guarantee -->
   <string name="stripe_paymentsheet_bacs_protection_mandate">결제는 %s에 의해 보호됩니다.</string>
-  <!-- Text displayed on manage card screen when card details are not editable. -->
-  <string name="stripe_paymentsheet_card_details_cannot_be_changed">카드 세부사항은 설정되면 변경할 수 없습니다.</string>
+  <!-- Text displayed on manage bank account screen when bank account details are not editable. -->
+  <string name="stripe_paymentsheet_bank_account_details_cannot_be_changed">은행 계좌 세부사항은 설정되면 변경할 수 없습니다.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
   <string name="stripe_paymentsheet_card_mandate">카드 정보를 제공하면 %s에서 향후 결제에 대해 해당 약관에 따라 귀하의 카드에 대금을 청구할 수 있습니다.</string>
   <!-- Title shown above a carousel containing available payment methods -->
@@ -57,10 +57,12 @@
   <string name="stripe_paymentsheet_confirm_your_cvc">CVC 확인</string>
   <!-- Text for a button that allows manual entry of an address -->
   <string name="stripe_paymentsheet_enter_address_manually">주소 직접 입력</string>
-  <!-- Title shown above a view containing a customer's card payment methods that they can delete or update -->
-  <string name="stripe_paymentsheet_manage_card">카드 관리</string>
+  <!-- Title shown above a view containing a customer's bank account that they can delete or update -->
+  <string name="stripe_paymentsheet_manage_bank_account">미국 은행 계좌 관리</string>
   <!-- Title shown above a view containing the customer's card payment methods that they can delete or update -->
   <string name="stripe_paymentsheet_manage_payment_methods">결제 방식 관리</string>
+  <!-- Title shown above a view containing a customer's SEPA debit account that they can delete or update -->
+  <string name="stripe_paymentsheet_manage_sepa_debit">SEPA 자동 이체 관리</string>
   <!-- Title shown above a carousel containing the customer's payment methods -->
   <string name="stripe_paymentsheet_manage_your_payment_methods">내 결제 방식 관리</string>
   <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->
@@ -115,6 +117,8 @@
   <string name="stripe_paymentsheet_select_payment_method">결제 방식 선택</string>
   <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
   <string name="stripe_paymentsheet_select_your_payment_method">결제 수단을 선택하세요.</string>
+  <!-- Text displayed on manage SEPA debit screen when SEPA debit details are not editable. -->
+  <string name="stripe_paymentsheet_sepa_debit_details_cannot_be_changed">SEPA 자동 이체 세부사항은 설정되면 변경할 수 없습니다.</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">합계 : %s</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->

@@ -44,6 +44,8 @@
   <string name="stripe_paymentsheet_bacs_notice_mandate">Be to, el. paštu prieš dvi dienas gausite pranešimą apie bet kokią pagal šį nurodymą nurašomą sumą. Mokėjimai jūsų banko išraše bus rodomi kaip „%s“.</string>
   <!-- Message shown as part of overall Bacs Mandate indicating that their payments are protected by a defined guarantee -->
   <string name="stripe_paymentsheet_bacs_protection_mandate">Jūsų mokėjimai apsaugoti %s.</string>
+  <!-- Text displayed on manage bank account screen when bank account details are not editable. -->
+  <string name="stripe_paymentsheet_bank_account_details_cannot_be_changed">Banko sąskaitos duomenų keisti negalima.</string>
   <!-- Text displayed on manage card screen when card details are not editable. -->
   <string name="stripe_paymentsheet_card_details_cannot_be_changed">Kortelės duomenų keisti negalima.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
@@ -57,10 +59,14 @@
   <string name="stripe_paymentsheet_confirm_your_cvc">Patvirtinkite savo CVC</string>
   <!-- Text for a button that allows manual entry of an address -->
   <string name="stripe_paymentsheet_enter_address_manually">Įvesti adresą rankiniu būdu</string>
+  <!-- Title shown above a view containing a customer's bank account that they can delete or update -->
+  <string name="stripe_paymentsheet_manage_bank_account">Tvarkyti JAV banko sąskaitą</string>
   <!-- Title shown above a view containing a customer's card payment methods that they can delete or update -->
   <string name="stripe_paymentsheet_manage_card">Tvarkyti kortelę</string>
   <!-- Title shown above a view containing the customer's card payment methods that they can delete or update -->
   <string name="stripe_paymentsheet_manage_payment_methods">Valdyti mokėjimo būdus</string>
+  <!-- Title shown above a view containing a customer's SEPA debit account that they can delete or update -->
+  <string name="stripe_paymentsheet_manage_sepa_debit">Tvarkyti SEPA debetą</string>
   <!-- Title shown above a carousel containing the customer's payment methods -->
   <string name="stripe_paymentsheet_manage_your_payment_methods">Valdykite savo mokėjimo būdus</string>
   <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->
@@ -115,6 +121,8 @@
   <string name="stripe_paymentsheet_select_payment_method">Pasirinkti mokėjimo būdą</string>
   <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
   <string name="stripe_paymentsheet_select_your_payment_method">Pasirinkite mokėjimo būdą</string>
+  <!-- Text displayed on manage SEPA debit screen when SEPA debit details are not editable. -->
+  <string name="stripe_paymentsheet_sepa_debit_details_cannot_be_changed">SEPA debeto duomenų keisti negalima.</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">Bendra suma: %s</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
