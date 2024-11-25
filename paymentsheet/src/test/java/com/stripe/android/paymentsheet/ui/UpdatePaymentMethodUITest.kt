@@ -246,6 +246,17 @@ class UpdatePaymentMethodUITest {
     }
 
     @Test
+    fun expiredCard_hidesDetailsCantBeChangedText() {
+        runScenario(
+            displayableSavedPaymentMethod = PaymentMethodFixtures
+                .EXPIRED_CARD_PAYMENT_METHOD
+                .toDisplayableSavedPaymentMethod(),
+            isExpiredCard = true,
+        ) {
+            composeRule.onNodeWithTag(UPDATE_PM_DETAILS_SUBTITLE_TEST_TAG).assertDoesNotExist()
+        }
+    }
+
     fun modifiableCard_cbcDropdownIsShown() {
         runScenario(
             displayableSavedPaymentMethod = PaymentMethodFixtures
@@ -348,6 +359,7 @@ class UpdatePaymentMethodUITest {
 
     private fun runScenario(
         displayableSavedPaymentMethod: DisplayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
+        isExpiredCard: Boolean = false,
         errorMessage: ResolvableString? = null,
         initialCardBrand: CardBrand = CardBrand.Unknown,
         canRemove: Boolean = true,
@@ -357,6 +369,7 @@ class UpdatePaymentMethodUITest {
         val interactor = FakeUpdatePaymentMethodInteractor(
             displayableSavedPaymentMethod = displayableSavedPaymentMethod,
             canRemove = canRemove,
+            isExpiredCard = isExpiredCard,
             viewActionRecorder = viewActionRecorder,
             initialState = UpdatePaymentMethodInteractor.State(
                 error = errorMessage,

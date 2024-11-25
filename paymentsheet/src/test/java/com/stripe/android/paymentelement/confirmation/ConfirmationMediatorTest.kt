@@ -1,19 +1,16 @@
 package com.stripe.android.paymentelement.confirmation
 
+import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.PaymentIntentFixtures
-import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.paymentelement.confirmation.epms.ExternalPaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
-import com.stripe.android.testing.PaymentMethodFactory
-import com.stripe.android.testing.SetupIntentFactory
 import kotlinx.coroutines.test.runTest
+import kotlinx.parcelize.Parcelize
 import org.junit.Test
 import org.mockito.kotlin.mock
 import java.util.concurrent.CountDownLatch
@@ -21,46 +18,37 @@ import java.util.concurrent.TimeUnit
 
 class ConfirmationMediatorTest {
     @Test
-    fun `On can confirm, should return true if definition is the same type`() = runTest {
+    fun `On can confirm, should return true if definition is the same type`() = test {
         val mediator = ConfirmationMediator(
             savedStateHandle = SavedStateHandle(),
-            definition = FakeConfirmationDefinition()
+            definition = definition,
         )
 
         val canConfirm = mediator.canConfirm(
-            confirmationOption = PaymentMethodConfirmationOption.Saved(
-                initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                    clientSecret = "pi_123_secret_123",
-                ),
-                optionsParams = null,
-                shippingDetails = null,
-                paymentMethod = PaymentMethodFactory.card(),
-            ),
+            confirmationOption = TestConfirmationDefinition.Option,
         )
 
+        assertThat(optionCalls.awaitItem().option).isEqualTo(TestConfirmationDefinition.Option)
         assertThat(canConfirm).isTrue()
     }
 
     @Test
-    fun `On can confirm, should return false if definition is not the same type`() = runTest {
+    fun `On can confirm, should return false if definition is not the same type`() = test {
         val mediator = ConfirmationMediator(
             savedStateHandle = SavedStateHandle(),
-            definition = FakeConfirmationDefinition()
+            definition = definition,
         )
 
         val canConfirm = mediator.canConfirm(
-            confirmationOption = ExternalPaymentMethodConfirmationOption(
-                type = "paypal",
-                billingDetails = null,
-            ),
+            confirmationOption = InvalidTestConfirmationOption,
         )
 
+        assertThat(optionCalls.awaitItem().option).isEqualTo(InvalidTestConfirmationOption)
         assertThat(canConfirm).isFalse()
     }
 
     @Test
-    fun `On register, should create launcher`() = runTest {
-        val definition = FakeConfirmationDefinition()
+    fun `On register, should create launcher`() = test {
         val mediator = ConfirmationMediator(
             savedStateHandle = SavedStateHandle(),
             definition = definition,
@@ -73,31 +61,30 @@ class ConfirmationMediatorTest {
             onResult = {},
         )
 
-        val createLauncherCall = definition.createLauncherCalls.awaitItem()
+        val createLauncherCall = createLauncherCalls.awaitItem()
 
         assertThat(createLauncherCall.activityResultCaller).isEqualTo(activityResultCaller)
     }
 
     @Test
-    fun `On incorrect confirmation option provided on action, should return fail action`() = runTest {
+    fun `On incorrect confirmation option provided on action, should return fail action`() = test {
         val mediator = ConfirmationMediator(
             savedStateHandle = SavedStateHandle(),
-            definition = FakeConfirmationDefinition()
+            definition = definition
         )
 
         val action = mediator.action(
-            option = ExternalPaymentMethodConfirmationOption(
-                type = "paypal",
-                billingDetails = null,
-            ),
+            option = InvalidTestConfirmationOption,
             intent = PaymentIntentFixtures.PI_SUCCEEDED,
         )
+
+        assertThat(optionCalls.awaitItem().option).isEqualTo(InvalidTestConfirmationOption)
 
         val failAction = action.asFail()
 
         assertThat(failAction.cause).isInstanceOf(IllegalArgumentException::class.java)
         assertThat(failAction.cause.message).isEqualTo(
-            "Parameter type of 'ExternalPaymentMethodConfirmationOption' cannot be used with " +
+            "Parameter type of 'InvalidTestConfirmationOption' cannot be used with " +
                 "ConfirmationMediator to read a result"
         )
         assertThat(failAction.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
@@ -105,84 +92,78 @@ class ConfirmationMediatorTest {
     }
 
     @Test
-    fun `On complete confirmation action, should return mediator complete action`() = runTest {
-        val definition = FakeConfirmationDefinition(
-            onAction = { confirmationOption, intent ->
-                ConfirmationDefinition.Action.Complete(
-                    confirmationOption = confirmationOption,
-                    intent = intent,
-                    deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
-                )
-            }
-        )
-
+    fun `On complete confirmation action, should return mediator complete action`() = test(
+        action = ConfirmationDefinition.Action.Complete(
+            confirmationOption = TestConfirmationDefinition.Option,
+            intent = INTENT,
+            deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
+        ),
+    ) {
         val mediator = ConfirmationMediator(
             savedStateHandle = SavedStateHandle(),
             definition = definition
         )
 
         val action = mediator.action(
-            option = SAVED_CONFIRMATION_OPTION,
+            option = TestConfirmationDefinition.Option,
             intent = INTENT,
         )
 
+        assertThat(optionCalls.awaitItem().option).isEqualTo(TestConfirmationDefinition.Option)
+
+        val actionCall = actionCalls.awaitItem()
+
+        assertThat(actionCall.confirmationOption).isEqualTo(TestConfirmationDefinition.Option)
+        assertThat(actionCall.intent).isEqualTo(INTENT)
+
         val completeAction = action.asComplete()
 
-        assertThat(completeAction.confirmationOption).isEqualTo(SAVED_CONFIRMATION_OPTION)
+        assertThat(completeAction.confirmationOption).isEqualTo(TestConfirmationDefinition.Option)
         assertThat(completeAction.intent).isEqualTo(INTENT)
         assertThat(completeAction.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Client)
     }
 
     @Test
-    fun `On failed confirmation action, should return mediator fail action`() = runTest {
-        val exception = IllegalStateException("Failed!")
-        val message = R.string.stripe_something_went_wrong.resolvableString
-        val errorType = ConfirmationHandler.Result.Failed.ErrorType.Fatal
-
-        val definition = FakeConfirmationDefinition(
-            onAction = { _, _ ->
-                ConfirmationDefinition.Action.Fail(
-                    cause = exception,
-                    message = R.string.stripe_something_went_wrong.resolvableString,
-                    errorType = errorType,
-                )
-            }
-        )
-
+    fun `On failed confirmation action, should return mediator fail action`() = test(
+        action = ConfirmationDefinition.Action.Fail(
+            cause = IllegalStateException("Failed!"),
+            message = R.string.stripe_something_went_wrong.resolvableString,
+            errorType = ConfirmationHandler.Result.Failed.ErrorType.Fatal,
+        ),
+    ) {
         val mediator = ConfirmationMediator(
             savedStateHandle = SavedStateHandle(),
             definition = definition
         )
 
         val action = mediator.action(
-            option = SAVED_CONFIRMATION_OPTION,
+            option = TestConfirmationDefinition.Option,
             intent = INTENT,
         )
+
+        assertThat(optionCalls.awaitItem().option).isEqualTo(TestConfirmationDefinition.Option)
+
+        val actionCall = actionCalls.awaitItem()
+
+        assertThat(actionCall.confirmationOption).isEqualTo(TestConfirmationDefinition.Option)
+        assertThat(actionCall.intent).isEqualTo(INTENT)
 
         val failAction = action.asFail()
 
         assertThat(failAction.cause).isInstanceOf(IllegalStateException::class.java)
         assertThat(failAction.cause.message).isEqualTo("Failed!")
-        assertThat(failAction.message).isEqualTo(message)
-        assertThat(failAction.errorType).isEqualTo(errorType)
+        assertThat(failAction.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
+        assertThat(failAction.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Fatal)
     }
 
     @Test
-    fun `On launch action, should call definition launch and persist parameters`() = runTest {
-        val launcherArguments = FakeConfirmationDefinition.LauncherArgs(amount = 5000)
-        val launcher = FakeConfirmationDefinition.Launcher()
-
-        val definition = FakeConfirmationDefinition(
-            onAction = { _, _ ->
-                ConfirmationDefinition.Action.Launch(
-                    launcherArguments = launcherArguments,
-                    deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
-                    receivesResultInProcess = false,
-                )
-            },
-            launcher = launcher,
-        )
-
+    fun `On launch action, should call definition launch and persist parameters`() = test(
+        action = ConfirmationDefinition.Action.Launch(
+            launcherArguments = TestConfirmationDefinition.LauncherArgs,
+            deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
+            receivesResultInProcess = false,
+        ),
+    ) {
         val savedStateHandle = SavedStateHandle()
 
         val mediator = ConfirmationMediator(
@@ -195,10 +176,19 @@ class ConfirmationMediatorTest {
             )
         }
 
+        assertThat(createLauncherCalls.awaitItem()).isNotNull()
+
         val action = mediator.action(
-            option = SAVED_CONFIRMATION_OPTION,
+            option = TestConfirmationDefinition.Option,
             intent = INTENT,
         )
+
+        assertThat(optionCalls.awaitItem().option).isEqualTo(TestConfirmationDefinition.Option)
+
+        val actionCall = actionCalls.awaitItem()
+
+        assertThat(actionCall.confirmationOption).isEqualTo(TestConfirmationDefinition.Option)
+        assertThat(actionCall.intent).isEqualTo(INTENT)
 
         val launchAction = action.asLaunch()
 
@@ -206,37 +196,32 @@ class ConfirmationMediatorTest {
 
         launchAction.launch()
 
-        val launchCall = definition.launchCalls.awaitItem()
+        val launchCall = launchCalls.awaitItem()
 
-        assertThat(launchCall.confirmationOption).isEqualTo(SAVED_CONFIRMATION_OPTION)
-        assertThat(launchCall.arguments).isEqualTo(launcherArguments)
+        assertThat(launchCall.confirmationOption).isEqualTo(TestConfirmationDefinition.Option)
+        assertThat(launchCall.arguments).isEqualTo(TestConfirmationDefinition.LauncherArgs)
         assertThat(launchCall.intent).isEqualTo(INTENT)
-        assertThat(launchCall.launcher).isEqualTo(launcher)
+        assertThat(launchCall.launcher).isEqualTo(TestConfirmationDefinition.Launcher)
 
         val parameters = savedStateHandle
-            .get<ConfirmationMediator.Parameters<PaymentMethodConfirmationOption.Saved>>(
+            .get<ConfirmationMediator.Parameters<TestConfirmationDefinition.Option>>(
                 "TestParameters"
             )
 
-        assertThat(parameters?.confirmationOption).isEqualTo(SAVED_CONFIRMATION_OPTION)
+        assertThat(parameters?.confirmationOption).isEqualTo(TestConfirmationDefinition.Option)
         assertThat(parameters?.intent).isEqualTo(INTENT)
         assertThat(parameters?.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Client)
     }
 
     @Test
     fun `On launch definition action where result is received in process, 'receivesResultInProcess' should be true`() =
-        runTest {
-            val definition = FakeConfirmationDefinition(
-                onAction = { _, _ ->
-                    ConfirmationDefinition.Action.Launch(
-                        launcherArguments = FakeConfirmationDefinition.LauncherArgs(amount = 5000),
-                        deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
-                        receivesResultInProcess = true,
-                    )
-                },
-                launcher = FakeConfirmationDefinition.Launcher(),
-            )
-
+        test(
+            action = ConfirmationDefinition.Action.Launch(
+                launcherArguments = TestConfirmationDefinition.LauncherArgs,
+                deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
+                receivesResultInProcess = true,
+            ),
+        ) {
             val mediator = ConfirmationMediator(
                 savedStateHandle = SavedStateHandle(),
                 definition = definition
@@ -247,10 +232,19 @@ class ConfirmationMediatorTest {
                 )
             }
 
+            assertThat(createLauncherCalls.awaitItem()).isNotNull()
+
             val action = mediator.action(
-                option = SAVED_CONFIRMATION_OPTION,
+                option = TestConfirmationDefinition.Option,
                 intent = INTENT,
             )
+
+            assertThat(optionCalls.awaitItem().option).isEqualTo(TestConfirmationDefinition.Option)
+
+            val actionCall = actionCalls.awaitItem()
+
+            assertThat(actionCall.confirmationOption).isEqualTo(TestConfirmationDefinition.Option)
+            assertThat(actionCall.intent).isEqualTo(INTENT)
 
             val launchAction = action.asLaunch()
 
@@ -258,49 +252,48 @@ class ConfirmationMediatorTest {
         }
 
     @Test
-    fun `On confirmation action without registering, should return fail action`() = runTest {
-        val definition = FakeConfirmationDefinition(
-            onAction = { _, _ ->
-                ConfirmationDefinition.Action.Launch(
-                    launcherArguments = FakeConfirmationDefinition.LauncherArgs(amount = 5000),
-                    deferredIntentConfirmationType = null,
-                    receivesResultInProcess = false,
-                )
-            },
-        )
-
+    fun `On confirmation action without registering, should return fail action`() = test(
+        action = ConfirmationDefinition.Action.Launch(
+            launcherArguments = TestConfirmationDefinition.LauncherArgs,
+            deferredIntentConfirmationType = null,
+            receivesResultInProcess = false,
+        ),
+    ) {
         val mediator = ConfirmationMediator(
             savedStateHandle = SavedStateHandle(),
             definition = definition
         )
 
         val action = mediator.action(
-            option = SAVED_CONFIRMATION_OPTION,
+            option = TestConfirmationDefinition.Option,
             intent = INTENT,
         )
+
+        assertThat(optionCalls.awaitItem().option).isEqualTo(TestConfirmationDefinition.Option)
+
+        val actionCall = actionCalls.awaitItem()
+
+        assertThat(actionCall.confirmationOption).isEqualTo(TestConfirmationDefinition.Option)
+        assertThat(actionCall.intent).isEqualTo(INTENT)
 
         val failAction = action.asFail()
 
         assertThat(failAction.cause).isInstanceOf(IllegalStateException::class.java)
         assertThat(failAction.cause.message).isEqualTo(
-            "No launcher for FakeConfirmationDefinition was found, did you call register?"
+            "No launcher for RecordingConfirmationDefinition was found, did you call register?"
         )
         assertThat(failAction.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
         assertThat(failAction.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Fatal)
     }
 
     @Test
-    fun `On confirmation action after un-registering, should return fail action`() = runTest {
-        val definition = FakeConfirmationDefinition(
-            onAction = { _, _ ->
-                ConfirmationDefinition.Action.Launch(
-                    launcherArguments = FakeConfirmationDefinition.LauncherArgs(amount = 5000),
-                    deferredIntentConfirmationType = null,
-                    receivesResultInProcess = false,
-                )
-            },
-        )
-
+    fun `On confirmation action after un-registering, should return fail action`() = test(
+        action = ConfirmationDefinition.Action.Launch(
+            launcherArguments = TestConfirmationDefinition.LauncherArgs,
+            deferredIntentConfirmationType = null,
+            receivesResultInProcess = false,
+        ),
+    ) {
         val mediator = ConfirmationMediator(
             savedStateHandle = SavedStateHandle(),
             definition = definition
@@ -312,58 +305,47 @@ class ConfirmationMediatorTest {
         )
         mediator.unregister()
 
+        assertThat(createLauncherCalls.awaitItem()).isNotNull()
+
         val action = mediator.action(
-            option = SAVED_CONFIRMATION_OPTION,
+            option = TestConfirmationDefinition.Option,
             intent = INTENT,
         )
+
+        assertThat(optionCalls.awaitItem().option).isEqualTo(TestConfirmationDefinition.Option)
+
+        val actionCall = actionCalls.awaitItem()
+
+        assertThat(actionCall.confirmationOption).isEqualTo(TestConfirmationDefinition.Option)
+        assertThat(actionCall.intent).isEqualTo(INTENT)
 
         val failAction = action.asFail()
 
         assertThat(failAction.cause).isInstanceOf(IllegalStateException::class.java)
         assertThat(failAction.cause.message).isEqualTo(
-            "No launcher for FakeConfirmationDefinition was found, did you call register?"
+            "No launcher for RecordingConfirmationDefinition was found, did you call register?"
         )
         assertThat(failAction.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
         assertThat(failAction.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Fatal)
     }
 
     @Test
-    fun `On result, should attempt to convert launcher result to confirmation result and return it`() = runTest {
+    fun `On result, should attempt to convert launcher result to confirmation result and return it`() = test(
+        action = ConfirmationDefinition.Action.Launch(
+            launcherArguments = TestConfirmationDefinition.LauncherArgs,
+            deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
+            receivesResultInProcess = false,
+        ),
+        result = ConfirmationDefinition.Result.Succeeded(
+            intent = INTENT,
+            deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
+        ),
+    ) {
         val waitForResultLatch = CountDownLatch(1)
-
-        val intent = SetupIntentFactory.create(
-            paymentMethod = PaymentMethodFactory.card(random = true)
-        )
-        val deferredIntentConfirmationType = DeferredIntentConfirmationType.Client
-        val launcherResult = FakeConfirmationDefinition.LauncherResult(amount = 50)
-        val confirmationResult = ConfirmationDefinition.Result.Succeeded(
-            intent = intent,
-            deferredIntentConfirmationType = deferredIntentConfirmationType,
-        )
-
-        val definition = FakeConfirmationDefinition(
-            result = confirmationResult,
-            onAction = { _, _ ->
-                ConfirmationDefinition.Action.Launch(
-                    launcherArguments = FakeConfirmationDefinition.LauncherArgs(amount = 5000),
-                    deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
-                    receivesResultInProcess = false,
-                )
-            },
-        )
 
         val mediator = ConfirmationMediator(
             savedStateHandle = SavedStateHandle(),
             definition = definition,
-        )
-
-        val confirmationOption = PaymentMethodConfirmationOption.Saved(
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = "pi_123_secret_123",
-            ),
-            optionsParams = null,
-            shippingDetails = null,
-            paymentMethod = PaymentMethodFactory.card(),
         )
 
         var receivedResult: ConfirmationDefinition.Result? = null
@@ -377,12 +359,19 @@ class ConfirmationMediatorTest {
             },
         )
 
-        val createLauncherCall = definition.createLauncherCalls.awaitItem()
+        val createLauncherCall = createLauncherCalls.awaitItem()
 
         val action = mediator.action(
-            intent = intent,
-            option = confirmationOption,
+            intent = INTENT,
+            option = TestConfirmationDefinition.Option,
         )
+
+        assertThat(optionCalls.awaitItem().option).isEqualTo(TestConfirmationDefinition.Option)
+
+        val actionCall = actionCalls.awaitItem()
+
+        assertThat(actionCall.confirmationOption).isEqualTo(TestConfirmationDefinition.Option)
+        assertThat(actionCall.intent).isEqualTo(INTENT)
 
         assertThat(action).isInstanceOf<ConfirmationMediator.Action.Launch>()
 
@@ -390,25 +379,36 @@ class ConfirmationMediatorTest {
 
         launchAction.launch()
 
-        createLauncherCall.onResult(launcherResult)
+        val launchCall = launchCalls.awaitItem()
+
+        assertThat(launchCall.confirmationOption).isEqualTo(TestConfirmationDefinition.Option)
+        assertThat(launchCall.arguments).isEqualTo(TestConfirmationDefinition.LauncherArgs)
+        assertThat(launchCall.intent).isEqualTo(INTENT)
+        assertThat(launchCall.launcher).isEqualTo(TestConfirmationDefinition.Launcher)
+
+        createLauncherCall.onResult(TestConfirmationDefinition.LauncherResult)
 
         waitForResultLatch.await(2, TimeUnit.SECONDS)
 
-        val toPaymentConfirmationResultCall = definition.toResultCalls.awaitItem()
+        val toPaymentConfirmationResultCall = toResultCalls.awaitItem()
 
-        assertThat(toPaymentConfirmationResultCall.confirmationOption).isEqualTo(confirmationOption)
-        assertThat(toPaymentConfirmationResultCall.intent).isEqualTo(intent)
-        assertThat(toPaymentConfirmationResultCall.result).isEqualTo(launcherResult)
+        assertThat(toPaymentConfirmationResultCall.confirmationOption).isEqualTo(TestConfirmationDefinition.Option)
+        assertThat(toPaymentConfirmationResultCall.intent).isEqualTo(INTENT)
+        assertThat(toPaymentConfirmationResultCall.result).isEqualTo(TestConfirmationDefinition.LauncherResult)
         assertThat(toPaymentConfirmationResultCall.deferredIntentConfirmationType)
-            .isEqualTo(deferredIntentConfirmationType)
+            .isEqualTo(DeferredIntentConfirmationType.Client)
 
-        assertThat(receivedResult).isEqualTo(confirmationResult)
+        assertThat(receivedResult).isInstanceOf<ConfirmationDefinition.Result.Succeeded>()
+
+        val successResult = receivedResult.asSucceeded()
+
+        assertThat(successResult.intent).isEqualTo(INTENT)
+        assertThat(successResult.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Client)
     }
 
     @Test
-    fun `On result with no persisted parameters, should return failed result`() = runTest {
+    fun `On result with no persisted parameters, should return failed result`() = test {
         val countDownLatch = CountDownLatch(1)
-        val definition = FakeConfirmationDefinition()
         val mediator = ConfirmationMediator(
             savedStateHandle = SavedStateHandle(),
             definition = definition,
@@ -434,13 +434,31 @@ class ConfirmationMediatorTest {
             },
         )
 
-        val createLauncherCall = definition.createLauncherCalls.awaitItem()
+        val createLauncherCall = createLauncherCalls.awaitItem()
 
-        createLauncherCall.onResult(
-            FakeConfirmationDefinition.LauncherResult(amount = 50)
-        )
+        createLauncherCall.onResult(TestConfirmationDefinition.LauncherResult)
 
         countDownLatch.await(2, TimeUnit.SECONDS)
+    }
+
+    private fun test(
+        action: ConfirmationDefinition.Action<TestConfirmationDefinition.LauncherArgs> =
+            ConfirmationDefinition.Action.Fail(
+                cause = IllegalStateException("Failed!"),
+                message = R.string.stripe_something_went_wrong.resolvableString,
+                errorType = ConfirmationHandler.Result.Failed.ErrorType.Internal,
+            ),
+        result: ConfirmationDefinition.Result = ConfirmationDefinition.Result.Canceled(
+            action = ConfirmationHandler.Result.Canceled.Action.InformCancellation,
+        ),
+        scenarioTest: suspend RecordingConfirmationDefinition.Scenario<
+            TestConfirmationDefinition.Option,
+            TestConfirmationDefinition.Launcher,
+            TestConfirmationDefinition.LauncherArgs,
+            TestConfirmationDefinition.LauncherResult,
+            >.() -> Unit
+    ) = runTest {
+        RecordingConfirmationDefinition.test(TestConfirmationDefinition(action, result), scenarioTest)
     }
 
     private fun ConfirmationHandler.Result.asFailed(): ConfirmationHandler.Result.Failed {
@@ -459,14 +477,40 @@ class ConfirmationMediatorTest {
         return this as ConfirmationMediator.Action.Launch
     }
 
-    private companion object {
-        private val SAVED_CONFIRMATION_OPTION = PaymentMethodConfirmationOption.Saved(
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(clientSecret = "pi_123"),
-            shippingDetails = null,
-            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
-            optionsParams = null,
-        )
+    private class TestConfirmationDefinition(
+        action: ConfirmationDefinition.Action<LauncherArgs>,
+        result: ConfirmationDefinition.Result,
+    ) : FakeConfirmationDefinition<
+        TestConfirmationDefinition.Option,
+        TestConfirmationDefinition.Launcher,
+        TestConfirmationDefinition.LauncherArgs,
+        TestConfirmationDefinition.LauncherResult,
+        >(
+        launcher = Launcher,
+        action = action,
+        result = result,
+    ) {
+        override val key: String = "Test"
 
+        override fun option(confirmationOption: ConfirmationHandler.Option): Option? {
+            return confirmationOption as? Option
+        }
+
+        @Parcelize
+        data object Option : ConfirmationHandler.Option
+
+        object Launcher
+
+        data object LauncherArgs
+
+        @Parcelize
+        data object LauncherResult : Parcelable
+    }
+
+    @Parcelize
+    private object InvalidTestConfirmationOption : ConfirmationHandler.Option
+
+    private companion object {
         private val INTENT = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
     }
 }

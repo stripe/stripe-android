@@ -23,6 +23,7 @@ internal interface UpdatePaymentMethodInteractor {
     val displayableSavedPaymentMethod: DisplayableSavedPaymentMethod
     val screenTitle: ResolvableString?
     val cardBrandFilter: CardBrandFilter
+    val isExpiredCard: Boolean
 
     val state: StateFlow<State>
 
@@ -50,6 +51,8 @@ internal interface UpdatePaymentMethodInteractor {
                 SavedPaymentMethod.Unexpected -> null
             }
             )?.resolvableString
+
+        val expiredErrorMessage: ResolvableString = com.stripe.android.R.string.stripe_expired_card.resolvableString
     }
 }
 
@@ -64,10 +67,11 @@ internal class DefaultUpdatePaymentMethodInteractor(
     workContext: CoroutineContext = Dispatchers.Default,
 ) : UpdatePaymentMethodInteractor {
     private val coroutineScope = CoroutineScope(workContext + SupervisorJob())
-    private val error = MutableStateFlow<ResolvableString?>(null)
+    private val error = MutableStateFlow(getInitialError())
     private val isRemoving = MutableStateFlow(false)
     private val cardBrandChoice = MutableStateFlow(getInitialCardBrandChoice())
 
+    override val isExpiredCard = paymentMethodIsExpiredCard()
     override val screenTitle: ResolvableString? = UpdatePaymentMethodInteractor.screenTitle(
         displayableSavedPaymentMethod
     )
@@ -100,13 +104,13 @@ internal class DefaultUpdatePaymentMethodInteractor(
 
     private fun removePaymentMethod() {
         coroutineScope.launch {
-            error.emit(null)
+            error.emit(getInitialError())
             isRemoving.emit(true)
 
             val removeError = removeExecutor(displayableSavedPaymentMethod.paymentMethod)
 
             isRemoving.emit(false)
-            error.emit(removeError?.stripeErrorMessage())
+            error.emit(removeError?.stripeErrorMessage() ?: getInitialError())
         }
     }
 
@@ -120,6 +124,18 @@ internal class DefaultUpdatePaymentMethodInteractor(
         return when (val savedPaymentMethod = displayableSavedPaymentMethod.savedPaymentMethod) {
             is SavedPaymentMethod.Card -> savedPaymentMethod.card.getPreferredChoice()
             else -> CardBrandChoice(brand = CardBrand.Unknown)
+        }
+    }
+
+    private fun paymentMethodIsExpiredCard(): Boolean {
+        return (displayableSavedPaymentMethod.savedPaymentMethod as? SavedPaymentMethod.Card)?.isExpired() ?: false
+    }
+
+    private fun getInitialError(): ResolvableString? {
+        return if (paymentMethodIsExpiredCard()) {
+            UpdatePaymentMethodInteractor.expiredErrorMessage
+        } else {
+            null
         }
     }
 }

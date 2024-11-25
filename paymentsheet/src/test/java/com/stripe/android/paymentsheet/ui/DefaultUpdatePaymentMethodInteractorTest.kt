@@ -57,6 +57,32 @@ class DefaultUpdatePaymentMethodInteractorTest {
             }
         }
     }
+    
+    @Test
+    fun expiredCard_displaysExpiredCardError() {
+        runScenario(
+            displayableSavedPaymentMethod = PaymentMethodFixtures
+                .EXPIRED_CARD_PAYMENT_METHOD
+                .toDisplayableSavedPaymentMethod()
+        ) {
+            interactor.state.test {
+                assertThat(awaitItem().error).isEqualTo(
+                    UpdatePaymentMethodInteractor.expiredErrorMessage
+                )
+            }
+        }
+    }
+    
+    @Test
+    fun nonExpiredCard_hasNoInitialError() {
+        runScenario(
+            displayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard()
+        ) {
+            interactor.state.test {
+                assertThat(awaitItem().error).isNull()
+            }
+        }
+    }
 
     @Test
     fun initialCardBrand_forCardWithNetworks_isCorrect() {
