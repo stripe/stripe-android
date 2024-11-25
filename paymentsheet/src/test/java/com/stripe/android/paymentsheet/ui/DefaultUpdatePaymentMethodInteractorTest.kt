@@ -4,8 +4,10 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.common.exception.stripeErrorMessage
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -56,6 +58,43 @@ class DefaultUpdatePaymentMethodInteractorTest {
         }
     }
 
+    @Test
+    fun initialCardBrand_forCardWithNetworks_isCorrect() {
+        runScenario(
+            displayableSavedPaymentMethod = PaymentMethodFixtures
+                .CARD_WITH_NETWORKS_PAYMENT_METHOD
+                .toDisplayableSavedPaymentMethod()
+        ) {
+            interactor.state.test {
+                assertThat(awaitItem().cardBrandChoice.brand).isEqualTo(CardBrand.CartesBancaires)
+            }
+        }
+    }
+
+    @Test
+    fun onCardBrandChoiceChanged_updatesCardBrandInState() {
+        runScenario(
+            displayableSavedPaymentMethod = PaymentMethodFixtures
+                .CARD_WITH_NETWORKS_PAYMENT_METHOD
+                .toDisplayableSavedPaymentMethod()
+        ) {
+            val initialCardBrand = CardBrand.CartesBancaires
+            val updatedCardBrand = CardBrand.Visa
+
+            interactor.state.test {
+                assertThat(awaitItem().cardBrandChoice.brand).isEqualTo(initialCardBrand)
+            }
+
+            interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.BrandChoiceChanged(
+                cardBrandChoice = CardBrandChoice(brand = updatedCardBrand)
+            ))
+
+            interactor.state.test {
+                assertThat(awaitItem().cardBrandChoice.brand).isEqualTo(updatedCardBrand)
+            }
+        }
+    }
+
     private val notImplemented: () -> Nothing = { throw AssertionError("Not implemented") }
 
     private fun runScenario(
@@ -71,6 +110,8 @@ class DefaultUpdatePaymentMethodInteractorTest {
             removeExecutor = onRemovePaymentMethod,
             workContext = UnconfinedTestDispatcher(),
             cardBrandFilter = DefaultCardBrandFilter,
+            onBrandChoiceOptionsShown = {},
+            onBrandChoiceOptionsDismissed = {},
         )
 
         TestParams(interactor).apply { runTest { testBlock() } }

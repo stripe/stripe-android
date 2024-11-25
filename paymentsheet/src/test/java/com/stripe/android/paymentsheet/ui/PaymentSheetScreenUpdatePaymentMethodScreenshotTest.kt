@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.ui
 import androidx.compose.runtime.Composable
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
@@ -34,6 +35,7 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
                     .CARD_WITH_NETWORKS_PAYMENT_METHOD
                     .toDisplayableSavedPaymentMethod(),
                 canRemove = true,
+                initialCardBrand = CardBrand.CartesBancaires,
             )
         }
     }
@@ -83,6 +85,7 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
     fun PaymentSheetScreenOnUpdatePaymentMethod(
         paymentMethod: DisplayableSavedPaymentMethod,
         canRemove: Boolean,
+        initialCardBrand: CardBrand = CardBrand.Unknown,
         error: String? = null,
     ) {
         val interactor = FakeUpdatePaymentMethodInteractor(
@@ -92,6 +95,7 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
             initialState = UpdatePaymentMethodInteractor.State(
                 error = error?.resolvableString,
                 isRemoving = false,
+                cardBrandChoice = CardBrandChoice(brand = initialCardBrand)
             ),
         )
         val screen = com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.UpdatePaymentMethod(interactor)

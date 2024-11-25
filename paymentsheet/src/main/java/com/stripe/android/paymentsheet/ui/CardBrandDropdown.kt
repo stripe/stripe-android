@@ -45,6 +45,10 @@ internal fun CardBrandDropdown(
                     expanded = true
 
                     onBrandOptionsShown()
+                } else {
+                    expanded = false
+
+                    onBrandChoiceOptionsDismissed()
                 }
             }
             .semantics {

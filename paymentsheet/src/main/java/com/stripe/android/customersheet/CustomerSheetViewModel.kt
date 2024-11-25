@@ -574,6 +574,18 @@ internal class CustomerSheetViewModel(
                         displayableSavedPaymentMethod = paymentMethod,
                         cardBrandFilter = PaymentSheetCardBrandFilter(customerState.configuration.cardBrandAcceptance),
                         removeExecutor = ::removeExecutor,
+                        onBrandChoiceOptionsShown = {
+                            eventReporter.onShowPaymentOptionBrands(
+                                source = CustomerSheetEventReporter.CardBrandChoiceEventSource.Edit,
+                                selectedBrand = it
+                            )
+                        },
+                        onBrandChoiceOptionsDismissed = {
+                            eventReporter.onHidePaymentOptionBrands(
+                                source = CustomerSheetEventReporter.CardBrandChoiceEventSource.Edit,
+                                selectedBrand = it
+                            )
+                        },
                     ),
                     isLiveMode = isLiveModeProvider(),
                 )
