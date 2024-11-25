@@ -17,7 +17,9 @@ private val ButtonLabel = Color(0xFF011E0F)
 private val ErrorText = Color(0xFFFF2F4C)
 private val ErrorBackground = Color(0x2EFE87A1)
 
+private val LightComponentBackground = Color.White
 private val LightComponentBorder = Color(0xFFE0E6EB)
+private val LightComponentDivider = Color(0xFFEFF2F4)
 private val LightTextPrimary = Color(0xFF30313D)
 private val LightTextSecondary = Color(0xFF6A7383)
 private val LightTextDisabled = Color(0xFFA3ACBA)
@@ -30,7 +32,9 @@ private val LightCloseButton = Color(0xFF30313D)
 private val LightLinkLogo = Color(0xFF1D3944)
 private val LightOtpPlaceholder = Color(0xFFEBEEF1)
 
+private val DarkComponentBackground = Color(0x2E747480)
 private val DarkComponentBorder = Color(0x5C787880)
+private val DarkComponentDivider = Color(0x33787880)
 private val DarkTextPrimary = Color.White
 private val DarkTextSecondary = Color(0x99EBEBF5)
 private val DarkTextDisabled = Color(0x61FFFFFF)
@@ -42,7 +46,9 @@ private val DarkProgressIndicator = LinkTeal
 private val DarkOtpPlaceholder = Color(0x61FFFFFF)
 
 internal data class LinkColors(
+    val componentBackground: Color,
     val componentBorder: Color,
+    val componentDivider: Color,
     val actionLabel: Color,
     val buttonLabel: Color,
     val actionLabelLight: Color,
@@ -64,7 +70,9 @@ internal object LinkThemeConfig {
     }
 
     private val colorsLight = LinkColors(
+        componentBackground = LightComponentBackground,
         componentBorder = LightComponentBorder,
+        componentDivider = LightComponentDivider,
         buttonLabel = ButtonLabel,
         actionLabelLight = ActionLightGreen,
         errorText = ErrorText,
@@ -91,7 +99,9 @@ internal object LinkThemeConfig {
     )
 
     private val colorsDark = colorsLight.copy(
+        componentBackground = DarkComponentBackground,
         componentBorder = DarkComponentBorder,
+        componentDivider = DarkComponentDivider,
         progressIndicator = DarkProgressIndicator,
         linkLogo = DarkLinkLogo,
         closeButton = DarkCloseButton,
