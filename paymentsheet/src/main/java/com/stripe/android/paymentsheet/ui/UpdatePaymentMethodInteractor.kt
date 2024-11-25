@@ -29,9 +29,15 @@ internal interface UpdatePaymentMethodInteractor {
 
     data class State(
         val error: ResolvableString?,
-        val isRemoving: Boolean,
+        val status: Status,
         val cardBrandChoice: CardBrandChoice,
     )
+
+    enum class Status {
+        Idle,
+        Updating,
+        Removing
+    }
 
     fun handleViewAction(viewAction: ViewAction)
 
@@ -68,7 +74,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
 ) : UpdatePaymentMethodInteractor {
     private val coroutineScope = CoroutineScope(workContext + SupervisorJob())
     private val error = MutableStateFlow(getInitialError())
-    private val isRemoving = MutableStateFlow(false)
+    private val status = MutableStateFlow(UpdatePaymentMethodInteractor.Status.Idle)
     private val cardBrandChoice = MutableStateFlow(getInitialCardBrandChoice())
 
     override val isExpiredCard = paymentMethodIsExpiredCard()
@@ -78,12 +84,12 @@ internal class DefaultUpdatePaymentMethodInteractor(
 
     private val _state = combineAsStateFlow(
         error,
-        isRemoving,
+        status,
         cardBrandChoice,
-    ) { error, isRemoving, cardBrandChoice ->
+    ) { error, status, cardBrandChoice ->
         UpdatePaymentMethodInteractor.State(
             error = error,
-            isRemoving = isRemoving,
+            status = status,
             cardBrandChoice = cardBrandChoice
         )
     }
@@ -107,11 +113,11 @@ internal class DefaultUpdatePaymentMethodInteractor(
     private fun removePaymentMethod() {
         coroutineScope.launch {
             error.emit(getInitialError())
-            isRemoving.emit(true)
+            status.emit(UpdatePaymentMethodInteractor.Status.Removing)
 
             val removeError = removeExecutor(displayableSavedPaymentMethod.paymentMethod)
 
-            isRemoving.emit(false)
+            status.emit(UpdatePaymentMethodInteractor.Status.Idle)
             error.emit(removeError?.stripeErrorMessage() ?: getInitialError())
         }
     }

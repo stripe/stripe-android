@@ -109,7 +109,7 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
             viewActionRecorder = null,
             initialState = UpdatePaymentMethodInteractor.State(
                 error = error?.resolvableString,
-                isRemoving = false,
+                status = UpdatePaymentMethodInteractor.Status.Idle,
                 cardBrandChoice = CardBrandChoice(brand = initialCardBrand)
             ),
         )

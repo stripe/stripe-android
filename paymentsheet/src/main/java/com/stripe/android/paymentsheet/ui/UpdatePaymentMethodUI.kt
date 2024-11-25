@@ -255,15 +255,15 @@ private fun BankAccountTextField(
 @Composable
 private fun DeletePaymentMethodUi(interactor: UpdatePaymentMethodInteractor) {
     val openDialogValue = rememberSaveable { mutableStateOf(false) }
-    val isRemoving by interactor.state.mapAsStateFlow { it.isRemoving }.collectAsState()
+    val status by interactor.state.mapAsStateFlow { it.status }.collectAsState()
 
     Spacer(modifier = Modifier.requiredHeight(32.dp))
 
     RemoveButton(
         title = R.string.stripe_remove.resolvableString,
         borderColor = MaterialTheme.colors.error,
-        idle = true,
-        removing = openDialogValue.value || isRemoving,
+        idle = status == UpdatePaymentMethodInteractor.Status.Idle,
+        removing = openDialogValue.value || status == UpdatePaymentMethodInteractor.Status.Removing,
         onRemove = { openDialogValue.value = true },
         testTag = UPDATE_PM_REMOVE_BUTTON_TEST_TAG,
     )

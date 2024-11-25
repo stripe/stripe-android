@@ -373,7 +373,7 @@ class UpdatePaymentMethodUITest {
             viewActionRecorder = viewActionRecorder,
             initialState = UpdatePaymentMethodInteractor.State(
                 error = errorMessage,
-                isRemoving = false,
+                status = UpdatePaymentMethodInteractor.Status.Idle,
                 cardBrandChoice = CardBrandChoice(brand = initialCardBrand)
             ),
         )
