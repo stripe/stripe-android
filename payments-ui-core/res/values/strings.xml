@@ -67,6 +67,8 @@
   <string name="stripe_p24_bank">Przelewy24 Bank</string>
   <!-- Label of a button that initiates payment when tapped -->
   <string name="stripe_pay_button_amount">Pay %s</string>
+  <!-- Title for a bank account payment method -->
+  <string name="stripe_payment_method_bank">Bank</string>
   <!-- Label of a button displayed below a card entry form that saves the card details -->
   <string name="stripe_paymentsheet_add_card">Add card</string>
   <!-- Title shown above a view allowing the customer to save a card. -->

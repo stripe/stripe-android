@@ -38,6 +38,7 @@ import com.stripe.android.link.theme.linkShapes
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetails.Card
 import com.stripe.android.R as StripeR
+import com.stripe.android.ui.core.R as StripeUiCoreR
 
 @Composable
 internal fun PaymentDetailsListItem(
@@ -226,7 +227,7 @@ private fun RowScope.BankAccountInfo(
         )
         Column(horizontalAlignment = Alignment.Start) {
             Text(
-                text = bankAccount.bankName ?: stringResource(R.string.stripe_wallet_bank),
+                text = bankAccount.bankName ?: stringResource(StripeUiCoreR.string.stripe_payment_method_bank),
                 color = MaterialTheme.colors.onPrimary,
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 1,

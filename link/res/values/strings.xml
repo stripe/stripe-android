@@ -42,8 +42,6 @@
   <string name="stripe_verification_not_email">Not %s?</string>
   <!-- Label for a button that re-sends the a login code when tapped -->
   <string name="stripe_verification_resend">Resend code</string>
-  <!-- Title for a bank account payment method -->
-  <string name="stripe_wallet_bank">Bank</string>
   <!-- Mandate text displayed when paying via Link instant debit. -->
   <string name="stripe_wallet_bank_account_terms"><![CDATA[By continuing, you agree to authorize payments pursuant to these <terms>terms</terms>.]]></string>
   <!-- Label for a section displaying payment details. -->
