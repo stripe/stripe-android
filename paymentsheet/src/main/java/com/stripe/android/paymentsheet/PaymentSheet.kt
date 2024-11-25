@@ -6,6 +6,7 @@ import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.annotation.ColorInt
 import androidx.annotation.FontRes
+import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
@@ -922,6 +923,7 @@ class PaymentSheet internal constructor(
             primaryButton = PrimaryButton(),
         )
 
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
         constructor(
             colorsLight: Colors,
@@ -942,6 +944,7 @@ class PaymentSheet internal constructor(
             return if (isDark) colorsDark else colorsLight
         }
 
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @ExperimentalEmbeddedPaymentElementApi
         @Parcelize
         class Embedded(
@@ -1197,6 +1200,7 @@ class PaymentSheet internal constructor(
                 this.primaryButton = primaryButton
             }
 
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             @ExperimentalEmbeddedPaymentElementApi
             fun embeddedAppearance(embeddedAppearance: Embedded) = apply {
                 this.embeddedAppearance = embeddedAppearance
