@@ -9,6 +9,7 @@ import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.viewmodels.FakeBaseSheetViewModel
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.testing.PaymentMethodFactory
+import com.stripe.android.uicore.strings.resolve
 import org.junit.Rule
 import org.junit.Test
 
@@ -49,6 +50,18 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
     }
 
     @Test
+    fun updatePaymentMethodScreen_forExpiredCard() {
+        paparazziRule.snapshot {
+            PaymentSheetScreenOnUpdatePaymentMethod(
+                paymentMethod = PaymentMethodFixtures.EXPIRED_CARD_PAYMENT_METHOD.toDisplayableSavedPaymentMethod(),
+                canRemove = true,
+                isExpiredCard = true,
+                error = UpdatePaymentMethodInteractor.expiredErrorMessage.resolve(),
+            )
+        }
+    }
+
+    @Test
     fun updatePaymentMethodScreen_forCard_withRemoveButton_withError() {
         paparazziRule.snapshot {
             PaymentSheetScreenOnUpdatePaymentMethod(
@@ -83,11 +96,13 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
     fun PaymentSheetScreenOnUpdatePaymentMethod(
         paymentMethod: DisplayableSavedPaymentMethod,
         canRemove: Boolean,
+        isExpiredCard: Boolean = false,
         error: String? = null,
     ) {
         val interactor = FakeUpdatePaymentMethodInteractor(
             displayableSavedPaymentMethod = paymentMethod,
             canRemove = canRemove,
+            isExpiredCard = isExpiredCard,
             viewActionRecorder = null,
             initialState = UpdatePaymentMethodInteractor.State(
                 error = error?.resolvableString,

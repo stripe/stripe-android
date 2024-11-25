@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet
 
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.utils.DateUtils
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 
@@ -98,7 +99,19 @@ internal data class DisplayableSavedPaymentMethod private constructor(
 }
 
 internal sealed interface SavedPaymentMethod {
-    data class Card(val card: PaymentMethod.Card) : SavedPaymentMethod
+    data class Card(val card: PaymentMethod.Card) : SavedPaymentMethod {
+        fun isExpired(): Boolean {
+            val cardExpiryMonth = card.expiryMonth
+            val cardExpiryYear = card.expiryYear
+            // If the card's expiration dates are missing, we can't conclude that it is expired, so we don't want to
+            // show the user an expired card error.
+            return cardExpiryMonth != null && cardExpiryYear != null &&
+                !DateUtils.isExpiryDataValid(
+                    expiryMonth = cardExpiryMonth,
+                    expiryYear = cardExpiryYear,
+                )
+        }
+    }
     data class USBankAccount(val usBankAccount: PaymentMethod.USBankAccount) : SavedPaymentMethod
     data class SepaDebit(val sepaDebit: PaymentMethod.SepaDebit) : SavedPaymentMethod
     data object Unexpected : SavedPaymentMethod

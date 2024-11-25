@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.StateFlow
 internal class FakeUpdatePaymentMethodInteractor(
     override val displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
     override val canRemove: Boolean,
+    override val isExpiredCard: Boolean,
     val viewActionRecorder: ViewActionRecorder<UpdatePaymentMethodInteractor.ViewAction>?,
     initialState: UpdatePaymentMethodInteractor.State,
 ) : UpdatePaymentMethodInteractor {

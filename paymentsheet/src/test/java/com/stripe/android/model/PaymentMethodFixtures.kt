@@ -22,7 +22,7 @@ internal object PaymentMethodFixtures {
         ),
         country = "US",
         expiryMonth = 8,
-        expiryYear = 2022,
+        expiryYear = 2029,
         fingerprint = "fingerprint123",
         funding = "credit",
         last4 = "4242",
@@ -73,6 +73,20 @@ internal object PaymentMethodFixtures {
         billingDetails = BILLING_DETAILS,
         customerId = "cus_AQsHpvKfKwJDrF",
         card = CARD_WITH_NETWORKS,
+        code = "card"
+    )
+
+    val EXPIRED_CARD_PAYMENT_METHOD = PaymentMethod(
+        id = "pm_123456789",
+        created = 1550757934255L,
+        liveMode = true,
+        type = PaymentMethod.Type.Card,
+        billingDetails = BILLING_DETAILS,
+        customerId = "cus_AQsHpvKfKwJDrF",
+        card = CARD.copy(
+            expiryMonth = 4,
+            expiryYear = 2024,
+        ),
         code = "card"
     )
 
