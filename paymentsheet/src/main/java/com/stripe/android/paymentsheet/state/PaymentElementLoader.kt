@@ -189,6 +189,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 customerInfo = customerInfo,
                 metadata = metadata.await(),
                 savedSelection = savedSelection,
+                configuration = configuration,
                 cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance)
             )
         }
@@ -313,6 +314,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     }
 
     private suspend fun createCustomerState(
+        configuration: CommonConfiguration,
         customerInfo: CustomerInfo?,
         metadata: PaymentMethodMetadata,
         savedSelection: Deferred<SavedSelection>,
@@ -322,6 +324,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             is CustomerInfo.CustomerSession -> {
                 CustomerState.createForCustomerSession(
                     customer = customerInfo.elementsSessionCustomer,
+                    configuration = configuration,
                     supportedSavedPaymentMethodTypes = metadata.supportedSavedPaymentMethodTypes()
                 )
             }
@@ -329,6 +332,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 CustomerState.createForLegacyEphemeralKey(
                     customerId = customerInfo.id,
                     accessType = customerInfo.accessType,
+                    configuration = configuration,
                     paymentMethods = retrieveCustomerPaymentMethods(
                         metadata = metadata,
                         customerConfig = customerInfo.customerConfig,

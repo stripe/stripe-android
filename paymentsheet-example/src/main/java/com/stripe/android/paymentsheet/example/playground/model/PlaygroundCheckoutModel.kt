@@ -38,6 +38,8 @@ class CheckoutRequest private constructor(
     val paymentMethodSaveFeature: FeatureState?,
     @SerialName("customer_session_payment_method_remove")
     val paymentMethodRemoveFeature: FeatureState?,
+    @SerialName("customer_session_payment_method_remove_last")
+    val paymentMethodRemoveLastFeature: FeatureState?,
     @SerialName("customer_session_payment_method_redisplay")
     val paymentMethodRedisplayFeature: FeatureState?,
     @SerialName("customer_session_payment_method_allow_redisplay_filters")
@@ -69,6 +71,7 @@ class CheckoutRequest private constructor(
         private var requireCvcRecollection: Boolean? = null
         private var paymentMethodSaveFeature: FeatureState = FeatureState.Enabled
         private var paymentMethodRemoveFeature: FeatureState = FeatureState.Enabled
+        private var paymentMethodRemoveLastFeature: FeatureState = FeatureState.Enabled
         private var paymentMethodRedisplayFeature: FeatureState = FeatureState.Enabled
         private var paymentMethodRedisplayFilters: List<AllowRedisplayFilter> = listOf(
             AllowRedisplayFilter.Unspecified,
@@ -129,6 +132,10 @@ class CheckoutRequest private constructor(
             this.paymentMethodRemoveFeature = state
         }
 
+        fun paymentMethodRemoveLastFeature(state: FeatureState) {
+            this.paymentMethodRemoveLastFeature = state
+        }
+
         fun paymentMethodRedisplayFeature(state: FeatureState) {
             this.paymentMethodRedisplayFeature = state
         }
@@ -162,6 +169,7 @@ class CheckoutRequest private constructor(
                 customerSessionComponentName = "mobile_payment_element",
                 paymentMethodSaveFeature = paymentMethodSaveFeature,
                 paymentMethodRemoveFeature = paymentMethodRemoveFeature,
+                paymentMethodRemoveLastFeature = paymentMethodRemoveLastFeature,
                 paymentMethodRedisplayFeature = paymentMethodRedisplayFeature,
                 paymentMethodRedisplayFilters = paymentMethodRedisplayFilters,
                 paymentMethodOverrideRedisplay = paymentMethodOverrideRedisplay,

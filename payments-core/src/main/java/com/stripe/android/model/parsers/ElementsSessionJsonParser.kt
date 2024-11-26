@@ -243,6 +243,7 @@ internal class ElementsSessionJsonParser(
 
             val paymentMethodSaveFeature = paymentSheetFeatures.optString(FIELD_PAYMENT_METHOD_SAVE)
             val paymentMethodRemoveFeature = paymentSheetFeatures.optString(FIELD_PAYMENT_METHOD_REMOVE)
+            val paymentMethodRemoveLastFeature = paymentSheetFeatures.optString(FIELD_PAYMENT_METHOD_REMOVE_LAST)
             val allowRedisplayOverrideValue = paymentSheetFeatures
                 .optString(FIELD_PAYMENT_METHOD_ALLOW_REDISPLAY_OVERRIDE)
 
@@ -253,6 +254,7 @@ internal class ElementsSessionJsonParser(
             ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
                 isPaymentMethodSaveEnabled = paymentMethodSaveFeature == VALUE_ENABLED,
                 isPaymentMethodRemoveEnabled = paymentMethodRemoveFeature == VALUE_ENABLED,
+                canRemoveLastPaymentMethod = paymentMethodRemoveLastFeature == VALUE_ENABLED,
                 allowRedisplayOverride = allowRedisplayOverride,
             )
         } else {
@@ -349,6 +351,7 @@ internal class ElementsSessionJsonParser(
         private const val FIELD_PAYMENT_METHOD_REMOVE = "payment_method_remove"
         private const val FIELD_PAYMENT_METHOD_ALLOW_REDISPLAY_OVERRIDE =
             "payment_method_save_allow_redisplay_override"
+        private const val FIELD_PAYMENT_METHOD_REMOVE_LAST = "payment_method_remove_last"
         private const val VALUE_ENABLED = FIELD_ENABLED
         const val FIELD_GOOGLE_PAY_PREFERENCE = "google_pay_preference"
 
