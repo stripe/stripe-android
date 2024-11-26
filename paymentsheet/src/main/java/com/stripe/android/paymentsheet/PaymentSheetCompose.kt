@@ -3,13 +3,13 @@ package com.stripe.android.paymentsheet
 import android.app.Application
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
+import com.stripe.android.common.ui.UpdateExternalPaymentMethodConfirmHandler
+import com.stripe.android.common.ui.UpdateIntentConfirmationInterceptor
 import com.stripe.android.utils.rememberActivity
 
 /**
@@ -93,23 +93,5 @@ fun rememberPaymentSheet(
         rememberPaymentSheet(paymentResultCallback)
     } else {
         rememberPaymentSheet(createIntentCallback, paymentResultCallback)
-    }
-}
-
-@Composable
-private fun UpdateIntentConfirmationInterceptor(
-    createIntentCallback: CreateIntentCallback,
-) {
-    LaunchedEffect(createIntentCallback) {
-        IntentConfirmationInterceptor.createIntentCallback = createIntentCallback
-    }
-}
-
-@Composable
-private fun UpdateExternalPaymentMethodConfirmHandler(
-    externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler,
-) {
-    LaunchedEffect(externalPaymentMethodConfirmHandler) {
-        ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler
     }
 }

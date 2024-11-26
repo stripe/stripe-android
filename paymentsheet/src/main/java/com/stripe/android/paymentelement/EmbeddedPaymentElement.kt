@@ -14,6 +14,8 @@ import com.stripe.android.ExperimentalCardBrandFilteringApi
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.ui.DelegateDrawable
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentelement.embedded.SharedPaymentElementViewModel
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -26,7 +28,8 @@ import kotlinx.parcelize.Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @ExperimentalEmbeddedPaymentElementApi
 class EmbeddedPaymentElement private constructor(
-    private val sharedViewModel: SharedPaymentElementViewModel
+    private val sharedViewModel: SharedPaymentElementViewModel,
+    private val resultCallback: ResultCallback,
 ) {
     /**
      * Contains information about the customer's selected payment option.
@@ -56,6 +59,15 @@ class EmbeddedPaymentElement private constructor(
     @Composable
     fun Content() {
         Text("Hello World!")
+    }
+
+    /**
+     * Asynchronously confirms the currently selected payment options.
+     *
+     * Results will be delivered to the [ResultCallback] supplied during initialization of [EmbeddedPaymentElement].
+     */
+    fun confirm() {
+        resultCallback.onResult(Result.Failed(NotImplementedError("Not yet implemented.")))
     }
 
     /** Configuration for [EmbeddedPaymentElement] **/
@@ -377,14 +389,67 @@ class EmbeddedPaymentElement private constructor(
             get() = rememberDrawablePainter(iconDrawable)
     }
 
+    /**
+     * The result of an attempt to confirm a [PaymentIntent] or [SetupIntent].
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @ExperimentalEmbeddedPaymentElementApi
+    sealed interface Result {
+        /**
+         * The customer completed the payment or setup.
+         * The payment may still be processing at this point; don't assume money has successfully moved.
+         *
+         * Your app should transition to a generic receipt view (e.g. a screen that displays "Your order
+         * is confirmed!"), and fulfill the order (e.g. ship the product to the customer) after
+         * receiving a successful payment event from Stripe.
+         *
+         * See [Stripe's documentation](https://stripe.com/docs/payments/handling-payment-events).
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @ExperimentalEmbeddedPaymentElementApi
+        class Completed internal constructor() : Result
+
+        /**
+         * The customer canceled the payment or setup attempt.
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @ExperimentalEmbeddedPaymentElementApi
+        class Canceled internal constructor() : Result
+
+        /**
+         * The payment or setup attempt failed.
+         *
+         * @param error The error encountered by the customer.
+         */
+        @Poko
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @ExperimentalEmbeddedPaymentElementApi
+        class Failed internal constructor(val error: Throwable) : Result
+    }
+
+    /**
+     * Callback that is invoked when a [Result] is available.
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @ExperimentalEmbeddedPaymentElementApi
+    fun interface ResultCallback {
+        fun onResult(result: Result)
+    }
+
     internal companion object {
         @ExperimentalEmbeddedPaymentElementApi
-        fun create(viewModelStoreOwner: ViewModelStoreOwner): EmbeddedPaymentElement {
+        fun create(
+            viewModelStoreOwner: ViewModelStoreOwner,
+            resultCallback: ResultCallback,
+        ): EmbeddedPaymentElement {
             val sharedViewModel = ViewModelProvider(
                 owner = viewModelStoreOwner,
                 factory = SharedPaymentElementViewModel.Factory()
             )[SharedPaymentElementViewModel::class.java]
-            return EmbeddedPaymentElement(sharedViewModel)
+            return EmbeddedPaymentElement(
+                sharedViewModel = sharedViewModel,
+                resultCallback = resultCallback,
+            )
         }
     }
 }
