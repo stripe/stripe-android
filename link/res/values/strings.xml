@@ -72,11 +72,5 @@
   <string name="stripe_wallet_update_card">Update card</string>
   <!-- A text notice shown when the user selects an expired card. -->
   <string name="stripe_wallet_update_expired_card_error">This card has expired. Update your card info or choose a different payment method.</string>
-  <!-- Prefix for last 4 digits of payment method id e.g  •••• 1234 -->
-  <string name="stripe_wallet_last4_prefix" translatable="false">•••• </string>
-  <!-- Default name for bank account payment method when bank name is unavailable -->
-  <string name="stripe_wallet_bank">Bank</string>
-  <!-- Accessibility description for Passthrough payment method -->
-  <string name="stripe_wallet_passthrough_description" translatable="false">Passthrough</string>
   <string name="stripe_wallet_expand_accessibility">Change selection</string>
 </resources>
