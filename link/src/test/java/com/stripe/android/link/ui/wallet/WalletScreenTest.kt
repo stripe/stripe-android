@@ -84,7 +84,7 @@ internal class WalletScreenTest {
             linkAccount = TestFactory.LINK_ACCOUNT,
             linkAccountManager = linkAccountManager,
             logger = FakeLogger(),
-            navigate = { _, _ -> },
+            navigateAndClearStack = {},
             dismissWithResult = {}
         )
     }

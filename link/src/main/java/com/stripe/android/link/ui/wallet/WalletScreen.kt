@@ -90,9 +90,7 @@ internal fun WalletBody(
                 .animateContentSize()
         ) {
             val selectedItem = state.selectedItem
-            println("selectedItem => ${selectedItem?.id}, isExpanded => ${state.isExpanded}")
             if (state.isExpanded || selectedItem == null) {
-                println("in expanded state")
                 ExpandedPaymentDetails(
                     uiState = state,
                     onItemSelected = onItemSelected,
@@ -103,7 +101,6 @@ internal fun WalletBody(
                     }
                 )
             } else {
-                println("in collapsed state")
                 CollapsedPaymentDetails(
                     selectedPaymentMethod = selectedItem,
                     enabled = !state.primaryButtonState.isBlocking,
