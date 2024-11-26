@@ -883,6 +883,7 @@ class PaymentSheet internal constructor(
     }
 
     @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
     data class Appearance(
         /**
@@ -923,14 +924,12 @@ class PaymentSheet internal constructor(
             primaryButton = PrimaryButton(),
         )
 
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
         constructor(
-            colorsLight: Colors,
-            colorsDark: Colors,
-            shapes: Shapes,
-            typography: Typography,
-            primaryButton: PrimaryButton,
+            colorsLight: Colors = Colors.defaultLight,
+            colorsDark: Colors = Colors.defaultDark,
+            shapes: Shapes = Shapes.default,
+            typography: Typography = Typography.default,
+            primaryButton: PrimaryButton = PrimaryButton(),
         ) : this(
             colorsLight = colorsLight,
             colorsDark = colorsDark,
