@@ -107,21 +107,26 @@ internal fun UpdatePaymentMethodUI(interactor: UpdatePaymentMethodInteractor, mo
             )
         }
 
-        if (interactor.isModifiablePaymentMethod) {
-            Spacer(modifier = Modifier.requiredHeight(32.dp))
-            UpdatePaymentMethodUi(interactor)
+        UpdatePaymentMethodButtons(interactor)
+    }
+}
+
+@Composable
+private fun UpdatePaymentMethodButtons(interactor: UpdatePaymentMethodInteractor) {
+    if (interactor.isModifiablePaymentMethod) {
+        Spacer(modifier = Modifier.requiredHeight(32.dp))
+        UpdatePaymentMethodUi(interactor)
+    }
+
+    if (interactor.canRemove) {
+        val spacerHeight = if (interactor.isModifiablePaymentMethod) {
+            16.dp
+        } else {
+            32.dp
         }
 
-        if (interactor.canRemove) {
-            val spacerHeight = if (interactor.isModifiablePaymentMethod) {
-                16.dp
-            } else {
-                32.dp
-            }
-
-            Spacer(modifier = Modifier.requiredHeight(spacerHeight))
-            DeletePaymentMethodUi(interactor)
-        }
+        Spacer(modifier = Modifier.requiredHeight(spacerHeight))
+        DeletePaymentMethodUi(interactor)
     }
 }
 

@@ -201,6 +201,8 @@ class DefaultUpdatePaymentMethodInteractorTest {
     @Test
     fun saveButtonClick_failure_displaysError() {
         val updateException = IllegalStateException("Not allowed.")
+
+        @Suppress("UnusedParameter")
         fun updateExecutor(paymentMethod: PaymentMethod, brand: CardBrand): Result<PaymentMethod> {
             return Result.failure(updateException)
         }
