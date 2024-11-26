@@ -83,7 +83,12 @@ internal object PaymentMethodFixtures {
         type = PaymentMethod.Type.Card,
         billingDetails = BILLING_DETAILS,
         customerId = "cus_AQsHpvKfKwJDrF",
-        card = CARD_WITH_NETWORKS.copy(
+        card =  CARD_WITH_NETWORKS.copy(
+            displayBrand = "visa",
+            networks = PaymentMethod.Card.Networks(
+                available = setOf("visa", "cartes_bancaires"),
+                preferred = "visa",
+            ),
             expiryMonth = 4,
             expiryYear = 2024,
         ),
