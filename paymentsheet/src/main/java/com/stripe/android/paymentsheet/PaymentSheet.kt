@@ -957,6 +957,7 @@ class PaymentSheet internal constructor(
                 )
             }
 
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             @Parcelize
             sealed class RowStyle : Parcelable {
 
@@ -1050,6 +1051,7 @@ class PaymentSheet internal constructor(
                     }
                 }
 
+                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                 @Parcelize
                 class FlatWithCheckmark(
                     /**
@@ -1138,6 +1140,7 @@ class PaymentSheet internal constructor(
                     }
                 }
 
+                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                 @Parcelize
                 class FloatingButton(
                     /**
