@@ -430,4 +430,12 @@ abstract class AbsFakeStripeRepository : StripeRepository {
     ): Result<ConsumerPaymentDetails> {
         TODO("Not yet implemented")
     }
+
+    override suspend fun deletePaymentDetails(
+        clientSecret: String,
+        paymentDetailsId: String,
+        requestOptions: ApiRequest.Options
+    ): Result<Unit> {
+        TODO("Not yet implemented")
+    }
 }

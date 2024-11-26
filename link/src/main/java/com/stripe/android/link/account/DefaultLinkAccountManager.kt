@@ -253,6 +253,15 @@ internal class DefaultLinkAccountManager @Inject constructor(
         )
     }
 
+    override suspend fun deletePaymentDetails(paymentDetailsId: String): Result<Unit> {
+        val clientSecret = linkAccount.value?.clientSecret ?: return Result.failure(NoLinkAccountFoundException())
+        return linkRepository.deletePaymentDetails(
+            paymentDetailsId = paymentDetailsId,
+            consumerSessionClientSecret = clientSecret,
+            consumerPublishableKey = consumerPublishableKey
+        )
+    }
+
     @VisibleForTesting
     internal fun setAccountNullable(
         consumerSession: ConsumerSession?,

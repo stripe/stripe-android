@@ -81,4 +81,13 @@ internal interface LinkRepository {
         consumerSessionClientSecret: String,
         consumerPublishableKey: String?
     ): Result<ConsumerPaymentDetails>
+
+    /**
+     * Delete the payment method from the consumer account.
+     */
+    suspend fun deletePaymentDetails(
+        paymentDetailsId: String,
+        consumerSessionClientSecret: String,
+        consumerPublishableKey: String?
+    ): Result<Unit>
 }

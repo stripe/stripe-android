@@ -217,6 +217,23 @@ internal class LinkApiRepository @Inject constructor(
         )
     }
 
+    override suspend fun deletePaymentDetails(
+        paymentDetailsId: String,
+        consumerSessionClientSecret: String,
+        consumerPublishableKey: String?
+    ): Result<Unit> {
+        return stripeRepository.deletePaymentDetails(
+            clientSecret = consumerSessionClientSecret,
+            paymentDetailsId = paymentDetailsId,
+            requestOptions = consumerPublishableKey?.let {
+                ApiRequest.Options(it)
+            } ?: ApiRequest.Options(
+                publishableKeyProvider(),
+                stripeAccountIdProvider()
+            )
+        )
+    }
+
     private fun buildRequestOptions(
         consumerAccountPublishableKey: String? = null,
     ): ApiRequest.Options {

@@ -75,4 +75,9 @@ internal interface LinkAccountManager {
      * Fetch all saved payment methods for the signed in consumer.
      */
     suspend fun listPaymentDetails(paymentMethodTypes: Set<String>): Result<ConsumerPaymentDetails>
+
+    /**
+     * Delete the payment method from the signed in consumer account.
+     */
+    suspend fun deletePaymentDetails(paymentDetailsId: String): Result<Unit>
 }

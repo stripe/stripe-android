@@ -2751,6 +2751,37 @@ internal class StripeApiRepositoryTest {
             assertThat(params["types"] as? List<*>).containsExactlyElementsIn(paymentMethodTypes.toList())
         }
 
+    @Test
+    fun `deletePaymentDetails() sends all parameters`() = runTest {
+        val stripeResponse = StripeResponse(
+            200,
+            "",
+            emptyMap()
+        )
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+            .thenReturn(stripeResponse)
+
+        val clientSecret = "secret"
+        val paymentDetailsId = "id"
+        create().deletePaymentDetails(
+            clientSecret,
+            paymentDetailsId,
+            DEFAULT_OPTIONS
+        )
+
+        verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+        val request = apiRequestArgumentCaptor.firstValue
+        val params = requireNotNull(request.params)
+
+        assertThat(
+            "https://api.stripe.com/v1/consumers/payment_details/$paymentDetailsId",
+        ).isEqualTo(request.baseUrl)
+
+        assertThat(params["request_surface"]).isEqualTo("android_payment_element")
+        val credentials = params["credentials"] as Map<*, *>
+        assertThat(credentials["consumer_session_client_secret"]).isEqualTo(clientSecret)
+    }
+
     /**
      * Helper DSL to validate nested params.
      */
