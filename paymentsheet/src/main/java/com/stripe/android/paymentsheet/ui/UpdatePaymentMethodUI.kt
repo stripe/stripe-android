@@ -91,7 +91,9 @@ internal fun UpdatePaymentMethodUI(interactor: UpdatePaymentMethodInteractor, mo
                     style = MaterialTheme.typography.caption,
                     color = MaterialTheme.stripeColors.subtitle,
                     fontWeight = FontWeight.Normal,
-                    modifier = Modifier.padding(top = 12.dp).testTag(UPDATE_PM_DETAILS_SUBTITLE_TEST_TAG)
+                    modifier = Modifier
+                        .padding(top = 12.dp)
+                        .testTag(UPDATE_PM_DETAILS_SUBTITLE_TEST_TAG)
                 )
             }
         }
@@ -141,8 +143,8 @@ private fun CardDetailsUI(
             CardNumberField(
                 card = card,
                 selectedBrand = selectedBrand,
-                shouldShowCardBrandDropdown = interactor.isModifiablePaymentMethod
-                    && displayableSavedPaymentMethod.isModifiable(),
+                shouldShowCardBrandDropdown = interactor.isModifiablePaymentMethod &&
+                    displayableSavedPaymentMethod.isModifiable(),
                 cardBrandFilter = interactor.cardBrandFilter,
                 savedPaymentMethodIcon = displayableSavedPaymentMethod
                     .paymentMethod

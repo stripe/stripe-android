@@ -167,9 +167,11 @@ class DefaultUpdatePaymentMethodInteractorTest {
             }
 
             val expectedNewCardBrand = CardBrand.Visa
-            interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.BrandChoiceChanged(
-                cardBrandChoice = CardBrandChoice(brand = expectedNewCardBrand)
-            ))
+            interactor.handleViewAction(
+                UpdatePaymentMethodInteractor.ViewAction.BrandChoiceChanged(
+                    cardBrandChoice = CardBrandChoice(brand = expectedNewCardBrand)
+                )
+            )
             interactor.state.test {
                 assertThat(awaitItem().cardBrandHasBeenChanged).isTrue()
             }
@@ -185,9 +187,11 @@ class DefaultUpdatePaymentMethodInteractorTest {
             }
 
             // Re-clicking on the already saved card brand doesn't update cardBrandHasBeenChanged incorectly.
-            interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.BrandChoiceChanged(
-                cardBrandChoice = CardBrandChoice(brand = expectedNewCardBrand)
-            ))
+            interactor.handleViewAction(
+                UpdatePaymentMethodInteractor.ViewAction.BrandChoiceChanged(
+                    cardBrandChoice = CardBrandChoice(brand = expectedNewCardBrand)
+                )
+            )
             interactor.state.test {
                 assertThat(awaitItem().cardBrandHasBeenChanged).isFalse()
             }
@@ -212,9 +216,11 @@ class DefaultUpdatePaymentMethodInteractorTest {
                 assertThat(awaitItem().cardBrandChoice.brand).isEqualTo(originalCardBrand)
             }
 
-            interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.BrandChoiceChanged(
-                cardBrandChoice = CardBrandChoice(brand = CardBrand.Visa)
-            ))
+            interactor.handleViewAction(
+                UpdatePaymentMethodInteractor.ViewAction.BrandChoiceChanged(
+                    cardBrandChoice = CardBrandChoice(brand = CardBrand.Visa)
+                )
+            )
             interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.SaveButtonPressed)
 
             interactor.state.test {
@@ -232,7 +238,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
         canRemove: Boolean = false,
         displayableSavedPaymentMethod: DisplayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
         onRemovePaymentMethod: (PaymentMethod) -> Throwable? = { notImplemented() },
-        onSavePaymentMethod: (PaymentMethod, CardBrand) -> Result<PaymentMethod> = { _, _ ->  notImplemented() },
+        onSavePaymentMethod: (PaymentMethod, CardBrand) -> Result<PaymentMethod> = { _, _ -> notImplemented() },
         testBlock: suspend TestParams.() -> Unit
     ) {
         val interactor = DefaultUpdatePaymentMethodInteractor(
