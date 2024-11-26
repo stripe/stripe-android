@@ -867,6 +867,7 @@ internal class PaymentMethodMetadataTest {
             mobilePaymentElementComponent = ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
                 isPaymentMethodSaveEnabled = true,
                 isPaymentMethodRemoveEnabled = true,
+                canRemoveLastPaymentMethod = true,
                 allowRedisplayOverride = null,
             )
         )
@@ -880,6 +881,7 @@ internal class PaymentMethodMetadataTest {
             mobilePaymentElementComponent = ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
                 isPaymentMethodSaveEnabled = false,
                 isPaymentMethodRemoveEnabled = true,
+                canRemoveLastPaymentMethod = true,
                 allowRedisplayOverride = null,
             ),
         )

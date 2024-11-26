@@ -334,6 +334,7 @@ internal class PaymentSheetViewModelTest {
                 paymentMethods = paymentMethods,
                 permissions = CustomerState.Permissions(
                     canRemovePaymentMethods = true,
+                    canRemoveLastPaymentMethod = true,
                     canRemoveDuplicates = false,
                 ),
             ),

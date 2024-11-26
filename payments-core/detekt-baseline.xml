@@ -34,7 +34,7 @@
     <ID>LongMethod:CardFormViewTest.kt$CardFormViewTest$@Test fun testCardValidCallback()</ID>
     <ID>LongMethod:CardInputWidget.kt$CardInputWidget$private fun initView(attrs: AttributeSet?)</ID>
     <ID>LongMethod:CollectBankAccountViewModel.kt$CollectBankAccountViewModel$private suspend fun createFinancialConnectionsSession()</ID>
-    <ID>LongMethod:ElementsSessionFixtures.kt$ElementsSessionFixtures$fun createPaymentIntentWithCustomerSession( allowRedisplay: String? = "limited" ): JSONObject</ID>
+    <ID>LongMethod:ElementsSessionFixtures.kt$ElementsSessionFixtures$fun createPaymentIntentWithCustomerSession( allowRedisplay: String? = "limited", paymentMethodRemoveFeature: String? = "enabled", paymentMethodRemoveLastFeature: String? = "enabled", ): JSONObject</ID>
     <ID>LongMethod:ElementsSessionJsonParserTest.kt$ElementsSessionJsonParserTest$@Test fun `ElementsSession has expected customer session information in the response`()</ID>
     <ID>LongMethod:GooglePayJsonFactoryTest.kt$GooglePayJsonFactoryTest$@Test fun testCreatePaymentMethodRequestJson()</ID>
     <ID>LongMethod:PaymentAuthConfigTest.kt$PaymentAuthConfigTest$@Test fun testUiCustomizationWrapper()</ID>

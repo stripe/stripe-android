@@ -97,6 +97,7 @@ internal object PaymentSheetFixtures {
         paymentMethods = listOf(),
         permissions = CustomerState.Permissions(
             canRemovePaymentMethods = true,
+            canRemoveLastPaymentMethod = true,
             canRemoveDuplicates = false,
         )
     )
@@ -159,6 +160,7 @@ internal object PaymentSheetFixtures {
                     paymentMethods = paymentMethods,
                     permissions = CustomerState.Permissions(
                         canRemovePaymentMethods = true,
+                        canRemoveLastPaymentMethod = true,
                         canRemoveDuplicates = false,
                     )
                 ),
