@@ -28,10 +28,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.R
@@ -64,7 +63,8 @@ internal fun WalletBody(
     if (state.paymentDetailsList.isEmpty()) {
         Box(
             modifier = Modifier
-                .fillMaxSize(),
+                .fillMaxSize()
+                .testTag(WALLET_LOADER_TAG),
             contentAlignment = Alignment.Center
         ) {
             CircularProgressIndicator()
@@ -90,7 +90,9 @@ internal fun WalletBody(
                 .animateContentSize()
         ) {
             val selectedItem = state.selectedItem
+            println("selectedItem => ${selectedItem?.id}, isExpanded => ${state.isExpanded}")
             if (state.isExpanded || selectedItem == null) {
+                println("in expanded state")
                 ExpandedPaymentDetails(
                     uiState = state,
                     onItemSelected = onItemSelected,
@@ -101,6 +103,7 @@ internal fun WalletBody(
                     }
                 )
             } else {
+                println("in collapsed state")
                 CollapsedPaymentDetails(
                     selectedPaymentMethod = selectedItem,
                     enabled = !state.primaryButtonState.isBlocking,
@@ -125,6 +128,7 @@ internal fun CollapsedPaymentDetails(
 ) {
     Row(
         modifier = Modifier
+            .testTag(COLLAPSED_WALLET_ROW)
             .fillMaxWidth()
             .height(64.dp)
             .border(
@@ -144,22 +148,26 @@ internal fun CollapsedPaymentDetails(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = stringResource(id = R.string.stripe_wallet_collapsed_payment),
-            modifier = Modifier.padding(
-                start = HorizontalPadding,
-                end = 8.dp
-            ),
+            text = stringResource(R.string.stripe_wallet_collapsed_payment),
+            modifier = Modifier
+                .testTag(COLLAPSED_WALLET_HEADER_TAG)
+                .padding(
+                    start = HorizontalPadding,
+                    end = 8.dp
+                ),
             color = MaterialTheme.linkColors.disabledText
         )
-        PaymentDetails(paymentDetails = selectedPaymentMethod)
+        PaymentDetails(
+            modifier = Modifier
+                .testTag(COLLAPSED_WALLET_PAYMENT_DETAILS_TAG),
+            paymentDetails = selectedPaymentMethod
+        )
         Icon(
-            painter = painterResource(id = R.drawable.stripe_link_chevron),
-            contentDescription = stringResource(id = R.string.stripe_wallet_expand_accessibility),
+            painter = painterResource(R.drawable.stripe_link_chevron),
+            contentDescription = stringResource(R.string.stripe_wallet_expand_accessibility),
             modifier = Modifier
                 .padding(end = 22.dp)
-                .semantics {
-                    testTag = "ChevronIcon"
-                },
+                .testTag(COLLAPSED_WALLET_CHEVRON_ICON_TAG),
             tint = MaterialTheme.linkColors.disabledText
         )
     }
@@ -203,6 +211,8 @@ private fun ExpandedPaymentDetails(
             }
         ) { item ->
             PaymentDetailsListItem(
+                modifier = Modifier
+                    .testTag(WALLET_SCREEN_PAYMENT_METHODS_LIST),
                 paymentDetails = item,
                 enabled = isEnabled,
                 isSelected = uiState.selectedItem?.id == item.id,
@@ -232,8 +242,12 @@ private fun ExpandedRowHeader(
 ) {
     Row(
         modifier = Modifier
+            .testTag(WALLET_SCREEN_EXPANDED_ROW_HEADER)
             .height(44.dp)
-            .clickable(enabled = isEnabled, onClick = onCollapse),
+            .clickable(
+                enabled = isEnabled,
+                onClick = onCollapse
+            ),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
@@ -249,10 +263,7 @@ private fun ExpandedRowHeader(
             contentDescription = stringResource(id = R.string.stripe_wallet_expand_accessibility),
             modifier = Modifier
                 .padding(top = 20.dp, end = 22.dp)
-                .rotate(CHEVRON_ICON_ROTATION)
-                .semantics {
-                    testTag = "ChevronIcon"
-                },
+                .rotate(CHEVRON_ICON_ROTATION),
             tint = MaterialTheme.colors.onPrimary
         )
     }
@@ -265,6 +276,7 @@ private fun AddPaymentMethodRow(
 ) {
     Row(
         modifier = Modifier
+            .testTag(WALLET_ADD_PAYMENT_METHOD_ROW)
             .fillMaxWidth()
             .height(60.dp)
             .clickable(enabled = isEnabled, onClick = onAddNewPaymentMethodClick),
@@ -306,3 +318,11 @@ private fun String.replaceHyperlinks() = this.replace(
 ).replace("</terms>", "</a>")
 
 private const val CHEVRON_ICON_ROTATION = 180f
+internal const val WALLET_LOADER_TAG = "wallet_screen_loader_tag"
+internal const val COLLAPSED_WALLET_HEADER_TAG = "collapsed_wallet_header_tag"
+internal const val COLLAPSED_WALLET_CHEVRON_ICON_TAG = "collapsed_wallet_chevron_icon_tag"
+internal const val COLLAPSED_WALLET_PAYMENT_DETAILS_TAG = "collapsed_wallet_payment_details_tag"
+internal const val COLLAPSED_WALLET_ROW = "collapsed_wallet_row_tag"
+internal const val WALLET_SCREEN_EXPANDED_ROW_HEADER = "wallet_screen_expanded_row_header"
+internal const val WALLET_ADD_PAYMENT_METHOD_ROW = "wallet_add_payment_method_row"
+internal const val WALLET_SCREEN_PAYMENT_METHODS_LIST = "wallet_screen_payment_methods_list"
