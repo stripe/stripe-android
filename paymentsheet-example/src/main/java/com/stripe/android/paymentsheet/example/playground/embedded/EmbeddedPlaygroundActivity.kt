@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.rememberEmbeddedPaymentElement
+import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentMethodSelector
@@ -44,7 +45,14 @@ internal class EmbeddedPlaygroundActivity : AppCompatActivity() {
         }
 
         setContent {
-            val embeddedPaymentElement = rememberEmbeddedPaymentElement()
+            val embeddedPaymentElement = rememberEmbeddedPaymentElement(
+                createIntentCallback = { _, _ ->
+                    CreateIntentResult.Failure(IllegalStateException("Not implemented."))
+                },
+                resultCallback = {
+                    println("Not implemented.")
+                }
+            )
 
             LaunchedEffect(embeddedPaymentElement) {
                 embeddedPaymentElement.configure(
