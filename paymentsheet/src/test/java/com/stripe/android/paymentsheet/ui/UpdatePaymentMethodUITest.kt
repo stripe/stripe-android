@@ -2,9 +2,12 @@ package com.stripe.android.paymentsheet.ui
 
 import android.os.Build
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onChild
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import com.google.common.truth.Truth.assertThat
@@ -169,6 +172,50 @@ class UpdatePaymentMethodUITest {
     }
 
     @Test
+    fun isModifiablePMIsFalse_saveButtonHidden() = runScenario(
+        isModifiablePaymentMethod = false,
+    ) {
+        composeRule.onNodeWithTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG).assertDoesNotExist()
+    }
+
+    @Test
+    fun isModifiablePMIsTrue_saveButtonHidden() = runScenario(
+        isModifiablePaymentMethod = true,
+    ) {
+        composeRule.onNodeWithTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG).assertExists()
+    }
+
+    @Test
+    fun cardBrandHasNotBeenChanged_saveButtonNotEnabled() = runScenario(
+        isModifiablePaymentMethod = true,
+        cardBrandHasBeenChanged = false,
+    ) {
+        // The actual button is a child of the composable used for this button.
+        composeRule.onNodeWithTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG).onChild().assertIsNotEnabled()
+    }
+
+    @Test
+    fun cardBrandHasBeenChanged_saveButtonEnabled() = runScenario(
+        isModifiablePaymentMethod = true,
+        cardBrandHasBeenChanged = true,
+    ) {
+        // The actual button is a child of the composable used for this button.
+        composeRule.onNodeWithTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG).onChild().assertIsEnabled()
+    }
+
+    @Test
+    fun clickingSaveButton_sendsSaveButtonPressedAction() = runScenario(
+        isModifiablePaymentMethod = true,
+        cardBrandHasBeenChanged = true,
+    ) {
+        assertThat(viewActionRecorder.viewActions).isEmpty()
+        composeRule.onNodeWithTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG).performClick()
+
+        viewActionRecorder.consume(UpdatePaymentMethodInteractor.ViewAction.SaveButtonPressed)
+        assertThat(viewActionRecorder.viewActions).isEmpty()
+    }
+
+    @Test
     fun stateHasError_errorMessageIsDisplayed() {
         val errorMessage = "Something went wrong"
 
@@ -257,6 +304,7 @@ class UpdatePaymentMethodUITest {
         }
     }
 
+    @Test
     fun modifiableCard_cbcDropdownIsShown() {
         runScenario(
             displayableSavedPaymentMethod = PaymentMethodFixtures
@@ -281,6 +329,19 @@ class UpdatePaymentMethodUITest {
         runScenario(
             displayableSavedPaymentMethod = PaymentMethodFixtures.US_BANK_ACCOUNT.toDisplayableSavedPaymentMethod()
         ) {
+            composeRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG).assertDoesNotExist()
+        }
+    }
+
+    @Test
+    fun isNotModifiablePM_cbcDropdownIsNotShown() {
+        runScenario(
+            displayableSavedPaymentMethod = PaymentMethodFixtures
+                .CARD_WITH_NETWORKS_PAYMENT_METHOD
+                .toDisplayableSavedPaymentMethod(),
+            isModifiablePaymentMethod = false,
+        ) {
+            // Even if the card itself is modifiable, if we set isModifiablePaymentMethod to false, CBC is hidden.
             composeRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG).assertDoesNotExist()
         }
     }
@@ -362,7 +423,9 @@ class UpdatePaymentMethodUITest {
         isExpiredCard: Boolean = false,
         errorMessage: ResolvableString? = null,
         initialCardBrand: CardBrand = CardBrand.Unknown,
+        cardBrandHasBeenChanged: Boolean = false,
         canRemove: Boolean = true,
+        isModifiablePaymentMethod: Boolean = true,
         testBlock: Scenario.() -> Unit,
     ) {
         val viewActionRecorder = ViewActionRecorder<UpdatePaymentMethodInteractor.ViewAction>()
@@ -370,11 +433,13 @@ class UpdatePaymentMethodUITest {
             displayableSavedPaymentMethod = displayableSavedPaymentMethod,
             canRemove = canRemove,
             isExpiredCard = isExpiredCard,
+            isModifiablePaymentMethod = isModifiablePaymentMethod,
             viewActionRecorder = viewActionRecorder,
             initialState = UpdatePaymentMethodInteractor.State(
                 error = errorMessage,
                 status = UpdatePaymentMethodInteractor.Status.Idle,
-                cardBrandChoice = CardBrandChoice(brand = initialCardBrand)
+                cardBrandChoice = CardBrandChoice(brand = initialCardBrand),
+                cardBrandHasBeenChanged = cardBrandHasBeenChanged,
             ),
         )
 

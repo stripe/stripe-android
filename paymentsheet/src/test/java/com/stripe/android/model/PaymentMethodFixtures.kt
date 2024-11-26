@@ -83,7 +83,7 @@ internal object PaymentMethodFixtures {
         type = PaymentMethod.Type.Card,
         billingDetails = BILLING_DETAILS,
         customerId = "cus_AQsHpvKfKwJDrF",
-        card = CARD.copy(
+        card = CARD_WITH_NETWORKS.copy(
             expiryMonth = 4,
             expiryYear = 2024,
         ),

@@ -37,6 +37,21 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
                     .toDisplayableSavedPaymentMethod(),
                 canRemove = true,
                 initialCardBrand = CardBrand.CartesBancaires,
+                isModifiablePaymentMethod = true,
+            )
+        }
+    }
+
+    @Test
+    fun updatePaymentMethodScreen_forCbcEligibleCard_withoutRemoveButton() {
+        paparazziRule.snapshot {
+            PaymentSheetScreenOnUpdatePaymentMethod(
+                paymentMethod = PaymentMethodFixtures
+                    .CARD_WITH_NETWORKS_PAYMENT_METHOD
+                    .toDisplayableSavedPaymentMethod(),
+                canRemove = false,
+                initialCardBrand = CardBrand.CartesBancaires,
+                isModifiablePaymentMethod = true,
             )
         }
     }
@@ -98,6 +113,7 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
     fun PaymentSheetScreenOnUpdatePaymentMethod(
         paymentMethod: DisplayableSavedPaymentMethod,
         canRemove: Boolean,
+        isModifiablePaymentMethod: Boolean = false,
         initialCardBrand: CardBrand = CardBrand.Unknown,
         isExpiredCard: Boolean = false,
         error: String? = null,
@@ -106,11 +122,13 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
             displayableSavedPaymentMethod = paymentMethod,
             canRemove = canRemove,
             isExpiredCard = isExpiredCard,
+            isModifiablePaymentMethod = isModifiablePaymentMethod,
             viewActionRecorder = null,
             initialState = UpdatePaymentMethodInteractor.State(
                 error = error?.resolvableString,
                 status = UpdatePaymentMethodInteractor.Status.Idle,
-                cardBrandChoice = CardBrandChoice(brand = initialCardBrand)
+                cardBrandChoice = CardBrandChoice(brand = initialCardBrand),
+                cardBrandHasBeenChanged = false,
             ),
         )
         val screen = com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.UpdatePaymentMethod(interactor)

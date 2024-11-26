@@ -385,6 +385,7 @@ internal class CustomerSheetScreenshotTest {
             updatePaymentMethodInteractor = DefaultUpdatePaymentMethodInteractor(
                 displayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
                 removeExecutor = { null },
+                updateExecutor = { paymentMethod, _ -> Result.success(paymentMethod) },
                 canRemove = true,
                 isLiveMode = true,
                 cardBrandFilter = DefaultCardBrandFilter,

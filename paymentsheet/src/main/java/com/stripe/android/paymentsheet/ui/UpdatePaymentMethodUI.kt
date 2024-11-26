@@ -50,6 +50,7 @@ import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.stripeShapes
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.mapAsStateFlow
+import com.stripe.android.common.ui.PrimaryButton as PrimaryButton
 import com.stripe.android.paymentsheet.R as PaymentSheetR
 
 @Composable
@@ -104,7 +105,19 @@ internal fun UpdatePaymentMethodUI(interactor: UpdatePaymentMethodInteractor, mo
             )
         }
 
+        if (interactor.isModifiablePaymentMethod) {
+            Spacer(modifier = Modifier.requiredHeight(32.dp))
+            UpdatePaymentMethodUi(interactor)
+        }
+
         if (interactor.canRemove) {
+            val spacerHeight = if (interactor.isModifiablePaymentMethod) {
+                16.dp
+            } else {
+                32.dp
+            }
+
+            Spacer(modifier = Modifier.requiredHeight(spacerHeight))
             DeletePaymentMethodUi(interactor)
         }
     }
@@ -128,7 +141,8 @@ private fun CardDetailsUI(
             CardNumberField(
                 card = card,
                 selectedBrand = selectedBrand,
-                isModifiable = displayableSavedPaymentMethod.isModifiable(),
+                shouldShowCardBrandDropdown = interactor.isModifiablePaymentMethod
+                    && displayableSavedPaymentMethod.isModifiable(),
                 cardBrandFilter = interactor.cardBrandFilter,
                 savedPaymentMethodIcon = displayableSavedPaymentMethod
                     .paymentMethod
@@ -253,11 +267,22 @@ private fun BankAccountTextField(
 }
 
 @Composable
+private fun UpdatePaymentMethodUi(interactor: UpdatePaymentMethodInteractor) {
+    val state by interactor.state.collectAsState()
+
+    PrimaryButton(
+        label = stringResource(id = PaymentSheetR.string.stripe_paymentsheet_save),
+        isLoading = state.status == UpdatePaymentMethodInteractor.Status.Updating,
+        isEnabled = state.cardBrandHasBeenChanged && state.status == UpdatePaymentMethodInteractor.Status.Idle,
+        onButtonClick = { interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.SaveButtonPressed) },
+        modifier = Modifier.testTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG)
+    )
+}
+
+@Composable
 private fun DeletePaymentMethodUi(interactor: UpdatePaymentMethodInteractor) {
     val openDialogValue = rememberSaveable { mutableStateOf(false) }
     val status by interactor.state.mapAsStateFlow { it.status }.collectAsState()
-
-    Spacer(modifier = Modifier.requiredHeight(32.dp))
 
     RemoveButton(
         title = R.string.stripe_remove.resolvableString,
@@ -283,7 +308,7 @@ private fun CardNumberField(
     card: PaymentMethod.Card,
     selectedBrand: CardBrandChoice,
     cardBrandFilter: CardBrandFilter,
-    isModifiable: Boolean,
+    shouldShowCardBrandDropdown: Boolean,
     savedPaymentMethodIcon: Int,
     onBrandOptionsShown: () -> Unit,
     onBrandChoiceChanged: (CardBrandChoice) -> Unit,
@@ -293,7 +318,7 @@ private fun CardNumberField(
         value = "•••• •••• •••• ${card.last4}",
         label = stringResource(id = R.string.stripe_acc_label_card_number),
         trailingIcon = {
-            if (isModifiable) {
+            if (shouldShowCardBrandDropdown) {
                 CardBrandDropdown(
                     selectedBrand = selectedBrand,
                     availableBrands = card.getAvailableNetworks(cardBrandFilter),
@@ -450,6 +475,7 @@ private fun PreviewUpdatePaymentMethodUI() {
             canRemove = true,
             displayableSavedPaymentMethod = exampleCard,
             removeExecutor = { null },
+            updateExecutor = { paymentMethod, _ -> Result.success(paymentMethod) },
             cardBrandFilter = DefaultCardBrandFilter,
             onBrandChoiceOptionsShown = {},
             onBrandChoiceOptionsDismissed = {},
@@ -481,6 +507,7 @@ private const val YEAR_2100 = 2100
 internal const val UPDATE_PM_EXPIRY_FIELD_TEST_TAG = "update_payment_method_expiry_date"
 internal const val UPDATE_PM_CVC_FIELD_TEST_TAG = "update_payment_method_cvc"
 internal const val UPDATE_PM_REMOVE_BUTTON_TEST_TAG = "update_payment_method_remove_button"
+internal const val UPDATE_PM_SAVE_BUTTON_TEST_TAG = "update_payment_method_save_button"
 internal const val UPDATE_PM_ERROR_MESSAGE_TEST_TAG = "update_payment_method_error_message"
 internal const val UPDATE_PM_US_BANK_ACCOUNT_TEST_TAG = "update_payment_method_bank_account_ui"
 internal const val UPDATE_PM_SEPA_DEBIT_TEST_TAG = "update_payment_method_sepa_debit_ui"

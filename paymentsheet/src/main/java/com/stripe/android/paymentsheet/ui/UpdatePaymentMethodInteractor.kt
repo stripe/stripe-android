@@ -24,6 +24,7 @@ internal interface UpdatePaymentMethodInteractor {
     val screenTitle: ResolvableString?
     val cardBrandFilter: CardBrandFilter
     val isExpiredCard: Boolean
+    val isModifiablePaymentMethod: Boolean
 
     val state: StateFlow<State>
 
@@ -31,6 +32,7 @@ internal interface UpdatePaymentMethodInteractor {
         val error: ResolvableString?,
         val status: Status,
         val cardBrandChoice: CardBrandChoice,
+        val cardBrandHasBeenChanged: Boolean,
     )
 
     enum class Status {
@@ -46,6 +48,7 @@ internal interface UpdatePaymentMethodInteractor {
         data object BrandChoiceOptionsShown : ViewAction()
         data class BrandChoiceChanged(val cardBrandChoice: CardBrandChoice) : ViewAction()
         data object BrandChoiceOptionsDismissed : ViewAction()
+        data object SaveButtonPressed : ViewAction()
     }
 
     companion object {
@@ -68,6 +71,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
     override val displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
     override val cardBrandFilter: CardBrandFilter,
     private val removeExecutor: PaymentMethodRemoveOperation,
+    private val updateExecutor: PaymentMethodUpdateOperation,
     private val onBrandChoiceOptionsShown: (CardBrand) -> Unit,
     private val onBrandChoiceOptionsDismissed: (CardBrand) -> Unit,
     workContext: CoroutineContext = Dispatchers.Default,
@@ -76,21 +80,27 @@ internal class DefaultUpdatePaymentMethodInteractor(
     private val error = MutableStateFlow(getInitialError())
     private val status = MutableStateFlow(UpdatePaymentMethodInteractor.Status.Idle)
     private val cardBrandChoice = MutableStateFlow(getInitialCardBrandChoice())
+    private val cardBrandHasBeenChanged = MutableStateFlow(false)
+    private val savedCardBrand = MutableStateFlow(getInitialCardBrandChoice())
 
     override val isExpiredCard = paymentMethodIsExpiredCard()
     override val screenTitle: ResolvableString? = UpdatePaymentMethodInteractor.screenTitle(
         displayableSavedPaymentMethod
     )
+    override val isModifiablePaymentMethod: Boolean
+        get() = !isExpiredCard && displayableSavedPaymentMethod.isModifiable()
 
     private val _state = combineAsStateFlow(
         error,
         status,
         cardBrandChoice,
-    ) { error, status, cardBrandChoice ->
+        cardBrandHasBeenChanged,
+    ) { error, status, cardBrandChoice, cardBrandHasBeenChanged, ->
         UpdatePaymentMethodInteractor.State(
             error = error,
             status = status,
-            cardBrandChoice = cardBrandChoice
+            cardBrandChoice = cardBrandChoice,
+            cardBrandHasBeenChanged = cardBrandHasBeenChanged,
         )
     }
     override val state = _state
@@ -104,6 +114,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
             UpdatePaymentMethodInteractor.ViewAction.BrandChoiceOptionsDismissed -> onBrandChoiceOptionsDismissed(
                 cardBrandChoice.value.brand
             )
+            UpdatePaymentMethodInteractor.ViewAction.SaveButtonPressed -> savePaymentMethod()
             is UpdatePaymentMethodInteractor.ViewAction.BrandChoiceChanged -> onBrandChoiceChanged(
                 viewAction.cardBrandChoice
             )
@@ -122,8 +133,28 @@ internal class DefaultUpdatePaymentMethodInteractor(
         }
     }
 
+    private fun savePaymentMethod() {
+        coroutineScope.launch {
+            val newCardBrand = cardBrandChoice.value.brand
+
+            error.emit(getInitialError())
+            status.emit(UpdatePaymentMethodInteractor.Status.Updating)
+
+            val updateResult = updateExecutor(displayableSavedPaymentMethod.paymentMethod, newCardBrand)
+
+            updateResult.onSuccess {
+                savedCardBrand.emit(CardBrandChoice(brand = newCardBrand))
+                cardBrandHasBeenChanged.emit(false)
+            }.onFailure {
+                error.emit(it.stripeErrorMessage())
+            }
+            status.emit(UpdatePaymentMethodInteractor.Status.Idle)
+        }
+    }
+
     private fun onBrandChoiceChanged(cardBrandChoice: CardBrandChoice) {
         this.cardBrandChoice.value = cardBrandChoice
+        this.cardBrandHasBeenChanged.value = cardBrandChoice != savedCardBrand.value
 
         onBrandChoiceOptionsDismissed(cardBrandChoice.brand)
     }

@@ -245,6 +245,7 @@ internal class SavedPaymentMethodMutator(
                         displayableSavedPaymentMethod,
                         cardBrandFilter = cardBrandFilter,
                         removeExecutor = ::removePaymentMethodInEditScreen,
+                        updateExecutor = ::modifyCardPaymentMethod,
                         onBrandChoiceOptionsShown = {
                             eventReporter.onShowPaymentOptionBrands(
                                 source = EventReporter.CardBrandChoiceEventSource.Edit,
