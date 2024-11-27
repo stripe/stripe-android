@@ -85,4 +85,6 @@ internal open class FakeLinkAccountManager : LinkAccountManager {
     override suspend fun listPaymentDetails(paymentMethodTypes: Set<String>): Result<ConsumerPaymentDetails> {
         return listPaymentDetailsResult
     }
+
+    override suspend fun deletePaymentDetails(paymentDetailsId: String) = Result.success(Unit)
 }

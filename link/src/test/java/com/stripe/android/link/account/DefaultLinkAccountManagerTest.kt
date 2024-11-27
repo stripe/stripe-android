@@ -747,6 +747,31 @@ class DefaultLinkAccountManagerTest {
         assertThat(linkRepository.paymentMethodTypes).isEqualTo(setOf("card"))
     }
 
+    @Test
+    fun `deletePaymentDetails returns error when repository call fails`() = runSuspendTest {
+        val error = AuthenticationException(StripeError())
+        val linkRepository = FakeLinkRepository()
+
+        val accountManager = accountManager(linkRepository = linkRepository)
+        accountManager.setAccountNullable(TestFactory.CONSUMER_SESSION, TestFactory.PUBLISHABLE_KEY)
+
+        linkRepository.deletePaymentDetailsResult = Result.failure(error)
+
+        val result = accountManager.deletePaymentDetails("id")
+
+        assertThat(result.exceptionOrNull()).isEqualTo(error)
+    }
+
+    @Test
+    fun `deletePaymentDetails returns success when repository call succeeds`() = runSuspendTest {
+        val accountManager = accountManager()
+        accountManager.setAccountNullable(TestFactory.CONSUMER_SESSION, TestFactory.PUBLISHABLE_KEY)
+
+        val result = accountManager.deletePaymentDetails("id")
+
+        assertThat(result.getOrNull()).isEqualTo(Unit)
+    }
+
     private fun runSuspendTest(testBody: suspend TestScope.() -> Unit) = runTest {
         testBody()
     }

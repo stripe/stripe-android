@@ -1458,6 +1458,28 @@ class StripeApiRepository @JvmOverloads internal constructor(
         )
     }
 
+    override suspend fun deletePaymentDetails(
+        clientSecret: String,
+        paymentDetailsId: String,
+        requestOptions: ApiRequest.Options
+    ): Result<Unit> {
+        return runCatching {
+            makeApiRequest(
+                apiRequestFactory.createDelete(
+                    getConsumerPaymentDetailsUrl(paymentDetailsId),
+                    requestOptions,
+                    mapOf(
+                        "request_surface" to "android_payment_element",
+                        "credentials" to mapOf(
+                            "consumer_session_client_secret" to clientSecret
+                        )
+                    )
+                ),
+                onResponse = {}
+            )
+        }
+    }
+
     private suspend fun retrieveElementsSession(
         params: ElementsSessionParams,
         options: ApiRequest.Options,

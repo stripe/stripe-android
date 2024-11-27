@@ -15,6 +15,7 @@ open class FakeLinkRepository : LinkRepository {
     var startVerificationResult = Result.success(TestFactory.CONSUMER_SESSION)
     var confirmVerificationResult = Result.success(TestFactory.CONSUMER_SESSION)
     var listPaymentDetailsResult = Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS)
+    var deletePaymentDetailsResult = Result.success(Unit)
 
     override suspend fun lookupConsumer(email: String) = lookupConsumerResult
 
@@ -63,4 +64,10 @@ open class FakeLinkRepository : LinkRepository {
         consumerSessionClientSecret: String,
         consumerPublishableKey: String?
     ): Result<ConsumerPaymentDetails> = listPaymentDetailsResult
+
+    override suspend fun deletePaymentDetails(
+        paymentDetailsId: String,
+        consumerSessionClientSecret: String,
+        consumerPublishableKey: String?
+    ): Result<Unit> = deletePaymentDetailsResult
 }

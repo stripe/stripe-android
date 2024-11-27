@@ -389,5 +389,12 @@ interface StripeRepository {
     ): Result<ConsumerPaymentDetails>
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    suspend fun deletePaymentDetails(
+        clientSecret: String,
+        paymentDetailsId: String,
+        requestOptions: ApiRequest.Options
+    ): Result<Unit>
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun buildPaymentUserAgent(attribution: Set<String> = emptySet()): String
 }

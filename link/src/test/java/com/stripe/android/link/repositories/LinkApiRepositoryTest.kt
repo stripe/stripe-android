@@ -519,6 +519,39 @@ class LinkApiRepositoryTest {
         )
     }
 
+    @Test
+    fun `deletePaymentDetails without consumerPublishableKey sends correct parameters`() = runTest {
+        val secret = "secret"
+        val id = "payment_details_id"
+        linkRepository.deletePaymentDetails(id, secret, null)
+
+        verify(stripeRepository).deletePaymentDetails(
+            eq(secret),
+            eq(id),
+            eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID))
+        )
+    }
+
+    @Test
+    fun `deletePaymentDetails returns successful result`() = runTest {
+        whenever(stripeRepository.deletePaymentDetails(any(), any(), any())).thenReturn(Result.success(Unit))
+
+        val result = linkRepository.deletePaymentDetails("id", "secret", "key")
+
+        assertThat(result.isSuccess).isTrue()
+    }
+
+    @Test
+    fun `deletePaymentDetails returns error result when repository fails`() = runTest {
+        val error = RuntimeException("error")
+        whenever(stripeRepository.deletePaymentDetails(any(), any(), any()))
+            .thenReturn(Result.failure(error))
+
+        val result = linkRepository.deletePaymentDetails("id", "secret", "key")
+
+        assertThat(result.exceptionOrNull()).isEqualTo(error)
+    }
+
     private val cardPaymentMethodCreateParams =
         FieldValuesToParamsMapConverter.transformToPaymentMethodCreateParams(
             mapOf(
