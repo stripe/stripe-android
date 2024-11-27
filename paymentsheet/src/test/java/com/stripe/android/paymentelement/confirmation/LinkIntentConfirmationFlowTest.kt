@@ -27,7 +27,7 @@ import com.stripe.android.testing.FakePaymentLauncher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
-internal class IntentConfirmationFlowTest {
+internal class LinkIntentConfirmationFlowTest {
     @Test
     fun `On payment intent, action should be to confirm intent`() = runTest {
         val intentConfirmationDefinition = createIntentConfirmationDefinition()
