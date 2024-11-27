@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stripe.android.screenshottesting.PaparazziRule
+import com.stripe.android.testing.LocaleTestRule
 import com.stripe.android.utils.screenshots.PaymentSheetAppearance
 import org.junit.Rule
 import org.junit.Test
@@ -16,6 +17,9 @@ internal class PromoBadgeScreenshotTest {
         PaymentSheetAppearance.entries,
         boxModifier = Modifier.padding(16.dp)
     )
+
+    @get:Rule
+    val localeRule = LocaleTestRule()
 
     @Test
     fun testPromoBadge() {
@@ -39,24 +43,13 @@ internal class PromoBadgeScreenshotTest {
 
     @Test
     fun testPromoBadgeInTinyModeWithNonEnglish() {
-        withLocale(Locale.GERMAN) {
-            paparazziRule.snapshot {
-                PromoBadge(
-                    text = "$5",
-                    tinyMode = true,
-                )
-            }
+        localeRule.setTemporarily(Locale.GERMAN)
+
+        paparazziRule.snapshot {
+            PromoBadge(
+                text = "$5",
+                tinyMode = true,
+            )
         }
-    }
-}
-
-private fun withLocale(locale: Locale, block: () -> Unit) {
-    val original = Locale.getDefault()
-    Locale.setDefault(locale)
-
-    try {
-        block()
-    } finally {
-        Locale.setDefault(original)
     }
 }
