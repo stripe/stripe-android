@@ -4,6 +4,7 @@
   <CurrentIssues>
     <ID>ConstructorParameterNaming:FinancialConnectionsAuthorizationSession.kt$FinancialConnectionsAuthorizationSession$@SerialName(value = "is_oauth") private val _isOAuth: Boolean? = false</ID>
     <ID>ConstructorParameterNaming:PartnerAccountsList.kt$PartnerAccount$@SerialName(value = "allow_selection") private val _allowSelection: Boolean? = null</ID>
+    <ID>LargeClass:FinancialConnectionsSheetViewModelTest.kt$FinancialConnectionsSheetViewModelTest</ID>
     <ID>LongMethod:AccountItem.kt$@Composable @Preview internal fun AccountItemPreview()</ID>
     <ID>LongMethod:Button.kt$@Composable internal fun FinancialConnectionsButton( onClick: () -> Unit, modifier: Modifier = Modifier, type: Type = Primary, size: FinancialConnectionsButton.Size = FinancialConnectionsButton.Size.Regular, enabled: Boolean = true, loading: Boolean = false, content: @Composable (RowScope.() -> Unit) )</ID>
     <ID>LongMethod:FinancialConnectionsSheetNativeActivity.kt$FinancialConnectionsSheetNativeActivity$@Composable fun NavHost( initialPane: Pane, testMode: Boolean, )</ID>

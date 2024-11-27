@@ -34,6 +34,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession.StatusDetails
 import com.stripe.android.financialconnections.presentation.withState
+import com.stripe.android.model.IncentiveEligibilitySession
 import com.stripe.android.model.LinkMode
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -147,7 +148,6 @@ class FinancialConnectionsSheetViewModelTest {
                     initialArgs = ForInstantDebits(
                         configuration = configuration,
                         elementsSessionContext = ElementsSessionContext(
-                            initializationMode = ElementsSessionContext.InitializationMode.PaymentIntent("pi_123"),
                             amount = 123,
                             currency = "usd",
                             linkMode = LinkMode.LinkPaymentMethod,
@@ -156,7 +156,8 @@ class FinancialConnectionsSheetViewModelTest {
                                 email = null,
                                 phone = null,
                                 phoneCountryCode = null,
-                            )
+                            ),
+                            incentiveEligibilitySession = null,
                         ),
                     )
                 )
@@ -183,7 +184,6 @@ class FinancialConnectionsSheetViewModelTest {
                     initialArgs = ForInstantDebits(
                         configuration = configuration,
                         elementsSessionContext = ElementsSessionContext(
-                            initializationMode = ElementsSessionContext.InitializationMode.PaymentIntent("pi_123"),
                             amount = 123,
                             currency = "usd",
                             linkMode = LinkMode.LinkPaymentMethod,
@@ -192,7 +192,8 @@ class FinancialConnectionsSheetViewModelTest {
                                 email = null,
                                 phone = null,
                                 phoneCountryCode = null,
-                            )
+                            ),
+                            incentiveEligibilitySession = null,
                         ),
                     )
                 )
@@ -218,7 +219,6 @@ class FinancialConnectionsSheetViewModelTest {
                 initialArgs = ForInstantDebits(
                     configuration = configuration,
                     elementsSessionContext = ElementsSessionContext(
-                        initializationMode = ElementsSessionContext.InitializationMode.PaymentIntent("pi_123"),
                         amount = 123,
                         currency = "usd",
                         linkMode = null,
@@ -227,7 +227,8 @@ class FinancialConnectionsSheetViewModelTest {
                             email = null,
                             phone = null,
                             phoneCountryCode = null,
-                        )
+                        ),
+                        incentiveEligibilitySession = null,
                     ),
                 )
             )
@@ -237,6 +238,78 @@ class FinancialConnectionsSheetViewModelTest {
         withState(viewModel) {
             val viewEffect = it.viewEffect as OpenAuthFlowWithUrl
             assertThat(viewEffect.url).doesNotContain("link_mode")
+        }
+    }
+
+    @Test
+    fun `init - when instant debits flow, hosted auth url contains incentive info if eligible`() = runTest {
+        // Given
+        whenever(browserManager.canOpenHttpsUrl()).thenReturn(true)
+        whenever(getOrFetchSync(any())).thenReturn(syncResponse)
+        whenever(nativeRouter.nativeAuthFlowEnabled(any())).thenReturn(false)
+
+        // When
+        val viewModel = createViewModel(
+            defaultInitialState.copy(
+                initialArgs = ForInstantDebits(
+                    configuration = configuration,
+                    elementsSessionContext = ElementsSessionContext(
+                        amount = 123,
+                        currency = "usd",
+                        linkMode = null,
+                        billingDetails = null,
+                        prefillDetails = ElementsSessionContext.PrefillDetails(
+                            email = null,
+                            phone = null,
+                            phoneCountryCode = null,
+                        ),
+                        incentiveEligibilitySession = IncentiveEligibilitySession.PaymentIntent("pi_123"),
+                    ),
+                )
+            )
+        )
+
+        // Then
+        withState(viewModel) {
+            val viewEffect = it.viewEffect as OpenAuthFlowWithUrl
+            assertThat(viewEffect.url).contains("instantDebitsIncentive=true")
+            assertThat(viewEffect.url).contains("incentiveEligibilitySession=pi_123")
+        }
+    }
+
+    @Test
+    fun `init - when instant debits flow, hosted auth url does not contain incentive info if not eligible`() = runTest {
+        // Given
+        whenever(browserManager.canOpenHttpsUrl()).thenReturn(true)
+        whenever(getOrFetchSync(any())).thenReturn(syncResponse)
+        whenever(nativeRouter.nativeAuthFlowEnabled(any())).thenReturn(false)
+
+        // When
+        val viewModel = createViewModel(
+            defaultInitialState.copy(
+                initialArgs = ForInstantDebits(
+                    configuration = configuration,
+                    elementsSessionContext = ElementsSessionContext(
+                        amount = 123,
+                        currency = "usd",
+                        linkMode = null,
+                        billingDetails = null,
+                        prefillDetails = ElementsSessionContext.PrefillDetails(
+                            email = null,
+                            phone = null,
+                            phoneCountryCode = null,
+                        ),
+                        incentiveEligibilitySession = null,
+                    ),
+                )
+            )
+        )
+
+        // Then
+        withState(viewModel) {
+            val viewEffect = it.viewEffect as OpenAuthFlowWithUrl
+            assertThat(viewEffect.url).contains("instantDebitsIncentive=false")
+            assertThat(viewEffect.url).doesNotContain("incentiveEligibilitySession")
         }
     }
 
@@ -253,7 +326,6 @@ class FinancialConnectionsSheetViewModelTest {
                 initialArgs = ForInstantDebits(
                     configuration = configuration,
                     elementsSessionContext = ElementsSessionContext(
-                        initializationMode = ElementsSessionContext.InitializationMode.PaymentIntent("pi_123"),
                         amount = 123,
                         currency = "usd",
                         linkMode = null,
@@ -262,7 +334,8 @@ class FinancialConnectionsSheetViewModelTest {
                             email = "email@email.com",
                             phone = "5555551234",
                             phoneCountryCode = "US",
-                        )
+                        ),
+                        incentiveEligibilitySession = null,
                     ),
                 )
             )
@@ -290,7 +363,6 @@ class FinancialConnectionsSheetViewModelTest {
                 initialArgs = ForInstantDebits(
                     configuration = configuration,
                     elementsSessionContext = ElementsSessionContext(
-                        initializationMode = ElementsSessionContext.InitializationMode.PaymentIntent("pi_123"),
                         amount = 123,
                         currency = "usd",
                         linkMode = null,
@@ -311,7 +383,8 @@ class FinancialConnectionsSheetViewModelTest {
                             email = null,
                             phone = null,
                             phoneCountryCode = null,
-                        )
+                        ),
+                        incentiveEligibilitySession = null,
                     ),
                 )
             )

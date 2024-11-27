@@ -12,7 +12,6 @@ import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
 import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
 import com.stripe.android.financialconnections.CoroutineTestRule
 import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext
-import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext.InitializationMode
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ConsentAgree.analyticsValue
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
@@ -122,7 +121,6 @@ class NetworkingLinkSignupViewModelTest {
         val viewModel = buildViewModel(
             state = NetworkingLinkSignupState(),
             elementsSessionContext = ElementsSessionContext(
-                initializationMode = InitializationMode.PaymentIntent("pi_1234"),
                 amount = null,
                 currency = null,
                 linkMode = LinkMode.LinkPaymentMethod,
@@ -132,6 +130,7 @@ class NetworkingLinkSignupViewModelTest {
                     phone = "5555555555",
                     phoneCountryCode = "US",
                 ),
+                incentiveEligibilitySession = null,
             )
         )
 

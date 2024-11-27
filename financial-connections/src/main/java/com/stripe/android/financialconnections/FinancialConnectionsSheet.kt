@@ -7,6 +7,7 @@ import androidx.fragment.app.Fragment
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForDataLauncher
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForTokenLauncher
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetLauncher
+import com.stripe.android.model.IncentiveEligibilitySession
 import com.stripe.android.model.LinkMode
 import kotlinx.parcelize.Parcelize
 
@@ -42,35 +43,13 @@ class FinancialConnectionsSheet internal constructor(
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
     data class ElementsSessionContext(
-        val initializationMode: InitializationMode,
         val amount: Long?,
         val currency: String?,
         val linkMode: LinkMode?,
         val billingDetails: BillingDetails?,
         val prefillDetails: PrefillDetails,
+        val incentiveEligibilitySession: IncentiveEligibilitySession?
     ) : Parcelable {
-
-        val paymentIntentId: String?
-            get() = (initializationMode as? InitializationMode.PaymentIntent)?.paymentIntentId
-
-        val setupIntentId: String?
-            get() = (initializationMode as? InitializationMode.SetupIntent)?.setupIntentId
-
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        sealed interface InitializationMode : Parcelable {
-
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-            @Parcelize
-            data class PaymentIntent(val paymentIntentId: String) : InitializationMode
-
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-            @Parcelize
-            data class SetupIntent(val setupIntentId: String) : InitializationMode
-
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-            @Parcelize
-            data object DeferredIntent : InitializationMode
-        }
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Parcelize
