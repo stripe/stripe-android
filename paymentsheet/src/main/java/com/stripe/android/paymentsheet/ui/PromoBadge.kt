@@ -42,20 +42,16 @@ internal fun PromoBadge(
             modifier = modifier
                 .background(backgroundColor, shape)
                 .padding(
-                    horizontal = if (tinyMode) 4.dp else 8.dp,
+                    horizontal = if (tinyMode) 4.dp else 6.dp,
                     vertical = if (tinyMode) 0.dp else 4.dp,
                 )
         ) {
             Text(
                 text = formatPromoText(text),
                 color = foregroundColor,
-                style = if (tinyMode) {
-                    MaterialTheme.typography.caption.copy(
-                        fontSize = StripeThemeDefaults.typography.xSmallFontSize,
-                    )
-                } else {
-                    MaterialTheme.typography.body1
-                },
+                style = MaterialTheme.typography.caption.copy(
+                    fontSize = StripeThemeDefaults.typography.xSmallFontSize,
+                ),
             )
         }
     }
@@ -72,7 +68,7 @@ private fun formatPromoText(text: String): String {
     }
 
     val isEnglish = currentLocale.language == Locale.ENGLISH.language
-    return if (!isEnglish) text else "Get $text"
+    return if (isEnglish) "Get $text" else text
 }
 
 @Composable
