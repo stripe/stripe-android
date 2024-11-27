@@ -1,8 +1,9 @@
-package com.stripe.android.connect.example
+package com.stripe.android.connect.example.ui.accountloader
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.kittinunf.fuel.core.FuelError
+import com.stripe.android.connect.example.BuildConfig
 import com.stripe.android.connect.example.data.EmbeddedComponentService
 import com.stripe.android.core.Logger
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -14,7 +15,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class MainViewModel @Inject constructor(
+class AccountLoaderViewModel @Inject constructor(
     private val embeddedComponentService: EmbeddedComponentService,
 ) : ViewModel() {
 

@@ -29,6 +29,7 @@
     <string name="reload">Reload</string>
     <string name="warming_up_the_server">Warming up the server… This may take several seconds</string>
     <string name="app_settings">App Settings</string>
+    <string name="error_initializing">Error initializing SDK. Please try again.</string>
 
     <!-- Appearance Strings -->
     <string name="appearance_default">Default</string>
