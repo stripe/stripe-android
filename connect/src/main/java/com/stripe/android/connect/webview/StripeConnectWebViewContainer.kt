@@ -186,6 +186,7 @@ internal class StripeConnectWebViewContainerImpl<Listener : StripeEmbeddedCompon
         val viewBinding = this.viewBinding ?: return
         viewBinding.stripeWebView.setBackgroundColor(state.backgroundColor)
         viewBinding.stripeWebViewProgressBar.isVisible = state.isNativeLoadingIndicatorVisible
+        viewBinding.stripeWebView.isVisible = !state.isNativeLoadingIndicatorVisible
         if (state.isNativeLoadingIndicatorVisible) {
             viewBinding.stripeWebViewProgressBar.indeterminateTintList =
                 ColorStateList.valueOf(state.nativeLoadingIndicatorColor)
