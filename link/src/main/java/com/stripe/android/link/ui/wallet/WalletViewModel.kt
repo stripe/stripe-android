@@ -35,7 +35,6 @@ internal class WalletViewModel @Inject constructor(
             paymentDetailsList = emptyList(),
             selectedItem = null,
             isProcessing = false,
-            isExpanded = false
         )
     )
 
@@ -79,12 +78,6 @@ internal class WalletViewModel @Inject constructor(
 
         _uiState.update {
             it.copy(selectedItem = item)
-        }
-    }
-
-    fun setExpanded(expanded: Boolean) {
-        _uiState.update {
-            it.copy(isExpanded = expanded)
         }
     }
 

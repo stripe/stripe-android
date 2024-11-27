@@ -22,6 +22,9 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -46,17 +49,22 @@ internal fun WalletScreen(
     viewModel: WalletViewModel,
 ) {
     val state by viewModel.uiState.collectAsState()
+    var isExpanded by rememberSaveable { mutableStateOf(false) }
 
     WalletBody(
         state = state,
+        isExpanded = isExpanded,
         onItemSelected = viewModel::onItemSelected,
-        onExpandedChanged = viewModel::setExpanded
+        onExpandedChanged = { expanded ->
+            isExpanded = expanded
+        }
     )
 }
 
 @Composable
 internal fun WalletBody(
     state: WalletUiState,
+    isExpanded: Boolean,
     onItemSelected: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onExpandedChanged: (Boolean) -> Unit,
 ) {
@@ -90,7 +98,7 @@ internal fun WalletBody(
                 .animateContentSize()
         ) {
             val selectedItem = state.selectedItem
-            if (state.isExpanded || selectedItem == null) {
+            if (isExpanded || selectedItem == null) {
                 ExpandedPaymentDetails(
                     uiState = state,
                     onItemSelected = onItemSelected,
@@ -248,7 +256,7 @@ private fun ExpandedRowHeader(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = stringResource(id = R.string.stripe_wallet_expanded_title),
+            text = stringResource(R.string.stripe_wallet_expanded_title),
             modifier = Modifier
                 .padding(start = HorizontalPadding, top = 20.dp),
             color = MaterialTheme.colors.onPrimary,
@@ -257,7 +265,7 @@ private fun ExpandedRowHeader(
         Spacer(modifier = Modifier.weight(1f))
         Icon(
             painter = painterResource(id = R.drawable.stripe_link_chevron),
-            contentDescription = stringResource(id = R.string.stripe_wallet_expand_accessibility),
+            contentDescription = stringResource(R.string.stripe_wallet_expand_accessibility),
             modifier = Modifier
                 .padding(top = 20.dp, end = 22.dp)
                 .rotate(CHEVRON_ICON_ROTATION),
@@ -280,13 +288,13 @@ private fun AddPaymentMethodRow(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
-            painter = painterResource(id = R.drawable.stripe_link_add_green),
+            painter = painterResource(R.drawable.stripe_link_add_green),
             contentDescription = null,
             modifier = Modifier.padding(start = HorizontalPadding, end = 12.dp),
             tint = Color.Unspecified
         )
         Text(
-            text = stringResource(id = R.string.stripe_add_payment_method),
+            text = stringResource(R.string.stripe_add_payment_method),
             modifier = Modifier.padding(end = HorizontalPadding),
             color = MaterialTheme.linkColors.actionLabel,
             style = MaterialTheme.typography.button
