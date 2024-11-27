@@ -587,6 +587,7 @@ internal class CustomerSheetViewModel(
                                 selectedBrand = it
                             )
                         },
+                        updateExecutor = ::updateExecutor,
                     ),
                     isLiveMode = isLiveModeProvider(),
                 )
@@ -614,12 +615,7 @@ internal class CustomerSheetViewModel(
                         },
                         displayName = providePaymentMethodName(paymentMethod.paymentMethod.type?.code),
                         removeExecutor = ::removeExecutor,
-                        updateExecutor = { method, brand ->
-                            when (val result = modifyCardPaymentMethod(method, brand)) {
-                                is CustomerSheetDataResult.Success -> Result.success(result.value)
-                                is CustomerSheetDataResult.Failure -> Result.failure(result.cause)
-                            }
-                        },
+                        updateExecutor = ::updateExecutor,
                         canRemove = customerState.canRemove,
                         isLiveMode = requireNotNull(customerState.metadata).stripeIntent.isLiveMode,
                         cardBrandFilter = PaymentSheetCardBrandFilter(customerState.configuration.cardBrandAcceptance)
@@ -635,6 +631,13 @@ internal class CustomerSheetViewModel(
             onBackPressed()
             handlePaymentMethodRemovedFromEditScreen(paymentMethod)
         }.failureOrNull()?.cause
+    }
+
+    private suspend fun updateExecutor(paymentMethod: PaymentMethod, brand: CardBrand): Result<PaymentMethod> {
+        return when (val result = modifyCardPaymentMethod(paymentMethod, brand)) {
+            is CustomerSheetDataResult.Success -> Result.success(result.value)
+            is CustomerSheetDataResult.Failure -> Result.failure(result.cause)
+        }
     }
 
     private fun removePaymentMethodFromState(paymentMethod: PaymentMethod) {

@@ -12,6 +12,7 @@ internal class FakeUpdatePaymentMethodInteractor(
     override val displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
     override val canRemove: Boolean,
     override val isExpiredCard: Boolean,
+    override val isModifiablePaymentMethod: Boolean,
     val viewActionRecorder: ViewActionRecorder<UpdatePaymentMethodInteractor.ViewAction>?,
     initialState: UpdatePaymentMethodInteractor.State,
 ) : UpdatePaymentMethodInteractor {
