@@ -1463,20 +1463,20 @@ class StripeApiRepository @JvmOverloads internal constructor(
         paymentDetailsId: String,
         requestOptions: ApiRequest.Options
     ): Result<Unit> {
-        return makeApiRequest(
-            apiRequestFactory.createDelete(
-                getConsumerPaymentDetailsUrl(paymentDetailsId),
-                requestOptions,
-                mapOf(
-                    "request_surface" to "android_payment_element",
-                    "credentials" to mapOf(
-                        "consumer_session_client_secret" to clientSecret
+        return runCatching {
+            makeApiRequest(
+                apiRequestFactory.createDelete(
+                    getConsumerPaymentDetailsUrl(paymentDetailsId),
+                    requestOptions,
+                    mapOf(
+                        "request_surface" to "android_payment_element",
+                        "credentials" to mapOf(
+                            "consumer_session_client_secret" to clientSecret
+                        )
                     )
-                )
-            ),
-            onResponse = {}
-        ).runCatching {
-            // no-op
+                ),
+                onResponse = {}
+            )
         }
     }
 
