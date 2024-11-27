@@ -25,8 +25,10 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            AccountLoaderScreen(viewModel, embeddedComponentManagerProvider) { _ ->
-                ComponentPickerScreen(onReloadRequested = viewModel::reload)
+            ConnectSdkExampleTheme {
+                AccountLoaderScreen(viewModel, embeddedComponentManagerProvider) { _ ->
+                    ComponentPickerScreen(onReloadRequested = viewModel::reload)
+                }
             }
         }
     }

@@ -11,6 +11,7 @@ import androidx.fragment.app.FragmentActivity
 import com.stripe.android.connect.BuildConfig
 import com.stripe.android.connect.EmbeddedComponentManager
 import com.stripe.android.connect.PrivateBetaConnectSDK
+import com.stripe.android.connect.example.ConnectSdkExampleTheme
 import com.stripe.android.connect.example.data.EmbeddedComponentManagerProvider
 import com.stripe.android.connect.example.ui.accountloader.AccountLoaderScreen
 import com.stripe.android.connect.example.ui.accountloader.AccountLoaderViewModel
@@ -38,12 +39,14 @@ abstract class BasicComponentExampleActivity : FragmentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            AccountLoaderScreen(viewModel, embeddedComponentManagerProvider) { embeddedComponentManager ->
-                BasicComponentExample(
-                    title = stringResource(titleRes),
-                    finish = ::finish,
-                    createComponentView = { context -> createComponentView(context, embeddedComponentManager) },
-                )
+            ConnectSdkExampleTheme {
+                AccountLoaderScreen(viewModel, embeddedComponentManagerProvider) { embeddedComponentManager ->
+                    BasicComponentExample(
+                        title = stringResource(titleRes),
+                        finish = ::finish,
+                        createComponentView = { context -> createComponentView(context, embeddedComponentManager) },
+                    )
+                }
             }
         }
     }

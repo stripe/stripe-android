@@ -26,7 +26,12 @@ class AccountLoaderViewModel @Inject constructor(
     val state: StateFlow<MainState> = _state.asStateFlow()
 
     init {
-        fetchAccounts()
+        if (embeddedComponentService.accounts.value == null) {
+            _state.update { it.copy(isLoading = true) }
+            fetchAccounts()
+        } else {
+            _state.update { it.copy(isLoading = false) }
+        }
     }
 
     // Public methods
