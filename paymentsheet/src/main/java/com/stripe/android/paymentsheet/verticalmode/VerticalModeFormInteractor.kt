@@ -30,7 +30,6 @@ internal interface VerticalModeFormInteractor {
     fun close()
 
     data class State(
-        val selectedPaymentMethodCode: String,
         val isProcessing: Boolean,
         val usBankAccountFormArguments: USBankAccountFormArguments,
         val formArguments: FormArguments,
@@ -59,7 +58,6 @@ internal class DefaultVerticalModeFormInteractor(
 ) : VerticalModeFormInteractor {
     override val state: StateFlow<VerticalModeFormInteractor.State> = processing.mapAsStateFlow { isProcessing ->
         VerticalModeFormInteractor.State(
-            selectedPaymentMethodCode = selectedPaymentMethodCode,
             isProcessing = isProcessing,
             usBankAccountFormArguments = usBankAccountArguments,
             formArguments = formArguments,

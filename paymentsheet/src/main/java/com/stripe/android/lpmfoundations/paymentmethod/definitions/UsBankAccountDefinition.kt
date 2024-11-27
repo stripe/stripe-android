@@ -7,6 +7,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequireme
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
+import com.stripe.android.lpmfoundations.paymentmethod.bank.BankFormElementsFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.ui.core.R
 import com.stripe.android.uicore.elements.FormElement
@@ -46,9 +47,10 @@ private object UsBankAccountUiDefinitionFactory : UiDefinitionFactory.Simple {
         )
     }
 
-    // US Bank Account uses it's own mechanism, not these form elements.
     override fun createFormElements(
         metadata: PaymentMethodMetadata,
-        arguments: UiDefinitionFactory.Arguments,
-    ): List<FormElement> = emptyList()
+        arguments: UiDefinitionFactory.Arguments
+    ): List<FormElement> {
+        return BankFormElementsFactory.create(metadata, arguments)
+    }
 }

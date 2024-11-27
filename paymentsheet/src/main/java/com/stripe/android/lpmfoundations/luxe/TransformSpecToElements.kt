@@ -1,6 +1,7 @@
 package com.stripe.android.lpmfoundations.luxe
 
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.forms.PlaceholderHelper.specsForConfiguration
 import com.stripe.android.ui.core.elements.AddressSpec
 import com.stripe.android.ui.core.elements.AffirmTextSpec
@@ -39,7 +40,7 @@ import com.stripe.android.uicore.elements.IdentifierSpec
  *
  */
 internal class TransformSpecToElements(
-    private val arguments: UiDefinitionFactory.Arguments,
+    private val arguments: Arguments,
 ) {
     fun transform(
         specs: List<FormItemSpec>,
@@ -79,4 +80,24 @@ internal class TransformSpecToElements(
             }
         }
     }
+
+    data class Arguments(
+        val initialValues: Map<IdentifierSpec, String?>,
+        val shippingValues: Map<IdentifierSpec, String?>?,
+        val merchantName: String,
+        val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
+        val requiresMandate: Boolean,
+    )
+}
+
+internal fun TransformSpecToElements(arguments: UiDefinitionFactory.Arguments): TransformSpecToElements {
+    return TransformSpecToElements(
+        arguments = TransformSpecToElements.Arguments(
+            initialValues = arguments.initialValues,
+            shippingValues = arguments.shippingValues,
+            merchantName = arguments.merchantName,
+            billingDetailsCollectionConfiguration = arguments.billingDetailsCollectionConfiguration,
+            requiresMandate = arguments.requiresMandate,
+        )
+    )
 }
