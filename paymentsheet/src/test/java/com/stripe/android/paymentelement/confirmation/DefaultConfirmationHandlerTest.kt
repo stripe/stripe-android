@@ -1,2169 +1,980 @@
 package com.stripe.android.paymentelement.confirmation
 
-import androidx.activity.result.ActivityResultCallback
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContract
+import android.os.Parcelable
+import androidx.activity.result.ActivityResultCaller
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import app.cash.turbine.TurbineTestContext
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.CardBrandFilter
-import com.stripe.android.DefaultCardBrandFilter
-import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.core.utils.UserFacingLogger
-import com.stripe.android.googlepaylauncher.GooglePayEnvironment
-import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
-import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
-import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
-import com.stripe.android.model.Address
-import com.stripe.android.model.CardParams
-import com.stripe.android.model.ConfirmPaymentIntentParams
-import com.stripe.android.model.ConfirmSetupIntentParams
-import com.stripe.android.model.PaymentIntentFixtures
-import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.model.PaymentMethodOptionsParams
-import com.stripe.android.model.SetupIntentFixtures
-import com.stripe.android.paymentelement.confirmation.bacs.BacsConfirmationOption
-import com.stripe.android.paymentelement.confirmation.epms.ExternalPaymentMethodConfirmationOption
-import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
+import com.stripe.android.isInstanceOf
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
-import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
-import com.stripe.android.paymentelement.confirmation.intent.InvalidDeferredIntentUsageException
-import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
-import com.stripe.android.payments.paymentlauncher.PaymentLauncher
-import com.stripe.android.payments.paymentlauncher.PaymentResult
-import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
-import com.stripe.android.paymentsheet.ExternalPaymentMethodInput
-import com.stripe.android.paymentsheet.ExternalPaymentMethodInterceptor
-import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.PaymentSheetFixtures
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
-import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncher
-import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationResult
-import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateData
-import com.stripe.android.paymentsheet.paymentdatacollection.bacs.FakeBacsMandateConfirmationLauncher
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
-import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.testing.FakeErrorReporter
-import com.stripe.android.testing.FakePaymentLauncher
-import com.stripe.android.utils.FakeExternalPaymentMethodLauncher
-import com.stripe.android.utils.FakeIntentConfirmationInterceptor
-import com.stripe.android.utils.FakeResultHandler
+import com.stripe.android.testing.PaymentIntentFactory
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.Test
-import org.junit.runner.RunWith
-import org.mockito.kotlin.any
-import org.mockito.kotlin.argumentCaptor
-import org.mockito.kotlin.doReturn
-import org.mockito.kotlin.eq
+import kotlinx.coroutines.withTimeout
+import kotlinx.parcelize.Parcelize
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.verify
+import kotlin.test.Test
+import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
-import com.stripe.android.R as PaymentsCoreR
 
-@RunWith(AndroidJUnit4::class)
 class DefaultConfirmationHandlerTest {
     @Test
-    fun `On 'init', state should be idle`() = runTest {
-        val defaultConfirmationHandler = createDefaultConfirmationHandler()
+    fun `On initial register, should create launchers for each definition`() = test(shouldRegister = false) {
+        assertThat(confirmationHandler.hasReloadedFromProcessDeath).isFalse()
 
-        defaultConfirmationHandler.state.test {
-            assertThat(awaitItem()).isEqualTo(ConfirmationHandler.State.Idle)
+        val activityResultCaller = mock<ActivityResultCaller>()
 
-            ensureAllEventsConsumed()
-        }
+        confirmationHandler.register(
+            activityResultCaller = activityResultCaller,
+            lifecycleOwner = TestLifecycleOwner(),
+        )
+
+        val someDefinitionCreateLauncherCall = someDefinitionScenario.createLauncherCalls.awaitItem()
+        val someOtherDefinitionCreateLauncherCall = someOtherDefinitionScenario.createLauncherCalls.awaitItem()
+
+        assertThat(someDefinitionCreateLauncherCall.activityResultCaller).isEqualTo(activityResultCaller)
+        assertThat(someOtherDefinitionCreateLauncherCall.activityResultCaller).isEqualTo(activityResultCaller)
     }
 
     @Test
-    fun `On 'start' with existing payment method, should call interceptor properly`() = runTest {
-        val interceptor = FakeIntentConfirmationInterceptor()
-
-        val initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(clientSecret = "ci_123")
-        val shippingDetails = AddressDetails(
-            name = "John Doe",
-            phoneNumber = "11234567890",
-            address = PaymentSheet.Address(
-                line1 = "123 Apple Street",
-                line2 = "Unit 47",
-                city = "South San Francisco",
-                state = "CA",
-                country = "US",
-                postalCode = "99899",
-            )
-        )
-        val savedPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
-        val paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(
-            cvc = "507"
-        )
-
-        val defaultConfirmationHandler = createDefaultConfirmationHandler(
-            intentConfirmationInterceptor = interceptor,
-        )
-
-        defaultConfirmationHandler.start(
-            arguments = ConfirmationHandler.Args(
-                intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                confirmationOption = PaymentMethodConfirmationOption.Saved(
-                    initializationMode = initializationMode,
-                    shippingDetails = shippingDetails,
-                    paymentMethod = savedPaymentMethod,
-                    optionsParams = paymentMethodOptionsParams,
-                ),
-            ),
-        )
-
-        val call = interceptor.calls.awaitItem()
-
-        assertThat(call).isEqualTo(
-            FakeIntentConfirmationInterceptor.InterceptCall.WithExistingPaymentMethod(
-                initializationMode = initializationMode,
-                shippingValues = ConfirmPaymentIntentParams.Shipping(
-                    name = "John Doe",
-                    address = Address.Builder()
-                        .setLine1("123 Apple Street")
-                        .setLine2("Unit 47")
-                        .setCity("South San Francisco")
-                        .setState("CA")
-                        .setCountry("US")
-                        .setPostalCode("99899")
-                        .build(),
-                    phone = "11234567890"
-                ),
-                paymentMethod = savedPaymentMethod,
-                paymentMethodOptionsParams = paymentMethodOptionsParams,
-            )
-        )
-
-        interceptor.calls.ensureAllEventsConsumed()
-    }
-
-    @Test
-    fun `On 'start', state should be updated to confirming`() = runTest {
-        val defaultConfirmationHandler = createDefaultConfirmationHandler()
-
-        defaultConfirmationHandler.state.test {
-            assertThat(awaitItem()).isEqualTo(ConfirmationHandler.State.Idle)
-
-            defaultConfirmationHandler.start(
-                arguments = ConfirmationHandler.Args(
-                    intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                    confirmationOption = PaymentMethodConfirmationOption.Saved(
-                        initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                            clientSecret = "pi_456_secret_456"
-                        ),
-                        shippingDetails = null,
-                        paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
-                        optionsParams = null,
-                    ),
-                ),
-            )
-
-            assertThat(awaitItem()).isEqualTo(
-                ConfirmationHandler.State.Confirming(
-                    option = DEFAULT_ARGUMENTS.confirmationOption,
-                )
-            )
-
-            ensureAllEventsConsumed()
-        }
-    }
-
-    @Test
-    fun `On 'start' with new payment method, should call interceptor properly`() = runTest {
-        val interceptor = FakeIntentConfirmationInterceptor()
-
-        val initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(clientSecret = "ci_123")
-        val newCard = PaymentMethodCreateParams.createCard(
-            CardParams(
-                number = "4242424242424242",
-                expMonth = 5,
-                expYear = 2035,
-            )
-        )
-
-        val defaultConfirmationHandler = createDefaultConfirmationHandler(
-            intentConfirmationInterceptor = interceptor,
-        )
-
-        defaultConfirmationHandler.start(
-            arguments = ConfirmationHandler.Args(
-                intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                confirmationOption = PaymentMethodConfirmationOption.New(
-                    initializationMode = initializationMode,
-                    shippingDetails = null,
-                    createParams = newCard,
-                    optionsParams = null,
-                    shouldSave = true,
-                ),
-            ),
-        )
-
-        val call = interceptor.calls.awaitItem()
-
-        assertThat(call).isEqualTo(
-            FakeIntentConfirmationInterceptor.InterceptCall.WithNewPaymentMethod(
-                initializationMode = initializationMode,
-                shippingValues = null,
-                paymentMethodCreateParams = newCard,
-                paymentMethodOptionsParams = null,
-                customerRequestedSave = true,
-            )
-        )
-
-        interceptor.calls.ensureAllEventsConsumed()
-    }
-
-    @Test
-    fun `On 'start' with deferred intent initialization, should call interceptor properly`() = runTest {
-        val interceptor = FakeIntentConfirmationInterceptor()
-
-        val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-            intentConfiguration = PaymentSheet.IntentConfiguration(
-                mode = PaymentSheet.IntentConfiguration.Mode.Payment(
-                    amount = 100L,
-                    currency = "CAD",
-                    setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession,
-                    captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.AutomaticAsync,
-                ),
-                paymentMethodTypes = listOf("card"),
-                onBehalfOf = "Merchant",
-            )
-        )
-
-        val defaultConfirmationHandler = createDefaultConfirmationHandler(
-            intentConfirmationInterceptor = interceptor,
-        )
-
-        defaultConfirmationHandler.start(
-            arguments = ConfirmationHandler.Args(
-                intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                confirmationOption = PaymentMethodConfirmationOption.Saved(
-                    initializationMode = initializationMode,
-                    shippingDetails = null,
-                    paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
-                    optionsParams = null,
-                ),
-            ),
-        )
-
-        val call = interceptor.calls.awaitItem()
-
-        assertThat(call).isEqualTo(
-            FakeIntentConfirmationInterceptor.InterceptCall.WithExistingPaymentMethod(
-                initializationMode = initializationMode,
-                paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
-                paymentMethodOptionsParams = null,
-                shippingValues = null,
-            )
-        )
-
-        interceptor.calls.ensureAllEventsConsumed()
-    }
-
-    @Test
-    fun `On 'start' while handler is already confirming, should not do anything`() = runTest {
-        val interceptor = FakeIntentConfirmationInterceptor()
-        val defaultConfirmationHandler = createDefaultConfirmationHandler(
-            intentConfirmationInterceptor = interceptor
-        )
-
-        defaultConfirmationHandler.start(
-            arguments = DEFAULT_ARGUMENTS,
-        )
-
-        interceptor.calls.skipItems(1)
-
-        defaultConfirmationHandler.start(
-            arguments = DEFAULT_ARGUMENTS,
-        )
-
-        interceptor.calls.ensureAllEventsConsumed()
-    }
-
-    @Test
-    fun `On intercepted intent complete, should receive 'Succeeded' result through 'awaitResult'`() = runTest {
-        val interceptor = FakeIntentConfirmationInterceptor()
-
-        interceptor.enqueueCompleteStep()
-
-        val defaultConfirmationHandler = createDefaultConfirmationHandler(
-            intentConfirmationInterceptor = interceptor
-        )
-
-        defaultConfirmationHandler.start(
-            arguments = DEFAULT_ARGUMENTS,
-        )
-
-        val result = defaultConfirmationHandler.awaitResult()
-
-        assertThat(result).isEqualTo(
-            ConfirmationHandler.Result.Succeeded(
-                intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
-            )
-        )
-    }
-
-    @Test
-    fun `On intercepted intent next step failed, should be 'Failed' result through 'awaitResult'`() = runTest {
-        val interceptor = FakeIntentConfirmationInterceptor()
-
-        val cause = IllegalStateException("An error occurred!")
-        val message = "Could not continue intent confirmation!"
-
-        interceptor.enqueueFailureStep(
-            cause = cause,
-            message = message,
-        )
-
-        val defaultConfirmationHandler = createDefaultConfirmationHandler(
-            intentConfirmationInterceptor = interceptor
-        )
-
-        defaultConfirmationHandler.start(
-            arguments = DEFAULT_ARGUMENTS,
-        )
-
-        val result = defaultConfirmationHandler.awaitResult()
-
-        assertThat(result).isEqualTo(
-            ConfirmationHandler.Result.Failed(
-                cause = cause,
-                message = message.resolvableString,
-                type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
-            )
-        )
-    }
-
-    @Test
-    fun `On confirmation attempt without registering callbacks, should return 'Failed' result`() =
-        runTest {
-            val interceptor = FakeIntentConfirmationInterceptor()
-            val paymentLauncher = FakePaymentLauncher()
-
-            interceptor.enqueueConfirmStep(ConfirmPaymentIntentParams.create(clientSecret = "pi_1234"))
-
-            val defaultConfirmationHandler = createDefaultConfirmationHandler(
-                intentConfirmationInterceptor = interceptor,
-                paymentLauncher = paymentLauncher,
-                shouldRegister = false,
-            )
-
-            defaultConfirmationHandler.start(
-                arguments = DEFAULT_ARGUMENTS,
-            )
-
-            val result = defaultConfirmationHandler.awaitResult()
-
-            val failedResult = result.asFailed()
-
-            val message = "No launcher for IntentConfirmationDefinition was found, did you call register?"
-
-            assertThat(failedResult.cause).isInstanceOf(IllegalStateException::class.java)
-            assertThat(failedResult.cause.message).isEqualTo(message)
-            assertThat(failedResult.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
-            assertThat(failedResult.type).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Fatal)
-        }
-
-    @Test
-    fun `On 'PaymentIntent' requires confirmation, should call 'PaymentLauncher' to handle confirmation`() = runTest {
-        val confirmParams = ConfirmPaymentIntentParams.create(clientSecret = "pi_1234")
-        val paymentLauncher = FakePaymentLauncher()
-        val interceptor = FakeIntentConfirmationInterceptor().apply {
-            enqueueConfirmStep(confirmParams)
-        }
-
-        val defaultConfirmationHandler = createDefaultConfirmationHandler(
-            intentConfirmationInterceptor = interceptor,
-            paymentLauncher = paymentLauncher,
-        )
-
-        defaultConfirmationHandler.start(
-            arguments = DEFAULT_ARGUMENTS,
-        )
-
-        val call = paymentLauncher.calls.awaitItem()
-
-        assertThat(call).isEqualTo(
-            FakePaymentLauncher.Call.Confirm.PaymentIntent(
-                params = confirmParams
-            )
-        )
-    }
-
-    @Test
-    fun `On 'SetupIntent' requires confirmation, should call 'PaymentLauncher' to handle confirmation`() = runTest {
-        val confirmParams = ConfirmSetupIntentParams.create(
-            clientSecret = "pi_1234",
-            paymentMethodType = PaymentMethod.Type.Card
-        )
-        val paymentLauncher = FakePaymentLauncher()
-        val interceptor = FakeIntentConfirmationInterceptor().apply {
-            enqueueConfirmStep(confirmParams)
-        }
-
-        val defaultConfirmationHandler = createDefaultConfirmationHandler(
-            intentConfirmationInterceptor = interceptor,
-            paymentLauncher = paymentLauncher,
-        )
-
-        defaultConfirmationHandler.start(
-            arguments = DEFAULT_ARGUMENTS.copy(
-                intent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
-            ),
-        )
-
-        val call = paymentLauncher.calls.awaitItem()
-
-        assertThat(call).isEqualTo(
-            FakePaymentLauncher.Call.Confirm.SetupIntent(
-                params = confirmParams
-            )
-        )
-    }
-
-    @Test
-    fun `On 'PaymentIntent' requires next action, should call 'PaymentLauncher' to handle next action`() = runTest {
-        val paymentLauncher = FakePaymentLauncher()
-        val clientSecret = "pi_1234"
-        val interceptor = FakeIntentConfirmationInterceptor().apply {
-            enqueueNextActionStep(clientSecret)
-        }
-
-        val defaultConfirmationHandler = createDefaultConfirmationHandler(
-            intentConfirmationInterceptor = interceptor,
-            paymentLauncher = paymentLauncher,
-        )
-
-        defaultConfirmationHandler.start(
-            arguments = DEFAULT_ARGUMENTS,
-        )
-
-        val call = paymentLauncher.calls.awaitItem()
-
-        assertThat(call).isEqualTo(
-            FakePaymentLauncher.Call.HandleNextAction.PaymentIntent(
-                clientSecret = clientSecret
-            )
-        )
-    }
-
-    @Test
-    fun `On 'SetupIntent' requires next action, should call 'PaymentLauncher' to handle next action`() = runTest {
-        val paymentLauncher = FakePaymentLauncher()
-        val clientSecret = "pi_1234"
-        val interceptor = FakeIntentConfirmationInterceptor().apply {
-            enqueueNextActionStep(clientSecret)
-        }
-
-        val defaultConfirmationHandler = createDefaultConfirmationHandler(
-            intentConfirmationInterceptor = interceptor,
-            paymentLauncher = paymentLauncher,
-        )
-
-        defaultConfirmationHandler.start(
-            arguments = DEFAULT_ARGUMENTS.copy(
-                intent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
-            ),
-        )
-
-        val call = paymentLauncher.calls.awaitItem()
-
-        assertThat(call).isEqualTo(
-            FakePaymentLauncher.Call.HandleNextAction.SetupIntent(
-                clientSecret = clientSecret
-            )
-        )
-    }
-
-    @Test
-    fun `On payment launcher result succeeded, should be 'Succeeded' result`() = runTest {
-        val interceptor = FakeIntentConfirmationInterceptor().apply {
-            enqueueConfirmStep(ConfirmPaymentIntentParams.create("pi_123"))
-        }
-
-        val defaultConfirmationHandler = createDefaultConfirmationHandler(
-            intentConfirmationInterceptor = interceptor,
-            shouldRegister = false,
-        )
-
-        val paymentResultCallbackHandler = FakeResultHandler<InternalPaymentResult>()
-
-        defaultConfirmationHandler.registerWithCallbacks(
-            paymentResultCallbackHandler = paymentResultCallbackHandler
-        )
-
-        defaultConfirmationHandler.state.test {
-            assertThat(awaitItem()).isEqualTo(ConfirmationHandler.State.Idle)
-
-            defaultConfirmationHandler.start(
-                arguments = DEFAULT_ARGUMENTS,
-            )
-
-            assertThat(awaitItem()).isEqualTo(
-                ConfirmationHandler.State.Confirming(
-                    option = DEFAULT_ARGUMENTS.confirmationOption,
-                )
-            )
-
-            paymentResultCallbackHandler.onResult(InternalPaymentResult.Completed(PaymentIntentFixtures.PI_SUCCEEDED))
-
-            val expectedResult = ConfirmationHandler.Result.Succeeded(
-                intent = PaymentIntentFixtures.PI_SUCCEEDED,
-                deferredIntentConfirmationType = null,
-            )
-
-            assertThat(defaultConfirmationHandler.awaitResult()).isEqualTo(expectedResult)
-            assertThat(awaitItem()).isEqualTo(ConfirmationHandler.State.Complete(expectedResult))
-
-            ensureAllEventsConsumed()
-        }
-    }
-
-    @Test
-    fun `On payment launcher result canceled, should be 'Canceled' result`() = runTest {
-        val interceptor = FakeIntentConfirmationInterceptor().apply {
-            enqueueConfirmStep(ConfirmPaymentIntentParams.create("pi_123"))
-        }
-
-        val defaultConfirmationHandler = createDefaultConfirmationHandler(
-            intentConfirmationInterceptor = interceptor,
-            shouldRegister = false,
-        )
-
-        val paymentResultCallbackHandler = FakeResultHandler<InternalPaymentResult>()
-
-        defaultConfirmationHandler.registerWithCallbacks(
-            paymentResultCallbackHandler = paymentResultCallbackHandler
-        )
-
-        defaultConfirmationHandler.state.test {
-            assertThat(awaitItem()).isEqualTo(ConfirmationHandler.State.Idle)
-
-            defaultConfirmationHandler.start(
-                arguments = DEFAULT_ARGUMENTS,
-            )
-
-            assertThat(awaitItem()).isEqualTo(
-                ConfirmationHandler.State.Confirming(
-                    option = DEFAULT_ARGUMENTS.confirmationOption,
-                )
-            )
-
-            paymentResultCallbackHandler.onResult(InternalPaymentResult.Canceled)
-
-            val expectedResult = ConfirmationHandler.Result.Canceled(
-                action = ConfirmationHandler.Result.Canceled.Action.InformCancellation,
-            )
-
-            assertThat(defaultConfirmationHandler.awaitResult()).isEqualTo(expectedResult)
-            assertThat(awaitItem()).isEqualTo(ConfirmationHandler.State.Complete(expectedResult))
-
-            ensureAllEventsConsumed()
-        }
-    }
-
-    @Test
-    fun `On payment launcher result failed, should be 'Failed' result`() = runTest {
-        val interceptor = FakeIntentConfirmationInterceptor().apply {
-            enqueueConfirmStep(ConfirmPaymentIntentParams.create("pi_123"))
-        }
-
-        val defaultConfirmationHandler = createDefaultConfirmationHandler(
-            intentConfirmationInterceptor = interceptor,
-            shouldRegister = false,
-        )
-
-        val paymentResultCallbackHandler = FakeResultHandler<InternalPaymentResult>()
-
-        defaultConfirmationHandler.registerWithCallbacks(
-            paymentResultCallbackHandler = paymentResultCallbackHandler
-        )
-
-        defaultConfirmationHandler.state.test {
-            assertThat(awaitItem()).isEqualTo(ConfirmationHandler.State.Idle)
-
-            defaultConfirmationHandler.start(
-                arguments = DEFAULT_ARGUMENTS,
-            )
-
-            assertThat(awaitItem()).isEqualTo(
-                ConfirmationHandler.State.Confirming(
-                    option = DEFAULT_ARGUMENTS.confirmationOption,
-                )
-            )
-
-            val cause = IllegalStateException("This is a failure!")
-
-            paymentResultCallbackHandler.onResult(InternalPaymentResult.Failed(cause))
-
-            val expectedResult = ConfirmationHandler.Result.Failed(
-                cause = cause,
-                message = R.string.stripe_something_went_wrong.resolvableString,
-                type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
-            )
-
-            assertThat(defaultConfirmationHandler.awaitResult()).isEqualTo(expectedResult)
-            assertThat(awaitItem()).isEqualTo(ConfirmationHandler.State.Complete(expectedResult))
-
-            ensureAllEventsConsumed()
-        }
-    }
-
-    @Test
-    fun `On payment confirm, should store 'AwaitingConfirmationResult' data in 'SavedStateHandle'`() = runTest {
-        val savedStateHandle = SavedStateHandle()
-        val interceptor = FakeIntentConfirmationInterceptor().apply {
-            enqueueConfirmStep(ConfirmPaymentIntentParams.create("pi_123"))
-        }
-
-        val defaultConfirmationHandler = createDefaultConfirmationHandler(
-            intentConfirmationInterceptor = interceptor,
-            savedStateHandle = savedStateHandle,
-        )
-
-        defaultConfirmationHandler.start(
-            arguments = DEFAULT_ARGUMENTS,
-        )
-
-        val data = savedStateHandle
-            .get<DefaultConfirmationHandler.AwaitingConfirmationResultData>("AwaitingConfirmationResult")
-
-        assertThat(data?.confirmationOption).isEqualTo(DEFAULT_ARGUMENTS.confirmationOption)
-        assertThat(data?.receivesResultInProcess).isFalse()
-    }
-
-    @Test
-    fun `On payment handle next action, should store 'AwaitingConfirmationResult' in 'SavedStateHandle'`() = runTest {
-        val savedStateHandle = SavedStateHandle()
-        val interceptor = FakeIntentConfirmationInterceptor().apply {
-            enqueueNextActionStep("pi_123")
-        }
-
-        val defaultConfirmationHandler = createDefaultConfirmationHandler(
-            intentConfirmationInterceptor = interceptor,
-            savedStateHandle = savedStateHandle,
-        )
-
-        defaultConfirmationHandler.start(
-            arguments = DEFAULT_ARGUMENTS,
-        )
-
-        val data = savedStateHandle
-            .get<DefaultConfirmationHandler.AwaitingConfirmationResultData>("AwaitingConfirmationResult")
-
-        assertThat(data?.confirmationOption).isEqualTo(DEFAULT_ARGUMENTS.confirmationOption)
-        assertThat(data?.receivesResultInProcess).isFalse()
-    }
-
-    @Test
-    fun `On launch EPMs handler, should store 'AwaitingConfirmationResult' in 'SavedStateHandle'`() = runTest {
-        ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = EXTERNAL_PAYMENT_METHOD_CONFIRM_HANDLER
-
-        val savedStateHandle = SavedStateHandle()
-        val interceptor = FakeIntentConfirmationInterceptor().apply {
-            enqueueNextActionStep("pi_123")
-        }
-
-        val defaultConfirmationHandler = createDefaultConfirmationHandler(
-            intentConfirmationInterceptor = interceptor,
-            savedStateHandle = savedStateHandle,
-        )
-
-        defaultConfirmationHandler.start(
-            arguments = DEFAULT_ARGUMENTS.copy(
-                confirmationOption = EXTERNAL_PAYMENT_METHOD
-            ),
-        )
-
-        val data = savedStateHandle
-            .get<DefaultConfirmationHandler.AwaitingConfirmationResultData>("AwaitingConfirmationResult")
-
-        assertThat(data?.confirmationOption).isEqualTo(EXTERNAL_PAYMENT_METHOD)
-        assertThat(data?.receivesResultInProcess).isFalse()
-    }
-
-    @Test
-    fun `On start Bacs mandate, should store 'AwaitingConfirmationResult' in 'SavedStateHandle'`() = runTest {
-        val savedStateHandle = SavedStateHandle()
-
-        val defaultConfirmationHandler = createDefaultConfirmationHandler(
-            savedStateHandle = savedStateHandle,
-
-        )
-
-        defaultConfirmationHandler.start(
-            arguments = DEFAULT_ARGUMENTS.copy(
-                confirmationOption = BACS_OPTION,
-            ),
-        )
-
-        val data = savedStateHandle
-            .get<DefaultConfirmationHandler.AwaitingConfirmationResultData>("AwaitingConfirmationResult")
-
-        assertThat(data?.confirmationOption).isEqualTo(BACS_OPTION)
-        assertThat(data?.receivesResultInProcess).isTrue()
-    }
-
-    @Test
-    fun `On start Google Pay, should store 'AwaitingConfirmationResult' in 'SavedStateHandle'`() = runTest {
-        val savedStateHandle = SavedStateHandle()
-
-        val defaultConfirmationHandler = createDefaultConfirmationHandler(
-            savedStateHandle = savedStateHandle,
-        )
-
-        defaultConfirmationHandler.start(
-            arguments = DEFAULT_ARGUMENTS.copy(
-                confirmationOption = GOOGLE_PAY_OPTION,
-            ),
-        )
-
-        val data = savedStateHandle
-            .get<DefaultConfirmationHandler.AwaitingConfirmationResultData>("AwaitingConfirmationResult")
-
-        assertThat(data?.confirmationOption).isEqualTo(GOOGLE_PAY_OPTION)
-        assertThat(data?.receivesResultInProcess).isTrue()
-    }
-
-    @Test
-    fun `On init with 'SavedStateHandle' awaiting result, should timeout & cancel after 1 second`() = runTest {
-        val dispatcher = StandardTestDispatcher()
-
-        val savedStateHandle = SavedStateHandle().apply {
-            set(
-                "AwaitingConfirmationResult",
-                DefaultConfirmationHandler.AwaitingConfirmationResultData(
-                    confirmationOption = EXTERNAL_PAYMENT_METHOD,
-                    receivesResultInProcess = false,
-                ),
-            )
-        }
-
-        val defaultConfirmationHandler = createDefaultConfirmationHandler(
-            savedStateHandle = savedStateHandle,
-            coroutineScope = CoroutineScope(dispatcher)
-        )
-
-        defaultConfirmationHandler.state.test {
-            assertThat(awaitItem()).isEqualTo(ConfirmationHandler.State.Confirming(EXTERNAL_PAYMENT_METHOD))
-
-            dispatcher.scheduler.advanceTimeBy(delayTime = 1.01.seconds)
-
-            val expectedResult = ConfirmationHandler.Result.Canceled(
-                action = ConfirmationHandler.Result.Canceled.Action.None
-            )
-
-            assertThat(defaultConfirmationHandler.awaitResult()).isEqualTo(expectedResult)
-            assertThat(awaitItem()).isEqualTo(ConfirmationHandler.State.Complete(expectedResult))
-
-            ensureAllEventsConsumed()
-        }
-    }
-
-    @Test
-    fun `On init with 'SavedStateHandle' awaiting result in process, continue to wait until result`() = runTest {
-        val dispatcher = StandardTestDispatcher()
-        val interceptor = FakeIntentConfirmationInterceptor().apply {
-            enqueueCompleteStep()
-        }
-
-        val bacsParameters = ConfirmationMediator.Parameters(
-            confirmationOption = BACS_OPTION,
-            intent = DEFAULT_ARGUMENTS.intent,
+    fun `On lifecycle destroyed, should unregister all launchers`() = test(
+        shouldRegister = false,
+        someDefinitionAction = ConfirmationDefinition.Action.Launch(
+            launcherArguments = SomeConfirmationDefinition.LauncherArgs,
+            receivesResultInProcess = true,
             deferredIntentConfirmationType = null,
+        ),
+        someOtherDefinitionAction = ConfirmationDefinition.Action.Launch(
+            launcherArguments = SomeOtherConfirmationDefinition.LauncherArgs,
+            receivesResultInProcess = true,
+            deferredIntentConfirmationType = null,
+        ),
+    ) {
+        val activityResultCaller = mock<ActivityResultCaller>()
+        val lifecycleOwner = TestLifecycleOwner(
+            coroutineDispatcher = UnconfinedTestDispatcher(),
         )
 
-        val savedStateHandle = SavedStateHandle().apply {
-            set(
-                "AwaitingConfirmationResult",
-                DefaultConfirmationHandler.AwaitingConfirmationResultData(
-                    confirmationOption = BACS_OPTION,
-                    receivesResultInProcess = true,
-                ),
-            )
-            set("BacsParameters", bacsParameters)
-        }
-
-        val defaultConfirmationHandler = createDefaultConfirmationHandler(
-            savedStateHandle = savedStateHandle,
-            intentConfirmationInterceptor = interceptor,
-            coroutineScope = CoroutineScope(dispatcher)
+        confirmationHandler.register(
+            activityResultCaller = activityResultCaller,
+            lifecycleOwner = lifecycleOwner,
         )
 
-        val bacsMandateConfirmationCallbackHandler = FakeResultHandler<BacsMandateConfirmationResult>()
+        assertThat(someDefinitionScenario.createLauncherCalls.awaitItem()).isNotNull()
+        assertThat(someOtherDefinitionScenario.createLauncherCalls.awaitItem()).isNotNull()
 
-        defaultConfirmationHandler.registerWithCallbacks(
-            bacsMandateConfirmationCallbackHandler = bacsMandateConfirmationCallbackHandler
-        )
+        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
 
-        defaultConfirmationHandler.state.test {
-            assertThat(awaitItem()).isEqualTo(
-                ConfirmationHandler.State.Confirming(
-                    option = BACS_OPTION,
+        confirmationHandler.state.test {
+            assertIdleState()
+
+            confirmationHandler.start(
+                ConfirmationHandler.Args(
+                    confirmationOption = SomeConfirmationDefinition.Option,
+                    intent = PAYMENT_INTENT,
                 )
             )
 
-            dispatcher.scheduler.advanceTimeBy(delayTime = 200.seconds)
+            assertSomeDefinitionActionCalled()
+            assertSomeDefinitionConfirmingState()
 
-            bacsMandateConfirmationCallbackHandler.onResult(BacsMandateConfirmationResult.Confirmed)
+            val someDefinitionFailedResult = awaitCompleteState().result.assertFailed()
 
-            dispatcher.scheduler.advanceUntilIdle()
+            assertThat(someDefinitionFailedResult.cause).isInstanceOf(IllegalStateException::class.java)
+            assertThat(someDefinitionFailedResult.cause.message).isEqualTo(
+                "No launcher for RecordingConfirmationDefinition was found, did you call register?"
+            )
+            assertThat(someDefinitionFailedResult.message)
+                .isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
+            assertThat(someDefinitionFailedResult.type).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Fatal)
 
-            assertThat(awaitItem()).isEqualTo(ConfirmationHandler.State.Confirming(NEW_BACS_PM_OPTION))
-
-            val expectedResult = ConfirmationHandler.Result.Succeeded(
-                intent = DEFAULT_ARGUMENTS.intent,
-                deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
+            confirmationHandler.start(
+                ConfirmationHandler.Args(
+                    confirmationOption = SomeOtherConfirmationDefinition.Option,
+                    intent = PAYMENT_INTENT,
+                )
             )
 
-            assertThat(defaultConfirmationHandler.awaitResult()).isEqualTo(expectedResult)
-            assertThat(awaitItem()).isEqualTo(ConfirmationHandler.State.Complete(expectedResult))
+            assertSomeOtherDefinitionActionCalled()
+            assertSomeOtherDefinitionConfirmingState()
 
-            ensureAllEventsConsumed()
+            val someOtherDefinitionFailedResult = awaitCompleteState().result.assertFailed()
+
+            assertThat(someOtherDefinitionFailedResult.cause).isInstanceOf(IllegalStateException::class.java)
+            assertThat(someOtherDefinitionFailedResult.cause.message).isEqualTo(
+                "No launcher for RecordingConfirmationDefinition was found, did you call register?"
+            )
+            assertThat(someOtherDefinitionFailedResult.message)
+                .isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
+            assertThat(someOtherDefinitionFailedResult.type)
+                .isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Fatal)
         }
     }
 
     @Test
-    fun `On init with 'SavedStateHandle' with incorrect option, error should be internal`() = runTest {
-        val savedStateHandle = SavedStateHandle().apply {
-            set(
-                "AwaitingConfirmationResult",
-                DefaultConfirmationHandler.AwaitingConfirmationResultData(
-                    confirmationOption = EXTERNAL_PAYMENT_METHOD,
-                    receivesResultInProcess = false,
-                ),
+    fun `On 'start' with unknown option, should fail and report unexpected error`() = test {
+        confirmationHandler.state.test {
+            assertIdleState()
+
+            confirmationHandler.start(
+                ConfirmationHandler.Args(
+                    confirmationOption = InvalidConfirmationOption,
+                    intent = PAYMENT_INTENT,
+                )
             )
-            set("IntentConfirmationArguments", DEFAULT_ARGUMENTS.copy(confirmationOption = EXTERNAL_PAYMENT_METHOD))
+
+            // Should check all passed definitions
+            assertThat(someDefinitionScenario.optionCalls.awaitItem().option)
+                .isEqualTo(InvalidConfirmationOption)
+            assertThat(someOtherDefinitionScenario.optionCalls.awaitItem().option)
+                .isEqualTo(InvalidConfirmationOption)
+
+            val confirmingState = awaitItem().assertConfirming()
+
+            assertThat(confirmingState.option).isEqualTo(InvalidConfirmationOption)
+
+            val completeState = awaitCompleteState()
+
+            val failedResult = completeState.result.assertFailed()
+
+            assertThat(failedResult.cause).isInstanceOf<IllegalStateException>()
+            assertThat(failedResult.cause.message).isEqualTo(
+                "Attempted to confirm invalid ${InvalidConfirmationOption::class.qualifiedName} " +
+                    "confirmation type"
+            )
+            assertThat(failedResult.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
+            assertThat(failedResult.type).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Internal)
+
+            assertThat(errorReporter.getLoggedErrors()).containsExactly(
+                ErrorReporter
+                    .UnexpectedErrorEvent
+                    .INTENT_CONFIRMATION_HANDLER_INVALID_PAYMENT_CONFIRMATION_OPTION
+                    .eventName,
+            )
         }
+    }
 
-        val defaultConfirmationHandler = createDefaultConfirmationHandler(
-            savedStateHandle = savedStateHandle,
+    @Test
+    fun `On 'start' with 'SomeDefinition' option, should complete with failed result`() = test(
+        someDefinitionAction = ConfirmationDefinition.Action.Fail(
+            cause = IllegalStateException("Failed!"),
+            message = R.string.stripe_something_went_wrong.resolvableString,
+            errorType = ConfirmationHandler.Result.Failed.ErrorType.Internal,
         )
+    ) {
+        confirmationHandler.state.test {
+            assertIdleState()
 
-        val paymentResultCallbackHandler = FakeResultHandler<InternalPaymentResult>()
+            confirmationHandler.start(
+                ConfirmationHandler.Args(
+                    confirmationOption = SomeConfirmationDefinition.Option,
+                    intent = PAYMENT_INTENT,
+                )
+            )
 
-        defaultConfirmationHandler.registerWithCallbacks(
-            paymentResultCallbackHandler = paymentResultCallbackHandler
+            assertSomeDefinitionActionCalled()
+            assertSomeDefinitionConfirmingState()
+
+            val completeState = awaitCompleteState()
+            val failedResult = completeState.result.assertFailed()
+
+            assertThat(failedResult.cause).isInstanceOf<IllegalStateException>()
+            assertThat(failedResult.cause.message).isEqualTo("Failed!")
+            assertThat(failedResult.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
+            assertThat(failedResult.type).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Internal)
+
+            confirmationHandler.assertAwaitResultCallReceivesSameResult(completeState)
+        }
+    }
+
+    @Test
+    fun `On 'start' with 'SomeOtherDefinition' option, should complete with failed result`() = test(
+        someOtherDefinitionAction = ConfirmationDefinition.Action.Fail(
+            cause = IllegalStateException("Failed!"),
+            message = R.string.stripe_something_went_wrong.resolvableString,
+            errorType = ConfirmationHandler.Result.Failed.ErrorType.Internal,
         )
+    ) {
+        confirmationHandler.state.test {
+            assertIdleState()
 
-        paymentResultCallbackHandler.onResult(InternalPaymentResult.Completed(PaymentIntentFixtures.PI_SUCCEEDED))
+            confirmationHandler.start(
+                ConfirmationHandler.Args(
+                    confirmationOption = SomeOtherConfirmationDefinition.Option,
+                    intent = PAYMENT_INTENT,
+                )
+            )
 
-        val failedResult = defaultConfirmationHandler.awaitResult().asFailed()
+            assertSomeOtherDefinitionActionCalled()
+            assertSomeOtherDefinitionConfirmingState()
 
+            val completeState = awaitCompleteState()
+            val failedResult = completeState.result.assertFailed()
+
+            assertThat(failedResult.cause).isInstanceOf<IllegalStateException>()
+            assertThat(failedResult.cause.message).isEqualTo("Failed!")
+            assertThat(failedResult.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
+            assertThat(failedResult.type).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Internal)
+
+            confirmationHandler.assertAwaitResultCallReceivesSameResult(completeState)
+        }
+    }
+
+    @Test
+    fun `On complete action, should complete with success result`() = test(
+        someDefinitionAction = ConfirmationDefinition.Action.Complete(
+            intent = PAYMENT_INTENT,
+            confirmationOption = SomeConfirmationDefinition.Option,
+            deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
+        ),
+    ) {
+        confirmationHandler.state.test {
+            assertIdleState()
+
+            confirmationHandler.start(
+                ConfirmationHandler.Args(
+                    confirmationOption = SomeConfirmationDefinition.Option,
+                    intent = PAYMENT_INTENT,
+                )
+            )
+
+            assertSomeDefinitionActionCalled()
+            assertSomeDefinitionConfirmingState()
+
+            val completeState = awaitCompleteState()
+            val successResult = completeState.result.assertSucceeded()
+
+            assertThat(successResult.intent).isEqualTo(PAYMENT_INTENT)
+            assertThat(successResult.deferredIntentConfirmationType)
+                .isEqualTo(DeferredIntentConfirmationType.Client)
+
+            confirmationHandler.assertAwaitResultCallReceivesSameResult(completeState)
+        }
+    }
+
+    @Test
+    fun `On launch action with receives result in process as true, should launch & persist as expected`() =
+        persistedParametersTest(receivesResultInProcess = true)
+
+    @Test
+    fun `On launch action with receives result in process as false, should launch & persist as expected`() =
+        persistedParametersTest(receivesResultInProcess = false)
+
+    @Test
+    fun `On success result from launched action, should complete with success result`() = launcherResultTest(
+        result = ConfirmationDefinition.Result.Succeeded(
+            intent = PAYMENT_INTENT,
+            deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
+        ),
+    ) { completeState ->
+        val successResult = completeState.result.assertSucceeded()
+
+        assertThat(successResult.intent).isEqualTo(PAYMENT_INTENT)
+        assertThat(successResult.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Server)
+    }
+
+    @Test
+    fun `On failed result from launched action, should complete with failed result`() = launcherResultTest(
+        result = ConfirmationDefinition.Result.Failed(
+            cause = IllegalStateException("Failed!"),
+            message = R.string.stripe_something_went_wrong.resolvableString,
+            type = ConfirmationHandler.Result.Failed.ErrorType.Internal,
+        ),
+    ) { completeState ->
+        val failedResult = completeState.result.assertFailed()
+
+        assertThat(failedResult.cause).isInstanceOf<IllegalStateException>()
+        assertThat(failedResult.cause.message).isEqualTo("Failed!")
+        assertThat(failedResult.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
         assertThat(failedResult.type).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Internal)
     }
 
     @Test
-    fun `On init with 'SavedStateHandle', should receive result through 'awaitResult'`() = runTest {
-        val savedStateHandle = SavedStateHandle().apply {
-            set(
-                "AwaitingConfirmationResult",
-                DefaultConfirmationHandler.AwaitingConfirmationResultData(
-                    confirmationOption = DEFAULT_ARGUMENTS.confirmationOption,
-                    receivesResultInProcess = false,
-                ),
-            )
-            set(
-                "IntentConfirmationParameters",
-                ConfirmationMediator.Parameters(
-                    confirmationOption = DEFAULT_ARGUMENTS.confirmationOption,
-                    intent = DEFAULT_ARGUMENTS.intent,
-                    deferredIntentConfirmationType = null,
+    fun `On canceled result from launched action, should complete with canceled result`() = launcherResultTest(
+        result = ConfirmationDefinition.Result.Canceled(
+            action = ConfirmationHandler.Result.Canceled.Action.ModifyPaymentDetails,
+        ),
+    ) { completeState ->
+        val canceledResult = completeState.result.assertCanceled()
+
+        assertThat(canceledResult.action).isEqualTo(ConfirmationHandler.Result.Canceled.Action.ModifyPaymentDetails)
+    }
+
+    @Test
+    fun `On next step result, should move to next definition and complete from after its result`() = test(
+        someDefinitionAction = ConfirmationDefinition.Action.Launch(
+            launcherArguments = SomeConfirmationDefinition.LauncherArgs,
+            receivesResultInProcess = true,
+            deferredIntentConfirmationType = null,
+        ),
+        someDefinitionResult = ConfirmationDefinition.Result.NextStep(
+            intent = PAYMENT_INTENT,
+            confirmationOption = SomeOtherConfirmationDefinition.Option,
+        ),
+        someOtherDefinitionAction = ConfirmationDefinition.Action.Launch(
+            launcherArguments = SomeOtherConfirmationDefinition.LauncherArgs,
+            receivesResultInProcess = true,
+            deferredIntentConfirmationType = null,
+        ),
+        someOtherDefinitionResult = ConfirmationDefinition.Result.Succeeded(
+            intent = PAYMENT_INTENT,
+            deferredIntentConfirmationType = null,
+        ),
+    ) {
+        confirmationHandler.state.test {
+            assertIdleState()
+
+            confirmationHandler.start(
+                ConfirmationHandler.Args(
+                    confirmationOption = SomeConfirmationDefinition.Option,
+                    intent = PAYMENT_INTENT,
                 )
             )
+
+            assertSomeDefinitionActionCalled()
+            assertSomeDefinitionConfirmingState()
+            assertSomeDefinitionLaunchCalled()
+            sendSomeDefinitionLauncherResult()
+            assertSomeDefinitionToResultCalled()
+
+            assertSomeOtherDefinitionActionCalled()
+            assertSomeOtherDefinitionConfirmingState()
+            assertSomeOtherDefinitionLaunchCalled()
+            sendSomeOtherDefinitionLauncherResult()
+            assertSomeOtherDefinitionToResultCalled()
+
+            val completeState = awaitCompleteState()
+            val successResult = completeState.result.assertSucceeded()
+
+            assertThat(successResult.intent).isEqualTo(PAYMENT_INTENT)
+            assertThat(successResult.deferredIntentConfirmationType).isNull()
+
+            confirmationHandler.assertAwaitResultCallReceivesSameResult(completeState)
         }
+    }
 
-        val defaultConfirmationHandler = createDefaultConfirmationHandler(
-            savedStateHandle = savedStateHandle,
-        )
+    @Test
+    fun `On return from process death, should wait & complete when result is handled in process`() {
+        val dispatcher = StandardTestDispatcher()
 
-        val paymentResultCallbackHandler = FakeResultHandler<InternalPaymentResult>()
-
-        defaultConfirmationHandler.registerWithCallbacks(
-            paymentResultCallbackHandler = paymentResultCallbackHandler
-        )
-
-        paymentResultCallbackHandler.onResult(InternalPaymentResult.Completed(PaymentIntentFixtures.PI_SUCCEEDED))
-
-        val result = defaultConfirmationHandler.awaitResult()
-
-        assertThat(result).isEqualTo(
-            ConfirmationHandler.Result.Succeeded(
-                intent = PaymentIntentFixtures.PI_SUCCEEDED,
+        test(
+            savedStateHandle = createPrepopulatedSavedStateHandle(receivesResultInProcess = true),
+            someDefinitionResult = ConfirmationDefinition.Result.Succeeded(
+                intent = PAYMENT_INTENT,
                 deferredIntentConfirmationType = null,
-            )
-        )
-    }
-
-    @Test
-    fun `On fail due to invalid deferred intent usage, should fail with expected integration error`() = runTest {
-        val interceptor = FakeIntentConfirmationInterceptor().apply {
-            enqueueFailureStep(
-                cause = InvalidDeferredIntentUsageException(),
-                message = "An error occurred!",
-            )
-        }
-
-        val defaultConfirmationHandler = createDefaultConfirmationHandler(
-            intentConfirmationInterceptor = interceptor,
-        )
-
-        defaultConfirmationHandler.start(
-            arguments = DEFAULT_ARGUMENTS,
-        )
-
-        val failedResult = defaultConfirmationHandler.awaitResult().asFailed()
-
-        assertThat(failedResult.cause).isInstanceOf(InvalidDeferredIntentUsageException::class.java)
-        assertThat(failedResult.type).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Payment)
-        assertThat(failedResult.message).isEqualTo("An error occurred!".resolvableString)
-    }
-
-    @Test
-    fun `On successful confirm with deferred intent, should return 'Client' confirmation type`() = runTest {
-        val interceptor = FakeIntentConfirmationInterceptor().apply {
-            enqueueConfirmStep(
-                confirmParams = ConfirmPaymentIntentParams.create("pi_123"),
-                isDeferred = true,
-            )
-        }
-
-        val defaultConfirmationHandler = createDefaultConfirmationHandler(
-            intentConfirmationInterceptor = interceptor,
-            shouldRegister = false,
-        )
-
-        val paymentResultCallbackHandler = FakeResultHandler<InternalPaymentResult>()
-
-        defaultConfirmationHandler.registerWithCallbacks(
-            paymentResultCallbackHandler = paymentResultCallbackHandler
-        )
-
-        defaultConfirmationHandler.start(
-            arguments = DEFAULT_ARGUMENTS,
-        )
-
-        paymentResultCallbackHandler.onResult(InternalPaymentResult.Completed(PaymentIntentFixtures.PI_SUCCEEDED))
-
-        val result = defaultConfirmationHandler.awaitResult()
-
-        assertThat(result).isEqualTo(
-            ConfirmationHandler.Result.Succeeded(
-                intent = PaymentIntentFixtures.PI_SUCCEEDED,
-                deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
-            )
-        )
-    }
-
-    @Test
-    fun `On successful confirm with non-deferred intent, should return null confirmation type`() = runTest {
-        val interceptor = FakeIntentConfirmationInterceptor()
-
-        interceptor.enqueueConfirmStep(
-            confirmParams = ConfirmPaymentIntentParams.create("pi_123"),
-            isDeferred = false,
-        )
-
-        val defaultConfirmationHandler = createDefaultConfirmationHandler(
-            intentConfirmationInterceptor = interceptor,
-            shouldRegister = false,
-        )
-
-        val paymentResultCallbackHandler = FakeResultHandler<InternalPaymentResult>()
-
-        defaultConfirmationHandler.registerWithCallbacks(
-            paymentResultCallbackHandler = paymentResultCallbackHandler
-        )
-
-        defaultConfirmationHandler.state.test {
-            assertThat(awaitItem()).isEqualTo(ConfirmationHandler.State.Idle)
-
-            defaultConfirmationHandler.start(
-                arguments = DEFAULT_ARGUMENTS,
-            )
-
-            assertThat(awaitItem()).isEqualTo(
-                ConfirmationHandler.State.Confirming(
-                    option = DEFAULT_ARGUMENTS.confirmationOption,
-                )
-            )
-
-            paymentResultCallbackHandler.onResult(InternalPaymentResult.Completed(PaymentIntentFixtures.PI_SUCCEEDED))
-
-            val expectedResult = ConfirmationHandler.Result.Succeeded(
-                intent = PaymentIntentFixtures.PI_SUCCEEDED,
-                deferredIntentConfirmationType = null,
-            )
-
-            assertThat(defaultConfirmationHandler.awaitResult()).isEqualTo(expectedResult)
-            assertThat(awaitItem()).isEqualTo(ConfirmationHandler.State.Complete(expectedResult))
-
-            ensureAllEventsConsumed()
-        }
-    }
-
-    @Test
-    fun `On external PM, should launch external PM handler with expected params`() = runTest {
-        ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = EXTERNAL_PAYMENT_METHOD_CONFIRM_HANDLER
-
-        val fakeExternalPaymentMethodLauncher = FakeExternalPaymentMethodLauncher()
-
-        val defaultConfirmationHandler = createDefaultConfirmationHandler().apply {
-            setExternalPaymentMethodLauncher(fakeExternalPaymentMethodLauncher)
-        }
-
-        defaultConfirmationHandler.start(
-            arguments = DEFAULT_ARGUMENTS.copy(
-                confirmationOption = EXTERNAL_PAYMENT_METHOD.copy(
-                    billingDetails = PaymentMethod.BillingDetails(
-                        name = "John Doe",
-                        address = Address(
-                            city = "South San Francisco"
-                        )
-                    )
-                )
             ),
-        )
+            dispatcher = dispatcher,
+        ) {
+            assertThat(confirmationHandler.hasReloadedFromProcessDeath).isTrue()
 
-        val launch = fakeExternalPaymentMethodLauncher.calls.awaitItem()
+            confirmationHandler.state.test {
+                assertSomeDefinitionConfirmingState()
 
-        assertThat(launch).isEqualTo(
-            FakeExternalPaymentMethodLauncher.Launch(
-                input = ExternalPaymentMethodInput(
-                    type = "paypal",
-                    billingDetails = PaymentMethod.BillingDetails(
-                        name = "John Doe",
-                        address = Address(
-                            city = "South San Francisco",
+                dispatcher.scheduler.advanceTimeBy(2.minutes)
+
+                sendSomeDefinitionLauncherResult()
+                assertSomeDefinitionToResultCalled()
+
+                val completeState = awaitCompleteState()
+                val successResult = completeState.result.assertSucceeded()
+
+                assertThat(successResult.intent).isEqualTo(PAYMENT_INTENT)
+                assertThat(successResult.deferredIntentConfirmationType).isNull()
+
+                confirmationHandler.assertAwaitResultCallReceivesSameResult(completeState)
+            }
+        }
+    }
+
+    @Test
+    fun `On return from process death, should complete if no result when received result not in process`() {
+        val dispatcher = StandardTestDispatcher()
+
+        test(
+            savedStateHandle = createPrepopulatedSavedStateHandle(receivesResultInProcess = false),
+            dispatcher = dispatcher,
+        ) {
+            assertThat(confirmationHandler.hasReloadedFromProcessDeath).isTrue()
+
+            confirmationHandler.state.test {
+                assertSomeDefinitionConfirmingState()
+
+                dispatcher.scheduler.advanceTimeBy(1.seconds)
+
+                expectNoEvents()
+
+                dispatcher.scheduler.advanceTimeBy(1.seconds)
+
+                val completeState = awaitCompleteState()
+
+                val canceledResult = completeState.result.assertCanceled()
+
+                assertThat(canceledResult.action).isEqualTo(ConfirmationHandler.Result.Canceled.Action.None)
+
+                confirmationHandler.assertAwaitResultCallReceivesSameResult(completeState)
+            }
+        }
+    }
+
+    @Test
+    fun `On return from process death, should complete with success result if received in time when not in process`() {
+        val dispatcher = StandardTestDispatcher()
+
+        test(
+            savedStateHandle = createPrepopulatedSavedStateHandle(receivesResultInProcess = false),
+            someDefinitionResult = ConfirmationDefinition.Result.Succeeded(
+                intent = PAYMENT_INTENT,
+                deferredIntentConfirmationType = null,
+            ),
+            dispatcher = dispatcher,
+        ) {
+            assertThat(confirmationHandler.hasReloadedFromProcessDeath).isTrue()
+
+            confirmationHandler.state.test {
+                assertSomeDefinitionConfirmingState()
+
+                dispatcher.scheduler.advanceTimeBy(1.seconds)
+
+                sendSomeDefinitionLauncherResult()
+                assertSomeDefinitionToResultCalled()
+
+                val completeState = awaitCompleteState()
+                val successResult = completeState.result.assertSucceeded()
+
+                assertThat(successResult.intent).isEqualTo(PAYMENT_INTENT)
+                assertThat(successResult.deferredIntentConfirmationType).isNull()
+
+                confirmationHandler.assertAwaitResultCallReceivesSameResult(completeState)
+            }
+        }
+    }
+
+    @Test
+    fun `On 'awaitResult', should return null if no confirmation process was started`() = test {
+        val result = withTimeout(5.seconds) {
+            confirmationHandler.awaitResult()
+        }
+
+        assertThat(result).isNull()
+    }
+
+    @Test
+    fun `On 'awaitResult', should wait until result is received if confirmation process was started`() {
+        val dispatcher = StandardTestDispatcher()
+
+        test(
+            someDefinitionAction = ConfirmationDefinition.Action.Launch(
+                launcherArguments = SomeConfirmationDefinition.LauncherArgs,
+                receivesResultInProcess = true,
+                deferredIntentConfirmationType = null,
+            ),
+            someDefinitionResult = ConfirmationDefinition.Result.Succeeded(
+                intent = PAYMENT_INTENT,
+                deferredIntentConfirmationType = null,
+            ),
+            dispatcher = dispatcher,
+        ) {
+            confirmationHandler.start(
+                ConfirmationHandler.Args(
+                    confirmationOption = SomeConfirmationDefinition.Option,
+                    intent = PAYMENT_INTENT,
+                )
+            )
+
+            val job = CoroutineScope(dispatcher).launch {
+                val result = confirmationHandler.awaitResult().assertSucceeded()
+
+                assertThat(result.intent).isEqualTo(PAYMENT_INTENT)
+                assertThat(result.deferredIntentConfirmationType).isNull()
+            }
+
+            dispatcher.scheduler.advanceUntilIdle()
+
+            assertSomeDefinitionActionCalled()
+            assertSomeDefinitionLaunchCalled()
+
+            dispatcher.scheduler.advanceTimeBy(3.minutes)
+
+            assertThat(job.isActive).isTrue()
+
+            sendSomeDefinitionLauncherResult()
+
+            dispatcher.scheduler.advanceUntilIdle()
+
+            assertSomeDefinitionToResultCalled()
+
+            // Wait for job to complete
+            withTimeout(5.seconds) {
+                job.join()
+            }
+        }
+    }
+
+    private fun launcherResultTest(
+        result: ConfirmationDefinition.Result,
+        test: (ConfirmationHandler.State.Complete) -> Unit,
+    ) = test(
+        someDefinitionAction = ConfirmationDefinition.Action.Launch(
+            launcherArguments = SomeConfirmationDefinition.LauncherArgs,
+            receivesResultInProcess = true,
+            deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
+        ),
+        someDefinitionResult = result,
+    ) {
+        confirmationHandler.state.test {
+            assertIdleState()
+
+            confirmationHandler.start(
+                ConfirmationHandler.Args(
+                    confirmationOption = SomeConfirmationDefinition.Option,
+                    intent = PAYMENT_INTENT,
+                )
+            )
+
+            assertSomeDefinitionActionCalled()
+            assertSomeDefinitionConfirmingState()
+            assertSomeDefinitionLaunchCalled()
+            sendSomeDefinitionLauncherResult()
+            assertSomeDefinitionToResultCalled()
+
+            val completeState = awaitCompleteState()
+
+            test(completeState)
+
+            confirmationHandler.assertAwaitResultCallReceivesSameResult(completeState)
+        }
+    }
+
+    private fun persistedParametersTest(receivesResultInProcess: Boolean) = test(
+        someDefinitionAction = ConfirmationDefinition.Action.Launch(
+            launcherArguments = SomeConfirmationDefinition.LauncherArgs,
+            receivesResultInProcess = receivesResultInProcess,
+            deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
+        ),
+    ) {
+        confirmationHandler.state.test {
+            assertIdleState()
+
+            confirmationHandler.start(
+                ConfirmationHandler.Args(
+                    confirmationOption = SomeConfirmationDefinition.Option,
+                    intent = PAYMENT_INTENT,
+                )
+            )
+
+            assertSomeDefinitionActionCalled()
+            assertSomeDefinitionConfirmingState()
+            assertSomeDefinitionLaunchCalled()
+
+            assertThat(savedStateHandle.contains(AWAITING_CONFIRMATION_RESULT_KEY)).isTrue()
+            assertThat(savedStateHandle.contains(SOME_DEFINITION_PERSISTED_KEY)).isTrue()
+
+            val resultData = savedStateHandle.get<DefaultConfirmationHandler.AwaitingConfirmationResultData>(
+                AWAITING_CONFIRMATION_RESULT_KEY
+            )
+
+            assertThat(resultData?.confirmationOption).isEqualTo(SomeConfirmationDefinition.Option)
+            assertThat(resultData?.receivesResultInProcess).isEqualTo(receivesResultInProcess)
+
+            val parameters = savedStateHandle.get<ConfirmationMediator.Parameters<SomeConfirmationDefinition.Option>>(
+                SOME_DEFINITION_PERSISTED_KEY
+            )
+
+            assertThat(parameters?.intent).isEqualTo(PAYMENT_INTENT)
+            assertThat(parameters?.confirmationOption).isEqualTo(SomeConfirmationDefinition.Option)
+            assertThat(parameters?.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Client)
+        }
+    }
+
+    private fun test(
+        someDefinitionAction: ConfirmationDefinition.Action<SomeConfirmationDefinition.LauncherArgs> =
+            ConfirmationDefinition.Action.Fail(
+                cause = IllegalStateException("Failed!"),
+                message = R.string.stripe_something_went_wrong.resolvableString,
+                errorType = ConfirmationHandler.Result.Failed.ErrorType.Internal,
+            ),
+        someDefinitionResult: ConfirmationDefinition.Result =
+            ConfirmationDefinition.Result.Failed(
+                cause = IllegalStateException("Failed!"),
+                message = R.string.stripe_something_went_wrong.resolvableString,
+                type = ConfirmationHandler.Result.Failed.ErrorType.Internal,
+            ),
+        someOtherDefinitionAction: ConfirmationDefinition.Action<SomeOtherConfirmationDefinition.LauncherArgs> =
+            ConfirmationDefinition.Action.Fail(
+                cause = IllegalStateException("Failed!"),
+                message = R.string.stripe_something_went_wrong.resolvableString,
+                errorType = ConfirmationHandler.Result.Failed.ErrorType.Internal,
+            ),
+        someOtherDefinitionResult: ConfirmationDefinition.Result =
+            ConfirmationDefinition.Result.Failed(
+                cause = IllegalStateException("Failed!"),
+                message = R.string.stripe_something_went_wrong.resolvableString,
+                type = ConfirmationHandler.Result.Failed.ErrorType.Internal,
+            ),
+        shouldRegister: Boolean = true,
+        savedStateHandle: SavedStateHandle = SavedStateHandle(),
+        dispatcher: CoroutineDispatcher = UnconfinedTestDispatcher(),
+        scenarioTest: suspend Scenario.() -> Unit
+    ) = runTest {
+        RecordingConfirmationDefinition.test(
+            SomeConfirmationDefinition(
+                action = someDefinitionAction,
+                result = someDefinitionResult,
+            )
+        ) {
+            val someDefinitionScenario = this
+
+            RecordingConfirmationDefinition.test(
+                SomeOtherConfirmationDefinition(
+                    action = someOtherDefinitionAction,
+                    result = someOtherDefinitionResult,
+                )
+            ) {
+                val someOtherDefinitionScenario = this
+
+                var someDefinitionOnResult: ((SomeConfirmationDefinition.LauncherResult) -> Unit)? = null
+                var someOtherDefinitionOnResult: ((SomeOtherConfirmationDefinition.LauncherResult) -> Unit)? = null
+
+                val errorReporter = FakeErrorReporter()
+                val confirmationHandler = createDefaultConfirmationHandler(
+                    mediators = listOf(
+                        ConfirmationMediator(
+                            savedStateHandle = savedStateHandle,
+                            definition = someDefinitionScenario.definition,
+                        ),
+                        ConfirmationMediator(
+                            savedStateHandle = savedStateHandle,
+                            definition = someOtherDefinitionScenario.definition,
                         ),
                     ),
-                )
-            )
-        )
-    }
-
-    @Test
-    fun `On external PM with no confirm handler, should return failed result`() = runTest {
-        ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = null
-
-        val defaultConfirmationHandler = createDefaultConfirmationHandler()
-
-        defaultConfirmationHandler.start(
-            arguments = DEFAULT_ARGUMENTS.copy(
-                confirmationOption = EXTERNAL_PAYMENT_METHOD,
-            ),
-        )
-
-        val intentResult = defaultConfirmationHandler.awaitResult().asFailed()
-
-        assertThat(intentResult.cause.message).isEqualTo(
-            "externalPaymentMethodConfirmHandler is null. Cannot process payment for payment selection: paypal"
-        )
-        assertThat(intentResult.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
-        assertThat(intentResult.type).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.ExternalPaymentMethod)
-    }
-
-    @Test
-    fun `On external PM with no launcher, should return failed result`() = runTest {
-        ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = EXTERNAL_PAYMENT_METHOD_CONFIRM_HANDLER
-
-        val defaultConfirmationHandler = createDefaultConfirmationHandler(
-            shouldRegister = false,
-        )
-
-        defaultConfirmationHandler.start(
-            arguments = DEFAULT_ARGUMENTS.copy(
-                confirmationOption = EXTERNAL_PAYMENT_METHOD,
-            ),
-        )
-
-        val intentResult = defaultConfirmationHandler.awaitResult().asFailed()
-
-        assertThat(intentResult.cause.message).isEqualTo(
-            "No launcher for ExternalPaymentMethodConfirmationDefinition was found, did you call register?"
-        )
-        assertThat(intentResult.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
-        assertThat(intentResult.type).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Fatal)
-    }
-
-    @Test
-    fun `On external PM succeeded result, should return intent succeeded result`() = runTest {
-        ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = EXTERNAL_PAYMENT_METHOD_CONFIRM_HANDLER
-
-        val defaultConfirmationHandler = createDefaultConfirmationHandler()
-
-        val epmsCallbackHandler = FakeResultHandler<PaymentResult>()
-
-        defaultConfirmationHandler.registerWithCallbacks(
-            externalPaymentMethodsCallbackHandler = epmsCallbackHandler
-        )
-
-        defaultConfirmationHandler.state.test {
-            assertThat(awaitItem()).isEqualTo(ConfirmationHandler.State.Idle)
-
-            defaultConfirmationHandler.start(
-                arguments = DEFAULT_ARGUMENTS.copy(
-                    confirmationOption = EXTERNAL_PAYMENT_METHOD,
-                ),
-            )
-
-            assertThat(awaitItem()).isEqualTo(
-                ConfirmationHandler.State.Confirming(
-                    option = EXTERNAL_PAYMENT_METHOD,
-                )
-            )
-
-            epmsCallbackHandler.onResult(PaymentResult.Completed)
-
-            val expectedResult = ConfirmationHandler.Result.Succeeded(
-                intent = DEFAULT_ARGUMENTS.intent,
-                deferredIntentConfirmationType = null,
-            )
-
-            assertThat(defaultConfirmationHandler.awaitResult()).isEqualTo(expectedResult)
-            assertThat(awaitItem()).isEqualTo(ConfirmationHandler.State.Complete(expectedResult))
-
-            ensureAllEventsConsumed()
-        }
-    }
-
-    @Test
-    fun `On external PM failed result, should return intent failed result`() = runTest {
-        ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = EXTERNAL_PAYMENT_METHOD_CONFIRM_HANDLER
-
-        val defaultConfirmationHandler = createDefaultConfirmationHandler()
-
-        val epmsCallbackHandler = FakeResultHandler<PaymentResult>()
-
-        defaultConfirmationHandler.registerWithCallbacks(
-            externalPaymentMethodsCallbackHandler = epmsCallbackHandler
-        )
-
-        defaultConfirmationHandler.state.test {
-            assertThat(awaitItem()).isEqualTo(ConfirmationHandler.State.Idle)
-
-            defaultConfirmationHandler.start(
-                arguments = DEFAULT_ARGUMENTS.copy(
-                    confirmationOption = EXTERNAL_PAYMENT_METHOD,
-                ),
-            )
-
-            assertThat(awaitItem()).isEqualTo(
-                ConfirmationHandler.State.Confirming(
-                    option = EXTERNAL_PAYMENT_METHOD,
-                )
-            )
-
-            val exception = APIException()
-
-            epmsCallbackHandler.onResult(PaymentResult.Failed(exception))
-
-            val expectedResult = ConfirmationHandler.Result.Failed(
-                cause = exception,
-                message = R.string.stripe_something_went_wrong.resolvableString,
-                type = ConfirmationHandler.Result.Failed.ErrorType.ExternalPaymentMethod,
-            )
-
-            assertThat(defaultConfirmationHandler.awaitResult()).isEqualTo(expectedResult)
-            assertThat(awaitItem()).isEqualTo(ConfirmationHandler.State.Complete(expectedResult))
-
-            ensureAllEventsConsumed()
-        }
-    }
-
-    @Test
-    fun `On external PM canceled result, should return intent canceled result`() = runTest {
-        ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = EXTERNAL_PAYMENT_METHOD_CONFIRM_HANDLER
-
-        val defaultConfirmationHandler = createDefaultConfirmationHandler()
-
-        val epmsCallbackHandler = FakeResultHandler<PaymentResult>()
-
-        defaultConfirmationHandler.registerWithCallbacks(
-            externalPaymentMethodsCallbackHandler = epmsCallbackHandler
-        )
-
-        defaultConfirmationHandler.state.test {
-            assertThat(awaitItem()).isEqualTo(ConfirmationHandler.State.Idle)
-
-            defaultConfirmationHandler.start(
-                arguments = DEFAULT_ARGUMENTS.copy(
-                    confirmationOption = EXTERNAL_PAYMENT_METHOD,
-                ),
-            )
-
-            assertThat(awaitItem()).isEqualTo(
-                ConfirmationHandler.State.Confirming(
-                    option = EXTERNAL_PAYMENT_METHOD,
-                )
-            )
-
-            epmsCallbackHandler.onResult(PaymentResult.Canceled)
-
-            val expectedResult = ConfirmationHandler.Result.Canceled(
-                action = ConfirmationHandler.Result.Canceled.Action.None,
-            )
-
-            assertThat(defaultConfirmationHandler.awaitResult()).isEqualTo(expectedResult)
-            assertThat(awaitItem()).isEqualTo(ConfirmationHandler.State.Complete(expectedResult))
-
-            ensureAllEventsConsumed()
-        }
-    }
-
-    @Test
-    fun `On bacs payment method, should launch mandate screen`() = runTest {
-        val bacsMandateConfirmationLauncher = FakeBacsMandateConfirmationLauncher()
-        val interceptor = FakeIntentConfirmationInterceptor()
-
-        val defaultConfirmationHandler = createDefaultConfirmationHandler(
-            intentConfirmationInterceptor = interceptor,
-            bacsMandateConfirmationLauncher = bacsMandateConfirmationLauncher,
-        ).apply {
-            registerWithCallbacks()
-        }
-
-        defaultConfirmationHandler.start(
-            arguments = DEFAULT_ARGUMENTS.copy(
-                confirmationOption = createBacsPaymentConfirmationOption(),
-            ),
-        )
-
-        val call = bacsMandateConfirmationLauncher.calls.awaitItem()
-
-        assertThat(call).isEqualTo(
-            FakeBacsMandateConfirmationLauncher.Call(
-                data = BacsMandateData(
-                    accountNumber = "00012345",
-                    sortCode = "108800",
-                    name = "John Doe",
-                    email = "johndoe@email.com",
-                ),
-                appearance = APPEARANCE,
-            )
-        )
-
-        bacsMandateConfirmationLauncher.calls.ensureAllEventsConsumed()
-    }
-
-    @Test
-    fun `On bacs payment method without registering callbacks, should fail intent confirmation`() = runTest {
-        val bacsMandateConfirmationLauncher = FakeBacsMandateConfirmationLauncher()
-
-        val defaultConfirmationHandler = createDefaultConfirmationHandler(
-            bacsMandateConfirmationLauncher = bacsMandateConfirmationLauncher,
-            shouldRegister = false
-        )
-
-        defaultConfirmationHandler.start(
-            arguments = DEFAULT_ARGUMENTS.copy(
-                confirmationOption = createBacsPaymentConfirmationOption(),
-            ),
-        )
-
-        bacsMandateConfirmationLauncher.calls.expectNoEvents()
-
-        val result = defaultConfirmationHandler.awaitResult().asFailed()
-
-        assertThat(result.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
-        assertThat(result.type).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Fatal)
-        assertThat(result.cause.message)
-            .isEqualTo("No launcher for BacsConfirmationDefinition was found, did you call register?")
-    }
-
-    @Test
-    fun `On missing name for Bacs, should fail with internal error`() = runTest {
-        val bacsMandateConfirmationLauncher = FakeBacsMandateConfirmationLauncher()
-
-        val defaultConfirmationHandler = createDefaultConfirmationHandler(
-            bacsMandateConfirmationLauncher = bacsMandateConfirmationLauncher,
-        )
-
-        defaultConfirmationHandler.start(
-            arguments = DEFAULT_ARGUMENTS.copy(
-                confirmationOption = createBacsPaymentConfirmationOption(
-                    name = null,
-                ),
-            ),
-        )
-
-        bacsMandateConfirmationLauncher.calls.expectNoEvents()
-
-        val result = defaultConfirmationHandler.awaitResult().asFailed()
-
-        assertThat(result.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
-        assertThat(result.type).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Internal)
-        assertThat(result.cause.message).isEqualTo(
-            "Given confirmation option does not have expected Bacs data!"
-        )
-    }
-
-    @Test
-    fun `On missing email for Bacs, should fail with internal error`() = runTest {
-        val bacsMandateConfirmationLauncher = FakeBacsMandateConfirmationLauncher()
-
-        val defaultConfirmationHandler = createDefaultConfirmationHandler(
-            bacsMandateConfirmationLauncher = bacsMandateConfirmationLauncher,
-        )
-
-        defaultConfirmationHandler.start(
-            arguments = DEFAULT_ARGUMENTS.copy(
-                confirmationOption = createBacsPaymentConfirmationOption(
-                    email = null,
-                ),
-            ),
-        )
-
-        bacsMandateConfirmationLauncher.calls.expectNoEvents()
-
-        val result = defaultConfirmationHandler.awaitResult().asFailed()
-
-        assertThat(result.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
-        assertThat(result.type).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Internal)
-        assertThat(result.cause.message).isEqualTo(
-            "Given confirmation option does not have expected Bacs data!"
-        )
-    }
-
-    @Test
-    fun `On Bacs mandate confirmed, should continue confirmation process`() = runTest {
-        val interceptor = FakeIntentConfirmationInterceptor()
-
-        val defaultConfirmationHandler = createDefaultConfirmationHandler(
-            intentConfirmationInterceptor = interceptor,
-        )
-
-        val bacsMandateConfirmationCallbackHandler = FakeResultHandler<BacsMandateConfirmationResult>()
-
-        defaultConfirmationHandler.registerWithCallbacks(
-            bacsMandateConfirmationCallbackHandler = bacsMandateConfirmationCallbackHandler,
-        )
-
-        val confirmationOption = createBacsPaymentConfirmationOption()
-
-        defaultConfirmationHandler.start(
-            arguments = DEFAULT_ARGUMENTS.copy(
-                confirmationOption = confirmationOption
-            ),
-        )
-
-        bacsMandateConfirmationCallbackHandler.onResult(BacsMandateConfirmationResult.Confirmed)
-
-        val call = interceptor.calls.awaitItem()
-
-        assertThat(call).isEqualTo(
-            FakeIntentConfirmationInterceptor.InterceptCall.WithNewPaymentMethod(
-                initializationMode = confirmationOption.initializationMode,
-                paymentMethodCreateParams = confirmationOption.createParams,
-                shippingValues = null,
-                paymentMethodOptionsParams = null,
-                customerRequestedSave = false,
-            )
-        )
-
-        interceptor.calls.ensureAllEventsConsumed()
-    }
-
-    @Test
-    fun `On modify Bacs data event, should return canceled result`() = runTest {
-        val interceptor = FakeIntentConfirmationInterceptor()
-
-        val defaultConfirmationHandler = createDefaultConfirmationHandler(
-            intentConfirmationInterceptor = interceptor,
-            shouldRegister = false,
-        )
-
-        val bacsMandateConfirmationCallbackHandler = FakeResultHandler<BacsMandateConfirmationResult>()
-
-        defaultConfirmationHandler.registerWithCallbacks(
-            bacsMandateConfirmationCallbackHandler = bacsMandateConfirmationCallbackHandler,
-        )
-
-        val confirmationOption = createBacsPaymentConfirmationOption()
-
-        defaultConfirmationHandler.state.test {
-            assertThat(awaitItem()).isEqualTo(ConfirmationHandler.State.Idle)
-
-            defaultConfirmationHandler.start(
-                arguments = DEFAULT_ARGUMENTS.copy(
-                    confirmationOption = confirmationOption
-                ),
-            )
-
-            assertThat(awaitItem()).isEqualTo(
-                ConfirmationHandler.State.Confirming(
-                    option = confirmationOption,
-                )
-            )
-
-            bacsMandateConfirmationCallbackHandler.onResult(BacsMandateConfirmationResult.ModifyDetails)
-
-            interceptor.calls.expectNoEvents()
-
-            val expectedResult = ConfirmationHandler.Result.Canceled(
-                action = ConfirmationHandler.Result.Canceled.Action.ModifyPaymentDetails,
-            )
-
-            assertThat(defaultConfirmationHandler.awaitResult()).isEqualTo(expectedResult)
-            assertThat(awaitItem()).isEqualTo(ConfirmationHandler.State.Complete(expectedResult))
-
-            ensureAllEventsConsumed()
-        }
-    }
-
-    @Test
-    fun `On cancel Bacs data event, should return canceled result`() = runTest {
-        val interceptor = FakeIntentConfirmationInterceptor()
-
-        val defaultConfirmationHandler = createDefaultConfirmationHandler(
-            intentConfirmationInterceptor = interceptor,
-            shouldRegister = false,
-        )
-
-        val bacsMandateConfirmationCallbackHandler = FakeResultHandler<BacsMandateConfirmationResult>()
-
-        defaultConfirmationHandler.registerWithCallbacks(
-            bacsMandateConfirmationCallbackHandler = bacsMandateConfirmationCallbackHandler,
-        )
-
-        val confirmationOption = createBacsPaymentConfirmationOption()
-
-        defaultConfirmationHandler.state.test {
-            assertThat(awaitItem()).isEqualTo(ConfirmationHandler.State.Idle)
-
-            defaultConfirmationHandler.start(
-                arguments = DEFAULT_ARGUMENTS.copy(
-                    confirmationOption = confirmationOption,
-                ),
-            )
-
-            assertThat(awaitItem()).isEqualTo(
-                ConfirmationHandler.State.Confirming(
-                    option = confirmationOption,
-                )
-            )
-
-            bacsMandateConfirmationCallbackHandler.onResult(BacsMandateConfirmationResult.Cancelled)
-
-            interceptor.calls.expectNoEvents()
-
-            val expectedResult = ConfirmationHandler.Result.Canceled(
-                action = ConfirmationHandler.Result.Canceled.Action.None,
-            )
-
-            assertThat(defaultConfirmationHandler.awaitResult()).isEqualTo(expectedResult)
-            assertThat(awaitItem()).isEqualTo(ConfirmationHandler.State.Complete(expectedResult))
-
-            ensureAllEventsConsumed()
-        }
-    }
-
-    @Test
-    fun `On start Google Pay with no currency and setup intent, should fail and log`() = runTest {
-        val logger = FakeUserFacingLogger()
-        val defaultConfirmationHandler = createDefaultConfirmationHandler(
-            logger = logger
-        )
-
-        defaultConfirmationHandler.start(
-            arguments = DEFAULT_ARGUMENTS.copy(
-                confirmationOption = GOOGLE_PAY_OPTION.copy(
-                    initializationMode = PaymentElementLoader.InitializationMode.SetupIntent(
-                        clientSecret = "si_123_secret_123",
-                    ),
-                    config = GOOGLE_PAY_OPTION.config.copy(
-                        merchantCurrencyCode = null,
-                    )
-                ),
-            ),
-        )
-
-        val result = defaultConfirmationHandler.awaitResult().asFailed()
-
-        val message = "GooglePayConfig.currencyCode is required in order to use " +
-            "Google Pay when processing a Setup Intent"
-
-        assertThat(result.cause.message).isEqualTo(message)
-        assertThat(result.type).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.MerchantIntegration)
-        assertThat(result.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
-
-        assertThat(logger.getLoggedMessages()).contains(message)
-    }
-
-    @Test
-    fun `On start Google Pay with PI, should create and launch Google Pay launcher properly`() = runTest {
-        val googlePayPaymentMethodLauncher = mock<GooglePayPaymentMethodLauncher>()
-        val googlePayPaymentMethodLauncherFactory = mock<GooglePayPaymentMethodLauncherFactory> {
-            on {
-                create(any(), any(), any(), any(), any(), eq(DefaultCardBrandFilter))
-            } doReturn googlePayPaymentMethodLauncher
-        }
-
-        val defaultConfirmationHandler = createDefaultConfirmationHandler(
-            googlePayPaymentMethodLauncherFactory = googlePayPaymentMethodLauncherFactory
-        )
-
-        val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
-
-        defaultConfirmationHandler.start(
-            arguments = DEFAULT_ARGUMENTS.copy(
-                intent = paymentIntent,
-                confirmationOption = GOOGLE_PAY_OPTION.copy(
-                    config = GOOGLE_PAY_OPTION.config.copy(
-                        billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                            email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                            phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                            address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                    errorReporter = errorReporter,
+                    dispatcher = dispatcher,
+                    savedStateHandle = savedStateHandle,
+                ).apply {
+                    if (shouldRegister) {
+                        val activityResultCaller = mock<ActivityResultCaller>()
+
+                        register(
+                            activityResultCaller = activityResultCaller,
+                            lifecycleOwner = TestLifecycleOwner(),
                         )
+
+                        val someDefinitionCreateLauncherCall = someDefinitionScenario
+                            .createLauncherCalls
+                            .awaitItem()
+                        val someOtherDefinitionCreateLauncherCall = someOtherDefinitionScenario
+                            .createLauncherCalls
+                            .awaitItem()
+
+                        assertThat(someDefinitionCreateLauncherCall.activityResultCaller)
+                            .isEqualTo(activityResultCaller)
+                        assertThat(someOtherDefinitionCreateLauncherCall.activityResultCaller)
+                            .isEqualTo(activityResultCaller)
+
+                        someDefinitionOnResult = someDefinitionCreateLauncherCall.onResult
+                        someOtherDefinitionOnResult = someOtherDefinitionCreateLauncherCall.onResult
+                    }
+                }
+
+                scenarioTest(
+                    Scenario(
+                        confirmationHandler = confirmationHandler,
+                        someDefinitionScenario = someDefinitionScenario,
+                        someDefinitionOnResult = someDefinitionOnResult,
+                        someOtherDefinitionScenario = someOtherDefinitionScenario,
+                        someOtherDefinitionOnResult = someOtherDefinitionOnResult,
+                        savedStateHandle = savedStateHandle,
+                        errorReporter = errorReporter,
                     )
-                ),
-            ),
-        )
-
-        verify(googlePayPaymentMethodLauncherFactory).create(
-            lifecycleScope = any(),
-            config = eq(
-                GooglePayPaymentMethodLauncher.Config(
-                    environment = GooglePayEnvironment.Production,
-                    merchantName = "Merchant, Inc.",
-                    merchantCountryCode = "US",
-                    isEmailRequired = true,
-                    billingAddressConfig = GooglePayPaymentMethodLauncher.BillingAddressConfig(
-                        isRequired = true,
-                        format = GooglePayPaymentMethodLauncher.BillingAddressConfig.Format.Full,
-                        isPhoneNumberRequired = true,
-                    )
                 )
-            ),
-            readyCallback = any(),
-            activityResultLauncher = any(),
-            skipReadyCheck = eq(true),
-            cardBrandFilter = eq(DefaultCardBrandFilter)
-        )
-
-        verify(googlePayPaymentMethodLauncher).present(
-            currencyCode = paymentIntent.currency!!,
-            amount = paymentIntent.amount!!,
-            label = "Merchant Payments",
-            transactionId = paymentIntent.id
-        )
-    }
-
-    @Test
-    fun `On start Google Pay with SI, should create and launch Google Pay launcher properly`() = runTest {
-        val googlePayPaymentMethodLauncher = mock<GooglePayPaymentMethodLauncher>()
-        val googlePayPaymentMethodLauncherFactory = mock<GooglePayPaymentMethodLauncherFactory> {
-            on {
-                create(any(), any(), any(), any(), any(), eq(DefaultCardBrandFilter))
-            } doReturn googlePayPaymentMethodLauncher
-        }
-
-        val defaultConfirmationHandler = createDefaultConfirmationHandler(
-            googlePayPaymentMethodLauncherFactory = googlePayPaymentMethodLauncherFactory
-        )
-
-        val setupIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD
-
-        defaultConfirmationHandler.start(
-            arguments = DEFAULT_ARGUMENTS.copy(
-                intent = setupIntent,
-                confirmationOption = GOOGLE_PAY_OPTION,
-            ),
-        )
-
-        verify(googlePayPaymentMethodLauncherFactory).create(
-            lifecycleScope = any(),
-            config = eq(
-                GooglePayPaymentMethodLauncher.Config(
-                    environment = GooglePayEnvironment.Production,
-                    merchantName = "Merchant, Inc.",
-                    merchantCountryCode = "US",
-                    isEmailRequired = false,
-                    billingAddressConfig = GooglePayPaymentMethodLauncher.BillingAddressConfig()
-                )
-            ),
-            readyCallback = any(),
-            activityResultLauncher = any(),
-            skipReadyCheck = eq(true),
-            cardBrandFilter = eq(DefaultCardBrandFilter)
-        )
-
-        verify(googlePayPaymentMethodLauncher).present(
-            currencyCode = "USD",
-            amount = 5000,
-            label = "Merchant Payments",
-            transactionId = setupIntent.id
-        )
-    }
-
-    @Test
-    fun `On Google Pay launcher succeeded, should proceed to intent confirmation`() = runTest {
-        val intentConfirmationInterceptor = FakeIntentConfirmationInterceptor()
-        val googlePayCallbackHandler = FakeResultHandler<GooglePayPaymentMethodLauncher.Result>()
-        val defaultConfirmationHandler = createDefaultConfirmationHandler(
-            intentConfirmationInterceptor = intentConfirmationInterceptor,
-        ).apply {
-            registerWithCallbacks(
-                googlePayCallbackHandler = googlePayCallbackHandler,
-            )
-        }
-
-        defaultConfirmationHandler.state.test {
-            assertThat(awaitItem()).isEqualTo(ConfirmationHandler.State.Idle)
-
-            defaultConfirmationHandler.start(
-                arguments = DEFAULT_ARGUMENTS.copy(
-                    confirmationOption = GOOGLE_PAY_OPTION
-                ),
-            )
-
-            assertThat(awaitItem()).isEqualTo(
-                ConfirmationHandler.State.Confirming(
-                    option = GOOGLE_PAY_OPTION,
-                )
-            )
-
-            val result = GooglePayPaymentMethodLauncher.Result.Completed(
-                paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
-            )
-
-            googlePayCallbackHandler.onResult(result)
-
-            assertThat(awaitItem()).isEqualTo(
-                ConfirmationHandler.State.Confirming(
-                    option = createGooglePaySavedPaymentMethodOption(
-                        option = GOOGLE_PAY_OPTION,
-                        result = result,
-                    ),
-                )
-            )
-
-            val call = intentConfirmationInterceptor.calls.awaitItem()
-
-            assertThat(call).isEqualTo(
-                FakeIntentConfirmationInterceptor.InterceptCall.WithExistingPaymentMethod(
-                    initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                        clientSecret = "pi_456_secret_456"
-                    ),
-                    paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
-                    paymentMethodOptionsParams = null,
-                    shippingValues = null,
-                )
-            )
-        }
-    }
-
-    @Test
-    fun `On Google Pay succeeded, should return successful result`() = runGooglePayTest(
-        googlePayResult = GooglePayPaymentMethodLauncher.Result.Completed(
-            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
-        ),
-        skipPaymentResultCheck = false,
-        internalPaymentResult = InternalPaymentResult.Completed(PaymentIntentFixtures.PI_SUCCEEDED)
-    ) { result ->
-        assertThat(result).isEqualTo(
-            ConfirmationHandler.Result.Succeeded(
-                intent = PaymentIntentFixtures.PI_SUCCEEDED,
-                deferredIntentConfirmationType = null,
-            )
-        )
-    }
-
-    @Test
-    fun `On Google Pay network failure, should return expected failed result`() = runGooglePayTest(
-        googlePayResult = GooglePayPaymentMethodLauncher.Result.Failed(
-            error = IllegalStateException("An error occurred"),
-            errorCode = GooglePayPaymentMethodLauncher.NETWORK_ERROR,
-        ),
-        skipPaymentResultCheck = true,
-        internalPaymentResult = null,
-    ) { result ->
-        val failedResult = result.asFailed()
-
-        assertThat(failedResult.cause)
-            .isInstanceOf(IllegalStateException::class.java)
-        assertThat(failedResult.message)
-            .isEqualTo(PaymentsCoreR.string.stripe_failure_connection_error.resolvableString)
-        assertThat(failedResult.type)
-            .isEqualTo(
-                ConfirmationHandler.Result.Failed.ErrorType.GooglePay(GooglePayPaymentMethodLauncher.NETWORK_ERROR)
-            )
-    }
-
-    @Test
-    fun `On Google Pay internal failure, should return expected failed result`() = runGooglePayTest(
-        googlePayResult = GooglePayPaymentMethodLauncher.Result.Failed(
-            error = IllegalStateException("An error occurred"),
-            errorCode = GooglePayPaymentMethodLauncher.INTERNAL_ERROR,
-        ),
-        skipPaymentResultCheck = true,
-        internalPaymentResult = null,
-    ) { result ->
-        val failedResult = result.asFailed()
-
-        assertThat(failedResult.cause)
-            .isInstanceOf(IllegalStateException::class.java)
-        assertThat(failedResult.message)
-            .isEqualTo(PaymentsCoreR.string.stripe_internal_error.resolvableString)
-        assertThat(failedResult.type)
-            .isEqualTo(
-                ConfirmationHandler.Result.Failed.ErrorType.GooglePay(GooglePayPaymentMethodLauncher.INTERNAL_ERROR)
-            )
-    }
-
-    @Test
-    fun `On Google Pay cancel, should return expected cancel result`() = runGooglePayTest(
-        googlePayResult = GooglePayPaymentMethodLauncher.Result.Canceled,
-        skipPaymentResultCheck = true,
-        internalPaymentResult = null,
-    ) { result ->
-        assertThat(result).isEqualTo(
-            ConfirmationHandler.Result.Canceled(
-                action = ConfirmationHandler.Result.Canceled.Action.InformCancellation
-            )
-        )
-    }
-
-    @Test
-    fun `On Google Pay failure while confirming intent, should return expected failed result`() = runGooglePayTest(
-        googlePayResult = GooglePayPaymentMethodLauncher.Result.Completed(
-            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
-        ),
-        skipPaymentResultCheck = false,
-        internalPaymentResult = InternalPaymentResult.Failed(
-            throwable = IllegalStateException("An error occurred"),
-        ),
-    ) { result ->
-        val failedResult = result.asFailed()
-
-        assertThat(failedResult.cause)
-            .isInstanceOf(IllegalStateException::class.java)
-        assertThat(failedResult.message)
-            .isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
-        assertThat(failedResult.type)
-            .isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Payment)
-    }
-
-    @Test
-    fun `On Google Pay canceled while confirming intent, should return expected cancel result`() = runGooglePayTest(
-        googlePayResult = GooglePayPaymentMethodLauncher.Result.Completed(
-            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
-        ),
-        skipPaymentResultCheck = false,
-        internalPaymentResult = InternalPaymentResult.Canceled,
-    ) { result ->
-        assertThat(result).isEqualTo(
-            ConfirmationHandler.Result.Canceled(
-                action = ConfirmationHandler.Result.Canceled.Action.InformCancellation
-            )
-        )
-    }
-
-    @Test
-    fun `On Bacs succeeded, should return successful result`() = runBacsTest(
-        bacsMandateConfirmationResult = BacsMandateConfirmationResult.Confirmed,
-        skipPaymentResultCheck = false,
-        internalPaymentResult = InternalPaymentResult.Completed(PaymentIntentFixtures.PI_SUCCEEDED)
-    ) { result ->
-        assertThat(result).isEqualTo(
-            ConfirmationHandler.Result.Succeeded(
-                intent = PaymentIntentFixtures.PI_SUCCEEDED,
-                deferredIntentConfirmationType = null,
-            )
-        )
-    }
-
-    @Test
-    fun `On Bacs modify details, should return expected cancel result`() = runBacsTest(
-        bacsMandateConfirmationResult = BacsMandateConfirmationResult.ModifyDetails,
-        skipPaymentResultCheck = true,
-        internalPaymentResult = null,
-    ) { result ->
-        assertThat(result).isEqualTo(
-            ConfirmationHandler.Result.Canceled(
-                action = ConfirmationHandler.Result.Canceled.Action.ModifyPaymentDetails,
-            )
-        )
-    }
-
-    @Test
-    fun `On Bacs cancel, should return expected cancel result`() = runBacsTest(
-        bacsMandateConfirmationResult = BacsMandateConfirmationResult.Cancelled,
-        skipPaymentResultCheck = true,
-        internalPaymentResult = null,
-    ) { result ->
-        assertThat(result).isEqualTo(
-            ConfirmationHandler.Result.Canceled(
-                action = ConfirmationHandler.Result.Canceled.Action.None,
-            )
-        )
-    }
-
-    @Test
-    fun `On Bacs cancelled while confirming intent, should return expected failed result`() = runBacsTest(
-        bacsMandateConfirmationResult = BacsMandateConfirmationResult.Confirmed,
-        skipPaymentResultCheck = false,
-        internalPaymentResult = InternalPaymentResult.Failed(
-            throwable = IllegalStateException("An error occurred"),
-        ),
-    ) { result ->
-        val failedResult = result.asFailed()
-
-        assertThat(failedResult.cause)
-            .isInstanceOf(IllegalStateException::class.java)
-        assertThat(failedResult.message)
-            .isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
-        assertThat(failedResult.type)
-            .isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Payment)
-    }
-
-    private fun runGooglePayTest(
-        googlePayResult: GooglePayPaymentMethodLauncher.Result,
-        internalPaymentResult: InternalPaymentResult?,
-        skipPaymentResultCheck: Boolean,
-        test: suspend (result: ConfirmationHandler.Result) -> Unit
-    ) = runTest {
-        val intentConfirmationInterceptor = FakeIntentConfirmationInterceptor().apply {
-            enqueueConfirmStep(
-                confirmParams = ConfirmPaymentIntentParams.create(
-                    clientSecret = "pi_123_secret_123"
-                )
-            )
-        }
-
-        val paymentResultCallbackHandler = FakeResultHandler<InternalPaymentResult>()
-        val googlePayCallbackHandler = FakeResultHandler<GooglePayPaymentMethodLauncher.Result>()
-
-        val defaultConfirmationHandler = createDefaultConfirmationHandler(
-            intentConfirmationInterceptor = intentConfirmationInterceptor,
-        ).apply {
-            registerWithCallbacks(
-                paymentResultCallbackHandler = paymentResultCallbackHandler,
-                googlePayCallbackHandler = googlePayCallbackHandler,
-            )
-        }
-
-        defaultConfirmationHandler.state.test {
-            assertThat(awaitItem()).isEqualTo(ConfirmationHandler.State.Idle)
-
-            defaultConfirmationHandler.start(
-                arguments = DEFAULT_ARGUMENTS.copy(
-                    confirmationOption = GOOGLE_PAY_OPTION
-                ),
-            )
-
-            assertThat(awaitItem()).isEqualTo(
-                ConfirmationHandler.State.Confirming(
-                    option = GOOGLE_PAY_OPTION,
-                )
-            )
-
-            googlePayCallbackHandler.onResult(googlePayResult)
-
-            if (skipPaymentResultCheck) {
-                test(awaitItem().asCompleted().result)
-
-                return@test
             }
-
-            assertThat(awaitItem()).isEqualTo(
-                ConfirmationHandler.State.Confirming(
-                    createGooglePaySavedPaymentMethodOption(
-                        option = GOOGLE_PAY_OPTION,
-                        result = googlePayResult,
-                    )
-                )
-            )
-
-            internalPaymentResult?.let { result ->
-                paymentResultCallbackHandler.onResult(result)
-            } ?: throw IllegalStateException("Cannot continue test without a payment result!")
-
-            test(awaitItem().asCompleted().result)
-        }
-    }
-
-    private fun runBacsTest(
-        bacsMandateConfirmationResult: BacsMandateConfirmationResult,
-        internalPaymentResult: InternalPaymentResult?,
-        skipPaymentResultCheck: Boolean,
-        test: suspend (result: ConfirmationHandler.Result) -> Unit
-    ) = runTest {
-        val intentConfirmationInterceptor = FakeIntentConfirmationInterceptor().apply {
-            enqueueConfirmStep(
-                confirmParams = ConfirmPaymentIntentParams.create(
-                    clientSecret = "pi_123_secret_123"
-                )
-            )
-        }
-
-        val paymentResultCallbackHandler = FakeResultHandler<InternalPaymentResult>()
-        val bacsMandateConfirmationCallbackHandler = FakeResultHandler<BacsMandateConfirmationResult>()
-
-        val defaultConfirmationHandler = createDefaultConfirmationHandler(
-            intentConfirmationInterceptor = intentConfirmationInterceptor,
-        ).apply {
-            registerWithCallbacks(
-                paymentResultCallbackHandler = paymentResultCallbackHandler,
-                bacsMandateConfirmationCallbackHandler = bacsMandateConfirmationCallbackHandler,
-            )
-        }
-
-        defaultConfirmationHandler.state.test {
-            assertThat(awaitItem()).isEqualTo(ConfirmationHandler.State.Idle)
-
-            defaultConfirmationHandler.start(
-                arguments = DEFAULT_ARGUMENTS.copy(
-                    confirmationOption = BACS_OPTION
-                ),
-            )
-
-            assertThat(awaitItem()).isEqualTo(
-                ConfirmationHandler.State.Confirming(
-                    option = BACS_OPTION,
-                )
-            )
-
-            bacsMandateConfirmationCallbackHandler.onResult(bacsMandateConfirmationResult)
-
-            if (skipPaymentResultCheck) {
-                test(awaitItem().asCompleted().result)
-
-                return@test
-            }
-
-            assertThat(awaitItem()).isEqualTo(ConfirmationHandler.State.Confirming(NEW_BACS_PM_OPTION))
-
-            internalPaymentResult?.let { result ->
-                paymentResultCallbackHandler.onResult(result)
-            } ?: throw IllegalStateException("Cannot continue test without a payment result!")
-
-            test(awaitItem().asCompleted().result)
         }
     }
 
     private fun createDefaultConfirmationHandler(
-        intentConfirmationInterceptor: IntentConfirmationInterceptor = FakeIntentConfirmationInterceptor(),
-        bacsMandateConfirmationLauncher: BacsMandateConfirmationLauncher = FakeBacsMandateConfirmationLauncher(),
-        googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory =
-            object : GooglePayPaymentMethodLauncherFactory {
-                override fun create(
-                    lifecycleScope: CoroutineScope,
-                    config: GooglePayPaymentMethodLauncher.Config,
-                    readyCallback: GooglePayPaymentMethodLauncher.ReadyCallback,
-                    activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>,
-                    skipReadyCheck: Boolean,
-                    cardBrandFilter: CardBrandFilter
-                ): GooglePayPaymentMethodLauncher = mock()
-            },
-        paymentLauncher: PaymentLauncher = FakePaymentLauncher(),
+        dispatcher: CoroutineDispatcher,
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
-        logger: UserFacingLogger = FakeUserFacingLogger(),
-        shouldRegister: Boolean = true,
-        coroutineScope: CoroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
+        mediators: List<ConfirmationMediator<*, *, *, *>> = listOf(
+            ConfirmationMediator(
+                savedStateHandle = savedStateHandle,
+                definition = SomeConfirmationDefinition()
+            )
+        ),
+        errorReporter: ErrorReporter = FakeErrorReporter(),
     ): DefaultConfirmationHandler {
         return DefaultConfirmationHandler(
-            intentConfirmationInterceptor = intentConfirmationInterceptor,
-            paymentLauncherFactory = { paymentLauncher },
-            bacsMandateConfirmationLauncherFactory = { bacsMandateConfirmationLauncher },
-            googlePayPaymentMethodLauncherFactory = googlePayPaymentMethodLauncherFactory,
-            coroutineScope = coroutineScope,
-            errorReporter = FakeErrorReporter(),
+            mediators = mediators,
+            coroutineScope = CoroutineScope(dispatcher),
+            errorReporter = errorReporter,
             savedStateHandle = savedStateHandle,
-            logger = logger,
-        ).apply {
-            if (shouldRegister) {
-                registerWithCallbacks()
-            }
-        }
+        )
     }
 
-    private fun ConfirmationHandler.setExternalPaymentMethodLauncher(
-        launcher: ActivityResultLauncher<ExternalPaymentMethodInput>
+    private fun createPrepopulatedSavedStateHandle(
+        receivesResultInProcess: Boolean,
+    ) = SavedStateHandle().apply {
+        set(
+            "AwaitingConfirmationResult",
+            DefaultConfirmationHandler.AwaitingConfirmationResultData(
+                confirmationOption = SomeConfirmationDefinition.Option,
+                receivesResultInProcess = receivesResultInProcess,
+            ),
+        )
+        set(
+            "SomeParameters",
+            ConfirmationMediator.Parameters(
+                confirmationOption = SomeConfirmationDefinition.Option,
+                intent = PAYMENT_INTENT,
+                deferredIntentConfirmationType = null,
+            )
+        )
+    }
+
+    private suspend fun ConfirmationHandler.assertAwaitResultCallReceivesSameResult(
+        state: ConfirmationHandler.State.Complete
     ) {
-        register(
-            activityResultCaller = mock {
-                on {
-                    registerForActivityResult<ExternalPaymentMethodInput, PaymentResult>(
-                        any(),
-                        any()
-                    )
-                } doReturn launcher
-            },
-            lifecycleOwner = TestLifecycleOwner(),
-        )
+        assertThat(awaitResult()).isEqualTo(state.result)
     }
 
-    private fun ConfirmationHandler.registerWithCallbacks(
-        paymentResultCallbackHandler: FakeResultHandler<InternalPaymentResult> =
-            FakeResultHandler(),
-        externalPaymentMethodsCallbackHandler: FakeResultHandler<PaymentResult> =
-            FakeResultHandler(),
-        bacsMandateConfirmationCallbackHandler: FakeResultHandler<BacsMandateConfirmationResult> =
-            FakeResultHandler(),
-        googlePayCallbackHandler: FakeResultHandler<GooglePayPaymentMethodLauncher.Result> =
-            FakeResultHandler()
-    ) {
-        register(
-            activityResultCaller = mock {
-                val captor = argumentCaptor<ActivityResultCallback<Any>>()
-
-                on {
-                    registerForActivityResult(
-                        any<ActivityResultContract<Any, Any>>(),
-                        captor.capture()
-                    )
-                } doReturn mock()
-
-                paymentResultCallbackHandler.register {
-                    captor.firstValue.onActivityResult(it)
-                }
-
-                externalPaymentMethodsCallbackHandler.register {
-                    captor.secondValue.onActivityResult(it)
-                }
-
-                bacsMandateConfirmationCallbackHandler.register {
-                    captor.thirdValue.onActivityResult(it)
-                }
-
-                googlePayCallbackHandler.register {
-                    captor.allValues[3].onActivityResult(it)
-                }
-            },
-            lifecycleOwner = TestLifecycleOwner(),
-        )
+    private fun Scenario.sendSomeDefinitionLauncherResult() {
+        someDefinitionOnResult?.invoke(SomeConfirmationDefinition.LauncherResult)
     }
 
-    private fun createGooglePaySavedPaymentMethodOption(
-        option: GooglePayConfirmationOption,
-        result: GooglePayPaymentMethodLauncher.Result,
-    ): PaymentMethodConfirmationOption.Saved {
-        return PaymentMethodConfirmationOption.Saved(
-            initializationMode = option.initializationMode,
-            shippingDetails = option.shippingDetails,
-            paymentMethod = result.asCompleted().paymentMethod,
-            optionsParams = null,
-        )
+    private suspend fun Scenario.assertSomeDefinitionActionCalled() {
+        /*
+         * Should first only check some definition since it is first in the ordered list of mediators
+         * then make another option call when fetching action.
+         */
+        assertThat(someDefinitionScenario.optionCalls.awaitItem().option)
+            .isEqualTo(SomeConfirmationDefinition.Option)
+        assertThat(someDefinitionScenario.optionCalls.awaitItem().option)
+            .isEqualTo(SomeConfirmationDefinition.Option)
+
+        val actionCall = someDefinitionScenario.actionCalls.awaitItem()
+
+        assertThat(actionCall.confirmationOption).isEqualTo(SomeConfirmationDefinition.Option)
+        assertThat(actionCall.intent).isEqualTo(PAYMENT_INTENT)
     }
 
-    private fun GooglePayPaymentMethodLauncher.Result.asCompleted(): GooglePayPaymentMethodLauncher.Result.Completed {
-        return this as GooglePayPaymentMethodLauncher.Result.Completed
+    private suspend fun Scenario.assertSomeDefinitionLaunchCalled() {
+        val launchCall = someDefinitionScenario.launchCalls.awaitItem()
+
+        assertThat(launchCall.launcher).isEqualTo(SomeConfirmationDefinition.Launcher)
+        assertThat(launchCall.confirmationOption).isEqualTo(SomeConfirmationDefinition.Option)
+        assertThat(launchCall.arguments).isEqualTo(SomeConfirmationDefinition.LauncherArgs)
+        assertThat(launchCall.intent).isEqualTo(PAYMENT_INTENT)
     }
 
-    private fun ConfirmationHandler.Result?.asFailed(): ConfirmationHandler.Result.Failed {
-        return this as ConfirmationHandler.Result.Failed
+    private suspend fun Scenario.assertSomeDefinitionToResultCalled() {
+        val toResultCall = someDefinitionScenario.toResultCalls.awaitItem()
+
+        assertThat(toResultCall.confirmationOption).isEqualTo(SomeConfirmationDefinition.Option)
+        assertThat(toResultCall.result).isEqualTo(SomeConfirmationDefinition.LauncherResult)
+        assertThat(toResultCall.intent).isEqualTo(PAYMENT_INTENT)
     }
 
-    private fun ConfirmationHandler.State.asCompleted(): ConfirmationHandler.State.Complete {
+    private fun Scenario.sendSomeOtherDefinitionLauncherResult() {
+        someOtherDefinitionOnResult?.invoke(SomeOtherConfirmationDefinition.LauncherResult)
+    }
+
+    private suspend fun Scenario.assertSomeOtherDefinitionActionCalled() {
+        /*
+         * Should first check against both definitions since it is last in the ordered list of mediators
+         * then make another option call when fetching action.
+         */
+        assertThat(someDefinitionScenario.optionCalls.awaitItem().option)
+            .isEqualTo(SomeOtherConfirmationDefinition.Option)
+        assertThat(someOtherDefinitionScenario.optionCalls.awaitItem().option)
+            .isEqualTo(SomeOtherConfirmationDefinition.Option)
+        assertThat(someOtherDefinitionScenario.optionCalls.awaitItem().option)
+            .isEqualTo(SomeOtherConfirmationDefinition.Option)
+
+        val actionCall = someOtherDefinitionScenario.actionCalls.awaitItem()
+
+        assertThat(actionCall.confirmationOption).isEqualTo(SomeOtherConfirmationDefinition.Option)
+        assertThat(actionCall.intent).isEqualTo(PAYMENT_INTENT)
+    }
+
+    private suspend fun Scenario.assertSomeOtherDefinitionLaunchCalled() {
+        val launchCall = someOtherDefinitionScenario.launchCalls.awaitItem()
+
+        assertThat(launchCall.launcher).isEqualTo(SomeOtherConfirmationDefinition.Launcher)
+        assertThat(launchCall.confirmationOption).isEqualTo(SomeOtherConfirmationDefinition.Option)
+        assertThat(launchCall.arguments).isEqualTo(SomeOtherConfirmationDefinition.LauncherArgs)
+        assertThat(launchCall.intent).isEqualTo(PAYMENT_INTENT)
+    }
+
+    private suspend fun Scenario.assertSomeOtherDefinitionToResultCalled() {
+        val toResultCall = someOtherDefinitionScenario.toResultCalls.awaitItem()
+
+        assertThat(toResultCall.confirmationOption).isEqualTo(SomeOtherConfirmationDefinition.Option)
+        assertThat(toResultCall.result).isEqualTo(SomeOtherConfirmationDefinition.LauncherResult)
+        assertThat(toResultCall.intent).isEqualTo(PAYMENT_INTENT)
+    }
+
+    private suspend fun TurbineTestContext<ConfirmationHandler.State>.assertIdleState() {
+        assertThat(awaitItem()).isEqualTo(ConfirmationHandler.State.Idle)
+    }
+
+    private suspend fun TurbineTestContext<ConfirmationHandler.State>.assertSomeDefinitionConfirmingState() {
+        val confirmingState = awaitItem().assertConfirming()
+
+        assertThat(confirmingState.option).isEqualTo(SomeConfirmationDefinition.Option)
+    }
+
+    private suspend fun TurbineTestContext<ConfirmationHandler.State>.assertSomeOtherDefinitionConfirmingState() {
+        val confirmingState = awaitItem().assertConfirming()
+
+        assertThat(confirmingState.option).isEqualTo(SomeOtherConfirmationDefinition.Option)
+    }
+
+    private suspend fun TurbineTestContext<ConfirmationHandler.State>.awaitCompleteState():
+        ConfirmationHandler.State.Complete {
+        return awaitItem().assertComplete()
+    }
+
+    private fun ConfirmationHandler.State.assertConfirming(): ConfirmationHandler.State.Confirming {
+        assertThat(this).isInstanceOf<ConfirmationHandler.State.Confirming>()
+
+        return this as ConfirmationHandler.State.Confirming
+    }
+
+    private fun ConfirmationHandler.State.assertComplete(): ConfirmationHandler.State.Complete {
+        assertThat(this).isInstanceOf<ConfirmationHandler.State.Complete>()
+
         return this as ConfirmationHandler.State.Complete
     }
 
-    private fun createBacsPaymentConfirmationOption(
-        name: String? = "John Doe",
-        email: String? = "johndoe@email.com",
-    ): BacsConfirmationOption {
-        return BacsConfirmationOption(
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = "pi_456_secret_456"
-            ),
-            shippingDetails = null,
-            createParams = PaymentMethodCreateParams.create(
-                bacsDebit = PaymentMethodCreateParams.BacsDebit(
-                    accountNumber = "00012345",
-                    sortCode = "108800"
-                ),
-                billingDetails = PaymentMethod.BillingDetails(
-                    name = name,
-                    email = email,
-                )
-            ),
-            appearance = APPEARANCE,
-            optionsParams = null,
-        )
+    private fun ConfirmationHandler.Result?.assertSucceeded(): ConfirmationHandler.Result.Succeeded {
+        assertThat(this).isInstanceOf<ConfirmationHandler.Result.Succeeded>()
+
+        return this as ConfirmationHandler.Result.Succeeded
     }
 
-    private companion object {
-        val APPEARANCE = PaymentSheetFixtures.CONFIG_WITH_EVERYTHING.appearance
-        val DEFAULT_ARGUMENTS = ConfirmationHandler.Args(
-            intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-            confirmationOption = PaymentMethodConfirmationOption.Saved(
-                initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                    clientSecret = "pi_456_secret_456"
-                ),
-                shippingDetails = null,
-                paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
-                optionsParams = null,
+    private fun ConfirmationHandler.Result?.assertFailed(): ConfirmationHandler.Result.Failed {
+        assertThat(this).isInstanceOf<ConfirmationHandler.Result.Failed>()
+
+        return this as ConfirmationHandler.Result.Failed
+    }
+
+    private fun ConfirmationHandler.Result?.assertCanceled(): ConfirmationHandler.Result.Canceled {
+        assertThat(this).isInstanceOf<ConfirmationHandler.Result.Canceled>()
+
+        return this as ConfirmationHandler.Result.Canceled
+    }
+
+    private class Scenario(
+        val confirmationHandler: DefaultConfirmationHandler,
+        val errorReporter: FakeErrorReporter,
+        val savedStateHandle: SavedStateHandle,
+        val someDefinitionScenario: RecordingConfirmationDefinition.Scenario<
+            SomeConfirmationDefinition.Option,
+            SomeConfirmationDefinition.Launcher,
+            SomeConfirmationDefinition.LauncherArgs,
+            SomeConfirmationDefinition.LauncherResult,
+            >,
+        val someDefinitionOnResult: ((SomeConfirmationDefinition.LauncherResult) -> Unit)?,
+        val someOtherDefinitionScenario: RecordingConfirmationDefinition.Scenario<
+            SomeOtherConfirmationDefinition.Option,
+            SomeOtherConfirmationDefinition.Launcher,
+            SomeOtherConfirmationDefinition.LauncherArgs,
+            SomeOtherConfirmationDefinition.LauncherResult,
+            >,
+        val someOtherDefinitionOnResult: ((SomeOtherConfirmationDefinition.LauncherResult) -> Unit)?,
+    )
+
+    private class SomeConfirmationDefinition(
+        action: ConfirmationDefinition.Action<LauncherArgs> =
+            ConfirmationDefinition.Action.Fail(
+                cause = IllegalStateException("Failed!"),
+                message = R.string.stripe_something_went_wrong.resolvableString,
+                errorType = ConfirmationHandler.Result.Failed.ErrorType.Internal,
             ),
-        )
+        result: ConfirmationDefinition.Result = ConfirmationDefinition.Result.Canceled(
+            action = ConfirmationHandler.Result.Canceled.Action.InformCancellation,
+        ),
+    ) : FakeConfirmationDefinition<
+        SomeConfirmationDefinition.Option,
+        SomeConfirmationDefinition.Launcher,
+        SomeConfirmationDefinition.LauncherArgs,
+        SomeConfirmationDefinition.LauncherResult,
+        >(
+        launcher = Launcher,
+        action = action,
+        result = result,
+    ) {
+        override val key: String = "Some"
 
-        val EXTERNAL_PAYMENT_METHOD = ExternalPaymentMethodConfirmationOption(
-            type = "paypal",
-            billingDetails = null
-        )
-
-        val BACS_OPTION = BacsConfirmationOption(
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = "pi_456_secret_456"
-            ),
-            shippingDetails = null,
-            appearance = APPEARANCE,
-            createParams = PaymentMethodCreateParams.create(
-                bacsDebit = PaymentMethodCreateParams.BacsDebit(
-                    accountNumber = "00012345",
-                    sortCode = "808080",
-                ),
-                billingDetails = PaymentMethod.BillingDetails(
-                    name = "John Doe",
-                    email = "johndoe@email.com"
-                ),
-            ),
-            optionsParams = null,
-        )
-
-        val NEW_BACS_PM_OPTION = PaymentMethodConfirmationOption.New(
-            initializationMode = BACS_OPTION.initializationMode,
-            createParams = BACS_OPTION.createParams,
-            shippingDetails = null,
-            optionsParams = null,
-            shouldSave = false,
-        )
-
-        val GOOGLE_PAY_OPTION = GooglePayConfirmationOption(
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = "pi_456_secret_456"
-            ),
-            shippingDetails = null,
-            config = GooglePayConfirmationOption.Config(
-                environment = PaymentSheet.GooglePayConfiguration.Environment.Production,
-                merchantName = "Merchant, Inc.",
-                merchantCurrencyCode = "USD",
-                merchantCountryCode = "US",
-                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
-                customAmount = 5000,
-                customLabel = "Merchant Payments",
-                cardBrandFilter = DefaultCardBrandFilter
-            )
-        )
-
-        /**
-         * The external payment method confirm handler is not used in [ExternalPaymentMethodInterceptor] which is
-         * not tested here but is instead meant to be used in the launched activity the interceptor attempts to launch.
-         * Since we only care that [DefaultConfirmationHandler] is actually attempting to launch the EPM handler as well
-         * as its interactions, we don't do anything here except for using the handler to validate that we can launch
-         * the EPM handler.
-         */
-        val EXTERNAL_PAYMENT_METHOD_CONFIRM_HANDLER = ExternalPaymentMethodConfirmHandler { _, _ ->
-            // Do nothing
+        override fun option(confirmationOption: ConfirmationHandler.Option): Option? {
+            return confirmationOption as? Option
         }
+
+        @Parcelize
+        data object Option : ConfirmationHandler.Option
+
+        object Launcher
+
+        data object LauncherArgs
+
+        @Parcelize
+        data object LauncherResult : Parcelable
+    }
+
+    private class SomeOtherConfirmationDefinition(
+        action: ConfirmationDefinition.Action<LauncherArgs> =
+            ConfirmationDefinition.Action.Fail(
+                cause = IllegalStateException("Failed!"),
+                message = R.string.stripe_something_went_wrong.resolvableString,
+                errorType = ConfirmationHandler.Result.Failed.ErrorType.Internal,
+            ),
+        result: ConfirmationDefinition.Result = ConfirmationDefinition.Result.Canceled(
+            action = ConfirmationHandler.Result.Canceled.Action.InformCancellation,
+        ),
+    ) : FakeConfirmationDefinition<
+        SomeOtherConfirmationDefinition.Option,
+        SomeOtherConfirmationDefinition.Launcher,
+        SomeOtherConfirmationDefinition.LauncherArgs,
+        SomeOtherConfirmationDefinition.LauncherResult,
+        >(
+        launcher = Launcher,
+        action = action,
+        result = result,
+    ) {
+        override val key: String = "Some"
+
+        override fun option(confirmationOption: ConfirmationHandler.Option): Option? {
+            return confirmationOption as? Option
+        }
+
+        @Parcelize
+        data object Option : ConfirmationHandler.Option
+
+        object Launcher
+
+        data object LauncherArgs
+
+        @Parcelize
+        data object LauncherResult : Parcelable
+    }
+
+    @Parcelize
+    private data object InvalidConfirmationOption : ConfirmationHandler.Option
+
+    private companion object {
+        const val SOME_DEFINITION_PERSISTED_KEY = "SomeParameters"
+        const val AWAITING_CONFIRMATION_RESULT_KEY = "AwaitingConfirmationResult"
+
+        val PAYMENT_INTENT = PaymentIntentFactory.create()
     }
 }

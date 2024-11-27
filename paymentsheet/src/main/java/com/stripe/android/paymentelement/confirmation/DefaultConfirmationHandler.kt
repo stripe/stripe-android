@@ -2,7 +2,6 @@ package com.stripe.android.paymentelement.confirmation
 
 import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
-import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
@@ -18,8 +17,6 @@ import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmation
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
 import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.android.payments.paymentlauncher.PaymentLauncher
-import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.ExternalPaymentMethodInterceptor
 import com.stripe.android.paymentsheet.R
@@ -39,41 +36,11 @@ import javax.inject.Provider
 import kotlin.time.Duration.Companion.seconds
 
 internal class DefaultConfirmationHandler(
-    private val intentConfirmationInterceptor: IntentConfirmationInterceptor,
-    private val paymentLauncherFactory: (ActivityResultLauncher<PaymentLauncherContract.Args>) -> PaymentLauncher,
-    private val bacsMandateConfirmationLauncherFactory: BacsMandateConfirmationLauncherFactory,
-    private val googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory?,
+    private val mediators: List<ConfirmationMediator<*, *, *, *>>,
     private val coroutineScope: CoroutineScope,
     private val savedStateHandle: SavedStateHandle,
     private val errorReporter: ErrorReporter,
-    private val logger: UserFacingLogger?
 ) : ConfirmationHandler {
-    private val confirmationRegistry = ConfirmationRegistry(
-        confirmationDefinitions = listOfNotNull(
-            IntentConfirmationDefinition(
-                intentConfirmationInterceptor = intentConfirmationInterceptor,
-                paymentLauncherFactory = paymentLauncherFactory,
-            ),
-            ExternalPaymentMethodConfirmationDefinition(
-                externalPaymentMethodConfirmHandlerProvider = {
-                    ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler
-                },
-                errorReporter = errorReporter,
-            ),
-            BacsConfirmationDefinition(
-                bacsMandateConfirmationLauncherFactory = bacsMandateConfirmationLauncherFactory,
-            ),
-            googlePayPaymentMethodLauncherFactory?.let {
-                GooglePayConfirmationDefinition(
-                    googlePayPaymentMethodLauncherFactory = it,
-                    userFacingLogger = logger,
-                )
-            }
-        )
-    )
-
-    private val confirmationMediators = confirmationRegistry.createConfirmationMediators(savedStateHandle)
-
     private val isAwaitingForResultData = retrieveIsAwaitingForResultData()
 
     override val hasReloadedFromProcessDeath = isAwaitingForResultData != null
@@ -105,14 +72,14 @@ internal class DefaultConfirmationHandler(
     }
 
     override fun register(activityResultCaller: ActivityResultCaller, lifecycleOwner: LifecycleOwner) {
-        confirmationMediators.forEach { mediator ->
+        mediators.forEach { mediator ->
             mediator.register(activityResultCaller, ::onResult)
         }
 
         lifecycleOwner.lifecycle.addObserver(
             object : DefaultLifecycleObserver {
                 override fun onDestroy(owner: LifecycleOwner) {
-                    confirmationMediators.forEach { mediator ->
+                    mediators.forEach { mediator ->
                         mediator.unregister()
                     }
                     super.onDestroy(owner)
@@ -158,7 +125,7 @@ internal class DefaultConfirmationHandler(
     ) {
         _state.value = ConfirmationHandler.State.Confirming(confirmationOption)
 
-        val mediator = confirmationMediators.find { mediator ->
+        val mediator = mediators.find { mediator ->
             mediator.canConfirm(confirmationOption)
         } ?: run {
             errorReporter.report(
@@ -297,23 +264,43 @@ internal class DefaultConfirmationHandler(
         private val logger: UserFacingLogger?
     ) : ConfirmationHandler.Factory {
         override fun create(scope: CoroutineScope): ConfirmationHandler {
+            val mediators = ConfirmationRegistry(
+                listOfNotNull(
+                    IntentConfirmationDefinition(
+                        intentConfirmationInterceptor = intentConfirmationInterceptor,
+                        paymentLauncherFactory = { hostActivityLauncher ->
+                            stripePaymentLauncherAssistedFactory.create(
+                                publishableKey = { paymentConfigurationProvider.get().publishableKey },
+                                stripeAccountId = { paymentConfigurationProvider.get().stripeAccountId },
+                                hostActivityLauncher = hostActivityLauncher,
+                                statusBarColor = statusBarColor(),
+                                includePaymentSheetNextHandlers = true,
+                            )
+                        },
+                    ),
+                    ExternalPaymentMethodConfirmationDefinition(
+                        externalPaymentMethodConfirmHandlerProvider = {
+                            ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler
+                        },
+                        errorReporter = errorReporter,
+                    ),
+                    BacsConfirmationDefinition(
+                        bacsMandateConfirmationLauncherFactory = bacsMandateConfirmationLauncherFactory,
+                    ),
+                    googlePayPaymentMethodLauncherFactory?.let {
+                        GooglePayConfirmationDefinition(
+                            googlePayPaymentMethodLauncherFactory = it,
+                            userFacingLogger = logger,
+                        )
+                    }
+                )
+            ).createConfirmationMediators(savedStateHandle)
+
             return DefaultConfirmationHandler(
-                bacsMandateConfirmationLauncherFactory = bacsMandateConfirmationLauncherFactory,
-                googlePayPaymentMethodLauncherFactory = googlePayPaymentMethodLauncherFactory,
-                paymentLauncherFactory = { hostActivityLauncher ->
-                    stripePaymentLauncherAssistedFactory.create(
-                        publishableKey = { paymentConfigurationProvider.get().publishableKey },
-                        stripeAccountId = { paymentConfigurationProvider.get().stripeAccountId },
-                        hostActivityLauncher = hostActivityLauncher,
-                        statusBarColor = statusBarColor(),
-                        includePaymentSheetNextHandlers = true,
-                    )
-                },
-                intentConfirmationInterceptor = intentConfirmationInterceptor,
+                mediators = mediators,
                 coroutineScope = scope,
                 errorReporter = errorReporter,
                 savedStateHandle = savedStateHandle,
-                logger = logger
             )
         }
     }
