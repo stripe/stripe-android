@@ -205,6 +205,7 @@ internal class LinkHandler @Inject constructor(
 
         linkLauncher.present(
             config,
+            linkIntentConfirmationHandler
         )
 
         _processingState.tryEmit(ProcessingState.Launched)

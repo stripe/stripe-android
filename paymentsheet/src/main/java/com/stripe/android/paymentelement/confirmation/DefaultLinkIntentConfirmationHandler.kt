@@ -31,7 +31,9 @@ internal class DefaultLinkIntentConfirmationHandler @Inject constructor(
                                     message = result.message
                                 )
                             }
-                            is ConfirmationHandler.Result.Succeeded -> LinkIntentConfirmationHandler.State.Success
+                            is ConfirmationHandler.Result.Succeeded -> {
+                                LinkIntentConfirmationHandler.State.Success(result.)
+                            }
                         }
                     }
                     is ConfirmationHandler.State.Confirming -> LinkIntentConfirmationHandler.State.Idle

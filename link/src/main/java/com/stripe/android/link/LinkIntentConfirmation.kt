@@ -1,14 +1,10 @@
 package com.stripe.android.link
 
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
 import kotlinx.coroutines.flow.Flow
-
-typealias LinkConfirmPaymentType = suspend(
-    intent: StripeIntent,
-    params: PaymentMethodCreateParams
-) -> Unit
 
 interface LinkIntentConfirmationHandler {
     val state: Flow<State>
@@ -28,7 +24,7 @@ interface LinkIntentConfirmationHandler {
 
         data object Idle : State
 
-        data object Success : State
+        data class Success(val paymentMethod: PaymentMethod) : State
     }
 }
 

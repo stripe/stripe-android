@@ -21,13 +21,16 @@ import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.LinkAppBarState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 internal class LinkActivityViewModel @Inject constructor(
     val activityRetainedComponent: NativeLinkComponent,
-    private val linkAccountManager: LinkAccountManager
+    private val linkAccountManager: LinkAccountManager,
+    private val linkIntentConfirmationHandler: LinkIntentConfirmationHandler
 ) : ViewModel(), DefaultLifecycleObserver {
     private val _linkState = MutableStateFlow(
         value = LinkAppBarState(
@@ -44,6 +47,16 @@ internal class LinkActivityViewModel @Inject constructor(
 
     var navController: NavHostController? = null
     var dismissWithResult: ((LinkActivityResult) -> Unit)? = null
+
+    fun listenForSuccessfulPayment() {
+        viewModelScope.launch {
+            linkIntentConfirmationHandler.state
+                .filterIsInstance<LinkIntentConfirmationHandler.State.Success>()
+                .collect {
+                    dismissWithResult?.invoke(LinkActivityResult.Completed())
+                }
+        }
+    }
 
     fun handleViewAction(action: LinkAction) {
         when (action) {
@@ -102,10 +115,11 @@ internal class LinkActivityViewModel @Inject constructor(
                 val handle: SavedStateHandle = savedStateHandle ?: createSavedStateHandle()
                 val app = this[APPLICATION_KEY] as Application
                 val args: NativeLinkArgs = getArgs(handle) ?: throw NoArgsException()
-
+                val linkIntentConfirmationHandler = LinkIntentConfirmation.handler ?: throw NoArgsException()
                 DaggerNativeLinkComponent
                     .builder()
                     .configuration(args.configuration)
+                    .linkIntentConfirmationHandler(linkIntentConfirmationHandler)
                     .publishableKeyProvider { args.publishableKey }
                     .stripeAccountIdProvider { args.stripeAccountId }
                     .context(app)

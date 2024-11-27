@@ -20,6 +20,8 @@ import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.DefaultConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.DefaultLinkIntentConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
@@ -85,7 +87,9 @@ internal class DefaultFlowController @Inject internal constructor(
     private val configurationHandler: FlowControllerConfigurationHandler,
     private val errorReporter: ErrorReporter,
     @InitializedViaCompose private val initializedViaCompose: Boolean,
-    private val cvcRecollectionHandler: CvcRecollectionHandler
+    private val cvcRecollectionHandler: CvcRecollectionHandler,
+    @IOContext workContext: CoroutineContext,
+    logger: UserFacingLogger,
 ) : PaymentSheet.FlowController {
     private val paymentOptionActivityLauncher: ActivityResultLauncher<PaymentOptionContract.Args>
     private val sepaMandateActivityLauncher: ActivityResultLauncher<SepaMandateContract.Args>
@@ -96,6 +100,8 @@ internal class DefaultFlowController @Inject internal constructor(
      * after [DefaultFlowController].
      */
     lateinit var flowControllerComponent: FlowControllerComponent
+
+    private val linkIntentConfirmationHandler = DefaultLinkIntentConfirmationHandler(confirmationHandlerFactory)
 
     private val initializationMode: PaymentElementLoader.InitializationMode?
         get() = viewModel.previousConfigureRequest?.initializationMode
@@ -662,7 +668,10 @@ internal class DefaultFlowController @Inject internal constructor(
 
         if (paymentSelection is PaymentSelection.Link) {
             // User selected Link as the payment method, not inline
-            linkLauncher.present(linkConfig)
+            linkLauncher.present(
+                linkConfig,
+                linkIntentConfirmationHandler
+            )
         } else {
             // New user paying inline, complete without launching Link
             confirmPaymentSelection(paymentSelection, state, appearance)
