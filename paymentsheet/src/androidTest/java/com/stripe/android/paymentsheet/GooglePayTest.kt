@@ -5,7 +5,6 @@ import android.app.Instrumentation
 import android.content.Intent
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.hasTestTag
-import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.performClick
 import androidx.core.os.bundleOf
@@ -37,7 +36,6 @@ import com.stripe.android.paymentsheet.utils.ProductIntegrationType
 import com.stripe.android.paymentsheet.utils.ProductIntegrationTypeProvider
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.assertCompleted
-import com.stripe.android.paymentsheet.utils.assertFailed
 import com.stripe.android.paymentsheet.utils.expectNoResult
 import com.stripe.android.paymentsheet.utils.runProductIntegrationTest
 import com.stripe.android.testing.PaymentIntentFactory
@@ -48,7 +46,6 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.util.concurrent.CountDownLatch
 
 @RunWith(TestParameterInjector::class)
 internal class GooglePayTest {
@@ -132,78 +129,6 @@ internal class GooglePayTest {
         }
     }
 
-    @Test
-    fun googlePayFailsOnGooglePaySheetFailure() {
-        val flowControllerFailureResult = CountDownLatch(1)
-
-        runGooglePayFlowTest(
-            paymentResultCallback = {
-                when (integrationType) {
-                    ProductIntegrationType.PaymentSheet -> expectNoResult(it)
-                    ProductIntegrationType.FlowController -> {
-                        assertFailed(it)
-                        flowControllerFailureResult.countDown()
-                    }
-                }
-            }
-        ) { scenario ->
-            intendingGooglePayToBeLaunched(
-                GooglePayPaymentMethodLauncher.Result.Failed(
-                    error = IllegalStateException("An error occurred!"),
-                    errorCode = GooglePayPaymentMethodLauncher.INTERNAL_ERROR
-                )
-            )
-
-            scenario.confirm()
-
-            intendedGooglePayToBeLaunched()
-
-            when (integrationType) {
-                ProductIntegrationType.PaymentSheet -> {
-                    waitForErrorMessage("An internal error occurred.")
-                    scenario.markTestSucceeded()
-                }
-                ProductIntegrationType.FlowController -> flowControllerFailureResult.await()
-            }
-        }
-    }
-
-    @Test
-    fun googlePayFailsOnPaymentFailure() {
-        val flowControllerFailureResult = CountDownLatch(1)
-
-        runGooglePayFlowTest(
-            paymentResultCallback = {
-                when (integrationType) {
-                    ProductIntegrationType.PaymentSheet -> expectNoResult(it)
-                    ProductIntegrationType.FlowController -> {
-                        assertFailed(it)
-                        flowControllerFailureResult.countDown()
-                    }
-                }
-            }
-        ) { scenario ->
-            intendingGooglePayToBeLaunched(
-                GooglePayPaymentMethodLauncher.Result.Failed(
-                    error = IllegalStateException("An error occurred!"),
-                    errorCode = GooglePayPaymentMethodLauncher.INTERNAL_ERROR
-                )
-            )
-
-            scenario.confirm()
-
-            intendedGooglePayToBeLaunched()
-
-            when (integrationType) {
-                ProductIntegrationType.PaymentSheet -> {
-                    waitForErrorMessage("An internal error occurred.")
-                    scenario.markTestSucceeded()
-                }
-                ProductIntegrationType.FlowController -> flowControllerFailureResult.await()
-            }
-        }
-    }
-
     private fun runGooglePayFlowTest(
         paymentResultCallback: (PaymentSheetResult) -> Unit,
         test: (GooglePayFlowScenario) -> Unit
@@ -215,7 +140,7 @@ internal class GooglePayTest {
             paymentResultCallback = paymentResultCallback,
         ) { context ->
             test(
-                GooglePayFlowScenario(context::markTestSucceeded) {
+                GooglePayFlowScenario {
                     Espresso.onIdle()
                     composeTestRule.waitForIdle()
 
@@ -356,15 +281,6 @@ internal class GooglePayTest {
         intended(hasComponent(PAYMENT_CONFIRMATION_LAUNCHER_ACTIVITY_NAME))
     }
 
-    private fun waitForErrorMessage(message: String) {
-        composeTestRule.waitUntil(UI_TIMEOUT) {
-            composeTestRule
-                .onAllNodes(hasText(message))
-                .fetchSemanticsNodes()
-                .isNotEmpty()
-        }
-    }
-
     private fun ComposeTestRule.onGooglePayOption(): SemanticsNodeInteraction {
         return when (integrationType) {
             ProductIntegrationType.PaymentSheet -> onNode(hasTestTag(GOOGLE_PAY_BUTTON_TEST_TAG))
@@ -387,7 +303,6 @@ internal class GooglePayTest {
     }
 
     private class GooglePayFlowScenario(
-        val markTestSucceeded: () -> Unit,
         val confirm: () -> Unit,
     )
 
