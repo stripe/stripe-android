@@ -34,8 +34,6 @@ internal fun NewPaymentMethodTab(
     modifier: Modifier = Modifier,
     onItemSelectedListener: () -> Unit
 ) {
-    val minContentWidth = minViewWidth - (PaymentMethodUISpacing.cardPadding * 2)
-
     RowButton(
         isEnabled = isEnabled,
         isSelected = isSelected,
@@ -46,14 +44,13 @@ internal fun NewPaymentMethodTab(
             top = PaymentMethodUISpacing.cardPadding,
         ),
         verticalArrangement = Arrangement.Top,
-        modifier = modifier.height(60.dp),
+        modifier = modifier
+            .height(60.dp)
+            .widthIn(min = minViewWidth),
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier.widthIn(
-                min = minContentWidth,
-            ),
         ) {
             PaymentMethodIcon(
                 iconRes = iconRes,

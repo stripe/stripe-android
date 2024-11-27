@@ -65,10 +65,10 @@ internal class PaymentMethodUIScreenshotTest {
         paparazziRule.snapshot {
             NewPaymentMethodTab(
                 minViewWidth = 100.dp,
-                iconRes = R.drawable.stripe_ic_paymentsheet_pm_card,
+                iconRes = R.drawable.stripe_ic_paymentsheet_pm_bank,
                 iconUrl = null,
                 imageLoader = mock(),
-                title = "Card",
+                title = "Bank",
                 isSelected = false,
                 isEnabled = true,
                 iconRequiresTinting = true,
@@ -103,10 +103,10 @@ internal class PaymentMethodUIScreenshotTest {
         paparazziRule.snapshot {
             NewPaymentMethodTab(
                 minViewWidth = 100.dp,
-                iconRes = R.drawable.stripe_ic_paymentsheet_pm_card,
+                iconRes = R.drawable.stripe_ic_paymentsheet_pm_bank,
                 iconUrl = null,
                 imageLoader = mock(),
-                title = "Card",
+                title = "Bank",
                 isSelected = false,
                 isEnabled = false,
                 iconRequiresTinting = true,
