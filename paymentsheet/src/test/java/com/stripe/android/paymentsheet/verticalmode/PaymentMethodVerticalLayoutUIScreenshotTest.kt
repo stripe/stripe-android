@@ -38,4 +38,27 @@ internal class PaymentMethodVerticalLayoutUIScreenshotTest {
             )
         }
     }
+
+    @Test
+    fun testNewPmsWithPromoBadge() {
+        val paymentMethodsWithBadge = paymentMethods.map { pm ->
+            pm.copy(promoBadge = "$5".takeIf { pm.code == "affirm" })
+        }
+
+        paparazziRule.snapshot {
+            PaymentMethodVerticalLayoutUI(
+                paymentMethods = paymentMethodsWithBadge,
+                displayedSavedPaymentMethod = savedPaymentMethod,
+                savedPaymentMethodAction =
+                PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
+                selection = PaymentSelection.Saved(savedPaymentMethod.paymentMethod),
+                isEnabled = true,
+                onEditPaymentMethod = {},
+                onViewMorePaymentMethods = {},
+                onSelectSavedPaymentMethod = {},
+                onManageOneSavedPaymentMethod = {},
+                imageLoader = mock(),
+            )
+        }
+    }
 }

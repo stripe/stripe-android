@@ -88,6 +88,7 @@ internal fun NewPaymentMethodTabLayoutUI(
                     isSelected = index == selectedIndex,
                     isEnabled = isEnabled,
                     iconRequiresTinting = item.iconRequiresTinting,
+                    promoBadge = null,
                     onItemSelectedListener = {
                         onItemSelectedListener(paymentMethods[index])
                     }
