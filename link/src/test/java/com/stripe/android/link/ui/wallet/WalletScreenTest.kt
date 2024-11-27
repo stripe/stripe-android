@@ -41,6 +41,7 @@ internal class WalletScreenTest {
         composeTestRule.setContent {
             WalletScreen(viewModel)
         }
+        composeTestRule.waitForIdle()
 
         onWalletCollapsedHeader().assertIsDisplayed()
         onWalletCollapsedChevron().assertIsDisplayed()
@@ -55,7 +56,11 @@ internal class WalletScreenTest {
             WalletScreen(viewModel)
         }
 
+        composeTestRule.waitForIdle()
+
         onCollapsedWalletRow().performClick()
+
+        composeTestRule.waitForIdle()
 
         onWalletAddPaymentMethodRow().assertIsDisplayed().assertHasClickAction()
         onExpandedWalletHeader().assertIsDisplayed()
@@ -71,6 +76,8 @@ internal class WalletScreenTest {
         composeTestRule.setContent {
             WalletScreen(viewModel)
         }
+
+        composeTestRule.waitForIdle()
 
         onLoader().assertIsDisplayed()
         onPaymentMethodList().assertCountEquals(0)
