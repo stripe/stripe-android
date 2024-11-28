@@ -152,7 +152,7 @@ class USBankAccountFormViewModelTest {
 
         viewModel.linkedAccount.test {
             skipItems(1)
-            viewModel.handleCollectBankAccountResult(mockUnverifiedBankAccount())
+            viewModel.handleCollectBankAccountResult(mockManuallyEnteredBankAccount(usesMicrodeposits = true))
 
             val screenState = awaitItem()?.screenState
             assertThat(screenState?.linkedBankAccount?.isVerifyingWithMicrodeposits).isTrue()
@@ -173,7 +173,7 @@ class USBankAccountFormViewModelTest {
     @Test
     fun `Transitions to correct screen state when collecting an unverified bank account in custom flow`() = runTest {
         val viewModel = createViewModel(defaultArgs.copy(isCompleteFlow = false))
-        val bankAccount = mockUnverifiedBankAccount()
+        val bankAccount = mockManuallyEnteredBankAccount(usesMicrodeposits = true)
 
         viewModel.linkedAccount.test {
             skipItems(1)
@@ -1034,7 +1034,30 @@ class USBankAccountFormViewModelTest {
         viewModel.currentScreenState.test {
             assertThat(awaitItem().linkedBankAccount).isNull()
 
-            val unverifiedAccount = mockUnverifiedBankAccount()
+            val unverifiedAccount = mockManuallyEnteredBankAccount(usesMicrodeposits = true)
+            viewModel.handleCollectBankAccountResult(unverifiedAccount)
+
+            val mandateCollectionViewState = awaitItem()
+            assertThat(mandateCollectionViewState.linkedBankAccount?.mandateText).isEqualTo(expectedResult)
+        }
+    }
+
+    @Test
+    fun `Produces correct mandate text when skipping verification for manually entered account`() = runTest {
+        val viewModel = createViewModel()
+
+        val expectedResult = USBankAccountTextBuilder.buildMandateAndMicrodepositsText(
+            merchantName = MERCHANT_NAME,
+            isVerifyingMicrodeposits = false,
+            isSaveForFutureUseSelected = false,
+            isSetupFlow = false,
+            isInstantDebits = false,
+        )
+
+        viewModel.currentScreenState.test {
+            assertThat(awaitItem().linkedBankAccount).isNull()
+
+            val unverifiedAccount = mockManuallyEnteredBankAccount(usesMicrodeposits = false)
             viewModel.handleCollectBankAccountResult(unverifiedAccount)
 
             val mandateCollectionViewState = awaitItem()
@@ -1446,7 +1469,7 @@ class USBankAccountFormViewModelTest {
         )
     }
 
-    private fun mockUnverifiedBankAccount(): CollectBankAccountResultInternal.Completed {
+    private fun mockManuallyEnteredBankAccount(usesMicrodeposits: Boolean): CollectBankAccountResultInternal.Completed {
         val paymentIntent = mock<PaymentIntent>()
         val financialConnectionsSession = mock<FinancialConnectionsSession>()
         whenever(paymentIntent.id).thenReturn(defaultArgs.clientSecret)
@@ -1456,7 +1479,8 @@ class USBankAccountFormViewModelTest {
                 id = "123",
                 last4 = "4567",
                 bankName = "Test",
-                routingNumber = "123"
+                routingNumber = "123",
+                usesMicrodeposits = usesMicrodeposits,
             )
         )
 

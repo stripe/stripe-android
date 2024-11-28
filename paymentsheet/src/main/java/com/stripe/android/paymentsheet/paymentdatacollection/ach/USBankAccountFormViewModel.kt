@@ -374,7 +374,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                             intentId = intentId,
                             financialConnectionsSessionId = usBankAccountData.financialConnectionsSession.id,
                             mandateText = buildMandateText(isVerifyWithMicrodeposits = true),
-                            isVerifyingWithMicrodeposits = true,
+                            isVerifyingWithMicrodeposits = paymentAccount.usesMicrodeposits,
                         )
                     )
                 }

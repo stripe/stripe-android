@@ -52,6 +52,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
+import com.stripe.android.financialconnections.model.update
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
@@ -297,10 +298,11 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         viewModelScope.launch {
             kotlin.runCatching {
                 fetchFinancialConnectionsSession(state.sessionSecret)
-            }.onSuccess {
+            }.onSuccess { session ->
+                val updatedSession = session.update(state.manifest)
                 finishWithResult(
                     state = state,
-                    result = Completed(financialConnectionsSession = it)
+                    result = Completed(financialConnectionsSession = updatedSession)
                 )
             }.onFailure { error ->
                 finishWithResult(stateFlow.value, Failed(error))
@@ -320,9 +322,13 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
             kotlin.runCatching {
                 fetchFinancialConnectionsSessionForToken(clientSecret = state.sessionSecret)
             }.onSuccess { (las, token) ->
+                val updatedSession = las.update(state.manifest)
                 finishWithResult(
                     state = state,
-                    result = Completed(financialConnectionsSession = las, token = token)
+                    result = Completed(
+                        financialConnectionsSession = updatedSession,
+                        token = token,
+                    )
                 )
             }.onFailure { error ->
                 finishWithResult(stateFlow.value, Failed(error))
