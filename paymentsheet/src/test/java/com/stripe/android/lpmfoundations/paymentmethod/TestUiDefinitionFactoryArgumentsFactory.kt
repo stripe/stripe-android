@@ -8,7 +8,7 @@ import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
-import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
+import com.stripe.android.testing.NullCardAccountRangeRepositoryFactory
 
 internal object TestUiDefinitionFactoryArgumentsFactory {
     fun create(
