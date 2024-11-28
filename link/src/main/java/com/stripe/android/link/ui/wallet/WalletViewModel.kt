@@ -13,6 +13,7 @@ import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.supportedPaymentMethodTypes
+import com.stripe.android.model.ConsumerPaymentDetails
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -24,17 +25,16 @@ internal class WalletViewModel @Inject constructor(
     private val linkAccount: LinkAccount,
     private val linkAccountManager: LinkAccountManager,
     private val logger: Logger,
-    private val navigate: (route: LinkScreen, clearStack: Boolean) -> Unit,
+    private val navigateAndClearStack: (route: LinkScreen) -> Unit,
     private val dismissWithResult: (LinkActivityResult) -> Unit
 ) : ViewModel() {
     private val stripeIntent = configuration.stripeIntent
 
     private val _uiState = MutableStateFlow(
         value = WalletUiState(
-            supportedTypes = stripeIntent.supportedPaymentMethodTypes(linkAccount),
             paymentDetailsList = emptyList(),
             selectedItem = null,
-            isProcessing = false
+            isProcessing = false,
         )
     )
 
@@ -51,7 +51,7 @@ internal class WalletViewModel @Inject constructor(
 
         viewModelScope.launch {
             linkAccountManager.listPaymentDetails(
-                paymentMethodTypes = _uiState.value.supportedTypes
+                paymentMethodTypes = stripeIntent.supportedPaymentMethodTypes(linkAccount)
             ).fold(
                 onSuccess = { response ->
                     _uiState.update {
@@ -59,7 +59,7 @@ internal class WalletViewModel @Inject constructor(
                     }
 
                     if (response.paymentDetails.isEmpty()) {
-                        navigate(LinkScreen.PaymentMethod, true)
+                        navigateAndClearStack(LinkScreen.PaymentMethod)
                     }
                 },
                 // If we can't load the payment details there's nothing to see here
@@ -73,11 +73,19 @@ internal class WalletViewModel @Inject constructor(
         dismissWithResult(LinkActivityResult.Failed(fatalError))
     }
 
+    fun onItemSelected(item: ConsumerPaymentDetails.PaymentDetails) {
+        if (item == uiState.value.selectedItem) return
+
+        _uiState.update {
+            it.copy(selectedItem = item)
+        }
+    }
+
     companion object {
         fun factory(
             parentComponent: NativeLinkComponent,
             linkAccount: LinkAccount,
-            navigate: (route: LinkScreen, clearStack: Boolean) -> Unit,
+            navigateAndClearStack: (route: LinkScreen) -> Unit,
             dismissWithResult: (LinkActivityResult) -> Unit
         ): ViewModelProvider.Factory {
             return viewModelFactory {
@@ -87,7 +95,7 @@ internal class WalletViewModel @Inject constructor(
                         linkAccountManager = parentComponent.linkAccountManager,
                         logger = parentComponent.logger,
                         linkAccount = linkAccount,
-                        navigate = navigate,
+                        navigateAndClearStack = navigateAndClearStack,
                         dismissWithResult = dismissWithResult
                     )
                 }

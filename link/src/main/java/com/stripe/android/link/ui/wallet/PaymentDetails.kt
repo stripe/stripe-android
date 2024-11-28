@@ -25,6 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -42,6 +43,7 @@ import com.stripe.android.ui.core.R as StripeUiCoreR
 
 @Composable
 internal fun PaymentDetailsListItem(
+    modifier: Modifier = Modifier,
     paymentDetails: ConsumerPaymentDetails.PaymentDetails,
     enabled: Boolean,
     isSelected: Boolean,
@@ -50,7 +52,7 @@ internal fun PaymentDetailsListItem(
     onMenuButtonClick: () -> Unit
 ) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .defaultMinSize(minHeight = 56.dp)
             .clickable(enabled = enabled, onClick = onClick),
@@ -59,7 +61,9 @@ internal fun PaymentDetailsListItem(
         RadioButton(
             selected = isSelected,
             onClick = null,
-            modifier = Modifier.padding(start = 20.dp, end = 6.dp),
+            modifier = Modifier
+                .testTag(WALLET_PAYMENT_DETAIL_ITEM_RADIO_BUTTON)
+                .padding(start = 20.dp, end = 6.dp),
             colors = RadioButtonDefaults.colors(
                 selectedColor = MaterialTheme.linkColors.actionLabelLight,
                 unselectedColor = MaterialTheme.linkColors.disabledText
@@ -154,12 +158,14 @@ private fun DefaultTag() {
 }
 
 @Composable
-private fun RowScope.PaymentDetails(
+internal fun RowScope.PaymentDetails(
+    modifier: Modifier = Modifier,
     paymentDetails: ConsumerPaymentDetails.PaymentDetails,
 ) {
     when (paymentDetails) {
         is Card -> {
             CardInfo(
+                modifier = modifier,
                 last4 = paymentDetails.last4,
                 icon = paymentDetails.brand.icon,
                 contentDescription = paymentDetails.brand.displayName
@@ -170,6 +176,7 @@ private fun RowScope.PaymentDetails(
         }
         is ConsumerPaymentDetails.Passthrough -> {
             CardInfo(
+                modifier = modifier,
                 last4 = paymentDetails.last4,
                 icon = R.drawable.stripe_link_bank,
                 contentDescription = stringResource(R.string.stripe_wallet_passthrough_description)
@@ -180,12 +187,13 @@ private fun RowScope.PaymentDetails(
 
 @Composable
 private fun RowScope.CardInfo(
+    modifier: Modifier = Modifier,
     last4: String,
     icon: Int,
-    contentDescription: String? = null
+    contentDescription: String? = null,
 ) {
     Row(
-        modifier = Modifier.weight(1f),
+        modifier = modifier.weight(1f),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Image(
@@ -210,10 +218,11 @@ private fun RowScope.CardInfo(
 
 @Composable
 private fun RowScope.BankAccountInfo(
+    modifier: Modifier = Modifier,
     bankAccount: ConsumerPaymentDetails.BankAccount,
 ) {
     Row(
-        modifier = Modifier.weight(1f),
+        modifier = modifier.weight(1f),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Image(
@@ -248,3 +257,5 @@ private fun RowScope.BankAccountInfo(
         }
     }
 }
+
+internal const val WALLET_PAYMENT_DETAIL_ITEM_RADIO_BUTTON = "wallet_payment_detail_item_radio_button"

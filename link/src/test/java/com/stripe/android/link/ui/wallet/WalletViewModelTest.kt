@@ -54,7 +54,6 @@ class WalletViewModelTest {
 
         assertThat(viewModel.uiState.value).isEqualTo(
             WalletUiState(
-                supportedTypes = TestFactory.LINK_CONFIGURATION.stripeIntent.paymentMethodTypes.toSet(),
                 paymentDetailsList = TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails,
                 selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails.firstOrNull(),
                 isProcessing = false
@@ -92,25 +91,22 @@ class WalletViewModelTest {
         linkAccountManager.listPaymentDetailsResult = Result.success(ConsumerPaymentDetails(emptyList()))
 
         var navScreen: LinkScreen? = null
-        var navClearStack: Boolean? = null
-        fun navigate(screen: LinkScreen, clearStack: Boolean) {
+        fun navigateAndClearStack(screen: LinkScreen) {
             navScreen = screen
-            navClearStack = clearStack
         }
 
         createViewModel(
             linkAccountManager = linkAccountManager,
-            navigate = ::navigate
+            navigateAndClearStack = ::navigateAndClearStack
         )
 
         assertThat(navScreen).isEqualTo(LinkScreen.PaymentMethod)
-        assertThat(navClearStack).isTrue()
     }
 
     private fun createViewModel(
         linkAccountManager: LinkAccountManager = FakeLinkAccountManager(),
         logger: Logger = FakeLogger(),
-        navigate: (route: LinkScreen, clearStack: Boolean) -> Unit = { _, _ -> },
+        navigateAndClearStack: (route: LinkScreen) -> Unit = {},
         dismissWithResult: (LinkActivityResult) -> Unit = {}
     ): WalletViewModel {
         return WalletViewModel(
@@ -118,7 +114,7 @@ class WalletViewModelTest {
             linkAccount = TestFactory.LINK_ACCOUNT,
             linkAccountManager = linkAccountManager,
             logger = logger,
-            navigate = navigate,
+            navigateAndClearStack = navigateAndClearStack,
             dismissWithResult = dismissWithResult
         )
     }
