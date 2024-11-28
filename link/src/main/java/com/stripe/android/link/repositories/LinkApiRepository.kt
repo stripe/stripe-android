@@ -9,6 +9,7 @@ import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams.Card.Companion.extraConfirmationParams
+import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSessionSignup
@@ -224,6 +225,23 @@ internal class LinkApiRepository @Inject constructor(
         return stripeRepository.deletePaymentDetails(
             clientSecret = consumerSessionClientSecret,
             paymentDetailsId = paymentDetailsId,
+            requestOptions = consumerPublishableKey?.let {
+                ApiRequest.Options(it)
+            } ?: ApiRequest.Options(
+                publishableKeyProvider(),
+                stripeAccountIdProvider()
+            )
+        )
+    }
+
+    override suspend fun updatePaymentDetails(
+        updateParams: ConsumerPaymentDetailsUpdateParams,
+        consumerSessionClientSecret: String,
+        consumerPublishableKey: String?
+    ): Result<ConsumerPaymentDetails> {
+        return stripeRepository.updatePaymentDetails(
+            clientSecret = consumerSessionClientSecret,
+            paymentDetailsUpdateParams = updateParams,
             requestOptions = consumerPublishableKey?.let {
                 ApiRequest.Options(it)
             } ?: ApiRequest.Options(
