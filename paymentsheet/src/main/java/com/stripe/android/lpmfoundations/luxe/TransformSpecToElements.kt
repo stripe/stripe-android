@@ -10,6 +10,8 @@ import com.stripe.android.ui.core.elements.AuBecsDebitMandateTextSpec
 import com.stripe.android.ui.core.elements.BacsDebitBankAccountSpec
 import com.stripe.android.ui.core.elements.BacsDebitConfirmSpec
 import com.stripe.android.ui.core.elements.BsbSpec
+import com.stripe.android.ui.core.elements.CardBillingSpec
+import com.stripe.android.ui.core.elements.CardDetailsSectionSpec
 import com.stripe.android.ui.core.elements.CashAppPayMandateTextSpec
 import com.stripe.android.ui.core.elements.CountrySpec
 import com.stripe.android.ui.core.elements.DropdownSpec
@@ -76,6 +78,8 @@ internal class TransformSpecToElements(
                 is PlaceholderSpec -> listOf() // Placeholders should be processed before calling transform.
                 is CashAppPayMandateTextSpec -> listOf(spec.transform(arguments.merchantName))
                 is KlarnaMandateTextSpec -> listOf(spec.transform(arguments.merchantName))
+                is CardBillingSpec -> TODO()
+                is CardDetailsSectionSpec -> TODO()
             }
         }
     }

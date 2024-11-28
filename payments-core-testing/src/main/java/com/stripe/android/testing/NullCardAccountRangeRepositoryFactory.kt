@@ -1,4 +1,4 @@
-package com.stripe.android.utils
+package com.stripe.android.testing
 
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.CardNumber
