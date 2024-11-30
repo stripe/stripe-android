@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.confirmation
 
 import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
+import androidx.annotation.ColorInt
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
@@ -17,6 +18,7 @@ import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmation
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.ExternalPaymentMethodInterceptor
 import com.stripe.android.paymentsheet.R
@@ -259,7 +261,7 @@ internal class DefaultConfirmationHandler(
         private val stripePaymentLauncherAssistedFactory: StripePaymentLauncherAssistedFactory,
         private val googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory?,
         private val savedStateHandle: SavedStateHandle,
-        @Named(STATUS_BAR_COLOR_PROVIDER) private val statusBarColor: () -> Int?,
+        @Named(STATUS_BAR_COLOR) @ColorInt private val statusBarColor: Int?,
         private val errorReporter: ErrorReporter,
         private val logger: UserFacingLogger?
     ) : ConfirmationHandler.Factory {
@@ -273,7 +275,7 @@ internal class DefaultConfirmationHandler(
                                 publishableKey = { paymentConfigurationProvider.get().publishableKey },
                                 stripeAccountId = { paymentConfigurationProvider.get().stripeAccountId },
                                 hostActivityLauncher = hostActivityLauncher,
-                                statusBarColor = statusBarColor(),
+                                statusBarColor = statusBarColor,
                                 includePaymentSheetNextHandlers = true,
                             )
                         },

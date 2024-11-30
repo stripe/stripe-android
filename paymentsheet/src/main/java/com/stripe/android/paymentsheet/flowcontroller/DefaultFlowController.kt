@@ -123,7 +123,7 @@ internal class DefaultFlowController @Inject internal constructor(
     private val confirmationHandler = DefaultConfirmationHandler.Factory(
         intentConfirmationInterceptor = intentConfirmationInterceptor,
         paymentConfigurationProvider = lazyPaymentConfiguration,
-        statusBarColor = { null },
+        statusBarColor = statusBarColor(),
         savedStateHandle = viewModel.handle,
         bacsMandateConfirmationLauncherFactory = bacsMandateConfirmationLauncherFactory,
         stripePaymentLauncherAssistedFactory = paymentLauncherFactory,

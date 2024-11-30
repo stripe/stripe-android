@@ -3102,7 +3102,7 @@ internal class PaymentSheetViewModelTest {
                     stripePaymentLauncherAssistedFactory = paymentLauncherFactory,
                     googlePayPaymentMethodLauncherFactory = googlePayLauncherFactory,
                     paymentConfigurationProvider = { paymentConfiguration },
-                    statusBarColor = { args.statusBarColor },
+                    statusBarColor = args.statusBarColor,
                     errorReporter = FakeErrorReporter(),
                     logger = FakeUserFacingLogger(),
                 ),
