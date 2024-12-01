@@ -60,6 +60,8 @@ internal fun UpdatePaymentMethodUI(interactor: UpdatePaymentMethodInteractor, mo
         id = PaymentSheetR.dimen.stripe_paymentsheet_outer_spacing_horizontal
     )
     val state by interactor.state.collectAsState()
+    val shouldShowCardBrandDropdown = interactor.isModifiablePaymentMethod &&
+        interactor.displayableSavedPaymentMethod.isModifiable()
 
     Column(
         modifier = modifier.padding(horizontal = horizontalPadding),
@@ -67,6 +69,7 @@ internal fun UpdatePaymentMethodUI(interactor: UpdatePaymentMethodInteractor, mo
         when (val savedPaymentMethod = interactor.displayableSavedPaymentMethod.savedPaymentMethod) {
             is SavedPaymentMethod.Card -> CardDetailsUI(
                 displayableSavedPaymentMethod = interactor.displayableSavedPaymentMethod,
+                shouldShowCardBrandDropdown = shouldShowCardBrandDropdown,
                 selectedBrand = state.cardBrandChoice,
                 card = savedPaymentMethod.card,
                 interactor = interactor,
@@ -85,7 +88,9 @@ internal fun UpdatePaymentMethodUI(interactor: UpdatePaymentMethodInteractor, mo
         }
 
         if (!interactor.isExpiredCard) {
-            interactor.displayableSavedPaymentMethod.getDetailsCannotBeChangedText()?.let {
+            interactor.displayableSavedPaymentMethod.getDetailsCannotBeChangedText(
+                shouldShowCardBrandDropdown = shouldShowCardBrandDropdown,
+            )?.let {
                 Text(
                     text = it.resolve(context),
                     style = MaterialTheme.typography.caption,
@@ -133,6 +138,7 @@ private fun UpdatePaymentMethodButtons(interactor: UpdatePaymentMethodInteractor
 @Composable
 private fun CardDetailsUI(
     displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
+    shouldShowCardBrandDropdown: Boolean,
     selectedBrand: CardBrandChoice,
     card: PaymentMethod.Card,
     interactor: UpdatePaymentMethodInteractor,
@@ -148,8 +154,7 @@ private fun CardDetailsUI(
             CardNumberField(
                 card = card,
                 selectedBrand = selectedBrand,
-                shouldShowCardBrandDropdown = interactor.isModifiablePaymentMethod &&
-                    displayableSavedPaymentMethod.isModifiable(),
+                shouldShowCardBrandDropdown = shouldShowCardBrandDropdown,
                 cardBrandFilter = interactor.cardBrandFilter,
                 savedPaymentMethodIcon = displayableSavedPaymentMethod
                     .paymentMethod
@@ -264,6 +269,7 @@ private fun BankAccountTextField(
 ) {
     Card(
         border = MaterialTheme.getBorderStroke(false),
+        elevation = 0.dp,
         modifier = modifier,
     ) {
         CommonTextField(
@@ -491,11 +497,17 @@ private fun PreviewUpdatePaymentMethodUI() {
     )
 }
 
-private fun DisplayableSavedPaymentMethod.getDetailsCannotBeChangedText(): ResolvableString? {
+private fun DisplayableSavedPaymentMethod.getDetailsCannotBeChangedText(
+    shouldShowCardBrandDropdown: Boolean,
+): ResolvableString? {
     return (
         when (savedPaymentMethod) {
             is SavedPaymentMethod.Card ->
-                PaymentSheetR.string.stripe_paymentsheet_card_details_cannot_be_changed
+                if (shouldShowCardBrandDropdown) {
+                    PaymentSheetR.string.stripe_paymentsheet_only_card_brand_can_be_changed
+                } else {
+                    PaymentSheetR.string.stripe_paymentsheet_card_details_cannot_be_changed
+                }
             is SavedPaymentMethod.USBankAccount ->
                 PaymentSheetR.string.stripe_paymentsheet_bank_account_details_cannot_be_changed
             is SavedPaymentMethod.SepaDebit ->
