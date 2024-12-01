@@ -145,7 +145,7 @@ internal object CustomerSheetTestHelper {
                         cardBrandFilter: CardBrandFilter
                     ): GooglePayPaymentMethodLauncher = mock()
                 },
-                statusBarColor = { null },
+                statusBarColor = null,
                 savedStateHandle = SavedStateHandle(),
                 errorReporter = FakeErrorReporter(),
                 logger = FakeUserFacingLogger(),

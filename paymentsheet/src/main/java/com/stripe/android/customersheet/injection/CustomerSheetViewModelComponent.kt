@@ -7,9 +7,11 @@ import com.stripe.android.customersheet.CustomerSheetIntegration
 import com.stripe.android.customersheet.CustomerSheetViewModel
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
 import com.stripe.android.paymentelement.confirmation.ConfirmationModule
+import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import dagger.BindsInstance
 import dagger.Component
+import javax.inject.Named
 
 @CustomerSheetViewModelScope
 @Component(
@@ -33,7 +35,7 @@ internal interface CustomerSheetViewModelComponent {
         fun configuration(configuration: CustomerSheet.Configuration): Builder
 
         @BindsInstance
-        fun statusBarColor(statusBarColor: Int?): Builder
+        fun statusBarColor(@Named(STATUS_BAR_COLOR) statusBarColor: Int?): Builder
 
         @BindsInstance
         fun integrationType(integrationType: CustomerSheetIntegration.Type): Builder

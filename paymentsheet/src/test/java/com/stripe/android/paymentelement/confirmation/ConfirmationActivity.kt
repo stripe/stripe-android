@@ -26,6 +26,7 @@ import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
+import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.testing.FakeErrorReporter
@@ -65,7 +66,7 @@ internal class ConfirmationActivity : AppCompatActivity() {
                 val component = DaggerConfirmationTestComponent.builder()
                     .application(extras.requireApplication())
                     .allowsManualConfirmation(allowsManualConfirmation = false)
-                    .statusBarColor { null }
+                    .statusBarColor(null)
                     .savedStateHandle(extras.createSavedStateHandle())
                     .build()
 
@@ -96,7 +97,7 @@ internal interface ConfirmationTestComponent {
         fun savedStateHandle(savedStateHandle: SavedStateHandle): Builder
 
         @BindsInstance
-        fun statusBarColor(@Named(STATUS_BAR_COLOR_PROVIDER) statusBarColor: () -> Int?): Builder
+        fun statusBarColor(@Named(STATUS_BAR_COLOR) statusBarColor: Int?): Builder
 
         @BindsInstance
         fun allowsManualConfirmation(@Named(ALLOWS_MANUAL_CONFIRMATION) allowsManualConfirmation: Boolean): Builder

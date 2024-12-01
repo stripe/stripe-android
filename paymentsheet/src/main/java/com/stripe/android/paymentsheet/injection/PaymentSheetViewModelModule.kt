@@ -2,7 +2,7 @@ package com.stripe.android.paymentsheet.injection
 
 import android.content.Context
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.paymentelement.confirmation.STATUS_BAR_COLOR_PROVIDER
+import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PaymentSheetContractV2
 import com.stripe.android.paymentsheet.PrefsRepository
@@ -20,9 +20,9 @@ internal class PaymentSheetViewModelModule(private val starterArgs: PaymentSheet
     }
 
     @Provides
-    @Named(STATUS_BAR_COLOR_PROVIDER)
-    fun providesStatusBarColor(): () -> Int? {
-        return { starterArgs.statusBarColor }
+    @Named(STATUS_BAR_COLOR)
+    fun providesStatusBarColor(): Int? {
+        return starterArgs.statusBarColor
     }
 
     @Provides

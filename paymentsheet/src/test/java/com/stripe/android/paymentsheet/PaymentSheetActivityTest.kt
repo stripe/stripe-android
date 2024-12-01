@@ -1158,7 +1158,7 @@ internal class PaymentSheetActivityTest {
                     bacsMandateConfirmationLauncherFactory = { FakeBacsMandateConfirmationLauncher() },
                     googlePayPaymentMethodLauncherFactory = googlePayPaymentMethodLauncherFactory,
                     paymentConfigurationProvider = { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY) },
-                    statusBarColor = { args.statusBarColor },
+                    statusBarColor = args.statusBarColor,
                     errorReporter = FakeErrorReporter(),
                     logger = FakeUserFacingLogger(),
                 ),

@@ -23,7 +23,6 @@ import com.stripe.android.customersheet.DefaultCustomerSheetLoader
 import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
 import com.stripe.android.customersheet.analytics.DefaultCustomerSheetEventReporter
 import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
-import com.stripe.android.paymentelement.confirmation.STATUS_BAR_COLOR_PROVIDER
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
@@ -101,10 +100,6 @@ internal interface CustomerSheetViewModelModule {
         fun isLiveMode(
             paymentConfiguration: Provider<PaymentConfiguration>
         ): () -> Boolean = { paymentConfiguration.get().publishableKey.startsWith("pk_live") }
-
-        @Provides
-        @Named(STATUS_BAR_COLOR_PROVIDER)
-        fun providesStatusBarColor(statusBarColor: Int?): () -> Int? = { statusBarColor }
 
         @Provides
         fun providesUserFacingLogger(): UserFacingLogger? = null
