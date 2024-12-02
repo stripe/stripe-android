@@ -883,7 +883,6 @@ class PaymentSheet internal constructor(
     }
 
     @Parcelize
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
     data class Appearance(
         /**
