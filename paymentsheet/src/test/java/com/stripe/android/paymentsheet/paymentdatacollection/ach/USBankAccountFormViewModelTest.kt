@@ -54,6 +54,7 @@ class USBankAccountFormViewModelTest {
 
     private val defaultArgs = USBankAccountFormViewModel.Args(
         instantDebits = false,
+        incentive = null,
         formArgs = FormArguments(
             paymentMethodCode = PaymentMethod.Type.USBankAccount.code,
             merchantName = MERCHANT_NAME,
@@ -373,7 +374,7 @@ class USBankAccountFormViewModelTest {
         )
 
         val screenStates = listOf(
-            BankFormScreenState(),
+            BankFormScreenState(isPaymentFlow = true),
             BankFormScreenStateFactory.createWithSession(
                 sessionId = "session_1234",
                 isVerifyingWithMicrodeposits = false,

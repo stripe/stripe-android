@@ -52,6 +52,7 @@ internal class CustomerSheetScreenshotTest {
     private val usBankAccountFormArguments = USBankAccountFormArguments(
         showCheckbox = false,
         instantDebits = false,
+        incentive = null,
         linkMode = null,
         onBehalfOf = null,
         isCompleteFlow = false,

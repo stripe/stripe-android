@@ -37,6 +37,7 @@ internal object BankFormScreenStateFactory {
         mandateText: ResolvableString,
     ): BankFormScreenState {
         return BankFormScreenState(
+            isPaymentFlow = true,
             linkedBankAccount = BankFormScreenState.LinkedBankAccount(
                 resultIdentifier = resultIdentifier,
                 financialConnectionsSessionId = "session_1234",
