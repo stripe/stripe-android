@@ -942,6 +942,9 @@ class PaymentSheet internal constructor(
         }
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun getEmbedded() = embeddedAppearance
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Parcelize
         @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
         class Embedded(
@@ -954,6 +957,9 @@ class PaymentSheet internal constructor(
                     style = RowStyle.FlatWithRadio.defaultLight
                 )
             }
+
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun getRowStyle() = style
 
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             @ExperimentalEmbeddedPaymentElementApi

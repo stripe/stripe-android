@@ -35,6 +35,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Slider
+import androidx.compose.material.Switch
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material.TopAppBar
@@ -64,8 +65,11 @@ import androidx.compose.ui.unit.sp
 import com.godaddy.android.colorpicker.ClassicColorPicker
 import com.godaddy.android.colorpicker.HsvColor
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.example.R
+import com.stripe.android.uicore.StripeThemeDefaults
 
 private val BASE_FONT_SIZE = 20.sp
 private val BASE_PADDING = 8.dp
@@ -95,6 +99,7 @@ internal class AppearanceBottomSheetDialogFragment : BottomSheetDialogFragment()
     }
 }
 
+@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @Composable
 private fun AppearancePicker(
     currentAppearance: PaymentSheet.Appearance,
@@ -150,6 +155,29 @@ private fun AppearancePicker(
                     currentAppearance = currentAppearance,
                     updateAppearance = updateAppearance,
                 )
+            }
+            CustomizationCard("Embedded") {
+                RowStyleDropDown(currentAppearance.getEmbedded().getRowStyle()) { style ->
+                    updateAppearance(currentAppearance.copy(embeddedAppearance = Embedded(style)))
+                }
+                Divider()
+                when (currentAppearance.getEmbedded().getRowStyle()) {
+                    is Embedded.RowStyle.FloatingButton ->
+                        FloatingButton(
+                            currentAppearance = currentAppearance,
+                            updateAppearance = updateAppearance,
+                        )
+                    is Embedded.RowStyle.FlatWithCheckmark ->
+                        FlatWithCheckmark(
+                            currentAppearance = currentAppearance,
+                            updateAppearance = updateAppearance,
+                        )
+                    is Embedded.RowStyle.FlatWithRadio ->
+                        FlatWithRadio(
+                            currentAppearance = currentAppearance,
+                            updateAppearance = updateAppearance,
+                        )
+                }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -589,6 +617,345 @@ private fun PrimaryButton(
     }
 }
 
+@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
+@Composable
+private fun FlatWithRadio(
+    currentAppearance: PaymentSheet.Appearance,
+    updateAppearance: (PaymentSheet.Appearance) -> Unit,
+) {
+    val currentEmbeddedRowStyle = currentAppearance.getEmbedded().getRowStyle() as Embedded.RowStyle.FlatWithRadio
+
+    ColorItem(
+        label = "separatorColor",
+        currentColor = Color(currentEmbeddedRowStyle.separatorColor),
+        onColorPicked = {
+            currentAppearance.copy(
+                embeddedAppearance = Embedded(
+                    updateFlatWithRadio(
+                        current = currentEmbeddedRowStyle,
+                        separatorColor = it.toArgb()
+                    )
+                )
+            )
+        },
+        updateAppearance = updateAppearance,
+    )
+    Divider()
+
+    ColorItem(
+        label = "selectedColor",
+        currentColor = Color(currentEmbeddedRowStyle.selectedColor),
+        onColorPicked = {
+            currentAppearance.copy(
+                embeddedAppearance = Embedded(
+                    updateFlatWithRadio(
+                        current = currentEmbeddedRowStyle,
+                        selectedColor = it.toArgb()
+                    )
+                )
+            )
+        },
+        updateAppearance = updateAppearance,
+    )
+    Divider()
+
+    ColorItem(
+        label = "unselectedColor",
+        currentColor = Color(currentEmbeddedRowStyle.unselectedColor),
+        onColorPicked = {
+            currentAppearance.copy(
+                embeddedAppearance = Embedded(
+                    updateFlatWithRadio(
+                        current = currentEmbeddedRowStyle,
+                        unselectedColor = it.toArgb()
+                    )
+                )
+            )
+        },
+        updateAppearance = updateAppearance,
+    )
+
+    IncrementDecrementItem("separatorInsetsDp", currentEmbeddedRowStyle.separatorInsetsDp) {
+        updateAppearance(
+            currentAppearance.copy(
+                embeddedAppearance = Embedded(
+                    updateFlatWithRadio(
+                        current = currentEmbeddedRowStyle,
+                        separatorInsetsDp = it
+                    )
+                )
+            )
+        )
+    }
+    Divider()
+
+    IncrementDecrementItem("separatorThicknessDp", currentEmbeddedRowStyle.separatorThicknessDp) {
+        updateAppearance(
+            currentAppearance.copy(
+                embeddedAppearance = Embedded(
+                    updateFlatWithRadio(
+                        current = currentEmbeddedRowStyle,
+                        separatorThicknessDp = it
+                    )
+                )
+            )
+        )
+    }
+    Divider()
+
+    IncrementDecrementItem("additionalInsets", currentEmbeddedRowStyle.additionalInsetsDp) {
+        updateAppearance(
+            currentAppearance.copy(
+                embeddedAppearance = Embedded(
+                    updateFlatWithRadio(
+                        current = currentEmbeddedRowStyle,
+                        additionalInsetsDp = it
+                    )
+                )
+            )
+        )
+    }
+    Divider()
+
+    AppearanceToggle("topSeparatorEnabled", currentEmbeddedRowStyle.topSeparatorEnabled) {
+        updateAppearance(
+            currentAppearance.copy(
+                embeddedAppearance = Embedded(
+                    updateFlatWithRadio(
+                        current = currentEmbeddedRowStyle,
+                        topSeparatorEnabled = it
+                    )
+                )
+            )
+        )
+    }
+    Divider()
+
+    AppearanceToggle("bottomSeparatorEnabled", currentEmbeddedRowStyle.bottomSeparatorEnabled) {
+        updateAppearance(
+            currentAppearance.copy(
+                embeddedAppearance = Embedded(
+                    updateFlatWithRadio(
+                        current = currentEmbeddedRowStyle,
+                        bottomSeparatorEnabled = it
+                    )
+                )
+            )
+        )
+    }
+    Divider()
+}
+
+@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
+@Composable
+private fun FlatWithCheckmark(
+    currentAppearance: PaymentSheet.Appearance,
+    updateAppearance: (PaymentSheet.Appearance) -> Unit,
+) {
+    val currentStyle = currentAppearance.getEmbedded().getRowStyle() as Embedded.RowStyle.FlatWithCheckmark
+
+    ColorItem(
+        label = "separatorColor",
+        currentColor = Color(currentStyle.separatorColor),
+        onColorPicked = {
+            currentAppearance.copy(
+                embeddedAppearance = Embedded(
+                    updateFlatWithCheckmark(
+                        current = currentStyle,
+                        separatorColor = it.toArgb()
+                    )
+                )
+            )
+        },
+        updateAppearance = updateAppearance,
+    )
+    Divider()
+
+    ColorItem(
+        label = "checkmarkColor",
+        currentColor = Color(currentStyle.checkmarkColor),
+        onColorPicked = {
+            currentAppearance.copy(
+                embeddedAppearance = Embedded(
+                    updateFlatWithCheckmark(
+                        current = currentStyle,
+                        checkmarkColor = it.toArgb()
+                    )
+                )
+            )
+        },
+        updateAppearance = updateAppearance,
+    )
+    Divider()
+
+    IncrementDecrementItem("separatorThicknessDp", currentStyle.separatorThicknessDp) {
+        updateAppearance(
+            currentAppearance.copy(
+                embeddedAppearance = Embedded(
+                    updateFlatWithCheckmark(
+                        current = currentStyle,
+                        separatorThicknessDp = it
+                    )
+                )
+            )
+        )
+    }
+    Divider()
+
+    IncrementDecrementItem("separatorInsetsDp", currentStyle.separatorInsetsDp) {
+        updateAppearance(
+            currentAppearance.copy(
+                embeddedAppearance = Embedded(
+                    updateFlatWithCheckmark(
+                        current = currentStyle,
+                        separatorInsetsDp = it
+                    )
+                )
+            )
+        )
+    }
+    Divider()
+
+    IncrementDecrementItem("checkmarkInsetsDp", currentStyle.checkmarkInsetDp) {
+        updateAppearance(
+            currentAppearance.copy(
+                embeddedAppearance = Embedded(
+                    updateFlatWithCheckmark(
+                        current = currentStyle,
+                        checkmarkInsetsDp = it
+                    )
+                )
+            )
+        )
+    }
+    Divider()
+
+    IncrementDecrementItem("additionalInsetsDp", currentStyle.additionalInsetsDp) {
+        updateAppearance(
+            currentAppearance.copy(
+                embeddedAppearance = Embedded(
+                    updateFlatWithCheckmark(
+                        current = currentStyle,
+                        additionalInsetsDp = it
+                    )
+                )
+            )
+        )
+    }
+    Divider()
+
+    AppearanceToggle("topSeparatorEnabled", currentStyle.topSeparatorEnabled) {
+        updateAppearance(
+            currentAppearance.copy(
+                embeddedAppearance = Embedded(
+                    updateFlatWithCheckmark(
+                        current = currentStyle,
+                        topSeparatorEnabled = it
+                    )
+                )
+            )
+        )
+    }
+    Divider()
+
+    AppearanceToggle("bottomSeparatorEnabled", currentStyle.bottomSeparatorEnabled) {
+        updateAppearance(
+            currentAppearance.copy(
+                embeddedAppearance = Embedded(
+                    updateFlatWithCheckmark(
+                        current = currentStyle,
+                        bottomSeparatorEnabled = it
+                    )
+                )
+            )
+        )
+    }
+}
+
+@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
+@Composable
+private fun FloatingButton(
+    currentAppearance: PaymentSheet.Appearance,
+    updateAppearance: (PaymentSheet.Appearance) -> Unit,
+) {
+    val currentEmbeddedRowStyle = currentAppearance.getEmbedded().getRowStyle() as Embedded.RowStyle.FloatingButton
+
+    IncrementDecrementItem("spacingDp", currentEmbeddedRowStyle.spacingDp) {
+        updateAppearance(
+            currentAppearance.copy(
+                embeddedAppearance = Embedded(
+                    Embedded.RowStyle.FloatingButton(
+                        spacingDp = it,
+                        additionalInsetsDp = currentEmbeddedRowStyle.additionalInsetsDp
+                    )
+                )
+            )
+        )
+    }
+    Divider()
+
+    IncrementDecrementItem("additionalInsets", currentEmbeddedRowStyle.additionalInsetsDp) {
+        updateAppearance(
+            currentAppearance.copy(
+                embeddedAppearance = Embedded(
+                    Embedded.RowStyle.FloatingButton(
+                        spacingDp = currentEmbeddedRowStyle.spacingDp,
+                        additionalInsetsDp = it
+                    )
+                )
+            )
+        )
+    }
+}
+
+@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
+private fun updateFlatWithRadio(
+    current: Embedded.RowStyle.FlatWithRadio,
+    separatorThicknessDp: Float? = null,
+    separatorColor: Int? = null,
+    separatorInsetsDp: Float? = null,
+    topSeparatorEnabled: Boolean? = null,
+    bottomSeparatorEnabled: Boolean? = null,
+    selectedColor: Int? = null,
+    unselectedColor: Int? = null,
+    additionalInsetsDp: Float? = null
+): Embedded.RowStyle.FlatWithRadio {
+    return Embedded.RowStyle.FlatWithRadio(
+        separatorThicknessDp = separatorThicknessDp ?: current.separatorThicknessDp,
+        separatorColor = separatorColor ?: current.separatorColor,
+        separatorInsetsDp = separatorInsetsDp ?: current.separatorInsetsDp,
+        topSeparatorEnabled = topSeparatorEnabled ?: current.topSeparatorEnabled,
+        bottomSeparatorEnabled = bottomSeparatorEnabled ?: current.bottomSeparatorEnabled,
+        selectedColor = selectedColor ?: current.selectedColor,
+        unselectedColor = unselectedColor ?: current.unselectedColor,
+        additionalInsetsDp = additionalInsetsDp ?: current.additionalInsetsDp,
+    )
+}
+
+@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
+private fun updateFlatWithCheckmark(
+    current: Embedded.RowStyle.FlatWithCheckmark,
+    separatorThicknessDp: Float? = null,
+    separatorColor: Int? = null,
+    separatorInsetsDp: Float? = null,
+    topSeparatorEnabled: Boolean? = null,
+    bottomSeparatorEnabled: Boolean? = null,
+    checkmarkColor: Int? = null,
+    checkmarkInsetsDp: Float? = null,
+    additionalInsetsDp: Float? = null
+): Embedded.RowStyle.FlatWithCheckmark {
+    return Embedded.RowStyle.FlatWithCheckmark(
+        separatorThicknessDp = separatorThicknessDp ?: current.separatorThicknessDp,
+        separatorColor = separatorColor ?: current.separatorColor,
+        separatorInsetsDp = separatorInsetsDp ?: current.separatorInsetsDp,
+        topSeparatorEnabled = topSeparatorEnabled ?: current.topSeparatorEnabled,
+        bottomSeparatorEnabled = bottomSeparatorEnabled ?: current.bottomSeparatorEnabled,
+        checkmarkColor = checkmarkColor ?: current.checkmarkColor,
+        checkmarkInsetDp = checkmarkInsetsDp ?: current.checkmarkInsetDp,
+        additionalInsetsDp = additionalInsetsDp ?: current.additionalInsetsDp,
+    )
+}
+
 @Composable
 private fun ColorItem(
     label: String,
@@ -725,6 +1092,26 @@ private fun IncrementDecrementItem(label: String, value: Float, onValueChange: (
 }
 
 @Composable
+private fun AppearanceToggle(label: String, value: Boolean, onValueChange: (Boolean) -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(all = BASE_PADDING),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(text = "$label: $value", fontSize = BASE_FONT_SIZE)
+        Spacer(modifier = Modifier.weight(1f))
+        Switch(
+            checked = value,
+            onCheckedChange = {
+                onValueChange(it)
+            }
+        )
+    }
+}
+
+@Composable
 private fun FontScaleSlider(sliderPosition: Float, onValueChange: (Float) -> Unit) {
     Text(
         text = "sizeScaleFactor: $sliderPosition",
@@ -738,6 +1125,85 @@ private fun FontScaleSlider(sliderPosition: Float, onValueChange: (Float) -> Uni
             onValueChange(it)
         }
     )
+}
+
+@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
+@Composable
+private fun RowStyleDropDown(style: Embedded.RowStyle, rowStyleSelectedCallback: (Embedded.RowStyle) -> Unit) {
+    var expanded by remember { mutableStateOf(false) }
+
+    Row(
+        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(all = BASE_PADDING)
+            .wrapContentSize(Alignment.TopStart)
+    ) {
+        Text(
+            text = "RowStyle: ${style::class.simpleName}",
+            fontSize = BASE_FONT_SIZE,
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(onClick = { expanded = true })
+        )
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            DropdownMenuItem(
+                onClick = {
+                    expanded = false
+                    rowStyleSelectedCallback(
+                        Embedded.RowStyle.FlatWithRadio(
+                            separatorThicknessDp = StripeThemeDefaults.flat.separatorThickness,
+                            separatorColor = StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
+                            separatorInsetsDp = StripeThemeDefaults.flat.separatorInsets,
+                            topSeparatorEnabled = StripeThemeDefaults.flat.topSeparatorEnabled,
+                            bottomSeparatorEnabled = StripeThemeDefaults.flat.bottomSeparatorEnabled,
+                            selectedColor = StripeThemeDefaults.colorsLight.materialColors.primary.toArgb(),
+                            unselectedColor = StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
+                            additionalInsetsDp = StripeThemeDefaults.embeddedCommon.additionalInsetsDp
+                        )
+                    )
+                }
+            ) {
+                Text("FlatWithRadio")
+            }
+            DropdownMenuItem(
+                onClick = {
+                    expanded = false
+                    rowStyleSelectedCallback(
+                        Embedded.RowStyle.FlatWithCheckmark(
+                            separatorThicknessDp = StripeThemeDefaults.flat.separatorThickness,
+                            separatorColor = StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
+                            separatorInsetsDp = StripeThemeDefaults.flat.separatorInsets,
+                            topSeparatorEnabled = StripeThemeDefaults.flat.topSeparatorEnabled,
+                            bottomSeparatorEnabled = StripeThemeDefaults.flat.bottomSeparatorEnabled,
+                            checkmarkColor = StripeThemeDefaults.colorsLight.materialColors.primary.toArgb(),
+                            checkmarkInsetDp = StripeThemeDefaults.embeddedCommon.checkmarkInsetDp,
+                            additionalInsetsDp = StripeThemeDefaults.embeddedCommon.additionalInsetsDp
+                        )
+                    )
+                }
+            ) {
+                Text("FlatWithCheckmark")
+            }
+            DropdownMenuItem(
+                onClick = {
+                    expanded = false
+                    rowStyleSelectedCallback(
+                        Embedded.RowStyle.FloatingButton(
+                            spacingDp = StripeThemeDefaults.floating.spacing,
+                            additionalInsetsDp = StripeThemeDefaults.embeddedCommon.additionalInsetsDp
+                        )
+                    )
+                }
+            ) {
+                Text("FloatingButton")
+            }
+        }
+    }
 }
 
 @Composable
