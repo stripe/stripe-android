@@ -83,6 +83,7 @@ internal class StripeConnectWebViewContainerController(
                     // Bind appearance changes in the manager to the WebView (only when page is loaded).
                     embeddedComponentManager.appearanceFlow
                         .collectLatest { appearance ->
+                            updateState { copy(appearance = appearance) }
                             if (stateFlow.value.receivedPageDidLoad) {
                                 view.updateConnectInstance(appearance)
                             }
