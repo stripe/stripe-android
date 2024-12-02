@@ -1,5 +1,6 @@
 package com.stripe.android.link.ui.cardedit
 
+import androidx.compose.ui.util.fastFold
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -19,9 +20,11 @@ import com.stripe.android.ui.core.elements.CardBillingSpec
 import com.stripe.android.ui.core.elements.CardDetailsSectionSpec
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -38,13 +41,30 @@ internal class CardEditViewModel @Inject constructor(
     private val _formElements = MutableStateFlow(listOf<FormElement>())
     val formElements: StateFlow<List<FormElement>> = _formElements
 
+    val primaryButtonEnabled = formElements.mapAsStateFlow { elements ->
+        if (elements.isEmpty()) return@mapAsStateFlow false
+        elements.fastFold(
+            initial = true
+        ) { current, element ->
+            current && element.isComplete()
+        }
+    }
+
+    private fun FormElement.isComplete(): Boolean {
+        return getFormFieldValueFlow().value.fastFold(
+            initial = true
+        ) { current, fieldValue ->
+            current && fieldValue.second.isComplete
+        }
+    }
+
     private val _viewState = MutableStateFlow(
         value = CardEditState(
             isProcessing = false,
             isDefault = false
         )
     )
-    val viewState: Flow<CardEditState> = _viewState
+    val viewState: StateFlow<CardEditState> = _viewState
 
     private val cardDetailsSpec = CardDetailsSectionSpec(IdentifierSpec.Generic("card_details_section"))
     private val billingSpec = CardBillingSpec(allowedCountryCodes = CountryUtils.supportedBillingCountries)
@@ -111,7 +131,6 @@ internal class CardEditViewModel @Inject constructor(
             parentComponent: NativeLinkComponent,
             paymentDetailsId: String,
             linkAccount: LinkAccount,
-            cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
             dismissWithResult: (LinkActivityResult) -> Unit
         ): ViewModelProvider.Factory {
             return viewModelFactory {
@@ -123,7 +142,7 @@ internal class CardEditViewModel @Inject constructor(
                         logger = parentComponent.logger,
                         linkAccount = linkAccount,
                         dismissWithResult = dismissWithResult,
-                        cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory
+                        cardAccountRangeRepositoryFactory = parentComponent.cardAccountRangeRepositoryFactory
                     )
                 }
             }

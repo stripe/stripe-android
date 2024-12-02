@@ -29,7 +29,7 @@ data class CardBillingSpec(
             rawValuesMap = initialValues,
             sameAsShippingElement = null,
             shippingValuesMap = shippingValues,
-            collectionMode = BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
+            collectionMode = BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
         )
 
         return createSectionElement(

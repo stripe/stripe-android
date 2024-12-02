@@ -61,12 +61,6 @@ internal interface NativeLinkModule {
     @NativeLinkScope
     fun stripeRepository(stripeRepository: StripeApiRepository): StripeRepository
 
-    @Binds
-    @NativeLinkScope
-    fun bindsCardAccountRangeRepositoryFactory(
-        defaultCardAccountRangeRepositoryFactory: DefaultCardAccountRangeRepositoryFactory
-    ): CardAccountRangeRepository.Factory
-
     companion object {
         @Provides
         @NativeLinkScope
@@ -132,5 +126,13 @@ internal interface NativeLinkModule {
         @Named(ENABLE_LOGGING)
         @NativeLinkScope
         fun providesEnableLogging(): Boolean = BuildConfig.DEBUG
+
+        @Provides
+        @NativeLinkScope
+        fun bindsCardAccountRangeRepositoryFactory(
+            context: Context
+        ): CardAccountRangeRepository.Factory {
+            return DefaultCardAccountRangeRepositoryFactory(context)
+        }
     }
 }

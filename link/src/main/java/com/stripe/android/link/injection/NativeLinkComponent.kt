@@ -1,6 +1,7 @@
 package com.stripe.android.link.injection
 
 import android.content.Context
+import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
@@ -28,6 +29,7 @@ internal interface NativeLinkComponent {
     val configuration: LinkConfiguration
     val linkEventsReporter: LinkEventsReporter
     val logger: Logger
+    val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory
     val viewModel: LinkActivityViewModel
 
     @Component.Builder
