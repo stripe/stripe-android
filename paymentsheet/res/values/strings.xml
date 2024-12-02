@@ -77,6 +77,8 @@
   <string name="stripe_paymentsheet_new_card">New card</string>
   <!-- Title shown above a section containing payment methods that a customer can choose to pay with e.g. card, bank account, etc. -->
   <string name="stripe_paymentsheet_new_pm">New payment method</string>
+  <!-- Text displayed on manage card screen when the only editable card detail is the card brand. -->
+  <string name="stripe_paymentsheet_only_card_brand_can_be_changed">Only card brand can be changed.</string>
   <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_using">Or pay using</string>
   <!-- Title of a section containing a card form that will collect the payment information from the user. -->

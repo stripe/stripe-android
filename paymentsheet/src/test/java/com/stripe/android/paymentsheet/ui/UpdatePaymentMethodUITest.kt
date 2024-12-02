@@ -269,6 +269,19 @@ class UpdatePaymentMethodUITest {
     }
 
     @Test
+    fun cardPaymentMethod_cbcEligible_onlyCardBrandCanBeChangedTextShown() {
+        runScenario(
+            displayableSavedPaymentMethod = PaymentMethodFixtures
+                .CARD_WITH_NETWORKS_PAYMENT_METHOD
+                .toDisplayableSavedPaymentMethod()
+        ) {
+            composeRule.onNodeWithTag(UPDATE_PM_DETAILS_SUBTITLE_TEST_TAG).assertTextEquals(
+                "Only card brand can be changed."
+            )
+        }
+    }
+
+    @Test
     fun sepaPaymentMethod_sepaDetailsCannotBeChangedTextShown() {
         runScenario(
             displayableSavedPaymentMethod = PaymentMethodFixtures
