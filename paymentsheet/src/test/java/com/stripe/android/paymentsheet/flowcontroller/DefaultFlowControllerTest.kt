@@ -38,7 +38,7 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.wallets.Wallet
-import com.stripe.android.paymentelement.confirmation.DefaultConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.createTestConfirmationHandlerFactory
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
 import com.stripe.android.paymentelement.confirmation.intent.InvalidDeferredIntentUsageException
@@ -88,7 +88,6 @@ import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.paymentsheet.ui.SepaMandateContract
 import com.stripe.android.paymentsheet.ui.SepaMandateResult
-import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.paymentsheet.utils.RecordingGooglePayPaymentMethodLauncherFactory
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.uicore.image.StripeImageLoader
@@ -2410,15 +2409,12 @@ internal class DefaultFlowControllerTest {
         errorReporter = errorReporter,
         cvcRecollectionLauncherFactory = cvcRecollectionLauncherFactory,
         initializedViaCompose = false,
-        confirmationHandler = DefaultConfirmationHandler.Factory(
+        confirmationHandler = createTestConfirmationHandlerFactory(
             bacsMandateConfirmationLauncherFactory = bacsMandateConfirmationLauncherFactory,
             googlePayPaymentMethodLauncherFactory = googlePayPaymentMethodLauncherFactory,
             intentConfirmationInterceptor = fakeIntentConfirmationInterceptor,
             stripePaymentLauncherAssistedFactory = paymentLauncherAssistedFactory,
-            paymentConfigurationProvider = {
-                PaymentConfiguration.getInstance(context)
-            },
-            logger = FakeUserFacingLogger(),
+            paymentConfiguration = PaymentConfiguration.getInstance(context),
             errorReporter = errorReporter,
             savedStateHandle = viewModel.handle,
             statusBarColor = STATUS_BAR_COLOR,

@@ -17,8 +17,8 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.isInstanceOf
-import com.stripe.android.paymentelement.confirmation.ConfirmationActivity
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.PaymentElementConfirmationTestActivity
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -46,7 +46,7 @@ internal class GooglePayConfirmationActivityTest {
     val intentsRule = IntentsRule()
 
     @get:Rule
-    val testActivityRule = createTestActivityRule<ConfirmationActivity>()
+    val testActivityRule = createTestActivityRule<PaymentElementConfirmationTestActivity>()
 
     @Test
     fun googlePaySucceeds() = test {
@@ -248,12 +248,12 @@ internal class GooglePayConfirmationActivityTest {
     }
 
     private fun test(
-        test: suspend ConfirmationActivity.() -> Unit
+        test: suspend PaymentElementConfirmationTestActivity.() -> Unit
     ) = runTest(UnconfinedTestDispatcher()) {
         val countDownLatch = CountDownLatch(1)
 
-        ActivityScenario.launch<ConfirmationActivity>(
-            Intent(application, ConfirmationActivity::class.java)
+        ActivityScenario.launch<PaymentElementConfirmationTestActivity>(
+            Intent(application, PaymentElementConfirmationTestActivity::class.java)
         ).use { scenario ->
             scenario.onActivity { activity ->
                 launch {

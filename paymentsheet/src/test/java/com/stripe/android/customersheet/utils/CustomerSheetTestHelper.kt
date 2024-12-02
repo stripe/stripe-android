@@ -32,7 +32,7 @@ import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 import com.stripe.android.networking.StripeRepository
-import com.stripe.android.paymentelement.confirmation.DefaultConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.createTestConfirmationHandlerFactory
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
@@ -45,7 +45,6 @@ import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.PaymentMethodRemoveOperation
 import com.stripe.android.paymentsheet.ui.PaymentMethodUpdateOperation
-import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.utils.CompletableSingle
@@ -118,9 +117,9 @@ internal object CustomerSheetTestHelper {
             integrationType = integrationType,
             isLiveModeProvider = { isLiveMode },
             logger = Logger.noop(),
-            confirmationHandlerFactory = DefaultConfirmationHandler.Factory(
+            confirmationHandlerFactory = createTestConfirmationHandlerFactory(
                 intentConfirmationInterceptor = intentConfirmationInterceptor,
-                paymentConfigurationProvider = { paymentConfiguration },
+                paymentConfiguration = paymentConfiguration,
                 bacsMandateConfirmationLauncherFactory = {
                     FakeBacsMandateConfirmationLauncher()
                 },
@@ -148,7 +147,6 @@ internal object CustomerSheetTestHelper {
                 statusBarColor = null,
                 savedStateHandle = SavedStateHandle(),
                 errorReporter = FakeErrorReporter(),
-                logger = FakeUserFacingLogger(),
             ),
             eventReporter = eventReporter,
             customerSheetLoader = customerSheetLoader,
