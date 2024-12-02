@@ -883,7 +883,7 @@ class PaymentSheet internal constructor(
     }
 
     @Parcelize
-    data class Appearance internal constructor(
+    data class Appearance(
         /**
          * Describes the colors used while the system is in light mode.
          */
