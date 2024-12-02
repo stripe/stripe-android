@@ -24,6 +24,7 @@ import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.paymentelement.confirmation.injection.PaymentElementConfirmationModule
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
@@ -41,7 +42,7 @@ import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
 
-internal class ConfirmationActivity : AppCompatActivity() {
+internal class PaymentElementConfirmationTestActivity : AppCompatActivity() {
     val viewModel: TestViewModel by viewModels {
         TestViewModel.Factory
     }
@@ -63,7 +64,7 @@ internal class ConfirmationActivity : AppCompatActivity() {
 
         object Factory : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-                val component = DaggerConfirmationTestComponent.builder()
+                val component = DaggerPaymentElementConfirmationTestComponent.builder()
                     .application(extras.requireApplication())
                     .allowsManualConfirmation(allowsManualConfirmation = false)
                     .statusBarColor(null)
@@ -79,14 +80,14 @@ internal class ConfirmationActivity : AppCompatActivity() {
 
 @Component(
     modules = [
-        ConfirmationModule::class,
+        PaymentElementConfirmationModule::class,
         CoroutineContextModule::class,
-        ConfirmationTestModule::class,
+        PaymentElementConfirmationTestModule::class,
     ]
 )
 @Singleton
-internal interface ConfirmationTestComponent {
-    val viewModel: ConfirmationActivity.TestViewModel
+internal interface PaymentElementConfirmationTestComponent {
+    val viewModel: PaymentElementConfirmationTestActivity.TestViewModel
 
     @Component.Builder
     interface Builder {
@@ -102,12 +103,12 @@ internal interface ConfirmationTestComponent {
         @BindsInstance
         fun allowsManualConfirmation(@Named(ALLOWS_MANUAL_CONFIRMATION) allowsManualConfirmation: Boolean): Builder
 
-        fun build(): ConfirmationTestComponent
+        fun build(): PaymentElementConfirmationTestComponent
     }
 }
 
 @Module
-internal interface ConfirmationTestModule {
+internal interface PaymentElementConfirmationTestModule {
     @Binds
     fun bindsStripeRepository(repository: StripeApiRepository): StripeRepository
 
