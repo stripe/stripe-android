@@ -34,6 +34,7 @@ import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConf
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentSelection.New
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
+import com.stripe.android.paymentsheet.ui.Mandate
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseElementUI
 import com.stripe.android.ui.core.elements.SimpleDialogElementUI
@@ -50,6 +51,7 @@ import com.stripe.android.uicore.elements.SectionCard
 import com.stripe.android.uicore.elements.TextField
 import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.elements.TextFieldSection
+import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.R as StripeR
@@ -68,6 +70,7 @@ internal fun USBankAccountForm(
         factory = USBankAccountFormViewModel.Factory {
             USBankAccountFormViewModel.Args(
                 instantDebits = usBankAccountFormArgs.instantDebits,
+                incentive = usBankAccountFormArgs.incentive,
                 linkMode = usBankAccountFormArgs.linkMode,
                 formArgs = formArgs,
                 hostedSurface = usBankAccountFormArgs.hostedSurface,
@@ -151,7 +154,26 @@ internal fun BankAccountForm(
                 onRemoveAccount = onRemoveAccount,
             )
         }
+
+        state.promoDisclaimerText?.let {
+            PromoDisclaimer(
+                promoText = it.resolve(),
+                modifier = Modifier.padding(top = 12.dp),
+            )
+        }
     }
+}
+
+@Composable
+private fun PromoDisclaimer(
+    promoText: String,
+    modifier: Modifier = Modifier,
+) {
+    // Not technically a mandate, but we want to use the same style
+    Mandate(
+        mandateText = promoText,
+        modifier = modifier,
+    )
 }
 
 @Composable

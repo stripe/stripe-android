@@ -33,6 +33,7 @@ import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConf
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
+import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.BankFormScreenState.ResultIdentifier
@@ -418,7 +419,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     fun reset(error: ResolvableString? = null) {
         hasLaunched = false
         shouldReset = false
-        screenStateWithoutSaveForFutureUse.value = BankFormScreenState(error = error)
+        screenStateWithoutSaveForFutureUse.value = args.toInitialState(error = error)
         saveForFutureUseElement.controller.onValueChange(true)
     }
 
@@ -438,7 +439,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         return if (args.savedPaymentMethod != null) {
             args.savedPaymentMethod.screenState
         } else {
-            BankFormScreenState()
+            args.toInitialState()
         }
     }
 
@@ -699,6 +700,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
     data class Args(
         val instantDebits: Boolean,
+        val incentive: PaymentMethodIncentive?,
         val linkMode: LinkMode?,
         val formArgs: FormArguments,
         val showCheckbox: Boolean,
@@ -760,4 +762,14 @@ internal fun customerRequestedSave(
     } else {
         PaymentSelection.CustomerRequestedSave.NoRequest
     }
+}
+
+private fun USBankAccountFormViewModel.Args.toInitialState(
+    error: ResolvableString? = null,
+): BankFormScreenState {
+    return BankFormScreenState(
+        isPaymentFlow = isPaymentFlow,
+        promoText = incentive?.displayText,
+        error = error,
+    )
 }
