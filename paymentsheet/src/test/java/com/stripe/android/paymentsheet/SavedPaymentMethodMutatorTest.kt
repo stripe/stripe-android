@@ -1,9 +1,10 @@
 package com.stripe.android.paymentsheet
 
 import androidx.lifecycle.SavedStateHandle
+import app.cash.turbine.ReceiveTurbine
+import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.strings.orEmpty
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.PaymentMethod
@@ -11,26 +12,18 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.navigation.NavigationHandler
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.CustomerState
-import com.stripe.android.paymentsheet.verticalmode.FakeManageScreenInteractor
-import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.FakeCustomerRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.mockito.Mockito.mock
-import org.mockito.Mockito.verify
-import org.mockito.kotlin.any
-import org.mockito.kotlin.verifyNoInteractions
-import org.mockito.kotlin.whenever
 
 class SavedPaymentMethodMutatorTest {
     @Test
@@ -338,6 +331,8 @@ class SavedPaymentMethodMutatorTest {
                 assertThat(awaitItem()).isEmpty()
             }
 
+            assertThat(paymentMethodRemovedTurbine.awaitItem()).isEqualTo(Unit)
+
             assertThat(calledDetach).isTrue()
         }
     }
@@ -373,10 +368,12 @@ class SavedPaymentMethodMutatorTest {
             savedPaymentMethodMutator.removePaymentMethod(customerPaymentMethods.single())
             assertThat(awaitItem()).isFalse()
         }
+
+        assertThat(paymentMethodRemovedTurbine.awaitItem()).isEqualTo(Unit)
     }
 
     @Test
-    fun `modifyPaymentMethod should create modify screen correctly when can remove`() = runScenario {
+    fun `modifyPaymentMethod should call through to the callback`() = runScenario {
         val cards = PaymentMethodFixtures.createCards(3)
 
         customerStateHolder.setCustomerState(
@@ -388,27 +385,7 @@ class SavedPaymentMethodMutatorTest {
 
         savedPaymentMethodMutator.modifyPaymentMethod(cards[0])
 
-        val call = editPaymentMethodInteractorFactory.calls.awaitItem()
-
-        assertThat(call.canRemove).isTrue()
-    }
-
-    @Test
-    fun `modifyPaymentMethod should create modify screen correctly when cannot remove`() = runScenario {
-        val cards = PaymentMethodFixtures.createCards(3)
-
-        customerStateHolder.setCustomerState(
-            createCustomerState(
-                paymentMethods = cards,
-                isRemoveEnabled = false,
-            )
-        )
-
-        savedPaymentMethodMutator.modifyPaymentMethod(cards[0])
-
-        val call = editPaymentMethodInteractorFactory.calls.awaitItem()
-
-        assertThat(call.canRemove).isFalse()
+        assertThat(modifyPaymentMethodTurbine.awaitItem()).isEqualTo(cards[0])
     }
 
     @Test
@@ -424,38 +401,8 @@ class SavedPaymentMethodMutatorTest {
             savedPaymentMethodMutator.removePaymentMethod(selection.paymentMethod)
             assertThat(awaitItem()).isNull()
         }
-    }
 
-    @Test
-    fun `Exiting the manage saved PMs screen resets editing to false`() {
-        runScenario {
-            currentScreen.value = PaymentSheetScreen.ManageSavedPaymentMethods(
-                interactor = FakeManageScreenInteractor()
-            )
-
-            savedPaymentMethodMutator.toggleEditing()
-            savedPaymentMethodMutator.editing.test {
-                assertThat(awaitItem()).isTrue()
-            }
-
-            currentScreen.value = PaymentSheetScreen.VerticalMode(
-                interactor = FakePaymentMethodVerticalLayoutInteractor
-            )
-
-            savedPaymentMethodMutator.editing.test {
-                assertThat(awaitItem()).isFalse()
-            }
-        }
-    }
-
-    private object FakePaymentMethodVerticalLayoutInteractor : PaymentMethodVerticalLayoutInteractor {
-        override val isLiveMode: Boolean = false
-        override val state: StateFlow<PaymentMethodVerticalLayoutInteractor.State> = mock()
-        override val showsWalletsHeader: StateFlow<Boolean> = MutableStateFlow(false)
-
-        override fun handleViewAction(viewAction: PaymentMethodVerticalLayoutInteractor.ViewAction) {
-            // Do nothing.
-        }
+        assertThat(paymentMethodRemovedTurbine.awaitItem()).isEqualTo(Unit)
     }
 
     @Test
@@ -469,22 +416,12 @@ class SavedPaymentMethodMutatorTest {
     }
 
     @Test
-    fun `updatePaymentMethod for card navigates to update payment method screen`() {
+    fun `updatePaymentMethod calls through to callback`() {
         val displayableSavedPaymentMethod = PaymentMethodFactory.cards(1).first().toDisplayableSavedPaymentMethod()
         runScenario {
             savedPaymentMethodMutator.updatePaymentMethod(displayableSavedPaymentMethod)
 
-            verify(navigationHandler).transitionTo(any())
-        }
-    }
-
-    @Test
-    fun `updatePaymentMethod for unsupported SPM type does nothing`() {
-        val displayableSavedPaymentMethod = PaymentMethodFactory.amazonPay().toDisplayableSavedPaymentMethod()
-        runScenario {
-            savedPaymentMethodMutator.updatePaymentMethod(displayableSavedPaymentMethod)
-
-            verifyNoInteractions(navigationHandler)
+            assertThat(updatePaymentMethodTurbine.awaitItem()).isEqualTo(displayableSavedPaymentMethod)
         }
     }
 
@@ -523,6 +460,8 @@ class SavedPaymentMethodMutatorTest {
 
             savedPaymentMethodMutator.removePaymentMethod(paymentMethod)
 
+            assertThat(paymentMethodRemovedTurbine.awaitItem()).isEqualTo(Unit)
+
             assertThat(repository.detachRequests.awaitItem()).isEqualTo(
                 FakeCustomerRepository.DetachRequest(
                     paymentMethodId = paymentMethod.id!!,
@@ -550,40 +489,52 @@ class SavedPaymentMethodMutatorTest {
                 savedStateHandle = SavedStateHandle(),
                 selection = selection,
             )
-            val navigationHandler = mock<NavigationHandler>()
-            val editPaymentMethodInteractorFactory = FakeEditPaymentMethodInteractor.Factory()
-            whenever(navigationHandler.currentScreen).thenReturn(stateFlowOf(PaymentSheetScreen.Loading))
+
+            val paymentMethodRemovedTurbine = Turbine<Unit>()
+            val updatePaymentMethodTurbine = Turbine<DisplayableSavedPaymentMethod>()
+            val modifyPaymentMethodTurbine = Turbine<PaymentMethod>()
+            val navigationPopTurbine = Turbine<Unit>()
+
             val savedPaymentMethodMutator = SavedPaymentMethodMutator(
-                editInteractorFactory = editPaymentMethodInteractorFactory,
                 eventReporter = mock(),
                 coroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
                 workContext = coroutineContext,
-                navigationHandler = navigationHandler,
                 customerRepository = customerRepository,
                 allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod,
                 selection = selection,
                 providePaymentMethodName = { it?.resolvableString.orEmpty() },
                 customerStateHolder = customerStateHolder,
-                addFirstPaymentMethodScreenFactory = { throw AssertionError("Not implemented") },
                 clearSelection = { selection.value = null },
+                onPaymentMethodRemoved = { paymentMethodRemovedTurbine.add(Unit) },
+                onUpdatePaymentMethod = { displayableSavedPaymentMethod, canRemove, performRemove, updateExecutor ->
+                    updatePaymentMethodTurbine.add(displayableSavedPaymentMethod)
+                },
+                onModifyPaymentMethod = { paymentMethod, name, canRemove, performRemove, updateExecutor ->
+                    modifyPaymentMethodTurbine.add(paymentMethod)
+                },
+                navigationPop = { navigationPopTurbine.add(Unit) },
                 isCbcEligible = isCbcEligible,
                 isGooglePayReady = stateFlowOf(false),
                 isLinkEnabled = stateFlowOf(false),
                 isNotPaymentFlow = true,
-                isLiveModeProvider = { true },
-                currentScreen = currentScreen,
-                cardBrandFilter = DefaultCardBrandFilter
             )
             Scenario(
                 savedPaymentMethodMutator = savedPaymentMethodMutator,
                 customerStateHolder = customerStateHolder,
                 selectionSource = selection,
-                editPaymentMethodInteractorFactory = editPaymentMethodInteractorFactory,
                 currentScreen = currentScreen,
-                navigationHandler = navigationHandler,
+                paymentMethodRemovedTurbine = paymentMethodRemovedTurbine,
+                updatePaymentMethodTurbine = updatePaymentMethodTurbine,
+                modifyPaymentMethodTurbine = modifyPaymentMethodTurbine,
+                navigationPopTurbine = navigationPopTurbine,
             ).apply {
                 block()
             }
+
+            paymentMethodRemovedTurbine.ensureAllEventsConsumed()
+            updatePaymentMethodTurbine.ensureAllEventsConsumed()
+            modifyPaymentMethodTurbine.ensureAllEventsConsumed()
+            navigationPopTurbine.ensureAllEventsConsumed()
         }
     }
 
@@ -591,8 +542,10 @@ class SavedPaymentMethodMutatorTest {
         val savedPaymentMethodMutator: SavedPaymentMethodMutator,
         val customerStateHolder: CustomerStateHolder,
         val selectionSource: MutableStateFlow<PaymentSelection?>,
-        val editPaymentMethodInteractorFactory: FakeEditPaymentMethodInteractor.Factory,
         val currentScreen: MutableStateFlow<PaymentSheetScreen>,
-        val navigationHandler: NavigationHandler,
+        val paymentMethodRemovedTurbine: ReceiveTurbine<Unit>,
+        val updatePaymentMethodTurbine: ReceiveTurbine<DisplayableSavedPaymentMethod>,
+        val modifyPaymentMethodTurbine: ReceiveTurbine<PaymentMethod>,
+        val navigationPopTurbine: ReceiveTurbine<Unit>,
     )
 }
