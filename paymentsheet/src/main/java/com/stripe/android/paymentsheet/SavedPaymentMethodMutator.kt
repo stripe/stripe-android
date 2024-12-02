@@ -442,7 +442,6 @@ internal class SavedPaymentMethodMutator(
                         }
                     }
                 }
-
             }
         }
     }
