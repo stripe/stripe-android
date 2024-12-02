@@ -883,7 +883,7 @@ class PaymentSheet internal constructor(
     }
 
     @Parcelize
-    data class Appearance(
+    data class Appearance internal constructor(
         /**
          * Describes the colors used while the system is in light mode.
          */
@@ -943,21 +943,25 @@ class PaymentSheet internal constructor(
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Parcelize
+        @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
         class Embedded(
             internal val style: RowStyle
         ) : Parcelable {
 
             internal companion object {
+                @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
                 val default = Embedded(
                     style = RowStyle.FlatWithRadio.defaultLight
                 )
             }
 
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            @ExperimentalEmbeddedPaymentElementApi
             @Parcelize
             sealed class RowStyle : Parcelable {
 
                 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                @ExperimentalEmbeddedPaymentElementApi
                 @Parcelize
                 class FlatWithRadio(
                     /**
@@ -1049,6 +1053,7 @@ class PaymentSheet internal constructor(
                 }
 
                 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                @ExperimentalEmbeddedPaymentElementApi
                 @Parcelize
                 class FlatWithCheckmark(
                     /**
@@ -1138,6 +1143,7 @@ class PaymentSheet internal constructor(
                 }
 
                 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                @ExperimentalEmbeddedPaymentElementApi
                 @Parcelize
                 class FloatingButton(
                     /**
