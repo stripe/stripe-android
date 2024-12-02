@@ -2,8 +2,11 @@ package com.stripe.android.paymentsheet.flowcontroller
 
 import android.app.Application
 import android.content.Context
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.stripe.android.core.injection.IOContext
 import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
+import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.PaymentOptionsViewModelSubcomponent
@@ -11,8 +14,10 @@ import com.stripe.android.uicore.image.StripeImageLoader
 import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.plus
 import javax.inject.Named
 import javax.inject.Singleton
+import kotlin.coroutines.CoroutineContext
 
 @Module(
     subcomponents = [
@@ -37,6 +42,26 @@ internal object FlowControllerModule {
     @Singleton
     fun provideViewModelScope(viewModel: FlowControllerViewModel): CoroutineScope {
         return viewModel.viewModelScope
+    }
+
+    @Provides
+    @Singleton
+    fun providesSavedStateHandle(
+        viewModel: FlowControllerViewModel,
+    ): SavedStateHandle {
+        return viewModel.handle
+    }
+
+    @Provides
+    @Singleton
+    fun providesConfirmationHandler(
+        confirmationHandlerFactory: ConfirmationHandler.Factory,
+        viewModel: FlowControllerViewModel,
+        @IOContext workContext: CoroutineContext,
+    ): ConfirmationHandler {
+        return confirmationHandlerFactory.create(
+            scope = viewModel.viewModelScope.plus(workContext)
+        )
     }
 
     @Provides

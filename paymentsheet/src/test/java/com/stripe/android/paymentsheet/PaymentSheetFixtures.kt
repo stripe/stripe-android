@@ -139,7 +139,6 @@ internal object PaymentSheetFixtures {
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         ),
         configuration = CONFIG_GOOGLEPAY,
-        statusBarColor = STATUS_BAR_COLOR,
         enableLogging = false,
         productUsage = mock()
     )

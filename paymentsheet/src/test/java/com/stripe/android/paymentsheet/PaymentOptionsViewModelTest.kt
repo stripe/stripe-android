@@ -889,7 +889,6 @@ internal class PaymentOptionsViewModelTest {
                 ),
             ),
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
-            statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR,
             enableLogging = false,
             productUsage = mock()
         )

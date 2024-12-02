@@ -67,7 +67,8 @@ class FlowControllerConfigurationHandlerTest {
 
         viewModel = FlowControllerViewModel(
             application = ApplicationProvider.getApplicationContext(),
-            handle = SavedStateHandle()
+            handle = SavedStateHandle(),
+            statusBarColor = null,
         )
     }
 
