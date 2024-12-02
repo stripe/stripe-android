@@ -9,6 +9,7 @@
     <ID>LongMethod:FinancialConnectionsSheetNativeActivity.kt$FinancialConnectionsSheetNativeActivity$@Composable fun NavHost( initialPane: Pane, testMode: Boolean, )</ID>
     <ID>LongMethod:InstitutionPickerScreen.kt$private fun LazyListScope.searchResults( isInputEmpty: Boolean, payload: Payload, selectedInstitutionId: String?, onInstitutionSelected: (FinancialConnectionsInstitution, Boolean) -> Unit, institutions: Async&lt;InstitutionResponse>, onManualEntryClick: () -> Unit, onSearchMoreClick: () -> Unit )</ID>
     <ID>LongMethod:LinkAccountPickerPreviewParameterProvider.kt$LinkAccountPickerPreviewParameterProvider$private fun partnerAccountList()</ID>
+    <ID>LongMethod:NetworkingLinkSignupScreen.kt$@Composable private fun NetworkingLinkSignupLoaded( validForm: Boolean, payload: Payload, isLoading: Boolean, lookupAccountSync: Async&lt;ConsumerSessionLookup>, showFullForm: Boolean, phoneError: String?, onClickableTextClick: (String) -> Unit, onSaveToLink: () -> Unit, onSkipClick: () -> Unit, )</ID>
     <ID>LongMethod:NetworkingSaveToLinkVerificationScreen.kt$@Composable private fun NetworkingSaveToLinkVerificationLoaded( confirmVerificationAsync: Async&lt;Unit>, payload: Payload, onCloseFromErrorClick: (Throwable) -> Unit, onSkipClick: () -> Unit, )</ID>
     <ID>LongMethod:SuccessContent.kt$@Composable private fun SpinnerToSuccessAnimation( showSpinner: Boolean, initialSuccessBodyHeight: Dp?, content: TextResource?, title: TextResource?, modifier: Modifier = Modifier, )</ID>
     <ID>MagicNumber:AccountPickerScreen.kt$3</ID>

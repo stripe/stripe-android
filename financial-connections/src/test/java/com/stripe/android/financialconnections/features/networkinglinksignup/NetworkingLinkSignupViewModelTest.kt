@@ -5,6 +5,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIConnectionException
+import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.exception.PermissionException
 import com.stripe.android.financialconnections.ApiKeyFixtures.cachedPartnerAccounts
 import com.stripe.android.financialconnections.ApiKeyFixtures.consumerSessionSignup
@@ -13,6 +14,7 @@ import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
 import com.stripe.android.financialconnections.CoroutineTestRule
 import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext
 import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext.InitializationMode
+import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ConsentAgree.analyticsValue
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
@@ -32,7 +34,9 @@ import com.stripe.android.financialconnections.navigation.Destination.Networking
 import com.stripe.android.financialconnections.navigation.Destination.NetworkingSaveToLinkVerification
 import com.stripe.android.financialconnections.navigation.NavigationIntent
 import com.stripe.android.financialconnections.navigation.NavigationManagerImpl
+import com.stripe.android.financialconnections.presentation.Async
 import com.stripe.android.financialconnections.repository.FinancialConnectionsConsumerSessionRepository
+import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.utils.TestHandleError
 import com.stripe.android.financialconnections.utils.UriUtils
 import com.stripe.android.model.ConsumerSessionLookup
@@ -242,7 +246,7 @@ class NetworkingLinkSignupViewModelTest {
             state = NetworkingLinkSignupState(isInstantDebits = true),
             signupHandler = mockLinkSignupHandlerForInstantDebits(
                 // We don't expect a signup to be performed
-                failOnSignup = true,
+                errorOnSignup = APIConnectionException(),
             ),
         )
 
@@ -474,7 +478,7 @@ class NetworkingLinkSignupViewModelTest {
 
         val viewModel = buildViewModel(
             state = NetworkingLinkSignupState(isInstantDebits = true),
-            signupHandler = mockLinkSignupHandlerForInstantDebits(failOnSignup = true),
+            signupHandler = mockLinkSignupHandlerForInstantDebits(errorOnSignup = APIConnectionException()),
         )
 
         navigationManager.navigationFlow.test {
@@ -508,7 +512,7 @@ class NetworkingLinkSignupViewModelTest {
 
         buildViewModel(
             state = NetworkingLinkSignupState(isInstantDebits = true),
-            signupHandler = mockLinkSignupHandlerForInstantDebits(failOnSignup = true),
+            signupHandler = mockLinkSignupHandlerForInstantDebits(errorOnSignup = APIConnectionException()),
         )
 
         delay(300)
@@ -540,7 +544,7 @@ class NetworkingLinkSignupViewModelTest {
 
         buildViewModel(
             state = NetworkingLinkSignupState(isInstantDebits = true),
-            signupHandler = mockLinkSignupHandlerForInstantDebits(failOnSignup = true),
+            signupHandler = mockLinkSignupHandlerForInstantDebits(errorOnSignup = APIConnectionException()),
         )
 
         delay(300)
@@ -583,6 +587,51 @@ class NetworkingLinkSignupViewModelTest {
             pane = NETWORKING_LINK_SIGNUP_PANE,
             displayErrorScreen = false,
         )
+    }
+
+    @Test
+    fun `Shows inline error if encountering invalid phone number in Instant Debits`() = runTest {
+        val initialSyncResponse = syncResponse().copy(
+            manifest = sessionManifest().copy(isLinkWithStripe = true),
+            text = TextUpdate(linkLoginPane = linkLoginPane()),
+        )
+
+        whenever(getOrFetchSync(any())).thenReturn(initialSyncResponse)
+        whenever(lookupAccount(any())).thenReturn(ConsumerSessionLookup(exists = false))
+
+        val viewModel = buildViewModel(
+            state = NetworkingLinkSignupState(isInstantDebits = true),
+            signupHandler = mockLinkSignupHandlerForInstantDebits(
+                errorOnSignup = InvalidRequestException(
+                    stripeError = StripeError(
+                        code = "invalid_request_error",
+                        message = "The phone number provided was invalid.",
+                    )
+                )
+            ),
+        )
+
+        viewModel.stateFlow.test {
+            val state = awaitItem()
+            val payload = requireNotNull(state.payload())
+
+            payload.emailController.onValueChange("email@email.com")
+            assertThat(awaitItem().validEmail).isEqualTo("email@email.com")
+            assertThat(awaitItem().lookupAccount).isEqualTo(Async.Loading<ConsumerSessionLookup>())
+            assertThat(awaitItem().showFullForm).isTrue()
+
+            payload.phoneController.onValueChange("5555555555")
+            assertThat(awaitItem().validPhone).isEqualTo("+15555555555")
+
+            viewModel.onSaveAccount()
+            assertThat(awaitItem().phoneError).isEqualTo(
+                TextResource.StringId(R.string.stripe_networking_signup_invalid_phone_number)
+            )
+
+            // Clears error on subsequent changes to phone number
+            payload.phoneController.onValueChange("+1555555555")
+            assertThat(awaitItem().phoneError).isNull()
+        }
     }
 
     private fun mockLinkSignupHandlerForNetworking(
@@ -628,7 +677,7 @@ class NetworkingLinkSignupViewModelTest {
     }
 
     private fun mockLinkSignupHandlerForInstantDebits(
-        failOnSignup: Boolean = false,
+        errorOnSignup: Throwable? = null,
     ): LinkSignupHandler {
         val manifest = sessionManifest().copy(
             businessName = "Business",
@@ -647,9 +696,9 @@ class NetworkingLinkSignupViewModelTest {
         }
 
         val consumerRepository = mock<FinancialConnectionsConsumerSessionRepository> {
-            if (failOnSignup) {
+            if (errorOnSignup != null) {
                 onBlocking { signUp(any(), any(), any()) } doAnswer {
-                    throw APIConnectionException()
+                    throw errorOnSignup
                 }
             } else {
                 onBlocking { signUp(any(), any(), any()) } doReturn consumerSessionSignup()

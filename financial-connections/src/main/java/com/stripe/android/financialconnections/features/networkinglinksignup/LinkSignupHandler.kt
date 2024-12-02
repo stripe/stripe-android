@@ -1,6 +1,8 @@
 package com.stripe.android.financialconnections.features.networkinglinksignup
 
 import com.stripe.android.core.Logger
+import com.stripe.android.core.exception.StripeException
+import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.Click
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.logError
@@ -19,6 +21,7 @@ import com.stripe.android.financialconnections.navigation.Destination.Networking
 import com.stripe.android.financialconnections.navigation.Destination.Success
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.repository.FinancialConnectionsConsumerSessionRepository
+import com.stripe.android.financialconnections.ui.TextResource
 import javax.inject.Inject
 
 internal interface LinkSignupHandler {
@@ -28,8 +31,9 @@ internal interface LinkSignupHandler {
     ): Pane
 
     fun handleSignupFailure(
+        state: NetworkingLinkSignupState,
         error: Throwable,
-    )
+    ): NetworkingLinkSignupState
 
     fun navigateToVerification()
 }
@@ -65,13 +69,30 @@ internal class LinkSignupHandlerForInstantDebits @Inject constructor(
         navigationManager.tryNavigateTo(NetworkingLinkVerification(referrer = LINK_LOGIN))
     }
 
-    override fun handleSignupFailure(error: Throwable) {
+    override fun handleSignupFailure(
+        state: NetworkingLinkSignupState,
+        error: Throwable,
+    ): NetworkingLinkSignupState {
+        val phoneError = error.extractPhoneNumberValidationError()
+
         handleError(
             extraMessage = "Error creating a Link account",
             error = error,
             pane = LINK_LOGIN,
-            displayErrorScreen = true,
+            displayErrorScreen = phoneError == null,
         )
+
+        return state.copy(phoneError = phoneError)
+    }
+
+    private fun Throwable.extractPhoneNumberValidationError(): TextResource? {
+        val error = (this as? StripeException)?.stripeError?.message
+        val isPhoneError = error?.contains("phone") == true
+        return if (isPhoneError) {
+            TextResource.StringId(R.string.stripe_networking_signup_invalid_phone_number)
+        } else {
+            null
+        }
     }
 }
 
@@ -107,7 +128,10 @@ internal class LinkSignupHandlerForNetworking @Inject constructor(
         navigationManager.tryNavigateTo(NetworkingSaveToLinkVerification(referrer = NETWORKING_LINK_SIGNUP_PANE))
     }
 
-    override fun handleSignupFailure(error: Throwable) {
+    override fun handleSignupFailure(
+        state: NetworkingLinkSignupState,
+        error: Throwable,
+    ): NetworkingLinkSignupState {
         eventTracker.logError(
             extraMessage = "Error saving account to Link",
             error = error,
@@ -116,5 +140,6 @@ internal class LinkSignupHandlerForNetworking @Inject constructor(
         )
 
         navigationManager.tryNavigateTo(Success(referrer = NETWORKING_LINK_SIGNUP_PANE))
+        return state
     }
 }

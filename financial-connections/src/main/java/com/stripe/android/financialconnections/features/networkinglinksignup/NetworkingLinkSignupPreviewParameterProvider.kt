@@ -7,6 +7,7 @@ import com.stripe.android.financialconnections.model.NetworkingLinkSignupBody
 import com.stripe.android.financialconnections.model.NetworkingLinkSignupPane
 import com.stripe.android.financialconnections.presentation.Async.Success
 import com.stripe.android.financialconnections.presentation.Async.Uninitialized
+import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.PhoneNumberController
@@ -18,6 +19,7 @@ internal class NetworkingLinkSignupPreviewParameterProvider :
         emailEntered(),
         invalidEmail(),
         instantDebits(),
+        instantDebitsInvalidPhoneNumber(),
     )
 
     private fun default() = NetworkingLinkSignupState(
@@ -107,6 +109,35 @@ internal class NetworkingLinkSignupPreviewParameterProvider :
         lookupAccount = Uninitialized,
         saveAccountToLink = Uninitialized,
         isInstantDebits = true,
+    )
+
+    private fun instantDebitsInvalidPhoneNumber() = NetworkingLinkSignupState(
+        payload = Success(
+            NetworkingLinkSignupState.Payload(
+                merchantName = "Test",
+                emailController = EmailConfig.createController(
+                    initialValue = "email@email.com",
+                ),
+                phoneController = PhoneNumberController.createPhoneNumberController(
+                    initialValue = "5555555555",
+                    initiallySelectedCountryCode = "US",
+                ),
+                isInstantDebits = true,
+                content = linkLoginPane(),
+            )
+        ),
+        validEmail = "email@email.com",
+        validPhone = "5555555555",
+        lookupAccount = Success(
+            ConsumerSessionLookup(
+                exists = false,
+                consumerSession = null,
+                errorMessage = null
+            )
+        ),
+        saveAccountToLink = Uninitialized,
+        isInstantDebits = true,
+        phoneError = TextResource.Text("Your mobile phone number is invalid."),
     )
 
     private fun networkingLinkSignupPane() = NetworkingLinkSignupPane(

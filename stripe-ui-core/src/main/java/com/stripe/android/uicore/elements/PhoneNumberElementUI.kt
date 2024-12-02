@@ -67,11 +67,12 @@ fun PhoneNumberCollectionSection(
     requestFocusWhenShown: Boolean = false,
     moveToNextFieldOnceComplete: Boolean = false,
     focusRequester: FocusRequester = remember { FocusRequester() },
-    imeAction: ImeAction = ImeAction.Done
+    imeAction: ImeAction = ImeAction.Done,
+    error: String? = null,
 ) {
-    val error by phoneNumberController.error.collectAsState()
+    val controllerError by phoneNumberController.error.collectAsState()
 
-    val sectionErrorString = error?.let {
+    val displayedError = error ?: controllerError?.let {
         it.formatArgs?.let { args ->
             stringResource(
                 it.errorMessage,
@@ -83,7 +84,7 @@ fun PhoneNumberCollectionSection(
     Section(
         modifier = Modifier.padding(vertical = 8.dp),
         title = sectionTitle,
-        error = sectionErrorString,
+        error = displayedError,
         isSelected = isSelected
     ) {
         PhoneNumberElementUI(

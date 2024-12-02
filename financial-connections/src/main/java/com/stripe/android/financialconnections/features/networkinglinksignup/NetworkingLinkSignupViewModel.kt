@@ -39,6 +39,7 @@ import com.stripe.android.financialconnections.presentation.Async
 import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeState
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
+import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.utils.ConflatedJob
 import com.stripe.android.financialconnections.utils.UriUtils
 import com.stripe.android.financialconnections.utils.error
@@ -161,7 +162,11 @@ internal class NetworkingLinkSignupViewModel @AssistedInject constructor(
                 val destination = nextPane.destination(referrer = pane)
                 navigationManager.tryNavigateTo(destination)
             },
-            onFail = linkSignupHandler::handleSignupFailure,
+            onFail = { error ->
+                setState {
+                    linkSignupHandler.handleSignupFailure(this, error)
+                }
+            }
         )
     }
 
@@ -176,8 +181,14 @@ internal class NetworkingLinkSignupViewModel @AssistedInject constructor(
                         .collectLatest(::onEmailEntered)
                 }
                 viewModelScope.launch {
-                    payload.phoneController.validFormFieldState().collectLatest {
-                        setState { copy(validPhone = it) }
+                    payload.phoneController.formFieldValue.collect { formField ->
+                        val completeValue = formField.value.takeIf { formField.isComplete }
+                        setState {
+                            copy(
+                                validPhone = completeValue,
+                                phoneError = null,
+                            )
+                        }
                     }
                 }
             },
@@ -195,9 +206,7 @@ internal class NetworkingLinkSignupViewModel @AssistedInject constructor(
     /**
      * @param validEmail valid email, or null if entered email is invalid.
      */
-    private suspend fun onEmailEntered(
-        validEmail: String?
-    ) {
+    private fun onEmailEntered(validEmail: String?) {
         setState { copy(validEmail = validEmail) }
         if (validEmail != null) {
             logger.debug("VALID EMAIL ADDRESS $validEmail.")
@@ -240,6 +249,7 @@ internal class NetworkingLinkSignupViewModel @AssistedInject constructor(
 
     private fun saveNewAccount() {
         suspend {
+            setState { copy(phoneError = null) }
             val state = stateFlow.value
             linkSignupHandler.performSignup(state)
         }.execute {
@@ -321,6 +331,7 @@ internal data class NetworkingLinkSignupState(
     val lookupAccount: Async<ConsumerSessionLookup> = Uninitialized,
     val viewEffect: ViewEffect? = null,
     val isInstantDebits: Boolean = false,
+    val phoneError: TextResource? = null,
 ) {
 
     constructor(parentState: FinancialConnectionsSheetNativeState) : this(
