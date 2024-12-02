@@ -227,6 +227,38 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     }
 
     @Test
+    fun `Passes promo badge information along to affected payment method`() {
+        val incentive = PaymentMethodIncentive(
+            identifier = "link_instant_debits",
+            displayText = "$5",
+        )
+
+        runScenario(incentive = incentive) {
+            interactor.state.test {
+                val paymentMethods = awaitItem().displayablePaymentMethods
+                val instantDebits = paymentMethods.first { it.code == "link" }
+                assertThat(instantDebits.promoBadge).isEqualTo("$5")
+            }
+        }
+    }
+
+    @Test
+    fun `Does not pass promo badge information along to non-affected payment methods`() {
+        val incentive = PaymentMethodIncentive(
+            identifier = "a_weird_payment_method",
+            displayText = "$5",
+        )
+
+        runScenario(incentive = incentive) {
+            interactor.state.test {
+                val paymentMethods = awaitItem().displayablePaymentMethods
+                val instantDebits = paymentMethods.first { it.code == "link" }
+                assertThat(instantDebits.promoBadge).isNull()
+            }
+        }
+    }
+
+    @Test
     fun `saved PM selection is removed if only saved pm is removed`() {
         val displayedPM = PaymentMethodFixtures.CARD_PAYMENT_METHOD
         runScenario(
