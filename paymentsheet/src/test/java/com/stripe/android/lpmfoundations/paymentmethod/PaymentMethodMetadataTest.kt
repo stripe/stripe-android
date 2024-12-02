@@ -790,6 +790,7 @@ internal class PaymentMethodMetadataTest {
             linkInlineConfiguration = linkInlineConfiguration,
             linkMode = null,
             cardBrandFilter = PaymentSheetCardBrandFilter(cardBrandAcceptance),
+            paymentMethodIncentive = null,
         )
 
         assertThat(metadata).isEqualTo(expectedMetadata)
@@ -854,6 +855,7 @@ internal class PaymentMethodMetadataTest {
             linkInlineConfiguration = null,
             linkMode = null,
             cardBrandFilter = PaymentSheetCardBrandFilter(cardBrandAcceptance),
+            paymentMethodIncentive = null,
         )
 
         assertThat(metadata).isEqualTo(expectedMetadata)

@@ -27,6 +27,7 @@ class PaymentMethodsUIScreenshotTest {
                 paymentMethods = paymentMethods,
                 selectedIndex = 0,
                 isEnabled = true,
+                incentive = null,
                 onItemSelectedListener = {},
                 imageLoader = mock(),
             )
@@ -48,6 +49,7 @@ class PaymentMethodsUIScreenshotTest {
                 paymentMethods = paymentMethods,
                 selectedIndex = 0,
                 isEnabled = true,
+                incentive = null,
                 onItemSelectedListener = {},
                 imageLoader = mock(),
             )
@@ -61,6 +63,7 @@ class PaymentMethodsUIScreenshotTest {
                 paymentMethods = paymentMethods,
                 selectedIndex = 3,
                 isEnabled = true,
+                incentive = null,
                 state = LazyListState(firstVisibleItemIndex = 3),
                 onItemSelectedListener = {},
                 imageLoader = mock(),
@@ -76,6 +79,7 @@ class PaymentMethodsUIScreenshotTest {
                 paymentMethods = paymentMethods,
                 selectedIndex = 0,
                 isEnabled = true,
+                incentive = null,
                 onItemSelectedListener = {},
                 imageLoader = mock(),
             )
@@ -94,6 +98,7 @@ class PaymentMethodsUIScreenshotTest {
                 paymentMethods = paymentMethods,
                 selectedIndex = 0,
                 isEnabled = true,
+                incentive = null,
                 onItemSelectedListener = {},
                 imageLoader = mock(),
             )
@@ -117,6 +122,7 @@ class PaymentMethodsUIScreenshotTest {
                 paymentMethods = paymentMethods,
                 selectedIndex = 0,
                 isEnabled = true,
+                incentive = null,
                 onItemSelectedListener = {},
                 imageLoader = mock(),
             )

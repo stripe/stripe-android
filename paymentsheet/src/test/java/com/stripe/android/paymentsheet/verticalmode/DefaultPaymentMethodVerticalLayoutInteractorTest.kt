@@ -17,6 +17,7 @@ import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.analytics.code
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
+import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.verticalmode.DefaultPaymentMethodVerticalLayoutInteractor.FormType
@@ -221,6 +222,38 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                         PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.NONE
                     )
                 }
+            }
+        }
+    }
+
+    @Test
+    fun `Passes promo badge information along to affected payment method`() {
+        val incentive = PaymentMethodIncentive(
+            identifier = "link_instant_debits",
+            displayText = "$5",
+        )
+
+        runScenario(incentive = incentive) {
+            interactor.state.test {
+                val paymentMethods = awaitItem().displayablePaymentMethods
+                val instantDebits = paymentMethods.first { it.code == "link" }
+                assertThat(instantDebits.promoBadge).isEqualTo("$5")
+            }
+        }
+    }
+
+    @Test
+    fun `Does not pass promo badge information along to non-affected payment methods`() {
+        val incentive = PaymentMethodIncentive(
+            identifier = "a_weird_payment_method",
+            displayText = "$5",
+        )
+
+        runScenario(incentive = incentive) {
+            interactor.state.test {
+                val paymentMethods = awaitItem().displayablePaymentMethods
+                val instantDebits = paymentMethods.first { it.code == "link" }
+                assertThat(instantDebits.promoBadge).isNull()
             }
         }
     }
@@ -976,6 +1009,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         initialProcessing: Boolean = false,
         initialSelection: PaymentSelection? = null,
         initialIsCurrentScreen: Boolean = false,
+        incentive: PaymentMethodIncentive? = null,
         formTypeForCode: (code: String) -> FormType = { notImplemented() },
         onFormFieldValuesChanged: (formValues: FormFieldValues, selectedPaymentMethodCode: String) -> Unit = { _, _ ->
             notImplemented()
@@ -1005,11 +1039,13 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         val walletsState = MutableStateFlow<WalletsState?>(null)
         val canRemove = MutableStateFlow(true)
         val isCurrentScreen: MutableStateFlow<Boolean> = MutableStateFlow(initialIsCurrentScreen)
+        val paymentMethodIncentiveInteractor = PaymentMethodIncentiveInteractor(incentive)
 
         val interactor = DefaultPaymentMethodVerticalLayoutInteractor(
             paymentMethodMetadata = paymentMethodMetadata,
             processing = processing,
             selection = selection,
+            paymentMethodIncentiveInteractor = paymentMethodIncentiveInteractor,
             formTypeForCode = formTypeForCode,
             onFormFieldValuesChanged = onFormFieldValuesChanged,
             transitionToManageScreen = transitionToManageScreen,

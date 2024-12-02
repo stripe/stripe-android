@@ -123,7 +123,7 @@ internal class DefaultPaymentElementLoaderTest {
                 config = config.asCommonConfiguration(),
                 customer = CustomerState(
                     id = config.customer!!.id,
-                    ephemeralKeySecret = config.customer.ephemeralKeySecret,
+                    ephemeralKeySecret = config.customer!!.ephemeralKeySecret,
                     paymentMethods = PAYMENT_METHODS,
                     permissions = CustomerState.Permissions(
                         canRemovePaymentMethods = true,

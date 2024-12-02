@@ -9,6 +9,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
 import com.stripe.android.ui.core.elements.LpmSerializer
@@ -34,6 +35,7 @@ internal object PaymentMethodMetadataFactory {
         linkMode: LinkMode? = LinkMode.LinkPaymentMethod,
         cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
         defaultBillingDetails: PaymentSheet.BillingDetails = PaymentSheet.BillingDetails(),
+        paymentMethodIncentive: PaymentMethodIncentive? = null,
     ): PaymentMethodMetadata {
         return PaymentMethodMetadata(
             stripeIntent = stripeIntent,
@@ -53,7 +55,8 @@ internal object PaymentMethodMetadataFactory {
             isGooglePayReady = isGooglePayReady,
             linkInlineConfiguration = linkInlineConfiguration,
             linkMode = linkMode,
-            cardBrandFilter = cardBrandFilter
+            cardBrandFilter = cardBrandFilter,
+            paymentMethodIncentive = paymentMethodIncentive,
         )
     }
 

@@ -14,6 +14,7 @@ import com.stripe.android.paymentsheet.LinkInlineHandler
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.code
 import com.stripe.android.paymentsheet.forms.FormFieldValues
+import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.state.WalletsState
@@ -68,6 +69,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     paymentMethodMetadata: PaymentMethodMetadata,
     processing: StateFlow<Boolean>,
     selection: StateFlow<PaymentSelection?>,
+    paymentMethodIncentiveInteractor: PaymentMethodIncentiveInteractor,
     private val formTypeForCode: (code: String) -> FormType,
     private val onFormFieldValuesChanged: (formValues: FormFieldValues, selectedPaymentMethodCode: String) -> Unit,
     private val transitionToManageScreen: () -> Unit,
@@ -102,6 +104,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             viewModel: BaseSheetViewModel,
             paymentMethodMetadata: PaymentMethodMetadata,
             customerStateHolder: CustomerStateHolder,
+            bankFormInteractor: BankFormInteractor,
         ): PaymentMethodVerticalLayoutInteractor {
             val linkInlineHandler = LinkInlineHandler.create(viewModel, viewModel.viewModelScope)
             val formHelper = FormHelper.create(viewModel, linkInlineHandler, paymentMethodMetadata)
@@ -109,6 +112,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 paymentMethodMetadata = paymentMethodMetadata,
                 processing = viewModel.processing,
                 selection = viewModel.selection,
+                paymentMethodIncentiveInteractor = bankFormInteractor.paymentMethodIncentiveInteractor,
                 formTypeForCode = { code ->
                     if (formHelper.requiresFormScreen(code)) {
                         FormType.UserInteractionRequired
@@ -148,6 +152,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                         viewModel = viewModel,
                         paymentMethodMetadata = paymentMethodMetadata,
                         customerStateHolder = customerStateHolder,
+                        bankFormInteractor = bankFormInteractor,
                     )
                     val screen = PaymentSheetScreen.VerticalModeForm(interactor = interactor)
                     viewModel.navigationHandler.transitionToWithDelay(screen)
@@ -207,16 +212,23 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         )
     }
 
-    override val state: StateFlow<PaymentMethodVerticalLayoutInteractor.State> = combineAsStateFlow(
+    private val displayablePaymentMethods = combineAsStateFlow(
         paymentMethods,
+        walletsState,
+        paymentMethodIncentiveInteractor.displayedIncentive,
+    ) { paymentMethods, walletsState, incentive ->
+        getDisplayablePaymentMethods(paymentMethods, walletsState, incentive)
+    }
+
+    override val state: StateFlow<PaymentMethodVerticalLayoutInteractor.State> = combineAsStateFlow(
+        displayablePaymentMethods,
         processing,
         verticalModeScreenSelection,
         displayedSavedPaymentMethod,
-        walletsState,
         availableSavedPaymentMethodAction,
-    ) { paymentMethods, isProcessing, mostRecentSelection, displayedSavedPaymentMethod, walletsState, action ->
+    ) { displayablePaymentMethods, isProcessing, mostRecentSelection, displayedSavedPaymentMethod, action ->
         PaymentMethodVerticalLayoutInteractor.State(
-            displayablePaymentMethods = getDisplayablePaymentMethods(paymentMethods, walletsState),
+            displayablePaymentMethods = displayablePaymentMethods,
             isProcessing = isProcessing,
             selection = mostRecentSelection,
             displayedSavedPaymentMethod = displayedSavedPaymentMethod,
@@ -271,9 +283,10 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private fun getDisplayablePaymentMethods(
         paymentMethods: List<PaymentMethod>,
         walletsState: WalletsState?,
+        incentive: PaymentMethodIncentive?,
     ): List<DisplayablePaymentMethod> {
         val lpms = supportedPaymentMethods.map { supportedPaymentMethod ->
-            supportedPaymentMethod.asDisplayablePaymentMethod(paymentMethods) {
+            supportedPaymentMethod.asDisplayablePaymentMethod(paymentMethods, incentive) {
                 handleViewAction(ViewAction.PaymentMethodSelected(supportedPaymentMethod.code))
             }
         }
