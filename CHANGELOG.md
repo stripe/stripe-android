@@ -1,6 +1,8 @@
 # CHANGELOG
 
 ## XX.XX.XX - 20XX-XX-XX
+
+## 21.2.1 - 2024-12-02
 ### PaymentSheet
 - [CHANGED][9695](https://github.com/stripe/stripe-android/pull/9695) US Bank Account now supports the `instant_or_skip` verification method.
 
