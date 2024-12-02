@@ -46,6 +46,10 @@
   <string name="stripe_paymentsheet_bacs_protection_mandate">Your payments are protected by the %s.</string>
   <!-- Text displayed on manage bank account screen when bank account details are not editable. -->
   <string name="stripe_paymentsheet_bank_account_details_cannot_be_changed">Bank account details cannot be changed.</string>
+  <!-- Text shown in the bank payment form when a promo is available and the user is paying, e.g. 'Get $5 back when you pay by bank. See terms' -->
+  <string name="stripe_paymentsheet_bank_payment_promo_for_payment"><![CDATA[Get %s back when you pay by bank. <a href=\"https://link.com/promotion-terms\">Seeu00A0terms</a>]]></string>
+  <!-- Text shown in the bank payment form when a promo is available and the user is setting up an account, e.g. 'Get $5 back when you pay by bank. See terms' -->
+  <string name="stripe_paymentsheet_bank_payment_promo_for_setup"><![CDATA[Get %s back when you pay for the first time with your bank. <a href=\"https://link.com/promotion-terms\">Seeu00A0terms</a>]]></string>
   <!-- Text displayed on manage card screen when card details are not editable. -->
   <string name="stripe_paymentsheet_card_details_cannot_be_changed">Card details cannot be changed.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
@@ -91,10 +95,6 @@
   <string name="stripe_paymentsheet_pay_using">Pay using</string>
   <!-- US Bank Account copy title for Mobile payment element form -->
   <string name="stripe_paymentsheet_pay_with_bank_title">Pay with your bank account in just a few steps.</string>
-  <!-- Text shown in the bank payment form when a promo is available and the user is paying, e.g. 'Get $5 back when you pay by bank. See terms' -->
-  <string name="stripe_paymentsheet_bank_payment_promo_for_payment"><![CDATA[Get %s back when you pay by bank. <a href="https://link.com/promotion-terms">See\u00A0terms</a>]]></string>
-  <!-- Text shown in the bank payment form when a promo is available and the user is setting up an account, e.g. 'Get $5 back when you pay by bank. See terms' -->
-  <string name="stripe_paymentsheet_bank_payment_promo_for_setup"><![CDATA[Get %s back when you pay for the first time with your bank. <a href="https://link.com/promotion-terms">See\u00A0terms</a>]]></string>
   <!-- Label of a button that, when tapped, initiates payment, becomes disabled, and displays this text -->
   <string name="stripe_paymentsheet_primary_button_processing">Processing…</string>
   <!-- Title for confirmation alert to remove a saved bank account payment method -->
