@@ -64,7 +64,6 @@ import androidx.compose.ui.unit.sp
 import com.godaddy.android.colorpicker.ClassicColorPicker
 import com.godaddy.android.colorpicker.HsvColor
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.R
 
@@ -183,7 +182,6 @@ private fun CustomizationCard(
     }
 }
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @Composable
 private fun Colors(
     currentAppearance: PaymentSheet.Appearance,
@@ -366,7 +364,6 @@ private fun Colors(
     )
 }
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @Composable
 private fun Shapes(
     currentAppearance: PaymentSheet.Appearance,
@@ -393,7 +390,6 @@ private fun Shapes(
     }
 }
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @Composable
 private fun Typography(
     currentAppearance: PaymentSheet.Appearance,
@@ -420,7 +416,6 @@ private fun Typography(
     }
 }
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @Composable
 private fun PrimaryButton(
     currentAppearance: PaymentSheet.Appearance,

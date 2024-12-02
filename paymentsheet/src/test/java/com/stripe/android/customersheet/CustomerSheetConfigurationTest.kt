@@ -2,7 +2,6 @@ package com.stripe.android.customersheet
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.CardBrand
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import junit.framework.TestCase.fail
 import org.junit.Test
@@ -11,7 +10,6 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class CustomerSheetConfigurationTest {
-    @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
     @Test
     fun `Builder returns a configuration`() {
         val googlePayEnabled = true

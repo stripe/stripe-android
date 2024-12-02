@@ -6,7 +6,6 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationOption
@@ -228,7 +227,6 @@ class BacsConfirmationDefinitionTest {
         assertThat(launchAction.receivesResultInProcess).isTrue()
     }
 
-    @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
     @Test
     fun `On 'launch', should use launcher to launch`() = runTest {
         val definition = createBacsConfirmationDefinition()

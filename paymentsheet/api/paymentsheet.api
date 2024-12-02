@@ -669,23 +669,6 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$Appearance$Embed
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithRadio : com/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle {
-	public static final field $stable I
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> (FIFZZIIF)V
-	public synthetic fun <init> (Landroid/content/Context;IJIZZJJILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun describeContents ()I
-	public final fun getAdditionalInsetsDp ()F
-	public final fun getBottomSeparatorEnabled ()Z
-	public final fun getSelectedColor ()I
-	public final fun getSeparatorColor ()I
-	public final fun getSeparatorInsetsDp ()F
-	public final fun getSeparatorThicknessDp ()F
-	public final fun getTopSeparatorEnabled ()Z
-	public final fun getUnselectedColor ()I
-	public final fun writeToParcel (Landroid/os/Parcel;I)V
-}
-
 public final class com/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithRadio$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithRadio;

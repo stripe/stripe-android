@@ -883,7 +883,6 @@ class PaymentSheet internal constructor(
     }
 
     @Parcelize
-    @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
     data class Appearance(
         /**
          * Describes the colors used while the system is in light mode.
@@ -943,7 +942,6 @@ class PaymentSheet internal constructor(
         }
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        @ExperimentalEmbeddedPaymentElementApi
         @Parcelize
         class Embedded(
             internal val style: RowStyle
@@ -959,6 +957,7 @@ class PaymentSheet internal constructor(
             @Parcelize
             sealed class RowStyle : Parcelable {
 
+                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                 @Parcelize
                 class FlatWithRadio(
                     /**
