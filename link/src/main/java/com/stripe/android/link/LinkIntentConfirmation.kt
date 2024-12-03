@@ -18,7 +18,7 @@ interface LinkIntentConfirmationHandler {
         data class Failed(
             val cause: Throwable,
             val message: ResolvableString,
-        ): State
+        ) : State
 
         data object Cancelled : State
 
