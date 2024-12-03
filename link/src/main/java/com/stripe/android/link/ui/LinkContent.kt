@@ -94,6 +94,7 @@ internal fun LinkContent(
                 Screens(
                     navController = navController,
                     goBack = viewModel::goBack,
+                    onUpdateSheetContent = onUpdateSheetContent,
                     navigateAndClearStack = { screen ->
                         viewModel.navigate(screen, clearStack = true)
                     },
@@ -113,6 +114,7 @@ internal fun LinkContent(
 private fun Screens(
     navController: NavHostController,
     getLinkAccount: () -> LinkAccount?,
+    onUpdateSheetContent: (BottomSheetContent?) -> Unit,
     goBack: () -> Unit,
     navigateAndClearStack: (route: LinkScreen) -> Unit,
     dismissWithResult: (LinkActivityResult) -> Unit
@@ -122,13 +124,7 @@ private fun Screens(
         startDestination = LinkScreen.Loading.route
     ) {
         composable(LinkScreen.Loading.route) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
-            }
+            Loader()
         }
 
         composable(LinkScreen.SignUp.route) {
@@ -166,7 +162,10 @@ private fun Screens(
                     dismissWithResult = dismissWithResult
                 )
             }
-            WalletScreen(viewModel)
+            WalletScreen(
+                viewModel = viewModel,
+                showBottomSheetContent = onUpdateSheetContent
+            )
         }
 
         composable(LinkScreen.CardEdit.route) {
@@ -176,5 +175,16 @@ private fun Screens(
         composable(LinkScreen.PaymentMethod.route) {
             PaymentMethodScreen()
         }
+    }
+}
+
+@Composable
+private fun Loader() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        CircularProgressIndicator()
     }
 }

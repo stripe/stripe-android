@@ -41,6 +41,7 @@ import com.stripe.android.link.R
 import com.stripe.android.link.theme.HorizontalPadding
 import com.stripe.android.link.theme.linkColors
 import com.stripe.android.link.theme.linkShapes
+import com.stripe.android.link.ui.BottomSheetContent
 import com.stripe.android.link.ui.PrimaryButton
 import com.stripe.android.link.ui.SecondaryButton
 import com.stripe.android.model.ConsumerPaymentDetails
@@ -50,6 +51,7 @@ import com.stripe.android.uicore.utils.collectAsState
 @Composable
 internal fun WalletScreen(
     viewModel: WalletViewModel,
+    showBottomSheetContent: (BottomSheetContent?) -> Unit
 ) {
     val state by viewModel.uiState.collectAsState()
     var isExpanded by rememberSaveable { mutableStateOf(false) }
@@ -62,7 +64,11 @@ internal fun WalletScreen(
             isExpanded = expanded
         },
         onPrimaryButtonClick = viewModel::onPrimaryButtonClicked,
-        onPayAnotherWayClick = viewModel::onPayAnotherWayClicked
+        onPayAnotherWayClick = viewModel::onPayAnotherWayClicked,
+        onRemoveClicked = viewModel::onRemoveClicked,
+        onEditPaymentMethodClicked = viewModel::onEditPaymentMethodClicked,
+        onSetDefaultClicked = viewModel::onSetDefaultClicked,
+        showBottomSheetContent = showBottomSheetContent
     )
 }
 
@@ -73,7 +79,11 @@ internal fun WalletBody(
     onItemSelected: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onExpandedChanged: (Boolean) -> Unit,
     onPrimaryButtonClick: () -> Unit,
-    onPayAnotherWayClick: () -> Unit
+    onPayAnotherWayClick: () -> Unit,
+    onEditPaymentMethodClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
+    onSetDefaultClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
+    onRemoveClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
+    showBottomSheetContent: (BottomSheetContent?) -> Unit
 ) {
     if (state.paymentDetailsList.isEmpty()) {
         Box(
@@ -104,7 +114,11 @@ internal fun WalletBody(
             state = state,
             isExpanded = isExpanded,
             onItemSelected = onItemSelected,
-            onExpandedChanged = onExpandedChanged
+            onExpandedChanged = onExpandedChanged,
+            showBottomSheetContent = showBottomSheetContent,
+            onRemoveClicked = onRemoveClicked,
+            onSetDefaultClicked = onSetDefaultClicked,
+            onEditPaymentMethodClicked = onEditPaymentMethodClicked,
         )
 
         AnimatedVisibility(state.showBankAccountTerms) {
@@ -134,6 +148,10 @@ private fun PaymentMethodSection(
     isExpanded: Boolean,
     onItemSelected: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onExpandedChanged: (Boolean) -> Unit,
+    onEditPaymentMethodClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
+    onSetDefaultClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
+    onRemoveClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
+    showBottomSheetContent: (BottomSheetContent?) -> Unit
 ) {
     Box(
         modifier = Modifier
@@ -144,7 +162,28 @@ private fun PaymentMethodSection(
             ExpandedPaymentDetails(
                 uiState = state,
                 onItemSelected = onItemSelected,
-                onMenuButtonClick = {},
+                onMenuButtonClick = {
+                    showBottomSheetContent {
+                        WalletPaymentMethodMenu(
+                            paymentDetails = it,
+                            onEditClick = {
+                                showBottomSheetContent(null)
+                                onEditPaymentMethodClicked(it)
+                            },
+                            onSetDefaultClick = {
+                                showBottomSheetContent(null)
+                                onSetDefaultClicked(it)
+                            },
+                            onRemoveClick = {
+                                showBottomSheetContent(null)
+                                onRemoveClicked(it)
+                            },
+                            onCancelClick = {
+                                showBottomSheetContent(null)
+                            }
+                        )
+                    }
+                },
                 onAddNewPaymentMethodClick = {},
                 onCollapse = {
                     onExpandedChanged(false)

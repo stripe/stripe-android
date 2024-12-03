@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@SuppressWarnings("EmptyFunctionBlock", "UnusedParameter")
 internal class WalletViewModel @Inject constructor(
     private val configuration: LinkConfiguration,
     private val linkAccount: LinkAccount,
@@ -81,6 +82,15 @@ internal class WalletViewModel @Inject constructor(
         _uiState.update {
             it.copy(selectedItem = item)
         }
+    }
+
+    fun onSetDefaultClicked(item: ConsumerPaymentDetails.PaymentDetails) {
+    }
+
+    fun onRemoveClicked(item: ConsumerPaymentDetails.PaymentDetails) {
+    }
+
+    fun onEditPaymentMethodClicked(item: ConsumerPaymentDetails.PaymentDetails) {
     }
 
     fun onPrimaryButtonClicked() {}
