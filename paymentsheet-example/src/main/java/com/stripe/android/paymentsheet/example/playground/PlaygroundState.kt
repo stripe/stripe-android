@@ -8,7 +8,11 @@ import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutResponse
 import com.stripe.android.paymentsheet.example.playground.model.CustomerEphemeralKeyRequest
+import com.stripe.android.paymentsheet.example.playground.settings.AdditionalInsetsSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.AutomaticPaymentMethodsSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.BottomSeparatorEnabledSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CheckmarkColorSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CheckmarkInsetsSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.Country
 import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
@@ -18,13 +22,22 @@ import com.stripe.android.paymentsheet.example.playground.settings.CustomerSessi
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSheetPaymentMethodModeDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
+import com.stripe.android.paymentsheet.example.playground.settings.FloatingButtonSpacingSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationTypeSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PaymentMethodConfigurationSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PaymentMethodMode
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
 import com.stripe.android.paymentsheet.example.playground.settings.RequireCvcRecollectionDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.RowStyleEnum
+import com.stripe.android.paymentsheet.example.playground.settings.RowStyleSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.SelectedColorSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.SeparatorColorSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.SeparatorInsetsSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.SeparatorThicknessSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.SupportedPaymentMethodsSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.TopSeparatorEnabledSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.UnselectedColorSettingsDefinition
 import kotlinx.parcelize.Parcelize
 
 @Stable
@@ -163,6 +176,77 @@ internal sealed interface PlaygroundState : Parcelable {
                 clientSecret = intentClientSecret,
                 defaultEndpoint = defaultEndpoint
             )
+        }
+    }
+
+    @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
+    data class EmbeddedAppearanceState(
+        val snapshot: PlaygroundSettings.Snapshot
+    ) {
+
+        val rowStyle: RowStyleEnum
+            get() = snapshot[RowStyleSettingsDefinition]
+
+        val separatorThicknessDp: Float
+            get() = snapshot[SeparatorThicknessSettingsDefinition]
+
+        val separatorInsetsDp: Float
+            get() = snapshot[SeparatorInsetsSettingsDefinition]
+
+        val additionalInsetsDp: Float
+            get() = snapshot[AdditionalInsetsSettingsDefinition]
+
+        val checkmarkInsetsDp: Float
+            get() = snapshot[CheckmarkInsetsSettingsDefinition]
+
+        val floatingButtonSpacingDp: Float
+            get() = snapshot[FloatingButtonSpacingSettingsDefinition]
+
+        val topSeparatorEnabled: Boolean
+            get() = snapshot[TopSeparatorEnabledSettingsDefinition]
+
+        val bottomSeparatorEnabled: Boolean
+            get() = snapshot[BottomSeparatorEnabledSettingsDefinition]
+
+        val separatorColor: Int
+            get() = snapshot[SeparatorColorSettingsDefinition]
+
+        val selectedColor: Int
+            get() = snapshot[SelectedColorSettingsDefinition]
+
+        val unselectedColor: Int
+            get() = snapshot[UnselectedColorSettingsDefinition]
+
+        val checkmarkColor: Int
+            get() = snapshot[CheckmarkColorSettingsDefinition]
+
+        fun getRow(): PaymentSheet.Appearance.Embedded.RowStyle {
+            return when (rowStyle) {
+                RowStyleEnum.FlatWithRadio -> PaymentSheet.Appearance.Embedded.RowStyle.FlatWithRadio(
+                    separatorThicknessDp = separatorThicknessDp,
+                    separatorColor = separatorColor,
+                    separatorInsetsDp = separatorInsetsDp,
+                    topSeparatorEnabled = topSeparatorEnabled,
+                    bottomSeparatorEnabled = bottomSeparatorEnabled,
+                    selectedColor = selectedColor,
+                    unselectedColor = unselectedColor,
+                    additionalInsetsDp = additionalInsetsDp
+                )
+                RowStyleEnum.FlatWithCheckmark -> PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark(
+                    separatorThicknessDp = separatorThicknessDp,
+                    separatorColor = separatorColor,
+                    separatorInsetsDp = separatorInsetsDp,
+                    topSeparatorEnabled = topSeparatorEnabled,
+                    bottomSeparatorEnabled = bottomSeparatorEnabled,
+                    checkmarkColor = checkmarkColor,
+                    checkmarkInsetDp = checkmarkInsetsDp,
+                    additionalInsetsDp = additionalInsetsDp
+                )
+                RowStyleEnum.FloatingButton -> PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton(
+                    spacingDp = floatingButtonSpacingDp,
+                    additionalInsetsDp = additionalInsetsDp
+                )
+            }
         }
     }
 }

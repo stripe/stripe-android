@@ -62,6 +62,7 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModelProvider
 import com.godaddy.android.colorpicker.ClassicColorPicker
 import com.godaddy.android.colorpicker.HsvColor
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
@@ -69,7 +70,22 @@ import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.example.R
-import com.stripe.android.uicore.StripeThemeDefaults
+import com.stripe.android.paymentsheet.example.playground.PaymentSheetPlaygroundViewModel
+import com.stripe.android.paymentsheet.example.playground.PlaygroundState
+import com.stripe.android.paymentsheet.example.playground.settings.AdditionalInsetsSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.BottomSeparatorEnabledSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CheckmarkColorSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CheckmarkInsetsSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.FloatingButtonSpacingSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.RowStyleEnum
+import com.stripe.android.paymentsheet.example.playground.settings.RowStyleSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.SelectedColorSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.SeparatorColorSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.SeparatorInsetsSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.SeparatorThicknessSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.TopSeparatorEnabledSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.UnselectedColorSettingsDefinition
+import com.stripe.android.uicore.utils.collectAsState
 
 private val BASE_FONT_SIZE = 20.sp
 private val BASE_PADDING = 8.dp
@@ -82,11 +98,13 @@ internal class AppearanceBottomSheetDialogFragment : BottomSheetDialogFragment()
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        val viewModel = ViewModelProvider(requireActivity())[PaymentSheetPlaygroundViewModel::class.java]
         return ComposeView(requireContext()).apply {
             setContent {
                 AppearancePicker(
                     currentAppearance = AppearanceStore.state,
                     updateAppearance = { AppearanceStore.state = it },
+                    viewModel = viewModel
                 )
             }
         }
@@ -99,11 +117,11 @@ internal class AppearanceBottomSheetDialogFragment : BottomSheetDialogFragment()
     }
 }
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @Composable
 private fun AppearancePicker(
     currentAppearance: PaymentSheet.Appearance,
     updateAppearance: (PaymentSheet.Appearance) -> Unit,
+    viewModel: PaymentSheetPlaygroundViewModel
 ) {
     val scrollState = rememberScrollState()
     val nestedScrollConnection = rememberNestedScrollInteropConnection()
@@ -113,7 +131,10 @@ private fun AppearancePicker(
             TopAppBar(
                 title = { Text("Appearance") },
                 actions = {
-                    TextButton(onClick = AppearanceStore::reset) {
+                    TextButton(onClick = {
+                        AppearanceStore::reset
+                        resetEmbeddedAppearance(viewModel, currentAppearance, updateAppearance)
+                    }) {
                         Text(text = stringResource(R.string.reset))
                     }
                 },
@@ -157,27 +178,11 @@ private fun AppearancePicker(
                 )
             }
             CustomizationCard("Embedded") {
-                RowStyleDropDown(currentAppearance.getEmbedded().getRowStyle()) { style ->
-                    updateAppearance(currentAppearance.copy(embeddedAppearance = Embedded(style)))
-                }
-                Divider()
-                when (currentAppearance.getEmbedded().getRowStyle()) {
-                    is Embedded.RowStyle.FloatingButton ->
-                        FloatingButton(
-                            currentAppearance = currentAppearance,
-                            updateAppearance = updateAppearance,
-                        )
-                    is Embedded.RowStyle.FlatWithCheckmark ->
-                        FlatWithCheckmark(
-                            currentAppearance = currentAppearance,
-                            updateAppearance = updateAppearance,
-                        )
-                    is Embedded.RowStyle.FlatWithRadio ->
-                        FlatWithRadio(
-                            currentAppearance = currentAppearance,
-                            updateAppearance = updateAppearance,
-                        )
-                }
+                Embedded(
+                    viewModel = viewModel,
+                    currentAppearance = currentAppearance,
+                    updateAppearance = updateAppearance
+                )
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -619,23 +624,33 @@ private fun PrimaryButton(
 
 @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @Composable
-private fun FlatWithRadio(
+private fun Embedded(
+    viewModel: PaymentSheetPlaygroundViewModel,
     currentAppearance: PaymentSheet.Appearance,
-    updateAppearance: (PaymentSheet.Appearance) -> Unit,
+    updateAppearance: (PaymentSheet.Appearance) -> Unit
 ) {
-    val currentEmbeddedRowStyle = currentAppearance.getEmbedded().getRowStyle() as Embedded.RowStyle.FlatWithRadio
+    val settings = viewModel.playgroundSettingsFlow.collectAsState().value
+    val snapshot = settings!!.snapshot()
+    val embeddedState = PlaygroundState.EmbeddedAppearanceState(snapshot)
 
+    RowStyleDropDown(embeddedState.rowStyle) { style ->
+        viewModel.updateEmbeddedAppearance(
+            RowStyleSettingsDefinition,
+            style
+        )
+        updateAppearance(
+            currentAppearance.copy(
+                embeddedAppearance = Embedded(embeddedState.getRow())
+            )
+        )
+    }
     ColorItem(
         label = "separatorColor",
-        currentColor = Color(currentEmbeddedRowStyle.separatorColor),
+        currentColor = Color(embeddedState.separatorColor),
         onColorPicked = {
+            viewModel.updateEmbeddedAppearance(SeparatorColorSettingsDefinition, it.toArgb())
             currentAppearance.copy(
-                embeddedAppearance = Embedded(
-                    updateFlatWithRadio(
-                        current = currentEmbeddedRowStyle,
-                        separatorColor = it.toArgb()
-                    )
-                )
+                embeddedAppearance = Embedded(embeddedState.getRow())
             )
         },
         updateAppearance = updateAppearance,
@@ -644,15 +659,11 @@ private fun FlatWithRadio(
 
     ColorItem(
         label = "selectedColor",
-        currentColor = Color(currentEmbeddedRowStyle.selectedColor),
+        currentColor = Color(embeddedState.selectedColor),
         onColorPicked = {
+            viewModel.updateEmbeddedAppearance(SelectedColorSettingsDefinition, it.toArgb())
             currentAppearance.copy(
-                embeddedAppearance = Embedded(
-                    updateFlatWithRadio(
-                        current = currentEmbeddedRowStyle,
-                        selectedColor = it.toArgb()
-                    )
-                )
+                embeddedAppearance = Embedded(embeddedState.getRow())
             )
         },
         updateAppearance = updateAppearance,
@@ -661,110 +672,11 @@ private fun FlatWithRadio(
 
     ColorItem(
         label = "unselectedColor",
-        currentColor = Color(currentEmbeddedRowStyle.unselectedColor),
+        currentColor = Color(embeddedState.unselectedColor),
         onColorPicked = {
+            viewModel.updateEmbeddedAppearance(UnselectedColorSettingsDefinition, it.toArgb())
             currentAppearance.copy(
-                embeddedAppearance = Embedded(
-                    updateFlatWithRadio(
-                        current = currentEmbeddedRowStyle,
-                        unselectedColor = it.toArgb()
-                    )
-                )
-            )
-        },
-        updateAppearance = updateAppearance,
-    )
-
-    IncrementDecrementItem("separatorInsetsDp", currentEmbeddedRowStyle.separatorInsetsDp) {
-        updateAppearance(
-            currentAppearance.copy(
-                embeddedAppearance = Embedded(
-                    updateFlatWithRadio(
-                        current = currentEmbeddedRowStyle,
-                        separatorInsetsDp = it
-                    )
-                )
-            )
-        )
-    }
-    Divider()
-
-    IncrementDecrementItem("separatorThicknessDp", currentEmbeddedRowStyle.separatorThicknessDp) {
-        updateAppearance(
-            currentAppearance.copy(
-                embeddedAppearance = Embedded(
-                    updateFlatWithRadio(
-                        current = currentEmbeddedRowStyle,
-                        separatorThicknessDp = it
-                    )
-                )
-            )
-        )
-    }
-    Divider()
-
-    IncrementDecrementItem("additionalInsets", currentEmbeddedRowStyle.additionalInsetsDp) {
-        updateAppearance(
-            currentAppearance.copy(
-                embeddedAppearance = Embedded(
-                    updateFlatWithRadio(
-                        current = currentEmbeddedRowStyle,
-                        additionalInsetsDp = it
-                    )
-                )
-            )
-        )
-    }
-    Divider()
-
-    AppearanceToggle("topSeparatorEnabled", currentEmbeddedRowStyle.topSeparatorEnabled) {
-        updateAppearance(
-            currentAppearance.copy(
-                embeddedAppearance = Embedded(
-                    updateFlatWithRadio(
-                        current = currentEmbeddedRowStyle,
-                        topSeparatorEnabled = it
-                    )
-                )
-            )
-        )
-    }
-    Divider()
-
-    AppearanceToggle("bottomSeparatorEnabled", currentEmbeddedRowStyle.bottomSeparatorEnabled) {
-        updateAppearance(
-            currentAppearance.copy(
-                embeddedAppearance = Embedded(
-                    updateFlatWithRadio(
-                        current = currentEmbeddedRowStyle,
-                        bottomSeparatorEnabled = it
-                    )
-                )
-            )
-        )
-    }
-    Divider()
-}
-
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
-@Composable
-private fun FlatWithCheckmark(
-    currentAppearance: PaymentSheet.Appearance,
-    updateAppearance: (PaymentSheet.Appearance) -> Unit,
-) {
-    val currentStyle = currentAppearance.getEmbedded().getRowStyle() as Embedded.RowStyle.FlatWithCheckmark
-
-    ColorItem(
-        label = "separatorColor",
-        currentColor = Color(currentStyle.separatorColor),
-        onColorPicked = {
-            currentAppearance.copy(
-                embeddedAppearance = Embedded(
-                    updateFlatWithCheckmark(
-                        current = currentStyle,
-                        separatorColor = it.toArgb()
-                    )
-                )
+                embeddedAppearance = Embedded(embeddedState.getRow())
             )
         },
         updateAppearance = updateAppearance,
@@ -773,187 +685,76 @@ private fun FlatWithCheckmark(
 
     ColorItem(
         label = "checkmarkColor",
-        currentColor = Color(currentStyle.checkmarkColor),
+        currentColor = Color(embeddedState.checkmarkColor),
         onColorPicked = {
+            viewModel.updateEmbeddedAppearance(CheckmarkColorSettingsDefinition, it.toArgb())
             currentAppearance.copy(
-                embeddedAppearance = Embedded(
-                    updateFlatWithCheckmark(
-                        current = currentStyle,
-                        checkmarkColor = it.toArgb()
-                    )
-                )
+                embeddedAppearance = Embedded(embeddedState.getRow())
             )
         },
         updateAppearance = updateAppearance,
     )
     Divider()
 
-    IncrementDecrementItem("separatorThicknessDp", currentStyle.separatorThicknessDp) {
+    IncrementDecrementItem("separatorInsetsDp", embeddedState.separatorInsetsDp) {
+        viewModel.updateEmbeddedAppearance(SeparatorInsetsSettingsDefinition, it)
         updateAppearance(
             currentAppearance.copy(
-                embeddedAppearance = Embedded(
-                    updateFlatWithCheckmark(
-                        current = currentStyle,
-                        separatorThicknessDp = it
-                    )
-                )
+                embeddedAppearance = Embedded(embeddedState.getRow())
             )
         )
     }
     Divider()
 
-    IncrementDecrementItem("separatorInsetsDp", currentStyle.separatorInsetsDp) {
+    IncrementDecrementItem("separatorThicknessDp", embeddedState.separatorThicknessDp) {
+        viewModel.updateEmbeddedAppearance(SeparatorThicknessSettingsDefinition, it)
         updateAppearance(
             currentAppearance.copy(
-                embeddedAppearance = Embedded(
-                    updateFlatWithCheckmark(
-                        current = currentStyle,
-                        separatorInsetsDp = it
-                    )
-                )
+                embeddedAppearance = Embedded(embeddedState.getRow())
             )
         )
     }
     Divider()
 
-    IncrementDecrementItem("checkmarkInsetsDp", currentStyle.checkmarkInsetDp) {
+    IncrementDecrementItem("additionalInsets", embeddedState.additionalInsetsDp) {
+        viewModel.updateEmbeddedAppearance(AdditionalInsetsSettingsDefinition, it)
         updateAppearance(
             currentAppearance.copy(
-                embeddedAppearance = Embedded(
-                    updateFlatWithCheckmark(
-                        current = currentStyle,
-                        checkmarkInsetsDp = it
-                    )
-                )
+                embeddedAppearance = Embedded(embeddedState.getRow())
             )
         )
     }
     Divider()
 
-    IncrementDecrementItem("additionalInsetsDp", currentStyle.additionalInsetsDp) {
+    IncrementDecrementItem("checkmarkInsetsDp", embeddedState.checkmarkInsetsDp) {
+        viewModel.updateEmbeddedAppearance(CheckmarkInsetsSettingsDefinition, it)
         updateAppearance(
             currentAppearance.copy(
-                embeddedAppearance = Embedded(
-                    updateFlatWithCheckmark(
-                        current = currentStyle,
-                        additionalInsetsDp = it
-                    )
-                )
+                embeddedAppearance = Embedded(embeddedState.getRow())
             )
         )
     }
     Divider()
 
-    AppearanceToggle("topSeparatorEnabled", currentStyle.topSeparatorEnabled) {
+    AppearanceToggle("topSeparatorEnabled", embeddedState.topSeparatorEnabled) {
+        viewModel.updateEmbeddedAppearance(TopSeparatorEnabledSettingsDefinition, it)
         updateAppearance(
             currentAppearance.copy(
-                embeddedAppearance = Embedded(
-                    updateFlatWithCheckmark(
-                        current = currentStyle,
-                        topSeparatorEnabled = it
-                    )
-                )
+                embeddedAppearance = Embedded(embeddedState.getRow())
             )
         )
     }
     Divider()
 
-    AppearanceToggle("bottomSeparatorEnabled", currentStyle.bottomSeparatorEnabled) {
+    AppearanceToggle("bottomSeparatorEnabled", embeddedState.bottomSeparatorEnabled) {
+        viewModel.updateEmbeddedAppearance(BottomSeparatorEnabledSettingsDefinition, it)
         updateAppearance(
             currentAppearance.copy(
-                embeddedAppearance = Embedded(
-                    updateFlatWithCheckmark(
-                        current = currentStyle,
-                        bottomSeparatorEnabled = it
-                    )
-                )
-            )
-        )
-    }
-}
-
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
-@Composable
-private fun FloatingButton(
-    currentAppearance: PaymentSheet.Appearance,
-    updateAppearance: (PaymentSheet.Appearance) -> Unit,
-) {
-    val currentEmbeddedRowStyle = currentAppearance.getEmbedded().getRowStyle() as Embedded.RowStyle.FloatingButton
-
-    IncrementDecrementItem("spacingDp", currentEmbeddedRowStyle.spacingDp) {
-        updateAppearance(
-            currentAppearance.copy(
-                embeddedAppearance = Embedded(
-                    Embedded.RowStyle.FloatingButton(
-                        spacingDp = it,
-                        additionalInsetsDp = currentEmbeddedRowStyle.additionalInsetsDp
-                    )
-                )
+                embeddedAppearance = Embedded(embeddedState.getRow())
             )
         )
     }
     Divider()
-
-    IncrementDecrementItem("additionalInsets", currentEmbeddedRowStyle.additionalInsetsDp) {
-        updateAppearance(
-            currentAppearance.copy(
-                embeddedAppearance = Embedded(
-                    Embedded.RowStyle.FloatingButton(
-                        spacingDp = currentEmbeddedRowStyle.spacingDp,
-                        additionalInsetsDp = it
-                    )
-                )
-            )
-        )
-    }
-}
-
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
-private fun updateFlatWithRadio(
-    current: Embedded.RowStyle.FlatWithRadio,
-    separatorThicknessDp: Float? = null,
-    separatorColor: Int? = null,
-    separatorInsetsDp: Float? = null,
-    topSeparatorEnabled: Boolean? = null,
-    bottomSeparatorEnabled: Boolean? = null,
-    selectedColor: Int? = null,
-    unselectedColor: Int? = null,
-    additionalInsetsDp: Float? = null
-): Embedded.RowStyle.FlatWithRadio {
-    return Embedded.RowStyle.FlatWithRadio(
-        separatorThicknessDp = separatorThicknessDp ?: current.separatorThicknessDp,
-        separatorColor = separatorColor ?: current.separatorColor,
-        separatorInsetsDp = separatorInsetsDp ?: current.separatorInsetsDp,
-        topSeparatorEnabled = topSeparatorEnabled ?: current.topSeparatorEnabled,
-        bottomSeparatorEnabled = bottomSeparatorEnabled ?: current.bottomSeparatorEnabled,
-        selectedColor = selectedColor ?: current.selectedColor,
-        unselectedColor = unselectedColor ?: current.unselectedColor,
-        additionalInsetsDp = additionalInsetsDp ?: current.additionalInsetsDp,
-    )
-}
-
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
-private fun updateFlatWithCheckmark(
-    current: Embedded.RowStyle.FlatWithCheckmark,
-    separatorThicknessDp: Float? = null,
-    separatorColor: Int? = null,
-    separatorInsetsDp: Float? = null,
-    topSeparatorEnabled: Boolean? = null,
-    bottomSeparatorEnabled: Boolean? = null,
-    checkmarkColor: Int? = null,
-    checkmarkInsetsDp: Float? = null,
-    additionalInsetsDp: Float? = null
-): Embedded.RowStyle.FlatWithCheckmark {
-    return Embedded.RowStyle.FlatWithCheckmark(
-        separatorThicknessDp = separatorThicknessDp ?: current.separatorThicknessDp,
-        separatorColor = separatorColor ?: current.separatorColor,
-        separatorInsetsDp = separatorInsetsDp ?: current.separatorInsetsDp,
-        topSeparatorEnabled = topSeparatorEnabled ?: current.topSeparatorEnabled,
-        bottomSeparatorEnabled = bottomSeparatorEnabled ?: current.bottomSeparatorEnabled,
-        checkmarkColor = checkmarkColor ?: current.checkmarkColor,
-        checkmarkInsetDp = checkmarkInsetsDp ?: current.checkmarkInsetDp,
-        additionalInsetsDp = additionalInsetsDp ?: current.additionalInsetsDp,
-    )
 }
 
 @Composable
@@ -1127,9 +928,8 @@ private fun FontScaleSlider(sliderPosition: Float, onValueChange: (Float) -> Uni
     )
 }
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @Composable
-private fun RowStyleDropDown(style: Embedded.RowStyle, rowStyleSelectedCallback: (Embedded.RowStyle) -> Unit) {
+private fun RowStyleDropDown(style: RowStyleEnum, rowStyleSelectedCallback: (RowStyleEnum) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
 
     Row(
@@ -1140,7 +940,7 @@ private fun RowStyleDropDown(style: Embedded.RowStyle, rowStyleSelectedCallback:
             .wrapContentSize(Alignment.TopStart)
     ) {
         Text(
-            text = "RowStyle: ${style::class.simpleName}",
+            text = "RowStyle: ${style.value}",
             fontSize = BASE_FONT_SIZE,
             modifier = Modifier
                 .fillMaxWidth()
@@ -1154,18 +954,7 @@ private fun RowStyleDropDown(style: Embedded.RowStyle, rowStyleSelectedCallback:
             DropdownMenuItem(
                 onClick = {
                     expanded = false
-                    rowStyleSelectedCallback(
-                        Embedded.RowStyle.FlatWithRadio(
-                            separatorThicknessDp = StripeThemeDefaults.flat.separatorThickness,
-                            separatorColor = StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
-                            separatorInsetsDp = StripeThemeDefaults.flat.separatorInsets,
-                            topSeparatorEnabled = StripeThemeDefaults.flat.topSeparatorEnabled,
-                            bottomSeparatorEnabled = StripeThemeDefaults.flat.bottomSeparatorEnabled,
-                            selectedColor = StripeThemeDefaults.colorsLight.materialColors.primary.toArgb(),
-                            unselectedColor = StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
-                            additionalInsetsDp = StripeThemeDefaults.embeddedCommon.additionalInsetsDp
-                        )
-                    )
+                    rowStyleSelectedCallback(RowStyleEnum.FlatWithRadio)
                 }
             ) {
                 Text("FlatWithRadio")
@@ -1173,18 +962,7 @@ private fun RowStyleDropDown(style: Embedded.RowStyle, rowStyleSelectedCallback:
             DropdownMenuItem(
                 onClick = {
                     expanded = false
-                    rowStyleSelectedCallback(
-                        Embedded.RowStyle.FlatWithCheckmark(
-                            separatorThicknessDp = StripeThemeDefaults.flat.separatorThickness,
-                            separatorColor = StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
-                            separatorInsetsDp = StripeThemeDefaults.flat.separatorInsets,
-                            topSeparatorEnabled = StripeThemeDefaults.flat.topSeparatorEnabled,
-                            bottomSeparatorEnabled = StripeThemeDefaults.flat.bottomSeparatorEnabled,
-                            checkmarkColor = StripeThemeDefaults.colorsLight.materialColors.primary.toArgb(),
-                            checkmarkInsetDp = StripeThemeDefaults.embeddedCommon.checkmarkInsetDp,
-                            additionalInsetsDp = StripeThemeDefaults.embeddedCommon.additionalInsetsDp
-                        )
-                    )
+                    rowStyleSelectedCallback(RowStyleEnum.FlatWithCheckmark)
                 }
             ) {
                 Text("FlatWithCheckmark")
@@ -1192,12 +970,7 @@ private fun RowStyleDropDown(style: Embedded.RowStyle, rowStyleSelectedCallback:
             DropdownMenuItem(
                 onClick = {
                     expanded = false
-                    rowStyleSelectedCallback(
-                        Embedded.RowStyle.FloatingButton(
-                            spacingDp = StripeThemeDefaults.floating.spacing,
-                            additionalInsetsDp = StripeThemeDefaults.embeddedCommon.additionalInsetsDp
-                        )
-                    )
+                    rowStyleSelectedCallback(RowStyleEnum.FloatingButton)
                 }
             ) {
                 Text("FloatingButton")
@@ -1265,4 +1038,69 @@ private fun getFontFromResource(fontResId: Int?): FontFamily {
     } ?: run {
         FontFamily.Default
     }
+}
+
+@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
+private fun resetEmbeddedAppearance(
+    viewModel: PaymentSheetPlaygroundViewModel,
+    currentAppearance: PaymentSheet.Appearance,
+    updateAppearance: (PaymentSheet.Appearance) -> Unit
+) {
+    viewModel.updateEmbeddedAppearance(
+        RowStyleSettingsDefinition,
+        RowStyleSettingsDefinition.defaultValue
+    )
+    viewModel.updateEmbeddedAppearance(
+        SeparatorThicknessSettingsDefinition,
+        SeparatorThicknessSettingsDefinition.defaultValue
+    )
+    viewModel.updateEmbeddedAppearance(
+        SeparatorInsetsSettingsDefinition,
+        SeparatorInsetsSettingsDefinition.defaultValue
+    )
+    viewModel.updateEmbeddedAppearance(
+        AdditionalInsetsSettingsDefinition,
+        AdditionalInsetsSettingsDefinition.defaultValue
+    )
+    viewModel.updateEmbeddedAppearance(
+        CheckmarkInsetsSettingsDefinition,
+        CheckmarkInsetsSettingsDefinition.defaultValue
+    )
+    viewModel.updateEmbeddedAppearance(
+        FloatingButtonSpacingSettingsDefinition,
+        FloatingButtonSpacingSettingsDefinition.defaultValue
+    )
+    viewModel.updateEmbeddedAppearance(
+        TopSeparatorEnabledSettingsDefinition,
+        TopSeparatorEnabledSettingsDefinition.defaultValue
+    )
+    viewModel.updateEmbeddedAppearance(
+        BottomSeparatorEnabledSettingsDefinition,
+        BottomSeparatorEnabledSettingsDefinition.defaultValue
+    )
+    viewModel.updateEmbeddedAppearance(
+        SeparatorColorSettingsDefinition,
+        SeparatorColorSettingsDefinition.defaultValue
+    )
+    viewModel.updateEmbeddedAppearance(
+        SelectedColorSettingsDefinition,
+        SelectedColorSettingsDefinition.defaultValue
+    )
+    viewModel.updateEmbeddedAppearance(
+        UnselectedColorSettingsDefinition,
+        UnselectedColorSettingsDefinition.defaultValue
+    )
+    viewModel.updateEmbeddedAppearance(
+        CheckmarkColorSettingsDefinition,
+        CheckmarkColorSettingsDefinition.defaultValue
+    )
+
+    val settings = viewModel.playgroundSettingsFlow.value
+    val snapshot = settings!!.snapshot()
+    val embeddedState = PlaygroundState.EmbeddedAppearanceState(snapshot)
+    updateAppearance(
+        currentAppearance.copy(
+            embeddedAppearance = Embedded(embeddedState.getRow())
+        )
+    )
 }

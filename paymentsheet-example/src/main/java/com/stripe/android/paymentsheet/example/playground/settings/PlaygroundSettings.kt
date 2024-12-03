@@ -455,6 +455,18 @@ internal class PlaygroundSettings private constructor(
             AppearanceSettingsDefinition,
             CustomEndpointDefinition,
             ShippingAddressSettingsDefinition,
+            RowStyleSettingsDefinition,
+            SeparatorThicknessSettingsDefinition,
+            SeparatorInsetsSettingsDefinition,
+            AdditionalInsetsSettingsDefinition,
+            CheckmarkInsetsSettingsDefinition,
+            FloatingButtonSpacingSettingsDefinition,
+            TopSeparatorEnabledSettingsDefinition,
+            BottomSeparatorEnabledSettingsDefinition,
+            SeparatorColorSettingsDefinition,
+            SelectedColorSettingsDefinition,
+            UnselectedColorSettingsDefinition,
+            CheckmarkColorSettingsDefinition
         )
 
         private val allSettingDefinitions: List<PlaygroundSettingDefinition<*>> =
