@@ -57,10 +57,6 @@
     <ID>MagicNumber:CardInputWidgetPlacement.kt$CardInputWidgetPlacement$3</ID>
     <ID>MagicNumber:CardInputWidgetPlacement.kt$CardInputWidgetPlacement$4</ID>
     <ID>MagicNumber:CardInputWidgetPlacement.kt$CardInputWidgetPlacement$5</ID>
-    <ID>MagicNumber:DateUtils.kt$DateUtils$100</ID>
-    <ID>MagicNumber:DateUtils.kt$DateUtils$12</ID>
-    <ID>MagicNumber:DateUtils.kt$DateUtils$20</ID>
-    <ID>MagicNumber:DateUtils.kt$DateUtils$80</ID>
     <ID>MagicNumber:ExpirationDate.kt$ExpirationDate.Unvalidated$3</ID>
     <ID>MagicNumber:PaymentAuthConfig.kt$PaymentAuthConfig.Stripe3ds2Config$5</ID>
     <ID>MagicNumber:PaymentAuthConfig.kt$PaymentAuthConfig.Stripe3ds2Config$99</ID>
