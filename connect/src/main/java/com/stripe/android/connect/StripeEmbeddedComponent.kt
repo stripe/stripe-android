@@ -7,6 +7,11 @@ package com.stripe.android.connect
  */
 internal enum class StripeEmbeddedComponent(val componentName: String) {
     /**
+     * Represents the Account Onboarding component: [https://docs.stripe.com/connect/supported-embedded-components/account-onboarding](https://docs.stripe.com/connect/supported-embedded-components/account-onboarding)
+     */
+    ACCOUNT_ONBOARDING("account-onboarding"),
+
+    /**
      * Represents the Payouts component: [https://docs.stripe.com/connect/supported-embedded-components/payouts](https://docs.stripe.com/connect/supported-embedded-components/payouts)
      */
     PAYOUTS("payouts"),
