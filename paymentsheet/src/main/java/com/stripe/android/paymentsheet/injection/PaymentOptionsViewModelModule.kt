@@ -1,7 +1,7 @@
 package com.stripe.android.paymentsheet.injection
 
 import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
-import com.stripe.android.paymentelement.confirmation.STATUS_BAR_COLOR_PROVIDER
+//import com.stripe.android.paymentelement.confirmation.STATUS_BAR_COLOR_PROVIDER
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import dagger.Module
 import dagger.Provides
@@ -19,11 +19,11 @@ internal class PaymentOptionsViewModelModule {
     @Singleton
     fun provideEventReporterMode(): EventReporter.Mode = EventReporter.Mode.Custom
 
-    @Provides
-    @Named(STATUS_BAR_COLOR_PROVIDER)
-    fun providesStatusBarColor(): () -> Int? {
-        return { null }
-    }
+//    @Provides
+//    @Named(STATUS_BAR_COLOR_PROVIDER)
+//    fun providesStatusBarColor(): () -> Int? {
+//        return { null }
+//    }
 
     @Provides
     @Named(ALLOWS_MANUAL_CONFIRMATION)
