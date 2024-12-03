@@ -967,45 +967,45 @@ class PaymentSheet internal constructor(
                     /**
                      * The thickness of the separator line between rows.
                      */
-                    val separatorThicknessDp: Float,
+                    internal val separatorThicknessDp: Float,
 
                     /**
                      * The color of the separator line between rows.
                      */
                     @ColorInt
-                    val separatorColor: Int,
+                    internal val separatorColor: Int,
 
                     /**
                      * The insets of the separator line between rows.
                      */
-                    val separatorInsetsDp: Float,
+                    internal val separatorInsetsDp: Float,
 
                     /**
                      * Determines if the top separator is visible at the top of the Embedded Mobile Payment Element.
                      */
-                    val topSeparatorEnabled: Boolean,
+                    internal val topSeparatorEnabled: Boolean,
 
                     /**
                      * Determines if the bottom separator is visible at the bottom of the Embedded Mobile Payment
                      * Element.
                      */
-                    val bottomSeparatorEnabled: Boolean,
+                    internal val bottomSeparatorEnabled: Boolean,
                     /**
                      * The color of the radio button when selected.
                      */
                     @ColorInt
-                    val selectedColor: Int,
+                    internal val selectedColor: Int,
 
                     /**
                      * The color of the radio button when unselected.
                      */
                     @ColorInt
-                    val unselectedColor: Int,
+                    internal val unselectedColor: Int,
                     /**
                      * Additional vertical insets applied to a payment method row.
                      * - Note: Increasing this value increases the height of each row.
                      */
-                    val additionalInsetsDp: Float,
+                    internal val additionalInsetsDp: Float,
                 ) : RowStyle() {
                     constructor(
                         context: Context,
@@ -1027,6 +1027,7 @@ class PaymentSheet internal constructor(
                         unselectedColor = unselectedColor.toArgb(),
                         additionalInsetsDp = context.getRawValueFromDimenResource(additionalInsetsDp)
                     )
+
                     internal companion object {
                         val defaultLight = FlatWithRadio(
                             separatorThicknessDp = StripeThemeDefaults.flat.separatorThickness,
@@ -1059,43 +1060,43 @@ class PaymentSheet internal constructor(
                     /**
                      * The thickness of the separator line between rows.
                      */
-                    val separatorThicknessDp: Float,
+                    internal val separatorThicknessDp: Float,
 
                     /**
                      * The color of the separator line between rows.
                      */
                     @ColorInt
-                    val separatorColor: Int,
+                    internal val separatorColor: Int,
 
                     /**
                      * The insets of the separator line between rows.
                      */
-                    val separatorInsetsDp: Float,
+                    internal val separatorInsetsDp: Float,
 
                     /**
                      * Determines if the top separator is visible at the top of the Embedded Mobile Payment Element.
                      */
-                    val topSeparatorEnabled: Boolean,
+                    internal val topSeparatorEnabled: Boolean,
 
                     /**
                      * Determines if the bottom separator is visible at the bottom of the Embedded Mobile Payment
                      * Element.
                      */
-                    val bottomSeparatorEnabled: Boolean,
+                    internal val bottomSeparatorEnabled: Boolean,
                     /**
                      * The color of the checkmark.
                      */
                     @ColorInt
-                    val checkmarkColor: Int,
+                    internal val checkmarkColor: Int,
                     /**
                      * Inset of the checkmark from the end of the row
                      */
-                    val checkmarkInsetDp: Float,
+                    internal val checkmarkInsetDp: Float,
                     /**
                      * Additional vertical insets applied to a payment method row.
                      * - Note: Increasing this value increases the height of each row.
                      */
-                    val additionalInsetsDp: Float,
+                    internal val additionalInsetsDp: Float,
                 ) : RowStyle() {
                     constructor(
                         context: Context,
@@ -1117,6 +1118,7 @@ class PaymentSheet internal constructor(
                         checkmarkInsetDp = context.getRawValueFromDimenResource(checkmarkInsetDp),
                         additionalInsetsDp = context.getRawValueFromDimenResource(additionalInsetsDp)
                     )
+
                     internal companion object {
                         val defaultLight = FlatWithCheckmark(
                             separatorThicknessDp = StripeThemeDefaults.flat.separatorThickness,
@@ -1149,12 +1151,12 @@ class PaymentSheet internal constructor(
                     /**
                      * The spacing between payment method rows
                      */
-                    val spacingDp: Float,
+                    internal val spacingDp: Float,
                     /**
                      * Additional vertical insets applied to a payment method row.
                      * - Note: Increasing this value increases the height of each row.
                      */
-                    val additionalInsetsDp: Float,
+                    internal val additionalInsetsDp: Float,
                 ) : RowStyle() {
                     constructor(
                         context: Context,
