@@ -13,28 +13,10 @@ import javax.inject.Inject
 internal class DefaultLinkIntentConfirmationHandler @Inject constructor(
     private val confirmationHandler: ConfirmationHandler
 ) : LinkIntentConfirmationHandler {
+
     override val state: Flow<LinkIntentConfirmationHandler.State>
         get() {
-            return confirmationHandler.state.map { confirmationHandlerState ->
-                when (confirmationHandlerState) {
-                    is ConfirmationHandler.State.Complete -> {
-                        when (val result = confirmationHandlerState.result) {
-                            is ConfirmationHandler.Result.Canceled -> LinkIntentConfirmationHandler.State.Cancelled
-                            is ConfirmationHandler.Result.Failed -> {
-                                LinkIntentConfirmationHandler.State.Failed(
-                                    cause = result.cause,
-                                    message = result.message
-                                )
-                            }
-                            is ConfirmationHandler.Result.Succeeded -> {
-                                LinkIntentConfirmationHandler.State.Success
-                            }
-                        }
-                    }
-                    is ConfirmationHandler.State.Confirming -> LinkIntentConfirmationHandler.State.Idle
-                    ConfirmationHandler.State.Idle -> LinkIntentConfirmationHandler.State.Idle
-                }
-            }
+            return confirmationHandler.state.map(::transformConfirmationHandlerState)
         }
 
     override suspend fun confirmIntent(
@@ -55,12 +37,45 @@ internal class DefaultLinkIntentConfirmationHandler @Inject constructor(
         )
     }
 
+    private fun transformConfirmationHandlerState(
+        confirmationHandlerState: ConfirmationHandler.State
+    ): LinkIntentConfirmationHandler.State {
+        return when (confirmationHandlerState) {
+            is ConfirmationHandler.State.Complete -> {
+                when (val result = confirmationHandlerState.result) {
+                    is ConfirmationHandler.Result.Canceled -> {
+                        LinkIntentConfirmationHandler.State.Cancelled
+                    }
+                    is ConfirmationHandler.Result.Failed -> {
+                        LinkIntentConfirmationHandler.State.Failed(
+                            cause = result.cause,
+                            message = result.message
+                        )
+                    }
+                    is ConfirmationHandler.Result.Succeeded -> {
+                        LinkIntentConfirmationHandler.State.Success
+                    }
+                }
+            }
+            is ConfirmationHandler.State.Confirming -> {
+                LinkIntentConfirmationHandler.State.Idle
+            }
+            ConfirmationHandler.State.Idle -> {
+                LinkIntentConfirmationHandler.State.Idle
+            }
+        }
+    }
+
     private fun StripeIntent.initializationMode(): PaymentElementLoader.InitializationMode {
         return when (this) {
             is PaymentIntent -> {
-                PaymentElementLoader.InitializationMode.PaymentIntent(clientSecret ?: "")
+                PaymentElementLoader.InitializationMode.PaymentIntent(
+                    clientSecret = clientSecret ?: ""
+                )
             }
-            is SetupIntent -> PaymentElementLoader.InitializationMode.SetupIntent(clientSecret ?: "")
+            is SetupIntent -> PaymentElementLoader.InitializationMode.SetupIntent(
+                clientSecret = clientSecret ?: ""
+            )
         }
     }
 }
