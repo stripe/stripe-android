@@ -27,19 +27,13 @@ class AccountLoaderViewModel @Inject constructor(
 
     init {
         if (embeddedComponentService.accounts.value == null) {
-            _state.update { it.copy(isLoading = true) }
             fetchAccounts()
-        } else {
-            _state.update { it.copy(isLoading = false) }
         }
     }
 
     // Public methods
 
     fun reload() {
-        _state.update {
-            it.copy(isLoading = true, errorMessage = null)
-        }
         fetchAccounts()
     }
 
@@ -48,6 +42,9 @@ class AccountLoaderViewModel @Inject constructor(
     private fun fetchAccounts() {
         viewModelScope.launch {
             try {
+                _state.update {
+                    it.copy(isLoading = true, errorMessage = null)
+                }
                 embeddedComponentService.getAccounts()
                 _state.update {
                     it.copy(isLoading = false, errorMessage = null)
@@ -64,7 +61,7 @@ class AccountLoaderViewModel @Inject constructor(
     // State
 
     data class MainState(
-        val isLoading: Boolean = true,
+        val isLoading: Boolean = false,
         val errorMessage: String? = null,
     )
 }
