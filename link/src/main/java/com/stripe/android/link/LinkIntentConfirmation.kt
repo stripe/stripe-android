@@ -24,7 +24,7 @@ interface LinkIntentConfirmationHandler {
 
         data object Idle : State
 
-        data class Success(val paymentMethod: PaymentMethod) : State
+        data object Success : State
     }
 }
 

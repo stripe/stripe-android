@@ -6,18 +6,13 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
-import kotlin.coroutines.CoroutineContext
 
 internal class DefaultLinkIntentConfirmationHandler @Inject constructor(
-    confirmationHandlerFactory: ConfirmationHandler.Factory
-): LinkIntentConfirmationHandler, CoroutineScope {
-    private val confirmationHandler = confirmationHandlerFactory.create(this)
+    private val confirmationHandler: ConfirmationHandler
+) : LinkIntentConfirmationHandler {
     override val state: Flow<LinkIntentConfirmationHandler.State>
         get() {
             return confirmationHandler.state.map { confirmationHandlerState ->
@@ -32,7 +27,7 @@ internal class DefaultLinkIntentConfirmationHandler @Inject constructor(
                                 )
                             }
                             is ConfirmationHandler.Result.Succeeded -> {
-                                LinkIntentConfirmationHandler.State.Success(result.)
+                                LinkIntentConfirmationHandler.State.Success
                             }
                         }
                     }
@@ -68,7 +63,4 @@ internal class DefaultLinkIntentConfirmationHandler @Inject constructor(
             is SetupIntent -> PaymentElementLoader.InitializationMode.SetupIntent(clientSecret ?: "")
         }
     }
-
-    override val coroutineContext: CoroutineContext
-        get() = Dispatchers.IO + SupervisorJob()
 }

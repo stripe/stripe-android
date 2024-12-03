@@ -53,7 +53,7 @@ internal class LinkActivityViewModel @Inject constructor(
             linkIntentConfirmationHandler.state
                 .filterIsInstance<LinkIntentConfirmationHandler.State.Success>()
                 .collect {
-                    dismissWithResult?.invoke(LinkActivityResult.Completed())
+//                    dismissWithResult?.invoke(LinkActivityResult.Completed())
                 }
         }
     }
