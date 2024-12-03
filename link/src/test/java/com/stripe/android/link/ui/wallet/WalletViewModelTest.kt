@@ -5,6 +5,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.TestFactory
+import com.stripe.android.link.TestFactory.LINK_WALLET_PRIMARY_BUTTOB_LABEL
 import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.ui.PrimaryButtonState
@@ -56,7 +57,8 @@ class WalletViewModelTest {
             WalletUiState(
                 paymentDetailsList = TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails,
                 selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails.firstOrNull(),
-                isProcessing = false
+                isProcessing = false,
+                primaryButtonLabel = LINK_WALLET_PRIMARY_BUTTOB_LABEL
             )
         )
         assertThat(viewModel.uiState.value.primaryButtonState).isEqualTo(PrimaryButtonState.Disabled)

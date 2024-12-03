@@ -16,6 +16,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
@@ -26,10 +27,15 @@ import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.PrimaryButtonHeight
 import com.stripe.android.link.theme.linkColors
 import com.stripe.android.link.theme.linkShapes
+import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.SetupIntent
+import com.stripe.android.model.StripeIntent
+import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.R
 
 @Composable
@@ -119,6 +125,48 @@ private fun PrimaryButtonIcon(
             )
         }
     }
+}
+
+@Composable
+internal fun SecondaryButton(
+    enabled: Boolean,
+    label: String,
+    onClick: () -> Unit
+) {
+    TextButton(
+        onClick = onClick,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(PrimaryButtonHeight),
+        enabled = enabled,
+        shape = MaterialTheme.linkShapes.medium,
+        colors = ButtonDefaults.buttonColors(
+            backgroundColor = MaterialTheme.colors.secondary,
+            disabledBackgroundColor = MaterialTheme.colors.secondary
+        )
+    ) {
+        CompositionLocalProvider(
+            LocalContentAlpha provides if (enabled) ContentAlpha.high else ContentAlpha.disabled
+        ) {
+            Text(
+                text = label,
+                color = MaterialTheme.linkColors.secondaryButtonLabel
+                    .copy(alpha = LocalContentAlpha.current)
+            )
+        }
+    }
+}
+
+internal fun completePaymentButtonLabel(
+    stripeIntent: StripeIntent,
+) = when (stripeIntent) {
+    is PaymentIntent -> {
+        Amount(
+            requireNotNull(stripeIntent.amount),
+            requireNotNull(stripeIntent.currency)
+        ).buildPayButtonLabel()
+    }
+    is SetupIntent -> R.string.stripe_setup_button_label.resolvableString
 }
 
 /**

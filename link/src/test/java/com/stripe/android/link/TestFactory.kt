@@ -11,6 +11,7 @@ import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSessionSignup
 import com.stripe.android.model.CvcCheck
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.ui.core.Amount
 import org.mockito.kotlin.mock
 
 internal object TestFactory {
@@ -126,4 +127,9 @@ internal object TestFactory {
         cardBrandChoice = null,
         passthroughModeEnabled = false
     )
+
+    val LINK_WALLET_PRIMARY_BUTTOB_LABEL = Amount(
+        requireNotNull(StripeIntentFixtures.PI_SUCCEEDED.amount),
+        requireNotNull(StripeIntentFixtures.PI_SUCCEEDED.currency)
+    ).buildPayButtonLabel()
 }

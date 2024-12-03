@@ -30,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -40,6 +41,8 @@ import com.stripe.android.link.R
 import com.stripe.android.link.theme.HorizontalPadding
 import com.stripe.android.link.theme.linkColors
 import com.stripe.android.link.theme.linkShapes
+import com.stripe.android.link.ui.PrimaryButton
+import com.stripe.android.link.ui.SecondaryButton
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.uicore.text.Html
 import com.stripe.android.uicore.utils.collectAsState
@@ -57,7 +60,9 @@ internal fun WalletScreen(
         onItemSelected = viewModel::onItemSelected,
         onExpandedChanged = { expanded ->
             isExpanded = expanded
-        }
+        },
+        onPrimaryButtonClick = viewModel::onPrimaryButtonClicked,
+        onPayAnotherWayClick = viewModel::onPayAnotherWayClicked
     )
 }
 
@@ -67,6 +72,8 @@ internal fun WalletBody(
     isExpanded: Boolean,
     onItemSelected: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onExpandedChanged: (Boolean) -> Unit,
+    onPrimaryButtonClick: () -> Unit,
+    onPayAnotherWayClick: () -> Unit
 ) {
     if (state.paymentDetailsList.isEmpty()) {
         Box(
@@ -93,34 +100,64 @@ internal fun WalletBody(
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        Box(
-            modifier = Modifier
-                .animateContentSize()
-        ) {
-            val selectedItem = state.selectedItem
-            if (isExpanded || selectedItem == null) {
-                ExpandedPaymentDetails(
-                    uiState = state,
-                    onItemSelected = onItemSelected,
-                    onMenuButtonClick = {},
-                    onAddNewPaymentMethodClick = {},
-                    onCollapse = {
-                        onExpandedChanged(false)
-                    }
-                )
-            } else {
-                CollapsedPaymentDetails(
-                    selectedPaymentMethod = selectedItem,
-                    enabled = !state.primaryButtonState.isBlocking,
-                    onClick = {
-                        onExpandedChanged(true)
-                    }
-                )
-            }
-        }
+        PaymentMethodSection(
+            state = state,
+            isExpanded = isExpanded,
+            onItemSelected = onItemSelected,
+            onExpandedChanged = onExpandedChanged
+        )
 
         AnimatedVisibility(state.showBankAccountTerms) {
             BankAccountTerms()
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        PrimaryButton(
+            label = state.primaryButtonLabel.resolve(LocalContext.current),
+            state = state.primaryButtonState,
+            onButtonClick = onPrimaryButtonClick,
+            iconEnd = com.stripe.android.ui.core.R.drawable.stripe_ic_lock
+        )
+
+        SecondaryButton(
+            enabled = !state.primaryButtonState.isBlocking,
+            label = stringResource(id = R.string.stripe_wallet_pay_another_way),
+            onClick = onPayAnotherWayClick
+        )
+    }
+}
+
+@Composable
+private fun PaymentMethodSection(
+    state: WalletUiState,
+    isExpanded: Boolean,
+    onItemSelected: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
+    onExpandedChanged: (Boolean) -> Unit,
+) {
+    Box(
+        modifier = Modifier
+            .animateContentSize()
+    ) {
+        val selectedItem = state.selectedItem
+        if (isExpanded || selectedItem == null) {
+            ExpandedPaymentDetails(
+                uiState = state,
+                onItemSelected = onItemSelected,
+                onMenuButtonClick = {},
+                onAddNewPaymentMethodClick = {},
+                onCollapse = {
+                    onExpandedChanged(false)
+                }
+            )
+        } else {
+            CollapsedPaymentDetails(
+                selectedPaymentMethod = selectedItem,
+                enabled = !state.primaryButtonState.isBlocking,
+                onClick = {
+                    onExpandedChanged(true)
+                }
+            )
         }
     }
 }

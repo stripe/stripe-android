@@ -11,7 +11,7 @@ import com.stripe.android.screenshottesting.SystemAppearance
 import org.junit.Rule
 import org.junit.Test
 
-internal class PrimaryButtonScreenshotTest {
+internal class SecondaryButtonScreenshotTest {
     @get:Rule
     val paparazziRule = PaparazziRule(
         SystemAppearance.entries,
@@ -23,31 +23,23 @@ internal class PrimaryButtonScreenshotTest {
 
     @Test
     fun testEnabledState() {
-        snapshot(PrimaryButtonState.Enabled)
+        snapshot(enabled = true)
     }
 
     @Test
     fun testDisabledState() {
-        snapshot(PrimaryButtonState.Disabled)
+        snapshot(enabled = false)
     }
 
-    @Test
-    fun testCompletedState() {
-        snapshot(PrimaryButtonState.Completed)
-    }
-
-    @Test
-    fun testProcessingState() {
-        snapshot(PrimaryButtonState.Processing)
-    }
-
-    private fun snapshot(state: PrimaryButtonState) {
+    private fun snapshot(
+        enabled: Boolean
+    ) {
         paparazziRule.snapshot {
             DefaultLinkTheme {
-                PrimaryButton(
-                    label = "Join Link",
-                    state = state,
-                    onButtonClick = {}
+                SecondaryButton(
+                    enabled = enabled,
+                    label = "Pay Another Way",
+                    onClick = {}
                 )
             }
         }
