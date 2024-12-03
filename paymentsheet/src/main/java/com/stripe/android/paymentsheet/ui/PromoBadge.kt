@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.ui
 
+import android.content.Context
 import android.os.Build.VERSION.SDK_INT
 import android.os.Build.VERSION_CODES.N
 import androidx.compose.foundation.background
@@ -13,28 +14,40 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.StripeThemeDefaults
 import com.stripe.android.uicore.getOnSuccessBackgroundColor
 import com.stripe.android.uicore.getSuccessBackgroundColor
+import com.stripe.android.uicore.stripeColors
 import java.util.Locale
 
 @Composable
 internal fun PromoBadge(
     text: String,
     modifier: Modifier = Modifier,
+    eligible: Boolean = true,
     tinyMode: Boolean = false,
 ) {
     // TODO(tillh-stripe): Revisit how we want the badge text to scale in tiny mode
     FixedTextSize(fixed = tinyMode) {
-        val backgroundColor = Color(
-            color = StripeThemeDefaults.primaryButtonStyle.getSuccessBackgroundColor(LocalContext.current),
-        )
+        val backgroundColor = if (eligible) {
+            Color(
+                color = StripeThemeDefaults.primaryButtonStyle.getSuccessBackgroundColor(LocalContext.current),
+            )
+        } else {
+            MaterialTheme.stripeColors.componentBorder
+        }
 
-        val foregroundColor = Color(
-            color = StripeThemeDefaults.primaryButtonStyle.getOnSuccessBackgroundColor(LocalContext.current),
-        )
+        val foregroundColor = if (eligible) {
+            Color(
+                color = StripeThemeDefaults.primaryButtonStyle.getOnSuccessBackgroundColor(LocalContext.current),
+            )
+        } else {
+            MaterialTheme.stripeColors.onComponent
+        }
 
         val shape = MaterialTheme.shapes.medium
 
@@ -47,7 +60,7 @@ internal fun PromoBadge(
                 )
         ) {
             Text(
-                text = formatPromoText(text),
+                text = formatPromoText(text, eligible),
                 color = foregroundColor,
                 style = MaterialTheme.typography.caption.copy(
                     fontSize = StripeThemeDefaults.typography.xSmallFontSize,
@@ -58,17 +71,21 @@ internal fun PromoBadge(
 }
 
 @Composable
-private fun formatPromoText(text: String): String {
-    val context = LocalContext.current
-    val currentLocale: Locale = if (SDK_INT >= N) {
-        context.resources.configuration.locales[0]
-    } else {
-        @Suppress("DEPRECATION")
-        context.resources.configuration.locale
-    }
+private fun formatPromoText(
+    text: String,
+    eligible: Boolean,
+): String {
+    return if (eligible) {
+        val context = LocalContext.current
 
-    val isEnglish = currentLocale.language == Locale.ENGLISH.language
-    return if (isEnglish) "Get $text" else text
+        if (context.isEnglishLanguage) {
+            "Get $text"
+        } else {
+            text
+        }
+    } else {
+        stringResource(R.string.stripe_paymentsheet_bank_payment_promo_ineligible, text)
+    }
 }
 
 @Composable
@@ -85,6 +102,18 @@ private fun FixedTextSize(
         content()
     }
 }
+
+private val Context.isEnglishLanguage: Boolean
+    get() {
+        val currentLocale: Locale = if (SDK_INT >= N) {
+            resources.configuration.locales[0]
+        } else {
+            @Suppress("DEPRECATION")
+            resources.configuration.locale
+        }
+
+        return currentLocale.language == Locale.ENGLISH.language
+    }
 
 private fun Density.copy(
     fontScale: Float = 1f,

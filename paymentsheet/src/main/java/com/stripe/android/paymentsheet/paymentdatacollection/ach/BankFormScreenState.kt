@@ -19,9 +19,18 @@ internal data class BankFormScreenState(
     val isProcessing: Boolean
         get() = _isProcessing && linkedBankAccount == null
 
+    val promoBadgeState: PromoBadgeState?
+        get() = if (promoText != null && linkedBankAccount != null) {
+            PromoBadgeState(promoText, eligible = linkedBankAccount.eligibleForIncentive)
+        } else {
+            null
+        }
+
     val promoDisclaimerText: ResolvableString?
         get() = promoText?.let {
-            if (isPaymentFlow) {
+            if (linkedBankAccount?.eligibleForIncentive == false) {
+                return null
+            } else if (isPaymentFlow) {
                 resolvableString(R.string.stripe_paymentsheet_bank_payment_promo_for_payment, it)
             } else {
                 resolvableString(R.string.stripe_paymentsheet_bank_payment_promo_for_setup, it)
@@ -41,7 +50,13 @@ internal data class BankFormScreenState(
         val financialConnectionsSessionId: String?,
         val mandateText: ResolvableString,
         val isVerifyingWithMicrodeposits: Boolean,
+        val eligibleForIncentive: Boolean = false,
     ) : Parcelable
+
+    data class PromoBadgeState(
+        val promoText: String,
+        val eligible: Boolean,
+    )
 
     sealed interface ResultIdentifier : Parcelable {
         @Parcelize

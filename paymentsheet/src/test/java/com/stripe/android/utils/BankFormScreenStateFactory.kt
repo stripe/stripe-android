@@ -11,11 +11,15 @@ internal object BankFormScreenStateFactory {
         sessionId: String,
         isVerifyingWithMicrodeposits: Boolean = false,
         mandateText: ResolvableString = "Some legal text".resolvableString,
+        promoText: String? = null,
+        eligibleForPromo: Boolean = true,
     ): BankFormScreenState {
         return create(
             resultIdentifier = BankFormScreenState.ResultIdentifier.Session(sessionId),
             isVerifyingWithMicrodeposits = isVerifyingWithMicrodeposits,
             mandateText = mandateText,
+            promoText = promoText,
+            eligibleForPromo = eligibleForPromo,
         )
     }
 
@@ -28,6 +32,8 @@ internal object BankFormScreenStateFactory {
             resultIdentifier = BankFormScreenState.ResultIdentifier.PaymentMethod(paymentMethod),
             isVerifyingWithMicrodeposits = isVerifyingWithMicrodeposits,
             mandateText = mandateText,
+            promoText = null,
+            eligibleForPromo = false,
         )
     }
 
@@ -35,6 +41,8 @@ internal object BankFormScreenStateFactory {
         resultIdentifier: BankFormScreenState.ResultIdentifier,
         isVerifyingWithMicrodeposits: Boolean,
         mandateText: ResolvableString,
+        promoText: String?,
+        eligibleForPromo: Boolean,
     ): BankFormScreenState {
         return BankFormScreenState(
             isPaymentFlow = true,
@@ -46,7 +54,9 @@ internal object BankFormScreenStateFactory {
                 last4 = "6789",
                 mandateText = mandateText,
                 isVerifyingWithMicrodeposits = isVerifyingWithMicrodeposits,
-            )
+                eligibleForIncentive = eligibleForPromo,
+            ),
+            promoText = promoText,
         )
     }
 }

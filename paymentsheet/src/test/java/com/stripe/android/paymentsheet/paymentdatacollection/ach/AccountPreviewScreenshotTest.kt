@@ -119,6 +119,55 @@ internal class AccountPreviewScreenshotTest {
         }
     }
 
+    @Test
+    fun testWithPromoBadge() {
+        paparazzi.snapshot {
+            BankAccountForm(
+                state = BankFormScreenStateFactory.createWithSession(
+                    sessionId = "session_1234",
+                    promoText = "$5",
+                ),
+                instantDebits = true,
+                isPaymentFlow = true,
+                formArgs = formArguments,
+                nameController = createNameController(),
+                emailController = createEmailController(),
+                phoneController = createPhoneNumberController(),
+                addressController = createAddressController(fillAddress = false),
+                sameAsShippingElement = sameAsShippingElement,
+                saveForFutureUseElement = saveForFutureUseElement,
+                showCheckbox = false,
+                lastTextFieldIdentifier = null,
+                onRemoveAccount = {},
+            )
+        }
+    }
+
+    @Test
+    fun testWithIneligiblePromoBadge() {
+        paparazzi.snapshot {
+            BankAccountForm(
+                state = BankFormScreenStateFactory.createWithSession(
+                    sessionId = "session_1234",
+                    promoText = "$5",
+                    eligibleForPromo = false,
+                ),
+                instantDebits = true,
+                isPaymentFlow = true,
+                formArgs = formArguments,
+                nameController = createNameController(),
+                emailController = createEmailController(),
+                phoneController = createPhoneNumberController(),
+                addressController = createAddressController(fillAddress = false),
+                sameAsShippingElement = sameAsShippingElement,
+                saveForFutureUseElement = saveForFutureUseElement,
+                showCheckbox = false,
+                lastTextFieldIdentifier = null,
+                onRemoveAccount = {},
+            )
+        }
+    }
+
     private fun createNameController(): TextFieldController {
         return NameConfig.createController("John Doe")
     }
