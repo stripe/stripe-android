@@ -716,7 +716,6 @@ class USBankAccountFormViewModelTest {
                     name = "Jenny Rose",
                     email = "email@email.com",
                     elementsSessionContext = ElementsSessionContext(
-                        initializationMode = ElementsSessionContext.InitializationMode.DeferredIntent,
                         amount = 5099,
                         currency = "usd",
                         linkMode = LinkMode.LinkPaymentMethod,
@@ -729,6 +728,7 @@ class USBankAccountFormViewModelTest {
                             phone = null,
                             phoneCountryCode = "US",
                         ),
+                        incentiveEligibilitySession = null,
                     ),
                 )
             ),
@@ -765,7 +765,6 @@ class USBankAccountFormViewModelTest {
                     name = "Jenny Rose",
                     email = "email@email.com",
                     elementsSessionContext = ElementsSessionContext(
-                        initializationMode = ElementsSessionContext.InitializationMode.DeferredIntent,
                         amount = null,
                         currency = null,
                         linkMode = LinkMode.LinkPaymentMethod,
@@ -778,6 +777,7 @@ class USBankAccountFormViewModelTest {
                             phone = null,
                             phoneCountryCode = "US",
                         ),
+                        incentiveEligibilitySession = null,
                     ),
                 )
             ),
@@ -938,7 +938,6 @@ class USBankAccountFormViewModelTest {
                     name = "Some Name",
                     email = "email@email.com",
                     elementsSessionContext = ElementsSessionContext(
-                        initializationMode = ElementsSessionContext.InitializationMode.PaymentIntent("id_12345"),
                         amount = 5099,
                         currency = "usd",
                         linkMode = null,
@@ -951,6 +950,7 @@ class USBankAccountFormViewModelTest {
                             phone = null,
                             phoneCountryCode = "US",
                         ),
+                        incentiveEligibilitySession = null,
                     ),
                 )
             ),
@@ -980,7 +980,6 @@ class USBankAccountFormViewModelTest {
                 CollectBankAccountConfiguration.InstantDebits(
                     email = "email@email.com",
                     elementsSessionContext = ElementsSessionContext(
-                        initializationMode = ElementsSessionContext.InitializationMode.PaymentIntent("id_12345"),
                         amount = 5099,
                         currency = "usd",
                         linkMode = LinkMode.LinkCardBrand,
@@ -992,6 +991,7 @@ class USBankAccountFormViewModelTest {
                             phone = null,
                             phoneCountryCode = "US",
                         ),
+                        incentiveEligibilitySession = null,
                     ),
                 )
             ),
