@@ -165,6 +165,8 @@ private fun PaymentMethodSection(
                 onMenuButtonClick = {
                     showBottomSheetContent {
                         WalletPaymentMethodMenu(
+                            modifier = Modifier
+                                .testTag(WALLET_SCREEN_MENU_SHEET_TAG),
                             paymentDetails = it,
                             onEditClick = {
                                 showBottomSheetContent(null)
@@ -407,3 +409,4 @@ internal const val COLLAPSED_WALLET_ROW = "collapsed_wallet_row_tag"
 internal const val WALLET_SCREEN_EXPANDED_ROW_HEADER = "wallet_screen_expanded_row_header"
 internal const val WALLET_ADD_PAYMENT_METHOD_ROW = "wallet_add_payment_method_row"
 internal const val WALLET_SCREEN_PAYMENT_METHODS_LIST = "wallet_screen_payment_methods_list"
+internal const val WALLET_SCREEN_MENU_SHEET_TAG = "wallet_screen_menu_sheet_tag"

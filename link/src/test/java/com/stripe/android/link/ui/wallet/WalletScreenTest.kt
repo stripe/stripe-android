@@ -39,7 +39,7 @@ internal class WalletScreenTest {
     fun `wallet list is collapsed on start`() = runTest(dispatcher) {
         val viewModel = createViewModel()
         composeTestRule.setContent {
-            WalletScreen(viewModel)
+            WalletScreen(viewModel) {}
         }
         composeTestRule.waitForIdle()
 
@@ -47,13 +47,14 @@ internal class WalletScreenTest {
         onWalletCollapsedChevron().assertIsDisplayed()
         onWalletCollapsedPaymentDetails().assertIsDisplayed()
         onCollapsedWalletRow().assertIsDisplayed().assertHasClickAction()
+        onWalletPaymentMethodMenu().assertDoesNotExist()
     }
 
     @Test
     fun `wallet list is expanded on expand clicked`() = runTest(dispatcher) {
         val viewModel = createViewModel()
         composeTestRule.setContent {
-            WalletScreen(viewModel)
+            WalletScreen(viewModel) {}
         }
 
         composeTestRule.waitForIdle()
@@ -74,7 +75,7 @@ internal class WalletScreenTest {
 
         val viewModel = createViewModel(linkAccountManager)
         composeTestRule.setContent {
-            WalletScreen(viewModel)
+            WalletScreen(viewModel) {}
         }
 
         composeTestRule.waitForIdle()
@@ -116,4 +117,10 @@ internal class WalletScreenTest {
         composeTestRule.onNodeWithTag(WALLET_SCREEN_EXPANDED_ROW_HEADER, useUnmergedTree = true)
 
     private fun onLoader() = composeTestRule.onNodeWithTag(WALLET_LOADER_TAG)
+
+    private fun onWalletPaymentMethodRowMenuButton() =
+        composeTestRule.onNodeWithTag(WALLET_PAYMENT_DETAIL_ITEM_MENU_BUTTON, useUnmergedTree = true)
+
+    private fun onWalletPaymentMethodMenu() =
+        composeTestRule.onNodeWithTag(WALLET_SCREEN_MENU_SHEET_TAG, useUnmergedTree = true)
 }

@@ -3,6 +3,7 @@ package com.stripe.android.link.ui.wallet
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
 import com.stripe.android.link.R
 import com.stripe.android.link.ui.menus.LinkMenu
 import com.stripe.android.link.ui.menus.LinkMenuItem
@@ -11,6 +12,7 @@ import com.stripe.android.R as StripeR
 
 @Composable
 internal fun WalletPaymentMethodMenu(
+    modifier: Modifier = Modifier,
     paymentDetails: ConsumerPaymentDetails.PaymentDetails,
     onEditClick: () -> Unit,
     onSetDefaultClick: () -> Unit,
@@ -33,6 +35,7 @@ internal fun WalletPaymentMethodMenu(
     }
 
     LinkMenu(
+        modifier = modifier,
         items = items,
         onItemPress = { item ->
             when (item) {

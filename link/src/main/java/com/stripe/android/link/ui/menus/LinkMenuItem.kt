@@ -37,11 +37,12 @@ internal interface LinkMenuItem {
  */
 @Composable
 internal fun <T : LinkMenuItem> LinkMenu(
+    modifier: Modifier = Modifier,
     items: List<T>,
     onItemPress: (T) -> Unit
 ) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(vertical = 10.dp)
     ) {
