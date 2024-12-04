@@ -9,7 +9,6 @@ import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import org.junit.Test
 import java.lang.IllegalArgumentException
 import kotlin.test.assertFailsWith
-import kotlin.test.assertSame
 
 class PaymentSheetConfigurationKtxTest {
     @Test
@@ -122,7 +121,6 @@ class PaymentSheetConfigurationKtxTest {
         ).asCommonConfiguration()
     }
 
-
     @Test
     fun `'validate' should succeed when ephemeral key secret is of correct format`() {
         getConfig("ek_askljdlkasfhgasdfjls").validate()
@@ -131,7 +129,6 @@ class PaymentSheetConfigurationKtxTest {
 
         @Test
     fun `'validate' should fail when ephemeral key secret is of wrong format`() {
-
         fun assertFailsWithEphemeralKeySecret(ephemeralKeySecret: String) {
             assertFailsWith(
                 IllegalArgumentException::class,
