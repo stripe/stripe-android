@@ -46,8 +46,8 @@ import com.stripe.android.connect.example.ConnectExampleScaffold
 import com.stripe.android.connect.example.R
 import com.stripe.android.connect.example.ui.appearance.AppearanceView
 import com.stripe.android.connect.example.ui.common.BetaBadge
-import com.stripe.android.connect.example.ui.features.accountonboarding.AccountOnboardingExampleActivity
-import com.stripe.android.connect.example.ui.features.payouts.PayoutsExampleActivity
+import com.stripe.android.connect.example.ui.features.accountonboarding.AccountOnboardingExampleComponentActivity
+import com.stripe.android.connect.example.ui.features.payouts.PayoutsExampleComponentActivity
 import com.stripe.android.connect.example.ui.settings.SettingsView
 import kotlinx.coroutines.launch
 
@@ -182,13 +182,13 @@ private val menuItems = listOf(
     MenuItem(
         title = R.string.account_onboarding,
         subtitle = R.string.account_onboarding_menu_subtitle,
-        activity = AccountOnboardingExampleActivity::class.java,
+        activity = AccountOnboardingExampleComponentActivity::class.java,
         isBeta = true,
     ),
     MenuItem(
         title = R.string.payouts,
         subtitle = R.string.payouts_menu_subtitle,
-        activity = PayoutsExampleActivity::class.java,
+        activity = PayoutsExampleComponentActivity::class.java,
         isBeta = true,
     ),
 )

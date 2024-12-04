@@ -17,36 +17,33 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.viewinterop.AndroidView
-import com.stripe.android.connect.example.ConnectSdkExampleTheme
 import com.stripe.android.connect.example.ConnectExampleScaffold
 import com.stripe.android.connect.example.R
 import com.stripe.android.connect.example.ui.appearance.AppearanceView
 import kotlinx.coroutines.launch
 
 @Composable
-fun BasicComponentExample(
+fun BasicExampleComponent(
     title: String,
     finish: () -> Unit,
     createComponentView: (context: Context) -> View,
 ) {
-    ConnectSdkExampleTheme {
-        BackHandler(onBack = finish)
-        BasicComponentExampleContent(
-            title = title,
-            navigationIcon = {
-                BackIconButton(onClick = finish)
-            }
-        ) {
-            AndroidView(modifier = Modifier.fillMaxSize(), factory = { context ->
-                createComponentView(context)
-            })
+    BackHandler(onBack = finish)
+    BasicExampleComponentContent(
+        title = title,
+        navigationIcon = {
+            BackIconButton(onClick = finish)
         }
+    ) {
+        AndroidView(modifier = Modifier.fillMaxSize(), factory = { context ->
+            createComponentView(context)
+        })
     }
 }
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun BasicComponentExampleContent(
+private fun BasicExampleComponentContent(
     title: String,
     navigationIcon: @Composable (() -> Unit)? = null,
     content: @Composable () -> Unit,

@@ -7,12 +7,12 @@ import com.stripe.android.connect.EmbeddedComponentManager
 import com.stripe.android.connect.PayoutsListener
 import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.example.R
-import com.stripe.android.connect.example.ui.common.BasicComponentExampleActivity
+import com.stripe.android.connect.example.ui.common.BasicExampleComponentActivity
 import dagger.hilt.android.AndroidEntryPoint
 
 @OptIn(PrivateBetaConnectSDK::class)
 @AndroidEntryPoint
-class PayoutsExampleActivity : BasicComponentExampleActivity() {
+class PayoutsExampleComponentActivity : BasicExampleComponentActivity() {
     override val titleRes: Int = R.string.payouts
 
     override fun createComponentView(context: Context, embeddedComponentManager: EmbeddedComponentManager): View {
@@ -24,7 +24,7 @@ class PayoutsExampleActivity : BasicComponentExampleActivity() {
 
     private inner class Listener : PayoutsListener {
         override fun onLoadError(error: Throwable) {
-            Toast.makeText(this@PayoutsExampleActivity, error.message, Toast.LENGTH_LONG).show()
+            Toast.makeText(this@PayoutsExampleComponentActivity, error.message, Toast.LENGTH_LONG).show()
         }
     }
 }

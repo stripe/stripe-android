@@ -19,11 +19,11 @@
         </activity>
 
         <activity
-            android:name=".ui.features.accountonboarding.AccountOnboardingExampleActivity"
+            android:name=".ui.features.accountonboarding.AccountOnboardingExampleComponentActivity"
             android:exported="false"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
         <activity
-            android:name=".ui.features.payouts.PayoutsExampleActivity"
+            android:name=".ui.features.payouts.PayoutsExampleComponentActivity"
             android:exported="false"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
     </application>
