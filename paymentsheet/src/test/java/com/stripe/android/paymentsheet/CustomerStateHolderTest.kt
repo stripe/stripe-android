@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.CustomerState
@@ -31,6 +32,7 @@ internal class CustomerStateHolderTest {
         val savedStateHandle = SavedStateHandle()
         val customerState = CustomerState.createForLegacyEphemeralKey(
             customerId = "cus_123",
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
             accessType = PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey("ek_123"),
             paymentMethods = emptyList()
         )
@@ -50,6 +52,7 @@ internal class CustomerStateHolderTest {
             customerStateHolder.setCustomerState(
                 CustomerState.createForLegacyEphemeralKey(
                     customerId = "cus_123",
+                    configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                     accessType = PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey("ek_123"),
                     paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
                 )

@@ -34,7 +34,6 @@ internal class SavedPaymentMethodMutator(
     private val coroutineScope: CoroutineScope,
     private val workContext: CoroutineContext,
     private val customerRepository: CustomerRepository,
-    private val allowsRemovalOfLastSavedPaymentMethod: Boolean,
     private val selection: StateFlow<PaymentSelection?>,
     val providePaymentMethodName: (PaymentMethodCode?) -> ResolvableString,
     private val clearSelection: () -> Unit,
@@ -62,10 +61,11 @@ internal class SavedPaymentMethodMutator(
     val canRemove: StateFlow<Boolean> = customerStateHolder.customer.mapAsStateFlow { customerState ->
         customerState?.run {
             val hasRemovePermissions = customerState.permissions.canRemovePaymentMethods
+            val hasRemoveLastPaymentMethodPermissions = customerState.permissions.canRemoveLastPaymentMethod
 
             when (paymentMethods.size) {
                 0 -> false
-                1 -> allowsRemovalOfLastSavedPaymentMethod && hasRemovePermissions
+                1 -> hasRemoveLastPaymentMethodPermissions && hasRemovePermissions
                 else -> hasRemovePermissions
             }
         } ?: false
@@ -390,7 +390,6 @@ internal class SavedPaymentMethodMutator(
                 coroutineScope = viewModel.viewModelScope,
                 workContext = viewModel.workContext,
                 customerRepository = viewModel.customerRepository,
-                allowsRemovalOfLastSavedPaymentMethod = viewModel.config.allowsRemovalOfLastSavedPaymentMethod,
                 selection = viewModel.selection,
                 providePaymentMethodName = { code ->
                     code?.let {
