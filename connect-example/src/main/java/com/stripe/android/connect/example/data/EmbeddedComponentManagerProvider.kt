@@ -33,7 +33,7 @@ class EmbeddedComponentManagerProvider @Inject constructor(
     // In the future it may manage multiple instances if needed.
     private var embeddedComponentManager: EmbeddedComponentManager? = null
 
-    private val loggingTag = this::class.java.name
+    private val loggingTag = this::class.java.simpleName
     private val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG)
     private val ioScope: CoroutineScope by lazy { CoroutineScope(Dispatchers.IO) }
 

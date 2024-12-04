@@ -30,7 +30,7 @@ class EmbeddedComponentLoaderViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG)
-    private val loggingTag = this::class.java.name
+    private val loggingTag = this::class.java.simpleName
 
     private val _state = MutableStateFlow(EmbeddedComponentLoaderState())
     val state: StateFlow<EmbeddedComponentLoaderState> = _state.asStateFlow()
