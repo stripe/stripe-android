@@ -51,49 +51,49 @@ private fun AccountUpdateRequiredModalContent(
         )
     }
 }
-
-@Preview(
-    showBackground = true,
-    group = "Account Update Required Modal",
-)
-@Composable
-internal fun AccountUpdateRequiredModalPreview() {
-    FinancialConnectionsPreview {
-        AccountUpdateRequiredModalContent(
-            payload = UpdateRequired(
-                generic = FinancialConnectionsGenericInfoScreen(
-                    id = "sampleScreen1",
-                    header = Header(
-                        title = "Update required",
-                        subtitle = "Backend driven update subtitle. An update is required on this account!",
-                        icon = Image(default = "BrandIcon"),
-                        alignment = Alignment.Left
-                    ),
-                    body = null,
-                    footer = Footer(
-                        primaryCta = GenericInfoAction(
-                            id = "primaryCta1",
-                            label = "Continue",
-                            icon = null,
-                        ),
-                        secondaryCta = GenericInfoAction(
-                            id = "primaryCta1",
-                            label = "Cancel",
-                            icon = null,
-                        ),
-                        belowCta = null
-                    ),
-                    options = Options(
-                        fullWidthContent = true,
-                        verticalAlignment = VerticalAlignment.Default
-                    )
-                ),
-                type = Supportability(
-                    institution = null,
-                ),
-            ),
-            onContinue = {},
-            onCancel = {},
-        )
-    }
-}
+//
+//@Preview(
+//    showBackground = true,
+//    group = "Account Update Required Modal",
+//)
+//@Composable
+//internal fun AccountUpdateRequiredModalPreview() {
+//    FinancialConnectionsPreview {
+//        AccountUpdateRequiredModalContent(
+//            payload = UpdateRequired(
+//                generic = FinancialConnectionsGenericInfoScreen(
+//                    id = "sampleScreen1",
+//                    header = Header(
+//                        title = "Update required",
+//                        subtitle = "Backend driven update subtitle. An update is required on this account!",
+//                        icon = Image(default = "BrandIcon"),
+//                        alignment = Alignment.Left
+//                    ),
+//                    body = null,
+//                    footer = Footer(
+//                        primaryCta = GenericInfoAction(
+//                            id = "primaryCta1",
+//                            label = "Continue",
+//                            icon = null,
+//                        ),
+//                        secondaryCta = GenericInfoAction(
+//                            id = "primaryCta1",
+//                            label = "Cancel",
+//                            icon = null,
+//                        ),
+//                        belowCta = null
+//                    ),
+//                    options = Options(
+//                        fullWidthContent = true,
+//                        verticalAlignment = VerticalAlignment.Default
+//                    )
+//                ),
+//                type = Supportability(
+//                    institution = null,
+//                ),
+//            ),
+//            onContinue = {},
+//            onCancel = {},
+//        )
+//    }
+//}

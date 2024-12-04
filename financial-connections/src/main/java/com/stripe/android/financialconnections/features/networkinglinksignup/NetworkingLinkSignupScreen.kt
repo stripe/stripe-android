@@ -357,21 +357,21 @@ private suspend fun ScrollState.animateScrollToBottom(
     animateScrollBy(Float.MAX_VALUE, animationSpec)
 }
 
-@Composable
-@Preview(group = "NetworkingLinkSignup Pane")
-internal fun NetworkingLinkSignupScreenPreview(
-    @PreviewParameter(NetworkingLinkSignupPreviewParameterProvider::class)
-    state: NetworkingLinkSignupState
-) {
-    FinancialConnectionsPreview(
-        theme = if (state.isInstantDebits) Theme.LinkLight else Theme.DefaultLight,
-    ) {
-        NetworkingLinkSignupContent(
-            state = state,
-            onSaveToLink = {},
-            onClickableTextClick = {},
-            onCloseFromErrorClick = {},
-            onSkipClick = {}
-        )
-    }
-}
+//@Composable
+//@Preview(group = "NetworkingLinkSignup Pane")
+//internal fun NetworkingLinkSignupScreenPreview(
+//    @PreviewParameter(NetworkingLinkSignupPreviewParameterProvider::class)
+//    state: NetworkingLinkSignupState
+//) {
+//    FinancialConnectionsPreview(
+//        theme = if (state.isInstantDebits) Theme.LinkLight else Theme.DefaultLight,
+//    ) {
+//        NetworkingLinkSignupContent(
+//            state = state,
+//            onSaveToLink = {},
+//            onClickableTextClick = {},
+//            onCloseFromErrorClick = {},
+//            onSkipClick = {}
+//        )
+//    }
+//}

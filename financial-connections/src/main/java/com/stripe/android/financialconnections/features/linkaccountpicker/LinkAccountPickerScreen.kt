@@ -334,20 +334,20 @@ fun SelectNewAccountIcon(
     }
 }
 
-@Composable
-@Preview(group = "LinkAccountPicker Pane")
-internal fun LinkAccountPickerScreenPreview(
-    @PreviewParameter(LinkAccountPickerPreviewParameterProvider::class)
-    state: LinkAccountPickerState
-) {
-    FinancialConnectionsPreview {
-        LinkAccountPickerContent(
-            state = state,
-            onCloseFromErrorClick = {},
-            onClickableTextClick = {},
-            onNewBankAccountClick = {},
-            onSelectAccountClick = {},
-            onAccountClick = {},
-        )
-    }
-}
+//@Composable
+//@Preview(group = "LinkAccountPicker Pane")
+//internal fun LinkAccountPickerScreenPreview(
+//    @PreviewParameter(LinkAccountPickerPreviewParameterProvider::class)
+//    state: LinkAccountPickerState
+//) {
+//    FinancialConnectionsPreview {
+//        LinkAccountPickerContent(
+//            state = state,
+//            onCloseFromErrorClick = {},
+//            onClickableTextClick = {},
+//            onNewBankAccountClick = {},
+//            onSelectAccountClick = {},
+//            onAccountClick = {},
+//        )
+//    }
+//}

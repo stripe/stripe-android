@@ -191,18 +191,18 @@ internal fun ExistingEmailSection(
     }
 }
 
-@Composable
-@Preview(group = "NetworkingLinkLoginWarmup Pane", name = "Canonical")
-internal fun NetworkingLinkLoginWarmupScreenPreview(
-    @PreviewParameter(NetworkingLinkLoginWarmupPreviewParameterProvider::class) state: NetworkingLinkLoginWarmupState
-) {
-    FinancialConnectionsPreview(
-        theme = if (state.isInstantDebits) Theme.LinkLight else Theme.DefaultLight,
-    ) {
-        NetworkingLinkLoginWarmupContent(
-            state = state,
-            onContinueClick = {},
-            onSkipClicked = {},
-        )
-    }
-}
+//@Composable
+//@Preview(group = "NetworkingLinkLoginWarmup Pane", name = "Canonical")
+//internal fun NetworkingLinkLoginWarmupScreenPreview(
+//    @PreviewParameter(NetworkingLinkLoginWarmupPreviewParameterProvider::class) state: NetworkingLinkLoginWarmupState
+//) {
+//    FinancialConnectionsPreview(
+//        theme = if (state.isInstantDebits) Theme.LinkLight else Theme.DefaultLight,
+//    ) {
+//        NetworkingLinkLoginWarmupContent(
+//            state = state,
+//            onContinueClick = {},
+//            onSkipClicked = {},
+//        )
+//    }
+//}
