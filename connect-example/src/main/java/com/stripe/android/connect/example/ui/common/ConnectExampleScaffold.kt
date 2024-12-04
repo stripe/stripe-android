@@ -72,7 +72,7 @@ fun ConnectExampleScaffold(
 @OptIn(ExperimentalMaterialApi::class)
 @Preview(showBackground = true)
 @Composable
-fun ConnectExampleScaffoldPreview() {
+private fun ConnectExampleScaffoldPreview() {
     ConnectExampleScaffold(
         title = "Title",
         content = {

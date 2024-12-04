@@ -47,7 +47,7 @@ fun BetaBadge() {
 
 @Composable
 @Preview(showBackground = true)
-fun BetaBadgePreview() {
+private fun BetaBadgePreview() {
     ConnectSdkExampleTheme {
         BetaBadge()
     }

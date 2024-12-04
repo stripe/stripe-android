@@ -127,7 +127,7 @@ private fun ErrorScreen(
 @OptIn(PrivateBetaConnectSDK::class)
 @Preview(showBackground = true)
 @Composable
-fun EmbeddedComponentLoaderLoadingPreview() {
+private fun EmbeddedComponentLoaderLoadingPreview() {
     EmbeddedComponentManagerLoader(
         embeddedComponentAsync = Loading(),
         reload = { },
@@ -138,7 +138,7 @@ fun EmbeddedComponentLoaderLoadingPreview() {
 @OptIn(PrivateBetaConnectSDK::class)
 @Preview(showBackground = true)
 @Composable
-fun EmbeddedComponentLoaderErrorPreview() {
+private fun EmbeddedComponentLoaderErrorPreview() {
     EmbeddedComponentManagerLoader(
         embeddedComponentAsync = Fail(IllegalStateException("Example error")),
         reload = { },
