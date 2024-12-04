@@ -24,12 +24,12 @@ import androidx.compose.ui.res.stringResource
 import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.example.core.Success
 import com.stripe.android.connect.example.core.then
-import com.stripe.android.connect.example.ui.embeddedcomponentmanagerloader.EmbeddedComponentManagerLoader
-import com.stripe.android.connect.example.ui.embeddedcomponentmanagerloader.EmbeddedComponentLoaderViewModel
 import com.stripe.android.connect.example.ui.appearance.AppearanceView
 import com.stripe.android.connect.example.ui.common.ConnectExampleScaffold
 import com.stripe.android.connect.example.ui.common.ConnectSdkExampleTheme
 import com.stripe.android.connect.example.ui.componentpicker.ComponentPickerList
+import com.stripe.android.connect.example.ui.embeddedcomponentmanagerloader.EmbeddedComponentLoaderViewModel
+import com.stripe.android.connect.example.ui.embeddedcomponentmanagerloader.EmbeddedComponentManagerLoader
 import com.stripe.android.connect.example.ui.settings.SettingsView
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
