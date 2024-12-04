@@ -252,10 +252,12 @@ open class StripeEditText @JvmOverloads constructor(
     }
 
     override fun onRestoreInstanceState(state: Parcelable?) {
-        (state as StripeEditTextState).let {
-            super.onRestoreInstanceState(it.superState)
-            errorMessage = it.errorMessage
-            shouldShowError = it.shouldShowError
+        if (state is StripeEditTextState) {
+            super.onRestoreInstanceState(state.superState)
+            errorMessage = state.errorMessage
+            shouldShowError = state.shouldShowError
+        } else {
+            super.onRestoreInstanceState(state)
         }
     }
 
