@@ -3,11 +3,13 @@ package com.stripe.android.paymentsheet
 import android.content.res.ColorStateList
 import android.graphics.Color
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import org.junit.Test
 import java.lang.IllegalArgumentException
 import kotlin.test.assertFailsWith
+import kotlin.test.assertSame
 
 class PaymentSheetConfigurationKtxTest {
     @Test
@@ -109,6 +111,53 @@ class PaymentSheetConfigurationKtxTest {
         ) {
             configWithBlankEphemeralKeySecret.validate()
         }
+    }
+
+    private fun getConfig(eKey: String): CommonConfiguration {
+        return configuration.copy(
+            customer = PaymentSheet.CustomerConfiguration(
+                id = "cus_1",
+                ephemeralKeySecret = eKey
+            ),
+        ).asCommonConfiguration()
+    }
+
+
+    @Test
+    fun `'validate' should succeed when ephemeral key secret is of correct format`() {
+        val validEphemeralKeys = listOf(
+            "ek_askljdlkasfhgasdfjls",
+            "ek_test_iiuwfhdaiuhasdvkcjn32n"
+        )
+
+        // Basically assert there is no crash
+        validEphemeralKeys.forEach {
+            getConfig(it).validate()
+        }
+    }
+
+        @Test
+    fun `'validate' should fail when ephemeral key secret is of wrong format`() {
+
+        val invalidEphemeralKeys = listOf(
+            "eph_askjdfhajkshdfjkashdjkfhsakjdhfkjashfd",
+            "eph_test_askjdfhajkshdfjkashdjkfhsakjdhfkjashfd",
+            "sk_askjdfhajkshdfjkashdjkfhsakjdhfkjashfd",
+            "ek_",
+            "ek",
+            "eeek_aldkfjalskdjflkasjbvdkjds"
+        )
+
+
+        invalidEphemeralKeys.forEach{
+            assertFailsWith(
+                IllegalArgumentException::class,
+                message = "`ephemeralKeySecret` format does not match expected client secret formatting"
+            ) {
+                getConfig(it).validate()
+            }
+        }
+
     }
 
     @OptIn(ExperimentalCustomerSessionApi::class)
