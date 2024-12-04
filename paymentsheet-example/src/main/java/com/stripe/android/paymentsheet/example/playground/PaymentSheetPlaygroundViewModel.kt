@@ -414,6 +414,12 @@ internal class PaymentSheetPlaygroundViewModel(
         status.value = StatusMessage(statusMessage)
     }
 
+    fun onEmbeddedResult(success: Boolean) {
+        if (success) {
+            setPlaygroundState(null)
+        }
+    }
+
     fun onCustomerSheetCallback(result: CustomerSheetResult) {
         val statusMessage = when (result) {
             is CustomerSheetResult.Canceled -> {

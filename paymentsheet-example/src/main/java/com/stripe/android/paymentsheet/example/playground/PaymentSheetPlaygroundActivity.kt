@@ -53,7 +53,7 @@ import com.stripe.android.paymentsheet.example.playground.activity.AppearanceBot
 import com.stripe.android.paymentsheet.example.playground.activity.AppearanceStore
 import com.stripe.android.paymentsheet.example.playground.activity.FawryActivity
 import com.stripe.android.paymentsheet.example.playground.activity.QrCodeActivity
-import com.stripe.android.paymentsheet.example.playground.embedded.EmbeddedPlaygroundActivity
+import com.stripe.android.paymentsheet.example.playground.embedded.EmbeddedPlaygroundContract
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationType
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
@@ -82,6 +82,10 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
             applicationSupplier = { application },
             uriSupplier = { intent.data },
         )
+    }
+
+    private val embeddedPlaygroundLauncher = registerForActivityResult(EmbeddedPlaygroundContract()) { success ->
+        viewModel.onEmbeddedResult(success)
     }
 
     @OptIn(ExperimentalCustomerSessionApi::class)
@@ -380,16 +384,10 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
     fun EmbeddedUi(
         playgroundState: PlaygroundState.Payment,
     ) {
-        val context = LocalContext.current
         BuyButton(
             buyButtonEnabled = true,
             onClick = {
-                context.startActivity(
-                    EmbeddedPlaygroundActivity.create(
-                        context = context,
-                        playgroundState = playgroundState,
-                    )
-                )
+                embeddedPlaygroundLauncher.launch(playgroundState)
             }
         )
     }
