@@ -1,8 +1,9 @@
 package com.stripe.android.connect
 
+import android.app.Activity
+import android.content.Context
 import android.os.Parcelable
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.ColorInt
 import androidx.annotation.RestrictTo
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.coroutines.MainScope
@@ -50,11 +51,11 @@ class EmbeddedComponentManager(
      * Create a new [AccountOnboardingView] for inclusion in the view hierarchy.
      */
     fun createAccountOnboardingView(
-        context: Context,
+        activity: Activity,
         listener: AccountOnboardingListener? = null
     ): AccountOnboardingView {
         return AccountOnboardingView(
-            context = context,
+            context = activity,
             embeddedComponentManager = this,
             listener = listener
         )
@@ -64,7 +65,7 @@ class EmbeddedComponentManager(
      * Create a new [PayoutsView] for inclusion in the view hierarchy.
      */
     fun createPayoutsView(
-        activity: AppCompatActivity,
+        activity: Activity,
         listener: PayoutsListener? = null,
     ): PayoutsView {
         return PayoutsView(
