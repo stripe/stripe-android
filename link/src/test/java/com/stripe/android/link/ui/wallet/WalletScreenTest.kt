@@ -1,17 +1,25 @@
 package com.stripe.android.link.ui.wallet
 
 import androidx.activity.ComponentActivity
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.account.LinkAccountManager
+import com.stripe.android.link.ui.BottomSheetContent
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.testing.FakeLogger
 import kotlinx.coroutines.Dispatchers
@@ -39,7 +47,7 @@ internal class WalletScreenTest {
     fun `wallet list is collapsed on start`() = runTest(dispatcher) {
         val viewModel = createViewModel()
         composeTestRule.setContent {
-            WalletScreen(viewModel)
+            WalletScreen(viewModel) {}
         }
         composeTestRule.waitForIdle()
 
@@ -47,13 +55,14 @@ internal class WalletScreenTest {
         onWalletCollapsedChevron().assertIsDisplayed()
         onWalletCollapsedPaymentDetails().assertIsDisplayed()
         onCollapsedWalletRow().assertIsDisplayed().assertHasClickAction()
+        onWalletPaymentMethodMenu().assertDoesNotExist()
     }
 
     @Test
     fun `wallet list is expanded on expand clicked`() = runTest(dispatcher) {
         val viewModel = createViewModel()
         composeTestRule.setContent {
-            WalletScreen(viewModel)
+            WalletScreen(viewModel) {}
         }
 
         composeTestRule.waitForIdle()
@@ -68,13 +77,43 @@ internal class WalletScreenTest {
     }
 
     @Test
+    fun `wallet menu is displayed on payment method menu clicked`() = runTest(dispatcher) {
+        val viewModel = createViewModel()
+        composeTestRule.setContent {
+            var sheetContent by remember { mutableStateOf<BottomSheetContent?>(null) }
+            Box {
+                WalletScreen(viewModel) {
+                    sheetContent = it
+                }
+
+                sheetContent?.let {
+                    Column { it() }
+                }
+            }
+        }
+
+        composeTestRule.waitForIdle()
+
+        onCollapsedWalletRow().performClick()
+
+        composeTestRule.waitForIdle()
+
+        onWalletPaymentMethodMenu().assertDoesNotExist()
+        onWalletPaymentMethodRowMenuButton().onLast().performClick()
+
+        composeTestRule.waitForIdle()
+
+        onWalletPaymentMethodMenu().assertIsDisplayed()
+    }
+
+    @Test
     fun `wallet loader should be displayed when no payment method is available`() = runTest(dispatcher) {
         val linkAccountManager = FakeLinkAccountManager()
         linkAccountManager.listPaymentDetailsResult = Result.success(ConsumerPaymentDetails(emptyList()))
 
         val viewModel = createViewModel(linkAccountManager)
         composeTestRule.setContent {
-            WalletScreen(viewModel)
+            WalletScreen(viewModel) {}
         }
 
         composeTestRule.waitForIdle()
@@ -116,4 +155,10 @@ internal class WalletScreenTest {
         composeTestRule.onNodeWithTag(WALLET_SCREEN_EXPANDED_ROW_HEADER, useUnmergedTree = true)
 
     private fun onLoader() = composeTestRule.onNodeWithTag(WALLET_LOADER_TAG)
+
+    private fun onWalletPaymentMethodRowMenuButton() =
+        composeTestRule.onAllNodes(hasTestTag(WALLET_PAYMENT_DETAIL_ITEM_MENU_BUTTON), useUnmergedTree = true)
+
+    private fun onWalletPaymentMethodMenu() =
+        composeTestRule.onNodeWithTag(WALLET_SCREEN_MENU_SHEET_TAG, useUnmergedTree = true)
 }

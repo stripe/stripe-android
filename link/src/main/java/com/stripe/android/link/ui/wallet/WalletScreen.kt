@@ -30,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -40,6 +41,9 @@ import com.stripe.android.link.R
 import com.stripe.android.link.theme.HorizontalPadding
 import com.stripe.android.link.theme.linkColors
 import com.stripe.android.link.theme.linkShapes
+import com.stripe.android.link.ui.BottomSheetContent
+import com.stripe.android.link.ui.PrimaryButton
+import com.stripe.android.link.ui.SecondaryButton
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.uicore.text.Html
 import com.stripe.android.uicore.utils.collectAsState
@@ -47,6 +51,7 @@ import com.stripe.android.uicore.utils.collectAsState
 @Composable
 internal fun WalletScreen(
     viewModel: WalletViewModel,
+    showBottomSheetContent: (BottomSheetContent?) -> Unit
 ) {
     val state by viewModel.uiState.collectAsState()
     var isExpanded by rememberSaveable { mutableStateOf(false) }
@@ -57,7 +62,13 @@ internal fun WalletScreen(
         onItemSelected = viewModel::onItemSelected,
         onExpandedChanged = { expanded ->
             isExpanded = expanded
-        }
+        },
+        onPrimaryButtonClick = viewModel::onPrimaryButtonClicked,
+        onPayAnotherWayClick = viewModel::onPayAnotherWayClicked,
+        onRemoveClicked = viewModel::onRemoveClicked,
+        onEditPaymentMethodClicked = viewModel::onEditPaymentMethodClicked,
+        onSetDefaultClicked = viewModel::onSetDefaultClicked,
+        showBottomSheetContent = showBottomSheetContent
     )
 }
 
@@ -67,6 +78,12 @@ internal fun WalletBody(
     isExpanded: Boolean,
     onItemSelected: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onExpandedChanged: (Boolean) -> Unit,
+    onPrimaryButtonClick: () -> Unit,
+    onPayAnotherWayClick: () -> Unit,
+    onEditPaymentMethodClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
+    onSetDefaultClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
+    onRemoveClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
+    showBottomSheetContent: (BottomSheetContent?) -> Unit
 ) {
     if (state.paymentDetailsList.isEmpty()) {
         Box(
@@ -93,34 +110,95 @@ internal fun WalletBody(
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        Box(
-            modifier = Modifier
-                .animateContentSize()
-        ) {
-            val selectedItem = state.selectedItem
-            if (isExpanded || selectedItem == null) {
-                ExpandedPaymentDetails(
-                    uiState = state,
-                    onItemSelected = onItemSelected,
-                    onMenuButtonClick = {},
-                    onAddNewPaymentMethodClick = {},
-                    onCollapse = {
-                        onExpandedChanged(false)
-                    }
-                )
-            } else {
-                CollapsedPaymentDetails(
-                    selectedPaymentMethod = selectedItem,
-                    enabled = !state.primaryButtonState.isBlocking,
-                    onClick = {
-                        onExpandedChanged(true)
-                    }
-                )
-            }
-        }
+        PaymentMethodSection(
+            state = state,
+            isExpanded = isExpanded,
+            onItemSelected = onItemSelected,
+            onExpandedChanged = onExpandedChanged,
+            showBottomSheetContent = showBottomSheetContent,
+            onRemoveClicked = onRemoveClicked,
+            onSetDefaultClicked = onSetDefaultClicked,
+            onEditPaymentMethodClicked = onEditPaymentMethodClicked,
+        )
 
         AnimatedVisibility(state.showBankAccountTerms) {
             BankAccountTerms()
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        PrimaryButton(
+            label = state.primaryButtonLabel.resolve(LocalContext.current),
+            state = state.primaryButtonState,
+            onButtonClick = onPrimaryButtonClick,
+            iconEnd = com.stripe.android.ui.core.R.drawable.stripe_ic_lock
+        )
+
+        SecondaryButton(
+            enabled = !state.primaryButtonState.isBlocking,
+            label = stringResource(id = R.string.stripe_wallet_pay_another_way),
+            onClick = onPayAnotherWayClick
+        )
+    }
+}
+
+@Composable
+private fun PaymentMethodSection(
+    state: WalletUiState,
+    isExpanded: Boolean,
+    onItemSelected: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
+    onExpandedChanged: (Boolean) -> Unit,
+    onEditPaymentMethodClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
+    onSetDefaultClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
+    onRemoveClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
+    showBottomSheetContent: (BottomSheetContent?) -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .animateContentSize()
+    ) {
+        val selectedItem = state.selectedItem
+        if (isExpanded || selectedItem == null) {
+            ExpandedPaymentDetails(
+                uiState = state,
+                onItemSelected = onItemSelected,
+                onMenuButtonClick = {
+                    showBottomSheetContent {
+                        WalletPaymentMethodMenu(
+                            modifier = Modifier
+                                .testTag(WALLET_SCREEN_MENU_SHEET_TAG),
+                            paymentDetails = it,
+                            onEditClick = {
+                                showBottomSheetContent(null)
+                                onEditPaymentMethodClicked(it)
+                            },
+                            onSetDefaultClick = {
+                                showBottomSheetContent(null)
+                                onSetDefaultClicked(it)
+                            },
+                            onRemoveClick = {
+                                showBottomSheetContent(null)
+                                onRemoveClicked(it)
+                            },
+                            onCancelClick = {
+                                showBottomSheetContent(null)
+                            }
+                        )
+                    }
+                },
+                onAddNewPaymentMethodClick = {},
+                onCollapse = {
+                    onExpandedChanged(false)
+                }
+            )
+        } else {
+            CollapsedPaymentDetails(
+                selectedPaymentMethod = selectedItem,
+                enabled = !state.primaryButtonState.isBlocking,
+                onClick = {
+                    onExpandedChanged(true)
+                }
+            )
         }
     }
 }
@@ -331,3 +409,4 @@ internal const val COLLAPSED_WALLET_ROW = "collapsed_wallet_row_tag"
 internal const val WALLET_SCREEN_EXPANDED_ROW_HEADER = "wallet_screen_expanded_row_header"
 internal const val WALLET_ADD_PAYMENT_METHOD_ROW = "wallet_add_payment_method_row"
 internal const val WALLET_SCREEN_PAYMENT_METHODS_LIST = "wallet_screen_payment_methods_list"
+internal const val WALLET_SCREEN_MENU_SHEET_TAG = "wallet_screen_menu_sheet_tag"
