@@ -2,6 +2,7 @@ apply from: configs.androidLibrary
 
 dependencies {
     implementation project(":payments-core")
+    implementation project(":stripe-ui-core")
 
     implementation libs.androidx.activity
     implementation libs.androidx.viewModel

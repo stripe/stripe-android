@@ -68,12 +68,12 @@ internal object TestFactory {
         )
     )
 
-    private val CONSUMER_PAYMENT_DETAILS_CARD = ConsumerPaymentDetails.Card(
+    val CONSUMER_PAYMENT_DETAILS_CARD = ConsumerPaymentDetails.Card(
         id = "pm_123",
         last4 = "4242",
         expiryYear = 2023,
         expiryMonth = 12,
-        brand = CardBrand.AmericanExpress,
+        brand = CardBrand.Visa,
         cvcCheck = CvcCheck.Pass,
         isDefault = true,
         billingAddress = ConsumerPaymentDetails.BillingAddress(
@@ -82,7 +82,7 @@ internal object TestFactory {
         )
     )
 
-    private val CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT = ConsumerPaymentDetails.BankAccount(
+    val CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT = ConsumerPaymentDetails.BankAccount(
         id = "pm_124",
         last4 = "4242",
         isDefault = false,
@@ -90,7 +90,7 @@ internal object TestFactory {
         bankIconCode = null
     )
 
-    private val CONSUMER_PAYMENT_DETAILS_PASSTHROUGH = ConsumerPaymentDetails.Passthrough(
+    val CONSUMER_PAYMENT_DETAILS_PASSTHROUGH = ConsumerPaymentDetails.Passthrough(
         id = "pm_125",
         last4 = "4242",
     )

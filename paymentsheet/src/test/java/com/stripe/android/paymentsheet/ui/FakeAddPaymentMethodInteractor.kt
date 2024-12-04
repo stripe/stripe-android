@@ -6,8 +6,8 @@ import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.ViewActionRecorder
 import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
+import com.stripe.android.testing.NullCardAccountRangeRepositoryFactory
 import com.stripe.android.uicore.utils.stateFlowOf
-import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import kotlinx.coroutines.flow.StateFlow
 import org.mockito.kotlin.mock
 
