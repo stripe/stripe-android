@@ -30,7 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.stripe.android.connect.example.MainContent
+import com.stripe.android.connect.example.ConnectExampleScaffold
 import com.stripe.android.connect.example.R
 import com.stripe.android.connect.example.ui.settings.SettingsViewModel.SettingsState.DemoMerchant
 
@@ -45,7 +45,7 @@ fun SettingsView(
 
     BackHandler { onDismiss() }
     LaunchedEffect(state.serverUrl) { serverUrlDidChange = true } // track if the serverURL ever changes
-    MainContent(
+    ConnectExampleScaffold(
         title = stringResource(R.string.settings),
         navigationIcon = {
             IconButton(onClick = onDismiss) {

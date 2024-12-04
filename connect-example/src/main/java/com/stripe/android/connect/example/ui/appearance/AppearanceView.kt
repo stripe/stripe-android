@@ -22,7 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.stripe.android.connect.example.MainContent
+import com.stripe.android.connect.example.ConnectExampleScaffold
 import com.stripe.android.connect.example.R
 
 @Composable
@@ -33,7 +33,7 @@ fun AppearanceView(
     val state by viewModel.state.collectAsState()
 
     BackHandler { onDismiss() }
-    MainContent(
+    ConnectExampleScaffold(
         title = stringResource(R.string.customize_appearance),
         navigationIcon = {
             IconButton(onClick = onDismiss) {

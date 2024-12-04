@@ -24,7 +24,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.stripe.android.connect.EmbeddedComponentManager
 import com.stripe.android.connect.PrivateBetaConnectSDK
-import com.stripe.android.connect.example.MainContent
+import com.stripe.android.connect.example.ConnectExampleScaffold
 import com.stripe.android.connect.example.R
 import com.stripe.android.connect.example.data.EmbeddedComponentManagerProvider
 import com.stripe.android.connect.example.ui.settings.SettingsView
@@ -77,7 +77,7 @@ private fun AccountLoader(
 
 @Composable
 private fun LoadingScreen() {
-    MainContent(title = stringResource(R.string.connect_sdk_example)) {
+    ConnectExampleScaffold(title = stringResource(R.string.connect_sdk_example)) {
         Box(
             modifier = Modifier.fillMaxSize().padding(24.dp),
             contentAlignment = Alignment.Center,
@@ -96,7 +96,7 @@ private fun ErrorScreen(
     errorMessage: String,
     onReloadRequested: () -> Unit,
 ) {
-    MainContent(
+    ConnectExampleScaffold(
         title = stringResource(R.string.connect_sdk_example),
     ) {
         val settingsSheetState = rememberModalBottomSheetState(

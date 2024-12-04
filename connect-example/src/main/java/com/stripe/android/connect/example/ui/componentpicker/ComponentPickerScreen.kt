@@ -42,7 +42,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.stripe.android.connect.example.ConnectSdkExampleTheme
-import com.stripe.android.connect.example.MainContent
+import com.stripe.android.connect.example.ConnectExampleScaffold
 import com.stripe.android.connect.example.R
 import com.stripe.android.connect.example.ui.appearance.AppearanceView
 import com.stripe.android.connect.example.ui.common.BetaBadge
@@ -73,7 +73,7 @@ fun ComponentPickerScreen(
         }
     }
 
-    MainContent(
+    ConnectExampleScaffold(
         title = stringResource(R.string.connect_sdk_example),
         actions = {
             IconButton(onClick = { toggleSettingsSheet(SheetType.SETTINGS) }) {

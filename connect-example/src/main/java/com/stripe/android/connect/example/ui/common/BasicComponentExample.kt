@@ -18,7 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.viewinterop.AndroidView
 import com.stripe.android.connect.example.ConnectSdkExampleTheme
-import com.stripe.android.connect.example.MainContent
+import com.stripe.android.connect.example.ConnectExampleScaffold
 import com.stripe.android.connect.example.R
 import com.stripe.android.connect.example.ui.appearance.AppearanceView
 import kotlinx.coroutines.launch
@@ -66,7 +66,7 @@ fun BasicComponentExampleContent(
         }
     }
 
-    MainContent(
+    ConnectExampleScaffold(
         title = title,
         navigationIcon = navigationIcon,
         actions = {

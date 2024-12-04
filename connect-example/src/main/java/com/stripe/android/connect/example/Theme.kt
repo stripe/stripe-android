@@ -27,7 +27,7 @@ fun ConnectSdkExampleTheme(
 }
 
 @Composable
-fun MainContent(
+fun ConnectExampleScaffold(
     title: String,
     navigationIcon: @Composable (() -> Unit)? = null,
     actions: @Composable RowScope.() -> Unit = {},
