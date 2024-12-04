@@ -15,6 +15,7 @@ import com.stripe.android.connect.StripeEmbeddedComponent
 import com.stripe.android.connect.appearance.Appearance
 import com.stripe.android.connect.appearance.Colors
 import com.stripe.android.connect.webview.serialization.SetOnLoadError
+import com.stripe.android.connect.webview.serialization.SetOnLoadError.LoadError
 import com.stripe.android.connect.webview.serialization.SetOnLoaderStart
 import com.stripe.android.connect.webview.serialization.SetterFunctionCalledMessage
 import com.stripe.android.core.Logger
@@ -149,7 +150,7 @@ class StripeConnectWebViewContainerControllerTest {
 
     @Test
     fun `should handle SetOnLoadError`() = runTest {
-        val message = SetterFunctionCalledMessage(SetOnLoadError("", null))
+        val message = SetterFunctionCalledMessage(SetOnLoadError(LoadError("", null)))
         controller.onReceivedSetterFunctionCalled(message)
 
         verify(listener).onLoadError(any())
@@ -164,6 +165,13 @@ class StripeConnectWebViewContainerControllerTest {
         controller.onReceivedSetterFunctionCalled(message)
 
         assertThat(delegateReceivedEvents).contains(message)
+    }
+
+    @Test
+    fun `onReceivedError should forward to listener`() = runTest {
+        controller.onReceivedError("https://stripe.com", 404, "Not Found")
+
+        verify(listener).onLoadError(any())
     }
 
     @Test
