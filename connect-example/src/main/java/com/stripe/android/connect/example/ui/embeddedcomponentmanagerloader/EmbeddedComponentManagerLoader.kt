@@ -1,4 +1,4 @@
-package com.stripe.android.connect.example.ui.accountloader
+package com.stripe.android.connect.example.ui.embeddedcomponentmanagerloader
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -36,7 +36,7 @@ import kotlinx.coroutines.launch
  */
 @OptIn(PrivateBetaConnectSDK::class)
 @Composable
-fun EmbeddedComponentLoader(
+fun EmbeddedComponentManagerLoader(
     embeddedComponentAsync: Async<EmbeddedComponentManager>,
     reload: () -> Unit,
     content: @Composable (embeddedComponentManager: EmbeddedComponentManager) -> Unit,
@@ -128,7 +128,7 @@ private fun ErrorScreen(
 @Preview(showBackground = true)
 @Composable
 fun EmbeddedComponentLoaderLoadingPreview() {
-    EmbeddedComponentLoader(
+    EmbeddedComponentManagerLoader(
         embeddedComponentAsync = Loading(),
         reload = { },
         content = { },
@@ -139,7 +139,7 @@ fun EmbeddedComponentLoaderLoadingPreview() {
 @Preview(showBackground = true)
 @Composable
 fun EmbeddedComponentLoaderErrorPreview() {
-    EmbeddedComponentLoader(
+    EmbeddedComponentManagerLoader(
         embeddedComponentAsync = Fail(IllegalStateException("Example error")),
         reload = { },
         content = { },

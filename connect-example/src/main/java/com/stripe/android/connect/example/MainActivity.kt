@@ -22,9 +22,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
 import com.stripe.android.connect.PrivateBetaConnectSDK
-import com.stripe.android.connect.example.data.EmbeddedComponentManagerProvider
-import com.stripe.android.connect.example.ui.accountloader.EmbeddedComponentLoader
-import com.stripe.android.connect.example.ui.accountloader.EmbeddedComponentLoaderViewModel
+import com.stripe.android.connect.example.ui.embeddedcomponentmanagerloader.EmbeddedComponentManagerLoader
+import com.stripe.android.connect.example.ui.embeddedcomponentmanagerloader.EmbeddedComponentLoaderViewModel
 import com.stripe.android.connect.example.ui.appearance.AppearanceView
 import com.stripe.android.connect.example.ui.common.ConnectExampleScaffold
 import com.stripe.android.connect.example.ui.common.ConnectSdkExampleTheme
@@ -34,16 +33,12 @@ import com.stripe.android.connect.example.ui.componentpicker.ComponentPickerList
 import com.stripe.android.connect.example.ui.settings.SettingsView
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @OptIn(PrivateBetaConnectSDK::class)
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     private val viewModel: EmbeddedComponentLoaderViewModel by viewModels()
-
-    @Inject
-    lateinit var embeddedComponentManagerProvider: EmbeddedComponentManagerProvider
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -127,7 +122,7 @@ class MainActivity : ComponentActivity() {
                 }
             },
         ) {
-            EmbeddedComponentLoader(
+            EmbeddedComponentManagerLoader(
                 embeddedComponentAsync = embeddedComponentAsync,
                 reload = viewModel::reload,
             ) {

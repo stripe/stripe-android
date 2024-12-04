@@ -21,20 +21,15 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.fragment.app.FragmentActivity
 import com.stripe.android.connect.EmbeddedComponentManager
 import com.stripe.android.connect.PrivateBetaConnectSDK
-import com.stripe.android.connect.example.data.EmbeddedComponentManagerProvider
-import com.stripe.android.connect.example.ui.accountloader.EmbeddedComponentLoader
-import com.stripe.android.connect.example.ui.accountloader.EmbeddedComponentLoaderViewModel
+import com.stripe.android.connect.example.ui.embeddedcomponentmanagerloader.EmbeddedComponentManagerLoader
+import com.stripe.android.connect.example.ui.embeddedcomponentmanagerloader.EmbeddedComponentLoaderViewModel
 import com.stripe.android.connect.example.ui.appearance.AppearanceView
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @OptIn(PrivateBetaConnectSDK::class)
 @AndroidEntryPoint
 abstract class BasicExampleComponentActivity : FragmentActivity() {
-
-    @Inject
-    lateinit var embeddedComponentManagerProvider: EmbeddedComponentManagerProvider
 
     private val viewModel: EmbeddedComponentLoaderViewModel by viewModels()
 
@@ -97,7 +92,7 @@ abstract class BasicExampleComponentActivity : FragmentActivity() {
                 }
             },
         ) {
-            EmbeddedComponentLoader(
+            EmbeddedComponentManagerLoader(
                 embeddedComponentAsync = embeddedComponentAsync,
                 reload = viewModel::reload,
             ) { embeddedComponentManager ->

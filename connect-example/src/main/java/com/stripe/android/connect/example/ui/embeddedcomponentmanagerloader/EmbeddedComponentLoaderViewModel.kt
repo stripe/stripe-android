@@ -1,4 +1,4 @@
-package com.stripe.android.connect.example.ui.accountloader
+package com.stripe.android.connect.example.ui.embeddedcomponentmanagerloader
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -32,8 +32,8 @@ class EmbeddedComponentLoaderViewModel @Inject constructor(
     private val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG)
     private val loggingTag = this::class.java.simpleName
 
-    private val _state = MutableStateFlow(EmbeddedComponentLoaderState())
-    val state: StateFlow<EmbeddedComponentLoaderState> = _state.asStateFlow()
+    private val _state = MutableStateFlow(EmbeddedComponentManagerLoaderState())
+    val state: StateFlow<EmbeddedComponentManagerLoaderState> = _state.asStateFlow()
 
     init {
         initializeManager()
@@ -90,11 +90,4 @@ class EmbeddedComponentLoaderViewModel @Inject constructor(
             }
         }
     }
-
-    // State
-
-    @OptIn(PrivateBetaConnectSDK::class)
-    data class EmbeddedComponentLoaderState(
-        val embeddedComponentAsync: Async<EmbeddedComponentManager> = Uninitialized,
-    )
 }
