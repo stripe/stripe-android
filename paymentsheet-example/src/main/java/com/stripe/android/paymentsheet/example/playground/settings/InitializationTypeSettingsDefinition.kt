@@ -14,13 +14,15 @@ internal object InitializationTypeSettingsDefinition :
 
     override fun createOptions(
         configurationData: PlaygroundConfigurationData
-    ) = listOf(
-        option("Normal", InitializationType.Normal),
-        option("Deferred CSC", InitializationType.DeferredClientSideConfirmation),
-        option("Deferred SSC", InitializationType.DeferredServerSideConfirmation),
-        option("Deferred SSC + MC", InitializationType.DeferredManualConfirmation),
-        option("Deferred SSC + MP", InitializationType.DeferredMultiprocessor),
-    )
+    ) = buildList<PlaygroundSettingDefinition.Displayable.Option<InitializationType>> {
+        if (configurationData.integrationType != PlaygroundConfigurationData.IntegrationType.Embedded) {
+            add(option("Normal", InitializationType.Normal))
+        }
+        add(option("Deferred CSC", InitializationType.DeferredClientSideConfirmation))
+        add(option("Deferred SSC", InitializationType.DeferredServerSideConfirmation))
+        add(option("Deferred SSC + MC", InitializationType.DeferredManualConfirmation))
+        add(option("Deferred SSC + MP", InitializationType.DeferredMultiprocessor))
+    }
 
     override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
         return configurationData.integrationType.isPaymentFlow()

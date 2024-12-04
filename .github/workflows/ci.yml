@@ -20,7 +20,7 @@ jobs:
       - uses: ./.github/actions/stripe_setup
       - name: End-to-end tests
         run: ./gradlew :stripe-test-e2e:testDebugUnitTest
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: unit-test-report
@@ -35,7 +35,7 @@ jobs:
       - uses: ./.github/actions/stripe_setup
       - name: Build example projects
         run: ./gradlew :paymentsheet-example:assembleAndroidTest
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: test-failures

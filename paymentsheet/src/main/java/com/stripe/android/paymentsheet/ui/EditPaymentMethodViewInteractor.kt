@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.ui
 
+import com.stripe.android.CardBrandFilter
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.model.CardBrand
@@ -48,6 +49,7 @@ internal interface ModifiableEditPaymentMethodViewInteractor : EditPaymentMethod
             displayName: ResolvableString,
             canRemove: Boolean,
             isLiveMode: Boolean,
+            cardBrandFilter: CardBrandFilter
         ): ModifiableEditPaymentMethodViewInteractor
     }
 }
@@ -60,9 +62,10 @@ internal class DefaultEditPaymentMethodViewInteractor(
     private val updateExecutor: PaymentMethodUpdateOperation,
     private val canRemove: Boolean,
     override val isLiveMode: Boolean,
+    private val cardBrandFilter: CardBrandFilter,
     workContext: CoroutineContext = Dispatchers.Default,
 ) : ModifiableEditPaymentMethodViewInteractor {
-    private val choice = MutableStateFlow(initialPaymentMethod.getPreferredChoice())
+    private val choice = MutableStateFlow(initialPaymentMethod.getCard().getPreferredChoice())
     private val status = MutableStateFlow(EditPaymentMethodViewState.Status.Idle)
     private val paymentMethod = MutableStateFlow(initialPaymentMethod)
     private val confirmRemoval = MutableStateFlow(false)
@@ -76,8 +79,8 @@ internal class DefaultEditPaymentMethodViewInteractor(
         confirmRemoval,
         error,
     ) { paymentMethod, choice, status, confirmDeletion, error ->
-        val savedChoice = paymentMethod.getPreferredChoice()
-        val availableChoices = paymentMethod.getAvailableNetworks()
+        val savedChoice = paymentMethod.getCard().getPreferredChoice()
+        val availableChoices = paymentMethod.getCard().getAvailableNetworks(cardBrandFilter)
 
         EditPaymentMethodViewState(
             last4 = paymentMethod.getLast4(),
@@ -131,7 +134,7 @@ internal class DefaultEditPaymentMethodViewInteractor(
         val currentPaymentMethod = paymentMethod.value
         val currentChoice = choice.value
 
-        if (currentPaymentMethod.getPreferredChoice() != currentChoice) {
+        if (currentPaymentMethod.getCard().getPreferredChoice() != currentChoice) {
             coroutineScope.launch {
                 error.emit(null)
                 status.emit(EditPaymentMethodViewState.Status.Updating)
@@ -157,7 +160,7 @@ internal class DefaultEditPaymentMethodViewInteractor(
         eventHandler(EditPaymentMethodViewInteractor.Event.HideBrands(brand = null))
     }
 
-    private fun onBrandChoiceChanged(choice: EditPaymentMethodViewState.CardBrandChoice) {
+    private fun onBrandChoiceChanged(choice: CardBrandChoice) {
         this.choice.value = choice
 
         eventHandler(EditPaymentMethodViewInteractor.Event.HideBrands(brand = choice.brand))
@@ -172,24 +175,8 @@ internal class DefaultEditPaymentMethodViewInteractor(
             ?: throw IllegalStateException("Card payment method must contain last 4 digits")
     }
 
-    private fun PaymentMethod.getPreferredChoice(): EditPaymentMethodViewState.CardBrandChoice {
-        return CardBrand.fromCode(getCard().displayBrand).toChoice()
-    }
-
-    private fun PaymentMethod.getAvailableNetworks(): List<EditPaymentMethodViewState.CardBrandChoice> {
-        return getCard().networks?.available?.let { brandCodes ->
-            brandCodes.map { code ->
-                CardBrand.fromCode(code).toChoice()
-            }
-        } ?: listOf()
-    }
-
     private fun PaymentMethod.getCard(): PaymentMethod.Card {
         return card ?: throw IllegalStateException("Payment method must be a card in order to be edited")
-    }
-
-    private fun CardBrand.toChoice(): EditPaymentMethodViewState.CardBrandChoice {
-        return EditPaymentMethodViewState.CardBrandChoice(brand = this)
     }
 
     object Factory : ModifiableEditPaymentMethodViewInteractor.Factory {
@@ -201,6 +188,7 @@ internal class DefaultEditPaymentMethodViewInteractor(
             displayName: ResolvableString,
             canRemove: Boolean,
             isLiveMode: Boolean,
+            cardBrandFilter: CardBrandFilter
         ): ModifiableEditPaymentMethodViewInteractor {
             return DefaultEditPaymentMethodViewInteractor(
                 initialPaymentMethod = initialPaymentMethod,
@@ -210,6 +198,7 @@ internal class DefaultEditPaymentMethodViewInteractor(
                 displayName = displayName,
                 canRemove = canRemove,
                 isLiveMode = isLiveMode,
+                cardBrandFilter = cardBrandFilter
             )
         }
     }

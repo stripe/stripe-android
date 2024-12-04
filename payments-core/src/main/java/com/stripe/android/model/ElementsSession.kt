@@ -45,6 +45,7 @@ data class ElementsSession(
         val linkMode: LinkMode?,
         val linkFlags: Map<String, Boolean>,
         val disableLinkSignup: Boolean,
+        val linkConsumerIncentive: LinkConsumerIncentive?,
     ) : StripeModel
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -89,6 +90,7 @@ data class ElementsSession(
                 data class Enabled(
                     val isPaymentMethodSaveEnabled: Boolean,
                     val isPaymentMethodRemoveEnabled: Boolean,
+                    val canRemoveLastPaymentMethod: Boolean,
                     val allowRedisplayOverride: PaymentMethod.AllowRedisplay?
                 ) : MobilePaymentElement
             }

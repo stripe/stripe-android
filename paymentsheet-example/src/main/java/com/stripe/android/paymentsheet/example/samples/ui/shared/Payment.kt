@@ -32,6 +32,7 @@ fun PaymentMethodSelector(
     isEnabled: Boolean,
     paymentMethodLabel: String,
     paymentMethodPainter: Painter?,
+    clickable: Boolean = isEnabled,
     onClick: () -> Unit,
 ) {
     Row(
@@ -49,8 +50,8 @@ fun PaymentMethodSelector(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.End,
             modifier = Modifier.clickable(
-                enabled = isEnabled,
-                onClick = onClick
+                enabled = clickable,
+                onClick = onClick,
             ).semantics {
                 testTag = PAYMENT_METHOD_SELECTOR_TEST_TAG
                 text = AnnotatedString(paymentMethodLabel)

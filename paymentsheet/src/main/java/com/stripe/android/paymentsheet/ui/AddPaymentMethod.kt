@@ -31,6 +31,7 @@ internal fun AddPaymentMethod(
         enabled = !state.processing,
         supportedPaymentMethods = state.supportedPaymentMethods,
         selectedItemCode = state.selectedPaymentMethodCode,
+        incentive = state.incentive,
         formElements = state.formElements,
         onItemSelectedListener = { selectedLpm ->
             interactor.handleViewAction(

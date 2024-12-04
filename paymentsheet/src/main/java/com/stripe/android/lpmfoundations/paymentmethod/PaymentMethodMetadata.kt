@@ -1,8 +1,9 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
 import android.os.Parcelable
+import com.stripe.android.CardBrandFilter
+import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.customersheet.CustomerSheet
-import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.lpmfoundations.FormHeaderInformation
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.ExternalPaymentMethodUiDefinitionFactory
@@ -18,7 +19,9 @@ import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnec
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.toPaymentMethodIncentive
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
@@ -48,7 +51,9 @@ internal data class PaymentMethodMetadata(
     val linkInlineConfiguration: LinkInlineConfiguration?,
     val paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior,
     val linkMode: LinkMode?,
+    val paymentMethodIncentive: PaymentMethodIncentive?,
     val financialConnectionsAvailable: Boolean = DefaultIsFinancialConnectionsAvailable(),
+    val cardBrandFilter: CardBrandFilter,
 ) : Parcelable {
     fun hasIntentToSetup(): Boolean {
         return when (stripeIntent) {
@@ -214,56 +219,22 @@ internal data class PaymentMethodMetadata(
     fun allowRedisplay(
         customerRequestedSave: PaymentSelection.CustomerRequestedSave,
     ): PaymentMethod.AllowRedisplay {
-        return if (hasIntentToSetup()) {
-            allowRedisplayForSetupIntent(customerRequestedSave)
-        } else {
-            allowRedisplayForPaymentIntent(customerRequestedSave)
-        }
-    }
-
-    private fun allowRedisplayForSetupIntent(
-        customerRequestedSave: PaymentSelection.CustomerRequestedSave,
-    ): PaymentMethod.AllowRedisplay {
-        return when (paymentMethodSaveConsentBehavior) {
-            is PaymentMethodSaveConsentBehavior.Legacy -> PaymentMethod.AllowRedisplay.UNSPECIFIED
-            is PaymentMethodSaveConsentBehavior.Disabled -> {
-                paymentMethodSaveConsentBehavior.overrideAllowRedisplay ?: PaymentMethod.AllowRedisplay.LIMITED
-            }
-            is PaymentMethodSaveConsentBehavior.Enabled -> {
-                if (customerRequestedSave == PaymentSelection.CustomerRequestedSave.RequestReuse) {
-                    PaymentMethod.AllowRedisplay.ALWAYS
-                } else {
-                    PaymentMethod.AllowRedisplay.LIMITED
-                }
-            }
-        }
-    }
-
-    private fun allowRedisplayForPaymentIntent(
-        customerRequestedSave: PaymentSelection.CustomerRequestedSave,
-    ): PaymentMethod.AllowRedisplay {
-        return when (paymentMethodSaveConsentBehavior) {
-            is PaymentMethodSaveConsentBehavior.Legacy -> PaymentMethod.AllowRedisplay.UNSPECIFIED
-            is PaymentMethodSaveConsentBehavior.Disabled -> PaymentMethod.AllowRedisplay.UNSPECIFIED
-            is PaymentMethodSaveConsentBehavior.Enabled -> {
-                if (customerRequestedSave == PaymentSelection.CustomerRequestedSave.RequestReuse) {
-                    PaymentMethod.AllowRedisplay.ALWAYS
-                } else {
-                    PaymentMethod.AllowRedisplay.UNSPECIFIED
-                }
-            }
-        }
+        return paymentMethodSaveConsentBehavior.allowRedisplay(
+            isSetupIntent = hasIntentToSetup(),
+            customerRequestedSave = customerRequestedSave,
+        )
     }
 
     internal companion object {
         internal fun create(
             elementsSession: ElementsSession,
-            configuration: PaymentSheet.Configuration,
+            configuration: CommonConfiguration,
             sharedDataSpecs: List<SharedDataSpec>,
             externalPaymentMethodSpecs: List<ExternalPaymentMethodSpec>,
             isGooglePayReady: Boolean,
             linkInlineConfiguration: LinkInlineConfiguration?,
         ): PaymentMethodMetadata {
+            val linkSettings = elementsSession.linkSettings
             return PaymentMethodMetadata(
                 stripeIntent = elementsSession.stripeIntent,
                 billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
@@ -283,12 +254,13 @@ internal data class PaymentMethodMetadata(
                 externalPaymentMethodSpecs = externalPaymentMethodSpecs,
                 paymentMethodSaveConsentBehavior = elementsSession.toPaymentSheetSaveConsentBehavior(),
                 linkInlineConfiguration = linkInlineConfiguration,
-                linkMode = elementsSession.linkSettings?.linkMode,
+                linkMode = linkSettings?.linkMode,
+                paymentMethodIncentive = linkSettings?.linkConsumerIncentive?.toPaymentMethodIncentive(),
                 isGooglePayReady = isGooglePayReady,
+                cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance)
             )
         }
 
-        @OptIn(ExperimentalCustomerSheetApi::class)
         internal fun create(
             elementsSession: ElementsSession,
             configuration: CustomerSheet.Configuration,
@@ -317,7 +289,9 @@ internal data class PaymentMethodMetadata(
                 financialConnectionsAvailable = isFinancialConnectionsAvailable(),
                 paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
                 linkMode = elementsSession.linkSettings?.linkMode,
+                paymentMethodIncentive = null,
                 externalPaymentMethodSpecs = emptyList(),
+                cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance)
             )
         }
     }

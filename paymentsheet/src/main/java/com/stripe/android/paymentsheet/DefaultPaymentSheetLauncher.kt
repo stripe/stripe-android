@@ -9,6 +9,8 @@ import androidx.core.app.ActivityOptionsCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.uicore.utils.AnimationConstants
 import org.jetbrains.annotations.TestOnly
 
@@ -85,7 +87,7 @@ internal class DefaultPaymentSheetLauncher(
     )
 
     override fun present(
-        mode: PaymentSheet.InitializationMode,
+        mode: PaymentElementLoader.InitializationMode,
         configuration: PaymentSheet.Configuration?
     ) {
         val args = PaymentSheetContractV2.Args(

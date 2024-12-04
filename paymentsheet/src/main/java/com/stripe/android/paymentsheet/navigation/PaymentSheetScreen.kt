@@ -21,6 +21,8 @@ import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarStateFactory
 import com.stripe.android.paymentsheet.ui.SavedPaymentMethodTabLayoutUI
 import com.stripe.android.paymentsheet.ui.SavedPaymentMethodsTopContentPadding
 import com.stripe.android.paymentsheet.ui.SelectSavedPaymentMethodsInteractor
+import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
+import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodUI
 import com.stripe.android.paymentsheet.verticalmode.ManageOneSavedPaymentMethodInteractor
 import com.stripe.android.paymentsheet.verticalmode.ManageOneSavedPaymentMethodUI
 import com.stripe.android.paymentsheet.verticalmode.ManageScreenInteractor
@@ -36,8 +38,7 @@ import kotlinx.coroutines.flow.StateFlow
 import java.io.Closeable
 import com.stripe.android.R as PaymentsCoreR
 
-internal val verticalModeBottomContentPadding = 20.dp
-internal val horizontalModeBottomContentPadding = 8.dp
+internal val formBottomContentPadding = 20.dp
 internal val horizontalModeWalletsDividerSpacing = 16.dp
 internal val verticalModeWalletsDividerSpacing = 24.dp
 
@@ -188,7 +189,7 @@ internal sealed interface PaymentSheetScreen {
         )
         override val showsContinueButton: Boolean = true
         override val topContentPadding: Dp = 0.dp
-        override val bottomContentPadding: Dp = horizontalModeBottomContentPadding
+        override val bottomContentPadding: Dp = formBottomContentPadding
         override val walletsDividerSpacing: Dp = horizontalModeWalletsDividerSpacing
         override val animationStyle: AnimationStyle = AnimationStyle.PrimaryButtonAnchored
         override val showsMandates: Boolean = true
@@ -240,7 +241,7 @@ internal sealed interface PaymentSheetScreen {
         )
         override val showsContinueButton: Boolean = true
         override val topContentPadding: Dp = 0.dp
-        override val bottomContentPadding: Dp = horizontalModeBottomContentPadding
+        override val bottomContentPadding: Dp = formBottomContentPadding
         override val walletsDividerSpacing: Dp = horizontalModeWalletsDividerSpacing
         override val showsMandates: Boolean = true
 
@@ -332,7 +333,7 @@ internal sealed interface PaymentSheetScreen {
         )
         override val showsContinueButton: Boolean = true
         override val topContentPadding: Dp = 0.dp
-        override val bottomContentPadding: Dp = verticalModeBottomContentPadding
+        override val bottomContentPadding: Dp = formBottomContentPadding
         override val walletsDividerSpacing: Dp = verticalModeWalletsDividerSpacing
         override val showsMandates: Boolean = true
 
@@ -378,7 +379,7 @@ internal sealed interface PaymentSheetScreen {
         )
         override val showsContinueButton: Boolean = true
         override val topContentPadding: Dp = 0.dp
-        override val bottomContentPadding: Dp = verticalModeBottomContentPadding
+        override val bottomContentPadding: Dp = formBottomContentPadding
         override val walletsDividerSpacing: Dp = verticalModeWalletsDividerSpacing
         override val showsMandates: Boolean = true
 
@@ -402,7 +403,7 @@ internal sealed interface PaymentSheetScreen {
 
         @Composable
         override fun Content(modifier: Modifier) {
-            VerticalModeFormUI(interactor)
+            VerticalModeFormUI(interactor, modifier)
         }
 
         override fun close() {
@@ -507,7 +508,7 @@ internal sealed interface PaymentSheetScreen {
         )
         override val showsContinueButton: Boolean = false
         override val topContentPadding: Dp = 0.dp
-        override val bottomContentPadding: Dp = verticalModeBottomContentPadding
+        override val bottomContentPadding: Dp = formBottomContentPadding
         override val walletsDividerSpacing: Dp = verticalModeWalletsDividerSpacing
         override val showsMandates: Boolean = false
 
@@ -532,6 +533,40 @@ internal sealed interface PaymentSheetScreen {
         @Composable
         override fun Content(modifier: Modifier) {
             CvcRecollectionPaymentSheetScreen(interactor)
+        }
+    }
+
+    class UpdatePaymentMethod(
+        val interactor: UpdatePaymentMethodInteractor,
+    ) : PaymentSheetScreen {
+        override val buyButtonState: StateFlow<BuyButtonState> = stateFlowOf(
+            BuyButtonState(visible = false)
+        )
+        override val showsContinueButton: Boolean = false
+        override val topContentPadding: Dp = 0.dp
+        override val bottomContentPadding: Dp = formBottomContentPadding
+        override val walletsDividerSpacing: Dp = verticalModeWalletsDividerSpacing
+        override val showsMandates: Boolean = false
+
+        override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
+            return stateFlowOf(
+                PaymentSheetTopBarStateFactory.create(
+                    hasBackStack = true,
+                    isLiveMode = interactor.isLiveMode,
+                    editable = PaymentSheetTopBarState.Editable.Never,
+                )
+            )
+        }
+
+        override fun title(isCompleteFlow: Boolean, isWalletEnabled: Boolean): StateFlow<ResolvableString?> {
+            return stateFlowOf(interactor.screenTitle)
+        }
+
+        override fun showsWalletsHeader(isCompleteFlow: Boolean): StateFlow<Boolean> = stateFlowOf(false)
+
+        @Composable
+        override fun Content(modifier: Modifier) {
+            UpdatePaymentMethodUI(interactor, modifier)
         }
     }
 }

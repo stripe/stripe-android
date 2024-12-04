@@ -6,6 +6,7 @@ import com.stripe.android.BuildConfig
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
+import com.stripe.android.core.frauddetection.FraudDetectionErrorReporter
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.networking.AnalyticsEvent
@@ -25,13 +26,20 @@ import javax.inject.Named
 import kotlin.coroutines.CoroutineContext
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-interface ErrorReporter {
+interface ErrorReporter : FraudDetectionErrorReporter {
 
     fun report(
         errorEvent: ErrorEvent,
         stripeException: StripeException? = null,
         additionalNonPiiParams: Map<String, String> = emptyMap(),
     )
+
+    override fun reportFraudDetectionError(error: StripeException) {
+        report(
+            errorEvent = ExpectedErrorEvent.FRAUD_DETECTION_API_FAILURE,
+            stripeException = error,
+        )
+    }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
@@ -95,6 +103,9 @@ interface ErrorReporter {
         ),
         CUSTOMER_SHEET_ELEMENTS_SESSION_LOAD_FAILURE(
             eventName = "elements.customer_sheet.elements_session.load_failure"
+        ),
+        CUSTOMER_SHEET_CUSTOMER_SESSION_ELEMENTS_SESSION_LOAD_FAILURE(
+            eventName = "elements.customer_sheet.customer_session.elements_session.load_failure"
         ),
         CUSTOMER_SHEET_PAYMENT_METHODS_LOAD_FAILURE(
             eventName = "elements.customer_sheet.payment_methods.load_failure"
@@ -205,6 +216,12 @@ interface ErrorReporter {
         CVC_RECOLLECTION_UNEXPECTED_PAYMENT_SELECTION(
             partialEventName = "payments.cvc_recollection_unexpected_payment_selection"
         ),
+        CUSTOMER_SHEET_ATTACH_CALLED_WITH_CUSTOMER_SESSION(
+            partialEventName = "customersheet.customer_session.attach_called"
+        ),
+        CUSTOMER_SESSION_ON_CUSTOMER_SHEET_ELEMENTS_SESSION_NO_CUSTOMER_FIELD(
+            partialEventName = "customersheet.customer_session.elements_session.no_customer_field"
+        ),
         ;
 
         override val eventName: String
@@ -220,6 +237,9 @@ interface ErrorReporter {
     enum class SuccessEvent(override val eventName: String) : ErrorEvent {
         CUSTOMER_SHEET_ELEMENTS_SESSION_LOAD_SUCCESS(
             eventName = "elements.customer_sheet.elements_session.load_success"
+        ),
+        CUSTOMER_SHEET_CUSTOMER_SESSION_ELEMENTS_SESSION_LOAD_SUCCESS(
+            eventName = "elements.customer_sheet.customer_session.elements_session.load_success"
         ),
         CUSTOMER_SHEET_PAYMENT_METHODS_LOAD_SUCCESS(
             eventName = "elements.customer_sheet.payment_methods.load_success"

@@ -12,9 +12,6 @@ internal data class LinkAccountSessionPaymentAccount(
     @Required
     val id: String,
 
-    @SerialName(value = "eligible_for_networking")
-    val eligibleForNetworking: Boolean? = null,
-
     @SerialName(value = "microdeposit_verification_method")
     val microdepositVerificationMethod: MicrodepositVerificationMethod = UNKNOWN,
 

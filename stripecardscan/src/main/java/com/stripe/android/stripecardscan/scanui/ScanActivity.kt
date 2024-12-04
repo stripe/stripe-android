@@ -19,14 +19,12 @@ import com.stripe.android.camera.CameraErrorListener
 import com.stripe.android.camera.CameraPermissionCheckingActivity
 import com.stripe.android.camera.CameraPreviewImage
 import com.stripe.android.camera.DefaultCameraErrorListener
-import com.stripe.android.camera.framework.Stats
 import com.stripe.android.mlcore.impl.InterpreterInitializerImpl
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.parcelize.Parcelize
 import kotlin.coroutines.CoroutineContext
 import com.stripe.android.camera.R as CameraR
@@ -63,9 +61,6 @@ internal abstract class ScanActivity : CameraPermissionCheckingActivity(), Corou
 
     override val coroutineContext: CoroutineContext = Dispatchers.Main
 
-    internal val scanStat = Stats.trackTask("scan_activity")
-    private val permissionStat = Stats.trackTask("camera_permission")
-
     protected var isFlashlightOn: Boolean = false
         private set
 
@@ -89,10 +84,7 @@ internal abstract class ScanActivity : CameraPermissionCheckingActivity(), Corou
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        Stats.startScan()
-
         onBackPressedDispatcher.addCallback {
-            runBlocking { scanStat.trackResult("user_canceled") }
             resultListener.userCanceled(CancellationReason.Back)
             closeScanner()
         }
@@ -199,7 +191,6 @@ internal abstract class ScanActivity : CameraPermissionCheckingActivity(), Corou
      */
     protected open fun scanFailure(cause: Throwable? = null) {
         Log.e(LOG_TAG, "Canceling scan due to error", cause)
-        runBlocking { scanStat.trackResult("scan_failure") }
         resultListener.failed(cause)
         closeScanner()
     }
@@ -208,7 +199,6 @@ internal abstract class ScanActivity : CameraPermissionCheckingActivity(), Corou
      * The scan has been closed by the user.
      */
     protected open fun userClosedScanner() {
-        runBlocking { scanStat.trackResult("user_canceled") }
         resultListener.userCanceled(CancellationReason.Closed)
         closeScanner()
     }
@@ -222,7 +212,6 @@ internal abstract class ScanActivity : CameraPermissionCheckingActivity(), Corou
      * The camera permission was denied.
      */
     protected fun onUserDeniedCameraPermission() {
-        runBlocking { scanStat.trackResult("user_canceled") }
         resultListener.userCanceled(CancellationReason.CameraPermissionDenied)
         closeScanner()
     }
@@ -231,7 +220,6 @@ internal abstract class ScanActivity : CameraPermissionCheckingActivity(), Corou
      * The user cannot scan the required object.
      */
     protected open fun userCannotScan() {
-        runBlocking { scanStat.trackResult("user_missing_card") }
         resultListener.userCanceled(CancellationReason.UserCannotScan)
         closeScanner()
     }
@@ -247,9 +235,7 @@ internal abstract class ScanActivity : CameraPermissionCheckingActivity(), Corou
     protected fun startCameraAdapter() {
         cameraAdapter.bindToLifecycle(this)
 
-        val torchStat = Stats.trackTask("torch_supported")
         cameraAdapter.withFlashSupport {
-            launch { torchStat.trackResult(if (it) "supported" else "unsupported") }
             setFlashlightState(cameraAdapter.isTorchOn())
             onFlashSupported(it)
         }

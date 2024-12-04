@@ -4,16 +4,18 @@ import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.exception.AuthenticationException
 import com.stripe.android.core.exception.InvalidRequestException
+import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext.BillingDetails
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccountList
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.GetFinancialConnectionsAcccountsParams
 import com.stripe.android.financialconnections.model.MixedOAuthParams
-import com.stripe.android.financialconnections.model.PaymentMethod
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
 import com.stripe.android.financialconnections.network.NetworkConstants
 import com.stripe.android.financialconnections.repository.api.ProvideApiRequestOptions
 import com.stripe.android.financialconnections.utils.filterNotNullValues
+import com.stripe.android.financialconnections.utils.toApiParams
 import javax.inject.Inject
 
 internal interface FinancialConnectionsRepository {
@@ -56,13 +58,15 @@ internal interface FinancialConnectionsRepository {
     suspend fun createPaymentMethod(
         paymentDetailsId: String,
         consumerSessionClientSecret: String,
-    ): PaymentMethod
+        billingDetails: BillingDetails?,
+    ): String
 }
 
 internal class FinancialConnectionsRepositoryImpl @Inject constructor(
     private val requestExecutor: FinancialConnectionsRequestExecutor,
     private val provideApiRequestOptions: ProvideApiRequestOptions,
-    private val apiRequestFactory: ApiRequest.Factory
+    private val fraudDetectionDataRepository: FraudDetectionDataRepository,
+    private val apiRequestFactory: ApiRequest.Factory,
 ) : FinancialConnectionsRepository {
 
     override suspend fun getFinancialConnectionsAccounts(
@@ -133,30 +137,32 @@ internal class FinancialConnectionsRepositoryImpl @Inject constructor(
 
     override suspend fun createPaymentMethod(
         paymentDetailsId: String,
-        consumerSessionClientSecret: String
-    ): PaymentMethod {
-        val credentials = mapOf(
-            "consumer_session_client_secret" to consumerSessionClientSecret,
-        )
-
-        val params = mapOf(
+        consumerSessionClientSecret: String,
+        billingDetails: BillingDetails?,
+    ): String {
+        val linkParams = mapOf(
             "type" to "link",
             "link" to mapOf(
-                "credentials" to credentials,
+                "credentials" to mapOf(
+                    "consumer_session_client_secret" to consumerSessionClientSecret,
+                ),
                 "payment_details_id" to paymentDetailsId,
             ),
         )
 
+        val billingParams = billingDetails?.let {
+            mapOf("billing_details" to billingDetails.toApiParams())
+        }.orEmpty()
+
+        val fraudDetectionParams = fraudDetectionDataRepository.getCached()?.params.orEmpty()
+
         val request = apiRequestFactory.createPost(
             url = paymentMethodsUrl,
             options = provideApiRequestOptions(useConsumerPublishableKey = false),
-            params = params,
+            params = linkParams + billingParams + fraudDetectionParams,
         )
 
-        return requestExecutor.execute(
-            request,
-            PaymentMethod.serializer()
-        )
+        return requestExecutor.execute(request)
     }
 
     internal companion object {

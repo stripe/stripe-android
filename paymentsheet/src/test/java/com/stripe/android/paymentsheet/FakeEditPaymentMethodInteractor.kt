@@ -2,10 +2,12 @@ package com.stripe.android.paymentsheet
 
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
+import com.stripe.android.CardBrandFilter
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentsheet.ui.CardBrandChoice
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewAction
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewState
@@ -25,11 +27,11 @@ internal class FakeEditPaymentMethodInteractor(
             last4 = paymentMethod.card?.last4 ?: "",
             canUpdate = false,
             availableBrands = paymentMethod.card?.networks?.available?.map { code ->
-                EditPaymentMethodViewState.CardBrandChoice(CardBrand.fromCode(code))
+                CardBrandChoice(CardBrand.fromCode(code))
             } ?: listOf(),
             selectedBrand = paymentMethod.card?.networks?.preferred?.let { code ->
-                EditPaymentMethodViewState.CardBrandChoice(CardBrand.fromCode(code))
-            } ?: EditPaymentMethodViewState.CardBrandChoice(CardBrand.Unknown),
+                CardBrandChoice(CardBrand.fromCode(code))
+            } ?: CardBrandChoice(CardBrand.Unknown),
             displayName = "Card".resolvableString,
             canRemove = true,
         )
@@ -56,6 +58,7 @@ internal class FakeEditPaymentMethodInteractor(
             displayName: ResolvableString,
             canRemove: Boolean,
             isLiveMode: Boolean,
+            cardBrandFilter: CardBrandFilter
         ): ModifiableEditPaymentMethodViewInteractor {
             _calls.add(Call(initialPaymentMethod, canRemove))
 

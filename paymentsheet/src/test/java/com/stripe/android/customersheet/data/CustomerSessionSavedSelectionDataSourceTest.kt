@@ -101,12 +101,4 @@ class CustomerSessionSavedSelectionDataSourceTest {
             workContext = coroutineContext
         )
     }
-
-    private fun <T> CustomerSheetDataResult<T>.asSuccess(): CustomerSheetDataResult.Success<T> {
-        return this as CustomerSheetDataResult.Success<T>
-    }
-
-    private fun <T> CustomerSheetDataResult<T>.asFailure(): CustomerSheetDataResult.Failure<T> {
-        return this as CustomerSheetDataResult.Failure<T>
-    }
 }

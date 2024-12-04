@@ -12,9 +12,13 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheet.Element
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetInstantDebitsResult
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration.InstantDebits
+import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration.USBankAccount
+import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration.USBankAccountInternal
 import com.stripe.android.payments.bankaccount.di.DaggerCollectBankAccountComponent
 import com.stripe.android.payments.bankaccount.domain.AttachFinancialConnectionsSession
 import com.stripe.android.payments.bankaccount.domain.CreateFinancialConnectionsSession
@@ -31,6 +35,7 @@ import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect.O
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
+import org.json.JSONObject
 import javax.inject.Inject
 
 @Suppress("ConstructorParameterNaming", "LongParameterList")
@@ -62,29 +67,37 @@ internal class CollectBankAccountViewModel @Inject constructor(
 
     private suspend fun createFinancialConnectionsSession() {
         when (args) {
-            is CollectBankAccountContract.Args.ForDeferredPaymentIntent ->
-                createFinancialConnectionsSession.forDeferredPayments(
+            is CollectBankAccountContract.Args.ForDeferredPaymentIntent -> {
+                val elementsSessionContext = args.configuration.retrieveElementsSessionContext()
+                createFinancialConnectionsSession.forDeferredIntent(
                     publishableKey = args.publishableKey,
                     stripeAccountId = args.stripeAccountId,
                     hostedSurface = args.hostedSurface,
                     elementsSessionId = args.elementsSessionId,
                     customerId = args.customerId,
                     onBehalfOf = args.onBehalfOf,
+                    linkMode = elementsSessionContext?.linkMode,
                     amount = args.amount,
-                    currency = args.currency
+                    currency = args.currency,
+                    product = args.product,
                 )
+            }
 
-            is CollectBankAccountContract.Args.ForDeferredSetupIntent ->
-                createFinancialConnectionsSession.forDeferredPayments(
+            is CollectBankAccountContract.Args.ForDeferredSetupIntent -> {
+                val elementsSessionContext = args.configuration.retrieveElementsSessionContext()
+                createFinancialConnectionsSession.forDeferredIntent(
                     publishableKey = args.publishableKey,
                     stripeAccountId = args.stripeAccountId,
                     hostedSurface = args.hostedSurface,
                     elementsSessionId = args.elementsSessionId,
                     customerId = args.customerId,
                     onBehalfOf = args.onBehalfOf,
+                    linkMode = elementsSessionContext?.linkMode,
                     amount = null,
-                    currency = null
+                    currency = null,
+                    product = args.product,
                 )
+            }
 
             is CollectBankAccountContract.Args.ForPaymentIntent ->
                 createFinancialConnectionsSession.forPaymentIntent(
@@ -177,16 +190,29 @@ internal class CollectBankAccountViewModel @Inject constructor(
         result: FinancialConnectionsSheetInstantDebitsResult.Completed,
     ) {
         finishWithRefreshedIntent { intent ->
+            val paymentMethod = result.encodedPaymentMethod.parsePaymentMethod()
+
             CollectBankAccountResponseInternal(
                 intent = intent,
                 usBankAccountData = null,
-                instantDebitsData = InstantDebitsData(
-                    paymentMethodId = result.paymentMethodId,
-                    last4 = result.last4,
-                    bankName = result.bankName,
-                ),
+                instantDebitsData = paymentMethod?.let {
+                    InstantDebitsData(
+                        paymentMethod = it,
+                        last4 = result.last4,
+                        bankName = result.bankName,
+                    )
+                },
             )
         }
+    }
+
+    private fun String.parsePaymentMethod(): PaymentMethod? = try {
+        val json = JSONObject(this)
+        val paymentMethod = PaymentMethodJsonParser().parse(json)
+        paymentMethod
+    } catch (e: Exception) {
+        logger.error("Failed to parse PaymentMethod", e)
+        null
     }
 
     private fun finishWithRefreshedIntent(
@@ -237,7 +263,7 @@ internal class CollectBankAccountViewModel @Inject constructor(
                 .mapCatching { stripeIntent ->
                     Completed(
                         CollectBankAccountResponseInternal(
-                            stripeIntent,
+                            intent = stripeIntent,
                             usBankAccountData = USBankAccountData(financialConnectionsSession),
                             instantDebitsData = null
                         )
@@ -280,5 +306,9 @@ internal class CollectBankAccountViewModel @Inject constructor(
 }
 
 private fun CollectBankAccountConfiguration.retrieveElementsSessionContext(): ElementsSessionContext? {
-    return (this as? InstantDebits)?.elementsSessionContext
+    return when (this) {
+        is InstantDebits -> elementsSessionContext
+        is USBankAccountInternal -> elementsSessionContext
+        is USBankAccount -> null
+    }
 }

@@ -181,7 +181,7 @@ class SelfieScreenTest {
             scannerState = IdentityScanViewModel.State.Scanned(
                 IdentityAggregator.FinalResult(
                     mock(),
-                    mock(),
+                    mock<FaceDetectorOutput>(),
                     finishedState
                 )
             ),

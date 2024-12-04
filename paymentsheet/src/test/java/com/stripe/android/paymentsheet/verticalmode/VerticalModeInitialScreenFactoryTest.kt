@@ -74,6 +74,7 @@ class VerticalModeInitialScreenFactoryTest {
                     paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
                     permissions = CustomerState.Permissions(
                         canRemovePaymentMethods = true,
+                        canRemoveLastPaymentMethod = true,
                         canRemoveDuplicates = true,
                     )
                 )

@@ -381,8 +381,6 @@ class CardMultilineWidget @JvmOverloads constructor(
         initFocusChangeListeners()
         initDeleteEmptyListeners()
 
-        cardBrandView.tintColorInt = cardNumberEditText.hintTextColors.defaultColor
-
         cardNumberEditText.completionCallback = {
             expiryDateEditText.requestFocus()
             cardInputListener?.onCardComplete()

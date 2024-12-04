@@ -18,7 +18,6 @@ import com.stripe.android.customersheet.CustomerAdapter
 import com.stripe.android.customersheet.CustomerEphemeralKey
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetResult
-import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.DelicatePaymentSheetApi
@@ -53,7 +52,7 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import java.io.IOException
 
-@OptIn(ExperimentalCustomerSheetApi::class, ExperimentalCustomerSessionApi::class)
+@OptIn(ExperimentalCustomerSessionApi::class)
 internal class PaymentSheetPlaygroundViewModel(
     application: Application,
     private val savedStateHandle: SavedStateHandle,
@@ -190,7 +189,8 @@ internal class PaymentSheetPlaygroundViewModel(
                 { customerId -> createSetupIntentClientSecret(customerId, customerState.countryCode) }
             } else {
                 null
-            }
+            },
+            paymentMethodTypes = customerState?.supportedPaymentMethodTypes,
         )
     }
 
@@ -198,6 +198,14 @@ internal class PaymentSheetPlaygroundViewModel(
         playgroundState: PlaygroundState.Customer,
     ): CustomerSheet.CustomerSessionProvider {
         return object : CustomerSheet.CustomerSessionProvider() {
+            override suspend fun intentConfiguration(): kotlin.Result<CustomerSheet.IntentConfiguration> {
+                return kotlin.Result.success(
+                    CustomerSheet.IntentConfiguration.Builder()
+                        .paymentMethodTypes(playgroundState.supportedPaymentMethodTypes)
+                        .build()
+                )
+            }
+
             override suspend fun providesCustomerSessionClientSecret(): kotlin.Result<
                 CustomerSheet.CustomerSessionClientSecret
                 > {
@@ -269,7 +277,6 @@ internal class PaymentSheetPlaygroundViewModel(
         }
     }
 
-    @OptIn(ExperimentalCustomerSheetApi::class)
     private suspend fun fetchEphemeralKey(
         request: CustomerEphemeralKeyRequest,
         isNewCustomer: Boolean,
@@ -324,7 +331,6 @@ internal class PaymentSheetPlaygroundViewModel(
         }
     }
 
-    @OptIn(ExperimentalCustomerSheetApi::class)
     private suspend fun createSetupIntentClientSecret(
         customerId: String,
         country: Country,
@@ -408,7 +414,12 @@ internal class PaymentSheetPlaygroundViewModel(
         status.value = StatusMessage(statusMessage)
     }
 
-    @OptIn(ExperimentalCustomerSheetApi::class)
+    fun onEmbeddedResult(success: Boolean) {
+        if (success) {
+            setPlaygroundState(null)
+        }
+    }
+
     fun onCustomerSheetCallback(result: CustomerSheetResult) {
         val statusMessage = when (result) {
             is CustomerSheetResult.Canceled -> {

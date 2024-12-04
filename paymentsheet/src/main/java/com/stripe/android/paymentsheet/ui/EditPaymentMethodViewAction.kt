@@ -6,7 +6,7 @@ internal sealed interface EditPaymentMethodViewAction {
     object OnBrandChoiceOptionsDismissed : EditPaymentMethodViewAction
 
     data class OnBrandChoiceChanged(
-        val choice: EditPaymentMethodViewState.CardBrandChoice
+        val choice: CardBrandChoice
     ) : EditPaymentMethodViewAction
 
     object OnRemovePressed : EditPaymentMethodViewAction

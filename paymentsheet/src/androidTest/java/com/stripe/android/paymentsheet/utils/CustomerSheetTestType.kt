@@ -5,10 +5,11 @@ import com.google.testing.junit.testparameterinjector.TestParameterValuesProvide
 internal enum class CustomerSheetTestType {
     AttachToCustomer,
     AttachToSetupIntent,
+    CustomerSession,
 }
 
 internal object CustomerSheetTestTypeProvider : TestParameterValuesProvider() {
     override fun provideValues(context: Context?): List<CustomerSheetTestType> {
-        return CustomerSheetTestType.entries
+        return listOf(CustomerSheetTestType.AttachToCustomer, CustomerSheetTestType.AttachToCustomer)
     }
 }

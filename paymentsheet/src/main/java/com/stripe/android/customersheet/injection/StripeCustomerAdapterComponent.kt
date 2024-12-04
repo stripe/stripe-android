@@ -6,15 +6,11 @@ import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.customersheet.CustomerEphemeralKey
 import com.stripe.android.customersheet.CustomerEphemeralKeyProvider
-import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.customersheet.SetupIntentClientSecretProvider
 import com.stripe.android.customersheet.StripeCustomerAdapter
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PrefsRepository
-import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
-import com.stripe.android.paymentsheet.repositories.CustomerRepository
-import dagger.Binds
 import dagger.BindsInstance
 import dagger.Component
 import dagger.Module
@@ -32,7 +28,6 @@ import kotlin.coroutines.CoroutineContext
         CoreCommonModule::class,
     ]
 )
-@OptIn(ExperimentalCustomerSheetApi::class)
 internal interface StripeCustomerAdapterComponent {
     val stripeCustomerAdapter: StripeCustomerAdapter
 
@@ -61,11 +56,7 @@ internal interface StripeCustomerAdapterComponent {
 }
 
 @Module
-@OptIn(ExperimentalCustomerSheetApi::class)
 internal interface StripeCustomerAdapterModule {
-    @Binds
-    fun bindsCustomerRepository(repository: CustomerApiRepository): CustomerRepository
-
     companion object {
         @Provides
         fun providePrefsRepositoryFactory(

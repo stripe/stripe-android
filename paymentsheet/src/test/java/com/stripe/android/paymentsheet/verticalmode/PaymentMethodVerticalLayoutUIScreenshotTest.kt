@@ -15,7 +15,13 @@ internal class PaymentMethodVerticalLayoutUIScreenshotTest {
     val paparazziRule = PaparazziRule(PaymentSheetAppearance.entries)
 
     private val paymentMethods: List<DisplayablePaymentMethod> by lazy {
-        MockPaymentMethodsFactory.create().map { it.asDisplayablePaymentMethod(emptyList()) { } }
+        MockPaymentMethodsFactory.create().map {
+            it.asDisplayablePaymentMethod(
+                customerSavedPaymentMethods = emptyList(),
+                incentive = null,
+                onClick = {},
+            )
+        }
     }
 
     private val savedPaymentMethod: DisplayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard()
@@ -25,6 +31,29 @@ internal class PaymentMethodVerticalLayoutUIScreenshotTest {
         paparazziRule.snapshot {
             PaymentMethodVerticalLayoutUI(
                 paymentMethods = paymentMethods,
+                displayedSavedPaymentMethod = savedPaymentMethod,
+                savedPaymentMethodAction =
+                PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
+                selection = PaymentSelection.Saved(savedPaymentMethod.paymentMethod),
+                isEnabled = true,
+                onEditPaymentMethod = {},
+                onViewMorePaymentMethods = {},
+                onSelectSavedPaymentMethod = {},
+                onManageOneSavedPaymentMethod = {},
+                imageLoader = mock(),
+            )
+        }
+    }
+
+    @Test
+    fun testNewPmsWithPromoBadge() {
+        val paymentMethodsWithBadge = paymentMethods.map { pm ->
+            pm.copy(promoBadge = "$5".takeIf { pm.code == "affirm" })
+        }
+
+        paparazziRule.snapshot {
+            PaymentMethodVerticalLayoutUI(
+                paymentMethods = paymentMethodsWithBadge,
                 displayedSavedPaymentMethod = savedPaymentMethod,
                 savedPaymentMethodAction =
                 PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,

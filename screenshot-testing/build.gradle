@@ -1,10 +1,13 @@
 apply from: configs.androidLibrary
+apply plugin: 'org.jetbrains.kotlin.plugin.compose'
 
 dependencies {
     implementation project(':stripe-ui-core')
     implementation libs.compose.ui
     implementation libs.compose.foundation
     implementation libs.compose.material
+
+    implementation testLibs.kotlin.reflect
 
     // Implemented here instead of using plugin which implements with testImplementation
     api("app.cash.paparazzi:paparazzi:${versions.paparazzi}") {
@@ -17,9 +20,6 @@ dependencies {
 android {
     buildFeatures {
         compose = true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion "${versions.androidxComposeCompiler}"
     }
 
     packagingOptions {

@@ -61,6 +61,7 @@ internal fun SavedPaymentMethodRowButton(
         },
         title = paymentMethodTitle.resolve(),
         subtitle = null,
+        promoText = null,
         onClick = onClick,
         modifier = modifier
             .testTag(
@@ -74,7 +75,7 @@ internal fun SavedPaymentMethodRowButton(
 @Preview
 @Composable
 internal fun PreviewCardSavedPaymentMethodRowButton() {
-    val cardSavedPaymentMethod = DisplayableSavedPaymentMethod(
+    val cardSavedPaymentMethod = DisplayableSavedPaymentMethod.create(
         displayName = "4242".resolvableString,
         paymentMethod = PaymentMethod(
             id = "001",

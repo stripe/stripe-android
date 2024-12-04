@@ -2,6 +2,86 @@ name: identity-example size diff
 on:
   pull_request:
 jobs:
+  # Checkout base branch and build the APK
+  build-base:
+    name: Build base
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.base_ref }}
+      - uses: ./.github/actions/stripe_setup
+      - name: Build base branch
+        run: ./gradlew :identity-example:assembleRelease && mv identity-example/build/outputs/apk/theme1/release/identity-example-theme1-release.apk identity-example/build/outputs/apk/theme1/release/identity-example-release-base.apk
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: identity-base-apk
+          path: identity-example/build/outputs/apk/theme1/release/identity-example-release-base.apk
+
+  # Checkout PR branch and build the APK
+  build-pr:
+    name: Build PR
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/stripe_setup
+      - name: Build PR branch
+        run: ./gradlew :identity-example:assembleRelease && mv identity-example/build/outputs/apk/theme1/release/identity-example-theme1-release.apk identity-example/build/outputs/apk/theme1/release/identity-example-release-pr.apk
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: identity-pr-apk
+          path: identity-example/build/outputs/apk/theme1/release/identity-example-release-pr.apk
+
+  # Execute Diffuse only when the two APKs are built successfully
+  diffuse:
+    needs: [ build-base, build-pr ]
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download APKs
+        uses: actions/download-artifact@v4
+        with:
+          path: apk
+          pattern: identity-*-apk
+          merge-multiple: true
+      - name: diffuse
+        id: diffuse
+        uses: usefulness/diffuse-action@41995fe8ff6be0a8847e63bdc5a4679c704b455c
+        with:
+          old-file-path: apk/identity-example-release-base.apk
+          new-file-path: apk/identity-example-release-pr.apk
+
+      # Post comment with output
+
+      - uses: peter-evans/find-comment@d2dae40ed151c634e4189471272b57e76ec19ba8
+        id: find_comment
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body-includes: Diffuse output
+
+      - uses: peter-evans/create-or-update-comment@a35cf36e5301d70b76f316e867e7788a55a31dae
+        if: ${{ steps.diffuse.outputs.diff-raw != null || steps.find_comment.outputs.comment-id != null }}
+        with:
+          body: |
+            Diffuse output:
+
+            ${{ steps.diffuse.outputs.diff-gh-comment }}
+          edit-mode: replace
+          comment-id: ${{ steps.find_comment.outputs.comment-id }}
+          issue-number: ${{ github.event.pull_request.number }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload diffuse output
+        uses: actions/upload-artifact@v4
+        with:
+          name: diffuse-output
+          path: ${{ steps.diffuse.outputs.diff-file }}
+
   # Use emerge tools to analyze the example app size
   apk-size-analysis:
     runs-on: ubuntu-latest

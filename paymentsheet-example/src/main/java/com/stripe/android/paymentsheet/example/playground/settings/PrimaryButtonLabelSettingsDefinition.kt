@@ -1,5 +1,7 @@
 package com.stripe.android.paymentsheet.example.playground.settings
 
+import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 
@@ -27,6 +29,18 @@ internal object PrimaryButtonLabelSettingsDefinition :
         configurationBuilder: PaymentSheet.Configuration.Builder,
         playgroundState: PlaygroundState.Payment,
         configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData
+    ) {
+        if (value.isNotEmpty()) {
+            configurationBuilder.primaryButtonLabel(value)
+        }
+    }
+
+    @ExperimentalEmbeddedPaymentElementApi
+    override fun configure(
+        value: String,
+        configurationBuilder: EmbeddedPaymentElement.Configuration.Builder,
+        playgroundState: PlaygroundState.Payment,
+        configurationData: PlaygroundSettingDefinition.EmbeddedConfigurationData
     ) {
         if (value.isNotEmpty()) {
             configurationBuilder.primaryButtonLabel(value)

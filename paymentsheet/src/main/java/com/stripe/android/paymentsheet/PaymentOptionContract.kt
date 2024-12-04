@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet
 import android.content.Context
 import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
-import androidx.annotation.ColorInt
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
@@ -28,7 +27,7 @@ internal class PaymentOptionContract :
     @Parcelize
     internal data class Args(
         val state: PaymentSheetState.Full,
-        @ColorInt val statusBarColor: Int?,
+        val configuration: PaymentSheet.Configuration,
         val enableLogging: Boolean,
         val productUsage: Set<String>
     ) : ActivityStarter.Args {

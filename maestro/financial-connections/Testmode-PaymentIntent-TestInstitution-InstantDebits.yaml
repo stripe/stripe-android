@@ -27,8 +27,9 @@ tags:
       text: ".*555.*" # wait for placeholder to be visible
 - inputText: "6223115555"
 - tapOn: "Continue with Link"
-# Select bank
-- tapOn: "Test Institution"
+# Select "Payment Success" institution
+- tapOn:
+    id: "bcinst_QsDedeogZ5PA7V"
 # Bypass Chrome on-boarding screen
 - runFlow:
     file: ../common/subflow-skip-chrome-welcome.yaml

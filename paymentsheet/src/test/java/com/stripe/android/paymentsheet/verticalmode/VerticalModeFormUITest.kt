@@ -10,6 +10,7 @@ import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTextReplacement
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.KlarnaDefinition
@@ -23,6 +24,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.ui.FORM_ELEMENT_TEST_TAG
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import com.stripe.android.ui.core.elements.events.LocalCardBrandDisallowedReporter
 import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventReporter
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -98,7 +100,8 @@ internal class VerticalModeFormUITest {
 
         composeRule.setContent {
             CompositionLocalProvider(
-                LocalCardNumberCompletedEventReporter provides { }
+                LocalCardNumberCompletedEventReporter provides { },
+                LocalCardBrandDisallowedReporter provides { }
             ) {
                 VerticalModeFormUI(interactor)
             }
@@ -146,6 +149,8 @@ internal class VerticalModeFormUITest {
                 billingDetails = null,
                 shippingDetails = null,
                 billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
+                hasIntentToSetup = false,
+                paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
             ),
             formElements = CardDefinition.formElements(),
             headerInformation = headerInformation,
@@ -173,6 +178,8 @@ internal class VerticalModeFormUITest {
                 billingDetails = null,
                 shippingDetails = null,
                 billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
+                hasIntentToSetup = false,
+                paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
             ),
             formElements = emptyList(),
             headerInformation = headerInformation,
@@ -204,6 +211,8 @@ internal class VerticalModeFormUITest {
                 billingDetails = null,
                 shippingDetails = null,
                 billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
+                hasIntentToSetup = false,
+                paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
             ),
             formElements = KlarnaDefinition.formElements(paymentMethodMetadata),
             headerInformation = headerInformation,

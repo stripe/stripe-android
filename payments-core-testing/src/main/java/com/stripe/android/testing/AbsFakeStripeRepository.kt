@@ -9,6 +9,7 @@ import com.stripe.android.model.BankStatuses
 import com.stripe.android.model.CardMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
+import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.CreateFinancialConnectionsSessionForDeferredPaymentParams
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
@@ -419,6 +420,22 @@ abstract class AbsFakeStripeRepository : StripeRepository {
     }
 
     override fun buildPaymentUserAgent(attribution: Set<String>): String {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun listPaymentDetails(
+        clientSecret: String,
+        paymentMethodTypes: Set<String>,
+        requestOptions: ApiRequest.Options
+    ): Result<ConsumerPaymentDetails> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun deletePaymentDetails(
+        clientSecret: String,
+        paymentDetailsId: String,
+        requestOptions: ApiRequest.Options
+    ): Result<Unit> {
         TODO("Not yet implemented")
     }
 }

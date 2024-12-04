@@ -240,6 +240,8 @@ internal class AddPaymentMethodTest {
                 paymentMethodCode = initiallySelectedPaymentMethodType,
                 cbcEligibility = CardBrandChoiceEligibility.Ineligible,
                 merchantName = "Example, Inc.",
+                hasIntentToSetup = false,
+                paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
             ),
             formElements = listOf(
                 CheckboxFieldElement(
@@ -249,6 +251,7 @@ internal class AddPaymentMethodTest {
             paymentSelection = null,
             processing = false,
             usBankAccountFormArguments = mock(),
+            incentive = null,
         )
 
         val viewActionRecorder = ViewActionRecorder<AddPaymentMethodInteractor.ViewAction>()

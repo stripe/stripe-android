@@ -13,6 +13,7 @@ import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.paymentsheet.model.ClientSecret
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
 
@@ -58,10 +59,10 @@ class PaymentSheetContract :
             return PaymentSheetContractV2.Args(
                 initializationMode = when (clientSecret) {
                     is PaymentIntentClientSecret -> {
-                        PaymentSheet.InitializationMode.PaymentIntent(clientSecret.value)
+                        PaymentElementLoader.InitializationMode.PaymentIntent(clientSecret.value)
                     }
                     is SetupIntentClientSecret -> {
-                        PaymentSheet.InitializationMode.SetupIntent(clientSecret.value)
+                        PaymentElementLoader.InitializationMode.SetupIntent(clientSecret.value)
                     }
                 },
                 config = config ?: PaymentSheet.Configuration.default(context),

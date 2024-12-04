@@ -1,8 +1,8 @@
 package com.stripe.android.paymentsheet.verticalmode
 
 import android.os.Build
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertAll
-import androidx.compose.ui.test.assertAny
 import androidx.compose.ui.test.isSelected
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onChildren
@@ -49,7 +49,7 @@ internal class PaymentMethodVerticalLayoutUITest {
     }
 
     @Test
-    fun oneSavedPm_canBeRemoved_buttonIsEdit_transitionsToManageScreen() = runScenario(
+    fun oneSavedPm_canBeRemoved_buttonIsEdit_callsOnManageOneSavedPm() = runScenario(
         PaymentMethodVerticalLayoutInteractor.State(
             displayablePaymentMethods = emptyList(),
             isProcessing = false,
@@ -62,7 +62,9 @@ internal class PaymentMethodVerticalLayoutUITest {
         assertThat(viewActionRecorder.viewActions).isEmpty()
         composeRule.onNodeWithTag(TEST_TAG_EDIT_SAVED_CARD).performClick()
         viewActionRecorder.consume(
-            PaymentMethodVerticalLayoutInteractor.ViewAction.TransitionToManageOneSavedPaymentMethod
+            PaymentMethodVerticalLayoutInteractor.ViewAction.OnManageOneSavedPaymentMethod(
+                PaymentMethodFixtures.displayableCard()
+            )
         )
         assertThat(viewActionRecorder.viewActions).isEmpty()
     }
@@ -114,7 +116,11 @@ internal class PaymentMethodVerticalLayoutUITest {
             PaymentMethodVerticalLayoutInteractor.State(
                 displayablePaymentMethods = listOf(
                     CardDefinition.uiDefinitionFactory().supportedPaymentMethod(CardDefinition, emptyList())!!
-                        .asDisplayablePaymentMethod(emptyList()) { onClickCalled = true },
+                        .asDisplayablePaymentMethod(
+                            customerSavedPaymentMethods = emptyList(),
+                            incentive = null,
+                            onClick = { onClickCalled = true },
+                        ),
                 ),
                 isProcessing = false,
                 selection = null,
@@ -162,7 +168,13 @@ internal class PaymentMethodVerticalLayoutUITest {
                 PaymentIntentFixtures.PI_WITH_PAYMENT_METHOD!!.copy(
                     paymentMethodTypes = listOf("card", "cashapp", "klarna")
                 )
-            ).sortedSupportedPaymentMethods().map { it.asDisplayablePaymentMethod(emptyList()) { } },
+            ).sortedSupportedPaymentMethods().map {
+                it.asDisplayablePaymentMethod(
+                    customerSavedPaymentMethods = emptyList(),
+                    incentive = null,
+                    onClick = {},
+                )
+            },
             isProcessing = false,
             selection = null,
             displayedSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
@@ -191,7 +203,13 @@ internal class PaymentMethodVerticalLayoutUITest {
                 PaymentIntentFixtures.PI_WITH_PAYMENT_METHOD!!.copy(
                     paymentMethodTypes = listOf("card", "cashapp", "klarna")
                 )
-            ).sortedSupportedPaymentMethods().map { it.asDisplayablePaymentMethod(emptyList()) { } },
+            ).sortedSupportedPaymentMethods().map {
+                it.asDisplayablePaymentMethod(
+                    customerSavedPaymentMethods = emptyList(),
+                    incentive = null,
+                    onClick = {},
+                )
+            },
             isProcessing = false,
             selection = PaymentSelection.Saved(PaymentMethodFixtures.displayableCard().paymentMethod),
             displayedSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
@@ -202,7 +220,7 @@ internal class PaymentMethodVerticalLayoutUITest {
         composeRule.onNodeWithTag(
             TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON + "_${PaymentMethodFixtures.displayableCard().paymentMethod.id}"
         ).assertExists()
-            .onChildren().assertAny(isSelected())
+            .assert(isSelected())
 
         composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_card")
             .assertExists()
@@ -232,7 +250,11 @@ internal class PaymentMethodVerticalLayoutUITest {
         runScenario(
             PaymentMethodVerticalLayoutInteractor.State(
                 displayablePaymentMethods = supportedPaymentMethods.map {
-                    it.asDisplayablePaymentMethod(emptyList()) { }
+                    it.asDisplayablePaymentMethod(
+                        customerSavedPaymentMethods = emptyList(),
+                        incentive = null,
+                        onClick = {},
+                    )
                 },
                 isProcessing = false,
                 selection = selection,
@@ -251,7 +273,7 @@ internal class PaymentMethodVerticalLayoutUITest {
                 .onChildren().assertAll(isSelected().not())
             composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_cashapp")
                 .assertExists()
-                .onChildren().assertAny(isSelected())
+                .assert(isSelected())
             composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_klarna")
                 .assertExists()
                 .onChildren().assertAll(isSelected().not())

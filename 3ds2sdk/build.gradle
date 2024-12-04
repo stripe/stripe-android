@@ -19,7 +19,7 @@ android {
 
     sourceSets {
         main {
-            manifest.srcFile 'AndroidManifest.xml'
+            manifest.srcFile 'src/main/AndroidManifest.xml'
             java.srcDirs += 'src/main/kotlin'
             java.srcDirs += 'src/main/java'
         }
@@ -60,13 +60,10 @@ android {
         disable += "ResourceName"
     }
 
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_11
-        targetCompatibility JavaVersion.VERSION_11
-    }
-
     kotlinOptions {
-        jvmTarget = "11"
+        freeCompilerArgs += [
+                "-Xconsistent-data-class-copy-visibility"
+        ]
     }
 }
 

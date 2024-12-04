@@ -10,7 +10,7 @@ internal object CustomerSessionRedisplayFiltersSettingsDefinition :
     by EnumSaveable(
         key = "customer_session_payment_method_redisplay_filters",
         values = RedisplayFilterType.entries.toTypedArray(),
-        defaultValue = RedisplayFilterType.All,
+        defaultValue = RedisplayFilterType.Always,
     ),
     PlaygroundSettingDefinition.Displayable<CustomerSessionRedisplayFiltersSettingsDefinition.RedisplayFilterType> {
     override val displayName: String = "Customer Session Allow Redisplay Filters"

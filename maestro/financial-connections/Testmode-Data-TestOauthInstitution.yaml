@@ -16,9 +16,9 @@ tags:
     timeout: 30000
 # Common: web AuthFlow - connect OAuth institution
 - tapOn: "Agree and continue"
-- assertVisible: "Test OAuth Institution"
 # SELECT OAUTH INSTITUTION
-- tapOn: "Test OAuth Institution"
+- tapOn:
+    id: "bcinst_LLQZzmKZMjl0j0"
 - tapOn:
     id: "prepane_cta"
 ####### Bypass Chrome on-boarding screen #######

@@ -15,7 +15,7 @@ import java.io.Closeable
 import java.nio.ByteBuffer
 
 /**
- * A TensorFlowLite analyzer uses an [Interpreter] to analyze data.
+ * A TensorFlowLite analyzer uses an [InterpreterWrapper] to analyze data.
  */
 internal abstract class TensorFlowLiteAnalyzer<Input, MLInput, Output, MLOutput>(
     private val tfInterpreter: InterpreterWrapper,

@@ -6,11 +6,13 @@ import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.model.PaymentDetailsFixtures
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
+import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSessionSignup
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.VerificationType
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.repository.ConsumersApiService
@@ -125,6 +127,9 @@ class LinkApiRepositoryTest {
             country = country,
             name = name,
             locale = Locale.US,
+            amount = null,
+            currency = null,
+            incentiveEligibilitySession = null,
             requestSurface = "android_payment_element",
             consentAction = ConsumerSignUpConsentAction.Checkbox,
             requestOptions = ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID),
@@ -141,6 +146,9 @@ class LinkApiRepositoryTest {
                 country = any(),
                 name = anyOrNull(),
                 locale = anyOrNull(),
+                amount = anyOrNull(),
+                currency = anyOrNull(),
+                incentiveEligibilitySession = anyOrNull(),
                 requestSurface = any(),
                 consentAction = any(),
                 requestOptions = any()
@@ -168,6 +176,9 @@ class LinkApiRepositoryTest {
                 country = any(),
                 name = anyOrNull(),
                 locale = anyOrNull(),
+                amount = anyOrNull(),
+                currency = anyOrNull(),
+                incentiveEligibilitySession = anyOrNull(),
                 requestSurface = any(),
                 consentAction = any(),
                 requestOptions = any()
@@ -403,6 +414,139 @@ class LinkApiRepositoryTest {
         assertThat(result.isFailure).isTrue()
         assertThat(loggedErrors.size).isEqualTo(1)
         assertThat(loggedErrors.first()).isEqualTo(ErrorReporter.ExpectedErrorEvent.LINK_SHARE_CARD_FAILURE.eventName)
+    }
+
+    @Test
+    fun `startVerification sends correct parameters`() = runTest {
+        val secret = "secret"
+        val consumerKey = "key"
+        linkRepository.startVerification(secret, consumerKey)
+
+        verify(consumersApiService).startConsumerVerification(
+            consumerSessionClientSecret = secret,
+            locale = Locale.US,
+            requestSurface = CONSUMER_SURFACE,
+            type = VerificationType.SMS,
+            customEmailType = null,
+            connectionsMerchantName = null,
+            requestOptions = ApiRequest.Options(consumerKey),
+        )
+    }
+
+    @Test
+    fun `startVerification without consumerPublishableKey sends correct parameters`() = runTest {
+        val secret = "secret"
+        linkRepository.startVerification(secret, null)
+
+        verify(consumersApiService).startConsumerVerification(
+            consumerSessionClientSecret = secret,
+            locale = Locale.US,
+            requestSurface = CONSUMER_SURFACE,
+            type = VerificationType.SMS,
+            customEmailType = null,
+            connectionsMerchantName = null,
+            requestOptions = ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID),
+        )
+    }
+
+    @Test
+    fun `startVerification returns successful result`() = runTest {
+        val consumerSession = mock<ConsumerSession>()
+        whenever(
+            consumersApiService.startConsumerVerification(
+                consumerSessionClientSecret = any(),
+                locale = any(),
+                requestSurface = any(),
+                type = any(),
+                customEmailType = anyOrNull(),
+                connectionsMerchantName = anyOrNull(),
+                requestOptions = any(),
+            )
+        )
+            .thenReturn(consumerSession)
+
+        val result = linkRepository.startVerification("secret", "key")
+
+        assertThat(result.isSuccess).isTrue()
+        assertThat(result.getOrNull()).isEqualTo(consumerSession)
+    }
+
+    @Test
+    fun `startVerification catches exception and returns failure`() = runTest {
+        whenever(
+            consumersApiService.startConsumerVerification(
+                consumerSessionClientSecret = any(),
+                locale = any(),
+                requestSurface = any(),
+                type = any(),
+                customEmailType = anyOrNull(),
+                connectionsMerchantName = anyOrNull(),
+                requestOptions = any(),
+            )
+        )
+            .thenThrow(RuntimeException("error"))
+
+        val result = linkRepository.startVerification("secret", "key")
+
+        assertThat(result.isFailure).isTrue()
+    }
+
+    @Test
+    fun `listPaymentDetails sends correct parameters`() = runTest {
+        val secret = "secret"
+        val consumerKey = "key"
+        linkRepository.listPaymentDetails(setOf("card"), secret, consumerKey)
+
+        verify(stripeRepository).listPaymentDetails(
+            eq(secret),
+            eq(setOf("card")),
+            eq(ApiRequest.Options(consumerKey))
+        )
+    }
+
+    @Test
+    fun `listPaymentDetails without consumerPublishableKey sends correct parameters`() = runTest {
+        val secret = "secret"
+        linkRepository.listPaymentDetails(setOf("card"), secret, null)
+
+        verify(stripeRepository).listPaymentDetails(
+            eq(secret),
+            eq(setOf("card")),
+            eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID))
+        )
+    }
+
+    @Test
+    fun `deletePaymentDetails without consumerPublishableKey sends correct parameters`() = runTest {
+        val secret = "secret"
+        val id = "payment_details_id"
+        linkRepository.deletePaymentDetails(id, secret, null)
+
+        verify(stripeRepository).deletePaymentDetails(
+            eq(secret),
+            eq(id),
+            eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID))
+        )
+    }
+
+    @Test
+    fun `deletePaymentDetails returns successful result`() = runTest {
+        whenever(stripeRepository.deletePaymentDetails(any(), any(), any())).thenReturn(Result.success(Unit))
+
+        val result = linkRepository.deletePaymentDetails("id", "secret", "key")
+
+        assertThat(result.isSuccess).isTrue()
+    }
+
+    @Test
+    fun `deletePaymentDetails returns error result when repository fails`() = runTest {
+        val error = RuntimeException("error")
+        whenever(stripeRepository.deletePaymentDetails(any(), any(), any()))
+            .thenReturn(Result.failure(error))
+
+        val result = linkRepository.deletePaymentDetails("id", "secret", "key")
+
+        assertThat(result.exceptionOrNull()).isEqualTo(error)
     }
 
     private val cardPaymentMethodCreateParams =

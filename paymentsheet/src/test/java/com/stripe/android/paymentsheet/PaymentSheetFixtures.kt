@@ -3,7 +3,9 @@ package com.stripe.android.paymentsheet
 import android.content.res.ColorStateList
 import android.graphics.Color
 import androidx.core.graphics.toColorInt
+import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
@@ -11,6 +13,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.LinkState
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import org.mockito.kotlin.mock
@@ -28,7 +31,8 @@ internal object PaymentSheetFixtures {
     internal val SETUP_INTENT_CLIENT_SECRET = PaymentIntentClientSecret(SETUP_CLIENT_SECRET)
 
     internal val CONFIG_MINIMUM = PaymentSheet.Configuration(
-        merchantDisplayName = MERCHANT_DISPLAY_NAME
+        merchantDisplayName = MERCHANT_DISPLAY_NAME,
+        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
     )
 
     internal val CONFIG_WITH_EVERYTHING = PaymentSheet.Configuration(
@@ -84,6 +88,7 @@ internal object PaymentSheetFixtures {
     internal val CONFIG_CUSTOMER = PaymentSheet.Configuration(
         merchantDisplayName = MERCHANT_DISPLAY_NAME,
         customer = defaultCustomerConfig,
+        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
     )
 
     internal val EMPTY_CUSTOMER_STATE = CustomerState(
@@ -92,6 +97,7 @@ internal object PaymentSheetFixtures {
         paymentMethods = listOf(),
         permissions = CustomerState.Permissions(
             canRemovePaymentMethods = true,
+            canRemoveLastPaymentMethod = true,
             canRemoveDuplicates = false,
         )
     )
@@ -99,7 +105,8 @@ internal object PaymentSheetFixtures {
     internal val CONFIG_GOOGLEPAY
         get() = PaymentSheet.Configuration(
             merchantDisplayName = MERCHANT_DISPLAY_NAME,
-            googlePay = ConfigFixtures.GOOGLE_PAY
+            googlePay = ConfigFixtures.GOOGLE_PAY,
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
         )
 
     internal val CONFIG_CUSTOMER_WITH_GOOGLEPAY
@@ -126,13 +133,13 @@ internal object PaymentSheetFixtures {
     internal val PAYMENT_OPTIONS_CONTRACT_ARGS = PaymentOptionContract.Args(
         state = PaymentSheetState.Full(
             customer = EMPTY_CUSTOMER_STATE,
-            config = CONFIG_GOOGLEPAY,
+            config = CONFIG_GOOGLEPAY.asCommonConfiguration(),
             paymentSelection = null,
             linkState = null,
             validationError = null,
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         ),
-        statusBarColor = STATUS_BAR_COLOR,
+        configuration = CONFIG_GOOGLEPAY,
         enableLogging = false,
         productUsage = mock()
     )
@@ -141,7 +148,7 @@ internal object PaymentSheetFixtures {
         paymentMethods: List<PaymentMethod> = state.customer?.paymentMethods ?: emptyList(),
         isGooglePayReady: Boolean = state.paymentMethodMetadata.isGooglePayReady,
         stripeIntent: StripeIntent = state.stripeIntent,
-        config: PaymentSheet.Configuration = state.config,
+        config: PaymentSheet.Configuration = configuration,
         paymentSelection: PaymentSelection? = state.paymentSelection,
         linkState: LinkState? = state.linkState,
     ): PaymentOptionContract.Args {
@@ -153,10 +160,11 @@ internal object PaymentSheetFixtures {
                     paymentMethods = paymentMethods,
                     permissions = CustomerState.Permissions(
                         canRemovePaymentMethods = true,
+                        canRemoveLastPaymentMethod = true,
                         canRemoveDuplicates = false,
                     )
                 ),
-                config = config,
+                config = config.asCommonConfiguration(),
                 paymentSelection = paymentSelection,
                 linkState = linkState,
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(
@@ -164,19 +172,20 @@ internal object PaymentSheetFixtures {
                     isGooglePayReady = isGooglePayReady,
                 ),
             ),
+            configuration = config,
         )
     }
 
     internal val ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP
         get() = PaymentSheetContractV2.Args(
-            initializationMode = PaymentSheet.InitializationMode.SetupIntent("seti_1234_secret_1234"),
+            initializationMode = PaymentElementLoader.InitializationMode.SetupIntent("seti_1234_secret_1234"),
             CONFIG_CUSTOMER_WITH_GOOGLEPAY,
             STATUS_BAR_COLOR
         )
 
     internal val ARGS_CUSTOMER_WITH_GOOGLEPAY
         get() = PaymentSheetContractV2.Args(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
             CONFIG_CUSTOMER_WITH_GOOGLEPAY,
@@ -185,7 +194,7 @@ internal object PaymentSheetFixtures {
 
     internal val ARGS_CUSTOMER_WITHOUT_GOOGLEPAY
         get() = PaymentSheetContractV2.Args(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
             CONFIG_CUSTOMER,
@@ -201,7 +210,7 @@ internal object PaymentSheetFixtures {
 
     internal val ARGS_DEFERRED_INTENT
         get() = PaymentSheetContractV2.Args(
-            initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 10L,
@@ -230,7 +239,9 @@ internal object PaymentSheetFixtures {
                 name = "Jenny Rosen",
                 phone = "+18008675309"
             ),
-            cbcEligibility = CardBrandChoiceEligibility.Ineligible
+            cbcEligibility = CardBrandChoiceEligibility.Ineligible,
+            hasIntentToSetup = false,
+            paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
         )
 
     internal val PAYPAL_AND_VENMO_EXTERNAL_PAYMENT_METHOD_DATA = """

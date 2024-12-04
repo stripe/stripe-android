@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="default_border_color">#FBD992</color>
+    <color name="default_background_color">#FCEEB5</color>
+    <color name="default_text_color">#B13600</color>
+
+    <!-- Ogre Theme Colors -->
+    <color name="ogre_primary">#5AE92B</color>
+    <color name="ogre_background">#837411</color>
+    <color name="ogre_button_primary_background">#DAB9B9</color>
+    <color name="ogre_button_primary_border">#F00000</color>
+    <color name="ogre_button_primary_text">#000000</color>
+    <color name="ogre_button_secondary_background">#025F08</color>
+    <color name="ogre_text">#554125</color>
+    <color name="ogre_badge_neutral_text">#28D72A</color>
+    <color name="ogre_badge_neutral_background">#638863</color>
+    <color name="ogre_button_secondary_text">#000000</color>
+
+    <!-- Hot Dog Theme Colors -->
+    <color name="hot_dog_primary">#FF2200</color>
+    <color name="hot_dog_background">#FFFF00</color>
+    <color name="hot_dog_button_secondary_background">#C6C6C6</color>
+    <color name="hot_dog_button_secondary_border">#1F1F1F</color>
+    <color name="hot_dog_button_primary_border">#1F1F1F</color>
+    <color name="hot_dog_button_primary_text">#1F1F1F</color>
+    <color name="hot_dog_button_primary_background">#C6C6C6</color>
+    <color name="hot_dog_offset_background">#FF2200</color>
+    <color name="hot_dog_text">#000000</color>
+    <color name="hot_dog_secondary_text">#000000</color>
+    <color name="hot_dog_badge_danger_text">#991400</color>
+    <color name="hot_dog_badge_warning_background">#F9A443</color>
+
+    <!-- Ocean Breeze Theme Colors -->
+    <color name="ocean_breeze_background">#EAF6FB</color>
+    <color name="ocean_breeze_primary">#15609E</color>
+    <color name="ocean_breeze_badge_success_text">#2A6093</color>
+    <color name="ocean_breeze_badge_neutral_text">#5A621D</color>
+    <color name="ocean_breeze_button_secondary_text">#2C93E8</color>
+    <color name="ocean_breeze_button_secondary_border">#2C93E8</color>
+
+    <!-- Link Theme Colors -->
+    <color name="link_primary">#1C3944</color>
+    <color name="link_button_primary_background">#33DCB3</color>
+    <color name="link_button_primary_border">#33DCB3</color>
+    <color name="link_button_primary_text">#1C3944</color>
+    <color name="link_secondary_text">#485B61</color>
+    <color name="link_text">#1C3944</color>
+    <color name="link_action_primary_text">#33DCB3</color>
+    <color name="link_badge_success_background">#B4FEE1</color>
+    <color name="link_badge_success_border">#C0D7CD</color>
+    <color name="link_badge_success_text">#1C3944</color>
+    <color name="link_badge_neutral_background">#DEFECC</color>
+    <color name="link_badge_neutral_text">#1C3944</color>
+
+</resources>

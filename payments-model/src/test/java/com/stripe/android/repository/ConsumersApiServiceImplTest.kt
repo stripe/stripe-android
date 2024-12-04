@@ -12,6 +12,7 @@ import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSignUpConsentAction
+import com.stripe.android.model.IncentiveEligibilitySession
 import com.stripe.android.model.VerificationType
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
@@ -50,6 +51,9 @@ class ConsumersApiServiceImplTest {
             bodyPart("phone_number", "%2B15555555568"),
             bodyPart("country", "US"),
             bodyPart("locale", "en-US"),
+            bodyPart("amount", "1234"),
+            bodyPart("currency", "cad"),
+            bodyPart(urlEncode("financial_incentive[payment_intent]"), "pi_123"),
             bodyPart("consent_action", "clicked_checkbox_nospm_mobile_v0"),
             bodyPart("request_surface", requestSurface),
         ) { response ->
@@ -62,6 +66,9 @@ class ConsumersApiServiceImplTest {
             country = "US",
             name = null,
             locale = Locale.US,
+            amount = 1234,
+            currency = "cad",
+            incentiveEligibilitySession = IncentiveEligibilitySession.PaymentIntent("pi_123"),
             consentAction = ConsumerSignUpConsentAction.Checkbox,
             requestSurface = requestSurface,
             requestOptions = DEFAULT_OPTIONS,

@@ -2,20 +2,30 @@ package com.stripe.android.model.parsers
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.model.parsers.ModelJsonParser
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.DeferredIntentParams
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSessionFixtures
 import com.stripe.android.model.ElementsSessionFixtures.createPaymentIntentWithCustomerSession
 import com.stripe.android.model.ElementsSessionParams
+import com.stripe.android.model.LinkConsumerIncentive
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.testing.FeatureFlagTestRule
 import org.json.JSONObject
+import org.junit.Rule
 import org.junit.Test
 
 class ElementsSessionJsonParserTest {
+
+    @get:Rule
+    val incentivesFeatureFlagRule = FeatureFlagTestRule(
+        featureFlag = FeatureFlags.instantDebitsIncentives,
+        isEnabled = false,
+    )
 
     @Test
     fun parsePaymentIntent_shouldCreateObjectWithOrderedPaymentMethods() {
@@ -24,7 +34,7 @@ class ElementsSessionJsonParserTest {
                 clientSecret = "secret",
                 externalPaymentMethods = emptyList(),
             ),
-            apiKey = "test"
+            isLiveMode = false
         ).parse(
             ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON
         )
@@ -50,7 +60,7 @@ class ElementsSessionJsonParserTest {
                 clientSecret = "secret",
                 externalPaymentMethods = emptyList(),
             ),
-            apiKey = "test"
+            isLiveMode = false
         ).parse(
             ElementsSessionFixtures.EXPANDED_SETUP_INTENT_JSON
         )
@@ -75,7 +85,7 @@ class ElementsSessionJsonParserTest {
                 clientSecret = "secret",
                 externalPaymentMethods = emptyList(),
             ),
-            apiKey = "test"
+            isLiveMode = false
         ).parse(
             ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_WITH_LINK_FUNDING_SOURCES_JSON
         )!!
@@ -92,7 +102,7 @@ class ElementsSessionJsonParserTest {
                 clientSecret = "secret",
                 externalPaymentMethods = emptyList(),
             ),
-            apiKey = "test"
+            isLiveMode = false
         ).parse(
             ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_WITH_LINK_FUNDING_SOURCES_JSON
         )!!
@@ -119,7 +129,7 @@ class ElementsSessionJsonParserTest {
                 clientSecret = "secret",
                 externalPaymentMethods = emptyList(),
             ),
-            apiKey = "test"
+            isLiveMode = false
         ).parse(
             ElementsSessionFixtures.EXPANDED_SETUP_INTENT_WITH_LINK_SIGNUP_DISABLED_JSON
         )!!
@@ -134,7 +144,7 @@ class ElementsSessionJsonParserTest {
                 clientSecret = "secret",
                 externalPaymentMethods = emptyList(),
             ),
-            apiKey = "test"
+            isLiveMode = false
         ).parse(
             ElementsSessionFixtures.EXPANDED_SETUP_INTENT_WITH_LINK_SIGNUP_DISABLED_FLAG_FALSE_JSON
         )!!
@@ -149,7 +159,7 @@ class ElementsSessionJsonParserTest {
                 clientSecret = "secret",
                 externalPaymentMethods = emptyList(),
             ),
-            apiKey = "test"
+            isLiveMode = false
         ).parse(
             ElementsSessionFixtures.EXPANDED_SETUP_INTENT_WITH_LINK_FUNDING_SOURCES_JSON
         )!!
@@ -166,7 +176,7 @@ class ElementsSessionJsonParserTest {
                 clientSecret = "secret",
                 externalPaymentMethods = emptyList(),
             ),
-            apiKey = "test"
+            isLiveMode = false
         ).parse(
             JSONObject(
                 ElementsSessionFixtures.PI_WITH_CARD_AFTERPAY_AU_BECS
@@ -188,7 +198,7 @@ class ElementsSessionJsonParserTest {
                 clientSecret = "secret",
                 externalPaymentMethods = emptyList(),
             ),
-            apiKey = "test"
+            isLiveMode = false
         ).parse(
             JSONObject(
                 ElementsSessionFixtures.PI_WITH_CARD_AFTERPAY_AU_BECS_NO_ORDERED_LPMS
@@ -211,7 +221,7 @@ class ElementsSessionJsonParserTest {
                 clientSecret = "secret",
                 externalPaymentMethods = emptyList(),
             ),
-            apiKey = "test"
+            isLiveMode = false
         ).parse(
             JSONObject(
                 """
@@ -235,7 +245,7 @@ class ElementsSessionJsonParserTest {
                 clientSecret = "secret",
                 externalPaymentMethods = emptyList(),
             ),
-            apiKey = "test"
+            isLiveMode = false
         ).parse(
             JSONObject(
                 """
@@ -259,7 +269,7 @@ class ElementsSessionJsonParserTest {
                 clientSecret = "secret",
                 externalPaymentMethods = emptyList(),
             ),
-            apiKey = "test"
+            isLiveMode = false
         ).parse(
             JSONObject(
                 """
@@ -281,7 +291,7 @@ class ElementsSessionJsonParserTest {
                 clientSecret = "secret",
                 externalPaymentMethods = emptyList(),
             ),
-            apiKey = "test"
+            isLiveMode = false
         ).parse(
             ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON
         )
@@ -302,7 +312,7 @@ class ElementsSessionJsonParserTest {
                 clientSecret = "secret",
                 externalPaymentMethods = emptyList(),
             ),
-            apiKey = "test"
+            isLiveMode = false
         ).parse(
             ElementsSessionFixtures.EXPANDED_SETUP_INTENT_JSON
         )
@@ -333,7 +343,7 @@ class ElementsSessionJsonParserTest {
                 ),
                 externalPaymentMethods = emptyList(),
             ),
-            apiKey = "test",
+            isLiveMode = false,
             timeProvider = { 1 }
         ).parse(
             ElementsSessionFixtures.DEFERRED_INTENT_JSON
@@ -361,95 +371,6 @@ class ElementsSessionJsonParserTest {
     }
 
     @Test
-    fun `Test deferred livemode=true when publishable key does not have test or live`() {
-        val data = ElementsSessionJsonParser(
-            ElementsSessionParams.DeferredIntentType(
-                deferredIntentParams = DeferredIntentParams(
-                    mode = DeferredIntentParams.Mode.Payment(
-                        amount = 2000,
-                        currency = "usd",
-                        captureMethod = PaymentIntent.CaptureMethod.Automatic,
-                        setupFutureUsage = null,
-                    ),
-                    paymentMethodTypes = emptyList(),
-                    paymentMethodConfigurationId = null,
-                    onBehalfOf = null,
-                ),
-                externalPaymentMethods = emptyList(),
-            ),
-            apiKey = "pk_foobar",
-            timeProvider = { 1 }
-        ).parse(
-            ElementsSessionFixtures.DEFERRED_INTENT_JSON
-        )
-
-        val deferredIntent = data?.stripeIntent
-
-        assertThat(deferredIntent).isNotNull()
-        assertThat(deferredIntent).isEqualTo(
-            PaymentIntent(
-                id = "elements_session_1t6ejApXCS5",
-                clientSecret = null,
-                amount = 2000L,
-                currency = "usd",
-                captureMethod = PaymentIntent.CaptureMethod.Automatic,
-                countryCode = "CA",
-                created = 1,
-                isLiveMode = true,
-                setupFutureUsage = null,
-                unactivatedPaymentMethods = listOf(),
-                paymentMethodTypes = listOf("card", "link", "cashapp"),
-                linkFundingSources = listOf("card")
-            )
-        )
-    }
-
-    @Test
-    fun `Test deferred livemode=true when publishable key does not have test or live for setup mode`() {
-        val data = ElementsSessionJsonParser(
-            ElementsSessionParams.DeferredIntentType(
-                deferredIntentParams = DeferredIntentParams(
-                    mode = DeferredIntentParams.Mode.Setup(
-                        currency = "usd",
-                        setupFutureUsage = StripeIntent.Usage.OffSession,
-                    ),
-                    paymentMethodTypes = emptyList(),
-                    paymentMethodConfigurationId = null,
-                    onBehalfOf = null,
-                ),
-                externalPaymentMethods = emptyList(),
-            ),
-            apiKey = "pk_foobar",
-            timeProvider = { 1 }
-        ).parse(
-            ElementsSessionFixtures.DEFERRED_INTENT_JSON
-        )
-
-        val deferredIntent = data?.stripeIntent
-
-        assertThat(deferredIntent).isNotNull()
-        assertThat(deferredIntent).isEqualTo(
-            SetupIntent(
-                id = "elements_session_1t6ejApXCS5",
-                clientSecret = null,
-                cancellationReason = null,
-                description = null,
-                nextActionData = null,
-                paymentMethodId = null,
-                paymentMethod = null,
-                status = null,
-                countryCode = "CA",
-                created = 1,
-                isLiveMode = true,
-                usage = StripeIntent.Usage.OffSession,
-                unactivatedPaymentMethods = listOf(),
-                paymentMethodTypes = listOf("card", "link", "cashapp"),
-                linkFundingSources = listOf("card")
-            )
-        )
-    }
-
-    @Test
     fun `Test deferred SetupIntent`() {
         val data = ElementsSessionJsonParser(
             ElementsSessionParams.DeferredIntentType(
@@ -464,7 +385,7 @@ class ElementsSessionJsonParserTest {
                 ),
                 externalPaymentMethods = emptyList(),
             ),
-            apiKey = "test",
+            isLiveMode = false,
             timeProvider = { 1 }
         ).parse(
             ElementsSessionFixtures.DEFERRED_INTENT_JSON
@@ -501,7 +422,7 @@ class ElementsSessionJsonParserTest {
                 clientSecret = "secret",
                 externalPaymentMethods = emptyList(),
             ),
-            apiKey = "test",
+            isLiveMode = false,
         )
 
         val intent = ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON_WITH_CBC_ELIGIBLE
@@ -518,7 +439,7 @@ class ElementsSessionJsonParserTest {
                 clientSecret = "secret",
                 externalPaymentMethods = emptyList(),
             ),
-            apiKey = "test",
+            isLiveMode = false,
         )
 
         val intent = ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON_WITH_CBC_NOT_ELIGIBLE
@@ -535,7 +456,7 @@ class ElementsSessionJsonParserTest {
                 clientSecret = "secret",
                 externalPaymentMethods = emptyList(),
             ),
-            apiKey = "test",
+            isLiveMode = false,
         )
 
         val intent = ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON
@@ -551,7 +472,7 @@ class ElementsSessionJsonParserTest {
                 clientSecret = "secret",
                 externalPaymentMethods = emptyList(),
             ),
-            apiKey = "test",
+            isLiveMode = false,
         )
 
         val intent = ElementsSessionFixtures.EXPANDED_SETUP_INTENT_JSON_WITH_CBC_ELIGIBLE_BUT_NO_NETWORKS
@@ -568,7 +489,7 @@ class ElementsSessionJsonParserTest {
                 clientSecret = "secret",
                 externalPaymentMethods = listOf("external_venmo"),
             ),
-            apiKey = "test",
+            isLiveMode = false,
         )
 
         val intent = ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON
@@ -585,7 +506,7 @@ class ElementsSessionJsonParserTest {
                 clientSecret = "secret",
                 externalPaymentMethods = listOf(venmo),
             ),
-            apiKey = "test",
+            isLiveMode = false,
         )
 
         val intent = ElementsSessionFixtures.PAYMENT_INTENT_WITH_EXTERNAL_VENMO_JSON
@@ -602,7 +523,7 @@ class ElementsSessionJsonParserTest {
                 customerSessionClientSecret = "customer_session_client_secret",
                 externalPaymentMethods = emptyList(),
             ),
-            apiKey = "test",
+            isLiveMode = false,
         )
 
         val intent = createPaymentIntentWithCustomerSession()
@@ -620,6 +541,7 @@ class ElementsSessionJsonParserTest {
                         mobilePaymentElement = ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
                             isPaymentMethodSaveEnabled = false,
                             isPaymentMethodRemoveEnabled = true,
+                            canRemoveLastPaymentMethod = true,
                             allowRedisplayOverride = PaymentMethod.AllowRedisplay.LIMITED,
                         ),
                         customerSheet = ElementsSession.Customer.Components.CustomerSheet.Disabled
@@ -691,6 +613,54 @@ class ElementsSessionJsonParserTest {
     }
 
     @Test
+    fun `when 'payment_method_remove' is 'enabled' for MPE, 'canRemovePaymentMethods' should be true`() {
+        mobilePaymentElementPermissionsTest(
+            paymentMethodRemoveFeatureValue = "enabled",
+            canRemovePaymentMethods = true,
+        )
+    }
+
+    @Test
+    fun `when 'payment_method_remove' is 'disabled' for MPE, 'canRemovePaymentMethods' should be false`() {
+        mobilePaymentElementPermissionsTest(
+            paymentMethodRemoveFeatureValue = "disabled",
+            canRemovePaymentMethods = false,
+        )
+    }
+
+    @Test
+    fun `when 'payment_method_remove' is unknown value for MPE, 'canRemovePaymentMethods' should be false`() {
+        mobilePaymentElementPermissionsTest(
+            paymentMethodRemoveFeatureValue = "something",
+            canRemovePaymentMethods = false,
+        )
+    }
+
+    @Test
+    fun `when 'payment_method_remove_last' is 'enabled' for MPE, 'canRemoveLastPaymentMethod' should be true`() {
+        mobilePaymentElementPermissionsTest(
+            paymentMethodRemoveLastFeatureValue = "enabled",
+            canRemoveLastPaymentMethod = true,
+        )
+    }
+
+    @Test
+    fun `when 'payment_method_remove_last' is 'disabled' for MPE, 'canRemoveLastPaymentMethod' should be false`() {
+        mobilePaymentElementPermissionsTest(
+            paymentMethodRemoveLastFeatureValue = "disabled",
+            canRemoveLastPaymentMethod = false,
+        )
+    }
+
+    @Test
+    fun `when 'payment_method_remove_last' is unknown value for MPE, 'canRemoveLastPaymentMethod' should be false`() {
+        mobilePaymentElementPermissionsTest(
+            paymentMethodRemoveLastFeatureValue = "something",
+            canRemoveLastPaymentMethod = false,
+        )
+    }
+
+    @Test
     fun `ElementsSession has expected customer session information with customer sheet component in the response`() {
         val parser = ElementsSessionJsonParser(
             ElementsSessionParams.PaymentIntentType(
@@ -698,7 +668,7 @@ class ElementsSessionJsonParserTest {
                 customerSessionClientSecret = "customer_session_client_secret",
                 externalPaymentMethods = emptyList(),
             ),
-            apiKey = "test",
+            isLiveMode = false,
         )
 
         val intent = ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_WITH_CUSTOMER_SESSION_AND_CUSTOMER_SHEET_COMPONENT
@@ -715,7 +685,7 @@ class ElementsSessionJsonParserTest {
                     components = ElementsSession.Customer.Components(
                         mobilePaymentElement = ElementsSession.Customer.Components.MobilePaymentElement.Disabled,
                         customerSheet = ElementsSession.Customer.Components.CustomerSheet.Enabled(
-                            isPaymentMethodRemoveEnabled = true
+                            isPaymentMethodRemoveEnabled = true,
                         ),
                     )
                 ),
@@ -759,7 +729,7 @@ class ElementsSessionJsonParserTest {
                 clientSecret = "secret",
                 externalPaymentMethods = emptyList(),
             ),
-            apiKey = "test"
+            isLiveMode = false
         )
 
         fun assertIsGooglePayEnabled(expectedValue: Boolean, jsonTransform: JSONObject.() -> Unit) {
@@ -781,7 +751,7 @@ class ElementsSessionJsonParserTest {
                 clientSecret = "secret",
                 externalPaymentMethods = emptyList(),
             ),
-            apiKey = "pk_live_abc123",
+            isLiveMode = true,
         ).parse(
             JSONObject(
                 ElementsSessionFixtures.PI_WITH_CARD_AFTERPAY_AU_BECS
@@ -789,6 +759,47 @@ class ElementsSessionJsonParserTest {
         )
 
         assertThat(elementsSession?.stripeIntent?.unactivatedPaymentMethods).containsExactly("au_becs_debit")
+    }
+
+    @Test
+    fun `Parses Link consumer incentives if feature flag is enabled`() {
+        incentivesFeatureFlagRule.setEnabled(true)
+
+        val elementsSession = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret",
+                externalPaymentMethods = emptyList(),
+            ),
+            isLiveMode = true,
+        ).parse(
+            ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_WITH_LINK_INCENTIVE_JSON
+        )
+
+        assertThat(elementsSession?.linkSettings?.linkConsumerIncentive).isEqualTo(
+            LinkConsumerIncentive(
+                incentiveParams = LinkConsumerIncentive.IncentiveParams(
+                    paymentMethod = "link_instant_debits",
+                ),
+                incentiveDisplayText = "$5",
+            )
+        )
+    }
+
+    @Test
+    fun `Does not parse Link consumer incentives if feature flag is disabled`() {
+        incentivesFeatureFlagRule.setEnabled(false)
+
+        val elementsSession = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret",
+                externalPaymentMethods = emptyList(),
+            ),
+            isLiveMode = true,
+        ).parse(
+            ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_WITH_LINK_INCENTIVE_JSON
+        )
+
+        assertThat(elementsSession?.linkSettings?.linkConsumerIncentive).isNull()
     }
 
     private fun allowRedisplayTest(
@@ -801,7 +812,7 @@ class ElementsSessionJsonParserTest {
                 customerSessionClientSecret = "customer_session_client_secret",
                 externalPaymentMethods = emptyList(),
             ),
-            apiKey = "test",
+            isLiveMode = false,
         )
 
         val intent = createPaymentIntentWithCustomerSession(allowRedisplay = rawAllowRedisplayValue)
@@ -813,5 +824,39 @@ class ElementsSessionJsonParserTest {
             ElementsSession.Customer.Components.MobilePaymentElement.Enabled
 
         assertThat(enabledComponent?.allowRedisplayOverride).isEqualTo(allowRedisplay)
+    }
+
+    private fun mobilePaymentElementPermissionsTest(
+        paymentMethodRemoveFeatureValue: String? = "enabled",
+        paymentMethodRemoveLastFeatureValue: String? = "enabled",
+        canRemovePaymentMethods: Boolean = true,
+        canRemoveLastPaymentMethod: Boolean = true,
+    ) {
+        val parser = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret",
+                customerSessionClientSecret = "customer_session_client_secret",
+                externalPaymentMethods = emptyList(),
+            ),
+            isLiveMode = false,
+        )
+
+        val intent = createPaymentIntentWithCustomerSession(
+            paymentMethodRemoveFeature = paymentMethodRemoveFeatureValue,
+            paymentMethodRemoveLastFeature = paymentMethodRemoveLastFeatureValue,
+        )
+
+        val elementsSession = parser.parse(intent)
+
+        val mobilePaymentElementComponent = elementsSession?.customer?.session?.components?.mobilePaymentElement
+
+        assertThat(mobilePaymentElementComponent)
+            .isInstanceOf(ElementsSession.Customer.Components.MobilePaymentElement.Enabled::class.java)
+
+        val enabledComponent = mobilePaymentElementComponent as?
+            ElementsSession.Customer.Components.MobilePaymentElement.Enabled
+
+        assertThat(enabledComponent?.isPaymentMethodRemoveEnabled).isEqualTo(canRemovePaymentMethods)
+        assertThat(enabledComponent?.canRemoveLastPaymentMethod).isEqualTo(canRemoveLastPaymentMethod)
     }
 }

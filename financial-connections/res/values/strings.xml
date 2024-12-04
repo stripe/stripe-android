@@ -1,11 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="stripe_consent_pane_tc">You agree to Stripe\'s <annotation clickable="terms">Terms</annotation> and <annotation clickable="privacy">Privacy Policy</annotation>. <annotation clickable="privacy_center">Learn more</annotation></string>
-    <string name="stripe_consent_pane_manual_entry"><annotation clickable="manual_entry">Enter account details manually instead</annotation></string>
-    <string name="stripe_consent_pane_manual_entry_microdeposits"><annotation clickable="manual_entry">Enter account details manually instead</annotation> (takes 1–2 business days)</string>
-    <string name="stripe_ok">OK</string>
-    <string name="stripe_prepane_title">Link with %1$s</string>
-    <string name="stripe_prepane_continue">Continue</string>
+    <!-- Institution picker -->
     <string name="stripe_institutionpicker_pane_select_bank">Select bank</string>
     <string name="stripe_institutionpicker_manual_entry_title">Don’t see your bank?</string>
     <string name="stripe_institutionpicker_search_more_title">Search for more banks</string>
@@ -13,11 +8,9 @@
     <string name="stripe_institutionpicker_pane_error_title">No results</string>
     <string name="stripe_institutionpicker_pane_error_desc">Try searching another bank</string>
     <string name="stripe_institutionpicker_pane_error_desc_manual_entry">Try searching another bank or <annotation clickable="manual_entry">manually\u00a0enter\u00a0details</annotation>.</string>
-    <string name="stripe_partnerauth_loading_title">Establishing connection</string>
-    <string name="stripe_partnerauth_loading_desc">Please wait while we connect to your bank.</string>
-    <string name="stripe_picker_search_no_results">No results for "%1$s"</string>
-    <string name="stripe_picker_error_title">This institution is currently unavailable</string>
-    <string name="stripe_picker_error_desc">Please select another bank or try again</string>
+    <string name="stripe_search">Search</string>
+
+    <!-- Error pane -->
     <string name="stripe_error_generic_title">Something went wrong</string>
     <string name="stripe_error_generic_desc">Your account can’t be linked at this time. Please try again later.</string>
     <string name="stripe_error_unplanned_downtime_title">%1$s is currently unavailable</string>
@@ -27,22 +20,26 @@
     <string name="stripe_error_cta_select_another_bank">Select another bank</string>
     <string name="stripe_error_cta_retry">Try again</string>
     <string name="stripe_error_cta_manual_entry">Enter bank details manually</string>
-    <string name="stripe_account_picker_loading_title">Connecting your bank</string>
-    <string name="stripe_account_picker_loading_desc">You\'re almost done.</string>
-    <string name="stripe_account_picker_select_account">Select your account</string>
-    <string name="stripe_account_picker_confirm_account">Confirm your account</string>
+    <string name="stripe_accounts_error_desc_retry">Please select another bank or try again.</string>
+    <string name="stripe_attachlinkedpaymentaccount_error_title">Your account number couldn’t be accessed at this time</string>
+    <string name="stripe_attachlinkedpaymentaccount_error_desc">Please enter your bank details manually</string>
+    <string name="stripe_attachlinkedpaymentaccount_error_desc_manual_entry">Please enter your bank details manually or select another bank.</string>
+    <string name="stripe_error_cta_close">Close</string>
+    <string name="stripe_accounts_error_desc_manualentry">Please enter your bank details manually or select another bank.</string>
+    <string name="stripe_accounts_error_desc_no_retry">Please select another bank.</string>
+
+    <!-- Account picker -->
     <string name="stripe_account_picker_singleselect_account">Select an account</string>
     <string name="stripe_account_picker_multiselect_account">Select accounts</string>
-    <string name="stripe_account_picker_cta_confirm">Confirm</string>
     <plurals name="stripe_account_picker_cta_link">
         <item quantity="one">Connect account</item>
         <item quantity="other">Connect accounts</item>
     </plurals>
-    <string name="stripe_search">Search</string>
-    <string name="stripe_account_picker_dropdown_hint">Choose one</string>
+
+    <!-- Success panes -->
     <string name="stripe_success_pane_title">Success</string>
+    <string name="stripe_success_pane_title_microdeposits">Almost there</string>
     <string name="stripe_success_pane_desc_microdeposits">You can expect micro-deposits to account ••••%1$s in 1–2 days and an email with further instructions.</string>
-    <string name="stripe_success_pane_desc_microdeposits_no_account">You can expect micro-deposits to your account in 1–2 days and an email with further instructions.</string>
     <plurals name="stripe_success_pane_desc">
         <item quantity="one">Your account was connected.</item>
         <item quantity="other">Your accounts were connected.</item>
@@ -57,14 +54,14 @@
     </plurals>
     <string name="stripe_success_pane_done">Done</string>
     <string name="stripe_success_pane_done_with_merchant">Back to %1$s</string>
-    <string name="stripe_prepane_partner_callout">Stripe works with partners like %1$s to reliably offer access to thousands of financial institutions. <annotation clickable="privacy_center">Learn more</annotation></string>
     <string name="stripe_account_picker_error_no_payment_method_title">No payment accounts available</string>
     <plurals name="stripe_account_picker_error_no_payment_method_desc">
         <item quantity="one">We found %1$s %2$s account but you can only link checking or savings accounts to %3$s. Please try selecting another bank.</item>
         <item quantity="other">We found %1$s %2$s accounts but you can only link checking or savings accounts to %3$s. Please try selecting another bank.</item>
     </plurals>
     <string name="stripe_account_picker_error_no_account_available_title">There was a problem accessing your %1$s account</string>
-    <string name="stripe_account_picker_error_no_account_available_desc">Please select another bank or try again</string>
+
+    <!-- Manual entry -->
     <string name="stripe_manualentry_title">Enter bank details</string>
     <string name="stripe_manualentry_routing">Routing number</string>
     <string name="stripe_manualentry_account">Account number</string>
@@ -78,57 +75,37 @@
     <string name="stripe_validation_account_confirm_mismatch">Your account numbers don\'t match.</string>
     <string name="stripe_manualentry_microdeposits_desc">Your bank information will be verified via micro-deposits to your account, typically within 1–2 business days. Only checking accounts are supported.</string>
     <string name="stripe_manualentry_test_banner">Use test account</string>
-    <plurals name="stripe_attachlinkedpaymentaccount_title">
-        <item quantity="one">Linking account</item>
-        <item quantity="other">Linking accounts</item>
-    </plurals>
-    <plurals name="stripe_attachlinkedpaymentaccount_desc">
-        <item quantity="one">Please wait while your account is connected to %1$s</item>
-        <item quantity="other">Please wait while your accounts are connected to %1$s</item>
-    </plurals>
-    <plurals name="stripe_attachlinkedpaymentaccount_desc_no_business">
-        <item quantity="one">Please wait while your account is connected to this business</item>
-        <item quantity="other">Please wait while your accounts are connected to this business</item>
-    </plurals>
-    <string name="stripe_attachlinkedpaymentaccount_error_title">Your account number couldn’t be accessed at this time</string>
-    <string name="stripe_attachlinkedpaymentaccount_error_desc">Please enter your bank details manually</string>
-    <string name="stripe_attachlinkedpaymentaccount_error_desc_manual_entry">Please enter your bank details manually or select another bank.</string>
-    <string name="stripe_close_dialog_confirm">Yes, cancel</string>
-    <string name="stripe_close_dialog_back">Back</string>
-    <string name="stripe_error_cta_close">Close</string>
-    <string name="stripe_success_infobox_accounts">%1$d accounts</string>
-    <string name="stripe_accounts_error_desc_retry">Please select another bank or try again.</string>
-    <string name="stripe_accounts_error_desc_manualentry">Please enter your bank details manually or select another bank.</string>
-    <string name="stripe_accounts_error_desc_no_retry">Please select another bank.</string>
-    <string name="stripe_accountpicker_singleaccount_description">Select the account you\'d like to link.</string>
-    <string name="stripe_account_picker_select_all_accounts">Select all accounts</string>
-    <string name="stripe_networking_signup_phone_number_disclaimer">We’ll use this to verify and manage your account.</string>
+
+    <!-- Networking signup -->
+    <string name="stripe_networking_signup_email_label">Email address</string>
+
+    <!-- Networking warmup -->
     <string name="stripe_networking_link_login_warmup_description">Use information you previously saved with your Link account.</string>
     <string name="stripe_networking_link_login_warmup_title">Continue with Link</string>
     <string name="stripe_networking_link_login_warmup_cta_continue">Continue with Link</string>
     <string name="stripe_networking_link_login_warmup_cta_skip">Not now</string>
     <string name="stripe_networking_link_login_warmup_cta_cancel">Cancel</string>
+
+    <!-- Networking verification -->
     <string name="stripe_networking_verification_title">Confirm it\'s you</string>
     <string name="stripe_networking_verification_desc">Enter the code sent to %1$s</string>
-    <string name="stripe_networking_verification_email">Signing in as %1$s</string>
-    <string name="stripe_link_account_picker_title">Select an account to connect to %1$s</string>
-    <string name="stripe_link_account_picker_title_nobusiness">Select an account to connect to this business</string>
-    <string name="stripe_link_account_picker_new_account">New bank account</string>
-    <string name="stripe_link_account_picker_cta">Connect account</string>
+
+    <string name="stripe_networking_save_to_link_verification_title">Confirm it\'s you</string>
+    <string name="stripe_networking_save_to_link_verification_cta_negative">Not now</string>
+
+    <!-- Networking step-up verification -->
     <string name="stripe_link_stepup_verification_title">Verify your email</string>
     <string name="stripe_link_stepup_verification_desc">Enter the code sent to %1$s. We periodically request this extra step to keep your account safe.</string>
     <string name="stripe_link_stepup_verification_resend_code"><annotation clickable="resend_code">Resend code</annotation></string>
-    <string name="stripe_networking_save_to_link_verification_title">Confirm it\'s you</string>
-    <string name="stripe_networking_save_to_link_verification_cta_negative">Not now</string>
+
+    <!-- Verification (shared) -->
     <string name="stripe_verification.codeInvalid">Hmm, that code didn’t work. Double check it and try again.</string>
-    <string name="stripe_verification.codeExpired">It looks like the verification code you provided is not valid anymore. Get a new code and try again.</string>
     <string name="stripe_verification.codeExpiredEmail">It looks like the verification code you provided is not valid anymore. Click “Resend code” and try again, or <annotation clickable="contact_us">Contact us</annotation>.</string>
     <string name="stripe_verification.codeExpiredSms">It looks like the verification code you provided is not valid anymore. Try again, or <annotation clickable="contact_us">Contact us</annotation>.</string>
     <string name="stripe_verification.inTestMode">You\'re in test mode.</string>
-    <string name="stripe_verification.maxAttemptsExceeded">We\'re experiencing high volumes. Try again in an hour and if you need immediate assistance, please contact us.</string>
-    <string name="stripe_verification.unexpectedError">Something went wrong.</string>
     <string name="stripe_verification.useTestCode">Use test code</string>
-    <string name="stripe_link_account_picker_disconnected">Disconnected</string>
+
+    <!-- Exit modal -->
     <string name="stripe_exit_modal_title">Exit without connecting?</string>
     <string name="stripe_exit_modal_desc">Your bank account won’t be connected to %1$s and all progress will be lost.</string>
     <string name="stripe_exit_modal_desc_no_business">Your bank account won’t be connected to this business and all progress will be lost.</string>
@@ -136,40 +113,10 @@
     <string name="stripe_close_dialog_networking_desc_no_business">If you cancel now, your account will be linked to this business but it will not be saved to Link.</string>
     <string name="stripe_exit_modal_cta_accept">Yes, exit</string>
     <string name="stripe_exit_modal_cta_cancel">Cancel</string>
-    <string name="stripe_prepane_cancel_cta">Cancel</string>
-    <string name="stripe_networking_signup_email_label">Email address</string>
-    <string name="stripe_loading_pill_label">Hang on, nearly there</string>
-    <plurals name="stripe_success_networking_save_to_link_failed">
-        <item quantity="one">Your account was connected to %1$s but could not be saved to Link with Stripe at this time.</item>
-        <item quantity="other">Your accounts were connected to %1$s but could not be saved to Link with Stripe at this time.</item>
-    </plurals>
-    <plurals name="stripe_success_pane_networking_save_to_link_failed_no_business">
-        <item quantity="one">Your account was connected to this business but could not be saved to Link with Stripe at this time.</item>
-        <item quantity="other">Your accounts were connected to this business but could not be saved to Link with Stripe at this time.</item>
-    </plurals>
-    <plurals name="stripe_success_pane_link_with_connected_account_name">
-        <item quantity="one">Your account was successfully connected to %1$s and %2$s through Link.</item>
-        <item quantity="other">Your accounts were successfully connected to %1$s and %2$s through Link.</item>
-    </plurals>
-    <plurals name="stripe_success_pane_link_with_business_name">
-        <item quantity="one">Your account was successfully connected to %1$s through Link.</item>
-        <item quantity="other">Your accounts were successfully connected to %1$s through Link.</item>
-    </plurals>
-    <plurals name="stripe_success_pane_link_with_no_business_name">
-        <item quantity="one">Your account was successfully connected to Link.</item>
-        <item quantity="other">Your accounts were successfully connected to Link.</item>
-    </plurals>
-    <plurals name="stripe_success_pane_has_connected_account_name">
-        <item quantity="one">Your account was successfully linked to %1$s and %2$s through Stripe.</item>
-        <item quantity="other">Your accounts were successfully linked to %1$s and %2$s through Stripe.</item>
-    </plurals>
-    <plurals name="stripe_success_pane_has_business_name">
-        <item quantity="one">Your account was successfully linked to %1$s through Stripe.</item>
-        <item quantity="other">Your accounts were successfully linked to %1$s through Stripe.</item>
-    </plurals>
-    <plurals name="stripe_success_pane_no_business_name">
-        <item quantity="one">Your account was successfully linked to Stripe.</item>
-        <item quantity="other">Your accounts were successfully linked to Stripe.</item>
-    </plurals>
-</resources>
 
+    <!-- Partner auth -->
+    <string name="stripe_prepane_cancel_cta">Cancel</string>
+
+    <!-- Loading -->
+    <string name="stripe_loading_pill_label">Hang on, nearly there</string>
+</resources>

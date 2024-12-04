@@ -10,7 +10,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalInspectionMode
 import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
-import app.cash.paparazzi.detectEnvironment
 import com.android.ide.common.rendering.api.SessionParams
 import com.stripe.android.uicore.StripeTheme
 import org.junit.rules.TestRule
@@ -43,6 +42,8 @@ class PaparazziRule(
         val description = requireNotNull(description) {
             "Description in PaparazziRule can't be null"
         }
+
+        var errorResult: Throwable? = null
 
         for (testCase in testCases) {
             testCase.initialize()
@@ -81,9 +82,18 @@ class PaparazziRule(
                     },
                     description = newDescription,
                 ).evaluate()
+            } catch (t: Throwable) {
+                if (errorResult == null) {
+                    errorResult = t
+                }
             } finally {
                 testCase.reset()
             }
+        }
+
+        if (errorResult != null) {
+            // We want to generate all scenarios. So don't stop running the scenarios until all are complete.
+            throw errorResult
         }
     }
 
@@ -98,9 +108,6 @@ class PaparazziRule(
             // Needed to shrink the screenshot to the height of the composable
             renderingMode = SessionParams.RenderingMode.SHRINK,
             showSystemUi = false,
-            environment = detectEnvironment().run {
-                copy(compileSdkVersion = 33, platformDir = platformDir.replace("34", "33"))
-            },
             theme = "Theme.MaterialComponents",
         )
     }

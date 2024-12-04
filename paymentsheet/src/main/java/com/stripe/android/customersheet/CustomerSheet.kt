@@ -4,7 +4,6 @@ import android.app.Application
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultRegistryOwner
-import androidx.annotation.RestrictTo
 import androidx.core.app.ActivityOptionsCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -12,12 +11,14 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
+import com.stripe.android.ExperimentalCardBrandFilteringApi
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
 import com.stripe.android.customersheet.util.CustomerSheetHacks
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheet.CardBrandAcceptance
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.uicore.image.StripeImageLoader
@@ -28,17 +29,14 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.parcelize.Parcelize
 
 /**
- * 🏗 This feature is in private beta and could change 🏗
- *
- * [CustomerSheet] A class that presents a bottom sheet to manage a customer through the
- * [CustomerAdapter].
+ * A drop-in class that presents a bottom sheet to manage a customer's saved payment methods.
  */
-@ExperimentalCustomerSheetApi
 class CustomerSheet internal constructor(
     private val application: Application,
     lifecycleOwner: LifecycleOwner,
     activityResultRegistryOwner: ActivityResultRegistryOwner,
     viewModelStoreOwner: ViewModelStoreOwner,
+    private val integrationType: CustomerSheetIntegration.Type,
     private val paymentOptionFactory: PaymentOptionFactory,
     private val callback: CustomerSheetResultCallback,
     private val statusBarColor: () -> Int?,
@@ -79,8 +77,8 @@ class CustomerSheet internal constructor(
     }
 
     /**
-     * Presents a sheet to manage the customer through a [CustomerAdapter]. Results of the sheet
-     * are delivered through the callback passed in [CustomerSheet.create].
+     * Presents a sheet to manage the customer. Results of the sheet are delivered through the callback
+     * passed in [CustomerSheet.create].
      */
     fun present() {
         val request = viewModel.configureRequest ?: run {
@@ -97,6 +95,7 @@ class CustomerSheet internal constructor(
 
         val args = CustomerSheetContract.Args(
             configuration = request.configuration,
+            integrationType = integrationType,
             statusBarColor = statusBarColor(),
         )
 
@@ -172,10 +171,10 @@ class CustomerSheet internal constructor(
     /**
      * Configuration for [CustomerSheet]
      */
-    @ExperimentalCustomerSheetApi
     @Parcelize
     @Poko
-    class Configuration internal constructor(
+    class Configuration
+    internal constructor(
         /**
          * Describes the appearance of [CustomerSheet].
          */
@@ -227,6 +226,8 @@ class CustomerSheet internal constructor(
             ConfigurationDefaults.allowsRemovalOfLastSavedPaymentMethod,
 
         internal val paymentMethodOrder: List<String> = ConfigurationDefaults.paymentMethodOrder,
+
+        internal val cardBrandAcceptance: CardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance,
     ) : Parcelable {
 
         // Hide no-argument constructor init
@@ -252,7 +253,6 @@ class CustomerSheet internal constructor(
                 .paymentMethodOrder(paymentMethodOrder)
         }
 
-        @ExperimentalCustomerSheetApi
         class Builder internal constructor(private val merchantDisplayName: String) {
             private var appearance: PaymentSheet.Appearance = ConfigurationDefaults.appearance
             private var googlePayEnabled: Boolean = ConfigurationDefaults.googlePayEnabled
@@ -264,13 +264,14 @@ class CustomerSheet internal constructor(
             private var allowsRemovalOfLastSavedPaymentMethod: Boolean =
                 ConfigurationDefaults.allowsRemovalOfLastSavedPaymentMethod
             private var paymentMethodOrder: List<String> = ConfigurationDefaults.paymentMethodOrder
+            private var cardBrandAcceptance: CardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance
 
             fun appearance(appearance: PaymentSheet.Appearance) = apply {
                 this.appearance = appearance
             }
 
-            fun googlePayEnabled(googlePayConfiguration: Boolean) = apply {
-                this.googlePayEnabled = googlePayConfiguration
+            fun googlePayEnabled(googlePayEnabled: Boolean) = apply {
+                this.googlePayEnabled = googlePayEnabled
             }
 
             fun headerTextForSelectionScreen(headerTextForSelectionScreen: String?) = apply {
@@ -313,6 +314,20 @@ class CustomerSheet internal constructor(
                 this.paymentMethodOrder = paymentMethodOrder
             }
 
+            /**
+             * By default, CustomerSheet will accept all supported cards by Stripe.
+             * You can specify card brands CustomerSheet should block or allow
+             * payment for by providing a list of those card brands.
+             * **Note**: This is only a client-side solution.
+             * **Note**: Card brand filtering is not currently supported in Link.
+             */
+            @ExperimentalCardBrandFilteringApi
+            fun cardBrandAcceptance(
+                cardBrandAcceptance: CardBrandAcceptance
+            ) = apply {
+                this.cardBrandAcceptance = cardBrandAcceptance
+            }
+
             fun build() = Configuration(
                 appearance = appearance,
                 googlePayEnabled = googlePayEnabled,
@@ -323,6 +338,7 @@ class CustomerSheet internal constructor(
                 preferredNetworks = preferredNetworks,
                 allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod,
                 paymentMethodOrder = paymentMethodOrder,
+                cardBrandAcceptance = cardBrandAcceptance
             )
         }
 
@@ -340,7 +356,6 @@ class CustomerSheet internal constructor(
      * to attach payment methods with.
      */
     @ExperimentalCustomerSessionApi
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class IntentConfiguration internal constructor(
         internal val paymentMethodTypes: List<String>,
     ) {
@@ -348,7 +363,6 @@ class CustomerSheet internal constructor(
          * Builder for creating a [IntentConfiguration]
          */
         @ExperimentalCustomerSessionApi
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         class Builder {
             private var paymentMethodTypes = listOf<String>()
 
@@ -378,13 +392,11 @@ class CustomerSheet internal constructor(
      */
     @Poko
     @ExperimentalCustomerSessionApi
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class CustomerSessionClientSecret internal constructor(
         internal val customerId: String,
         internal val clientSecret: String
     ) {
         @ExperimentalCustomerSessionApi
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         companion object {
             /**
              * Creates an instance of a [CustomerSessionClientSecret]
@@ -409,7 +421,6 @@ class CustomerSheet internal constructor(
      * [CustomerSessionProvider] provides the necessary functions
      */
     @ExperimentalCustomerSessionApi
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     abstract class CustomerSessionProvider {
         /**
          * Creates an [IntentConfiguration] that is used when configuring the intent used when
@@ -435,7 +446,6 @@ class CustomerSheet internal constructor(
         abstract suspend fun providesCustomerSessionClientSecret(): Result<CustomerSessionClientSecret>
     }
 
-    @ExperimentalCustomerSheetApi
     companion object {
 
         /**
@@ -457,7 +467,7 @@ class CustomerSheet internal constructor(
                 viewModelStoreOwner = activity,
                 activityResultRegistryOwner = activity,
                 statusBarColor = { activity.window.statusBarColor },
-                integrationType = CustomerSheetIntegrationType.Adapter(customerAdapter),
+                integration = CustomerSheetIntegration.Adapter(customerAdapter),
                 callback = callback,
             )
         }
@@ -471,7 +481,6 @@ class CustomerSheet internal constructor(
          */
         @ExperimentalCustomerSessionApi
         @JvmStatic
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun create(
             activity: ComponentActivity,
             customerSessionProvider: CustomerSessionProvider,
@@ -483,7 +492,7 @@ class CustomerSheet internal constructor(
                 viewModelStoreOwner = activity,
                 activityResultRegistryOwner = activity,
                 statusBarColor = { activity.window.statusBarColor },
-                integrationType = CustomerSheetIntegrationType.CustomerSession(customerSessionProvider),
+                integration = CustomerSheetIntegration.CustomerSession(customerSessionProvider),
                 callback = callback,
             )
         }
@@ -508,7 +517,7 @@ class CustomerSheet internal constructor(
                 activityResultRegistryOwner = (fragment.host as? ActivityResultRegistryOwner)
                     ?: fragment.requireActivity(),
                 statusBarColor = { fragment.activity?.window?.statusBarColor },
-                integrationType = CustomerSheetIntegrationType.Adapter(customerAdapter),
+                integration = CustomerSheetIntegration.Adapter(customerAdapter),
                 callback = callback,
             )
         }
@@ -522,7 +531,6 @@ class CustomerSheet internal constructor(
          */
         @ExperimentalCustomerSessionApi
         @JvmStatic
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun create(
             fragment: Fragment,
             customerSessionProvider: CustomerSessionProvider,
@@ -535,7 +543,7 @@ class CustomerSheet internal constructor(
                 activityResultRegistryOwner = (fragment.host as? ActivityResultRegistryOwner)
                     ?: fragment.requireActivity(),
                 statusBarColor = { fragment.activity?.window?.statusBarColor },
-                integrationType = CustomerSheetIntegrationType.CustomerSession(customerSessionProvider),
+                integration = CustomerSheetIntegration.CustomerSession(customerSessionProvider),
                 callback = callback,
             )
         }
@@ -546,13 +554,13 @@ class CustomerSheet internal constructor(
             lifecycleOwner: LifecycleOwner,
             activityResultRegistryOwner: ActivityResultRegistryOwner,
             statusBarColor: () -> Int?,
-            integrationType: CustomerSheetIntegrationType,
+            integration: CustomerSheetIntegration,
             callback: CustomerSheetResultCallback,
         ): CustomerSheet {
             CustomerSheetHacks.initialize(
                 application = application,
                 lifecycleOwner = lifecycleOwner,
-                integrationType = integrationType,
+                integration = integration,
             )
 
             return CustomerSheet(
@@ -560,9 +568,12 @@ class CustomerSheet internal constructor(
                 viewModelStoreOwner = viewModelStoreOwner,
                 lifecycleOwner = lifecycleOwner,
                 activityResultRegistryOwner = activityResultRegistryOwner,
+                integrationType = integration.type,
                 paymentOptionFactory = PaymentOptionFactory(
-                    resources = application.resources,
-                    imageLoader = StripeImageLoader(application),
+                    iconLoader = PaymentSelection.IconLoader(
+                        resources = application.resources,
+                        imageLoader = StripeImageLoader(application),
+                    ),
                     context = application,
                 ),
                 callback = callback,

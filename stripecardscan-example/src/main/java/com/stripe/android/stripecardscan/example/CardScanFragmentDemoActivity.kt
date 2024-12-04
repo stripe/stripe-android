@@ -14,13 +14,11 @@ class CardScanFragmentDemoActivity : AppCompatActivity() {
 
     private lateinit var cardScanSheet: CardScanSheet
 
-    private val settings by lazy { Settings(this) }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(viewBinding.root)
 
-        cardScanSheet = CardScanSheet.create(this, settings.publishableKey, ::onScanFinished)
+        cardScanSheet = CardScanSheet.create(this, ::onScanFinished)
 
         viewBinding.launchScanButton.setOnClickListener {
             attachCardScanFragment()

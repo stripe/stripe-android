@@ -1,10 +1,9 @@
 package com.stripe.android.customersheet.utils
 
 import com.stripe.android.customersheet.CustomerSheet
-import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 
-@OptIn(ExperimentalCustomerSheetApi::class, ExperimentalCustomerSessionApi::class)
+@OptIn(ExperimentalCustomerSessionApi::class)
 class FakeCustomerSessionProvider(
     private val onIntentConfiguration: () -> Result<CustomerSheet.IntentConfiguration> = {
         throw NotImplementedError("Not implemented yet!")

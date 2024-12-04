@@ -26,7 +26,7 @@ internal object PaymentOptionsStateFactory {
             PaymentOptionsItem.Link.takeIf { showLink }
         ) + paymentMethods.map {
             PaymentOptionsItem.SavedPaymentMethod(
-                DisplayableSavedPaymentMethod(
+                DisplayableSavedPaymentMethod.create(
                     displayName = nameProvider(it.type?.code),
                     paymentMethod = it,
                     isCbcEligible = isCbcEligible

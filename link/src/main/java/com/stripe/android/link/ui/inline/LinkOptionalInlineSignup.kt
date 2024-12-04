@@ -220,7 +220,7 @@ internal fun LinkLogo() {
                 R.drawable.stripe_link_logo_knockout_white
             }
         ),
-        contentDescription = stringResource(id = R.string.stripe_link),
+        contentDescription = stringResource(id = com.stripe.android.R.string.stripe_link),
         modifier = Modifier
             .padding(end = 16.dp)
             .semantics {

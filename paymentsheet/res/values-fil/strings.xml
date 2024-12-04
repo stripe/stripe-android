@@ -6,6 +6,10 @@
   <string name="stripe_afterpay_subtitle">Bumili ngayon o magbayad sa ibang pagkakataon gamit ang Afterpay</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
   <string name="stripe_bank_account_ending_in">Aaccount sa bangko na nagtatapos sa %s</string>
+  <!-- Concise description of a saved bank account. E.g. 'Bank account ···· 4242' -->
+  <string name="stripe_bank_account_plus_last_4">Account sa bangko ···· %s</string>
+  <!-- Concise description of a saved bank account. E.g. 'Bank account ····4242' -->
+  <string name="stripe_bank_account_with_last_4">Account sa bangko ····%s</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">Kumpirmahin ang pagbabayad sa app ng iyong bangko sa loob ng %s para kumpletuhin ang pagbili.</string>
   <!-- This shows the message on Buy Now Pay Later LPM, clearpay. -->
@@ -40,6 +44,10 @@
   <string name="stripe_paymentsheet_bacs_notice_mandate">Bilang karagdagan, makakatanggap ka ng dalawang araw na paunang abiso sa pamamagitan ng email para sa anumang halaga na ide-debit sa ilalim ng tagubiling ito. Ipapakita ang mga pagbabayad bilang \'%s\' sa iyong bank statement.</string>
   <!-- Message shown as part of overall Bacs Mandate indicating that their payments are protected by a defined guarantee -->
   <string name="stripe_paymentsheet_bacs_protection_mandate">Ang iyong mga pagbabayad ay protektado ng %s.</string>
+  <!-- Text displayed on manage bank account screen when bank account details are not editable. -->
+  <string name="stripe_paymentsheet_bank_account_details_cannot_be_changed">Hindi puwedeng baguhin ang mga detalye ng account sa bangko.</string>
+  <!-- Text displayed on manage card screen when card details are not editable. -->
+  <string name="stripe_paymentsheet_card_details_cannot_be_changed">Hindi puwedeng baguhin ang mga detalye ng kard.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
   <string name="stripe_paymentsheet_card_mandate">Sa pagbibigay ng impormasyon ng iyong kard, pinahihintulutan mo ang %s na singilin ang iyong kard para sa mga pagbabayad sa hinaharap alinsunod sa kanilang mga tuntunin.</string>
   <!-- Title shown above a carousel containing available payment methods -->
@@ -51,8 +59,14 @@
   <string name="stripe_paymentsheet_confirm_your_cvc">Kumpirmahin ang iyong CVC</string>
   <!-- Text for a button that allows manual entry of an address -->
   <string name="stripe_paymentsheet_enter_address_manually">Manwal na ilagay ang address</string>
+  <!-- Title shown above a view containing a customer's bank account that they can delete or update -->
+  <string name="stripe_paymentsheet_manage_bank_account">Pangasiwaan ang account sa bangko sa US</string>
+  <!-- Title shown above a view containing a customer's card payment methods that they can delete or update -->
+  <string name="stripe_paymentsheet_manage_card">Pangasiwaan ang kard</string>
   <!-- Title shown above a view containing the customer's card payment methods that they can delete or update -->
   <string name="stripe_paymentsheet_manage_payment_methods">Pangasiwaan ang mga paraan ng pagbabayad</string>
+  <!-- Title shown above a view containing a customer's SEPA debit account that they can delete or update -->
+  <string name="stripe_paymentsheet_manage_sepa_debit">Pangasiwaan ang SEPA debit</string>
   <!-- Title shown above a carousel containing the customer's payment methods -->
   <string name="stripe_paymentsheet_manage_your_payment_methods">Pangasiwaan ang iyong mga paraan ng pagbabayad</string>
   <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->
@@ -107,6 +121,8 @@
   <string name="stripe_paymentsheet_select_payment_method">Pumili ng paraan ng pagbabayad</string>
   <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
   <string name="stripe_paymentsheet_select_your_payment_method">Piliin ang iyong paraan ng pagbabayad</string>
+  <!-- Text displayed on manage SEPA debit screen when SEPA debit details are not editable. -->
+  <string name="stripe_paymentsheet_sepa_debit_details_cannot_be_changed">Hindi puwedeng baguhin ang mga detalye ng SEPA debit.</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">Kabuuan: %s</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->

@@ -25,5 +25,7 @@
     <ID>PackageNaming:ServerSideConfirmationCustomFlowActivity.kt$package com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.server_side_confirm.custom_flow</ID>
     <ID>PackageNaming:ServerSideConfirmationCustomFlowViewModel.kt$package com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.server_side_confirm.custom_flow</ID>
     <ID>PackageNaming:ServerSideConfirmationCustomFlowViewState.kt$package com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.server_side_confirm.custom_flow</ID>
+    <ID>TooManyFunctions:PaymentSheetPlaygroundViewModel.kt$PaymentSheetPlaygroundViewModel : AndroidViewModel</ID>
+    <ID>TooManyFunctions:PlaygroundSettings.kt$PlaygroundSettings$Snapshot : Parcelable</ID>
   </CurrentIssues>
 </SmellBaseline>

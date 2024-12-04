@@ -4,7 +4,6 @@ import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.PaymentSheet
 
-@OptIn(ExperimentalCustomerSheetApi::class)
 internal object CustomerSheetFixtures {
     val MINIMUM_CONFIG = CustomerSheet.Configuration
         .builder(merchantDisplayName = "Merchant, Inc")
@@ -12,7 +11,7 @@ internal object CustomerSheetFixtures {
 
     val CONFIG_WITH_GOOGLE_PAY_ENABLED = CustomerSheet.Configuration
         .builder(merchantDisplayName = "Merchant, Inc")
-        .googlePayEnabled(googlePayConfiguration = true)
+        .googlePayEnabled(googlePayEnabled = true)
         .build()
 
     @OptIn(ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi::class)
@@ -57,6 +56,6 @@ internal object CustomerSheetFixtures {
         .preferredNetworks(listOf(CardBrand.CartesBancaires, CardBrand.Visa))
         .allowsRemovalOfLastSavedPaymentMethod(false)
         .paymentMethodOrder(listOf("klarna", "afterpay", "card"))
-        .googlePayEnabled(googlePayConfiguration = true)
+        .googlePayEnabled(googlePayEnabled = true)
         .build()
 }

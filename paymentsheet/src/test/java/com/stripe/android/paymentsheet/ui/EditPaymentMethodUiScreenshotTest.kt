@@ -114,15 +114,15 @@ class EditPaymentMethodUiScreenshotTest {
         return EditPaymentMethodViewState(
             status = status,
             last4 = "4242",
-            selectedBrand = EditPaymentMethodViewState.CardBrandChoice(
+            selectedBrand = CardBrandChoice(
                 brand = CardBrand.CartesBancaires
             ),
             canUpdate = canUpdate,
             availableBrands = listOf(
-                EditPaymentMethodViewState.CardBrandChoice(
+                CardBrandChoice(
                     brand = CardBrand.Visa
                 ),
-                EditPaymentMethodViewState.CardBrandChoice(
+                CardBrandChoice(
                     brand = CardBrand.CartesBancaires
                 )
             ),

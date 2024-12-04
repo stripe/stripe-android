@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
@@ -50,8 +49,10 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidViewBinding
+import com.stripe.android.CardBrandFilter
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.link.ui.LinkButton
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.R
@@ -67,6 +68,7 @@ import com.stripe.android.paymentsheet.utils.PaymentSheetContentPadding
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.CircularProgressIndicator
 import com.stripe.android.ui.core.elements.H4Text
+import com.stripe.android.ui.core.elements.events.LocalCardBrandDisallowedReporter
 import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventReporter
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.LocalAutofillEventReporter
@@ -309,11 +311,10 @@ private fun PaymentSheetContent(
     error: ResolvableString?,
     currentScreen: PaymentSheetScreen,
     mandateText: MandateText?,
-    modifier: Modifier,
+    modifier: Modifier
 ) {
     val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
-
-    Column(modifier = modifier) {
+    Column(modifier = modifier.padding(bottom = currentScreen.bottomContentPadding)) {
         headerText?.let { text ->
             H4Text(
                 text = text.resolve(),
@@ -332,6 +333,7 @@ private fun PaymentSheetContent(
                 onLinkPressed = state.onLinkPressed,
                 dividerSpacing = currentScreen.walletsDividerSpacing,
                 modifier = Modifier.padding(bottom = bottomSpacing),
+                cardBrandFilter = PaymentSheetCardBrandFilter(viewModel.config.cardBrandAcceptance)
             )
         }
 
@@ -353,13 +355,12 @@ private fun PaymentSheetContent(
             )
         }
 
-        Spacer(modifier = Modifier.height(currentScreen.bottomContentPadding))
-
         error?.let {
             ErrorMessage(
                 error = it.resolve(),
                 modifier = Modifier
-                    .padding(vertical = 2.dp, horizontal = horizontalPadding)
+                    .padding(horizontal = horizontalPadding)
+                    .padding(top = 2.dp, bottom = 8.dp)
                     .testTag(PAYMENT_SHEET_ERROR_TEXT_TEST_TAG),
             )
         }
@@ -388,6 +389,7 @@ internal fun Wallet(
     onLinkPressed: () -> Unit,
     dividerSpacing: Dp,
     modifier: Modifier = Modifier,
+    cardBrandFilter: CardBrandFilter
 ) {
     val padding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
 
@@ -400,6 +402,7 @@ internal fun Wallet(
                 billingAddressParameters = googlePay.billingAddressParameters,
                 isEnabled = state.buttonsEnabled,
                 onPressed = onGooglePayPressed,
+                cardBrandFilter = cardBrandFilter
             )
         }
 
@@ -440,6 +443,7 @@ private fun EventReporterProvider(
     CompositionLocalProvider(
         LocalAutofillEventReporter provides viewModel.eventReporter::onAutofill,
         LocalCardNumberCompletedEventReporter provides viewModel.eventReporter::onCardNumberCompleted,
+        LocalCardBrandDisallowedReporter provides viewModel.eventReporter::onDisallowedCardBrandEntered
     ) {
         content()
     }

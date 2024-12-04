@@ -153,8 +153,6 @@ class PaymentMethodJsonParserTest {
 
         assertThat(usBankAccount.type)
             .isEqualTo(PaymentMethod.Type.USBankAccount)
-        assertThat(usBankAccount.usBankAccount?.linkedAccount)
-            .isEqualTo("fca_111")
         assertThat(usBankAccount.usBankAccount?.financialConnectionsAccount)
             .isEqualTo("fca_111")
     }

@@ -6,7 +6,6 @@ import com.stripe.android.core.injection.IOContext
 import com.stripe.android.customersheet.CustomerAdapter
 import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
 import com.stripe.android.customersheet.CustomerPermissions
-import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.customersheet.map
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.ElementsSession
@@ -16,12 +15,13 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.coroutines.async
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
-@OptIn(ExperimentalCustomerSheetApi::class)
 @Singleton
 internal class CustomerAdapterDataSource @Inject constructor(
     private val elementsSessionRepository: ElementsSessionRepository,
@@ -66,42 +66,42 @@ internal class CustomerAdapterDataSource @Inject constructor(
         }.toCustomerSheetDataResult()
     }
 
-    override suspend fun retrievePaymentMethods(): CustomerSheetDataResult<List<PaymentMethod>> {
-        return customerAdapter.retrievePaymentMethods().toCustomerSheetDataResult()
+    override suspend fun retrievePaymentMethods() = runCatchingAdapterTask {
+        customerAdapter.retrievePaymentMethods()
     }
 
     override suspend fun updatePaymentMethod(
         paymentMethodId: String,
         params: PaymentMethodUpdateParams,
-    ): CustomerSheetDataResult<PaymentMethod> {
-        return customerAdapter.updatePaymentMethod(paymentMethodId, params).toCustomerSheetDataResult()
+    ) = runCatchingAdapterTask {
+        customerAdapter.updatePaymentMethod(paymentMethodId, params)
     }
 
-    override suspend fun attachPaymentMethod(paymentMethodId: String): CustomerSheetDataResult<PaymentMethod> {
-        return customerAdapter.attachPaymentMethod(paymentMethodId).toCustomerSheetDataResult()
+    override suspend fun attachPaymentMethod(paymentMethodId: String) = runCatchingAdapterTask {
+        customerAdapter.attachPaymentMethod(paymentMethodId)
     }
 
-    override suspend fun detachPaymentMethod(paymentMethodId: String): CustomerSheetDataResult<PaymentMethod> {
-        return customerAdapter.detachPaymentMethod(paymentMethodId).toCustomerSheetDataResult()
+    override suspend fun detachPaymentMethod(paymentMethodId: String) = runCatchingAdapterTask {
+        customerAdapter.detachPaymentMethod(paymentMethodId)
     }
 
-    override suspend fun retrieveSavedSelection(): CustomerSheetDataResult<SavedSelection?> {
-        return customerAdapter.retrieveSelectedPaymentOption().map { result ->
+    override suspend fun retrieveSavedSelection() = runCatchingAdapterTask {
+        customerAdapter.retrieveSelectedPaymentOption().map { result ->
             result?.toSavedSelection()
-        }.toCustomerSheetDataResult()
+        }
     }
 
-    override suspend fun setSavedSelection(selection: SavedSelection?): CustomerSheetDataResult<Unit> {
-        return customerAdapter.setSelectedPaymentOption(selection?.toPaymentOption()).toCustomerSheetDataResult()
+    override suspend fun setSavedSelection(selection: SavedSelection?) = runCatchingAdapterTask {
+        customerAdapter.setSelectedPaymentOption(selection?.toPaymentOption())
     }
 
-    override suspend fun retrieveSetupIntentClientSecret(): CustomerSheetDataResult<String> {
-        return customerAdapter.setupIntentClientSecretForCustomerAttach().toCustomerSheetDataResult()
+    override suspend fun retrieveSetupIntentClientSecret() = runCatchingAdapterTask {
+        customerAdapter.setupIntentClientSecretForCustomerAttach()
     }
 
     private suspend fun fetchElementsSession(): Result<ElementsSession> {
         val paymentMethodTypes = createPaymentMethodTypes()
-        val initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
+        val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
             PaymentSheet.IntentConfiguration(
                 mode = PaymentSheet.IntentConfiguration.Mode.Setup(),
                 paymentMethodTypes = paymentMethodTypes,
@@ -148,5 +148,18 @@ internal class CustomerAdapterDataSource @Inject constructor(
             // We only support cards if `customerAdapter.canCreateSetupIntents` is false.
             listOf("card")
         }
+    }
+
+    private suspend fun <T> runCatchingAdapterTask(
+        task: suspend () -> CustomerAdapter.Result<T>
+    ): CustomerSheetDataResult<T> = withContext(workContext) {
+        runCatching {
+            task()
+        }.fold(
+            onSuccess = { it.toCustomerSheetDataResult() },
+            onFailure = {
+                CustomerSheetDataResult.failure(cause = it, displayMessage = null)
+            }
+        )
     }
 }

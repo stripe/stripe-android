@@ -3,11 +3,14 @@ package com.stripe.android.financialconnections.repository
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
+import com.stripe.android.core.frauddetection.FraudDetectionData
+import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.ApiKeyFixtures.consumerSession
 import com.stripe.android.financialconnections.ApiKeyFixtures.consumerSessionSignup
 import com.stripe.android.financialconnections.ApiKeyFixtures.verifiedConsumerSession
+import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext
 import com.stripe.android.financialconnections.repository.api.FinancialConnectionsConsumersApiService
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSession.VerificationSession.SessionState
@@ -15,6 +18,9 @@ import com.stripe.android.model.ConsumerSession.VerificationSession.SessionType
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSessionSignup
 import com.stripe.android.model.CustomEmailType
+import com.stripe.android.model.IncentiveEligibilitySession
+import com.stripe.android.model.LinkMode
+import com.stripe.android.model.SharePaymentDetails
 import com.stripe.android.model.VerificationType
 import com.stripe.android.repository.ConsumersApiService
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -23,6 +29,7 @@ import org.junit.Test
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import java.util.Locale
@@ -39,9 +46,11 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
     private val logger: Logger = mock()
     private val locale: Locale = Locale.getDefault()
     private val consumerSessionRepository = RealConsumerSessionRepository(SavedStateHandle())
+    private val fraudDetectionDataRepository = mock<FraudDetectionDataRepository>()
 
     private fun buildRepository(
-        isInstantDebits: Boolean = false
+        isInstantDebits: Boolean = false,
+        elementsSessionContext: ElementsSessionContext? = null,
     ) = FinancialConnectionsConsumerSessionRepository(
         consumersApiService = consumersApiService,
         provideApiRequestOptions = { apiOptions },
@@ -50,6 +59,8 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
         locale = locale,
         logger = logger,
         isLinkWithStripe = { isInstantDebits },
+        fraudDetectionDataRepository = fraudDetectionDataRepository,
+        elementsSessionContext = elementsSessionContext,
     )
 
     @Test
@@ -75,6 +86,9 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
                 country = anyOrNull(),
                 name = anyOrNull(),
                 locale = anyOrNull(),
+                amount = anyOrNull(),
+                currency = anyOrNull(),
+                incentiveEligibilitySession = anyOrNull(),
                 consentAction = anyOrNull(),
                 requestSurface = anyOrNull(),
                 requestOptions = anyOrNull(),
@@ -103,6 +117,62 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
                 publishableKey = "pk_123",
                 isVerified = true,
             )
+        )
+    }
+
+    @Test
+    fun `Sends relevant fields from ElementsSessionContext in signup call`() = runTest {
+        val consumerSession = consumerSession().copy(
+            verificationSessions = listOf(
+                ConsumerSession.VerificationSession(
+                    type = SessionType.SignUp,
+                    state = SessionState.Started,
+                )
+            )
+        )
+
+        val consumerSessionSignup = ConsumerSessionSignup(
+            consumerSession = consumerSession,
+            publishableKey = "pk_123",
+        )
+
+        whenever(
+            consumersApiService.signUp(
+                email = anyOrNull(),
+                phoneNumber = anyOrNull(),
+                country = anyOrNull(),
+                name = anyOrNull(),
+                locale = anyOrNull(),
+                amount = eq(1234),
+                currency = eq("cad"),
+                incentiveEligibilitySession = eq(IncentiveEligibilitySession.PaymentIntent("pi_123")),
+                consentAction = anyOrNull(),
+                requestSurface = anyOrNull(),
+                requestOptions = anyOrNull(),
+            )
+        ).thenReturn(
+            Result.success(consumerSessionSignup)
+        )
+
+        val repository = buildRepository(
+            elementsSessionContext = ElementsSessionContext(
+                amount = 1234,
+                currency = "cad",
+                linkMode = LinkMode.LinkPaymentMethod,
+                billingDetails = null,
+                prefillDetails = ElementsSessionContext.PrefillDetails(
+                    email = null,
+                    phone = null,
+                    phoneCountryCode = null,
+                ),
+                incentiveEligibilitySession = IncentiveEligibilitySession.PaymentIntent("pi_123"),
+            )
+        )
+
+        repository.signUp(
+            email = "email@email.com",
+            phoneNumber = "+15555555555",
+            country = "US",
         )
     }
 
@@ -266,6 +336,9 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
                 country = anyOrNull(),
                 name = anyOrNull(),
                 locale = anyOrNull(),
+                amount = anyOrNull(),
+                currency = anyOrNull(),
+                incentiveEligibilitySession = anyOrNull(),
                 consentAction = anyOrNull(),
                 requestSurface = anyOrNull(),
                 requestOptions = anyOrNull(),
@@ -284,6 +357,9 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
             country = anyOrNull(),
             name = anyOrNull(),
             locale = anyOrNull(),
+            amount = anyOrNull(),
+            currency = anyOrNull(),
+            incentiveEligibilitySession = anyOrNull(),
             requestSurface = eq("android_connections"),
             consentAction = anyOrNull(),
             requestOptions = anyOrNull(),
@@ -301,6 +377,9 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
                 country = anyOrNull(),
                 name = anyOrNull(),
                 locale = anyOrNull(),
+                amount = anyOrNull(),
+                currency = anyOrNull(),
+                incentiveEligibilitySession = anyOrNull(),
                 consentAction = anyOrNull(),
                 requestSurface = anyOrNull(),
                 requestOptions = anyOrNull(),
@@ -319,9 +398,55 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
             country = anyOrNull(),
             name = anyOrNull(),
             locale = anyOrNull(),
+            amount = anyOrNull(),
+            currency = anyOrNull(),
+            incentiveEligibilitySession = anyOrNull(),
             requestSurface = eq("android_instant_debits"),
             consentAction = anyOrNull(),
             requestOptions = anyOrNull(),
         )
+    }
+
+    @Test
+    fun `Sends fraud detection data when sharing PaymentDetails`() = runTest {
+        val consumerSessionClientSecret = "clientSecret"
+        val repository = buildRepository()
+
+        val fraudParams = FraudDetectionData(
+            guid = "guid_1234",
+            muid = "muid_1234",
+            sid = "sid_1234",
+            timestamp = 1234567890L,
+        )
+
+        whenever(fraudDetectionDataRepository.getCached()).thenReturn(fraudParams)
+
+        whenever(
+            consumersApiService.sharePaymentDetails(
+                consumerSessionClientSecret = anyOrNull(),
+                paymentDetailsId = anyOrNull(),
+                expectedPaymentMethodType = anyOrNull(),
+                billingPhone = anyOrNull(),
+                requestSurface = anyOrNull(),
+                requestOptions = anyOrNull(),
+                extraParams = eq(fraudParams.params),
+            )
+        ).thenReturn(
+            Result.success(
+                SharePaymentDetails(
+                    paymentMethodId = "pm_123",
+                    encodedPaymentMethod = "{\"id\": \"pm_123\"}",
+                )
+            )
+        )
+
+        repository.sharePaymentDetails(
+            consumerSessionClientSecret = consumerSessionClientSecret,
+            paymentDetailsId = "pd_123",
+            expectedPaymentMethodType = "card",
+            billingPhone = null,
+        )
+
+        verify(fraudDetectionDataRepository, never()).getLatest()
     }
 }

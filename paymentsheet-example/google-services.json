@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "577365562050",
+    "project_id": "stripe-payments-sdk-prod",
+    "storage_bucket": "stripe-payments-sdk-prod.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:577365562050:android:5b7e92d18f8ca8d1e9a15b",
+        "android_client_info": {
+          "package_name": "com.stripe.android.paymentsheet.example"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB2kcJSRjIOQDQfRSe7oLySGOzxgRRhZxw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

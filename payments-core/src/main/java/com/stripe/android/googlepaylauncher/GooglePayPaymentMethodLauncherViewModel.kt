@@ -137,6 +137,7 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
                 }
                 .productUsage(setOf(GooglePayPaymentMethodLauncher.PRODUCT_USAGE_TOKEN))
                 .googlePayConfig(args.config)
+                .cardBrandFilter(args.cardBrandFilter)
                 .build().subcomponentBuilder
 
             return subComponentBuilder

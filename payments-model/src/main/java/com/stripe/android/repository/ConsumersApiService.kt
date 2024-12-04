@@ -16,6 +16,7 @@ import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSessionSignup
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.CustomEmailType
+import com.stripe.android.model.IncentiveEligibilitySession
 import com.stripe.android.model.SharePaymentDetails
 import com.stripe.android.model.VerificationType
 import com.stripe.android.model.parsers.AttachConsumerToLinkAccountSessionJsonParser
@@ -35,6 +36,9 @@ interface ConsumersApiService {
         country: String,
         name: String?,
         locale: Locale?,
+        amount: Long?,
+        currency: String?,
+        incentiveEligibilitySession: IncentiveEligibilitySession?,
         requestSurface: String,
         consentAction: ConsumerSignUpConsentAction,
         requestOptions: ApiRequest.Options,
@@ -82,8 +86,10 @@ interface ConsumersApiService {
         consumerSessionClientSecret: String,
         paymentDetailsId: String,
         expectedPaymentMethodType: String,
+        billingPhone: String?,
         requestSurface: String,
         requestOptions: ApiRequest.Options,
+        extraParams: Map<String, Any?>,
     ): Result<SharePaymentDetails>
 }
 
@@ -109,6 +115,9 @@ class ConsumersApiServiceImpl(
         country: String,
         name: String?,
         locale: Locale?,
+        amount: Long?,
+        currency: String?,
+        incentiveEligibilitySession: IncentiveEligibilitySession?,
         requestSurface: String,
         consentAction: ConsumerSignUpConsentAction,
         requestOptions: ApiRequest.Options,
@@ -124,6 +133,8 @@ class ConsumersApiServiceImpl(
                     "phone_number" to phoneNumber,
                     "country" to country,
                     "country_inferring_method" to "PHONE_NUMBER",
+                    "amount" to amount,
+                    "currency" to currency,
                     "consent_action" to consentAction.value,
                     "request_surface" to requestSurface,
                 ).plus(
@@ -134,6 +145,8 @@ class ConsumersApiServiceImpl(
                     name?.let {
                         mapOf("legal_name" to it)
                     } ?: emptyMap()
+                ).plus(
+                    incentiveEligibilitySession?.toParamMap().orEmpty()
                 ),
             ),
             responseJsonParser = ConsumerSessionSignupJsonParser,
@@ -276,8 +289,10 @@ class ConsumersApiServiceImpl(
         consumerSessionClientSecret: String,
         paymentDetailsId: String,
         expectedPaymentMethodType: String,
+        billingPhone: String?,
         requestSurface: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: ApiRequest.Options,
+        extraParams: Map<String, Any?>,
     ): Result<SharePaymentDetails> {
         return executeRequestWithResultParser(
             stripeErrorJsonParser = stripeErrorJsonParser,
@@ -292,7 +307,8 @@ class ConsumersApiServiceImpl(
                     "credentials" to mapOf(
                         "consumer_session_client_secret" to consumerSessionClientSecret
                     ),
-                )
+                    "billing_phone" to billingPhone,
+                ) + extraParams,
             ),
             responseJsonParser = SharePaymentDetailsJsonParser,
         )

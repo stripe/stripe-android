@@ -69,6 +69,7 @@ internal class PaymentSheetAnalyticsListener(
             is PaymentSheetScreen.VerticalModeForm,
             is PaymentSheetScreen.ManageOneSavedPaymentMethod,
             is PaymentSheetScreen.ManageSavedPaymentMethods,
+            is PaymentSheetScreen.UpdatePaymentMethod,
             is PaymentSheetScreen.CvcRecollection -> {
                 // Nothing to do here
             }

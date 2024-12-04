@@ -4,7 +4,6 @@ import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import kotlin.test.Test
 
-@OptIn(ExperimentalCustomerSheetApi::class)
 class CustomerSheetConfigViewModelTest {
     @Test
     fun `On set configure request, should be able to retrieve the same request`() {
@@ -16,7 +15,7 @@ class CustomerSheetConfigViewModelTest {
             configuration = CustomerSheet.Configuration.builder(
                 merchantDisplayName = "Merchant, Inc.",
             )
-                .googlePayEnabled(googlePayConfiguration = true)
+                .googlePayEnabled(googlePayEnabled = true)
                 .build()
         )
 
@@ -36,7 +35,7 @@ class CustomerSheetConfigViewModelTest {
             configuration = CustomerSheet.Configuration.builder(
                 merchantDisplayName = "Merchant, Inc.",
             )
-                .googlePayEnabled(googlePayConfiguration = true)
+                .googlePayEnabled(googlePayEnabled = true)
                 .build()
         )
 

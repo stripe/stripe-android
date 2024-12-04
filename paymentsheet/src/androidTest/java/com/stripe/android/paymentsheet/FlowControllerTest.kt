@@ -36,7 +36,6 @@ import org.junit.runner.RunWith
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
-@OptIn(ExperimentalPaymentMethodLayoutApi::class)
 @RunWith(TestParameterInjector::class)
 internal class FlowControllerTest {
     @get:Rule
@@ -46,6 +45,10 @@ internal class FlowControllerTest {
     private val networkRule = testRules.networkRule
 
     private val page: PaymentSheetPage = PaymentSheetPage(composeTestRule)
+
+    private val defaultConfiguration = PaymentSheet.Configuration.Builder("Example, Inc.")
+        .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
+        .build()
 
     @Test
     fun testSuccessfulCardPayment(
@@ -65,7 +68,7 @@ internal class FlowControllerTest {
         testContext.configureFlowController {
             configureWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = null,
+                configuration = defaultConfiguration,
                 callback = { success, error ->
                     assertThat(success).isTrue()
                     assertThat(error).isNull()
@@ -247,7 +250,7 @@ internal class FlowControllerTest {
         testContext.configureFlowController {
             configureWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = null,
+                configuration = defaultConfiguration,
                 callback = { success, error ->
                     assertThat(success).isTrue()
                     assertThat(error).isNull()
@@ -287,7 +290,7 @@ internal class FlowControllerTest {
             testContext.configureFlowController {
                 configureWithPaymentIntent(
                     paymentIntentClientSecret = "pi_example_secret_example",
-                    configuration = null,
+                    configuration = defaultConfiguration,
                     callback = { success, error ->
                         assertThat(success).isTrue()
                         assertThat(error).isNull()
@@ -348,7 +351,7 @@ internal class FlowControllerTest {
         scenario.onActivity {
             flowController.configureWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = null,
+                configuration = defaultConfiguration,
                 callback = { success, error ->
                     assertThat(success).isTrue()
                     assertThat(error).isNull()
@@ -372,7 +375,7 @@ internal class FlowControllerTest {
         scenario.onActivity {
             flowController.configureWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = null,
+                configuration = defaultConfiguration,
                 callback = { success, error ->
                     assertThat(success).isTrue()
                     assertThat(error).isNull()
@@ -411,7 +414,7 @@ internal class FlowControllerTest {
             scenario.onActivity {
                 flowController.configureWithPaymentIntent(
                     paymentIntentClientSecret = paymentIntentClientSecret,
-                    configuration = null,
+                    configuration = defaultConfiguration,
                     callback = { success, error ->
                         assertThat(success).isTrue()
                         assertThat(error).isNull()
@@ -466,7 +469,7 @@ internal class FlowControllerTest {
                         currency = "usd"
                     )
                 ),
-                configuration = null,
+                configuration = defaultConfiguration,
                 callback = { success, error ->
                     assertThat(success).isTrue()
                     assertThat(error).isNull()
@@ -544,7 +547,7 @@ internal class FlowControllerTest {
                         currency = "usd"
                     )
                 ),
-                configuration = null,
+                configuration = defaultConfiguration,
                 callback = { success, error ->
                     assertThat(success).isTrue()
                     assertThat(error).isNull()
@@ -596,7 +599,7 @@ internal class FlowControllerTest {
                         currency = "usd"
                     )
                 ),
-                configuration = null,
+                configuration = defaultConfiguration,
                 callback = { success, error ->
                     assertThat(success).isTrue()
                     assertThat(error).isNull()
@@ -653,7 +656,7 @@ internal class FlowControllerTest {
                         currency = "cad",
                     )
                 ),
-                configuration = null,
+                configuration = defaultConfiguration,
                 callback = { success, error ->
                     assertThat(success).isTrue()
                     assertThat(error).isNull()
@@ -718,6 +721,7 @@ internal class FlowControllerTest {
                         id = "cus_1",
                         ephemeralKeySecret = "123",
                     ),
+                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
                 ),
                 callback = { success, error ->
                     assertThat(success).isTrue()

@@ -3,6 +3,7 @@ package com.stripe.android.lpm
 import com.stripe.android.BasePlaygroundTest
 import com.stripe.android.paymentsheet.example.playground.settings.Country
 import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CustomerSessionSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSheetPaymentMethodModeDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PaymentMethodMode
 import com.stripe.android.test.core.AuthorizeAction
@@ -25,6 +26,17 @@ internal class TestUsBankAccountInCustomerSheet : BasePlaygroundTest() {
             testParameters = testParameters.copy(
                 authorizationAction = AuthorizeAction.Cancel,
             )
+        )
+    }
+
+    @Test
+    fun testUSBankAccountWithCustomerSession() {
+        testDriver.saveUsBankAccountInCustomerSheet(
+            testParameters = testParameters.copy(
+                authorizationAction = AuthorizeAction.Cancel,
+            ).copyPlaygroundSettings { settings ->
+                settings[CustomerSessionSettingsDefinition] = true
+            }
         )
     }
 }

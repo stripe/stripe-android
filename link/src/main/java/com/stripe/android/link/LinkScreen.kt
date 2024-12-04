@@ -1,9 +1,10 @@
 package com.stripe.android.link
 
-internal sealed interface LinkScreen {
-    data object Verification : LinkScreen
-    data object Wallet : LinkScreen
-    data object PaymentMethod : LinkScreen
-    data object CardEdit : LinkScreen
-    data object SignUp : LinkScreen
+internal sealed class LinkScreen(val route: String) {
+    data object Loading : LinkScreen("loading")
+    data object Verification : LinkScreen("verification")
+    data object Wallet : LinkScreen("wallet")
+    data object PaymentMethod : LinkScreen("paymentMethod")
+    data object CardEdit : LinkScreen("cardEdit")
+    data object SignUp : LinkScreen("signUp")
 }

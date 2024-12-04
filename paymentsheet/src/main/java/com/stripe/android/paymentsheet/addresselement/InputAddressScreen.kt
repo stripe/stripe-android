@@ -127,6 +127,7 @@ internal fun InputAddressScreen(
                 checkboxContent = {
                     viewModel.args.config?.additionalFields?.checkboxLabel?.let { label ->
                         CheckboxElementUI(
+                            modifier = Modifier.padding(vertical = 4.dp),
                             isChecked = checkboxChecked,
                             label = label,
                             isEnabled = formEnabled,

@@ -9,6 +9,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.customersheet.CustomerSheetViewState.AddPaymentMethod
 import com.stripe.android.customersheet.CustomerSheetViewState.SelectPaymentMethod
 import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
@@ -20,9 +21,6 @@ import com.stripe.android.customersheet.injection.CustomerSheetViewModelModule
 import com.stripe.android.customersheet.utils.CustomerSheetTestHelper.createModifiableEditPaymentMethodViewInteractorFactory
 import com.stripe.android.customersheet.utils.CustomerSheetTestHelper.createViewModel
 import com.stripe.android.customersheet.utils.FakeCustomerSheetLoader
-import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
-import com.stripe.android.financialconnections.model.FinancialConnectionsSession
-import com.stripe.android.financialconnections.model.PaymentAccount
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
 import com.stripe.android.model.CardBrand
@@ -31,25 +29,24 @@ import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 import com.stripe.android.model.PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD
 import com.stripe.android.model.PaymentMethodFixtures.US_BANK_ACCOUNT
 import com.stripe.android.model.PaymentMethodFixtures.US_BANK_ACCOUNT_VERIFIED
+import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.model.SetupIntentFixtures
-import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResponseInternal
-import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
 import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
-import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormScreenState
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.paymentsheet.ui.CardBrandChoice
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewAction
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewAction.OnBrandChoiceChanged
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewAction.OnRemoveConfirmed
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewAction.OnRemovePressed
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewAction.OnUpdatePressed
-import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
+import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.CardBillingAddressElement
@@ -58,6 +55,7 @@ import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.forms.FormFieldEntry
+import com.stripe.android.utils.BankFormScreenStateFactory
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -69,20 +67,24 @@ import org.mockito.kotlin.argThat
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import kotlin.coroutines.coroutineContext
 import kotlin.test.assertFailsWith
 import com.stripe.android.ui.core.R as UiCoreR
 
 @RunWith(RobolectricTestRunner::class)
-@OptIn(ExperimentalCustomerSheetApi::class)
 class CustomerSheetViewModelTest {
 
     private val testDispatcher = UnconfinedTestDispatcher(TestCoroutineScheduler())
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule(testDispatcher)
+
+    @get:Rule
+    val featureFlagRule = FeatureFlagTestRule(
+        featureFlag = FeatureFlags.useNewUpdateCardScreen,
+        isEnabled = false,
+    )
 
     @Test
     fun `isLiveMode is true when publishable key is live`() {
@@ -150,16 +152,37 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
-    fun `on init, sends 'onInit' event to event reporter`() = runTest(testDispatcher) {
+    fun `on init, sends expected 'onInit' event to event reporter`() = runTest(testDispatcher) {
         val eventReporter: CustomerSheetEventReporter = mock()
 
         createViewModel(
             workContext = testDispatcher,
             eventReporter = eventReporter,
+            integrationType = CustomerSheetIntegration.Type.CustomerAdapter,
             configuration = CustomerSheetFixtures.MINIMUM_CONFIG,
         )
 
-        verify(eventReporter).onInit(CustomerSheetFixtures.MINIMUM_CONFIG)
+        verify(eventReporter).onInit(
+            configuration = CustomerSheetFixtures.MINIMUM_CONFIG,
+            integrationType = CustomerSheetIntegration.Type.CustomerAdapter,
+        )
+    }
+
+    @Test
+    fun `on init with customer session, sends expected 'onInit' event to event reporter`() = runTest(testDispatcher) {
+        val eventReporter: CustomerSheetEventReporter = mock()
+
+        createViewModel(
+            workContext = testDispatcher,
+            eventReporter = eventReporter,
+            integrationType = CustomerSheetIntegration.Type.CustomerSession,
+            configuration = CustomerSheetFixtures.MINIMUM_CONFIG,
+        )
+
+        verify(eventReporter).onInit(
+            configuration = CustomerSheetFixtures.MINIMUM_CONFIG,
+            integrationType = CustomerSheetIntegration.Type.CustomerSession,
+        )
     }
 
     @Test
@@ -1068,6 +1091,9 @@ class CustomerSheetViewModelTest {
                 createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
                 retrieveSetupIntent = Result.success(SetupIntentFixtures.SI_SUCCEEDED),
             ),
+            paymentMethodDataSource = FakeCustomerSheetPaymentMethodDataSource(
+                paymentMethods = CustomerSheetDataResult.success(listOf(CARD_PAYMENT_METHOD)),
+            ),
             intentDataSource = FakeCustomerSheetIntentDataSource(
                 onRetrieveSetupIntentClientSecret = {
                     CustomerSheetDataResult.success("seti_123")
@@ -1164,6 +1190,12 @@ class CustomerSheetViewModelTest {
             ),
             customerPaymentMethods = listOf(CARD_PAYMENT_METHOD.copy(id = "pm_1")),
             paymentMethodDataSource = FakeCustomerSheetPaymentMethodDataSource(
+                paymentMethods = CustomerSheetDataResult.success(
+                    listOf(
+                        CARD_PAYMENT_METHOD.copy(id = "pm_1"),
+                        CARD_PAYMENT_METHOD.copy(id = "pm_2"),
+                    )
+                ),
                 onDetachPaymentMethod = {
                     CustomerSheetDataResult.success(CARD_PAYMENT_METHOD.copy(id = "pm_2"))
                 },
@@ -1174,7 +1206,7 @@ class CustomerSheetViewModelTest {
                 },
             ),
             stripeRepository = FakeStripeRepository(
-                createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD.copy(id = "pm_2"),),
+                createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD.copy(id = "pm_2")),
                 retrieveSetupIntent = Result.success(SetupIntentFixtures.SI_SUCCEEDED),
             ),
         )
@@ -1376,13 +1408,38 @@ class CustomerSheetViewModelTest {
         )
 
         viewModel.handleViewAction(
-            CustomerSheetViewAction.OnModifyItem(paymentMethod = CARD_PAYMENT_METHOD)
+            CustomerSheetViewAction.OnModifyItem(paymentMethod = CARD_PAYMENT_METHOD.toDisplayableSavedPaymentMethod())
         )
 
         viewModel.viewState.test {
             val state = awaitItem()
 
             assertThat(state).isInstanceOf<CustomerSheetViewState.EditPaymentMethod>()
+            assertThat(state.topBarState {}.showEditMenu).isFalse()
+        }
+
+        verify(eventReporter).onScreenPresented(CustomerSheetEventReporter.Screen.EditPaymentMethod)
+    }
+
+    @Test
+    fun `When update payment screen is presented, no edit menu & event is reported`() = runTest {
+        featureFlagRule.setEnabled(true)
+        val eventReporter: CustomerSheetEventReporter = mock()
+
+        val viewModel = createViewModel(
+            workContext = testDispatcher,
+            customerPaymentMethods = listOf(CARD_PAYMENT_METHOD),
+            eventReporter = eventReporter,
+        )
+
+        viewModel.handleViewAction(
+            CustomerSheetViewAction.OnModifyItem(paymentMethod = CARD_PAYMENT_METHOD.toDisplayableSavedPaymentMethod())
+        )
+
+        viewModel.viewState.test {
+            val state = awaitItem()
+
+            assertThat(state).isInstanceOf<CustomerSheetViewState.UpdatePaymentMethod>()
             assertThat(state.topBarState {}.showEditMenu).isFalse()
         }
 
@@ -1399,7 +1456,7 @@ class CustomerSheetViewModelTest {
         )
 
         viewModel.handleViewAction(
-            CustomerSheetViewAction.OnModifyItem(paymentMethod = CARD_PAYMENT_METHOD)
+            CustomerSheetViewAction.OnModifyItem(paymentMethod = CARD_PAYMENT_METHOD.toDisplayableSavedPaymentMethod())
         )
 
         viewModel.handleViewAction(CustomerSheetViewAction.OnBackPressed)
@@ -2009,28 +2066,7 @@ class CustomerSheetViewModelTest {
 
     @Test
     fun `US Bank Account can be created and attached`() = runTest(testDispatcher) {
-        val usBankAccount = PaymentSelection.New.USBankAccount(
-            labelResource = "Test",
-            iconResource = 0,
-            paymentMethodCreateParams = mock(),
-            customerRequestedSave = mock(),
-            input = PaymentSelection.New.USBankAccount.Input(
-                name = "",
-                email = null,
-                phone = null,
-                address = null,
-                saveForFutureUse = false,
-            ),
-            instantDebits = null,
-            screenState = USBankAccountFormScreenState.SavedAccount(
-                financialConnectionsSessionId = "session_1234",
-                intentId = "intent_1234",
-                bankName = "Stripe Bank",
-                last4 = "6789",
-                primaryButtonText = "Continue".resolvableString,
-                mandateText = null,
-            ),
-        )
+        val usBankAccount = mockUSBankAccountPaymentSelection()
         val viewModel = createViewModel(
             workContext = testDispatcher,
             stripeRepository = FakeStripeRepository(
@@ -2039,6 +2075,9 @@ class CustomerSheetViewModelTest {
             ),
             isGooglePayAvailable = false,
             customerPaymentMethods = listOf(),
+            paymentMethodDataSource = FakeCustomerSheetPaymentMethodDataSource(
+                paymentMethods = CustomerSheetDataResult.success(listOf(US_BANK_ACCOUNT_VERIFIED)),
+            ),
             intentDataSource = FakeCustomerSheetIntentDataSource(
                 onRetrieveSetupIntentClientSecret = {
                     CustomerSheetDataResult.success("seti_123")
@@ -2051,19 +2090,26 @@ class CustomerSheetViewModelTest {
             assertThat(awaitItem()).isInstanceOf<AddPaymentMethod>()
 
             viewModel.handleViewAction(
-                CustomerSheetViewAction.OnConfirmUSBankAccount(usBankAccount)
-            )
-
-            viewModel.handleViewAction(
-                CustomerSheetViewAction.OnPrimaryButtonPressed
-            )
-
-            val viewState = awaitViewState<SelectPaymentMethod>()
-
-            assertThat(viewState.paymentSelection)
-                .isEqualTo(
-                    PaymentSelection.Saved(US_BANK_ACCOUNT_VERIFIED)
+                CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
+                    LpmRepositoryTestHelpers.usBankAccount,
                 )
+            )
+
+            assertThat(awaitItem()).isInstanceOf<AddPaymentMethod>()
+
+            viewModel.handleViewAction(CustomerSheetViewAction.OnBankAccountSelectionChanged(usBankAccount))
+
+            val viewStateAfterAdding = awaitViewState<AddPaymentMethod>()
+            assertThat(viewStateAfterAdding.bankAccountSelection).isEqualTo(usBankAccount)
+
+            viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
+            assertThat(awaitItem()).isInstanceOf<AddPaymentMethod>()
+
+            val viewStateAfterConfirming = awaitViewState<SelectPaymentMethod>()
+
+            assertThat(viewStateAfterConfirming.paymentSelection).isEqualTo(
+                PaymentSelection.Saved(US_BANK_ACCOUNT_VERIFIED)
+            )
 
             cancelAndIgnoreRemainingEvents()
         }
@@ -2098,7 +2144,6 @@ class CustomerSheetViewModelTest {
     fun `When adding a US Bank account and user taps on scrim, a confirmation dialog should be visible`() = runTest(testDispatcher) {
         val viewModel = createViewModel(
             workContext = testDispatcher,
-            isFinancialConnectionsAvailable = { true },
             isGooglePayAvailable = false,
             customerPaymentMethods = listOf(),
         )
@@ -2115,10 +2160,8 @@ class CustomerSheetViewModelTest {
                 .isFalse()
 
             viewModel.handleViewAction(
-                CustomerSheetViewAction.OnCollectBankAccountResult(
-                    bankAccountResult = mockUSBankAccountResult(
-                        isVerified = true
-                    ),
+                CustomerSheetViewAction.OnBankAccountSelectionChanged(
+                    paymentSelection = mockUSBankAccountPaymentSelection(),
                 )
             )
 
@@ -2138,25 +2181,21 @@ class CustomerSheetViewModelTest {
     fun `When adding a Card and user taps on scrim, a confirmation dialog should not be visible`() = runTest(testDispatcher) {
         val viewModel = createViewModel(
             workContext = testDispatcher,
-            isFinancialConnectionsAvailable = { true },
             isGooglePayAvailable = false,
             customerPaymentMethods = listOf(),
         )
 
         viewModel.viewState.test {
-            var viewState = awaitViewState<AddPaymentMethod>()
+            val viewState = awaitViewState<AddPaymentMethod>()
             assertThat(viewState.displayDismissConfirmationModal)
                 .isFalse()
 
             viewModel.handleViewAction(
-                CustomerSheetViewAction.OnCollectBankAccountResult(
-                    bankAccountResult = CollectBankAccountResultInternal.Completed(
-                        response = mock(),
-                    ),
+                CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
+                    LpmRepositoryTestHelpers.card,
                 )
             )
 
-            viewState = awaitViewState()
             assertThat(viewState.displayDismissConfirmationModal)
                 .isFalse()
 
@@ -2172,7 +2211,6 @@ class CustomerSheetViewModelTest {
             workContext = testDispatcher,
             isGooglePayAvailable = false,
             customerPaymentMethods = listOf(),
-            isFinancialConnectionsAvailable = { true },
             supportedPaymentMethods = listOf(LpmRepositoryTestHelpers.usBankAccount),
         )
 
@@ -2188,11 +2226,7 @@ class CustomerSheetViewModelTest {
                 .isFalse()
 
             viewModel.handleViewAction(
-                CustomerSheetViewAction.OnCollectBankAccountResult(
-                    bankAccountResult = mockUSBankAccountResult(
-                        isVerified = true
-                    ),
-                )
+                CustomerSheetViewAction.OnBankAccountSelectionChanged(mockUSBankAccountPaymentSelection())
             )
 
             viewState = awaitViewState()
@@ -2219,7 +2253,6 @@ class CustomerSheetViewModelTest {
     fun `When user confirms the confirmation dialog, the sheet should close`() = runTest(testDispatcher) {
         val viewModel = createViewModel(
             workContext = testDispatcher,
-            isFinancialConnectionsAvailable = { true },
             isGooglePayAvailable = false,
             customerPaymentMethods = listOf(),
         )
@@ -2241,11 +2274,7 @@ class CustomerSheetViewModelTest {
                 .isFalse()
 
             viewModel.handleViewAction(
-                CustomerSheetViewAction.OnCollectBankAccountResult(
-                    bankAccountResult = mockUSBankAccountResult(
-                        isVerified = true
-                    ),
-                )
+                CustomerSheetViewAction.OnBankAccountSelectionChanged(mockUSBankAccountPaymentSelection())
             )
 
             viewState = viewStateTurbine.awaitViewState()
@@ -2278,7 +2307,6 @@ class CustomerSheetViewModelTest {
     fun `When in add flow and us bank account is retrieved, then shouldDisplayConfirmationDialog should be true`() = runTest(testDispatcher) {
         val viewModel = createViewModel(
             workContext = testDispatcher,
-            isFinancialConnectionsAvailable = { true },
             isGooglePayAvailable = false,
             customerPaymentMethods = listOf(),
         )
@@ -2290,68 +2318,14 @@ class CustomerSheetViewModelTest {
         )
 
         viewModel.handleViewAction(
-            CustomerSheetViewAction.OnCollectBankAccountResult(
-                mockUSBankAccountResult(
-                    isVerified = true,
-                )
-            )
+            CustomerSheetViewAction.OnBankAccountSelectionChanged(mockUSBankAccountPaymentSelection())
         )
 
         viewModel.viewState.test {
             val viewState = awaitViewState<AddPaymentMethod>()
             assertThat(
-                viewState.shouldDisplayDismissConfirmationModal(
-                    isFinancialConnectionsAvailable = { true }
-                )
+                viewState.shouldDisplayDismissConfirmationModal()
             ).isTrue()
-        }
-    }
-
-    @Test
-    fun `When in add flow and unverified us bank account is retrieved, then shouldDisplayConfirmationDialog should be false`() = runTest(testDispatcher) {
-        val viewModel = createViewModel(
-            workContext = testDispatcher,
-            isFinancialConnectionsAvailable = { true },
-            isGooglePayAvailable = false,
-            customerPaymentMethods = listOf(),
-            supportedPaymentMethods = listOf(LpmRepositoryTestHelpers.usBankAccount),
-        )
-
-        viewModel.handleViewAction(
-            CustomerSheetViewAction.OnCollectBankAccountResult(
-                mockUSBankAccountResult(
-                    isVerified = false,
-                )
-            )
-        )
-
-        viewModel.viewState.test {
-            val viewState = awaitViewState<AddPaymentMethod>()
-            assertThat(
-                viewState.shouldDisplayDismissConfirmationModal(
-                    isFinancialConnectionsAvailable = { true }
-                )
-            ).isFalse()
-        }
-    }
-
-    @Test
-    fun `When financial connections is not available, then shouldDisplayConfirmationDialog should be false`() = runTest(testDispatcher) {
-        val viewModel = createViewModel(
-            workContext = testDispatcher,
-            isFinancialConnectionsAvailable = { true },
-            isGooglePayAvailable = false,
-            customerPaymentMethods = listOf(),
-            supportedPaymentMethods = listOf(LpmRepositoryTestHelpers.usBankAccount),
-        )
-
-        viewModel.viewState.test {
-            val viewState = awaitViewState<AddPaymentMethod>()
-            assertThat(
-                viewState.shouldDisplayDismissConfirmationModal(
-                    isFinancialConnectionsAvailable = { false }
-                )
-            ).isFalse()
         }
     }
 
@@ -2359,7 +2333,6 @@ class CustomerSheetViewModelTest {
     fun `Selecting the already selected payment method in add flow does nothing`() = runTest(testDispatcher) {
         val viewModel = createViewModel(
             workContext = testDispatcher,
-            isFinancialConnectionsAvailable = { true },
             isGooglePayAvailable = false,
             customerPaymentMethods = listOf(),
         )
@@ -2390,7 +2363,6 @@ class CustomerSheetViewModelTest {
     fun `When adding a us bank account and the account is retrieved, the primary button should say save`() = runTest(testDispatcher) {
         val viewModel = createViewModel(
             workContext = testDispatcher,
-            isFinancialConnectionsAvailable = { true },
             isGooglePayAvailable = false,
             customerPaymentMethods = listOf(),
             supportedPaymentMethods = listOf(LpmRepositoryTestHelpers.usBankAccount),
@@ -2404,37 +2376,9 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
-    fun `When adding a us bank account and the account is cancelled, the primary button should say continue`() = runTest(testDispatcher) {
-        val viewModel = createViewModel(
-            workContext = testDispatcher,
-            isFinancialConnectionsAvailable = { true },
-            isGooglePayAvailable = false,
-            customerPaymentMethods = listOf(),
-            supportedPaymentMethods = listOf(LpmRepositoryTestHelpers.usBankAccount),
-        )
-
-        viewModel.viewState.test {
-            var viewState = awaitViewState<AddPaymentMethod>()
-            assertThat(viewState.primaryButtonLabel)
-                .isEqualTo(R.string.stripe_paymentsheet_save.resolvableString)
-
-            viewModel.handleViewAction(
-                CustomerSheetViewAction.OnCollectBankAccountResult(
-                    CollectBankAccountResultInternal.Cancelled
-                )
-            )
-
-            viewState = awaitViewState()
-            assertThat(viewState.primaryButtonLabel)
-                .isEqualTo(UiCoreR.string.stripe_continue_button_label.resolvableString)
-        }
-    }
-
-    @Test
     fun `When adding us bank and primary button says save, it should stay as save`() = runTest(testDispatcher) {
         val viewModel = createViewModel(
             workContext = testDispatcher,
-            isFinancialConnectionsAvailable = { true },
             isGooglePayAvailable = false,
             customerPaymentMethods = listOf(),
         )
@@ -2446,11 +2390,7 @@ class CustomerSheetViewModelTest {
         )
 
         viewModel.handleViewAction(
-            CustomerSheetViewAction.OnCollectBankAccountResult(
-                CollectBankAccountResultInternal.Completed(
-                    response = mock(),
-                )
-            )
+            CustomerSheetViewAction.OnBankAccountSelectionChanged(mockUSBankAccountPaymentSelection())
         )
 
         viewModel.viewState.test {
@@ -2484,7 +2424,6 @@ class CustomerSheetViewModelTest {
     fun `Mandate is required depending on payment method`() = runTest(testDispatcher) {
         val viewModel = createViewModel(
             workContext = testDispatcher,
-            isFinancialConnectionsAvailable = { true },
             isGooglePayAvailable = false,
             customerPaymentMethods = listOf(),
         )
@@ -2531,7 +2470,6 @@ class CustomerSheetViewModelTest {
     fun `When confirming a US Bank Account, mandate text should be visible in select payment method screen`() = runTest(testDispatcher) {
         val viewModel = createViewModel(
             workContext = testDispatcher,
-            isFinancialConnectionsAvailable = { true },
             customerPaymentMethods = listOf(CARD_PAYMENT_METHOD, US_BANK_ACCOUNT),
         )
 
@@ -2558,7 +2496,6 @@ class CustomerSheetViewModelTest {
     fun `A confirmed US Bank Account shouldn't show mandate when selected in select payment method screen`() = runTest(testDispatcher) {
         val viewModel = createViewModel(
             workContext = testDispatcher,
-            isFinancialConnectionsAvailable = { true },
             savedPaymentSelection = PaymentSelection.Saved(
                 paymentMethod = US_BANK_ACCOUNT
             ),
@@ -2628,28 +2565,6 @@ class CustomerSheetViewModelTest {
 
     @Test
     fun `When attaching a non-verified bank account, the sheet closes and returns the account`() = runTest(testDispatcher) {
-        val usBankAccount = PaymentSelection.New.USBankAccount(
-            labelResource = "Test",
-            iconResource = 0,
-            paymentMethodCreateParams = mock(),
-            customerRequestedSave = mock(),
-            input = PaymentSelection.New.USBankAccount.Input(
-                name = "",
-                email = null,
-                phone = null,
-                address = null,
-                saveForFutureUse = false,
-            ),
-            instantDebits = null,
-            screenState = USBankAccountFormScreenState.SavedAccount(
-                financialConnectionsSessionId = "session_1234",
-                intentId = "intent_1234",
-                bankName = "Stripe Bank",
-                last4 = "6789",
-                primaryButtonText = "Continue".resolvableString,
-                mandateText = null,
-            ),
-        )
         val viewModel = createViewModel(
             workContext = testDispatcher,
             isGooglePayAvailable = false,
@@ -2669,10 +2584,10 @@ class CustomerSheetViewModelTest {
         viewModel.handleViewAction(CustomerSheetViewAction.OnFormFieldValuesCompleted(TEST_FORM_VALUES))
 
         viewModel.result.test {
-            assertThat(awaitItem())
-                .isNull()
+            assertThat(awaitItem()).isNull()
+
             viewModel.handleViewAction(
-                CustomerSheetViewAction.OnConfirmUSBankAccount(usBankAccount)
+                CustomerSheetViewAction.OnBankAccountSelectionChanged(mockUSBankAccountPaymentSelection())
             )
 
             viewModel.handleViewAction(
@@ -2700,7 +2615,9 @@ class CustomerSheetViewModelTest {
 
         viewModel.viewState.test {
             assertThat(awaitItem()).isInstanceOf<SelectPaymentMethod>()
-            viewModel.handleViewAction(CustomerSheetViewAction.OnModifyItem(paymentMethods.single()))
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnModifyItem(paymentMethods.single().toDisplayableSavedPaymentMethod())
+            )
 
             val editViewState = awaitViewState<CustomerSheetViewState.EditPaymentMethod>()
             editViewState.editPaymentMethodInteractor.handleViewAction(OnRemovePressed)
@@ -2730,7 +2647,9 @@ class CustomerSheetViewModelTest {
 
         viewModel.viewState.test {
             assertThat(awaitItem()).isInstanceOf<SelectPaymentMethod>()
-            viewModel.handleViewAction(CustomerSheetViewAction.OnModifyItem(paymentMethods.first()))
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnModifyItem(paymentMethods.first().toDisplayableSavedPaymentMethod())
+            )
 
             val editViewState = awaitViewState<CustomerSheetViewState.EditPaymentMethod>()
             editViewState.editPaymentMethodInteractor.handleViewAction(OnRemovePressed)
@@ -2784,12 +2703,14 @@ class CustomerSheetViewModelTest {
 
             viewModel.viewState.test {
                 assertThat(awaitItem()).isInstanceOf<SelectPaymentMethod>()
-                viewModel.handleViewAction(CustomerSheetViewAction.OnModifyItem(firstMethod))
+                viewModel.handleViewAction(
+                    CustomerSheetViewAction.OnModifyItem(firstMethod.toDisplayableSavedPaymentMethod())
+                )
 
                 val editViewState = awaitViewState<CustomerSheetViewState.EditPaymentMethod>()
                 editViewState.editPaymentMethodInteractor.handleViewAction(
                     OnBrandChoiceChanged(
-                        EditPaymentMethodViewState.CardBrandChoice(
+                        CardBrandChoice(
                             brand = CardBrand.Visa
                         )
                     )
@@ -2970,12 +2891,14 @@ class CustomerSheetViewModelTest {
 
         viewModel.viewState.test {
             assertThat(awaitItem()).isInstanceOf<SelectPaymentMethod>()
-            viewModel.handleViewAction(CustomerSheetViewAction.OnModifyItem(firstMethod))
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnModifyItem(firstMethod.toDisplayableSavedPaymentMethod())
+            )
 
             val editViewState = awaitViewState<CustomerSheetViewState.EditPaymentMethod>()
             editViewState.editPaymentMethodInteractor.handleViewAction(
                 OnBrandChoiceChanged(
-                    EditPaymentMethodViewState.CardBrandChoice(
+                    CardBrandChoice(
                         brand = CardBrand.Visa
                     )
                 )
@@ -3004,7 +2927,9 @@ class CustomerSheetViewModelTest {
 
         viewModel.viewState.test {
             assertThat(awaitItem()).isInstanceOf<SelectPaymentMethod>()
-            viewModel.handleViewAction(CustomerSheetViewAction.OnModifyItem(paymentMethods.single()))
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnModifyItem(paymentMethods.single().toDisplayableSavedPaymentMethod())
+            )
 
             val editViewState = awaitViewState<CustomerSheetViewState.EditPaymentMethod>()
             editViewState.editPaymentMethodInteractor.handleViewAction(
@@ -3031,7 +2956,9 @@ class CustomerSheetViewModelTest {
 
         viewModel.viewState.test {
             assertThat(awaitItem()).isInstanceOf<SelectPaymentMethod>()
-            viewModel.handleViewAction(CustomerSheetViewAction.OnModifyItem(paymentMethods.single()))
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnModifyItem(paymentMethods.single().toDisplayableSavedPaymentMethod())
+            )
 
             val editViewState = awaitViewState<CustomerSheetViewState.EditPaymentMethod>()
             editViewState.editPaymentMethodInteractor.handleViewAction(
@@ -3058,12 +2985,14 @@ class CustomerSheetViewModelTest {
 
         viewModel.viewState.test {
             assertThat(awaitItem()).isInstanceOf<SelectPaymentMethod>()
-            viewModel.handleViewAction(CustomerSheetViewAction.OnModifyItem(paymentMethods.single()))
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnModifyItem(paymentMethods.single().toDisplayableSavedPaymentMethod())
+            )
 
             val editViewState = awaitViewState<CustomerSheetViewState.EditPaymentMethod>()
             editViewState.editPaymentMethodInteractor.handleViewAction(
                 OnBrandChoiceChanged(
-                    EditPaymentMethodViewState.CardBrandChoice(brand = CardBrand.Visa)
+                    CardBrandChoice(brand = CardBrand.Visa)
                 )
             )
 
@@ -3077,22 +3006,24 @@ class CustomerSheetViewModelTest {
     @Test
     fun `Modifying a payment method does not show remove`() = runTest(testDispatcher) {
         val eventReporter: CustomerSheetEventReporter = mock()
-        val paymentMethods = listOf(CARD_WITH_NETWORKS_PAYMENT_METHOD)
+        val paymentMethod = CARD_WITH_NETWORKS_PAYMENT_METHOD
 
         val viewModel = createViewModel(
             workContext = testDispatcher,
             eventReporter = eventReporter,
-            customerPaymentMethods = paymentMethods,
+            customerPaymentMethods = listOf(paymentMethod),
         )
 
         viewModel.viewState.test {
             assertThat(awaitItem()).isInstanceOf<SelectPaymentMethod>()
-            viewModel.handleViewAction(CustomerSheetViewAction.OnModifyItem(paymentMethods.single()))
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnModifyItem(paymentMethod.toDisplayableSavedPaymentMethod())
+            )
 
             val editViewState = awaitViewState<CustomerSheetViewState.EditPaymentMethod>()
             editViewState.editPaymentMethodInteractor.handleViewAction(
                 OnBrandChoiceChanged(
-                    EditPaymentMethodViewState.CardBrandChoice(brand = CardBrand.Visa)
+                    CardBrandChoice(brand = CardBrand.Visa)
                 )
             )
 
@@ -3107,7 +3038,6 @@ class CustomerSheetViewModelTest {
     fun `Removing the current and original payment selection results in the selection being null`() = runTest(testDispatcher) {
         val viewModel = createViewModel(
             workContext = testDispatcher,
-            isFinancialConnectionsAvailable = { true },
             customerPaymentMethods = listOf(CARD_PAYMENT_METHOD, US_BANK_ACCOUNT),
             savedPaymentSelection = PaymentSelection.Saved(CARD_PAYMENT_METHOD),
         )
@@ -3204,6 +3134,20 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
+    fun `When disallowed brand entered, should report event`() = runTest(testDispatcher) {
+        val eventReporter = mock<CustomerSheetEventReporter>()
+
+        val viewModel = createViewModel(
+            workContext = testDispatcher,
+            eventReporter = eventReporter,
+        )
+
+        viewModel.handleViewAction(CustomerSheetViewAction.OnDisallowedCardBrandEntered(CardBrand.AmericanExpress))
+
+        verify(eventReporter).onDisallowedCardBrandEntered(CardBrand.AmericanExpress)
+    }
+
+    @Test
     fun `When setting up with intent, should call 'IntentConfirmationInterceptor' with expected params`() =
         runTest(testDispatcher) {
             val intentConfirmationInterceptor = FakeIntentConfirmationInterceptor()
@@ -3237,7 +3181,7 @@ class CustomerSheetViewModelTest {
 
             assertThat(call).isEqualTo(
                 FakeIntentConfirmationInterceptor.InterceptCall.WithExistingPaymentMethod(
-                    initializationMode = PaymentSheet.InitializationMode.SetupIntent(
+                    initializationMode = PaymentElementLoader.InitializationMode.SetupIntent(
                         clientSecret = "seti_123"
                     ),
                     paymentMethod = CARD_PAYMENT_METHOD,
@@ -3304,40 +3248,179 @@ class CustomerSheetViewModelTest {
             assertThat(selectState.topBarState {}.showEditMenu).isTrue()
         }
 
-    private fun mockUSBankAccountResult(
-        isVerified: Boolean
-    ): CollectBankAccountResultInternal.Completed {
-        val paymentAccount = mock<PaymentAccount>()
-        val financialConnectionsAccount = mock<FinancialConnectionsAccount>()
-        val financialConnectionsSession = mock<FinancialConnectionsSession>()
-        whenever(financialConnectionsSession.paymentAccount).thenReturn(
-            if (isVerified) {
-                financialConnectionsAccount
-            } else {
-                paymentAccount
+    @Test
+    fun `If refreshed payment methods does not contain newly added payment method, keep original selection`() =
+        runTest(testDispatcher) {
+            val attachedPaymentMethod = PaymentMethodFactory.card(random = true)
+            val paymentMethods = PaymentMethodFactory.cards(size = 4)
+            val originalSelection = PaymentSelection.Saved(paymentMethods[0])
+
+            val viewModel = retrieveViewModelForAttaching(
+                attachWithSetupIntent = true,
+                shouldFailRefresh = false,
+                originalSelection = originalSelection,
+                originalPaymentMethods = paymentMethods,
+                attachedPaymentMethod = attachedPaymentMethod,
+                refreshedPaymentMethods = paymentMethods,
+            )
+
+            viewModel.viewState.test {
+                assertThat(awaitViewState<AddPaymentMethod>().isProcessing).isFalse()
+
+                viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
+
+                assertThat(awaitViewState<AddPaymentMethod>().isProcessing).isTrue()
+
+                val newViewState = awaitViewState<SelectPaymentMethod>()
+
+                assertThat(newViewState.savedPaymentMethods).containsExactlyElementsIn(paymentMethods)
+                assertThat(newViewState.paymentSelection).isEqualTo(originalSelection)
             }
-        )
-        return CollectBankAccountResultInternal.Completed(
-            response = CollectBankAccountResponseInternal(
-                intent = null,
-                usBankAccountData = CollectBankAccountResponseInternal.USBankAccountData(
-                    financialConnectionsSession = financialConnectionsSession
-                ),
-                instantDebitsData = null
+        }
+
+    @Test
+    fun `If refreshed payment methods does contain newly added payment method, use new selection & sort PMs`() =
+        runTest(testDispatcher) {
+            val attachedPaymentMethod = PaymentMethodFactory.card(random = true)
+            val paymentMethods = PaymentMethodFactory.cards(size = 4)
+            val originalSelection = PaymentSelection.Saved(paymentMethods[0])
+            val newSelection = PaymentSelection.Saved(attachedPaymentMethod)
+
+            val viewModel = retrieveViewModelForAttaching(
+                attachWithSetupIntent = true,
+                shouldFailRefresh = false,
+                originalSelection = originalSelection,
+                originalPaymentMethods = paymentMethods,
+                attachedPaymentMethod = attachedPaymentMethod,
+                refreshedPaymentMethods = paymentMethods + listOf(attachedPaymentMethod),
+            )
+
+            viewModel.viewState.test {
+                assertThat(awaitViewState<AddPaymentMethod>().isProcessing).isFalse()
+
+                viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
+
+                assertThat(awaitViewState<AddPaymentMethod>().isProcessing).isTrue()
+
+                val newViewState = awaitViewState<SelectPaymentMethod>()
+
+                assertThat(newViewState.savedPaymentMethods)
+                    .containsExactlyElementsIn(listOf(attachedPaymentMethod) + paymentMethods)
+                    .inOrder()
+                assertThat(newViewState.paymentSelection).isEqualTo(newSelection)
+            }
+        }
+
+    @Test
+    fun `When removing an un-selected card, selection should be maintained & primary button should not visible`() =
+        runTest(testDispatcher) {
+            val paymentMethods = PaymentMethodFactory.cards(size = 3)
+            val paymentMethodToRemove = paymentMethods.last()
+            val originalSelection = PaymentSelection.Saved(paymentMethods.first())
+
+            val viewModel = retrieveViewModelForRemoving(
+                savedPaymentMethods = paymentMethods,
+                originalSelection = originalSelection,
+                paymentMethodToRemove = paymentMethodToRemove
+            )
+
+            viewModel.handleViewAction(CustomerSheetViewAction.OnItemRemoved(paymentMethodToRemove))
+
+            viewModel.viewState.test {
+                val currentState = awaitViewState<SelectPaymentMethod>()
+
+                assertThat(currentState.isEditing).isFalse()
+                assertThat(currentState.savedPaymentMethods).containsExactlyElementsIn(paymentMethods.dropLast(1))
+                assertThat(currentState.paymentSelection).isEqualTo(originalSelection)
+                assertThat(currentState.primaryButtonVisible).isFalse()
+            }
+        }
+
+    @Test
+    fun `When updating the original selection, original selection should be updated even if current selection is not the original`() =
+        runTest(testDispatcher) {
+            val paymentMethods = PaymentMethodFactory.cards(size = 3)
+
+            val paymentMethodToUpdate = paymentMethods.first()
+            val updatedPaymentMethod = paymentMethodToUpdate.copy(
+                card = paymentMethodToUpdate.card?.copy(
+                    expiryYear = 2030,
+                    expiryMonth = 4
+                )
+            )
+
+            val originalSelection = PaymentSelection.Saved(paymentMethodToUpdate)
+
+            val viewModel = retrieveViewModelForUpdating(
+                savedPaymentMethods = paymentMethods,
+                originalSelection = originalSelection,
+                updatedPaymentMethod = updatedPaymentMethod,
+            )
+
+            viewModel.updatePaymentMethod(
+                originalPaymentMethod = paymentMethodToUpdate,
+                updatedPaymentMethod = updatedPaymentMethod
+            )
+
+            viewModel.viewState.test {
+                val currentState = awaitViewState<SelectPaymentMethod>()
+
+                assertThat(currentState.isEditing).isFalse()
+                assertThat(currentState.savedPaymentMethods)
+                    .containsExactlyElementsIn(listOf(updatedPaymentMethod) + paymentMethods.drop(1))
+                assertThat(currentState.primaryButtonVisible).isFalse()
+            }
+
+            viewModel.handleViewAction(CustomerSheetViewAction.OnDismissed)
+
+            viewModel.result.test {
+                val result = awaitItem()
+
+                assertThat(result).isInstanceOf<InternalCustomerSheetResult.Canceled>()
+
+                val canceledResult = result.asCanceled()
+
+                assertThat(canceledResult.paymentSelection).isInstanceOf<PaymentSelection.Saved>()
+
+                val savedSelection = canceledResult.paymentSelection.asSaved()
+
+                assertThat(savedSelection.paymentMethod).isEqualTo(updatedPaymentMethod)
+            }
+        }
+
+    private fun mockUSBankAccountPaymentSelection(): PaymentSelection.New.USBankAccount {
+        return PaymentSelection.New.USBankAccount(
+            label = "Test",
+            iconResource = 0,
+            paymentMethodCreateParams = mock(),
+            customerRequestedSave = mock(),
+            input = PaymentSelection.New.USBankAccount.Input(
+                name = "",
+                email = null,
+                phone = null,
+                address = null,
+                saveForFutureUse = false,
             ),
+            instantDebits = null,
+            screenState = BankFormScreenStateFactory.createWithSession("session_1234"),
         )
     }
 
     private fun retrieveViewModelForAttaching(
         attachWithSetupIntent: Boolean,
         shouldFailRefresh: Boolean,
+        originalPaymentMethods: List<PaymentMethod> = listOf(),
+        originalSelection: PaymentSelection.Saved? = null,
+        attachedPaymentMethod: PaymentMethod = CARD_PAYMENT_METHOD,
+        refreshedPaymentMethods: List<PaymentMethod> = listOf(CARD_PAYMENT_METHOD),
         errorReporter: ErrorReporter = FakeErrorReporter()
     ): CustomerSheetViewModel {
         return createViewModel(
             workContext = testDispatcher,
-            customerPaymentMethods = listOf(),
+            customerPaymentMethods = originalPaymentMethods,
             isGooglePayAvailable = false,
             errorReporter = errorReporter,
+            savedPaymentSelection = originalSelection,
             intentDataSource = FakeCustomerSheetIntentDataSource(
                 canCreateSetupIntents = attachWithSetupIntent,
                 onRetrieveSetupIntentClientSecret = {
@@ -3351,17 +3434,21 @@ class CustomerSheetViewModelTest {
                         displayMessage = null
                     )
                 } else {
-                    CustomerSheetDataResult.success(listOf(CARD_PAYMENT_METHOD))
+                    CustomerSheetDataResult.success(refreshedPaymentMethods)
                 },
                 onAttachPaymentMethod = {
-                    CustomerSheetDataResult.success(CARD_PAYMENT_METHOD)
+                    CustomerSheetDataResult.success(attachedPaymentMethod)
                 },
             ),
             stripeRepository = FakeStripeRepository(
-                createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
+                createPaymentMethodResult = Result.success(attachedPaymentMethod),
                 retrieveSetupIntent = Result.success(SetupIntentFixtures.SI_SUCCEEDED),
             ),
         ).apply {
+            if (originalPaymentMethods.isNotEmpty()) {
+                handleViewAction(CustomerSheetViewAction.OnAddCardPressed)
+            }
+
             handleViewAction(
                 CustomerSheetViewAction.OnFormFieldValuesCompleted(
                     formFieldValues = TEST_FORM_VALUES,
@@ -3425,12 +3512,14 @@ class CustomerSheetViewModelTest {
         viewState.test {
             assertThat(awaitItem()).isInstanceOf<SelectPaymentMethod>()
 
-            handleViewAction(CustomerSheetViewAction.OnModifyItem(originalPaymentMethod))
+            handleViewAction(
+                CustomerSheetViewAction.OnModifyItem(originalPaymentMethod.toDisplayableSavedPaymentMethod())
+            )
 
             val editViewState = awaitViewState<CustomerSheetViewState.EditPaymentMethod>()
             editViewState.editPaymentMethodInteractor.handleViewAction(
                 OnBrandChoiceChanged(
-                    EditPaymentMethodViewState.CardBrandChoice(
+                    CardBrandChoice(
                         brand = CardBrand.Visa
                     )
                 )
@@ -3451,7 +3540,9 @@ class CustomerSheetViewModelTest {
         viewState.test {
             assertThat(awaitItem()).isInstanceOf<SelectPaymentMethod>()
 
-            handleViewAction(CustomerSheetViewAction.OnModifyItem(paymentMethodToRemove))
+            handleViewAction(
+                CustomerSheetViewAction.OnModifyItem(paymentMethodToRemove.toDisplayableSavedPaymentMethod())
+            )
 
             val editViewState = awaitViewState<CustomerSheetViewState.EditPaymentMethod>()
             editViewState.editPaymentMethodInteractor.handleViewAction(OnRemoveConfirmed)

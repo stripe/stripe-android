@@ -15,7 +15,13 @@ internal class NewPaymentMethodVerticalLayoutUIScreenshotTest {
     val paparazziRule = PaparazziRule()
 
     private val paymentMethods: List<DisplayablePaymentMethod> by lazy {
-        MockPaymentMethodsFactory.create().map { it.asDisplayablePaymentMethod(emptyList()) { } }
+        MockPaymentMethodsFactory.create().map {
+            it.asDisplayablePaymentMethod(
+                customerSavedPaymentMethods = emptyList(),
+                incentive = null,
+                onClick = {},
+            )
+        }
     }
 
     @Test
@@ -37,7 +43,12 @@ internal class NewPaymentMethodVerticalLayoutUIScreenshotTest {
             displayNameResource = R.string.stripe_paymentsheet_payment_method_us_bank_account,
             iconResource = R.drawable.stripe_ic_paymentsheet_pm_bank,
             iconRequiresTinting = true
-        ).asDisplayablePaymentMethod(emptyList()) { }
+        ).asDisplayablePaymentMethod(
+            customerSavedPaymentMethods = emptyList(),
+            incentive = null,
+            onClick = {},
+        )
+
         val paymentMethods = paymentMethods.toMutableList()
         paymentMethods.add(1, bankPaymentMethod)
         paparazziRule.snapshot {
@@ -68,7 +79,11 @@ internal class NewPaymentMethodVerticalLayoutUIScreenshotTest {
         val paymentMethods = listOf(
             ExternalPaymentMethodUiDefinitionFactory(
                 PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC
-            ).createSupportedPaymentMethod().asDisplayablePaymentMethod(emptyList()) { }
+            ).createSupportedPaymentMethod().asDisplayablePaymentMethod(
+                customerSavedPaymentMethods = emptyList(),
+                incentive = null,
+                onClick = {},
+            )
         ).plus(paymentMethods)
         paparazziRule.snapshot {
             NewPaymentMethodVerticalLayoutUI(

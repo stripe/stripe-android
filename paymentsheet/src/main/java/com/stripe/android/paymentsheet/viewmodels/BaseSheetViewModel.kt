@@ -141,8 +141,6 @@ internal abstract class BaseSheetViewModel(
 
     abstract fun handlePaymentMethodSelected(selection: PaymentSelection?)
 
-    abstract fun handleConfirmUSBankAccount(paymentSelection: PaymentSelection.New.USBankAccount)
-
     fun updateSelection(selection: PaymentSelection?) {
         when (selection) {
             is PaymentSelection.New -> newPaymentSelection = NewOrExternalPaymentSelection.New(selection)

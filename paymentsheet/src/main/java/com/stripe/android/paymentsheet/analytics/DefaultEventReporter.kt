@@ -7,9 +7,10 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
-import com.stripe.android.paymentsheet.DeferredIntentConfirmationType
+import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -26,9 +27,12 @@ internal class DefaultEventReporter @Inject internal constructor(
 ) : EventReporter {
 
     private var isDeferred: Boolean = false
-    private var linkEnabled: Boolean = false
+    private var linkMode: LinkMode? = null
     private var googlePaySupported: Boolean = false
     private var currency: String? = null
+
+    private val linkEnabled: Boolean
+        get() = linkMode != null
 
     override fun onInit(
         configuration: PaymentSheet.Configuration,
@@ -57,12 +61,12 @@ internal class DefaultEventReporter @Inject internal constructor(
         linkMode: LinkMode?,
         googlePaySupported: Boolean,
         currency: String?,
-        initializationMode: PaymentSheet.InitializationMode,
+        initializationMode: PaymentElementLoader.InitializationMode,
         orderedLpms: List<String>,
         requireCvcRecollection: Boolean
     ) {
         this.currency = currency
-        this.linkEnabled = linkMode != null
+        this.linkMode = linkMode
         this.googlePaySupported = googlePaySupported
 
         durationProvider.start(DurationProvider.Key.Checkout)
@@ -152,6 +156,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 isDeferred = isDeferred,
                 currency = currency,
                 linkEnabled = linkEnabled,
+                linkContext = determineLinkContextForPaymentMethodType(code),
                 googlePaySupported = googlePaySupported,
             )
         )
@@ -199,6 +204,17 @@ internal class DefaultEventReporter @Inject internal constructor(
                 mode = mode,
                 paymentSelection = paymentSelection,
                 currency = currency,
+                isDeferred = isDeferred,
+                linkEnabled = linkEnabled,
+                googlePaySupported = googlePaySupported,
+            )
+        )
+    }
+
+    override fun onDisallowedCardBrandEntered(brand: CardBrand) {
+        fireEvent(
+            PaymentSheetEvent.CardBrandDisallowed(
+                cardBrand = brand,
                 isDeferred = isDeferred,
                 linkEnabled = linkEnabled,
                 googlePaySupported = googlePaySupported,
@@ -393,6 +409,18 @@ internal class DefaultEventReporter @Inject internal constructor(
                     additionalParams = event.params,
                 )
             )
+        }
+    }
+
+    private fun determineLinkContextForPaymentMethodType(code: String): String? {
+        return if (code == "link") {
+            if (linkMode == LinkMode.LinkCardBrand) {
+                "link_card_brand"
+            } else {
+                "instant_debits"
+            }
+        } else {
+            null
         }
     }
 }

@@ -19,7 +19,7 @@ tags:
 - tapOn: "Search"
 - inputText: "mx"
 - tapOn:
-    id: "search_result_1"
+    id: "bcinst_NKJdZEPMVNdkLg"
 - tapOn:
     id: "prepane_cta"
 ####### Bypass Chrome on-boarding screen #######

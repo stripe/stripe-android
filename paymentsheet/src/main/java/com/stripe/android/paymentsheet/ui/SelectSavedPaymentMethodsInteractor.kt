@@ -1,8 +1,10 @@
 package com.stripe.android.paymentsheet.ui
 
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.CustomerStateHolder
+import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentOptionsItem
 import com.stripe.android.paymentsheet.PaymentOptionsStateFactory
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
@@ -42,7 +44,7 @@ internal interface SelectSavedPaymentMethodsInteractor {
         data object AddCardPressed : ViewAction()
         data class SelectPaymentMethod(val selection: PaymentSelection?) : ViewAction()
         data class DeletePaymentMethod(val paymentMethod: PaymentMethod) : ViewAction()
-        data class EditPaymentMethod(val paymentMethod: PaymentMethod) : ViewAction()
+        data class EditPaymentMethod(val paymentMethod: DisplayableSavedPaymentMethod) : ViewAction()
         data object ToggleEdit : ViewAction()
     }
 }
@@ -58,6 +60,7 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
     private val mostRecentlySelectedSavedPaymentMethod: StateFlow<PaymentMethod?>,
     private val onAddCardPressed: () -> Unit,
     private val onEditPaymentMethod: (PaymentMethod) -> Unit,
+    private val onUpdatePaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     private val onDeletePaymentMethod: (PaymentMethod) -> Unit,
     private val onPaymentMethodSelected: (PaymentSelection?) -> Unit,
     override val isLiveMode: Boolean,
@@ -190,9 +193,13 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
                 viewAction.paymentMethod
             )
 
-            is SelectSavedPaymentMethodsInteractor.ViewAction.EditPaymentMethod -> onEditPaymentMethod(
-                viewAction.paymentMethod
-            )
+            is SelectSavedPaymentMethodsInteractor.ViewAction.EditPaymentMethod -> {
+                if (FeatureFlags.useNewUpdateCardScreen.isEnabled) {
+                    onUpdatePaymentMethod(viewAction.paymentMethod)
+                } else {
+                    onEditPaymentMethod(viewAction.paymentMethod.paymentMethod)
+                }
+            }
 
             is SelectSavedPaymentMethodsInteractor.ViewAction.SelectPaymentMethod -> onPaymentMethodSelected(
                 viewAction.selection
@@ -233,6 +240,7 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
                     )
                 },
                 onEditPaymentMethod = savedPaymentMethodMutator::modifyPaymentMethod,
+                onUpdatePaymentMethod = savedPaymentMethodMutator::updatePaymentMethod,
                 onDeletePaymentMethod = savedPaymentMethodMutator::removePaymentMethod,
                 onPaymentMethodSelected = viewModel::handlePaymentMethodSelected,
                 isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,

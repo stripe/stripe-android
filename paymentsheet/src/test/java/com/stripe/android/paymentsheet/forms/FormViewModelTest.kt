@@ -235,16 +235,20 @@ internal class FormViewModelTest {
             paymentMethodCode = PaymentMethod.Type.SepaDebit.code,
             billingDetails = null
         )
+        val addressElements = AddressSpec(
+            IdentifierSpec.Generic("address"),
+            allowedCountryCodes = setOf("US", "JP")
+        )
+            .transform(emptyMap(), emptyMap())
+            .toTypedArray()
+
         val formViewModel = createViewModel(
             args,
             listOfNotNull(
                 NameSpec().transform(emptyMap()),
                 EmailSpec().transform(emptyMap()),
                 IbanSpec().transform(emptyMap()),
-                AddressSpec(
-                    IdentifierSpec.Generic("address"),
-                    allowedCountryCodes = setOf("US", "JP")
-                ).transform(emptyMap(), emptyMap()),
+                *addressElements,
                 MandateTextSpec(
                     IdentifierSpec.Generic("mandate"),
                     R.string.stripe_sepa_mandate
@@ -316,16 +320,20 @@ internal class FormViewModelTest {
             paymentMethodCode = PaymentMethod.Type.SepaDebit.code,
             billingDetails = null
         )
+        val addressElements = AddressSpec(
+            IdentifierSpec.Generic("address"),
+            allowedCountryCodes = setOf("US", "JP")
+        )
+            .transform(emptyMap(), emptyMap())
+            .toTypedArray()
+
         val formViewModel = createViewModel(
             args,
             listOfNotNull(
                 NameSpec().transform(emptyMap()),
                 EmailSpec().transform(emptyMap()),
                 IbanSpec().transform(emptyMap()),
-                AddressSpec(
-                    IdentifierSpec.Generic("address"),
-                    allowedCountryCodes = setOf("US", "JP")
-                ).transform(emptyMap(), emptyMap()),
+                *addressElements,
                 MandateTextSpec(
                     IdentifierSpec.Generic("mandate"),
                     R.string.stripe_sepa_mandate
@@ -562,6 +570,12 @@ internal class FormViewModelTest {
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
                 billingDetails = PaymentSheet.BillingDetails(),
             )
+            val addressElements = AddressSpec(hideCountry = true)
+                .transform(
+                    initialValues = emptyMap(),
+                    shippingValues = emptyMap(),
+                )
+                .toTypedArray()
             val formViewModel = createViewModel(
                 args,
                 listOfNotNull(
@@ -569,10 +583,7 @@ internal class FormViewModelTest {
                     EmailSpec().transform(emptyMap()),
                     PhoneSpec().transform(emptyMap()),
                     CountrySpec().transform(emptyMap()),
-                    AddressSpec(hideCountry = true).transform(
-                        initialValues = emptyMap(),
-                        shippingValues = emptyMap(),
-                    ),
+                    *addressElements,
                 ),
             )
 

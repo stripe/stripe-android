@@ -1,0 +1,62 @@
+{
+  "business_name": "Mobile Example Account",
+  "google_pay_preference": "enabled",
+  "merchant_country": "US",
+  "merchant_currency": "usd",
+  "merchant_id": "acct_1HvTI7Lu5o3P18Zp",
+  "meta_pay_signed_container_context": null,
+  "order": null,
+  "ordered_payment_method_types_and_wallets": [
+    "card"
+  ],
+  "card_brand_choice": {
+    "eligible": true,
+    "preferred_networks": ["cartes_bancaires"]
+  },
+  "customer": {
+    "payment_methods": [PAYMENT_METHODS_HERE],
+    "customer_session": {
+      "id": "cuss_654321",
+      "livemode": false,
+      "api_key": "ek_12345",
+      "api_key_expiry": 2147483647,
+      "customer": "cus_12345",
+      "components": {
+        "mobile_payment_element": {
+          "enabled": false,
+          "features": null
+        },
+        "customer_sheet": {
+          "enabled": true,
+          "features": {
+            "payment_method_remove": "PAYMENT_METHOD_REMOVE_FEATURE"
+          }
+        }
+      }
+    },
+    "default_payment_method": null
+  },
+  "payment_method_preference": {
+    "object": "payment_method_preference",
+    "country_code": "US",
+    "ordered_payment_method_types": [
+      "card"
+    ],
+    "type": "deferred_intent"
+  },
+  "payment_method_specs": [
+    {
+      "async": false,
+      "fields": [],
+      "type": "card"
+    }
+  ],
+  "paypal_express_config": {
+    "client_id": null,
+    "paypal_merchant_id": null
+  },
+  "shipping_address_settings": {
+    "autocomplete_allowed": true
+  },
+  "unactivated_payment_method_types": []
+}

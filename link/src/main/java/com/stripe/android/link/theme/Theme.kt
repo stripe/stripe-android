@@ -6,8 +6,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.unit.dp
 
 private val LocalColors = staticCompositionLocalOf { LinkThemeConfig.colors(false) }
+
+internal val MinimumTouchTargetSize = 48.dp
+internal val PrimaryButtonHeight = 56.dp
+internal val AppBarHeight = 56.dp
+internal val HorizontalPadding = 20.dp
 
 @Composable
 internal fun DefaultLinkTheme(
@@ -31,3 +37,8 @@ internal val MaterialTheme.linkColors: LinkColors
     @Composable
     @ReadOnlyComposable
     get() = LocalColors.current
+
+internal val MaterialTheme.linkShapes: LinkShapes
+    @Composable
+    @ReadOnlyComposable
+    get() = LinkShapes

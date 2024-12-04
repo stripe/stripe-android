@@ -1,11 +1,10 @@
 package com.stripe.android.customersheet.data
 
 import com.stripe.android.customersheet.CustomerSheet
-import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import javax.inject.Inject
 
-@OptIn(ExperimentalCustomerSheetApi::class, ExperimentalCustomerSessionApi::class)
+@OptIn(ExperimentalCustomerSessionApi::class)
 internal class CustomerSessionIntentDataSource @Inject constructor(
     private val elementsSessionManager: CustomerSessionElementsSessionManager,
     private val customerSessionProvider: CustomerSheet.CustomerSessionProvider,

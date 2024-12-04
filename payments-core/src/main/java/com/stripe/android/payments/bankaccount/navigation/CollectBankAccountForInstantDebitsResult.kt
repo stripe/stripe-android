@@ -2,6 +2,7 @@ package com.stripe.android.payments.bankaccount.navigation
 
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import kotlinx.parcelize.Parcelize
 
@@ -14,8 +15,8 @@ sealed interface CollectBankAccountForInstantDebitsResult : Parcelable {
     @Parcelize
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Completed(
-        val intent: StripeIntent,
-        val paymentMethodId: String,
+        val intent: StripeIntent?,
+        val paymentMethod: PaymentMethod,
         val last4: String?,
         val bankName: String?
     ) : CollectBankAccountForInstantDebitsResult
@@ -39,12 +40,6 @@ internal fun CollectBankAccountResultInternal.toInstantDebitsResult(): CollectBa
 
         is CollectBankAccountResultInternal.Completed -> {
             when {
-                response.intent == null -> {
-                    CollectBankAccountForInstantDebitsResult.Failed(
-                        IllegalArgumentException("StripeIntent not set for this session")
-                    )
-                }
-
                 response.instantDebitsData == null -> {
                     CollectBankAccountForInstantDebitsResult.Failed(
                         IllegalArgumentException("instant debits data cannot be null")
@@ -54,7 +49,7 @@ internal fun CollectBankAccountResultInternal.toInstantDebitsResult(): CollectBa
                 else -> {
                     CollectBankAccountForInstantDebitsResult.Completed(
                         intent = response.intent,
-                        paymentMethodId = response.instantDebitsData.paymentMethodId,
+                        paymentMethod = response.instantDebitsData.paymentMethod,
                         last4 = response.instantDebitsData.last4,
                         bankName = response.instantDebitsData.bankName
                     )

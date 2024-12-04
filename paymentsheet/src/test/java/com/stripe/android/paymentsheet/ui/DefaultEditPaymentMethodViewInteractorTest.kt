@@ -1,7 +1,10 @@
 package com.stripe.android.paymentsheet.ui
 
+import android.os.Parcel
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.CardBrandFilter
+import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.exception.LocalStripeException
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
@@ -279,12 +282,45 @@ class DefaultEditPaymentMethodViewInteractorTest {
         }
     }
 
+    @Test
+    fun `availableBrands should be filtered according to cardBrandFilter`() = runTest {
+        val cardBrandFilter = object : CardBrandFilter {
+            override fun isAccepted(cardBrand: CardBrand): Boolean {
+                return cardBrand == CardBrand.Visa
+            }
+
+            override fun describeContents(): Int = 0
+
+            override fun writeToParcel(parcel: Parcel, flags: Int) {
+                throw IllegalStateException("Should not invoke writeToParcel")
+            }
+        }
+
+        val interactor = createInteractor(cardBrandFilter = cardBrandFilter)
+
+        interactor.viewState.test {
+            val state = awaitItem()
+            assertThat(state.availableBrands).isEqualTo(listOf(VISA_BRAND_CHOICE))
+        }
+    }
+
+    @Test
+    fun `availableBrands should be unmodified when using DefaultCardBrandFilter`() = runTest {
+        val interactor = createInteractor(cardBrandFilter = DefaultCardBrandFilter)
+
+        interactor.viewState.test {
+            val state = awaitItem()
+            assertThat(state.availableBrands).isEqualTo(listOf(VISA_BRAND_CHOICE, CARTES_BANCAIRES_BRAND_CHOICE))
+        }
+    }
+
     private fun createInteractor(
         eventHandler: (EditPaymentMethodViewInteractor.Event) -> Unit = {},
         onRemove: PaymentMethodRemoveOperation = { null },
         onUpdate: PaymentMethodUpdateOperation = { _, _ -> Result.success(CARD_WITH_NETWORKS_PAYMENT_METHOD) },
         workContext: CoroutineContext = UnconfinedTestDispatcher(),
         canRemove: Boolean = true,
+        cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter
     ): DefaultEditPaymentMethodViewInteractor {
         return DefaultEditPaymentMethodViewInteractor(
             initialPaymentMethod = CARD_WITH_NETWORKS_PAYMENT_METHOD,
@@ -295,6 +331,7 @@ class DefaultEditPaymentMethodViewInteractorTest {
             workContext = workContext,
             canRemove = canRemove,
             isLiveMode = true,
+            cardBrandFilter = cardBrandFilter
         )
     }
 
@@ -305,11 +342,11 @@ class DefaultEditPaymentMethodViewInteractorTest {
     private companion object {
         private val CARD_WITH_NETWORKS_PAYMENT_METHOD = PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD
 
-        val CARTES_BANCAIRES_BRAND_CHOICE = EditPaymentMethodViewState.CardBrandChoice(
+        val CARTES_BANCAIRES_BRAND_CHOICE = CardBrandChoice(
             brand = CardBrand.CartesBancaires
         )
 
-        private val VISA_BRAND_CHOICE = EditPaymentMethodViewState.CardBrandChoice(
+        private val VISA_BRAND_CHOICE = CardBrandChoice(
             brand = CardBrand.Visa
         )
     }

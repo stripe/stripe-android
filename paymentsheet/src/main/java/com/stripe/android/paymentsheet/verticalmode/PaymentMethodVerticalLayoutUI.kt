@@ -10,7 +10,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -72,7 +72,7 @@ internal fun PaymentMethodVerticalLayoutUI(
         },
         onManageOneSavedPaymentMethod = {
             interactor.handleViewAction(
-                PaymentMethodVerticalLayoutInteractor.ViewAction.TransitionToManageOneSavedPaymentMethod
+                PaymentMethodVerticalLayoutInteractor.ViewAction.OnManageOneSavedPaymentMethod(it)
             )
         },
         imageLoader = imageLoader,
@@ -91,7 +91,7 @@ internal fun PaymentMethodVerticalLayoutUI(
     selection: PaymentSelection?,
     isEnabled: Boolean,
     onViewMorePaymentMethods: () -> Unit,
-    onManageOneSavedPaymentMethod: () -> Unit,
+    onManageOneSavedPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     onEditPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     onSelectSavedPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     imageLoader: StripeImageLoader,
@@ -118,7 +118,7 @@ internal fun PaymentMethodVerticalLayoutUI(
                         savedPaymentMethodAction = savedPaymentMethodAction,
                         onViewMorePaymentMethods = onViewMorePaymentMethods,
                         onEditPaymentMethod = onEditPaymentMethod,
-                        onManageOneSavedPaymentMethod = onManageOneSavedPaymentMethod,
+                        onManageOneSavedPaymentMethod = { onManageOneSavedPaymentMethod(displayedSavedPaymentMethod) },
                     )
                 },
                 onClick = { onSelectSavedPaymentMethod(displayedSavedPaymentMethod) },
@@ -200,7 +200,7 @@ private fun ViewMoreButton(
             fontWeight = FontWeight.Medium,
         )
         Icon(
-            imageVector = Icons.Filled.KeyboardArrowRight,
+            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
             contentDescription = null,
             tint = MaterialTheme.colors.primary,
         )

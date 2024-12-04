@@ -5,7 +5,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.link.LinkConfiguration
-import com.stripe.android.link.account.LinkAccountManager
+import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.signup.SignUpState
@@ -21,7 +21,6 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.any
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
@@ -32,7 +31,7 @@ import kotlin.test.BeforeTest
 
 @RunWith(RobolectricTestRunner::class)
 class InlineSignupViewModelTest {
-    private val linkAccountManager = mock<LinkAccountManager>()
+    private val linkAccountManager = FakeLinkAccountManager()
     private val linkEventsReporter = mock<LinkEventsReporter>()
 
     @BeforeTest
@@ -48,6 +47,14 @@ class InlineSignupViewModelTest {
     @Test
     fun `When email and phone are provided it should prefill all values`() =
         runTest(UnconfinedTestDispatcher()) {
+            val linkAccountManager = object : FakeLinkAccountManager() {
+                var counter = 0
+
+                override suspend fun lookupConsumer(email: String, startSession: Boolean): Result<LinkAccount?> {
+                    counter += 1
+                    return super.lookupConsumer(email, startSession)
+                }
+            }
             val viewModel = InlineSignupViewModel(
                 config = LinkConfiguration(
                     stripeIntent = mockStripeIntent(),
@@ -70,8 +77,7 @@ class InlineSignupViewModelTest {
                 logger = Logger.noop(),
             )
 
-            whenever(linkAccountManager.lookupConsumer(any(), any()))
-                .thenReturn(Result.success(null))
+            linkAccountManager.lookupConsumerResult = Result.success(null)
 
             viewModel.toggleExpanded()
             advanceTimeBy(LOOKUP_DEBOUNCE_MS + 1) // Trigger lookup by waiting for delay.
@@ -79,7 +85,7 @@ class InlineSignupViewModelTest {
             assertThat(viewModel.emailController.fieldValue.first()).isEqualTo(CUSTOMER_EMAIL)
             assertThat(viewModel.phoneController.fieldValue.first()).isEqualTo(CUSTOMER_PHONE)
 
-            verify(linkAccountManager).lookupConsumer(any(), any())
+            assertThat(linkAccountManager.counter).isEqualTo(1)
         }
 
     @Test
@@ -89,16 +95,14 @@ class InlineSignupViewModelTest {
             viewModel.toggleExpanded()
             viewModel.emailController.onRawValueChange("valid@email.com")
 
-            whenever(linkAccountManager.lookupConsumer(any(), any()))
-                .thenReturn(Result.failure(APIConnectionException()))
+            linkAccountManager.lookupConsumerResult = Result.failure(APIConnectionException())
 
             // Advance past lookup debounce delay
             advanceTimeBy(LOOKUP_DEBOUNCE_MS + 100)
 
             assertThat(viewModel.viewState.value.useLink).isEqualTo(false)
 
-            whenever(linkAccountManager.lookupConsumer(any(), any()))
-                .thenReturn(Result.success(mock()))
+            linkAccountManager.lookupConsumerResult = Result.success(mock())
 
             viewModel.emailController.onRawValueChange("valid2@email.com")
 
@@ -122,8 +126,7 @@ class InlineSignupViewModelTest {
                     ConsumerSession.VerificationSession.SessionState.Started
                 )
             )
-            whenever(linkAccountManager.lookupConsumer(any(), any()))
-                .thenReturn(Result.success(linkAccount))
+            linkAccountManager.lookupConsumerResult = Result.success(linkAccount)
 
             // Advance past lookup debounce delay
             advanceTimeBy(LOOKUP_DEBOUNCE_MS + 100)
@@ -138,8 +141,7 @@ class InlineSignupViewModelTest {
             viewModel.toggleExpanded()
             viewModel.emailController.onRawValueChange("valid@email.com")
 
-            whenever(linkAccountManager.lookupConsumer(any(), any()))
-                .thenReturn(Result.success(null))
+            linkAccountManager.lookupConsumerResult = Result.success(null)
 
             // Advance past lookup debounce delay
             advanceTimeBy(LOOKUP_DEBOUNCE_MS + 100)
@@ -158,8 +160,7 @@ class InlineSignupViewModelTest {
 
             assertThat(viewModel.viewState.value.userInput).isNull()
 
-            whenever(linkAccountManager.lookupConsumer(any(), any()))
-                .thenReturn(Result.success(null))
+            linkAccountManager.lookupConsumerResult = Result.success(null)
 
             // Advance past lookup debounce delay
             advanceTimeBy(LOOKUP_DEBOUNCE_MS + 100)
@@ -201,8 +202,7 @@ class InlineSignupViewModelTest {
             viewModel.toggleExpanded()
             viewModel.emailController.onRawValueChange("valid@email.com")
 
-            whenever(linkAccountManager.lookupConsumer(any(), any()))
-                .thenReturn(Result.success(null))
+            linkAccountManager.lookupConsumerResult = Result.success(null)
 
             // Advance past lookup debounce delay
             advanceTimeBy(LOOKUP_DEBOUNCE_MS + 100)

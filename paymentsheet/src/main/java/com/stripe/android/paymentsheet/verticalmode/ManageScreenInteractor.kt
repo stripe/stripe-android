@@ -41,6 +41,7 @@ internal interface ManageScreenInteractor {
         data class SelectPaymentMethod(val paymentMethod: DisplayableSavedPaymentMethod) : ViewAction()
         data class DeletePaymentMethod(val paymentMethod: DisplayableSavedPaymentMethod) : ViewAction()
         data class EditPaymentMethod(val paymentMethod: DisplayableSavedPaymentMethod) : ViewAction()
+        data class UpdatePaymentMethod(val paymentMethod: DisplayableSavedPaymentMethod) : ViewAction()
         data object ToggleEdit : ViewAction()
     }
 }
@@ -57,6 +58,7 @@ internal class DefaultManageScreenInteractor(
     private val onSelectPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     private val onDeletePaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     private val onEditPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
+    private val onUpdatePaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     private val navigateBack: (withDelay: Boolean) -> Unit,
     override val isLiveMode: Boolean,
     dispatcher: CoroutineContext = Dispatchers.Default,
@@ -119,6 +121,7 @@ internal class DefaultManageScreenInteractor(
                 handlePaymentMethodSelected(viewAction.paymentMethod)
             is ManageScreenInteractor.ViewAction.DeletePaymentMethod -> onDeletePaymentMethod(viewAction.paymentMethod)
             is ManageScreenInteractor.ViewAction.EditPaymentMethod -> onEditPaymentMethod(viewAction.paymentMethod)
+            is ManageScreenInteractor.ViewAction.UpdatePaymentMethod -> onUpdatePaymentMethod(viewAction.paymentMethod)
             ManageScreenInteractor.ViewAction.ToggleEdit -> toggleEdit()
         }
     }
@@ -161,6 +164,7 @@ internal class DefaultManageScreenInteractor(
                 },
                 onDeletePaymentMethod = { savedPaymentMethodMutator.removePaymentMethod(it.paymentMethod) },
                 onEditPaymentMethod = { savedPaymentMethodMutator.modifyPaymentMethod(it.paymentMethod) },
+                onUpdatePaymentMethod = { savedPaymentMethodMutator.updatePaymentMethod(it) },
                 navigateBack = { withDelay ->
                     if (withDelay) {
                         viewModel.navigationHandler.popWithDelay()

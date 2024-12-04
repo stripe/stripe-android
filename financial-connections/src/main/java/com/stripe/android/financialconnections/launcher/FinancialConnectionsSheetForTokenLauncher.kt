@@ -54,7 +54,8 @@ internal class FinancialConnectionsSheetForTokenLauncher(
     ) {
         activityResultLauncher.launch(
             FinancialConnectionsSheetActivityArgs.ForToken(
-                configuration
+                configuration = configuration,
+                elementsSessionContext = elementsSessionContext,
             )
         )
     }

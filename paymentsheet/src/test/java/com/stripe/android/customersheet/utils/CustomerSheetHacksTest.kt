@@ -5,8 +5,8 @@ import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.customersheet.CustomerSheetIntegrationType
-import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
+import com.stripe.android.common.coroutines.Single
+import com.stripe.android.customersheet.CustomerSheetIntegration
 import com.stripe.android.customersheet.FakeCustomerAdapter
 import com.stripe.android.customersheet.data.CustomerAdapterDataSource
 import com.stripe.android.customersheet.data.CustomerSessionInitializationDataSource
@@ -16,7 +16,6 @@ import com.stripe.android.customersheet.data.CustomerSessionSavedSelectionDataSo
 import com.stripe.android.customersheet.util.CustomerSheetHacks
 import com.stripe.android.isInstanceOf
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
-import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withTimeoutOrNull
 import org.junit.After
@@ -24,7 +23,7 @@ import org.junit.runner.RunWith
 import kotlin.test.Test
 import kotlin.time.Duration.Companion.seconds
 
-@OptIn(ExperimentalCustomerSheetApi::class, ExperimentalCustomerSessionApi::class)
+@OptIn(ExperimentalCustomerSessionApi::class)
 @RunWith(AndroidJUnit4::class)
 class CustomerSheetHacksTest {
     private val application = ApplicationProvider.getApplicationContext<Application>()
@@ -39,7 +38,7 @@ class CustomerSheetHacksTest {
         CustomerSheetHacks.initialize(
             application = application,
             lifecycleOwner = TestLifecycleOwner(),
-            integrationType = CustomerSheetIntegrationType.Adapter(FakeCustomerAdapter())
+            integration = CustomerSheetIntegration.Adapter(FakeCustomerAdapter())
         )
 
         assertThat(CustomerSheetHacks.initializationDataSource.awaitWithTimeout())
@@ -57,7 +56,7 @@ class CustomerSheetHacksTest {
         CustomerSheetHacks.initialize(
             application = application,
             lifecycleOwner = TestLifecycleOwner(),
-            integrationType = CustomerSheetIntegrationType.CustomerSession(FakeCustomerSessionProvider())
+            integration = CustomerSheetIntegration.CustomerSession(FakeCustomerSessionProvider())
         )
 
         assertThat(CustomerSheetHacks.initializationDataSource.awaitWithTimeout())
@@ -75,7 +74,7 @@ class CustomerSheetHacksTest {
         CustomerSheetHacks.initialize(
             application = application,
             lifecycleOwner = TestLifecycleOwner(),
-            integrationType = CustomerSheetIntegrationType.Adapter(FakeCustomerAdapter())
+            integration = CustomerSheetIntegration.Adapter(FakeCustomerAdapter())
         )
         CustomerSheetHacks.clear()
 
@@ -85,7 +84,7 @@ class CustomerSheetHacksTest {
         assertThat(CustomerSheetHacks.savedSelectionDataSource.awaitWithTimeout()).isNull()
     }
 
-    private suspend fun <T> Deferred<T>.awaitWithTimeout(): T? {
+    private suspend fun <T> Single<T>.awaitWithTimeout(): T? {
         return withTimeoutOrNull(1.seconds) { await() }
     }
 }

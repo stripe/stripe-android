@@ -5,6 +5,7 @@ import android.app.Application
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.util.Base64
 import androidx.activity.result.ActivityResult
 import androidx.annotation.StringRes
 import androidx.lifecycle.SavedStateHandle
@@ -19,6 +20,7 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheetState.Au
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.FinishWithResult
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenAuthFlowWithUrl
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenNativeAuthFlow
+import com.stripe.android.financialconnections.FinancialConnectionsSheetViewModel.Companion.QUERY_PARAM_PAYMENT_METHOD
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ErrorCode
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Metadata
@@ -50,11 +52,11 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
+import com.stripe.android.financialconnections.model.update
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.utils.parcelable
-import com.stripe.android.model.LinkMode
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -128,17 +130,16 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
             logNoBrowserAvailableAndFinish()
             return
         }
+
         val manifest = sync.manifest
-        val isInstantDebits = stateFlow.value.isInstantDebits
         val nativeAuthFlowEnabled = nativeRouter.nativeAuthFlowEnabled(manifest)
         nativeRouter.logExposure(manifest)
 
-        val linkMode = initialState.initialArgs.elementsSessionContext?.linkMode
-        val hostedAuthUrl = buildHostedAuthUrl(
-            hostedAuthUrl = manifest.hostedAuthUrl,
-            isInstantDebits = isInstantDebits,
-            linkMode = linkMode,
+        val hostedAuthUrl = HostedAuthUrlBuilder.create(
+            args = initialState.initialArgs,
+            manifest = manifest,
         )
+
         if (hostedAuthUrl == null) {
             finishWithResult(
                 state = stateFlow.value,
@@ -169,26 +170,6 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                 }
             }
         }
-    }
-
-    private fun buildHostedAuthUrl(
-        hostedAuthUrl: String?,
-        isInstantDebits: Boolean,
-        linkMode: LinkMode?,
-    ): String? {
-        if (hostedAuthUrl == null) {
-            return null
-        }
-
-        val queryParams = mutableListOf(hostedAuthUrl)
-        if (isInstantDebits) {
-            // For Instant Debits, add a query parameter to the hosted auth URL so that payment account creation
-            // takes place on the web side of the flow and the payment method ID is returned to the app.
-            queryParams.add("return_payment_method=true")
-            linkMode?.let { queryParams.add("link_mode=${it.value}") }
-        }
-
-        return queryParams.joinToString("&")
     }
 
     private fun logNoBrowserAvailableAndFinish() {
@@ -317,10 +298,11 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         viewModelScope.launch {
             kotlin.runCatching {
                 fetchFinancialConnectionsSession(state.sessionSecret)
-            }.onSuccess {
+            }.onSuccess { session ->
+                val updatedSession = session.update(state.manifest)
                 finishWithResult(
                     state = state,
-                    result = Completed(financialConnectionsSession = it)
+                    result = Completed(financialConnectionsSession = updatedSession)
                 )
             }.onFailure { error ->
                 finishWithResult(stateFlow.value, Failed(error))
@@ -340,9 +322,13 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
             kotlin.runCatching {
                 fetchFinancialConnectionsSessionForToken(clientSecret = state.sessionSecret)
             }.onSuccess { (las, token) ->
+                val updatedSession = las.update(state.manifest)
                 finishWithResult(
                     state = state,
-                    result = Completed(financialConnectionsSession = las, token = token)
+                    result = Completed(
+                        financialConnectionsSession = updatedSession,
+                        token = token,
+                    )
                 )
             }.onFailure { error ->
                 finishWithResult(stateFlow.value, Failed(error))
@@ -466,14 +452,14 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     }
 
     private fun onSuccessFromInstantDebits(url: Uri) {
-        runCatching { requireNotNull(url.getQueryParameter(QUERY_PARAM_PAYMENT_METHOD_ID)) }
-            .onSuccess { paymentMethodId ->
+        runCatching { url.getEncodedPaymentMethodOrThrow() }
+            .onSuccess { paymentMethod ->
                 withState {
                     finishWithResult(
                         state = it,
                         result = Completed(
                             instantDebits = InstantDebitsResult(
-                                paymentMethodId = paymentMethodId,
+                                encodedPaymentMethod = paymentMethod,
                                 last4 = url.getQueryParameter(QUERY_PARAM_LAST4),
                                 bankName = url.getQueryParameter(QUERY_BANK_NAME)
                             ),
@@ -550,7 +536,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         }
 
         internal const val MAX_ACCOUNTS = 100
-        internal const val QUERY_PARAM_PAYMENT_METHOD_ID = "payment_method_id"
+        internal const val QUERY_PARAM_PAYMENT_METHOD = "payment_method"
         internal const val QUERY_PARAM_LAST4 = "last4"
         internal const val QUERY_BANK_NAME = "bank_name"
     }
@@ -558,4 +544,9 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     override fun updateTopAppBar(state: FinancialConnectionsSheetState): TopAppBarStateUpdate? {
         return null
     }
+}
+
+private fun Uri.getEncodedPaymentMethodOrThrow(): String {
+    val encodedPaymentMethod = requireNotNull(getQueryParameter(QUERY_PARAM_PAYMENT_METHOD))
+    return String(Base64.decode(encodedPaymentMethod, 0), Charsets.UTF_8)
 }

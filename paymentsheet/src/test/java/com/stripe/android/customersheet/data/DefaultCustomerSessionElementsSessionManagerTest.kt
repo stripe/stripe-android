@@ -2,33 +2,39 @@ package com.stripe.android.customersheet.data
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.customersheet.CustomerSheet
-import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.customersheet.utils.FakeCustomerSessionProvider
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.ElementsSession
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.FakePrefsRepository
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
+import com.stripe.android.paymentsheet.state.PaymentElementLoader.InitializationMode
+import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentIntentFactory
+import com.stripe.android.testing.SetupIntentFactory
 import com.stripe.android.utils.FakeElementsSessionRepository
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import kotlin.coroutines.coroutineContext
 
-@OptIn(ExperimentalCustomerSheetApi::class, ExperimentalCustomerSessionApi::class)
+@OptIn(ExperimentalCustomerSessionApi::class)
 class DefaultCustomerSessionElementsSessionManagerTest {
     @Test
-    fun `on fetch elements session, should set parameters properly`() = runTest {
+    fun `on fetch elements session, should set parameters properly & report successful load`() = runTest {
+        val errorReporter = FakeErrorReporter()
         val elementsSessionRepository = FakeElementsSessionRepository(
             stripeIntent = PaymentIntentFactory.create(),
             error = null,
             linkSettings = null,
+            sessionsCustomer = createDefaultCustomer(),
         )
 
         val manager = createElementsSessionManager(
             elementsSessionRepository = elementsSessionRepository,
+            errorReporter = errorReporter,
             savedSelection = SavedSelection.PaymentMethod(id = "pm_123"),
             intentConfiguration = Result.success(
                 CustomerSheet.IntentConfiguration.Builder()
@@ -51,7 +57,7 @@ class DefaultCustomerSessionElementsSessionManagerTest {
         assertThat(lastParams?.externalPaymentMethods).isEmpty()
 
         val initializationMode = lastParams?.initializationMode
-        assertThat(initializationMode).isInstanceOf(PaymentSheet.InitializationMode.DeferredIntent::class.java)
+        assertThat(initializationMode).isInstanceOf(InitializationMode.DeferredIntent::class.java)
 
         val intentConfiguration = initializationMode.asDeferred().intentConfiguration
         assertThat(intentConfiguration.paymentMethodTypes).containsExactly(
@@ -65,6 +71,39 @@ class DefaultCustomerSessionElementsSessionManagerTest {
         assertThat(customer?.id).isEqualTo("cus_1")
         assertThat(customer?.accessType)
             .isEqualTo(PaymentSheet.CustomerAccessType.CustomerSession(customerSessionClientSecret = "cuss_123"))
+
+        assertThat(errorReporter.getLoggedErrors()).containsExactly(
+            ErrorReporter.SuccessEvent.CUSTOMER_SHEET_CUSTOMER_SESSION_ELEMENTS_SESSION_LOAD_SUCCESS.eventName,
+        )
+    }
+
+    @Test
+    fun `on fetch elements session, should fail & report if elements session request failed`() = runTest {
+        val exception = IllegalStateException("Failed to load!")
+
+        val errorReporter = FakeErrorReporter()
+
+        val elementsSessionManager = createElementsSessionManager(
+            elementsSessionRepository = FakeElementsSessionRepository(
+                stripeIntent = SetupIntentFactory.create(),
+                error = exception,
+                linkSettings = null,
+                sessionsCustomer = null,
+            ),
+            errorReporter = errorReporter,
+        )
+
+        val elementsSessionResult = elementsSessionManager.fetchElementsSession()
+
+        assertThat(elementsSessionResult.isFailure).isTrue()
+        assertThat(elementsSessionResult.exceptionOrNull()).isEqualTo(exception)
+
+        assertThat(errorReporter.getLoggedErrors()).containsExactly(
+            ErrorReporter
+                .ExpectedErrorEvent
+                .CUSTOMER_SHEET_CUSTOMER_SESSION_ELEMENTS_SESSION_LOAD_FAILURE
+                .eventName,
+        )
     }
 
     @Test
@@ -126,7 +165,7 @@ class DefaultCustomerSessionElementsSessionManagerTest {
 
         assertThat(result).isEqualTo(
             Result.success(
-                CachedCustomerEphemeralKey.Available(
+                CachedCustomerEphemeralKey(
                     customerId = "cus_1",
                     ephemeralKey = "ek_123",
                     expiresAt = 999999,
@@ -181,7 +220,7 @@ class DefaultCustomerSessionElementsSessionManagerTest {
         assertThat(amountOfCalls).isEqualTo(1)
         assertThat(lastResult).isEqualTo(
             Result.success(
-                CachedCustomerEphemeralKey.Available(
+                CachedCustomerEphemeralKey(
                     customerId = "cus_1",
                     ephemeralKey = "ek_123",
                     expiresAt = 999999,
@@ -220,7 +259,7 @@ class DefaultCustomerSessionElementsSessionManagerTest {
         assertThat(amountOfCalls).isEqualTo(4)
         assertThat(lastResult).isEqualTo(
             Result.success(
-                CachedCustomerEphemeralKey.Available(
+                CachedCustomerEphemeralKey(
                     customerId = "cus_1",
                     ephemeralKey = "ek_123",
                     expiresAt = 200000,
@@ -255,13 +294,86 @@ class DefaultCustomerSessionElementsSessionManagerTest {
 
         assertThat(ephemeralKey).isEqualTo(
             Result.success(
-                CachedCustomerEphemeralKey.Available(
+                CachedCustomerEphemeralKey(
                     customerId = "cus_1",
                     ephemeralKey = "ek_123",
                     expiresAt = 999999,
                 )
             )
         )
+    }
+
+    @Test
+    fun `on fetch elements session, should fail & report if 'customer' field is empty`() = runTest {
+        val errorReporter = FakeErrorReporter()
+        val elementsSessionManager = createElementsSessionManager(
+            elementsSessionRepository = FakeElementsSessionRepository(
+                stripeIntent = SetupIntentFactory.create(),
+                error = null,
+                linkSettings = null,
+                sessionsCustomer = null,
+            ),
+            errorReporter = errorReporter,
+        )
+
+        val elementsSessionResult = elementsSessionManager.fetchElementsSession()
+
+        assertThat(elementsSessionResult.isFailure).isTrue()
+        assertThat(elementsSessionResult.exceptionOrNull()?.message).isEqualTo(
+            "`customer` field should be available when using `CustomerSession` in elements/session!"
+        )
+
+        assertThat(errorReporter.getLoggedErrors()).containsExactly(
+            ErrorReporter.SuccessEvent.CUSTOMER_SHEET_CUSTOMER_SESSION_ELEMENTS_SESSION_LOAD_SUCCESS.eventName,
+            ErrorReporter
+                .UnexpectedErrorEvent
+                .CUSTOMER_SESSION_ON_CUSTOMER_SHEET_ELEMENTS_SESSION_NO_CUSTOMER_FIELD
+                .eventName
+        )
+    }
+
+    @Test
+    fun `on fetch elements session, should fail if client secret is empty`() = runClientValidationErrorTest(
+        invalidClientSecret = "",
+        errorMessage = "The provided 'customerSessionClientSecret' cannot be an empty string."
+    )
+
+    @Test
+    fun `on fetch elements session, should fail if client secret is legacy ephemeral key`() =
+        runClientValidationErrorTest(
+            invalidClientSecret = "ek_123",
+            errorMessage = "Provided secret looks like an Ephemeral Key secret, but expecting a CustomerSession " +
+                "client secret. See CustomerSession API: https://docs.stripe.com/api/customer_sessions/create"
+        )
+
+    @Test
+    fun `on fetch elements session, should fail if client secret is not in expected customer session format`() =
+        runClientValidationErrorTest(
+            invalidClientSecret = "cutt_123",
+            errorMessage = "Provided secret does not look like a CustomerSession client secret. " +
+                "See CustomerSession API: https://docs.stripe.com/api/customer_sessions/create"
+        )
+
+    private fun runClientValidationErrorTest(
+        invalidClientSecret: String,
+        errorMessage: String,
+    ) = runTest {
+        val manager = createElementsSessionManager(
+            customerSessionClientSecret = Result.success(
+                CustomerSheet.CustomerSessionClientSecret.create(
+                    customerId = "cus_1",
+                    clientSecret = invalidClientSecret
+                )
+            )
+        )
+
+        val result = manager.fetchElementsSession()
+
+        assertThat(result.isFailure).isTrue()
+
+        val exception = result.exceptionOrNull()
+
+        assertThat(exception?.message).isEqualTo(errorMessage)
     }
 
     private suspend fun createElementsSessionManagerWithCustomer(
@@ -278,24 +390,18 @@ class DefaultCustomerSessionElementsSessionManagerTest {
             )
         },
     ): CustomerSessionElementsSessionManager {
+        val defaultCustomer = createDefaultCustomer()
+
         return createElementsSessionManager(
             elementsSessionRepository = FakeElementsSessionRepository(
                 stripeIntent = PaymentIntentFactory.create(),
                 error = null,
                 linkSettings = null,
-                sessionsCustomer = ElementsSession.Customer(
-                    paymentMethods = listOf(),
-                    defaultPaymentMethod = null,
-                    session = ElementsSession.Customer.Session(
-                        id = "cuss_123",
-                        liveMode = true,
+                sessionsCustomer = defaultCustomer.copy(
+                    session = defaultCustomer.session.copy(
                         apiKey = apiKey,
                         apiKeyExpiry = apiKeyExpiry,
                         customerId = customerId,
-                        components = ElementsSession.Customer.Components(
-                            mobilePaymentElement = ElementsSession.Customer.Components.MobilePaymentElement.Disabled,
-                            customerSheet = ElementsSession.Customer.Components.CustomerSheet.Disabled,
-                        )
                     )
                 ),
             ),
@@ -311,6 +417,7 @@ class DefaultCustomerSessionElementsSessionManagerTest {
                 error = null,
                 linkSettings = null,
             ),
+        errorReporter: ErrorReporter = FakeErrorReporter(),
         intentConfiguration: Result<CustomerSheet.IntentConfiguration> =
             Result.success(CustomerSheet.IntentConfiguration.Builder().build()),
         onIntentConfiguration: () -> Result<CustomerSheet.IntentConfiguration> = { intentConfiguration },
@@ -331,6 +438,7 @@ class DefaultCustomerSessionElementsSessionManagerTest {
     ): CustomerSessionElementsSessionManager {
         return DefaultCustomerSessionElementsSessionManager(
             elementsSessionRepository = elementsSessionRepository,
+            errorReporter = errorReporter,
             prefsRepositoryFactory = {
                 FakePrefsRepository().apply {
                     setSavedSelection(savedSelection = savedSelection)
@@ -345,7 +453,25 @@ class DefaultCustomerSessionElementsSessionManagerTest {
         )
     }
 
-    private fun PaymentSheet.InitializationMode?.asDeferred(): PaymentSheet.InitializationMode.DeferredIntent {
-        return this as PaymentSheet.InitializationMode.DeferredIntent
+    private fun createDefaultCustomer(): ElementsSession.Customer {
+        return ElementsSession.Customer(
+            paymentMethods = listOf(),
+            defaultPaymentMethod = null,
+            session = ElementsSession.Customer.Session(
+                id = "cuss_1",
+                customerId = "cus_1",
+                apiKey = "ek_123",
+                apiKeyExpiry = 999999,
+                components = ElementsSession.Customer.Components(
+                    mobilePaymentElement = ElementsSession.Customer.Components.MobilePaymentElement.Disabled,
+                    customerSheet = ElementsSession.Customer.Components.CustomerSheet.Disabled,
+                ),
+                liveMode = false,
+            )
+        )
+    }
+
+    private fun InitializationMode?.asDeferred(): InitializationMode.DeferredIntent {
+        return this as InitializationMode.DeferredIntent
     }
 }

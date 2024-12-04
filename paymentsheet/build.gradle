@@ -3,6 +3,7 @@ apply from: configs.androidLibrary
 apply plugin: 'com.google.devtools.ksp'
 apply plugin: "org.jetbrains.kotlin.plugin.parcelize"
 apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
+apply plugin: 'org.jetbrains.kotlin.plugin.compose'
 apply plugin: 'app.cash.paparazzi'
 apply plugin: 'dev.drewhamilton.poko'
 
@@ -25,6 +26,7 @@ dependencies {
     implementation libs.androidx.browser
     implementation libs.androidx.fragment
     implementation libs.androidx.lifecycle
+    implementation libs.androidx.lifecycleCompose
     implementation libs.androidx.savedState
     implementation libs.androidx.viewModel
 
@@ -82,6 +84,8 @@ dependencies {
 
     // temporary fix for running compose test in RobolectricTestRunner, see https://github.com/robolectric/robolectric/issues/6593
     testImplementation testLibs.espresso.core
+
+    kspTest libs.daggerCompiler
 
     androidTestImplementation project(':network-testing')
     androidTestImplementation project(':payments-core-testing')
@@ -146,14 +150,11 @@ android {
         }
     }
 
-    composeOptions {
-        kotlinCompilerExtensionVersion "${versions.androidxComposeCompiler}"
-    }
-
     kotlinOptions {
         freeCompilerArgs += [
                 "-opt-in=kotlinx.coroutines.FlowPreview",
                 "-Xcontext-receivers",
+                "-Xconsistent-data-class-copy-visibility"
         ]
         if (gradle.ext.isCi) {
             kotlinOptions.allWarningsAsErrors = true

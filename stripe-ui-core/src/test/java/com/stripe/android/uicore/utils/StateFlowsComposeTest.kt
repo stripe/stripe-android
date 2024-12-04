@@ -10,6 +10,7 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.InternalForInheritanceCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.junit.Rule
@@ -23,6 +24,7 @@ class StateFlowsComposeTest {
     val composeTestRule = createComposeRule()
 
     @Test
+    @OptIn(InternalForInheritanceCoroutinesApi::class)
     fun `Custom 'collectAsState' only produces initial value on initial composition`() {
         val stateFlow = MutableStateFlow(2)
         var initialValueProducedCount = 0

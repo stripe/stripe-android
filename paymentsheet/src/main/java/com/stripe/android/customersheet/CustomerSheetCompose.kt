@@ -4,7 +4,7 @@ import androidx.activity.compose.LocalActivityResultRegistryOwner
 import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.utils.rememberActivity
@@ -17,15 +17,14 @@ import com.stripe.android.utils.rememberActivity
  * @param customerAdapter The [CustomerAdapter] to fetch customer-related information
  * @param callback Called with the result of the operation after [CustomerSheet] is dismissed
  */
-@ExperimentalCustomerSheetApi
 @Composable
 fun rememberCustomerSheet(
     customerAdapter: CustomerAdapter,
     callback: CustomerSheetResultCallback,
 ): CustomerSheet {
     return rememberCustomerSheet(
-        integrationType = remember(customerAdapter) {
-            CustomerSheetIntegrationType.Adapter(customerAdapter)
+        integration = remember(customerAdapter) {
+            CustomerSheetIntegration.Adapter(customerAdapter)
         },
         callback = callback,
     )
@@ -39,7 +38,6 @@ fun rememberCustomerSheet(
 * @param customerSessionProvider provider for providing customer session elements
 * @param callback Called with the result of the operation after [CustomerSheet] is dismissed
 */
-@ExperimentalCustomerSheetApi
 @ExperimentalCustomerSessionApi
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Composable
@@ -48,17 +46,16 @@ fun rememberCustomerSheet(
     callback: CustomerSheetResultCallback,
 ): CustomerSheet {
     return rememberCustomerSheet(
-        integrationType = remember(customerSessionProvider) {
-            CustomerSheetIntegrationType.CustomerSession(customerSessionProvider)
+        integration = remember(customerSessionProvider) {
+            CustomerSheetIntegration.CustomerSession(customerSessionProvider)
         },
         callback = callback,
     )
 }
 
-@ExperimentalCustomerSheetApi
 @Composable
 private fun rememberCustomerSheet(
-    integrationType: CustomerSheetIntegrationType,
+    integration: CustomerSheetIntegration,
     callback: CustomerSheetResultCallback,
 ): CustomerSheet {
     val activityResultRegistryOwner = requireNotNull(LocalActivityResultRegistryOwner.current) {
@@ -75,7 +72,7 @@ private fun rememberCustomerSheet(
     }
 
     return remember(
-        integrationType,
+        integration,
         callback,
     ) {
         CustomerSheet.getInstance(
@@ -83,7 +80,7 @@ private fun rememberCustomerSheet(
             lifecycleOwner = lifecycleOwner,
             activityResultRegistryOwner = activityResultRegistryOwner,
             viewModelStoreOwner = viewModelStoreOwner,
-            integrationType = integrationType,
+            integration = integration,
             callback = callback,
             statusBarColor = { activity.window?.statusBarColor },
         )

@@ -6,25 +6,29 @@ import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.annotation.ColorInt
 import androidx.annotation.FontRes
+import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.fragment.app.Fragment
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
+import com.stripe.android.ExperimentalCardBrandFilteringApi
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
+import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
+import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerFactory
-import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentOption
-import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
+import com.stripe.android.paymentsheet.state.PaymentElementLoader.InitializationMode
 import com.stripe.android.uicore.PRIMARY_BUTTON_SUCCESS_BACKGROUND_COLOR
 import com.stripe.android.uicore.StripeThemeDefaults
 import com.stripe.android.uicore.getRawValueFromDimenResource
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 
@@ -303,41 +307,6 @@ class PaymentSheet internal constructor(
         )
     }
 
-    internal sealed class InitializationMode : Parcelable {
-
-        internal abstract fun validate()
-
-        @Parcelize
-        internal data class PaymentIntent(
-            val clientSecret: String,
-        ) : InitializationMode() {
-
-            override fun validate() {
-                PaymentIntentClientSecret(clientSecret).validate()
-            }
-        }
-
-        @Parcelize
-        internal data class SetupIntent(
-            val clientSecret: String,
-        ) : InitializationMode() {
-
-            override fun validate() {
-                SetupIntentClientSecret(clientSecret).validate()
-            }
-        }
-
-        @Parcelize
-        internal data class DeferredIntent(
-            val intentConfiguration: IntentConfiguration,
-        ) : InitializationMode() {
-
-            override fun validate() {
-                // Nothing to do here
-            }
-        }
-    }
-
     /**
      * Contains information needed to render [PaymentSheet]. The values are used to calculate
      * the payment methods displayed and influence the UI.
@@ -383,6 +352,7 @@ class PaymentSheet internal constructor(
              * @param captureMethod Controls when the funds will be captured from the customer's
              * account. See [our docs](https://stripe.com/docs/api/payment_intents/create#create_payment_intent-capture_method) for more info.
              */
+            @Poko
             @Parcelize
             class Payment @JvmOverloads constructor(
                 val amount: Long,
@@ -399,6 +369,7 @@ class PaymentSheet internal constructor(
              * @param setupFutureUse Indicates that you intend to make future payments. See
              * [our docs](https://stripe.com/docs/api/payment_intents/create#create_payment_intent-setup_future_usage) for more info.
              */
+            @Poko
             @Parcelize
             class Setup @JvmOverloads constructor(
                 val currency: String? = null,
@@ -596,7 +567,9 @@ class PaymentSheet internal constructor(
 
         internal val externalPaymentMethods: List<String> = ConfigurationDefaults.externalPaymentMethods,
 
-        internal val paymentMethodLayout: PaymentMethodLayout = PaymentMethodLayout.default,
+        internal val paymentMethodLayout: PaymentMethodLayout = ConfigurationDefaults.paymentMethodLayout,
+
+        internal val cardBrandAcceptance: CardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance,
     ) : Parcelable {
 
         @JvmOverloads
@@ -745,7 +718,8 @@ class PaymentSheet internal constructor(
                 ConfigurationDefaults.allowsRemovalOfLastSavedPaymentMethod
             private var paymentMethodOrder: List<String> = ConfigurationDefaults.paymentMethodOrder
             private var externalPaymentMethods: List<String> = ConfigurationDefaults.externalPaymentMethods
-            private var paymentMethodLayout: PaymentMethodLayout = PaymentMethodLayout.default
+            private var paymentMethodLayout: PaymentMethodLayout = ConfigurationDefaults.paymentMethodLayout
+            private var cardBrandAcceptance: CardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance
 
             fun merchantDisplayName(merchantDisplayName: String) =
                 apply { this.merchantDisplayName = merchantDisplayName }
@@ -839,9 +813,22 @@ class PaymentSheet internal constructor(
              * The layout of payment methods in PaymentSheet. Defaults to [PaymentSheet.PaymentMethodLayout.Horizontal].
              * @see [PaymentSheet.PaymentMethodLayout] for the list of available layouts.
              */
-            @ExperimentalPaymentMethodLayoutApi
             fun paymentMethodLayout(paymentMethodLayout: PaymentMethodLayout): Builder = apply {
                 this.paymentMethodLayout = paymentMethodLayout
+            }
+
+            /**
+             * By default, PaymentSheet will accept all supported cards by Stripe.
+             * You can specify card brands PaymentSheet should block or allow
+             * payment for by providing a list of those card brands.
+             * **Note**: This is only a client-side solution.
+             * **Note**: Card brand filtering is not currently supported in Link.
+             */
+            @ExperimentalCardBrandFilteringApi
+            fun cardBrandAcceptance(
+                cardBrandAcceptance: CardBrandAcceptance
+            ) = apply {
+                this.cardBrandAcceptance = cardBrandAcceptance
             }
 
             fun build() = Configuration(
@@ -861,6 +848,7 @@ class PaymentSheet internal constructor(
                 paymentMethodOrder = paymentMethodOrder,
                 externalPaymentMethods = externalPaymentMethods,
                 paymentMethodLayout = paymentMethodLayout,
+                cardBrandAcceptance = cardBrandAcceptance,
             )
         }
 
@@ -891,11 +879,7 @@ class PaymentSheet internal constructor(
         /**
          * This lets Stripe choose the best layout for payment methods in the sheet.
          */
-        Automatic;
-
-        internal companion object {
-            internal val default: PaymentMethodLayout = Horizontal
-        }
+        Automatic
     }
 
     @Parcelize
@@ -924,6 +908,11 @@ class PaymentSheet internal constructor(
          * Describes the appearance of the primary button (e.g., the "Pay" button).
          */
         val primaryButton: PrimaryButton = PrimaryButton(),
+
+        /**
+         * Describes the appearance of the Embedded Payment Element
+         */
+        internal val embeddedAppearance: Embedded = Embedded.default
     ) : Parcelable {
         constructor() : this(
             colorsLight = Colors.defaultLight,
@@ -933,8 +922,259 @@ class PaymentSheet internal constructor(
             primaryButton = PrimaryButton(),
         )
 
+        constructor(
+            colorsLight: Colors = Colors.defaultLight,
+            colorsDark: Colors = Colors.defaultDark,
+            shapes: Shapes = Shapes.default,
+            typography: Typography = Typography.default,
+            primaryButton: PrimaryButton = PrimaryButton(),
+        ) : this(
+            colorsLight = colorsLight,
+            colorsDark = colorsDark,
+            shapes = shapes,
+            typography = typography,
+            primaryButton = primaryButton,
+            embeddedAppearance = Embedded.default
+        )
+
         fun getColors(isDark: Boolean): Colors {
             return if (isDark) colorsDark else colorsLight
+        }
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Parcelize
+        @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
+        class Embedded(
+            internal val style: RowStyle
+        ) : Parcelable {
+
+            internal companion object {
+                @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
+                val default = Embedded(
+                    style = RowStyle.FlatWithRadio.defaultLight
+                )
+            }
+
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            @ExperimentalEmbeddedPaymentElementApi
+            @Parcelize
+            sealed class RowStyle : Parcelable {
+
+                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                @ExperimentalEmbeddedPaymentElementApi
+                @Parcelize
+                class FlatWithRadio(
+                    /**
+                     * The thickness of the separator line between rows.
+                     */
+                    internal val separatorThicknessDp: Float,
+
+                    /**
+                     * The color of the separator line between rows.
+                     */
+                    @ColorInt
+                    internal val separatorColor: Int,
+
+                    /**
+                     * The insets of the separator line between rows.
+                     */
+                    internal val separatorInsetsDp: Float,
+
+                    /**
+                     * Determines if the top separator is visible at the top of the Embedded Mobile Payment Element.
+                     */
+                    internal val topSeparatorEnabled: Boolean,
+
+                    /**
+                     * Determines if the bottom separator is visible at the bottom of the Embedded Mobile Payment
+                     * Element.
+                     */
+                    internal val bottomSeparatorEnabled: Boolean,
+                    /**
+                     * The color of the radio button when selected.
+                     */
+                    @ColorInt
+                    internal val selectedColor: Int,
+
+                    /**
+                     * The color of the radio button when unselected.
+                     */
+                    @ColorInt
+                    internal val unselectedColor: Int,
+                    /**
+                     * Additional vertical insets applied to a payment method row.
+                     * - Note: Increasing this value increases the height of each row.
+                     */
+                    internal val additionalInsetsDp: Float,
+                ) : RowStyle() {
+                    constructor(
+                        context: Context,
+                        separatorThicknessDp: Int,
+                        separatorColor: Color,
+                        separatorInsetsDp: Int,
+                        topSeparatorEnabled: Boolean,
+                        bottomSeparatorEnabled: Boolean,
+                        selectedColor: Color,
+                        unselectedColor: Color,
+                        additionalInsetsDp: Int
+                    ) : this(
+                        separatorThicknessDp = context.getRawValueFromDimenResource(separatorThicknessDp),
+                        separatorColor = separatorColor.toArgb(),
+                        separatorInsetsDp = context.getRawValueFromDimenResource(separatorInsetsDp),
+                        topSeparatorEnabled = topSeparatorEnabled,
+                        bottomSeparatorEnabled = bottomSeparatorEnabled,
+                        selectedColor = selectedColor.toArgb(),
+                        unselectedColor = unselectedColor.toArgb(),
+                        additionalInsetsDp = context.getRawValueFromDimenResource(additionalInsetsDp)
+                    )
+
+                    internal companion object {
+                        val defaultLight = FlatWithRadio(
+                            separatorThicknessDp = StripeThemeDefaults.flat.separatorThickness,
+                            separatorColor = StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
+                            separatorInsetsDp = StripeThemeDefaults.flat.separatorInsets,
+                            topSeparatorEnabled = StripeThemeDefaults.flat.topSeparatorEnabled,
+                            bottomSeparatorEnabled = StripeThemeDefaults.flat.bottomSeparatorEnabled,
+                            selectedColor = StripeThemeDefaults.colorsLight.materialColors.primary.toArgb(),
+                            unselectedColor = StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
+                            additionalInsetsDp = StripeThemeDefaults.embeddedCommon.additionalInsetsDp
+                        )
+
+                        val defaultDark = FlatWithRadio(
+                            separatorThicknessDp = StripeThemeDefaults.flat.separatorThickness,
+                            separatorColor = StripeThemeDefaults.colorsDark.componentBorder.toArgb(),
+                            separatorInsetsDp = StripeThemeDefaults.flat.separatorInsets,
+                            topSeparatorEnabled = StripeThemeDefaults.flat.topSeparatorEnabled,
+                            bottomSeparatorEnabled = StripeThemeDefaults.flat.bottomSeparatorEnabled,
+                            selectedColor = StripeThemeDefaults.colorsDark.materialColors.primary.toArgb(),
+                            unselectedColor = StripeThemeDefaults.colorsDark.componentBorder.toArgb(),
+                            additionalInsetsDp = StripeThemeDefaults.embeddedCommon.additionalInsetsDp
+                        )
+                    }
+                }
+
+                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                @ExperimentalEmbeddedPaymentElementApi
+                @Parcelize
+                class FlatWithCheckmark(
+                    /**
+                     * The thickness of the separator line between rows.
+                     */
+                    internal val separatorThicknessDp: Float,
+
+                    /**
+                     * The color of the separator line between rows.
+                     */
+                    @ColorInt
+                    internal val separatorColor: Int,
+
+                    /**
+                     * The insets of the separator line between rows.
+                     */
+                    internal val separatorInsetsDp: Float,
+
+                    /**
+                     * Determines if the top separator is visible at the top of the Embedded Mobile Payment Element.
+                     */
+                    internal val topSeparatorEnabled: Boolean,
+
+                    /**
+                     * Determines if the bottom separator is visible at the bottom of the Embedded Mobile Payment
+                     * Element.
+                     */
+                    internal val bottomSeparatorEnabled: Boolean,
+                    /**
+                     * The color of the checkmark.
+                     */
+                    @ColorInt
+                    internal val checkmarkColor: Int,
+                    /**
+                     * Inset of the checkmark from the end of the row
+                     */
+                    internal val checkmarkInsetDp: Float,
+                    /**
+                     * Additional vertical insets applied to a payment method row.
+                     * - Note: Increasing this value increases the height of each row.
+                     */
+                    internal val additionalInsetsDp: Float,
+                ) : RowStyle() {
+                    constructor(
+                        context: Context,
+                        separatorThicknessDp: Int,
+                        separatorColor: Color,
+                        separatorInsetsDp: Int,
+                        topSeparatorEnabled: Boolean,
+                        bottomSeparatorEnabled: Boolean,
+                        checkmarkColor: Color,
+                        checkmarkInsetDp: Int,
+                        additionalInsetsDp: Int
+                    ) : this(
+                        separatorThicknessDp = context.getRawValueFromDimenResource(separatorThicknessDp),
+                        separatorColor = separatorColor.toArgb(),
+                        separatorInsetsDp = context.getRawValueFromDimenResource(separatorInsetsDp),
+                        topSeparatorEnabled = topSeparatorEnabled,
+                        bottomSeparatorEnabled = bottomSeparatorEnabled,
+                        checkmarkColor = checkmarkColor.toArgb(),
+                        checkmarkInsetDp = context.getRawValueFromDimenResource(checkmarkInsetDp),
+                        additionalInsetsDp = context.getRawValueFromDimenResource(additionalInsetsDp)
+                    )
+
+                    internal companion object {
+                        val defaultLight = FlatWithCheckmark(
+                            separatorThicknessDp = StripeThemeDefaults.flat.separatorThickness,
+                            separatorColor = StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
+                            separatorInsetsDp = StripeThemeDefaults.flat.separatorInsets,
+                            topSeparatorEnabled = StripeThemeDefaults.flat.topSeparatorEnabled,
+                            bottomSeparatorEnabled = StripeThemeDefaults.flat.bottomSeparatorEnabled,
+                            checkmarkColor = StripeThemeDefaults.colorsLight.materialColors.primary.toArgb(),
+                            checkmarkInsetDp = StripeThemeDefaults.embeddedCommon.checkmarkInsetDp,
+                            additionalInsetsDp = StripeThemeDefaults.embeddedCommon.additionalInsetsDp
+                        )
+
+                        val defaultDark = FlatWithCheckmark(
+                            separatorThicknessDp = StripeThemeDefaults.flat.separatorThickness,
+                            separatorColor = StripeThemeDefaults.colorsDark.componentBorder.toArgb(),
+                            separatorInsetsDp = StripeThemeDefaults.flat.separatorInsets,
+                            topSeparatorEnabled = StripeThemeDefaults.flat.topSeparatorEnabled,
+                            bottomSeparatorEnabled = StripeThemeDefaults.flat.bottomSeparatorEnabled,
+                            checkmarkColor = StripeThemeDefaults.colorsDark.materialColors.primary.toArgb(),
+                            checkmarkInsetDp = StripeThemeDefaults.embeddedCommon.checkmarkInsetDp,
+                            additionalInsetsDp = StripeThemeDefaults.embeddedCommon.additionalInsetsDp
+                        )
+                    }
+                }
+
+                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                @ExperimentalEmbeddedPaymentElementApi
+                @Parcelize
+                class FloatingButton(
+                    /**
+                     * The spacing between payment method rows
+                     */
+                    internal val spacingDp: Float,
+                    /**
+                     * Additional vertical insets applied to a payment method row.
+                     * - Note: Increasing this value increases the height of each row.
+                     */
+                    internal val additionalInsetsDp: Float,
+                ) : RowStyle() {
+                    constructor(
+                        context: Context,
+                        spacingDp: Int,
+                        additionalInsetsDp: Int
+                    ) : this(
+                        spacingDp = context.getRawValueFromDimenResource(spacingDp),
+                        additionalInsetsDp = context.getRawValueFromDimenResource(additionalInsetsDp)
+                    )
+
+                    internal companion object {
+                        val default = FloatingButton(
+                            spacingDp = StripeThemeDefaults.floating.spacing,
+                            additionalInsetsDp = StripeThemeDefaults.embeddedCommon.additionalInsetsDp
+                        )
+                    }
+                }
+            }
         }
 
         class Builder {
@@ -943,6 +1183,10 @@ class PaymentSheet internal constructor(
             private var shapes = Shapes.default
             private var typography = Typography.default
             private var primaryButton: PrimaryButton = PrimaryButton()
+
+            @ExperimentalEmbeddedPaymentElementApi
+            private var embeddedAppearance: Embedded =
+                Embedded.default
 
             fun colorsLight(colors: Colors) = apply {
                 this.colorsLight = colors
@@ -964,8 +1208,15 @@ class PaymentSheet internal constructor(
                 this.primaryButton = primaryButton
             }
 
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            @ExperimentalEmbeddedPaymentElementApi
+            fun embeddedAppearance(embeddedAppearance: Embedded) = apply {
+                this.embeddedAppearance = embeddedAppearance
+            }
+
+            @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
             fun build(): Appearance {
-                return Appearance(colorsLight, colorsDark, shapes, typography, primaryButton)
+                return Appearance(colorsLight, colorsDark, shapes, typography, primaryButton, embeddedAppearance)
             }
         }
     }
@@ -1514,6 +1765,83 @@ class PaymentSheet internal constructor(
              */
             Full,
         }
+    }
+
+    /**
+     * Options to block certain card brands on the client
+     */
+    sealed class CardBrandAcceptance : Parcelable {
+
+        /**
+         * Card brand categories that can be allowed or disallowed
+         */
+        @Parcelize
+        @ExperimentalCardBrandFilteringApi
+        enum class BrandCategory : Parcelable {
+            /**
+             * Visa branded cards
+             */
+            Visa,
+
+            /**
+             * Mastercard branded cards
+             */
+            Mastercard,
+
+            /**
+             * Amex branded cards
+             */
+            Amex,
+
+            /**
+             * Discover branded cards
+             * **Note**: Encompasses all of Discover Global Network (Discover, Diners, JCB, UnionPay, Elo).
+             */
+            Discover
+        }
+
+        companion object {
+            /**
+             * Accept all card brands supported by Stripe
+             */
+            @JvmStatic
+            @ExperimentalCardBrandFilteringApi
+            fun all(): CardBrandAcceptance = All
+
+            /**
+             * Accept only the card brands specified in `brands`.
+             * **Note**: Any card brands that do not map to a `BrandCategory` will be blocked when using an allow list.
+             */
+            @JvmStatic
+            @ExperimentalCardBrandFilteringApi
+            fun allowed(brands: List<BrandCategory>): CardBrandAcceptance =
+                Allowed(brands)
+
+            /**
+             * Accept all card brands supported by Stripe except for those specified in `brands`.
+             * **Note**: Any card brands that do not map to a `BrandCategory` will be accepted
+             * when using a disallow list.
+             */
+            @JvmStatic
+            @ExperimentalCardBrandFilteringApi
+            fun disallowed(brands: List<BrandCategory>): CardBrandAcceptance =
+                Disallowed(brands)
+        }
+
+        @Parcelize
+        internal data object All : CardBrandAcceptance()
+
+        @Parcelize
+        @OptIn(ExperimentalCardBrandFilteringApi::class)
+        internal data class Allowed(
+            val brands: List<BrandCategory>
+        ) : CardBrandAcceptance()
+
+        @Parcelize
+        @OptIn(ExperimentalCardBrandFilteringApi::class)
+        internal data class Disallowed(
+            val brands: List<BrandCategory>
+        ) : CardBrandAcceptance()
     }
 
     internal sealed interface CustomerAccessType : Parcelable {

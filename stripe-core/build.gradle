@@ -11,6 +11,14 @@ ext {
     artifactDescrption = "The core module of Stripe Android SDKs"
 }
 
+android {
+    kotlinOptions {
+        freeCompilerArgs += [
+                "-Xconsistent-data-class-copy-visibility"
+        ]
+    }
+}
+
 dependencies {
     implementation libs.androidx.browser
     implementation libs.dagger

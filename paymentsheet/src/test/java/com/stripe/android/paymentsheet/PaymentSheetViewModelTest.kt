@@ -54,13 +54,19 @@ import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentelement.confirmation.ConfirmationMediator
+import com.stripe.android.paymentelement.confirmation.DefaultConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
+import com.stripe.android.paymentelement.confirmation.createTestConfirmationHandlerFactory
+import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
+import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
+import com.stripe.android.paymentelement.confirmation.intent.InvalidDeferredIntentUsageException
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
-import com.stripe.android.paymentsheet.PaymentSheet.InitializationMode
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.ARGS_DEFERRED_INTENT
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
@@ -79,7 +85,6 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddAnotherPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
-import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormScreenState
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationContract
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncher
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncherFactory
@@ -91,15 +96,15 @@ import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.Cvc
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.LinkState
-import com.stripe.android.paymentsheet.state.PaymentSheetLoader
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.paymentsheet.state.PaymentElementLoader.InitializationMode
 import com.stripe.android.paymentsheet.state.PaymentSheetLoadingException
 import com.stripe.android.paymentsheet.state.PaymentSheetLoadingException.PaymentIntentInTerminalState
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
+import com.stripe.android.paymentsheet.ui.CardBrandChoice
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewAction
-import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.utils.FakeEditPaymentMethodInteractorFactory
-import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_PROCESSING
@@ -107,14 +112,15 @@ import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.SessionTestRule
 import com.stripe.android.ui.core.Amount
+import com.stripe.android.utils.BankFormScreenStateFactory
 import com.stripe.android.utils.DummyActivityResultCaller
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
-import com.stripe.android.utils.FakePaymentSheetLoader
+import com.stripe.android.utils.FakePaymentElementLoader
 import com.stripe.android.utils.IntentConfirmationInterceptorTestRule
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
-import com.stripe.android.utils.RelayingPaymentSheetLoader
+import com.stripe.android.utils.RelayingPaymentElementLoader
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
@@ -173,7 +179,7 @@ internal class PaymentSheetViewModelTest {
     }
     private val googlePayLauncher = mock<GooglePayPaymentMethodLauncher>()
     private val googlePayLauncherFactory = mock<GooglePayPaymentMethodLauncherFactory> {
-        on { create(any(), any(), any(), any(), any()) } doReturn googlePayLauncher
+        on { create(any(), any(), any(), any(), any(), any()) } doReturn googlePayLauncher
     }
     private val fakeIntentConfirmationInterceptor = FakeIntentConfirmationInterceptor()
     private val fakeEditPaymentMethodInteractorFactory = FakeEditPaymentMethodInteractorFactory(testDispatcher)
@@ -290,7 +296,7 @@ internal class PaymentSheetViewModelTest {
 
                 interactor.handleViewAction(
                     EditPaymentMethodViewAction.OnBrandChoiceChanged(
-                        EditPaymentMethodViewState.CardBrandChoice(CardBrand.Visa)
+                        CardBrandChoice(CardBrand.Visa)
                     )
                 )
 
@@ -328,6 +334,7 @@ internal class PaymentSheetViewModelTest {
                 paymentMethods = paymentMethods,
                 permissions = CustomerState.Permissions(
                     canRemovePaymentMethods = true,
+                    canRemoveLastPaymentMethod = true,
                     canRemoveDuplicates = false,
                 ),
             ),
@@ -348,7 +355,7 @@ internal class PaymentSheetViewModelTest {
 
                 interactor.handleViewAction(
                     EditPaymentMethodViewAction.OnBrandChoiceChanged(
-                        EditPaymentMethodViewState.CardBrandChoice(CardBrand.Visa)
+                        CardBrandChoice(CardBrand.Visa)
                     )
                 )
 
@@ -414,7 +421,7 @@ internal class PaymentSheetViewModelTest {
 
                 interactor.handleViewAction(
                     EditPaymentMethodViewAction.OnBrandChoiceChanged(
-                        EditPaymentMethodViewState.CardBrandChoice(CardBrand.Visa)
+                        CardBrandChoice(CardBrand.Visa)
                     )
                 )
 
@@ -484,7 +491,7 @@ internal class PaymentSheetViewModelTest {
 
                 interactor.handleViewAction(
                     EditPaymentMethodViewAction.OnBrandChoiceChanged(
-                        EditPaymentMethodViewState.CardBrandChoice(CardBrand.Visa)
+                        CardBrandChoice(CardBrand.Visa)
                     )
                 )
 
@@ -1581,6 +1588,7 @@ internal class PaymentSheetViewModelTest {
                     value = 1099,
                     currencyCode = "usd",
                 ),
+                hasIntentToSetup = true,
                 billingDetails = PaymentSheet.BillingDetails(),
             )
         )
@@ -1860,7 +1868,7 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `Confirms intent if intent confirmation interceptor returns an unconfirmed intent`() = runTest {
         val viewModel = createViewModelForDeferredIntent().apply {
-            registerFromActivity(DummyActivityResultCaller(), TestLifecycleOwner())
+            registerFromActivity(DummyActivityResultCaller.noOp(), TestLifecycleOwner())
         }
 
         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
@@ -1884,7 +1892,7 @@ internal class PaymentSheetViewModelTest {
     fun `Handles next action if intent confirmation interceptor returns an intent with an outstanding action`() =
         runTest {
             val viewModel = createViewModelForDeferredIntent().apply {
-                registerFromActivity(DummyActivityResultCaller(), TestLifecycleOwner())
+                registerFromActivity(DummyActivityResultCaller.noOp(), TestLifecycleOwner())
             }
 
             val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
@@ -2097,38 +2105,6 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `Sends confirm pressed event when fully confirming US bank account payment`() = runTest {
-        val newPaymentSelection = PaymentSelection.New.USBankAccount(
-            labelResource = "Test",
-            iconResource = 0,
-            paymentMethodCreateParams = mock(),
-            customerRequestedSave = mock(),
-            input = PaymentSelection.New.USBankAccount.Input(
-                name = "",
-                email = null,
-                phone = null,
-                address = null,
-                saveForFutureUse = false,
-            ),
-            instantDebits = null,
-            screenState = USBankAccountFormScreenState.SavedAccount(
-                financialConnectionsSessionId = "session_1234",
-                intentId = "intent_1234",
-                bankName = "Stripe Bank",
-                last4 = "6789",
-                primaryButtonText = "Continue".resolvableString,
-                mandateText = null,
-            ),
-        )
-
-        val viewModel = createViewModel()
-
-        viewModel.handleConfirmUSBankAccount(newPaymentSelection)
-
-        verify(eventReporter).onPressConfirmButton(newPaymentSelection)
-    }
-
-    @Test
     fun `Sends no confirm pressed event when opening US bank account auth flow`() = runTest {
         val paymentIntent = PAYMENT_INTENT.copy(
             amount = 9999,
@@ -2140,7 +2116,7 @@ internal class PaymentSheetViewModelTest {
 
         // Mock the filled out US Bank Account form by updating the selection
         val usBankAccount = PaymentSelection.New.USBankAccount(
-            labelResource = "Test",
+            label = "Test",
             iconResource = 0,
             paymentMethodCreateParams = mock(),
             customerRequestedSave = mock(),
@@ -2152,14 +2128,7 @@ internal class PaymentSheetViewModelTest {
                 saveForFutureUse = false,
             ),
             instantDebits = null,
-            screenState = USBankAccountFormScreenState.SavedAccount(
-                financialConnectionsSessionId = "session_1234",
-                intentId = "intent_1234",
-                bankName = "Stripe Bank",
-                last4 = "6789",
-                primaryButtonText = "Continue".resolvableString,
-                mandateText = null,
-            ),
+            screenState = BankFormScreenStateFactory.createWithSession("session_1234"),
         )
         viewModel.updateSelection(usBankAccount)
 
@@ -2646,7 +2615,7 @@ internal class PaymentSheetViewModelTest {
 
                 interactor.handleViewAction(
                     EditPaymentMethodViewAction.OnBrandChoiceChanged(
-                        EditPaymentMethodViewState.CardBrandChoice(CardBrand.Visa)
+                        CardBrandChoice(CardBrand.Visa)
                     )
                 )
 
@@ -2953,26 +2922,31 @@ internal class PaymentSheetViewModelTest {
 
     private suspend fun testProcessDeathRestorationAfterPaymentSuccess(loadStateBeforePaymentResult: Boolean) {
         val stripeIntent = PaymentIntentFactory.create(status = StripeIntent.Status.Succeeded)
+        val option = PaymentMethodConfirmationOption.Saved(
+            initializationMode = ARGS_CUSTOMER_WITH_GOOGLEPAY.initializationMode,
+            paymentMethod = CARD_PAYMENT_METHOD,
+            optionsParams = null,
+            shippingDetails = null,
+        )
         val savedStateHandle = SavedStateHandle(
             initialState = mapOf(
-                "AwaitingPaymentResult" to true,
-                "IntentConfirmationArguments" to IntentConfirmationHandler.Args(
+                "AwaitingConfirmationResult" to DefaultConfirmationHandler.AwaitingConfirmationResultData(
+                    confirmationOption = option,
+                    receivesResultInProcess = false,
+                ),
+                "IntentConfirmationParameters" to ConfirmationMediator.Parameters(
                     intent = PAYMENT_INTENT,
-                    confirmationOption = PaymentConfirmationOption.PaymentMethod.Saved(
-                        initializationMode = ARGS_CUSTOMER_WITH_GOOGLEPAY.initializationMode,
-                        paymentMethod = CARD_PAYMENT_METHOD,
-                        optionsParams = null,
-                        shippingDetails = null,
-                    )
+                    confirmationOption = option,
+                    deferredIntentConfirmationType = null,
                 )
             )
         )
-        val paymentSheetLoader = RelayingPaymentSheetLoader()
+        val paymentSheetLoader = RelayingPaymentElementLoader()
 
         val viewModel = createViewModel(
             stripeIntent = stripeIntent,
             savedStateHandle = savedStateHandle,
-            paymentSheetLoader = paymentSheetLoader,
+            paymentElementLoader = paymentSheetLoader,
         )
 
         val resultListener = viewModel.capturePaymentResultListener()
@@ -3026,11 +3000,19 @@ internal class PaymentSheetViewModelTest {
 
         val paymentResultListener = viewModel.capturePaymentResultListener()
 
+        val createParams = PaymentMethodCreateParams.create(
+            card = PaymentMethodCreateParams.Card()
+        )
         val selection = PaymentSelection.New.Card(
             brand = CardBrand.Visa,
             customerRequestedSave = customerRequestedSave,
-            paymentMethodCreateParams = PaymentMethodCreateParams.create(
-                card = PaymentMethodCreateParams.Card()
+            paymentMethodCreateParams = createParams
+        )
+
+        fakeIntentConfirmationInterceptor.enqueueConfirmStep(
+            confirmParams = ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
+                paymentMethodCreateParams = createParams,
+                clientSecret = "pi_1234"
             )
         )
 
@@ -3083,7 +3065,7 @@ internal class PaymentSheetViewModelTest {
         paymentLauncherFactory: StripePaymentLauncherAssistedFactory = this.paymentLauncherFactory,
         validationError: PaymentSheetLoadingException? = null,
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
-        paymentSheetLoader: PaymentSheetLoader = FakePaymentSheetLoader(
+        paymentElementLoader: PaymentElementLoader = FakePaymentElementLoader(
             stripeIntent = stripeIntent,
             shouldFail = shouldFailLoad,
             linkState = linkState,
@@ -3107,23 +3089,22 @@ internal class PaymentSheetViewModelTest {
             PaymentSheetViewModel(
                 args = args,
                 eventReporter = eventReporter,
-                paymentSheetLoader = paymentSheetLoader,
+                paymentElementLoader = paymentElementLoader,
                 customerRepository = customerRepository,
                 prefsRepository = prefsRepository,
                 logger = Logger.noop(),
                 workContext = testDispatcher,
                 savedStateHandle = thisSavedStateHandle,
                 linkHandler = linkHandler,
-                intentConfirmationHandlerFactory = IntentConfirmationHandler.Factory(
+                confirmationHandlerFactory = createTestConfirmationHandlerFactory(
                     intentConfirmationInterceptor = intentConfirmationInterceptor,
                     savedStateHandle = thisSavedStateHandle,
                     bacsMandateConfirmationLauncherFactory = bacsMandateConfirmationLauncherFactory,
                     stripePaymentLauncherAssistedFactory = paymentLauncherFactory,
                     googlePayPaymentMethodLauncherFactory = googlePayLauncherFactory,
-                    paymentConfigurationProvider = { paymentConfiguration },
-                    statusBarColor = { args.statusBarColor },
+                    paymentConfiguration = paymentConfiguration,
+                    statusBarColor = args.statusBarColor,
                     errorReporter = FakeErrorReporter(),
-                    logger = FakeUserFacingLogger(),
                 ),
                 cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
                 editInteractorFactory = fakeEditPaymentMethodInteractorFactory,

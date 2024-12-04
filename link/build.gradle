@@ -4,6 +4,7 @@ apply plugin: 'com.google.devtools.ksp'
 apply plugin: "org.jetbrains.kotlin.plugin.parcelize"
 apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
 apply plugin: 'app.cash.paparazzi'
+apply plugin: 'org.jetbrains.kotlin.plugin.compose'
 
 dependencies {
     implementation project(':payments-core')
@@ -68,12 +69,11 @@ android {
             }
         }
         kotlinOptions {
-            freeCompilerArgs += ["-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"]
+            freeCompilerArgs += [
+                    "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
+                    "-Xconsistent-data-class-copy-visibility",
+            ]
         }
-    }
-
-    composeOptions {
-        kotlinCompilerExtensionVersion "${versions.androidxComposeCompiler}"
     }
 }
 

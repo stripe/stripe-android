@@ -12,5 +12,6 @@ internal data class DisplayablePaymentMethod(
     val darkThemeIconUrl: String?,
     val iconRequiresTinting: Boolean,
     val subtitle: ResolvableString? = null,
+    val promoBadge: String? = null,
     val onClick: () -> Unit,
 )

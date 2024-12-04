@@ -4,6 +4,7 @@ import android.content.Intent
 import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIException
@@ -27,11 +28,13 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Canceled
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Completed
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Failed
+import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccountFixtures
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccountList
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession.StatusDetails
 import com.stripe.android.financialconnections.presentation.withState
+import com.stripe.android.model.IncentiveEligibilitySession
 import com.stripe.android.model.LinkMode
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -145,7 +148,16 @@ class FinancialConnectionsSheetViewModelTest {
                     initialArgs = ForInstantDebits(
                         configuration = configuration,
                         elementsSessionContext = ElementsSessionContext(
+                            amount = 123,
+                            currency = "usd",
                             linkMode = LinkMode.LinkPaymentMethod,
+                            billingDetails = null,
+                            prefillDetails = ElementsSessionContext.PrefillDetails(
+                                email = null,
+                                phone = null,
+                                phoneCountryCode = null,
+                            ),
+                            incentiveEligibilitySession = null,
                         ),
                     )
                 )
@@ -154,9 +166,43 @@ class FinancialConnectionsSheetViewModelTest {
             // Then
             withState(viewModel) {
                 val viewEffect = it.viewEffect as OpenAuthFlowWithUrl
-                assertThat(viewEffect.url).isEqualTo(
-                    "${syncResponse.manifest.hostedAuthUrl}&return_payment_method=true&link_mode=LINK_PAYMENT_METHOD"
+                assertThat(viewEffect.url).contains("return_payment_method=true")
+            }
+        }
+
+    @Test
+    fun `init - when instant debits flow, hosted auth url expands the payment method`() =
+        runTest {
+            // Given
+            whenever(browserManager.canOpenHttpsUrl()).thenReturn(true)
+            whenever(getOrFetchSync(any())).thenReturn(syncResponse)
+            whenever(nativeRouter.nativeAuthFlowEnabled(any())).thenReturn(false)
+
+            // When
+            val viewModel = createViewModel(
+                defaultInitialState.copy(
+                    initialArgs = ForInstantDebits(
+                        configuration = configuration,
+                        elementsSessionContext = ElementsSessionContext(
+                            amount = 123,
+                            currency = "usd",
+                            linkMode = LinkMode.LinkPaymentMethod,
+                            billingDetails = null,
+                            prefillDetails = ElementsSessionContext.PrefillDetails(
+                                email = null,
+                                phone = null,
+                                phoneCountryCode = null,
+                            ),
+                            incentiveEligibilitySession = null,
+                        ),
+                    )
                 )
+            )
+
+            // Then
+            withState(viewModel) {
+                val viewEffect = it.viewEffect as OpenAuthFlowWithUrl
+                assertThat(viewEffect.url).contains("expand_payment_method=true")
             }
         }
 
@@ -173,7 +219,16 @@ class FinancialConnectionsSheetViewModelTest {
                 initialArgs = ForInstantDebits(
                     configuration = configuration,
                     elementsSessionContext = ElementsSessionContext(
+                        amount = 123,
+                        currency = "usd",
                         linkMode = null,
+                        billingDetails = null,
+                        prefillDetails = ElementsSessionContext.PrefillDetails(
+                            email = null,
+                            phone = null,
+                            phoneCountryCode = null,
+                        ),
+                        incentiveEligibilitySession = null,
                     ),
                 )
             )
@@ -182,9 +237,170 @@ class FinancialConnectionsSheetViewModelTest {
         // Then
         withState(viewModel) {
             val viewEffect = it.viewEffect as OpenAuthFlowWithUrl
-            assertThat(viewEffect.url).isEqualTo(
-                "${syncResponse.manifest.hostedAuthUrl}&return_payment_method=true"
+            assertThat(viewEffect.url).doesNotContain("link_mode")
+        }
+    }
+
+    @Test
+    fun `init - when instant debits flow, hosted auth url contains incentive info if eligible`() = runTest {
+        // Given
+        whenever(browserManager.canOpenHttpsUrl()).thenReturn(true)
+        whenever(getOrFetchSync(any())).thenReturn(syncResponse)
+        whenever(nativeRouter.nativeAuthFlowEnabled(any())).thenReturn(false)
+
+        // When
+        val viewModel = createViewModel(
+            defaultInitialState.copy(
+                initialArgs = ForInstantDebits(
+                    configuration = configuration,
+                    elementsSessionContext = ElementsSessionContext(
+                        amount = 123,
+                        currency = "usd",
+                        linkMode = null,
+                        billingDetails = null,
+                        prefillDetails = ElementsSessionContext.PrefillDetails(
+                            email = null,
+                            phone = null,
+                            phoneCountryCode = null,
+                        ),
+                        incentiveEligibilitySession = IncentiveEligibilitySession.PaymentIntent("pi_123"),
+                    ),
+                )
             )
+        )
+
+        // Then
+        withState(viewModel) {
+            val viewEffect = it.viewEffect as OpenAuthFlowWithUrl
+            assertThat(viewEffect.url).contains("instantDebitsIncentive=true")
+            assertThat(viewEffect.url).contains("incentiveEligibilitySession=pi_123")
+        }
+    }
+
+    @Test
+    fun `init - when instant debits flow, hosted auth url does not contain incentive info if not eligible`() = runTest {
+        // Given
+        whenever(browserManager.canOpenHttpsUrl()).thenReturn(true)
+        whenever(getOrFetchSync(any())).thenReturn(syncResponse)
+        whenever(nativeRouter.nativeAuthFlowEnabled(any())).thenReturn(false)
+
+        // When
+        val viewModel = createViewModel(
+            defaultInitialState.copy(
+                initialArgs = ForInstantDebits(
+                    configuration = configuration,
+                    elementsSessionContext = ElementsSessionContext(
+                        amount = 123,
+                        currency = "usd",
+                        linkMode = null,
+                        billingDetails = null,
+                        prefillDetails = ElementsSessionContext.PrefillDetails(
+                            email = null,
+                            phone = null,
+                            phoneCountryCode = null,
+                        ),
+                        incentiveEligibilitySession = null,
+                    ),
+                )
+            )
+        )
+
+        // Then
+        withState(viewModel) {
+            val viewEffect = it.viewEffect as OpenAuthFlowWithUrl
+            assertThat(viewEffect.url).contains("instantDebitsIncentive=false")
+            assertThat(viewEffect.url).doesNotContain("incentiveEligibilitySession")
+        }
+    }
+
+    @Test
+    fun `init - hosted auth url contains prefill details`() = runTest {
+        // Given
+        whenever(browserManager.canOpenHttpsUrl()).thenReturn(true)
+        whenever(getOrFetchSync(any())).thenReturn(syncResponse)
+        whenever(nativeRouter.nativeAuthFlowEnabled(any())).thenReturn(false)
+
+        // When
+        val viewModel = createViewModel(
+            defaultInitialState.copy(
+                initialArgs = ForInstantDebits(
+                    configuration = configuration,
+                    elementsSessionContext = ElementsSessionContext(
+                        amount = 123,
+                        currency = "usd",
+                        linkMode = null,
+                        billingDetails = null,
+                        prefillDetails = ElementsSessionContext.PrefillDetails(
+                            email = "email@email.com",
+                            phone = "5555551234",
+                            phoneCountryCode = "US",
+                        ),
+                        incentiveEligibilitySession = null,
+                    ),
+                )
+            )
+        )
+
+        // Then
+        withState(viewModel) {
+            val viewEffect = it.viewEffect as OpenAuthFlowWithUrl
+            assertThat(viewEffect.url).contains("email=email@email.com")
+            assertThat(viewEffect.url).contains("linkMobilePhone=5555551234")
+            assertThat(viewEffect.url).contains("linkMobilePhoneCountry=US")
+        }
+    }
+
+    @Test
+    fun `init - hosted auth url contains billing details`() = runTest {
+        // Given
+        whenever(browserManager.canOpenHttpsUrl()).thenReturn(true)
+        whenever(getOrFetchSync(any())).thenReturn(syncResponse)
+        whenever(nativeRouter.nativeAuthFlowEnabled(any())).thenReturn(false)
+
+        // When
+        val viewModel = createViewModel(
+            defaultInitialState.copy(
+                initialArgs = ForInstantDebits(
+                    configuration = configuration,
+                    elementsSessionContext = ElementsSessionContext(
+                        amount = 123,
+                        currency = "usd",
+                        linkMode = null,
+                        billingDetails = ElementsSessionContext.BillingDetails(
+                            name = "John Doe",
+                            address = ElementsSessionContext.BillingDetails.Address(
+                                line1 = "123 Main St",
+                                line2 = "",
+                                city = "Toronto",
+                                state = "ON",
+                                postalCode = "A1B 2C3",
+                                country = "CA",
+                            ),
+                            email = "email@email.com",
+                            phone = null,
+                        ),
+                        prefillDetails = ElementsSessionContext.PrefillDetails(
+                            email = null,
+                            phone = null,
+                            phoneCountryCode = null,
+                        ),
+                        incentiveEligibilitySession = null,
+                    ),
+                )
+            )
+        )
+
+        // Then
+        withState(viewModel) {
+            val viewEffect = it.viewEffect as OpenAuthFlowWithUrl
+            assertThat(viewEffect.url).contains("billingDetails%5Bname%5D=John+Doe")
+            assertThat(viewEffect.url).contains("billingDetails%5Bemail%5D=email%40email.com")
+            assertThat(viewEffect.url).contains("billingDetails%5Baddress%5D%5Bline1%5D=123+Main+St")
+            assertThat(viewEffect.url).contains("billingDetails%5Baddress%5D%5Bcity%5D=Toronto")
+            assertThat(viewEffect.url).contains("billingDetails%5Baddress%5D%5Bstate%5D=ON")
+            assertThat(viewEffect.url).contains("billingDetails%5Baddress%5D%5Bpostal_code%5D=A1B+2C3")
+            assertThat(viewEffect.url).contains("billingDetails%5Baddress%5D%5Bcountry%5D=CA")
+            assertThat(viewEffect.url).doesNotContain("billingDetails%5Baddress%5D%5Bline2%5D")
         }
     }
 
@@ -513,6 +729,40 @@ class FinancialConnectionsSheetViewModelTest {
                 val viewEffect = it.viewEffect as FinishWithResult
                 assertThat(viewEffect.result).isEqualTo(Canceled)
                 verify(eventReporter).onResult(eq(configuration), any<Canceled>())
+            }
+        }
+    }
+
+    @Test
+    fun `Returns correct result when manual entry does not use microdeposits`() {
+        runTest {
+            // Given
+            whenever(fetchFinancialConnectionsSession(any())).thenReturn(
+                financialConnectionsSession().copy(
+                    paymentAccount = BankAccount(
+                        id = "id_1234",
+                        last4 = "4242",
+                    )
+                )
+            )
+
+            val viewModel = createViewModel(
+                defaultInitialState.copy(
+                    manifest = syncResponse.manifest.copy(manualEntryUsesMicrodeposits = false),
+                    webAuthFlowStatus = AuthFlowStatus.ON_EXTERNAL_ACTIVITY,
+                )
+            )
+
+            viewModel.stateFlow.test {
+                assertThat(awaitItem().viewEffect).isNull()
+
+                viewModel.handleOnNewIntent(successIntent())
+                assertThat(awaitItem().webAuthFlowStatus).isEqualTo(AuthFlowStatus.NONE)
+
+                val state = awaitItem()
+                val result = (state.viewEffect as FinishWithResult).result as Completed
+                val bankAccount = result.financialConnectionsSession?.paymentAccount as BankAccount
+                assertThat(bankAccount.usesMicrodeposits).isFalse()
             }
         }
     }

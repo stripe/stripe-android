@@ -17,18 +17,8 @@ internal fun USBankAccountEmitters(
     val activityResultRegistryOwner = LocalActivityResultRegistryOwner.current
 
     LaunchedEffect(Unit) {
-        viewModel.result.collect { result ->
-            result?.let {
-                usBankAccountFormArgs.onConfirmUSBankAccount(result)
-            }
-        }
-    }
-
-    LaunchedEffect(Unit) {
-        viewModel.collectBankAccountResult.collect { result ->
-            result?.let {
-                usBankAccountFormArgs.onCollectBankAccountResult?.invoke(result)
-            }
+        viewModel.linkedAccount.collect { result ->
+            usBankAccountFormArgs.onLinkedBankAccountChanged(result)
         }
     }
 

@@ -4,6 +4,7 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.CreateFinancialConnectionsSessionForDeferredPaymentParams
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
 import com.stripe.android.model.FinancialConnectionsSession
+import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.VerificationMethodParam
@@ -74,7 +75,7 @@ internal class CreateFinancialConnectionsSession @Inject constructor(
     }
 
     /**
-     * Creates a [FinancialConnectionsSession] for deferred payments.
+     * Creates a [FinancialConnectionsSession] for deferred intent.
      *
      * @param elementsSessionId the elements session id
      *
@@ -82,15 +83,17 @@ internal class CreateFinancialConnectionsSession @Inject constructor(
      * @param amount the amount of the payment
      * @param currency the currency of the payment
      */
-    suspend fun forDeferredPayments(
+    suspend fun forDeferredIntent(
         publishableKey: String,
         stripeAccountId: String?,
         elementsSessionId: String,
         customerId: String?,
         onBehalfOf: String?,
         hostedSurface: String?,
+        linkMode: LinkMode?,
         amount: Int?,
-        currency: String?
+        currency: String?,
+        product: String?,
     ): Result<FinancialConnectionsSession> {
         return stripeRepository.createFinancialConnectionsSessionForDeferredPayments(
             params = CreateFinancialConnectionsSessionForDeferredPaymentParams(
@@ -102,8 +105,10 @@ internal class CreateFinancialConnectionsSession @Inject constructor(
                 verificationMethod = VerificationMethodParam.Automatic,
                 customer = customerId,
                 onBehalfOf = onBehalfOf,
+                linkMode = linkMode,
                 amount = amount,
                 currency = currency,
+                product = product,
             ),
             requestOptions = ApiRequest.Options(
                 publishableKey,
@@ -122,7 +127,18 @@ internal class CreateFinancialConnectionsSession @Inject constructor(
                     clientSecret = clientSecret,
                     customerName = name,
                     customerEmailAddress = email,
-                    hostedSurface = hostedSurface
+                    hostedSurface = hostedSurface,
+                    linkMode = null,
+                )
+            }
+
+            is CollectBankAccountConfiguration.USBankAccountInternal -> {
+                CreateFinancialConnectionsSessionParams.USBankAccount(
+                    clientSecret = clientSecret,
+                    customerName = name,
+                    customerEmailAddress = email,
+                    hostedSurface = hostedSurface,
+                    linkMode = elementsSessionContext?.linkMode,
                 )
             }
 
@@ -130,7 +146,8 @@ internal class CreateFinancialConnectionsSession @Inject constructor(
                 CreateFinancialConnectionsSessionParams.InstantDebits(
                     clientSecret = clientSecret,
                     customerEmailAddress = email,
-                    hostedSurface = hostedSurface
+                    hostedSurface = hostedSurface,
+                    linkMode = elementsSessionContext?.linkMode,
                 )
             }
         }

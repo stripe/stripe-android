@@ -9,7 +9,6 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-@OptIn(ExperimentalCustomerSheetApi::class)
 class CustomerSheetConfigurationTest {
     @Test
     fun `Builder returns a configuration`() {
@@ -84,6 +83,7 @@ class CustomerSheetConfigurationTest {
             "build",
             "allowsRemovalOfLastSavedPaymentMethod",
             "paymentMethodOrder",
+            "cardBrandAcceptance",
         )
 
         // Programmatically check for any new method on the builder using reflection

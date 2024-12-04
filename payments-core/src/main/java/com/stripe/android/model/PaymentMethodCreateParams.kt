@@ -19,7 +19,9 @@ import java.util.Objects
  * See [PaymentMethod] for API object.
  */
 @Parcelize
-data class PaymentMethodCreateParams internal constructor(
+data class PaymentMethodCreateParams
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+constructor(
     internal val code: PaymentMethodCode,
     internal val requiresMandate: Boolean,
     val card: Card? = null,
@@ -314,12 +316,6 @@ data class PaymentMethodCreateParams internal constructor(
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun cardLast4(): String? {
         return ((toParamMap()["card"] as? Map<*, *>?)?.get("number") as? String)?.takeLast(4)
-    }
-
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    fun linkBankPaymentMethodId(): String? {
-        val linkParams = (toParamMap()["link"] as? Map<*, *>) ?: return null
-        return linkParams["payment_method_id"] as? String
     }
 
     @Parcelize
@@ -1307,18 +1303,15 @@ data class PaymentMethodCreateParams internal constructor(
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
         fun createInstantDebits(
-            paymentMethodId: String,
             requiresMandate: Boolean,
             productUsage: Set<String>,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(
                 code = PaymentMethod.Type.Link.code,
                 requiresMandate = requiresMandate,
-                overrideParamMap = mapOf(
-                    "link" to mapOf(
-                        "payment_method_id" to paymentMethodId,
-                    ),
-                ),
+                overrideParamMap = emptyMap(),
+                allowRedisplay = allowRedisplay,
                 productUsage = productUsage,
             )
         }

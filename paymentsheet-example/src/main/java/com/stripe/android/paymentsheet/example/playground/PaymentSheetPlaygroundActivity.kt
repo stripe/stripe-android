@@ -41,7 +41,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetResult
-import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.customersheet.rememberCustomerSheet
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
@@ -54,6 +53,7 @@ import com.stripe.android.paymentsheet.example.playground.activity.AppearanceBot
 import com.stripe.android.paymentsheet.example.playground.activity.AppearanceStore
 import com.stripe.android.paymentsheet.example.playground.activity.FawryActivity
 import com.stripe.android.paymentsheet.example.playground.activity.QrCodeActivity
+import com.stripe.android.paymentsheet.example.playground.embedded.EmbeddedPlaygroundContract
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationType
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
@@ -84,7 +84,11 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
         )
     }
 
-    @OptIn(ExperimentalCustomerSheetApi::class, ExperimentalCustomerSessionApi::class)
+    private val embeddedPlaygroundLauncher = registerForActivityResult(EmbeddedPlaygroundContract()) { success ->
+        viewModel.onEmbeddedResult(success)
+    }
+
+    @OptIn(ExperimentalCustomerSessionApi::class)
     @Suppress("LongMethod")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -264,7 +268,6 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
         }
     }
 
-    @OptIn(ExperimentalCustomerSheetApi::class)
     @Composable
     private fun PlaygroundStateUi(
         playgroundState: PlaygroundState?,
@@ -276,13 +279,16 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
         if (playgroundState == null) {
             return
         }
+        playgroundState.snapshot.setValues()
 
         when (playgroundState) {
             is PlaygroundState.Payment -> {
-                ShippingAddressButton(
-                    addressLauncher = addressLauncher,
-                    playgroundState = playgroundState,
-                )
+                if (playgroundState.displaysShippingAddressButton()) {
+                    ShippingAddressButton(
+                        addressLauncher = addressLauncher,
+                        playgroundState = playgroundState,
+                    )
+                }
 
                 when (playgroundState.integrationType) {
                     PlaygroundConfigurationData.IntegrationType.PaymentSheet -> {
@@ -298,6 +304,13 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
                             playgroundState = playgroundState,
                         )
                     }
+
+                    PlaygroundConfigurationData.IntegrationType.Embedded -> {
+                        EmbeddedUi(
+                            playgroundState = playgroundState,
+                        )
+                    }
+
                     else -> Unit
                 }
             }
@@ -367,7 +380,18 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
         )
     }
 
-    @OptIn(ExperimentalCustomerSheetApi::class)
+    @Composable
+    fun EmbeddedUi(
+        playgroundState: PlaygroundState.Payment,
+    ) {
+        BuyButton(
+            buyButtonEnabled = true,
+            onClick = {
+                embeddedPlaygroundLauncher.launch(playgroundState)
+            }
+        )
+    }
+
     @Composable
     fun CustomerSheetUi(
         customerSheet: CustomerSheet,
@@ -447,12 +471,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
             }
         } else {
             paymentSheet.presentWithIntentConfiguration(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = playgroundState.checkoutMode.intentConfigurationMode(playgroundState),
-                    paymentMethodTypes = playgroundState.paymentMethodTypes,
-                    paymentMethodConfigurationId = playgroundState.paymentMethodConfigurationId,
-                    requireCvcRecollection = playgroundState.requireCvcRecollectionForDeferred
-                ),
+                intentConfiguration = playgroundState.intentConfiguration(),
                 configuration = playgroundState.paymentSheetConfiguration(),
             )
         }
@@ -478,19 +497,13 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
             }
         } else {
             flowController.configureWithIntentConfiguration(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = playgroundState.checkoutMode.intentConfigurationMode(playgroundState),
-                    paymentMethodTypes = playgroundState.paymentMethodTypes,
-                    paymentMethodConfigurationId = playgroundState.paymentMethodConfigurationId,
-                    requireCvcRecollection = playgroundState.requireCvcRecollectionForDeferred
-                ),
+                intentConfiguration = playgroundState.intentConfiguration(),
                 configuration = playgroundState.paymentSheetConfiguration(),
                 callback = viewModel::onFlowControllerConfigured,
             )
         }
     }
 
-    @OptIn(ExperimentalCustomerSheetApi::class)
     private suspend fun fetchOption(
         customerSheet: CustomerSheet
     ): Result<PaymentOption?> = withContext(Dispatchers.IO) {

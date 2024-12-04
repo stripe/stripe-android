@@ -50,6 +50,10 @@
   <string name="stripe_wallet_default">Default</string>
   <!-- Title for a section listing one or more payment methods. -->
   <string name="stripe_wallet_expanded_title">Payment methods</string>
+  <!-- Prefix for last 4 digits of payment method id e.g  •••• 1234 -->
+  <string name="stripe_wallet_last4_prefix" translatable="false">•••• </string>
+  <!-- Accessibility description for Passthrough payment method -->
+  <string name="stripe_wallet_passthrough_description">Passthrough</string>
   <!-- Label of a button that when tapped allows the user to select a different form of payment. -->
   <string name="stripe_wallet_pay_another_way">Pay another way</string>
   <!-- A text notice shown when the user selects a card that requires re-entering the security code (CVV/CVC). -->
@@ -68,4 +72,5 @@
   <string name="stripe_wallet_update_card">Update card</string>
   <!-- A text notice shown when the user selects an expired card. -->
   <string name="stripe_wallet_update_expired_card_error">This card has expired. Update your card info or choose a different payment method.</string>
+  <string name="stripe_wallet_expand_accessibility">Change selection</string>
 </resources>

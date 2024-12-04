@@ -6,6 +6,10 @@
   <string name="stripe_afterpay_subtitle">Osta nyt tai maksa myöhemmin Afterpaylla</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
   <string name="stripe_bank_account_ending_in">Pankkitili, joka päättyy numeroihin %s</string>
+  <!-- Concise description of a saved bank account. E.g. 'Bank account ···· 4242' -->
+  <string name="stripe_bank_account_plus_last_4">Pankkitili ···· %s</string>
+  <!-- Concise description of a saved bank account. E.g. 'Bank account ····4242' -->
+  <string name="stripe_bank_account_with_last_4">Pankkitili ····%s</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">Suorita osto vahvistamalla maksu pankkisi sovelluksessa %s.</string>
   <!-- This shows the message on Buy Now Pay Later LPM, clearpay. -->
@@ -40,6 +44,10 @@
   <string name="stripe_paymentsheet_bacs_notice_mandate">Lisäksi saat kahden päivän ennakkoilmoituksen sähköpostitse kaikista tämän ohjeen mukaisesti veloitettavista summista. Maksut näkyvät tiliotteessa kohteena \'%s\'.</string>
   <!-- Message shown as part of overall Bacs Mandate indicating that their payments are protected by a defined guarantee -->
   <string name="stripe_paymentsheet_bacs_protection_mandate">Maksujasi suojaa %s.</string>
+  <!-- Text displayed on manage bank account screen when bank account details are not editable. -->
+  <string name="stripe_paymentsheet_bank_account_details_cannot_be_changed">Pankkitilin tietoja ei voi muuttaa.</string>
+  <!-- Text displayed on manage card screen when card details are not editable. -->
+  <string name="stripe_paymentsheet_card_details_cannot_be_changed">Kortin tietoja ei voi muuttaa.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
   <string name="stripe_paymentsheet_card_mandate">Antamalla korttisi tiedot annat yrityksen %s veloittaa korttiasi tulevien maksujen osalta heidän ehtojensa mukaisesti.</string>
   <!-- Title shown above a carousel containing available payment methods -->
@@ -51,8 +59,14 @@
   <string name="stripe_paymentsheet_confirm_your_cvc">Vahvista CVC</string>
   <!-- Text for a button that allows manual entry of an address -->
   <string name="stripe_paymentsheet_enter_address_manually">Syötä osoite manuaalisesti</string>
+  <!-- Title shown above a view containing a customer's bank account that they can delete or update -->
+  <string name="stripe_paymentsheet_manage_bank_account">Hallinnoi yhdysvaltalaista pankkitiliä</string>
+  <!-- Title shown above a view containing a customer's card payment methods that they can delete or update -->
+  <string name="stripe_paymentsheet_manage_card">Hallinnoi korttia</string>
   <!-- Title shown above a view containing the customer's card payment methods that they can delete or update -->
   <string name="stripe_paymentsheet_manage_payment_methods">Hallitse maksutapoja</string>
+  <!-- Title shown above a view containing a customer's SEPA debit account that they can delete or update -->
+  <string name="stripe_paymentsheet_manage_sepa_debit">Hallinnoi SEPA-pankkiveloitusta</string>
   <!-- Title shown above a carousel containing the customer's payment methods -->
   <string name="stripe_paymentsheet_manage_your_payment_methods">Hallitse maksutapojasi</string>
   <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->
@@ -107,6 +121,8 @@
   <string name="stripe_paymentsheet_select_payment_method">Valitse maksutapa</string>
   <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
   <string name="stripe_paymentsheet_select_your_payment_method">Valitse maksutapa</string>
+  <!-- Text displayed on manage SEPA debit screen when SEPA debit details are not editable. -->
+  <string name="stripe_paymentsheet_sepa_debit_details_cannot_be_changed">SEPA-pankkimaksun tietoja ei voi muuttaa.</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">Yhteensä: %s</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
