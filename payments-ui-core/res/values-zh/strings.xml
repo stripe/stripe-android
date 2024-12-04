@@ -58,7 +58,7 @@
   <!-- Klarna mandate text -->
   <string name="stripe_klarna_mandate">继续前往 Klarna 即表示您允许 %1$s 按照他们的条款和 Klarna 的条款从您的 Klarna 账户扣取未来款项。您可以在您的 Klarna 应用程序中随时对其进行修改，也可以联系 %2$s。</string>
   <!-- Klarna pay later copy -->
-  <string name="stripe_klarna_pay_later">用 Klarna 延后支付。</string>
+  <string name="stripe_klarna_pay_later">用 Klarna 先买后付</string>
   <!-- Caption for Phone field on address form -->
   <string name="stripe_konbini_confirmation_number_label">电话</string>
   <!-- Label for name on card field -->
