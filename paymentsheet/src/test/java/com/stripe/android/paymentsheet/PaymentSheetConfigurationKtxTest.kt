@@ -208,7 +208,7 @@ class PaymentSheetConfigurationKtxTest {
             merchantDisplayName = "Merchant, Inc.",
             customer = PaymentSheet.CustomerConfiguration(
                 id = "1",
-                ephemeralKeySecret = "secret",
+                ephemeralKeySecret = "ek_123",
             ),
             googlePay = PaymentSheet.GooglePayConfiguration(
                 environment = PaymentSheet.GooglePayConfiguration.Environment.Test,

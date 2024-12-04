@@ -39,7 +39,7 @@ internal object PaymentSheetFixtures {
         merchantDisplayName = MERCHANT_DISPLAY_NAME,
         customer = PaymentSheet.CustomerConfiguration(
             "customer_id",
-            "ephemeral_key"
+            "ek_123"
         ),
         googlePay = ConfigFixtures.GOOGLE_PAY,
         primaryButtonColor = ColorStateList.valueOf(Color.BLACK),

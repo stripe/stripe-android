@@ -324,7 +324,7 @@ internal class PaymentSheetViewModelTest {
                 config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.copy(
                     customer = PaymentSheet.CustomerConfiguration(
                         id = "cus_1",
-                        ephemeralKeySecret = "ephemeral_key_1"
+                        ephemeralKeySecret = "ek_123",
                     )
                 )
             ),

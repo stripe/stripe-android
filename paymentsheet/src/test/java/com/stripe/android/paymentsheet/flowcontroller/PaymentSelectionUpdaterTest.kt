@@ -328,7 +328,7 @@ class PaymentSelectionUpdaterTest {
         val newConfig = defaultPaymentSheetConfiguration.copy(
             customer = PaymentSheet.CustomerConfiguration(
                 id = "id1",
-                ephemeralKeySecret = "000"
+                ephemeralKeySecret = "ek_123",
             )
         )
         val newState = mockPaymentSheetStateWithPaymentIntent(
