@@ -70,7 +70,9 @@ abstract class BasicExampleComponentActivity : FragmentActivity() {
         ConnectExampleScaffold(
             title = stringResource(titleRes),
             navigationIcon = (embeddedComponentAsync is Success).then {
-                { BackIconButton(onClick = ::finish) }
+                {
+                    BackIconButton(onClick = ::finish)
+                }
             },
             actions = (embeddedComponentAsync is Success).then {
                 {

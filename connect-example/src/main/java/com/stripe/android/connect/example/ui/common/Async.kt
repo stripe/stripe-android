@@ -36,5 +36,9 @@ data class Fail<out T>(
             error.stackTrace.firstOrNull() == otherError.stackTrace.firstOrNull()
     }
 
-    override fun hashCode(): Int = arrayOf(error::class, error.message, error.stackTrace.firstOrNull()).contentHashCode()
+    override fun hashCode(): Int = arrayOf(
+        error::class,
+        error.message,
+        error.stackTrace.firstOrNull(),
+    ).contentHashCode()
 }

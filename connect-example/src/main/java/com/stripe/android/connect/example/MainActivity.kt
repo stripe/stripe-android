@@ -55,6 +55,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    @Suppress("LongMethod")
     @OptIn(ExperimentalMaterialApi::class)
     @Composable
     private fun ComponentPickerContent() {
