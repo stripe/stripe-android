@@ -145,15 +145,11 @@ internal fun SecondaryButton(
             disabledBackgroundColor = MaterialTheme.colors.secondary
         )
     ) {
-        CompositionLocalProvider(
-            LocalContentAlpha provides if (enabled) ContentAlpha.high else ContentAlpha.disabled
-        ) {
-            Text(
-                text = label,
-                color = MaterialTheme.linkColors.secondaryButtonLabel
-                    .copy(alpha = LocalContentAlpha.current)
-            )
-        }
+        Text(
+            text = label,
+            color = MaterialTheme.linkColors.secondaryButtonLabel
+                .copy(alpha = if (enabled) ContentAlpha.high else ContentAlpha.disabled)
+        )
     }
 }
 

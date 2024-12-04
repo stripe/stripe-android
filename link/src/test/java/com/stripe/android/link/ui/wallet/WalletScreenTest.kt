@@ -77,7 +77,7 @@ internal class WalletScreenTest {
     }
 
     @Test
-    fun `wallet menu is displayed on menu clicked`() = runTest(dispatcher) {
+    fun `wallet menu is displayed on payment method menu clicked`() = runTest(dispatcher) {
         val viewModel = createViewModel()
         composeTestRule.setContent {
             var sheetContent by remember { mutableStateOf<BottomSheetContent?>(null) }
