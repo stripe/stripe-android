@@ -21,7 +21,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.connect.EmbeddedComponentManager
 import com.stripe.android.connect.PrivateBetaConnectSDK
-import com.stripe.android.connect.example.ConnectExampleScaffold
 import com.stripe.android.connect.example.R
 import com.stripe.android.connect.example.ui.common.Async
 import com.stripe.android.connect.example.ui.common.Fail
