@@ -25,10 +25,8 @@ import kotlin.test.Test
 internal class SharedPaymentElementViewModelTest {
 
     @Test
-    fun `configure maps success result`() = runTest {
+    fun `configure maps success result`() = testScenario {
         val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
-        val handler = FakeEmbeddedConfigurationHandler()
-        val viewModel = SharedPaymentElementViewModel(handler, createPaymentOptionDisplayDataFactory())
         handler.emit(
             Result.success(
                 PaymentElementLoader.State(
@@ -65,10 +63,8 @@ internal class SharedPaymentElementViewModelTest {
     }
 
     @Test
-    fun `configure emits payment option`() = runTest {
+    fun `configure emits payment option`() = testScenario {
         val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
-        val handler = FakeEmbeddedConfigurationHandler()
-        val viewModel = SharedPaymentElementViewModel(handler, createPaymentOptionDisplayDataFactory())
         handler.emit(
             Result.success(
                 PaymentElementLoader.State(
@@ -108,10 +104,8 @@ internal class SharedPaymentElementViewModelTest {
     }
 
     @Test
-    fun `configure maps failure result`() = runTest {
+    fun `configure maps failure result`() = testScenario {
         val exception = IllegalStateException("Hi")
-        val handler = FakeEmbeddedConfigurationHandler()
-        val viewModel = SharedPaymentElementViewModel(handler, createPaymentOptionDisplayDataFactory())
         handler.emit(Result.failure(exception))
         assertThat(
             viewModel.configure(
@@ -123,8 +117,34 @@ internal class SharedPaymentElementViewModelTest {
         ).isEqualTo(EmbeddedPaymentElement.ConfigureResult.Failed(exception))
     }
 
+    private fun testScenario(
+        block: suspend Scenario.() -> Unit,
+    ) {
+        val configurationHandler = FakeEmbeddedConfigurationHandler()
+        val paymentOptionDisplayDataFactory = PaymentOptionDisplayDataFactory(
+            iconLoader = mock(),
+            context = ApplicationProvider.getApplicationContext(),
+        )
+
+        val viewModel = SharedPaymentElementViewModel(
+            configurationHandler = configurationHandler,
+            paymentOptionDisplayDataFactory = paymentOptionDisplayDataFactory,
+        )
+
+        runTest {
+            Scenario(configurationHandler, viewModel).block()
+        }
+
+        configurationHandler.turbine.ensureAllEventsConsumed()
+    }
+
+    private class Scenario(
+        val handler: FakeEmbeddedConfigurationHandler,
+        val viewModel: SharedPaymentElementViewModel,
+    )
+
     private class FakeEmbeddedConfigurationHandler : EmbeddedConfigurationHandler {
-        private val turbine: Turbine<Result<PaymentElementLoader.State>> = Turbine()
+        val turbine: Turbine<Result<PaymentElementLoader.State>> = Turbine()
 
         fun emit(result: Result<PaymentElementLoader.State>) {
             turbine.add(result)
@@ -136,12 +156,5 @@ internal class SharedPaymentElementViewModelTest {
         ): Result<PaymentElementLoader.State> {
             return turbine.awaitItem()
         }
-    }
-
-    private fun createPaymentOptionDisplayDataFactory(): PaymentOptionDisplayDataFactory {
-        return PaymentOptionDisplayDataFactory(
-            iconLoader = mock(),
-            context = ApplicationProvider.getApplicationContext(),
-        )
     }
 }
