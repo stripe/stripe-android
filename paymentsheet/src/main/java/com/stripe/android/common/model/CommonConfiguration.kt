@@ -1,7 +1,6 @@
 package com.stripe.android.common.model
 
 import android.os.Parcelable
-import android.util.Log
 import com.stripe.android.common.validation.CustomerSessionClientSecretValidator
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
