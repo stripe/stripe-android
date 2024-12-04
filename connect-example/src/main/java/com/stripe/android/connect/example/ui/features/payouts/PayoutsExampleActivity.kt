@@ -12,7 +12,7 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @OptIn(PrivateBetaConnectSDK::class)
 @AndroidEntryPoint
-class PayoutsExampleComponentActivity : BasicExampleComponentActivity() {
+class PayoutsExampleActivity : BasicExampleComponentActivity() {
     override val titleRes: Int = R.string.payouts
 
     override fun createComponentView(context: Context, embeddedComponentManager: EmbeddedComponentManager): View {
@@ -24,7 +24,7 @@ class PayoutsExampleComponentActivity : BasicExampleComponentActivity() {
 
     private inner class Listener : PayoutsListener {
         override fun onLoadError(error: Throwable) {
-            Toast.makeText(this@PayoutsExampleComponentActivity, error.message, Toast.LENGTH_LONG).show()
+            Toast.makeText(this@PayoutsExampleActivity, error.message, Toast.LENGTH_LONG).show()
         }
     }
 }

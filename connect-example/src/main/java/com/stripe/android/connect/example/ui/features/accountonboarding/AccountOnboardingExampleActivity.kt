@@ -10,7 +10,7 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @OptIn(PrivateBetaConnectSDK::class)
 @AndroidEntryPoint
-class AccountOnboardingExampleComponentActivity : BasicExampleComponentActivity() {
+class AccountOnboardingExampleActivity : BasicExampleComponentActivity() {
     override val titleRes: Int = R.string.account_onboarding
 
     override fun createComponentView(context: Context, embeddedComponentManager: EmbeddedComponentManager): View {
