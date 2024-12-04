@@ -58,6 +58,7 @@ class WalletViewModelTest {
                 paymentDetailsList = TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails,
                 selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails.firstOrNull(),
                 isProcessing = false,
+                hasCompleted = false,
                 primaryButtonLabel = LINK_WALLET_PRIMARY_BUTTON_LABEL
             )
         )

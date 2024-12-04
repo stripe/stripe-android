@@ -19,6 +19,7 @@ internal class WalletScreenScreenshotTest {
                 paymentDetailsList = emptyList(),
                 selectedItem = null,
                 isProcessing = false,
+                hasCompleted = false,
                 primaryButtonLabel = primaryButtonLabel
             )
         )
@@ -31,6 +32,7 @@ internal class WalletScreenScreenshotTest {
                 paymentDetailsList = TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails,
                 selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails.firstOrNull(),
                 isProcessing = false,
+                hasCompleted = false,
                 primaryButtonLabel = primaryButtonLabel
             )
         )
@@ -43,6 +45,7 @@ internal class WalletScreenScreenshotTest {
                 paymentDetailsList = TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails,
                 selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails.firstOrNull(),
                 isProcessing = false,
+                hasCompleted = false,
                 primaryButtonLabel = primaryButtonLabel
             ),
             isExpanded = true
@@ -58,6 +61,7 @@ internal class WalletScreenScreenshotTest {
                     it is ConsumerPaymentDetails.BankAccount
                 },
                 isProcessing = false,
+                hasCompleted = false,
                 primaryButtonLabel = primaryButtonLabel
             ),
             isExpanded = true

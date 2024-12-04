@@ -37,6 +37,7 @@ internal class WalletViewModel @Inject constructor(
             paymentDetailsList = emptyList(),
             selectedItem = null,
             isProcessing = false,
+            hasCompleted = false,
             primaryButtonLabel = completePaymentButtonLabel(configuration.stripeIntent)
         )
     )

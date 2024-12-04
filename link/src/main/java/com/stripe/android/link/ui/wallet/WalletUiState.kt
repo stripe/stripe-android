@@ -12,7 +12,7 @@ internal data class WalletUiState(
     val selectedItem: ConsumerPaymentDetails.PaymentDetails?,
     val isProcessing: Boolean,
     val primaryButtonLabel: ResolvableString,
-    val hasCompleted: Boolean = false,
+    val hasCompleted: Boolean,
 ) {
 
     val showBankAccountTerms = selectedItem is ConsumerPaymentDetails.BankAccount
