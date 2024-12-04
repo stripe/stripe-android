@@ -2,6 +2,7 @@ package com.stripe.android.connect.example
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.material.ExperimentalMaterialApi
@@ -108,15 +109,20 @@ class MainActivity : ComponentActivity() {
                 }
             } ?: { },
             modalSheetState = sheetState,
-            modalContent = {
-                when (sheetType) {
-                    SheetType.SETTINGS -> SettingsView(
-                        onDismiss = { coroutineScope.launch { sheetState.hide() } },
-                        onReloadRequested = viewModel::reload,
-                    )
-                    SheetType.APPEARANCE -> AppearanceView(
-                        onDismiss = { coroutineScope.launch { sheetState.hide() } },
-                    )
+            modalContent = (embeddedComponentAsync is Success).then {
+                {
+                    BackHandler(enabled = sheetState.isVisible) {
+                        coroutineScope.launch { sheetState.hide() }
+                    }
+                    when (sheetType) {
+                        SheetType.SETTINGS -> SettingsView(
+                            onDismiss = { coroutineScope.launch { sheetState.hide() } },
+                            onReloadRequested = viewModel::reload,
+                        )
+                        SheetType.APPEARANCE -> AppearanceView(
+                            onDismiss = { coroutineScope.launch { sheetState.hide() } },
+                        )
+                    }
                 }
             },
         ) {

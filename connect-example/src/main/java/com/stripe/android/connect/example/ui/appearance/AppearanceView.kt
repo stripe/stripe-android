@@ -1,6 +1,5 @@
 package com.stripe.android.connect.example.ui.appearance
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -34,7 +33,6 @@ fun AppearanceView(
 ) {
     val state by viewModel.state.collectAsState()
 
-    BackHandler { onDismiss() }
     ConnectExampleScaffold(
         title = stringResource(R.string.customize_appearance),
         navigationIcon = {

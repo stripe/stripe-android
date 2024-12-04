@@ -90,8 +90,13 @@ abstract class BasicExampleComponentActivity : FragmentActivity() {
                 }
             } ?: { },
             modalSheetState = sheetState,
-            modalContent = {
-                AppearanceView(onDismiss = { coroutineScope.launch { sheetState.hide() } },)
+            modalContent = (embeddedComponentAsync is Success).then {
+                {
+                    BackHandler(enabled = sheetState.isVisible) {
+                        coroutineScope.launch { sheetState.hide() }
+                    }
+                    AppearanceView(onDismiss = { coroutineScope.launch { sheetState.hide() } })
+                }
             },
         ) {
             EmbeddedComponentLoader(

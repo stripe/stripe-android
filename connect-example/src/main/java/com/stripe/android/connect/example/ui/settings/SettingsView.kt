@@ -45,7 +45,6 @@ fun SettingsView(
     val state by viewModel.state.collectAsState()
     var serverUrlDidChange = rememberSaveable { false }
 
-    BackHandler { onDismiss() }
     LaunchedEffect(state.serverUrl) { serverUrlDidChange = true } // track if the serverURL ever changes
     ConnectExampleScaffold(
         title = stringResource(R.string.settings),
