@@ -39,7 +39,7 @@ import java.util.Objects
 import kotlin.test.assertFailsWith
 
 @RunWith(RobolectricTestRunner::class)
-class DefaultIntentConfirmationInterceptorTest {
+class DefaultLinkIntentConfirmationInterceptorTest {
 
     @get:Rule
     val intentConfirmationInterceptorTestRule = IntentConfirmationInterceptorTestRule()

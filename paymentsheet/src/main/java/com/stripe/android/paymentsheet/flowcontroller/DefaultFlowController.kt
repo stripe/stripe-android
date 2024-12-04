@@ -16,6 +16,7 @@ import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.link.LinkActivityResult
+import com.stripe.android.link.LinkIntentConfirmationHandler
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodOptionsParams
@@ -85,7 +86,8 @@ internal class DefaultFlowController @Inject internal constructor(
     private val configurationHandler: FlowControllerConfigurationHandler,
     private val errorReporter: ErrorReporter,
     @InitializedViaCompose private val initializedViaCompose: Boolean,
-    private val cvcRecollectionHandler: CvcRecollectionHandler
+    private val cvcRecollectionHandler: CvcRecollectionHandler,
+    private val linkIntentConfirmationHandler: LinkIntentConfirmationHandler
 ) : PaymentSheet.FlowController {
     private val paymentOptionActivityLauncher: ActivityResultLauncher<PaymentOptionContract.Args>
     private val sepaMandateActivityLauncher: ActivityResultLauncher<SepaMandateContract.Args>
@@ -662,7 +664,10 @@ internal class DefaultFlowController @Inject internal constructor(
 
         if (paymentSelection is PaymentSelection.Link) {
             // User selected Link as the payment method, not inline
-            linkLauncher.present(linkConfig)
+            linkLauncher.present(
+                linkConfig,
+                linkIntentConfirmationHandler
+            )
         } else {
             // New user paying inline, complete without launching Link
             confirmPaymentSelection(paymentSelection, state, appearance)

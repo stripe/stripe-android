@@ -28,7 +28,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 
-class IntentConfirmationDefinitionTest {
+class LinkIntentConfirmationDefinitionTest {
     @Test
     fun `'createLauncher' should call factory when creating launcher`() {
         val launcher = FakePaymentLauncher()

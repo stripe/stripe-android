@@ -6,6 +6,7 @@ import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.link.LinkActivityViewModel
 import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.LinkIntentConfirmationHandler
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.LinkEventsReporter
 import dagger.BindsInstance
@@ -29,11 +30,15 @@ internal interface NativeLinkComponent {
     val linkEventsReporter: LinkEventsReporter
     val logger: Logger
     val viewModel: LinkActivityViewModel
+    val linkIntentConfirmationHandler: LinkIntentConfirmationHandler
 
     @Component.Builder
     interface Builder {
         @BindsInstance
         fun configuration(configuration: LinkConfiguration): Builder
+
+        @BindsInstance
+        fun linkIntentConfirmationHandler(linkIntentConfirmationHandler: LinkIntentConfirmationHandler): Builder
 
         @BindsInstance
         fun publishableKeyProvider(@Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String): Builder

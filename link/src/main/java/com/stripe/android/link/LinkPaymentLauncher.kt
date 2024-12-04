@@ -59,6 +59,7 @@ class LinkPaymentLauncher @Inject internal constructor(
     fun unregister() {
         linkActivityResultLauncher?.unregister()
         linkActivityResultLauncher = null
+        LinkIntentConfirmation.handler = null
     }
 
     /**
@@ -68,7 +69,9 @@ class LinkPaymentLauncher @Inject internal constructor(
      */
     fun present(
         configuration: LinkConfiguration,
+        linkIntentConfirmationHandler: LinkIntentConfirmationHandler? = null
     ) {
+        LinkIntentConfirmation.handler = linkIntentConfirmationHandler
         val args = LinkActivityContract.Args(
             configuration,
         )

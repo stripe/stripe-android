@@ -3,6 +3,8 @@ package com.stripe.android.paymentsheet.injection
 import android.content.Context
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
+import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
+import com.stripe.android.paymentelement.confirmation.ConfirmationModule
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.ui.core.forms.resources.injection.ResourceRepositoryModule
@@ -19,7 +21,9 @@ import javax.inject.Singleton
         PaymentOptionsViewModelModule::class,
         CoroutineContextModule::class,
         CoreCommonModule::class,
-        ResourceRepositoryModule::class
+        ResourceRepositoryModule::class,
+        ConfirmationModule::class,
+        GooglePayLauncherModule::class,
     ]
 )
 internal interface PaymentOptionsViewModelFactoryComponent {
