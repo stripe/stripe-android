@@ -1,5 +1,6 @@
 package com.stripe.android.link.ui.wallet
 
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.model.ConsumerPaymentDetails
@@ -17,7 +18,9 @@ internal class WalletScreenScreenshotTest {
             state = WalletUiState(
                 paymentDetailsList = emptyList(),
                 selectedItem = null,
-                isProcessing = false
+                isProcessing = false,
+                hasCompleted = false,
+                primaryButtonLabel = primaryButtonLabel
             )
         )
     }
@@ -28,7 +31,9 @@ internal class WalletScreenScreenshotTest {
             state = WalletUiState(
                 paymentDetailsList = TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails,
                 selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails.firstOrNull(),
-                isProcessing = false
+                isProcessing = false,
+                hasCompleted = false,
+                primaryButtonLabel = primaryButtonLabel
             )
         )
     }
@@ -39,7 +44,9 @@ internal class WalletScreenScreenshotTest {
             state = WalletUiState(
                 paymentDetailsList = TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails,
                 selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails.firstOrNull(),
-                isProcessing = false
+                isProcessing = false,
+                hasCompleted = false,
+                primaryButtonLabel = primaryButtonLabel
             ),
             isExpanded = true
         )
@@ -53,7 +60,9 @@ internal class WalletScreenScreenshotTest {
                 selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails.firstOrNull {
                     it is ConsumerPaymentDetails.BankAccount
                 },
-                isProcessing = false
+                isProcessing = false,
+                hasCompleted = false,
+                primaryButtonLabel = primaryButtonLabel
             ),
             isExpanded = true
         )
@@ -69,9 +78,15 @@ internal class WalletScreenScreenshotTest {
                     state = state,
                     isExpanded = isExpanded,
                     onItemSelected = {},
-                    onExpandedChanged = {}
+                    onExpandedChanged = {},
+                    onPrimaryButtonClick = {},
+                    onPayAnotherWayClick = {}
                 )
             }
         }
+    }
+
+    companion object {
+        private val primaryButtonLabel = "Pay $50".resolvableString
     }
 }

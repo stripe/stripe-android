@@ -47,6 +47,8 @@ internal class WalletScreenTest {
         onWalletCollapsedChevron().assertIsDisplayed()
         onWalletCollapsedPaymentDetails().assertIsDisplayed()
         onCollapsedWalletRow().assertIsDisplayed().assertHasClickAction()
+        onWalletPayButton().assertIsDisplayed()
+        onWalletPayAnotherWayButton().assertIsDisplayed()
     }
 
     @Test
@@ -114,6 +116,12 @@ internal class WalletScreenTest {
 
     private fun onExpandedWalletHeader() =
         composeTestRule.onNodeWithTag(WALLET_SCREEN_EXPANDED_ROW_HEADER, useUnmergedTree = true)
+
+    private fun onWalletPayButton() =
+        composeTestRule.onNodeWithTag(WALLET_SCREEN_PAY_BUTTON, useUnmergedTree = true)
+
+    private fun onWalletPayAnotherWayButton() =
+        composeTestRule.onNodeWithTag(WALLET_SCREEN_PAY_ANOTHER_WAY_BUTTON, useUnmergedTree = true)
 
     private fun onLoader() = composeTestRule.onNodeWithTag(WALLET_LOADER_TAG)
 }

@@ -13,6 +13,7 @@ import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.supportedPaymentMethodTypes
+import com.stripe.android.link.ui.completePaymentButtonLabel
 import com.stripe.android.model.ConsumerPaymentDetails
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -35,6 +36,8 @@ internal class WalletViewModel @Inject constructor(
             paymentDetailsList = emptyList(),
             selectedItem = null,
             isProcessing = false,
+            hasCompleted = false,
+            primaryButtonLabel = completePaymentButtonLabel(configuration.stripeIntent)
         )
     )
 
@@ -79,6 +82,12 @@ internal class WalletViewModel @Inject constructor(
         _uiState.update {
             it.copy(selectedItem = item)
         }
+    }
+
+    fun onPrimaryButtonClicked() = Unit
+
+    fun onPayAnotherWayClicked() {
+        dismissWithResult(LinkActivityResult.Canceled(LinkActivityResult.Canceled.Reason.PayAnotherWay))
     }
 
     companion object {

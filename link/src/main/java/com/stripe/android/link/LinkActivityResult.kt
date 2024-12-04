@@ -32,7 +32,8 @@ sealed class LinkActivityResult : Parcelable {
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         enum class Reason {
             BackPressed,
-            LoggedOut
+            LoggedOut,
+            PayAnotherWay
         }
     }
 

@@ -11,6 +11,7 @@ import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSessionSignup
 import com.stripe.android.model.CvcCheck
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.ui.core.Amount
 import org.mockito.kotlin.mock
 
 internal object TestFactory {
@@ -68,7 +69,7 @@ internal object TestFactory {
         )
     )
 
-    private val CONSUMER_PAYMENT_DETAILS_CARD = ConsumerPaymentDetails.Card(
+    val CONSUMER_PAYMENT_DETAILS_CARD = ConsumerPaymentDetails.Card(
         id = "pm_123",
         last4 = "4242",
         expiryYear = 2023,
@@ -82,7 +83,7 @@ internal object TestFactory {
         )
     )
 
-    private val CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT = ConsumerPaymentDetails.BankAccount(
+    val CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT = ConsumerPaymentDetails.BankAccount(
         id = "pm_124",
         last4 = "4242",
         isDefault = false,
@@ -126,4 +127,9 @@ internal object TestFactory {
         cardBrandChoice = null,
         passthroughModeEnabled = false
     )
+
+    val LINK_WALLET_PRIMARY_BUTTON_LABEL = Amount(
+        requireNotNull(StripeIntentFixtures.PI_SUCCEEDED.amount),
+        requireNotNull(StripeIntentFixtures.PI_SUCCEEDED.currency)
+    ).buildPayButtonLabel()
 }

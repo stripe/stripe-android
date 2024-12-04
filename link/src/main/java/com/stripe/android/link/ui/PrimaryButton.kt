@@ -26,14 +26,20 @@ import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.PrimaryButtonHeight
 import com.stripe.android.link.theme.linkColors
 import com.stripe.android.link.theme.linkShapes
+import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.SetupIntent
+import com.stripe.android.model.StripeIntent
+import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.R
 
 @Composable
 internal fun PrimaryButton(
+    modifier: Modifier = Modifier,
     label: String,
     state: PrimaryButtonState,
     onButtonClick: () -> Unit,
@@ -44,7 +50,7 @@ internal fun PrimaryButton(
         LocalContentAlpha provides
             if (state == PrimaryButtonState.Disabled) ContentAlpha.disabled else ContentAlpha.high
     ) {
-        Box(modifier = Modifier.padding(vertical = 16.dp)) {
+        Box(modifier.padding(vertical = 16.dp)) {
             Button(
                 onClick = onButtonClick,
                 modifier = Modifier
@@ -119,6 +125,18 @@ private fun PrimaryButtonIcon(
             )
         }
     }
+}
+
+internal fun completePaymentButtonLabel(
+    stripeIntent: StripeIntent,
+) = when (stripeIntent) {
+    is PaymentIntent -> {
+        Amount(
+            requireNotNull(stripeIntent.amount),
+            requireNotNull(stripeIntent.currency)
+        ).buildPayButtonLabel()
+    }
+    is SetupIntent -> R.string.stripe_setup_button_label.resolvableString
 }
 
 /**
