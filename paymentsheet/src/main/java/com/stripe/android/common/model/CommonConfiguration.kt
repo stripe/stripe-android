@@ -9,6 +9,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import kotlinx.parcelize.Parcelize
 
+const val isEKClientSecretValidRegexPattern = "^ek_[^_](.)+$"
 @Parcelize
 internal data class CommonConfiguration(
     val merchantDisplayName: String,
@@ -25,11 +26,6 @@ internal data class CommonConfiguration(
     val externalPaymentMethods: List<String>,
     val cardBrandAcceptance: PaymentSheet.CardBrandAcceptance,
 ) : Parcelable {
-    private val isEKClientSecretValidRegexPattern = "^ek_[^_](.)+$"
-    private fun String.isEKClientSecretValid(): Boolean {
-        return Regex(isEKClientSecretValidRegexPattern).matches(this)
-    }
-
     fun validate() {
         // These are not localized as they are not intended to be displayed to a user.
         when {
@@ -90,6 +86,10 @@ internal data class CommonConfiguration(
             }
         }
     }
+}
+
+internal fun String.isEKClientSecretValid(): Boolean {
+    return Regex(isEKClientSecretValidRegexPattern).matches(this)
 }
 
 internal fun PaymentSheet.Configuration.asCommonConfiguration(): CommonConfiguration = CommonConfiguration(

@@ -125,39 +125,28 @@ class PaymentSheetConfigurationKtxTest {
 
     @Test
     fun `'validate' should succeed when ephemeral key secret is of correct format`() {
-        val validEphemeralKeys = listOf(
-            "ek_askljdlkasfhgasdfjls",
-            "ek_test_iiuwfhdaiuhasdvkcjn32n"
-        )
-
-        // Basically assert there is no crash
-        validEphemeralKeys.forEach {
-            getConfig(it).validate()
-        }
+        getConfig("ek_askljdlkasfhgasdfjls").validate()
+        getConfig("ek_test_iiuwfhdaiuhasdvkcjn32n").validate()
     }
 
         @Test
     fun `'validate' should fail when ephemeral key secret is of wrong format`() {
 
-        val invalidEphemeralKeys = listOf(
-            "eph_askjdfhajkshdfjkashdjkfhsakjdhfkjashfd",
-            "eph_test_askjdfhajkshdfjkashdjkfhsakjdhfkjashfd",
-            "sk_askjdfhajkshdfjkashdjkfhsakjdhfkjashfd",
-            "ek_",
-            "ek",
-            "eeek_aldkfjalskdjflkasjbvdkjds"
-        )
-
-
-        invalidEphemeralKeys.forEach{
+        fun assertFailsWithEphemeralKeySecret(ephemeralKeySecret: String) {
             assertFailsWith(
                 IllegalArgumentException::class,
                 message = "`ephemeralKeySecret` format does not match expected client secret formatting"
             ) {
-                getConfig(it).validate()
+                getConfig(ephemeralKeySecret).validate()
             }
         }
 
+        assertFailsWithEphemeralKeySecret("eph_askjdfhajkshdfjkashdjkfhsakjdhfkjashfd")
+        assertFailsWithEphemeralKeySecret("eph_test_askjdfhajkshdfjkashdjkfhsakjdhfkjashfd")
+        assertFailsWithEphemeralKeySecret("sk_askjdfhajkshdfjkashdjkfhsakjdhfkjashfd")
+        assertFailsWithEphemeralKeySecret("ek_")
+        assertFailsWithEphemeralKeySecret("ek")
+        assertFailsWithEphemeralKeySecret("eeek_aldkfjalskdjflkasjbvdkjds")
     }
 
     @OptIn(ExperimentalCustomerSessionApi::class)
