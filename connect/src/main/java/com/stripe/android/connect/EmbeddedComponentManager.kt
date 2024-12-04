@@ -1,11 +1,10 @@
 package com.stripe.android.connect
 
-import android.app.Activity
 import android.content.Context
 import android.os.Parcelable
+import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RestrictTo
-import androidx.appcompat.app.AppCompatActivity
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.first
@@ -24,7 +23,7 @@ import kotlin.coroutines.resume
 @PrivateBetaConnectSDK
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class EmbeddedComponentManager(
-    activity: AppCompatActivity,
+    activity: ComponentActivity,
     private val configuration: Configuration,
     private val fetchClientSecretCallback: FetchClientSecretCallback,
     appearance: Appearance = Appearance(),
@@ -51,11 +50,11 @@ class EmbeddedComponentManager(
      * Create a new [AccountOnboardingView] for inclusion in the view hierarchy.
      */
     fun createAccountOnboardingView(
-        activity: Activity,
+        context: Context,
         listener: AccountOnboardingListener? = null
     ): AccountOnboardingView {
         return AccountOnboardingView(
-            context = activity,
+            context = context,
             embeddedComponentManager = this,
             listener = listener
         )
@@ -65,11 +64,11 @@ class EmbeddedComponentManager(
      * Create a new [PayoutsView] for inclusion in the view hierarchy.
      */
     fun createPayoutsView(
-        activity: Activity,
+        context: Context,
         listener: PayoutsListener? = null,
     ): PayoutsView {
         return PayoutsView(
-            context = activity,
+            context = context,
             embeddedComponentManager = this,
             listener = listener,
         )

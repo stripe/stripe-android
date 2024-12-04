@@ -34,7 +34,7 @@ abstract class BasicComponentExampleActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         embeddedComponentManager = try {
-            embeddedComponentManagerProvider.provideEmbeddedComponentManager()
+            embeddedComponentManagerProvider.provideEmbeddedComponentManager(this@BasicComponentExampleActivity)
         } catch (e: IllegalStateException) {
             // TODO - handle app restoration more gracefully
             logger.error("Error retrieving EmbeddedComponentManager: $e")

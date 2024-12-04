@@ -1,7 +1,7 @@
 package com.stripe.android.connect.example.data
 
-import androidx.appcompat.app.AppCompatActivity
 import android.content.Context
+import androidx.activity.ComponentActivity
 import com.github.kittinunf.fuel.core.FuelError
 import com.stripe.android.connect.EmbeddedComponentManager
 import com.stripe.android.connect.FetchClientSecretCallback.ClientSecretResultCallback
@@ -50,7 +50,7 @@ class EmbeddedComponentManagerProvider @Inject constructor(
      * Provides the EmbeddedComponentManager instance, creating it if it doesn't exist.
      * Throws [IllegalStateException] if an EmbeddedComponentManager cannot be created at this time.
      */
-    fun provideEmbeddedComponentManager(activity: AppCompatActivity): EmbeddedComponentManager {
+    fun provideEmbeddedComponentManager(activity: ComponentActivity): EmbeddedComponentManager {
         if (embeddedComponentManager != null) {
             return embeddedComponentManager!!
         }
