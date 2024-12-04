@@ -19,14 +19,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.fragment.app.FragmentActivity
-import com.stripe.android.connect.BuildConfig
 import com.stripe.android.connect.EmbeddedComponentManager
 import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.example.data.EmbeddedComponentManagerProvider
 import com.stripe.android.connect.example.ui.accountloader.EmbeddedComponentLoader
 import com.stripe.android.connect.example.ui.accountloader.EmbeddedComponentLoaderViewModel
 import com.stripe.android.connect.example.ui.appearance.AppearanceView
-import com.stripe.android.core.Logger
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -39,8 +37,6 @@ abstract class BasicExampleComponentActivity : FragmentActivity() {
     lateinit var embeddedComponentManagerProvider: EmbeddedComponentManagerProvider
 
     private val viewModel: EmbeddedComponentLoaderViewModel by viewModels()
-
-    protected val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG)
 
     @get:StringRes
     abstract val titleRes: Int
