@@ -22,11 +22,11 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.connect.EmbeddedComponentManager
 import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.example.R
-import com.stripe.android.connect.example.ui.common.Async
-import com.stripe.android.connect.example.ui.common.Fail
-import com.stripe.android.connect.example.ui.common.Loading
-import com.stripe.android.connect.example.ui.common.Success
-import com.stripe.android.connect.example.ui.common.Uninitialized
+import com.stripe.android.connect.example.core.Async
+import com.stripe.android.connect.example.core.Fail
+import com.stripe.android.connect.example.core.Loading
+import com.stripe.android.connect.example.core.Success
+import com.stripe.android.connect.example.core.Uninitialized
 import com.stripe.android.connect.example.ui.settings.SettingsView
 import kotlinx.coroutines.launch
 

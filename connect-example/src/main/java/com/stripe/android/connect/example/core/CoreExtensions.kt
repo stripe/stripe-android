@@ -1,4 +1,4 @@
-package com.stripe.android.connect.example.ui.common
+package com.stripe.android.connect.example.core
 
 /**
  * Executes and returns the value of [block] if [this] is true, otherwise returns null.

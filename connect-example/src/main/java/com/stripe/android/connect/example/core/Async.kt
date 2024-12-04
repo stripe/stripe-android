@@ -1,4 +1,4 @@
-package com.stripe.android.connect.example.ui.common
+package com.stripe.android.connect.example.core
 
 /**
  * Represents an asynchronous operation that is either:

@@ -7,9 +7,9 @@ import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.example.BuildConfig
 import com.stripe.android.connect.example.data.EmbeddedComponentManagerProvider
 import com.stripe.android.connect.example.data.EmbeddedComponentService
-import com.stripe.android.connect.example.ui.common.Fail
-import com.stripe.android.connect.example.ui.common.Loading
-import com.stripe.android.connect.example.ui.common.Success
+import com.stripe.android.connect.example.core.Fail
+import com.stripe.android.connect.example.core.Loading
+import com.stripe.android.connect.example.core.Success
 import com.stripe.android.core.Logger
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
