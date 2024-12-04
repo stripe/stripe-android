@@ -10,6 +10,7 @@ import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import kotlinx.parcelize.Parcelize
 
 const val isEKClientSecretValidRegexPattern = "^ek_[^_](.)+$"
+
 @Parcelize
 internal data class CommonConfiguration(
     val merchantDisplayName: String,
