@@ -54,7 +54,7 @@ abstract class BasicExampleComponentActivity : FragmentActivity() {
     @Composable
     private fun ExampleComponentContent() {
         val state by viewModel.state.collectAsState()
-        val embeddedComponentAsync = state.embeddedComponentAsync
+        val embeddedComponentAsync = state.embeddedComponentManagerAsync
 
         val sheetState = rememberModalBottomSheetState(
             initialValue = ModalBottomSheetValue.Hidden,

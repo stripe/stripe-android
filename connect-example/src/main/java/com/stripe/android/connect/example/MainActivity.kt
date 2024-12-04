@@ -55,7 +55,7 @@ class MainActivity : ComponentActivity() {
     @Composable
     private fun ComponentPickerContent() {
         val state by viewModel.state.collectAsState()
-        val embeddedComponentAsync = state.embeddedComponentAsync
+        val embeddedComponentAsync = state.embeddedComponentManagerAsync
 
         val sheetState = rememberModalBottomSheetState(
             initialValue = ModalBottomSheetValue.Hidden,

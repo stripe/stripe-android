@@ -7,5 +7,5 @@ import com.stripe.android.connect.example.ui.common.Uninitialized
 
 @OptIn(PrivateBetaConnectSDK::class)
 data class EmbeddedComponentManagerLoaderState(
-    val embeddedComponentAsync: Async<EmbeddedComponentManager> = Uninitialized,
+    val embeddedComponentManagerAsync: Async<EmbeddedComponentManager> = Uninitialized,
 )
