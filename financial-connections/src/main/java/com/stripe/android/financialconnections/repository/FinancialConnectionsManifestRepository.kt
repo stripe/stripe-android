@@ -125,6 +125,18 @@ internal interface FinancialConnectionsManifestRepository {
         selectedAccounts: Set<String>?
     ): FinancialConnectionsSessionManifest
 
+    suspend fun postSaveAccountsToLinkVerified(
+        clientSecret: String,
+        email: String?,
+        country: String?,
+        locale: String?,
+        phoneNumber: String?,
+        consumerSessionClientSecret: String?,
+        selectedAccounts: Set<String>?,
+        appId: String,
+        verificationToken: String
+    ): FinancialConnectionsSessionManifest
+
     /**
      * Disable networking in Connections Auth Flow
      *
@@ -389,13 +401,63 @@ private class FinancialConnectionsManifestRepositoryImpl(
         consumerSessionClientSecret: String?,
         selectedAccounts: Set<String>?,
     ): FinancialConnectionsSessionManifest {
-        // Accounts to be saved can be null in case of manual entry.
+        return postSaveAccountsToLink(
+            endpoint = saveAccountToLinkUrl,
+            selectedAccounts = selectedAccounts,
+            clientSecret = clientSecret,
+            consumerSessionClientSecret = consumerSessionClientSecret,
+            country = country,
+            locale = locale,
+            email = email,
+            phoneNumber = phoneNumber,
+            appId = null,
+            verificationToken = null
+        )
+    }
+
+    override suspend fun postSaveAccountsToLinkVerified(
+        clientSecret: String,
+        email: String?,
+        country: String?,
+        locale: String?,
+        phoneNumber: String?,
+        consumerSessionClientSecret: String?,
+        selectedAccounts: Set<String>?,
+        appId: String,
+        verificationToken: String
+    ): FinancialConnectionsSessionManifest {
+        return postSaveAccountsToLink(
+            endpoint = saveAccountToLinkMobileUrl,
+            selectedAccounts = selectedAccounts,
+            clientSecret = clientSecret,
+            consumerSessionClientSecret = consumerSessionClientSecret,
+            country = country,
+            locale = locale,
+            email = email,
+            phoneNumber = phoneNumber,
+            appId = appId,
+            verificationToken = verificationToken
+        )
+    }
+
+    private suspend fun postSaveAccountsToLink(
+        endpoint: String,
+        selectedAccounts: Set<String>?,
+        clientSecret: String,
+        consumerSessionClientSecret: String?,
+        country: String?,
+        locale: String?,
+        email: String?,
+        phoneNumber: String?,
+        appId: String?,
+        verificationToken: String?
+    ): FinancialConnectionsSessionManifest {
         val accounts: Map<String, Any> = selectedAccounts
             ?.mapIndexed { index, account -> "$PARAM_SELECTED_ACCOUNTS[$index]" to account }
             ?.toMap()
             ?: emptyMap()
         val request = apiRequestFactory.createPost(
-            url = saveAccountToLinkUrl,
+            url = endpoint,
             options = provideApiRequestOptions(useConsumerPublishableKey = false),
             params = mapOf(
                 NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
@@ -404,7 +466,9 @@ private class FinancialConnectionsManifestRepositoryImpl(
                 "country" to country,
                 "locale" to locale,
                 "email_address" to email,
-                "phone_number" to phoneNumber
+                "phone_number" to phoneNumber,
+                "app_id" to appId,
+                "android_verification_token" to verificationToken,
             ).filterNotNullValues() + accounts
         )
         return requestExecutor.execute(
@@ -544,6 +608,9 @@ private class FinancialConnectionsManifestRepositoryImpl(
 
         internal const val saveAccountToLinkUrl: String =
             "${ApiRequest.API_HOST}/v1/link_account_sessions/save_accounts_to_link"
+
+        internal const val saveAccountToLinkMobileUrl: String =
+            "${ApiRequest.API_HOST}/v1/connections/mobile/link_account_sessions/save_accounts_to_link"
 
         internal const val linkVerifiedUrl: String =
             "${ApiRequest.API_HOST}/v1/link_account_sessions/link_verified"

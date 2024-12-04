@@ -17,6 +17,7 @@ import com.stripe.android.model.ConsumerSessionSignup
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.CustomEmailType
 import com.stripe.android.model.IncentiveEligibilitySession
+import com.stripe.android.model.IntegrityToken
 import com.stripe.android.model.SharePaymentDetails
 import com.stripe.android.model.VerificationType
 import com.stripe.android.model.parsers.AttachConsumerToLinkAccountSessionJsonParser
@@ -42,6 +43,22 @@ interface ConsumersApiService {
         requestSurface: String,
         consentAction: ConsumerSignUpConsentAction,
         requestOptions: ApiRequest.Options,
+    ): Result<ConsumerSessionSignup>
+
+
+    suspend fun signUpVerified(
+        email: String,
+        phoneNumber: String,
+        country: String,
+        name: String?,
+        locale: Locale?,
+        amount: Long?,
+        currency: String?,
+        incentiveEligibilitySession: IncentiveEligibilitySession?,
+        requestSurface: String,
+        consentAction: ConsumerSignUpConsentAction,
+        requestOptions: ApiRequest.Options,
+        integrityToken: IntegrityToken
     ): Result<ConsumerSessionSignup>
 
     suspend fun lookupConsumerSession(
@@ -122,36 +139,99 @@ class ConsumersApiServiceImpl(
         consentAction: ConsumerSignUpConsentAction,
         requestOptions: ApiRequest.Options,
     ): Result<ConsumerSessionSignup> {
-        return executeRequestWithResultParser(
-            stripeErrorJsonParser = stripeErrorJsonParser,
-            stripeNetworkClient = stripeNetworkClient,
-            request = apiRequestFactory.createPost(
-                url = consumerAccountsSignUpUrl,
-                options = requestOptions,
-                params = mapOf(
-                    "email_address" to email.lowercase(),
-                    "phone_number" to phoneNumber,
-                    "country" to country,
-                    "country_inferring_method" to "PHONE_NUMBER",
-                    "amount" to amount,
-                    "currency" to currency,
-                    "consent_action" to consentAction.value,
-                    "request_surface" to requestSurface,
-                ).plus(
-                    locale?.let {
-                        mapOf("locale" to it.toLanguageTag())
-                    } ?: emptyMap()
-                ).plus(
-                    name?.let {
-                        mapOf("legal_name" to it)
-                    } ?: emptyMap()
-                ).plus(
-                    incentiveEligibilitySession?.toParamMap().orEmpty()
-                ),
-            ),
-            responseJsonParser = ConsumerSessionSignupJsonParser,
+        return signUp(
+            endpoint = consumerAccountsSignUpUrl,
+            requestOptions = requestOptions,
+            email = email,
+            phoneNumber = phoneNumber,
+            country = country,
+            amount = amount,
+            currency = currency,
+            consentAction = consentAction,
+            requestSurface = requestSurface,
+            locale = locale,
+            name = name,
+            incentiveEligibilitySession = incentiveEligibilitySession,
+            integrityToken = null
         )
     }
+
+    override suspend fun signUpVerified(
+        email: String,
+        phoneNumber: String,
+        country: String,
+        name: String?,
+        locale: Locale?,
+        amount: Long?,
+        currency: String?,
+        incentiveEligibilitySession: IncentiveEligibilitySession?,
+        requestSurface: String,
+        consentAction: ConsumerSignUpConsentAction,
+        requestOptions: ApiRequest.Options,
+        integrityToken: IntegrityToken
+    ): Result<ConsumerSessionSignup> {
+        return signUp(
+            endpoint = consumerAccountsMobileSignUpUrl,
+            requestOptions = requestOptions,
+            email = email,
+            phoneNumber = phoneNumber,
+            country = country,
+            amount = amount,
+            currency = currency,
+            consentAction = consentAction,
+            requestSurface = requestSurface,
+            locale = locale,
+            name = name,
+            incentiveEligibilitySession = incentiveEligibilitySession,
+            integrityToken = integrityToken
+        )
+    }
+
+    private suspend fun signUp(
+        endpoint: String,
+        requestOptions: ApiRequest.Options,
+        email: String,
+        phoneNumber: String,
+        country: String,
+        amount: Long?,
+        currency: String?,
+        consentAction: ConsumerSignUpConsentAction,
+        requestSurface: String,
+        locale: Locale?,
+        name: String?,
+        incentiveEligibilitySession: IncentiveEligibilitySession?,
+        integrityToken: IntegrityToken?
+    ): Result<ConsumerSessionSignup> = executeRequestWithResultParser(
+        stripeErrorJsonParser = stripeErrorJsonParser,
+        stripeNetworkClient = stripeNetworkClient,
+        request = apiRequestFactory.createPost(
+            url = endpoint,
+            options = requestOptions,
+            params = mapOf(
+                "email_address" to email.lowercase(),
+                "phone_number" to phoneNumber,
+                "country" to country,
+                "country_inferring_method" to "PHONE_NUMBER",
+                "amount" to amount,
+                "currency" to currency,
+                "consent_action" to consentAction.value,
+                "request_surface" to requestSurface,
+            ).plus(
+                locale?.let {
+                    mapOf("locale" to it.toLanguageTag())
+                } ?: emptyMap()
+            ).plus(
+                name?.let {
+                    mapOf("legal_name" to it)
+                } ?: emptyMap()
+            ).plus(
+                incentiveEligibilitySession?.toParamMap().orEmpty()
+            ).plus(
+                integrityToken?.toParamMap().orEmpty()
+            )
+        ),
+        responseJsonParser = ConsumerSessionSignupJsonParser,
+    )
 
     /**
      * Retrieves the ConsumerSession if the given email is associated with a Link account.
@@ -321,6 +401,12 @@ class ConsumersApiServiceImpl(
          */
         internal val consumerAccountsSignUpUrl: String =
             getApiUrl("consumers/accounts/sign_up")
+
+        /**
+         * @return `https://api.stripe.com/v1/consumers/accounts/sign_up`
+         */
+        internal val consumerAccountsMobileSignUpUrl: String =
+            getApiUrl("consumers/mobile/sign_up")
 
         /**
          * @return `https://api.stripe.com/v1/consumers/sessions/lookup`

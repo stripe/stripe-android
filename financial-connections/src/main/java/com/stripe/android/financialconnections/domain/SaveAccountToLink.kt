@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.domain
 
+import android.app.Application
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
@@ -18,6 +19,7 @@ import kotlin.math.max
 import kotlin.time.Duration.Companion.seconds
 
 internal class SaveAccountToLink @Inject constructor(
+    private val context: Application,
     private val locale: Locale?,
     private val configuration: FinancialConnectionsSheet.Configuration,
     private val attachedPaymentAccountRepository: AttachedPaymentAccountRepository,
@@ -34,7 +36,7 @@ internal class SaveAccountToLink @Inject constructor(
         shouldPollAccountNumbers: Boolean,
     ): FinancialConnectionsSessionManifest {
         return ensureReadyAccounts(shouldPollAccountNumbers, selectedAccounts) { selectedAccountIds ->
-            repository.postSaveAccountsToLink(
+            repository.postSaveAccountsToLinkVerified(
                 clientSecret = configuration.financialConnectionsSessionClientSecret,
                 email = email,
                 country = country,
@@ -42,6 +44,8 @@ internal class SaveAccountToLink @Inject constructor(
                 locale = (locale ?: Locale.getDefault()).toLanguageTag(),
                 consumerSessionClientSecret = null,
                 selectedAccounts = selectedAccountIds,
+                appId = context.packageName,
+                verificationToken = "12345"
             )
         }
     }
@@ -52,7 +56,7 @@ internal class SaveAccountToLink @Inject constructor(
         shouldPollAccountNumbers: Boolean,
     ): FinancialConnectionsSessionManifest {
         return ensureReadyAccounts(shouldPollAccountNumbers, selectedAccounts) { selectedAccountIds ->
-            repository.postSaveAccountsToLink(
+            repository.postSaveAccountsToLinkVerified(
                 clientSecret = configuration.financialConnectionsSessionClientSecret,
                 email = null,
                 country = null,
@@ -60,6 +64,8 @@ internal class SaveAccountToLink @Inject constructor(
                 locale = null,
                 consumerSessionClientSecret = consumerSessionClientSecret,
                 selectedAccounts = selectedAccountIds,
+                appId = context.packageName,
+                verificationToken = "12345"
             )
         }
     }

@@ -16,6 +16,7 @@ import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSessionSignup
 import com.stripe.android.model.ConsumerSignUpConsentAction.EnteredPhoneNumberClickedSaveToLink
 import com.stripe.android.model.CustomEmailType
+import com.stripe.android.model.IntegrityToken
 import com.stripe.android.model.SharePaymentDetails
 import com.stripe.android.model.VerificationType
 import com.stripe.android.repository.ConsumersApiService
@@ -31,6 +32,13 @@ internal interface FinancialConnectionsConsumerSessionRepository {
         email: String,
         phoneNumber: String,
         country: String,
+    ): ConsumerSessionSignup
+
+    suspend fun signUpVerified(
+        email: String,
+        phoneNumber: String,
+        country: String,
+        integrityToken: IntegrityToken
     ): ConsumerSessionSignup
 
     suspend fun lookupConsumerSession(
@@ -148,7 +156,31 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
             incentiveEligibilitySession = elementsSessionContext?.incentiveEligibilitySession,
             requestOptions = provideApiRequestOptions(useConsumerPublishableKey = false),
             requestSurface = requestSurface,
+            consentAction = EnteredPhoneNumberClickedSaveToLink
+        ).onSuccess { signup ->
+            updateCachedConsumerSessionFromSignup(signup)
+        }.getOrThrow()
+    }
+
+    override suspend fun signUpVerified(
+        email: String,
+        phoneNumber: String,
+        country: String,
+        integrityToken: IntegrityToken
+    ): ConsumerSessionSignup = mutex.withLock {
+        consumersApiService.signUpVerified(
+            email = email,
+            phoneNumber = phoneNumber,
+            country = country,
+            name = "Carlos", //TODO Change
+            locale = locale,
+            amount = elementsSessionContext?.amount,
+            currency = elementsSessionContext?.currency,
+            incentiveEligibilitySession = elementsSessionContext?.incentiveEligibilitySession,
+            requestOptions = provideApiRequestOptions(useConsumerPublishableKey = false),
+            requestSurface = requestSurface,
             consentAction = EnteredPhoneNumberClickedSaveToLink,
+            integrityToken = integrityToken
         ).onSuccess { signup ->
             updateCachedConsumerSessionFromSignup(signup)
         }.getOrThrow()

@@ -1,5 +1,7 @@
 package com.stripe.android.financialconnections.features.networkinglinksignup
 
+import android.app.Application
+import android.content.Context
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.Click
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
@@ -19,6 +21,8 @@ import com.stripe.android.financialconnections.navigation.Destination.Networking
 import com.stripe.android.financialconnections.navigation.Destination.Success
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.repository.FinancialConnectionsConsumerSessionRepository
+import com.stripe.android.model.IntegrityToken
+import com.stripe.attestation.IntegrityRequestManager
 import javax.inject.Inject
 
 internal interface LinkSignupHandler {
@@ -35,7 +39,9 @@ internal interface LinkSignupHandler {
 }
 
 internal class LinkSignupHandlerForInstantDebits @Inject constructor(
+    private val context: Application,
     private val consumerRepository: FinancialConnectionsConsumerSessionRepository,
+    private val integrityRequestManager: IntegrityRequestManager,
     private val attachConsumerToLinkAccountSession: AttachConsumerToLinkAccountSession,
     private val getOrFetchSync: GetOrFetchSync,
     private val navigationManager: NavigationManager,
@@ -47,10 +53,17 @@ internal class LinkSignupHandlerForInstantDebits @Inject constructor(
     ): Pane {
         val phoneController = state.payload()!!.phoneController
 
-        val signup = consumerRepository.signUp(
+        integrityRequestManager.prepare()
+        val token: Result<String> = integrityRequestManager.requestToken(requestIdentifier = null)
+
+        val signup = consumerRepository.signUpVerified(
             email = state.validEmail!!,
             phoneNumber = state.validPhone!!,
             country = phoneController.getCountryCode(),
+            integrityToken = IntegrityToken(
+                token = token.getOrThrow(),
+                applicationId = context.packageName
+            )
         )
 
         attachConsumerToLinkAccountSession(
