@@ -58,10 +58,27 @@ internal class RealCreateInstantDebitsResult @Inject constructor(
             )
         }
 
+        val incentiveEligibilitySessionId = elementsSessionContext?.incentiveEligibilitySession?.id
+        val newAccountId = consumerSession?.accountId
+
+        val eligibleForIncentive = if (incentiveEligibilitySessionId != null && newAccountId != null) {
+            val availableIncentives = runCatching {
+                consumerRepository.updateAvailableIncentives(
+                    sessionId = incentiveEligibilitySessionId,
+                    consumerAccount = newAccountId,
+                )
+            }.getOrNull()
+
+            availableIncentives?.data?.isNotEmpty() == true
+        } else {
+            false
+        }
+
         return InstantDebitsResult(
             encodedPaymentMethod = paymentMethod,
             bankName = paymentDetails.bankName,
             last4 = paymentDetails.last4,
+            eligibleForIncentive = eligibleForIncentive,
         )
     }
 }

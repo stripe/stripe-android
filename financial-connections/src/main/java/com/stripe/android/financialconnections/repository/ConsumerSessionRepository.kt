@@ -13,6 +13,7 @@ internal const val KeyConsumerSession = "ConsumerSession"
 
 @Parcelize
 internal data class CachedConsumerSession(
+    val accountId: String?,
     val emailAddress: String,
     val phoneNumber: String,
     val clientSecret: String,
@@ -28,6 +29,7 @@ internal interface ConsumerSessionRepository : ConsumerSessionProvider {
     fun storeNewConsumerSession(
         consumerSession: ConsumerSession?,
         publishableKey: String?,
+        accountId: String? = null,
     )
 
     fun updateConsumerSession(
@@ -46,8 +48,9 @@ internal class RealConsumerSessionRepository @Inject constructor(
     override fun storeNewConsumerSession(
         consumerSession: ConsumerSession?,
         publishableKey: String?,
+        accountId: String?,
     ) {
-        savedStateHandle[KeyConsumerSession] = consumerSession?.toCached(publishableKey)
+        savedStateHandle[KeyConsumerSession] = consumerSession?.toCached(publishableKey, accountId)
     }
 
     override fun updateConsumerSession(consumerSession: ConsumerSession) {
@@ -58,7 +61,9 @@ internal class RealConsumerSessionRepository @Inject constructor(
 
     private fun ConsumerSession.toCached(
         publishableKey: String?,
+        accountId: String? = null,
     ) = CachedConsumerSession(
+        accountId = accountId,
         emailAddress = emailAddress,
         phoneNumber = getRedactedPhoneNumber(),
         clientSecret = clientSecret,

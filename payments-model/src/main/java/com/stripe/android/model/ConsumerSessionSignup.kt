@@ -13,6 +13,8 @@ import kotlinx.serialization.Serializable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Serializable
 data class ConsumerSessionSignup(
+    @SerialName("account_id")
+    val accountId: String,
     @SerialName("consumer_session")
     val consumerSession: ConsumerSession,
     @SerialName("publishable_key")

@@ -11,10 +11,13 @@ object ConsumerSessionSignupJsonParser : ModelJsonParser<ConsumerSessionSignup> 
 
     override fun parse(json: JSONObject): ConsumerSessionSignup? {
         val consumerSession = ConsumerSessionJsonParser().parse(json)
+        val accountId = optString(json, "account_id")
         val publishableKey = optString(json, "publishable_key")
 
-        return consumerSession?.let { session ->
-            ConsumerSessionSignup(session, publishableKey)
+        return if (consumerSession != null && accountId != null) {
+            ConsumerSessionSignup(accountId, consumerSession, publishableKey)
+        } else {
+            null
         }
     }
 }
