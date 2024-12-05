@@ -10,6 +10,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFact
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
+import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
@@ -25,9 +26,48 @@ import kotlin.test.Test
 internal class SharedPaymentElementViewModelTest {
 
     @Test
+    fun `configure sets initial confirmationState`() = testScenario {
+        val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
+        configurationHandler.emit(
+            Result.success(
+                PaymentElementLoader.State(
+                    config = configuration.asCommonConfiguration(),
+                    customer = null,
+                    linkState = null,
+                    paymentSelection = null,
+                    validationError = null,
+                    paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                        stripeIntent = PaymentIntentFixtures.PI_SUCCEEDED,
+                        billingDetailsCollectionConfiguration = configuration
+                            .billingDetailsCollectionConfiguration,
+                        allowsDelayedPaymentMethods = configuration.allowsDelayedPaymentMethods,
+                        allowsPaymentMethodsRequiringShippingAddress = configuration
+                            .allowsPaymentMethodsRequiringShippingAddress,
+                        isGooglePayReady = false,
+                        cbcEligibility = CardBrandChoiceEligibility.Ineligible,
+                    ),
+                )
+            )
+        )
+
+        assertThat(viewModel.confirmationState).isNull()
+
+        assertThat(
+            viewModel.configure(
+                PaymentSheet.IntentConfiguration(
+                    PaymentSheet.IntentConfiguration.Mode.Payment(5000, "USD"),
+                ),
+                configuration = configuration,
+            )
+        ).isInstanceOf<EmbeddedPaymentElement.ConfigureResult.Succeeded>()
+
+        assertThat(viewModel.confirmationState?.paymentMethodMetadata).isNotNull()
+    }
+
+    @Test
     fun `configure maps success result`() = testScenario {
         val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
-        handler.emit(
+        configurationHandler.emit(
             Result.success(
                 PaymentElementLoader.State(
                     config = configuration.asCommonConfiguration(),
@@ -65,7 +105,7 @@ internal class SharedPaymentElementViewModelTest {
     @Test
     fun `configure emits payment option`() = testScenario {
         val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
-        handler.emit(
+        configurationHandler.emit(
             Result.success(
                 PaymentElementLoader.State(
                     config = configuration.asCommonConfiguration(),
@@ -106,7 +146,7 @@ internal class SharedPaymentElementViewModelTest {
     @Test
     fun `configure maps failure result`() = testScenario {
         val exception = IllegalStateException("Hi")
-        handler.emit(Result.failure(exception))
+        configurationHandler.emit(Result.failure(exception))
         assertThat(
             viewModel.configure(
                 PaymentSheet.IntentConfiguration(
@@ -120,26 +160,33 @@ internal class SharedPaymentElementViewModelTest {
     private fun testScenario(
         block: suspend Scenario.() -> Unit,
     ) {
+        val confirmationHandler = FakeConfirmationHandler()
         val configurationHandler = FakeEmbeddedConfigurationHandler()
         val paymentOptionDisplayDataFactory = PaymentOptionDisplayDataFactory(
             iconLoader = mock(),
             context = ApplicationProvider.getApplicationContext(),
         )
 
-        val viewModel = SharedPaymentElementViewModel(
-            configurationHandler = configurationHandler,
-            paymentOptionDisplayDataFactory = paymentOptionDisplayDataFactory,
-        )
-
         runTest {
-            Scenario(configurationHandler, viewModel).block()
+            val viewModel = SharedPaymentElementViewModel(
+                confirmationHandlerFactory = { confirmationHandler },
+                ioContext = testScheduler,
+                configurationHandler = configurationHandler,
+                paymentOptionDisplayDataFactory = paymentOptionDisplayDataFactory,
+            )
+
+            Scenario(
+                configurationHandler = configurationHandler,
+                viewModel = viewModel,
+            ).block()
         }
 
         configurationHandler.turbine.ensureAllEventsConsumed()
+        confirmationHandler.validate()
     }
 
     private class Scenario(
-        val handler: FakeEmbeddedConfigurationHandler,
+        val configurationHandler: FakeEmbeddedConfigurationHandler,
         val viewModel: SharedPaymentElementViewModel,
     )
 
