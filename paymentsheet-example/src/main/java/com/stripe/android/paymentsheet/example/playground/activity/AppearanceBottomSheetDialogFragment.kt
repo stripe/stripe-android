@@ -71,6 +71,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.playground.activity.AppearanceBottomSheetDialogFragment.Companion.EMBEDDED_KEY
 import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedAppearance
+import com.stripe.android.paymentsheet.example.playground.settings.Row
 
 private val BASE_FONT_SIZE = 20.sp
 private val BASE_PADDING = 8.dp
@@ -101,7 +102,7 @@ internal class AppearanceBottomSheetDialogFragment : BottomSheetDialogFragment()
     }
 
     private fun resetAppearance() {
-        AppearanceStore::reset
+        AppearanceStore.reset()
         embeddedAppearance = EmbeddedAppearance()
     }
 
@@ -915,7 +916,7 @@ private fun FontScaleSlider(sliderPosition: Float, onValueChange: (Float) -> Uni
 }
 
 @Composable
-private fun RowStyleDropDown(style: String, rowStyleSelectedCallback: (String) -> Unit) {
+private fun RowStyleDropDown(style: Row, rowStyleSelectedCallback: (Row) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
 
     Row(
@@ -940,26 +941,26 @@ private fun RowStyleDropDown(style: String, rowStyleSelectedCallback: (String) -
             DropdownMenuItem(
                 onClick = {
                     expanded = false
-                    rowStyleSelectedCallback("flatWithRadio")
+                    rowStyleSelectedCallback(Row.FlatWithRadio)
                 }
             ) {
-                Text("FlatWithRadio")
+                Text(Row.FlatWithRadio.name)
             }
             DropdownMenuItem(
                 onClick = {
                     expanded = false
-                    rowStyleSelectedCallback("flatWithCheckmark")
+                    rowStyleSelectedCallback(Row.FlatWithCheckmark)
                 }
             ) {
-                Text("FlatWithCheckmark")
+                Text(Row.FlatWithCheckmark.name)
             }
             DropdownMenuItem(
                 onClick = {
                     expanded = false
-                    rowStyleSelectedCallback("floatingButton")
+                    rowStyleSelectedCallback(Row.FloatingButton)
                 }
             ) {
-                Text("FloatingButton")
+                Text(Row.FloatingButton.name)
             }
         }
     }
@@ -1026,7 +1027,7 @@ private fun getFontFromResource(fontResId: Int?): FontFamily {
     }
 }
 
-fun Bundle?.getEmbeddedAppearance(): EmbeddedAppearance {
+internal fun Bundle?.getEmbeddedAppearance(): EmbeddedAppearance {
     val appearance = if (SDK_INT >= 33) {
         this?.getParcelable(EMBEDDED_KEY, EmbeddedAppearance::class.java)
     } else {
