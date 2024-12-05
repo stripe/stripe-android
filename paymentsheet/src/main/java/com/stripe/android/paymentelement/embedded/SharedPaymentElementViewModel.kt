@@ -178,7 +178,7 @@ internal interface SharedPaymentElementViewModelModule {
 
         @Provides
         @Named(PRODUCT_USAGE)
-        fun provideProductUsageTokens() = setOf("Embedded")
+        fun provideProductUsageTokens() = setOf("EmbeddedPaymentElement")
 
         /**
          * Provides a non-singleton PaymentConfiguration.
