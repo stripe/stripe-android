@@ -1,7 +1,6 @@
 package com.stripe.android.common.model
 
 import android.os.Parcelable
-import androidx.annotation.RestrictTo
 import com.stripe.android.common.validation.CustomerSessionClientSecretValidator
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
@@ -10,8 +9,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import kotlinx.parcelize.Parcelize
 
-@RestrictTo(RestrictTo.Scope.LIBRARY)
-const val IsEKClientSecretValidRegexPattern = "^ek_[^_](.)+$"
+private const val IsEKClientSecretValidRegexPattern = "^ek_[^_](.)+$"
 
 @Parcelize
 internal data class CommonConfiguration(
@@ -29,9 +27,8 @@ internal data class CommonConfiguration(
     val externalPaymentMethods: List<String>,
     val cardBrandAcceptance: PaymentSheet.CardBrandAcceptance,
 ) : Parcelable {
-    @Suppress("LongMethod", "ThrowsCount")
-    fun validate() {
-        // These are not localized as they are not intended to be displayed to a user.
+    @Suppress("ThrowsCount")
+    private fun customerAndMerchantValidate() {
         when {
             merchantDisplayName.isBlank() -> {
                 throw IllegalArgumentException(
@@ -46,57 +43,81 @@ internal data class CommonConfiguration(
                 )
             }
         }
+    }
+
+    private fun customerAccessTypeValidate(customerAccessType: PaymentSheet.CustomerAccessType) {
+        when (customerAccessType) {
+            is PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey -> {
+                legacyCustomerEphemeralKeyValidate(customerAccessType)
+            }
+            is PaymentSheet.CustomerAccessType.CustomerSession -> {
+                customerSessionValidate(customerAccessType)
+            }
+        }
+    }
+
+    @Suppress("ThrowsCount")
+    private fun customerSessionValidate(customerAccessType: PaymentSheet.CustomerAccessType.CustomerSession) {
+        val result = CustomerSessionClientSecretValidator
+            .validate(customerAccessType.customerSessionClientSecret)
+
+        when (result) {
+            is CustomerSessionClientSecretValidator.Result.Error.Empty -> {
+                throw IllegalArgumentException(
+                    "When a CustomerConfiguration is passed to PaymentSheet, " +
+                        "the customerSessionClientSecret cannot be an empty string."
+                )
+            }
+            is CustomerSessionClientSecretValidator.Result.Error.LegacyEphemeralKey -> {
+                throw IllegalArgumentException(
+                    "Argument looks like an Ephemeral Key secret, but expecting a CustomerSession client " +
+                        "secret. See CustomerSession API: https://docs.stripe.com/api/customer_sessions/create"
+                )
+            }
+            is CustomerSessionClientSecretValidator.Result.Error.UnknownKey -> {
+                throw IllegalArgumentException(
+                    "Argument does not look like a CustomerSession client secret. " +
+                        "See CustomerSession API: https://docs.stripe.com/api/customer_sessions/create"
+                )
+            }
+            is CustomerSessionClientSecretValidator.Result.Valid -> Unit
+        }
+    }
+
+    @Suppress("ThrowsCount")
+    private fun legacyCustomerEphemeralKeyValidate(
+        customerAccessType: PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey
+    ) {
+        if (customerAccessType.ephemeralKeySecret != customer?.ephemeralKeySecret) {
+            throw IllegalArgumentException(
+                "Conflicting ephemeralKeySecrets"
+            )
+        } else if (customerAccessType.ephemeralKeySecret.isBlank() || customer.ephemeralKeySecret.isBlank()) {
+            throw IllegalArgumentException(
+                "When a CustomerConfiguration is passed to PaymentSheet, " +
+                    "the ephemeralKeySecret cannot be an empty string."
+            )
+        } else if (
+            customerAccessType.ephemeralKeySecret.isEKClientSecretValid().not() ||
+            customer.ephemeralKeySecret.isEKClientSecretValid().not()
+        ) {
+            throw IllegalArgumentException(
+                "`ephemeralKeySecret` format does not match expected client secret formatting"
+            )
+        }
+    }
+
+    fun validate() {
+        // These are not localized as they are not intended to be displayed to a user.
+        customerAndMerchantValidate()
 
         customer?.accessType?.let { customerAccessType ->
-            when (customerAccessType) {
-                is PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey -> {
-                    if (customerAccessType.ephemeralKeySecret.isBlank() || customer.ephemeralKeySecret.isBlank()) {
-                        throw IllegalArgumentException(
-                            "When a CustomerConfiguration is passed to PaymentSheet, " +
-                                "the ephemeralKeySecret cannot be an empty string."
-                        )
-                    } else if (
-                        customerAccessType.ephemeralKeySecret.isEKClientSecretValid().not() ||
-                        customer.ephemeralKeySecret.isEKClientSecretValid().not()
-                    ) {
-                        throw IllegalArgumentException(
-                            "`ephemeralKeySecret` format does not match expected client secret formatting"
-                        )
-                    }
-                }
-                is PaymentSheet.CustomerAccessType.CustomerSession -> {
-                    val result = CustomerSessionClientSecretValidator
-                        .validate(customerAccessType.customerSessionClientSecret)
-
-                    when (result) {
-                        is CustomerSessionClientSecretValidator.Result.Error.Empty -> {
-                            throw IllegalArgumentException(
-                                "When a CustomerConfiguration is passed to PaymentSheet, " +
-                                    "the customerSessionClientSecret cannot be an empty string."
-                            )
-                        }
-                        is CustomerSessionClientSecretValidator.Result.Error.LegacyEphemeralKey -> {
-                            throw IllegalArgumentException(
-                                "Argument looks like an Ephemeral Key secret, but expecting a CustomerSession client " +
-                                    "secret. See CustomerSession API: https://docs.stripe.com/api/customer_sessions/create"
-                            )
-                        }
-                        is CustomerSessionClientSecretValidator.Result.Error.UnknownKey -> {
-                            throw IllegalArgumentException(
-                                "Argument does not look like a CustomerSession client secret. " +
-                                    "See CustomerSession API: https://docs.stripe.com/api/customer_sessions/create"
-                            )
-                        }
-                        is CustomerSessionClientSecretValidator.Result.Valid -> Unit
-                    }
-                }
-            }
+            customerAccessTypeValidate(customerAccessType)
         }
     }
 }
 
-@RestrictTo(RestrictTo.Scope.LIBRARY)
-internal fun String.isEKClientSecretValid(): Boolean {
+private fun String.isEKClientSecretValid(): Boolean {
     return Regex(IsEKClientSecretValidRegexPattern).matches(this)
 }
 
