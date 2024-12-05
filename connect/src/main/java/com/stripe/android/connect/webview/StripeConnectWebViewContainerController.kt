@@ -123,10 +123,10 @@ internal class StripeConnectWebViewContainerController<Listener : StripeEmbedded
     /**
      *
      */
-    fun onPermissionRequest(request: PermissionRequest) {
-        // we only care about camera permissions at this time (video/audio)
+    suspend fun onPermissionRequest(context: Context, request: PermissionRequest) {
+        // we only care about camera permissions (audio/video)
         val permissionsRequested = request.resources.filter {
-            it in listOf(PermissionRequest.RESOURCE_VIDEO_CAPTURE, PermissionRequest.RESOURCE_AUDIO_CAPTURE)
+            it in listOf(PermissionRequest.RESOURCE_AUDIO_CAPTURE, PermissionRequest.RESOURCE_VIDEO_CAPTURE)
         }.toTypedArray()
         if (permissionsRequested.isEmpty()) {
             request.deny() // no supported permissions were requested, so reject the request
@@ -136,19 +136,17 @@ internal class StripeConnectWebViewContainerController<Listener : StripeEmbedded
         if (checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
             request.grant(permissionsRequested)
         } else {
-            val job = viewScope().launch {
-                val isGranted = embeddedComponentManager.requestCameraPermission()
-                withContext(Dispatchers.Main) {
-                    if (isGranted) {
-                        request.grant(permissionsRequested)
-                    } else {
-                        request.deny()
-                    }
+            val isGranted = embeddedComponentManager.requestCameraPermission()
+            withContext(Dispatchers.Main) {
+                if (isGranted) {
+                    request.grant(permissionsRequested)
+                } else {
+                    request.deny()
                 }
-                inProgressRequests.remove(request)
             }
-            inProgressRequests[request] = job
+            inProgressRequests.remove(request)
         }
+//        inProgressRequests[request] = job
     }
 
     /**

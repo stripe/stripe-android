@@ -1,9 +1,6 @@
 package com.stripe.android.connect.webview
 
-import android.Manifest
 import android.annotation.SuppressLint
-import android.content.Context
-import android.content.pm.PackageManager
 import android.content.res.ColorStateList
 import android.graphics.Bitmap
 import android.view.LayoutInflater
@@ -16,11 +13,9 @@ import android.webkit.WebViewClient
 import android.widget.FrameLayout
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
-import androidx.core.content.ContextCompat.checkSelfPermission
 import androidx.core.view.doOnAttach
 import androidx.core.view.doOnDetach
 import androidx.core.view.isVisible
-import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.connect.BuildConfig
@@ -40,12 +35,9 @@ import com.stripe.android.connect.webview.serialization.SetterFunctionCalledMess
 import com.stripe.android.connect.webview.serialization.toJs
 import com.stripe.android.core.Logger
 import com.stripe.android.core.version.StripeSdkVersion
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.encodeToJsonElement
@@ -251,11 +243,14 @@ internal class StripeConnectWebViewContainerImpl<Listener : StripeEmbeddedCompon
      */
     internal inner class StripeConnectWebChromeClient : WebChromeClient() {
         override fun onPermissionRequest(request: PermissionRequest) {
-            controller?.onPermissionRequest(request)
+            val view = webView ?: return request.deny()
+
+            view.findViewTreeLifecycleOwner()?.lifecycleScope?.launch {
+                controller?.onPermissionRequest(view.context, request)
+            } ?: return request.deny()
         }
 
-        override fun onPermissionRequestCanceled(request: PermissionRequest?) {
-            if (request == null) return
+        override fun onPermissionRequestCanceled(request: PermissionRequest) {
             controller?.onPermissionRequestCanceled(request)
         }
     }
