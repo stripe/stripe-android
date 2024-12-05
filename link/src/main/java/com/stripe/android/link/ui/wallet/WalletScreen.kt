@@ -41,6 +41,7 @@ import com.stripe.android.link.theme.HorizontalPadding
 import com.stripe.android.link.theme.linkColors
 import com.stripe.android.link.theme.linkShapes
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.ui.core.input.SpecBox
 import com.stripe.android.uicore.text.Html
 import com.stripe.android.uicore.utils.collectAsState
 
@@ -51,9 +52,10 @@ internal fun WalletScreen(
     val state by viewModel.uiState.collectAsState()
     var isExpanded by rememberSaveable { mutableStateOf(false) }
 
-    state.cardDetailsInputSpec.Content(
+    SpecBox(
         modifier = Modifier
-            .fillMaxWidth()
+            .fillMaxWidth(),
+        spec = state.cardDetailsInputSpec
     )
 
 //    WalletBody(
