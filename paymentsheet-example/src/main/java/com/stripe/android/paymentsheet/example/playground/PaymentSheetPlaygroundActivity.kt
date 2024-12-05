@@ -29,7 +29,6 @@ import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -53,8 +52,10 @@ import com.stripe.android.paymentsheet.example.playground.activity.AppearanceBot
 import com.stripe.android.paymentsheet.example.playground.activity.AppearanceStore
 import com.stripe.android.paymentsheet.example.playground.activity.FawryActivity
 import com.stripe.android.paymentsheet.example.playground.activity.QrCodeActivity
+import com.stripe.android.paymentsheet.example.playground.activity.getEmbeddedAppearance
 import com.stripe.android.paymentsheet.example.playground.embedded.EmbeddedPlaygroundContract
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
+import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedAppearanceSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationType
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
@@ -63,6 +64,7 @@ import com.stripe.android.paymentsheet.example.samples.ui.shared.BuyButton
 import com.stripe.android.paymentsheet.example.samples.ui.shared.CHECKOUT_TEST_TAG
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentMethodSelector
 import com.stripe.android.paymentsheet.model.PaymentOption
+import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
@@ -210,9 +212,23 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
 
     @Composable
     private fun AppearanceButton() {
+        val settings = viewModel.playgroundSettingsFlow.collectAsState().value
+        val embeddedAppearance = settings?.get(EmbeddedAppearanceSettingsDefinition)?.collectAsState()?.value
+        supportFragmentManager.setFragmentResultListener(
+            AppearanceBottomSheetDialogFragment.REQUEST_KEY,
+            this@PaymentSheetPlaygroundActivity
+        ) { _, bundle ->
+            viewModel.updateEmbeddedAppearance(
+                EmbeddedAppearanceSettingsDefinition,
+                bundle.getEmbeddedAppearance()
+            )
+        }
         Button(
             onClick = {
                 val bottomSheet = AppearanceBottomSheetDialogFragment.newInstance()
+                bottomSheet.arguments = Bundle().apply {
+                    putParcelable(AppearanceBottomSheetDialogFragment.EMBEDDED_KEY, embeddedAppearance)
+                }
                 bottomSheet.show(supportFragmentManager, bottomSheet.tag)
             },
             modifier = Modifier.fillMaxWidth(),

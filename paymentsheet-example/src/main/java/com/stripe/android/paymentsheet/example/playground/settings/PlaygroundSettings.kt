@@ -456,6 +456,7 @@ internal class PlaygroundSettings private constructor(
             AppearanceSettingsDefinition,
             CustomEndpointDefinition,
             ShippingAddressSettingsDefinition,
+            EmbeddedAppearanceSettingsDefinition
         )
 
         private val allSettingDefinitions: List<PlaygroundSettingDefinition<*>> =
