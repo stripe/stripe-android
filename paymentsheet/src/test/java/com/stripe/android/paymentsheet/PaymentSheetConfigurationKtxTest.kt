@@ -127,7 +127,7 @@ class PaymentSheetConfigurationKtxTest {
         getConfig("ek_test_iiuwfhdaiuhasdvkcjn32n").validate()
     }
 
-        @Test
+    @Test
     fun `'validate' should fail when ephemeral key secret is of wrong format`() {
         fun assertFailsWithEphemeralKeySecret(ephemeralKeySecret: String) {
             assertFailsWith(

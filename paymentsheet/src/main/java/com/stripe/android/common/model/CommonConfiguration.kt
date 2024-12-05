@@ -1,6 +1,7 @@
 package com.stripe.android.common.model
 
 import android.os.Parcelable
+import androidx.annotation.RestrictTo
 import com.stripe.android.common.validation.CustomerSessionClientSecretValidator
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
@@ -9,7 +10,8 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import kotlinx.parcelize.Parcelize
 
-const val isEKClientSecretValidRegexPattern = "^ek_[^_](.)+$"
+@RestrictTo(RestrictTo.Scope.LIBRARY)
+const val IsEKClientSecretValidRegexPattern = "^ek_[^_](.)+$"
 
 @Parcelize
 internal data class CommonConfiguration(
@@ -27,6 +29,7 @@ internal data class CommonConfiguration(
     val externalPaymentMethods: List<String>,
     val cardBrandAcceptance: PaymentSheet.CardBrandAcceptance,
 ) : Parcelable {
+    @Suppress("LongMethod", "ThrowsCount")
     fun validate() {
         // These are not localized as they are not intended to be displayed to a user.
         when {
@@ -52,7 +55,10 @@ internal data class CommonConfiguration(
                             "When a CustomerConfiguration is passed to PaymentSheet, " +
                                 "the ephemeralKeySecret cannot be an empty string."
                         )
-                    } else if (customerAccessType.ephemeralKeySecret.isEKClientSecretValid().not() || customer.ephemeralKeySecret.isEKClientSecretValid().not()) {
+                    } else if (
+                        customerAccessType.ephemeralKeySecret.isEKClientSecretValid().not() ||
+                        customer.ephemeralKeySecret.isEKClientSecretValid().not()
+                    ) {
                         throw IllegalArgumentException(
                             "`ephemeralKeySecret` format does not match expected client secret formatting"
                         )
@@ -89,8 +95,9 @@ internal data class CommonConfiguration(
     }
 }
 
+@RestrictTo(RestrictTo.Scope.LIBRARY)
 internal fun String.isEKClientSecretValid(): Boolean {
-    return Regex(isEKClientSecretValidRegexPattern).matches(this)
+    return Regex(IsEKClientSecretValidRegexPattern).matches(this)
 }
 
 internal fun PaymentSheet.Configuration.asCommonConfiguration(): CommonConfiguration = CommonConfiguration(
