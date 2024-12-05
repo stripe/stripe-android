@@ -26,10 +26,31 @@ class EmbeddedComponentManager(
     internal val appearanceFlow: StateFlow<Appearance> get() = _appearanceFlow.asStateFlow()
 
     /**
+     * Create a new [AccountOnboardingView] for inclusion in the view hierarchy.
+     */
+    fun createAccountOnboardingView(
+        context: Context,
+        listener: AccountOnboardingListener? = null
+    ): AccountOnboardingView {
+        return AccountOnboardingView(
+            context = context,
+            embeddedComponentManager = this,
+            listener = listener
+        )
+    }
+
+    /**
      * Create a new [PayoutsView] for inclusion in the view hierarchy.
      */
-    fun createPayoutsView(context: Context): PayoutsView {
-        return PayoutsView(context = context, embeddedComponentManager = this)
+    fun createPayoutsView(
+        context: Context,
+        listener: PayoutsListener? = null
+    ): PayoutsView {
+        return PayoutsView(
+            context = context,
+            embeddedComponentManager = this,
+            listener = listener
+        )
     }
 
     internal fun getInitialParams(context: Context): ConnectInstanceJs {

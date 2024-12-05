@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet
 
 import androidx.lifecycle.viewModelScope
-import com.stripe.android.CardBrandFilter
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.orEmpty
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
@@ -11,13 +10,11 @@ import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.navigation.NavigationHandler
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.ui.DefaultAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewInteractor
-import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.PaymentMethodRemovalDelayMillis
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.PaymentOptionsItemsMapper
@@ -33,21 +30,29 @@ import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 
 internal class SavedPaymentMethodMutator(
-    private val editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory,
     private val eventReporter: EventReporter,
     private val coroutineScope: CoroutineScope,
     private val workContext: CoroutineContext,
-    private val navigationHandler: NavigationHandler,
     private val customerRepository: CustomerRepository,
-    private val allowsRemovalOfLastSavedPaymentMethod: Boolean,
     private val selection: StateFlow<PaymentSelection?>,
     val providePaymentMethodName: (PaymentMethodCode?) -> ResolvableString,
-    private val addFirstPaymentMethodScreenFactory: () -> PaymentSheetScreen,
     private val clearSelection: () -> Unit,
-    private val isLiveModeProvider: () -> Boolean,
     private val customerStateHolder: CustomerStateHolder,
-    private val currentScreen: StateFlow<PaymentSheetScreen>,
-    private val cardBrandFilter: CardBrandFilter,
+    private val onPaymentMethodRemoved: () -> Unit,
+    private val onModifyPaymentMethod: (
+        paymentMethod: PaymentMethod,
+        paymentMethodName: ResolvableString,
+        canRemove: Boolean,
+        performRemove: suspend () -> Throwable?,
+        updateExecutor: suspend (brand: CardBrand) -> Result<PaymentMethod>,
+    ) -> Unit,
+    private val onUpdatePaymentMethod: (
+        DisplayableSavedPaymentMethod,
+        canRemove: Boolean,
+        performRemove: suspend () -> Throwable?,
+        updateExecutor: suspend (brand: CardBrand) -> Result<PaymentMethod>,
+    ) -> Unit,
+    private val navigationPop: () -> Unit,
     isCbcEligible: () -> Boolean,
     isGooglePayReady: StateFlow<Boolean>,
     isLinkEnabled: StateFlow<Boolean?>,
@@ -56,10 +61,11 @@ internal class SavedPaymentMethodMutator(
     val canRemove: StateFlow<Boolean> = customerStateHolder.customer.mapAsStateFlow { customerState ->
         customerState?.run {
             val hasRemovePermissions = customerState.permissions.canRemovePaymentMethods
+            val hasRemoveLastPaymentMethodPermissions = customerState.permissions.canRemoveLastPaymentMethod
 
             when (paymentMethods.size) {
                 0 -> false
-                1 -> allowsRemovalOfLastSavedPaymentMethod && hasRemovePermissions
+                1 -> hasRemoveLastPaymentMethodPermissions && hasRemovePermissions
                 else -> hasRemovePermissions
             }
         } ?: false
@@ -112,20 +118,6 @@ internal class SavedPaymentMethodMutator(
             customerStateHolder.paymentMethods.collect { paymentMethods ->
                 if (paymentMethods.isEmpty() && editing.value) {
                     _editing.value = false
-                }
-            }
-        }
-
-        coroutineScope.launch {
-            currentScreen.collect { currentScreen ->
-                when (currentScreen) {
-                    is PaymentSheetScreen.VerticalMode -> {
-                        // When returning to the vertical mode screen, reset editing to false.
-                        _editing.value = false
-                    }
-                    else -> {
-                        // Do nothing.
-                    }
                 }
             }
         }
@@ -191,77 +183,35 @@ internal class SavedPaymentMethodMutator(
             clearSelection()
         }
 
-        val shouldResetToAddPaymentMethodForm = customerStateHolder.paymentMethods.value.isEmpty() &&
-            navigationHandler.currentScreen.value is PaymentSheetScreen.SelectSavedPaymentMethods
-
-        if (shouldResetToAddPaymentMethodForm) {
-            navigationHandler.resetTo(listOf(addFirstPaymentMethodScreenFactory()))
-        }
+        onPaymentMethodRemoved()
     }
 
     fun modifyPaymentMethod(paymentMethod: PaymentMethod) {
-        navigationHandler.transitionTo(
-            PaymentSheetScreen.EditPaymentMethod(
-                editInteractorFactory.create(
-                    initialPaymentMethod = paymentMethod,
-                    eventHandler = { event ->
-                        when (event) {
-                            is EditPaymentMethodViewInteractor.Event.ShowBrands -> {
-                                eventReporter.onShowPaymentOptionBrands(
-                                    source = EventReporter.CardBrandChoiceEventSource.Edit,
-                                    selectedBrand = event.brand
-                                )
-                            }
-                            is EditPaymentMethodViewInteractor.Event.HideBrands -> {
-                                eventReporter.onHidePaymentOptionBrands(
-                                    source = EventReporter.CardBrandChoiceEventSource.Edit,
-                                    selectedBrand = event.brand
-                                )
-                            }
-                        }
-                    },
-                    displayName = providePaymentMethodName(paymentMethod.type?.code),
-                    removeExecutor = { method ->
-                        removePaymentMethodInEditScreen(method)
-                    },
-                    updateExecutor = { method, brand ->
-                        modifyCardPaymentMethod(method, brand)
-                    },
-                    canRemove = canRemove.value,
-                    isLiveMode = isLiveModeProvider(),
-                    cardBrandFilter = cardBrandFilter
-                ),
-            )
+        onModifyPaymentMethod(
+            paymentMethod,
+            providePaymentMethodName(paymentMethod.type?.code),
+            canRemove.value,
+            {
+                removePaymentMethodInEditScreen(paymentMethod)
+            },
+            { cardBrand ->
+                modifyCardPaymentMethod(paymentMethod, cardBrand)
+            }
         )
     }
 
     fun updatePaymentMethod(displayableSavedPaymentMethod: DisplayableSavedPaymentMethod) {
-        if (displayableSavedPaymentMethod.savedPaymentMethod != SavedPaymentMethod.Unexpected) {
-            navigationHandler.transitionTo(
-                PaymentSheetScreen.UpdatePaymentMethod(
-                    DefaultUpdatePaymentMethodInteractor(
-                        isLiveMode = isLiveModeProvider(),
-                        canRemove = canRemove.value,
-                        displayableSavedPaymentMethod,
-                        cardBrandFilter = cardBrandFilter,
-                        removeExecutor = ::removePaymentMethodInEditScreen,
-                        updateExecutor = ::modifyCardPaymentMethod,
-                        onBrandChoiceOptionsShown = {
-                            eventReporter.onShowPaymentOptionBrands(
-                                source = EventReporter.CardBrandChoiceEventSource.Edit,
-                                selectedBrand = it
-                            )
-                        },
-                        onBrandChoiceOptionsDismissed = {
-                            eventReporter.onHidePaymentOptionBrands(
-                                source = EventReporter.CardBrandChoiceEventSource.Edit,
-                                selectedBrand = it
-                            )
-                        },
-                    )
-                )
-            )
-        }
+        val paymentMethod = displayableSavedPaymentMethod.paymentMethod
+        onUpdatePaymentMethod(
+            displayableSavedPaymentMethod,
+            canRemove.value,
+            {
+                removePaymentMethodInEditScreen(paymentMethod)
+            },
+            { cardBrand ->
+                modifyCardPaymentMethod(paymentMethod, cardBrand)
+            }
+        )
     }
 
     private suspend fun removePaymentMethodInEditScreen(paymentMethod: PaymentMethod): Throwable? {
@@ -270,7 +220,7 @@ internal class SavedPaymentMethodMutator(
 
         if (result.isSuccess) {
             coroutineScope.launch(workContext) {
-                navigationHandler.pop()
+                navigationPop()
                 delay(PaymentMethodRemovalDelayMillis)
                 removeDeletedPaymentMethodFromState(paymentMethodId = paymentMethodId)
             }
@@ -281,7 +231,7 @@ internal class SavedPaymentMethodMutator(
 
     private suspend fun modifyCardPaymentMethod(
         paymentMethod: PaymentMethod,
-        brand: CardBrand
+        brand: CardBrand,
     ): Result<PaymentMethod> {
         // TODO(samer-stripe): Send 'unexpected_error' here
         val currentCustomer = customerStateHolder.customer.value ?: return Result.failure(
@@ -320,7 +270,7 @@ internal class SavedPaymentMethodMutator(
                 )
             )
 
-            navigationHandler.pop()
+            navigationPop()
 
             eventReporter.onUpdatePaymentMethodSucceeded(
                 selectedBrand = brand
@@ -334,15 +284,112 @@ internal class SavedPaymentMethodMutator(
     }
 
     companion object {
+        private fun onPaymentMethodRemoved(viewModel: BaseSheetViewModel) {
+            val currentScreen = viewModel.navigationHandler.currentScreen.value
+            val shouldResetToAddPaymentMethodForm =
+                viewModel.customerStateHolder.paymentMethods.value.isEmpty() &&
+                    currentScreen is PaymentSheetScreen.SelectSavedPaymentMethods
+
+            if (shouldResetToAddPaymentMethodForm) {
+                val interactor = DefaultAddPaymentMethodInteractor.create(
+                    viewModel = viewModel,
+                    paymentMethodMetadata = requireNotNull(viewModel.paymentMethodMetadata.value),
+                )
+                val screen = PaymentSheetScreen.AddFirstPaymentMethod(interactor)
+                viewModel.navigationHandler.resetTo(listOf(screen))
+            }
+        }
+
+        private fun onModifyPaymentMethod(
+            viewModel: BaseSheetViewModel,
+            paymentMethod: PaymentMethod,
+            paymentMethodName: ResolvableString,
+            canRemove: Boolean,
+            performRemove: suspend () -> Throwable?,
+            updateExecutor: suspend (brand: CardBrand) -> Result<PaymentMethod>,
+        ) {
+            val isLiveMode = requireNotNull(viewModel.paymentMethodMetadata.value).stripeIntent.isLiveMode
+            viewModel.navigationHandler.transitionTo(
+                PaymentSheetScreen.EditPaymentMethod(
+                    viewModel.editInteractorFactory.create(
+                        initialPaymentMethod = paymentMethod,
+                        eventHandler = { event ->
+                            when (event) {
+                                is EditPaymentMethodViewInteractor.Event.ShowBrands -> {
+                                    viewModel.eventReporter.onShowPaymentOptionBrands(
+                                        source = EventReporter.CardBrandChoiceEventSource.Edit,
+                                        selectedBrand = event.brand
+                                    )
+                                }
+                                is EditPaymentMethodViewInteractor.Event.HideBrands -> {
+                                    viewModel.eventReporter.onHidePaymentOptionBrands(
+                                        source = EventReporter.CardBrandChoiceEventSource.Edit,
+                                        selectedBrand = event.brand
+                                    )
+                                }
+                            }
+                        },
+                        displayName = paymentMethodName,
+                        removeExecutor = { method ->
+                            performRemove()
+                        },
+                        updateExecutor = { method, brand ->
+                            updateExecutor(brand)
+                        },
+                        canRemove = canRemove,
+                        isLiveMode = isLiveMode,
+                        cardBrandFilter = PaymentSheetCardBrandFilter(viewModel.config.cardBrandAcceptance),
+                    ),
+                )
+            )
+        }
+
+        private fun onUpdatePaymentMethod(
+            viewModel: BaseSheetViewModel,
+            displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
+            canRemove: Boolean,
+            performRemove: suspend () -> Throwable?,
+            updateExecutor: suspend (brand: CardBrand) -> Result<PaymentMethod>,
+        ) {
+            if (displayableSavedPaymentMethod.savedPaymentMethod != SavedPaymentMethod.Unexpected) {
+                val isLiveMode = requireNotNull(viewModel.paymentMethodMetadata.value).stripeIntent.isLiveMode
+                viewModel.navigationHandler.transitionTo(
+                    PaymentSheetScreen.UpdatePaymentMethod(
+                        DefaultUpdatePaymentMethodInteractor(
+                            isLiveMode = isLiveMode,
+                            canRemove = canRemove,
+                            displayableSavedPaymentMethod,
+                            cardBrandFilter = PaymentSheetCardBrandFilter(viewModel.config.cardBrandAcceptance),
+                            removeExecutor = { method ->
+                                performRemove()
+                            },
+                            updateExecutor = { method, brand ->
+                                updateExecutor(brand)
+                            },
+                            onBrandChoiceOptionsShown = {
+                                viewModel.eventReporter.onShowPaymentOptionBrands(
+                                    source = EventReporter.CardBrandChoiceEventSource.Edit,
+                                    selectedBrand = it
+                                )
+                            },
+                            onBrandChoiceOptionsDismissed = {
+                                viewModel.eventReporter.onHidePaymentOptionBrands(
+                                    source = EventReporter.CardBrandChoiceEventSource.Edit,
+                                    selectedBrand = it
+                                )
+                            },
+                        )
+                    )
+                )
+            }
+        }
+
         fun create(viewModel: BaseSheetViewModel): SavedPaymentMethodMutator {
             return SavedPaymentMethodMutator(
-                editInteractorFactory = viewModel.editInteractorFactory,
                 eventReporter = viewModel.eventReporter,
                 coroutineScope = viewModel.viewModelScope,
                 workContext = viewModel.workContext,
-                navigationHandler = viewModel.navigationHandler,
                 customerRepository = viewModel.customerRepository,
-                allowsRemovalOfLastSavedPaymentMethod = viewModel.config.allowsRemovalOfLastSavedPaymentMethod,
                 selection = viewModel.selection,
                 providePaymentMethodName = { code ->
                     code?.let {
@@ -350,24 +397,51 @@ internal class SavedPaymentMethodMutator(
                     }?.displayName.orEmpty()
                 },
                 customerStateHolder = viewModel.customerStateHolder,
-                addFirstPaymentMethodScreenFactory = {
-                    val interactor = DefaultAddPaymentMethodInteractor.create(
-                        viewModel = viewModel,
-                        paymentMethodMetadata = requireNotNull(viewModel.paymentMethodMetadata.value),
-                    )
-                    PaymentSheetScreen.AddFirstPaymentMethod(interactor)
-                },
                 clearSelection = { viewModel.updateSelection(null) },
+                onPaymentMethodRemoved = {
+                    onPaymentMethodRemoved(viewModel)
+                },
+                onModifyPaymentMethod = { paymentMethod, paymentMethodName, canRemove, performRemove, updateExecutor ->
+                    onModifyPaymentMethod(
+                        viewModel = viewModel,
+                        paymentMethod = paymentMethod,
+                        paymentMethodName = paymentMethodName,
+                        canRemove = canRemove,
+                        performRemove = performRemove,
+                        updateExecutor = updateExecutor,
+                    )
+                },
+                onUpdatePaymentMethod = { displayableSavedPaymentMethod, canRemove, performRemove, updateExecutor ->
+                    onUpdatePaymentMethod(
+                        viewModel = viewModel,
+                        displayableSavedPaymentMethod = displayableSavedPaymentMethod,
+                        canRemove = canRemove,
+                        performRemove = performRemove,
+                        updateExecutor = updateExecutor,
+                    )
+                },
+                navigationPop = viewModel.navigationHandler::pop,
                 isCbcEligible = {
                     viewModel.paymentMethodMetadata.value?.cbcEligibility is CardBrandChoiceEligibility.Eligible
                 },
                 isGooglePayReady = viewModel.paymentMethodMetadata.mapAsStateFlow { it?.isGooglePayReady == true },
                 isLinkEnabled = viewModel.linkHandler.isLinkEnabled,
                 isNotPaymentFlow = !viewModel.isCompleteFlow,
-                isLiveModeProvider = { requireNotNull(viewModel.paymentMethodMetadata.value).stripeIntent.isLiveMode },
-                currentScreen = viewModel.navigationHandler.currentScreen,
-                cardBrandFilter = PaymentSheetCardBrandFilter(viewModel.config.cardBrandAcceptance)
-            )
+            ).apply {
+                viewModel.viewModelScope.launch {
+                    viewModel.navigationHandler.currentScreen.collect { currentScreen ->
+                        when (currentScreen) {
+                            is PaymentSheetScreen.VerticalMode -> {
+                                // When returning to the vertical mode screen, reset editing to false.
+                                _editing.value = false
+                            }
+                            else -> {
+                                // Do nothing.
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }

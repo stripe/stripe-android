@@ -46,6 +46,10 @@
   <string name="stripe_paymentsheet_bacs_protection_mandate">Your payments are protected by the %s.</string>
   <!-- Text displayed on manage bank account screen when bank account details are not editable. -->
   <string name="stripe_paymentsheet_bank_account_details_cannot_be_changed">Bank account details cannot be changed.</string>
+  <!-- Text shown in the bank payment form when a promo is available and the user is paying, e.g. 'Get $5 back when you pay by bank. See terms'. Note that 'See terms' contains a non-breaking space. -->
+  <string name="stripe_paymentsheet_bank_payment_promo_for_payment"><![CDATA[Get %s back when you pay by bank. <a href=\"https://link.com/promotion-terms\">See&#160;terms</a>]]></string>
+  <!-- Text shown in the bank payment form when a promo is available and the user is setting up an account, e.g. 'Get $5 back when you pay by bank. See terms'. Note that 'See terms' contains a non-breaking space. -->
+  <string name="stripe_paymentsheet_bank_payment_promo_for_setup"><![CDATA[Get %s back when you pay for the first time with your bank. <a href=\"https://link.com/promotion-terms\">See&#160;terms</a>]]></string>
   <!-- Text displayed on manage card screen when card details are not editable. -->
   <string name="stripe_paymentsheet_card_details_cannot_be_changed">Card details cannot be changed.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->

@@ -240,7 +240,9 @@ internal object ElementsSessionFixtures {
     )
 
     fun createPaymentIntentWithCustomerSession(
-        allowRedisplay: String? = "limited"
+        allowRedisplay: String? = "limited",
+        paymentMethodRemoveFeature: String? = "enabled",
+        paymentMethodRemoveLastFeature: String? = "enabled",
     ): JSONObject {
         return JSONObject(
             """
@@ -322,8 +324,9 @@ internal object ElementsSessionFixtures {
                     "mobile_payment_element": {
                       "enabled": true,
                       "features": {
-                        "payment_method_remove": "enabled",
+                        "payment_method_remove": ${paymentMethodRemoveFeature ?: "enabled"},
                         "payment_method_save": "disabled",
+                        "payment_method_remove_last": ${paymentMethodRemoveLastFeature ?: "enabled"},
                         "payment_method_save_allow_redisplay_override": ${allowRedisplay?.let { "\"$it\""} ?: "null"}
                       }
                     },

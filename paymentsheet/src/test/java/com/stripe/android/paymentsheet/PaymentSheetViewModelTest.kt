@@ -57,6 +57,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.ConfirmationMediator
 import com.stripe.android.paymentelement.confirmation.DefaultConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
+import com.stripe.android.paymentelement.confirmation.createTestConfirmationHandlerFactory
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
 import com.stripe.android.paymentelement.confirmation.intent.InvalidDeferredIntentUsageException
@@ -104,7 +105,6 @@ import com.stripe.android.paymentsheet.ui.CardBrandChoice
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewAction
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.utils.FakeEditPaymentMethodInteractorFactory
-import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_PROCESSING
@@ -334,6 +334,7 @@ internal class PaymentSheetViewModelTest {
                 paymentMethods = paymentMethods,
                 permissions = CustomerState.Permissions(
                     canRemovePaymentMethods = true,
+                    canRemoveLastPaymentMethod = true,
                     canRemoveDuplicates = false,
                 ),
             ),
@@ -3095,16 +3096,15 @@ internal class PaymentSheetViewModelTest {
                 workContext = testDispatcher,
                 savedStateHandle = thisSavedStateHandle,
                 linkHandler = linkHandler,
-                confirmationHandlerFactory = DefaultConfirmationHandler.Factory(
+                confirmationHandlerFactory = createTestConfirmationHandlerFactory(
                     intentConfirmationInterceptor = intentConfirmationInterceptor,
                     savedStateHandle = thisSavedStateHandle,
                     bacsMandateConfirmationLauncherFactory = bacsMandateConfirmationLauncherFactory,
                     stripePaymentLauncherAssistedFactory = paymentLauncherFactory,
                     googlePayPaymentMethodLauncherFactory = googlePayLauncherFactory,
-                    paymentConfigurationProvider = { paymentConfiguration },
+                    paymentConfiguration = paymentConfiguration,
                     statusBarColor = args.statusBarColor,
                     errorReporter = FakeErrorReporter(),
-                    logger = FakeUserFacingLogger(),
                 ),
                 cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
                 editInteractorFactory = fakeEditPaymentMethodInteractorFactory,

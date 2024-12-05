@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.state
 
 import android.os.Parcelable
+import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -16,6 +17,7 @@ internal data class CustomerState(
     @Parcelize
     data class Permissions(
         val canRemovePaymentMethods: Boolean,
+        val canRemoveLastPaymentMethod: Boolean,
         val canRemoveDuplicates: Boolean,
     ) : Parcelable
 
@@ -28,15 +30,24 @@ internal data class CustomerState(
          * @return [CustomerState] instance using [ElementsSession.Customer] data
          */
         internal fun createForCustomerSession(
+            configuration: CommonConfiguration,
             customer: ElementsSession.Customer,
             supportedSavedPaymentMethodTypes: List<PaymentMethod.Type>,
         ): CustomerState {
-            val canRemovePaymentMethods = when (
-                val mobilePaymentElementComponent = customer.session.components.mobilePaymentElement
-            ) {
-                is ElementsSession.Customer.Components.MobilePaymentElement.Enabled ->
+            val mobilePaymentElementComponent = customer.session.components.mobilePaymentElement
+
+            val canRemovePaymentMethods = when (mobilePaymentElementComponent) {
+                is ElementsSession.Customer.Components.MobilePaymentElement.Enabled -> {
                     mobilePaymentElementComponent.isPaymentMethodRemoveEnabled
+                }
                 is ElementsSession.Customer.Components.MobilePaymentElement.Disabled -> false
+            }
+
+            val canRemoveLastPaymentMethod = when {
+                !configuration.allowsRemovalOfLastSavedPaymentMethod -> false
+                mobilePaymentElementComponent is ElementsSession.Customer.Components.MobilePaymentElement.Enabled ->
+                    mobilePaymentElementComponent.canRemoveLastPaymentMethod
+                else -> false
             }
 
             return CustomerState(
@@ -47,6 +58,7 @@ internal data class CustomerState(
                 },
                 permissions = Permissions(
                     canRemovePaymentMethods = canRemovePaymentMethods,
+                    canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
                     // Should always remove duplicates when using `customer_session`
                     canRemoveDuplicates = true,
                 )
@@ -63,6 +75,7 @@ internal data class CustomerState(
          * @return [CustomerState] instance with legacy ephemeral key secrets
          */
         internal fun createForLegacyEphemeralKey(
+            configuration: CommonConfiguration,
             customerId: String,
             accessType: PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey,
             paymentMethods: List<PaymentMethod>,
@@ -77,6 +90,13 @@ internal data class CustomerState(
                      * always be set to true.
                      */
                     canRemovePaymentMethods = true,
+                    /*
+                     * Un-scoped legacy ephemeral keys normally have full permissions to remove the last payment
+                     * method, however we do have client-side configuration option to configure this ability. This
+                     * should eventually be removed in favor of the server-side option available with customer
+                     * sessions.
+                     */
+                    canRemoveLastPaymentMethod = configuration.allowsRemovalOfLastSavedPaymentMethod,
                     /*
                      * Removing duplicates is not applicable here since we don't filter out duplicates for for
                      * un-scoped ephemeral keys.

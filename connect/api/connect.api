@@ -1,3 +1,13 @@
+public abstract interface class com/stripe/android/connect/AccountOnboardingListener : com/stripe/android/connect/StripeEmbeddedComponentListener {
+	public abstract fun onExit ()V
+}
+
+public final class com/stripe/android/connect/AccountOnboardingListener$DefaultImpls {
+	public static fun onExit (Lcom/stripe/android/connect/AccountOnboardingListener;)V
+	public static fun onLoadError (Lcom/stripe/android/connect/AccountOnboardingListener;Ljava/lang/Throwable;)V
+	public static fun onLoaderStart (Lcom/stripe/android/connect/AccountOnboardingListener;)V
+}
+
 public final class com/stripe/android/connect/BuildConfig {
 	public static final field BUILD_TYPE Ljava/lang/String;
 	public static final field DEBUG Z
@@ -11,6 +21,24 @@ public final class com/stripe/android/connect/EmbeddedComponentManager$Configura
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/connect/EmbeddedComponentManager$Configuration;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public abstract interface class com/stripe/android/connect/PayoutsListener : com/stripe/android/connect/StripeEmbeddedComponentListener {
+}
+
+public final class com/stripe/android/connect/PayoutsListener$DefaultImpls {
+	public static fun onLoadError (Lcom/stripe/android/connect/PayoutsListener;Ljava/lang/Throwable;)V
+	public static fun onLoaderStart (Lcom/stripe/android/connect/PayoutsListener;)V
+}
+
+public abstract interface class com/stripe/android/connect/StripeEmbeddedComponentListener {
+	public abstract fun onLoadError (Ljava/lang/Throwable;)V
+	public abstract fun onLoaderStart ()V
+}
+
+public final class com/stripe/android/connect/StripeEmbeddedComponentListener$DefaultImpls {
+	public static fun onLoadError (Lcom/stripe/android/connect/StripeEmbeddedComponentListener;Ljava/lang/Throwable;)V
+	public static fun onLoaderStart (Lcom/stripe/android/connect/StripeEmbeddedComponentListener;)V
 }
 
 public final class com/stripe/android/connect/appearance/Appearance : android/os/Parcelable {

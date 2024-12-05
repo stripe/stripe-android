@@ -816,6 +816,21 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     }
 
     @Test
+    fun handleViewAction_OnEditPaymentMethod_transitionsToUpdateScreen_whenFeatureEnabled() {
+        var updatedPaymentMethod: DisplayableSavedPaymentMethod? = null
+        runScenario(
+            onUpdatePaymentMethod = {
+                updatedPaymentMethod = it
+            },
+            useNewUpdatePaymentMethodScreen = true,
+        ) {
+            val paymentMethod = PaymentMethodFixtures.displayableCard()
+            interactor.handleViewAction(ViewAction.EditPaymentMethod(paymentMethod))
+            assertThat(updatedPaymentMethod).isEqualTo(paymentMethod)
+        }
+    }
+
+    @Test
     fun handleViewAction_SelectSavedPaymentMethod_selectsSavedPm() {
         val savedPaymentMethod = PaymentMethodFixtures.displayableCard()
         var selectedSavedPaymentMethod: PaymentMethod? = null

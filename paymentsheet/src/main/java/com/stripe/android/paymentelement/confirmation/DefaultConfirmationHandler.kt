@@ -2,27 +2,14 @@ package com.stripe.android.paymentelement.confirmation
 
 import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
-import androidx.annotation.ColorInt
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.core.utils.UserFacingLogger
-import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.paymentelement.confirmation.bacs.BacsConfirmationDefinition
-import com.stripe.android.paymentelement.confirmation.epms.ExternalPaymentMethodConfirmationDefinition
-import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationDefinition
-import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationDefinition
-import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
 import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
-import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
-import com.stripe.android.paymentsheet.ExternalPaymentMethodInterceptor
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncherFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -33,8 +20,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
-import javax.inject.Named
-import javax.inject.Provider
 import kotlin.time.Duration.Companion.seconds
 
 internal class DefaultConfirmationHandler(
@@ -175,7 +160,7 @@ internal class DefaultConfirmationHandler(
             is ConfirmationMediator.Action.Complete -> {
                 onHandlerResult(
                     ConfirmationHandler.Result.Succeeded(
-                        intent = intent,
+                        intent = action.intent,
                         deferredIntentConfirmationType = action.deferredIntentConfirmationType,
                     )
                 )
@@ -255,51 +240,13 @@ internal class DefaultConfirmationHandler(
     ) : Parcelable
 
     class Factory @Inject constructor(
-        private val intentConfirmationInterceptor: IntentConfirmationInterceptor,
-        private val paymentConfigurationProvider: Provider<PaymentConfiguration>,
-        private val bacsMandateConfirmationLauncherFactory: BacsMandateConfirmationLauncherFactory,
-        private val stripePaymentLauncherAssistedFactory: StripePaymentLauncherAssistedFactory,
-        private val googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory?,
+        private val registry: ConfirmationRegistry,
         private val savedStateHandle: SavedStateHandle,
-        @Named(STATUS_BAR_COLOR) @ColorInt private val statusBarColor: Int?,
         private val errorReporter: ErrorReporter,
-        private val logger: UserFacingLogger?
     ) : ConfirmationHandler.Factory {
         override fun create(scope: CoroutineScope): ConfirmationHandler {
-            val mediators = ConfirmationRegistry(
-                listOfNotNull(
-                    IntentConfirmationDefinition(
-                        intentConfirmationInterceptor = intentConfirmationInterceptor,
-                        paymentLauncherFactory = { hostActivityLauncher ->
-                            stripePaymentLauncherAssistedFactory.create(
-                                publishableKey = { paymentConfigurationProvider.get().publishableKey },
-                                stripeAccountId = { paymentConfigurationProvider.get().stripeAccountId },
-                                hostActivityLauncher = hostActivityLauncher,
-                                statusBarColor = statusBarColor,
-                                includePaymentSheetNextHandlers = true,
-                            )
-                        },
-                    ),
-                    ExternalPaymentMethodConfirmationDefinition(
-                        externalPaymentMethodConfirmHandlerProvider = {
-                            ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler
-                        },
-                        errorReporter = errorReporter,
-                    ),
-                    BacsConfirmationDefinition(
-                        bacsMandateConfirmationLauncherFactory = bacsMandateConfirmationLauncherFactory,
-                    ),
-                    googlePayPaymentMethodLauncherFactory?.let {
-                        GooglePayConfirmationDefinition(
-                            googlePayPaymentMethodLauncherFactory = it,
-                            userFacingLogger = logger,
-                        )
-                    }
-                )
-            ).createConfirmationMediators(savedStateHandle)
-
             return DefaultConfirmationHandler(
-                mediators = mediators,
+                mediators = registry.createConfirmationMediators(savedStateHandle),
                 coroutineScope = scope,
                 errorReporter = errorReporter,
                 savedStateHandle = savedStateHandle,

@@ -17,6 +17,7 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheet.Element
 import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.model.Address
+import com.stripe.android.model.IncentiveEligibilitySession
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -33,6 +34,7 @@ import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConf
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
+import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.BankFormScreenState.ResultIdentifier
@@ -418,7 +420,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     fun reset(error: ResolvableString? = null) {
         hasLaunched = false
         shouldReset = false
-        screenStateWithoutSaveForFutureUse.value = BankFormScreenState(error = error)
+        screenStateWithoutSaveForFutureUse.value = args.toInitialState(error = error)
         saveForFutureUseElement.controller.onValueChange(true)
     }
 
@@ -438,7 +440,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         return if (args.savedPaymentMethod != null) {
             args.savedPaymentMethod.screenState
         } else {
-            BankFormScreenState()
+            args.toInitialState()
         }
     }
 
@@ -493,21 +495,28 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     }
 
     private fun makeElementsSessionContext(): ElementsSessionContext {
-        val initializationMode = if (args.clientSecret == null) {
-            ElementsSessionContext.InitializationMode.DeferredIntent
-        } else if (args.isPaymentFlow) {
-            ElementsSessionContext.InitializationMode.PaymentIntent(args.stripeIntentId!!)
+        val intentId = args.stripeIntentId!!
+        val eligibleForIncentive = args.incentive != null
+
+        val incentiveEligibilitySession = if (eligibleForIncentive) {
+            if (args.clientSecret == null) {
+                IncentiveEligibilitySession.DeferredIntent(intentId)
+            } else if (args.isPaymentFlow) {
+                IncentiveEligibilitySession.PaymentIntent(intentId)
+            } else {
+                IncentiveEligibilitySession.SetupIntent(intentId)
+            }
         } else {
-            ElementsSessionContext.InitializationMode.SetupIntent(args.stripeIntentId!!)
+            null
         }
 
         return ElementsSessionContext(
-            initializationMode = initializationMode,
             amount = args.formArgs.amount?.value,
             currency = args.formArgs.amount?.currencyCode,
             linkMode = args.linkMode,
             billingDetails = makeElementsSessionContextBillingDetails(),
             prefillDetails = makePrefillDetails(),
+            incentiveEligibilitySession = incentiveEligibilitySession,
         )
     }
 
@@ -699,6 +708,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
     data class Args(
         val instantDebits: Boolean,
+        val incentive: PaymentMethodIncentive?,
         val linkMode: LinkMode?,
         val formArgs: FormArguments,
         val showCheckbox: Boolean,
@@ -760,4 +770,14 @@ internal fun customerRequestedSave(
     } else {
         PaymentSelection.CustomerRequestedSave.NoRequest
     }
+}
+
+private fun USBankAccountFormViewModel.Args.toInitialState(
+    error: ResolvableString? = null,
+): BankFormScreenState {
+    return BankFormScreenState(
+        isPaymentFlow = isPaymentFlow,
+        promoText = incentive?.displayText,
+        error = error,
+    )
 }

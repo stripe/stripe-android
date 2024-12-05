@@ -1,13 +1,13 @@
 package com.stripe.android.paymentsheet.injection
 
 import androidx.lifecycle.SavedStateHandle
-import com.stripe.android.paymentelement.confirmation.ConfirmationModule
+import com.stripe.android.paymentelement.confirmation.injection.PaymentElementConfirmationModule
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import dagger.BindsInstance
 import dagger.Subcomponent
 
 @Subcomponent(
-    modules = [PaymentSheetViewModelModule::class, ConfirmationModule::class]
+    modules = [PaymentSheetViewModelModule::class, PaymentElementConfirmationModule::class]
 )
 internal interface PaymentSheetViewModelSubcomponent {
     val viewModel: PaymentSheetViewModel

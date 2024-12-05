@@ -2,11 +2,13 @@ package com.stripe.android.paymentelement
 
 import android.graphics.drawable.Drawable
 import android.os.Parcelable
+import androidx.activity.result.ActivityResultCaller
 import androidx.annotation.RestrictTo
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.AnnotatedString
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
@@ -16,6 +18,7 @@ import com.stripe.android.common.ui.DelegateDrawable
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
+import com.stripe.android.paymentelement.embedded.EmbeddedConfirmationHelper
 import com.stripe.android.paymentelement.embedded.SharedPaymentElementViewModel
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -28,8 +31,8 @@ import kotlinx.parcelize.Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @ExperimentalEmbeddedPaymentElementApi
 class EmbeddedPaymentElement private constructor(
+    private val embeddedConfirmationHelper: EmbeddedConfirmationHelper,
     private val sharedViewModel: SharedPaymentElementViewModel,
-    private val resultCallback: ResultCallback,
 ) {
     /**
      * Contains information about the customer's selected payment option.
@@ -67,7 +70,7 @@ class EmbeddedPaymentElement private constructor(
      * Results will be delivered to the [ResultCallback] supplied during initialization of [EmbeddedPaymentElement].
      */
     fun confirm() {
-        resultCallback.onResult(Result.Failed(NotImplementedError("Not yet implemented.")))
+        embeddedConfirmationHelper.confirm()
     }
 
     /** Configuration for [EmbeddedPaymentElement] **/
@@ -439,16 +442,25 @@ class EmbeddedPaymentElement private constructor(
     internal companion object {
         @ExperimentalEmbeddedPaymentElementApi
         fun create(
+            statusBarColor: Int?,
+            activityResultCaller: ActivityResultCaller,
             viewModelStoreOwner: ViewModelStoreOwner,
+            lifecycleOwner: LifecycleOwner,
             resultCallback: ResultCallback,
         ): EmbeddedPaymentElement {
             val sharedViewModel = ViewModelProvider(
                 owner = viewModelStoreOwner,
-                factory = SharedPaymentElementViewModel.Factory()
+                factory = SharedPaymentElementViewModel.Factory(statusBarColor)
             )[SharedPaymentElementViewModel::class.java]
             return EmbeddedPaymentElement(
+                embeddedConfirmationHelper = EmbeddedConfirmationHelper(
+                    confirmationHandler = sharedViewModel.confirmationHandler,
+                    resultCallback = resultCallback,
+                    activityResultCaller = activityResultCaller,
+                    lifecycleOwner = lifecycleOwner,
+                    confirmationStateSupplier = { sharedViewModel.confirmationState }
+                ),
                 sharedViewModel = sharedViewModel,
-                resultCallback = resultCallback,
             )
         }
     }

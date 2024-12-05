@@ -30,6 +30,8 @@ internal class ConfirmationMediator<
             savedStateHandle[parametersKey] = value
         }
 
+    val key = definition.key
+
     fun canConfirm(confirmationOption: ConfirmationHandler.Option): Boolean {
         return definition.option(confirmationOption) != null
     }

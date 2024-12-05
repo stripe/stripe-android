@@ -15,7 +15,6 @@ import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.stripe.android.connect.example.ConnectSdkExampleTheme
 import com.stripe.android.connect.example.R
 
 @Composable
@@ -48,7 +47,7 @@ fun BetaBadge() {
 
 @Composable
 @Preview(showBackground = true)
-fun BetaBadgePreview() {
+private fun BetaBadgePreview() {
     ConnectSdkExampleTheme {
         BetaBadge()
     }

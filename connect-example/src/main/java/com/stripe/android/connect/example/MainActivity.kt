@@ -2,125 +2,137 @@ package com.stripe.android.connect.example
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ModalBottomSheetLayout
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.ModalBottomSheetValue
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
-import com.stripe.android.connect.example.ui.componentpicker.ComponentPickerScreen
+import com.stripe.android.connect.PrivateBetaConnectSDK
+import com.stripe.android.connect.example.core.Success
+import com.stripe.android.connect.example.core.then
+import com.stripe.android.connect.example.ui.appearance.AppearanceView
+import com.stripe.android.connect.example.ui.common.ConnectExampleScaffold
+import com.stripe.android.connect.example.ui.common.ConnectSdkExampleTheme
+import com.stripe.android.connect.example.ui.componentpicker.ComponentPickerList
+import com.stripe.android.connect.example.ui.embeddedcomponentmanagerloader.EmbeddedComponentLoaderViewModel
+import com.stripe.android.connect.example.ui.embeddedcomponentmanagerloader.EmbeddedComponentManagerLoader
 import com.stripe.android.connect.example.ui.settings.SettingsView
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
+@OptIn(PrivateBetaConnectSDK::class)
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    val viewModel: MainViewModel by viewModels()
+    private val viewModel: EmbeddedComponentLoaderViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContent {
-            val state by viewModel.state.collectAsState()
-
             ConnectSdkExampleTheme {
-                when {
-                    state.isLoading -> LoadingScreen()
-                    state.errorMessage != null -> ErrorScreen(
-                        errorMessage = state.errorMessage,
-                        onReloadRequested = viewModel::reload,
-                    )
-                    else -> ComponentPickerScreen(
-                        onReloadRequested = viewModel::reload,
-                    )
-                }
+                ComponentPickerContent()
             }
         }
     }
 
-    @Composable
-    private fun LoadingScreen() {
-        MainContent(title = stringResource(R.string.connect_sdk_example)) {
-            Box(
-                modifier = Modifier.fillMaxSize().padding(24.dp),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    text = stringResource(R.string.warming_up_the_server),
-                    textAlign = TextAlign.Center,
-                )
-            }
-        }
-    }
-
+    @Suppress("LongMethod")
     @OptIn(ExperimentalMaterialApi::class)
     @Composable
-    private fun ErrorScreen(
-        errorMessage: String? = null,
-        onReloadRequested: () -> Unit,
-    ) {
-        MainContent(
-            title = stringResource(R.string.connect_sdk_example),
-        ) {
-            val settingsSheetState = rememberModalBottomSheetState(
-                initialValue = ModalBottomSheetValue.Hidden,
-                skipHalfExpanded = true,
-            )
-            val coroutineScope = rememberCoroutineScope()
+    private fun ComponentPickerContent() {
+        val state by viewModel.state.collectAsState()
+        val embeddedComponentAsync = state.embeddedComponentManagerAsync
 
-            ModalBottomSheetLayout(
-                modifier = Modifier.fillMaxSize(),
-                sheetState = settingsSheetState,
-                sheetContent = {
-                    SettingsView(
-                        onDismiss = { coroutineScope.launch { settingsSheetState.hide() } },
-                        onReloadRequested = onReloadRequested,
-                    )
-                },
-            ) {
-                Column(
-                    modifier = Modifier.fillMaxSize().padding(24.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center,
-                ) {
-                    Text(stringResource(R.string.failed_to_start_app))
-                    TextButton(onClick = onReloadRequested) {
-                        Text(stringResource(R.string.reload))
-                    }
-                    TextButton(onClick = {
-                        coroutineScope.launch {
-                            if (!settingsSheetState.isVisible) {
-                                settingsSheetState.show()
-                            } else {
-                                settingsSheetState.hide()
+        val sheetState = rememberModalBottomSheetState(
+            initialValue = ModalBottomSheetValue.Hidden,
+            skipHalfExpanded = true,
+        )
+        var sheetType by rememberSaveable { mutableStateOf(SheetType.SETTINGS) }
+        val coroutineScope = rememberCoroutineScope()
+
+        ConnectExampleScaffold(
+            title = stringResource(R.string.connect_sdk_example),
+            actions = (embeddedComponentAsync is Success).then {
+                {
+                    IconButton(
+                        onClick = {
+                            coroutineScope.launch {
+                                if (!sheetState.isVisible) {
+                                    sheetType = SheetType.SETTINGS
+                                    sheetState.show()
+                                } else {
+                                    sheetState.hide()
+                                }
                             }
                         }
-                    }) {
-                        Text(stringResource(R.string.app_settings))
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = stringResource(R.string.settings),
+                        )
                     }
-
-                    if (errorMessage != null) {
-                        Text(errorMessage)
+                    IconButton(
+                        onClick = {
+                            coroutineScope.launch {
+                                if (!sheetState.isVisible) {
+                                    sheetType = SheetType.APPEARANCE
+                                    sheetState.show()
+                                } else {
+                                    sheetState.hide()
+                                }
+                            }
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.MoreVert,
+                            contentDescription = stringResource(R.string.customize_appearance),
+                        )
                     }
                 }
+            } ?: { },
+            modalSheetState = sheetState,
+            modalContent = (embeddedComponentAsync is Success).then {
+                {
+                    BackHandler(enabled = sheetState.isVisible) {
+                        coroutineScope.launch { sheetState.hide() }
+                    }
+                    when (sheetType) {
+                        SheetType.SETTINGS -> SettingsView(
+                            onDismiss = { coroutineScope.launch { sheetState.hide() } },
+                            onReloadRequested = viewModel::reload,
+                        )
+                        SheetType.APPEARANCE -> AppearanceView(
+                            onDismiss = { coroutineScope.launch { sheetState.hide() } },
+                        )
+                    }
+                }
+            },
+        ) {
+            EmbeddedComponentManagerLoader(
+                embeddedComponentAsync = embeddedComponentAsync,
+                reload = viewModel::reload,
+            ) {
+                ComponentPickerList()
             }
         }
+    }
+
+    private enum class SheetType {
+        SETTINGS,
+        APPEARANCE,
     }
 }

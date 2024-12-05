@@ -32,7 +32,7 @@ internal class BillingDetailsCollectionScreenshotTest {
     fun testEmpty() {
         paparazzi.snapshot {
             BankAccountForm(
-                state = BankFormScreenState(),
+                state = BankFormScreenState(isPaymentFlow = true),
                 instantDebits = false,
                 isPaymentFlow = true,
                 formArgs = createFormArguments(),
@@ -56,7 +56,7 @@ internal class BillingDetailsCollectionScreenshotTest {
     fun testEmptySetupFlow() {
         paparazzi.snapshot {
             BankAccountForm(
-                state = BankFormScreenState(),
+                state = BankFormScreenState(isPaymentFlow = false),
                 instantDebits = false,
                 isPaymentFlow = false,
                 formArgs = createFormArguments(),
@@ -77,10 +77,64 @@ internal class BillingDetailsCollectionScreenshotTest {
     }
 
     @Test
+    fun testPromoDisclaimer() {
+        paparazzi.snapshot {
+            BankAccountForm(
+                state = BankFormScreenState(
+                    isPaymentFlow = true,
+                    promoText = "$5",
+                ),
+                instantDebits = false,
+                isPaymentFlow = true,
+                formArgs = createFormArguments(),
+                nameController = createNameController("John Doe"),
+                emailController = createEmailController("email@email.com"),
+                phoneController = createPhoneNumberController(),
+                addressController = createAddressController(),
+                sameAsShippingElement = null,
+                saveForFutureUseElement = SaveForFutureUseElement(
+                    initialValue = false,
+                    merchantName = "Test Merchant",
+                ),
+                showCheckbox = false,
+                lastTextFieldIdentifier = null,
+                onRemoveAccount = {},
+            )
+        }
+    }
+
+    @Test
+    fun testPromoDisclaimerSetupFlow() {
+        paparazzi.snapshot {
+            BankAccountForm(
+                state = BankFormScreenState(
+                    isPaymentFlow = false,
+                    promoText = "$5",
+                ),
+                instantDebits = false,
+                isPaymentFlow = false,
+                formArgs = createFormArguments(),
+                nameController = createNameController("John Doe"),
+                emailController = createEmailController("email@email.com"),
+                phoneController = createPhoneNumberController(),
+                addressController = createAddressController(),
+                sameAsShippingElement = null,
+                saveForFutureUseElement = SaveForFutureUseElement(
+                    initialValue = false,
+                    merchantName = "Test Merchant",
+                ),
+                showCheckbox = false,
+                lastTextFieldIdentifier = null,
+                onRemoveAccount = {},
+            )
+        }
+    }
+
+    @Test
     fun testFilled() {
         paparazzi.snapshot {
             BankAccountForm(
-                state = BankFormScreenState(),
+                state = BankFormScreenState(isPaymentFlow = true),
                 instantDebits = false,
                 isPaymentFlow = true,
                 formArgs = createFormArguments(),
@@ -104,7 +158,7 @@ internal class BillingDetailsCollectionScreenshotTest {
     fun testEmptyWithBillingAddress() {
         paparazzi.snapshot {
             BankAccountForm(
-                state = BankFormScreenState(),
+                state = BankFormScreenState(isPaymentFlow = true),
                 instantDebits = false,
                 isPaymentFlow = true,
                 formArgs = createFormArguments(
@@ -132,7 +186,7 @@ internal class BillingDetailsCollectionScreenshotTest {
     fun testFilledWithBillingAddress() {
         paparazzi.snapshot {
             BankAccountForm(
-                state = BankFormScreenState(),
+                state = BankFormScreenState(isPaymentFlow = true),
                 formArgs = createFormArguments(
                     billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
                         address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full

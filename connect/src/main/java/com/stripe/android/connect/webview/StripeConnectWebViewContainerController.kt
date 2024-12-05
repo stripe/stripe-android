@@ -9,10 +9,15 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.stripe.android.connect.BuildConfig
+import com.stripe.android.connect.ComponentListenerDelegate
 import com.stripe.android.connect.EmbeddedComponentManager
 import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.StripeEmbeddedComponent
+import com.stripe.android.connect.StripeEmbeddedComponentListener
 import com.stripe.android.connect.webview.serialization.ConnectInstanceJs
+import com.stripe.android.connect.webview.serialization.SetOnLoadError
+import com.stripe.android.connect.webview.serialization.SetOnLoaderStart
+import com.stripe.android.connect.webview.serialization.SetterFunctionCalledMessage
 import com.stripe.android.core.Logger
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -22,10 +27,12 @@ import kotlinx.coroutines.launch
 
 @OptIn(PrivateBetaConnectSDK::class)
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-internal class StripeConnectWebViewContainerController(
+internal class StripeConnectWebViewContainerController<Listener : StripeEmbeddedComponentListener>(
     private val view: StripeConnectWebViewContainerInternal,
     private val embeddedComponentManager: EmbeddedComponentManager,
     private val embeddedComponent: StripeEmbeddedComponent,
+    private val listener: Listener?,
+    private val listenerDelegate: ComponentListenerDelegate<Listener>,
     private val stripeIntentLauncher: StripeIntentLauncher = StripeIntentLauncherImpl(),
     private val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG),
 ) : DefaultLifecycleObserver {
@@ -50,6 +57,20 @@ internal class StripeConnectWebViewContainerController(
      */
     fun onPageStarted() {
         updateState { copy(isNativeLoadingIndicatorVisible = !receivedSetOnLoaderStart) }
+    }
+
+    fun onReceivedError(requestUrl: String, httpStatusCode: Int? = null, errorMessage: String? = null) {
+        val errorString = buildString {
+            if (httpStatusCode != null) {
+                append("Received $httpStatusCode loading $requestUrl")
+            } else {
+                append("Received error loading $requestUrl")
+            }
+            if (errorMessage != null) {
+                append(": $errorMessage")
+            }
+        }
+        listener?.onLoadError(RuntimeException(errorString)) // TODO - wrap error better
     }
 
     fun shouldOverrideUrlLoading(context: Context, request: WebResourceRequest): Boolean {
@@ -113,14 +134,28 @@ internal class StripeConnectWebViewContainerController(
     }
 
     /**
-     * Callback to invoke upon receiving 'setOnLoaderStart' message.
+     * Callback to invoke upon receiving 'onSetterFunctionCalled' message.
      */
-    fun onReceivedSetOnLoaderStart() {
-        updateState {
-            copy(
-                receivedSetOnLoaderStart = true,
-                isNativeLoadingIndicatorVisible = false,
-            )
+    fun onReceivedSetterFunctionCalled(message: SetterFunctionCalledMessage) {
+        when (val value = message.value) {
+            is SetOnLoaderStart -> {
+                updateState {
+                    copy(
+                        receivedSetOnLoaderStart = true,
+                        isNativeLoadingIndicatorVisible = false,
+                    )
+                }
+                listener?.onLoaderStart()
+            }
+            is SetOnLoadError -> {
+                // TODO - wrap error better
+                listener?.onLoadError(RuntimeException("${value.error.type}: ${value.error.message}"))
+            }
+            else -> {
+                with(listenerDelegate) {
+                    listener?.delegate(message)
+                }
+            }
         }
     }
 

@@ -52,7 +52,7 @@ internal interface ConfirmationHandler {
      * A factory for creating a [ConfirmationHandler] instance using a provided [CoroutineScope]. This scope is
      * used to launch confirmation tasks.
      */
-    interface Factory {
+    fun interface Factory {
         fun create(scope: CoroutineScope): ConfirmationHandler
     }
 

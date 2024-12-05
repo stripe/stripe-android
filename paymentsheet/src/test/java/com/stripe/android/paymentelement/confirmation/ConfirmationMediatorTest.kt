@@ -18,6 +18,16 @@ import java.util.concurrent.TimeUnit
 
 class ConfirmationMediatorTest {
     @Test
+    fun `On get key, should return the definition's key`() = test {
+        val mediator = ConfirmationMediator(
+            savedStateHandle = SavedStateHandle(),
+            definition = definition,
+        )
+
+        assertThat(mediator.key).isEqualTo(definition.key)
+    }
+
+    @Test
     fun `On can confirm, should return true if definition is the same type`() = test {
         val mediator = ConfirmationMediator(
             savedStateHandle = SavedStateHandle(),
