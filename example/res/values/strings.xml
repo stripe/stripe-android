@@ -39,6 +39,7 @@
     <string name="sunbit_example">Sunbit</string>
     <string name="billie_example">Billie</string>
     <string name="satispay_example">Satispay</string>
+    <string name="crypto_example">Crypto</string>
     <string name="swish_example">Swish</string>
     <string name="mobilepay_example">MobilePay</string>
     <string name="card_brands">Card Brands</string>

@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+### Payments
+* [ADDED][9753](https://github.com/stripe/stripe-android/pull/9753) Added support for Crypto to API bindings and payment sheet.
+
 ## 21.2.1 - 2024-12-02
 ### PaymentSheet
 - [FIXED][9695](https://github.com/stripe/stripe-android/pull/9695) US Bank Account now supports the `instant_or_skip` verification method.
