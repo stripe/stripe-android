@@ -55,6 +55,7 @@ internal class EmbeddedConfirmationHelper(
             initializationMode = loadedState.initializationMode,
             configuration = loadedState.configuration.asCommonConfiguration(),
             appearance = loadedState.configuration.appearance,
+            linkConfiguration = null,
         ) ?: return null
 
         return ConfirmationHandler.Args(
