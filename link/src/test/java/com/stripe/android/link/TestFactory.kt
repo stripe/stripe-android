@@ -72,7 +72,7 @@ internal object TestFactory {
     val CONSUMER_PAYMENT_DETAILS_CARD = ConsumerPaymentDetails.Card(
         id = "pm_123",
         last4 = "4242",
-        expiryYear = 2023,
+        expiryYear = 2999,
         expiryMonth = 12,
         brand = CardBrand.Visa,
         cvcCheck = CvcCheck.Pass,
@@ -91,7 +91,7 @@ internal object TestFactory {
         bankIconCode = null
     )
 
-    private val CONSUMER_PAYMENT_DETAILS_PASSTHROUGH = ConsumerPaymentDetails.Passthrough(
+    val CONSUMER_PAYMENT_DETAILS_PASSTHROUGH = ConsumerPaymentDetails.Passthrough(
         id = "pm_125",
         last4 = "4242",
     )

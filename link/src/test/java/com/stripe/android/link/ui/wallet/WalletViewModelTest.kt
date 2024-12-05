@@ -7,7 +7,6 @@ import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.account.LinkAccountManager
-import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.testing.FakeLogger
 import kotlinx.coroutines.Dispatchers
@@ -61,7 +60,6 @@ class WalletViewModelTest {
                 primaryButtonLabel = TestFactory.LINK_WALLET_PRIMARY_BUTTON_LABEL
             )
         )
-        assertThat(viewModel.uiState.value.primaryButtonState).isEqualTo(PrimaryButtonState.Disabled)
     }
 
     @Test

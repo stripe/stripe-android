@@ -20,21 +20,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.PrimaryButtonHeight
 import com.stripe.android.link.theme.linkColors
 import com.stripe.android.link.theme.linkShapes
-import com.stripe.android.model.PaymentIntent
-import com.stripe.android.model.SetupIntent
-import com.stripe.android.model.StripeIntent
-import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.R
 
 @Composable
@@ -55,7 +51,8 @@ internal fun PrimaryButton(
                 onClick = onButtonClick,
                 modifier = Modifier
                     .height(PrimaryButtonHeight)
-                    .fillMaxWidth(),
+                    .fillMaxWidth()
+                    .testTag(PrimaryButtonTag),
                 enabled = state == PrimaryButtonState.Enabled,
                 elevation = ButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp, 0.dp),
                 shape = MaterialTheme.linkShapes.medium,
@@ -144,6 +141,7 @@ private val PrimaryButtonIconWidth = 13.dp
 private val PrimaryButtonIconHeight = 16.dp
 internal const val ProgressIndicatorTestTag = "CircularProgressIndicator"
 internal const val CompletedIconTestTag = "CompletedIcon"
+internal const val PrimaryButtonTag = "PrimaryButtonTag"
 
 @Composable
 @Preview
