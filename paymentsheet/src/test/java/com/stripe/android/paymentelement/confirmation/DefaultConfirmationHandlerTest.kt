@@ -78,6 +78,9 @@ class DefaultConfirmationHandlerTest {
 
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
 
+        assertThat(someDefinitionScenario.unregisterCalls.awaitItem()).isNotNull()
+        assertThat(someOtherDefinitionScenario.unregisterCalls.awaitItem()).isNotNull()
+
         confirmationHandler.state.test {
             assertIdleState()
 
