@@ -90,7 +90,7 @@ internal data class CommonConfiguration(
     ) {
         if (customerAccessType.ephemeralKeySecret != customer?.ephemeralKeySecret) {
             throw IllegalArgumentException(
-                "Conflicting ephemeralKeySecrets"
+                "Conflicting ephemeralKeySecrets between CustomerConfiguration and CustomerConfiguration.customerAccessType"
             )
         } else if (customerAccessType.ephemeralKeySecret.isBlank() || customer.ephemeralKeySecret.isBlank()) {
             throw IllegalArgumentException(
