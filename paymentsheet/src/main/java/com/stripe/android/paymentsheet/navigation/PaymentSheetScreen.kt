@@ -544,7 +544,7 @@ internal sealed interface PaymentSheetScreen {
         )
         override val showsContinueButton: Boolean = false
         override val topContentPadding: Dp = 0.dp
-        override val bottomContentPadding: Dp = formBottomContentPadding
+        override val bottomContentPadding: Dp = 0.dp
         override val walletsDividerSpacing: Dp = verticalModeWalletsDividerSpacing
         override val showsMandates: Boolean = false
 
