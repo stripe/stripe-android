@@ -67,6 +67,10 @@ internal class ConfirmationMediator<
     }
 
     fun unregister() {
+        launcher?.let {
+            definition.unregister(it)
+        }
+
         launcher = null
     }
 
