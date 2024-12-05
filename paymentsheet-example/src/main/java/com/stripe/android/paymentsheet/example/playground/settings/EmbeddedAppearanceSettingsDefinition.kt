@@ -37,7 +37,7 @@ internal object EmbeddedAppearanceSettingsDefinition :
     }
 }
 
-internal enum class Row {
+internal enum class EmbeddedRow {
     FlatWithRadio,
     FlatWithCheckmark,
     FloatingButton
@@ -47,7 +47,7 @@ internal enum class Row {
 @Serializable
 @Parcelize
 internal data class EmbeddedAppearance(
-    val rowStyle: Row = Row.FlatWithRadio,
+    val embeddedRowStyle: EmbeddedRow = EmbeddedRow.FlatWithRadio,
     val separatorThicknessDp: Float = 1.0f,
     val separatorInsetsDp: Float = 0.0f,
     val additionalInsetsDp: Float = 4.0f,
@@ -61,8 +61,8 @@ internal data class EmbeddedAppearance(
     val checkmarkColor: Int = Color(0xFF007AFF).toArgb()
 ) : Parcelable {
     fun getRow(): PaymentSheet.Appearance.Embedded.RowStyle {
-        return when (rowStyle) {
-            Row.FlatWithRadio -> PaymentSheet.Appearance.Embedded.RowStyle.FlatWithRadio(
+        return when (embeddedRowStyle) {
+            EmbeddedRow.FlatWithRadio -> PaymentSheet.Appearance.Embedded.RowStyle.FlatWithRadio(
                 separatorThicknessDp = separatorThicknessDp,
                 separatorColor = separatorColor,
                 separatorInsetsDp = separatorInsetsDp,
@@ -72,7 +72,7 @@ internal data class EmbeddedAppearance(
                 unselectedColor = unselectedColor,
                 additionalInsetsDp = additionalInsetsDp
             )
-            Row.FlatWithCheckmark -> PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark(
+            EmbeddedRow.FlatWithCheckmark -> PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark(
                 separatorThicknessDp = separatorThicknessDp,
                 separatorColor = separatorColor,
                 separatorInsetsDp = separatorInsetsDp,
@@ -82,7 +82,7 @@ internal data class EmbeddedAppearance(
                 checkmarkInsetDp = checkmarkInsetsDp,
                 additionalInsetsDp = additionalInsetsDp
             )
-            Row.FloatingButton -> PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton(
+            EmbeddedRow.FloatingButton -> PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton(
                 spacingDp = floatingButtonSpacingDp,
                 additionalInsetsDp = additionalInsetsDp
             )

@@ -71,7 +71,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.playground.activity.AppearanceBottomSheetDialogFragment.Companion.EMBEDDED_KEY
 import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedAppearance
-import com.stripe.android.paymentsheet.example.playground.settings.Row
+import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedRow
 
 private val BASE_FONT_SIZE = 20.sp
 private val BASE_PADDING = 8.dp
@@ -634,10 +634,10 @@ private fun EmbeddedPicker(
     embeddedAppearance: EmbeddedAppearance,
     updateEmbedded: (EmbeddedAppearance) -> Unit
 ) {
-    RowStyleDropDown(embeddedAppearance.rowStyle) { style ->
+    RowStyleDropDown(embeddedAppearance.embeddedRowStyle) { style ->
         updateEmbedded(
             embeddedAppearance.copy(
-                rowStyle = style
+                embeddedRowStyle = style
             )
         )
     }
@@ -916,7 +916,7 @@ private fun FontScaleSlider(sliderPosition: Float, onValueChange: (Float) -> Uni
 }
 
 @Composable
-private fun RowStyleDropDown(style: Row, rowStyleSelectedCallback: (Row) -> Unit) {
+private fun RowStyleDropDown(style: EmbeddedRow, rowStyleSelectedCallback: (EmbeddedRow) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
 
     Row(
@@ -938,29 +938,15 @@ private fun RowStyleDropDown(style: Row, rowStyleSelectedCallback: (Row) -> Unit
             onDismissRequest = { expanded = false },
             modifier = Modifier.fillMaxWidth()
         ) {
-            DropdownMenuItem(
-                onClick = {
-                    expanded = false
-                    rowStyleSelectedCallback(Row.FlatWithRadio)
+            EmbeddedRow.entries.forEach {
+                DropdownMenuItem(
+                    onClick = {
+                        expanded = false
+                        rowStyleSelectedCallback(it)
+                    }
+                ) {
+                    Text(it.name)
                 }
-            ) {
-                Text(Row.FlatWithRadio.name)
-            }
-            DropdownMenuItem(
-                onClick = {
-                    expanded = false
-                    rowStyleSelectedCallback(Row.FlatWithCheckmark)
-                }
-            ) {
-                Text(Row.FlatWithCheckmark.name)
-            }
-            DropdownMenuItem(
-                onClick = {
-                    expanded = false
-                    rowStyleSelectedCallback(Row.FloatingButton)
-                }
-            ) {
-                Text(Row.FloatingButton.name)
             }
         }
     }
