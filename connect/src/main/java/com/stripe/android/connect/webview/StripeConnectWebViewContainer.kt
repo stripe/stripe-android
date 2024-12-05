@@ -125,9 +125,7 @@ internal class StripeConnectWebViewContainerImpl<Listener : StripeEmbeddedCompon
             }
 
             setDownloadListener(StripeDownloadListener(webView.context))
-
             addJavascriptInterface(StripeJsInterface(), ANDROID_JS_INTERFACE)
-            addJavascriptInterface(StripeJsInterfaceInternal(), ANDROID_JS_INTERNAL_INTERFACE)
         }
     }
 
@@ -196,7 +194,6 @@ internal class StripeConnectWebViewContainerImpl<Listener : StripeEmbeddedCompon
     @VisibleForTesting
     internal inner class StripeConnectWebViewClient : WebViewClient() {
         override fun onPageStarted(view: WebView, url: String?, favicon: Bitmap?) {
-            initJavascriptBridge(view)
             controller?.onPageStarted()
         }
 
@@ -217,41 +214,6 @@ internal class StripeConnectWebViewContainerImpl<Listener : StripeEmbeddedCompon
                 null
             }
             controller?.onReceivedError(request.url.toString(), errorMessage = errorMessage)
-        }
-
-        private fun initJavascriptBridge(webView: WebView) {
-            logger.debug("Initializing Javascript Bridge")
-            webView.evaluateJavascript(
-                """
-                    $ANDROID_JS_INTERFACE.accountSessionClaimed = (message) => {
-                        $ANDROID_JS_INTERNAL_INTERFACE.accountSessionClaimed(JSON.stringify(message));
-                    };
-                    $ANDROID_JS_INTERFACE.pageDidLoad = (message) => {
-                        $ANDROID_JS_INTERNAL_INTERFACE.pageDidLoad(JSON.stringify(message));
-                    };
-                    $ANDROID_JS_INTERFACE.fetchInitParams = () => {
-                        let params = $ANDROID_JS_INTERNAL_INTERFACE.fetchInitParams();
-                        return Promise.resolve(JSON.parse(params));
-                    };
-                    $ANDROID_JS_INTERFACE.fetchClientSecret = () => {
-                        return new Promise((resolve, reject) => {
-                            try {
-                                let clientSecret = $ANDROID_JS_INTERNAL_INTERFACE.fetchClientSecret()
-                                resolve(clientSecret);
-                            } catch (e) {
-                                reject(e);
-                            }
-                        });
-                    };
-                    $ANDROID_JS_INTERFACE.onSetterFunctionCalled = (message) => {
-                        $ANDROID_JS_INTERNAL_INTERFACE.onSetterFunctionCalled(JSON.stringify(message));
-                    };
-                    $ANDROID_JS_INTERFACE.openSecureWebView = (message) => {
-                        $ANDROID_JS_INTERNAL_INTERFACE.openSecureWebView(JSON.stringify(message));
-                    };
-                """.trimIndent(),
-                { resultString -> logger.debug("Javascript Bridge initialized. Result: \"$resultString\"") }
-            )
         }
 
         override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
@@ -278,9 +240,7 @@ internal class StripeConnectWebViewContainerImpl<Listener : StripeEmbeddedCompon
         fun fetchInitComponentProps() {
             logger.debug("InitComponentProps fetched")
         }
-    }
 
-    private inner class StripeJsInterfaceInternal {
         @JavascriptInterface
         fun log(message: String) {
             logger.debug("Log from JS: $message")
@@ -340,6 +300,5 @@ internal class StripeConnectWebViewContainerImpl<Listener : StripeEmbeddedCompon
 
     internal companion object {
         private const val ANDROID_JS_INTERFACE = "Android"
-        private const val ANDROID_JS_INTERNAL_INTERFACE = "AndroidInternal"
     }
 }
