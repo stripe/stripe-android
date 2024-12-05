@@ -127,18 +127,6 @@ private fun PrimaryButtonIcon(
     }
 }
 
-internal fun completePaymentButtonLabel(
-    stripeIntent: StripeIntent,
-) = when (stripeIntent) {
-    is PaymentIntent -> {
-        Amount(
-            requireNotNull(stripeIntent.amount),
-            requireNotNull(stripeIntent.currency)
-        ).buildPayButtonLabel()
-    }
-    is SetupIntent -> R.string.stripe_setup_button_label.resolvableString
-}
-
 /**
  * Represent the possible states for the primary button on a Link screen.
  *

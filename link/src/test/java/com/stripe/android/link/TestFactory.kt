@@ -74,7 +74,7 @@ internal object TestFactory {
         last4 = "4242",
         expiryYear = 2023,
         expiryMonth = 12,
-        brand = CardBrand.AmericanExpress,
+        brand = CardBrand.Visa,
         cvcCheck = CvcCheck.Pass,
         isDefault = true,
         billingAddress = ConsumerPaymentDetails.BillingAddress(

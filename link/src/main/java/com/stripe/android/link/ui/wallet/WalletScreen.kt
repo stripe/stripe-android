@@ -97,6 +97,7 @@ internal fun WalletBody(
 
     Column(
         modifier = Modifier
+            .testTag(WALLET_SCREEN_BOX)
             .fillMaxSize()
             .padding(16.dp)
     ) {
@@ -172,50 +173,52 @@ internal fun CollapsedPaymentDetails(
     enabled: Boolean,
     onClick: () -> Unit
 ) {
-    Row(
-        modifier = Modifier
-            .testTag(COLLAPSED_WALLET_ROW)
-            .fillMaxWidth()
-            .height(64.dp)
-            .border(
-                width = 1.dp,
-                color = MaterialTheme.linkColors.componentBorder,
-                shape = MaterialTheme.linkShapes.large
-            )
-            .clip(MaterialTheme.linkShapes.large)
-            .background(
-                color = MaterialTheme.linkColors.componentBackground,
-                shape = MaterialTheme.linkShapes.large
-            )
-            .clickable(
-                enabled = enabled,
-                onClick = onClick
-            ),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = stringResource(R.string.stripe_wallet_collapsed_payment),
+    Column {
+        Row(
             modifier = Modifier
-                .testTag(COLLAPSED_WALLET_HEADER_TAG)
-                .padding(
-                    start = HorizontalPadding,
-                    end = 8.dp
+                .testTag(COLLAPSED_WALLET_ROW)
+                .fillMaxWidth()
+                .height(64.dp)
+                .border(
+                    width = 1.dp,
+                    color = MaterialTheme.linkColors.componentBorder,
+                    shape = MaterialTheme.linkShapes.large
+                )
+                .clip(MaterialTheme.linkShapes.large)
+                .background(
+                    color = MaterialTheme.linkColors.componentBackground,
+                    shape = MaterialTheme.linkShapes.large
+                )
+                .clickable(
+                    enabled = enabled,
+                    onClick = onClick
                 ),
-            color = MaterialTheme.linkColors.disabledText
-        )
-        PaymentDetails(
-            modifier = Modifier
-                .testTag(COLLAPSED_WALLET_PAYMENT_DETAILS_TAG),
-            paymentDetails = selectedPaymentMethod
-        )
-        Icon(
-            painter = painterResource(R.drawable.stripe_link_chevron),
-            contentDescription = stringResource(R.string.stripe_wallet_expand_accessibility),
-            modifier = Modifier
-                .padding(end = 22.dp)
-                .testTag(COLLAPSED_WALLET_CHEVRON_ICON_TAG),
-            tint = MaterialTheme.linkColors.disabledText
-        )
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = stringResource(R.string.stripe_wallet_collapsed_payment),
+                modifier = Modifier
+                    .testTag(COLLAPSED_WALLET_HEADER_TAG)
+                    .padding(
+                        start = HorizontalPadding,
+                        end = 8.dp
+                    ),
+                color = MaterialTheme.linkColors.disabledText
+            )
+            PaymentDetails(
+                modifier = Modifier
+                    .testTag(COLLAPSED_WALLET_PAYMENT_DETAILS_TAG),
+                paymentDetails = selectedPaymentMethod
+            )
+            Icon(
+                painter = painterResource(R.drawable.stripe_link_chevron),
+                contentDescription = stringResource(R.string.stripe_wallet_expand_accessibility),
+                modifier = Modifier
+                    .padding(end = 22.dp)
+                    .testTag(COLLAPSED_WALLET_CHEVRON_ICON_TAG),
+                tint = MaterialTheme.linkColors.disabledText
+            )
+        }
     }
 }
 
@@ -374,3 +377,4 @@ internal const val WALLET_ADD_PAYMENT_METHOD_ROW = "wallet_add_payment_method_ro
 internal const val WALLET_SCREEN_PAYMENT_METHODS_LIST = "wallet_screen_payment_methods_list"
 internal const val WALLET_SCREEN_PAY_BUTTON = "wallet_screen_pay_button"
 internal const val WALLET_SCREEN_PAY_ANOTHER_WAY_BUTTON = "wallet_screen_pay_another_way_button"
+internal const val WALLET_SCREEN_BOX = "wallet_screen_box"

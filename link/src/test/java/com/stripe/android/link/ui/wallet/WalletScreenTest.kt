@@ -8,6 +8,7 @@ import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToKey
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.FakeLinkAccountManager
@@ -67,6 +68,8 @@ internal class WalletScreenTest {
         onWalletAddPaymentMethodRow().assertIsDisplayed().assertHasClickAction()
         onExpandedWalletHeader().assertIsDisplayed()
         onPaymentMethodList().assertCountEquals(3)
+        onWalletPayButton().assertIsDisplayed()
+        onWalletPayAnotherWayButton().assertIsDisplayed()
     }
 
     @Test
@@ -122,6 +125,9 @@ internal class WalletScreenTest {
 
     private fun onWalletPayAnotherWayButton() =
         composeTestRule.onNodeWithTag(WALLET_SCREEN_PAY_ANOTHER_WAY_BUTTON, useUnmergedTree = true)
+
+    private fun onWalletScreen() =
+        composeTestRule.onNodeWithTag(WALLET_SCREEN_BOX, useUnmergedTree = true)
 
     private fun onLoader() = composeTestRule.onNodeWithTag(WALLET_LOADER_TAG)
 }
