@@ -27,6 +27,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
@@ -396,6 +397,7 @@ private fun AccountDetailsForm(
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.weight(1f)
                 ) {
                     Image(
                         painter = painterResource(bankIcon),
@@ -405,8 +407,11 @@ private fun AccountDetailsForm(
 
                     Text(
                         text = "$bankName •••• $last4",
-                        modifier = Modifier.alpha(if (isProcessing) 0.5f else 1f),
                         color = MaterialTheme.stripeColors.onComponent,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier
+                            .alpha(if (isProcessing) 0.5f else 1f)
+                            .weight(1f, fill = false),
                     )
 
                     promoBadgeState?.let { badgeState ->

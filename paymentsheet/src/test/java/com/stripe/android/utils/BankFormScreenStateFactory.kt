@@ -13,6 +13,7 @@ internal object BankFormScreenStateFactory {
         mandateText: ResolvableString = "Some legal text".resolvableString,
         promoText: String? = null,
         eligibleForPromo: Boolean = true,
+        bankName: String = "Stripe Bank",
     ): BankFormScreenState {
         return create(
             resultIdentifier = BankFormScreenState.ResultIdentifier.Session(sessionId),
@@ -20,6 +21,7 @@ internal object BankFormScreenStateFactory {
             mandateText = mandateText,
             promoText = promoText,
             eligibleForPromo = eligibleForPromo,
+            bankName = bankName,
         )
     }
 
@@ -43,6 +45,7 @@ internal object BankFormScreenStateFactory {
         mandateText: ResolvableString,
         promoText: String?,
         eligibleForPromo: Boolean,
+        bankName: String = "Stripe Bank",
     ): BankFormScreenState {
         return BankFormScreenState(
             isPaymentFlow = true,
@@ -50,7 +53,7 @@ internal object BankFormScreenStateFactory {
                 resultIdentifier = resultIdentifier,
                 financialConnectionsSessionId = "session_1234",
                 intentId = "intent_1234",
-                bankName = "Stripe Bank",
+                bankName = bankName,
                 last4 = "6789",
                 mandateText = mandateText,
                 isVerifyingWithMicrodeposits = isVerifyingWithMicrodeposits,
