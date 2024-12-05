@@ -5,13 +5,19 @@
     <ID>EmptyFunctionBlock:DrawablePainter.kt$EmptyPainter${}</ID>
     <ID>FunctionNaming:Receipt.kt$@Preview @Composable fun Receipt_Editable()</ID>
     <ID>FunctionNaming:Receipt.kt$@Preview @Composable fun Receipt_NotEditable()</ID>
+    <ID>LongMethod:AppearanceBottomSheetDialogFragment.kt$@Composable private fun AppearancePicker( currentAppearance: PaymentSheet.Appearance, updateAppearance: (PaymentSheet.Appearance) -> Unit, embeddedAppearance: EmbeddedAppearance, updateEmbedded: (EmbeddedAppearance) -> Unit, resetAppearance: () -> Unit, )</ID>
     <ID>LongMethod:AppearanceBottomSheetDialogFragment.kt$@Composable private fun Colors( currentAppearance: PaymentSheet.Appearance, updateAppearance: (PaymentSheet.Appearance) -> Unit, )</ID>
+    <ID>LongMethod:AppearanceBottomSheetDialogFragment.kt$@Composable private fun EmbeddedPicker( embeddedAppearance: EmbeddedAppearance, updateEmbedded: (EmbeddedAppearance) -> Unit )</ID>
     <ID>LongMethod:AppearanceBottomSheetDialogFragment.kt$@Composable private fun PrimaryButton( currentAppearance: PaymentSheet.Appearance, updateAppearance: (PaymentSheet.Appearance) -> Unit, )</ID>
     <ID>LongMethod:Receipt.kt$@Composable fun Receipt( isLoading: Boolean, cartState: CartState, isEditable: Boolean = false, onQuantityChanged: (CartProduct.Id, Int) -> Unit = { _, _ -> }, bottomContent: @Composable () -> Unit, )</ID>
     <ID>MagicNumber:AppearanceBottomSheetDialogFragment.kt$16</ID>
+    <ID>MagicNumber:AppearanceBottomSheetDialogFragment.kt$33</ID>
     <ID>MagicNumber:CartProduct.kt$100</ID>
     <ID>MagicNumber:DrawablePainter.kt$DrawablePainter$23</ID>
     <ID>MagicNumber:DrawablePainter.kt$DrawablePainter$255</ID>
+    <ID>MagicNumber:EmbeddedAppearanceSettingsDefinition.kt$EmbeddedAppearance$0x33787880</ID>
+    <ID>MagicNumber:EmbeddedAppearanceSettingsDefinition.kt$EmbeddedAppearance$0xFF007AFF</ID>
+    <ID>MagicNumber:EmbeddedAppearanceSettingsDefinition.kt$EmbeddedAppearance$0xFF787880</ID>
     <ID>MagicNumber:Payment.kt$0.5f</ID>
     <ID>PackageNaming:CompleteFlowActivity.kt$package com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.complete_flow</ID>
     <ID>PackageNaming:CompleteFlowViewModel.kt$package com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.complete_flow</ID>
