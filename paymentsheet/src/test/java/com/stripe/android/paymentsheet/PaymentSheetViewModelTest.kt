@@ -324,13 +324,13 @@ internal class PaymentSheetViewModelTest {
                 config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.copy(
                     customer = PaymentSheet.CustomerConfiguration(
                         id = "cus_1",
-                        ephemeralKeySecret = "ek_123",
+                        ephemeralKeySecret = "ek_123"
                     )
                 )
             ),
             customer = CustomerState(
                 id = "cus_2",
-                ephemeralKeySecret = "ephemeral_key_2",
+                ephemeralKeySecret = "ek_123",
                 paymentMethods = paymentMethods,
                 permissions = CustomerState.Permissions(
                     canRemovePaymentMethods = true,
@@ -375,7 +375,7 @@ internal class PaymentSheetViewModelTest {
         assertThat(customerInfoCaptor.firstValue).isEqualTo(
             CustomerRepository.CustomerInfo(
                 id = "cus_2",
-                ephemeralKeySecret = "ephemeral_key_2",
+                ephemeralKeySecret = "ek_123",
             )
         )
     }

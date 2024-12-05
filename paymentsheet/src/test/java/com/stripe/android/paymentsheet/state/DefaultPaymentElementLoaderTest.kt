@@ -1647,7 +1647,7 @@ internal class DefaultPaymentElementLoaderTest {
             assertThat(state.customer).isEqualTo(
                 CustomerState(
                     id = "cus_1",
-                    ephemeralKeySecret = "ephemeral_key_secret",
+                    ephemeralKeySecret = "ek_123",
                     paymentMethods = cards,
                     permissions = CustomerState.Permissions(
                         canRemovePaymentMethods = true,
