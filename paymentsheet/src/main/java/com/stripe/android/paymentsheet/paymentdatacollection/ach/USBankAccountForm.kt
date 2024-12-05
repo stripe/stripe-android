@@ -27,6 +27,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
@@ -34,7 +35,9 @@ import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConf
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentSelection.New
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.BankFormScreenState.PromoBadgeState
 import com.stripe.android.paymentsheet.ui.Mandate
+import com.stripe.android.paymentsheet.ui.PromoBadge
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseElementUI
 import com.stripe.android.ui.core.elements.SimpleDialogElementUI
@@ -150,6 +153,7 @@ internal fun BankAccountForm(
                 isProcessing = state.isProcessing,
                 bankName = linkedBankAccount.bankName,
                 last4 = linkedBankAccount.last4,
+                promoBadgeState = state.promoBadgeState,
                 saveForFutureUseElement = saveForFutureUseElement,
                 onRemoveAccount = onRemoveAccount,
             )
@@ -362,6 +366,7 @@ private fun AccountDetailsForm(
     isProcessing: Boolean,
     bankName: String?,
     last4: String?,
+    promoBadgeState: PromoBadgeState?,
     saveForFutureUseElement: SaveForFutureUseElement,
     onRemoveAccount: () -> Unit,
 ) {
@@ -392,6 +397,7 @@ private fun AccountDetailsForm(
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.weight(1f)
                 ) {
                     Image(
                         painter = painterResource(bankIcon),
@@ -401,9 +407,19 @@ private fun AccountDetailsForm(
 
                     Text(
                         text = "$bankName •••• $last4",
-                        modifier = Modifier.alpha(if (isProcessing) 0.5f else 1f),
                         color = MaterialTheme.stripeColors.onComponent,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier
+                            .alpha(if (isProcessing) 0.5f else 1f)
+                            .weight(1f, fill = false),
                     )
+
+                    promoBadgeState?.let { badgeState ->
+                        PromoBadge(
+                            text = badgeState.promoText,
+                            eligible = badgeState.eligible,
+                        )
+                    }
                 }
 
                 IconButton(
