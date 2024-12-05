@@ -15,6 +15,7 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentIntentFactory
+import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.utils.DummyActivityResultCaller
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -235,7 +236,7 @@ class DefaultConfirmationHandlerTest {
     @Test
     fun `On complete action, should complete with success result`() = test(
         someDefinitionAction = ConfirmationDefinition.Action.Complete(
-            intent = PAYMENT_INTENT,
+            intent = UPDATED_PAYMENT_INTENT,
             confirmationOption = SomeConfirmationDefinition.Option,
             deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
         ),
@@ -256,7 +257,7 @@ class DefaultConfirmationHandlerTest {
             val completeState = awaitCompleteState()
             val successResult = completeState.result.assertSucceeded()
 
-            assertThat(successResult.intent).isEqualTo(PAYMENT_INTENT)
+            assertThat(successResult.intent).isEqualTo(UPDATED_PAYMENT_INTENT)
             assertThat(successResult.deferredIntentConfirmationType)
                 .isEqualTo(DeferredIntentConfirmationType.Client)
 
@@ -275,13 +276,13 @@ class DefaultConfirmationHandlerTest {
     @Test
     fun `On success result from launched action, should complete with success result`() = launcherResultTest(
         result = ConfirmationDefinition.Result.Succeeded(
-            intent = PAYMENT_INTENT,
+            intent = UPDATED_PAYMENT_INTENT,
             deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
         ),
     ) { completeState ->
         val successResult = completeState.result.assertSucceeded()
 
-        assertThat(successResult.intent).isEqualTo(PAYMENT_INTENT)
+        assertThat(successResult.intent).isEqualTo(UPDATED_PAYMENT_INTENT)
         assertThat(successResult.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Server)
     }
 
@@ -979,5 +980,9 @@ class DefaultConfirmationHandlerTest {
         const val AWAITING_CONFIRMATION_RESULT_KEY = "AwaitingConfirmationResult"
 
         val PAYMENT_INTENT = PaymentIntentFactory.create()
+
+        val UPDATED_PAYMENT_INTENT = PAYMENT_INTENT.copy(
+            paymentMethod = PaymentMethodFactory.card(),
+        )
     }
 }
