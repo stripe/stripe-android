@@ -14,6 +14,7 @@ import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.supportedPaymentMethodTypes
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.ui.core.input.CardDetailsInputSpec
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -35,6 +36,9 @@ internal class WalletViewModel @Inject constructor(
             paymentDetailsList = emptyList(),
             selectedItem = null,
             isProcessing = false,
+            cardDetailsInputSpec = CardDetailsInputSpec(
+                onValueChanged = ::updateDetails
+            )
         )
     )
 
@@ -78,6 +82,12 @@ internal class WalletViewModel @Inject constructor(
 
         _uiState.update {
             it.copy(selectedItem = item)
+        }
+    }
+
+    fun updateDetails(spec: CardDetailsInputSpec) {
+        _uiState.update {
+            it.copy(cardDetailsInputSpec = spec)
         }
     }
 

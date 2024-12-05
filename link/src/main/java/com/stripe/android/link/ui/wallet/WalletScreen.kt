@@ -51,14 +51,19 @@ internal fun WalletScreen(
     val state by viewModel.uiState.collectAsState()
     var isExpanded by rememberSaveable { mutableStateOf(false) }
 
-    WalletBody(
-        state = state,
-        isExpanded = isExpanded,
-        onItemSelected = viewModel::onItemSelected,
-        onExpandedChanged = { expanded ->
-            isExpanded = expanded
-        }
+    state.cardDetailsInputSpec.Content(
+        modifier = Modifier
+            .fillMaxWidth()
     )
+
+//    WalletBody(
+//        state = state,
+//        isExpanded = isExpanded,
+//        onItemSelected = viewModel::onItemSelected,
+//        onExpandedChanged = { expanded ->
+//            isExpanded = expanded
+//        }
+//    )
 }
 
 @Composable
