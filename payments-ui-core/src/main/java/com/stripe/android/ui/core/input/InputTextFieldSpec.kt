@@ -10,9 +10,9 @@ import com.stripe.android.uicore.elements.compat.CompatTextField
 
 @Immutable
 data class InputTextFieldSpec(
-    val text: String,
-    val label: TextSpec? = null,
-    val trailing: InputSpec? = null,
+    val text: String = "",
+    val label: Spec? = null,
+    val trailing: Spec? = null,
     val readOnly: Boolean = false,
     val onValueChanged: (String) -> Unit
 ) : InputSpec {
