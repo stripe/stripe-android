@@ -21,7 +21,7 @@ internal fun BacsMandateButton(type: BacsMandateButtonType, label: String, onCli
             onButtonClick = onClick
         )
         BacsMandateButtonType.Secondary -> {
-            // use the same text style as the primary button but a different color
+            // Use the same text style as the primary button but a different color.
             val textStyle = StripeTheme.primaryButtonStyle.getComposeTextStyle().copy(
                 color = MaterialTheme.colors.primary
             )
