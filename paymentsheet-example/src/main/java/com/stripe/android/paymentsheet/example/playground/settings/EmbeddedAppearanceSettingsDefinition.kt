@@ -1,171 +1,76 @@
 package com.stripe.android.paymentsheet.example.playground.settings
 
+import android.os.Parcelable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
+import com.stripe.android.paymentsheet.PaymentSheet
+import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
-internal object RowStyleSettingsDefinition :
-    PlaygroundSettingDefinition<RowStyleEnum>,
-    PlaygroundSettingDefinition.Saveable<RowStyleEnum> by EnumSaveable(
-        key = "RowStyle",
-        values = RowStyleEnum.entries.toTypedArray(),
-        defaultValue = RowStyleEnum.FlatWithRadio
-    )
-
-internal object SeparatorThicknessSettingsDefinition :
-    PlaygroundSettingDefinition<Float>, PlaygroundSettingDefinition.Saveable<Float> {
+internal object EmbeddedAppearanceSettingsDefinition :
+    PlaygroundSettingDefinition<EmbeddedAppearance>,
+    PlaygroundSettingDefinition.Saveable<EmbeddedAppearance> {
     override val key: String
-        get() = "separatorThickness"
+        get() = "embeddedAppearance"
 
-    override val defaultValue: Float
-        get() = 1.0f
+    override val defaultValue: EmbeddedAppearance
+        get() = EmbeddedAppearance()
 
-    override fun convertToValue(value: String): Float = value.toFloat()
+    override fun convertToValue(value: String): EmbeddedAppearance {
+        return Json.decodeFromString<EmbeddedAppearance>(value)
+    }
 
-    override fun convertToString(value: Float): String = value.toString()
+    override fun convertToString(value: EmbeddedAppearance): String {
+        return Json.encodeToString(value)
+    }
 }
 
-internal object SeparatorInsetsSettingsDefinition :
-    PlaygroundSettingDefinition<Float>,
-    PlaygroundSettingDefinition.Saveable<Float> {
-    override val key: String
-        get() = "separatorInsets"
-
-    override val defaultValue: Float
-        get() = 0.0f
-
-    override fun convertToValue(value: String): Float = value.toFloat()
-
-    override fun convertToString(value: Float): String = value.toString()
-}
-
-internal object AdditionalInsetsSettingsDefinition :
-    PlaygroundSettingDefinition<Float>,
-    PlaygroundSettingDefinition.Saveable<Float> {
-    override val key: String
-        get() = "additionalInsets"
-
-    override val defaultValue: Float
-        get() = 4.0f
-
-    override fun convertToValue(value: String): Float = value.toFloat()
-
-    override fun convertToString(value: Float): String = value.toString()
-}
-
-internal object CheckmarkInsetsSettingsDefinition :
-    PlaygroundSettingDefinition<Float>,
-    PlaygroundSettingDefinition.Saveable<Float> {
-    override val key: String
-        get() = "checkmarkInsets"
-
-    override val defaultValue: Float
-        get() = 12.0f
-
-    override fun convertToValue(value: String): Float = value.toFloat()
-
-    override fun convertToString(value: Float): String = value.toString()
-}
-
-internal object FloatingButtonSpacingSettingsDefinition :
-    PlaygroundSettingDefinition<Float>,
-    PlaygroundSettingDefinition.Saveable<Float> {
-    override val key: String
-        get() = "floatingButtonSpacing"
-
-    override val defaultValue: Float
-        get() = 12.0f
-
-    override fun convertToValue(value: String): Float = value.toFloat()
-
-    override fun convertToString(value: Float): String = value.toString()
-}
-
-internal object TopSeparatorEnabledSettingsDefinition :
-    PlaygroundSettingDefinition<Boolean>,
-    PlaygroundSettingDefinition.Saveable<Boolean> {
-
-    override val key: String
-        get() = "topSeparatorEnabled"
-
-    override val defaultValue: Boolean = true
-
-    override fun convertToValue(value: String): Boolean = value == "true"
-
-    override fun convertToString(value: Boolean): String = value.toString()
-}
-
-internal object BottomSeparatorEnabledSettingsDefinition :
-    PlaygroundSettingDefinition<Boolean>,
-    PlaygroundSettingDefinition.Saveable<Boolean> {
-
-    override val key: String
-        get() = "bottomSeparatorEnabled"
-
-    override val defaultValue: Boolean = true
-
-    override fun convertToValue(value: String): Boolean = value == "true"
-
-    override fun convertToString(value: Boolean): String = value.toString()
-}
-
-internal object SeparatorColorSettingsDefinition :
-    PlaygroundSettingDefinition<Int>,
-    PlaygroundSettingDefinition.Saveable<Int> {
-    override val key: String
-        get() = "separatorColor"
-
-    override val defaultValue: Int
-        get() = Color(0xFF787880).toArgb()
-
-    override fun convertToString(value: Int): String = value.toString()
-
-    override fun convertToValue(value: String): Int = value.toInt()
-}
-
-internal object SelectedColorSettingsDefinition :
-    PlaygroundSettingDefinition<Int>,
-    PlaygroundSettingDefinition.Saveable<Int> {
-    override val key: String
-        get() = "selectedColor"
-
-    override val defaultValue: Int
-        get() = Color(0xFF007AFF).toArgb()
-
-    override fun convertToString(value: Int): String = value.toString()
-
-    override fun convertToValue(value: String): Int = value.toInt()
-}
-
-internal object UnselectedColorSettingsDefinition :
-    PlaygroundSettingDefinition<Int>,
-    PlaygroundSettingDefinition.Saveable<Int> {
-    override val key: String
-        get() = "unselectedColor"
-
-    override val defaultValue: Int
-        get() = Color(0x33787880).toArgb()
-
-    override fun convertToString(value: Int): String = value.toString()
-
-    override fun convertToValue(value: String): Int = value.toInt()
-}
-
-internal object CheckmarkColorSettingsDefinition :
-    PlaygroundSettingDefinition<Int>,
-    PlaygroundSettingDefinition.Saveable<Int> {
-    override val key: String
-        get() = "checkmarkColor"
-
-    override val defaultValue: Int
-        get() = Color(0xFF007AFF).toArgb()
-
-    override fun convertToString(value: Int): String = value.toString()
-
-    override fun convertToValue(value: String): Int = value.toInt()
-}
-
-enum class RowStyleEnum(override val value: String) : ValueEnum {
-    FlatWithRadio("FlatWithRadio"),
-    FlatWithCheckmark("FlatWithCheckmark"),
-    FloatingButton("FloatingButton")
+@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
+@Serializable
+@Parcelize
+data class EmbeddedAppearance(
+    val rowStyle: String = "flatWithRadio",
+    val separatorThicknessDp: Float = 1.0f,
+    val separatorInsetsDp: Float = 0.0f,
+    val additionalInsetsDp: Float = 4.0f,
+    val checkmarkInsetsDp: Float = 12.0f,
+    val floatingButtonSpacingDp: Float = 12.0f,
+    val topSeparatorEnabled: Boolean = true,
+    val bottomSeparatorEnabled: Boolean = true,
+    val separatorColor: Int = Color(0xFF787880).toArgb(),
+    val selectedColor: Int = Color(0xFF007AFF).toArgb(),
+    val unselectedColor: Int = Color(0x33787880).toArgb(),
+    val checkmarkColor: Int = Color(0xFF007AFF).toArgb()
+) : Parcelable {
+    fun getRow(): PaymentSheet.Appearance.Embedded.RowStyle {
+        return when (rowStyle) {
+            "flatWithRadio" -> PaymentSheet.Appearance.Embedded.RowStyle.FlatWithRadio(
+                separatorThicknessDp = separatorThicknessDp,
+                separatorColor = separatorColor,
+                separatorInsetsDp = separatorInsetsDp,
+                topSeparatorEnabled = topSeparatorEnabled,
+                bottomSeparatorEnabled = bottomSeparatorEnabled,
+                selectedColor = selectedColor,
+                unselectedColor = unselectedColor,
+                additionalInsetsDp = additionalInsetsDp
+            )
+            "flatWithCheckmark" -> PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark(
+                separatorThicknessDp = separatorThicknessDp,
+                separatorColor = separatorColor,
+                separatorInsetsDp = separatorInsetsDp,
+                topSeparatorEnabled = topSeparatorEnabled,
+                bottomSeparatorEnabled = bottomSeparatorEnabled,
+                checkmarkColor = checkmarkColor,
+                checkmarkInsetDp = checkmarkInsetsDp,
+                additionalInsetsDp = additionalInsetsDp
+            )
+            else -> PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton(
+                spacingDp = floatingButtonSpacingDp,
+                additionalInsetsDp = additionalInsetsDp
+            )
+        }
+    }
 }

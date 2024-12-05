@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.example.playground.activity
 
+import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -62,30 +63,14 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.setFragmentResult
 import com.godaddy.android.colorpicker.ClassicColorPicker
 import com.godaddy.android.colorpicker.HsvColor
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.example.R
-import com.stripe.android.paymentsheet.example.playground.PaymentSheetPlaygroundViewModel
-import com.stripe.android.paymentsheet.example.playground.PlaygroundState
-import com.stripe.android.paymentsheet.example.playground.settings.AdditionalInsetsSettingsDefinition
-import com.stripe.android.paymentsheet.example.playground.settings.BottomSeparatorEnabledSettingsDefinition
-import com.stripe.android.paymentsheet.example.playground.settings.CheckmarkColorSettingsDefinition
-import com.stripe.android.paymentsheet.example.playground.settings.CheckmarkInsetsSettingsDefinition
-import com.stripe.android.paymentsheet.example.playground.settings.FloatingButtonSpacingSettingsDefinition
-import com.stripe.android.paymentsheet.example.playground.settings.RowStyleEnum
-import com.stripe.android.paymentsheet.example.playground.settings.RowStyleSettingsDefinition
-import com.stripe.android.paymentsheet.example.playground.settings.SelectedColorSettingsDefinition
-import com.stripe.android.paymentsheet.example.playground.settings.SeparatorColorSettingsDefinition
-import com.stripe.android.paymentsheet.example.playground.settings.SeparatorInsetsSettingsDefinition
-import com.stripe.android.paymentsheet.example.playground.settings.SeparatorThicknessSettingsDefinition
-import com.stripe.android.paymentsheet.example.playground.settings.TopSeparatorEnabledSettingsDefinition
-import com.stripe.android.paymentsheet.example.playground.settings.UnselectedColorSettingsDefinition
-import com.stripe.android.uicore.utils.collectAsState
+import com.stripe.android.paymentsheet.example.playground.activity.AppearanceBottomSheetDialogFragment.Companion.EMBEDDED_KEY
+import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedAppearance
 
 private val BASE_FONT_SIZE = 20.sp
 private val BASE_PADDING = 8.dp
@@ -93,27 +78,48 @@ private val SECTION_LABEL_COLOR = Color(159, 159, 169)
 
 internal class AppearanceBottomSheetDialogFragment : BottomSheetDialogFragment() {
 
+    private var embeddedAppearance by mutableStateOf(EmbeddedAppearance())
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val viewModel = ViewModelProvider(requireActivity())[PaymentSheetPlaygroundViewModel::class.java]
+        embeddedAppearance = arguments.getEmbeddedAppearance()
+
         return ComposeView(requireContext()).apply {
             setContent {
                 AppearancePicker(
                     currentAppearance = AppearanceStore.state,
                     updateAppearance = { AppearanceStore.state = it },
-                    viewModel = viewModel
+                    embeddedAppearance = embeddedAppearance,
+                    updateEmbedded = { embeddedAppearance = it },
+                    resetAppearance = ::resetAppearance
                 )
             }
         }
+    }
+
+    private fun resetAppearance() {
+        AppearanceStore::reset
+        embeddedAppearance = EmbeddedAppearance()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        val result = Bundle().apply {
+            putParcelable(EMBEDDED_KEY, embeddedAppearance)
+        }
+        setFragmentResult(REQUEST_KEY, result)
     }
 
     companion object {
         fun newInstance(): AppearanceBottomSheetDialogFragment {
             return AppearanceBottomSheetDialogFragment()
         }
+
+        const val REQUEST_KEY = "REQUEST_KEY"
+        const val EMBEDDED_KEY = "EMBEDDED_APPEARANCE"
     }
 }
 
@@ -121,7 +127,9 @@ internal class AppearanceBottomSheetDialogFragment : BottomSheetDialogFragment()
 private fun AppearancePicker(
     currentAppearance: PaymentSheet.Appearance,
     updateAppearance: (PaymentSheet.Appearance) -> Unit,
-    viewModel: PaymentSheetPlaygroundViewModel
+    embeddedAppearance: EmbeddedAppearance,
+    updateEmbedded: (EmbeddedAppearance) -> Unit,
+    resetAppearance: () -> Unit,
 ) {
     val scrollState = rememberScrollState()
     val nestedScrollConnection = rememberNestedScrollInteropConnection()
@@ -132,8 +140,7 @@ private fun AppearancePicker(
                 title = { Text("Appearance") },
                 actions = {
                     TextButton(onClick = {
-                        AppearanceStore::reset
-                        resetEmbeddedAppearance(viewModel, currentAppearance, updateAppearance)
+                        resetAppearance()
                     }) {
                         Text(text = stringResource(R.string.reset))
                     }
@@ -178,10 +185,9 @@ private fun AppearancePicker(
                 )
             }
             CustomizationCard("Embedded") {
-                Embedded(
-                    viewModel = viewModel,
-                    currentAppearance = currentAppearance,
-                    updateAppearance = updateAppearance
+                EmbeddedPicker(
+                    embeddedAppearance = embeddedAppearance,
+                    updateEmbedded = updateEmbedded
                 )
             }
 
@@ -622,135 +628,115 @@ private fun PrimaryButton(
     }
 }
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @Composable
-private fun Embedded(
-    viewModel: PaymentSheetPlaygroundViewModel,
-    currentAppearance: PaymentSheet.Appearance,
-    updateAppearance: (PaymentSheet.Appearance) -> Unit
+private fun EmbeddedPicker(
+    embeddedAppearance: EmbeddedAppearance,
+    updateEmbedded: (EmbeddedAppearance) -> Unit
 ) {
-    val settings = viewModel.playgroundSettingsFlow.collectAsState().value
-    val snapshot = settings!!.snapshot()
-    val embeddedState = PlaygroundState.EmbeddedAppearanceState(snapshot)
-
-    RowStyleDropDown(embeddedState.rowStyle) { style ->
-        viewModel.updateEmbeddedAppearance(
-            RowStyleSettingsDefinition,
-            style
-        )
-        updateAppearance(
-            currentAppearance.copy(
-                embeddedAppearance = Embedded(embeddedState.getRow())
+    RowStyleDropDown(embeddedAppearance.rowStyle) { style ->
+        updateEmbedded(
+            embeddedAppearance.copy(
+                rowStyle = style
             )
         )
     }
     ColorItem(
         label = "separatorColor",
-        currentColor = Color(embeddedState.separatorColor),
+        currentColor = Color(embeddedAppearance.separatorColor),
         onColorPicked = {
-            viewModel.updateEmbeddedAppearance(SeparatorColorSettingsDefinition, it.toArgb())
-            currentAppearance.copy(
-                embeddedAppearance = Embedded(embeddedState.getRow())
+            embeddedAppearance.copy(
+                separatorColor = it.toArgb()
             )
         },
-        updateAppearance = updateAppearance,
+        updateAppearance = updateEmbedded,
     )
     Divider()
 
     ColorItem(
         label = "selectedColor",
-        currentColor = Color(embeddedState.selectedColor),
+        currentColor = Color(embeddedAppearance.selectedColor),
         onColorPicked = {
-            viewModel.updateEmbeddedAppearance(SelectedColorSettingsDefinition, it.toArgb())
-            currentAppearance.copy(
-                embeddedAppearance = Embedded(embeddedState.getRow())
+            embeddedAppearance.copy(
+                selectedColor = it.toArgb()
             )
         },
-        updateAppearance = updateAppearance,
+        updateAppearance = updateEmbedded,
     )
     Divider()
 
     ColorItem(
         label = "unselectedColor",
-        currentColor = Color(embeddedState.unselectedColor),
+        currentColor = Color(embeddedAppearance.unselectedColor),
         onColorPicked = {
-            viewModel.updateEmbeddedAppearance(UnselectedColorSettingsDefinition, it.toArgb())
-            currentAppearance.copy(
-                embeddedAppearance = Embedded(embeddedState.getRow())
+            embeddedAppearance.copy(
+                unselectedColor = it.toArgb()
             )
         },
-        updateAppearance = updateAppearance,
+        updateAppearance = updateEmbedded,
     )
     Divider()
 
     ColorItem(
         label = "checkmarkColor",
-        currentColor = Color(embeddedState.checkmarkColor),
+        currentColor = Color(embeddedAppearance.checkmarkColor),
         onColorPicked = {
-            viewModel.updateEmbeddedAppearance(CheckmarkColorSettingsDefinition, it.toArgb())
-            currentAppearance.copy(
-                embeddedAppearance = Embedded(embeddedState.getRow())
+            embeddedAppearance.copy(
+                checkmarkColor = it.toArgb()
             )
         },
-        updateAppearance = updateAppearance,
+        updateAppearance = updateEmbedded,
     )
     Divider()
 
-    IncrementDecrementItem("separatorInsetsDp", embeddedState.separatorInsetsDp) {
-        viewModel.updateEmbeddedAppearance(SeparatorInsetsSettingsDefinition, it)
-        updateAppearance(
-            currentAppearance.copy(
-                embeddedAppearance = Embedded(embeddedState.getRow())
+    IncrementDecrementItem("separatorInsetsDp", embeddedAppearance.separatorInsetsDp) {
+        updateEmbedded(
+            embeddedAppearance.copy(
+                separatorInsetsDp = it
             )
         )
     }
     Divider()
 
-    IncrementDecrementItem("separatorThicknessDp", embeddedState.separatorThicknessDp) {
-        viewModel.updateEmbeddedAppearance(SeparatorThicknessSettingsDefinition, it)
-        updateAppearance(
-            currentAppearance.copy(
-                embeddedAppearance = Embedded(embeddedState.getRow())
+    IncrementDecrementItem("separatorThicknessDp", embeddedAppearance.separatorThicknessDp) {
+        updateEmbedded(
+            embeddedAppearance.copy(
+                separatorThicknessDp = it
             )
         )
     }
     Divider()
 
-    IncrementDecrementItem("additionalInsets", embeddedState.additionalInsetsDp) {
-        viewModel.updateEmbeddedAppearance(AdditionalInsetsSettingsDefinition, it)
-        updateAppearance(
-            currentAppearance.copy(
-                embeddedAppearance = Embedded(embeddedState.getRow())
+    IncrementDecrementItem("additionalInsetsDp", embeddedAppearance.additionalInsetsDp) {
+        updateEmbedded(
+            embeddedAppearance.copy(
+                additionalInsetsDp = it
             )
         )
     }
     Divider()
 
-    IncrementDecrementItem("checkmarkInsetsDp", embeddedState.checkmarkInsetsDp) {
-        viewModel.updateEmbeddedAppearance(CheckmarkInsetsSettingsDefinition, it)
-        updateAppearance(
-            currentAppearance.copy(
-                embeddedAppearance = Embedded(embeddedState.getRow())
+    IncrementDecrementItem("checkmarkInsetsDp", embeddedAppearance.checkmarkInsetsDp) {
+        updateEmbedded(
+            embeddedAppearance.copy(
+                checkmarkInsetsDp = it
             )
         )
     }
     Divider()
 
-    AppearanceToggle("topSeparatorEnabled", embeddedState.topSeparatorEnabled) {
-        viewModel.updateEmbeddedAppearance(TopSeparatorEnabledSettingsDefinition, it)
-        updateAppearance(
-            currentAppearance.copy(
-                embeddedAppearance = Embedded(embeddedState.getRow())
+    AppearanceToggle("topSeparatorEnabled", embeddedAppearance.topSeparatorEnabled) {
+        updateEmbedded(
+            embeddedAppearance.copy(
+                topSeparatorEnabled = it
             )
         )
     }
     Divider()
 
-    AppearanceToggle("bottomSeparatorEnabled", embeddedState.bottomSeparatorEnabled) {
-        viewModel.updateEmbeddedAppearance(BottomSeparatorEnabledSettingsDefinition, it)
-        updateAppearance(
-            currentAppearance.copy(
-                embeddedAppearance = Embedded(embeddedState.getRow())
+    AppearanceToggle("bottomSeparatorEnabled", embeddedAppearance.bottomSeparatorEnabled) {
+        updateEmbedded(
+            embeddedAppearance.copy(
+                bottomSeparatorEnabled = it
             )
         )
     }
@@ -758,11 +744,11 @@ private fun Embedded(
 }
 
 @Composable
-private fun ColorItem(
+private fun <T> ColorItem(
     label: String,
     currentColor: Color,
-    onColorPicked: (Color) -> PaymentSheet.Appearance,
-    updateAppearance: (PaymentSheet.Appearance) -> Unit,
+    onColorPicked: (Color) -> T,
+    updateAppearance: (T) -> Unit,
 ) {
     val openDialog = remember { mutableStateOf(false) }
     ColorPicker(openDialog, currentColor) {
@@ -929,7 +915,7 @@ private fun FontScaleSlider(sliderPosition: Float, onValueChange: (Float) -> Uni
 }
 
 @Composable
-private fun RowStyleDropDown(style: RowStyleEnum, rowStyleSelectedCallback: (RowStyleEnum) -> Unit) {
+private fun RowStyleDropDown(style: String, rowStyleSelectedCallback: (String) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
 
     Row(
@@ -940,7 +926,7 @@ private fun RowStyleDropDown(style: RowStyleEnum, rowStyleSelectedCallback: (Row
             .wrapContentSize(Alignment.TopStart)
     ) {
         Text(
-            text = "RowStyle: ${style.value}",
+            text = "RowStyle: $style",
             fontSize = BASE_FONT_SIZE,
             modifier = Modifier
                 .fillMaxWidth()
@@ -954,7 +940,7 @@ private fun RowStyleDropDown(style: RowStyleEnum, rowStyleSelectedCallback: (Row
             DropdownMenuItem(
                 onClick = {
                     expanded = false
-                    rowStyleSelectedCallback(RowStyleEnum.FlatWithRadio)
+                    rowStyleSelectedCallback("flatWithRadio")
                 }
             ) {
                 Text("FlatWithRadio")
@@ -962,7 +948,7 @@ private fun RowStyleDropDown(style: RowStyleEnum, rowStyleSelectedCallback: (Row
             DropdownMenuItem(
                 onClick = {
                     expanded = false
-                    rowStyleSelectedCallback(RowStyleEnum.FlatWithCheckmark)
+                    rowStyleSelectedCallback("flatWithCheckmark")
                 }
             ) {
                 Text("FlatWithCheckmark")
@@ -970,7 +956,7 @@ private fun RowStyleDropDown(style: RowStyleEnum, rowStyleSelectedCallback: (Row
             DropdownMenuItem(
                 onClick = {
                     expanded = false
-                    rowStyleSelectedCallback(RowStyleEnum.FloatingButton)
+                    rowStyleSelectedCallback("floatingButton")
                 }
             ) {
                 Text("FloatingButton")
@@ -1040,67 +1026,12 @@ private fun getFontFromResource(fontResId: Int?): FontFamily {
     }
 }
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
-private fun resetEmbeddedAppearance(
-    viewModel: PaymentSheetPlaygroundViewModel,
-    currentAppearance: PaymentSheet.Appearance,
-    updateAppearance: (PaymentSheet.Appearance) -> Unit
-) {
-    viewModel.updateEmbeddedAppearance(
-        RowStyleSettingsDefinition,
-        RowStyleSettingsDefinition.defaultValue
-    )
-    viewModel.updateEmbeddedAppearance(
-        SeparatorThicknessSettingsDefinition,
-        SeparatorThicknessSettingsDefinition.defaultValue
-    )
-    viewModel.updateEmbeddedAppearance(
-        SeparatorInsetsSettingsDefinition,
-        SeparatorInsetsSettingsDefinition.defaultValue
-    )
-    viewModel.updateEmbeddedAppearance(
-        AdditionalInsetsSettingsDefinition,
-        AdditionalInsetsSettingsDefinition.defaultValue
-    )
-    viewModel.updateEmbeddedAppearance(
-        CheckmarkInsetsSettingsDefinition,
-        CheckmarkInsetsSettingsDefinition.defaultValue
-    )
-    viewModel.updateEmbeddedAppearance(
-        FloatingButtonSpacingSettingsDefinition,
-        FloatingButtonSpacingSettingsDefinition.defaultValue
-    )
-    viewModel.updateEmbeddedAppearance(
-        TopSeparatorEnabledSettingsDefinition,
-        TopSeparatorEnabledSettingsDefinition.defaultValue
-    )
-    viewModel.updateEmbeddedAppearance(
-        BottomSeparatorEnabledSettingsDefinition,
-        BottomSeparatorEnabledSettingsDefinition.defaultValue
-    )
-    viewModel.updateEmbeddedAppearance(
-        SeparatorColorSettingsDefinition,
-        SeparatorColorSettingsDefinition.defaultValue
-    )
-    viewModel.updateEmbeddedAppearance(
-        SelectedColorSettingsDefinition,
-        SelectedColorSettingsDefinition.defaultValue
-    )
-    viewModel.updateEmbeddedAppearance(
-        UnselectedColorSettingsDefinition,
-        UnselectedColorSettingsDefinition.defaultValue
-    )
-    viewModel.updateEmbeddedAppearance(
-        CheckmarkColorSettingsDefinition,
-        CheckmarkColorSettingsDefinition.defaultValue
-    )
-
-    val settings = viewModel.playgroundSettingsFlow.value
-    val snapshot = settings!!.snapshot()
-    val embeddedState = PlaygroundState.EmbeddedAppearanceState(snapshot)
-    updateAppearance(
-        currentAppearance.copy(
-            embeddedAppearance = Embedded(embeddedState.getRow())
-        )
-    )
+fun Bundle?.getEmbeddedAppearance(): EmbeddedAppearance {
+    val appearance = if (SDK_INT >= 33) {
+        this?.getParcelable(EMBEDDED_KEY, EmbeddedAppearance::class.java)
+    } else {
+        @Suppress("DEPRECATION")
+        this?.getParcelable(EMBEDDED_KEY)
+    }
+    return appearance ?: EmbeddedAppearance()
 }

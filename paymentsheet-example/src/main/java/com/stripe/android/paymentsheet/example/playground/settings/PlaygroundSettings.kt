@@ -12,6 +12,7 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
+import com.stripe.android.paymentsheet.example.playground.activity.AppearanceStore
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
 import com.stripe.android.paymentsheet.example.playground.model.CustomerEphemeralKeyRequest
 import com.stripe.android.uicore.utils.mapAsStateFlow
@@ -199,6 +200,12 @@ internal class PlaygroundSettings private constructor(
             playgroundState: PlaygroundState.Payment,
             configurationData: PlaygroundSettingDefinition.EmbeddedConfigurationData,
         ) {
+            val embeddedAppearance =
+                settings[EmbeddedAppearanceSettingsDefinition] as? EmbeddedAppearance ?: EmbeddedAppearance()
+            AppearanceStore.state = AppearanceStore.state.copy(
+                embeddedAppearance = PaymentSheet.Appearance.Embedded(embeddedAppearance.getRow())
+            )
+
             @Suppress("UNCHECKED_CAST")
             configure(
                 value = value as T,
@@ -455,18 +462,7 @@ internal class PlaygroundSettings private constructor(
             AppearanceSettingsDefinition,
             CustomEndpointDefinition,
             ShippingAddressSettingsDefinition,
-            RowStyleSettingsDefinition,
-            SeparatorThicknessSettingsDefinition,
-            SeparatorInsetsSettingsDefinition,
-            AdditionalInsetsSettingsDefinition,
-            CheckmarkInsetsSettingsDefinition,
-            FloatingButtonSpacingSettingsDefinition,
-            TopSeparatorEnabledSettingsDefinition,
-            BottomSeparatorEnabledSettingsDefinition,
-            SeparatorColorSettingsDefinition,
-            SelectedColorSettingsDefinition,
-            UnselectedColorSettingsDefinition,
-            CheckmarkColorSettingsDefinition
+            EmbeddedAppearanceSettingsDefinition
         )
 
         private val allSettingDefinitions: List<PlaygroundSettingDefinition<*>> =
