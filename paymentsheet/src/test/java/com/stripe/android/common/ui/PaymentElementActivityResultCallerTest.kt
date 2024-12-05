@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.flowcontroller
+package com.stripe.android.common.ui
 
 import android.content.Context
 import android.content.Intent
@@ -12,7 +12,7 @@ import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 
-class FlowControllerActivityResultCallerTest {
+class PaymentElementActivityResultCallerTest {
     @Test
     fun `on register callback, registry owner should register callback properly`() {
         val registry = mock<ActivityResultRegistry> {
@@ -29,7 +29,7 @@ class FlowControllerActivityResultCallerTest {
             on { activityResultRegistry } doReturn registry
         }
 
-        val caller = FlowControllerActivityResultCaller(activityResultRegistryOwner)
+        val caller = PaymentElementActivityResultCaller("FlowController", activityResultRegistryOwner)
 
         val contract = TestActivityResultContract()
         val callback = ActivityResultCallback<String> {}
@@ -60,7 +60,7 @@ class FlowControllerActivityResultCallerTest {
 
         val activityResultRegistryOwner = mock<ActivityResultRegistryOwner>()
 
-        val caller = FlowControllerActivityResultCaller(activityResultRegistryOwner)
+        val caller = PaymentElementActivityResultCaller("FlowController", activityResultRegistryOwner)
 
         val contract = TestActivityResultContract()
         val callback = ActivityResultCallback<String> {}

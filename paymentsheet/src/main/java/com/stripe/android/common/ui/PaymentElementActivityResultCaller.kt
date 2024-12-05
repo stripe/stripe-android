@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.flowcontroller
+package com.stripe.android.common.ui
 
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultCaller
@@ -7,7 +7,8 @@ import androidx.activity.result.ActivityResultRegistry
 import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.activity.result.contract.ActivityResultContract
 
-internal class FlowControllerActivityResultCaller(
+internal class PaymentElementActivityResultCaller(
+    private val key: String,
     private val registryOwner: ActivityResultRegistryOwner
 ) : ActivityResultCaller {
     override fun <I : Any?, O : Any?> registerForActivityResult(
@@ -26,10 +27,6 @@ internal class FlowControllerActivityResultCaller(
     }
 
     private fun <I : Any?, O : Any?> createKey(contract: ActivityResultContract<I, O>): String {
-        return "${FLOW_CONTROLLER_KEY}_${contract::class.java.name}"
-    }
-
-    private companion object {
-        const val FLOW_CONTROLLER_KEY = "FlowController"
+        return "${key}_${contract::class.java.name}"
     }
 }

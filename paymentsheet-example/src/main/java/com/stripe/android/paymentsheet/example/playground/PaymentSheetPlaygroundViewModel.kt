@@ -417,6 +417,7 @@ internal class PaymentSheetPlaygroundViewModel(
     fun onEmbeddedResult(success: Boolean) {
         if (success) {
             setPlaygroundState(null)
+            status.value = StatusMessage(SUCCESS_RESULT)
         }
     }
 
