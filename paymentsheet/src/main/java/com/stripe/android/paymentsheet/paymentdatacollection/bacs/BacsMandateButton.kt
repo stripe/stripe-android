@@ -9,6 +9,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.stripe.android.common.ui.PrimaryButton
+import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.getComposeTextStyle
 
 @Composable
 internal fun BacsMandateButton(type: BacsMandateButtonType, label: String, onClick: () -> Unit) {
@@ -18,16 +20,26 @@ internal fun BacsMandateButton(type: BacsMandateButtonType, label: String, onCli
             isEnabled = true,
             onButtonClick = onClick
         )
-        BacsMandateButtonType.Secondary -> TextButton(
-            modifier = Modifier.fillMaxWidth(),
-            shape = MaterialTheme.shapes.small,
-            colors = ButtonDefaults.buttonColors(
-                backgroundColor = Color.Transparent,
-                contentColor = MaterialTheme.colors.primary
-            ),
-            onClick = onClick
-        ) {
-            Text(text = label)
+        BacsMandateButtonType.Secondary -> {
+            // use the same text style as the primary button but a different color
+            val textStyle = StripeTheme.primaryButtonStyle.getComposeTextStyle().copy(
+                color = MaterialTheme.colors.primary
+            )
+
+            TextButton(
+                modifier = Modifier.fillMaxWidth(),
+                shape = MaterialTheme.shapes.small,
+                colors = ButtonDefaults.buttonColors(
+                    backgroundColor = Color.Transparent,
+                    contentColor = MaterialTheme.colors.primary
+                ),
+                onClick = onClick
+            ) {
+                Text(
+                    text = label,
+                    style = textStyle
+                )
+            }
         }
     }
 }
