@@ -13,19 +13,17 @@ import dagger.multibindings.IntoSet
         LinkAnalyticsComponent::class,
     ]
 )
-internal interface LinkConfirmationModule {
-    companion object {
-        @JvmSuppressWildcards
-        @Provides
-        @IntoSet
-        fun providesLinkConfirmationDefinition(
-            linkStore: LinkStore,
-            linkPaymentLauncher: LinkPaymentLauncher,
-        ): ConfirmationDefinition<*, *, *, *> {
-            return LinkConfirmationDefinition(
-                linkStore = linkStore,
-                linkPaymentLauncher = linkPaymentLauncher,
-            )
-        }
+internal object LinkConfirmationModule {
+    @JvmSuppressWildcards
+    @Provides
+    @IntoSet
+    fun providesLinkConfirmationDefinition(
+        linkStore: LinkStore,
+        linkPaymentLauncher: LinkPaymentLauncher,
+    ): ConfirmationDefinition<*, *, *, *> {
+        return LinkConfirmationDefinition(
+            linkStore = linkStore,
+            linkPaymentLauncher = linkPaymentLauncher,
+        )
     }
 }

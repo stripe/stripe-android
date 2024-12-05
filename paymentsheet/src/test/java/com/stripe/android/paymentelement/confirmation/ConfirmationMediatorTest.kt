@@ -87,7 +87,9 @@ class ConfirmationMediatorTest {
 
         mediator.register(
             activityResultCaller = activityResultCaller,
-            onResult = {},
+            onResult = {
+                throw NotImplementedError("'onResult' should not be called!")
+            },
         )
 
         assertThat(createLauncherCalls.awaitItem()).isNotNull()

@@ -7,7 +7,7 @@ import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-internal class LinkConfirmationOption(
+internal data class LinkConfirmationOption(
     val initializationMode: PaymentElementLoader.InitializationMode,
     val shippingDetails: AddressDetails?,
     val configuration: LinkConfiguration,

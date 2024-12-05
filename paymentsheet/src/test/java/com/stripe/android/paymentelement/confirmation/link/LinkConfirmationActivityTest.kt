@@ -27,7 +27,6 @@ import com.stripe.android.paymentelement.confirmation.assertSucceeded
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.paymentsheet.createTestActivityRule
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
-import com.stripe.android.paymentsheet.verticalmode.ShampooRule
 import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.PaymentIntentFactory
@@ -62,9 +61,6 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
         featureFlag = FeatureFlags.nativeLinkEnabled,
         isEnabled = false
     )
-
-    @get:Rule
-    val shampooRule = ShampooRule(200)
 
     @Test
     fun linkSucceeds() = test {
