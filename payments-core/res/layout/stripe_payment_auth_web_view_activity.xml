@@ -22,6 +22,7 @@
     </FrameLayout>
 
     <com.google.android.material.appbar.AppBarLayout
+        android:fitsSystemWindows="true"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:elevation="@dimen/stripe_toolbar_elevation">
