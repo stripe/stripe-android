@@ -9,8 +9,6 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import kotlinx.parcelize.Parcelize
 
-private const val IsEKClientSecretValidRegexPattern = "^ek_[^_](.)+$"
-
 @Parcelize
 internal data class CommonConfiguration(
     val merchantDisplayName: String,
@@ -27,6 +25,16 @@ internal data class CommonConfiguration(
     val externalPaymentMethods: List<String>,
     val cardBrandAcceptance: PaymentSheet.CardBrandAcceptance,
 ) : Parcelable {
+
+    fun validate() {
+        customerAndMerchantValidate()
+
+        customer?.accessType?.let { customerAccessType ->
+            customerAccessTypeValidate(customerAccessType)
+        }
+    }
+
+    // These exception messages are not localized as they are not intended to be displayed to a user."
     @Suppress("ThrowsCount")
     private fun customerAndMerchantValidate() {
         when {
@@ -56,6 +64,7 @@ internal data class CommonConfiguration(
         }
     }
 
+    // These exception messages are not localized as they are not intended to be displayed to a user."
     @Suppress("ThrowsCount")
     private fun customerSessionValidate(customerAccessType: PaymentSheet.CustomerAccessType.CustomerSession) {
         val result = CustomerSessionClientSecretValidator
@@ -84,6 +93,7 @@ internal data class CommonConfiguration(
         }
     }
 
+    // These exception messages are not localized as they are not intended to be displayed to a user."
     @Suppress("ThrowsCount")
     private fun legacyCustomerEphemeralKeyValidate(
         customerAccessType: PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey
@@ -107,19 +117,6 @@ internal data class CommonConfiguration(
             )
         }
     }
-
-    fun validate() {
-        // These are not localized as they are not intended to be displayed to a user.
-        customerAndMerchantValidate()
-
-        customer?.accessType?.let { customerAccessType ->
-            customerAccessTypeValidate(customerAccessType)
-        }
-    }
-}
-
-private fun String.isEKClientSecretValid(): Boolean {
-    return Regex(IsEKClientSecretValidRegexPattern).matches(this)
 }
 
 internal fun PaymentSheet.Configuration.asCommonConfiguration(): CommonConfiguration = CommonConfiguration(
@@ -154,3 +151,9 @@ internal fun EmbeddedPaymentElement.Configuration.asCommonConfiguration(): Commo
     externalPaymentMethods = externalPaymentMethods,
     cardBrandAcceptance = cardBrandAcceptance,
 )
+
+private fun String.isEKClientSecretValid(): Boolean {
+    return Regex(EK_CLIENT_SECRET_VALID_REGEX_PATTERN).matches(this)
+}
+
+private const val EK_CLIENT_SECRET_VALID_REGEX_PATTERN = "^ek_[^_](.)+$"
