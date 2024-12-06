@@ -463,6 +463,54 @@ class DefaultConfirmationHandlerTest {
     }
 
     @Test
+    fun `On return from process death, should continue to confirm is next step result is received`() {
+        val dispatcher = StandardTestDispatcher()
+
+        test(
+            savedStateHandle = createPrepopulatedSavedStateHandle(receivesResultInProcess = false),
+            someDefinitionResult = ConfirmationDefinition.Result.NextStep(
+                intent = PAYMENT_INTENT,
+                confirmationOption = SomeOtherConfirmationDefinition.Option,
+            ),
+            someOtherDefinitionAction = ConfirmationDefinition.Action.Launch(
+                launcherArguments = SomeOtherConfirmationDefinition.LauncherArgs,
+                receivesResultInProcess = false,
+                deferredIntentConfirmationType = null,
+            ),
+            someOtherDefinitionResult = ConfirmationDefinition.Result.Succeeded(
+                intent = UPDATED_PAYMENT_INTENT,
+                deferredIntentConfirmationType = null,
+            ),
+            dispatcher = dispatcher,
+        ) {
+            assertThat(confirmationHandler.hasReloadedFromProcessDeath).isTrue()
+
+            confirmationHandler.state.test {
+                assertSomeDefinitionConfirmingState()
+
+                sendSomeDefinitionLauncherResult()
+                assertSomeDefinitionToResultCalled()
+
+                dispatcher.scheduler.advanceUntilIdle()
+
+                assertSomeOtherDefinitionConfirmingState()
+                assertSomeOtherDefinitionActionCalled()
+                assertSomeOtherDefinitionLaunchCalled()
+                sendSomeOtherDefinitionLauncherResult()
+                assertSomeOtherDefinitionToResultCalled()
+
+                val completeState = awaitCompleteState()
+                val successResult = completeState.result.assertSucceeded()
+
+                assertThat(successResult.intent).isEqualTo(UPDATED_PAYMENT_INTENT)
+                assertThat(successResult.deferredIntentConfirmationType).isNull()
+
+                confirmationHandler.assertAwaitResultCallReceivesSameResult(completeState)
+            }
+        }
+    }
+
+    @Test
     fun `On 'awaitResult', should return null if no confirmation process was started`() = test {
         val result = withTimeout(5.seconds) {
             confirmationHandler.awaitResult()
@@ -731,6 +779,7 @@ class DefaultConfirmationHandlerTest {
         set(
             "AwaitingConfirmationResult",
             DefaultConfirmationHandler.AwaitingConfirmationResultData(
+                key = "Some",
                 confirmationOption = SomeConfirmationDefinition.Option,
                 receivesResultInProcess = receivesResultInProcess,
             ),
@@ -955,7 +1004,7 @@ class DefaultConfirmationHandlerTest {
         action = action,
         result = result,
     ) {
-        override val key: String = "Some"
+        override val key: String = "SomeOther"
 
         override fun option(confirmationOption: ConfirmationHandler.Option): Option? {
             return confirmationOption as? Option
