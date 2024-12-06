@@ -383,6 +383,13 @@ constructor(
             requiresMandate = false,
             hasDelayedSettlement = false,
         ),
+        Crypto(
+            "crypto",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false,
+        ),
         AmazonPay(
             "amazon_pay",
             isReusable = false,
