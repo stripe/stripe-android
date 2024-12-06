@@ -83,6 +83,7 @@
         <activity android:name=".activity.SunbitActivity"/>
         <activity android:name=".activity.BillieActivity"/>
         <activity android:name=".activity.SatispayActivity"/>
+        <activity android:name=".activity.CryptoActivity"/>
         <activity android:name=".activity.CardInputWidgetComposeExampleActivity"/>
     </application>
 
