@@ -6,6 +6,7 @@ import android.graphics.Bitmap
 import android.os.Build
 import android.view.LayoutInflater
 import android.webkit.JavascriptInterface
+import android.webkit.PermissionRequest
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
@@ -89,7 +90,7 @@ internal class StripeConnectWebViewContainerImpl<Listener : StripeEmbeddedCompon
     internal val stripeWebViewClient = StripeConnectWebViewClient()
 
     @VisibleForTesting
-    internal val stripeWebChromeClient = StripeWebChromeClient()
+    internal val stripeWebChromeClient = StripeConnectWebChromeClient()
 
     private var controller: StripeConnectWebViewContainerController<Listener>? = null
 
@@ -221,13 +222,22 @@ internal class StripeConnectWebViewContainerImpl<Listener : StripeEmbeddedCompon
     }
 
     /**
-     * A [WebChromeClient] that provides additional functionality for Stripe Connect Embedded Component WebViews.
-     *
-     * This class is currently empty, but it could be used to add additional functionality in the future
-     * Setting a [WebChromeClient] (even an empty one) is necessary for certain functionality, like
-     * [WebViewClient.shouldOverrideUrlLoading] to work properly.
+     * A [WebChromeClient] that provides additional functionality for Stripe Connect Embedded Component WebViews,
+     * namely around permissions.
      */
-    inner class StripeWebChromeClient : WebChromeClient()
+    internal inner class StripeConnectWebChromeClient : WebChromeClient() {
+        override fun onPermissionRequest(request: PermissionRequest) {
+            val view = webView ?: return request.deny()
+
+            view.findViewTreeLifecycleOwner()?.lifecycleScope?.launch {
+                controller?.onPermissionRequest(view.context, request)
+            } ?: return request.deny()
+        }
+
+        override fun onPermissionRequestCanceled(request: PermissionRequest) {
+            controller?.onPermissionRequestCanceled(request)
+        }
+    }
 
     private inner class StripeJsInterface {
         @JavascriptInterface
