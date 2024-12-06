@@ -1,9 +1,11 @@
 package com.stripe.android.paymentsheet.example.playground
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.AnimatedContent
@@ -14,9 +16,18 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeContentPadding
+import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
@@ -25,6 +36,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.material.TopAppBar
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
@@ -36,6 +48,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.stripe.android.customersheet.CustomerSheet
@@ -47,6 +60,7 @@ import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressLauncher
 import com.stripe.android.paymentsheet.addresselement.rememberAddressLauncher
+import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.Settings
 import com.stripe.android.paymentsheet.example.playground.activity.AppearanceBottomSheetDialogFragment
 import com.stripe.android.paymentsheet.example.playground.activity.AppearanceStore
@@ -93,9 +107,13 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
     @OptIn(ExperimentalCustomerSessionApi::class)
     @Suppress("LongMethod")
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
         setContent {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                window.isNavigationBarContrastEnforced = false
+            }
             val paymentSheet = PaymentSheet.Builder(viewModel::onPaymentSheetResult)
                 .externalPaymentMethodConfirmHandler(this)
                 .createIntentCallback(viewModel::createIntentCallback)
@@ -565,12 +583,27 @@ private fun PlaygroundTheme(
             color = MaterialTheme.colors.background,
         ) {
             Scaffold(
+                topBar = {
+                    TopAppBar(
+                        title = {
+                            Text(stringResource(R.string.app_name))
+                        },
+                        windowInsets = WindowInsets.systemBars.only(
+                            WindowInsetsSides.Horizontal + WindowInsetsSides.Top
+                        )
+                    )
+                },
                 bottomBar = {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
                             .background(MaterialTheme.colors.surface)
                             .animateContentSize()
+                            .padding(
+                                paddingValues = WindowInsets.systemBars.only(
+                                    WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom
+                                ).asPaddingValues()
+                            )
                     ) {
                         Divider()
                         Column(
@@ -581,8 +614,12 @@ private fun PlaygroundTheme(
                         )
                     }
                 },
+                contentWindowInsets = WindowInsets.systemBars
             ) { paddingValues ->
-                Box(modifier = Modifier.padding(paddingValues)) {
+                Box(
+                    modifier = Modifier
+                        .padding(paddingValues)
+                ) {
                     Column(
                         modifier = Modifier
                             .verticalScroll(rememberScrollState())
