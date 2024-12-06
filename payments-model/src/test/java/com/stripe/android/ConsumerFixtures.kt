@@ -35,6 +35,27 @@ object ConsumerFixtures {
         """.trimIndent()
     )
 
+    val SIGNUP_RESPONSE_JSON = JSONObject(
+        """
+            {
+              "account_id": "acct_123",
+              "auth_session_client_secret": "ascs_123",
+              "publishable_key": "pk_123",
+              "consumer_session": {
+                "client_secret": "secret",
+                "email_address": "email@example.com",
+                "redacted_phone_number": "+1********68",
+                "redacted_formatted_phone_number": "(***) *** **68",
+                "support_payment_details_types": [
+                  "CARD"
+                ],
+                "verification_sessions": []
+              },
+              "error_message": null
+            }
+        """.trimIndent()
+    )
+
     val CONSUMER_VERIFICATION_STARTED_JSON = JSONObject(
         """
             {

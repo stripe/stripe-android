@@ -2,6 +2,7 @@ package com.stripe.android.financialconnections.repository.api
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.financialconnections.model.UpdateAvailableIncentives
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
 import com.stripe.android.financialconnections.utils.filterNotNullValues
 import com.stripe.android.model.ConsumerSessionLookup
@@ -14,6 +15,11 @@ internal interface FinancialConnectionsConsumersApiService {
         clientSecret: String,
         requestSurface: String,
     ): ConsumerSessionLookup
+
+    suspend fun updateAvailableIncentives(
+        sessionId: String,
+        consumerAccount: String,
+    ): UpdateAvailableIncentives
 
     companion object {
         operator fun invoke(
@@ -59,11 +65,32 @@ private class FinancialConnectionsConsumersApiServiceImpl(
         )
     }
 
+    override suspend fun updateAvailableIncentives(
+        sessionId: String,
+        consumerAccount: String,
+    ): UpdateAvailableIncentives {
+        val request = apiRequestFactory.createPost(
+            updateAvailableIncentivesUrl,
+            apiOptions,
+            mapOf(
+                "session_id" to sessionId,
+                "consumer_account" to consumerAccount,
+            ).filterNotNullValues()
+        )
+        return requestExecutor.execute(
+            request,
+            UpdateAvailableIncentives.serializer()
+        )
+    }
+
     private companion object {
         /**
          * @return `https://api.stripe.com/v1/connections/link_account_sessions/consumer_sessions`
          */
         const val consumerSessionsUrl: String =
             "${ApiRequest.API_HOST}/v1/connections/link_account_sessions/consumer_sessions"
+
+        const val updateAvailableIncentivesUrl: String =
+            "${ApiRequest.API_HOST}/v1/consumers/incentives/update_available"
     }
 }

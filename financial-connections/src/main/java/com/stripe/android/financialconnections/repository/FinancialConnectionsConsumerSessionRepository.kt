@@ -5,6 +5,7 @@ import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext
 import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext.BillingDetails
 import com.stripe.android.financialconnections.domain.IsLinkWithStripe
+import com.stripe.android.financialconnections.model.UpdateAvailableIncentives
 import com.stripe.android.financialconnections.repository.api.FinancialConnectionsConsumersApiService
 import com.stripe.android.financialconnections.repository.api.ProvideApiRequestOptions
 import com.stripe.android.financialconnections.utils.toConsumerBillingAddressParams
@@ -68,6 +69,11 @@ internal interface FinancialConnectionsConsumerSessionRepository {
         expectedPaymentMethodType: String,
         billingPhone: String?,
     ): SharePaymentDetails
+
+    suspend fun updateAvailableIncentives(
+        sessionId: String,
+        consumerAccount: String,
+    ): UpdateAvailableIncentives
 
     companion object {
         operator fun invoke(
@@ -238,6 +244,16 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
         ).getOrThrow()
     }
 
+    override suspend fun updateAvailableIncentives(
+        sessionId: String,
+        consumerAccount: String,
+    ): UpdateAvailableIncentives {
+        return financialConnectionsConsumersApiService.updateAvailableIncentives(
+            sessionId = sessionId,
+            consumerAccount = consumerAccount,
+        )
+    }
+
     private suspend fun postConsumerSession(
         email: String,
         clientSecret: String
@@ -266,6 +282,10 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
         signup: ConsumerSessionSignup,
     ) {
         logger.debug("SYNC_CACHE: updating local consumer session from signUp")
-        consumerSessionRepository.storeNewConsumerSession(signup.consumerSession, signup.publishableKey)
+        consumerSessionRepository.storeNewConsumerSession(
+            consumerSession = signup.consumerSession,
+            publishableKey = signup.publishableKey,
+            accountId = signup.accountId,
+        )
     }
 }

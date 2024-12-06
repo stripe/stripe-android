@@ -75,6 +75,7 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
         )
 
         val consumerSessionSignup = ConsumerSessionSignup(
+            accountId = "acct_123",
             consumerSession = consumerSession,
             publishableKey = "pk_123",
         )
@@ -111,6 +112,7 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
         // ensures there's a cached consumer session after the signup call.
         assertThat(repository.getCachedConsumerSession()).isEqualTo(
             CachedConsumerSession(
+                accountId = "acct_123",
                 clientSecret = "clientSecret",
                 emailAddress = "test@test.com",
                 phoneNumber = "(•••) ••• ••12",
@@ -132,6 +134,7 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
         )
 
         val consumerSessionSignup = ConsumerSessionSignup(
+            accountId = "acct_123",
             consumerSession = consumerSession,
             publishableKey = "pk_123",
         )
@@ -212,6 +215,7 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
         // ensures there's a cached consumer session after the lookup call.
         assertThat(repository.getCachedConsumerSession()).isEqualTo(
             CachedConsumerSession(
+                accountId = null,
                 clientSecret = "clientSecret",
                 emailAddress = "test@test.com",
                 phoneNumber = "(•••) ••• ••12",
@@ -267,6 +271,7 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
         // ensures there's a cached consumer session after the start-verification call.
         assertThat(repository.getCachedConsumerSession()).isEqualTo(
             CachedConsumerSession(
+                accountId = null,
                 clientSecret = "clientSecret",
                 emailAddress = "test@test.com",
                 phoneNumber = "(•••) ••• ••12",
@@ -316,6 +321,7 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
         // ensures there's a cached consumer session after the confirm-verification call.
         assertThat(repository.getCachedConsumerSession()).isEqualTo(
             CachedConsumerSession(
+                accountId = null,
                 clientSecret = "clientSecret",
                 emailAddress = "test@test.com",
                 phoneNumber = "(•••) ••• ••12",

@@ -27,6 +27,7 @@ internal object TestFactory {
 
     const val EMAIL = "email@stripe.com"
     const val CLIENT_SECRET = "client_secret"
+    const val ACCOUNT_ID = "acct_123"
     const val PUBLISHABLE_KEY = "publishable_key"
     const val MERCHANT_NAME = "merchantName"
     const val CUSTOMER_EMAIL = "customer@email.com"
@@ -55,6 +56,7 @@ internal object TestFactory {
     )
 
     val CONSUMER_SESSION_SIGN_UP = ConsumerSessionSignup(
+        accountId = ACCOUNT_ID,
         consumerSession = CONSUMER_SESSION,
         publishableKey = PUBLISHABLE_KEY
     )
