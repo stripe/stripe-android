@@ -5,7 +5,6 @@ import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.account.LinkStore
-import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
@@ -36,7 +35,7 @@ internal class LinkConfirmationDefinition(
 
     override suspend fun action(
         confirmationOption: LinkConfirmationOption,
-        intent: StripeIntent
+        confirmationParameters: ConfirmationDefinition.Parameters,
     ): ConfirmationDefinition.Action<Unit> {
         return ConfirmationDefinition.Action.Launch(
             launcherArguments = Unit,
@@ -49,15 +48,15 @@ internal class LinkConfirmationDefinition(
         launcher: LinkPaymentLauncher,
         arguments: Unit,
         confirmationOption: LinkConfirmationOption,
-        intent: StripeIntent
+        confirmationParameters: ConfirmationDefinition.Parameters,
     ) {
         launcher.present(confirmationOption.configuration)
     }
 
     override fun toResult(
         confirmationOption: LinkConfirmationOption,
+        confirmationParameters: ConfirmationDefinition.Parameters,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
-        intent: StripeIntent,
         result: LinkActivityResult
     ): ConfirmationDefinition.Result {
         if (
@@ -70,12 +69,10 @@ internal class LinkConfirmationDefinition(
         return when (result) {
             is LinkActivityResult.Completed -> ConfirmationDefinition.Result.NextStep(
                 confirmationOption = PaymentMethodConfirmationOption.Saved(
-                    initializationMode = confirmationOption.initializationMode,
-                    shippingDetails = confirmationOption.shippingDetails,
                     paymentMethod = result.paymentMethod,
                     optionsParams = null,
                 ),
-                intent = intent,
+                parameters = confirmationParameters,
             )
             is LinkActivityResult.Failed -> ConfirmationDefinition.Result.Failed(
                 cause = result.error,

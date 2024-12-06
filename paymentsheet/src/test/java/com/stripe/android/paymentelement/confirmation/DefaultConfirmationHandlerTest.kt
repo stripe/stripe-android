@@ -12,7 +12,10 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
@@ -84,12 +87,7 @@ class DefaultConfirmationHandlerTest {
         confirmationHandler.state.test {
             assertIdleState()
 
-            confirmationHandler.start(
-                ConfirmationHandler.Args(
-                    confirmationOption = SomeConfirmationDefinition.Option,
-                    intent = PAYMENT_INTENT,
-                )
-            )
+            confirmationHandler.start(createArguments(SomeConfirmationDefinition.Option))
 
             assertSomeDefinitionActionCalled()
             assertSomeDefinitionConfirmingState()
@@ -104,12 +102,7 @@ class DefaultConfirmationHandlerTest {
                 .isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
             assertThat(someDefinitionFailedResult.type).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Fatal)
 
-            confirmationHandler.start(
-                ConfirmationHandler.Args(
-                    confirmationOption = SomeOtherConfirmationDefinition.Option,
-                    intent = PAYMENT_INTENT,
-                )
-            )
+            confirmationHandler.start(createArguments(SomeOtherConfirmationDefinition.Option))
 
             assertSomeOtherDefinitionActionCalled()
             assertSomeOtherDefinitionConfirmingState()
@@ -132,12 +125,7 @@ class DefaultConfirmationHandlerTest {
         confirmationHandler.state.test {
             assertIdleState()
 
-            confirmationHandler.start(
-                ConfirmationHandler.Args(
-                    confirmationOption = InvalidConfirmationOption,
-                    intent = PAYMENT_INTENT,
-                )
-            )
+            confirmationHandler.start(createArguments(InvalidConfirmationOption))
 
             // Should check all passed definitions
             assertThat(someDefinitionScenario.optionCalls.awaitItem().option)
@@ -181,12 +169,7 @@ class DefaultConfirmationHandlerTest {
         confirmationHandler.state.test {
             assertIdleState()
 
-            confirmationHandler.start(
-                ConfirmationHandler.Args(
-                    confirmationOption = SomeConfirmationDefinition.Option,
-                    intent = PAYMENT_INTENT,
-                )
-            )
+            confirmationHandler.start(createArguments(SomeConfirmationDefinition.Option))
 
             assertSomeDefinitionActionCalled()
             assertSomeDefinitionConfirmingState()
@@ -214,12 +197,7 @@ class DefaultConfirmationHandlerTest {
         confirmationHandler.state.test {
             assertIdleState()
 
-            confirmationHandler.start(
-                ConfirmationHandler.Args(
-                    confirmationOption = SomeOtherConfirmationDefinition.Option,
-                    intent = PAYMENT_INTENT,
-                )
-            )
+            confirmationHandler.start(createArguments(SomeOtherConfirmationDefinition.Option))
 
             assertSomeOtherDefinitionActionCalled()
             assertSomeOtherDefinitionConfirmingState()
@@ -247,12 +225,7 @@ class DefaultConfirmationHandlerTest {
         confirmationHandler.state.test {
             assertIdleState()
 
-            confirmationHandler.start(
-                ConfirmationHandler.Args(
-                    confirmationOption = SomeConfirmationDefinition.Option,
-                    intent = PAYMENT_INTENT,
-                )
-            )
+            confirmationHandler.start(createArguments(SomeConfirmationDefinition.Option))
 
             assertSomeDefinitionActionCalled()
             assertSomeDefinitionConfirmingState()
@@ -324,8 +297,8 @@ class DefaultConfirmationHandlerTest {
             deferredIntentConfirmationType = null,
         ),
         someDefinitionResult = ConfirmationDefinition.Result.NextStep(
-            intent = PAYMENT_INTENT,
             confirmationOption = SomeOtherConfirmationDefinition.Option,
+            parameters = CONFIRMATION_PARAMETERS,
         ),
         someOtherDefinitionAction = ConfirmationDefinition.Action.Launch(
             launcherArguments = SomeOtherConfirmationDefinition.LauncherArgs,
@@ -340,12 +313,7 @@ class DefaultConfirmationHandlerTest {
         confirmationHandler.state.test {
             assertIdleState()
 
-            confirmationHandler.start(
-                ConfirmationHandler.Args(
-                    confirmationOption = SomeConfirmationDefinition.Option,
-                    intent = PAYMENT_INTENT,
-                )
-            )
+            confirmationHandler.start(createArguments(SomeConfirmationDefinition.Option))
 
             assertSomeDefinitionActionCalled()
             assertSomeDefinitionConfirmingState()
@@ -472,7 +440,7 @@ class DefaultConfirmationHandlerTest {
         test(
             savedStateHandle = createPrepopulatedSavedStateHandle(receivesResultInProcess = false),
             someDefinitionResult = ConfirmationDefinition.Result.NextStep(
-                intent = PAYMENT_INTENT,
+                parameters = CONFIRMATION_PARAMETERS,
                 confirmationOption = SomeOtherConfirmationDefinition.Option,
             ),
             someOtherDefinitionAction = ConfirmationDefinition.Action.Launch(
@@ -538,12 +506,7 @@ class DefaultConfirmationHandlerTest {
             ),
             dispatcher = dispatcher,
         ) {
-            confirmationHandler.start(
-                ConfirmationHandler.Args(
-                    confirmationOption = SomeConfirmationDefinition.Option,
-                    intent = PAYMENT_INTENT,
-                )
-            )
+            confirmationHandler.start(createArguments(SomeConfirmationDefinition.Option))
 
             val job = CoroutineScope(dispatcher).launch {
                 val result = confirmationHandler.awaitResult().assertSucceeded()
@@ -590,12 +553,7 @@ class DefaultConfirmationHandlerTest {
         confirmationHandler.state.test {
             assertIdleState()
 
-            confirmationHandler.start(
-                ConfirmationHandler.Args(
-                    confirmationOption = SomeConfirmationDefinition.Option,
-                    intent = PAYMENT_INTENT,
-                )
-            )
+            confirmationHandler.start(createArguments(SomeConfirmationDefinition.Option))
 
             assertSomeDefinitionActionCalled()
             assertSomeDefinitionConfirmingState()
@@ -621,12 +579,7 @@ class DefaultConfirmationHandlerTest {
         confirmationHandler.state.test {
             assertIdleState()
 
-            confirmationHandler.start(
-                ConfirmationHandler.Args(
-                    confirmationOption = SomeConfirmationDefinition.Option,
-                    intent = PAYMENT_INTENT,
-                )
-            )
+            confirmationHandler.start(createArguments(SomeConfirmationDefinition.Option))
 
             assertSomeDefinitionActionCalled()
             assertSomeDefinitionConfirmingState()
@@ -646,7 +599,7 @@ class DefaultConfirmationHandlerTest {
                 SOME_DEFINITION_PERSISTED_KEY
             )
 
-            assertThat(parameters?.intent).isEqualTo(PAYMENT_INTENT)
+            assertThat(parameters?.confirmationParameters).isEqualTo(CONFIRMATION_PARAMETERS)
             assertThat(parameters?.confirmationOption).isEqualTo(SomeConfirmationDefinition.Option)
             assertThat(parameters?.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Client)
         }
@@ -776,6 +729,16 @@ class DefaultConfirmationHandlerTest {
         )
     }
 
+    private fun createArguments(option: ConfirmationHandler.Option): ConfirmationHandler.Args {
+        return ConfirmationHandler.Args(
+            confirmationOption = option,
+            intent = CONFIRMATION_PARAMETERS.intent,
+            appearance = CONFIRMATION_PARAMETERS.appearance,
+            initializationMode = CONFIRMATION_PARAMETERS.initializationMode,
+            shippingDetails = CONFIRMATION_PARAMETERS.shippingDetails,
+        )
+    }
+
     private fun createPrepopulatedSavedStateHandle(
         receivesResultInProcess: Boolean,
     ) = SavedStateHandle().apply {
@@ -791,7 +754,7 @@ class DefaultConfirmationHandlerTest {
             "SomeParameters",
             ConfirmationMediator.Parameters(
                 confirmationOption = SomeConfirmationDefinition.Option,
-                intent = PAYMENT_INTENT,
+                confirmationParameters = CONFIRMATION_PARAMETERS,
                 deferredIntentConfirmationType = null,
             )
         )
@@ -820,7 +783,7 @@ class DefaultConfirmationHandlerTest {
         val actionCall = someDefinitionScenario.actionCalls.awaitItem()
 
         assertThat(actionCall.confirmationOption).isEqualTo(SomeConfirmationDefinition.Option)
-        assertThat(actionCall.intent).isEqualTo(PAYMENT_INTENT)
+        assertThat(actionCall.confirmationParameters).isEqualTo(CONFIRMATION_PARAMETERS)
     }
 
     private suspend fun Scenario.assertSomeDefinitionLaunchCalled() {
@@ -829,7 +792,7 @@ class DefaultConfirmationHandlerTest {
         assertThat(launchCall.launcher).isEqualTo(SomeConfirmationDefinition.Launcher)
         assertThat(launchCall.confirmationOption).isEqualTo(SomeConfirmationDefinition.Option)
         assertThat(launchCall.arguments).isEqualTo(SomeConfirmationDefinition.LauncherArgs)
-        assertThat(launchCall.intent).isEqualTo(PAYMENT_INTENT)
+        assertThat(launchCall.confirmationParameters).isEqualTo(CONFIRMATION_PARAMETERS)
     }
 
     private suspend fun Scenario.assertSomeDefinitionToResultCalled() {
@@ -837,7 +800,7 @@ class DefaultConfirmationHandlerTest {
 
         assertThat(toResultCall.confirmationOption).isEqualTo(SomeConfirmationDefinition.Option)
         assertThat(toResultCall.result).isEqualTo(SomeConfirmationDefinition.LauncherResult)
-        assertThat(toResultCall.intent).isEqualTo(PAYMENT_INTENT)
+        assertThat(toResultCall.confirmationParameters).isEqualTo(CONFIRMATION_PARAMETERS)
     }
 
     private fun Scenario.sendSomeOtherDefinitionLauncherResult() {
@@ -859,7 +822,7 @@ class DefaultConfirmationHandlerTest {
         val actionCall = someOtherDefinitionScenario.actionCalls.awaitItem()
 
         assertThat(actionCall.confirmationOption).isEqualTo(SomeOtherConfirmationDefinition.Option)
-        assertThat(actionCall.intent).isEqualTo(PAYMENT_INTENT)
+        assertThat(actionCall.confirmationParameters).isEqualTo(CONFIRMATION_PARAMETERS)
     }
 
     private suspend fun Scenario.assertSomeOtherDefinitionLaunchCalled() {
@@ -868,7 +831,7 @@ class DefaultConfirmationHandlerTest {
         assertThat(launchCall.launcher).isEqualTo(SomeOtherConfirmationDefinition.Launcher)
         assertThat(launchCall.confirmationOption).isEqualTo(SomeOtherConfirmationDefinition.Option)
         assertThat(launchCall.arguments).isEqualTo(SomeOtherConfirmationDefinition.LauncherArgs)
-        assertThat(launchCall.intent).isEqualTo(PAYMENT_INTENT)
+        assertThat(launchCall.confirmationParameters).isEqualTo(CONFIRMATION_PARAMETERS)
     }
 
     private suspend fun Scenario.assertSomeOtherDefinitionToResultCalled() {
@@ -876,7 +839,7 @@ class DefaultConfirmationHandlerTest {
 
         assertThat(toResultCall.confirmationOption).isEqualTo(SomeOtherConfirmationDefinition.Option)
         assertThat(toResultCall.result).isEqualTo(SomeOtherConfirmationDefinition.LauncherResult)
-        assertThat(toResultCall.intent).isEqualTo(PAYMENT_INTENT)
+        assertThat(toResultCall.confirmationParameters).isEqualTo(CONFIRMATION_PARAMETERS)
     }
 
     private suspend fun TurbineTestContext<ConfirmationHandler.State>.assertIdleState() {
@@ -1032,6 +995,15 @@ class DefaultConfirmationHandlerTest {
         const val AWAITING_CONFIRMATION_RESULT_KEY = "AwaitingConfirmationResult"
 
         val PAYMENT_INTENT = PaymentIntentFactory.create()
+
+        val CONFIRMATION_PARAMETERS = ConfirmationDefinition.Parameters(
+            intent = PAYMENT_INTENT,
+            appearance = PaymentSheet.Appearance(),
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = "pi_123_secret_123",
+            ),
+            shippingDetails = AddressDetails(),
+        )
 
         val UPDATED_PAYMENT_INTENT = PAYMENT_INTENT.copy(
             paymentMethod = PaymentMethodFactory.card(),
