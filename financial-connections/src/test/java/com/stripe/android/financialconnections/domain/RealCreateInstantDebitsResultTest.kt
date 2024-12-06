@@ -199,8 +199,11 @@ class RealCreateInstantDebitsResultTest {
         }
     }
 
-    private fun makeCachedConsumerSession(): CachedConsumerSession {
+    private fun makeCachedConsumerSession(
+        accountId: String? = null,
+    ): CachedConsumerSession {
         return CachedConsumerSession(
+            accountId = accountId,
             clientSecret = "clientSecret",
             emailAddress = "test@test.com",
             phoneNumber = "(***) *** **12",

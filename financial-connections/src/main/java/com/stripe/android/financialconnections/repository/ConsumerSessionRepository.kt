@@ -56,7 +56,8 @@ internal class RealConsumerSessionRepository @Inject constructor(
     override fun updateConsumerSession(consumerSession: ConsumerSession) {
         val existingSession = provideConsumerSession()
         val publishableKey = existingSession?.publishableKey
-        savedStateHandle[KeyConsumerSession] = consumerSession.toCached(publishableKey)
+        val accountId = existingSession?.accountId
+        savedStateHandle[KeyConsumerSession] = consumerSession.toCached(publishableKey, accountId)
     }
 
     private fun ConsumerSession.toCached(
