@@ -1,11 +1,13 @@
 package com.stripe.android.paymentelement.confirmation
 
 import com.stripe.android.common.model.CommonConfiguration
+import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.confirmation.bacs.BacsConfirmationOption
 import com.stripe.android.paymentelement.confirmation.epms.ExternalPaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
+import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
@@ -14,6 +16,7 @@ internal fun PaymentSelection.toConfirmationOption(
     initializationMode: PaymentElementLoader.InitializationMode,
     configuration: CommonConfiguration,
     appearance: PaymentSheet.Appearance,
+    linkConfiguration: LinkConfiguration?,
 ): ConfirmationHandler.Option? {
     return when (this) {
         is PaymentSelection.Saved -> PaymentMethodConfirmationOption.Saved(
@@ -81,6 +84,12 @@ internal fun PaymentSelection.toConfirmationOption(
                 )
             )
         }
-        is PaymentSelection.Link -> null
+        is PaymentSelection.Link -> linkConfiguration?.let {
+            LinkConfirmationOption(
+                initializationMode = initializationMode,
+                shippingDetails = configuration.shippingDetails,
+                configuration = linkConfiguration,
+            )
+        }
     }
 }

@@ -39,7 +39,7 @@ internal object PaymentSheetFixtures {
         merchantDisplayName = MERCHANT_DISPLAY_NAME,
         customer = PaymentSheet.CustomerConfiguration(
             "customer_id",
-            "ephemeral_key"
+            "ek_123"
         ),
         googlePay = ConfigFixtures.GOOGLE_PAY,
         primaryButtonColor = ColorStateList.valueOf(Color.BLACK),
@@ -82,7 +82,7 @@ internal object PaymentSheetFixtures {
 
     private val defaultCustomerConfig = PaymentSheet.CustomerConfiguration(
         id = "customer_id",
-        ephemeralKeySecret = "ephemeral_key"
+        ephemeralKeySecret = "ek_6bpdbs8volf6ods1y6tf8oy9p9g64ehr"
     )
 
     internal val CONFIG_CUSTOMER = PaymentSheet.Configuration(

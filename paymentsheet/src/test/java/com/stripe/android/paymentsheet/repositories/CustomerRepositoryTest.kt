@@ -710,7 +710,7 @@ internal class CustomerRepositoryTest {
     private companion object {
         val FAKE_CUSTOMER_INFO = CustomerRepository.CustomerInfo(
             id = "customer_id",
-            ephemeralKeySecret = "ephemeral_key"
+            ephemeralKeySecret = "ek_123"
         )
     }
 }

@@ -23,6 +23,7 @@ internal class RecordingConfirmationDefinition<
     private val optionCalls = Turbine<OptionCall>()
     private val toResultCalls = Turbine<ToResultCall<TConfirmationOption, TLauncherResult>>()
     private val createLauncherCalls = Turbine<CreateLauncherCall<TLauncherResult>>()
+    private val unregisterCalls = Turbine<UnregisterCall<TLauncher>>()
     private val launchCalls = Turbine<LaunchCall<TConfirmationOption, TLauncher, TLauncherArgs>>()
     private val actionCalls = Turbine<ActionCall<TConfirmationOption>>()
 
@@ -52,6 +53,10 @@ internal class RecordingConfirmationDefinition<
         createLauncherCalls.add(CreateLauncherCall(activityResultCaller, onResult))
 
         return definition.createLauncher(activityResultCaller, onResult)
+    }
+
+    override fun unregister(launcher: TLauncher) {
+        unregisterCalls.add(UnregisterCall(launcher))
     }
 
     override fun launch(
@@ -90,6 +95,10 @@ internal class RecordingConfirmationDefinition<
         val onResult: (TLauncherResult) -> Unit
     )
 
+    class UnregisterCall<TLauncher>(
+        val launcher: TLauncher,
+    )
+
     class LaunchCall<TConfirmationOption : ConfirmationHandler.Option, TLauncher, TLauncherArgs>(
         val launcher: TLauncher,
         val arguments: TLauncherArgs,
@@ -112,6 +121,7 @@ internal class RecordingConfirmationDefinition<
         val optionCalls: ReceiveTurbine<OptionCall>,
         val toResultCalls: ReceiveTurbine<ToResultCall<TConfirmationOption, TLauncherResult>>,
         val createLauncherCalls: ReceiveTurbine<CreateLauncherCall<TLauncherResult>>,
+        val unregisterCalls: ReceiveTurbine<UnregisterCall<TLauncher>>,
         val launchCalls: ReceiveTurbine<LaunchCall<TConfirmationOption, TLauncher, TLauncherArgs>>,
         val actionCalls: ReceiveTurbine<ActionCall<TConfirmationOption>>,
     )
@@ -134,6 +144,7 @@ internal class RecordingConfirmationDefinition<
                     optionCalls = recordingDefinition.optionCalls,
                     toResultCalls = recordingDefinition.toResultCalls,
                     createLauncherCalls = recordingDefinition.createLauncherCalls,
+                    unregisterCalls = recordingDefinition.unregisterCalls,
                     launchCalls = recordingDefinition.launchCalls,
                     actionCalls = recordingDefinition.actionCalls,
                 )
@@ -142,6 +153,7 @@ internal class RecordingConfirmationDefinition<
             recordingDefinition.optionCalls.ensureAllEventsConsumed()
             recordingDefinition.toResultCalls.ensureAllEventsConsumed()
             recordingDefinition.createLauncherCalls.ensureAllEventsConsumed()
+            recordingDefinition.unregisterCalls.ensureAllEventsConsumed()
             recordingDefinition.launchCalls.ensureAllEventsConsumed()
             recordingDefinition.actionCalls.ensureAllEventsConsumed()
         }

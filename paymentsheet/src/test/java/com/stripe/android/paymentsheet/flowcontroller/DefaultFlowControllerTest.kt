@@ -2398,7 +2398,6 @@ internal class DefaultFlowControllerTest {
         enableLogging = ENABLE_LOGGING,
         productUsage = PRODUCT_USAGE,
         prefsRepositoryFactory = { prefsRepository },
-        linkLauncher = linkPaymentLauncher,
         configurationHandler = FlowControllerConfigurationHandler(
             paymentElementLoader = paymentElementLoader,
             uiContext = testDispatcher,
@@ -2415,6 +2414,7 @@ internal class DefaultFlowControllerTest {
             intentConfirmationInterceptor = fakeIntentConfirmationInterceptor,
             stripePaymentLauncherAssistedFactory = paymentLauncherAssistedFactory,
             paymentConfiguration = PaymentConfiguration.getInstance(context),
+            linkLauncher = linkPaymentLauncher,
             errorReporter = errorReporter,
             savedStateHandle = viewModel.handle,
             statusBarColor = STATUS_BAR_COLOR,

@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet
 import android.content.res.ColorStateList
 import android.graphics.Color
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import org.junit.Test
@@ -111,6 +112,40 @@ class PaymentSheetConfigurationKtxTest {
         }
     }
 
+    private fun getConfig(eKey: String): CommonConfiguration {
+        return configuration.copy(
+            customer = PaymentSheet.CustomerConfiguration(
+                id = "cus_1",
+                ephemeralKeySecret = eKey
+            ),
+        ).asCommonConfiguration()
+    }
+
+    @Test
+    fun `'validate' should succeed when ephemeral key secret is of correct format`() {
+        getConfig("ek_askljdlkasfhgasdfjls").validate()
+        getConfig("ek_test_iiuwfhdaiuhasdvkcjn32n").validate()
+    }
+
+    @Test
+    fun `'validate' should fail when ephemeral key secret is of wrong format`() {
+        fun assertFailsWithEphemeralKeySecret(ephemeralKeySecret: String) {
+            assertFailsWith(
+                IllegalArgumentException::class,
+                message = "`ephemeralKeySecret` format does not match expected client secret formatting"
+            ) {
+                getConfig(ephemeralKeySecret).validate()
+            }
+        }
+
+        assertFailsWithEphemeralKeySecret("eph_askjdfhajkshdfjkashdjkfhsakjdhfkjashfd")
+        assertFailsWithEphemeralKeySecret("eph_test_askjdfhajkshdfjkashdjkfhsakjdhfkjashfd")
+        assertFailsWithEphemeralKeySecret("sk_askjdfhajkshdfjkashdjkfhsakjdhfkjashfd")
+        assertFailsWithEphemeralKeySecret("ek_")
+        assertFailsWithEphemeralKeySecret("ek")
+        assertFailsWithEphemeralKeySecret("eeek_aldkfjalskdjflkasjbvdkjds")
+    }
+
     @OptIn(ExperimentalCustomerSessionApi::class)
     @Test
     fun `'validate' should fail when customer client secret key is secret is blank`() {
@@ -173,7 +208,7 @@ class PaymentSheetConfigurationKtxTest {
             merchantDisplayName = "Merchant, Inc.",
             customer = PaymentSheet.CustomerConfiguration(
                 id = "1",
-                ephemeralKeySecret = "secret",
+                ephemeralKeySecret = "ek_123",
             ),
             googlePay = PaymentSheet.GooglePayConfiguration(
                 environment = PaymentSheet.GooglePayConfiguration.Environment.Test,

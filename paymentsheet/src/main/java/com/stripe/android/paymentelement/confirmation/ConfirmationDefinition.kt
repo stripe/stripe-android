@@ -35,6 +35,10 @@ internal interface ConfirmationDefinition<
         onResult: (TLauncherResult) -> Unit,
     ): TLauncher
 
+    fun unregister(
+        launcher: TLauncher,
+    ) {}
+
     fun toResult(
         confirmationOption: TConfirmationOption,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
