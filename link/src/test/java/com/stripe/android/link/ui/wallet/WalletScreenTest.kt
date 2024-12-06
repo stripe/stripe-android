@@ -44,9 +44,7 @@ internal class WalletScreenTest {
         linkAccountManager.listPaymentDetailsResult = Result.success(
             ConsumerPaymentDetails(
                 paymentDetails = listOf(
-                    TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(
-                        expiryYear = 2099
-                    ),
+                    TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
                     TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT,
                 )
             )
@@ -98,9 +96,7 @@ internal class WalletScreenTest {
         linkAccountManager.listPaymentDetailsResult = Result.success(
             ConsumerPaymentDetails(
                 paymentDetails = listOf(
-                    TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(
-                        expiryYear = 2099
-                    ),
+                    TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
                     TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT
                 )
             )
