@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
@@ -34,6 +35,7 @@ import com.stripe.android.ui.core.R
 
 @Composable
 internal fun PrimaryButton(
+    modifier: Modifier = Modifier,
     label: String,
     state: PrimaryButtonState,
     onButtonClick: () -> Unit,
@@ -44,12 +46,13 @@ internal fun PrimaryButton(
         LocalContentAlpha provides
             if (state == PrimaryButtonState.Disabled) ContentAlpha.disabled else ContentAlpha.high
     ) {
-        Box(modifier = Modifier.padding(vertical = 16.dp)) {
+        Box(modifier.padding(vertical = 16.dp)) {
             Button(
                 onClick = onButtonClick,
                 modifier = Modifier
                     .height(PrimaryButtonHeight)
-                    .fillMaxWidth(),
+                    .fillMaxWidth()
+                    .testTag(PrimaryButtonTag),
                 enabled = state == PrimaryButtonState.Enabled,
                 elevation = ButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp, 0.dp),
                 shape = MaterialTheme.linkShapes.medium,
@@ -138,6 +141,7 @@ private val PrimaryButtonIconWidth = 13.dp
 private val PrimaryButtonIconHeight = 16.dp
 internal const val ProgressIndicatorTestTag = "CircularProgressIndicator"
 internal const val CompletedIconTestTag = "CompletedIcon"
+internal const val PrimaryButtonTag = "PrimaryButtonTag"
 
 @Composable
 @Preview
