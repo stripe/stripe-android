@@ -314,7 +314,7 @@ internal fun UploadImageDialog(
                         end = 24.dp
                     ),
                     text = stringResource(
-                        id = if (isFront) R.string.stripe_front_of_id else R.string.stripe_back_of_id
+                        id = if (isFront) R.string.stripe_front_of_id_document else R.string.stripe_back_of_id_document
                     ),
                     style = MaterialTheme.typography.subtitle1,
                     fontWeight = FontWeight.Bold
@@ -389,7 +389,7 @@ private fun SingleSideUploadRow(
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(
-            text = stringResource(id = if (isFront) R.string.stripe_front_of_id else R.string.stripe_back_of_id),
+            text = stringResource(id = if (isFront) R.string.stripe_front_of_id_document else R.string.stripe_back_of_id_document),
             modifier = Modifier.align(CenterVertically)
         )
         when (uploadUiState) {
@@ -414,7 +414,7 @@ private fun SingleSideUploadRow(
                 Image(
                     painter = painterResource(id = R.drawable.stripe_check_mark),
                     contentDescription = stringResource(
-                        id = if (isFront) R.string.stripe_front_of_id_selected else R.string.stripe_back_of_id_selected
+                        id = if (isFront) R.string.stripe_front_of_id_document_selected else R.string.stripe_back_of_id_document_selected
                     ),
                     modifier = Modifier
                         .height(18.dp)
