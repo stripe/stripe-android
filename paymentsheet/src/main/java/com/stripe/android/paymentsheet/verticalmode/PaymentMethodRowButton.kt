@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -58,14 +59,11 @@ internal fun PaymentMethodRowButton(
         isSelected = isSelected,
         contentPaddingValues = PaddingValues(horizontal = 12.dp, vertical = contentPaddingValues),
         verticalArrangement = Arrangement.Center,
+        isClickable = isClickable,
+        onClick = onClick,
         modifier = modifier
             .fillMaxWidth()
             .heightIn(min = 52.dp)
-            .selectable(
-                selected = isSelected,
-                enabled = isClickable,
-                onClick = onClick
-            ),
     ) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -92,12 +90,20 @@ private fun RowButtonFloatingOuterContent(
     isSelected: Boolean,
     contentPaddingValues: PaddingValues,
     verticalArrangement: Arrangement.Vertical,
+    isClickable: Boolean,
+    onClick: () -> Unit,
     modifier: Modifier,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     Card(
         modifier = modifier
-            .alpha(alpha = if (isEnabled) 1.0F else 0.6F),
+            .alpha(alpha = if (isEnabled) 1.0F else 0.6F)
+            .clip(MaterialTheme.shapes.medium)
+            .selectable(
+                selected = isSelected,
+                enabled = isClickable,
+                onClick = onClick
+            ),
         shape = MaterialTheme.shapes.medium,
         backgroundColor = MaterialTheme.stripeColors.component,
         border = MaterialTheme.getBorderStroke(isSelected),
