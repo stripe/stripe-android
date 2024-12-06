@@ -2931,6 +2931,7 @@ internal class PaymentSheetViewModelTest {
         val savedStateHandle = SavedStateHandle(
             initialState = mapOf(
                 "AwaitingConfirmationResult" to DefaultConfirmationHandler.AwaitingConfirmationResultData(
+                    key = "Intent",
                     confirmationOption = option,
                     receivesResultInProcess = false,
                 ),

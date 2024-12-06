@@ -28,12 +28,12 @@ internal class DefaultConfirmationHandler(
     private val savedStateHandle: SavedStateHandle,
     private val errorReporter: ErrorReporter,
 ) : ConfirmationHandler {
-    private val isAwaitingForResultData = retrieveIsAwaitingForResultData()
+    private val isInitiallyAwaitingForResultData = retrieveIsAwaitingForResultData()
 
-    override val hasReloadedFromProcessDeath = isAwaitingForResultData != null
+    override val hasReloadedFromProcessDeath = isInitiallyAwaitingForResultData != null
 
     private val _state = MutableStateFlow(
-        isAwaitingForResultData?.let { data ->
+        isInitiallyAwaitingForResultData?.let { data ->
             ConfirmationHandler.State.Confirming(data.confirmationOption)
         } ?: ConfirmationHandler.State.Idle
     )
@@ -44,9 +44,12 @@ internal class DefaultConfirmationHandler(
             coroutineScope.launch {
                 delay(1.seconds)
 
+                val isStillAwaitingForResultData = retrieveIsAwaitingForResultData()
+
                 if (
-                    _state.value is ConfirmationHandler.State.Confirming &&
-                    isAwaitingForResultData?.receivesResultInProcess != true
+                    isStillAwaitingForResultData != null &&
+                    isStillAwaitingForResultData.key == isInitiallyAwaitingForResultData?.key &&
+                    !isStillAwaitingForResultData.receivesResultInProcess
                 ) {
                     onHandlerResult(
                         ConfirmationHandler.Result.Canceled(
@@ -142,6 +145,7 @@ internal class DefaultConfirmationHandler(
         when (val action = mediator.action(confirmationOption, intent)) {
             is ConfirmationMediator.Action.Launch -> {
                 storeIsAwaitingForResult(
+                    key = mediator.key,
                     option = confirmationOption,
                     receivesResultInProcess = action.receivesResultInProcess,
                 )
@@ -171,6 +175,8 @@ internal class DefaultConfirmationHandler(
     private fun onResult(result: ConfirmationDefinition.Result) {
         val confirmationResult = when (result) {
             is ConfirmationDefinition.Result.NextStep -> {
+                removeIsAwaitingForResult()
+
                 coroutineScope.launch {
                     confirm(
                         intent = result.intent,
@@ -204,10 +210,12 @@ internal class DefaultConfirmationHandler(
     }
 
     private fun storeIsAwaitingForResult(
+        key: String,
         option: ConfirmationHandler.Option,
         receivesResultInProcess: Boolean,
     ) {
         savedStateHandle[AWAITING_CONFIRMATION_RESULT_KEY] = AwaitingConfirmationResultData(
+            key = key,
             confirmationOption = option,
             receivesResultInProcess = receivesResultInProcess,
         )
@@ -229,6 +237,7 @@ internal class DefaultConfirmationHandler(
 
     @Parcelize
     data class AwaitingConfirmationResultData(
+        val key: String,
         val confirmationOption: ConfirmationHandler.Option,
         /*
          * Indicates the user receives the result within the process of the app. For example, Bacs & Google Pay open
