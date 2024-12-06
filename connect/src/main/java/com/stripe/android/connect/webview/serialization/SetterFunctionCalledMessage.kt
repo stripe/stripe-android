@@ -64,9 +64,15 @@ internal data class SetOnLoaderStart(
  */
 @Serializable
 internal data class SetOnLoadError(
-    val type: String, // TODO - possibly use an enum or sealed class here.
-    val message: String?,
-) : SetterFunctionCalledMessage.Value
+    val error: LoadError
+) : SetterFunctionCalledMessage.Value {
+
+    @Serializable
+    data class LoadError(
+        val type: String?, // TODO - possibly use an enum or sealed class here.
+        val message: String?,
+    )
+}
 
 /**
  * The connected account has exited the onboarding process.

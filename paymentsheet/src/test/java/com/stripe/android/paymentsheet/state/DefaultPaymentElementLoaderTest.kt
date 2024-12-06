@@ -127,6 +127,7 @@ internal class DefaultPaymentElementLoaderTest {
                     paymentMethods = PAYMENT_METHODS,
                     permissions = CustomerState.Permissions(
                         canRemovePaymentMethods = true,
+                        canRemoveLastPaymentMethod = true,
                         canRemoveDuplicates = false,
                     ),
                 ),
@@ -1380,6 +1381,7 @@ internal class DefaultPaymentElementLoaderTest {
                     paymentMethods = cards,
                     permissions = CustomerState.Permissions(
                         canRemovePaymentMethods = false,
+                        canRemoveLastPaymentMethod = false,
                         canRemoveDuplicates = true,
                     ),
                 )
@@ -1396,6 +1398,7 @@ internal class DefaultPaymentElementLoaderTest {
                     session = createElementsSessionCustomerSession(
                         ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
                             isPaymentMethodRemoveEnabled = true,
+                            canRemoveLastPaymentMethod = true,
                             isPaymentMethodSaveEnabled = false,
                             allowRedisplayOverride = null,
                         )
@@ -1421,6 +1424,7 @@ internal class DefaultPaymentElementLoaderTest {
             assertThat(state.customer?.permissions).isEqualTo(
                 CustomerState.Permissions(
                     canRemovePaymentMethods = true,
+                    canRemoveLastPaymentMethod = true,
                     canRemoveDuplicates = true,
                 )
             )
@@ -1437,6 +1441,7 @@ internal class DefaultPaymentElementLoaderTest {
                         ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
                             isPaymentMethodRemoveEnabled = false,
                             isPaymentMethodSaveEnabled = false,
+                            canRemoveLastPaymentMethod = true,
                             allowRedisplayOverride = null,
                         )
                     ),
@@ -1461,6 +1466,7 @@ internal class DefaultPaymentElementLoaderTest {
             assertThat(state.customer?.permissions).isEqualTo(
                 CustomerState.Permissions(
                     canRemovePaymentMethods = false,
+                    canRemoveLastPaymentMethod = true,
                     canRemoveDuplicates = true,
                 )
             )
@@ -1477,6 +1483,7 @@ internal class DefaultPaymentElementLoaderTest {
                         ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
                             isPaymentMethodRemoveEnabled = false,
                             isPaymentMethodSaveEnabled = false,
+                            canRemoveLastPaymentMethod = true,
                             allowRedisplayOverride = null,
                         )
                     ),
@@ -1501,6 +1508,7 @@ internal class DefaultPaymentElementLoaderTest {
             assertThat(state.customer?.permissions).isEqualTo(
                 CustomerState.Permissions(
                     canRemovePaymentMethods = false,
+                    canRemoveLastPaymentMethod = true,
                     canRemoveDuplicates = true,
                 )
             )
@@ -1528,6 +1536,7 @@ internal class DefaultPaymentElementLoaderTest {
             assertThat(state.customer?.permissions).isEqualTo(
                 CustomerState.Permissions(
                     canRemovePaymentMethods = true,
+                    canRemoveLastPaymentMethod = true,
                     canRemoveDuplicates = false,
                 )
             )
@@ -1651,6 +1660,7 @@ internal class DefaultPaymentElementLoaderTest {
                     paymentMethods = cards,
                     permissions = CustomerState.Permissions(
                         canRemovePaymentMethods = true,
+                        canRemoveLastPaymentMethod = true,
                         canRemoveDuplicates = false,
                     ),
                 )
@@ -2107,6 +2117,73 @@ internal class DefaultPaymentElementLoaderTest {
         )
     }
 
+    @Test
+    fun `When using 'LegacyEphemeralKey',last PM permission should be true if config value is true`() =
+        removeLastPaymentMethodTest(
+            customer = PaymentSheet.CustomerConfiguration(
+                id = "cus_1",
+                ephemeralKeySecret = "ek_123",
+            ),
+            canRemoveLastPaymentMethodFromConfig = true,
+        ) { permissions ->
+            assertThat(permissions.canRemoveLastPaymentMethod).isTrue()
+        }
+
+    @OptIn(ExperimentalCustomerSessionApi::class)
+    @Test
+    fun `When using 'CustomerSession', last PM permission should be true if server & config value is true`() =
+        removeLastPaymentMethodTest(
+            customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                id = "cus_1",
+                clientSecret = "cuss_123",
+            ),
+            canRemoveLastPaymentMethodFromServer = true,
+            canRemoveLastPaymentMethodFromConfig = true,
+        ) { permissions ->
+            assertThat(permissions.canRemoveLastPaymentMethod).isTrue()
+        }
+
+    private fun removeLastPaymentMethodTest(
+        customer: PaymentSheet.CustomerConfiguration,
+        shouldDisableMobilePaymentElement: Boolean = false,
+        canRemoveLastPaymentMethodFromServer: Boolean = true,
+        canRemoveLastPaymentMethodFromConfig: Boolean = true,
+        test: (CustomerState.Permissions) -> Unit,
+    ) = runTest {
+        val loader = createPaymentElementLoader(
+            customer = ElementsSession.Customer(
+                paymentMethods = PaymentMethodFactory.cards(4),
+                session = createElementsSessionCustomerSession(
+                    if (shouldDisableMobilePaymentElement) {
+                        ElementsSession.Customer.Components.MobilePaymentElement.Disabled
+                    } else {
+                        ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
+                            isPaymentMethodRemoveEnabled = false,
+                            isPaymentMethodSaveEnabled = false,
+                            canRemoveLastPaymentMethod = canRemoveLastPaymentMethodFromServer,
+                            allowRedisplayOverride = null,
+                        )
+                    }
+                ),
+                defaultPaymentMethod = null,
+            )
+        )
+
+        val state = loader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = "client_secret"
+            ),
+            paymentSheetConfiguration = PaymentSheet.Configuration(
+                merchantDisplayName = "Merchant, Inc.",
+                customer = customer,
+                allowsRemovalOfLastSavedPaymentMethod = canRemoveLastPaymentMethodFromConfig
+            ),
+            initializedViaCompose = false,
+        ).getOrThrow()
+
+        test(requireNotNull(state.customer).permissions)
+    }
+
     private suspend fun testExternalPaymentMethods(
         requestedExternalPaymentMethods: List<String>,
         externalPaymentMethodData: String?,
@@ -2200,6 +2277,7 @@ internal class DefaultPaymentElementLoaderTest {
                 ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
                     isPaymentMethodSaveEnabled = it,
                     isPaymentMethodRemoveEnabled = true,
+                    canRemoveLastPaymentMethod = true,
                     allowRedisplayOverride = null,
                 )
             } ?: ElementsSession.Customer.Components.MobilePaymentElement.Disabled

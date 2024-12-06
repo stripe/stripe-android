@@ -68,6 +68,20 @@ internal class StripeConnectWebViewContainerController<Listener : StripeEmbedded
         updateState { copy(isNativeLoadingIndicatorVisible = !receivedSetOnLoaderStart) }
     }
 
+    fun onReceivedError(requestUrl: String, httpStatusCode: Int? = null, errorMessage: String? = null) {
+        val errorString = buildString {
+            if (httpStatusCode != null) {
+                append("Received $httpStatusCode loading $requestUrl")
+            } else {
+                append("Received error loading $requestUrl")
+            }
+            if (errorMessage != null) {
+                append(": $errorMessage")
+            }
+        }
+        listener?.onLoadError(RuntimeException(errorString)) // TODO - wrap error better
+    }
+
     fun shouldOverrideUrlLoading(context: Context, request: WebResourceRequest): Boolean {
         val url = request.url
         return if (url.host?.lowercase() in ALLOWLISTED_HOSTS) {
@@ -180,7 +194,7 @@ internal class StripeConnectWebViewContainerController<Listener : StripeEmbedded
             }
             is SetOnLoadError -> {
                 // TODO - wrap error better
-                listener?.onLoadError(RuntimeException("${value.type}: ${value.message}"))
+                listener?.onLoadError(RuntimeException("${value.error.type}: ${value.error.message}"))
             }
             else -> {
                 with(listenerDelegate) {

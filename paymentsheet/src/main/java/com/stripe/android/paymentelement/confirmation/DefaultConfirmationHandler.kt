@@ -160,7 +160,7 @@ internal class DefaultConfirmationHandler(
             is ConfirmationMediator.Action.Complete -> {
                 onHandlerResult(
                     ConfirmationHandler.Result.Succeeded(
-                        intent = intent,
+                        intent = action.intent,
                         deferredIntentConfirmationType = action.deferredIntentConfirmationType,
                     )
                 )

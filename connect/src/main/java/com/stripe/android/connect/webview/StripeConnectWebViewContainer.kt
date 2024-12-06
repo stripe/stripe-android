@@ -3,11 +3,14 @@ package com.stripe.android.connect.webview
 import android.annotation.SuppressLint
 import android.content.res.ColorStateList
 import android.graphics.Bitmap
+import android.os.Build
 import android.view.LayoutInflater
 import android.webkit.JavascriptInterface
 import android.webkit.PermissionRequest
 import android.webkit.WebChromeClient
+import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
+import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.FrameLayout
@@ -184,6 +187,7 @@ internal class StripeConnectWebViewContainerImpl<Listener : StripeEmbeddedCompon
         val viewBinding = this.viewBinding ?: return
         viewBinding.stripeWebView.setBackgroundColor(state.backgroundColor)
         viewBinding.stripeWebViewProgressBar.isVisible = state.isNativeLoadingIndicatorVisible
+        viewBinding.stripeWebView.isVisible = !state.isNativeLoadingIndicatorVisible
         if (state.isNativeLoadingIndicatorVisible) {
             viewBinding.stripeWebViewProgressBar.indeterminateTintList =
                 ColorStateList.valueOf(state.nativeLoadingIndicatorColor)
@@ -195,6 +199,25 @@ internal class StripeConnectWebViewContainerImpl<Listener : StripeEmbeddedCompon
         override fun onPageStarted(view: WebView, url: String?, favicon: Bitmap?) {
             initJavascriptBridge(view)
             controller?.onPageStarted()
+        }
+
+        override fun onReceivedHttpError(
+            view: WebView,
+            request: WebResourceRequest,
+            errorResponse: WebResourceResponse
+        ) {
+            controller?.onReceivedError(request.url.toString(), errorResponse.statusCode, errorResponse.reasonPhrase)
+        }
+
+        override fun onReceivedError(view: WebView, request: WebResourceRequest, error: WebResourceError) {
+            // for some reason errorCode and description are only available in API 23+,
+            // so we simply ignore the description for older devices
+            val errorMessage = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                error.description.toString()
+            } else {
+                null
+            }
+            controller?.onReceivedError(request.url.toString(), errorMessage = errorMessage)
         }
 
         private fun initJavascriptBridge(webView: WebView) {

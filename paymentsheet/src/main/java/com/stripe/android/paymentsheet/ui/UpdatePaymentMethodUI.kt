@@ -301,7 +301,7 @@ private fun DeletePaymentMethodUi(interactor: UpdatePaymentMethodInteractor) {
         title = R.string.stripe_remove.resolvableString,
         borderColor = MaterialTheme.colors.error,
         idle = status == UpdatePaymentMethodInteractor.Status.Idle,
-        removing = openDialogValue.value || status == UpdatePaymentMethodInteractor.Status.Removing,
+        removing = status == UpdatePaymentMethodInteractor.Status.Removing,
         onRemove = { openDialogValue.value = true },
         testTag = UPDATE_PM_REMOVE_BUTTON_TEST_TAG,
     )

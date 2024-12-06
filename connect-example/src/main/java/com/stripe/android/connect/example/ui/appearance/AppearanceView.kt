@@ -1,12 +1,12 @@
 package com.stripe.android.connect.example.ui.appearance
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.RadioButton
@@ -22,9 +22,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.stripe.android.connect.example.MainContent
 import com.stripe.android.connect.example.R
+import com.stripe.android.connect.example.ui.common.ConnectExampleScaffold
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun AppearanceView(
     onDismiss: () -> Unit,
@@ -32,8 +33,7 @@ fun AppearanceView(
 ) {
     val state by viewModel.state.collectAsState()
 
-    BackHandler { onDismiss() }
-    MainContent(
+    ConnectExampleScaffold(
         title = stringResource(R.string.customize_appearance),
         navigationIcon = {
             IconButton(onClick = onDismiss) {

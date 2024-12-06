@@ -6,6 +6,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.CoreCommonModule
@@ -30,9 +31,13 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.EmbeddedPaymentElement.ConfigureResult
 import com.stripe.android.paymentelement.EmbeddedPaymentElement.PaymentOptionDisplayData
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
+import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
+import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.injection.PaymentElementConfirmationModule
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
+import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
@@ -60,6 +65,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.plus
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Provider
@@ -69,11 +75,18 @@ import kotlin.reflect.KClass
 
 @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 internal class SharedPaymentElementViewModel @Inject constructor(
+    confirmationHandlerFactory: ConfirmationHandler.Factory,
+    @IOContext ioContext: CoroutineContext,
     private val configurationHandler: EmbeddedConfigurationHandler,
     private val paymentOptionDisplayDataFactory: PaymentOptionDisplayDataFactory,
 ) : ViewModel() {
     private val _paymentOption: MutableStateFlow<PaymentOptionDisplayData?> = MutableStateFlow(null)
     val paymentOption: StateFlow<PaymentOptionDisplayData?> = _paymentOption.asStateFlow()
+
+    val confirmationHandler = confirmationHandlerFactory.create(viewModelScope + ioContext)
+
+    @Volatile
+    var confirmationState: EmbeddedConfirmationHelper.State? = null
 
     suspend fun configure(
         intentConfiguration: PaymentSheet.IntentConfiguration,
@@ -84,6 +97,12 @@ internal class SharedPaymentElementViewModel @Inject constructor(
             configuration = configuration,
         ).fold(
             onSuccess = { state ->
+                confirmationState = EmbeddedConfirmationHelper.State(
+                    paymentMethodMetadata = state.paymentMethodMetadata,
+                    selection = state.paymentSelection,
+                    initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(intentConfiguration),
+                    configuration = configuration,
+                )
                 _paymentOption.value = paymentOptionDisplayDataFactory.create(state.paymentSelection)
                 ConfigureResult.Succeeded()
             },
@@ -93,11 +112,12 @@ internal class SharedPaymentElementViewModel @Inject constructor(
         )
     }
 
-    class Factory : ViewModelProvider.Factory {
+    class Factory(private val statusBarColor: Int?) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: KClass<T>, extras: CreationExtras): T {
             val component = DaggerSharedPaymentElementViewModelComponent.builder()
                 .savedStateHandle(extras.createSavedStateHandle())
                 .context(extras.requireApplication())
+                .statusBarColor(statusBarColor)
                 .build()
             @Suppress("UNCHECKED_CAST")
             return component.viewModel as T
@@ -113,6 +133,7 @@ internal class SharedPaymentElementViewModel @Inject constructor(
         GooglePayLauncherModule::class,
         CoreCommonModule::class,
         StripeRepositoryModule::class,
+        PaymentElementConfirmationModule::class,
     ]
 )
 internal interface SharedPaymentElementViewModelComponent {
@@ -125,6 +146,9 @@ internal interface SharedPaymentElementViewModelComponent {
 
         @BindsInstance
         fun context(context: Context): Builder
+
+        @BindsInstance
+        fun statusBarColor(@Named(STATUS_BAR_COLOR) statusBarColor: Int?): Builder
 
         fun build(): SharedPaymentElementViewModelComponent
     }
@@ -172,13 +196,18 @@ internal interface SharedPaymentElementViewModelModule {
     @Suppress("TooManyFunctions")
     companion object {
         @Provides
+        @Singleton
+        @Named(ALLOWS_MANUAL_CONFIRMATION)
+        fun provideAllowsManualConfirmation() = true
+
+        @Provides
         fun provideEventReporterMode(): EventReporter.Mode {
             return EventReporter.Mode.Embedded
         }
 
         @Provides
         @Named(PRODUCT_USAGE)
-        fun provideProductUsageTokens() = setOf("Embedded")
+        fun provideProductUsageTokens() = setOf("EmbeddedPaymentElement")
 
         /**
          * Provides a non-singleton PaymentConfiguration.

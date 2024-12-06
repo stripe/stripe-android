@@ -412,7 +412,11 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 }
             }
             is ViewAction.EditPaymentMethod -> {
-                onEditPaymentMethod(viewAction.savedPaymentMethod)
+                if (FeatureFlags.useNewUpdateCardScreen.isEnabled) {
+                    onUpdatePaymentMethod(viewAction.savedPaymentMethod)
+                } else {
+                    onEditPaymentMethod(viewAction.savedPaymentMethod)
+                }
             }
         }
     }

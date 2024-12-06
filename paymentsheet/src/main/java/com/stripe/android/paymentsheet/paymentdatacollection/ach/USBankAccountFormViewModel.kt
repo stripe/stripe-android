@@ -17,6 +17,7 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheet.Element
 import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.model.Address
+import com.stripe.android.model.IncentiveEligibilitySession
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -494,21 +495,28 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     }
 
     private fun makeElementsSessionContext(): ElementsSessionContext {
-        val initializationMode = if (args.clientSecret == null) {
-            ElementsSessionContext.InitializationMode.DeferredIntent
-        } else if (args.isPaymentFlow) {
-            ElementsSessionContext.InitializationMode.PaymentIntent(args.stripeIntentId!!)
+        val intentId = args.stripeIntentId!!
+        val eligibleForIncentive = args.incentive != null
+
+        val incentiveEligibilitySession = if (eligibleForIncentive) {
+            if (args.clientSecret == null) {
+                IncentiveEligibilitySession.DeferredIntent(intentId)
+            } else if (args.isPaymentFlow) {
+                IncentiveEligibilitySession.PaymentIntent(intentId)
+            } else {
+                IncentiveEligibilitySession.SetupIntent(intentId)
+            }
         } else {
-            ElementsSessionContext.InitializationMode.SetupIntent(args.stripeIntentId!!)
+            null
         }
 
         return ElementsSessionContext(
-            initializationMode = initializationMode,
             amount = args.formArgs.amount?.value,
             currency = args.formArgs.amount?.currencyCode,
             linkMode = args.linkMode,
             billingDetails = makeElementsSessionContextBillingDetails(),
             prefillDetails = makePrefillDetails(),
+            incentiveEligibilitySession = incentiveEligibilitySession,
         )
     }
 

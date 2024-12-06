@@ -214,7 +214,6 @@ class RealCreateInstantDebitsResultTest {
         billingDetails: BillingDetails? = null,
     ): ElementsSessionContext {
         return ElementsSessionContext(
-            initializationMode = ElementsSessionContext.InitializationMode.PaymentIntent("pi_123"),
             amount = 100L,
             currency = "usd",
             linkMode = linkMode,
@@ -223,7 +222,8 @@ class RealCreateInstantDebitsResultTest {
                 email = null,
                 phone = null,
                 phoneCountryCode = null,
-            )
+            ),
+            incentiveEligibilitySession = null,
         )
     }
 }

@@ -34,7 +34,7 @@ class EmbeddedComponentManagerProvider @Inject constructor(
     // In the future it may manage multiple instances if needed.
     private var embeddedComponentManager: EmbeddedComponentManager? = null
 
-    private val loggingTag = this::class.java.name
+    private val loggingTag = this::class.java.simpleName
     private val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG)
     private val ioScope: CoroutineScope by lazy { CoroutineScope(Dispatchers.IO) }
 
@@ -50,15 +50,10 @@ class EmbeddedComponentManagerProvider @Inject constructor(
      * Provides the EmbeddedComponentManager instance, creating it if it doesn't exist.
      * Throws [IllegalStateException] if an EmbeddedComponentManager cannot be created at this time.
      */
-    fun provideEmbeddedComponentManager(activity: ComponentActivity): EmbeddedComponentManager {
-        if (embeddedComponentManager != null) {
-            return embeddedComponentManager!!
-        }
+    fun provideEmbeddedComponentManager(activity: ComponentActivity): EmbeddedComponentManager? {
+        embeddedComponentManager?.let { return it } // return the embedded component manager if it already exists
 
-        // TODO - handle app restoration where publishableKey may be null when this is called
-        val publishableKey = embeddedComponentService.publishableKey.value
-            ?: throw IllegalStateException("Publishable key must be set before creating EmbeddedComponentManager")
-
+        val publishableKey = embeddedComponentService.publishableKey.value ?: return null
         return EmbeddedComponentManager(
             activity = activity,
             configuration = EmbeddedComponentManager.Configuration(
