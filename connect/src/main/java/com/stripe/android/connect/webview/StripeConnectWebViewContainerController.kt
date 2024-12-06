@@ -150,7 +150,7 @@ internal class StripeConnectWebViewContainerController<Listener : StripeEmbedded
         if (checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
             request.grant(permissionsRequested)
         } else {
-            val isGranted = embeddedComponentManager.requestCameraPermission()
+            val isGranted = embeddedComponentManager.requestCameraPermission(context) ?: return
             withContext(Dispatchers.Main) {
                 if (isGranted) {
                     request.grant(permissionsRequested)

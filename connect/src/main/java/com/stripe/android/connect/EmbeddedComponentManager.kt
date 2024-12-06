@@ -1,8 +1,12 @@
 package com.stripe.android.connect
 
+import android.app.Activity
+import android.app.Application.ActivityLifecycleCallbacks
 import android.content.Context
+import android.os.Bundle
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RestrictTo
 import kotlinx.coroutines.MainScope
@@ -11,6 +15,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import com.stripe.android.connect.appearance.Appearance
 import com.stripe.android.connect.appearance.fonts.CustomFontSource
+import com.stripe.android.connect.util.findActivity
 import com.stripe.android.connect.webview.serialization.ConnectInstanceJs
 import com.stripe.android.connect.webview.serialization.toJs
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,7 +28,6 @@ import kotlin.coroutines.resume
 @PrivateBetaConnectSDK
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class EmbeddedComponentManager(
-    activity: ComponentActivity,
     private val configuration: Configuration,
     private val fetchClientSecretCallback: FetchClientSecretCallback,
     appearance: Appearance = Appearance(),
@@ -32,17 +36,9 @@ class EmbeddedComponentManager(
     private val _appearanceFlow = MutableStateFlow(appearance)
     internal val appearanceFlow: StateFlow<Appearance> get() = _appearanceFlow.asStateFlow()
 
-    private val permissionsFlow: MutableSharedFlow<Boolean> = MutableSharedFlow()
-    private val requestPermissionLauncher = activity.registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        MainScope().launch {
-            permissionsFlow.emit(isGranted)
-        }
-    }
-
-    internal suspend fun requestCameraPermission(): Boolean {
-        requestPermissionLauncher.launch(android.Manifest.permission.CAMERA)
+    internal suspend fun requestCameraPermission(context: Context): Boolean? {
+        val activity = context.findActivity() ?: error("You must create an AccountOnboardingView from an Activity")
+        launcherMap[activity]?.launch(android.Manifest.permission.CAMERA) ?: return null
         return permissionsFlow.first()
     }
 
@@ -51,8 +47,13 @@ class EmbeddedComponentManager(
      */
     fun createAccountOnboardingView(
         context: Context,
-        listener: AccountOnboardingListener? = null
+        listener: AccountOnboardingListener? = null,
     ): AccountOnboardingView {
+        val activity = context.findActivity() ?: error("You must create an AccountOnboardingView from an Activity")
+        checkNotNull(launcherMap[activity]) {
+            "You must call EmbeddedComponentManager.onActivityCreate in your Activity.onCreate function"
+        }
+
         return AccountOnboardingView(
             context = context,
             embeddedComponentManager = this,
@@ -67,6 +68,11 @@ class EmbeddedComponentManager(
         context: Context,
         listener: PayoutsListener? = null,
     ): PayoutsView {
+        val activity = context.findActivity() ?: error("You must create an AccountOnboardingView from an Activity")
+        checkNotNull(launcherMap[activity]) {
+            "You must call EmbeddedComponentManager.onActivityCreate in your Activity.onCreate function"
+        }
+
         return PayoutsView(
             context = context,
             embeddedComponentManager = this,
@@ -126,4 +132,46 @@ class EmbeddedComponentManager(
     data class Configuration(
         val publishableKey: String,
     ) : Parcelable
+
+    companion object {
+        private val launcherMap = mutableMapOf<Activity, ActivityResultLauncher<String>>()
+        private val permissionsFlow: MutableSharedFlow<Boolean> = MutableSharedFlow()
+
+        fun onActivityCreate(activity: ComponentActivity) {
+            val application = activity.application
+
+            application.registerActivityLifecycleCallbacks(object : ActivityLifecycleCallbacks {
+                override fun onActivityDestroyed(destroyedActivity: Activity) {
+                    // ensure we remove the activity and its launcher from our map, and unregister
+                    // this activity from future callbacks
+                    launcherMap.remove(destroyedActivity)
+                    if (destroyedActivity == activity) {
+                        application.unregisterActivityLifecycleCallbacks(this)
+                    }
+                }
+
+                override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) { /* no-op */ }
+
+                override fun onActivityStarted(activity: Activity) { /* no-op */ }
+
+                override fun onActivityResumed(activity: Activity) { /* no-op */ }
+
+                override fun onActivityPaused(activity: Activity) { /* no-op */ }
+
+                override fun onActivityStopped(activity: Activity) { /* no-op */ }
+
+                override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) { /* no-op */ }
+            })
+
+            activity.registerForActivityResult(
+                ActivityResultContracts.RequestPermission()
+            ) { isGranted ->
+                MainScope().launch {
+                    permissionsFlow.emit(isGranted)
+                }
+            }.also {
+                launcherMap[activity] = it
+            }
+        }
+    }
 }

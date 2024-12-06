@@ -50,12 +50,11 @@ class EmbeddedComponentManagerProvider @Inject constructor(
      * Provides the EmbeddedComponentManager instance, creating it if it doesn't exist.
      * Throws [IllegalStateException] if an EmbeddedComponentManager cannot be created at this time.
      */
-    fun provideEmbeddedComponentManager(activity: ComponentActivity): EmbeddedComponentManager? {
+    fun provideEmbeddedComponentManager(): EmbeddedComponentManager? {
         embeddedComponentManager?.let { return it } // return the embedded component manager if it already exists
 
         val publishableKey = embeddedComponentService.publishableKey.value ?: return null
         return EmbeddedComponentManager(
-            activity = activity,
             configuration = EmbeddedComponentManager.Configuration(
                 publishableKey = publishableKey,
             ),
