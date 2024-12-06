@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.example
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.appcompat.app.AppCompatActivity
@@ -102,6 +103,9 @@ class MainActivity : AppCompatActivity() {
         setContentView(viewBinding.root)
         setSupportActionBar(viewBinding.toolbar)
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            window.isNavigationBarContrastEnforced = false
+        }
         viewBinding.content.setContent {
             PaymentSheetExampleTheme {
                 MainScreen(items = items)

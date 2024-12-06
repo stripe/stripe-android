@@ -3,8 +3,11 @@ package com.stripe.android.connect.example.ui.common
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetState
@@ -33,9 +36,11 @@ fun ConnectExampleScaffold(
     content: @Composable () -> Unit,
 ) {
     Scaffold(
+        contentWindowInsets = WindowInsets.systemBars,
         modifier = Modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
+                windowInsets = WindowInsets.statusBars,
                 title = {
                     Text(
                         text = title,
