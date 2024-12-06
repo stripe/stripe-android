@@ -348,9 +348,7 @@ internal class DefaultFlowController @Inject internal constructor(
             val initializationMode = requireNotNull(initializationMode)
 
             val confirmationOption = paymentSelection?.toConfirmationOption(
-                initializationMode = initializationMode,
                 configuration = state.config,
-                appearance = appearance,
                 linkConfiguration = state.linkState?.configuration,
             )
 
@@ -361,6 +359,9 @@ internal class DefaultFlowController @Inject internal constructor(
                     arguments = ConfirmationHandler.Args(
                         confirmationOption = option,
                         intent = stripeIntent,
+                        initializationMode = initializationMode,
+                        appearance = appearance,
+                        shippingDetails = state.config.shippingDetails,
                     )
                 )
             } ?: run {

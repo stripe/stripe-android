@@ -17,6 +17,7 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentElementConfirmationTestActivity
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
@@ -25,6 +26,7 @@ import com.stripe.android.paymentelement.confirmation.assertConfirming
 import com.stripe.android.paymentelement.confirmation.assertIdle
 import com.stripe.android.paymentelement.confirmation.assertSucceeded
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.createTestActivityRule
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.FeatureFlagTestRule
@@ -71,8 +73,11 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
 
             confirmationHandler.start(
                 ConfirmationHandler.Args(
-                    intent = PAYMENT_INTENT,
                     confirmationOption = LINK_CONFIRMATION_OPTION,
+                    appearance = CONFIRMATION_PARAMETERS.appearance,
+                    intent = CONFIRMATION_PARAMETERS.intent,
+                    shippingDetails = CONFIRMATION_PARAMETERS.shippingDetails,
+                    initializationMode = CONFIRMATION_PARAMETERS.initializationMode,
                 )
             )
 
@@ -110,8 +115,6 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
             assertThat(confirmingWithSavedPaymentMethod.option)
                 .isEqualTo(
                     PaymentMethodConfirmationOption.Saved(
-                        initializationMode = LINK_CONFIRMATION_OPTION.initializationMode,
-                        shippingDetails = LINK_CONFIRMATION_OPTION.shippingDetails,
                         paymentMethod = paymentMethod,
                         optionsParams = null,
                     )
@@ -209,10 +212,6 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
         )
 
         val LINK_CONFIRMATION_OPTION = LinkConfirmationOption(
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = "pi_123_secret_123"
-            ),
-            shippingDetails = null,
             configuration = LinkConfiguration(
                 stripeIntent = PAYMENT_INTENT,
                 merchantName = "Merchant, Inc.",
@@ -228,6 +227,15 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
                 flags = mapOf(),
                 cardBrandChoice = null,
             ),
+        )
+
+        val CONFIRMATION_PARAMETERS = ConfirmationDefinition.Parameters(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = "pi_123_secret_123"
+            ),
+            shippingDetails = null,
+            intent = PAYMENT_INTENT,
+            appearance = PaymentSheet.Appearance(),
         )
 
         const val LINK_COMPLETE_CODE = 49871

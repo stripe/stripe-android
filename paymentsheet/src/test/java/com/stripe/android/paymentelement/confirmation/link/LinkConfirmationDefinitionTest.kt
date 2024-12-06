@@ -16,7 +16,9 @@ import com.stripe.android.paymentelement.confirmation.asFailed
 import com.stripe.android.paymentelement.confirmation.asLaunch
 import com.stripe.android.paymentelement.confirmation.asNextStep
 import com.stripe.android.paymentelement.confirmation.asSaved
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
@@ -82,7 +84,7 @@ class LinkConfirmationDefinitionTest {
 
         val action = definition.action(
             confirmationOption = LINK_CONFIRMATION_OPTION,
-            intent = PAYMENT_INTENT,
+            confirmationParameters = CONFIRMATION_PARAMETERS,
         )
 
         assertThat(action).isInstanceOf<ConfirmationDefinition.Action.Launch<Unit>>()
@@ -100,7 +102,7 @@ class LinkConfirmationDefinitionTest {
 
         definition.launch(
             confirmationOption = LINK_CONFIRMATION_OPTION,
-            intent = PAYMENT_INTENT,
+            confirmationParameters = CONFIRMATION_PARAMETERS,
             launcher = launcherScenario.launcher,
             arguments = Unit,
         )
@@ -118,7 +120,7 @@ class LinkConfirmationDefinitionTest {
 
         val result = definition.toResult(
             confirmationOption = LINK_CONFIRMATION_OPTION,
-            intent = PAYMENT_INTENT,
+            confirmationParameters = CONFIRMATION_PARAMETERS,
             result = LinkActivityResult.Completed(paymentMethod),
             deferredIntentConfirmationType = null,
         )
@@ -128,13 +130,12 @@ class LinkConfirmationDefinitionTest {
         val nextStepResult = result.asNextStep()
 
         assertThat(nextStepResult.confirmationOption).isInstanceOf<PaymentMethodConfirmationOption.Saved>()
+        assertThat(nextStepResult.parameters).isEqualTo(CONFIRMATION_PARAMETERS)
 
         val savedOption = nextStepResult.confirmationOption.asSaved()
 
         assertThat(savedOption.paymentMethod).isEqualTo(paymentMethod)
         assertThat(savedOption.optionsParams).isNull()
-        assertThat(savedOption.shippingDetails).isEqualTo(LINK_CONFIRMATION_OPTION.shippingDetails)
-        assertThat(savedOption.initializationMode).isEqualTo(LINK_CONFIRMATION_OPTION.initializationMode)
 
         assertThat(storeScenario.markAsUsedCalls.awaitItem()).isNotNull()
     }
@@ -147,7 +148,7 @@ class LinkConfirmationDefinitionTest {
 
         val result = definition.toResult(
             confirmationOption = LINK_CONFIRMATION_OPTION,
-            intent = PAYMENT_INTENT,
+            confirmationParameters = CONFIRMATION_PARAMETERS,
             result = LinkActivityResult.Failed(exception),
             deferredIntentConfirmationType = null
         )
@@ -169,7 +170,7 @@ class LinkConfirmationDefinitionTest {
 
         val result = definition.toResult(
             confirmationOption = LINK_CONFIRMATION_OPTION,
-            intent = PAYMENT_INTENT,
+            confirmationParameters = CONFIRMATION_PARAMETERS,
             result = LinkActivityResult.Canceled(LinkActivityResult.Canceled.Reason.LoggedOut),
             deferredIntentConfirmationType = null,
         )
@@ -190,7 +191,7 @@ class LinkConfirmationDefinitionTest {
 
         val result = definition.toResult(
             confirmationOption = LINK_CONFIRMATION_OPTION,
-            intent = PAYMENT_INTENT,
+            confirmationParameters = CONFIRMATION_PARAMETERS,
             result = LinkActivityResult.Canceled(LinkActivityResult.Canceled.Reason.BackPressed),
             deferredIntentConfirmationType = null
         )
@@ -236,11 +237,17 @@ class LinkConfirmationDefinitionTest {
 
     private companion object {
         private val PAYMENT_INTENT = PaymentIntentFactory.create()
-        private val LINK_CONFIRMATION_OPTION = LinkConfirmationOption(
+
+        private val CONFIRMATION_PARAMETERS = ConfirmationDefinition.Parameters(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "pi_123_secret_123",
             ),
-            shippingDetails = null,
+            intent = PAYMENT_INTENT,
+            appearance = PaymentSheet.Appearance(),
+            shippingDetails = AddressDetails(),
+        )
+
+        private val LINK_CONFIRMATION_OPTION = LinkConfirmationOption(
             configuration = LinkConfiguration(
                 stripeIntent = PAYMENT_INTENT,
                 merchantName = "Merchant Inc.",

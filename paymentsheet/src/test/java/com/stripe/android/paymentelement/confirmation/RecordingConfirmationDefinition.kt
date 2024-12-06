@@ -4,7 +4,6 @@ import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
-import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 
 internal class RecordingConfirmationDefinition<
@@ -37,13 +36,25 @@ internal class RecordingConfirmationDefinition<
 
     override fun toResult(
         confirmationOption: TConfirmationOption,
+        confirmationParameters: ConfirmationDefinition.Parameters,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
-        intent: StripeIntent,
         result: TLauncherResult
     ): ConfirmationDefinition.Result {
-        toResultCalls.add(ToResultCall(confirmationOption, deferredIntentConfirmationType, intent, result))
+        toResultCalls.add(
+            ToResultCall(
+                confirmationOption = confirmationOption,
+                deferredIntentConfirmationType = deferredIntentConfirmationType,
+                confirmationParameters = confirmationParameters,
+                result = result
+            )
+        )
 
-        return definition.toResult(confirmationOption, deferredIntentConfirmationType, intent, result)
+        return definition.toResult(
+            confirmationOption = confirmationOption,
+            deferredIntentConfirmationType = deferredIntentConfirmationType,
+            confirmationParameters = confirmationParameters,
+            result = result
+        )
     }
 
     override fun createLauncher(
@@ -63,20 +74,20 @@ internal class RecordingConfirmationDefinition<
         launcher: TLauncher,
         arguments: TLauncherArgs,
         confirmationOption: TConfirmationOption,
-        intent: StripeIntent
+        confirmationParameters: ConfirmationDefinition.Parameters,
     ) {
-        launchCalls.add(LaunchCall(launcher, arguments, confirmationOption, intent))
+        launchCalls.add(LaunchCall(launcher, arguments, confirmationOption, confirmationParameters))
 
-        definition.launch(launcher, arguments, confirmationOption, intent)
+        definition.launch(launcher, arguments, confirmationOption, confirmationParameters)
     }
 
     override suspend fun action(
         confirmationOption: TConfirmationOption,
-        intent: StripeIntent
+        confirmationParameters: ConfirmationDefinition.Parameters,
     ): ConfirmationDefinition.Action<TLauncherArgs> {
-        actionCalls.add(ActionCall(confirmationOption, intent))
+        actionCalls.add(ActionCall(confirmationOption, confirmationParameters))
 
-        return definition.action(confirmationOption, intent)
+        return definition.action(confirmationOption, confirmationParameters)
     }
 
     class OptionCall(
@@ -85,8 +96,8 @@ internal class RecordingConfirmationDefinition<
 
     class ToResultCall<TConfirmationOption : ConfirmationHandler.Option, TLauncherResult>(
         val confirmationOption: TConfirmationOption,
+        val confirmationParameters: ConfirmationDefinition.Parameters,
         val deferredIntentConfirmationType: DeferredIntentConfirmationType?,
-        val intent: StripeIntent,
         val result: TLauncherResult,
     )
 
@@ -103,12 +114,12 @@ internal class RecordingConfirmationDefinition<
         val launcher: TLauncher,
         val arguments: TLauncherArgs,
         val confirmationOption: TConfirmationOption,
-        val intent: StripeIntent,
+        val confirmationParameters: ConfirmationDefinition.Parameters,
     )
 
     class ActionCall<TConfirmationOption : ConfirmationHandler.Option>(
         val confirmationOption: TConfirmationOption,
-        val intent: StripeIntent,
+        val confirmationParameters: ConfirmationDefinition.Parameters,
     )
 
     class Scenario<

@@ -17,7 +17,7 @@ class BacsConfirmationFlowTest {
     @Test
     fun `on launch, should persist parameters & launch using launcher as expected`() = runLaunchTest(
         confirmationOption = BACS_CONFIRMATION_OPTION,
-        intent = PAYMENT_INTENT,
+        parameters = CONFIRMATION_PARAMETERS,
         definition = BacsConfirmationDefinition(
             bacsMandateConfirmationLauncherFactory = DefaultBacsMandateConfirmationLauncherFactory,
         ),
@@ -26,28 +26,23 @@ class BacsConfirmationFlowTest {
     @Test
     fun `on result, should return confirmation result as expected`() = runResultTest(
         confirmationOption = BACS_CONFIRMATION_OPTION,
-        intent = PAYMENT_INTENT,
         definition = BacsConfirmationDefinition(
             bacsMandateConfirmationLauncherFactory = FakeBacsMandateConfirmationLauncherFactory(),
         ),
         launcherResult = BacsMandateConfirmationResult.Confirmed,
+        parameters = CONFIRMATION_PARAMETERS,
         definitionResult = ConfirmationDefinition.Result.NextStep(
-            intent = PAYMENT_INTENT,
             confirmationOption = PaymentMethodConfirmationOption.New(
-                initializationMode = BACS_CONFIRMATION_OPTION.initializationMode,
                 createParams = BACS_CONFIRMATION_OPTION.createParams,
                 optionsParams = BACS_CONFIRMATION_OPTION.optionsParams,
-                shippingDetails = BACS_CONFIRMATION_OPTION.shippingDetails,
                 shouldSave = false,
             ),
+            parameters = CONFIRMATION_PARAMETERS,
         ),
     )
 
     private companion object {
         private val BACS_CONFIRMATION_OPTION = BacsConfirmationOption(
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = "pi_123_secret_123"
-            ),
             createParams = PaymentMethodCreateParams.create(
                 bacsDebit = PaymentMethodCreateParams.BacsDebit(
                     accountNumber = "00012345",
@@ -59,10 +54,17 @@ class BacsConfirmationFlowTest {
                 )
             ),
             optionsParams = null,
-            shippingDetails = null,
-            appearance = PaymentSheet.Appearance(),
         )
 
         private val PAYMENT_INTENT = PaymentIntentFactory.create()
+
+        private val CONFIRMATION_PARAMETERS = ConfirmationDefinition.Parameters(
+            intent = PAYMENT_INTENT,
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = "pi_123_secret_123"
+            ),
+            shippingDetails = null,
+            appearance = PaymentSheet.Appearance(),
+        )
     }
 }

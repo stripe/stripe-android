@@ -5,7 +5,6 @@ import androidx.activity.result.ActivityResultCallback
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.isInstanceOf
-import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.ConfirmationMediator.Parameters
 import com.stripe.android.utils.DummyActivityResultCaller
 import kotlinx.coroutines.test.runTest
@@ -20,7 +19,7 @@ internal fun <
     > runLaunchTest(
     definition: ConfirmationDefinition<TConfirmationOption, TLauncher, TLauncherArgs, TLauncherResult>,
     confirmationOption: ConfirmationHandler.Option,
-    intent: StripeIntent,
+    parameters: ConfirmationDefinition.Parameters
 ) = runTest {
     val savedStateHandle = SavedStateHandle()
     val mediator = ConfirmationMediator(savedStateHandle, definition)
@@ -35,7 +34,7 @@ internal fun <
 
         val action = mediator.action(
             option = confirmationOption,
-            intent = intent,
+            parameters = parameters,
         )
 
         assertThat(action).isInstanceOf<ConfirmationMediator.Action.Launch>()
@@ -44,12 +43,12 @@ internal fun <
 
         launchAction.launch()
 
-        val parameters = savedStateHandle
+        val savedParameters = savedStateHandle
             .get<Parameters<TConfirmationOption>>("${definition.key}Parameters")
 
-        assertThat(parameters?.confirmationOption).isEqualTo(confirmationOption)
-        assertThat(parameters?.intent).isEqualTo(intent)
-        assertThat(parameters?.deferredIntentConfirmationType).isNull()
+        assertThat(savedParameters?.confirmationOption).isEqualTo(confirmationOption)
+        assertThat(savedParameters?.confirmationParameters).isEqualTo(parameters)
+        assertThat(savedParameters?.deferredIntentConfirmationType).isNull()
 
         assertThat(awaitRegisterCall()).isNotNull()
         assertThat(awaitLaunchCall()).isNotNull()
@@ -64,7 +63,7 @@ internal fun <
     > runResultTest(
     definition: ConfirmationDefinition<TConfirmationOption, TLauncher, TLauncherArgs, TLauncherResult>,
     confirmationOption: ConfirmationHandler.Option,
-    intent: StripeIntent,
+    parameters: ConfirmationDefinition.Parameters,
     launcherResult: TLauncherResult,
     definitionResult: ConfirmationDefinition.Result,
 ) = runTest {
@@ -75,7 +74,7 @@ internal fun <
             "${definition.key}Parameters",
             Parameters(
                 confirmationOption = confirmationOption,
-                intent = intent,
+                confirmationParameters = parameters,
                 deferredIntentConfirmationType = null,
             )
         )

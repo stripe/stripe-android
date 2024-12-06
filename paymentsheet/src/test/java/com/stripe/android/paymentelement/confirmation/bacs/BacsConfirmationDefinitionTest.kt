@@ -17,6 +17,7 @@ import com.stripe.android.paymentelement.confirmation.asLaunch
 import com.stripe.android.paymentelement.confirmation.asNextStep
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationContract
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncherFactory
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationResult
@@ -94,7 +95,7 @@ class BacsConfirmationDefinitionTest {
 
         val result = definition.toResult(
             confirmationOption = createBacsConfirmationOption(),
-            intent = PAYMENT_INTENT,
+            confirmationParameters = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
             result = BacsMandateConfirmationResult.Confirmed,
         )
@@ -103,7 +104,7 @@ class BacsConfirmationDefinitionTest {
 
         val successResult = result.asNextStep()
 
-        assertThat(successResult.intent).isEqualTo(PAYMENT_INTENT)
+        assertThat(successResult.parameters).isEqualTo(CONFIRMATION_PARAMETERS)
 
         val confirmationOption = successResult.confirmationOption
 
@@ -113,8 +114,6 @@ class BacsConfirmationDefinitionTest {
 
         assertThat(newPaymentMethodOption.createParams).isEqualTo(bacsConfirmationOption.createParams)
         assertThat(newPaymentMethodOption.optionsParams).isEqualTo(bacsConfirmationOption.optionsParams)
-        assertThat(newPaymentMethodOption.initializationMode).isEqualTo(bacsConfirmationOption.initializationMode)
-        assertThat(newPaymentMethodOption.shippingDetails).isEqualTo(bacsConfirmationOption.shippingDetails)
         assertThat(newPaymentMethodOption.shouldSave).isFalse()
     }
 
@@ -125,7 +124,7 @@ class BacsConfirmationDefinitionTest {
 
             val result = definition.toResult(
                 confirmationOption = createBacsConfirmationOption(),
-                intent = PAYMENT_INTENT,
+                confirmationParameters = CONFIRMATION_PARAMETERS,
                 deferredIntentConfirmationType = null,
                 result = BacsMandateConfirmationResult.Cancelled,
             )
@@ -144,7 +143,7 @@ class BacsConfirmationDefinitionTest {
 
             val result = definition.toResult(
                 confirmationOption = createBacsConfirmationOption(),
-                intent = PAYMENT_INTENT,
+                confirmationParameters = CONFIRMATION_PARAMETERS,
                 deferredIntentConfirmationType = null,
                 result = BacsMandateConfirmationResult.ModifyDetails,
             )
@@ -165,7 +164,7 @@ class BacsConfirmationDefinitionTest {
             confirmationOption = createBacsConfirmationOption(
                 name = null,
             ),
-            intent = PAYMENT_INTENT,
+            confirmationParameters = CONFIRMATION_PARAMETERS,
         )
 
         assertThat(action).isInstanceOf<ConfirmationDefinition.Action.Fail<BacsMandateData>>()
@@ -188,7 +187,7 @@ class BacsConfirmationDefinitionTest {
             confirmationOption = createBacsConfirmationOption(
                 email = null,
             ),
-            intent = PAYMENT_INTENT,
+            confirmationParameters = CONFIRMATION_PARAMETERS,
         )
 
         assertThat(action).isInstanceOf<ConfirmationDefinition.Action.Fail<BacsMandateData>>()
@@ -209,7 +208,7 @@ class BacsConfirmationDefinitionTest {
 
         val action = definition.action(
             confirmationOption = createBacsConfirmationOption(),
-            intent = PAYMENT_INTENT,
+            confirmationParameters = CONFIRMATION_PARAMETERS,
         )
 
         assertThat(action).isInstanceOf<ConfirmationDefinition.Action.Launch<BacsMandateData>>()
@@ -246,8 +245,8 @@ class BacsConfirmationDefinitionTest {
         )
 
         definition.launch(
-            confirmationOption = createBacsConfirmationOption().copy(appearance = appearance),
-            intent = PAYMENT_INTENT,
+            confirmationOption = createBacsConfirmationOption(),
+            confirmationParameters = CONFIRMATION_PARAMETERS.copy(appearance = appearance),
             arguments = bacsMandateData,
             launcher = launcher,
         )
@@ -272,9 +271,6 @@ class BacsConfirmationDefinitionTest {
         email: String? = "johndoe@email.com",
     ): BacsConfirmationOption {
         return BacsConfirmationOption(
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = "pi_123_secret_123"
-            ),
             createParams = PaymentMethodCreateParams.create(
                 bacsDebit = PaymentMethodCreateParams.BacsDebit(
                     accountNumber = "00012345",
@@ -286,8 +282,6 @@ class BacsConfirmationDefinitionTest {
                 )
             ),
             optionsParams = null,
-            shippingDetails = null,
-            appearance = PaymentSheet.Appearance(),
         )
     }
 
@@ -297,5 +291,14 @@ class BacsConfirmationDefinitionTest {
 
     private companion object {
         private val PAYMENT_INTENT = PaymentIntentFactory.create()
+
+        private val CONFIRMATION_PARAMETERS = ConfirmationDefinition.Parameters(
+            intent = PAYMENT_INTENT,
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = "pi_123_secret_123",
+            ),
+            appearance = PaymentSheet.Appearance(),
+            shippingDetails = AddressDetails(),
+        )
     }
 }

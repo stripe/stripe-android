@@ -1032,15 +1032,16 @@ internal class CustomerSheetViewModel(
     ) {
         confirmationHandler.start(
             arguments = ConfirmationHandler.Args(
-                intent = stripeIntent,
                 confirmationOption = PaymentMethodConfirmationOption.Saved(
-                    initializationMode = PaymentElementLoader.InitializationMode.SetupIntent(
-                        clientSecret = clientSecret
-                    ),
-                    shippingDetails = null,
                     paymentMethod = paymentMethod,
                     optionsParams = null,
                 ),
+                intent = stripeIntent,
+                initializationMode = PaymentElementLoader.InitializationMode.SetupIntent(
+                    clientSecret = clientSecret
+                ),
+                shippingDetails = null,
+                appearance = configuration.appearance,
             )
         )
 

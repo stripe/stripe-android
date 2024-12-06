@@ -39,11 +39,11 @@ internal class GooglePayConfirmationDefinition(
 
     override suspend fun action(
         confirmationOption: GooglePayConfirmationOption,
-        intent: StripeIntent
+        confirmationParameters: ConfirmationDefinition.Parameters,
     ): ConfirmationDefinition.Action<Unit> {
         if (
             confirmationOption.config.merchantCurrencyCode == null &&
-            !confirmationOption.initializationMode.isProcessingPayment
+            !confirmationParameters.initializationMode.isProcessingPayment
         ) {
             val message = "GooglePayConfig.currencyCode is required in order to use " +
                 "Google Pay when processing a Setup Intent"
@@ -78,9 +78,10 @@ internal class GooglePayConfirmationDefinition(
         launcher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>,
         arguments: Unit,
         confirmationOption: GooglePayConfirmationOption,
-        intent: StripeIntent,
+        confirmationParameters: ConfirmationDefinition.Parameters,
     ) {
         val config = confirmationOption.config
+        val intent = confirmationParameters.intent
         val googlePayLauncher = createGooglePayLauncher(
             factory = googlePayPaymentMethodLauncherFactory,
             activityLauncher = launcher,
@@ -101,22 +102,20 @@ internal class GooglePayConfirmationDefinition(
 
     override fun toResult(
         confirmationOption: GooglePayConfirmationOption,
+        confirmationParameters: ConfirmationDefinition.Parameters,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
-        intent: StripeIntent,
         result: GooglePayPaymentMethodLauncher.Result,
     ): ConfirmationDefinition.Result {
         return when (result) {
             is GooglePayPaymentMethodLauncher.Result.Completed -> {
                 val nextConfirmationOption = PaymentMethodConfirmationOption.Saved(
                     paymentMethod = result.paymentMethod,
-                    initializationMode = confirmationOption.initializationMode,
-                    shippingDetails = confirmationOption.shippingDetails,
                     optionsParams = null,
                 )
 
                 ConfirmationDefinition.Result.NextStep(
                     confirmationOption = nextConfirmationOption,
-                    intent = intent,
+                    parameters = confirmationParameters,
                 )
             }
             is GooglePayPaymentMethodLauncher.Result.Failed -> {

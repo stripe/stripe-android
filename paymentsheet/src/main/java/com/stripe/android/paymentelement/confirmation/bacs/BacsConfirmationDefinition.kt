@@ -1,7 +1,6 @@
 package com.stripe.android.paymentelement.confirmation.bacs
 import androidx.activity.result.ActivityResultCaller
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
@@ -29,7 +28,7 @@ internal class BacsConfirmationDefinition(
 
     override suspend fun action(
         confirmationOption: BacsConfirmationOption,
-        intent: StripeIntent
+        confirmationParameters: ConfirmationDefinition.Parameters,
     ): ConfirmationDefinition.Action<BacsMandateData> {
         return BacsMandateData.fromConfirmationOption(confirmationOption)?.let { data ->
             ConfirmationDefinition.Action.Launch(
@@ -64,33 +63,31 @@ internal class BacsConfirmationDefinition(
         launcher: BacsMandateConfirmationLauncher,
         arguments: BacsMandateData,
         confirmationOption: BacsConfirmationOption,
-        intent: StripeIntent,
+        confirmationParameters: ConfirmationDefinition.Parameters,
     ) {
         launcher.launch(
             data = arguments,
-            appearance = confirmationOption.appearance
+            appearance = confirmationParameters.appearance
         )
     }
 
     override fun toResult(
         confirmationOption: BacsConfirmationOption,
+        confirmationParameters: ConfirmationDefinition.Parameters,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
-        intent: StripeIntent,
         result: BacsMandateConfirmationResult,
     ): ConfirmationDefinition.Result {
         return when (result) {
             is BacsMandateConfirmationResult.Confirmed -> {
                 val nextConfirmationOption = PaymentMethodConfirmationOption.New(
-                    initializationMode = confirmationOption.initializationMode,
-                    shippingDetails = confirmationOption.shippingDetails,
                     createParams = confirmationOption.createParams,
                     optionsParams = null,
                     shouldSave = false,
                 )
 
                 ConfirmationDefinition.Result.NextStep(
-                    intent = intent,
                     confirmationOption = nextConfirmationOption,
+                    parameters = confirmationParameters,
                 )
             }
             is BacsMandateConfirmationResult.ModifyDetails -> ConfirmationDefinition.Result.Canceled(

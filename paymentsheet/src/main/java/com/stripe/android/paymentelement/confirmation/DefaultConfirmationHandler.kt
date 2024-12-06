@@ -7,7 +7,6 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.R
 import kotlinx.coroutines.CoroutineScope
@@ -90,10 +89,7 @@ internal class DefaultConfirmationHandler(
         _state.value = ConfirmationHandler.State.Confirming(arguments.confirmationOption)
 
         coroutineScope.launch {
-            confirm(
-                intent = arguments.intent,
-                confirmationOption = arguments.confirmationOption,
-            )
+            confirm(arguments)
         }
     }
 
@@ -110,9 +106,10 @@ internal class DefaultConfirmationHandler(
     }
 
     private suspend fun confirm(
-        confirmationOption: ConfirmationHandler.Option,
-        intent: StripeIntent,
+        arguments: ConfirmationHandler.Args,
     ) {
+        val confirmationOption = arguments.confirmationOption
+
         _state.value = ConfirmationHandler.State.Confirming(confirmationOption)
 
         val mediator = mediators.find { mediator ->
@@ -142,7 +139,7 @@ internal class DefaultConfirmationHandler(
             return
         }
 
-        when (val action = mediator.action(confirmationOption, intent)) {
+        when (val action = mediator.action(confirmationOption, arguments.toParameters())) {
             is ConfirmationMediator.Action.Launch -> {
                 storeIsAwaitingForResult(
                     key = mediator.key,
@@ -178,9 +175,16 @@ internal class DefaultConfirmationHandler(
                 removeIsAwaitingForResult()
 
                 coroutineScope.launch {
+                    val parameters = result.parameters
+
                     confirm(
-                        intent = result.intent,
-                        confirmationOption = result.confirmationOption,
+                        arguments = ConfirmationHandler.Args(
+                            intent = parameters.intent,
+                            shippingDetails = parameters.shippingDetails,
+                            appearance = parameters.appearance,
+                            initializationMode = parameters.initializationMode,
+                            confirmationOption = result.confirmationOption,
+                        )
                     )
                 }
 
@@ -227,6 +231,15 @@ internal class DefaultConfirmationHandler(
 
     private fun retrieveIsAwaitingForResultData(): AwaitingConfirmationResultData? {
         return savedStateHandle.get<AwaitingConfirmationResultData>(AWAITING_CONFIRMATION_RESULT_KEY)
+    }
+
+    private fun ConfirmationHandler.Args.toParameters(): ConfirmationDefinition.Parameters {
+        return ConfirmationDefinition.Parameters(
+            appearance = appearance,
+            shippingDetails = shippingDetails,
+            initializationMode = initializationMode,
+            intent = intent
+        )
     }
 
     private suspend inline fun <reified T> Flow<*>.firstInstanceOf(): T {

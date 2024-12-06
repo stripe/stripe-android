@@ -3,7 +3,6 @@ package com.stripe.android.paymentelement.confirmation
 import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.R
 
@@ -30,7 +29,7 @@ internal abstract class FakeConfirmationDefinition<
     > {
     override suspend fun action(
         confirmationOption: TConfirmationOption,
-        intent: StripeIntent
+        confirmationParameters: ConfirmationDefinition.Parameters,
     ): ConfirmationDefinition.Action<TLauncherArgs> {
         return action
     }
@@ -39,7 +38,7 @@ internal abstract class FakeConfirmationDefinition<
         launcher: TLauncher,
         arguments: TLauncherArgs,
         confirmationOption: TConfirmationOption,
-        intent: StripeIntent
+        confirmationParameters: ConfirmationDefinition.Parameters,
     ) {
         // Do nothing
     }
@@ -53,8 +52,8 @@ internal abstract class FakeConfirmationDefinition<
 
     override fun toResult(
         confirmationOption: TConfirmationOption,
+        confirmationParameters: ConfirmationDefinition.Parameters,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
-        intent: StripeIntent,
         result: TLauncherResult
     ): ConfirmationDefinition.Result {
         return this.result

@@ -3,7 +3,6 @@ package com.stripe.android.paymentelement.confirmation.epms
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import com.stripe.android.common.exception.stripeErrorMessage
-import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
@@ -34,7 +33,7 @@ internal class ExternalPaymentMethodConfirmationDefinition(
 
     override suspend fun action(
         confirmationOption: ExternalPaymentMethodConfirmationOption,
-        intent: StripeIntent
+        confirmationParameters: ConfirmationDefinition.Parameters,
     ): ConfirmationDefinition.Action<Unit> {
         val externalPaymentMethodType = confirmationOption.type
         val externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandlerProvider.get()
@@ -78,7 +77,7 @@ internal class ExternalPaymentMethodConfirmationDefinition(
         launcher: ActivityResultLauncher<ExternalPaymentMethodInput>,
         arguments: Unit,
         confirmationOption: ExternalPaymentMethodConfirmationOption,
-        intent: StripeIntent,
+        confirmationParameters: ConfirmationDefinition.Parameters,
     ) {
         errorReporter.report(
             ErrorReporter.SuccessEvent.EXTERNAL_PAYMENT_METHODS_LAUNCH_SUCCESS,
@@ -95,13 +94,13 @@ internal class ExternalPaymentMethodConfirmationDefinition(
 
     override fun toResult(
         confirmationOption: ExternalPaymentMethodConfirmationOption,
+        confirmationParameters: ConfirmationDefinition.Parameters,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
-        intent: StripeIntent,
         result: PaymentResult
     ): ConfirmationDefinition.Result {
         return when (result) {
             is PaymentResult.Completed -> ConfirmationDefinition.Result.Succeeded(
-                intent = intent,
+                intent = confirmationParameters.intent,
                 deferredIntentConfirmationType = null,
             )
             is PaymentResult.Failed -> ConfirmationDefinition.Result.Failed(
