@@ -107,6 +107,10 @@ internal fun <
     }
 }
 
+internal fun ConfirmationHandler.Option.asSaved(): PaymentMethodConfirmationOption.Saved {
+    return this as PaymentMethodConfirmationOption.Saved
+}
+
 internal fun ConfirmationDefinition.Result?.asSucceeded(): ConfirmationDefinition.Result.Succeeded {
     return this as ConfirmationDefinition.Result.Succeeded
 }
@@ -138,4 +142,40 @@ internal fun ConfirmationMediator.Action.asLaunch(): ConfirmationMediator.Action
 internal fun <T> ActivityResultCallback<*>.asCallbackFor(): ActivityResultCallback<T> {
     @Suppress("UNCHECKED_CAST")
     return this as ActivityResultCallback<T>
+}
+
+internal fun ConfirmationHandler.State.assertIdle(): ConfirmationHandler.State.Idle {
+    assertThat(this).isInstanceOf<ConfirmationHandler.State.Idle>()
+
+    return this as ConfirmationHandler.State.Idle
+}
+
+internal fun ConfirmationHandler.State.assertConfirming(): ConfirmationHandler.State.Confirming {
+    assertThat(this).isInstanceOf<ConfirmationHandler.State.Confirming>()
+
+    return this as ConfirmationHandler.State.Confirming
+}
+
+internal fun ConfirmationHandler.State.assertComplete(): ConfirmationHandler.State.Complete {
+    assertThat(this).isInstanceOf<ConfirmationHandler.State.Complete>()
+
+    return this as ConfirmationHandler.State.Complete
+}
+
+internal fun ConfirmationHandler.Result?.assertSucceeded(): ConfirmationHandler.Result.Succeeded {
+    assertThat(this).isInstanceOf<ConfirmationHandler.Result.Succeeded>()
+
+    return this as ConfirmationHandler.Result.Succeeded
+}
+
+internal fun ConfirmationHandler.Result?.assertFailed(): ConfirmationHandler.Result.Failed {
+    assertThat(this).isInstanceOf<ConfirmationHandler.Result.Failed>()
+
+    return this as ConfirmationHandler.Result.Failed
+}
+
+internal fun ConfirmationHandler.Result?.assertCanceled(): ConfirmationHandler.Result.Canceled {
+    assertThat(this).isInstanceOf<ConfirmationHandler.Result.Canceled>()
+
+    return this as ConfirmationHandler.Result.Canceled
 }

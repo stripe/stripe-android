@@ -3,17 +3,20 @@ package com.stripe.android.paymentelement.confirmation
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
+import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.paymentelement.confirmation.bacs.BacsConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.epms.ExternalPaymentMethodConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
+import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationDefinition
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.ExternalPaymentMethodInterceptor
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncherFactory
 import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.testing.FakeErrorReporter
+import com.stripe.android.utils.RecordingLinkStore
 
 internal fun createTestConfirmationHandlerFactory(
     intentConfirmationInterceptor: IntentConfirmationInterceptor,
@@ -21,6 +24,7 @@ internal fun createTestConfirmationHandlerFactory(
     bacsMandateConfirmationLauncherFactory: BacsMandateConfirmationLauncherFactory,
     stripePaymentLauncherAssistedFactory: StripePaymentLauncherAssistedFactory,
     googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory,
+    linkLauncher: LinkPaymentLauncher,
     paymentConfiguration: PaymentConfiguration,
     statusBarColor: Int?,
     errorReporter: ErrorReporter,
@@ -52,6 +56,10 @@ internal fun createTestConfirmationHandlerFactory(
                         ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler
                     },
                     errorReporter = errorReporter,
+                ),
+                LinkConfirmationDefinition(
+                    linkPaymentLauncher = linkLauncher,
+                    linkStore = RecordingLinkStore.noOp(),
                 ),
             )
         ),

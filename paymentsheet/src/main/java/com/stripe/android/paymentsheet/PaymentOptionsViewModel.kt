@@ -10,7 +10,6 @@ import com.stripe.android.analytics.SessionSavedStateHandler
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.strings.ResolvableString
-import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentIntent
@@ -166,20 +165,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
     private fun handleLinkProcessingState(processingState: LinkHandler.ProcessingState) {
         when (processingState) {
-            LinkHandler.ProcessingState.Cancelled -> {
-                onPaymentResult(PaymentResult.Canceled)
-            }
-            is LinkHandler.ProcessingState.PaymentMethodCollected -> {
-                TODO("This can't happen. Will follow up to remodel the states better.")
-            }
-            is LinkHandler.ProcessingState.CompletedWithPaymentResult -> {
-                onPaymentResult(processingState.result)
-            }
-            is LinkHandler.ProcessingState.Error -> {
-                onError(processingState.message?.resolvableString)
-            }
-            LinkHandler.ProcessingState.Launched -> {
-            }
             is LinkHandler.ProcessingState.PaymentDetailsCollected -> {
                 processingState.paymentSelection?.let {
                     // Link PaymentDetails was created successfully, use it to confirm the Stripe Intent.

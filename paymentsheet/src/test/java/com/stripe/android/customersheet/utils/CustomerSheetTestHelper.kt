@@ -50,6 +50,7 @@ import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.utils.CompletableSingle
 import com.stripe.android.utils.DummyActivityResultCaller
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
+import com.stripe.android.utils.RecordingLinkPaymentLauncher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.StandardTestDispatcher
 import org.mockito.kotlin.mock
@@ -147,6 +148,7 @@ internal object CustomerSheetTestHelper {
                 statusBarColor = null,
                 savedStateHandle = SavedStateHandle(),
                 errorReporter = FakeErrorReporter(),
+                linkLauncher = RecordingLinkPaymentLauncher.noOp(),
             ),
             eventReporter = eventReporter,
             customerSheetLoader = customerSheetLoader,

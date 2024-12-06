@@ -42,6 +42,7 @@ import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLaun
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfigurationCoordinator
+import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.LinkButtonTestTag
 import com.stripe.android.model.CardBrand
@@ -89,6 +90,7 @@ import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import com.stripe.android.utils.FakePaymentElementLoader
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
+import com.stripe.android.utils.RecordingLinkPaymentLauncher
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
 import com.stripe.android.utils.injectableActivityScenario
 import kotlinx.coroutines.CoroutineScope
@@ -709,22 +711,28 @@ internal class PaymentSheetActivityTest {
     }
 
     @Test
-    fun `link flow updates the payment sheet before and after`() {
-        val viewModel = createViewModel(isLinkAvailable = true)
-        val scenario = activityScenario(viewModel)
+    fun `link flow updates the payment sheet before and after`() = runTest {
+        RecordingLinkPaymentLauncher.test {
+            val viewModel = createViewModel(isLinkAvailable = true, linkPaymentLauncher = launcher)
+            val scenario = activityScenario(viewModel)
 
-        scenario.launch(intent).onActivity {
-            viewModel.checkoutIdentifier = CheckoutIdentifier.SheetTopWallet
+            scenario.launch(intent).onActivity {
+                viewModel.checkoutIdentifier = CheckoutIdentifier.SheetTopWallet
 
-            composeTestRule
-                .onNodeWithTag(LinkButtonTestTag)
-                .performClick()
+                composeTestRule
+                    .onNodeWithTag(LinkButtonTestTag)
+                    .performClick()
 
-            composeTestRule.waitForIdle()
+                composeTestRule.waitForIdle()
+            }
+
+            val registerCall = registerCalls.awaitItem()
+
+            assertThat(presentCalls.awaitItem()).isNotNull()
 
             assertThat(viewModel.walletsProcessingState.value).isEqualTo(WalletsProcessingState.Processing)
 
-            viewModel.linkHandler.onLinkActivityResult(LinkActivityResult.Completed(PAYMENT_METHODS.first()))
+            registerCall.callback(LinkActivityResult.Completed(PAYMENT_METHODS.first()))
 
             assertThat(viewModel.walletsProcessingState.value).isEqualTo(WalletsProcessingState.Processing)
 
@@ -1118,6 +1126,7 @@ internal class PaymentSheetActivityTest {
         loadDelay: Duration = Duration.ZERO,
         isGooglePayAvailable: Boolean = false,
         isLinkAvailable: Boolean = false,
+        linkPaymentLauncher: LinkPaymentLauncher = RecordingLinkPaymentLauncher.noOp(),
         initialPaymentSelection: PaymentSelection? = paymentMethods.firstOrNull()?.let { PaymentSelection.Saved(it) },
         args: PaymentSheetContractV2.Args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
         cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
@@ -1158,6 +1167,7 @@ internal class PaymentSheetActivityTest {
                     googlePayPaymentMethodLauncherFactory = googlePayPaymentMethodLauncherFactory,
                     paymentConfiguration = PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
                     statusBarColor = args.statusBarColor,
+                    linkLauncher = linkPaymentLauncher,
                     errorReporter = FakeErrorReporter(),
                 ),
                 cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,

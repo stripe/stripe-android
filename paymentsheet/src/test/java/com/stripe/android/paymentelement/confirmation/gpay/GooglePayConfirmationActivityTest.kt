@@ -20,6 +20,12 @@ import com.stripe.android.isInstanceOf
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentElementConfirmationTestActivity
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
+import com.stripe.android.paymentelement.confirmation.assertCanceled
+import com.stripe.android.paymentelement.confirmation.assertComplete
+import com.stripe.android.paymentelement.confirmation.assertConfirming
+import com.stripe.android.paymentelement.confirmation.assertFailed
+import com.stripe.android.paymentelement.confirmation.assertIdle
+import com.stripe.android.paymentelement.confirmation.assertSucceeded
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
@@ -290,42 +296,6 @@ internal class GooglePayConfirmationActivityTest {
 
     private fun intendedPaymentConfirmationToBeLaunched() {
         intended(hasComponent(PAYMENT_CONFIRMATION_LAUNCHER_ACTIVITY_NAME))
-    }
-
-    private fun ConfirmationHandler.State.assertIdle(): ConfirmationHandler.State.Idle {
-        assertThat(this).isInstanceOf<ConfirmationHandler.State.Idle>()
-
-        return this as ConfirmationHandler.State.Idle
-    }
-
-    private fun ConfirmationHandler.State.assertConfirming(): ConfirmationHandler.State.Confirming {
-        assertThat(this).isInstanceOf<ConfirmationHandler.State.Confirming>()
-
-        return this as ConfirmationHandler.State.Confirming
-    }
-
-    private fun ConfirmationHandler.State.assertComplete(): ConfirmationHandler.State.Complete {
-        assertThat(this).isInstanceOf<ConfirmationHandler.State.Complete>()
-
-        return this as ConfirmationHandler.State.Complete
-    }
-
-    private fun ConfirmationHandler.Result?.assertSucceeded(): ConfirmationHandler.Result.Succeeded {
-        assertThat(this).isInstanceOf<ConfirmationHandler.Result.Succeeded>()
-
-        return this as ConfirmationHandler.Result.Succeeded
-    }
-
-    private fun ConfirmationHandler.Result?.assertFailed(): ConfirmationHandler.Result.Failed {
-        assertThat(this).isInstanceOf<ConfirmationHandler.Result.Failed>()
-
-        return this as ConfirmationHandler.Result.Failed
-    }
-
-    private fun ConfirmationHandler.Result?.assertCanceled(): ConfirmationHandler.Result.Canceled {
-        assertThat(this).isInstanceOf<ConfirmationHandler.Result.Canceled>()
-
-        return this as ConfirmationHandler.Result.Canceled
     }
 
     private companion object {

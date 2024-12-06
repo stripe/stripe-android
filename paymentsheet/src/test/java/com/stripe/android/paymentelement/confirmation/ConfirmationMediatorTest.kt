@@ -77,6 +77,29 @@ class ConfirmationMediatorTest {
     }
 
     @Test
+    fun `On unregister, should call with launcher`() = test {
+        val mediator = ConfirmationMediator(
+            savedStateHandle = SavedStateHandle(),
+            definition = definition,
+        )
+
+        val activityResultCaller = mock<ActivityResultCaller>()
+
+        mediator.register(
+            activityResultCaller = activityResultCaller,
+            onResult = {
+                throw NotImplementedError("'onResult' should not be called!")
+            },
+        )
+
+        assertThat(createLauncherCalls.awaitItem()).isNotNull()
+
+        mediator.unregister()
+
+        assertThat(unregisterCalls.awaitItem().launcher).isEqualTo(TestConfirmationDefinition.Launcher)
+    }
+
+    @Test
     fun `On incorrect confirmation option provided on action, should return fail action`() = test {
         val mediator = ConfirmationMediator(
             savedStateHandle = SavedStateHandle(),
@@ -315,6 +338,7 @@ class ConfirmationMediatorTest {
         )
         mediator.unregister()
 
+        assertThat(unregisterCalls.awaitItem()).isNotNull()
         assertThat(createLauncherCalls.awaitItem()).isNotNull()
 
         val action = mediator.action(
@@ -469,10 +493,6 @@ class ConfirmationMediatorTest {
             >.() -> Unit
     ) = runTest {
         RecordingConfirmationDefinition.test(TestConfirmationDefinition(action, result), scenarioTest)
-    }
-
-    private fun ConfirmationHandler.Result.asFailed(): ConfirmationHandler.Result.Failed {
-        return this as ConfirmationHandler.Result.Failed
     }
 
     private fun ConfirmationMediator.Action.asFail(): ConfirmationMediator.Action.Fail {

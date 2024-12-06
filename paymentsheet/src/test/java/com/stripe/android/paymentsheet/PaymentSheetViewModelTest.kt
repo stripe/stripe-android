@@ -27,6 +27,7 @@ import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkConfigurationCoordinator
+import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.link.ui.inline.LinkSignupMode
@@ -120,6 +121,7 @@ import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakePaymentElementLoader
 import com.stripe.android.utils.IntentConfirmationInterceptorTestRule
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
+import com.stripe.android.utils.RecordingLinkPaymentLauncher
 import com.stripe.android.utils.RelayingPaymentElementLoader
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -916,57 +918,62 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `On link payment through launcher, should process with wallets processing state`() = runTest {
-        val linkConfiguration = LinkConfiguration(
-            stripeIntent = mock {
-                on { linkFundingSources } doReturn listOf(
-                    PaymentMethod.Type.Card.code
+        RecordingLinkPaymentLauncher.test {
+            val linkConfiguration = LinkConfiguration(
+                stripeIntent = mock {
+                    on { linkFundingSources } doReturn listOf(
+                        PaymentMethod.Type.Card.code
+                    )
+                },
+                customerInfo = LinkConfiguration.CustomerInfo(null, null, null, null),
+                flags = mapOf(),
+                merchantName = "Test merchant inc.",
+                merchantCountryCode = "US",
+                passthroughModeEnabled = false,
+                cardBrandChoice = null,
+                shippingValues = mapOf(),
+            )
+
+            val viewModel = createViewModel(
+                linkState = LinkState(
+                    configuration = linkConfiguration,
+                    loginState = LinkState.LoginState.LoggedOut,
+                    signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
+                ),
+                linkPaymentLauncher = launcher,
+            )
+
+            turbineScope {
+                val walletsProcessingStateTurbine = viewModel.walletsProcessingState.testIn(this)
+                val buyButtonStateTurbine = viewModel.buyButtonState.testIn(this)
+
+                assertThat(walletsProcessingStateTurbine.awaitItem()).isEqualTo(null)
+                assertThat(buyButtonStateTurbine.awaitItem()).isEqualTo(
+                    PaymentSheetViewState.Reset(null)
                 )
-            },
-            customerInfo = LinkConfiguration.CustomerInfo(null, null, null, null),
-            flags = mapOf(),
-            merchantName = "Test merchant inc.",
-            merchantCountryCode = "US",
-            passthroughModeEnabled = false,
-            cardBrandChoice = null,
-            shippingValues = mapOf(),
-        )
 
-        val viewModel = createViewModel(
-            linkState = LinkState(
-                configuration = linkConfiguration,
-                loginState = LinkState.LoginState.LoggedOut,
-                signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
-            )
-        )
+                viewModel.checkoutWithLink()
 
-        turbineScope {
-            val walletsProcessingStateTurbine = viewModel.walletsProcessingState.testIn(this)
-            val buyButtonStateTurbine = viewModel.buyButtonState.testIn(this)
+                assertThat(walletsProcessingStateTurbine.awaitItem()).isEqualTo(WalletsProcessingState.Processing)
+                assertThat(buyButtonStateTurbine.awaitItem()).isEqualTo(null)
 
-            assertThat(walletsProcessingStateTurbine.awaitItem()).isEqualTo(null)
-            assertThat(buyButtonStateTurbine.awaitItem()).isEqualTo(
-                PaymentSheetViewState.Reset(null)
-            )
+                fakeIntentConfirmationInterceptor.enqueueCompleteStep()
 
-            viewModel.linkHandler.launchLink()
+                val registerCall = registerCalls.awaitItem()
 
-            assertThat(walletsProcessingStateTurbine.awaitItem()).isEqualTo(WalletsProcessingState.Processing)
-            assertThat(buyButtonStateTurbine.awaitItem()).isEqualTo(null)
+                assertThat(presentCalls.awaitItem()).isNotNull()
 
-            fakeIntentConfirmationInterceptor.enqueueCompleteStep()
-
-            viewModel.linkHandler.onLinkActivityResult(
-                LinkActivityResult.Completed(
-                    paymentMethod = CARD_WITH_NETWORKS_PAYMENT_METHOD
+                registerCall.callback(
+                    LinkActivityResult.Completed(
+                        paymentMethod = CARD_WITH_NETWORKS_PAYMENT_METHOD
+                    )
                 )
-            )
 
-            assertThat(walletsProcessingStateTurbine.awaitItem()).isInstanceOf<
-                WalletsProcessingState.Completed
-                >()
+                assertThat(walletsProcessingStateTurbine.awaitItem()).isInstanceOf<WalletsProcessingState.Completed>()
 
-            buyButtonStateTurbine.cancel()
-            walletsProcessingStateTurbine.cancel()
+                buyButtonStateTurbine.cancel()
+                walletsProcessingStateTurbine.cancel()
+            }
         }
     }
 
@@ -3054,6 +3061,7 @@ internal class PaymentSheetViewModelTest {
         stripeIntent: StripeIntent = PAYMENT_INTENT,
         customer: CustomerState? = EMPTY_CUSTOMER_STATE.copy(paymentMethods = PAYMENT_METHODS),
         intentConfirmationInterceptor: IntentConfirmationInterceptor = fakeIntentConfirmationInterceptor,
+        linkPaymentLauncher: LinkPaymentLauncher = RecordingLinkPaymentLauncher.noOp(),
         linkConfigurationCoordinator: LinkConfigurationCoordinator = this.linkConfigurationCoordinator,
         customerRepository: CustomerRepository = FakeCustomerRepository(customer?.paymentMethods ?: emptyList()),
         shouldFailLoad: Boolean = false,
@@ -3106,6 +3114,7 @@ internal class PaymentSheetViewModelTest {
                     paymentConfiguration = paymentConfiguration,
                     statusBarColor = args.statusBarColor,
                     errorReporter = FakeErrorReporter(),
+                    linkLauncher = linkPaymentLauncher,
                 ),
                 cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
                 editInteractorFactory = fakeEditPaymentMethodInteractorFactory,
