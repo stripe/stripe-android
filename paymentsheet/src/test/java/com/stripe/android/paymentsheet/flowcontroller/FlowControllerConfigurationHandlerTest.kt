@@ -309,7 +309,7 @@ class FlowControllerConfigurationHandlerTest {
         }
 
         assertThat(configureErrors.awaitItem()?.message)
-            .isEqualTo("When a CustomerConfiguration is passed to PaymentSheet, the ephemeralKeySecret cannot be an empty string.")
+            .isEqualTo("Conflicting ephemeralKeySecrets between CustomerConfiguration and CustomerConfiguration.customerAccessType")
     }
 
     @Test
