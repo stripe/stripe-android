@@ -34,7 +34,7 @@ internal data class CommonConfiguration(
         }
     }
 
-    // These exception messages are not localized as they are not intended to be displayed to a user."
+    // These exception messages are not localized as they are not intended to be displayed to a user.
     @Suppress("ThrowsCount")
     private fun customerAndMerchantValidate() {
         when {
@@ -64,7 +64,7 @@ internal data class CommonConfiguration(
         }
     }
 
-    // These exception messages are not localized as they are not intended to be displayed to a user."
+    // These exception messages are not localized as they are not intended to be displayed to a user.
     @Suppress("ThrowsCount")
     private fun customerSessionValidate(customerAccessType: PaymentSheet.CustomerAccessType.CustomerSession) {
         val result = CustomerSessionClientSecretValidator
@@ -93,7 +93,7 @@ internal data class CommonConfiguration(
         }
     }
 
-    // These exception messages are not localized as they are not intended to be displayed to a user."
+    // These exception messages are not localized as they are not intended to be displayed to a user.
     @Suppress("ThrowsCount")
     private fun legacyCustomerEphemeralKeyValidate(
         customerAccessType: PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey
