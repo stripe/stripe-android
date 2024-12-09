@@ -29,7 +29,9 @@ fun NavGraphBuilder.settingsComposables(
         )
     }
     composable(SettingsDestination.OnboardingSettings) {
+        val settingsViewModel = hiltViewModel<SettingsViewModel>(activity)
         AccountOnboardingSettingsView(
+            viewModel = settingsViewModel,
             onBack = { navController.safeNavigateUp() },
         )
     }

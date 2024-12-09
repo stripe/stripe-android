@@ -14,6 +14,7 @@ import com.stripe.android.connect.example.ui.settings.SettingsViewModel.Settings
 import com.stripe.android.core.Logger
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -31,7 +32,7 @@ class SettingsViewModel @Inject constructor(
     private val loggingTag = this::class.java.simpleName
 
     private val _state = MutableStateFlow(SettingsState(serverUrl = embeddedComponentService.serverBaseUrl))
-    val state = _state.asStateFlow()
+    val state: StateFlow<SettingsState> = _state.asStateFlow()
 
     init {
         loadSettings()
@@ -75,6 +76,15 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    fun onOnboardingSettingsConfirmed(onboardingSettings: OnboardingSettings) {
+        viewModelScope.launch {
+            settingsService.setOnboardingSettings(onboardingSettings)
+            logger.info("($loggingTag) Onboarding settings saved")
+
+            _state.update { it.copy(onboardingSettings = onboardingSettings) }
+        }
+    }
+
     fun onServerUrlChanged(url: String) {
         _state.update { it.copy(serverUrl = url) }
     }
@@ -91,7 +101,6 @@ class SettingsViewModel @Inject constructor(
 
                 val selectedAccountId = selectedAccount?.merchantId
                 if (selectedAccountId != null) settingsService.setSelectedMerchant(selectedAccountId)
-                settingsService.setOnboardingSettings(onboardingSettings)
                 settingsService.setPresentationSettings(presentationSettings)
             }
             logger.info("($loggingTag) Settings saved")
@@ -135,14 +144,7 @@ class SettingsViewModel @Inject constructor(
         val saveEnabled: Boolean = false,
         val accounts: List<DemoMerchant> = listOf(DemoMerchant.Other()),
         val selectedAccount: DemoMerchant? = accounts.firstOrNull(),
-        val onboardingSettings: OnboardingSettings = OnboardingSettings(
-            fullTermsOfServiceString = null,
-            recipientTermsOfServiceString = null,
-            privacyPolicyString = null,
-            skipTermsOfService = SkipTermsOfService.DEFAULT,
-            fieldOption = FieldOption.DEFAULT,
-            futureRequirement = FutureRequirement.DEFAULT
-        ),
+        val onboardingSettings: OnboardingSettings = OnboardingSettings(),
         val presentationSettings: PresentationSettings = PresentationSettings(
             presentationStyleIsPush = true,
             embedInTabBar = false,
