@@ -5,12 +5,20 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.google.android.material.snackbar.Snackbar
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -37,6 +45,7 @@ internal class ServerSideConfirmationCustomFlowActivity : AppCompatActivity() {
 
     private val viewModel by viewModels<ServerSideConfirmationCustomFlowViewModel>()
 
+    @SuppressWarnings("LongMethod")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -66,34 +75,43 @@ internal class ServerSideConfirmationCustomFlowActivity : AppCompatActivity() {
                     }
                 }
 
-                if (uiState.isError) {
-                    ErrorScreen(onRetry = viewModel::retry)
-                } else {
-                    Receipt(
-                        isLoading = uiState.isProcessing,
-                        cartState = uiState.cartState,
-                        isEditable = true,
-                        onQuantityChanged = viewModel::updateQuantity,
-                    ) {
-                        PaymentMethodSelector(
-                            isEnabled = uiState.isPaymentMethodButtonEnabled,
-                            paymentMethodLabel = paymentMethodLabel,
-                            paymentMethodPainter = uiState.paymentOption?.iconPainter,
-                            onClick = flowController::presentPaymentOptions,
-                        )
+                Box(
+                    modifier = Modifier
+                        .padding(
+                            paddingValues = WindowInsets.systemBars.only(
+                                WindowInsetsSides.Horizontal + WindowInsetsSides.Top
+                            ).asPaddingValues()
+                        ),
+                ) {
+                    if (uiState.isError) {
+                        ErrorScreen(onRetry = viewModel::retry)
+                    } else {
+                        Receipt(
+                            isLoading = uiState.isProcessing,
+                            cartState = uiState.cartState,
+                            isEditable = true,
+                            onQuantityChanged = viewModel::updateQuantity,
+                        ) {
+                            PaymentMethodSelector(
+                                isEnabled = uiState.isPaymentMethodButtonEnabled,
+                                paymentMethodLabel = paymentMethodLabel,
+                                paymentMethodPainter = uiState.paymentOption?.iconPainter,
+                                onClick = flowController::presentPaymentOptions,
+                            )
 
-                        SubscriptionToggle(
-                            checked = uiState.cartState.isSubscription,
-                            onCheckedChange = viewModel::updateSubscription,
-                        )
+                            SubscriptionToggle(
+                                checked = uiState.cartState.isSubscription,
+                                onCheckedChange = viewModel::updateSubscription,
+                            )
 
-                        BuyButton(
-                            buyButtonEnabled = uiState.isBuyButtonEnabled,
-                            onClick = {
-                                viewModel.handleBuyButtonPressed()
-                                flowController.confirm()
-                            }
-                        )
+                            BuyButton(
+                                buyButtonEnabled = uiState.isBuyButtonEnabled,
+                                onClick = {
+                                    viewModel.handleBuyButtonPressed()
+                                    flowController.confirm()
+                                }
+                            )
+                        }
                     }
                 }
             }
