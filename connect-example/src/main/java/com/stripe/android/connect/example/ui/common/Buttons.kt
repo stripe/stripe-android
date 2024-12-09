@@ -4,8 +4,8 @@ import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import com.stripe.android.connect.example.R
 
@@ -20,14 +20,13 @@ fun BackIconButton(onClick: () -> Unit) {
 }
 
 @Composable
-fun MoreIconButton(
+fun CustomizeAppearanceIconButton(
     onClick: () -> Unit,
-    contentDescription: String = stringResource(R.string.more),
 ) {
     IconButton(onClick = onClick) {
         Icon(
-            imageVector = Icons.Default.MoreVert,
-            contentDescription = contentDescription,
+            painter = painterResource(R.drawable.ic_material_palette),
+            contentDescription = stringResource(R.string.customize_appearance),
         )
     }
 }
