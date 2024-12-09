@@ -30,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -40,6 +41,8 @@ import com.stripe.android.link.R
 import com.stripe.android.link.theme.HorizontalPadding
 import com.stripe.android.link.theme.linkColors
 import com.stripe.android.link.theme.linkShapes
+import com.stripe.android.link.ui.PrimaryButton
+import com.stripe.android.link.ui.SecondaryButton
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.uicore.text.Html
 import com.stripe.android.uicore.utils.collectAsState
@@ -57,7 +60,9 @@ internal fun WalletScreen(
         onItemSelected = viewModel::onItemSelected,
         onExpandedChanged = { expanded ->
             isExpanded = expanded
-        }
+        },
+        onPrimaryButtonClick = viewModel::onPrimaryButtonClicked,
+        onPayAnotherWayClick = viewModel::onPayAnotherWayClicked,
     )
 }
 
@@ -67,6 +72,8 @@ internal fun WalletBody(
     isExpanded: Boolean,
     onItemSelected: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onExpandedChanged: (Boolean) -> Unit,
+    onPrimaryButtonClick: () -> Unit,
+    onPayAnotherWayClick: () -> Unit,
 ) {
     if (state.paymentDetailsList.isEmpty()) {
         Box(
@@ -90,37 +97,72 @@ internal fun WalletBody(
 
     Column(
         modifier = Modifier
+            .testTag(WALLET_SCREEN_BOX)
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        Box(
-            modifier = Modifier
-                .animateContentSize()
-        ) {
-            val selectedItem = state.selectedItem
-            if (isExpanded || selectedItem == null) {
-                ExpandedPaymentDetails(
-                    uiState = state,
-                    onItemSelected = onItemSelected,
-                    onMenuButtonClick = {},
-                    onAddNewPaymentMethodClick = {},
-                    onCollapse = {
-                        onExpandedChanged(false)
-                    }
-                )
-            } else {
-                CollapsedPaymentDetails(
-                    selectedPaymentMethod = selectedItem,
-                    enabled = !state.primaryButtonState.isBlocking,
-                    onClick = {
-                        onExpandedChanged(true)
-                    }
-                )
-            }
-        }
+        PaymentMethodSection(
+            state = state,
+            isExpanded = isExpanded,
+            onItemSelected = onItemSelected,
+            onExpandedChanged = onExpandedChanged
+        )
 
         AnimatedVisibility(state.showBankAccountTerms) {
             BankAccountTerms()
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        PrimaryButton(
+            modifier = Modifier
+                .testTag(WALLET_SCREEN_PAY_BUTTON),
+            label = state.primaryButtonLabel.resolve(LocalContext.current),
+            state = state.primaryButtonState,
+            onButtonClick = onPrimaryButtonClick,
+            iconEnd = com.stripe.android.ui.core.R.drawable.stripe_ic_lock
+        )
+
+        SecondaryButton(
+            modifier = Modifier
+                .testTag(WALLET_SCREEN_PAY_ANOTHER_WAY_BUTTON),
+            enabled = !state.primaryButtonState.isBlocking,
+            label = stringResource(id = R.string.stripe_wallet_pay_another_way),
+            onClick = onPayAnotherWayClick
+        )
+    }
+}
+
+@Composable
+private fun PaymentMethodSection(
+    state: WalletUiState,
+    isExpanded: Boolean,
+    onItemSelected: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
+    onExpandedChanged: (Boolean) -> Unit,
+) {
+    Box(
+        modifier = Modifier
+            .animateContentSize()
+    ) {
+        val selectedItem = state.selectedItem
+        if (isExpanded || selectedItem == null) {
+            ExpandedPaymentDetails(
+                uiState = state,
+                onItemSelected = onItemSelected,
+                onMenuButtonClick = {},
+                onAddNewPaymentMethodClick = {},
+                onCollapse = {
+                    onExpandedChanged(false)
+                }
+            )
+        } else {
+            CollapsedPaymentDetails(
+                selectedPaymentMethod = selectedItem,
+                enabled = !state.primaryButtonState.isBlocking,
+                onClick = {
+                    onExpandedChanged(true)
+                }
+            )
         }
     }
 }
@@ -131,50 +173,52 @@ internal fun CollapsedPaymentDetails(
     enabled: Boolean,
     onClick: () -> Unit
 ) {
-    Row(
-        modifier = Modifier
-            .testTag(COLLAPSED_WALLET_ROW)
-            .fillMaxWidth()
-            .height(64.dp)
-            .border(
-                width = 1.dp,
-                color = MaterialTheme.linkColors.componentBorder,
-                shape = MaterialTheme.linkShapes.large
-            )
-            .clip(MaterialTheme.linkShapes.large)
-            .background(
-                color = MaterialTheme.linkColors.componentBackground,
-                shape = MaterialTheme.linkShapes.large
-            )
-            .clickable(
-                enabled = enabled,
-                onClick = onClick
-            ),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = stringResource(R.string.stripe_wallet_collapsed_payment),
+    Column {
+        Row(
             modifier = Modifier
-                .testTag(COLLAPSED_WALLET_HEADER_TAG)
-                .padding(
-                    start = HorizontalPadding,
-                    end = 8.dp
+                .testTag(COLLAPSED_WALLET_ROW)
+                .fillMaxWidth()
+                .height(64.dp)
+                .border(
+                    width = 1.dp,
+                    color = MaterialTheme.linkColors.componentBorder,
+                    shape = MaterialTheme.linkShapes.large
+                )
+                .clip(MaterialTheme.linkShapes.large)
+                .background(
+                    color = MaterialTheme.linkColors.componentBackground,
+                    shape = MaterialTheme.linkShapes.large
+                )
+                .clickable(
+                    enabled = enabled,
+                    onClick = onClick
                 ),
-            color = MaterialTheme.linkColors.disabledText
-        )
-        PaymentDetails(
-            modifier = Modifier
-                .testTag(COLLAPSED_WALLET_PAYMENT_DETAILS_TAG),
-            paymentDetails = selectedPaymentMethod
-        )
-        Icon(
-            painter = painterResource(R.drawable.stripe_link_chevron),
-            contentDescription = stringResource(R.string.stripe_wallet_expand_accessibility),
-            modifier = Modifier
-                .padding(end = 22.dp)
-                .testTag(COLLAPSED_WALLET_CHEVRON_ICON_TAG),
-            tint = MaterialTheme.linkColors.disabledText
-        )
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = stringResource(R.string.stripe_wallet_collapsed_payment),
+                modifier = Modifier
+                    .testTag(COLLAPSED_WALLET_HEADER_TAG)
+                    .padding(
+                        start = HorizontalPadding,
+                        end = 8.dp
+                    ),
+                color = MaterialTheme.linkColors.disabledText
+            )
+            PaymentDetails(
+                modifier = Modifier
+                    .testTag(COLLAPSED_WALLET_PAYMENT_DETAILS_TAG),
+                paymentDetails = selectedPaymentMethod
+            )
+            Icon(
+                painter = painterResource(R.drawable.stripe_link_chevron),
+                contentDescription = stringResource(R.string.stripe_wallet_expand_accessibility),
+                modifier = Modifier
+                    .padding(end = 22.dp)
+                    .testTag(COLLAPSED_WALLET_CHEVRON_ICON_TAG),
+                tint = MaterialTheme.linkColors.disabledText
+            )
+        }
     }
 }
 
@@ -331,3 +375,6 @@ internal const val COLLAPSED_WALLET_ROW = "collapsed_wallet_row_tag"
 internal const val WALLET_SCREEN_EXPANDED_ROW_HEADER = "wallet_screen_expanded_row_header"
 internal const val WALLET_ADD_PAYMENT_METHOD_ROW = "wallet_add_payment_method_row"
 internal const val WALLET_SCREEN_PAYMENT_METHODS_LIST = "wallet_screen_payment_methods_list"
+internal const val WALLET_SCREEN_PAY_BUTTON = "wallet_screen_pay_button"
+internal const val WALLET_SCREEN_PAY_ANOTHER_WAY_BUTTON = "wallet_screen_pay_another_way_button"
+internal const val WALLET_SCREEN_BOX = "wallet_screen_box"

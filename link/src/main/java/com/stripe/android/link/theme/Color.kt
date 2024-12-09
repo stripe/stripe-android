@@ -43,6 +43,7 @@ private val DarkFill = Color(0x33787880)
 private val DarkCloseButton = Color(0x99EBEBF5)
 private val DarkLinkLogo = Color.White
 private val DarkProgressIndicator = LinkTeal
+private val DarkSecondaryButtonLabel = ActionGreen
 private val DarkOtpPlaceholder = Color(0x61FFFFFF)
 
 internal data class LinkColors(
@@ -106,6 +107,7 @@ internal object LinkThemeConfig {
         linkLogo = DarkLinkLogo,
         closeButton = DarkCloseButton,
         disabledText = DarkTextDisabled,
+        secondaryButtonLabel = DarkSecondaryButtonLabel,
         otpElementColors = OTPElementColors(
             selectedBorder = LinkTeal,
             placeholder = DarkOtpPlaceholder
