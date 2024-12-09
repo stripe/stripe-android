@@ -150,12 +150,12 @@ class SettingsService @Inject constructor(@ApplicationContext context: Context) 
 }
 
 data class OnboardingSettings(
-    val fullTermsOfServiceString: String?,
-    val recipientTermsOfServiceString: String?,
-    val privacyPolicyString: String?,
-    val skipTermsOfService: SkipTermsOfService,
-    val fieldOption: FieldOption,
-    val futureRequirement: FutureRequirement
+    val fullTermsOfServiceString: String? = null,
+    val recipientTermsOfServiceString: String? = null,
+    val privacyPolicyString: String? = null,
+    val skipTermsOfService: SkipTermsOfService = SkipTermsOfService.DEFAULT,
+    val fieldOption: FieldOption = FieldOption.DEFAULT,
+    val futureRequirement: FutureRequirement = FutureRequirement.DEFAULT,
 )
 
 data class PresentationSettings(
