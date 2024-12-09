@@ -277,6 +277,7 @@ internal class AccountPickerViewModelTest {
     @Test
     fun `Saves selected accounts to Link if we have a consumer session`() = runTest {
         val consumerSession = CachedConsumerSession(
+            accountId = null,
             clientSecret = "clientSecret",
             emailAddress = "test@test.com",
             phoneNumber = "(***) *** **12",

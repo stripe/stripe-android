@@ -152,6 +152,7 @@ internal object ApiKeyFixtures {
     )
 
     fun consumerSessionSignup() = ConsumerSessionSignup(
+        accountId = "acct_123",
         publishableKey = "pk_123",
         consumerSession = consumerSession().copy(
             verificationSessions = listOf(
@@ -163,7 +164,10 @@ internal object ApiKeyFixtures {
         ),
     )
 
-    fun cachedConsumerSession() = CachedConsumerSession(
+    fun cachedConsumerSession(
+        accountId: String? = null,
+    ) = CachedConsumerSession(
+        accountId = accountId,
         clientSecret = "clientSecret",
         emailAddress = "test@test.com",
         phoneNumber = "(***) *** **12",

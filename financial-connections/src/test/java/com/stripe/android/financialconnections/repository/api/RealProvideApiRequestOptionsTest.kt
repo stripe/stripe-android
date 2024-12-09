@@ -106,6 +106,7 @@ class RealProvideApiRequestOptionsTest {
         publishableKey: String?,
     ): CachedConsumerSession {
         return CachedConsumerSession(
+            accountId = null,
             clientSecret = "clientSecret",
             emailAddress = "test@test.com",
             phoneNumber = "(***) *** **12",

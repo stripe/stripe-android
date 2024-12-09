@@ -1,11 +1,14 @@
 package com.stripe.android.financialconnections.domain
 
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext
 import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext.BillingDetails
 import com.stripe.android.financialconnections.repository.CachedConsumerSession
 import com.stripe.android.financialconnections.repository.FinancialConnectionsConsumerSessionRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsRepository
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.IncentiveEligibilitySession
+import com.stripe.android.model.LinkConsumerIncentive
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.SharePaymentDetails
 import kotlinx.coroutines.test.runTest
@@ -13,9 +16,12 @@ import org.junit.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoInteractions
+import org.mockito.kotlin.whenever
 
 class RealCreateInstantDebitsResultTest {
 
@@ -167,6 +173,96 @@ class RealCreateInstantDebitsResultTest {
         )
     }
 
+    @Test
+    fun `Skips checking available incentives if not incentive eligible`() = runTest {
+        val consumerRepository = makeConsumerSessionRepository()
+        val repository = makeRepository()
+
+        val createInstantDebitResult = RealCreateInstantDebitsResult(
+            consumerRepository = consumerRepository,
+            repository = repository,
+            consumerSessionProvider = { makeCachedConsumerSession("acct_789") },
+            elementsSessionContext = makeElementsSessionContext(
+                linkMode = LinkMode.LinkPaymentMethod,
+                incentiveEligibilitySession = null,
+            ),
+        )
+
+        val result = createInstantDebitResult("bank_account_id_001")
+
+        verify(consumerRepository, never()).updateAvailableIncentives(
+            sessionId = any(),
+            consumerAccount = any(),
+        )
+
+        assertThat(result.eligibleForIncentive).isFalse()
+    }
+
+    @Test
+    fun `Skips checking available incentives if no signup happened in the flow`() = runTest {
+        val consumerRepository = makeConsumerSessionRepository()
+        val repository = makeRepository()
+
+        val createInstantDebitResult = RealCreateInstantDebitsResult(
+            consumerRepository = consumerRepository,
+            repository = repository,
+            consumerSessionProvider = {
+                // A missing account ID means no signup happened
+                makeCachedConsumerSession(accountId = null)
+            },
+            elementsSessionContext = makeElementsSessionContext(
+                linkMode = LinkMode.LinkPaymentMethod,
+                incentiveEligibilitySession = IncentiveEligibilitySession.PaymentIntent("pi_123"),
+            ),
+        )
+
+        val result = createInstantDebitResult("bank_account_id_001")
+
+        verify(consumerRepository, never()).updateAvailableIncentives(
+            sessionId = any(),
+            consumerAccount = any(),
+        )
+
+        assertThat(result.eligibleForIncentive).isFalse()
+    }
+
+    @Test
+    fun `Checks available incentives if eligible`() = runTest {
+        val consumerRepository = makeConsumerSessionRepository()
+        val repository = makeRepository()
+
+        val createInstantDebitResult = RealCreateInstantDebitsResult(
+            consumerRepository = consumerRepository,
+            repository = repository,
+            consumerSessionProvider = { makeCachedConsumerSession("acct_789") },
+            elementsSessionContext = makeElementsSessionContext(
+                linkMode = LinkMode.LinkPaymentMethod,
+                incentiveEligibilitySession = IncentiveEligibilitySession.PaymentIntent("pi_123"),
+            ),
+        )
+
+        whenever(
+            consumerRepository.updateAvailableIncentives(
+                sessionId = eq("pi_123"),
+                consumerAccount = eq("acct_789"),
+            )
+        ).thenReturn(
+            UpdateAvailableIncentives(
+                data = listOf(
+                    LinkConsumerIncentive(
+                        incentiveParams = LinkConsumerIncentive.IncentiveParams(
+                            paymentMethod = "link_instant_debits",
+                        ),
+                        incentiveDisplayText = "$5",
+                    )
+                )
+            )
+        )
+
+        val result = createInstantDebitResult("bank_account_id_001")
+        assertThat(result.eligibleForIncentive).isTrue()
+    }
+
     private fun makeConsumerSessionRepository(): FinancialConnectionsConsumerSessionRepository {
         val consumerPaymentDetails = ConsumerPaymentDetails(
             paymentDetails = listOf(
@@ -199,8 +295,11 @@ class RealCreateInstantDebitsResultTest {
         }
     }
 
-    private fun makeCachedConsumerSession(): CachedConsumerSession {
+    private fun makeCachedConsumerSession(
+        accountId: String? = null,
+    ): CachedConsumerSession {
         return CachedConsumerSession(
+            accountId = accountId,
             clientSecret = "clientSecret",
             emailAddress = "test@test.com",
             phoneNumber = "(***) *** **12",
@@ -212,6 +311,7 @@ class RealCreateInstantDebitsResultTest {
     private fun makeElementsSessionContext(
         linkMode: LinkMode?,
         billingDetails: BillingDetails? = null,
+        incentiveEligibilitySession: IncentiveEligibilitySession? = null,
     ): ElementsSessionContext {
         return ElementsSessionContext(
             amount = 100L,
@@ -223,7 +323,7 @@ class RealCreateInstantDebitsResultTest {
                 phone = null,
                 phoneCountryCode = null,
             ),
-            incentiveEligibilitySession = null,
+            incentiveEligibilitySession = incentiveEligibilitySession,
         )
     }
 }

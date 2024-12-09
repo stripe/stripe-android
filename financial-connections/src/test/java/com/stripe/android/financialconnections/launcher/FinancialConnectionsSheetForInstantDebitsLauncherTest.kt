@@ -23,6 +23,7 @@ class FinancialConnectionsSheetForInstantDebitsLauncherTest {
                 encodedPaymentMethod = encodedPaymentMethod,
                 last4 = "1234",
                 bankName = "Bank of America",
+                eligibleForIncentive = false,
             )
         )
 
@@ -46,6 +47,7 @@ class FinancialConnectionsSheetForInstantDebitsLauncherTest {
                             encodedPaymentMethod = encodedPaymentMethod,
                             last4 = "1234",
                             bankName = "Bank of America",
+                            eligibleForIncentive = false,
                         )
                     )
             }
