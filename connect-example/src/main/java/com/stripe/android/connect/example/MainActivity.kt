@@ -7,8 +7,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.stripe.android.connect.example.ui.appearance.AppearanceView
-import com.stripe.android.connect.example.ui.appearance.AppearanceViewModel
+import com.stripe.android.connect.example.core.safeNavigateUp
 import com.stripe.android.connect.example.ui.common.ConnectSdkExampleTheme
 import com.stripe.android.connect.example.ui.componentpicker.ComponentPickerContent
 import com.stripe.android.connect.example.ui.embeddedcomponentmanagerloader.EmbeddedComponentLoaderViewModel
@@ -31,22 +30,14 @@ class MainActivity : ComponentActivity() {
                         ComponentPickerContent(
                             viewModel = viewModel,
                             openSettings = { navController.navigate(route = MainDestination.Settings) },
-                            openAppearance = { navController.navigate(route = MainDestination.Appearance) },
                         )
                     }
                     composable(MainDestination.Settings) {
                         val settingsViewModel = hiltViewModel<SettingsViewModel>()
                         SettingsView(
                             viewModel = settingsViewModel,
-                            onDismiss = { navController.popBackStack() },
+                            onDismiss = { navController.safeNavigateUp() },
                             onReloadRequested = viewModel::reload,
-                        )
-                    }
-                    composable(MainDestination.Appearance) {
-                        val appearanceViewModel = hiltViewModel<AppearanceViewModel>()
-                        AppearanceView(
-                            viewModel = appearanceViewModel,
-                            onDismiss = { navController.popBackStack() },
                         )
                     }
                 }
@@ -59,5 +50,4 @@ class MainActivity : ComponentActivity() {
 private object MainDestination {
     const val ComponentPicker = "ComponentPicker"
     const val Settings = "Settings"
-    const val Appearance = "Appearance"
 }

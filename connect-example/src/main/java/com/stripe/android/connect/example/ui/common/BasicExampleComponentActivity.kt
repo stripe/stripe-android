@@ -26,6 +26,7 @@ import androidx.navigation.compose.rememberNavController
 import com.stripe.android.connect.EmbeddedComponentManager
 import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.example.core.Success
+import com.stripe.android.connect.example.core.safeNavigateUp
 import com.stripe.android.connect.example.core.then
 import com.stripe.android.connect.example.ui.appearance.AppearanceView
 import com.stripe.android.connect.example.ui.appearance.AppearanceViewModel
@@ -70,7 +71,7 @@ abstract class BasicExampleComponentActivity : FragmentActivity() {
                         val settingsViewModel = hiltViewModel<SettingsViewModel>()
                         SettingsView(
                             viewModel = settingsViewModel,
-                            onDismiss = { navController.popBackStack() },
+                            onDismiss = { navController.safeNavigateUp() },
                             onReloadRequested = viewModel::reload,
                         )
                     }
