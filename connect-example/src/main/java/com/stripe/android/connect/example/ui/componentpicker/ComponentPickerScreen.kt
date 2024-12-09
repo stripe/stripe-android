@@ -16,10 +16,14 @@ import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -28,10 +32,51 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.example.R
+import com.stripe.android.connect.example.core.Success
+import com.stripe.android.connect.example.core.then
 import com.stripe.android.connect.example.ui.common.BetaBadge
+import com.stripe.android.connect.example.ui.common.ConnectExampleScaffold
+import com.stripe.android.connect.example.ui.common.CustomizeAppearanceIconButton
+import com.stripe.android.connect.example.ui.embeddedcomponentmanagerloader.EmbeddedComponentLoaderViewModel
+import com.stripe.android.connect.example.ui.embeddedcomponentmanagerloader.EmbeddedComponentManagerLoader
 import com.stripe.android.connect.example.ui.features.accountonboarding.AccountOnboardingExampleActivity
 import com.stripe.android.connect.example.ui.features.payouts.PayoutsExampleActivity
+
+@OptIn(PrivateBetaConnectSDK::class)
+@Composable
+fun ComponentPickerContent(
+    viewModel: EmbeddedComponentLoaderViewModel,
+    openSettings: () -> Unit,
+    openAppearance: () -> Unit,
+) {
+    val state by viewModel.state.collectAsState()
+    val embeddedComponentAsync = state.embeddedComponentManagerAsync
+
+    ConnectExampleScaffold(
+        title = stringResource(R.string.connect_sdk_example),
+        actions = (embeddedComponentAsync is Success).then {
+            {
+                IconButton(onClick = openSettings) {
+                    Icon(
+                        imageVector = Icons.Default.Settings,
+                        contentDescription = stringResource(R.string.settings),
+                    )
+                }
+                CustomizeAppearanceIconButton(onClick = openAppearance)
+            }
+        } ?: { },
+    ) {
+        EmbeddedComponentManagerLoader(
+            embeddedComponentAsync = embeddedComponentAsync,
+            reload = viewModel::reload,
+            openSettings = openSettings,
+        ) {
+            ComponentPickerList()
+        }
+    }
+}
 
 @Composable
 fun ComponentPickerList() {
