@@ -1,27 +1,31 @@
 package com.stripe.android.paymentelement.confirmation.intent
 
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
+import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.toConfirmPaymentIntentShipping
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 
 internal suspend fun IntentConfirmationInterceptor.intercept(
     confirmationOption: PaymentMethodConfirmationOption,
+    initializationMode: PaymentElementLoader.InitializationMode,
+    shippingDetails: AddressDetails?
 ): IntentConfirmationInterceptor.NextStep {
     return when (confirmationOption) {
         is PaymentMethodConfirmationOption.New -> {
             intercept(
-                initializationMode = confirmationOption.initializationMode,
+                initializationMode = initializationMode,
                 paymentMethodOptionsParams = confirmationOption.optionsParams,
                 paymentMethodCreateParams = confirmationOption.createParams,
-                shippingValues = confirmationOption.shippingDetails?.toConfirmPaymentIntentShipping(),
+                shippingValues = shippingDetails?.toConfirmPaymentIntentShipping(),
                 customerRequestedSave = confirmationOption.shouldSave,
             )
         }
         is PaymentMethodConfirmationOption.Saved -> {
             intercept(
-                initializationMode = confirmationOption.initializationMode,
+                initializationMode = initializationMode,
                 paymentMethod = confirmationOption.paymentMethod,
                 paymentMethodOptionsParams = confirmationOption.optionsParams,
-                shippingValues = confirmationOption.shippingDetails?.toConfirmPaymentIntentShipping(),
+                shippingValues = shippingDetails?.toConfirmPaymentIntentShipping(),
             )
         }
     }

@@ -55,6 +55,7 @@ import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationMediator
 import com.stripe.android.paymentelement.confirmation.DefaultConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
@@ -2930,10 +2931,8 @@ internal class PaymentSheetViewModelTest {
     private suspend fun testProcessDeathRestorationAfterPaymentSuccess(loadStateBeforePaymentResult: Boolean) {
         val stripeIntent = PaymentIntentFactory.create(status = StripeIntent.Status.Succeeded)
         val option = PaymentMethodConfirmationOption.Saved(
-            initializationMode = ARGS_CUSTOMER_WITH_GOOGLEPAY.initializationMode,
             paymentMethod = CARD_PAYMENT_METHOD,
             optionsParams = null,
-            shippingDetails = null,
         )
         val savedStateHandle = SavedStateHandle(
             initialState = mapOf(
@@ -2943,9 +2942,14 @@ internal class PaymentSheetViewModelTest {
                     receivesResultInProcess = false,
                 ),
                 "IntentConfirmationParameters" to ConfirmationMediator.Parameters(
-                    intent = PAYMENT_INTENT,
                     confirmationOption = option,
                     deferredIntentConfirmationType = null,
+                    confirmationParameters = ConfirmationDefinition.Parameters(
+                        intent = PAYMENT_INTENT,
+                        initializationMode = ARGS_CUSTOMER_WITH_GOOGLEPAY.initializationMode,
+                        shippingDetails = null,
+                        appearance = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.appearance,
+                    )
                 )
             )
         )
