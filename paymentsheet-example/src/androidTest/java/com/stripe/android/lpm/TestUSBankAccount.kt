@@ -19,12 +19,10 @@ import com.stripe.android.test.core.DEFAULT_UI_TIMEOUT
 import com.stripe.android.test.core.TestParameters
 import com.stripe.android.test.core.ui.ComposeButton
 import com.stripe.android.test.core.ui.PaymentSelection
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-@Ignore
 internal class TestUSBankAccount : BasePlaygroundTest() {
     private val testParameters = TestParameters.create(
         paymentMethodCode = "us_bank_account",
