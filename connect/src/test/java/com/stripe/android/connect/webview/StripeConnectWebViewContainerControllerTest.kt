@@ -22,6 +22,7 @@ import com.stripe.android.connect.webview.serialization.SetOnLoaderStart
 import com.stripe.android.connect.webview.serialization.SetterFunctionCalledMessage
 import com.stripe.android.core.Logger
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import kotlinx.serialization.json.JsonNull
@@ -49,12 +50,9 @@ class StripeConnectWebViewContainerControllerTest {
     private val mockPermissionRequest: PermissionRequest = mock()
     private val view: StripeConnectWebViewContainerInternal = mock()
     private val embeddedComponentManager: EmbeddedComponentManager = mock()
-//        EmbeddedComponentManager(
-//        configuration = Configuration(publishableKey = "pk_test_123"),
-//        fetchClientSecretCallback = { },
-//    )
     private val embeddedComponent: StripeEmbeddedComponent = StripeEmbeddedComponent.PAYOUTS
 
+    private val appearanceFlow = MutableStateFlow(Appearance())
     private val delegateReceivedEvents = mutableListOf<SetterFunctionCalledMessage>()
     private val listener: PayoutsListener = mock()
     private val listenerDelegate: ComponentListenerDelegate<PayoutsListener> =
@@ -69,6 +67,8 @@ class StripeConnectWebViewContainerControllerTest {
     @Before
     fun setup() {
         Dispatchers.setMain(Dispatchers.Unconfined)
+
+        whenever(embeddedComponentManager.appearanceFlow) doReturn appearanceFlow
 
         controller = StripeConnectWebViewContainerController(
             view = view,
@@ -146,7 +146,7 @@ class StripeConnectWebViewContainerControllerTest {
 
         controller.onCreate(lifecycleOwner)
         val newAppearance = Appearance()
-        embeddedComponentManager.update(newAppearance)
+        appearanceFlow.emit(newAppearance)
 
         assertThat(controller.stateFlow.value.appearance).isEqualTo(newAppearance)
     }
@@ -197,7 +197,7 @@ class StripeConnectWebViewContainerControllerTest {
         // Shouldn't update appearance until pageDidLoad is received.
         verify(view, never()).updateConnectInstance(any())
 
-        embeddedComponentManager.update(appearances[0])
+        appearanceFlow.emit(appearances[0])
         controller.onViewAttached()
         controller.onPageStarted()
         verify(view, never()).updateConnectInstance(any())
@@ -206,7 +206,7 @@ class StripeConnectWebViewContainerControllerTest {
         controller.onReceivedPageDidLoad()
 
         // Should update again when appearance changes.
-        embeddedComponentManager.update(appearances[1])
+        appearanceFlow.emit(appearances[1])
 
         inOrder(view) {
             verify(view).updateConnectInstance(appearances[0])
