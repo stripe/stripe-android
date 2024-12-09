@@ -71,23 +71,21 @@ private fun SelectAnAppearance(
 ) {
     Column(
         modifier = Modifier.padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         appearances.forEach { appearance ->
             Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
                 modifier = Modifier
                     .fillMaxWidth()
+                    .padding(vertical = 8.dp)
                     .clickable { onAppearanceSelected(appearance) },
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 RadioButton(
                     selected = appearance == selectedAppearance,
                     onClick = null, // onClick handled by row
                 )
-                Column {
-                    Text(text = stringResource(appearance.displayNameRes))
-                }
+                Text(text = stringResource(appearance.displayNameRes))
             }
         }
     }
