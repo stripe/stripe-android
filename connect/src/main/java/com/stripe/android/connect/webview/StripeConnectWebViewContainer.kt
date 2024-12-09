@@ -76,6 +76,7 @@ internal interface StripeConnectWebViewContainerInternal {
 internal class StripeConnectWebViewContainerImpl<Listener : StripeEmbeddedComponentListener>(
     val embeddedComponent: StripeEmbeddedComponent,
     embeddedComponentManager: EmbeddedComponentManager?,
+    private val props: JsonObject?,
     listener: Listener?,
     private val listenerDelegate: ComponentListenerDelegate<Listener>,
     private val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG),
@@ -236,8 +237,9 @@ internal class StripeConnectWebViewContainerImpl<Listener : StripeEmbeddedCompon
         }
 
         @JavascriptInterface
-        fun fetchInitComponentProps() {
+        fun fetchInitComponentProps(): String {
             logger.debug("InitComponentProps fetched")
+            return ConnectJson.encodeToString(props ?: JsonObject(emptyMap()))
         }
 
         @JavascriptInterface
