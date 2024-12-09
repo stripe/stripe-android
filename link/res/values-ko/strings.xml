@@ -50,6 +50,10 @@
   <string name="stripe_wallet_default">기본값</string>
   <!-- Title for a section listing one or more payment methods. -->
   <string name="stripe_wallet_expanded_title">결제 방식</string>
+  <!-- Prefix for last 4 digits of payment method id e.g  •••• 1234 -->
+  <string name="stripe_wallet_last4_prefix">•••• </string>
+  <!-- Accessibility description for Passthrough payment method -->
+  <string name="stripe_wallet_passthrough_description">패스스루</string>
   <!-- Label of a button that when tapped allows the user to select a different form of payment. -->
   <string name="stripe_wallet_pay_another_way">다른 방법으로 결제</string>
   <!-- A text notice shown when the user selects a card that requires re-entering the security code (CVV/CVC). -->
