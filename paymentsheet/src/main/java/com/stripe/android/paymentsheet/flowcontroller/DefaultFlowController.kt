@@ -16,7 +16,6 @@ import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.link.LinkActivityResult
-import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -81,7 +80,6 @@ internal class DefaultFlowController @Inject internal constructor(
     @Named(ENABLE_LOGGING) private val enableLogging: Boolean,
     @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
     cvcRecollectionLauncherFactory: CvcRecollectionLauncherFactory,
-    private val linkLauncher: LinkPaymentLauncher,
     private val configurationHandler: FlowControllerConfigurationHandler,
     private val errorReporter: ErrorReporter,
     @InitializedViaCompose private val initializedViaCompose: Boolean,
@@ -141,16 +139,10 @@ internal class DefaultFlowController @Inject internal constructor(
             cvcRecollectionActivityLauncher
         )
 
-        linkLauncher.register(
-            activityResultCaller = activityResultCaller,
-            callback = ::onLinkActivityResult,
-        )
-
         lifecycleOwner.lifecycle.addObserver(
             object : DefaultLifecycleObserver {
                 override fun onDestroy(owner: LifecycleOwner) {
                     activityResultLaunchers.forEach { it.unregister() }
-                    linkLauncher.unregister()
                     PaymentSheet.FlowController.linkHandler = null
                     IntentConfirmationInterceptor.createIntentCallback = null
                     ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = null
@@ -298,11 +290,7 @@ internal class DefaultFlowController @Inject internal constructor(
 
         when (val paymentSelection = viewModel.paymentSelection) {
             is PaymentSelection.Link,
-            is PaymentSelection.New.LinkInline -> confirmLink(
-                paymentSelection = paymentSelection,
-                state = state.paymentSheetState,
-                appearance = state.config.appearance,
-            )
+            is PaymentSelection.New.LinkInline,
             is PaymentSelection.GooglePay,
             is PaymentSelection.ExternalPaymentMethod,
             is PaymentSelection.New,
@@ -360,9 +348,8 @@ internal class DefaultFlowController @Inject internal constructor(
             val initializationMode = requireNotNull(initializationMode)
 
             val confirmationOption = paymentSelection?.toConfirmationOption(
-                initializationMode = initializationMode,
                 configuration = state.config,
-                appearance = appearance,
+                linkConfiguration = state.linkState?.configuration,
             )
 
             confirmationOption?.let { option ->
@@ -372,6 +359,9 @@ internal class DefaultFlowController @Inject internal constructor(
                     arguments = ConfirmationHandler.Args(
                         confirmationOption = option,
                         intent = stripeIntent,
+                        initializationMode = initializationMode,
+                        appearance = appearance,
+                        shippingDetails = state.config.shippingDetails,
                     )
                 )
             } ?: run {
@@ -650,22 +640,6 @@ internal class DefaultFlowController @Inject internal constructor(
             else -> {
                 // Nothing to do here
             }
-        }
-    }
-
-    private fun confirmLink(
-        paymentSelection: PaymentSelection,
-        state: PaymentSheetState.Full,
-        appearance: PaymentSheet.Appearance,
-    ) {
-        val linkConfig = requireNotNull(state.linkState).configuration
-
-        if (paymentSelection is PaymentSelection.Link) {
-            // User selected Link as the payment method, not inline
-            linkLauncher.present(linkConfig)
-        } else {
-            // New user paying inline, complete without launching Link
-            confirmPaymentSelection(paymentSelection, state, appearance)
         }
     }
 

@@ -52,14 +52,16 @@ internal class EmbeddedConfirmationHelper(
     private fun confirmationArgs(): ConfirmationHandler.Args? {
         val loadedState = confirmationStateSupplier() ?: return null
         val confirmationOption = loadedState.selection?.toConfirmationOption(
-            initializationMode = loadedState.initializationMode,
             configuration = loadedState.configuration.asCommonConfiguration(),
-            appearance = loadedState.configuration.appearance,
+            linkConfiguration = null,
         ) ?: return null
 
         return ConfirmationHandler.Args(
             intent = loadedState.paymentMethodMetadata.stripeIntent,
             confirmationOption = confirmationOption,
+            initializationMode = loadedState.initializationMode,
+            appearance = loadedState.configuration.appearance,
+            shippingDetails = loadedState.configuration.shippingDetails,
         )
     }
 

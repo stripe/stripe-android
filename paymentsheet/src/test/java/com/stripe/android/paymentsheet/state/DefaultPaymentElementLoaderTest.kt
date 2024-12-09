@@ -488,7 +488,7 @@ internal class DefaultPaymentElementLoaderTest {
             paymentSheetConfiguration = mockConfiguration(
                 customer = PaymentSheet.CustomerConfiguration(
                     id = "some_id",
-                    ephemeralKeySecret = "some_key"
+                    ephemeralKeySecret = "ek_123",
                 )
             ),
             initializedViaCompose = false,
@@ -912,7 +912,7 @@ internal class DefaultPaymentElementLoaderTest {
             paymentSheetConfiguration = mockConfiguration(
                 customer = PaymentSheet.CustomerConfiguration(
                     id = "id",
-                    ephemeralKeySecret = "key"
+                    ephemeralKeySecret = "ek_123",
                 ),
             ),
             initializedViaCompose = false,
@@ -936,7 +936,7 @@ internal class DefaultPaymentElementLoaderTest {
             paymentSheetConfiguration = mockConfiguration(
                 customer = PaymentSheet.CustomerConfiguration(
                     id = "id",
-                    ephemeralKeySecret = "key",
+                    ephemeralKeySecret = "ek_123",
                 ),
             ),
             initializedViaCompose = false,
@@ -982,7 +982,7 @@ internal class DefaultPaymentElementLoaderTest {
                 merchantDisplayName = "Some Name",
                 customer = PaymentSheet.CustomerConfiguration(
                     id = "cus_123",
-                    ephemeralKeySecret = "some_secret",
+                    ephemeralKeySecret = "ek_123",
                 ),
             ),
             initializedViaCompose = false,
@@ -1192,7 +1192,7 @@ internal class DefaultPaymentElementLoaderTest {
                 merchantDisplayName = "Some Name",
                 customer = PaymentSheet.CustomerConfiguration(
                     id = "cus_123",
-                    ephemeralKeySecret = "some_secret",
+                    ephemeralKeySecret = "ek_123",
                 ),
             ),
             initializedViaCompose = false,
@@ -1527,7 +1527,7 @@ internal class DefaultPaymentElementLoaderTest {
                     merchantDisplayName = "Merchant, Inc.",
                     customer = PaymentSheet.CustomerConfiguration(
                         id = "cus_1",
-                        ephemeralKeySecret = "ephemeral_key",
+                        ephemeralKeySecret = "ek_123",
                     ),
                 ),
                 initializedViaCompose = false,
@@ -1645,7 +1645,7 @@ internal class DefaultPaymentElementLoaderTest {
                     merchantDisplayName = "Merchant, Inc.",
                     customer = PaymentSheet.CustomerConfiguration(
                         id = "cus_1",
-                        ephemeralKeySecret = "ephemeral_key_secret",
+                        ephemeralKeySecret = "ek_123",
                     ),
                 ),
                 initializedViaCompose = false,
@@ -1656,7 +1656,7 @@ internal class DefaultPaymentElementLoaderTest {
             assertThat(state.customer).isEqualTo(
                 CustomerState(
                     id = "cus_1",
-                    ephemeralKeySecret = "ephemeral_key_secret",
+                    ephemeralKeySecret = "ek_123",
                     paymentMethods = cards,
                     permissions = CustomerState.Permissions(
                         canRemovePaymentMethods = true,
@@ -2224,7 +2224,7 @@ internal class DefaultPaymentElementLoaderTest {
                 merchantDisplayName = "Some Name",
                 customer = PaymentSheet.CustomerConfiguration(
                     id = "cus_123",
-                    ephemeralKeySecret = "some_secret",
+                    ephemeralKeySecret = "ek_123",
                 ),
             ),
             initializedViaCompose = false,
@@ -2372,7 +2372,7 @@ internal class DefaultPaymentElementLoaderTest {
             merchantDisplayName = "Some Name",
             customer = PaymentSheet.CustomerConfiguration(
                 id = "cus_123",
-                ephemeralKeySecret = "some_secret",
+                ephemeralKeySecret = "ek_123",
             ),
         )
         private val DEFAULT_INITIALIZATION_MODE = PaymentElementLoader.InitializationMode.PaymentIntent(

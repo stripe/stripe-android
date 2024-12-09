@@ -4,7 +4,6 @@ import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
-import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 
 internal class RecordingConfirmationDefinition<
@@ -23,6 +22,7 @@ internal class RecordingConfirmationDefinition<
     private val optionCalls = Turbine<OptionCall>()
     private val toResultCalls = Turbine<ToResultCall<TConfirmationOption, TLauncherResult>>()
     private val createLauncherCalls = Turbine<CreateLauncherCall<TLauncherResult>>()
+    private val unregisterCalls = Turbine<UnregisterCall<TLauncher>>()
     private val launchCalls = Turbine<LaunchCall<TConfirmationOption, TLauncher, TLauncherArgs>>()
     private val actionCalls = Turbine<ActionCall<TConfirmationOption>>()
 
@@ -36,13 +36,25 @@ internal class RecordingConfirmationDefinition<
 
     override fun toResult(
         confirmationOption: TConfirmationOption,
+        confirmationParameters: ConfirmationDefinition.Parameters,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
-        intent: StripeIntent,
         result: TLauncherResult
     ): ConfirmationDefinition.Result {
-        toResultCalls.add(ToResultCall(confirmationOption, deferredIntentConfirmationType, intent, result))
+        toResultCalls.add(
+            ToResultCall(
+                confirmationOption = confirmationOption,
+                deferredIntentConfirmationType = deferredIntentConfirmationType,
+                confirmationParameters = confirmationParameters,
+                result = result
+            )
+        )
 
-        return definition.toResult(confirmationOption, deferredIntentConfirmationType, intent, result)
+        return definition.toResult(
+            confirmationOption = confirmationOption,
+            deferredIntentConfirmationType = deferredIntentConfirmationType,
+            confirmationParameters = confirmationParameters,
+            result = result
+        )
     }
 
     override fun createLauncher(
@@ -54,24 +66,28 @@ internal class RecordingConfirmationDefinition<
         return definition.createLauncher(activityResultCaller, onResult)
     }
 
+    override fun unregister(launcher: TLauncher) {
+        unregisterCalls.add(UnregisterCall(launcher))
+    }
+
     override fun launch(
         launcher: TLauncher,
         arguments: TLauncherArgs,
         confirmationOption: TConfirmationOption,
-        intent: StripeIntent
+        confirmationParameters: ConfirmationDefinition.Parameters,
     ) {
-        launchCalls.add(LaunchCall(launcher, arguments, confirmationOption, intent))
+        launchCalls.add(LaunchCall(launcher, arguments, confirmationOption, confirmationParameters))
 
-        definition.launch(launcher, arguments, confirmationOption, intent)
+        definition.launch(launcher, arguments, confirmationOption, confirmationParameters)
     }
 
     override suspend fun action(
         confirmationOption: TConfirmationOption,
-        intent: StripeIntent
+        confirmationParameters: ConfirmationDefinition.Parameters,
     ): ConfirmationDefinition.Action<TLauncherArgs> {
-        actionCalls.add(ActionCall(confirmationOption, intent))
+        actionCalls.add(ActionCall(confirmationOption, confirmationParameters))
 
-        return definition.action(confirmationOption, intent)
+        return definition.action(confirmationOption, confirmationParameters)
     }
 
     class OptionCall(
@@ -80,8 +96,8 @@ internal class RecordingConfirmationDefinition<
 
     class ToResultCall<TConfirmationOption : ConfirmationHandler.Option, TLauncherResult>(
         val confirmationOption: TConfirmationOption,
+        val confirmationParameters: ConfirmationDefinition.Parameters,
         val deferredIntentConfirmationType: DeferredIntentConfirmationType?,
-        val intent: StripeIntent,
         val result: TLauncherResult,
     )
 
@@ -90,16 +106,20 @@ internal class RecordingConfirmationDefinition<
         val onResult: (TLauncherResult) -> Unit
     )
 
+    class UnregisterCall<TLauncher>(
+        val launcher: TLauncher,
+    )
+
     class LaunchCall<TConfirmationOption : ConfirmationHandler.Option, TLauncher, TLauncherArgs>(
         val launcher: TLauncher,
         val arguments: TLauncherArgs,
         val confirmationOption: TConfirmationOption,
-        val intent: StripeIntent,
+        val confirmationParameters: ConfirmationDefinition.Parameters,
     )
 
     class ActionCall<TConfirmationOption : ConfirmationHandler.Option>(
         val confirmationOption: TConfirmationOption,
-        val intent: StripeIntent,
+        val confirmationParameters: ConfirmationDefinition.Parameters,
     )
 
     class Scenario<
@@ -112,6 +132,7 @@ internal class RecordingConfirmationDefinition<
         val optionCalls: ReceiveTurbine<OptionCall>,
         val toResultCalls: ReceiveTurbine<ToResultCall<TConfirmationOption, TLauncherResult>>,
         val createLauncherCalls: ReceiveTurbine<CreateLauncherCall<TLauncherResult>>,
+        val unregisterCalls: ReceiveTurbine<UnregisterCall<TLauncher>>,
         val launchCalls: ReceiveTurbine<LaunchCall<TConfirmationOption, TLauncher, TLauncherArgs>>,
         val actionCalls: ReceiveTurbine<ActionCall<TConfirmationOption>>,
     )
@@ -134,6 +155,7 @@ internal class RecordingConfirmationDefinition<
                     optionCalls = recordingDefinition.optionCalls,
                     toResultCalls = recordingDefinition.toResultCalls,
                     createLauncherCalls = recordingDefinition.createLauncherCalls,
+                    unregisterCalls = recordingDefinition.unregisterCalls,
                     launchCalls = recordingDefinition.launchCalls,
                     actionCalls = recordingDefinition.actionCalls,
                 )
@@ -142,6 +164,7 @@ internal class RecordingConfirmationDefinition<
             recordingDefinition.optionCalls.ensureAllEventsConsumed()
             recordingDefinition.toResultCalls.ensureAllEventsConsumed()
             recordingDefinition.createLauncherCalls.ensureAllEventsConsumed()
+            recordingDefinition.unregisterCalls.ensureAllEventsConsumed()
             recordingDefinition.launchCalls.ensureAllEventsConsumed()
             recordingDefinition.actionCalls.ensureAllEventsConsumed()
         }

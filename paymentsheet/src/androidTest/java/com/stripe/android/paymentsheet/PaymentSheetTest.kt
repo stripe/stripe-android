@@ -346,7 +346,7 @@ internal class PaymentSheetTest {
                     merchantDisplayName = "Merchant, Inc.",
                     customer = PaymentSheet.CustomerConfiguration(
                         id = "cus_1",
-                        ephemeralKeySecret = "123",
+                        ephemeralKeySecret = "ek_123",
                     ),
                     paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
                 ),

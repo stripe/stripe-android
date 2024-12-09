@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet
 
 import androidx.activity.result.ActivityResultCaller
 import androidx.annotation.VisibleForTesting
-import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -18,7 +17,6 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.strings.ResolvableString
-import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
@@ -199,7 +197,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             googlePayLauncherConfig = googlePayLauncherConfig,
             googlePayButtonType = googlePayButtonType,
             onGooglePayPressed = this::checkoutWithGooglePay,
-            onLinkPressed = linkHandler::launchLink,
+            onLinkPressed = this::checkoutWithLink,
             isSetupIntent = paymentMethodMetadata?.stripeIntent is SetupIntent
         )
     }
@@ -240,27 +238,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     private fun handleLinkProcessingState(processingState: LinkHandler.ProcessingState) {
         when (processingState) {
-            LinkHandler.ProcessingState.Cancelled -> {
-                resetViewState()
-            }
-            is LinkHandler.ProcessingState.PaymentMethodCollected -> {
-                updateSelection(
-                    PaymentSelection.Saved(
-                        paymentMethod = processingState.paymentMethod,
-                        walletType = PaymentSelection.Saved.WalletType.Link,
-                    )
-                )
-                checkout(selection.value, CheckoutIdentifier.SheetTopWallet)
-            }
-            is LinkHandler.ProcessingState.CompletedWithPaymentResult -> {
-                onPaymentResult(processingState.result)
-            }
-            is LinkHandler.ProcessingState.Error -> {
-                onError(processingState.message?.resolvableString)
-            }
-            LinkHandler.ProcessingState.Launched -> {
-                startProcessing(CheckoutIdentifier.SheetTopWallet)
-            }
             is LinkHandler.ProcessingState.PaymentDetailsCollected -> {
                 processingState.paymentSelection?.let {
                     // Link PaymentDetails was created successfully, use it to confirm the Stripe Intent.
@@ -396,6 +373,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         checkout(PaymentSelection.GooglePay, CheckoutIdentifier.SheetTopWallet)
     }
 
+    fun checkoutWithLink() {
+        checkout(PaymentSelection.Link, CheckoutIdentifier.SheetTopWallet)
+    }
+
     private fun checkout(
         paymentSelection: PaymentSelection?,
         identifier: CheckoutIdentifier,
@@ -470,18 +451,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         activityResultCaller: ActivityResultCaller,
         lifecycleOwner: LifecycleOwner,
     ) {
-        linkHandler.registerFromActivity(activityResultCaller)
-
         confirmationHandler.register(activityResultCaller, lifecycleOwner)
-
-        lifecycleOwner.lifecycle.addObserver(
-            object : DefaultLifecycleObserver {
-                override fun onDestroy(owner: LifecycleOwner) {
-                    linkHandler.unregisterFromActivity()
-                    super.onDestroy(owner)
-                }
-            }
-        )
     }
 
     @Suppress("ComplexCondition")
@@ -507,9 +477,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         viewModelScope.launch(workContext) {
             val confirmationOption = paymentSelectionWithCvcIfEnabled(paymentSelection)
                 ?.toConfirmationOption(
-                    initializationMode = args.initializationMode,
                     configuration = config.asCommonConfiguration(),
-                    appearance = config.appearance
+                    linkConfiguration = linkHandler.linkConfiguration.value,
                 )
 
             confirmationOption?.let { option ->
@@ -519,6 +488,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     arguments = ConfirmationHandler.Args(
                         intent = stripeIntent,
                         confirmationOption = option,
+                        initializationMode = args.initializationMode,
+                        appearance = config.appearance,
+                        shippingDetails = config.shippingDetails,
                     ),
                 )
             } ?: run {

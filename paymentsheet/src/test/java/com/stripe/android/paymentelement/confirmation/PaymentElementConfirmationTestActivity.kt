@@ -18,6 +18,7 @@ import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
+import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
@@ -32,6 +33,7 @@ import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.FakeLogger
+import com.stripe.android.utils.FakeDurationProvider
 import dagger.Binds
 import dagger.BindsInstance
 import dagger.Component
@@ -118,6 +120,9 @@ internal interface PaymentElementConfirmationTestModule {
 
         @Provides
         fun providesErrorReporter(): ErrorReporter = FakeErrorReporter()
+
+        @Provides
+        fun provideDurationProvider(): DurationProvider = FakeDurationProvider()
 
         @Provides
         fun providesUserFacingLogger(): UserFacingLogger = FakeUserFacingLogger()

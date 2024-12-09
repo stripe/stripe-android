@@ -20,9 +20,16 @@ import com.stripe.android.isInstanceOf
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentElementConfirmationTestActivity
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
+import com.stripe.android.paymentelement.confirmation.assertCanceled
+import com.stripe.android.paymentelement.confirmation.assertComplete
+import com.stripe.android.paymentelement.confirmation.assertConfirming
+import com.stripe.android.paymentelement.confirmation.assertFailed
+import com.stripe.android.paymentelement.confirmation.assertIdle
+import com.stripe.android.paymentelement.confirmation.assertSucceeded
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.createTestActivityRule
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.PaymentIntentFactory
@@ -60,12 +67,7 @@ internal class GooglePayConfirmationActivityTest {
         confirmationHandler.state.test {
             awaitItem().assertIdle()
 
-            confirmationHandler.start(
-                ConfirmationHandler.Args(
-                    intent = PAYMENT_INTENT,
-                    confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION,
-                )
-            )
+            confirmationHandler.start(CONFIRMATION_ARGUMENTS)
 
             val confirmingWithGooglePay = awaitItem().assertConfirming()
 
@@ -78,8 +80,6 @@ internal class GooglePayConfirmationActivityTest {
             assertThat(confirmingWithSavedPaymentMethod.option)
                 .isEqualTo(
                     PaymentMethodConfirmationOption.Saved(
-                        initializationMode = GOOGLE_PAY_CONFIRMATION_OPTION.initializationMode,
-                        shippingDetails = GOOGLE_PAY_CONFIRMATION_OPTION.shippingDetails,
                         paymentMethod = paymentMethod,
                         optionsParams = null,
                     )
@@ -106,12 +106,7 @@ internal class GooglePayConfirmationActivityTest {
                 )
             )
 
-            confirmationHandler.start(
-                ConfirmationHandler.Args(
-                    intent = PAYMENT_INTENT,
-                    confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION,
-                )
-            )
+            confirmationHandler.start(CONFIRMATION_ARGUMENTS)
 
             val confirmingWithGooglePay = awaitItem().assertConfirming()
 
@@ -143,12 +138,7 @@ internal class GooglePayConfirmationActivityTest {
                 )
             )
 
-            confirmationHandler.start(
-                ConfirmationHandler.Args(
-                    intent = PAYMENT_INTENT,
-                    confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION,
-                )
-            )
+            confirmationHandler.start(CONFIRMATION_ARGUMENTS)
 
             val confirmingWithGooglePay = awaitItem().assertConfirming()
 
@@ -161,8 +151,6 @@ internal class GooglePayConfirmationActivityTest {
             assertThat(confirmingWithSavedPaymentMethod.option)
                 .isEqualTo(
                     PaymentMethodConfirmationOption.Saved(
-                        initializationMode = GOOGLE_PAY_CONFIRMATION_OPTION.initializationMode,
-                        shippingDetails = GOOGLE_PAY_CONFIRMATION_OPTION.shippingDetails,
                         paymentMethod = paymentMethod,
                         optionsParams = null,
                     )
@@ -185,12 +173,7 @@ internal class GooglePayConfirmationActivityTest {
 
             intendingGooglePayToBeLaunched(GooglePayPaymentMethodLauncher.Result.Canceled)
 
-            confirmationHandler.start(
-                ConfirmationHandler.Args(
-                    intent = PAYMENT_INTENT,
-                    confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION,
-                )
-            )
+            confirmationHandler.start(CONFIRMATION_ARGUMENTS)
 
             val confirmingWithGooglePay = awaitItem().assertConfirming()
 
@@ -214,12 +197,7 @@ internal class GooglePayConfirmationActivityTest {
             intendingGooglePayToBeLaunched(GooglePayPaymentMethodLauncher.Result.Completed(paymentMethod))
             intendingPaymentConfirmationToBeLaunched(InternalPaymentResult.Canceled)
 
-            confirmationHandler.start(
-                ConfirmationHandler.Args(
-                    intent = PAYMENT_INTENT,
-                    confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION,
-                )
-            )
+            confirmationHandler.start(CONFIRMATION_ARGUMENTS)
 
             val confirmingWithGooglePay = awaitItem().assertConfirming()
 
@@ -232,8 +210,6 @@ internal class GooglePayConfirmationActivityTest {
             assertThat(confirmingWithSavedPaymentMethod.option)
                 .isEqualTo(
                     PaymentMethodConfirmationOption.Saved(
-                        initializationMode = GOOGLE_PAY_CONFIRMATION_OPTION.initializationMode,
-                        shippingDetails = GOOGLE_PAY_CONFIRMATION_OPTION.shippingDetails,
                         paymentMethod = paymentMethod,
                         optionsParams = null,
                     )
@@ -292,42 +268,6 @@ internal class GooglePayConfirmationActivityTest {
         intended(hasComponent(PAYMENT_CONFIRMATION_LAUNCHER_ACTIVITY_NAME))
     }
 
-    private fun ConfirmationHandler.State.assertIdle(): ConfirmationHandler.State.Idle {
-        assertThat(this).isInstanceOf<ConfirmationHandler.State.Idle>()
-
-        return this as ConfirmationHandler.State.Idle
-    }
-
-    private fun ConfirmationHandler.State.assertConfirming(): ConfirmationHandler.State.Confirming {
-        assertThat(this).isInstanceOf<ConfirmationHandler.State.Confirming>()
-
-        return this as ConfirmationHandler.State.Confirming
-    }
-
-    private fun ConfirmationHandler.State.assertComplete(): ConfirmationHandler.State.Complete {
-        assertThat(this).isInstanceOf<ConfirmationHandler.State.Complete>()
-
-        return this as ConfirmationHandler.State.Complete
-    }
-
-    private fun ConfirmationHandler.Result?.assertSucceeded(): ConfirmationHandler.Result.Succeeded {
-        assertThat(this).isInstanceOf<ConfirmationHandler.Result.Succeeded>()
-
-        return this as ConfirmationHandler.Result.Succeeded
-    }
-
-    private fun ConfirmationHandler.Result?.assertFailed(): ConfirmationHandler.Result.Failed {
-        assertThat(this).isInstanceOf<ConfirmationHandler.Result.Failed>()
-
-        return this as ConfirmationHandler.Result.Failed
-    }
-
-    private fun ConfirmationHandler.Result?.assertCanceled(): ConfirmationHandler.Result.Canceled {
-        assertThat(this).isInstanceOf<ConfirmationHandler.Result.Canceled>()
-
-        return this as ConfirmationHandler.Result.Canceled
-    }
-
     private companion object {
         val PAYMENT_INTENT = PaymentIntentFactory.create().copy(
             id = "pm_1",
@@ -336,10 +276,6 @@ internal class GooglePayConfirmationActivityTest {
         )
 
         val GOOGLE_PAY_CONFIRMATION_OPTION = GooglePayConfirmationOption(
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = "pi_123_secret_123"
-            ),
-            shippingDetails = null,
             config = GooglePayConfirmationOption.Config(
                 environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
                 merchantName = "Test merchant Inc.",
@@ -351,6 +287,16 @@ internal class GooglePayConfirmationActivityTest {
                     .BillingDetailsCollectionConfiguration(),
                 cardBrandFilter = DefaultCardBrandFilter,
             )
+        )
+
+        val CONFIRMATION_ARGUMENTS = ConfirmationHandler.Args(
+            confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION,
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = "pi_123_secret_123"
+            ),
+            shippingDetails = AddressDetails(),
+            intent = PAYMENT_INTENT,
+            appearance = PaymentSheet.Appearance(),
         )
 
         const val GOOGLE_PAY_ACTIVITY_NAME =

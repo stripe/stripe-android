@@ -77,7 +77,6 @@ internal fun PaymentMethodVerticalLayoutUI(
         },
         imageLoader = imageLoader,
         modifier = modifier
-            .padding(horizontal = 20.dp)
             .testTag(TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT)
     )
 }

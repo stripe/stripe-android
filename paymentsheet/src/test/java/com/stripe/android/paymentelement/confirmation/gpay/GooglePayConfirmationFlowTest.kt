@@ -49,7 +49,7 @@ class GooglePayConfirmationFlowTest {
 
                 val action = mediator.action(
                     option = GOOGLE_PAY_CONFIRMATION_OPTION,
-                    intent = PAYMENT_INTENT,
+                    parameters = CONFIRMATION_PARAMETERS,
                 )
 
                 assertThat(action).isInstanceOf<ConfirmationMediator.Action.Launch>()
@@ -64,7 +64,7 @@ class GooglePayConfirmationFlowTest {
                     .get<Parameters<GooglePayConfirmationOption>>("GooglePayParameters")
 
                 assertThat(parameters?.confirmationOption).isEqualTo(GOOGLE_PAY_CONFIRMATION_OPTION)
-                assertThat(parameters?.intent).isEqualTo(PAYMENT_INTENT)
+                assertThat(parameters?.confirmationParameters).isEqualTo(CONFIRMATION_PARAMETERS)
                 assertThat(parameters?.deferredIntentConfirmationType).isNull()
 
                 verify(googlePayPaymentMethodLauncher, times(1)).present(
@@ -80,31 +80,23 @@ class GooglePayConfirmationFlowTest {
     @Test
     fun `on result, should return confirmation result as expected`() = runResultTest(
         confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION,
-        intent = PAYMENT_INTENT,
+        parameters = CONFIRMATION_PARAMETERS,
         definition = GooglePayConfirmationDefinition(
             googlePayPaymentMethodLauncherFactory = RecordingGooglePayPaymentMethodLauncherFactory.noOp(mock()),
             userFacingLogger = null,
         ),
         launcherResult = GooglePayPaymentMethodLauncher.Result.Completed(PAYMENT_METHOD),
         definitionResult = ConfirmationDefinition.Result.NextStep(
-            intent = PAYMENT_INTENT,
             confirmationOption = PaymentMethodConfirmationOption.Saved(
-                initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                    clientSecret = "pi_123_secret_123",
-                ),
                 paymentMethod = PAYMENT_METHOD,
                 optionsParams = null,
-                shippingDetails = null,
-            )
+            ),
+            parameters = CONFIRMATION_PARAMETERS,
         )
     )
 
     private companion object {
         private val GOOGLE_PAY_CONFIRMATION_OPTION = GooglePayConfirmationOption(
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = "pi_123_secret_123",
-            ),
-            shippingDetails = null,
             config = GooglePayConfirmationOption.Config(
                 environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
                 merchantName = "Test merchant Inc.",
@@ -122,5 +114,14 @@ class GooglePayConfirmationFlowTest {
         private val PAYMENT_METHOD = PaymentMethodFactory.card()
 
         private val PAYMENT_INTENT = PaymentIntentFactory.create()
+
+        private val CONFIRMATION_PARAMETERS = ConfirmationDefinition.Parameters(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = "pi_123_secret_123",
+            ),
+            shippingDetails = null,
+            intent = PAYMENT_INTENT,
+            appearance = PaymentSheet.Appearance()
+        )
     }
 }

@@ -5,6 +5,10 @@ import androidx.activity.result.ActivityResultCaller
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
+import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import kotlinx.parcelize.Parcelize
 
 internal interface ConfirmationDefinition<
     TConfirmationOption : ConfirmationHandler.Option,
@@ -20,14 +24,14 @@ internal interface ConfirmationDefinition<
 
     suspend fun action(
         confirmationOption: TConfirmationOption,
-        intent: StripeIntent,
+        confirmationParameters: Parameters,
     ): Action<TLauncherArgs>
 
     fun launch(
         launcher: TLauncher,
         arguments: TLauncherArgs,
         confirmationOption: TConfirmationOption,
-        intent: StripeIntent,
+        confirmationParameters: Parameters,
     )
 
     fun createLauncher(
@@ -35,12 +39,24 @@ internal interface ConfirmationDefinition<
         onResult: (TLauncherResult) -> Unit,
     ): TLauncher
 
+    fun unregister(
+        launcher: TLauncher,
+    ) {}
+
     fun toResult(
         confirmationOption: TConfirmationOption,
+        confirmationParameters: Parameters,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
-        intent: StripeIntent,
         result: TLauncherResult,
     ): Result
+
+    @Parcelize
+    data class Parameters(
+        val intent: StripeIntent,
+        val appearance: PaymentSheet.Appearance,
+        val initializationMode: PaymentElementLoader.InitializationMode,
+        val shippingDetails: AddressDetails?
+    ) : Parcelable
 
     sealed interface Result {
         data class Canceled(
@@ -53,8 +69,8 @@ internal interface ConfirmationDefinition<
         ) : Result
 
         data class NextStep(
-            val intent: StripeIntent,
             val confirmationOption: ConfirmationHandler.Option,
+            val parameters: Parameters,
         ) : Result
 
         data class Failed(

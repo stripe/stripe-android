@@ -27,7 +27,6 @@ import org.mockito.Mockito.mock
 
 private fun linkHandler(savedStateHandle: SavedStateHandle): LinkHandler {
     return LinkHandler(
-        linkLauncher = mock(),
         linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
         savedStateHandle = savedStateHandle,
         linkStore = mock(),

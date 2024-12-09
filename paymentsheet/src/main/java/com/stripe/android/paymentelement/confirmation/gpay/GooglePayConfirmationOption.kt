@@ -4,14 +4,10 @@ import android.os.Parcelable
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
 internal data class GooglePayConfirmationOption(
-    val initializationMode: PaymentElementLoader.InitializationMode,
-    val shippingDetails: AddressDetails?,
     val config: Config,
 ) : ConfirmationHandler.Option {
     @Parcelize

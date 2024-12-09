@@ -5,7 +5,6 @@ import androidx.activity.result.ActivityResultCallback
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.isInstanceOf
-import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.ConfirmationMediator.Parameters
 import com.stripe.android.utils.DummyActivityResultCaller
 import kotlinx.coroutines.test.runTest
@@ -20,7 +19,7 @@ internal fun <
     > runLaunchTest(
     definition: ConfirmationDefinition<TConfirmationOption, TLauncher, TLauncherArgs, TLauncherResult>,
     confirmationOption: ConfirmationHandler.Option,
-    intent: StripeIntent,
+    parameters: ConfirmationDefinition.Parameters
 ) = runTest {
     val savedStateHandle = SavedStateHandle()
     val mediator = ConfirmationMediator(savedStateHandle, definition)
@@ -35,7 +34,7 @@ internal fun <
 
         val action = mediator.action(
             option = confirmationOption,
-            intent = intent,
+            parameters = parameters,
         )
 
         assertThat(action).isInstanceOf<ConfirmationMediator.Action.Launch>()
@@ -44,12 +43,12 @@ internal fun <
 
         launchAction.launch()
 
-        val parameters = savedStateHandle
+        val savedParameters = savedStateHandle
             .get<Parameters<TConfirmationOption>>("${definition.key}Parameters")
 
-        assertThat(parameters?.confirmationOption).isEqualTo(confirmationOption)
-        assertThat(parameters?.intent).isEqualTo(intent)
-        assertThat(parameters?.deferredIntentConfirmationType).isNull()
+        assertThat(savedParameters?.confirmationOption).isEqualTo(confirmationOption)
+        assertThat(savedParameters?.confirmationParameters).isEqualTo(parameters)
+        assertThat(savedParameters?.deferredIntentConfirmationType).isNull()
 
         assertThat(awaitRegisterCall()).isNotNull()
         assertThat(awaitLaunchCall()).isNotNull()
@@ -64,7 +63,7 @@ internal fun <
     > runResultTest(
     definition: ConfirmationDefinition<TConfirmationOption, TLauncher, TLauncherArgs, TLauncherResult>,
     confirmationOption: ConfirmationHandler.Option,
-    intent: StripeIntent,
+    parameters: ConfirmationDefinition.Parameters,
     launcherResult: TLauncherResult,
     definitionResult: ConfirmationDefinition.Result,
 ) = runTest {
@@ -75,7 +74,7 @@ internal fun <
             "${definition.key}Parameters",
             Parameters(
                 confirmationOption = confirmationOption,
-                intent = intent,
+                confirmationParameters = parameters,
                 deferredIntentConfirmationType = null,
             )
         )
@@ -105,6 +104,10 @@ internal fun <
 
         assertThat(result).isEqualTo(definitionResult)
     }
+}
+
+internal fun ConfirmationHandler.Option.asSaved(): PaymentMethodConfirmationOption.Saved {
+    return this as PaymentMethodConfirmationOption.Saved
 }
 
 internal fun ConfirmationDefinition.Result?.asSucceeded(): ConfirmationDefinition.Result.Succeeded {
@@ -138,4 +141,40 @@ internal fun ConfirmationMediator.Action.asLaunch(): ConfirmationMediator.Action
 internal fun <T> ActivityResultCallback<*>.asCallbackFor(): ActivityResultCallback<T> {
     @Suppress("UNCHECKED_CAST")
     return this as ActivityResultCallback<T>
+}
+
+internal fun ConfirmationHandler.State.assertIdle(): ConfirmationHandler.State.Idle {
+    assertThat(this).isInstanceOf<ConfirmationHandler.State.Idle>()
+
+    return this as ConfirmationHandler.State.Idle
+}
+
+internal fun ConfirmationHandler.State.assertConfirming(): ConfirmationHandler.State.Confirming {
+    assertThat(this).isInstanceOf<ConfirmationHandler.State.Confirming>()
+
+    return this as ConfirmationHandler.State.Confirming
+}
+
+internal fun ConfirmationHandler.State.assertComplete(): ConfirmationHandler.State.Complete {
+    assertThat(this).isInstanceOf<ConfirmationHandler.State.Complete>()
+
+    return this as ConfirmationHandler.State.Complete
+}
+
+internal fun ConfirmationHandler.Result?.assertSucceeded(): ConfirmationHandler.Result.Succeeded {
+    assertThat(this).isInstanceOf<ConfirmationHandler.Result.Succeeded>()
+
+    return this as ConfirmationHandler.Result.Succeeded
+}
+
+internal fun ConfirmationHandler.Result?.assertFailed(): ConfirmationHandler.Result.Failed {
+    assertThat(this).isInstanceOf<ConfirmationHandler.Result.Failed>()
+
+    return this as ConfirmationHandler.Result.Failed
+}
+
+internal fun ConfirmationHandler.Result?.assertCanceled(): ConfirmationHandler.Result.Canceled {
+    assertThat(this).isInstanceOf<ConfirmationHandler.Result.Canceled>()
+
+    return this as ConfirmationHandler.Result.Canceled
 }
