@@ -43,6 +43,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.json.jsonObject
 
@@ -77,7 +78,7 @@ internal interface StripeConnectWebViewContainerInternal {
 internal class StripeConnectWebViewContainerImpl<Listener : StripeEmbeddedComponentListener>(
     val embeddedComponent: StripeEmbeddedComponent,
     embeddedComponentManager: EmbeddedComponentManager?,
-    private val props: JsonObject?,
+    private var props: JsonObject?,
     listener: Listener?,
     private val listenerDelegate: ComponentListenerDelegate<Listener>,
     private val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG),
@@ -168,6 +169,20 @@ internal class StripeConnectWebViewContainerImpl<Listener : StripeEmbeddedCompon
         }
     }
 
+    fun updateProps(props: JsonObject, merge: Boolean) {
+        val oldProps = this.props
+        this.props =
+            if (!merge || oldProps == null) {
+                props
+            } else {
+                buildJsonObject {
+                    (oldProps.entries + props.entries).forEach { (k, v) ->
+                        put(k, v)
+                    }
+                }
+            }
+    }
+
     override fun updateConnectInstance(appearance: Appearance) {
         val payload =
             ConnectInstanceJs(appearance = appearance.toJs())
@@ -178,6 +193,7 @@ internal class StripeConnectWebViewContainerImpl<Listener : StripeEmbeddedCompon
     }
 
     override fun loadUrl(url: String) {
+        webView?.clearCache(true)
         webView?.loadUrl(url)
     }
 

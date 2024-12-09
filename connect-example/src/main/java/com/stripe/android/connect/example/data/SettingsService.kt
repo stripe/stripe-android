@@ -88,7 +88,8 @@ class SettingsService @Inject constructor(@ApplicationContext context: Context) 
         return PresentationSettings(
             presentationStyleIsPush = !sharedPreferences.getBoolean(PRESENTATION_IS_MODAL, false),
             embedInTabBar = sharedPreferences.getBoolean(EMBED_IN_TABBAR, false),
-            embedInNavBar = !sharedPreferences.getBoolean(DISABLE_EMBED_IN_NAVBAR, false)
+            embedInNavBar = !sharedPreferences.getBoolean(DISABLE_EMBED_IN_NAVBAR, false),
+            useXmlViews = sharedPreferences.getBoolean(USE_XML_VIEWS, false)
         )
     }
 
@@ -97,6 +98,7 @@ class SettingsService @Inject constructor(@ApplicationContext context: Context) 
             putBoolean(PRESENTATION_IS_MODAL, !value.presentationStyleIsPush)
             putBoolean(EMBED_IN_TABBAR, value.embedInTabBar)
             putBoolean(DISABLE_EMBED_IN_NAVBAR, !value.embedInNavBar)
+            putBoolean(USE_XML_VIEWS, value.useXmlViews)
         }
     }
 
@@ -140,6 +142,7 @@ class SettingsService @Inject constructor(@ApplicationContext context: Context) 
         private const val PRESENTATION_IS_MODAL = "PresentationIsModal"
         private const val DISABLE_EMBED_IN_NAVBAR = "DisableEmbedInNavbar"
         private const val EMBED_IN_TABBAR = "EmbedInTabbar"
+        private const val USE_XML_VIEWS = "UseXmlViews"
         private const val ONBOARDING_TERMS_OF_SERVICE_URL = "OnboardingTermsOfServiceURL"
         private const val ONBOARDING_RECIPIENT_TERMS_OF_SERVICE_STRING = "OnboardingRecipientTermsOfServiceString"
         private const val ONBOARDING_PRIVACY_POLICY_STRING = "OnboardingPrivacyPolicyString"
@@ -159,9 +162,10 @@ data class OnboardingSettings(
 )
 
 data class PresentationSettings(
-    val presentationStyleIsPush: Boolean,
-    val embedInTabBar: Boolean,
-    val embedInNavBar: Boolean
+    val presentationStyleIsPush: Boolean = false,
+    val embedInTabBar: Boolean = false,
+    val embedInNavBar: Boolean = false,
+    val useXmlViews: Boolean = false,
 )
 
 enum class SkipTermsOfService { DEFAULT, SKIP, SHOW }

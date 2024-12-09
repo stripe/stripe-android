@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.Button
 import androidx.compose.material.Icon
@@ -39,6 +38,7 @@ fun SettingsView(
     onDismiss: () -> Unit,
     onReloadRequested: () -> Unit,
     openOnboardingSettings: () -> Unit,
+    openPresentationSettings: () -> Unit,
 ) {
     val state by viewModel.state.collectAsState()
     var serverUrlDidChange = rememberSaveable { false }
@@ -83,9 +83,10 @@ fun SettingsView(
                 )
             }
             item {
-                ComponentSettings(
-                    openOnboardingSettings = openOnboardingSettings,
-                )
+                ComponentSettings(openOnboardingSettings = openOnboardingSettings)
+            }
+            item {
+                PresentationSettingsSection(openPresentationSettings = openPresentationSettings)
             }
             item {
                 ApiServerSettings(
@@ -162,12 +163,21 @@ private fun ComponentSettings(
 ) {
     SettingsSectionHeader(stringResource(R.string.component_settings))
     Spacer(modifier = Modifier.height(8.dp))
-    Text(
-        modifier = Modifier
-            .clickable(onClick = openOnboardingSettings)
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
+    SettingsNavigationItem(
         text = stringResource(R.string.account_onboarding),
+        onClick = openOnboardingSettings
+    )
+}
+
+@Composable
+private fun PresentationSettingsSection(
+    openPresentationSettings: () -> Unit
+) {
+    SettingsSectionHeader(stringResource(R.string.presentation_settings))
+    Spacer(modifier = Modifier.height(8.dp))
+    SettingsNavigationItem(
+        text = stringResource(R.string.presentation_settings),
+        onClick = openPresentationSettings
     )
 }
 

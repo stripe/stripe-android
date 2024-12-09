@@ -39,6 +39,7 @@ fun AccountOnboardingSettingsView(
     )
 }
 
+@Suppress("LongMethod")
 @Composable
 private fun AccountOnboardingSettingsView(
     onboardingSettings: OnboardingSettings,
