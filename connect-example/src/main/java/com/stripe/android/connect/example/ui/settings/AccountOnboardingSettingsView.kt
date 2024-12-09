@@ -3,15 +3,11 @@ package com.stripe.android.connect.example.ui.settings
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.Composable
@@ -49,7 +45,15 @@ private fun AccountOnboardingSettingsView(
     onBack: () -> Unit,
     onSave: (OnboardingSettings) -> Unit,
 ) {
-    var fullTermsOfService by rememberSaveable { mutableStateOf(onboardingSettings.fullTermsOfServiceString ?: "") }
+    var fullTermsOfService by rememberSaveable {
+        mutableStateOf(onboardingSettings.fullTermsOfServiceString ?: "")
+    }
+    var recipientTermsOfService by rememberSaveable {
+        mutableStateOf(onboardingSettings.recipientTermsOfServiceString ?: "")
+    }
+    var privacyPolicy by rememberSaveable {
+        mutableStateOf(onboardingSettings.privacyPolicyString ?: "")
+    }
     ConnectExampleScaffold(
         title = stringResource(R.string.onboarding_settings),
         navigationIcon = { BackIconButton(onBack) },
@@ -58,9 +62,9 @@ private fun AccountOnboardingSettingsView(
                 onClick = {
                     onSave(
                         OnboardingSettings(
-                            fullTermsOfServiceString = fullTermsOfService.takeIf { it.isNotBlank() },
-                            recipientTermsOfServiceString = onboardingSettings.recipientTermsOfServiceString,
-                            privacyPolicyString = onboardingSettings.privacyPolicyString,
+                            fullTermsOfServiceString = fullTermsOfService.trim().takeIf { it.isNotEmpty() },
+                            recipientTermsOfServiceString = recipientTermsOfService.trim().takeIf { it.isNotEmpty() },
+                            privacyPolicyString = privacyPolicy.trim().takeIf { it.isNotEmpty() },
                             skipTermsOfService = onboardingSettings.skipTermsOfService,
                             fieldOption = onboardingSettings.fieldOption,
                             futureRequirement = onboardingSettings.futureRequirement,
@@ -82,14 +86,25 @@ private fun AccountOnboardingSettingsView(
                 .verticalScroll(rememberScrollState())
         ) {
             Spacer(Modifier.requiredHeight(16.dp))
-            OutlinedTextField(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                label = { Text("Full terms of service") },
-                placeholder = { Text(stringResource(R.string.server_url_placeholder)) },
+            SettingsTextField(
+                label = "Full terms of service",
+                placeholder = stringResource(R.string.server_url_placeholder),
                 value = fullTermsOfService,
                 onValueChange = { fullTermsOfService = it },
+            )
+            Spacer(Modifier.requiredHeight(8.dp))
+            SettingsTextField(
+                label = "Recipient terms of service",
+                placeholder = stringResource(R.string.server_url_placeholder),
+                value = recipientTermsOfService,
+                onValueChange = { recipientTermsOfService = it },
+            )
+            Spacer(Modifier.requiredHeight(8.dp))
+            SettingsTextField(
+                label = "Privacy policy",
+                placeholder = stringResource(R.string.server_url_placeholder),
+                value = privacyPolicy,
+                onValueChange = { privacyPolicy = it },
             )
         }
     }
