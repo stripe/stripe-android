@@ -1,4 +1,5 @@
 {
+  "account_id": "acct_123",
   "auth_session_client_secret": null,
   "publishable_key": "pk_545454676767898989",
   "consumer_session": {

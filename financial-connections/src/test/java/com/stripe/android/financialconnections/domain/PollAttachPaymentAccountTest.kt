@@ -108,6 +108,7 @@ internal class PollAttachPaymentAccountTest {
     )
 
     private fun cachedConsumerSession() = CachedConsumerSession(
+        accountId = null,
         clientSecret = "clientSecret",
         emailAddress = "test@test.com",
         isVerified = true,

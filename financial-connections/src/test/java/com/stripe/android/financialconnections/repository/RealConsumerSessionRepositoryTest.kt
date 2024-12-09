@@ -20,6 +20,7 @@ class RealConsumerSessionRepositoryTest {
         val cachedSession = store.provideConsumerSession()
         assertThat(cachedSession).isEqualTo(
             CachedConsumerSession(
+                accountId = null,
                 emailAddress = "email@email.com",
                 phoneNumber = "(•••) •••-1234",
                 clientSecret = "abc_123",
@@ -42,6 +43,7 @@ class RealConsumerSessionRepositoryTest {
         val cachedSession = store.provideConsumerSession()
         assertThat(cachedSession).isEqualTo(
             CachedConsumerSession(
+                accountId = null,
                 emailAddress = "email@email.com",
                 phoneNumber = "(•••) •••-1234",
                 clientSecret = "abc_123",
@@ -52,7 +54,7 @@ class RealConsumerSessionRepositoryTest {
     }
 
     @Test
-    fun `Keeps existing publishable key when storing updated consumer session`() {
+    fun `Keeps existing publishable key and account ID when storing updated consumer session`() {
         val store = RealConsumerSessionRepository(savedStateHandle = SavedStateHandle())
 
         val session1 = makeConsumerSession(
@@ -65,12 +67,13 @@ class RealConsumerSessionRepositoryTest {
             isVerified = true,
         )
 
-        store.storeNewConsumerSession(session1, publishableKey = "pk_123")
+        store.storeNewConsumerSession(session1, publishableKey = "pk_123", accountId = "acct_123")
         store.updateConsumerSession(session2)
 
         val cachedSession = store.provideConsumerSession()
         assertThat(cachedSession).isEqualTo(
             CachedConsumerSession(
+                accountId = "acct_123",
                 emailAddress = "email@email.com",
                 phoneNumber = "(•••) •••-1234",
                 clientSecret = "abc_123",
@@ -94,12 +97,13 @@ class RealConsumerSessionRepositoryTest {
             isVerified = false,
         )
 
-        store.storeNewConsumerSession(session1, publishableKey = "pk_123")
-        store.storeNewConsumerSession(session2, publishableKey = "pk_456")
+        store.storeNewConsumerSession(session1, publishableKey = "pk_123", accountId = "acct_123")
+        store.storeNewConsumerSession(session2, publishableKey = "pk_456", accountId = "acct_456")
 
         val cachedSession = store.provideConsumerSession()
         assertThat(cachedSession).isEqualTo(
             CachedConsumerSession(
+                accountId = "acct_456",
                 emailAddress = "email@email.com",
                 phoneNumber = "(•••) •••-1234",
                 clientSecret = "abc_456",

@@ -57,7 +57,7 @@ class ConsumersApiServiceImplTest {
             bodyPart("consent_action", "clicked_checkbox_nospm_mobile_v0"),
             bodyPart("request_surface", requestSurface),
         ) { response ->
-            response.setBody(ConsumerFixtures.EXISTING_CONSUMER_JSON.toString())
+            response.setBody(ConsumerFixtures.SIGNUP_RESPONSE_JSON.toString())
         }
 
         val signup = consumersApiService.signUp(
@@ -78,7 +78,8 @@ class ConsumersApiServiceImplTest {
         assertThat(signup.consumerSession.emailAddress).isEqualTo(email)
         assertThat(signup.consumerSession.redactedPhoneNumber).isEqualTo("+1********68")
         assertThat(signup.consumerSession.clientSecret).isEqualTo("secret")
-        assertThat(signup.publishableKey).isEqualTo("asdfg123")
+        assertThat(signup.publishableKey).isEqualTo("pk_123")
+        assertThat(signup.accountId).isEqualTo("acct_123")
     }
 
     @Test
