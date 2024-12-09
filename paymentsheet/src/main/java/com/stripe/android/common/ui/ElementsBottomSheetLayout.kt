@@ -26,7 +26,9 @@ internal fun ElementsBottomSheetLayout(
 ) {
     @Suppress("DEPRECATION")
     val systemUiController = rememberSystemUiController()
-    val layoutInfo = rememberStripeBottomSheetLayoutInfo()
+    val layoutInfo = rememberStripeBottomSheetLayoutInfo(
+        scrimColor = Color.Black.copy(alpha = 0.32f),
+    )
 
     LaunchedEffect(Unit) {
         state.skipHideAnimation = skipHideAnimation
