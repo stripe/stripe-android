@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.navigation
 
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
@@ -365,7 +366,7 @@ internal sealed interface PaymentSheetScreen {
 
         @Composable
         override fun Content(modifier: Modifier) {
-            PaymentMethodVerticalLayoutUI(interactor, modifier)
+            PaymentMethodVerticalLayoutUI(interactor, modifier.padding(horizontal = 20.dp))
         }
     }
 

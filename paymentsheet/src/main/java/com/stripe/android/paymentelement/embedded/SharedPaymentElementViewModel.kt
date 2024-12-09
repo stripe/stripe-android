@@ -85,6 +85,9 @@ internal class SharedPaymentElementViewModel @Inject constructor(
 
     val confirmationHandler = confirmationHandlerFactory.create(viewModelScope + ioContext)
 
+    private val _embeddedContent = MutableStateFlow<EmbeddedContent?>(null)
+    val embeddedContent: StateFlow<EmbeddedContent?> = _embeddedContent.asStateFlow()
+
     @Volatile
     var confirmationState: EmbeddedConfirmationHelper.State? = null
 
