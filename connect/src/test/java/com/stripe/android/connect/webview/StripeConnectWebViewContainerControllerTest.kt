@@ -1,14 +1,16 @@
 package com.stripe.android.connect.webview
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
 import android.graphics.Color
 import android.net.Uri
+import android.webkit.PermissionRequest
 import android.webkit.WebResourceRequest
 import androidx.lifecycle.testing.TestLifecycleOwner
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.connect.ComponentListenerDelegate
 import com.stripe.android.connect.EmbeddedComponentManager
-import com.stripe.android.connect.EmbeddedComponentManager.Configuration
 import com.stripe.android.connect.PayoutsListener
 import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.StripeEmbeddedComponent
@@ -19,17 +21,22 @@ import com.stripe.android.connect.webview.serialization.SetOnLoadError.LoadError
 import com.stripe.android.connect.webview.serialization.SetOnLoaderStart
 import com.stripe.android.connect.webview.serialization.SetterFunctionCalledMessage
 import com.stripe.android.core.Logger
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
 import kotlinx.serialization.json.JsonNull
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.inOrder
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
+import org.mockito.kotlin.wheneverBlocking
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -37,12 +44,15 @@ import kotlin.test.assertTrue
 @OptIn(PrivateBetaConnectSDK::class)
 @RunWith(RobolectricTestRunner::class)
 class StripeConnectWebViewContainerControllerTest {
+
     private val mockContext: Context = mock()
+    private val mockPermissionRequest: PermissionRequest = mock()
     private val view: StripeConnectWebViewContainerInternal = mock()
-    private val embeddedComponentManager = EmbeddedComponentManager(
-        configuration = Configuration(publishableKey = "pk_test_123"),
-        fetchClientSecretCallback = { },
-    )
+    private val embeddedComponentManager: EmbeddedComponentManager = mock()
+//        EmbeddedComponentManager(
+//        configuration = Configuration(publishableKey = "pk_test_123"),
+//        fetchClientSecretCallback = { },
+//    )
     private val embeddedComponent: StripeEmbeddedComponent = StripeEmbeddedComponent.PAYOUTS
 
     private val delegateReceivedEvents = mutableListOf<SetterFunctionCalledMessage>()
@@ -58,6 +68,8 @@ class StripeConnectWebViewContainerControllerTest {
 
     @Before
     fun setup() {
+        Dispatchers.setMain(Dispatchers.Unconfined)
+
         controller = StripeConnectWebViewContainerController(
             view = view,
             embeddedComponentManager = embeddedComponentManager,
@@ -71,6 +83,9 @@ class StripeConnectWebViewContainerControllerTest {
 
     @Test
     fun `should load URL when view is attached`() {
+        whenever(embeddedComponentManager.getStripeURL(embeddedComponent)) doReturn
+            "https://connect-js.stripe.com/v1.0/android_webview.html#component=payouts&publicKey=pk_test_123"
+
         controller.onViewAttached()
         verify(view).loadUrl(
             "https://connect-js.stripe.com/v1.0/android_webview.html#component=payouts&publicKey=pk_test_123"
@@ -197,5 +212,52 @@ class StripeConnectWebViewContainerControllerTest {
             verify(view).updateConnectInstance(appearances[0])
             verify(view).updateConnectInstance(appearances[1])
         }
+    }
+
+    @Test
+    fun `onPermissionRequest grants permission when camera permission is already granted`() = runTest {
+        whenever(mockContext.checkPermission(eq(Manifest.permission.CAMERA), any(), any())) doReturn
+            PackageManager.PERMISSION_GRANTED
+
+        whenever(mockPermissionRequest.resources).doReturn(arrayOf(PermissionRequest.RESOURCE_VIDEO_CAPTURE))
+
+        controller.onPermissionRequest(mockContext, mockPermissionRequest)
+
+        verify(mockPermissionRequest).grant(arrayOf(PermissionRequest.RESOURCE_VIDEO_CAPTURE))
+    }
+
+    @Test
+    fun `onPermissionRequest denies permission when no supported permissions are requested`() = runTest {
+        whenever(mockPermissionRequest.resources) doReturn arrayOf("unsupported_permission")
+
+        controller.onPermissionRequest(mockContext, mockPermissionRequest)
+
+        verify(mockPermissionRequest).deny()
+    }
+
+    @Test
+    fun `onPermissionRequest requests camera permission when not granted`() = runTest {
+        whenever(mockContext.checkPermission(eq(Manifest.permission.CAMERA), any(), any())) doReturn
+            PackageManager.PERMISSION_DENIED
+
+        whenever(mockPermissionRequest.resources) doReturn arrayOf(PermissionRequest.RESOURCE_VIDEO_CAPTURE)
+        wheneverBlocking { embeddedComponentManager.requestCameraPermission(any()) } doReturn true
+
+        controller.onPermissionRequest(mockContext, mockPermissionRequest)
+
+        verify(mockPermissionRequest).grant(arrayOf(PermissionRequest.RESOURCE_VIDEO_CAPTURE))
+    }
+
+    @Test
+    fun `onPermissionRequest denies permission when camera permission request is rejected`() = runTest {
+        whenever(mockContext.checkPermission(eq(Manifest.permission.CAMERA), any(), any())) doReturn
+            PackageManager.PERMISSION_DENIED
+
+        whenever(mockPermissionRequest.resources) doReturn arrayOf(PermissionRequest.RESOURCE_VIDEO_CAPTURE)
+        wheneverBlocking { embeddedComponentManager.requestCameraPermission(any()) } doReturn false
+
+        controller.onPermissionRequest(mockContext, mockPermissionRequest)
+
+        verify(mockPermissionRequest).deny()
     }
 }
