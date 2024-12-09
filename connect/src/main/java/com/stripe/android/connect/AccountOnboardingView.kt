@@ -1,29 +1,31 @@
 package com.stripe.android.connect
 
 import android.content.Context
+import android.os.Parcelable
 import android.util.AttributeSet
 import android.widget.FrameLayout
 import androidx.annotation.RestrictTo
+import androidx.core.content.withStyledAttributes
 import com.stripe.android.connect.webview.StripeConnectWebViewContainer
 import com.stripe.android.connect.webview.StripeConnectWebViewContainerImpl
-import com.stripe.android.connect.webview.serialization.ConnectJson
 import com.stripe.android.connect.webview.serialization.SetOnExit
 import com.stripe.android.connect.webview.serialization.SetterFunctionCalledMessage
+import com.stripe.android.connect.webview.serialization.toJsonObject
 import com.stripe.android.connect.webview.serialization.toJs
-import kotlinx.serialization.json.encodeToJsonElement
-import kotlinx.serialization.json.jsonObject
+import dev.drewhamilton.poko.Poko
+import kotlinx.parcelize.Parcelize
 
 @PrivateBetaConnectSDK
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class AccountOnboardingView private constructor(
     context: Context,
     attrs: AttributeSet?,
     defStyleAttr: Int,
-    webViewContainerBehavior: StripeConnectWebViewContainerImpl<AccountOnboardingListener>,
+    private val webViewContainerBehavior: StripeConnectWebViewContainerImpl<AccountOnboardingListener>,
 ) : FrameLayout(context, attrs, defStyleAttr),
     StripeConnectWebViewContainer<AccountOnboardingListener> by webViewContainerBehavior {
 
     @JvmOverloads
+    @RestrictTo(RestrictTo.Scope.LIBRARY)
     constructor(
         context: Context,
         attrs: AttributeSet? = null,
@@ -38,23 +40,48 @@ class AccountOnboardingView private constructor(
         StripeConnectWebViewContainerImpl(
             embeddedComponent = StripeEmbeddedComponent.ACCOUNT_ONBOARDING,
             embeddedComponentManager = embeddedComponentManager,
-            props = props?.toJs()?.let { ConnectJson.encodeToJsonElement(it).jsonObject },
+            props = props?.toJs()?.toJsonObject(),
             listener = listener,
             listenerDelegate = AccountOnboardingListenerDelegate,
         )
     )
 
     init {
+        context.withStyledAttributes(attrs, R.styleable.AccountOnboardingView, defStyleAttr, 0) {
+            val props = AccountOnboardingProps(
+                fullTermsOfServiceUrl = getString(R.styleable.AccountOnboardingView_fullTermsOfServiceUrl),
+                recipientTermsOfServiceUrl = getString(R.styleable.AccountOnboardingView_recipientTermsOfServiceUrl),
+                privacyPolicyUrl = getString(R.styleable.AccountOnboardingView_privacyPolicyUrl),
+            )
+            webViewContainerBehavior.updateProps(
+                props = props.toJs().toJsonObject(),
+                merge = true
+            )
+        }
+
         webViewContainerBehavior.initializeView(this)
+    }
+
+    /**
+     * Updates the component props to [props]. If [merge] is true, existing values will not be overwritten by
+     * null values.
+     */
+    fun updateProps(props: AccountOnboardingProps, merge: Boolean) {
+        webViewContainerBehavior.updateProps(
+            props = props.toJs().toJsonObject(),
+            merge = merge
+        )
     }
 }
 
 @PrivateBetaConnectSDK
-data class AccountOnboardingProps(
+@Parcelize
+@Poko
+class AccountOnboardingProps(
     val fullTermsOfServiceUrl: String? = null,
     val recipientTermsOfServiceUrl: String? = null,
     val privacyPolicyUrl: String? = null,
-)
+) : Parcelable
 
 @PrivateBetaConnectSDK
 interface AccountOnboardingListener : StripeEmbeddedComponentListener {

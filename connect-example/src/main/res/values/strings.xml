@@ -5,6 +5,7 @@
     <string name="beta_all_caps">BETA</string>
     <string name="account_onboarding">Account Onboarding</string>
     <string name="onboarding_settings">Onboarding Settings</string>
+    <string name="presentation_settings">Presentation Settings</string>
     <string name="account_onboarding_menu_subtitle">Show a localized onboarding form that validates data</string>
     <string name="payouts">Payouts</string>
     <string name="payouts_menu_subtitle">Show payout information and allow your users to perform payouts</string>

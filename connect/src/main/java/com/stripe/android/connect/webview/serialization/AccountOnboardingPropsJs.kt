@@ -5,11 +5,11 @@ import com.stripe.android.connect.PrivateBetaConnectSDK
 import kotlinx.serialization.Serializable
 
 @Serializable
-internal data class AccountOnboardingPropsJs (
+internal data class AccountOnboardingPropsJs(
     val setFullTermsOfServiceUrl: String?,
     val setRecipientTermsOfServiceUrl: String?,
     val setPrivacyPolicyUrl: String?,
-)
+) : ComponentProps
 
 @PrivateBetaConnectSDK
 internal fun AccountOnboardingProps.toJs(): AccountOnboardingPropsJs {

@@ -4,12 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.connect.BuildConfig
 import com.stripe.android.connect.example.data.EmbeddedComponentService
-import com.stripe.android.connect.example.data.FieldOption
-import com.stripe.android.connect.example.data.FutureRequirement
 import com.stripe.android.connect.example.data.OnboardingSettings
 import com.stripe.android.connect.example.data.PresentationSettings
 import com.stripe.android.connect.example.data.SettingsService
-import com.stripe.android.connect.example.data.SkipTermsOfService
 import com.stripe.android.connect.example.ui.settings.SettingsViewModel.SettingsState.DemoMerchant
 import com.stripe.android.core.Logger
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -85,6 +82,15 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    fun onPresentationSettingsConfirmed(presentationSettings: PresentationSettings) {
+        viewModelScope.launch {
+            settingsService.setPresentationSettings(presentationSettings)
+            logger.info("($loggingTag) Presentation settings saved")
+
+            _state.update { it.copy(presentationSettings = presentationSettings) }
+        }
+    }
+
     fun onServerUrlChanged(url: String) {
         _state.update { it.copy(serverUrl = url) }
     }
@@ -148,7 +154,8 @@ class SettingsViewModel @Inject constructor(
         val presentationSettings: PresentationSettings = PresentationSettings(
             presentationStyleIsPush = true,
             embedInTabBar = false,
-            embedInNavBar = true
+            embedInNavBar = true,
+            useXmlViews = false,
         )
     ) {
         val serverUrlResetEnabled: Boolean

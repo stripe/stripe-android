@@ -12,6 +12,7 @@ import com.stripe.android.connect.example.ui.embeddedcomponentmanagerloader.Embe
 object SettingsDestination {
     const val Settings = "Settings"
     const val OnboardingSettings = "OnboardingSettings"
+    const val PresentationSettings = "PresentationSettings"
 }
 
 fun NavGraphBuilder.settingsComposables(
@@ -25,12 +26,20 @@ fun NavGraphBuilder.settingsComposables(
             viewModel = settingsViewModel,
             onDismiss = { navController.safeNavigateUp() },
             onReloadRequested = loaderViewmodel::reload,
-            openOnboardingSettings = { navController.navigate(SettingsDestination.OnboardingSettings) }
+            openOnboardingSettings = { navController.navigate(SettingsDestination.OnboardingSettings) },
+            openPresentationSettings = { navController.navigate(SettingsDestination.PresentationSettings) }
         )
     }
     composable(SettingsDestination.OnboardingSettings) {
         val settingsViewModel = hiltViewModel<SettingsViewModel>(activity)
         AccountOnboardingSettingsView(
+            viewModel = settingsViewModel,
+            onBack = { navController.safeNavigateUp() },
+        )
+    }
+    composable(SettingsDestination.PresentationSettings) {
+        val settingsViewModel = hiltViewModel<SettingsViewModel>(activity)
+        PresentationSettingsView(
             viewModel = settingsViewModel,
             onBack = { navController.safeNavigateUp() },
         )
