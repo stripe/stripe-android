@@ -30,11 +30,13 @@ class EmbeddedComponentManager(
      */
     fun createAccountOnboardingView(
         context: Context,
-        listener: AccountOnboardingListener? = null
+        props: AccountOnboardingProps? = null,
+        listener: AccountOnboardingListener? = null,
     ): AccountOnboardingView {
         return AccountOnboardingView(
             context = context,
             embeddedComponentManager = this,
+            props = props,
             listener = listener
         )
     }

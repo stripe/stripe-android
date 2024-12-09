@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="AccountOnboardingView">
+        <attr name="fullTermsOfServiceUrl" format="string" />
+        <attr name="recipientTermsOfServiceUrl" format="string" />
+        <attr name="privacyPolicyUrl" format="string" />
+    </declare-styleable>
+</resources>

@@ -37,6 +37,8 @@ fun SettingsView(
     viewModel: SettingsViewModel,
     onDismiss: () -> Unit,
     onReloadRequested: () -> Unit,
+    openOnboardingSettings: () -> Unit,
+    openPresentationSettings: () -> Unit,
 ) {
     val state by viewModel.state.collectAsState()
     var serverUrlDidChange = rememberSaveable { false }
@@ -81,6 +83,12 @@ fun SettingsView(
                 )
             }
             item {
+                ComponentSettings(openOnboardingSettings = openOnboardingSettings)
+            }
+            item {
+                PresentationSettingsSection(openPresentationSettings = openPresentationSettings)
+            }
+            item {
                 ApiServerSettings(
                     serverUrl = state.serverUrl,
                     onServerUrlChanged = viewModel::onServerUrlChanged,
@@ -102,7 +110,7 @@ private fun SelectAnAccount(
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Text(stringResource(R.string.select_demo_account), style = MaterialTheme.typography.h6)
+        SettingsSectionHeader(stringResource(R.string.select_demo_account))
         accounts.forEach { merchant ->
             when (merchant) {
                 is DemoMerchant.Merchant -> {
@@ -150,13 +158,37 @@ private fun SelectAnAccount(
 }
 
 @Composable
+private fun ComponentSettings(
+    openOnboardingSettings: () -> Unit,
+) {
+    SettingsSectionHeader(stringResource(R.string.component_settings))
+    Spacer(modifier = Modifier.height(8.dp))
+    SettingsNavigationItem(
+        text = stringResource(R.string.account_onboarding),
+        onClick = openOnboardingSettings
+    )
+}
+
+@Composable
+private fun PresentationSettingsSection(
+    openPresentationSettings: () -> Unit
+) {
+    SettingsSectionHeader(stringResource(R.string.presentation_settings))
+    Spacer(modifier = Modifier.height(8.dp))
+    SettingsNavigationItem(
+        text = stringResource(R.string.presentation_settings),
+        onClick = openPresentationSettings
+    )
+}
+
+@Composable
 private fun ApiServerSettings(
     serverUrl: String,
     onServerUrlChanged: (String) -> Unit,
     resetServerUrlEnabled: Boolean,
     resetServerUrlClicked: () -> Unit,
 ) {
-    Text(stringResource(R.string.api_server_settings), style = MaterialTheme.typography.h6)
+    SettingsSectionHeader(stringResource(R.string.api_server_settings))
     Spacer(modifier = Modifier.height(8.dp))
     OutlinedTextField(
         value = serverUrl,
