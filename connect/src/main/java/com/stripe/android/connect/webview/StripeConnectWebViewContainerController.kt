@@ -142,8 +142,9 @@ internal class StripeConnectWebViewContainerController<Listener : StripeEmbedded
         }.toTypedArray()
         if (permissionsRequested.isEmpty()) {
             request.deny() // no supported permissions were requested, so reject the request
-            logger.debug("($loggerTag) Denying permission - ${request.resources.joinToString()}" +
-                " are not supported")
+            logger.debug(
+                "($loggerTag) Denying permission - ${request.resources.joinToString()} are not supported"
+            )
             return
         }
 
