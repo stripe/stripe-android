@@ -1,7 +1,7 @@
 package com.stripe.android.connect.webview
 
-import android.content.Context
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
 import android.webkit.PermissionRequest
 import android.webkit.WebResourceRequest
@@ -24,7 +24,6 @@ import com.stripe.android.connect.webview.serialization.SetOnLoaderStart
 import com.stripe.android.connect.webview.serialization.SetterFunctionCalledMessage
 import com.stripe.android.core.Logger
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -51,8 +50,6 @@ internal class StripeConnectWebViewContainerController<Listener : StripeEmbedded
      */
     val stateFlow: StateFlow<StripeConnectWebViewContainerState>
         get() = _stateFlow.asStateFlow()
-
-    private val inProgressRequests: MutableMap<PermissionRequest, Job> = mutableMapOf()
 
     /**
      * Callback to invoke when the view is attached.
@@ -158,16 +155,7 @@ internal class StripeConnectWebViewContainerController<Listener : StripeEmbedded
                     request.deny()
                 }
             }
-            inProgressRequests.remove(request)
         }
-//        inProgressRequests[request] = job
-    }
-
-    /**
-     *
-     */
-    fun onPermissionRequestCanceled(request: PermissionRequest) {
-        inProgressRequests.remove(request)?.also { it.cancel() }
     }
 
     /**

@@ -25,7 +25,6 @@ import com.stripe.android.connect.EmbeddedComponentManager
 import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.example.core.Success
 import com.stripe.android.connect.example.core.then
-import com.stripe.android.connect.example.data.SettingsService
 import com.stripe.android.connect.example.ui.appearance.AppearanceView
 import com.stripe.android.connect.example.ui.common.ConnectExampleScaffold
 import com.stripe.android.connect.example.ui.common.ConnectSdkExampleTheme

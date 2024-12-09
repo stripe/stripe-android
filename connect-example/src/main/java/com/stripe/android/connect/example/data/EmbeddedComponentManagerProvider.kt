@@ -1,7 +1,6 @@
 package com.stripe.android.connect.example.data
 
 import android.content.Context
-import androidx.activity.ComponentActivity
 import com.github.kittinunf.fuel.core.FuelError
 import com.stripe.android.connect.EmbeddedComponentManager
 import com.stripe.android.connect.FetchClientSecretCallback.ClientSecretResultCallback

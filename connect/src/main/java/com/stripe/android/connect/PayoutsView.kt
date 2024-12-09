@@ -24,7 +24,7 @@ class PayoutsView private constructor(
         defStyleAttr: Int = 0,
         embeddedComponentManager: EmbeddedComponentManager? = null,
         listener: PayoutsListener? = null,
-) : this(
+    ) : this(
         context,
         attrs,
         defStyleAttr,

@@ -235,7 +235,11 @@ internal class StripeConnectWebViewContainerImpl<Listener : StripeEmbeddedCompon
         }
 
         override fun onPermissionRequestCanceled(request: PermissionRequest) {
-            controller?.onPermissionRequestCanceled(request)
+            super.onPermissionRequestCanceled(request)
+
+            // currently a no-op since we don't hold any state from the permission
+            // request and delegate all the UI to the Android system, meaning
+            // there's no way for us to cancel any permissions UI
         }
     }
 
