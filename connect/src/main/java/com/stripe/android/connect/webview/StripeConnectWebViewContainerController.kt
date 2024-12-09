@@ -1,8 +1,12 @@
 package com.stripe.android.connect.webview
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
+import android.webkit.PermissionRequest
 import android.webkit.WebResourceRequest
 import androidx.annotation.RestrictTo
+import androidx.core.content.ContextCompat.checkSelfPermission
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
@@ -19,11 +23,13 @@ import com.stripe.android.connect.webview.serialization.SetOnLoadError
 import com.stripe.android.connect.webview.serialization.SetOnLoaderStart
 import com.stripe.android.connect.webview.serialization.SetterFunctionCalledMessage
 import com.stripe.android.core.Logger
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @OptIn(PrivateBetaConnectSDK::class)
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -37,6 +43,7 @@ internal class StripeConnectWebViewContainerController<Listener : StripeEmbedded
     private val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG),
 ) : DefaultLifecycleObserver {
 
+    private val loggerTag = javaClass.simpleName
     private val _stateFlow = MutableStateFlow(StripeConnectWebViewContainerState())
 
     /**
@@ -77,17 +84,17 @@ internal class StripeConnectWebViewContainerController<Listener : StripeEmbedded
         val url = request.url
         return if (url.host?.lowercase() in ALLOWLISTED_HOSTS) {
             // TODO - add an analytic event here to track this unexpected behavior
-            logger.warning("(StripeConnectWebViewClient) Received pop-up for allow-listed host: $url")
+            logger.warning("($loggerTag) Received pop-up for allow-listed host: $url")
             false // Allow the request to propagate so we open URL in WebView, but this is not an expected operation
         } else if (
             url.scheme.equals("https", ignoreCase = true) || url.scheme.equals("http", ignoreCase = true)
         ) {
             // open the URL in an external browser for safety and to preserve back navigation
-            logger.debug("(StripeConnectWebViewClient) Opening URL in external browser: $url")
+            logger.debug("($loggerTag) Opening URL in external browser: $url")
             stripeIntentLauncher.launchSecureExternalWebTab(context, url)
             true // block the request since we're opening it in a secure external tab
         } else {
-            logger.debug("(StripeConnectWebViewClient) Opening non-http/https pop-up request: $url")
+            logger.debug("($loggerTag) Opening non-http/https pop-up request: $url")
             if (url.scheme.equals("mailto", ignoreCase = true)) {
                 stripeIntentLauncher.launchEmailLink(context, url)
             } else {
@@ -123,6 +130,39 @@ internal class StripeConnectWebViewContainerController<Listener : StripeEmbedded
 
     fun getInitialParams(context: Context): ConnectInstanceJs {
         return embeddedComponentManager.getInitialParams(context)
+    }
+
+    /**
+     *
+     */
+    suspend fun onPermissionRequest(context: Context, request: PermissionRequest) {
+        // we only care about camera permissions (audio/video)
+        val permissionsRequested = request.resources.filter {
+            it in listOf(PermissionRequest.RESOURCE_AUDIO_CAPTURE, PermissionRequest.RESOURCE_VIDEO_CAPTURE)
+        }.toTypedArray()
+        if (permissionsRequested.isEmpty()) {
+            request.deny() // no supported permissions were requested, so reject the request
+            logger.debug(
+                "($loggerTag) Denying permission - ${request.resources.joinToString()} are not supported"
+            )
+            return
+        }
+
+        if (checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+            logger.debug("($loggerTag) Granting permission - permission already granted")
+            request.grant(permissionsRequested)
+        } else {
+            val isGranted = embeddedComponentManager.requestCameraPermission(context) ?: return
+            withContext(Dispatchers.Main) {
+                if (isGranted) {
+                    logger.debug("($loggerTag) Granting permission - user accepted permission")
+                    request.grant(permissionsRequested)
+                } else {
+                    logger.debug("($loggerTag) Denying permission - user denied permission")
+                    request.deny()
+                }
+            }
+        }
     }
 
     /**
