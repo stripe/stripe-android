@@ -74,7 +74,7 @@ class EmbeddedComponentService @Inject constructor(
      * Returns the publishable key for use in the Stripe Connect SDK.
      * Throws a [FuelError] exception on network issues and other errors.
      */
-    suspend fun loadPublishableKey(): GetAccountsResponse = getAccounts()
+    suspend fun loadPublishableKey(): String = getAccounts().publishableKey
 
     /**
      * Returns the client secret for the given merchant account to be used in the Stripe Connect SDK.
