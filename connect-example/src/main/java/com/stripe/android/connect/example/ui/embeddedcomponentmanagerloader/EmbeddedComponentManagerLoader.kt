@@ -5,14 +5,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ModalBottomSheetLayout
-import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
-import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -27,8 +22,6 @@ import com.stripe.android.connect.example.core.Fail
 import com.stripe.android.connect.example.core.Loading
 import com.stripe.android.connect.example.core.Success
 import com.stripe.android.connect.example.core.Uninitialized
-import com.stripe.android.connect.example.ui.settings.SettingsView
-import kotlinx.coroutines.launch
 
 /**
  * Manages the UI for loading an [EmbeddedComponentManager], including error states.
@@ -39,6 +32,7 @@ import kotlinx.coroutines.launch
 fun EmbeddedComponentManagerLoader(
     embeddedComponentAsync: Async<EmbeddedComponentManager>,
     reload: () -> Unit,
+    openSettings: () -> Unit,
     content: @Composable (embeddedComponentManager: EmbeddedComponentManager) -> Unit,
 ) {
     val embeddedComponentManager = embeddedComponentAsync()
@@ -47,6 +41,7 @@ fun EmbeddedComponentManagerLoader(
         is Fail -> ErrorScreen(
             errorMessage = embeddedComponentAsync.error.message ?: stringResource(R.string.error_initializing),
             onReloadRequested = reload,
+            openSettings = openSettings,
         )
         is Success -> {
             if (embeddedComponentManager != null) {
@@ -55,6 +50,7 @@ fun EmbeddedComponentManagerLoader(
                 ErrorScreen(
                     errorMessage = stringResource(R.string.error_initializing),
                     onReloadRequested = reload,
+                    openSettings = openSettings,
                 )
             }
         }
@@ -64,7 +60,9 @@ fun EmbeddedComponentManagerLoader(
 @Composable
 private fun LoadingScreen() {
     Box(
-        modifier = Modifier.fillMaxSize().padding(24.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp),
         contentAlignment = Alignment.Center,
     ) {
         Text(
@@ -74,51 +72,28 @@ private fun LoadingScreen() {
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun ErrorScreen(
     errorMessage: String,
     onReloadRequested: () -> Unit,
+    openSettings: () -> Unit,
 ) {
-    val settingsSheetState = rememberModalBottomSheetState(
-        initialValue = ModalBottomSheetValue.Hidden,
-        skipHalfExpanded = true,
-    )
-    val coroutineScope = rememberCoroutineScope()
-
-    ModalBottomSheetLayout(
-        modifier = Modifier.fillMaxSize(),
-        sheetState = settingsSheetState,
-        sheetContent = {
-            SettingsView(
-                onDismiss = { coroutineScope.launch { settingsSheetState.hide() } },
-                onReloadRequested = onReloadRequested,
-            )
-        },
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
     ) {
-        Column(
-            modifier = Modifier.fillMaxSize().padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-        ) {
-            Text(stringResource(R.string.failed_to_start_app))
-            TextButton(onClick = onReloadRequested) {
-                Text(stringResource(R.string.reload))
-            }
-            TextButton(onClick = {
-                coroutineScope.launch {
-                    if (!settingsSheetState.isVisible) {
-                        settingsSheetState.show()
-                    } else {
-                        settingsSheetState.hide()
-                    }
-                }
-            }) {
-                Text(stringResource(R.string.app_settings))
-            }
-
-            Text(errorMessage)
+        Text(stringResource(R.string.failed_to_start_app))
+        TextButton(onClick = onReloadRequested) {
+            Text(stringResource(R.string.reload))
         }
+        TextButton(onClick = openSettings) {
+            Text(stringResource(R.string.app_settings))
+        }
+
+        Text(errorMessage)
     }
 }
 
@@ -130,8 +105,9 @@ private fun ErrorScreen(
 private fun EmbeddedComponentLoaderLoadingPreview() {
     EmbeddedComponentManagerLoader(
         embeddedComponentAsync = Loading(),
-        reload = { },
-        content = { },
+        reload = {},
+        openSettings = {},
+        content = {},
     )
 }
 
@@ -141,7 +117,8 @@ private fun EmbeddedComponentLoaderLoadingPreview() {
 private fun EmbeddedComponentLoaderErrorPreview() {
     EmbeddedComponentManagerLoader(
         embeddedComponentAsync = Fail(IllegalStateException("Example error")),
-        reload = { },
-        content = { },
+        reload = {},
+        openSettings = {},
+        content = {},
     )
 }
