@@ -27,6 +27,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
+import org.mockito.kotlin.any
 
 class DefaultLinkAccountManagerTest {
 
@@ -770,6 +771,35 @@ class DefaultLinkAccountManagerTest {
         val result = accountManager.deletePaymentDetails("id")
 
         assertThat(result.getOrNull()).isEqualTo(Unit)
+    }
+
+    @Test
+    fun `updatePaymentDetails returns error when repository call fails`() = runSuspendTest {
+        val error = AuthenticationException(StripeError())
+        val linkRepository = FakeLinkRepository()
+
+        val accountManager = accountManager(linkRepository = linkRepository)
+        accountManager.setAccountNullable(TestFactory.CONSUMER_SESSION, TestFactory.PUBLISHABLE_KEY)
+
+        linkRepository.updatePaymentDetailsResult = Result.failure(error)
+
+        val result = accountManager.updatePaymentDetails(any())
+
+        assertThat(result.exceptionOrNull()).isEqualTo(error)
+    }
+
+    @Test
+    fun `updatePaymentDetails returns success when repository call succeeds`() = runSuspendTest {
+        val linkRepository = FakeLinkRepository()
+
+        val accountManager = accountManager(linkRepository = linkRepository)
+        accountManager.setAccountNullable(TestFactory.CONSUMER_SESSION, TestFactory.PUBLISHABLE_KEY)
+
+        linkRepository.updatePaymentDetailsResult = Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS)
+
+        val result = accountManager.updatePaymentDetails(any())
+
+        assertThat(result.getOrNull()).isEqualTo(TestFactory.CONSUMER_PAYMENT_DETAILS)
     }
 
     private fun runSuspendTest(testBody: suspend TestScope.() -> Unit) = runTest {

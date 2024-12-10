@@ -14,6 +14,7 @@ import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSignUpConsentAction
@@ -258,6 +259,17 @@ internal class DefaultLinkAccountManager @Inject constructor(
         val clientSecret = linkAccount.value?.clientSecret ?: return Result.failure(NoLinkAccountFoundException())
         return linkRepository.deletePaymentDetails(
             paymentDetailsId = paymentDetailsId,
+            consumerSessionClientSecret = clientSecret,
+            consumerPublishableKey = consumerPublishableKey
+        )
+    }
+
+    override suspend fun updatePaymentDetails(
+        updateParams: ConsumerPaymentDetailsUpdateParams
+    ): Result<ConsumerPaymentDetails> {
+        val clientSecret = linkAccount.value?.clientSecret ?: return Result.failure(NoLinkAccountFoundException())
+        return linkRepository.updatePaymentDetails(
+            updateParams = updateParams,
             consumerSessionClientSecret = clientSecret,
             consumerPublishableKey = consumerPublishableKey
         )
