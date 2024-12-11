@@ -229,9 +229,11 @@ internal class StripeConnectWebViewContainerImpl<Listener : StripeEmbeddedCompon
         override fun onPermissionRequest(request: PermissionRequest) {
             val view = webView ?: return request.deny()
 
-            view.findViewTreeLifecycleOwner()?.lifecycleScope?.launch {
-                controller?.onPermissionRequest(view.context, request)
-            } ?: return request.deny()
+            view.findViewTreeLifecycleOwner()?.lifecycleScope
+                ?.launch {
+                    controller?.onPermissionRequest(view.context, request)
+                }
+                ?: return request.deny()
         }
 
         override fun onPermissionRequestCanceled(request: PermissionRequest) {
