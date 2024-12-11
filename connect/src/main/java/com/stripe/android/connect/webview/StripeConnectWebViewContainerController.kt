@@ -1,12 +1,9 @@
 package com.stripe.android.connect.webview
 
-import android.Manifest
 import android.content.Context
-import android.content.pm.PackageManager
 import android.webkit.PermissionRequest
 import android.webkit.WebResourceRequest
 import androidx.annotation.RestrictTo
-import androidx.core.content.ContextCompat.checkSelfPermission
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
@@ -156,7 +153,7 @@ internal class StripeConnectWebViewContainerController<Listener : StripeEmbedded
         val permissionsRequested = request.resources.filter {
             it == PermissionRequest.RESOURCE_AUDIO_CAPTURE || it == PermissionRequest.RESOURCE_VIDEO_CAPTURE
         }.toTypedArray()
-        if (permissionsRequested.isEmpty()) {// all calls to PermissionRequest must be on the main thread
+        if (permissionsRequested.isEmpty()) { // all calls to PermissionRequest must be on the main thread
             withContext(Dispatchers.Main) {
                 request.deny() // no supported permissions were requested, so reject the request
                 // TODO - add an analytic event here to track this unexpected behavior

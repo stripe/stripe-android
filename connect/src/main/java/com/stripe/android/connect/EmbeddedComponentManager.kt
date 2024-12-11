@@ -19,13 +19,11 @@ import com.stripe.android.connect.util.findActivity
 import com.stripe.android.connect.webview.serialization.ConnectInstanceJs
 import com.stripe.android.connect.webview.serialization.toJs
 import com.stripe.android.core.Logger
-import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.parcelize.Parcelize
 import kotlin.coroutines.resume
@@ -137,7 +135,6 @@ class EmbeddedComponentManager(
             fetchClientSecretCallback.fetchClientSecret(resultCallback)
         }
     }
-
 
     /**
      * Requests camera permissions for the EmbeddedComponents. Returns true if the user grants permission, false if the
