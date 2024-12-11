@@ -23,6 +23,7 @@ class LinkAnalyticsHelper @Inject internal constructor(
                     LinkActivityResult.Canceled.Reason.LoggedOut -> {
                         linkEventsReporter.onPopupLogout()
                     }
+                    LinkActivityResult.Canceled.Reason.PayAnotherWay -> Unit
                 }
             }
 

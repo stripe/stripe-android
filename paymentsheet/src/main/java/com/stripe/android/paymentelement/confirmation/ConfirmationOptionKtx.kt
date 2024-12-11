@@ -8,20 +8,14 @@ import com.stripe.android.paymentelement.confirmation.bacs.BacsConfirmationOptio
 import com.stripe.android.paymentelement.confirmation.epms.ExternalPaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 
 internal fun PaymentSelection.toConfirmationOption(
-    initializationMode: PaymentElementLoader.InitializationMode,
     configuration: CommonConfiguration,
-    appearance: PaymentSheet.Appearance,
     linkConfiguration: LinkConfiguration?,
 ): ConfirmationHandler.Option? {
     return when (this) {
         is PaymentSelection.Saved -> PaymentMethodConfirmationOption.Saved(
-            initializationMode = initializationMode,
-            shippingDetails = configuration.shippingDetails,
             paymentMethod = paymentMethod,
             optionsParams = paymentMethodOptionsParams,
         )
@@ -34,15 +28,11 @@ internal fun PaymentSelection.toConfirmationOption(
                 // For Instant Debits, we create the PaymentMethod inside the bank auth flow. Therefore,
                 // we can just use the already created object here.
                 PaymentMethodConfirmationOption.Saved(
-                    initializationMode = initializationMode,
-                    shippingDetails = configuration.shippingDetails,
                     paymentMethod = instantDebits.paymentMethod,
                     optionsParams = paymentMethodOptionsParams,
                 )
             } else {
                 PaymentMethodConfirmationOption.New(
-                    initializationMode = initializationMode,
-                    shippingDetails = configuration.shippingDetails,
                     createParams = paymentMethodCreateParams,
                     optionsParams = paymentMethodOptionsParams,
                     shouldSave = customerRequestedSave == PaymentSelection.CustomerRequestedSave.RequestReuse,
@@ -52,16 +42,11 @@ internal fun PaymentSelection.toConfirmationOption(
         is PaymentSelection.New -> {
             if (paymentMethodCreateParams.typeCode == PaymentMethod.Type.BacsDebit.code) {
                 BacsConfirmationOption(
-                    initializationMode = initializationMode,
-                    shippingDetails = configuration.shippingDetails,
                     createParams = paymentMethodCreateParams,
                     optionsParams = paymentMethodOptionsParams,
-                    appearance = appearance,
                 )
             } else {
                 PaymentMethodConfirmationOption.New(
-                    initializationMode = initializationMode,
-                    shippingDetails = configuration.shippingDetails,
                     createParams = paymentMethodCreateParams,
                     optionsParams = paymentMethodOptionsParams,
                     shouldSave = customerRequestedSave == PaymentSelection.CustomerRequestedSave.RequestReuse,
@@ -70,8 +55,6 @@ internal fun PaymentSelection.toConfirmationOption(
         }
         is PaymentSelection.GooglePay -> configuration.googlePay?.let { googlePay ->
             GooglePayConfirmationOption(
-                initializationMode = initializationMode,
-                shippingDetails = configuration.shippingDetails,
                 config = GooglePayConfirmationOption.Config(
                     environment = googlePay.environment,
                     merchantName = configuration.merchantDisplayName,
@@ -85,11 +68,7 @@ internal fun PaymentSelection.toConfirmationOption(
             )
         }
         is PaymentSelection.Link -> linkConfiguration?.let {
-            LinkConfirmationOption(
-                initializationMode = initializationMode,
-                shippingDetails = configuration.shippingDetails,
-                configuration = linkConfiguration,
-            )
+            LinkConfirmationOption(configuration = linkConfiguration)
         }
     }
 }

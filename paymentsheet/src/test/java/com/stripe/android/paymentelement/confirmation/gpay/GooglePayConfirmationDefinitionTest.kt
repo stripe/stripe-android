@@ -103,7 +103,7 @@ class GooglePayConfirmationDefinitionTest {
         }
         val result = definition.toResult(
             confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION,
-            intent = PAYMENT_INTENT,
+            confirmationParameters = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
             result = GooglePayPaymentMethodLauncher.Result.Completed(
                 paymentMethod = paymentMethod,
@@ -114,7 +114,7 @@ class GooglePayConfirmationDefinitionTest {
 
         val successResult = result.asNextStep()
 
-        assertThat(successResult.intent).isEqualTo(PAYMENT_INTENT)
+        assertThat(successResult.parameters).isEqualTo(CONFIRMATION_PARAMETERS)
         assertThat(successResult.confirmationOption).isInstanceOf<PaymentMethodConfirmationOption.Saved>()
     }
 
@@ -125,7 +125,7 @@ class GooglePayConfirmationDefinitionTest {
         val exception = IllegalStateException("Failed!")
         val result = definition.toResult(
             confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION,
-            intent = PAYMENT_INTENT,
+            confirmationParameters = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
             result = GooglePayPaymentMethodLauncher.Result.Failed(
                 errorCode = 400,
@@ -149,7 +149,7 @@ class GooglePayConfirmationDefinitionTest {
         val exception = IllegalStateException("Failed!")
         val result = definition.toResult(
             confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION,
-            intent = PAYMENT_INTENT,
+            confirmationParameters = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
             result = GooglePayPaymentMethodLauncher.Result.Failed(
                 errorCode = GooglePayPaymentMethodLauncher.NETWORK_ERROR,
@@ -175,7 +175,7 @@ class GooglePayConfirmationDefinitionTest {
 
         val result = definition.toResult(
             confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION,
-            intent = PAYMENT_INTENT,
+            confirmationParameters = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
             result = GooglePayPaymentMethodLauncher.Result.Canceled,
         )
@@ -289,7 +289,7 @@ class GooglePayConfirmationDefinitionTest {
 
             definition.launch(
                 confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION,
-                intent = PAYMENT_INTENT,
+                confirmationParameters = CONFIRMATION_PARAMETERS,
                 arguments = Unit,
                 launcher = launcher,
             )
@@ -385,7 +385,9 @@ class GooglePayConfirmationDefinitionTest {
                         merchantCurrencyCode = "USD",
                     ),
                 ),
-                intent = PAYMENT_INTENT.copy(currency = "CAD"),
+                confirmationParameters = CONFIRMATION_PARAMETERS.copy(
+                    intent = PAYMENT_INTENT.copy(currency = "CAD"),
+                ),
                 arguments = Unit,
                 launcher = launcher,
             )
@@ -416,7 +418,9 @@ class GooglePayConfirmationDefinitionTest {
                         customLabel = "Merchant Inc."
                     ),
                 ),
-                intent = PAYMENT_INTENT.copy(currency = "CAD"),
+                confirmationParameters = CONFIRMATION_PARAMETERS.copy(
+                    intent = PAYMENT_INTENT.copy(currency = "CAD"),
+                ),
                 arguments = Unit,
                 launcher = launcher,
             )
@@ -448,7 +452,9 @@ class GooglePayConfirmationDefinitionTest {
                         customLabel = "Merchant Inc."
                     ),
                 ),
-                intent = SetupIntentFactory.create(),
+                confirmationParameters = CONFIRMATION_PARAMETERS.copy(
+                    intent = SetupIntentFactory.create(),
+                ),
                 arguments = Unit,
                 launcher = launcher,
             )
@@ -474,12 +480,14 @@ class GooglePayConfirmationDefinitionTest {
 
         val action = definition.action(
             confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION.copy(
-                initializationMode = initializationMode,
                 config = GOOGLE_PAY_CONFIRMATION_OPTION.config.copy(
                     merchantCurrencyCode = merchantCurrencyCode,
                 ),
             ),
-            intent = SetupIntentFactory.create(),
+            confirmationParameters = CONFIRMATION_PARAMETERS.copy(
+                initializationMode = initializationMode,
+                intent = SetupIntentFactory.create(),
+            ),
         )
 
         test(
@@ -507,7 +515,7 @@ class GooglePayConfirmationDefinitionTest {
 
             definition.launch(
                 confirmationOption = confirmationOption,
-                intent = PAYMENT_INTENT,
+                confirmationParameters = CONFIRMATION_PARAMETERS,
                 arguments = Unit,
                 launcher = launcher,
             )
@@ -594,10 +602,6 @@ class GooglePayConfirmationDefinitionTest {
 
     private companion object {
         private val GOOGLE_PAY_CONFIRMATION_OPTION = GooglePayConfirmationOption(
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = "pi_123_secret_123",
-            ),
-            shippingDetails = null,
             config = GooglePayConfirmationOption.Config(
                 environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
                 merchantName = "Test merchant Inc.",
@@ -613,5 +617,18 @@ class GooglePayConfirmationDefinitionTest {
         )
 
         private val PAYMENT_INTENT = PaymentIntentFactory.create()
+
+        private val APPEARANCE = PaymentSheet.Appearance().copy(
+            colorsDark = PaymentSheet.Colors.defaultLight,
+        )
+
+        private val CONFIRMATION_PARAMETERS = ConfirmationDefinition.Parameters(
+            intent = PAYMENT_INTENT,
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = "pi_123_secret_123",
+            ),
+            appearance = APPEARANCE,
+            shippingDetails = null,
+        )
     }
 }

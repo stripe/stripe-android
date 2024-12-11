@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.core.Logger
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkScreen
@@ -14,6 +15,11 @@ import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.supportedPaymentMethodTypes
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.SetupIntent
+import com.stripe.android.model.StripeIntent
+import com.stripe.android.ui.core.Amount
+import com.stripe.android.ui.core.R
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -35,6 +41,8 @@ internal class WalletViewModel @Inject constructor(
             paymentDetailsList = emptyList(),
             selectedItem = null,
             isProcessing = false,
+            hasCompleted = false,
+            primaryButtonLabel = completePaymentButtonLabel(configuration.stripeIntent)
         )
     )
 
@@ -79,6 +87,24 @@ internal class WalletViewModel @Inject constructor(
         _uiState.update {
             it.copy(selectedItem = item)
         }
+    }
+
+    fun onPrimaryButtonClicked() = Unit
+
+    fun onPayAnotherWayClicked() {
+        dismissWithResult(LinkActivityResult.Canceled(LinkActivityResult.Canceled.Reason.PayAnotherWay))
+    }
+
+    private fun completePaymentButtonLabel(
+        stripeIntent: StripeIntent,
+    ) = when (stripeIntent) {
+        is PaymentIntent -> {
+            Amount(
+                requireNotNull(stripeIntent.amount),
+                requireNotNull(stripeIntent.currency)
+            ).buildPayButtonLabel()
+        }
+        is SetupIntent -> R.string.stripe_setup_button_label.resolvableString
     }
 
     companion object {

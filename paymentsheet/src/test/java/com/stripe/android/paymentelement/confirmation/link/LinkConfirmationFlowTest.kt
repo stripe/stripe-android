@@ -10,6 +10,7 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationMediator
 import com.stripe.android.paymentelement.confirmation.ConfirmationMediator.Parameters
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.asLaunch
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
@@ -46,7 +47,7 @@ class LinkConfirmationFlowTest {
 
         val action = mediator.action(
             option = LINK_CONFIRMATION_OPTION,
-            intent = PAYMENT_INTENT,
+            parameters = CONFIRMATION_PARAMETERS,
         )
 
         assertThat(action).isInstanceOf<ConfirmationMediator.Action.Launch>()
@@ -62,7 +63,7 @@ class LinkConfirmationFlowTest {
         val parameters = savedStateHandle.get<Parameters<LinkConfirmationOption>>("LinkParameters")
 
         assertThat(parameters?.confirmationOption).isEqualTo(LINK_CONFIRMATION_OPTION)
-        assertThat(parameters?.intent).isEqualTo(PAYMENT_INTENT)
+        assertThat(parameters?.confirmationParameters).isEqualTo(CONFIRMATION_PARAMETERS)
         assertThat(parameters?.deferredIntentConfirmationType).isNull()
     }
 
@@ -75,8 +76,8 @@ class LinkConfirmationFlowTest {
                 "LinkParameters",
                 Parameters(
                     confirmationOption = LINK_CONFIRMATION_OPTION,
-                    intent = PAYMENT_INTENT,
                     deferredIntentConfirmationType = null,
+                    confirmationParameters = CONFIRMATION_PARAMETERS,
                 )
             )
         }
@@ -113,13 +114,11 @@ class LinkConfirmationFlowTest {
 
         assertThat(result).isEqualTo(
             ConfirmationDefinition.Result.NextStep(
-                intent = PAYMENT_INTENT,
                 confirmationOption = PaymentMethodConfirmationOption.Saved(
-                    initializationMode = LINK_CONFIRMATION_OPTION.initializationMode,
-                    shippingDetails = LINK_CONFIRMATION_OPTION.shippingDetails,
                     paymentMethod = PAYMENT_METHOD,
                     optionsParams = null,
-                )
+                ),
+                parameters = CONFIRMATION_PARAMETERS,
             )
         )
     }
@@ -137,11 +136,16 @@ class LinkConfirmationFlowTest {
 
         private val PAYMENT_INTENT = PaymentIntentFactory.create()
 
-        private val LINK_CONFIRMATION_OPTION = LinkConfirmationOption(
+        private val CONFIRMATION_PARAMETERS = ConfirmationDefinition.Parameters(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "pi_123_secret_123",
             ),
             shippingDetails = null,
+            intent = PAYMENT_INTENT,
+            appearance = PaymentSheet.Appearance()
+        )
+
+        private val LINK_CONFIRMATION_OPTION = LinkConfirmationOption(
             configuration = LinkConfiguration(
                 stripeIntent = PAYMENT_INTENT,
                 merchantName = "Merchant Inc.",

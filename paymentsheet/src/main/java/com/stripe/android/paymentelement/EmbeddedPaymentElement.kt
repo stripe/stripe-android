@@ -4,8 +4,8 @@ import android.graphics.drawable.Drawable
 import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
 import androidx.annotation.RestrictTo
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.AnnotatedString
 import androidx.lifecycle.LifecycleOwner
@@ -24,6 +24,7 @@ import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.uicore.image.rememberDrawablePainter
+import com.stripe.android.uicore.utils.collectAsState
 import dev.drewhamilton.poko.Poko
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.parcelize.Parcelize
@@ -61,7 +62,8 @@ class EmbeddedPaymentElement private constructor(
      */
     @Composable
     fun Content() {
-        Text("Hello World!")
+        val embeddedContent by sharedViewModel.embeddedContent.collectAsState()
+        embeddedContent?.Content()
     }
 
     /**
