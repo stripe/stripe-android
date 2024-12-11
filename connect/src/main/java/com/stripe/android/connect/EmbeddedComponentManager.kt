@@ -43,32 +43,13 @@ class EmbeddedComponentManager(
     internal val appearanceFlow: StateFlow<Appearance> get() = _appearanceFlow.asStateFlow()
     private val loggerTag = javaClass.simpleName
 
-    internal suspend fun requestCameraPermission(context: Context): Boolean? {
-        if (checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
-            logger.debug("($loggerTag) Skipping permission request - CAMERA permission already granted")
-            return true
-        }
-
-        val activity = context.findActivity()
-        if (activity == null) {
-            logger.warning("($loggerTag) You must create the EmbeddedComponent view from an Activity")
-            if (isDebugBuild) {
-                // crash if in debug mode so that developers are more likely to catch this error.
-                error("You must create an AccountOnboardingView from an Activity")
-            }
-        }
-        launcherMap[activity]?.launch(Manifest.permission.CAMERA)
-            ?: logger.warning(
-                "($loggerTag) Error launching camera permission request. " +
-                "Did you call EmbeddedComponentManager.onActivityCreate in your Activity.onCreate function?"
-            )
-
-        return permissionsFlow.first()
-    }
+    // Public functions
 
     /**
      * Create a new [AccountOnboardingView] for inclusion in the view hierarchy.
      */
+    @PrivateBetaConnectSDK
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun createAccountOnboardingView(
         context: Context,
         listener: AccountOnboardingListener? = null,
@@ -90,6 +71,8 @@ class EmbeddedComponentManager(
     /**
      * Create a new [PayoutsView] for inclusion in the view hierarchy.
      */
+    @PrivateBetaConnectSDK
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun createPayoutsView(
         context: Context,
         listener: PayoutsListener? = null,
@@ -107,6 +90,20 @@ class EmbeddedComponentManager(
             listener = listener,
         )
     }
+
+    @PrivateBetaConnectSDK
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun update(appearance: Appearance) {
+        _appearanceFlow.value = appearance
+    }
+
+    @PrivateBetaConnectSDK
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun logout() {
+        throw NotImplementedError("Logout functionality is not yet implemented")
+    }
+
+    // Internal functions (not for public consumption)
 
     internal fun getInitialParams(context: Context): ConnectInstanceJs {
         return ConnectInstanceJs(
@@ -140,16 +137,28 @@ class EmbeddedComponentManager(
         }
     }
 
-    @PrivateBetaConnectSDK
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    fun update(appearance: Appearance) {
-        _appearanceFlow.value = appearance
-    }
 
-    @PrivateBetaConnectSDK
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    fun logout() {
-        throw NotImplementedError("Logout functionality is not yet implemented")
+    internal suspend fun requestCameraPermission(context: Context): Boolean? {
+        if (checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+            logger.debug("($loggerTag) Skipping permission request - CAMERA permission already granted")
+            return true
+        }
+
+        val activity = context.findActivity()
+        if (activity == null) {
+            logger.warning("($loggerTag) You must create the EmbeddedComponent view from an Activity")
+            if (isDebugBuild) {
+                // crash if in debug mode so that developers are more likely to catch this error.
+                error("You must create an AccountOnboardingView from an Activity")
+            }
+        }
+        launcherMap[activity]?.launch(Manifest.permission.CAMERA)
+            ?: logger.warning(
+                "($loggerTag) Error launching camera permission request. " +
+                    "Did you call EmbeddedComponentManager.onActivityCreate in your Activity.onCreate function?"
+            )
+
+        return permissionsFlow.first()
     }
 
     // Configuration
