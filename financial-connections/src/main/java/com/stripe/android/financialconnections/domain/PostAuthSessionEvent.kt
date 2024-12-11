@@ -22,18 +22,18 @@ internal class PostAuthSessionEvent @Inject constructor(
         sessionId: String,
         events: List<AuthSessionEvent>
     ) {
-        GlobalScope.launch(Dispatchers.IO) {
-            runCatching {
-                repository.postAuthorizationSessionEvent(
-                    clientTimestamp = Date(),
-                    clientSecret = configuration.financialConnectionsSessionClientSecret,
-                    sessionId = sessionId,
-                    authSessionEvents = events
-                )
-            }.onFailure {
-                logger.error("error posting auth session event", it)
-            }
-        }
+//        GlobalScope.launch(Dispatchers.IO) {
+//            runCatching {
+//                repository.postAuthorizationSessionEvent(
+//                    clientTimestamp = Date(),
+//                    clientSecret = configuration.financialConnectionsSessionClientSecret,
+//                    sessionId = sessionId,
+//                    authSessionEvents = events
+//                )
+//            }.onFailure {
+//                logger.error("error posting auth session event", it)
+//            }
+//        }
     }
 
     operator fun invoke(
