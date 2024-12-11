@@ -10,8 +10,8 @@ import com.stripe.android.connect.webview.StripeConnectWebViewContainer
 import com.stripe.android.connect.webview.StripeConnectWebViewContainerImpl
 import com.stripe.android.connect.webview.serialization.SetOnExit
 import com.stripe.android.connect.webview.serialization.SetterFunctionCalledMessage
-import com.stripe.android.connect.webview.serialization.toJsonObject
 import com.stripe.android.connect.webview.serialization.toJs
+import com.stripe.android.connect.webview.serialization.toJsonObject
 import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
