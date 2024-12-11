@@ -49,7 +49,9 @@ class EmbeddedComponentManager(
         context: Context,
         listener: AccountOnboardingListener? = null,
     ): AccountOnboardingView {
-        val activity = context.findActivity() ?: error("You must create an AccountOnboardingView from an Activity")
+        val activity = checkNotNull(context.findActivity()) {
+            "You must create an AccountOnboardingView from an Activity"
+        }
         checkNotNull(launcherMap[activity]) {
             "You must call EmbeddedComponentManager.onActivityCreate in your Activity.onCreate function"
         }
