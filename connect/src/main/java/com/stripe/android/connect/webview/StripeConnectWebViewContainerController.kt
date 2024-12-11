@@ -37,6 +37,7 @@ internal class StripeConnectWebViewContainerController<Listener : StripeEmbedded
     private val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG),
 ) : DefaultLifecycleObserver {
 
+    private val loggerTag = javaClass.simpleName
     private val _stateFlow = MutableStateFlow(StripeConnectWebViewContainerState())
 
     /**
@@ -59,7 +60,12 @@ internal class StripeConnectWebViewContainerController<Listener : StripeEmbedded
         updateState { copy(isNativeLoadingIndicatorVisible = !receivedSetOnLoaderStart) }
     }
 
-    fun onReceivedError(requestUrl: String, httpStatusCode: Int? = null, errorMessage: String? = null) {
+    fun onReceivedError(
+        requestUrl: String,
+        httpStatusCode: Int? = null,
+        errorMessage: String? = null,
+        isForMainFrame: Boolean, // whether this request is for the main page load
+    ) {
         val errorString = buildString {
             if (httpStatusCode != null) {
                 append("Received $httpStatusCode loading $requestUrl")
@@ -70,7 +76,12 @@ internal class StripeConnectWebViewContainerController<Listener : StripeEmbedded
                 append(": $errorMessage")
             }
         }
-        listener?.onLoadError(RuntimeException(errorString)) // TODO - wrap error better
+        logger.debug("($loggerTag) $errorString")
+
+        // don't send errors for requests that aren't for the main page load
+        if (isForMainFrame) {
+            listener?.onLoadError(RuntimeException(errorString)) // TODO - wrap error better
+        }
     }
 
     fun shouldOverrideUrlLoading(context: Context, request: WebResourceRequest): Boolean {
@@ -83,11 +94,11 @@ internal class StripeConnectWebViewContainerController<Listener : StripeEmbedded
             url.scheme.equals("https", ignoreCase = true) || url.scheme.equals("http", ignoreCase = true)
         ) {
             // open the URL in an external browser for safety and to preserve back navigation
-            logger.debug("(StripeConnectWebViewClient) Opening URL in external browser: $url")
+            logger.debug("($loggerTag) Opening URL in external browser: $url")
             stripeIntentLauncher.launchSecureExternalWebTab(context, url)
             true // block the request since we're opening it in a secure external tab
         } else {
-            logger.debug("(StripeConnectWebViewClient) Opening non-http/https pop-up request: $url")
+            logger.debug("($loggerTag) Opening non-http/https pop-up request: $url")
             if (url.scheme.equals("mailto", ignoreCase = true)) {
                 stripeIntentLauncher.launchEmailLink(context, url)
             } else {
