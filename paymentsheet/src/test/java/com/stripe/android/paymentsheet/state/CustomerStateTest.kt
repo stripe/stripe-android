@@ -40,6 +40,7 @@ class CustomerStateTest {
                     // Always true for `customer_session`
                     canRemoveDuplicates = true,
                 ),
+                defaultPaymentMethodId = null
             )
         )
     }
@@ -76,6 +77,7 @@ class CustomerStateTest {
                     // Always true for `customer_session`
                     canRemoveDuplicates = true,
                 ),
+                defaultPaymentMethodId = null
             )
         )
     }
@@ -112,6 +114,7 @@ class CustomerStateTest {
                     // Always true for `customer_session`
                     canRemoveDuplicates = true,
                 ),
+                defaultPaymentMethodId = null
             )
         )
     }
@@ -141,6 +144,7 @@ class CustomerStateTest {
                     // Always 'false' for legacy ephemeral keys
                     canRemoveDuplicates = false,
                 ),
+                defaultPaymentMethodId = null
             )
         )
     }

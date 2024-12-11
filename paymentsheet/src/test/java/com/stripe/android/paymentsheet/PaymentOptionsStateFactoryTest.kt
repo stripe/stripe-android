@@ -31,6 +31,7 @@ class PaymentOptionsStateFactoryTest {
             nameProvider = { it!!.resolvableString },
             isCbcEligible = false,
             canRemovePaymentMethods = true,
+            defaultPaymentMethodId = null
         )
 
         val selectedPaymentMethod = state.selectedItem as? PaymentOptionsItem.SavedPaymentMethod
@@ -49,6 +50,7 @@ class PaymentOptionsStateFactoryTest {
             nameProvider = { it!!.resolvableString },
             isCbcEligible = false,
             canRemovePaymentMethods = true,
+            defaultPaymentMethodId = null
         )
 
         assertThat(state.selectedItem).isNull()
@@ -78,6 +80,7 @@ class PaymentOptionsStateFactoryTest {
             nameProvider = { it!!.resolvableString },
             isCbcEligible = true,
             canRemovePaymentMethods = true,
+            defaultPaymentMethodId = null
         )
 
         assertThat(
@@ -183,6 +186,7 @@ class PaymentOptionsStateFactoryTest {
             nameProvider = { it!!.resolvableString },
             isCbcEligible = true,
             canRemovePaymentMethods = canRemovePaymentMethods,
+            defaultPaymentMethodId = null
         )
     }
 }
