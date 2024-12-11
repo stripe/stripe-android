@@ -66,6 +66,10 @@ internal class StripeConnectWebViewContainerController<Listener : StripeEmbedded
         updateState { copy(isNativeLoadingIndicatorVisible = !receivedSetOnLoaderStart) }
     }
 
+    /**
+     * Callback to invoke when the webview received a network error. If the error was an HTTP error,
+     * [httpStatusCode] will be non-null.
+     */
     fun onReceivedError(requestUrl: String, httpStatusCode: Int? = null, errorMessage: String? = null) {
         val errorString = buildString {
             if (httpStatusCode != null) {
@@ -80,6 +84,11 @@ internal class StripeConnectWebViewContainerController<Listener : StripeEmbedded
         listener?.onLoadError(RuntimeException(errorString)) // TODO - wrap error better
     }
 
+    /**
+     * Callback to invoke when the webview begins loading a URL. Returns false if the URL
+     * should be loaded in the webview, true otherwise. Returning true has the effect of blocking
+     * the webview's navigation to the URL.
+     */
     fun shouldOverrideUrlLoading(context: Context, request: WebResourceRequest): Boolean {
         val url = request.url
         return if (url.host?.lowercase() in ALLOWLISTED_HOSTS) {
@@ -128,12 +137,19 @@ internal class StripeConnectWebViewContainerController<Listener : StripeEmbedded
         return embeddedComponentManager.fetchClientSecret()
     }
 
+    /**
+     * Get the initial parameters for the Connect SDK instance.
+     */
     fun getInitialParams(context: Context): ConnectInstanceJs {
         return embeddedComponentManager.getInitialParams(context)
     }
 
     /**
+     * Callback to invoke upon receiving a permission request from the webview.
+     * Calls [PermissionRequest.grant] if the user grants permission to the resources
+     * requested in [PermissionRequest.getResources], calls [PermissionRequest.deny] otherwise.
      *
+     * An example of where this is called is when the webview requests access to the camera.
      */
     suspend fun onPermissionRequest(context: Context, request: PermissionRequest) {
         // we only care about camera permissions (audio/video)

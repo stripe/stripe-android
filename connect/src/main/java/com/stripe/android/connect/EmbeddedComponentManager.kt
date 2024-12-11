@@ -70,7 +70,9 @@ class EmbeddedComponentManager(
         context: Context,
         listener: PayoutsListener? = null,
     ): PayoutsView {
-        val activity = context.findActivity() ?: error("You must create an AccountOnboardingView from an Activity")
+        val activity = checkNotNull(context.findActivity()) {
+            "You must create a PayoutsView from an Activity"
+        }
         checkNotNull(launcherMap[activity]) {
             "You must call EmbeddedComponentManager.onActivityCreate in your Activity.onCreate function"
         }
@@ -139,6 +141,13 @@ class EmbeddedComponentManager(
         private val launcherMap = mutableMapOf<Activity, ActivityResultLauncher<String>>()
         private val permissionsFlow: MutableSharedFlow<Boolean> = MutableSharedFlow()
 
+        /**
+         * Hooks the [EmbeddedComponentManager] into this activity's lifecycle.
+         *
+         * Must be called in [ComponentActivity.onCreate], passing in the instance of the
+         * activity as [activity]. This must be called in all activities where an EmbeddedComponent
+         * view is used.
+         */
         fun onActivityCreate(activity: ComponentActivity) {
             val application = activity.application
 
