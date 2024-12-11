@@ -262,6 +262,7 @@ class DefaultManageScreenInteractorTest {
         val canEdit = MutableStateFlow(true)
         val canRemove = MutableStateFlow(true)
         val dispatcher = UnconfinedTestDispatcher()
+        val defaultPaymentMethodId = MutableStateFlow(null)
 
         val interactor = DefaultManageScreenInteractor(
             paymentMethods = paymentMethods,
@@ -282,6 +283,7 @@ class DefaultManageScreenInteractorTest {
             navigateBack = handleBackPressed,
             dispatcher = dispatcher,
             isLiveMode = true,
+            defaultPaymentMethodId = defaultPaymentMethodId
         )
 
         TestParams(
