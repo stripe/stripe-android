@@ -23,9 +23,11 @@ import com.stripe.android.connect.webview.serialization.SetterFunctionCalledMess
 import com.stripe.android.core.Logger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import kotlinx.serialization.json.JsonNull
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -79,6 +81,11 @@ class StripeConnectWebViewContainerControllerTest {
             stripeIntentLauncher = mockStripeIntentLauncher,
             logger = mockLogger,
         )
+    }
+
+    @After
+    fun cleanup() {
+        Dispatchers.resetMain()
     }
 
     @Test

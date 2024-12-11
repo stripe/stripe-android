@@ -138,19 +138,24 @@ internal class StripeConnectWebViewContainerController<Listener : StripeEmbedded
     suspend fun onPermissionRequest(context: Context, request: PermissionRequest) {
         // we only care about camera permissions (audio/video)
         val permissionsRequested = request.resources.filter {
-            it in listOf(PermissionRequest.RESOURCE_AUDIO_CAPTURE, PermissionRequest.RESOURCE_VIDEO_CAPTURE)
+            it == PermissionRequest.RESOURCE_AUDIO_CAPTURE || it == PermissionRequest.RESOURCE_VIDEO_CAPTURE
         }.toTypedArray()
-        if (permissionsRequested.isEmpty()) {
-            request.deny() // no supported permissions were requested, so reject the request
-            logger.debug(
-                "($loggerTag) Denying permission - ${request.resources.joinToString()} are not supported"
-            )
+        if (permissionsRequested.isEmpty()) {// all calls to PermissionRequest must be on the main thread
+            withContext(Dispatchers.Main) {
+                request.deny() // no supported permissions were requested, so reject the request
+                logger.debug(
+                    "($loggerTag) Denying permission - ${request.resources.joinToString()} are not supported"
+                )
+            }
             return
         }
 
         if (checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
-            logger.debug("($loggerTag) Granting permission - permission already granted")
-            request.grant(permissionsRequested)
+            // all calls to PermissionRequest must be on the main thread
+            withContext(Dispatchers.Main) {
+                logger.debug("($loggerTag) Granting permission - permission already granted")
+                request.grant(permissionsRequested)
+            }
         } else {
             val isGranted = embeddedComponentManager.requestCameraPermission(context) ?: return
             withContext(Dispatchers.Main) {
