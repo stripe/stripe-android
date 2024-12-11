@@ -143,7 +143,8 @@ internal class StripeConnectWebViewContainerController<Listener : StripeEmbedded
         if (permissionsRequested.isEmpty()) {// all calls to PermissionRequest must be on the main thread
             withContext(Dispatchers.Main) {
                 request.deny() // no supported permissions were requested, so reject the request
-                logger.debug(
+                // TODO - add an analytic event here to track this unexpected behavior
+                logger.warning(
                     "($loggerTag) Denying permission - ${request.resources.joinToString()} are not supported"
                 )
             }
