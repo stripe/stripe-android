@@ -193,7 +193,6 @@ internal class StripeConnectWebViewContainerImpl<Listener : StripeEmbeddedCompon
     }
 
     override fun loadUrl(url: String) {
-        webView?.clearCache(true)
         webView?.loadUrl(url)
     }
 
