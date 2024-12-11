@@ -91,12 +91,6 @@ class EmbeddedComponentManager(
         _appearanceFlow.value = appearance
     }
 
-    @PrivateBetaConnectSDK
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    fun logout() {
-        throw NotImplementedError("Logout functionality is not yet implemented")
-    }
-
     // Configuration
 
     @PrivateBetaConnectSDK
