@@ -1,6 +1,7 @@
 package com.stripe.android.connect.example.ui.settings
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -17,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.stripe.android.connect.example.ui.common.ConnectSdkExampleTheme
 
 @Composable
 fun SettingsSectionHeader(
@@ -28,6 +30,12 @@ fun SettingsSectionHeader(
         text = text,
         style = MaterialTheme.typography.h6,
     )
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun SettingsSectionHeaderPreview() {
+    SettingsSectionHeader("Settings")
 }
 
 @Composable
@@ -46,6 +54,27 @@ fun SettingsTextField(
         value = value,
         onValueChange = onValueChange,
     )
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun SettingsTextFieldPreview() {
+    ConnectSdkExampleTheme {
+        Column {
+            SettingsTextField(
+                label = "Name",
+                placeholder = "Jane Doe",
+                value = "",
+                onValueChange = {}
+            )
+            SettingsTextField(
+                label = "Name",
+                placeholder = "Jane Doe",
+                value = "John",
+                onValueChange = {}
+            )
+        }
+    }
 }
 
 @Composable
@@ -74,7 +103,7 @@ fun SettingsNavigationItem(
 }
 
 @Composable
-@Preview
+@Preview(showBackground = true)
 private fun SettingsNavigationItemPreview() {
     SettingsNavigationItem(text = "Settings", onClick = {})
 }
