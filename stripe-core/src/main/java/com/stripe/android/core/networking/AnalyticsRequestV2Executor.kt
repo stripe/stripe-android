@@ -26,10 +26,10 @@ class DefaultAnalyticsRequestV2Executor @Inject constructor(
 ) : AnalyticsRequestV2Executor {
 
     override suspend fun enqueue(request: AnalyticsRequestV2) {
-        val isEnqueued = isWorkManagerAvailable() && enqueueRequest(request)
-        if (!isEnqueued) {
-            executeRequest(request)
-        }
+//        val isEnqueued = isWorkManagerAvailable() && enqueueRequest(request)
+//        if (!isEnqueued) {
+//            executeRequest(request)
+//        }
     }
 
     private suspend fun enqueueRequest(request: AnalyticsRequestV2): Boolean {
