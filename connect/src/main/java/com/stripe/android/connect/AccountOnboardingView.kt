@@ -47,11 +47,17 @@ class AccountOnboardingView private constructor(
     )
 
     init {
-        context.withStyledAttributes(attrs, R.styleable.AccountOnboardingView, defStyleAttr, 0) {
+        context.withStyledAttributes(attrs, R.styleable.StripeAccountOnboardingView, defStyleAttr, 0) {
             val props = AccountOnboardingProps(
-                fullTermsOfServiceUrl = getString(R.styleable.AccountOnboardingView_fullTermsOfServiceUrl),
-                recipientTermsOfServiceUrl = getString(R.styleable.AccountOnboardingView_recipientTermsOfServiceUrl),
-                privacyPolicyUrl = getString(R.styleable.AccountOnboardingView_privacyPolicyUrl),
+                fullTermsOfServiceUrl = getString(
+                    R.styleable.StripeAccountOnboardingView_stripeFullTermsOfServiceUrl
+                ),
+                recipientTermsOfServiceUrl = getString(
+                    R.styleable.StripeAccountOnboardingView_stripeRecipientTermsOfServiceUrl
+                ),
+                privacyPolicyUrl = getString(
+                    R.styleable.StripeAccountOnboardingView_stripePrivacyPolicyUrl
+                ),
             )
             webViewContainerBehavior.updateProps(
                 props = props.toJs().toJsonObject(),

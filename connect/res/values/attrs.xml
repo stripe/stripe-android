@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <declare-styleable name="AccountOnboardingView">
-        <attr name="fullTermsOfServiceUrl" format="string" />
-        <attr name="recipientTermsOfServiceUrl" format="string" />
-        <attr name="privacyPolicyUrl" format="string" />
+    <declare-styleable name="StripeAccountOnboardingView">
+        <attr name="stripeFullTermsOfServiceUrl" format="string" />
+        <attr name="stripeRecipientTermsOfServiceUrl" format="string" />
+        <attr name="stripePrivacyPolicyUrl" format="string" />
     </declare-styleable>
 </resources>
