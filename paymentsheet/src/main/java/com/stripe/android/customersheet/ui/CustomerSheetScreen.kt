@@ -149,6 +149,7 @@ internal fun SelectPaymentMethod(
             nameProvider = paymentMethodNameProvider,
             canRemovePaymentMethods = viewState.canRemovePaymentMethods,
             isCbcEligible = viewState.isCbcEligible,
+            defaultPaymentMethodId = null
         )
 
         SavedPaymentMethodTabLayoutUI(

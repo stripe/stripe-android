@@ -10,10 +10,12 @@ import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 internal fun PaymentMethod.toDisplayableSavedPaymentMethod(
     providePaymentMethodName: (PaymentMethodCode?) -> ResolvableString,
     paymentMethodMetadata: PaymentMethodMetadata?,
+    defaultPaymentMethodId: String?
 ): DisplayableSavedPaymentMethod {
     return DisplayableSavedPaymentMethod.create(
         displayName = providePaymentMethodName(type?.code),
         paymentMethod = this,
         isCbcEligible = paymentMethodMetadata?.cbcEligibility is CardBrandChoiceEligibility.Eligible,
+        isDefaultPaymentMethod = this.id != null && this.id == defaultPaymentMethodId
     )
 }

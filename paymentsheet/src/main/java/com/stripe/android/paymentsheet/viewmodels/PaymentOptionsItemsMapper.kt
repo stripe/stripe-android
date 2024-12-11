@@ -31,6 +31,7 @@ internal class PaymentOptionsItemsMapper(
                 isLinkEnabled = isLinkEnabled,
                 isGooglePayReady = isGooglePayReady,
                 canRemovePaymentMethods = canRemove,
+                defaultPaymentMethodId = customerState?.defaultPaymentMethodId
             ) ?: emptyList()
         }
     }
@@ -41,6 +42,7 @@ internal class PaymentOptionsItemsMapper(
         isLinkEnabled: Boolean?,
         isGooglePayReady: Boolean,
         canRemovePaymentMethods: Boolean,
+        defaultPaymentMethodId: String?
     ): List<PaymentOptionsItem>? {
         if (isLinkEnabled == null) return null
 
@@ -51,6 +53,7 @@ internal class PaymentOptionsItemsMapper(
             nameProvider = nameProvider,
             isCbcEligible = isCbcEligible(),
             canRemovePaymentMethods = canRemovePaymentMethods,
+            defaultPaymentMethodId = defaultPaymentMethodId
         )
     }
 }
