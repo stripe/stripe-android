@@ -11,6 +11,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RestrictTo
+import androidx.annotation.VisibleForTesting
 import androidx.core.content.ContextCompat.checkSelfPermission
 import com.stripe.android.connect.appearance.Appearance
 import com.stripe.android.connect.appearance.fonts.CustomFontSource
@@ -138,6 +139,13 @@ class EmbeddedComponentManager(
     }
 
 
+    /**
+     * Requests camera permissions for the EmbeddedComponents. Returns true if the user grants permission, false if the
+     * user denies permission, and null if the request cannot be completed.
+     *
+     * This function may result in a permissions pop-up being shown to the user (although this may not always
+     * happen, such as when the permission has already granted).
+     */
     internal suspend fun requestCameraPermission(context: Context): Boolean? {
         if (checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
             logger.debug("($loggerTag) Skipping permission request - CAMERA permission already granted")
@@ -152,11 +160,15 @@ class EmbeddedComponentManager(
                 error("You must create an AccountOnboardingView from an Activity")
             }
         }
-        launcherMap[activity]?.launch(Manifest.permission.CAMERA)
-            ?: logger.warning(
+        val launcher = launcherMap[activity]
+        if (launcher == null) {
+            logger.warning(
                 "($loggerTag) Error launching camera permission request. " +
                     "Did you call EmbeddedComponentManager.onActivityCreate in your Activity.onCreate function?"
             )
+            return null
+        }
+        launcher.launch(Manifest.permission.CAMERA)
 
         return permissionsFlow.first()
     }
@@ -171,8 +183,9 @@ class EmbeddedComponentManager(
     ) : Parcelable
 
     companion object {
+        @VisibleForTesting
+        internal val permissionsFlow: MutableSharedFlow<Boolean> = MutableSharedFlow(extraBufferCapacity = 1)
         private val launcherMap = mutableMapOf<Activity, ActivityResultLauncher<String>>()
-        private val permissionsFlow: MutableSharedFlow<Boolean> = MutableSharedFlow()
 
         /**
          * Hooks the [EmbeddedComponentManager] into this activity's lifecycle.
@@ -207,14 +220,10 @@ class EmbeddedComponentManager(
                 override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) { /* no-op */ }
             })
 
-            activity.registerForActivityResult(
+            launcherMap[activity] = activity.registerForActivityResult(
                 ActivityResultContracts.RequestPermission()
             ) { isGranted ->
-                MainScope().launch {
-                    permissionsFlow.emit(isGranted)
-                }
-            }.also {
-                launcherMap[activity] = it
+                permissionsFlow.tryEmit(isGranted)
             }
         }
     }

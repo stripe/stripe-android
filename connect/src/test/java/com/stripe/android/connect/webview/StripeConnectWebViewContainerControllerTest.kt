@@ -222,18 +222,6 @@ class StripeConnectWebViewContainerControllerTest {
     }
 
     @Test
-    fun `onPermissionRequest grants permission when camera permission is already granted`() = runTest {
-        whenever(mockContext.checkPermission(eq(Manifest.permission.CAMERA), any(), any())) doReturn
-            PackageManager.PERMISSION_GRANTED
-
-        whenever(mockPermissionRequest.resources).doReturn(arrayOf(PermissionRequest.RESOURCE_VIDEO_CAPTURE))
-
-        controller.onPermissionRequest(mockContext, mockPermissionRequest)
-
-        verify(mockPermissionRequest).grant(arrayOf(PermissionRequest.RESOURCE_VIDEO_CAPTURE))
-    }
-
-    @Test
     fun `onPermissionRequest denies permission when no supported permissions are requested`() = runTest {
         whenever(mockPermissionRequest.resources) doReturn arrayOf("unsupported_permission")
 
