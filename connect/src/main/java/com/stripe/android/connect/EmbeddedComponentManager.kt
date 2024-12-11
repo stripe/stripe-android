@@ -1,19 +1,23 @@
 package com.stripe.android.connect
 
+import android.Manifest
 import android.app.Activity
 import android.app.Application.ActivityLifecycleCallbacks
 import android.content.Context
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RestrictTo
+import androidx.core.content.ContextCompat.checkSelfPermission
 import com.stripe.android.connect.appearance.Appearance
 import com.stripe.android.connect.appearance.fonts.CustomFontSource
 import com.stripe.android.connect.util.findActivity
 import com.stripe.android.connect.webview.serialization.ConnectInstanceJs
 import com.stripe.android.connect.webview.serialization.toJs
+import com.stripe.android.core.Logger
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -32,13 +36,33 @@ class EmbeddedComponentManager(
     private val fetchClientSecretCallback: FetchClientSecretCallback,
     appearance: Appearance = Appearance(),
     private val customFonts: List<CustomFontSource> = emptyList(),
+    private val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG),
+    private val isDebugBuild: Boolean = BuildConfig.DEBUG,
 ) {
     private val _appearanceFlow = MutableStateFlow(appearance)
     internal val appearanceFlow: StateFlow<Appearance> get() = _appearanceFlow.asStateFlow()
+    private val loggerTag = javaClass.simpleName
 
     internal suspend fun requestCameraPermission(context: Context): Boolean? {
-        val activity = context.findActivity() ?: error("You must create an AccountOnboardingView from an Activity")
-        launcherMap[activity]?.launch(android.Manifest.permission.CAMERA) ?: return null
+        if (checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+            logger.debug("($loggerTag) Skipping permission request - CAMERA permission already granted")
+            return true
+        }
+
+        val activity = context.findActivity()
+        if (activity == null) {
+            logger.warning("($loggerTag) You must create the EmbeddedComponent view from an Activity")
+            if (isDebugBuild) {
+                // crash if in debug mode so that developers are more likely to catch this error.
+                error("You must create an AccountOnboardingView from an Activity")
+            }
+        }
+        launcherMap[activity]?.launch(Manifest.permission.CAMERA)
+            ?: logger.warning(
+                "($loggerTag) Error launching camera permission request. " +
+                "Did you call EmbeddedComponentManager.onActivityCreate in your Activity.onCreate function?"
+            )
+
         return permissionsFlow.first()
     }
 

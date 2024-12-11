@@ -167,22 +167,15 @@ internal class StripeConnectWebViewContainerController<Listener : StripeEmbedded
             return
         }
 
-        if (checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
-            // all calls to PermissionRequest must be on the main thread
-            withContext(Dispatchers.Main) {
-                logger.debug("($loggerTag) Granting permission - permission already granted")
+        // all calls to PermissionRequest must be on the main thread
+        val isGranted = embeddedComponentManager.requestCameraPermission(context) ?: return
+        withContext(Dispatchers.Main) {
+            if (isGranted) {
+                logger.debug("($loggerTag) Granting permission - user accepted permission")
                 request.grant(permissionsRequested)
-            }
-        } else {
-            val isGranted = embeddedComponentManager.requestCameraPermission(context) ?: return
-            withContext(Dispatchers.Main) {
-                if (isGranted) {
-                    logger.debug("($loggerTag) Granting permission - user accepted permission")
-                    request.grant(permissionsRequested)
-                } else {
-                    logger.debug("($loggerTag) Denying permission - user denied permission")
-                    request.deny()
-                }
+            } else {
+                logger.debug("($loggerTag) Denying permission - user denied permission")
+                request.deny()
             }
         }
     }
