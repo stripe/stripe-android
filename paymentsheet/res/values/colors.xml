@@ -50,4 +50,7 @@
     <color name="stripe_paymentsheet_googlepay_primary_button_tint_color">#FFFFFF</color>
     <!-- CardFormView -->
 
+    <!-- Link -->
+    <color name="stripe_link_window_background">#FFFFFF</color>
+
 </resources>
