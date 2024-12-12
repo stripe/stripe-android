@@ -73,7 +73,8 @@ class AccountOnboardingProps(
     val fullTermsOfServiceUrl: String? = null,
 
     /**
-     * URL to your [recipient terms of service](https://docs.stripe.com/connect/service-agreement-types#recipient) agreement.
+     * URL to your
+     * [recipient terms of service](https://docs.stripe.com/connect/service-agreement-types#recipient) agreement.
      */
     val recipientTermsOfServiceUrl: String? = null,
 
