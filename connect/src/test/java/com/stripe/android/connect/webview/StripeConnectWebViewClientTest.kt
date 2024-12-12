@@ -7,6 +7,7 @@ import android.webkit.WebView
 import com.stripe.android.connect.ComponentListenerDelegate
 import com.stripe.android.connect.EmbeddedComponentManager
 import com.stripe.android.connect.EmbeddedComponentManager.Configuration
+import com.stripe.android.connect.EmptyProps
 import com.stripe.android.connect.PayoutsListener
 import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.StripeEmbeddedComponent
@@ -36,7 +37,7 @@ class StripeConnectWebViewClientTest {
         on { context } doReturn mockContext
     }
 
-    private lateinit var container: StripeConnectWebViewContainerImpl<PayoutsListener>
+    private lateinit var container: StripeConnectWebViewContainerImpl<PayoutsListener, EmptyProps>
     private val webViewClient get() = container.stripeWebViewClient
 
     @Before
@@ -57,8 +58,9 @@ class StripeConnectWebViewClientTest {
             embeddedComponent = StripeEmbeddedComponent.PAYOUTS,
             embeddedComponentManager = embeddedComponentManager,
             listener = null,
+            listenerDelegate = ComponentListenerDelegate.ignore(),
             logger = Logger.getInstance(enableLogging = false),
-            listenerDelegate = ComponentListenerDelegate.ignore()
+            props = EmptyProps,
         )
     }
 

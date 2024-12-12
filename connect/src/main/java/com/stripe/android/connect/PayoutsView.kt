@@ -31,9 +31,9 @@ class PayoutsView private constructor(
         StripeConnectWebViewContainerImpl(
             embeddedComponent = StripeEmbeddedComponent.PAYOUTS,
             embeddedComponentManager = embeddedComponentManager,
-            props = EmptyProps,
             listener = listener,
             listenerDelegate = ComponentListenerDelegate.ignore(),
+            props = EmptyProps,
         )
     )
 

@@ -83,8 +83,8 @@ internal interface StripeConnectWebViewContainerInternal {
 internal class StripeConnectWebViewContainerImpl<Listener, Props>(
     val embeddedComponent: StripeEmbeddedComponent,
     embeddedComponentManager: EmbeddedComponentManager?,
-    props: Props?,
     listener: Listener?,
+    props: Props?,
     private val listenerDelegate: ComponentListenerDelegate<Listener>,
     private val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG),
 ) : StripeConnectWebViewContainer<Listener, Props>, StripeConnectWebViewContainerInternal
