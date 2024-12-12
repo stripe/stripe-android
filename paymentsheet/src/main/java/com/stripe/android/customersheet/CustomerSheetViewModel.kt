@@ -19,7 +19,6 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.orEmpty
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
 import com.stripe.android.customersheet.data.CustomerSheetDataResult
@@ -63,8 +62,6 @@ import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor
-import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewInteractor
-import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.PaymentMethodRemovalDelayMillis
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
@@ -104,7 +101,6 @@ internal class CustomerSheetViewModel(
     @Named(IS_LIVE_MODE) private val isLiveModeProvider: () -> Boolean,
     confirmationHandlerFactory: ConfirmationHandler.Factory,
     private val customerSheetLoader: CustomerSheetLoader,
-    private val editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory,
     private val errorReporter: ErrorReporter,
 ) : ViewModel() {
 
@@ -121,7 +117,6 @@ internal class CustomerSheetViewModel(
         @Named(IS_LIVE_MODE) isLiveModeProvider: () -> Boolean,
         confirmationHandlerFactory: ConfirmationHandler.Factory,
         customerSheetLoader: CustomerSheetLoader,
-        editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory,
         errorReporter: ErrorReporter,
     ) : this(
         application = application,
@@ -139,7 +134,6 @@ internal class CustomerSheetViewModel(
         isLiveModeProvider = isLiveModeProvider,
         confirmationHandlerFactory = confirmationHandlerFactory,
         customerSheetLoader = customerSheetLoader,
-        editInteractorFactory = editInteractorFactory,
         errorReporter = errorReporter,
     )
 
@@ -562,68 +556,35 @@ internal class CustomerSheetViewModel(
         }
     }
 
-    @Suppress("LongMethod") // Suppressing because this is only due to a temporary feature flag.
     private fun onModifyItem(paymentMethod: DisplayableSavedPaymentMethod) {
         val customerState = customerState.value
 
-        if (FeatureFlags.useNewUpdateCardScreen.isEnabled) {
-            transition(
-                to = CustomerSheetViewState.UpdatePaymentMethod(
-                    updatePaymentMethodInteractor = DefaultUpdatePaymentMethodInteractor(
-                        isLiveMode = isLiveModeProvider(),
-                        canRemove = customerState.canRemove,
-                        displayableSavedPaymentMethod = paymentMethod,
-                        cardBrandFilter = PaymentSheetCardBrandFilter(customerState.configuration.cardBrandAcceptance),
-                        removeExecutor = ::removeExecutor,
-                        onBrandChoiceOptionsShown = {
-                            eventReporter.onShowPaymentOptionBrands(
-                                source = CustomerSheetEventReporter.CardBrandChoiceEventSource.Edit,
-                                selectedBrand = it
-                            )
-                        },
-                        onBrandChoiceOptionsDismissed = {
-                            eventReporter.onHidePaymentOptionBrands(
-                                source = CustomerSheetEventReporter.CardBrandChoiceEventSource.Edit,
-                                selectedBrand = it
-                            )
-                        },
-                        updateExecutor = ::updateExecutor,
-                    ),
+        transition(
+            to = CustomerSheetViewState.UpdatePaymentMethod(
+                updatePaymentMethodInteractor = DefaultUpdatePaymentMethodInteractor(
                     isLiveMode = isLiveModeProvider(),
-                )
+                    canRemove = customerState.canRemove,
+                    displayableSavedPaymentMethod = paymentMethod,
+                    cardBrandFilter = PaymentSheetCardBrandFilter(customerState.configuration.cardBrandAcceptance),
+                    removeExecutor = ::removeExecutor,
+                    onBrandChoiceOptionsShown = {
+                        eventReporter.onShowPaymentOptionBrands(
+                            source = CustomerSheetEventReporter.CardBrandChoiceEventSource.Edit,
+                            selectedBrand = it
+                        )
+                    },
+                    onBrandChoiceOptionsDismissed = {
+                        eventReporter.onHidePaymentOptionBrands(
+                            source = CustomerSheetEventReporter.CardBrandChoiceEventSource.Edit,
+                            selectedBrand = it
+                        )
+                    },
+                    updateExecutor = ::updateExecutor,
+                    workContext = workContext,
+                ),
+                isLiveMode = isLiveModeProvider(),
             )
-        } else {
-            transition(
-                to = CustomerSheetViewState.EditPaymentMethod(
-                    editPaymentMethodInteractor = editInteractorFactory.create(
-                        initialPaymentMethod = paymentMethod.paymentMethod,
-                        eventHandler = { event ->
-                            when (event) {
-                                is EditPaymentMethodViewInteractor.Event.ShowBrands -> {
-                                    eventReporter.onShowPaymentOptionBrands(
-                                        source = CustomerSheetEventReporter.CardBrandChoiceEventSource.Edit,
-                                        selectedBrand = event.brand
-                                    )
-                                }
-                                is EditPaymentMethodViewInteractor.Event.HideBrands -> {
-                                    eventReporter.onHidePaymentOptionBrands(
-                                        source = CustomerSheetEventReporter.CardBrandChoiceEventSource.Edit,
-                                        selectedBrand = event.brand
-                                    )
-                                }
-                            }
-                        },
-                        displayName = providePaymentMethodName(paymentMethod.paymentMethod.type?.code),
-                        removeExecutor = ::removeExecutor,
-                        updateExecutor = ::updateExecutor,
-                        canRemove = customerState.canRemove,
-                        isLiveMode = requireNotNull(customerState.metadata).stripeIntent.isLiveMode,
-                        cardBrandFilter = PaymentSheetCardBrandFilter(customerState.configuration.cardBrandAcceptance)
-                    ),
-                    isLiveMode = isLiveModeProvider(),
-                )
-            )
-        }
+        )
     }
 
     private suspend fun removeExecutor(paymentMethod: PaymentMethod): Throwable? {
@@ -1221,7 +1182,6 @@ internal class CustomerSheetViewModel(
                 eventReporter.onScreenPresented(CustomerSheetEventReporter.Screen.AddPaymentMethod)
             is CustomerSheetViewState.SelectPaymentMethod ->
                 eventReporter.onScreenPresented(CustomerSheetEventReporter.Screen.SelectPaymentMethod)
-            is CustomerSheetViewState.EditPaymentMethod,
             is CustomerSheetViewState.UpdatePaymentMethod ->
                 eventReporter.onScreenPresented(CustomerSheetEventReporter.Screen.EditPaymentMethod)
             else -> { }
@@ -1260,7 +1220,6 @@ internal class CustomerSheetViewModel(
         get() = when (this) {
             is CustomerSheetViewState.AddPaymentMethod -> CustomerSheetEventReporter.Screen.AddPaymentMethod
             is CustomerSheetViewState.SelectPaymentMethod -> CustomerSheetEventReporter.Screen.SelectPaymentMethod
-            is CustomerSheetViewState.EditPaymentMethod,
             is CustomerSheetViewState.UpdatePaymentMethod -> CustomerSheetEventReporter.Screen.EditPaymentMethod
             else -> null
         }

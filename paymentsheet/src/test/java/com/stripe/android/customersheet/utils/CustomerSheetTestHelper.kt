@@ -8,8 +8,6 @@ import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
-import com.stripe.android.core.strings.ResolvableString
-import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.customersheet.CustomerPermissions
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetIntegration
@@ -40,11 +38,6 @@ import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.FakeBacsMandateConfirmationLauncher
-import com.stripe.android.paymentsheet.ui.DefaultEditPaymentMethodViewInteractor
-import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewInteractor
-import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
-import com.stripe.android.paymentsheet.ui.PaymentMethodRemoveOperation
-import com.stripe.android.paymentsheet.ui.PaymentMethodUpdateOperation
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.utils.CompletableSingle
@@ -52,7 +45,6 @@ import com.stripe.android.utils.DummyActivityResultCaller
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import com.stripe.android.utils.RecordingLinkPaymentLauncher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.test.StandardTestDispatcher
 import org.mockito.kotlin.mock
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
@@ -101,8 +93,6 @@ internal object CustomerSheetTestHelper {
             cbcEligibility = cbcEligibility,
             permissions = customerPermissions,
         ),
-        editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory =
-            createModifiableEditPaymentMethodViewInteractorFactory(),
         errorReporter: ErrorReporter = FakeErrorReporter(),
     ): CustomerSheetViewModel {
         return CustomerSheetViewModel(
@@ -152,39 +142,9 @@ internal object CustomerSheetTestHelper {
             ),
             eventReporter = eventReporter,
             customerSheetLoader = customerSheetLoader,
-            editInteractorFactory = editInteractorFactory,
             errorReporter = errorReporter,
         ).apply {
             registerFromActivity(DummyActivityResultCaller.noOp(), TestLifecycleOwner())
-        }
-    }
-
-    internal fun createModifiableEditPaymentMethodViewInteractorFactory(
-        workContext: CoroutineContext = StandardTestDispatcher(),
-    ): ModifiableEditPaymentMethodViewInteractor.Factory {
-        return object : ModifiableEditPaymentMethodViewInteractor.Factory {
-            override fun create(
-                initialPaymentMethod: PaymentMethod,
-                eventHandler: (EditPaymentMethodViewInteractor.Event) -> Unit,
-                removeExecutor: PaymentMethodRemoveOperation,
-                updateExecutor: PaymentMethodUpdateOperation,
-                displayName: ResolvableString,
-                canRemove: Boolean,
-                isLiveMode: Boolean,
-                cardBrandFilter: CardBrandFilter
-            ): ModifiableEditPaymentMethodViewInteractor {
-                return DefaultEditPaymentMethodViewInteractor(
-                    initialPaymentMethod = initialPaymentMethod,
-                    displayName = "Card".resolvableString,
-                    removeExecutor = removeExecutor,
-                    updateExecutor = updateExecutor,
-                    eventHandler = eventHandler,
-                    workContext = workContext,
-                    canRemove = canRemove,
-                    isLiveMode = isLiveMode,
-                    cardBrandFilter = cardBrandFilter
-                )
-            }
         }
     }
 }
