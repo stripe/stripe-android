@@ -2,6 +2,7 @@ package com.stripe.android.link.repositories
 
 import com.stripe.android.link.TestFactory
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
@@ -15,6 +16,7 @@ open class FakeLinkRepository : LinkRepository {
     var startVerificationResult = Result.success(TestFactory.CONSUMER_SESSION)
     var confirmVerificationResult = Result.success(TestFactory.CONSUMER_SESSION)
     var listPaymentDetailsResult = Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS)
+    var updatePaymentDetailsResult = Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS)
     var deletePaymentDetailsResult = Result.success(Unit)
 
     override suspend fun lookupConsumer(email: String) = lookupConsumerResult
@@ -70,4 +72,10 @@ open class FakeLinkRepository : LinkRepository {
         consumerSessionClientSecret: String,
         consumerPublishableKey: String?
     ): Result<Unit> = deletePaymentDetailsResult
+
+    override suspend fun updatePaymentDetails(
+        updateParams: ConsumerPaymentDetailsUpdateParams,
+        consumerSessionClientSecret: String,
+        consumerPublishableKey: String?
+    ): Result<ConsumerPaymentDetails> = updatePaymentDetailsResult
 }
