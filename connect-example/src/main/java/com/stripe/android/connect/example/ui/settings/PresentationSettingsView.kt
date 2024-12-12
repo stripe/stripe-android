@@ -87,7 +87,7 @@ private fun PresentationSettingsView(
             ) {
                 Text(
                     modifier = Modifier.weight(1f),
-                    text = "Use XML Views"
+                    text = stringResource(R.string.use_xml_views)
                 )
                 Switch(
                     checked = useXmlViews,

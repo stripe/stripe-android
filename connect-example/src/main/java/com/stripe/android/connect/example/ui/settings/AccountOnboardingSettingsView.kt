@@ -88,21 +88,21 @@ private fun AccountOnboardingSettingsView(
         ) {
             Spacer(Modifier.requiredHeight(16.dp))
             SettingsTextField(
-                label = "Full terms of service",
+                label = stringResource(R.string.full_terms_of_service),
                 placeholder = stringResource(R.string.server_url_placeholder),
                 value = fullTermsOfService,
                 onValueChange = { fullTermsOfService = it },
             )
             Spacer(Modifier.requiredHeight(8.dp))
             SettingsTextField(
-                label = "Recipient terms of service",
+                label = stringResource(R.string.recipient_terms_of_service),
                 placeholder = stringResource(R.string.server_url_placeholder),
                 value = recipientTermsOfService,
                 onValueChange = { recipientTermsOfService = it },
             )
             Spacer(Modifier.requiredHeight(8.dp))
             SettingsTextField(
-                label = "Privacy policy",
+                label = stringResource(R.string.privacy_policy),
                 placeholder = stringResource(R.string.server_url_placeholder),
                 value = privacyPolicy,
                 onValueChange = { privacyPolicy = it },
