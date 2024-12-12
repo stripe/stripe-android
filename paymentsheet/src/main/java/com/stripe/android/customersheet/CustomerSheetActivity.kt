@@ -95,11 +95,7 @@ internal class CustomerSheetActivity : AppCompatActivity() {
                     state = bottomSheetState,
                     onDismissed = { viewModel.handleViewAction(OnDismissed) },
                 ) {
-                    CustomerSheetScreen(
-                        viewState = viewState,
-                        viewActionHandler = viewModel::handleViewAction,
-                        paymentMethodNameProvider = viewModel::providePaymentMethodName,
-                    )
+                    CustomerSheetScreen(viewModel)
                 }
             }
         }
