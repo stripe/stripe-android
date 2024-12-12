@@ -1085,7 +1085,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             reportPaymentMethodTypeSelected = reportPaymentMethodTypeSelected,
             reportFormShown = reportFormShown,
             isLiveMode = true,
-            shouldShowDefaultBadge = null
+            shouldShowDefaultBadge = false
         )
 
         TestParams(
