@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet
 
 import android.content.Context
 import com.stripe.android.core.strings.ResolvableString
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.verticalmode.toDisplayableSavedPaymentMethod
 import com.stripe.android.testing.PaymentMethodFactory
@@ -19,7 +18,7 @@ class SavedPaymentMethodsExtensionTest {
         val resolvableStringValue = "abcde123"
         val resolvableString = mock<ResolvableString>()
         `when`(resolvableString.resolve(context)).thenReturn(resolvableStringValue)
-        val providePaymentMethodName: (PaymentMethodCode?) -> ResolvableString = {pmc ->
+        val providePaymentMethodName: (PaymentMethodCode?) -> ResolvableString = { pmc ->
             resolvableString
         }
 
@@ -42,12 +41,12 @@ class SavedPaymentMethodsExtensionTest {
     }
 
     @Test
-    fun `DisplayableSavedPaymentMethod is created correctly when defaultPaymentMethodId not equal to paymentMethod id`() {
+    fun `DisplayableSavedPaymentMethod created correctly when defaultPaymentMethodId != paymentMethod id`() {
         val context = mock<Context>()
         val resolvableStringValue = "abcde123"
         val resolvableString = mock<ResolvableString>()
         `when`(resolvableString.resolve(context)).thenReturn(resolvableStringValue)
-        val providePaymentMethodName: (PaymentMethodCode?) -> ResolvableString = {pmc ->
+        val providePaymentMethodName: (PaymentMethodCode?) -> ResolvableString = { pmc ->
             resolvableString
         }
 
@@ -77,7 +76,7 @@ class SavedPaymentMethodsExtensionTest {
         val resolvableStringValue = "abcde123"
         val resolvableString = mock<ResolvableString>()
         `when`(resolvableString.resolve(context)).thenReturn(resolvableStringValue)
-        val providePaymentMethodName: (PaymentMethodCode?) -> ResolvableString = {pmc ->
+        val providePaymentMethodName: (PaymentMethodCode?) -> ResolvableString = { pmc ->
             resolvableString
         }
 

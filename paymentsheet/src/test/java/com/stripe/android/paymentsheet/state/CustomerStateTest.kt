@@ -119,7 +119,6 @@ class CustomerStateTest {
         )
     }
 
-
     @Test
     fun `Should create 'CustomerState' for customer session properly with nonnull defaultPaymentMethodId`() {
         val paymentMethods = PaymentMethodFactory.cards(3)

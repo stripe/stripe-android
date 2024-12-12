@@ -181,7 +181,7 @@ class PaymentOptionsStateFactoryTest {
         val selectedPaymentMethod = paymentMethods.random()
         val defaultPaymentMethodId = selectedPaymentMethod.id
 
-        assert(defaultPaymentMethodId!=null)
+        assert(defaultPaymentMethodId != null)
 
         val state = PaymentOptionsStateFactory.create(
             paymentMethods = paymentMethods,
@@ -214,7 +214,7 @@ class PaymentOptionsStateFactoryTest {
         val defaultPaymentMethod = paymentMethods[1]
         val defaultPaymentMethodId = defaultPaymentMethod.id
 
-        assert(defaultPaymentMethodId!=null)
+        assert(defaultPaymentMethodId != null)
 
         val state = PaymentOptionsStateFactory.create(
             paymentMethods = paymentMethods,
