@@ -171,6 +171,7 @@ class EmbeddedComponentManager(
 
     @PrivateBetaConnectSDK
     @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Configuration(
         val publishableKey: String,
     ) : Parcelable

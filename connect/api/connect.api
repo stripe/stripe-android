@@ -15,10 +15,6 @@ public final class com/stripe/android/connect/BuildConfig {
 	public fun <init> ()V
 }
 
-public final class com/stripe/android/connect/EmbeddedComponentManager$Companion {
-	public final fun onActivityCreate (Landroidx/activity/ComponentActivity;)V
-}
-
 public final class com/stripe/android/connect/EmbeddedComponentManager$Configuration$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/connect/EmbeddedComponentManager$Configuration;
