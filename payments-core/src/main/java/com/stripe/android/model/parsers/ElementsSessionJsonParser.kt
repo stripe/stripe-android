@@ -273,9 +273,11 @@ internal class ElementsSessionJsonParser(
             val customerSheetFeatures = json.optJSONObject(FIELD_FEATURES) ?: return null
 
             val paymentMethodRemoveFeature = customerSheetFeatures.optString(FIELD_PAYMENT_METHOD_REMOVE)
+            val paymentMethodRemoveLastFeature = customerSheetFeatures.optString(FIELD_PAYMENT_METHOD_REMOVE_LAST)
 
             ElementsSession.Customer.Components.CustomerSheet.Enabled(
                 isPaymentMethodRemoveEnabled = paymentMethodRemoveFeature == VALUE_ENABLED,
+                canRemoveLastPaymentMethod = paymentMethodRemoveLastFeature == VALUE_ENABLED,
             )
         } else {
             ElementsSession.Customer.Components.CustomerSheet.Disabled

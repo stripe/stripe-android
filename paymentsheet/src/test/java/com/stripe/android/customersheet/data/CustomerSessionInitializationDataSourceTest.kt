@@ -1,6 +1,9 @@
 package com.stripe.android.customersheet.data
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
+import com.stripe.android.customersheet.CustomerSheet
+import com.stripe.android.customersheet.CustomerSheetFixtures
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.ElementsSession
@@ -24,7 +27,8 @@ class CustomerSessionInitializationDataSourceTest {
                 paymentMethods = paymentMethods,
                 customerSheetComponent = ElementsSession.Customer.Components.CustomerSheet.Enabled(
                     isPaymentMethodRemoveEnabled = true,
-                )
+                    canRemoveLastPaymentMethod = true,
+                ),
             ),
             savedSelectionDataSource = FakeCustomerSheetSavedSelectionDataSource(
                 savedSelection = CustomerSheetDataResult.success(
@@ -33,7 +37,7 @@ class CustomerSessionInitializationDataSourceTest {
             )
         )
 
-        val result = dataSource.loadCustomerSheetSession()
+        val result = dataSource.loadCustomerSheetSession(createConfiguration())
 
         assertThat(result).isInstanceOf<CustomerSheetDataResult.Success<CustomerSheetSession>>()
 
@@ -48,6 +52,7 @@ class CustomerSessionInitializationDataSourceTest {
             )
         )
         assertThat(customerSheetSession.permissions.canRemovePaymentMethods).isTrue()
+        assertThat(customerSheetSession.permissions.canRemoveLastPaymentMethod).isTrue()
     }
 
     @Test
@@ -56,17 +61,19 @@ class CustomerSessionInitializationDataSourceTest {
             elementsSessionManager = FakeCustomerSessionElementsSessionManager(
                 customerSheetComponent = ElementsSession.Customer.Components.CustomerSheet.Enabled(
                     isPaymentMethodRemoveEnabled = false,
+                    canRemoveLastPaymentMethod = false,
                 ),
             ),
         )
 
-        val result = dataSource.loadCustomerSheetSession()
+        val result = dataSource.loadCustomerSheetSession(createConfiguration())
 
         assertThat(result).isInstanceOf<CustomerSheetDataResult.Success<CustomerSheetSession>>()
 
         val customerSheetSession = result.asSuccess().value
 
         assertThat(customerSheetSession.permissions.canRemovePaymentMethods).isFalse()
+        assertThat(customerSheetSession.permissions.canRemoveLastPaymentMethod).isFalse()
     }
 
     @Test
@@ -77,7 +84,7 @@ class CustomerSessionInitializationDataSourceTest {
             ),
         )
 
-        val result = dataSource.loadCustomerSheetSession()
+        val result = dataSource.loadCustomerSheetSession(createConfiguration())
 
         assertThat(result).isInstanceOf<CustomerSheetDataResult.Success<CustomerSheetSession>>()
 
@@ -95,7 +102,7 @@ class CustomerSessionInitializationDataSourceTest {
             ),
         )
 
-        val result = dataSource.loadCustomerSheetSession()
+        val result = dataSource.loadCustomerSheetSession(createConfiguration())
 
         assertThat(result).isInstanceOf<CustomerSheetDataResult.Failure<CustomerSheetSession>>()
 
@@ -116,13 +123,108 @@ class CustomerSessionInitializationDataSourceTest {
             )
         )
 
-        val result = dataSource.loadCustomerSheetSession()
+        val result = dataSource.loadCustomerSheetSession(createConfiguration())
 
         assertThat(result).isInstanceOf<CustomerSheetDataResult.Failure<CustomerSheetSession>>()
 
         val returnedCause = result.asFailure().cause
 
         assertThat(returnedCause).isEqualTo(exception)
+    }
+
+    @Test
+    fun `When config value is false & server value is false, remove last PM permissions should be false`() =
+        runRemoveLastPaymentMethodPermissionsTest(
+            allowsRemovalOfLastSavedPaymentMethod = false,
+            canRemoveLastPaymentMethod = false,
+            customerSheetComponentIsDisabled = false,
+            expected = false,
+        )
+
+    @Test
+    fun `When config value is false & server component is disabled, remove last PM permissions should be false`() =
+        runRemoveLastPaymentMethodPermissionsTest(
+            allowsRemovalOfLastSavedPaymentMethod = false,
+            canRemoveLastPaymentMethod = false,
+            customerSheetComponentIsDisabled = true,
+            expected = false,
+        )
+
+    @Test
+    fun `When config value is false & server value is true, remove last PM permissions should be false`() =
+        runRemoveLastPaymentMethodPermissionsTest(
+            allowsRemovalOfLastSavedPaymentMethod = false,
+            canRemoveLastPaymentMethod = true,
+            customerSheetComponentIsDisabled = false,
+            expected = false,
+        )
+
+    @Test
+    fun `When config value is true & server value is false, remove last PM permissions should be false`() =
+        runRemoveLastPaymentMethodPermissionsTest(
+            allowsRemovalOfLastSavedPaymentMethod = true,
+            canRemoveLastPaymentMethod = false,
+            customerSheetComponentIsDisabled = false,
+            expected = false,
+        )
+
+    @Test
+    fun `When config value is true & server component is disabled, remove last PM permissions should be false`() =
+        runRemoveLastPaymentMethodPermissionsTest(
+            allowsRemovalOfLastSavedPaymentMethod = true,
+            canRemoveLastPaymentMethod = false,
+            customerSheetComponentIsDisabled = true,
+            expected = false,
+        )
+
+    @Test
+    fun `When config value is true & server value is true, remove last PM permissions should be true`() =
+        runRemoveLastPaymentMethodPermissionsTest(
+            allowsRemovalOfLastSavedPaymentMethod = true,
+            canRemoveLastPaymentMethod = true,
+            customerSheetComponentIsDisabled = false,
+            expected = true,
+        )
+
+    private fun runRemoveLastPaymentMethodPermissionsTest(
+        allowsRemovalOfLastSavedPaymentMethod: Boolean,
+        customerSheetComponentIsDisabled: Boolean,
+        canRemoveLastPaymentMethod: Boolean,
+        expected: Boolean,
+    ) = runTest {
+        val dataSource = createInitializationDataSource(
+            elementsSessionManager = FakeCustomerSessionElementsSessionManager(
+                customerSheetComponent = if (customerSheetComponentIsDisabled) {
+                    ElementsSession.Customer.Components.CustomerSheet.Disabled
+                } else {
+                    ElementsSession.Customer.Components.CustomerSheet.Enabled(
+                        isPaymentMethodRemoveEnabled = true,
+                        canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
+                    )
+                },
+            ),
+        )
+
+        val result = dataSource.loadCustomerSheetSession(
+            configuration = createConfiguration(
+                allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod,
+            )
+        )
+
+        assertThat(result).isInstanceOf<CustomerSheetDataResult.Success<*>>()
+
+        val customerSheetSession = result.asSuccess().value
+
+        assertThat(customerSheetSession.permissions.canRemoveLastPaymentMethod).isEqualTo(expected)
+    }
+
+    @OptIn(ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi::class)
+    private fun createConfiguration(
+        allowsRemovalOfLastSavedPaymentMethod: Boolean = true,
+    ): CustomerSheet.Configuration {
+        return CustomerSheetFixtures.CONFIG_WITH_EVERYTHING.newBuilder()
+            .allowsRemovalOfLastSavedPaymentMethod(allowsRemovalOfLastSavedPaymentMethod)
+            .build()
     }
 
     private suspend fun createInitializationDataSource(
