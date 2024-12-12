@@ -11,7 +11,7 @@ internal data class DisplayableSavedPaymentMethod private constructor(
     val paymentMethod: PaymentMethod,
     val savedPaymentMethod: SavedPaymentMethod,
     val isCbcEligible: Boolean = false,
-    val isDefaultPaymentMethod: Boolean = false
+    val shouldShowDefaultBadge: Boolean = false
 ) {
     fun isModifiable(): Boolean {
         return when (savedPaymentMethod) {
@@ -77,7 +77,7 @@ internal data class DisplayableSavedPaymentMethod private constructor(
             displayName: ResolvableString,
             paymentMethod: PaymentMethod,
             isCbcEligible: Boolean = false,
-            isDefaultPaymentMethod: Boolean = false
+            shouldShowDefaultBadge: Boolean = false
         ): DisplayableSavedPaymentMethod {
             val savedPaymentMethod = when (paymentMethod.type) {
                 PaymentMethod.Type.Card -> paymentMethod.card?.let { SavedPaymentMethod.Card(it) }
@@ -95,7 +95,7 @@ internal data class DisplayableSavedPaymentMethod private constructor(
                 paymentMethod = paymentMethod,
                 savedPaymentMethod = savedPaymentMethod ?: SavedPaymentMethod.Unexpected,
                 isCbcEligible = isCbcEligible,
-                isDefaultPaymentMethod = isDefaultPaymentMethod
+                shouldShowDefaultBadge = shouldShowDefaultBadge
             )
         }
     }
