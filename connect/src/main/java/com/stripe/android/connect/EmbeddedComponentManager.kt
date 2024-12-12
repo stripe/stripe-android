@@ -35,11 +35,12 @@ class EmbeddedComponentManager(
     private val fetchClientSecretCallback: FetchClientSecretCallback,
     appearance: Appearance = Appearance(),
     private val customFonts: List<CustomFontSource> = emptyList(),
-    private val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG),
-    private val isDebugBuild: Boolean = BuildConfig.DEBUG,
 ) {
     private val _appearanceFlow = MutableStateFlow(appearance)
     internal val appearanceFlow: StateFlow<Appearance> get() = _appearanceFlow.asStateFlow()
+
+    private val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG)
+    private val isDebugBuild: Boolean = BuildConfig.DEBUG
     private val loggerTag = javaClass.simpleName
 
     // Public functions
