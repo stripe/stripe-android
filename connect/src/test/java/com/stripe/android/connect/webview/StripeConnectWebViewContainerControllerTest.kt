@@ -173,7 +173,7 @@ class StripeConnectWebViewContainerControllerTest {
             requestUrl = "https://stripe.com",
             httpStatusCode = 404,
             errorMessage = "Not Found",
-            isForMainFrame = true
+            isMainPageLoad = true
         )
 
         verify(listener).onLoadError(any())
@@ -185,7 +185,7 @@ class StripeConnectWebViewContainerControllerTest {
             requestUrl = "https://stripe.com",
             httpStatusCode = 404,
             errorMessage = "Not Found",
-            isForMainFrame = false
+            isMainPageLoad = false
         )
 
         verify(listener, never()).onLoadError(any())

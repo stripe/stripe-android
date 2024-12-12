@@ -64,7 +64,7 @@ internal class StripeConnectWebViewContainerController<Listener : StripeEmbedded
         requestUrl: String,
         httpStatusCode: Int? = null,
         errorMessage: String? = null,
-        isForMainFrame: Boolean, // whether this request is for the main page load
+        isMainPageLoad: Boolean,
     ) {
         val errorString = buildString {
             if (httpStatusCode != null) {
@@ -79,7 +79,7 @@ internal class StripeConnectWebViewContainerController<Listener : StripeEmbedded
         logger.debug("($loggerTag) $errorString")
 
         // don't send errors for requests that aren't for the main page load
-        if (isForMainFrame) {
+        if (isMainPageLoad) {
             listener?.onLoadError(RuntimeException(errorString)) // TODO - wrap error better
         }
     }

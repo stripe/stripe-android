@@ -205,7 +205,7 @@ internal class StripeConnectWebViewContainerImpl<Listener : StripeEmbeddedCompon
                 requestUrl = request.url.toString(),
                 httpStatusCode = errorResponse.statusCode,
                 errorMessage = errorResponse.reasonPhrase,
-                isForMainFrame = request.isForMainFrame
+                isMainPageLoad = request.isForMainFrame
             )
         }
 
@@ -220,7 +220,7 @@ internal class StripeConnectWebViewContainerImpl<Listener : StripeEmbeddedCompon
             controller?.onReceivedError(
                 requestUrl = request.url.toString(),
                 errorMessage = errorMessage,
-                isForMainFrame = request.isForMainFrame
+                isMainPageLoad = request.isForMainFrame
             )
         }
 
