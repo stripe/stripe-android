@@ -191,9 +191,26 @@ class StripeConnectWebViewContainerControllerTest {
 
     @Test
     fun `onReceivedError should forward to listener`() = runTest {
-        controller.onReceivedError("https://stripe.com", 404, "Not Found")
+        controller.onReceivedError(
+            requestUrl = "https://stripe.com",
+            httpStatusCode = 404,
+            errorMessage = "Not Found",
+            isMainPageLoad = true
+        )
 
         verify(listener).onLoadError(any())
+    }
+
+    @Test
+    fun `onReceivedError should not forward errors outside of main page load to listener`() = runTest {
+        controller.onReceivedError(
+            requestUrl = "https://stripe.com",
+            httpStatusCode = 404,
+            errorMessage = "Not Found",
+            isMainPageLoad = false
+        )
+
+        verify(listener, never()).onLoadError(any())
     }
 
     @Test

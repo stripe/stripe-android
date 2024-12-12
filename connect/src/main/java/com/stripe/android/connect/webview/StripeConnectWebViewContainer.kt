@@ -202,7 +202,12 @@ internal class StripeConnectWebViewContainerImpl<Listener : StripeEmbeddedCompon
             request: WebResourceRequest,
             errorResponse: WebResourceResponse
         ) {
-            controller?.onReceivedError(request.url.toString(), errorResponse.statusCode, errorResponse.reasonPhrase)
+            controller?.onReceivedError(
+                requestUrl = request.url.toString(),
+                httpStatusCode = errorResponse.statusCode,
+                errorMessage = errorResponse.reasonPhrase,
+                isMainPageLoad = request.isForMainFrame
+            )
         }
 
         override fun onReceivedError(view: WebView, request: WebResourceRequest, error: WebResourceError) {
@@ -213,7 +218,11 @@ internal class StripeConnectWebViewContainerImpl<Listener : StripeEmbeddedCompon
             } else {
                 null
             }
-            controller?.onReceivedError(request.url.toString(), errorMessage = errorMessage)
+            controller?.onReceivedError(
+                requestUrl = request.url.toString(),
+                errorMessage = errorMessage,
+                isMainPageLoad = request.isForMainFrame
+            )
         }
 
         override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {

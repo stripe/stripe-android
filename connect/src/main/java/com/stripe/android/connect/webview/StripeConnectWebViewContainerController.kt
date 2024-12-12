@@ -66,7 +66,12 @@ internal class StripeConnectWebViewContainerController<Listener : StripeEmbedded
      * Callback to invoke when the webview received a network error. If the error was an HTTP error,
      * [httpStatusCode] will be non-null.
      */
-    fun onReceivedError(requestUrl: String, httpStatusCode: Int? = null, errorMessage: String? = null) {
+    fun onReceivedError(
+        requestUrl: String,
+        httpStatusCode: Int? = null,
+        errorMessage: String? = null,
+        isMainPageLoad: Boolean,
+    ) {
         val errorString = buildString {
             if (httpStatusCode != null) {
                 append("Received $httpStatusCode loading $requestUrl")
@@ -77,7 +82,12 @@ internal class StripeConnectWebViewContainerController<Listener : StripeEmbedded
                 append(": $errorMessage")
             }
         }
-        listener?.onLoadError(RuntimeException(errorString)) // TODO - wrap error better
+        logger.debug("($loggerTag) $errorString")
+
+        // don't send errors for requests that aren't for the main page load
+        if (isMainPageLoad) {
+            listener?.onLoadError(RuntimeException(errorString)) // TODO - wrap error better
+        }
     }
 
     /**
