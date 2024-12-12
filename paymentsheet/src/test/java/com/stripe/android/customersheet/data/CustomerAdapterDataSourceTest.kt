@@ -1,7 +1,10 @@
 package com.stripe.android.customersheet.data
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.customersheet.CustomerAdapter
+import com.stripe.android.customersheet.CustomerSheet
+import com.stripe.android.customersheet.CustomerSheetFixtures
 import com.stripe.android.customersheet.FakeCustomerAdapter
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
@@ -513,7 +516,7 @@ class CustomerAdapterDataSourceTest {
             errorReporter = errorReporter,
         )
 
-        val result = dataSource.loadCustomerSheetSession()
+        val result = dataSource.loadCustomerSheetSession(createConfiguration())
 
         assertThat(result).isInstanceOf<CustomerSheetDataResult.Success<CustomerSheetSession>>()
 
@@ -545,7 +548,7 @@ class CustomerAdapterDataSourceTest {
             errorReporter = errorReporter,
         )
 
-        val result = dataSource.loadCustomerSheetSession()
+        val result = dataSource.loadCustomerSheetSession(createConfiguration())
 
         assertThat(result).isInstanceOf<CustomerSheetDataResult.Failure<CustomerSheetSession>>()
 
@@ -573,7 +576,7 @@ class CustomerAdapterDataSourceTest {
             errorReporter = errorReporter,
         )
 
-        val result = dataSource.loadCustomerSheetSession()
+        val result = dataSource.loadCustomerSheetSession(createConfiguration())
 
         assertThat(result).isInstanceOf<CustomerSheetDataResult.Failure<CustomerSheetSession>>()
 
@@ -598,7 +601,7 @@ class CustomerAdapterDataSourceTest {
             ),
         )
 
-        val result = dataSource.loadCustomerSheetSession()
+        val result = dataSource.loadCustomerSheetSession(createConfiguration())
 
         assertThat(result).isInstanceOf<CustomerSheetDataResult.Failure<CustomerSheetSession>>()
 
@@ -640,6 +643,40 @@ class CustomerAdapterDataSourceTest {
             expectedPaymentMethodTypes = listOf("card")
         )
 
+    @Test
+    fun `when 'allowsRemovalOfLastSavedPaymentMethod' is true, 'canRemoveLastPaymentMethod should be true`() =
+        runRemoveLastPaymentMethodPermissionsTest(
+            allowsRemovalOfLastSavedPaymentMethod = true,
+        )
+
+    @Test
+    fun `when 'allowsRemovalOfLastSavedPaymentMethod' is false, 'canRemoveLastPaymentMethod should be false`() =
+        runRemoveLastPaymentMethodPermissionsTest(
+            allowsRemovalOfLastSavedPaymentMethod = false,
+        )
+
+    private fun runRemoveLastPaymentMethodPermissionsTest(
+        allowsRemovalOfLastSavedPaymentMethod: Boolean,
+    ) = runTest {
+        val dataSource = createCustomerAdapterDataSource(
+            adapter = FakeCustomerAdapter(),
+            elementsSessionRepository = createElementsSessionRepository()
+        )
+
+        val result = dataSource.loadCustomerSheetSession(
+            configuration = createConfiguration(
+                allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod,
+            )
+        )
+
+        assertThat(result).isInstanceOf<CustomerSheetDataResult.Success<*>>()
+
+        val customerSheetSession = result.asSuccess().value
+
+        assertThat(customerSheetSession.permissions.canRemoveLastPaymentMethod)
+            .isEqualTo(allowsRemovalOfLastSavedPaymentMethod)
+    }
+
     private fun runPaymentMethodTypesTest(
         canCreateSetupIntents: Boolean,
         providedPaymentMethodTypes: List<String>?,
@@ -655,7 +692,7 @@ class CustomerAdapterDataSourceTest {
             elementsSessionRepository = elementsSessionRepository
         )
 
-        dataSource.loadCustomerSheetSession()
+        dataSource.loadCustomerSheetSession(createConfiguration())
 
         val initializationMode = elementsSessionRepository.lastParams?.initializationMode
 
@@ -689,6 +726,15 @@ class CustomerAdapterDataSourceTest {
             linkSettings = null,
             stripeIntent = intent,
         )
+    }
+
+    @OptIn(ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi::class)
+    private fun createConfiguration(
+        allowsRemovalOfLastSavedPaymentMethod: Boolean = true,
+    ): CustomerSheet.Configuration {
+        return CustomerSheetFixtures.CONFIG_WITH_EVERYTHING.newBuilder()
+            .allowsRemovalOfLastSavedPaymentMethod(allowsRemovalOfLastSavedPaymentMethod)
+            .build()
     }
 
     private fun InitializationMode?.asDeferred(): InitializationMode.DeferredIntent {

@@ -103,6 +103,7 @@ class DefaultCustomerSheetLoaderTest {
             PaymentMethodFixtures.US_BANK_ACCOUNT,
         )
         assertThat(state.customerPermissions.canRemovePaymentMethods).isTrue()
+        assertThat(state.customerPermissions.canRemoveLastPaymentMethod).isTrue()
         assertThat(state.supportedPaymentMethods.map { it.code }).containsExactly("card")
         assertThat(state.paymentSelection).isEqualTo(
             PaymentSelection.Saved(
@@ -135,6 +136,7 @@ class DefaultCustomerSheetLoaderTest {
             PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_2"),
         )
         assertThat(state.customerPermissions.canRemovePaymentMethods).isTrue()
+        assertThat(state.customerPermissions.canRemoveLastPaymentMethod).isTrue()
         assertThat(state.supportedPaymentMethods.map { it.code }).containsExactly("card")
         assertThat(state.paymentSelection).isEqualTo(
             PaymentSelection.Saved(
@@ -168,6 +170,7 @@ class DefaultCustomerSheetLoaderTest {
             PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_3"),
         )
         assertThat(state.customerPermissions.canRemovePaymentMethods).isTrue()
+        assertThat(state.customerPermissions.canRemoveLastPaymentMethod).isTrue()
         assertThat(state.supportedPaymentMethods.map { it.code }).containsExactly("card")
         assertThat(state.paymentSelection).isNull()
         assertThat(state.paymentMethodMetadata.cbcEligibility).isEqualTo(CardBrandChoiceEligibility.Ineligible)
@@ -474,6 +477,7 @@ class DefaultCustomerSheetLoaderTest {
                         paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
                         permissions = CustomerPermissions(
                             canRemovePaymentMethods = true,
+                            canRemoveLastPaymentMethod = true,
                         ),
                     )
                 )

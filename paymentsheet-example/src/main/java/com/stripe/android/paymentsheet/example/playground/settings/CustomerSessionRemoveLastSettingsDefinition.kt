@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.example.playground.settings
 
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
+import com.stripe.android.paymentsheet.example.playground.model.CustomerEphemeralKeyRequest
 import com.stripe.android.paymentsheet.example.playground.model.FeatureState
 
 internal object CustomerSessionRemoveLastSettingsDefinition : BooleanSettingsDefinition(
@@ -20,6 +21,14 @@ internal object CustomerSessionRemoveLastSettingsDefinition : BooleanSettingsDef
             checkoutRequestBuilder.paymentMethodRemoveLastFeature(FeatureState.Enabled)
         } else {
             checkoutRequestBuilder.paymentMethodRemoveLastFeature(FeatureState.Disabled)
+        }
+    }
+
+    override fun configure(value: Boolean, customerEphemeralKeyRequestBuilder: CustomerEphemeralKeyRequest.Builder) {
+        if (value) {
+            customerEphemeralKeyRequestBuilder.paymentMethodRemoveLastFeature(FeatureState.Enabled)
+        } else {
+            customerEphemeralKeyRequestBuilder.paymentMethodRemoveLastFeature(FeatureState.Disabled)
         }
     }
 }
