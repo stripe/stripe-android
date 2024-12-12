@@ -174,6 +174,78 @@ class PaymentOptionsStateFactoryTest {
         assertThat(options[2].isEnabledDuringEditing).isTrue()
     }
 
+    @Test
+    fun `State is correct when given non null defaultPaymentMethodId and it is selected`() {
+        val paymentMethods = PaymentMethodFixtures.createCards(3)
+
+        val selectedPaymentMethod = paymentMethods.random()
+        val defaultPaymentMethodId = selectedPaymentMethod.id
+
+        assert(defaultPaymentMethodId!=null)
+
+        val state = PaymentOptionsStateFactory.create(
+            paymentMethods = paymentMethods,
+            showGooglePay = true,
+            showLink = true,
+            currentSelection = PaymentSelection.Saved(selectedPaymentMethod),
+            nameProvider = { it!!.resolvableString },
+            isCbcEligible = false,
+            canRemovePaymentMethods = true,
+            defaultPaymentMethodId = defaultPaymentMethodId
+        )
+
+        val options = state.items.filterIsInstance<PaymentOptionsItem.SavedPaymentMethod>()
+
+        val selectedPaymentOptionItem = options.find {
+            it.paymentMethod.id == defaultPaymentMethodId
+        }
+
+        assert(selectedPaymentOptionItem != null)
+        assert(selectedPaymentOptionItem!!.displayableSavedPaymentMethod.shouldShowDefaultBadge)
+    }
+
+    @Test
+    fun `State is correct when given non null defaultPaymentMethodId and it is not selected`() {
+        val paymentMethods = PaymentMethodFixtures.createCards(3)
+
+        val selectedPaymentMethod = paymentMethods[0]
+        val selectedPaymentMethodId = selectedPaymentMethod.id
+
+        val defaultPaymentMethod = paymentMethods[1]
+        val defaultPaymentMethodId = defaultPaymentMethod.id
+
+        assert(defaultPaymentMethodId!=null)
+
+        val state = PaymentOptionsStateFactory.create(
+            paymentMethods = paymentMethods,
+            showGooglePay = true,
+            showLink = true,
+            currentSelection = PaymentSelection.Saved(selectedPaymentMethod),
+            nameProvider = { it!!.resolvableString },
+            isCbcEligible = false,
+            canRemovePaymentMethods = true,
+            defaultPaymentMethodId = defaultPaymentMethodId
+        )
+
+        val options = state.items.filterIsInstance<PaymentOptionsItem.SavedPaymentMethod>()
+
+        val selectedPaymentOptionItem = options.find {
+            it.paymentMethod.id == selectedPaymentMethodId
+        }
+
+        assert(selectedPaymentOptionItem != null)
+        assert(!selectedPaymentOptionItem!!.displayableSavedPaymentMethod.shouldShowDefaultBadge)
+
+        val defaultPaymentOptionItem = options.find {
+            it.paymentMethod.id == defaultPaymentMethodId
+        }
+
+        assert(defaultPaymentOptionItem != null)
+        assert(selectedPaymentOptionItem != defaultPaymentOptionItem)
+
+        assert(defaultPaymentOptionItem!!.displayableSavedPaymentMethod.shouldShowDefaultBadge)
+    }
+
     private fun createPaymentOptionsState(
         paymentMethods: List<PaymentMethod>,
         canRemovePaymentMethods: Boolean,

@@ -119,6 +119,45 @@ class CustomerStateTest {
         )
     }
 
+
+    @Test
+    fun `Should create 'CustomerState' for customer session properly with nonnull defaultPaymentMethodId`() {
+        val paymentMethods = PaymentMethodFactory.cards(3)
+        val customer = createElementsSessionCustomer(
+            customerId = "cus_3",
+            ephemeralKeySecret = "ek_3",
+            paymentMethods = paymentMethods,
+            mobilePaymentElementComponent = ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
+                isPaymentMethodSaveEnabled = false,
+                isPaymentMethodRemoveEnabled = false,
+                canRemoveLastPaymentMethod = false,
+                allowRedisplayOverride = null,
+            ),
+            defaultPaymentMethodId = "aaa111"
+        )
+
+        val customerState = CustomerState.createForCustomerSession(
+            customer = customer,
+            configuration = createConfiguration(),
+            supportedSavedPaymentMethodTypes = listOf(PaymentMethod.Type.Card)
+        )
+
+        assertThat(customerState).isEqualTo(
+            CustomerState(
+                id = "cus_3",
+                ephemeralKeySecret = "ek_3",
+                paymentMethods = paymentMethods,
+                permissions = CustomerState.Permissions(
+                    canRemovePaymentMethods = false,
+                    canRemoveLastPaymentMethod = false,
+                    // Always true for `customer_session`
+                    canRemoveDuplicates = true,
+                ),
+                defaultPaymentMethodId = "aaa111"
+            )
+        )
+    }
+
     @Test
     fun `Should create 'CustomerState' for legacy ephemeral keys properly`() {
         val paymentMethods = PaymentMethodFactory.cards(7)
@@ -291,11 +330,12 @@ class CustomerStateTest {
         customerId: String = "cus_1",
         ephemeralKeySecret: String = "ek_1",
         paymentMethods: List<PaymentMethod> = listOf(),
-        mobilePaymentElementComponent: ElementsSession.Customer.Components.MobilePaymentElement
+        mobilePaymentElementComponent: ElementsSession.Customer.Components.MobilePaymentElement,
+        defaultPaymentMethodId: String? = null,
     ): ElementsSession.Customer {
         return ElementsSession.Customer(
             paymentMethods = paymentMethods,
-            defaultPaymentMethod = null,
+            defaultPaymentMethod = defaultPaymentMethodId,
             session = ElementsSession.Customer.Session(
                 id = "cuss_1",
                 customerId = customerId,
