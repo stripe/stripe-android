@@ -10,25 +10,24 @@ import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.json.jsonObject
 
 /**
- * Indicates a class is contains props for an embedded component.
+ * Customizable properties for an embedded component.
  */
 @PrivateBetaConnectSDK
 @RestrictTo(RestrictTo.Scope.LIBRARY)
 sealed interface ComponentProps : Parcelable
 
+/**
+ * Empty props.
+ */
 @PrivateBetaConnectSDK
 @RestrictTo(RestrictTo.Scope.LIBRARY)
 @Parcelize
 data object EmptyProps : ComponentProps
 
 @OptIn(PrivateBetaConnectSDK::class)
-internal fun ComponentProps.toJson(): JsonObject {
+internal fun ComponentProps.toJsonObject(): JsonObject {
     return when (this) {
         EmptyProps -> JsonObject(emptyMap())
-        is AccountOnboardingProps -> toJs().toJsonObject()
+        is AccountOnboardingProps -> ConnectJson.encodeToJsonElement(toJs()).jsonObject
     }
-}
-
-private inline fun <reified T> T.toJsonObject(): JsonObject {
-    return ConnectJson.encodeToJsonElement(this).jsonObject
 }

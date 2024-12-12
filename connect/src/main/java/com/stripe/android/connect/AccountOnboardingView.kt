@@ -67,8 +67,19 @@ class AccountOnboardingView private constructor(
 @Parcelize
 @Poko
 class AccountOnboardingProps(
+    /**
+     * URL to your [full terms of service agreement](https://docs.stripe.com/connect/service-agreement-types#full).
+     */
     val fullTermsOfServiceUrl: String? = null,
+
+    /**
+     * URL to your [recipient terms of service](https://docs.stripe.com/connect/service-agreement-types#recipient) agreement.
+     */
     val recipientTermsOfServiceUrl: String? = null,
+
+    /**
+     * Absolute URL to your privacy policy.
+     */
     val privacyPolicyUrl: String? = null,
 ) : ComponentProps
 
