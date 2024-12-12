@@ -23,7 +23,6 @@ import com.stripe.android.networktesting.ResponseReplacement
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.EditPage
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
-import com.stripe.android.paymentsheet.PaymentSheetActivity
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.RemoveDialog
 import com.stripe.android.paymentsheet.SavedPaymentMethodsPage
@@ -40,13 +39,15 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
 @OptIn(ExperimentalCustomerSessionApi::class)
 @RunWith(AndroidJUnit4::class)
 class CustomerSessionCustomerSheetActivityTest {
     private val application = ApplicationProvider.getApplicationContext<Application>()
 
-    private val composeTestRule = createAndroidComposeRule<PaymentSheetActivity>()
+    private val composeTestRule = createAndroidComposeRule<CustomerSheetActivity>()
     private val networkRule = NetworkRule()
 
     @get:Rule
@@ -347,6 +348,8 @@ class CustomerSessionCustomerSheetActivityTest {
             )
         )
 
+        val countDownLatch = CountDownLatch(1)
+
         enqueueElementsSession(cards, isPaymentMethodRemoveEnabled)
 
         ActivityScenario.launch<CustomerSheetActivity>(
@@ -375,7 +378,12 @@ class CustomerSessionCustomerSheetActivityTest {
                 }
 
                 test(activity)
+
+                countDownLatch.countDown()
             }
+
+            countDownLatch.await(10, TimeUnit.SECONDS)
+            networkRule.validate()
         }
     }
 
