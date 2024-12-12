@@ -5,11 +5,9 @@ import android.app.Application
 import androidx.activity.ComponentActivity
 import androidx.test.core.app.ApplicationProvider
 import junit.framework.TestCase.assertFalse
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith

@@ -3,7 +3,6 @@ package com.stripe.android.connect.webview
 import android.content.Context
 import android.webkit.PermissionRequest
 import android.webkit.WebResourceRequest
-import androidx.annotation.RestrictTo
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
