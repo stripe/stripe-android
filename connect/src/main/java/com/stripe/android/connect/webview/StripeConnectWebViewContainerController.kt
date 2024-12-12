@@ -29,7 +29,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 @OptIn(PrivateBetaConnectSDK::class)
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 internal class StripeConnectWebViewContainerController<Listener : StripeEmbeddedComponentListener>(
     private val view: StripeConnectWebViewContainerInternal,
     private val embeddedComponentManager: EmbeddedComponentManager,

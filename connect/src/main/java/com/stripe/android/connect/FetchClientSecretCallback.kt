@@ -7,11 +7,9 @@ import androidx.annotation.RestrictTo
 fun interface FetchClientSecretCallback {
 
     @PrivateBetaConnectSDK
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun fetchClientSecret(resultCallback: ClientSecretResultCallback)
 
     @PrivateBetaConnectSDK
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     interface ClientSecretResultCallback {
         fun onResult(secret: String?)
     }

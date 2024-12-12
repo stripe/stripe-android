@@ -49,7 +49,6 @@ class EmbeddedComponentManager(
      * Create a new [AccountOnboardingView] for inclusion in the view hierarchy.
      */
     @PrivateBetaConnectSDK
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun createAccountOnboardingView(
         context: Context,
         listener: AccountOnboardingListener? = null,
@@ -72,7 +71,6 @@ class EmbeddedComponentManager(
      * Create a new [PayoutsView] for inclusion in the view hierarchy.
      */
     @PrivateBetaConnectSDK
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun createPayoutsView(
         context: Context,
         listener: PayoutsListener? = null,
@@ -92,13 +90,11 @@ class EmbeddedComponentManager(
     }
 
     @PrivateBetaConnectSDK
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun update(appearance: Appearance) {
         _appearanceFlow.value = appearance
     }
 
     @PrivateBetaConnectSDK
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun logout() {
         throw NotImplementedError("Logout functionality is not yet implemented")
     }
@@ -174,12 +170,12 @@ class EmbeddedComponentManager(
     // Configuration
 
     @PrivateBetaConnectSDK
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
     data class Configuration(
         val publishableKey: String,
     ) : Parcelable
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
         @VisibleForTesting
         internal val permissionsFlow: MutableSharedFlow<Boolean> = MutableSharedFlow(extraBufferCapacity = 1)
