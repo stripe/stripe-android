@@ -51,8 +51,8 @@ class EmbeddedComponentManager(
     @PrivateBetaConnectSDK
     fun createAccountOnboardingView(
         context: Context,
-        props: AccountOnboardingProps? = null,
         listener: AccountOnboardingListener? = null,
+        props: AccountOnboardingProps? = null,
     ): AccountOnboardingView {
         val activity = checkNotNull(context.findActivity()) {
             "You must create an AccountOnboardingView from an Activity"
@@ -64,8 +64,8 @@ class EmbeddedComponentManager(
         return AccountOnboardingView(
             context = context,
             embeddedComponentManager = this,
+            listener = listener,
             props = props,
-            listener = listener
         )
     }
 

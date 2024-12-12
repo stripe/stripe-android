@@ -23,12 +23,14 @@ import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.connect.BuildConfig
 import com.stripe.android.connect.ComponentListenerDelegate
+import com.stripe.android.connect.ComponentProps
 import com.stripe.android.connect.EmbeddedComponentManager
 import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.StripeEmbeddedComponent
 import com.stripe.android.connect.StripeEmbeddedComponentListener
 import com.stripe.android.connect.appearance.Appearance
 import com.stripe.android.connect.databinding.StripeConnectWebviewBinding
+import com.stripe.android.connect.toJson
 import com.stripe.android.connect.webview.serialization.AccountSessionClaimedMessage
 import com.stripe.android.connect.webview.serialization.ConnectInstanceJs
 import com.stripe.android.connect.webview.serialization.ConnectJson
@@ -49,7 +51,9 @@ import kotlinx.serialization.json.jsonObject
 
 @PrivateBetaConnectSDK
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-interface StripeConnectWebViewContainer<Listener : StripeEmbeddedComponentListener> {
+interface StripeConnectWebViewContainer<Listener, Props>
+    where Props : ComponentProps,
+          Listener : StripeEmbeddedComponentListener {
     /**
      * Initializes the [EmbeddedComponentManager] and listener to use for this view.
      * Must be called when this view is created via XML.
@@ -58,6 +62,7 @@ interface StripeConnectWebViewContainer<Listener : StripeEmbeddedComponentListen
     fun initialize(
         embeddedComponentManager: EmbeddedComponentManager,
         listener: Listener?,
+        props: Props,
     )
 }
 
@@ -75,15 +80,16 @@ internal interface StripeConnectWebViewContainerInternal {
 }
 
 @OptIn(PrivateBetaConnectSDK::class)
-internal class StripeConnectWebViewContainerImpl<Listener : StripeEmbeddedComponentListener>(
+internal class StripeConnectWebViewContainerImpl<Listener, Props>(
     val embeddedComponent: StripeEmbeddedComponent,
     embeddedComponentManager: EmbeddedComponentManager?,
-    private var props: JsonObject?,
+    props: Props?,
     listener: Listener?,
     private val listenerDelegate: ComponentListenerDelegate<Listener>,
     private val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG),
-) : StripeConnectWebViewContainer<Listener>,
-    StripeConnectWebViewContainerInternal {
+) : StripeConnectWebViewContainer<Listener, Props>, StripeConnectWebViewContainerInternal
+    where Props : ComponentProps,
+          Listener : StripeEmbeddedComponentListener {
 
     private var viewBinding: StripeConnectWebviewBinding? = null
     private val webView get() = viewBinding?.stripeWebView
@@ -95,10 +101,15 @@ internal class StripeConnectWebViewContainerImpl<Listener : StripeEmbeddedCompon
     internal val stripeWebChromeClient = StripeConnectWebChromeClient()
 
     private var controller: StripeConnectWebViewContainerController<Listener>? = null
+    private var propsJson: JsonObject? = null
 
     init {
         if (embeddedComponentManager != null) {
-            initialize(embeddedComponentManager, listener)
+            initializeInternal(
+                embeddedComponentManager = embeddedComponentManager,
+                listener = listener,
+                propsJson = props?.toJson()
+            )
         }
     }
 
@@ -134,11 +145,37 @@ internal class StripeConnectWebViewContainerImpl<Listener : StripeEmbeddedCompon
 
     override fun initialize(
         embeddedComponentManager: EmbeddedComponentManager,
-        listener: Listener?
+        listener: Listener?,
+        props: Props,
+    ) {
+        initializeInternal(
+            embeddedComponentManager = embeddedComponentManager,
+            listener = listener,
+            propsJson = props.toJson()
+        )
+    }
+
+    private fun initializeInternal(
+        embeddedComponentManager: EmbeddedComponentManager,
+        listener: Listener?,
+        propsJson: JsonObject?,
     ) {
         if (this.controller != null) {
-            throw IllegalStateException("EmbeddedComponentManager is already set")
+            throw IllegalStateException("Already initialized")
         }
+        val oldProps = this.propsJson
+        this.propsJson =
+            when {
+                propsJson == null -> oldProps
+                oldProps == null -> propsJson
+                else -> {
+                    buildJsonObject {
+                        (oldProps.entries + propsJson.entries).forEach { (k, v) ->
+                            put(k, v)
+                        }
+                    }
+                }
+            }
         this.controller = StripeConnectWebViewContainerController(
             view = this,
             embeddedComponentManager = embeddedComponentManager,
@@ -169,18 +206,8 @@ internal class StripeConnectWebViewContainerImpl<Listener : StripeEmbeddedCompon
         }
     }
 
-    fun updateProps(props: JsonObject, merge: Boolean) {
-        val oldProps = this.props
-        this.props =
-            if (!merge || oldProps == null) {
-                props
-            } else {
-                buildJsonObject {
-                    (oldProps.entries + props.entries).forEach { (k, v) ->
-                        put(k, v)
-                    }
-                }
-            }
+    internal fun setPropsFromXml(props: Props) {
+        this.propsJson = props.toJson()
     }
 
     override fun updateConnectInstance(appearance: Appearance) {
@@ -279,7 +306,7 @@ internal class StripeConnectWebViewContainerImpl<Listener : StripeEmbeddedCompon
         @JavascriptInterface
         fun fetchInitComponentProps(): String {
             logger.debug("InitComponentProps fetched")
-            return ConnectJson.encodeToString(props ?: JsonObject(emptyMap()))
+            return ConnectJson.encodeToString(propsJson ?: JsonObject(emptyMap()))
         }
 
         @JavascriptInterface

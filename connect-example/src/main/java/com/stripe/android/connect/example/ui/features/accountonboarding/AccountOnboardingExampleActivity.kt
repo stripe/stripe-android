@@ -31,15 +31,16 @@ class AccountOnboardingExampleActivity : BasicExampleComponentActivity() {
         return if (settings.presentationSettings.useXmlViews) {
             ViewAccountOnboardingExampleBinding.inflate(LayoutInflater.from(context)).root
                 .apply {
-                    updateProps(
-                        props = AccountOnboardingProps(
-                            fullTermsOfServiceUrl = settingsProps.fullTermsOfServiceUrl,
-                            recipientTermsOfServiceUrl = settingsProps.recipientTermsOfServiceUrl,
-                            privacyPolicyUrl = settingsProps.privacyPolicyUrl,
-                        ),
-                        merge = true,
+                    val props = AccountOnboardingProps(
+                        fullTermsOfServiceUrl = settingsProps.fullTermsOfServiceUrl,
+                        recipientTermsOfServiceUrl = settingsProps.recipientTermsOfServiceUrl,
+                        privacyPolicyUrl = settingsProps.privacyPolicyUrl,
                     )
-                    initialize(embeddedComponentManager, null)
+                    initialize(
+                        embeddedComponentManager = embeddedComponentManager,
+                        listener = null,
+                        props = props
+                    )
                 }
         } else {
             embeddedComponentManager.createAccountOnboardingView(

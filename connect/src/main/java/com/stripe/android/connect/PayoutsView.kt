@@ -8,16 +8,16 @@ import com.stripe.android.connect.webview.StripeConnectWebViewContainer
 import com.stripe.android.connect.webview.StripeConnectWebViewContainerImpl
 
 @PrivateBetaConnectSDK
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class PayoutsView private constructor(
     context: Context,
     attrs: AttributeSet?,
     defStyleAttr: Int,
-    webViewContainerBehavior: StripeConnectWebViewContainerImpl<PayoutsListener>,
+    webViewContainerBehavior: StripeConnectWebViewContainerImpl<PayoutsListener, EmptyProps>,
 ) : FrameLayout(context, attrs, defStyleAttr),
-    StripeConnectWebViewContainer<PayoutsListener> by webViewContainerBehavior {
+    StripeConnectWebViewContainer<PayoutsListener, EmptyProps> by webViewContainerBehavior {
 
     @JvmOverloads
+    @RestrictTo(RestrictTo.Scope.LIBRARY)
     constructor(
         context: Context,
         attrs: AttributeSet? = null,
@@ -31,7 +31,7 @@ class PayoutsView private constructor(
         StripeConnectWebViewContainerImpl(
             embeddedComponent = StripeEmbeddedComponent.PAYOUTS,
             embeddedComponentManager = embeddedComponentManager,
-            props = null,
+            props = EmptyProps,
             listener = listener,
             listenerDelegate = ComponentListenerDelegate.ignore(),
         )
@@ -43,4 +43,5 @@ class PayoutsView private constructor(
 }
 
 @PrivateBetaConnectSDK
+@RestrictTo(RestrictTo.Scope.LIBRARY)
 interface PayoutsListener : StripeEmbeddedComponentListener

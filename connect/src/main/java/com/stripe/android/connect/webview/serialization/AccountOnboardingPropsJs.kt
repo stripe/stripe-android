@@ -9,9 +9,9 @@ internal data class AccountOnboardingPropsJs(
     val setFullTermsOfServiceUrl: String?,
     val setRecipientTermsOfServiceUrl: String?,
     val setPrivacyPolicyUrl: String?,
-) : ComponentProps
+)
 
-@PrivateBetaConnectSDK
+@OptIn(PrivateBetaConnectSDK::class)
 internal fun AccountOnboardingProps.toJs(): AccountOnboardingPropsJs {
     return AccountOnboardingPropsJs(
         setFullTermsOfServiceUrl = fullTermsOfServiceUrl,
