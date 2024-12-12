@@ -1,27 +1,43 @@
 package com.stripe.android.connect
 
+import android.Manifest
+import android.app.Application
+import androidx.activity.ComponentActivity
+import androidx.test.core.app.ApplicationProvider
+import junit.framework.TestCase.assertFalse
+import kotlinx.coroutines.async
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
+import org.robolectric.Robolectric
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.Shadows.shadowOf
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 @OptIn(PrivateBetaConnectSDK::class)
+@RunWith(RobolectricTestRunner::class)
 class EmbeddedComponentManagerTest {
 
     private lateinit var configuration: EmbeddedComponentManager.Configuration
     private lateinit var mockFetchClientSecretCallback: FetchClientSecretCallback
     private lateinit var embeddedComponentManager: EmbeddedComponentManager
+    private lateinit var testActivity: ComponentActivity
 
     @Before
     fun setup() {
         configuration = EmbeddedComponentManager.Configuration("test_publishable_key")
         mockFetchClientSecretCallback = mock()
         embeddedComponentManager = EmbeddedComponentManager(configuration, mockFetchClientSecretCallback)
+        testActivity = Robolectric.buildActivity(ComponentActivity::class.java).create().get()
     }
 
     @Test
@@ -50,5 +66,50 @@ class EmbeddedComponentManagerTest {
 
         assertNull(result)
         verify(mockFetchClientSecretCallback).fetchClientSecret(any())
+    }
+
+    @Test
+    fun `requestCameraPermission returns true when camera permission is already granted`() = runTest {
+        val shadowApplication = shadowOf(ApplicationProvider.getApplicationContext() as Application)
+        shadowApplication.grantPermissions(Manifest.permission.CAMERA)
+
+        assertTrue(embeddedComponentManager.requestCameraPermission(testActivity)!!)
+    }
+
+    @Test
+    fun `requestCameraPermission returns correct response when user responds to camera permission`() = runTest {
+        val shadowApplication = shadowOf(ApplicationProvider.getApplicationContext() as Application)
+        shadowApplication.denyPermissions(Manifest.permission.CAMERA)
+        EmbeddedComponentManager.onActivityCreate(testActivity)
+
+        // simulate a permissions denial
+        val resultFalseAsync = async {
+            embeddedComponentManager.requestCameraPermission(testActivity)
+        }
+        advanceUntilIdle() // make sure we advance up to the point where we're waiting for the permissionsFlow
+        EmbeddedComponentManager.permissionsFlow.emit(false)
+
+        val resultFalse = resultFalseAsync.await()
+        assertNotNull(resultFalse)
+        assertFalse(resultFalse)
+
+        // simulate a permissions grant
+        val resultTrueAsync = async {
+            embeddedComponentManager.requestCameraPermission(testActivity)
+        }
+        advanceUntilIdle() // make sure we advance up to the point where we're waiting for the permissionsFlow
+        EmbeddedComponentManager.permissionsFlow.emit(true)
+
+        val resultTrue = resultTrueAsync.await()
+        assertNotNull(resultTrue)
+        assertTrue(resultTrue)
+    }
+
+    @Test
+    fun `requestCameraPermission returns null when not initialized in Activity onCreate`() = runTest {
+        val shadowApplication = shadowOf(ApplicationProvider.getApplicationContext() as Application)
+        shadowApplication.denyPermissions(Manifest.permission.CAMERA)
+
+        assertNull(embeddedComponentManager.requestCameraPermission(testActivity))
     }
 }

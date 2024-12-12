@@ -1,8 +1,8 @@
 package com.stripe.android.connect.webview
 
 import android.content.Context
+import android.webkit.PermissionRequest
 import android.webkit.WebResourceRequest
-import androidx.annotation.RestrictTo
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
@@ -19,14 +19,15 @@ import com.stripe.android.connect.webview.serialization.SetOnLoadError
 import com.stripe.android.connect.webview.serialization.SetOnLoaderStart
 import com.stripe.android.connect.webview.serialization.SetterFunctionCalledMessage
 import com.stripe.android.core.Logger
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @OptIn(PrivateBetaConnectSDK::class)
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 internal class StripeConnectWebViewContainerController<Listener : StripeEmbeddedComponentListener>(
     private val view: StripeConnectWebViewContainerInternal,
     private val embeddedComponentManager: EmbeddedComponentManager,
@@ -60,6 +61,10 @@ internal class StripeConnectWebViewContainerController<Listener : StripeEmbedded
         updateState { copy(isNativeLoadingIndicatorVisible = !receivedSetOnLoaderStart) }
     }
 
+    /**
+     * Callback to invoke when the webview received a network error. If the error was an HTTP error,
+     * [httpStatusCode] will be non-null.
+     */
     fun onReceivedError(
         requestUrl: String,
         httpStatusCode: Int? = null,
@@ -84,11 +89,16 @@ internal class StripeConnectWebViewContainerController<Listener : StripeEmbedded
         }
     }
 
+    /**
+     * Callback to invoke when the webview begins loading a URL. Returns false if the URL
+     * should be loaded in the webview, true otherwise. Returning true has the effect of blocking
+     * the webview's navigation to the URL.
+     */
     fun shouldOverrideUrlLoading(context: Context, request: WebResourceRequest): Boolean {
         val url = request.url
         return if (url.host?.lowercase() in ALLOWLISTED_HOSTS) {
             // TODO - add an analytic event here to track this unexpected behavior
-            logger.warning("(StripeConnectWebViewClient) Received pop-up for allow-listed host: $url")
+            logger.warning("($loggerTag) Received pop-up for allow-listed host: $url")
             false // Allow the request to propagate so we open URL in WebView, but this is not an expected operation
         } else if (
             url.scheme.equals("https", ignoreCase = true) || url.scheme.equals("http", ignoreCase = true)
@@ -132,8 +142,47 @@ internal class StripeConnectWebViewContainerController<Listener : StripeEmbedded
         return embeddedComponentManager.fetchClientSecret()
     }
 
+    /**
+     * Get the initial parameters for the Connect SDK instance.
+     */
     fun getInitialParams(context: Context): ConnectInstanceJs {
         return embeddedComponentManager.getInitialParams(context)
+    }
+
+    /**
+     * Callback to invoke upon receiving a permission request from the webview.
+     * Calls [PermissionRequest.grant] if the user grants permission to the resources
+     * requested in [PermissionRequest.getResources], calls [PermissionRequest.deny] otherwise.
+     *
+     * An example of where this is called is when the webview requests access to the camera.
+     */
+    suspend fun onPermissionRequest(context: Context, request: PermissionRequest) {
+        // we only care about camera permissions (audio/video)
+        val permissionsRequested = request.resources.filter {
+            it == PermissionRequest.RESOURCE_AUDIO_CAPTURE || it == PermissionRequest.RESOURCE_VIDEO_CAPTURE
+        }.toTypedArray()
+        if (permissionsRequested.isEmpty()) { // all calls to PermissionRequest must be on the main thread
+            withContext(Dispatchers.Main) {
+                request.deny() // no supported permissions were requested, so reject the request
+                // TODO - add an analytic event here to track this unexpected behavior
+                logger.warning(
+                    "($loggerTag) Denying permission - ${request.resources.joinToString()} are not supported"
+                )
+            }
+            return
+        }
+
+        // all calls to PermissionRequest must be on the main thread
+        val isGranted = embeddedComponentManager.requestCameraPermission(context) ?: return
+        withContext(Dispatchers.Main) {
+            if (isGranted) {
+                logger.debug("($loggerTag) Granting permission - user accepted permission")
+                request.grant(permissionsRequested)
+            } else {
+                logger.debug("($loggerTag) Denying permission - user denied permission")
+                request.deny()
+            }
+        }
     }
 
     /**

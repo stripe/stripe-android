@@ -55,6 +55,8 @@ abstract class BasicExampleComponentActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        EmbeddedComponentManager.onActivityCreate(this@BasicExampleComponentActivity)
+
         setContent {
             BackHandler(onBack = ::finish)
             val viewModel = hiltViewModel<EmbeddedComponentLoaderViewModel>()
