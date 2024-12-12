@@ -36,8 +36,6 @@ class EmbeddedComponentManagerTest {
 
     @Before
     fun setup() {
-        Dispatchers.setMain(Dispatchers.Unconfined)
-
         configuration = EmbeddedComponentManager.Configuration("test_publishable_key")
         mockFetchClientSecretCallback = mock()
         embeddedComponentManager = EmbeddedComponentManager(configuration, mockFetchClientSecretCallback)
