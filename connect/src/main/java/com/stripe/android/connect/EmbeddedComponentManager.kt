@@ -52,6 +52,7 @@ class EmbeddedComponentManager(
     fun createAccountOnboardingView(
         context: Context,
         listener: AccountOnboardingListener? = null,
+        props: AccountOnboardingProps? = null,
     ): AccountOnboardingView {
         val activity = checkNotNull(context.findActivity()) {
             "You must create an AccountOnboardingView from an Activity"
@@ -63,7 +64,8 @@ class EmbeddedComponentManager(
         return AccountOnboardingView(
             context = context,
             embeddedComponentManager = this,
-            listener = listener
+            listener = listener,
+            props = props,
         )
     }
 

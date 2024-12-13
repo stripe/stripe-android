@@ -26,14 +26,12 @@ import androidx.navigation.compose.rememberNavController
 import com.stripe.android.connect.EmbeddedComponentManager
 import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.example.core.Success
-import com.stripe.android.connect.example.core.safeNavigateUp
 import com.stripe.android.connect.example.core.then
 import com.stripe.android.connect.example.ui.appearance.AppearanceView
 import com.stripe.android.connect.example.ui.appearance.AppearanceViewModel
 import com.stripe.android.connect.example.ui.embeddedcomponentmanagerloader.EmbeddedComponentLoaderViewModel
 import com.stripe.android.connect.example.ui.embeddedcomponentmanagerloader.EmbeddedComponentManagerLoader
-import com.stripe.android.connect.example.ui.settings.SettingsView
-import com.stripe.android.connect.example.ui.settings.SettingsViewModel
+import com.stripe.android.connect.example.ui.settings.settingsComposables
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -59,7 +57,7 @@ abstract class BasicExampleComponentActivity : FragmentActivity() {
 
         setContent {
             BackHandler(onBack = ::finish)
-            val viewModel = hiltViewModel<EmbeddedComponentLoaderViewModel>()
+            val viewModel = hiltViewModel<EmbeddedComponentLoaderViewModel>(this@BasicExampleComponentActivity)
             val navController = rememberNavController()
             ConnectSdkExampleTheme {
                 NavHost(navController = navController, startDestination = BasicComponentExampleDestination.Component) {
@@ -69,14 +67,7 @@ abstract class BasicExampleComponentActivity : FragmentActivity() {
                             openSettings = { navController.navigate(BasicComponentExampleDestination.Settings) },
                         )
                     }
-                    composable(BasicComponentExampleDestination.Settings) {
-                        val settingsViewModel = hiltViewModel<SettingsViewModel>()
-                        SettingsView(
-                            viewModel = settingsViewModel,
-                            onDismiss = { navController.safeNavigateUp() },
-                            onReloadRequested = viewModel::reload,
-                        )
-                    }
+                    settingsComposables(this@BasicExampleComponentActivity, navController)
                 }
             }
         }

@@ -23,12 +23,14 @@ import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.connect.BuildConfig
 import com.stripe.android.connect.ComponentListenerDelegate
+import com.stripe.android.connect.ComponentProps
 import com.stripe.android.connect.EmbeddedComponentManager
 import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.StripeEmbeddedComponent
 import com.stripe.android.connect.StripeEmbeddedComponentListener
 import com.stripe.android.connect.appearance.Appearance
 import com.stripe.android.connect.databinding.StripeConnectWebviewBinding
+import com.stripe.android.connect.toJsonObject
 import com.stripe.android.connect.webview.serialization.AccountSessionClaimedMessage
 import com.stripe.android.connect.webview.serialization.ConnectInstanceJs
 import com.stripe.android.connect.webview.serialization.ConnectJson
@@ -43,20 +45,24 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.json.jsonObject
 
 @PrivateBetaConnectSDK
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-interface StripeConnectWebViewContainer<Listener : StripeEmbeddedComponentListener> {
+interface StripeConnectWebViewContainer<Listener, Props>
+    where Props : ComponentProps,
+          Listener : StripeEmbeddedComponentListener {
+
     /**
-     * Initializes the [EmbeddedComponentManager] and listener to use for this view.
-     * Must be called when this view is created via XML.
-     * Cannot be called more than once per instance.
+     * Initializes the view. Must be called exactly once if and only if this view was created
+     * through XML layout inflation.
      */
     fun initialize(
         embeddedComponentManager: EmbeddedComponentManager,
         listener: Listener?,
+        props: Props,
     )
 }
 
@@ -74,14 +80,16 @@ internal interface StripeConnectWebViewContainerInternal {
 }
 
 @OptIn(PrivateBetaConnectSDK::class)
-internal class StripeConnectWebViewContainerImpl<Listener : StripeEmbeddedComponentListener>(
+internal class StripeConnectWebViewContainerImpl<Listener, Props>(
     val embeddedComponent: StripeEmbeddedComponent,
     embeddedComponentManager: EmbeddedComponentManager?,
     listener: Listener?,
+    props: Props?,
     private val listenerDelegate: ComponentListenerDelegate<Listener>,
     private val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG),
-) : StripeConnectWebViewContainer<Listener>,
-    StripeConnectWebViewContainerInternal {
+) : StripeConnectWebViewContainer<Listener, Props>, StripeConnectWebViewContainerInternal
+    where Props : ComponentProps,
+          Listener : StripeEmbeddedComponentListener {
 
     private var viewBinding: StripeConnectWebviewBinding? = null
     private val webView get() = viewBinding?.stripeWebView
@@ -92,11 +100,36 @@ internal class StripeConnectWebViewContainerImpl<Listener : StripeEmbeddedCompon
     @VisibleForTesting
     internal val stripeWebChromeClient = StripeConnectWebChromeClient()
 
+    /* Notes on initialization
+     * -----------------------
+     * An embedded component view can be instantiated in two ways:
+     *  1. Calling one of the create methods in EmbeddedComponentManager
+     *  2. XML layout inflation
+     * In both cases, we need to initialize the view with the manager, listener, and props exactly
+     * once.
+     *
+     * For (1), this is trivial since we can require the dependencies in the function signature
+     * and initialize immediately. The user doesn't need to worry about initialization. In this
+     * case, `embeddedComponentManager`, `props`, and `listener` from the constructor are all that
+     * we use.
+     *
+     * For (2), we require the user to call initialize() after inflation. The values of the
+     * constructor params will all be null, and we will only use the values passed to
+     * `initialize()`. The one exception is `props`, which will first be set by internal function
+     * `setPropsFromXml()` after which the user may merge in more props through `initialize()`
+     * (if the user doesn't want to use the XML props, they shouldn't be specifying them).
+     */
+
     private var controller: StripeConnectWebViewContainerController<Listener>? = null
+    private var propsJson: JsonObject? = null
 
     init {
         if (embeddedComponentManager != null) {
-            initialize(embeddedComponentManager, listener)
+            initializeInternal(
+                embeddedComponentManager = embeddedComponentManager,
+                listener = listener,
+                propsJson = props?.toJsonObject()
+            )
         }
     }
 
@@ -132,11 +165,37 @@ internal class StripeConnectWebViewContainerImpl<Listener : StripeEmbeddedCompon
 
     override fun initialize(
         embeddedComponentManager: EmbeddedComponentManager,
-        listener: Listener?
+        listener: Listener?,
+        props: Props,
+    ) {
+        initializeInternal(
+            embeddedComponentManager = embeddedComponentManager,
+            listener = listener,
+            propsJson = props.toJsonObject()
+        )
+    }
+
+    private fun initializeInternal(
+        embeddedComponentManager: EmbeddedComponentManager,
+        listener: Listener?,
+        propsJson: JsonObject?,
     ) {
         if (this.controller != null) {
-            throw IllegalStateException("EmbeddedComponentManager is already set")
+            throw IllegalStateException("Already initialized")
         }
+        val oldProps = this.propsJson
+        this.propsJson =
+            when {
+                propsJson == null -> oldProps
+                oldProps == null -> propsJson
+                else -> {
+                    buildJsonObject {
+                        (oldProps.entries + propsJson.entries).forEach { (k, v) ->
+                            put(k, v)
+                        }
+                    }
+                }
+            }
         this.controller = StripeConnectWebViewContainerController(
             view = this,
             embeddedComponentManager = embeddedComponentManager,
@@ -165,6 +224,10 @@ internal class StripeConnectWebViewContainerImpl<Listener : StripeEmbeddedCompon
         view.doOnDetach {
             view.findViewTreeLifecycleOwner()?.lifecycle?.removeObserver(controller)
         }
+    }
+
+    internal fun setPropsFromXml(props: Props) {
+        this.propsJson = props.toJsonObject()
     }
 
     override fun updateConnectInstance(appearance: Appearance) {
@@ -261,8 +324,9 @@ internal class StripeConnectWebViewContainerImpl<Listener : StripeEmbeddedCompon
         }
 
         @JavascriptInterface
-        fun fetchInitComponentProps() {
+        fun fetchInitComponentProps(): String {
             logger.debug("InitComponentProps fetched")
+            return ConnectJson.encodeToString(propsJson ?: JsonObject(emptyMap()))
         }
 
         @JavascriptInterface
