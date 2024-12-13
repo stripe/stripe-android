@@ -2,8 +2,8 @@ package com.stripe.android.link.analytics
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.LinkActivityResult
+import com.stripe.android.model.PaymentMethod
 import org.junit.Test
-import org.mockito.Mockito.mock
 
 internal class LinkAnalyticsHelperTest {
     @Test
@@ -26,7 +26,17 @@ internal class LinkAnalyticsHelperTest {
             }
         }
         val analyticsHelper = LinkAnalyticsHelper(eventReporter)
-        analyticsHelper.onLinkResult(LinkActivityResult.Completed(mock()))
+        analyticsHelper.onLinkResult(
+            linkActivityResult = LinkActivityResult.Completed(
+                paymentMethod = PaymentMethod(
+                    id = null,
+                    created = null,
+                    liveMode = false,
+                    code = null,
+                    type = null
+                )
+            )
+        )
         assertThat(eventReporter.calledCount).isEqualTo(1)
     }
 

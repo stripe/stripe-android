@@ -529,15 +529,18 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
-    fun `When CustomerSheetViewAction#OnItemRemoved with allowsRemovalOfLastSavedPaymentMethod=false, view state isEditing should be updated`() = runTest(testDispatcher) {
+    fun `When CustomerSheetViewAction#OnItemRemoved with canRemoveLastPaymentMethod=false, view state isEditing should be updated`() = runTest(testDispatcher) {
         val viewModel = createViewModel(
             workContext = testDispatcher,
             configuration = CustomerSheet.Configuration(
                 merchantDisplayName = "Example",
                 googlePayEnabled = true,
-                allowsRemovalOfLastSavedPaymentMethod = false,
             ),
             customerPaymentMethods = listOf(CARD_PAYMENT_METHOD, CARD_PAYMENT_METHOD.copy(id = "pm_543")),
+            customerPermissions = CustomerPermissions(
+                canRemovePaymentMethods = true,
+                canRemoveLastPaymentMethod = false,
+            )
         )
         viewModel.viewState.test {
             var viewState = awaitViewState<SelectPaymentMethod>()
@@ -3093,7 +3096,10 @@ class CustomerSheetViewModelTest {
                 savedPaymentMethods = paymentMethods,
                 originalSelection = PaymentSelection.Saved(paymentMethodToRemove),
                 paymentMethodToRemove = paymentMethodToRemove,
-                allowsRemovalOfLastSavedPaymentMethod = false
+                permissions = CustomerPermissions(
+                    canRemovePaymentMethods = true,
+                    canRemoveLastPaymentMethod = false,
+                )
             )
 
             viewModel.viewState.test {
@@ -3200,6 +3206,7 @@ class CustomerSheetViewModelTest {
             customerPaymentMethods = listOf(CARD_PAYMENT_METHOD),
             customerPermissions = CustomerPermissions(
                 canRemovePaymentMethods = true,
+                canRemoveLastPaymentMethod = true,
             ),
         )
 
@@ -3217,6 +3224,7 @@ class CustomerSheetViewModelTest {
             customerPaymentMethods = listOf(CARD_PAYMENT_METHOD),
             customerPermissions = CustomerPermissions(
                 canRemovePaymentMethods = false,
+                canRemoveLastPaymentMethod = false,
             ),
         )
 
@@ -3238,6 +3246,48 @@ class CustomerSheetViewModelTest {
                 ),
                 customerPermissions = CustomerPermissions(
                     canRemovePaymentMethods = false,
+                    canRemoveLastPaymentMethod = false,
+                ),
+            )
+
+            val selectState = viewModel.viewState.value.asSelectState()
+
+            assertThat(selectState.canRemovePaymentMethods).isFalse()
+            assertThat(selectState.canEdit).isTrue()
+            assertThat(selectState.topBarState {}.showEditMenu).isTrue()
+        }
+
+    @Test
+    fun `If has remove permissions but cannot remove last PM, can remove is false`() =
+        runTest(testDispatcher) {
+            val viewModel = createViewModel(
+                workContext = testDispatcher,
+                customerPaymentMethods = listOf(CARD_PAYMENT_METHOD),
+                customerPermissions = CustomerPermissions(
+                    canRemovePaymentMethods = true,
+                    canRemoveLastPaymentMethod = false,
+                ),
+            )
+
+            val selectState = viewModel.viewState.value.asSelectState()
+
+            assertThat(selectState.canRemovePaymentMethods).isFalse()
+            assertThat(selectState.canEdit).isFalse()
+            assertThat(selectState.topBarState {}.showEditMenu).isFalse()
+        }
+
+    @Test
+    fun `If cannot remove last PM but is CBC eligible, can remove is false but can edit is true`() =
+        runTest(testDispatcher) {
+            val viewModel = createViewModel(
+                workContext = testDispatcher,
+                customerPaymentMethods = listOf(CARD_WITH_NETWORKS_PAYMENT_METHOD),
+                cbcEligibility = CardBrandChoiceEligibility.Eligible(
+                    preferredNetworks = listOf(CardBrand.CartesBancaires),
+                ),
+                customerPermissions = CustomerPermissions(
+                    canRemovePaymentMethods = true,
+                    canRemoveLastPaymentMethod = false,
                 ),
             )
 
@@ -3482,14 +3532,16 @@ class CustomerSheetViewModelTest {
         savedPaymentMethods: List<PaymentMethod>,
         originalSelection: PaymentSelection.Saved,
         paymentMethodToRemove: PaymentMethod,
-        allowsRemovalOfLastSavedPaymentMethod: Boolean = true,
+        permissions: CustomerPermissions = CustomerPermissions(
+            canRemovePaymentMethods = true,
+            canRemoveLastPaymentMethod = true,
+        )
     ): CustomerSheetViewModel {
         return createViewModel(
             workContext = coroutineContext,
             configuration = CustomerSheet.Configuration(
                 merchantDisplayName = "Example",
                 googlePayEnabled = true,
-                allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod
             ),
             savedPaymentSelection = originalSelection,
             customerPaymentMethods = savedPaymentMethods,
@@ -3502,6 +3554,7 @@ class CustomerSheetViewModelTest {
             editInteractorFactory = createModifiableEditPaymentMethodViewInteractorFactory(
                 workContext = testDispatcher
             ),
+            customerPermissions = permissions,
         )
     }
 

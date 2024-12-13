@@ -105,6 +105,7 @@ data class ElementsSession(
                 @Parcelize
                 data class Enabled(
                     val isPaymentMethodRemoveEnabled: Boolean,
+                    val canRemoveLastPaymentMethod: Boolean,
                 ) : CustomerSheet
             }
         }
