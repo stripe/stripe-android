@@ -44,5 +44,6 @@
     <string name="appearance_hot_dog">Hot Dog Stand</string>
     <string name="appearance_ocean_breeze">Ocean Breeze</string>
     <string name="appearance_link">Link</string>
+    <string name="appearance_dynamic">Dynamic</string>
     <string name="custom_font">Custom Font</string>
 </resources>
