@@ -51,6 +51,7 @@ private fun PresentationSettingsView(
     onSave: (PresentationSettings) -> Unit,
 ) {
     var useXmlViews by rememberSaveable { mutableStateOf(presentationSettings.useXmlViews) }
+    var edgeToEdgeEnabled by rememberSaveable { mutableStateOf(presentationSettings.edgeToEdgeEnabled) }
     ConnectExampleScaffold(
         title = stringResource(R.string.presentation_settings),
         navigationIcon = { BackIconButton(onBack) },
@@ -63,6 +64,7 @@ private fun PresentationSettingsView(
                             embedInTabBar = presentationSettings.embedInTabBar,
                             embedInNavBar = presentationSettings.embedInNavBar,
                             useXmlViews = useXmlViews,
+                            edgeToEdgeEnabled = edgeToEdgeEnabled,
                         )
                     )
                     onBack()
@@ -92,6 +94,21 @@ private fun PresentationSettingsView(
                 Switch(
                     checked = useXmlViews,
                     onCheckedChange = { useXmlViews = it },
+                )
+            }
+
+            Spacer(Modifier.requiredHeight(16.dp))
+            Row(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    modifier = Modifier.weight(1f),
+                    text = stringResource(R.string.edge_to_edge_enabled)
+                )
+                Switch(
+                    checked = edgeToEdgeEnabled,
+                    onCheckedChange = { edgeToEdgeEnabled = it },
                 )
             }
         }

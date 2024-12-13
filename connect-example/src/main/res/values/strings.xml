@@ -37,6 +37,7 @@
     <string name="recipient_terms_of_service">Recipient terms of service</string>
     <string name="privacy_policy">Privacy policy</string>
     <string name="use_xml_views">Use XML Views</string>
+    <string name="edge_to_edge_enabled">Edge-to-edge Enabled</string>
 
     <!-- Appearance Strings -->
     <string name="appearance_default">Default</string>
