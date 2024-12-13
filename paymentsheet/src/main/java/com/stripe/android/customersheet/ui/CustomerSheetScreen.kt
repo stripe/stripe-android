@@ -25,7 +25,6 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.PaymentOptionsStateFactory
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.ui.EditPaymentMethod
 import com.stripe.android.paymentsheet.ui.ErrorMessage
 import com.stripe.android.paymentsheet.ui.Mandate
 import com.stripe.android.paymentsheet.ui.PaymentElement
@@ -98,12 +97,6 @@ internal fun CustomerSheetScreen(
                             viewState = viewState,
                             viewActionHandler = viewActionHandler,
                             displayForm = displayAddForm,
-                        )
-                        PaymentSheetContentPadding()
-                    }
-                    is CustomerSheetViewState.EditPaymentMethod -> {
-                        EditPaymentMethod(
-                            viewState = viewState,
                         )
                         PaymentSheetContentPadding()
                     }
@@ -307,28 +300,6 @@ internal fun AddPaymentMethod(
                 .fillMaxWidth()
                 .padding(top = 8.dp)
                 .padding(horizontal = horizontalPadding),
-        )
-    }
-}
-
-@Composable
-private fun EditPaymentMethod(
-    viewState: CustomerSheetViewState.EditPaymentMethod,
-    modifier: Modifier = Modifier,
-) {
-    val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
-
-    Column(modifier) {
-        H4Text(
-            text = stringResource(PaymentsCoreR.string.stripe_title_update_card),
-            modifier = Modifier
-                .padding(bottom = 20.dp)
-                .padding(horizontal = horizontalPadding)
-        )
-
-        EditPaymentMethod(
-            interactor = viewState.editPaymentMethodInteractor,
-            modifier = modifier,
         )
     }
 }

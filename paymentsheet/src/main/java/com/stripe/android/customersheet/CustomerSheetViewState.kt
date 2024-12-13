@@ -11,7 +11,6 @@ import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
-import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarStateFactory
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -29,7 +28,6 @@ internal sealed class CustomerSheetViewState(
     fun shouldDisplayDismissConfirmationModal(): Boolean {
         return when (this) {
             is Loading,
-            is EditPaymentMethod,
             is UpdatePaymentMethod,
             is SelectPaymentMethod -> {
                 false
@@ -118,23 +116,6 @@ internal sealed class CustomerSheetViewState(
         isLiveMode = isLiveMode,
         isProcessing = isProcessing,
         canNavigateBack = !isFirstPaymentMethod,
-    ) {
-        override fun topBarState(onEditIconPressed: () -> Unit): PaymentSheetTopBarState {
-            return PaymentSheetTopBarStateFactory.create(
-                hasBackStack = canNavigateBack,
-                isLiveMode = isLiveMode,
-                editable = PaymentSheetTopBarState.Editable.Never,
-            )
-        }
-    }
-
-    data class EditPaymentMethod(
-        val editPaymentMethodInteractor: ModifiableEditPaymentMethodViewInteractor,
-        override val isLiveMode: Boolean,
-    ) : CustomerSheetViewState(
-        isLiveMode = isLiveMode,
-        isProcessing = false,
-        canNavigateBack = true,
     ) {
         override fun topBarState(onEditIconPressed: () -> Unit): PaymentSheetTopBarState {
             return PaymentSheetTopBarStateFactory.create(
