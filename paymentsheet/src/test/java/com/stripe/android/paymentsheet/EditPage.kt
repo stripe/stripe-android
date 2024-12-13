@@ -4,6 +4,7 @@ import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import com.stripe.android.paymentsheet.ui.TEST_TAG_EDIT_SCREEN_UPDATE_BUTTON
 import com.stripe.android.paymentsheet.ui.TEST_TAG_PAYMENT_SHEET_EDIT_SCREEN
 import com.stripe.android.paymentsheet.ui.UPDATE_PM_REMOVE_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.UPDATE_PM_SAVE_BUTTON_TEST_TAG
@@ -42,9 +43,14 @@ internal class EditPage(
             .performClick()
     }
 
-    fun update() {
-        composeTestRule.onNodeWithTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG)
-            .performClick()
+    fun update(usingNewScreen: Boolean = true) {
+        if (usingNewScreen) {
+            composeTestRule.onNodeWithTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG)
+                .performClick()
+        } else {
+            composeTestRule.onNodeWithTag(TEST_TAG_EDIT_SCREEN_UPDATE_BUTTON)
+                .performClick()
+        }
     }
 
     fun onRemoveButton(): SemanticsNodeInteraction {
