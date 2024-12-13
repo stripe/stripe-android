@@ -22,6 +22,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.connect.example.R
 import com.stripe.android.connect.example.data.OnboardingSettings
+import com.stripe.android.connect.example.data.SkipTermsOfService
 import com.stripe.android.connect.example.ui.common.BackIconButton
 import com.stripe.android.connect.example.ui.common.ConnectExampleScaffold
 
@@ -55,6 +56,9 @@ private fun AccountOnboardingSettingsView(
     var privacyPolicy by rememberSaveable {
         mutableStateOf(onboardingSettings.privacyPolicyString ?: "")
     }
+    var skipTermsOfService by rememberSaveable {
+        mutableStateOf(onboardingSettings.skipTermsOfService)
+    }
     ConnectExampleScaffold(
         title = stringResource(R.string.onboarding_settings),
         navigationIcon = { BackIconButton(onBack) },
@@ -66,7 +70,7 @@ private fun AccountOnboardingSettingsView(
                             fullTermsOfServiceString = fullTermsOfService.trim().takeIf { it.isNotEmpty() },
                             recipientTermsOfServiceString = recipientTermsOfService.trim().takeIf { it.isNotEmpty() },
                             privacyPolicyString = privacyPolicy.trim().takeIf { it.isNotEmpty() },
-                            skipTermsOfService = onboardingSettings.skipTermsOfService,
+                            skipTermsOfService = skipTermsOfService,
                             fieldOption = onboardingSettings.fieldOption,
                             futureRequirement = onboardingSettings.futureRequirement,
                         )
@@ -106,6 +110,13 @@ private fun AccountOnboardingSettingsView(
                 placeholder = stringResource(R.string.server_url_placeholder),
                 value = privacyPolicy,
                 onValueChange = { privacyPolicy = it },
+            )
+            Spacer(Modifier.requiredHeight(9.dp))
+            SettingsDropdownField(
+                label = "Skip terms of service",
+                options = SkipTermsOfService.entries.toList(),
+                selectedOption = skipTermsOfService,
+                onSelectOption = { skipTermsOfService = it }
             )
         }
     }
