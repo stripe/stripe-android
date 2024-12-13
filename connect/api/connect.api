@@ -1,3 +1,11 @@
+public final class com/stripe/android/connect/AccountOnboardingProps$CollectionOptions$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/connect/AccountOnboardingProps$CollectionOptions;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/connect/AccountOnboardingProps$CollectionOptions;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public final class com/stripe/android/connect/AccountOnboardingProps$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/connect/AccountOnboardingProps;
