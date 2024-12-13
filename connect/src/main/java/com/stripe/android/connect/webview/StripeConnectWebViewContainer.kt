@@ -6,6 +6,7 @@ import android.graphics.Bitmap
 import android.os.Build
 import android.view.LayoutInflater
 import android.webkit.JavascriptInterface
+import android.webkit.PermissionRequest
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
@@ -89,7 +90,7 @@ internal class StripeConnectWebViewContainerImpl<Listener : StripeEmbeddedCompon
     internal val stripeWebViewClient = StripeConnectWebViewClient()
 
     @VisibleForTesting
-    internal val stripeWebChromeClient = StripeWebChromeClient()
+    internal val stripeWebChromeClient = StripeConnectWebChromeClient()
 
     private var controller: StripeConnectWebViewContainerController<Listener>? = null
 
@@ -201,7 +202,12 @@ internal class StripeConnectWebViewContainerImpl<Listener : StripeEmbeddedCompon
             request: WebResourceRequest,
             errorResponse: WebResourceResponse
         ) {
-            controller?.onReceivedError(request.url.toString(), errorResponse.statusCode, errorResponse.reasonPhrase)
+            controller?.onReceivedError(
+                requestUrl = request.url.toString(),
+                httpStatusCode = errorResponse.statusCode,
+                errorMessage = errorResponse.reasonPhrase,
+                isMainPageLoad = request.isForMainFrame
+            )
         }
 
         override fun onReceivedError(view: WebView, request: WebResourceRequest, error: WebResourceError) {
@@ -212,7 +218,11 @@ internal class StripeConnectWebViewContainerImpl<Listener : StripeEmbeddedCompon
             } else {
                 null
             }
-            controller?.onReceivedError(request.url.toString(), errorMessage = errorMessage)
+            controller?.onReceivedError(
+                requestUrl = request.url.toString(),
+                errorMessage = errorMessage,
+                isMainPageLoad = request.isForMainFrame
+            )
         }
 
         override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
@@ -221,13 +231,28 @@ internal class StripeConnectWebViewContainerImpl<Listener : StripeEmbeddedCompon
     }
 
     /**
-     * A [WebChromeClient] that provides additional functionality for Stripe Connect Embedded Component WebViews.
-     *
-     * This class is currently empty, but it could be used to add additional functionality in the future
-     * Setting a [WebChromeClient] (even an empty one) is necessary for certain functionality, like
-     * [WebViewClient.shouldOverrideUrlLoading] to work properly.
+     * A [WebChromeClient] that provides additional functionality for Stripe Connect Embedded Component WebViews,
+     * namely around permissions.
      */
-    inner class StripeWebChromeClient : WebChromeClient()
+    internal inner class StripeConnectWebChromeClient : WebChromeClient() {
+        override fun onPermissionRequest(request: PermissionRequest) {
+            val view = webView ?: return request.deny()
+
+            view.findViewTreeLifecycleOwner()?.lifecycleScope
+                ?.launch {
+                    controller?.onPermissionRequest(view.context, request)
+                }
+                ?: return request.deny()
+        }
+
+        override fun onPermissionRequestCanceled(request: PermissionRequest) {
+            super.onPermissionRequestCanceled(request)
+
+            // currently a no-op since we don't hold any state from the permission
+            // request and delegate all the UI to the Android system, meaning
+            // there's no way for us to cancel any permissions UI
+        }
+    }
 
     private inner class StripeJsInterface {
         @JavascriptInterface

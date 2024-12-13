@@ -169,6 +169,7 @@ internal class CustomerSheetViewModel(
             currentSelection = originalPaymentSelection,
             permissions = CustomerPermissions(
                 canRemovePaymentMethods = false,
+                canRemoveLastPaymentMethod = false,
             ),
             metadata = null,
         )
@@ -1233,7 +1234,7 @@ internal class CustomerSheetViewModel(
     ) {
         val canRemove = when (paymentMethods.size) {
             0 -> false
-            1 -> configuration.allowsRemovalOfLastSavedPaymentMethod && permissions.canRemovePaymentMethods
+            1 -> permissions.canRemoveLastPaymentMethod && permissions.canRemovePaymentMethods
             else -> permissions.canRemovePaymentMethods
         }
 

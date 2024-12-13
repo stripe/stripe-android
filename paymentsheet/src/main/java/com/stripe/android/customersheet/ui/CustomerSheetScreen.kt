@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -18,6 +19,7 @@ import com.stripe.android.common.ui.BottomSheetLoadingIndicator
 import com.stripe.android.common.ui.PrimaryButton
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.customersheet.CustomerSheetViewAction
+import com.stripe.android.customersheet.CustomerSheetViewModel
 import com.stripe.android.customersheet.CustomerSheetViewState
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethodCode
@@ -38,7 +40,21 @@ import com.stripe.android.ui.core.elements.events.CardNumberCompletedEventReport
 import com.stripe.android.ui.core.elements.events.LocalCardBrandDisallowedReporter
 import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventReporter
 import com.stripe.android.uicore.strings.resolve
+import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.R as PaymentsCoreR
+
+@Composable
+internal fun CustomerSheetScreen(
+    viewModel: CustomerSheetViewModel,
+) {
+    val viewState by viewModel.viewState.collectAsState()
+
+    CustomerSheetScreen(
+        viewState = viewState,
+        viewActionHandler = viewModel::handleViewAction,
+        paymentMethodNameProvider = viewModel::providePaymentMethodName,
+    )
+}
 
 @Composable
 internal fun CustomerSheetScreen(
