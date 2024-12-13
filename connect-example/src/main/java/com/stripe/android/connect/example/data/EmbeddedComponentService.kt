@@ -66,6 +66,12 @@ class EmbeddedComponentService @Inject constructor(
                 .apply {
                     _publishableKey.value = publishableKey
                     _accounts.value = availableMerchants
+
+                    // if we have no selected merchant, default to the first one
+                    val firstMerchant = availableMerchants.firstOrNull()?.merchantId
+                    if (settingsService.getSelectedMerchant() == null && firstMerchant != null) {
+                        settingsService.setSelectedMerchant(firstMerchant)
+                    }
                 }
         }
     }

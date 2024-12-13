@@ -120,9 +120,19 @@ class SettingsViewModel @Inject constructor(
     private fun loadSettings() {
         _state.update { state ->
             val accountsFromService = embeddedComponentService.accounts.value ?: emptyList()
-            val selectedAccountId = settingsService.getSelectedMerchant() ?: ""
-            val selectedAccountIsOther = accountsFromService.none { it.merchantId == selectedAccountId }
+            val savedAccountId = settingsService.getSelectedMerchant()
+            val selectedAccountIsOther = accountsFromService.none { it.merchantId == savedAccountId }
 
+            // default to the first merchant in the list if we have no accounts selected
+            // and save it for later use
+            val firstMerchantId = accountsFromService.firstOrNull()?.merchantId
+            val selectedAccountId = savedAccountId ?: firstMerchantId ?: ""
+            if (savedAccountId == null && firstMerchantId != null) {
+                settingsService.setSelectedMerchant(firstMerchantId)
+            }
+
+            // Insert an "Other" account in the list assuming that if we don't recognize the saved
+            // account, it's an "Other" account.
             val otherAccount = DemoMerchant.Other(if (selectedAccountIsOther) selectedAccountId else "")
             val mergedAccounts = accountsFromService.map {
                 DemoMerchant.Merchant(
@@ -131,7 +141,7 @@ class SettingsViewModel @Inject constructor(
                 )
             } + otherAccount
 
-            val selectedAccount = mergedAccounts.firstOrNull { it.merchantId == selectedAccountId } ?: otherAccount
+            val selectedAccount = mergedAccounts.firstOrNull { it.merchantId == savedAccountId } ?: otherAccount
             state.copy(
                 serverUrl = embeddedComponentService.serverBaseUrl,
                 selectedAccount = selectedAccount,
