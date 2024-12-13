@@ -21,10 +21,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.connect.example.R
+import com.stripe.android.connect.example.data.FieldOption
+import com.stripe.android.connect.example.data.FutureRequirement
 import com.stripe.android.connect.example.data.OnboardingSettings
 import com.stripe.android.connect.example.data.SkipTermsOfService
 import com.stripe.android.connect.example.ui.common.BackIconButton
 import com.stripe.android.connect.example.ui.common.ConnectExampleScaffold
+import com.stripe.android.connect.example.ui.common.ConnectSdkExampleTheme
 
 @Composable
 fun AccountOnboardingSettingsView(
@@ -59,6 +62,12 @@ private fun AccountOnboardingSettingsView(
     var skipTermsOfService by rememberSaveable {
         mutableStateOf(onboardingSettings.skipTermsOfService)
     }
+    var fieldOption by rememberSaveable {
+        mutableStateOf(onboardingSettings.fieldOption)
+    }
+    var futureRequirement by rememberSaveable {
+        mutableStateOf(onboardingSettings.futureRequirement)
+    }
     ConnectExampleScaffold(
         title = stringResource(R.string.onboarding_settings),
         navigationIcon = { BackIconButton(onBack) },
@@ -71,8 +80,8 @@ private fun AccountOnboardingSettingsView(
                             recipientTermsOfServiceString = recipientTermsOfService.trim().takeIf { it.isNotEmpty() },
                             privacyPolicyString = privacyPolicy.trim().takeIf { it.isNotEmpty() },
                             skipTermsOfService = skipTermsOfService,
-                            fieldOption = onboardingSettings.fieldOption,
-                            futureRequirement = onboardingSettings.futureRequirement,
+                            fieldOption = fieldOption,
+                            futureRequirement = futureRequirement,
                         )
                     )
                     onBack()
@@ -111,12 +120,26 @@ private fun AccountOnboardingSettingsView(
                 value = privacyPolicy,
                 onValueChange = { privacyPolicy = it },
             )
-            Spacer(Modifier.requiredHeight(9.dp))
+            Spacer(Modifier.requiredHeight(8.dp))
             SettingsDropdownField(
                 label = "Skip terms of service",
                 options = SkipTermsOfService.entries.toList(),
                 selectedOption = skipTermsOfService,
                 onSelectOption = { skipTermsOfService = it }
+            )
+            Spacer(Modifier.requiredHeight(8.dp))
+            SettingsDropdownField(
+                label = "Field option",
+                options = FieldOption.entries.toList(),
+                selectedOption = fieldOption,
+                onSelectOption = { fieldOption = it }
+            )
+            Spacer(Modifier.requiredHeight(8.dp))
+            SettingsDropdownField(
+                label = "Future requirement",
+                options = FutureRequirement.entries.toList(),
+                selectedOption = futureRequirement,
+                onSelectOption = { futureRequirement = it }
             )
         }
     }
@@ -125,9 +148,11 @@ private fun AccountOnboardingSettingsView(
 @Preview
 @Composable
 private fun AccountOnboardingSettingsViewPreview() {
-    AccountOnboardingSettingsView(
-        onboardingSettings = OnboardingSettings(),
-        onBack = {},
-        onSave = {}
-    )
+    ConnectSdkExampleTheme {
+        AccountOnboardingSettingsView(
+            onboardingSettings = OnboardingSettings(),
+            onBack = {},
+            onSave = {}
+        )
+    }
 }
