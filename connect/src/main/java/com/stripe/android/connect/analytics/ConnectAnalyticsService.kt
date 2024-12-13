@@ -20,7 +20,10 @@ import kotlinx.coroutines.launch
  */
 internal class ConnectAnalyticsService(
     context: Context,
+    private val isTestMode: Boolean,
 ) {
+    internal var merchantId: String? = null
+
     private val application: Application = context.applicationContext as Application
 
     private val analyticsRequestStorage = RealAnalyticsRequestV2Storage(application)
@@ -56,13 +59,15 @@ internal class ConnectAnalyticsService(
         }
     }
 
-    private fun commonParams(): Map<String, String?> {
-        return mapOf()
+    private fun commonParams(): Map<String, Any?> {
+        return mapOf(
+            "livemode" to !isTestMode,
+            "merchantId" to merchantId,
+        ).filterNot { (_, v) -> v == null }
     }
 
     internal companion object {
-        const val CLIENT_ID = "mobile-identity-sdk"
-        const val ORIGIN = "stripe-identity-android"
-        const val ID = "id"
+        const val CLIENT_ID = "mobile_connect_sdk"
+        const val ORIGIN = "stripe-connect-android"
     }
 }
