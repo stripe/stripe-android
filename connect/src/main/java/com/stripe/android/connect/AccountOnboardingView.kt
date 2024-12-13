@@ -1,6 +1,7 @@
 package com.stripe.android.connect
 
 import android.content.Context
+import android.os.Parcelable
 import android.util.AttributeSet
 import android.widget.FrameLayout
 import androidx.annotation.RestrictTo
@@ -82,7 +83,45 @@ class AccountOnboardingProps(
      * Absolute URL to your privacy policy.
      */
     val privacyPolicyUrl: String? = null,
-) : ComponentProps
+
+    /**
+     * If true, embedded onboarding skips terms of service collection and you must
+     * [collect terms acceptance yourself](https://docs.stripe.com/connect/updating-service-agreements#indicating-acceptance).
+     */
+    @Suppress("MaxLineLength")
+    val skipTermsOfServiceCollection: Boolean? = null,
+
+    /**
+     * Customizes collecting `currently_due` or `eventually_due` requirements and controls whether to include
+     * [future requirements](https://docs.stripe.com/api/accounts/object#account_object-future_requirements).
+     * Specifying `eventually_due` collects both `eventually_due` and `currently_due` requirements.
+     */
+    val collectionOptions: CollectionOptions? = null,
+) : ComponentProps {
+
+    @PrivateBetaConnectSDK
+    @RestrictTo(RestrictTo.Scope.LIBRARY)
+    @Parcelize
+    @Poko
+    class CollectionOptions(
+        val fields: FieldOption? = null,
+        val futureRequirements: FutureRequirementOption? = null,
+    ) : Parcelable
+
+    @PrivateBetaConnectSDK
+    @RestrictTo(RestrictTo.Scope.LIBRARY)
+    enum class FieldOption(internal val value: String) {
+        CURRENTLY_DUE("currently_due"),
+        EVENTUALLY_DUE("eventually_due"),
+    }
+
+    @PrivateBetaConnectSDK
+    @RestrictTo(RestrictTo.Scope.LIBRARY)
+    enum class FutureRequirementOption(internal val value: String) {
+        OMIT("omit"),
+        INCLUDE("include"),
+    }
+}
 
 @PrivateBetaConnectSDK
 @RestrictTo(RestrictTo.Scope.LIBRARY)

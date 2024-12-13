@@ -3,6 +3,8 @@ package com.stripe.android.connect.example.data
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
+import com.stripe.android.connect.AccountOnboardingProps
+import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.example.ui.appearance.AppearanceInfo
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.channels.awaitClose
@@ -159,7 +161,33 @@ data class OnboardingSettings(
     val skipTermsOfService: SkipTermsOfService = SkipTermsOfService.DEFAULT,
     val fieldOption: FieldOption = FieldOption.DEFAULT,
     val futureRequirement: FutureRequirement = FutureRequirement.DEFAULT,
-)
+) {
+    @OptIn(PrivateBetaConnectSDK::class)
+    fun toProps(): AccountOnboardingProps {
+        return AccountOnboardingProps(
+            fullTermsOfServiceUrl = fullTermsOfServiceString,
+            recipientTermsOfServiceUrl = recipientTermsOfServiceString,
+            privacyPolicyUrl = privacyPolicyString,
+            skipTermsOfServiceCollection = when (skipTermsOfService) {
+                SkipTermsOfService.DEFAULT -> null
+                SkipTermsOfService.SKIP -> true
+                SkipTermsOfService.SHOW -> false
+            },
+            collectionOptions = AccountOnboardingProps.CollectionOptions(
+                fields = when (fieldOption) {
+                    FieldOption.DEFAULT -> null
+                    FieldOption.CURRENTLY_DUE -> AccountOnboardingProps.FieldOption.CURRENTLY_DUE
+                    FieldOption.EVENTUALLY_DUE -> AccountOnboardingProps.FieldOption.EVENTUALLY_DUE
+                },
+                futureRequirements = when (futureRequirement) {
+                    FutureRequirement.DEFAULT -> null
+                    FutureRequirement.OMIT -> AccountOnboardingProps.FutureRequirementOption.OMIT
+                    FutureRequirement.INCLUDE -> AccountOnboardingProps.FutureRequirementOption.INCLUDE
+                }
+            ),
+        )
+    }
+}
 
 data class PresentationSettings(
     val presentationStyleIsPush: Boolean = false,
@@ -169,5 +197,5 @@ data class PresentationSettings(
 )
 
 enum class SkipTermsOfService { DEFAULT, SKIP, SHOW }
-enum class FieldOption { DEFAULT, OPTIONAL, REQUIRED }
-enum class FutureRequirement { DEFAULT, INCLUDE, EXCLUDE }
+enum class FieldOption { DEFAULT, CURRENTLY_DUE, EVENTUALLY_DUE }
+enum class FutureRequirement { DEFAULT, OMIT, INCLUDE }

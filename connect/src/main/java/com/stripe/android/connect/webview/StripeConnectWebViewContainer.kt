@@ -227,7 +227,10 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
     }
 
     internal fun setPropsFromXml(props: Props) {
-        this.propsJson = props.toJsonObject()
+        // Only set props if uninitialized.
+        if (controller == null) {
+            this.propsJson = props.toJsonObject()
+        }
     }
 
     override fun updateConnectInstance(appearance: Appearance) {

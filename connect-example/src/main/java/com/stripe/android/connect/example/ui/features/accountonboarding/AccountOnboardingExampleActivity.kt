@@ -4,7 +4,6 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import androidx.activity.viewModels
-import com.stripe.android.connect.AccountOnboardingProps
 import com.stripe.android.connect.EmbeddedComponentManager
 import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.example.R
@@ -23,29 +22,20 @@ class AccountOnboardingExampleActivity : BasicExampleComponentActivity() {
     override fun createComponentView(context: Context, embeddedComponentManager: EmbeddedComponentManager): View {
         val settings = settingsViewModel.state.value
         val onboardingSettings = settings.onboardingSettings
-        val settingsProps = AccountOnboardingProps(
-            fullTermsOfServiceUrl = onboardingSettings.fullTermsOfServiceString,
-            recipientTermsOfServiceUrl = onboardingSettings.recipientTermsOfServiceString,
-            privacyPolicyUrl = onboardingSettings.privacyPolicyString,
-        )
+        val props = onboardingSettings.toProps()
         return if (settings.presentationSettings.useXmlViews) {
             ViewAccountOnboardingExampleBinding.inflate(LayoutInflater.from(context)).root
                 .apply {
-                    val props = AccountOnboardingProps(
-                        fullTermsOfServiceUrl = settingsProps.fullTermsOfServiceUrl,
-                        recipientTermsOfServiceUrl = settingsProps.recipientTermsOfServiceUrl,
-                        privacyPolicyUrl = settingsProps.privacyPolicyUrl,
-                    )
                     initialize(
                         embeddedComponentManager = embeddedComponentManager,
                         listener = null,
-                        props = props
+                        props = props,
                     )
                 }
         } else {
             embeddedComponentManager.createAccountOnboardingView(
                 context = context,
-                props = settingsProps
+                props = props
             )
         }
     }
