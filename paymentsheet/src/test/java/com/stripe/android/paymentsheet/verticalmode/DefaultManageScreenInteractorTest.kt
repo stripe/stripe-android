@@ -245,6 +245,38 @@ class DefaultManageScreenInteractorTest {
         }
     }
 
+    @Test
+    fun `displayableSavedPaymentMethods updated correctly when defaultPaymentMethodId updated`() {
+        val initialPaymentMethods = PaymentMethodFixtures.createCards(3)
+        runScenario(initialPaymentMethods, currentSelection = null, handleBackPressed = {}) {
+            interactor.state.test {
+                defaultPaymentMethodSource.value = null
+                var updatedState = awaitItem()
+                assertThat(updatedState.paymentMethods[0].shouldShowDefaultBadge).isFalse()
+                assertThat(updatedState.paymentMethods[1].shouldShowDefaultBadge).isFalse()
+                assertThat(updatedState.paymentMethods[2].shouldShowDefaultBadge).isFalse()
+
+                defaultPaymentMethodSource.value = initialPaymentMethods[0].id
+                updatedState = awaitItem()
+                assertThat(updatedState.paymentMethods[0].shouldShowDefaultBadge).isTrue()
+                assertThat(updatedState.paymentMethods[1].shouldShowDefaultBadge).isFalse()
+                assertThat(updatedState.paymentMethods[2].shouldShowDefaultBadge).isFalse()
+
+                defaultPaymentMethodSource.value = initialPaymentMethods[1].id
+                updatedState = awaitItem()
+                assertThat(updatedState.paymentMethods[0].shouldShowDefaultBadge).isFalse()
+                assertThat(updatedState.paymentMethods[1].shouldShowDefaultBadge).isTrue()
+                assertThat(updatedState.paymentMethods[2].shouldShowDefaultBadge).isFalse()
+
+                defaultPaymentMethodSource.value = null
+                updatedState = awaitItem()
+                assertThat(updatedState.paymentMethods[0].shouldShowDefaultBadge).isFalse()
+                assertThat(updatedState.paymentMethods[1].shouldShowDefaultBadge).isFalse()
+                assertThat(updatedState.paymentMethods[2].shouldShowDefaultBadge).isFalse()
+            }
+        }
+    }
+
     private val notImplemented: () -> Nothing = { throw AssertionError("Not implemented") }
 
     private fun runScenario(
@@ -262,7 +294,7 @@ class DefaultManageScreenInteractorTest {
         val canEdit = MutableStateFlow(true)
         val canRemove = MutableStateFlow(true)
         val dispatcher = UnconfinedTestDispatcher()
-        val defaultPaymentMethodId = MutableStateFlow(null)
+        val defaultPaymentMethodId: MutableStateFlow<String?> = MutableStateFlow(null)
 
         val interactor = DefaultManageScreenInteractor(
             paymentMethods = paymentMethods,
@@ -292,6 +324,7 @@ class DefaultManageScreenInteractorTest {
             editingSource = editing,
             canEditSource = canEdit,
             canRemoveSource = canRemove,
+            defaultPaymentMethodSource = defaultPaymentMethodId
         ).apply {
             runTest {
                 testBlock()
@@ -304,6 +337,7 @@ class DefaultManageScreenInteractorTest {
         val paymentMethodsSource: MutableStateFlow<List<PaymentMethod>>,
         val editingSource: MutableStateFlow<Boolean>,
         val canEditSource: MutableStateFlow<Boolean>,
-        val canRemoveSource: MutableStateFlow<Boolean,>
+        val canRemoveSource: MutableStateFlow<Boolean>,
+        val defaultPaymentMethodSource: MutableStateFlow<String?>,
     )
 }
