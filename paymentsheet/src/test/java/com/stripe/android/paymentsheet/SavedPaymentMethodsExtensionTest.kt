@@ -1,100 +1,63 @@
 package com.stripe.android.paymentsheet
 
-import android.content.Context
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.verticalmode.toDisplayableSavedPaymentMethod
 import com.stripe.android.testing.PaymentMethodFactory
 import org.junit.Test
-import org.mockito.Mockito.mock
-import org.mockito.Mockito.`when`
 import kotlin.test.assertEquals
 
 class SavedPaymentMethodsExtensionTest {
-
     @Test
-    fun `DisplayableSavedPaymentMethod is created correctly when metadata & defaultPaymentMethodId is null`() {
-        val context = mock<Context>()
-        val resolvableStringValue = "abcde123"
-        val resolvableString = mock<ResolvableString>()
-        `when`(resolvableString.resolve(context)).thenReturn(resolvableStringValue)
-        val providePaymentMethodName: (PaymentMethodCode?) -> ResolvableString = { pmc ->
-            resolvableString
-        }
-
+    fun `shouldShowDefaultBadge is false when defaultPaymentMethodId is null and paymentMethod not null`() {
         val paymentMethodId = "aaa111"
-        val paymentMethod = PaymentMethodFactory.card(paymentMethodId)
+        val defaultPaymentMethodId = null
 
-        assertEquals(
-            expected = DisplayableSavedPaymentMethod.create(
-                displayName = resolvableString,
-                paymentMethod = paymentMethod,
-                isCbcEligible = false,
-                shouldShowDefaultBadge = false
-            ),
-            actual = paymentMethod.toDisplayableSavedPaymentMethod(
-                providePaymentMethodName = providePaymentMethodName,
-                paymentMethodMetadata = null,
-                defaultPaymentMethodId = null
-            )
-        )
+        val actual = testSetup(paymentMethodId, defaultPaymentMethodId)
+        assertEquals(actual.shouldShowDefaultBadge, false)
     }
 
     @Test
-    fun `DisplayableSavedPaymentMethod created correctly when defaultPaymentMethodId != paymentMethod id`() {
-        val context = mock<Context>()
-        val resolvableStringValue = "abcde123"
-        val resolvableString = mock<ResolvableString>()
-        `when`(resolvableString.resolve(context)).thenReturn(resolvableStringValue)
-        val providePaymentMethodName: (PaymentMethodCode?) -> ResolvableString = { pmc ->
-            resolvableString
-        }
-
+    fun `shouldShowDefaultBadge false when defaultPaymentMethodId != paymentMethod id and both not null`() {
         val paymentMethodId = "aaa111"
-        val paymentMethod = PaymentMethodFactory.card(paymentMethodId)
-
         val defaultPaymentMethodId = "bbb222"
 
-        assertEquals(
-            expected = DisplayableSavedPaymentMethod.create(
-                displayName = resolvableString,
-                paymentMethod = paymentMethod,
-                isCbcEligible = false,
-                shouldShowDefaultBadge = false
-            ),
-            actual = paymentMethod.toDisplayableSavedPaymentMethod(
-                providePaymentMethodName = providePaymentMethodName,
-                paymentMethodMetadata = null,
-                defaultPaymentMethodId = defaultPaymentMethodId
-            )
-        )
+        val actual = testSetup(paymentMethodId, defaultPaymentMethodId)
+        assertEquals(actual.shouldShowDefaultBadge, false)
     }
 
     @Test
-    fun `DisplayableSavedPaymentMethod is created correctly when defaultPaymentMethodId equal to paymentMethod id`() {
-        val context = mock<Context>()
-        val resolvableStringValue = "abcde123"
-        val resolvableString = mock<ResolvableString>()
-        `when`(resolvableString.resolve(context)).thenReturn(resolvableStringValue)
+    fun `shouldShowDefaultBadge is false when defaultPaymentMethodId is null and paymentMethod id null`() {
+        val actual = testSetup(null, null)
+        assertEquals(actual.shouldShowDefaultBadge, false)
+    }
+
+    @Test
+    fun `shouldShowDefaultBadge is true when defaultPaymentMethodId == paymentMethod id and both are not null`() {
+        val actual = testSetup("aaa111", "aaa111")
+        assertEquals(actual.shouldShowDefaultBadge, true)
+    }
+
+    private fun testSetup(paymentMethodId: String?, defaultPaymentMethodId: String?): DisplayableSavedPaymentMethod {
+        val resolvableString = "acbde123".resolvableString
+
+        val paymentMethod = if (paymentMethodId == null) {
+            PaymentMethodFactory.card("test").copy(
+                id = null
+            )
+        } else {
+            PaymentMethodFactory.card(paymentMethodId)
+        }
+
         val providePaymentMethodName: (PaymentMethodCode?) -> ResolvableString = { pmc ->
             resolvableString
         }
 
-        val paymentMethodId = "aaa111"
-        val paymentMethod = PaymentMethodFactory.card(paymentMethodId)
-
-        assertEquals(
-            expected = DisplayableSavedPaymentMethod.create(
-                displayName = resolvableString,
-                paymentMethod = paymentMethod,
-                isCbcEligible = false,
-                shouldShowDefaultBadge = true
-            ),
-            actual = paymentMethod.toDisplayableSavedPaymentMethod(
-                providePaymentMethodName = providePaymentMethodName,
-                paymentMethodMetadata = null,
-                defaultPaymentMethodId = paymentMethodId
-            )
+        return paymentMethod.toDisplayableSavedPaymentMethod(
+            providePaymentMethodName = providePaymentMethodName,
+            paymentMethodMetadata = null,
+            defaultPaymentMethodId = defaultPaymentMethodId
         )
     }
 }

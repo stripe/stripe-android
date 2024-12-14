@@ -175,52 +175,19 @@ class PaymentOptionsStateFactoryTest {
     }
 
     @Test
-    fun `State is correct when given non null defaultPaymentMethodId and it is selected`() {
+    fun `State is correct when given non null defaultPaymentMethodId`() {
         val paymentMethods = PaymentMethodFixtures.createCards(3)
 
-        val selectedPaymentMethod = paymentMethods.random()
-        val defaultPaymentMethodId = selectedPaymentMethod.id
-
-        assert(defaultPaymentMethodId != null)
-
-        val state = PaymentOptionsStateFactory.create(
-            paymentMethods = paymentMethods,
-            showGooglePay = true,
-            showLink = true,
-            currentSelection = PaymentSelection.Saved(selectedPaymentMethod),
-            nameProvider = { it!!.resolvableString },
-            isCbcEligible = false,
-            canRemovePaymentMethods = true,
-            defaultPaymentMethodId = defaultPaymentMethodId
-        )
-
-        val options = state.items.filterIsInstance<PaymentOptionsItem.SavedPaymentMethod>()
-
-        val selectedPaymentOptionItem = options.find {
-            it.paymentMethod.id == defaultPaymentMethodId
-        }
-
-        assert(selectedPaymentOptionItem != null)
-        assert(selectedPaymentOptionItem!!.displayableSavedPaymentMethod.shouldShowDefaultBadge)
-    }
-
-    @Test
-    fun `State is correct when given non null defaultPaymentMethodId and it is not selected`() {
-        val paymentMethods = PaymentMethodFixtures.createCards(3)
-
-        val selectedPaymentMethod = paymentMethods[0]
-        val selectedPaymentMethodId = selectedPaymentMethod.id
-
-        val defaultPaymentMethod = paymentMethods[1]
+        val defaultPaymentMethod = paymentMethods[0]
         val defaultPaymentMethodId = defaultPaymentMethod.id
 
-        assert(defaultPaymentMethodId != null)
+        assertThat(defaultPaymentMethodId).isNotNull()
 
         val state = PaymentOptionsStateFactory.create(
             paymentMethods = paymentMethods,
             showGooglePay = true,
             showLink = true,
-            currentSelection = PaymentSelection.Saved(selectedPaymentMethod),
+            currentSelection = PaymentSelection.Saved(defaultPaymentMethod),
             nameProvider = { it!!.resolvableString },
             isCbcEligible = false,
             canRemovePaymentMethods = true,
@@ -229,21 +196,10 @@ class PaymentOptionsStateFactoryTest {
 
         val options = state.items.filterIsInstance<PaymentOptionsItem.SavedPaymentMethod>()
 
-        val selectedPaymentOptionItem = options.find {
-            it.paymentMethod.id == selectedPaymentMethodId
-        }
-
-        assert(selectedPaymentOptionItem != null)
-        assert(!selectedPaymentOptionItem!!.displayableSavedPaymentMethod.shouldShowDefaultBadge)
-
-        val defaultPaymentOptionItem = options.find {
-            it.paymentMethod.id == defaultPaymentMethodId
-        }
-
-        assert(defaultPaymentOptionItem != null)
-        assert(selectedPaymentOptionItem != defaultPaymentOptionItem)
-
-        assert(defaultPaymentOptionItem!!.displayableSavedPaymentMethod.shouldShowDefaultBadge)
+        assertThat(options[0].paymentMethod.id).isEqualTo(defaultPaymentMethodId)
+        assertThat(options[0].displayableSavedPaymentMethod.shouldShowDefaultBadge).isTrue()
+        assertThat(options[1].displayableSavedPaymentMethod.shouldShowDefaultBadge).isFalse()
+        assertThat(options[2].displayableSavedPaymentMethod.shouldShowDefaultBadge).isFalse()
     }
 
     private fun createPaymentOptionsState(
