@@ -474,6 +474,7 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
             nameProvider = { it!!.resolvableString },
             isCbcEligible = true,
             canRemovePaymentMethods = true,
+            defaultPaymentMethodId = null
         ).items
     }
 

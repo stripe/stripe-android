@@ -99,7 +99,8 @@ internal object PaymentSheetFixtures {
             canRemovePaymentMethods = true,
             canRemoveLastPaymentMethod = true,
             canRemoveDuplicates = false,
-        )
+        ),
+        defaultPaymentMethodId = null
     )
 
     internal val CONFIG_GOOGLEPAY
@@ -162,7 +163,8 @@ internal object PaymentSheetFixtures {
                         canRemovePaymentMethods = true,
                         canRemoveLastPaymentMethod = true,
                         canRemoveDuplicates = false,
-                    )
+                    ),
+                    defaultPaymentMethodId = null
                 ),
                 config = config.asCommonConfiguration(),
                 paymentSelection = paymentSelection,

@@ -1084,7 +1084,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             canRemove = canRemove,
             reportPaymentMethodTypeSelected = reportPaymentMethodTypeSelected,
             reportFormShown = reportFormShown,
-            isLiveMode = true,
+            isLiveMode = true
         )
 
         TestParams(

@@ -177,7 +177,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 },
                 reportPaymentMethodTypeSelected = viewModel.eventReporter::onSelectPaymentMethod,
                 reportFormShown = viewModel.eventReporter::onPaymentMethodFormShown,
-                isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
+                isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode
             )
         }
     }
@@ -341,7 +341,11 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         mostRecentlySelectedSavedPaymentMethod: PaymentMethod?,
     ): DisplayableSavedPaymentMethod? {
         val paymentMethodToDisplay = mostRecentlySelectedSavedPaymentMethod ?: paymentMethods?.firstOrNull()
-        return paymentMethodToDisplay?.toDisplayableSavedPaymentMethod(providePaymentMethodName, paymentMethodMetadata)
+        return paymentMethodToDisplay?.toDisplayableSavedPaymentMethod(
+            providePaymentMethodName,
+            paymentMethodMetadata,
+            defaultPaymentMethodId = null
+        )
     }
 
     private fun getAvailableSavedPaymentMethodAction(
