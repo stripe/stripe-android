@@ -42,13 +42,7 @@ class SavedPaymentMethodsExtensionTest {
     private fun testSetup(paymentMethodId: String?, defaultPaymentMethodId: String?): DisplayableSavedPaymentMethod {
         val resolvableString = "acbde123".resolvableString
 
-        val paymentMethod = if (paymentMethodId == null) {
-            PaymentMethodFactory.card("test").copy(
-                id = null
-            )
-        } else {
-            PaymentMethodFactory.card(paymentMethodId)
-        }
+        val paymentMethod = PaymentMethodFactory.card(paymentMethodId)
 
         val providePaymentMethodName: (PaymentMethodCode?) -> ResolvableString = { pmc ->
             resolvableString
