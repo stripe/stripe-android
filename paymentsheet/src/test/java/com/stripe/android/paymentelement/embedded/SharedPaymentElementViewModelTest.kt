@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement.embedded
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.Turbine
 import app.cash.turbine.test
@@ -13,6 +14,7 @@ import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.paymentMethodType
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import kotlinx.coroutines.test.runTest
@@ -65,6 +67,47 @@ internal class SharedPaymentElementViewModelTest {
     }
 
     @Test
+    fun `Updating selection updates confirmationState`() = testScenario {
+        val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
+        configurationHandler.emit(
+            Result.success(
+                PaymentElementLoader.State(
+                    config = configuration.asCommonConfiguration(),
+                    customer = null,
+                    linkState = null,
+                    paymentSelection = PaymentSelection.GooglePay,
+                    validationError = null,
+                    paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                        stripeIntent = PaymentIntentFixtures.PI_SUCCEEDED,
+                        billingDetailsCollectionConfiguration = configuration
+                            .billingDetailsCollectionConfiguration,
+                        allowsDelayedPaymentMethods = configuration.allowsDelayedPaymentMethods,
+                        allowsPaymentMethodsRequiringShippingAddress = configuration
+                            .allowsPaymentMethodsRequiringShippingAddress,
+                        isGooglePayReady = true,
+                        cbcEligibility = CardBrandChoiceEligibility.Ineligible,
+                    ),
+                )
+            )
+        )
+
+        assertThat(viewModel.confirmationState?.selection?.paymentMethodType).isNull()
+
+        assertThat(
+            viewModel.configure(
+                PaymentSheet.IntentConfiguration(
+                    PaymentSheet.IntentConfiguration.Mode.Payment(5000, "USD"),
+                ),
+                configuration = configuration,
+            )
+        ).isInstanceOf<EmbeddedPaymentElement.ConfigureResult.Succeeded>()
+
+        assertThat(viewModel.confirmationState?.selection?.paymentMethodType).isEqualTo("google_pay")
+        selectionHolder.set(null)
+        assertThat(viewModel.confirmationState?.selection?.paymentMethodType).isNull()
+    }
+
+    @Test
     fun `configure maps success result`() = testScenario {
         val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
         configurationHandler.emit(
@@ -103,7 +146,7 @@ internal class SharedPaymentElementViewModelTest {
     }
 
     @Test
-    fun `configure emits payment option`() = testScenario {
+    fun `configure emits payment option and sets initial selection`() = testScenario {
         val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
         configurationHandler.emit(
             Result.success(
@@ -127,6 +170,7 @@ internal class SharedPaymentElementViewModelTest {
             )
         )
 
+        assertThat(selectionHolder.selection.value?.paymentMethodType).isNull()
         viewModel.paymentOption.test {
             assertThat(awaitItem()).isNull()
 
@@ -141,6 +185,7 @@ internal class SharedPaymentElementViewModelTest {
 
             assertThat(awaitItem()?.paymentMethodType).isEqualTo("google_pay")
         }
+        assertThat(selectionHolder.selection.value?.paymentMethodType).isEqualTo("google_pay")
     }
 
     @Test
@@ -166,6 +211,7 @@ internal class SharedPaymentElementViewModelTest {
             iconLoader = mock(),
             context = ApplicationProvider.getApplicationContext(),
         )
+        val selectionHolder = EmbeddedSelectionHolder(SavedStateHandle())
 
         runTest {
             val viewModel = SharedPaymentElementViewModel(
@@ -173,11 +219,13 @@ internal class SharedPaymentElementViewModelTest {
                 ioContext = testScheduler,
                 configurationHandler = configurationHandler,
                 paymentOptionDisplayDataFactory = paymentOptionDisplayDataFactory,
+                selectionHolder = selectionHolder,
             )
 
             Scenario(
                 configurationHandler = configurationHandler,
                 viewModel = viewModel,
+                selectionHolder = selectionHolder,
             ).block()
         }
 
@@ -188,6 +236,7 @@ internal class SharedPaymentElementViewModelTest {
     private class Scenario(
         val configurationHandler: FakeEmbeddedConfigurationHandler,
         val viewModel: SharedPaymentElementViewModel,
+        val selectionHolder: EmbeddedSelectionHolder,
     )
 
     private class FakeEmbeddedConfigurationHandler : EmbeddedConfigurationHandler {
