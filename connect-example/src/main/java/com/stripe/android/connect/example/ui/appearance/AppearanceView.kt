@@ -1,7 +1,6 @@
 package com.stripe.android.connect.example.ui.appearance
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -70,24 +69,24 @@ private fun SelectAnAppearance(
     onAppearanceSelected: (AppearanceInfo.AppearanceId) -> Unit,
 ) {
     Column(
-        modifier = Modifier.padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        modifier = Modifier.padding(vertical = 16.dp),
     ) {
         appearances.forEach { appearance ->
             Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
                 modifier = Modifier
+                    .clickable { onAppearanceSelected(appearance) }
                     .fillMaxWidth()
-                    .clickable { onAppearanceSelected(appearance) },
+                    .padding(vertical = 8.dp, horizontal = 16.dp),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 RadioButton(
                     selected = appearance == selectedAppearance,
                     onClick = null, // onClick handled by row
                 )
-                Column {
-                    Text(text = stringResource(appearance.displayNameRes))
-                }
+                Text(
+                    modifier = Modifier.padding(start = 16.dp),
+                    text = stringResource(appearance.displayNameRes)
+                )
             }
         }
     }

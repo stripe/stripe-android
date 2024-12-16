@@ -2,6 +2,7 @@ package com.stripe.android.link.repositories
 
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSessionSignup
@@ -90,4 +91,13 @@ internal interface LinkRepository {
         consumerSessionClientSecret: String,
         consumerPublishableKey: String?
     ): Result<Unit>
+
+    /**
+     * Update an existing payment method in the consumer account.
+     */
+    suspend fun updatePaymentDetails(
+        updateParams: ConsumerPaymentDetailsUpdateParams,
+        consumerSessionClientSecret: String,
+        consumerPublishableKey: String?
+    ): Result<ConsumerPaymentDetails>
 }

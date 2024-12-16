@@ -17,7 +17,7 @@ import com.stripe.android.paymentsheet.ui.TEST_TAG_REMOVE_BADGE
 
 class SavedPaymentMethodsPage(private val composeTestRule: ComposeTestRule) {
     fun waitUntilVisible() {
-        composeTestRule.waitUntil {
+        composeTestRule.waitUntil(timeoutMillis = 5_000) {
             composeTestRule
                 .onAllNodes(hasTestTag(SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG))
                 .fetchSemanticsNodes()

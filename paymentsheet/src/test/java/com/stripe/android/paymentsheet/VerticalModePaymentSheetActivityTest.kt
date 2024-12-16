@@ -258,7 +258,7 @@ internal class VerticalModePaymentSheetActivityTest {
 
         editPage.assertIsVisible()
         editPage.setCardBrand("Visa")
-        editPage.update()
+        editPage.update(usingNewScreen = false)
         managePage.waitUntilVisible()
         managePage.clickDone()
         verticalModePage.assertHasSelectedSavedPaymentMethod("pm_12345", cardBrand = "visa")

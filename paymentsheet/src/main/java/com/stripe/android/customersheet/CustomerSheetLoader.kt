@@ -62,7 +62,10 @@ internal class DefaultCustomerSheetLoader(
         configuration: CustomerSheet.Configuration
     ): Result<CustomerSheetState.Full> = workContext.runCatching {
         val initializationDataSource = retrieveInitializationDataSource().getOrThrow()
-        var customerSheetSession = initializationDataSource.loadCustomerSheetSession().toResult().getOrThrow()
+        var customerSheetSession = initializationDataSource
+            .loadCustomerSheetSession(configuration)
+            .toResult()
+            .getOrThrow()
 
         val filteredPaymentMethods = customerSheetSession.paymentMethods.filter {
             PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance).isAccepted(it)

@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -18,12 +19,12 @@ import com.stripe.android.common.ui.BottomSheetLoadingIndicator
 import com.stripe.android.common.ui.PrimaryButton
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.customersheet.CustomerSheetViewAction
+import com.stripe.android.customersheet.CustomerSheetViewModel
 import com.stripe.android.customersheet.CustomerSheetViewState
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.PaymentOptionsStateFactory
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.ui.EditPaymentMethod
 import com.stripe.android.paymentsheet.ui.ErrorMessage
 import com.stripe.android.paymentsheet.ui.Mandate
 import com.stripe.android.paymentsheet.ui.PaymentElement
@@ -39,7 +40,21 @@ import com.stripe.android.ui.core.elements.events.CardNumberCompletedEventReport
 import com.stripe.android.ui.core.elements.events.LocalCardBrandDisallowedReporter
 import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventReporter
 import com.stripe.android.uicore.strings.resolve
+import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.R as PaymentsCoreR
+
+@Composable
+internal fun CustomerSheetScreen(
+    viewModel: CustomerSheetViewModel,
+) {
+    val viewState by viewModel.viewState.collectAsState()
+
+    CustomerSheetScreen(
+        viewState = viewState,
+        viewActionHandler = viewModel::handleViewAction,
+        paymentMethodNameProvider = viewModel::providePaymentMethodName,
+    )
+}
 
 @Composable
 internal fun CustomerSheetScreen(
@@ -82,12 +97,6 @@ internal fun CustomerSheetScreen(
                             viewState = viewState,
                             viewActionHandler = viewActionHandler,
                             displayForm = displayAddForm,
-                        )
-                        PaymentSheetContentPadding()
-                    }
-                    is CustomerSheetViewState.EditPaymentMethod -> {
-                        EditPaymentMethod(
-                            viewState = viewState,
                         )
                         PaymentSheetContentPadding()
                     }
@@ -291,28 +300,6 @@ internal fun AddPaymentMethod(
                 .fillMaxWidth()
                 .padding(top = 8.dp)
                 .padding(horizontal = horizontalPadding),
-        )
-    }
-}
-
-@Composable
-private fun EditPaymentMethod(
-    viewState: CustomerSheetViewState.EditPaymentMethod,
-    modifier: Modifier = Modifier,
-) {
-    val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
-
-    Column(modifier) {
-        H4Text(
-            text = stringResource(PaymentsCoreR.string.stripe_title_update_card),
-            modifier = Modifier
-                .padding(bottom = 20.dp)
-                .padding(horizontal = horizontalPadding)
-        )
-
-        EditPaymentMethod(
-            interactor = viewState.editPaymentMethodInteractor,
-            modifier = modifier,
         )
     }
 }

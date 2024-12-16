@@ -7,6 +7,7 @@ import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -31,6 +32,7 @@ internal open class FakeLinkAccountManager : LinkAccountManager {
         value = TestFactory.LINK_NEW_PAYMENT_DETAILS
     )
     var listPaymentDetailsResult: Result<ConsumerPaymentDetails> = Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS)
+    var updatePaymentDetailsResult = Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS)
     var linkAccountFromLookupResult: LinkAccount? = null
     override var consumerPublishableKey: String? = null
 
@@ -87,4 +89,9 @@ internal open class FakeLinkAccountManager : LinkAccountManager {
     }
 
     override suspend fun deletePaymentDetails(paymentDetailsId: String) = Result.success(Unit)
+    override suspend fun updatePaymentDetails(
+        updateParams: ConsumerPaymentDetailsUpdateParams
+    ): Result<ConsumerPaymentDetails> {
+        return updatePaymentDetailsResult
+    }
 }

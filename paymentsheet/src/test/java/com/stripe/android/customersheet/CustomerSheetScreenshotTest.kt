@@ -19,7 +19,6 @@ import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
-import com.stripe.android.paymentsheet.ui.DefaultEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.utils.ViewModelStoreOwnerContext
 import com.stripe.android.screenshottesting.FontSize
@@ -27,7 +26,6 @@ import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
-import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.SetupIntentFactory
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
@@ -315,79 +313,34 @@ internal class CustomerSheetScreenshotTest {
     }
 
     @Test
-    fun testEditScreen() {
-        val paymentMethod = PaymentMethodFactory.card().copy(
-            card = PaymentMethod.Card(
-                last4 = "1001",
-                networks = PaymentMethod.Card.Networks(
-                    available = setOf(CardBrand.CartesBancaires.code, CardBrand.Visa.code),
-                ),
-            )
-        )
-
-        val editPaymentMethod = CustomerSheetViewState.EditPaymentMethod(
-            editPaymentMethodInteractor = DefaultEditPaymentMethodViewInteractor(
-                initialPaymentMethod = paymentMethod,
-                displayName = "Card".resolvableString,
-                removeExecutor = { null },
-                updateExecutor = { pm, _ -> Result.success(pm) },
-                eventHandler = {},
-                canRemove = true,
-                isLiveMode = true,
-                cardBrandFilter = DefaultCardBrandFilter
-            ),
-            isLiveMode = true,
-        )
-
-        paparazzi.snapshot {
-            CustomerSheetScreen(
-                viewState = editPaymentMethod,
-                paymentMethodNameProvider = { it!!.resolvableString },
-            )
-        }
-    }
-
-    @Test
-    fun testEditScreenWithoutRemove() {
-        val paymentMethod = PaymentMethodFactory.card().copy(
-            card = PaymentMethod.Card(
-                last4 = "1001",
-                networks = PaymentMethod.Card.Networks(
-                    available = setOf(CardBrand.CartesBancaires.code, CardBrand.Visa.code),
-                ),
-            )
-        )
-
-        val editPaymentMethod = CustomerSheetViewState.EditPaymentMethod(
-            editPaymentMethodInteractor = DefaultEditPaymentMethodViewInteractor(
-                initialPaymentMethod = paymentMethod,
-                displayName = "Card".resolvableString,
-                removeExecutor = { null },
-                updateExecutor = { pm, _ -> Result.success(pm) },
-                eventHandler = {},
-                canRemove = false,
-                isLiveMode = true,
-                cardBrandFilter = DefaultCardBrandFilter
-            ),
-            isLiveMode = true,
-        )
-
-        paparazzi.snapshot {
-            CustomerSheetScreen(
-                viewState = editPaymentMethod,
-                paymentMethodNameProvider = { it!!.resolvableString },
-            )
-        }
-    }
-
-    @Test
     fun testUpdatePaymentMethodScreen() {
-        val updatePaymentMethod = CustomerSheetViewState.UpdatePaymentMethod(
+        paparazzi.snapshot {
+            CustomerSheetScreen(
+                viewState = createUpdatePaymentMethodViewState(canRemove = true),
+                paymentMethodNameProvider = { it!!.resolvableString },
+            )
+        }
+    }
+
+    @Test
+    fun testUpdatePaymentMethodScreen_withoutRemove() {
+        paparazzi.snapshot {
+            CustomerSheetScreen(
+                viewState = createUpdatePaymentMethodViewState(canRemove = false),
+                paymentMethodNameProvider = { it!!.resolvableString },
+            )
+        }
+    }
+
+    private fun createUpdatePaymentMethodViewState(
+        canRemove: Boolean,
+    ): CustomerSheetViewState {
+        return CustomerSheetViewState.UpdatePaymentMethod(
             updatePaymentMethodInteractor = DefaultUpdatePaymentMethodInteractor(
                 displayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
                 removeExecutor = { null },
                 updateExecutor = { paymentMethod, _ -> Result.success(paymentMethod) },
-                canRemove = true,
+                canRemove = canRemove,
                 isLiveMode = true,
                 cardBrandFilter = DefaultCardBrandFilter,
                 onBrandChoiceOptionsDismissed = {},
@@ -395,12 +348,5 @@ internal class CustomerSheetScreenshotTest {
             ),
             isLiveMode = true,
         )
-
-        paparazzi.snapshot {
-            CustomerSheetScreen(
-                viewState = updatePaymentMethod,
-                paymentMethodNameProvider = { it!!.resolvableString },
-            )
-        }
     }
 }

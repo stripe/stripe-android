@@ -22,34 +22,10 @@ internal class EmbeddedContentScreenshotTest {
     }
 
     @Test
-    fun displaysVerticalModeListWithError() {
-        val metadata = PaymentMethodMetadataFactory.create()
-        val interactor = FakePaymentMethodVerticalLayoutInteractor.create(metadata)
-        val content = EmbeddedContent(interactor, error = "Some error".resolvableString)
-        paparazziRule.snapshot {
-            content.Content()
-        }
-    }
-
-    @Test
     fun displaysVerticalModeListWithMandate() {
         val metadata = PaymentMethodMetadataFactory.create()
         val interactor = FakePaymentMethodVerticalLayoutInteractor.create(metadata)
         val content = EmbeddedContent(interactor, mandate = "Some mandate".resolvableString)
-        paparazziRule.snapshot {
-            content.Content()
-        }
-    }
-
-    @Test
-    fun displaysVerticalModeListWithErrorAndMandate() {
-        val metadata = PaymentMethodMetadataFactory.create()
-        val interactor = FakePaymentMethodVerticalLayoutInteractor.create(metadata)
-        val content = EmbeddedContent(
-            interactor = interactor,
-            error = "Some error".resolvableString,
-            mandate = "Some mandate".resolvableString
-        )
         paparazziRule.snapshot {
             content.Content()
         }

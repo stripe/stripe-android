@@ -1,11 +1,23 @@
-public abstract interface class com/stripe/android/connect/AccountOnboardingListener : com/stripe/android/connect/StripeEmbeddedComponentListener {
-	public abstract fun onExit ()V
+public final class com/stripe/android/connect/AccountOnboardingProps$CollectionOptions$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/connect/AccountOnboardingProps$CollectionOptions;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/connect/AccountOnboardingProps$CollectionOptions;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/connect/AccountOnboardingListener$DefaultImpls {
-	public static fun onExit (Lcom/stripe/android/connect/AccountOnboardingListener;)V
-	public static fun onLoadError (Lcom/stripe/android/connect/AccountOnboardingListener;Ljava/lang/Throwable;)V
-	public static fun onLoaderStart (Lcom/stripe/android/connect/AccountOnboardingListener;)V
+public final class com/stripe/android/connect/AccountOnboardingProps$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/connect/AccountOnboardingProps;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/connect/AccountOnboardingProps;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/connect/AccountOnboardingView : android/widget/FrameLayout, com/stripe/android/connect/webview/StripeConnectWebViewContainer {
+	public static final field $stable I
+	public fun initialize (Lcom/stripe/android/connect/EmbeddedComponentManager;Lcom/stripe/android/connect/AccountOnboardingListener;Lcom/stripe/android/connect/AccountOnboardingProps;)V
+	public synthetic fun initialize (Lcom/stripe/android/connect/EmbeddedComponentManager;Lcom/stripe/android/connect/StripeEmbeddedComponentListener;Lcom/stripe/android/connect/ComponentProps;)V
 }
 
 public final class com/stripe/android/connect/BuildConfig {
@@ -23,12 +35,18 @@ public final class com/stripe/android/connect/EmbeddedComponentManager$Configura
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public abstract interface class com/stripe/android/connect/PayoutsListener : com/stripe/android/connect/StripeEmbeddedComponentListener {
+public final class com/stripe/android/connect/EmptyProps$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/connect/EmptyProps;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/connect/EmptyProps;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/connect/PayoutsListener$DefaultImpls {
-	public static fun onLoadError (Lcom/stripe/android/connect/PayoutsListener;Ljava/lang/Throwable;)V
-	public static fun onLoaderStart (Lcom/stripe/android/connect/PayoutsListener;)V
+public final class com/stripe/android/connect/PayoutsView : android/widget/FrameLayout, com/stripe/android/connect/webview/StripeConnectWebViewContainer {
+	public static final field $stable I
+	public fun initialize (Lcom/stripe/android/connect/EmbeddedComponentManager;Lcom/stripe/android/connect/PayoutsListener;Lcom/stripe/android/connect/EmptyProps;)V
+	public synthetic fun initialize (Lcom/stripe/android/connect/EmbeddedComponentManager;Lcom/stripe/android/connect/StripeEmbeddedComponentListener;Lcom/stripe/android/connect/ComponentProps;)V
 }
 
 public abstract interface class com/stripe/android/connect/StripeEmbeddedComponentListener {

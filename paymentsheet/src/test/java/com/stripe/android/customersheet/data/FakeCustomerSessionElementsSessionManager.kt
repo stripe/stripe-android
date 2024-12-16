@@ -18,6 +18,7 @@ internal class FakeCustomerSessionElementsSessionManager(
     private val customerSheetComponent: ElementsSession.Customer.Components.CustomerSheet =
         ElementsSession.Customer.Components.CustomerSheet.Enabled(
             isPaymentMethodRemoveEnabled = true,
+            canRemoveLastPaymentMethod = true,
         ),
     private val customer: ElementsSession.Customer = ElementsSession.Customer(
         session = ElementsSession.Customer.Session(
