@@ -82,7 +82,7 @@ internal fun PaymentMethodRowButton(
             ),
         trailingContent = trailingContent,
         onClick = onClick
-    ) {
+    ) { displayTrailingContent ->
         Row(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -97,7 +97,7 @@ internal fun PaymentMethodRowButton(
                 PromoBadge(promoText)
             }
 
-            if (trailingContent != null && style !is RowStyle.FlatWithCheckmark) {
+            if (trailingContent != null && displayTrailingContent) {
                 trailingContent()
             }
         }
@@ -114,7 +114,7 @@ private fun RowButtonOuterContent(
     modifier: Modifier,
     trailingContent: @Composable (RowScope.() -> Unit)?,
     onClick: () -> Unit,
-    rowContent: @Composable () -> Unit
+    rowContent: @Composable (displayTrailingContent: Boolean) -> Unit
 ) {
     when (style) {
         is RowStyle.FloatingButton -> {
@@ -128,7 +128,7 @@ private fun RowButtonOuterContent(
                 verticalArrangement = Arrangement.Center,
                 modifier = modifier,
             ) {
-                rowContent()
+                rowContent(true)
             }
         }
         is RowStyle.FlatWithCheckmark -> {
@@ -143,7 +143,7 @@ private fun RowButtonOuterContent(
                 style = style,
                 modifier = modifier
             ) {
-                rowContent()
+                rowContent(false)
             }
         }
         is RowStyle.FlatWithRadio -> {
@@ -159,7 +159,7 @@ private fun RowButtonOuterContent(
                 style = style,
                 modifier = modifier
             ) {
-                rowContent()
+                rowContent(true)
             }
         }
     }
