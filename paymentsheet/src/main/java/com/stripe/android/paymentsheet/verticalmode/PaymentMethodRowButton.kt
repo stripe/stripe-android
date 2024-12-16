@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.verticalmode
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -42,7 +41,6 @@ import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle
 import com.stripe.android.paymentsheet.ui.PaymentMethodIcon
 import com.stripe.android.paymentsheet.ui.PromoBadge
 import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconWidth
-import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.getBorderStroke
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.stripeColors
@@ -81,7 +79,7 @@ internal fun PaymentMethodRowButton(
                 selected = isSelected,
                 enabled = isClickable,
                 onClick = onClick
-            ).background(StripeTheme.getColors(isSystemInDarkTheme()).component),
+            ),
         trailingContent = trailingContent,
         onClick = onClick
     ) {
@@ -205,7 +203,10 @@ private fun RowButtonRadioOuterContent(
     style: RowStyle.FlatWithRadio,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    Row(modifier) {
+    Row(
+        modifier = modifier
+            .background(MaterialTheme.stripeColors.component)
+    ) {
         RadioButton(
             selected = isSelected,
             onClick = onClick,
@@ -240,7 +241,8 @@ private fun RowButtonCheckmarkOuterContent(
     content: @Composable ColumnScope.() -> Unit,
 ) {
     Row(
-        modifier = modifier,
+        modifier = modifier
+            .background(MaterialTheme.stripeColors.component),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(
@@ -344,7 +346,7 @@ private fun ButtonPreview() {
             subtitle = null,
             promoText = null,
             onClick = {},
-            style = RowStyle.FlatWithCheckmark.defaultLight,
+            style = RowStyle.FloatingButton.default,
             trailingContent = {
                 Text("Edit")
             }
