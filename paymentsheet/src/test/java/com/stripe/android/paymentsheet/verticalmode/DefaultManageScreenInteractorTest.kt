@@ -248,7 +248,7 @@ class DefaultManageScreenInteractorTest {
     @Test
     fun `displayableSavedPaymentMethods updated correctly when defaultPaymentMethodId updated`() {
         val initialPaymentMethods = PaymentMethodFixtures.createCards(3)
-        runScenario(initialPaymentMethods, currentSelection = null, handleBackPressed = {}) {
+        runScenario(initialPaymentMethods, currentSelection = null) {
             interactor.state.test {
                 defaultPaymentMethodSource.value = null
                 var updatedState = awaitItem()
