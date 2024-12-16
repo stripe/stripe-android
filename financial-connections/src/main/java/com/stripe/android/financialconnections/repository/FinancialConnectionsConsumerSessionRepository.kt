@@ -17,6 +17,7 @@ import com.stripe.android.model.ConsumerSessionSignup
 import com.stripe.android.model.ConsumerSignUpConsentAction.EnteredPhoneNumberClickedSaveToLink
 import com.stripe.android.model.CustomEmailType
 import com.stripe.android.model.SharePaymentDetails
+import com.stripe.android.model.UpdateAvailableIncentives
 import com.stripe.android.model.VerificationType
 import com.stripe.android.repository.ConsumersApiService
 import kotlinx.coroutines.sync.Mutex
@@ -68,6 +69,11 @@ internal interface FinancialConnectionsConsumerSessionRepository {
         expectedPaymentMethodType: String,
         billingPhone: String?,
     ): SharePaymentDetails
+
+    suspend fun updateAvailableIncentives(
+        sessionId: String,
+        consumerSessionClientSecret: String,
+    ): UpdateAvailableIncentives
 
     companion object {
         operator fun invoke(
@@ -238,6 +244,18 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
         ).getOrThrow()
     }
 
+    override suspend fun updateAvailableIncentives(
+        sessionId: String,
+        consumerSessionClientSecret: String,
+    ): UpdateAvailableIncentives {
+        return consumersApiService.updateAvailableIncentives(
+            sessionId = sessionId,
+            consumerSessionClientSecret = consumerSessionClientSecret,
+            requestSurface = requestSurface,
+            requestOptions = provideApiRequestOptions(useConsumerPublishableKey = true),
+        ).getOrThrow()
+    }
+
     private suspend fun postConsumerSession(
         email: String,
         clientSecret: String
@@ -266,6 +284,9 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
         signup: ConsumerSessionSignup,
     ) {
         logger.debug("SYNC_CACHE: updating local consumer session from signUp")
-        consumerSessionRepository.storeNewConsumerSession(signup.consumerSession, signup.publishableKey)
+        consumerSessionRepository.storeNewConsumerSession(
+            consumerSession = signup.consumerSession,
+            publishableKey = signup.publishableKey,
+        )
     }
 }

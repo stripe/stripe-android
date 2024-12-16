@@ -200,6 +200,7 @@ internal class CollectBankAccountViewModel @Inject constructor(
                         paymentMethod = it,
                         last4 = result.last4,
                         bankName = result.bankName,
+                        eligibleForIncentive = result.eligibleForIncentive,
                     )
                 },
             )
