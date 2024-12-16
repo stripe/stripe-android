@@ -5,10 +5,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Text
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
-import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton
+import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle.FlatWithRadio
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.ui.core.R
@@ -17,7 +18,7 @@ import org.junit.Rule
 import org.junit.Test
 
 @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
-internal class PaymentMethodRowButtonScreenshotTest {
+internal class PaymentMethodRowRadioButtonScreenshotTest {
 
     @get:Rule
     val paparazziRule = PaparazziRule(
@@ -43,6 +44,7 @@ internal class PaymentMethodRowButtonScreenshotTest {
                 subtitle = null,
                 promoText = null,
                 onClick = {},
+                style = FlatWithRadio.defaultLight
             )
         }
     }
@@ -63,6 +65,7 @@ internal class PaymentMethodRowButtonScreenshotTest {
                 subtitle = null,
                 promoText = null,
                 onClick = {},
+                style = FlatWithRadio.defaultLight,
             )
         }
     }
@@ -83,6 +86,7 @@ internal class PaymentMethodRowButtonScreenshotTest {
                 subtitle = null,
                 promoText = null,
                 onClick = {},
+                style = FlatWithRadio.defaultLight,
             )
         }
     }
@@ -103,6 +107,7 @@ internal class PaymentMethodRowButtonScreenshotTest {
                 subtitle = "Please click me, I'm fancy",
                 promoText = null,
                 onClick = {},
+                style = FlatWithRadio.defaultLight,
             )
         }
     }
@@ -124,6 +129,7 @@ internal class PaymentMethodRowButtonScreenshotTest {
                     "forever.",
                 promoText = null,
                 onClick = {},
+                style = FlatWithRadio.defaultLight,
             )
         }
     }
@@ -144,6 +150,7 @@ internal class PaymentMethodRowButtonScreenshotTest {
                 subtitle = null,
                 promoText = null,
                 onClick = {},
+                style = FlatWithRadio.defaultLight,
                 trailingContent = {
                     Text(text = "View more")
                 }
@@ -152,49 +159,15 @@ internal class PaymentMethodRowButtonScreenshotTest {
     }
 
     @Test
-    fun testPromoText() {
-        paparazziRule.snapshot {
-            PaymentMethodRowButton(
-                isEnabled = true,
-                isSelected = false,
-                iconContent = {
-                    Image(
-                        painter = painterResource(id = R.drawable.stripe_ic_paymentsheet_pm_bank),
-                        contentDescription = null
-                    )
-                },
-                title = "Bank",
-                subtitle = null,
-                promoText = "$5",
-                onClick = {},
-            )
-        }
-    }
-
-    @Test
-    fun testPromoTextDisabled() {
-        paparazziRule.snapshot {
-            PaymentMethodRowButton(
-                isEnabled = false,
-                isSelected = false,
-                iconContent = {
-                    Image(
-                        painter = painterResource(id = R.drawable.stripe_ic_paymentsheet_pm_bank),
-                        contentDescription = null
-                    )
-                },
-                title = "Bank",
-                subtitle = null,
-                promoText = "$5",
-                onClick = {},
-            )
-        }
-    }
-
-    @Test
     fun testStyleAppearance() {
-        val style = FloatingButton(
-            spacingDp = StripeThemeDefaults.floating.spacing,
+        val style = FlatWithRadio(
+            separatorThicknessDp = StripeThemeDefaults.flat.separatorThickness,
+            separatorColor = StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
+            separatorInsetsDp = StripeThemeDefaults.flat.separatorInsets,
+            topSeparatorEnabled = StripeThemeDefaults.flat.topSeparatorEnabled,
+            bottomSeparatorEnabled = StripeThemeDefaults.flat.bottomSeparatorEnabled,
+            selectedColor = StripeThemeDefaults.colorsLight.materialColors.error.toArgb(),
+            unselectedColor = StripeThemeDefaults.colorsLight.materialColors.primary.toArgb(),
             additionalInsetsDp = 40f
         )
         paparazziRule.snapshot {
