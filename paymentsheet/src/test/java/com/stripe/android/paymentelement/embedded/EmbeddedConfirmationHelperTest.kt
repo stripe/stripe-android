@@ -73,8 +73,8 @@ internal class EmbeddedConfirmationHelperTest {
         assertThat(confirmationHandler.startTurbine.awaitItem()).isNotNull()
     }
 
-    private fun defaultLoadedState(): EmbeddedConfirmationHelper.State {
-        return EmbeddedConfirmationHelper.State(
+    private fun defaultLoadedState(): EmbeddedConfirmationStateHolder.State {
+        return EmbeddedConfirmationStateHolder.State(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
             selection = PaymentSelection.GooglePay,
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
@@ -97,7 +97,7 @@ internal class EmbeddedConfirmationHelperTest {
     }
 
     private fun testScenario(
-        loadedState: EmbeddedConfirmationHelper.State? = defaultLoadedState(),
+        loadedState: EmbeddedConfirmationStateHolder.State? = defaultLoadedState(),
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val resultCallbackTurbine = Turbine<EmbeddedPaymentElement.Result>()
