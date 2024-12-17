@@ -202,6 +202,52 @@ internal class SharedPaymentElementViewModelTest {
         ).isEqualTo(EmbeddedPaymentElement.ConfigureResult.Failed(exception))
     }
 
+    @Test
+    fun `clearPaymentOption clears selection`() = testScenario {
+        val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
+        configurationHandler.emit(
+            Result.success(
+                PaymentElementLoader.State(
+                    config = configuration.asCommonConfiguration(),
+                    customer = null,
+                    linkState = null,
+                    paymentSelection = PaymentSelection.GooglePay,
+                    validationError = null,
+                    paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                        stripeIntent = PaymentIntentFixtures.PI_SUCCEEDED,
+                        billingDetailsCollectionConfiguration = configuration
+                            .billingDetailsCollectionConfiguration,
+                        allowsDelayedPaymentMethods = configuration.allowsDelayedPaymentMethods,
+                        allowsPaymentMethodsRequiringShippingAddress = configuration
+                            .allowsPaymentMethodsRequiringShippingAddress,
+                        isGooglePayReady = true,
+                        cbcEligibility = CardBrandChoiceEligibility.Ineligible,
+                    ),
+                )
+            )
+        )
+
+        assertThat(selectionHolder.selection.value?.paymentMethodType).isNull()
+        viewModel.paymentOption.test {
+            assertThat(awaitItem()).isNull()
+
+            assertThat(
+                viewModel.configure(
+                    PaymentSheet.IntentConfiguration(
+                        PaymentSheet.IntentConfiguration.Mode.Payment(5000, "USD"),
+                    ),
+                    configuration = configuration,
+                )
+            ).isInstanceOf<EmbeddedPaymentElement.ConfigureResult.Succeeded>()
+            assertThat(awaitItem()?.paymentMethodType).isEqualTo("google_pay")
+            assertThat(selectionHolder.selection.value?.paymentMethodType).isEqualTo("google_pay")
+
+            viewModel.clearPaymentOption()
+            assertThat(selectionHolder.selection.value?.paymentMethodType).isNull()
+            assertThat(awaitItem()).isNull()
+        }
+    }
+
     private fun testScenario(
         block: suspend Scenario.() -> Unit,
     ) {
