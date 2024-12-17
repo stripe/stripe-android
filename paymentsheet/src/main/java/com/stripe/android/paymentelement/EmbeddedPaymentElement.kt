@@ -471,7 +471,7 @@ class EmbeddedPaymentElement private constructor(
                     resultCallback = resultCallback,
                     activityResultCaller = activityResultCaller,
                     lifecycleOwner = lifecycleOwner,
-                    confirmationStateSupplier = { sharedViewModel.confirmationState }
+                    confirmationStateSupplier = { sharedViewModel.confirmationStateHolder.state },
                 ),
                 sharedViewModel = sharedViewModel,
             )

@@ -74,8 +74,10 @@ import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 import kotlin.reflect.KClass
 
+@Singleton
 @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 internal class SharedPaymentElementViewModel @Inject constructor(
+    confirmationStateHolderFactory: EmbeddedConfirmationStateHolderFactory,
     confirmationHandlerFactory: ConfirmationHandler.Factory,
     @IOContext ioContext: CoroutineContext,
     private val configurationHandler: EmbeddedConfigurationHandler,
@@ -85,19 +87,16 @@ internal class SharedPaymentElementViewModel @Inject constructor(
     private val _paymentOption: MutableStateFlow<PaymentOptionDisplayData?> = MutableStateFlow(null)
     val paymentOption: StateFlow<PaymentOptionDisplayData?> = _paymentOption.asStateFlow()
 
+    val confirmationStateHolder = confirmationStateHolderFactory.create(viewModelScope)
     val confirmationHandler = confirmationHandlerFactory.create(viewModelScope + ioContext)
 
     private val _embeddedContent = MutableStateFlow<EmbeddedContent?>(null)
     val embeddedContent: StateFlow<EmbeddedContent?> = _embeddedContent.asStateFlow()
 
-    @Volatile
-    var confirmationState: EmbeddedConfirmationHelper.State? = null
-
     init {
         viewModelScope.launch {
             selectionHolder.selection.collect { selection ->
                 _paymentOption.value = paymentOptionDisplayDataFactory.create(selection)
-                confirmationState = confirmationState?.copy(selection = selection)
             }
         }
     }
@@ -111,7 +110,7 @@ internal class SharedPaymentElementViewModel @Inject constructor(
             configuration = configuration,
         ).fold(
             onSuccess = { state ->
-                confirmationState = EmbeddedConfirmationHelper.State(
+                confirmationStateHolder.state = EmbeddedConfirmationStateHolder.State(
                     paymentMethodMetadata = state.paymentMethodMetadata,
                     selection = state.paymentSelection,
                     initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(intentConfiguration),

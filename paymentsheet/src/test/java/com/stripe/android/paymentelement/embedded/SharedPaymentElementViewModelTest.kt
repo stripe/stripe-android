@@ -17,6 +17,8 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.paymentMethodType
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
@@ -52,7 +54,7 @@ internal class SharedPaymentElementViewModelTest {
             )
         )
 
-        assertThat(viewModel.confirmationState).isNull()
+        assertThat(viewModel.confirmationStateHolder.state).isNull()
 
         assertThat(
             viewModel.configure(
@@ -63,7 +65,7 @@ internal class SharedPaymentElementViewModelTest {
             )
         ).isInstanceOf<EmbeddedPaymentElement.ConfigureResult.Succeeded>()
 
-        assertThat(viewModel.confirmationState?.paymentMethodMetadata).isNotNull()
+        assertThat(viewModel.confirmationStateHolder.state?.paymentMethodMetadata).isNotNull()
     }
 
     @Test
@@ -91,7 +93,7 @@ internal class SharedPaymentElementViewModelTest {
             )
         )
 
-        assertThat(viewModel.confirmationState?.selection?.paymentMethodType).isNull()
+        assertThat(viewModel.confirmationStateHolder.state?.selection?.paymentMethodType).isNull()
 
         assertThat(
             viewModel.configure(
@@ -102,9 +104,9 @@ internal class SharedPaymentElementViewModelTest {
             )
         ).isInstanceOf<EmbeddedPaymentElement.ConfigureResult.Succeeded>()
 
-        assertThat(viewModel.confirmationState?.selection?.paymentMethodType).isEqualTo("google_pay")
+        assertThat(viewModel.confirmationStateHolder.state?.selection?.paymentMethodType).isEqualTo("google_pay")
         selectionHolder.set(null)
-        assertThat(viewModel.confirmationState?.selection?.paymentMethodType).isNull()
+        assertThat(viewModel.confirmationStateHolder.state?.selection?.paymentMethodType).isNull()
     }
 
     @Test
@@ -205,16 +207,25 @@ internal class SharedPaymentElementViewModelTest {
     private fun testScenario(
         block: suspend Scenario.() -> Unit,
     ) {
-        val confirmationHandler = FakeConfirmationHandler()
-        val configurationHandler = FakeEmbeddedConfigurationHandler()
-        val paymentOptionDisplayDataFactory = PaymentOptionDisplayDataFactory(
-            iconLoader = mock(),
-            context = ApplicationProvider.getApplicationContext(),
-        )
-        val selectionHolder = EmbeddedSelectionHolder(SavedStateHandle())
-
         runTest {
+            val confirmationHandler = FakeConfirmationHandler()
+            val configurationHandler = FakeEmbeddedConfigurationHandler()
+            val paymentOptionDisplayDataFactory = PaymentOptionDisplayDataFactory(
+                iconLoader = mock(),
+                context = ApplicationProvider.getApplicationContext(),
+            )
+            val savedStateHandle = SavedStateHandle()
+            val selectionHolder = EmbeddedSelectionHolder(savedStateHandle)
+            val confirmationStateHolder = EmbeddedConfirmationStateHolder(
+                savedStateHandle = savedStateHandle,
+                selectionHolder = selectionHolder,
+                coroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
+            )
+
             val viewModel = SharedPaymentElementViewModel(
+                confirmationStateHolderFactory = EmbeddedConfirmationStateHolderFactory {
+                    confirmationStateHolder
+                },
                 confirmationHandlerFactory = { confirmationHandler },
                 ioContext = testScheduler,
                 configurationHandler = configurationHandler,
@@ -227,10 +238,10 @@ internal class SharedPaymentElementViewModelTest {
                 viewModel = viewModel,
                 selectionHolder = selectionHolder,
             ).block()
-        }
 
-        configurationHandler.turbine.ensureAllEventsConsumed()
-        confirmationHandler.validate()
+            configurationHandler.turbine.ensureAllEventsConsumed()
+            confirmationHandler.validate()
+        }
     }
 
     private class Scenario(
