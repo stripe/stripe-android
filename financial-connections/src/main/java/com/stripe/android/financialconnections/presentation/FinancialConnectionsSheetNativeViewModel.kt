@@ -63,6 +63,9 @@ import com.stripe.android.financialconnections.ui.toLocalTheme
 import com.stripe.android.financialconnections.utils.UriUtils
 import com.stripe.android.financialconnections.utils.get
 import com.stripe.android.financialconnections.utils.updateWithNewEntry
+import com.stripe.attestation.IntegrityStandardRequestManager
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -88,6 +91,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     private val completeFinancialConnectionsSession: CompleteFinancialConnectionsSession,
     private val createInstantDebitsResult: CreateInstantDebitsResult,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
+    private val integrityStandardRequestManager: IntegrityStandardRequestManager,
     private val logger: Logger,
     private val navigationManager: NavigationManager,
     @Named(APPLICATION_ID) private val applicationId: String,
@@ -142,6 +146,22 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                         updateTopAppBarState(message.update)
                     }
                 }
+            }
+        }
+        viewModelScope.launch {
+            initializeIntegrity()
+        }
+    }
+
+    // TODO use an app initializer alternatively to prepare Integrity.
+    private fun initializeIntegrity() {
+        GlobalScope.launch(Dispatchers.IO) {
+            val result = integrityStandardRequestManager.prepare()
+            result.onSuccess {
+                logger.info("Integrity prepared successfully")
+            }
+            result.onFailure {
+                logger.error("Failed to prepare Integrity", it)
             }
         }
     }

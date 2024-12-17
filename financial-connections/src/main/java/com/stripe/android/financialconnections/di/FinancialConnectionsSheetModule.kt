@@ -5,6 +5,7 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
 import com.stripe.android.financialconnections.repository.FinancialConnectionsManifestRepository
 import com.stripe.android.financialconnections.repository.api.ProvideApiRequestOptions
+import com.stripe.attestation.IntegrityStandardRequestManager
 import dagger.Module
 import dagger.Provides
 import java.util.Locale
@@ -27,6 +28,7 @@ internal object FinancialConnectionsSheetModule {
     fun providesFinancialConnectionsManifestRepository(
         requestExecutor: FinancialConnectionsRequestExecutor,
         apiRequestFactory: ApiRequest.Factory,
+        standardRequestManager: IntegrityStandardRequestManager,
         provideApiRequestOptions: ProvideApiRequestOptions,
         locale: Locale?,
         logger: Logger
@@ -36,6 +38,7 @@ internal object FinancialConnectionsSheetModule {
         provideApiRequestOptions = provideApiRequestOptions,
         logger = logger,
         locale = locale ?: Locale.getDefault(),
+        standardRequestManager = standardRequestManager,
         initialSync = null
     )
 }
