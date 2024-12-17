@@ -46,6 +46,12 @@
   <string name="stripe_paymentsheet_bacs_protection_mandate">支払いは %s によって保護されています。</string>
   <!-- Text displayed on manage bank account screen when bank account details are not editable. -->
   <string name="stripe_paymentsheet_bank_account_details_cannot_be_changed">銀行口座の詳細は変更できません。</string>
+  <!-- Text shown in the bank payment form when a promo is available and the user is paying, e.g. 'Get $5 back when you pay by bank. See terms'. Note that 'See terms' contains a non-breaking space. -->
+  <string name="stripe_paymentsheet_bank_payment_promo_for_payment"><![CDATA[銀行で支払うと %s が戻ってきます。<a href=\"https://link.com/promotion-terms\">規約を表示</a>]]></string>
+  <!-- Text shown in the bank payment form when a promo is available and the user is setting up an account, e.g. 'Get $5 back when you pay by bank. See terms'. Note that 'See terms' contains a non-breaking space. -->
+  <string name="stripe_paymentsheet_bank_payment_promo_for_setup"><![CDATA[ご利用の銀行での初回支払い時に %s を受け取れます。<a href=\"https://link.com/promotion-terms\">規約を表示</a>]]></string>
+  <!-- Label shown when paying with a bank account is not eligible for the incentive, e.g. 'No $5 promo' -->
+  <string name="stripe_paymentsheet_bank_payment_promo_ineligible">%s のプロモーションはありません</string>
   <!-- Text displayed on manage card screen when card details are not editable. -->
   <string name="stripe_paymentsheet_card_details_cannot_be_changed">カード詳細は変更できません。</string>
   <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
@@ -77,6 +83,8 @@
   <string name="stripe_paymentsheet_new_card">新しいカード</string>
   <!-- Title shown above a section containing payment methods that a customer can choose to pay with e.g. card, bank account, etc. -->
   <string name="stripe_paymentsheet_new_pm">新しい決済手段</string>
+  <!-- Text displayed on manage card screen when the only editable card detail is the card brand. -->
+  <string name="stripe_paymentsheet_only_card_brand_can_be_changed">カードブランドのみ変更できます。</string>
   <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_using">または別の方法で支払う</string>
   <!-- Title of a section containing a card form that will collect the payment information from the user. -->
