@@ -9,11 +9,13 @@ import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performClick
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_EDIT_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TEST_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_MODIFY_BADGE
 import com.stripe.android.paymentsheet.ui.TEST_TAG_REMOVE_BADGE
+import com.stripe.android.paymentsheet.ui.UPDATE_PM_REMOVE_BUTTON_TEST_TAG
 
 class SavedPaymentMethodsPage(private val composeTestRule: ComposeTestRule) {
     fun waitUntilVisible() {
@@ -47,16 +49,14 @@ class SavedPaymentMethodsPage(private val composeTestRule: ComposeTestRule) {
         return composeTestRule.onNodeWithTag(PAYMENT_SHEET_EDIT_BUTTON_TEST_TAG)
     }
 
-    fun onRemoveBadgeFor(last4: String): SemanticsNodeInteraction {
-        return composeTestRule.onNode(
-            hasTestTag(TEST_TAG_REMOVE_BADGE).and(hasAnyAncestor(savedPaymentMethodMatcher(last4)))
-        )
-    }
-
     fun onModifyBadgeFor(last4: String): SemanticsNodeInteraction {
         return composeTestRule.onNode(
             hasTestTag(TEST_TAG_MODIFY_BADGE).and(hasAnyAncestor(savedPaymentMethodMatcher(last4)))
         )
+    }
+
+    fun clickRemoveButton() {
+        composeTestRule.onNodeWithTag(UPDATE_PM_REMOVE_BUTTON_TEST_TAG).performClick()
     }
 
     private fun savedPaymentMethodMatcher(last4: String): SemanticsMatcher {

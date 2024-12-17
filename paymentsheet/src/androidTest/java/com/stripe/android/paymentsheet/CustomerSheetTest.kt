@@ -157,7 +157,8 @@ internal class CustomerSheetTest {
         }
 
         page.clickEditButton()
-        page.clickDeleteButton(forEndsWith = "4242")
+        page.clickModifyButton(forEndsWith = "4242")
+        page.clickDeleteButton()
         page.clickDialogRemoveButton()
 
         page.waitUntilRemoved(text = "4242", substring = true)

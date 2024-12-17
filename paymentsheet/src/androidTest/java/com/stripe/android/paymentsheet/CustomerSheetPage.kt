@@ -14,7 +14,8 @@ import com.stripe.android.customersheet.ui.CUSTOMER_SHEET_CONFIRM_BUTTON_TEST_TA
 import com.stripe.android.customersheet.ui.CUSTOMER_SHEET_SAVE_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_EDIT_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TEST_TAG
-import com.stripe.android.paymentsheet.ui.TEST_TAG_REMOVE_BADGE
+import com.stripe.android.paymentsheet.ui.TEST_TAG_MODIFY_BADGE
+import com.stripe.android.paymentsheet.ui.UPDATE_PM_REMOVE_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.readNumbersAsIndividualDigits
 import com.stripe.android.paymentsheet.utils.isPlaced
 import com.stripe.android.ui.core.elements.TEST_TAG_DIALOG_CONFIRM_BUTTON
@@ -88,12 +89,19 @@ internal class CustomerSheetPage(
         click(editButtonMatcher, canScroll = false)
     }
 
-    fun clickDeleteButton(forEndsWith: String) {
-        val deleteBadgeForSavedPmMatcher = hasTestTag(TEST_TAG_REMOVE_BADGE)
+    fun clickModifyButton(forEndsWith: String) {
+        val deleteBadgeForSavedPmMatcher = hasTestTag(TEST_TAG_MODIFY_BADGE)
             .and(hasContentDescription(forEndsWith.readNumbersAsIndividualDigits(), substring = true))
 
         waitUntil(deleteBadgeForSavedPmMatcher)
         click(deleteBadgeForSavedPmMatcher)
+    }
+
+    fun clickDeleteButton() {
+        val removeButtonMatch = hasTestTag(UPDATE_PM_REMOVE_BUTTON_TEST_TAG)
+
+        waitUntil(removeButtonMatch)
+        click(removeButtonMatch)
     }
 
     fun clickDialogRemoveButton() {

@@ -262,7 +262,8 @@ class CustomerSessionCustomerSheetActivityTest {
         allowsRemovalOfLastSavedPaymentMethod = true,
     ) {
         savedPaymentMethodsPage.onEditButton().performClick()
-        savedPaymentMethodsPage.onRemoveBadgeFor(last4 = "4242").performClick()
+        savedPaymentMethodsPage.onModifyBadgeFor(last4 = "4242").performClick()
+        savedPaymentMethodsPage.clickRemoveButton()
 
         enqueuePaymentMethods(
             cards = listOf(
