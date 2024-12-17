@@ -424,6 +424,8 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
             currentSelection = PaymentSelection.Saved(paymentMethods[0]),
             nameProvider = { it!!.resolvableString },
             isCbcEligible = true,
+            canRemovePaymentMethods = true,
+            defaultPaymentMethodId = null,
         ).items
     }
 

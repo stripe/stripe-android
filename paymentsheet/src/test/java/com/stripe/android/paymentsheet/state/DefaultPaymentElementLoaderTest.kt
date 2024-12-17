@@ -130,6 +130,7 @@ internal class DefaultPaymentElementLoaderTest {
                         canRemoveLastPaymentMethod = true,
                         canRemoveDuplicates = false,
                     ),
+                    defaultPaymentMethodId = null
                 ),
                 paymentSelection = PaymentSelection.Saved(
                     paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
@@ -1384,6 +1385,7 @@ internal class DefaultPaymentElementLoaderTest {
                         canRemoveLastPaymentMethod = false,
                         canRemoveDuplicates = true,
                     ),
+                    defaultPaymentMethodId = null
                 )
             )
         }
@@ -1663,6 +1665,7 @@ internal class DefaultPaymentElementLoaderTest {
                         canRemoveLastPaymentMethod = true,
                         canRemoveDuplicates = false,
                     ),
+                    defaultPaymentMethodId = null
                 )
             )
         }

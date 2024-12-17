@@ -331,8 +331,11 @@ internal object ElementsSessionFixtures {
                       }
                     },
                     "customer_sheet": {
-                      "enabled": false,
-                      "features": null
+                      "enabled": true,
+                      "features": {
+                        "payment_method_remove": ${paymentMethodRemoveFeature ?: "enabled"},
+                        "payment_method_remove_last": ${paymentMethodRemoveLastFeature ?: "enabled"},
+                      }
                     },
                     "pricing_table": {
                       "enabled": false
@@ -460,7 +463,8 @@ internal object ElementsSessionFixtures {
                 "customer_sheet": {
                   "enabled": true,
                   "features": {
-                    "payment_method_remove": "enabled"
+                    "payment_method_remove": "enabled",
+                    "payment_method_remove_last": "enabled"
                   }
                 },
                 "pricing_table": {

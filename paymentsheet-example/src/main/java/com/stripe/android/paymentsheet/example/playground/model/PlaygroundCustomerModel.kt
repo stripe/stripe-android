@@ -15,6 +15,8 @@ class CustomerEphemeralKeyRequest private constructor(
     val paymentMethodSaveFeature: FeatureState?,
     @SerialName("customer_session_payment_method_remove")
     val paymentMethodRemoveFeature: FeatureState?,
+    @SerialName("customer_session_payment_method_remove_last")
+    val paymentMethodRemoveLastFeature: FeatureState?,
     @SerialName("customer_session_payment_method_redisplay")
     val paymentMethodRedisplayFeature: FeatureState?,
     @SerialName("customer_session_payment_method_allow_redisplay_filters")
@@ -35,6 +37,7 @@ class CustomerEphemeralKeyRequest private constructor(
         private var customerKeyType: CustomerKeyType = CustomerKeyType.Legacy
         private var merchantCountryCode: String? = null
         private var paymentMethodRemoveFeature: FeatureState = FeatureState.Enabled
+        private var paymentMethodRemoveLastFeature: FeatureState = FeatureState.Enabled
         private var paymentMethodRedisplayFilters: List<AllowRedisplayFilter> = listOf(
             AllowRedisplayFilter.Unspecified,
             AllowRedisplayFilter.Limited,
@@ -53,6 +56,10 @@ class CustomerEphemeralKeyRequest private constructor(
             this.paymentMethodRemoveFeature = state
         }
 
+        fun paymentMethodRemoveLastFeature(state: FeatureState) {
+            this.paymentMethodRemoveLastFeature = state
+        }
+
         fun paymentMethodRedisplayFilters(filters: List<AllowRedisplayFilter>) {
             this.paymentMethodRedisplayFilters = filters
         }
@@ -68,6 +75,7 @@ class CustomerEphemeralKeyRequest private constructor(
                 merchantCountryCode = merchantCountryCode,
                 paymentMethodSaveFeature = FeatureState.Enabled,
                 paymentMethodRemoveFeature = paymentMethodRemoveFeature,
+                paymentMethodRemoveLastFeature = paymentMethodRemoveLastFeature,
                 paymentMethodRedisplayFeature = FeatureState.Enabled,
                 paymentMethodRedisplayFilters = paymentMethodRedisplayFilters,
             )

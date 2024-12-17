@@ -20,7 +20,8 @@ class DefaultManageOneSavedPaymentMethodInteractorTest {
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
             providePaymentMethodName = { it!!.resolvableString },
             onDeletePaymentMethod = { deletedPm = it },
-            navigateBack = { hasNavigatedBack = true }
+            navigateBack = { hasNavigatedBack = true },
+            defaultPaymentMethodId = null
         )
 
         interactor.handleViewAction(ManageOneSavedPaymentMethodInteractor.ViewAction.DeletePaymentMethod)

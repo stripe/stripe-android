@@ -65,6 +65,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import javax.inject.Inject
 import javax.inject.Named
@@ -79,6 +80,7 @@ internal class SharedPaymentElementViewModel @Inject constructor(
     @IOContext ioContext: CoroutineContext,
     private val configurationHandler: EmbeddedConfigurationHandler,
     private val paymentOptionDisplayDataFactory: PaymentOptionDisplayDataFactory,
+    private val selectionHolder: EmbeddedSelectionHolder,
 ) : ViewModel() {
     private val _paymentOption: MutableStateFlow<PaymentOptionDisplayData?> = MutableStateFlow(null)
     val paymentOption: StateFlow<PaymentOptionDisplayData?> = _paymentOption.asStateFlow()
@@ -90,6 +92,15 @@ internal class SharedPaymentElementViewModel @Inject constructor(
 
     @Volatile
     var confirmationState: EmbeddedConfirmationHelper.State? = null
+
+    init {
+        viewModelScope.launch {
+            selectionHolder.selection.collect { selection ->
+                _paymentOption.value = paymentOptionDisplayDataFactory.create(selection)
+                confirmationState = confirmationState?.copy(selection = selection)
+            }
+        }
+    }
 
     suspend fun configure(
         intentConfiguration: PaymentSheet.IntentConfiguration,
@@ -106,7 +117,7 @@ internal class SharedPaymentElementViewModel @Inject constructor(
                     initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(intentConfiguration),
                     configuration = configuration,
                 )
-                _paymentOption.value = paymentOptionDisplayDataFactory.create(state.paymentSelection)
+                selectionHolder.set(state.paymentSelection)
                 ConfigureResult.Succeeded()
             },
             onFailure = { error ->

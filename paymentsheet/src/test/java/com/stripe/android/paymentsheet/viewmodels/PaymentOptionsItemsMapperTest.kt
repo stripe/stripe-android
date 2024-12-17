@@ -90,7 +90,8 @@ class PaymentOptionsItemsMapperTest {
                 canRemovePaymentMethods = true,
                 canRemoveLastPaymentMethod = true,
                 canRemoveDuplicates = false,
-            )
+            ),
+            defaultPaymentMethodId = null
         )
     }
 }

@@ -13,6 +13,7 @@ internal data class CustomerState(
     val ephemeralKeySecret: String,
     val paymentMethods: List<PaymentMethod>,
     val permissions: Permissions,
+    val defaultPaymentMethodId: String?
 ) : Parcelable {
     @Parcelize
     data class Permissions(
@@ -61,7 +62,8 @@ internal data class CustomerState(
                     canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
                     // Should always remove duplicates when using `customer_session`
                     canRemoveDuplicates = true,
-                )
+                ),
+                defaultPaymentMethodId = customer.defaultPaymentMethod
             )
         }
 
@@ -102,7 +104,8 @@ internal data class CustomerState(
                      * un-scoped ephemeral keys.
                      */
                     canRemoveDuplicates = false,
-                )
+                ),
+                defaultPaymentMethodId = null
             )
         }
     }

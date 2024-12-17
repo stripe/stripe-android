@@ -21,6 +21,8 @@ class PaymentOptionsStateFactoryTest {
             currentSelection = PaymentSelection.Saved(paymentMethod),
             nameProvider = { it!!.resolvableString },
             isCbcEligible = false,
+            canRemovePaymentMethods = true,
+            defaultPaymentMethodId = null,
         )
 
         val selectedPaymentMethod = state.selectedItem as? PaymentOptionsItem.SavedPaymentMethod
@@ -38,6 +40,8 @@ class PaymentOptionsStateFactoryTest {
             currentSelection = PaymentSelection.Link,
             nameProvider = { it!!.resolvableString },
             isCbcEligible = false,
+            canRemovePaymentMethods = true,
+            defaultPaymentMethodId = null,
         )
 
         assertThat(state.selectedItem).isNull()
@@ -66,6 +70,8 @@ class PaymentOptionsStateFactoryTest {
             currentSelection = PaymentSelection.Link,
             nameProvider = { it!!.resolvableString },
             isCbcEligible = true,
+            canRemovePaymentMethods = true,
+            defaultPaymentMethodId = null,
         )
 
         assertThat(
@@ -99,6 +105,34 @@ class PaymentOptionsStateFactoryTest {
         assertThat(options[2].isEnabledDuringEditing).isTrue()
     }
 
+    @Test
+    fun `State is correct when given non null defaultPaymentMethodId`() {
+        val paymentMethods = PaymentMethodFixtures.createCards(3)
+
+        val defaultPaymentMethod = paymentMethods[0]
+        val defaultPaymentMethodId = defaultPaymentMethod.id
+
+        assertThat(defaultPaymentMethodId).isNotNull()
+
+        val state = PaymentOptionsStateFactory.create(
+            paymentMethods = paymentMethods,
+            showGooglePay = true,
+            showLink = true,
+            currentSelection = PaymentSelection.Saved(defaultPaymentMethod),
+            nameProvider = { it!!.resolvableString },
+            isCbcEligible = false,
+            canRemovePaymentMethods = true,
+            defaultPaymentMethodId = defaultPaymentMethodId
+        )
+
+        val options = state.items.filterIsInstance<PaymentOptionsItem.SavedPaymentMethod>()
+
+        assertThat(options[0].paymentMethod.id).isEqualTo(defaultPaymentMethodId)
+        assertThat(options[0].displayableSavedPaymentMethod.shouldShowDefaultBadge).isTrue()
+        assertThat(options[1].displayableSavedPaymentMethod.shouldShowDefaultBadge).isFalse()
+        assertThat(options[2].displayableSavedPaymentMethod.shouldShowDefaultBadge).isFalse()
+    }
+
     private fun createPaymentOptionsState(
         paymentMethods: List<PaymentMethod>,
     ): PaymentOptionsState {
@@ -109,6 +143,8 @@ class PaymentOptionsStateFactoryTest {
             currentSelection = PaymentSelection.Link,
             nameProvider = { it!!.resolvableString },
             isCbcEligible = true,
+            canRemovePaymentMethods = canRemovePaymentMethods,
+            defaultPaymentMethodId = null,
         )
     }
 }

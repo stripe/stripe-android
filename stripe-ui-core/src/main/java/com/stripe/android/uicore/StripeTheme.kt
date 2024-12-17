@@ -239,7 +239,7 @@ object StripeThemeDefaults {
     )
 
     val embeddedCommon = EmbeddedInsets(
-        additionalInsetsDp = 4.0f,
+        additionalInsetsDp = 0.0f,
         checkmarkInsetDp = 12.0f
     )
 
