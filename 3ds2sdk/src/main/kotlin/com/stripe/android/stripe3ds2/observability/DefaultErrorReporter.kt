@@ -28,7 +28,7 @@ internal class DefaultErrorReporter(
     private val config: Config = EmptyConfig,
     private val workContext: CoroutineContext = Dispatchers.IO,
     private val logger: Logger = Logger.Noop,
-    private val sentryConfig: SentryConfig = DefaultSentryConfig,
+    private val sentryConfig: SentryConfig,
     private val environment: String = BuildConfig.BUILD_TYPE,
     private val localeCountry: String = Locale.getDefault().country,
     private val osVersion: Int = Build.VERSION.SDK_INT
