@@ -21,6 +21,7 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffe
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenAuthFlowWithUrl
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenNativeAuthFlow
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewModel.Companion.QUERY_PARAM_PAYMENT_METHOD
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ErrorCode
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Metadata
@@ -57,6 +58,7 @@ import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarSta
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.utils.parcelable
+import com.stripe.attestation.IntegrityStandardRequestManager
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -73,6 +75,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     private val browserManager: BrowserManager,
     private val eventReporter: FinancialConnectionsEventReporter,
     private val analyticsTracker: FinancialConnectionsAnalyticsTracker,
+    private val standardRequestManager: IntegrityStandardRequestManager,
     private val nativeRouter: NativeAuthFlowRouter,
     nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val initialState: FinancialConnectionsSheetState,
@@ -110,13 +113,31 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     private fun fetchManifest() {
         viewModelScope.launch {
             kotlin.runCatching {
-                getOrFetchSync(refetchCondition = Always)
+                val tokenGenerationAvailable = prepareStandardRequestManager()
+                getOrFetchSync(
+                    refetchCondition = Always,
+                    tokenGenerationAvailable = tokenGenerationAvailable
+                )
             }.onFailure {
                 finishWithResult(stateFlow.value, Failed(it))
             }.onSuccess {
                 openAuthFlow(it)
             }
         }
+    }
+
+    private suspend fun prepareStandardRequestManager(): Boolean {
+        val result = runCatching { standardRequestManager.prepare() }
+        result.exceptionOrNull()?.let {
+            analyticsTracker.track(
+                FinancialConnectionsAnalyticsEvent.Error(
+                    extraMessage = "Failed to warm up the IntegrityStandardRequestManager",
+                    pane = Pane.CONSENT,
+                    exception = it
+                )
+            )
+        }
+        return result.isSuccess
     }
 
     /**

@@ -18,11 +18,13 @@ internal class GetOrFetchSync @Inject constructor(
 ) {
 
     suspend operator fun invoke(
-        refetchCondition: RefetchCondition = RefetchCondition.None
+        refetchCondition: RefetchCondition = RefetchCondition.None,
+        tokenGenerationAvailable: Boolean? = null,
     ): SynchronizeSessionResponse {
         return repository.getOrSynchronizeFinancialConnectionsSession(
             clientSecret = configuration.financialConnectionsSessionClientSecret,
             applicationId = applicationId,
+            tokenGenerationAvailable = tokenGenerationAvailable,
             reFetchCondition = refetchCondition::shouldReFetch,
         )
     }

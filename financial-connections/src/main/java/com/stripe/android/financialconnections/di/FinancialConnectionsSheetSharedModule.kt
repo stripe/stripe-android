@@ -35,6 +35,8 @@ import com.stripe.android.financialconnections.repository.FinancialConnectionsRe
 import com.stripe.android.financialconnections.repository.FinancialConnectionsRepositoryImpl
 import com.stripe.android.financialconnections.repository.RealConsumerSessionRepository
 import com.stripe.android.financialconnections.utils.DefaultFraudDetectionDataRepository
+import com.stripe.attestation.IntegrityStandardRequestManager
+import com.stripe.attestation.RealStandardIntegrityManagerFactory
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -104,6 +106,17 @@ internal interface FinancialConnectionsSheetSharedModule {
             isLenient = true
             encodeDefaults = true
         }
+
+        @Singleton
+        @Provides
+        fun providesIntegrityStandardRequestManager(
+            context: Application,
+            logger: Logger
+        ): IntegrityStandardRequestManager = IntegrityStandardRequestManager(
+            cloudProjectNumber = 527113280969, // stripe-financial-connections
+            logError = { message, error -> logger.error(message, error) },
+            factory = RealStandardIntegrityManagerFactory(context)
+        )
 
         @Provides
         @Singleton
