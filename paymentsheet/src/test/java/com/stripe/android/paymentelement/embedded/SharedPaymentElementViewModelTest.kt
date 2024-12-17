@@ -64,6 +64,7 @@ internal class SharedPaymentElementViewModelTest {
                 configuration = configuration,
             )
         ).isInstanceOf<EmbeddedPaymentElement.ConfigureResult.Succeeded>()
+        assertThat(embeddedContentHelper.dataLoadedTurbine.awaitItem()).isNotNull()
 
         assertThat(viewModel.confirmationStateHolder.state?.paymentMethodMetadata).isNotNull()
     }
@@ -103,6 +104,7 @@ internal class SharedPaymentElementViewModelTest {
                 configuration = configuration,
             )
         ).isInstanceOf<EmbeddedPaymentElement.ConfigureResult.Succeeded>()
+        assertThat(embeddedContentHelper.dataLoadedTurbine.awaitItem()).isNotNull()
 
         assertThat(viewModel.confirmationStateHolder.state?.selection?.paymentMethodType).isEqualTo("google_pay")
         selectionHolder.set(null)
@@ -145,6 +147,7 @@ internal class SharedPaymentElementViewModelTest {
         viewModel.paymentOption.test {
             assertThat(awaitItem()).isNull()
         }
+        assertThat(embeddedContentHelper.dataLoadedTurbine.awaitItem()).isNotNull()
     }
 
     @Test
@@ -188,6 +191,7 @@ internal class SharedPaymentElementViewModelTest {
             assertThat(awaitItem()?.paymentMethodType).isEqualTo("google_pay")
         }
         assertThat(selectionHolder.selection.value?.paymentMethodType).isEqualTo("google_pay")
+        assertThat(embeddedContentHelper.dataLoadedTurbine.awaitItem()).isNotNull()
     }
 
     @Test
@@ -248,52 +252,58 @@ internal class SharedPaymentElementViewModelTest {
             assertThat(selectionHolder.selection.value?.paymentMethodType).isNull()
             assertThat(awaitItem()).isNull()
         }
+        assertThat(embeddedContentHelper.dataLoadedTurbine.awaitItem()).isNotNull()
     }
 
     private fun testScenario(
         block: suspend Scenario.() -> Unit,
-    ) {
-        runTest {
-            val confirmationHandler = FakeConfirmationHandler()
-            val configurationHandler = FakeEmbeddedConfigurationHandler()
-            val paymentOptionDisplayDataFactory = PaymentOptionDisplayDataFactory(
-                iconLoader = mock(),
-                context = ApplicationProvider.getApplicationContext(),
-            )
-            val savedStateHandle = SavedStateHandle()
-            val selectionHolder = EmbeddedSelectionHolder(savedStateHandle)
-            val confirmationStateHolder = EmbeddedConfirmationStateHolder(
-                savedStateHandle = savedStateHandle,
-                selectionHolder = selectionHolder,
-                coroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
-            )
+    ) = runTest {
+        val confirmationHandler = FakeConfirmationHandler()
+        val configurationHandler = FakeEmbeddedConfigurationHandler()
+        val paymentOptionDisplayDataFactory = PaymentOptionDisplayDataFactory(
+            iconLoader = mock(),
+            context = ApplicationProvider.getApplicationContext(),
+        )
+        val savedStateHandle = SavedStateHandle()
+        val selectionHolder = EmbeddedSelectionHolder(savedStateHandle)
+        val confirmationStateHolder = EmbeddedConfirmationStateHolder(
+            savedStateHandle = savedStateHandle,
+            selectionHolder = selectionHolder,
+            coroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
+        )
+        val embeddedContentHelper = FakeEmbeddedContentHelper()
 
-            val viewModel = SharedPaymentElementViewModel(
-                confirmationStateHolderFactory = EmbeddedConfirmationStateHolderFactory {
-                    confirmationStateHolder
-                },
-                confirmationHandlerFactory = { confirmationHandler },
-                ioContext = testScheduler,
-                configurationHandler = configurationHandler,
-                paymentOptionDisplayDataFactory = paymentOptionDisplayDataFactory,
-                selectionHolder = selectionHolder,
-            )
+        val viewModel = SharedPaymentElementViewModel(
+            confirmationStateHolderFactory = EmbeddedConfirmationStateHolderFactory {
+                confirmationStateHolder
+            },
+            confirmationHandlerFactory = { confirmationHandler },
+            ioContext = testScheduler,
+            configurationHandler = configurationHandler,
+            paymentOptionDisplayDataFactory = paymentOptionDisplayDataFactory,
+            selectionHolder = selectionHolder,
+            embeddedContentHelperFactory = EmbeddedContentHelperFactory {
+                embeddedContentHelper
+            }
+        )
 
-            Scenario(
-                configurationHandler = configurationHandler,
-                viewModel = viewModel,
-                selectionHolder = selectionHolder,
-            ).block()
+        Scenario(
+            configurationHandler = configurationHandler,
+            viewModel = viewModel,
+            selectionHolder = selectionHolder,
+            embeddedContentHelper = embeddedContentHelper,
+        ).block()
 
-            configurationHandler.turbine.ensureAllEventsConsumed()
-            confirmationHandler.validate()
-        }
+        configurationHandler.turbine.ensureAllEventsConsumed()
+        confirmationHandler.validate()
+        embeddedContentHelper.validate()
     }
 
     private class Scenario(
         val configurationHandler: FakeEmbeddedConfigurationHandler,
         val viewModel: SharedPaymentElementViewModel,
         val selectionHolder: EmbeddedSelectionHolder,
+        val embeddedContentHelper: FakeEmbeddedContentHelper,
     )
 
     private class FakeEmbeddedConfigurationHandler : EmbeddedConfigurationHandler {

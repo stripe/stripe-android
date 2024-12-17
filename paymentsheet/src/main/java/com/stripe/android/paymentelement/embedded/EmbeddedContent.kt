@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement.embedded
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -16,13 +17,14 @@ import com.stripe.android.uicore.strings.resolve
 @Immutable
 internal data class EmbeddedContent(
     private val interactor: PaymentMethodVerticalLayoutInteractor,
-    private val mandate: ResolvableString? = null,
+    val mandate: ResolvableString? = null,
 ) {
     @Composable
     fun Content() {
         Column(
             modifier = Modifier
                 .padding(top = 8.dp)
+                .animateContentSize()
         ) {
             EmbeddedVerticalList()
             EmbeddedMandate()
