@@ -1,8 +1,5 @@
 package com.stripe.android.link.analytics
 
-import androidx.annotation.RestrictTo
-
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 internal interface LinkEventsReporter {
     fun onInvalidSessionState(state: SessionState)
 

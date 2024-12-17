@@ -1,6 +1,5 @@
 package com.stripe.android.link
 
-import androidx.annotation.RestrictTo
 import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.UserInput
@@ -16,8 +15,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-interface LinkConfigurationCoordinator {
+internal interface LinkConfigurationCoordinator {
     val emailFlow: StateFlow<String?>
 
     fun getComponent(configuration: LinkConfiguration): LinkComponent
@@ -40,8 +38,7 @@ interface LinkConfigurationCoordinator {
 }
 
 @Singleton
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class RealLinkConfigurationCoordinator @Inject internal constructor(
+internal class RealLinkConfigurationCoordinator @Inject internal constructor(
     private val linkComponentBuilder: LinkComponent.Builder,
 ) : LinkConfigurationCoordinator {
     private val componentFlow = MutableStateFlow<LinkComponent?>(null)

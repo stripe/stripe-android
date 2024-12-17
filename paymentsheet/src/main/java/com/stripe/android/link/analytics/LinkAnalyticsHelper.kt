@@ -1,11 +1,9 @@
 package com.stripe.android.link.analytics
 
-import androidx.annotation.RestrictTo
 import com.stripe.android.link.LinkActivityResult
 import javax.inject.Inject
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class LinkAnalyticsHelper @Inject internal constructor(
+internal class LinkAnalyticsHelper @Inject internal constructor(
     private val linkEventsReporter: LinkEventsReporter,
 ) {
     fun onLinkLaunched() {

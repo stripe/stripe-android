@@ -1,7 +1,6 @@
 package com.stripe.android.link
 
 import android.os.Parcelable
-import androidx.annotation.RestrictTo
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.ui.core.forms.convertToFormValuesMap
@@ -15,8 +14,7 @@ import kotlinx.parcelize.Parcelize
  * @param paymentMethodCreateParams The [PaymentMethodCreateParams] to be used to confirm
  *                                  the Stripe Intent.
  */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-sealed class LinkPaymentDetails(
+internal sealed class LinkPaymentDetails(
     open val paymentDetails: ConsumerPaymentDetails.PaymentDetails,
     open val paymentMethodCreateParams: PaymentMethodCreateParams
 ) : Parcelable {
@@ -25,7 +23,6 @@ sealed class LinkPaymentDetails(
      * A [ConsumerPaymentDetails.PaymentDetails] that is already saved to the consumer's account.
      */
     @Parcelize
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Saved(
         override val paymentDetails: ConsumerPaymentDetails.PaymentDetails,
         override val paymentMethodCreateParams: PaymentMethodCreateParams
@@ -37,7 +34,6 @@ sealed class LinkPaymentDetails(
      * fields with the user-entered values.
      */
     @Parcelize
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class New(
         override val paymentDetails: ConsumerPaymentDetails.PaymentDetails,
         override val paymentMethodCreateParams: PaymentMethodCreateParams,

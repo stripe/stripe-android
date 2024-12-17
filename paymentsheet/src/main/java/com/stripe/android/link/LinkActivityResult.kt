@@ -4,20 +4,17 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Parcelable
 import android.util.Base64
-import androidx.annotation.RestrictTo
 import androidx.core.os.BundleCompat
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import kotlinx.parcelize.Parcelize
 import org.json.JSONObject
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-sealed class LinkActivityResult : Parcelable {
+internal sealed class LinkActivityResult : Parcelable {
     /**
      * Indicates that the flow was completed successfully.
      */
     @Parcelize
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Completed(
         val paymentMethod: PaymentMethod
     ) : LinkActivityResult()
@@ -26,11 +23,9 @@ sealed class LinkActivityResult : Parcelable {
      * The user cancelled the Link flow without completing it.
      */
     @Parcelize
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Canceled(
         val reason: Reason = Reason.BackPressed,
     ) : LinkActivityResult() {
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         enum class Reason {
             BackPressed,
             LoggedOut,
@@ -42,7 +37,6 @@ sealed class LinkActivityResult : Parcelable {
      * Something went wrong. See [error] for more information.
      */
     @Parcelize
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Failed(
         val error: Throwable
     ) : LinkActivityResult()

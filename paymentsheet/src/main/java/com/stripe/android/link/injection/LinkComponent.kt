@@ -1,6 +1,5 @@
 package com.stripe.android.link.injection
 
-import androidx.annotation.RestrictTo
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.account.LinkAccountManager
@@ -22,8 +21,7 @@ internal annotation class LinkScope
         LinkModule::class,
     ]
 )
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-abstract class LinkComponent {
+internal abstract class LinkComponent {
     internal abstract val linkAccountManager: LinkAccountManager
     internal abstract val configuration: LinkConfiguration
     internal abstract val inlineSignupViewModelFactory: LinkInlineSignupAssistedViewModelFactory

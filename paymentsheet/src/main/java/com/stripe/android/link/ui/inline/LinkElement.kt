@@ -16,7 +16,7 @@ import com.stripe.android.link.LinkConfigurationCoordinator
 import java.util.UUID
 
 @Composable
-fun LinkElement(
+internal fun LinkElement(
     linkConfigurationCoordinator: LinkConfigurationCoordinator,
     configuration: LinkConfiguration,
     linkSignupMode: LinkSignupMode,

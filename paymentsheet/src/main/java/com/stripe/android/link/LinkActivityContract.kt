@@ -3,15 +3,13 @@ package com.stripe.android.link
 import android.content.Context
 import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
-import androidx.annotation.RestrictTo
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.serialization.PopupPayload
 import com.stripe.android.networking.StripeRepository
 import javax.inject.Inject
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class LinkActivityContract @Inject internal constructor(
+internal class LinkActivityContract @Inject internal constructor(
     private val stripeRepository: StripeRepository,
 ) : ActivityResultContract<LinkActivityContract.Args, LinkActivityResult>() {
 
@@ -51,12 +49,10 @@ class LinkActivityContract @Inject internal constructor(
         )
     }
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Args internal constructor(
         internal val configuration: LinkConfiguration
     )
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Result(
         val linkResult: LinkActivityResult
     )

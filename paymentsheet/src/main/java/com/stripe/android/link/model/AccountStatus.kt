@@ -1,9 +1,6 @@
 package com.stripe.android.link.model
 
-import androidx.annotation.RestrictTo
-
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-enum class AccountStatus {
+internal enum class AccountStatus {
     Verified, // Customer is signed in
     NeedsVerification, // Customer needs to authenticate
     VerificationStarted, // Customer has started OTP verification

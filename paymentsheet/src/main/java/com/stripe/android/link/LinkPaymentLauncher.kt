@@ -3,7 +3,6 @@ package com.stripe.android.link
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistry
-import androidx.annotation.RestrictTo
 import com.stripe.android.link.LinkActivityResult.Completed
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.injection.LinkAnalyticsComponent
@@ -14,8 +13,7 @@ import javax.inject.Singleton
  * Launcher for an Activity that will confirm a payment using Link.
  */
 @Singleton
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class LinkPaymentLauncher @Inject internal constructor(
+internal class LinkPaymentLauncher @Inject internal constructor(
     linkAnalyticsComponentBuilder: LinkAnalyticsComponent.Builder,
     private val linkActivityContract: LinkActivityContract,
     private val linkStore: LinkStore,

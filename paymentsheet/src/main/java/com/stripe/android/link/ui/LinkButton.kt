@@ -66,8 +66,7 @@ private const val LINK_EMAIL_FONT_SIZE = 16
 
 private const val LINK_ICON_ASPECT_RATIO = 72f / 26f
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-const val LinkButtonTestTag = "LinkButtonTestTag"
+internal const val LinkButtonTestTag = "LinkButtonTestTag"
 
 @Preview
 @Composable
@@ -89,9 +88,8 @@ private fun LinkNoEmailButton() {
     )
 }
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Composable
-fun LinkButton(
+internal fun LinkButton(
     email: String?,
     enabled: Boolean,
     onClick: () -> Unit,

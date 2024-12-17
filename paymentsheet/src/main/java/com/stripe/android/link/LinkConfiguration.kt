@@ -1,14 +1,12 @@
 package com.stripe.android.link
 
 import android.os.Parcelable
-import androidx.annotation.RestrictTo
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.uicore.elements.IdentifierSpec
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-data class LinkConfiguration(
+internal data class LinkConfiguration(
     val stripeIntent: StripeIntent,
     val merchantName: String,
     val merchantCountryCode: String?,
@@ -18,7 +16,6 @@ data class LinkConfiguration(
     val flags: Map<String, Boolean>,
     val cardBrandChoice: CardBrandChoice?,
 ) : Parcelable {
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
     data class CustomerInfo(
         val name: String?,
@@ -27,7 +24,6 @@ data class LinkConfiguration(
         val billingCountryCode: String?,
     ) : Parcelable
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
     data class CardBrandChoice(
         val eligible: Boolean,
