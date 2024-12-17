@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.verticalmode
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -11,28 +12,40 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.material.Card
+import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.RadioButton
+import androidx.compose.material.RadioButtonDefaults
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
+import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle
 import com.stripe.android.paymentsheet.ui.PaymentMethodIcon
 import com.stripe.android.paymentsheet.ui.PromoBadge
+import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconWidth
 import com.stripe.android.uicore.getBorderStroke
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.stripeColors
 
+@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @Composable
 internal fun PaymentMethodRowButton(
     isEnabled: Boolean,
@@ -45,6 +58,7 @@ internal fun PaymentMethodRowButton(
     onClick: () -> Unit,
     contentDescription: String? = null,
     modifier: Modifier = Modifier,
+    style: RowStyle = RowStyle.FloatingButton.default,
     trailingContent: (@Composable RowScope.() -> Unit)? = null,
 ) {
     val contentPaddingValues = if (subtitle != null) {
@@ -53,11 +67,11 @@ internal fun PaymentMethodRowButton(
         12.dp
     }
 
-    RowButtonFloatingOuterContent(
+    RowButtonOuterContent(
+        style = style,
         isEnabled = isEnabled,
         isSelected = isSelected,
-        contentPaddingValues = PaddingValues(horizontal = 12.dp, vertical = contentPaddingValues),
-        verticalArrangement = Arrangement.Center,
+        contentPaddingValues = contentPaddingValues,
         modifier = modifier
             .fillMaxWidth()
             .heightIn(min = 52.dp)
@@ -66,21 +80,86 @@ internal fun PaymentMethodRowButton(
                 enabled = isClickable,
                 onClick = onClick
             ),
-    ) {
+        trailingContent = trailingContent,
+        onClick = onClick
+    ) { displayTrailingContent ->
         Row(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             RowButtonInnerContent(isEnabled, iconContent, title, subtitle, contentDescription)
 
-            Spacer(modifier = Modifier.weight(1f))
+            if (style !is RowStyle.FlatWithCheckmark) {
+                Spacer(modifier = Modifier.weight(1f))
+            }
 
             if (promoText != null) {
                 PromoBadge(promoText)
             }
 
-            if (trailingContent != null) {
+            if (trailingContent != null && displayTrailingContent) {
                 trailingContent()
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
+@Composable
+private fun RowButtonOuterContent(
+    style: RowStyle,
+    isEnabled: Boolean,
+    isSelected: Boolean,
+    contentPaddingValues: Dp,
+    modifier: Modifier,
+    trailingContent: @Composable (RowScope.() -> Unit)?,
+    onClick: () -> Unit,
+    rowContent: @Composable (displayTrailingContent: Boolean) -> Unit
+) {
+    when (style) {
+        is RowStyle.FloatingButton -> {
+            RowButtonFloatingOuterContent(
+                isEnabled = isEnabled,
+                isSelected = isSelected,
+                contentPaddingValues = PaddingValues(
+                    horizontal = 12.dp,
+                    vertical = contentPaddingValues + style.additionalInsetsDp.dp
+                ),
+                verticalArrangement = Arrangement.Center,
+                modifier = modifier,
+            ) {
+                rowContent(true)
+            }
+        }
+        is RowStyle.FlatWithCheckmark -> {
+            RowButtonCheckmarkOuterContent(
+                isSelected = isSelected,
+                contentPaddingValues = PaddingValues(
+                    horizontal = 0.dp,
+                    vertical = contentPaddingValues + style.additionalInsetsDp.dp
+                ),
+                verticalArrangement = Arrangement.Center,
+                trailingContent = trailingContent,
+                style = style,
+                modifier = modifier
+            ) {
+                rowContent(false)
+            }
+        }
+        is RowStyle.FlatWithRadio -> {
+            RowButtonRadioOuterContent(
+                isEnabled = isEnabled,
+                isSelected = isSelected,
+                contentPaddingValues = PaddingValues(
+                    horizontal = 0.dp,
+                    vertical = contentPaddingValues + style.additionalInsetsDp.dp
+                ),
+                verticalArrangement = Arrangement.Center,
+                onClick = onClick,
+                style = style,
+                modifier = modifier
+            ) {
+                rowContent(true)
             }
         }
     }
@@ -108,6 +187,84 @@ private fun RowButtonFloatingOuterContent(
             verticalArrangement = verticalArrangement,
         ) {
             content()
+        }
+    }
+}
+
+@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
+@Composable
+private fun RowButtonRadioOuterContent(
+    isEnabled: Boolean,
+    isSelected: Boolean,
+    contentPaddingValues: PaddingValues,
+    verticalArrangement: Arrangement.Vertical,
+    onClick: () -> Unit,
+    modifier: Modifier,
+    style: RowStyle.FlatWithRadio,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    Row(
+        modifier = modifier
+            .background(MaterialTheme.stripeColors.component)
+    ) {
+        RadioButton(
+            selected = isSelected,
+            onClick = onClick,
+            enabled = isEnabled,
+            modifier = Modifier.align(Alignment.CenterVertically).size(20.dp),
+            colors = RadioButtonDefaults.colors(
+                selectedColor = Color(style.selectedColor),
+                unselectedColor = Color(style.unselectedColor)
+            )
+        )
+        Spacer(Modifier.width(12.dp))
+        Column(
+            modifier = Modifier
+                .padding(contentPaddingValues)
+                .align(Alignment.CenterVertically),
+            verticalArrangement = verticalArrangement,
+        ) {
+            content()
+        }
+    }
+}
+
+@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
+@Composable
+private fun RowButtonCheckmarkOuterContent(
+    isSelected: Boolean,
+    contentPaddingValues: PaddingValues,
+    verticalArrangement: Arrangement.Vertical,
+    trailingContent: (@Composable RowScope.() -> Unit)?,
+    modifier: Modifier,
+    style: RowStyle.FlatWithCheckmark,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    Row(
+        modifier = modifier
+            .background(MaterialTheme.stripeColors.component),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(
+            modifier = Modifier.padding(contentPaddingValues),
+            verticalArrangement = verticalArrangement,
+        ) {
+            content()
+            Row {
+                if (trailingContent != null) {
+                    Spacer(Modifier.width(iconWidth + 16.dp))
+                    trailingContent()
+                }
+            }
+        }
+        Spacer(Modifier.weight(1f))
+        if (isSelected) {
+            Icon(
+                imageVector = Icons.Filled.Check,
+                contentDescription = null,
+                modifier = Modifier.align(Alignment.CenterVertically).padding(end = style.checkmarkInsetDp.dp),
+                tint = Color(style.checkmarkColor)
+            )
         }
     }
 }
@@ -167,6 +324,7 @@ private fun TitleContent(title: String, subtitle: String?, isEnabled: Boolean, c
     }
 }
 
+@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @Composable
 @Preview
 private fun ButtonPreview() {
@@ -184,10 +342,14 @@ private fun ButtonPreview() {
                     contentAlignment = Alignment.Center,
                 )
             },
-            title = "Card",
-            subtitle = "This is a card",
+            title = "•••• 4242",
+            subtitle = null,
             promoText = null,
-            onClick = {}
+            onClick = {},
+            style = RowStyle.FloatingButton.default,
+            trailingContent = {
+                Text("Edit")
+            }
         )
     }
 }
