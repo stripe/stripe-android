@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Parcelable
 import android.util.Base64
 import androidx.annotation.RestrictTo
+import androidx.core.os.BundleCompat
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import kotlinx.parcelize.Parcelize
@@ -54,9 +55,15 @@ internal fun createLinkActivityResult(resultCode: Int, intent: Intent?): LinkAct
         }
 
         LinkForegroundActivity.RESULT_FAILURE -> {
-            val exception = intent?.getSerializableExtra(LinkForegroundActivity.EXTRA_FAILURE)
+            val exception = intent?.extras?.let {
+                BundleCompat.getSerializable(
+                    it,
+                    LinkForegroundActivity.EXTRA_FAILURE,
+                    Exception::class.java
+                )
+            }
             if (exception != null) {
-                LinkActivityResult.Failed(exception as Exception)
+                LinkActivityResult.Failed(exception)
             } else {
                 LinkActivityResult.Canceled()
             }
