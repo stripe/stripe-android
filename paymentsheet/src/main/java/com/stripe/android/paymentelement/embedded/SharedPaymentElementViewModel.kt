@@ -125,6 +125,10 @@ internal class SharedPaymentElementViewModel @Inject constructor(
         )
     }
 
+    fun clearPaymentOption() {
+        selectionHolder.set(null)
+    }
+
     class Factory(private val statusBarColor: Int?) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: KClass<T>, extras: CreationExtras): T {
             val component = DaggerSharedPaymentElementViewModelComponent.builder()

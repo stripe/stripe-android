@@ -78,6 +78,13 @@ class EmbeddedPaymentElement private constructor(
         embeddedConfirmationHelper.confirm()
     }
 
+    /**
+     * Sets the current [paymentOption] to `null`.
+     */
+    fun clearPaymentOption() {
+        sharedViewModel.clearPaymentOption()
+    }
+
     /** Configuration for [EmbeddedPaymentElement] **/
     @Parcelize
     @Poko
