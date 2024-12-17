@@ -2,21 +2,12 @@ package com.stripe.android.paymentsheet
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.testing.FeatureFlagTestRule
-import org.junit.Rule
 import org.junit.Test
 
 class PaymentOptionsStateFactoryTest {
-
-    @get:Rule
-    val featureFlagTestRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.useNewUpdateCardScreen,
-        isEnabled = false
-    )
 
     @Test
     fun `Returns current selection if available`() {
@@ -30,8 +21,7 @@ class PaymentOptionsStateFactoryTest {
             currentSelection = PaymentSelection.Saved(paymentMethod),
             nameProvider = { it!!.resolvableString },
             isCbcEligible = false,
-            canRemovePaymentMethods = true,
-            defaultPaymentMethodId = null
+            defaultPaymentMethodId = null,
         )
 
         val selectedPaymentMethod = state.selectedItem as? PaymentOptionsItem.SavedPaymentMethod
@@ -49,8 +39,7 @@ class PaymentOptionsStateFactoryTest {
             currentSelection = PaymentSelection.Link,
             nameProvider = { it!!.resolvableString },
             isCbcEligible = false,
-            canRemovePaymentMethods = true,
-            defaultPaymentMethodId = null
+            defaultPaymentMethodId = null,
         )
 
         assertThat(state.selectedItem).isNull()
@@ -79,8 +68,7 @@ class PaymentOptionsStateFactoryTest {
             currentSelection = PaymentSelection.Link,
             nameProvider = { it!!.resolvableString },
             isCbcEligible = true,
-            canRemovePaymentMethods = true,
-            defaultPaymentMethodId = null
+            defaultPaymentMethodId = null,
         )
 
         assertThat(
@@ -89,20 +77,9 @@ class PaymentOptionsStateFactoryTest {
     }
 
     @Test
-    fun `isEnabledDuringEditing is true for all saved payment methods when remove is enabled`() {
-        testIsEnabledDuringEditingTrueForAllSavedPmsWhenRemoveIsEnabled(useUpdatePaymentMethodScreen = false)
-    }
-
-    @Test
     fun `isEnabledDuringEditing is true for all saved payment methods when remove is enabled, using updatePM screen`() {
-        testIsEnabledDuringEditingTrueForAllSavedPmsWhenRemoveIsEnabled(useUpdatePaymentMethodScreen = true)
-    }
-
-    private fun testIsEnabledDuringEditingTrueForAllSavedPmsWhenRemoveIsEnabled(useUpdatePaymentMethodScreen: Boolean) {
-        featureFlagTestRule.setEnabled(useUpdatePaymentMethodScreen)
         val state = createPaymentOptionsState(
             paymentMethods = PaymentMethodFixtures.createCards(3),
-            canRemovePaymentMethods = true,
         )
 
         val options = state.items.filterIsInstance<PaymentOptionsItem.SavedPaymentMethod>()
@@ -113,58 +90,9 @@ class PaymentOptionsStateFactoryTest {
     }
 
     @Test
-    fun `canRemovePaymentMethods is false for all saved payment methods when not using updatePM screen`() {
-        featureFlagTestRule.setEnabled(false)
-        val state = createPaymentOptionsState(
-            paymentMethods = PaymentMethodFixtures.createCards(3),
-            canRemovePaymentMethods = false,
-        )
-
-        val options = state.items.filterIsInstance<PaymentOptionsItem.SavedPaymentMethod>()
-
-        assertThat(options[0].isEnabledDuringEditing).isFalse()
-        assertThat(options[1].isEnabledDuringEditing).isFalse()
-        assertThat(options[2].isEnabledDuringEditing).isFalse()
-    }
-
-    @Test
-    fun `canRemovePaymentMethods is false for all saved payment methods unless can modify`() {
-        featureFlagTestRule.setEnabled(false)
-        val paymentMethods = PaymentMethodFixtures.createCards(3).run {
-            val mutablePaymentMethods = toMutableList()
-            val updatedPaymentMethod = mutablePaymentMethods[2].run {
-                copy(
-                    card = card?.copy(
-                        networks = PaymentMethod.Card.Networks(
-                            available = setOf("visa", "cartes_bancaires")
-                        )
-                    )
-                )
-            }
-
-            mutablePaymentMethods[2] = updatedPaymentMethod
-
-            mutablePaymentMethods
-        }
-
-        val state = createPaymentOptionsState(
-            paymentMethods = paymentMethods,
-            canRemovePaymentMethods = false,
-        )
-
-        val options = state.items.filterIsInstance<PaymentOptionsItem.SavedPaymentMethod>()
-
-        assertThat(options[0].isEnabledDuringEditing).isFalse()
-        assertThat(options[1].isEnabledDuringEditing).isFalse()
-        assertThat(options[2].isEnabledDuringEditing).isTrue()
-    }
-
-    @Test
     fun `saved payment methods are enabled even when cannot remove when using updatePM screen`() {
-        featureFlagTestRule.setEnabled(true)
         val state = createPaymentOptionsState(
             paymentMethods = PaymentMethodFixtures.createCards(3),
-            canRemovePaymentMethods = false,
         )
 
         val options = state.items.filterIsInstance<PaymentOptionsItem.SavedPaymentMethod>()
@@ -190,7 +118,6 @@ class PaymentOptionsStateFactoryTest {
             currentSelection = PaymentSelection.Saved(defaultPaymentMethod),
             nameProvider = { it!!.resolvableString },
             isCbcEligible = false,
-            canRemovePaymentMethods = true,
             defaultPaymentMethodId = defaultPaymentMethodId
         )
 
@@ -204,7 +131,6 @@ class PaymentOptionsStateFactoryTest {
 
     private fun createPaymentOptionsState(
         paymentMethods: List<PaymentMethod>,
-        canRemovePaymentMethods: Boolean,
     ): PaymentOptionsState {
         return PaymentOptionsStateFactory.create(
             paymentMethods = paymentMethods,
@@ -213,8 +139,7 @@ class PaymentOptionsStateFactoryTest {
             currentSelection = PaymentSelection.Link,
             nameProvider = { it!!.resolvableString },
             isCbcEligible = true,
-            canRemovePaymentMethods = canRemovePaymentMethods,
-            defaultPaymentMethodId = null
+            defaultPaymentMethodId = null,
         )
     }
 }

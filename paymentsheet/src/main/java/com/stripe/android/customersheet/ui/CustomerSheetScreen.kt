@@ -140,7 +140,6 @@ internal fun SelectPaymentMethod(
             showLink = false,
             currentSelection = viewState.paymentSelection,
             nameProvider = paymentMethodNameProvider,
-            canRemovePaymentMethods = viewState.canRemovePaymentMethods,
             isCbcEligible = viewState.isCbcEligible,
             defaultPaymentMethodId = null
         )
@@ -153,7 +152,6 @@ internal fun SelectPaymentMethod(
             onAddCardPressed = { viewActionHandler(CustomerSheetViewAction.OnAddCardPressed) },
             onItemSelected = { viewActionHandler(CustomerSheetViewAction.OnItemSelected(it)) },
             onModifyItem = { viewActionHandler(CustomerSheetViewAction.OnModifyItem(it)) },
-            onItemRemoved = { viewActionHandler(CustomerSheetViewAction.OnItemRemoved(it)) },
             modifier = Modifier.padding(bottom = 2.dp),
         )
 

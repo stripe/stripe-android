@@ -70,7 +70,6 @@ internal class SavedPaymentMethodMutator(
             isNotPaymentFlow = isNotPaymentFlow,
             nameProvider = providePaymentMethodName,
             isCbcEligible = isCbcEligible,
-            canRemovePaymentMethods = customerStateHolder.canRemove,
         )
     }
 
