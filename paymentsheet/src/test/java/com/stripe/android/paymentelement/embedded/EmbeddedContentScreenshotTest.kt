@@ -1,5 +1,8 @@
 package com.stripe.android.paymentelement.embedded
 
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.paymentsheet.verticalmode.FakePaymentMethodVerticalLayoutInteractor
@@ -9,7 +12,7 @@ import kotlin.test.Test
 
 internal class EmbeddedContentScreenshotTest {
     @get:Rule
-    val paparazziRule = PaparazziRule()
+    val paparazziRule = PaparazziRule(boxModifier = Modifier.padding(horizontal = 20.dp))
 
     @Test
     fun displaysVerticalModeList() {

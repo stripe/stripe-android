@@ -6,10 +6,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.ResolvableString
-import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.Mandate
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutUI
@@ -22,10 +20,8 @@ internal data class EmbeddedContent(
 ) {
     @Composable
     fun Content() {
-        val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
         Column(
             modifier = Modifier
-                .padding(horizontal = horizontalPadding)
                 .padding(top = 8.dp)
         ) {
             EmbeddedVerticalList()
