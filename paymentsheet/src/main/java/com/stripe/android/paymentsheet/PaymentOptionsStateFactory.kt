@@ -17,7 +17,6 @@ internal object PaymentOptionsStateFactory {
         showGooglePay: Boolean,
         showLink: Boolean,
         nameProvider: (PaymentMethodCode?) -> ResolvableString,
-        canRemovePaymentMethods: Boolean,
         isCbcEligible: Boolean,
         defaultPaymentMethodId: String?,
     ): List<PaymentOptionsItem> {
@@ -52,7 +51,6 @@ internal object PaymentOptionsStateFactory {
         showLink: Boolean,
         currentSelection: PaymentSelection?,
         nameProvider: (PaymentMethodCode?) -> ResolvableString,
-        canRemovePaymentMethods: Boolean,
         isCbcEligible: Boolean,
         defaultPaymentMethodId: String?,
     ): PaymentOptionsState {
@@ -62,7 +60,6 @@ internal object PaymentOptionsStateFactory {
             showLink = showLink,
             nameProvider = nameProvider,
             isCbcEligible = isCbcEligible,
-            canRemovePaymentMethods = canRemovePaymentMethods,
             defaultPaymentMethodId = defaultPaymentMethodId,
         )
 

@@ -21,7 +21,6 @@ class PaymentOptionsStateFactoryTest {
             currentSelection = PaymentSelection.Saved(paymentMethod),
             nameProvider = { it!!.resolvableString },
             isCbcEligible = false,
-            canRemovePaymentMethods = true,
             defaultPaymentMethodId = null,
         )
 
@@ -40,7 +39,6 @@ class PaymentOptionsStateFactoryTest {
             currentSelection = PaymentSelection.Link,
             nameProvider = { it!!.resolvableString },
             isCbcEligible = false,
-            canRemovePaymentMethods = true,
             defaultPaymentMethodId = null,
         )
 
@@ -70,7 +68,6 @@ class PaymentOptionsStateFactoryTest {
             currentSelection = PaymentSelection.Link,
             nameProvider = { it!!.resolvableString },
             isCbcEligible = true,
-            canRemovePaymentMethods = true,
             defaultPaymentMethodId = null,
         )
 
@@ -121,7 +118,6 @@ class PaymentOptionsStateFactoryTest {
             currentSelection = PaymentSelection.Saved(defaultPaymentMethod),
             nameProvider = { it!!.resolvableString },
             isCbcEligible = false,
-            canRemovePaymentMethods = true,
             defaultPaymentMethodId = defaultPaymentMethodId
         )
 
@@ -143,7 +139,6 @@ class PaymentOptionsStateFactoryTest {
             currentSelection = PaymentSelection.Link,
             nameProvider = { it!!.resolvableString },
             isCbcEligible = true,
-            canRemovePaymentMethods = canRemovePaymentMethods,
             defaultPaymentMethodId = null,
         )
     }
