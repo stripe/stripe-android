@@ -7,6 +7,7 @@ import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.CustomerState
+import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.runTest
@@ -61,6 +62,155 @@ internal class CustomerStateHolderTest {
             assertThat(awaitItem()).hasSize(1)
         }
     }
+
+    @Test
+    fun `canRemove is correct when no payment methods for customer`() = runScenario {
+        customerStateHolder.canRemove.test {
+            assertThat(awaitItem()).isFalse()
+
+            customerStateHolder.setCustomerState(
+                createCustomerState(
+                    isRemoveEnabled = true,
+                    canRemoveLastPaymentMethod = true,
+                    paymentMethods = listOf()
+                )
+            )
+
+            // Should still be false so expect no more events
+            expectNoEvents()
+        }
+    }
+
+    @Test
+    fun `canRemove is correct when one payment method & can remove last payment method`() =
+        runScenario {
+            customerStateHolder.canRemove.test {
+                assertThat(awaitItem()).isFalse()
+
+                customerStateHolder.setCustomerState(
+                    createCustomerState(
+                        isRemoveEnabled = true,
+                        canRemoveLastPaymentMethod = true,
+                        paymentMethods = PaymentMethodFactory.cards(1),
+                    )
+                )
+
+                assertThat(awaitItem()).isTrue()
+
+                ensureAllEventsConsumed()
+            }
+        }
+
+    @Test
+    fun `canRemove is correct when one payment method & cannot remove last payment method`() =
+        runScenario {
+            customerStateHolder.canRemove.test {
+                assertThat(awaitItem()).isFalse()
+
+                customerStateHolder.setCustomerState(
+                    createCustomerState(
+                        isRemoveEnabled = true,
+                        canRemoveLastPaymentMethod = false,
+                        paymentMethods = PaymentMethodFactory.cards(1),
+                    )
+                )
+
+                // Should still be false so expect no more events
+                expectNoEvents()
+            }
+        }
+
+    @Test
+    fun `canRemove is correct when multiple payment methods & can remove last payment method`() =
+        runScenario {
+            customerStateHolder.canRemove.test {
+                assertThat(awaitItem()).isFalse()
+
+                customerStateHolder.setCustomerState(
+                    createCustomerState(
+                        isRemoveEnabled = true,
+                        canRemoveLastPaymentMethod = true,
+                        paymentMethods = PaymentMethodFactory.cards(2),
+                    )
+                )
+
+                assertThat(awaitItem()).isTrue()
+            }
+        }
+
+    @Test
+    fun `canRemove is correct when multiple payment methods & cannot remove last payment method`() =
+        runScenario {
+            customerStateHolder.canRemove.test {
+                assertThat(awaitItem()).isFalse()
+
+                customerStateHolder.setCustomerState(
+                    createCustomerState(
+                        isRemoveEnabled = true,
+                        canRemoveLastPaymentMethod = false,
+                        paymentMethods = PaymentMethodFactory.cards(2),
+                    )
+                )
+
+                assertThat(awaitItem()).isTrue()
+            }
+        }
+
+    @Test
+    fun `canRemove is correct when has remove permissions & can remove last payment method`() =
+        runScenario {
+            customerStateHolder.canRemove.test {
+                assertThat(awaitItem()).isFalse()
+
+                customerStateHolder.setCustomerState(
+                    createCustomerState(
+                        paymentMethods = PaymentMethodFactory.cards(1),
+                        isRemoveEnabled = true,
+                        canRemoveLastPaymentMethod = true,
+                    )
+                )
+
+                assertThat(awaitItem()).isTrue()
+
+                ensureAllEventsConsumed()
+            }
+        }
+
+    @Test
+    fun `canRemove is correct when has remove permissions & canRemoveLastPaymentMethod is false`() =
+        runScenario {
+            customerStateHolder.canRemove.test {
+                assertThat(awaitItem()).isFalse()
+
+                customerStateHolder.setCustomerState(
+                    createCustomerState(
+                        paymentMethods = PaymentMethodFactory.cards(1),
+                        isRemoveEnabled = true,
+                        canRemoveLastPaymentMethod = false,
+                    )
+                )
+
+                ensureAllEventsConsumed()
+            }
+        }
+
+    @Test
+    fun `canRemove is correct when does not remove permissions & canRemoveLastPaymentMethod is true`() =
+        runScenario {
+            customerStateHolder.canRemove.test {
+                assertThat(awaitItem()).isFalse()
+
+                customerStateHolder.setCustomerState(
+                    createCustomerState(
+                        paymentMethods = PaymentMethodFactory.cards(1),
+                        isRemoveEnabled = false,
+                        canRemoveLastPaymentMethod = true,
+                    )
+                )
+
+                ensureAllEventsConsumed()
+            }
+        }
 
     private fun runScenario(
         savedStateHandle: SavedStateHandle = SavedStateHandle(),

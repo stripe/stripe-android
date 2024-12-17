@@ -58,19 +58,6 @@ internal class SavedPaymentMethodMutator(
     isLinkEnabled: StateFlow<Boolean?>,
     isNotPaymentFlow: Boolean,
 ) {
-    val canRemove: StateFlow<Boolean> = customerStateHolder.customer.mapAsStateFlow { customerState ->
-        customerState?.run {
-            val hasRemovePermissions = customerState.permissions.canRemovePaymentMethods
-            val hasRemoveLastPaymentMethodPermissions = customerState.permissions.canRemoveLastPaymentMethod
-
-            when (paymentMethods.size) {
-                0 -> false
-                1 -> hasRemoveLastPaymentMethodPermissions && hasRemovePermissions
-                else -> hasRemovePermissions
-            }
-        } ?: false
-    }
-
     val defaultPaymentMethodId: StateFlow<String?> = customerStateHolder.customer.mapAsStateFlow { customerState ->
         customerState?.defaultPaymentMethodId
     }
@@ -83,14 +70,14 @@ internal class SavedPaymentMethodMutator(
             isNotPaymentFlow = isNotPaymentFlow,
             nameProvider = providePaymentMethodName,
             isCbcEligible = isCbcEligible,
-            canRemovePaymentMethods = canRemove,
+            canRemovePaymentMethods = customerStateHolder.canRemove,
         )
     }
 
     val paymentOptionsItems: StateFlow<List<PaymentOptionsItem>> = paymentOptionsItemsMapper()
 
     val canEdit: StateFlow<Boolean> = combineAsStateFlow(
-        canRemove,
+        customerStateHolder.canRemove,
         paymentOptionsItems
     ) { canRemove, items ->
         canRemove || items.filterIsInstance<PaymentOptionsItem.SavedPaymentMethod>().any { item ->
@@ -194,7 +181,7 @@ internal class SavedPaymentMethodMutator(
         onModifyPaymentMethod(
             paymentMethod,
             providePaymentMethodName(paymentMethod.type?.code),
-            canRemove.value,
+            customerStateHolder.canRemove.value,
             {
                 removePaymentMethodInEditScreen(paymentMethod)
             },
@@ -208,7 +195,7 @@ internal class SavedPaymentMethodMutator(
         val paymentMethod = displayableSavedPaymentMethod.paymentMethod
         onUpdatePaymentMethod(
             displayableSavedPaymentMethod,
-            canRemove.value,
+            customerStateHolder.canRemove.value,
             {
                 removePaymentMethodInEditScreen(paymentMethod)
             },

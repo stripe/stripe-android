@@ -225,7 +225,7 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
                 paymentOptionsItems = savedPaymentMethodMutator.paymentOptionsItems,
                 editing = savedPaymentMethodMutator.editing,
                 canEdit = savedPaymentMethodMutator.canEdit,
-                canRemove = savedPaymentMethodMutator.canRemove,
+                canRemove = customerStateHolder.canRemove,
                 toggleEdit = savedPaymentMethodMutator::toggleEditing,
                 isProcessing = viewModel.processing,
                 currentSelection = viewModel.selection,
