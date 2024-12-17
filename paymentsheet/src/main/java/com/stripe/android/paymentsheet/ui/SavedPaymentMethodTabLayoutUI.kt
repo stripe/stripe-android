@@ -290,14 +290,14 @@ private fun AddCardTab(
 
     SavedPaymentMethodTab(
         viewWidth = width,
-        isSelected = false,
         editState = PaymentOptionEditState.None,
+        isSelected = false,
+        labelText = stringResource(R.string.stripe_paymentsheet_add_payment_method_button_label),
         isEnabled = isEnabled,
         iconRes = iconRes,
-        modifier = modifier,
-        labelText = stringResource(R.string.stripe_paymentsheet_add_payment_method_button_label),
-        description = stringResource(R.string.stripe_add_new_payment_method),
         onItemSelectedListener = onAddCardPressed,
+        description = stringResource(R.string.stripe_add_new_payment_method),
+        modifier = modifier,
     )
 }
 
@@ -311,14 +311,14 @@ private fun GooglePayTab(
 ) {
     SavedPaymentMethodTab(
         viewWidth = width,
-        isSelected = isSelected,
         editState = PaymentOptionEditState.None,
+        isSelected = isSelected,
         isEnabled = isEnabled,
         iconRes = R.drawable.stripe_google_pay_mark,
-        modifier = modifier,
         labelText = stringResource(StripeR.string.stripe_google_pay),
         description = stringResource(StripeR.string.stripe_google_pay),
         onItemSelectedListener = { onItemSelected(PaymentSelection.GooglePay) },
+        modifier = modifier,
     )
 }
 
@@ -332,15 +332,15 @@ private fun LinkTab(
 ) {
     SavedPaymentMethodTab(
         viewWidth = width,
-        isSelected = isSelected,
         editState = PaymentOptionEditState.None,
+        isSelected = isSelected,
         isEnabled = isEnabled,
         iconRes = R.drawable.stripe_ic_paymentsheet_link,
-        modifier = modifier,
         iconTint = null,
         labelText = stringResource(StripeR.string.stripe_link),
         description = stringResource(StripeR.string.stripe_link),
         onItemSelectedListener = { onItemSelected(PaymentSelection.Link) },
+        modifier = modifier,
     )
 }
 
@@ -371,15 +371,14 @@ private fun SavedPaymentMethodTab(
     ) {
         SavedPaymentMethodTab(
             viewWidth = width,
-            isSelected = isSelected,
             editState = when {
                 isEnabled && isEditing -> PaymentOptionEditState.Modifiable
                 else -> PaymentOptionEditState.None
             },
+            isSelected = isSelected,
             isEnabled = isEnabled,
             isClickable = !isEditing,
             iconRes = paymentMethod.paymentMethod.getSavedPaymentMethodIcon(),
-            modifier = modifier,
             labelIcon = labelIcon,
             labelText = labelText,
             description = paymentMethod
@@ -396,6 +395,7 @@ private fun SavedPaymentMethodTab(
             onItemSelectedListener = {
                 onItemSelected(paymentMethod.toPaymentSelection())
             },
+            modifier = modifier,
         )
     }
 }

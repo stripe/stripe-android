@@ -18,7 +18,7 @@ internal object PaymentOptionsStateFactory {
         showLink: Boolean,
         nameProvider: (PaymentMethodCode?) -> ResolvableString,
         isCbcEligible: Boolean,
-        defaultPaymentMethodId: String?,
+        defaultPaymentMethodId: String?
     ): List<PaymentOptionsItem> {
         return listOfNotNull(
             PaymentOptionsItem.AddCard,
@@ -52,7 +52,7 @@ internal object PaymentOptionsStateFactory {
         currentSelection: PaymentSelection?,
         nameProvider: (PaymentMethodCode?) -> ResolvableString,
         isCbcEligible: Boolean,
-        defaultPaymentMethodId: String?,
+        defaultPaymentMethodId: String?
     ): PaymentOptionsState {
         val items = createPaymentOptionsList(
             paymentMethods = paymentMethods,
@@ -60,7 +60,7 @@ internal object PaymentOptionsStateFactory {
             showLink = showLink,
             nameProvider = nameProvider,
             isCbcEligible = isCbcEligible,
-            defaultPaymentMethodId = defaultPaymentMethodId,
+            defaultPaymentMethodId = defaultPaymentMethodId
         )
 
         val selectedItem = getSelectedItem(items, currentSelection)
