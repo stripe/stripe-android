@@ -160,7 +160,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 paymentMethods = customerStateHolder.paymentMethods,
                 mostRecentlySelectedSavedPaymentMethod = customerStateHolder.mostRecentlySelectedSavedPaymentMethod,
                 providePaymentMethodName = viewModel.savedPaymentMethodMutator.providePaymentMethodName,
-                canRemove = viewModel.savedPaymentMethodMutator.canRemove,
+                canRemove = viewModel.customerStateHolder.canRemove,
                 onEditPaymentMethod = { viewModel.savedPaymentMethodMutator.modifyPaymentMethod(it.paymentMethod) },
                 onSelectSavedPaymentMethod = {
                     viewModel.handlePaymentMethodSelected(PaymentSelection.Saved(it))

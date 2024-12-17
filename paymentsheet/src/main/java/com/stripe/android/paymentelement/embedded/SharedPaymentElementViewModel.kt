@@ -9,6 +9,8 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.cards.CardAccountRangeRepository
+import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
@@ -74,30 +76,30 @@ import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 import kotlin.reflect.KClass
 
+@Singleton
 @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 internal class SharedPaymentElementViewModel @Inject constructor(
+    confirmationStateHolderFactory: EmbeddedConfirmationStateHolderFactory,
     confirmationHandlerFactory: ConfirmationHandler.Factory,
     @IOContext ioContext: CoroutineContext,
     private val configurationHandler: EmbeddedConfigurationHandler,
     private val paymentOptionDisplayDataFactory: PaymentOptionDisplayDataFactory,
     private val selectionHolder: EmbeddedSelectionHolder,
+    embeddedContentHelperFactory: EmbeddedContentHelperFactory,
 ) : ViewModel() {
     private val _paymentOption: MutableStateFlow<PaymentOptionDisplayData?> = MutableStateFlow(null)
     val paymentOption: StateFlow<PaymentOptionDisplayData?> = _paymentOption.asStateFlow()
 
+    val confirmationStateHolder = confirmationStateHolderFactory.create(viewModelScope)
     val confirmationHandler = confirmationHandlerFactory.create(viewModelScope + ioContext)
 
-    private val _embeddedContent = MutableStateFlow<EmbeddedContent?>(null)
-    val embeddedContent: StateFlow<EmbeddedContent?> = _embeddedContent.asStateFlow()
-
-    @Volatile
-    var confirmationState: EmbeddedConfirmationHelper.State? = null
+    private val embeddedContentHelper = embeddedContentHelperFactory.create(viewModelScope)
+    val embeddedContent: StateFlow<EmbeddedContent?> = embeddedContentHelper.embeddedContent
 
     init {
         viewModelScope.launch {
             selectionHolder.selection.collect { selection ->
                 _paymentOption.value = paymentOptionDisplayDataFactory.create(selection)
-                confirmationState = confirmationState?.copy(selection = selection)
             }
         }
     }
@@ -111,19 +113,26 @@ internal class SharedPaymentElementViewModel @Inject constructor(
             configuration = configuration,
         ).fold(
             onSuccess = { state ->
-                confirmationState = EmbeddedConfirmationHelper.State(
+                confirmationStateHolder.state = EmbeddedConfirmationStateHolder.State(
                     paymentMethodMetadata = state.paymentMethodMetadata,
                     selection = state.paymentSelection,
                     initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(intentConfiguration),
                     configuration = configuration,
                 )
                 selectionHolder.set(state.paymentSelection)
+                embeddedContentHelper.dataLoaded(
+                    paymentMethodMetadata = state.paymentMethodMetadata,
+                )
                 ConfigureResult.Succeeded()
             },
             onFailure = { error ->
                 ConfigureResult.Failed(error)
             },
         )
+    }
+
+    fun clearPaymentOption() {
+        selectionHolder.set(null)
     }
 
     class Factory(private val statusBarColor: Int?) : ViewModelProvider.Factory {
@@ -176,6 +185,16 @@ internal interface SharedPaymentElementViewModelComponent {
     ],
 )
 internal interface SharedPaymentElementViewModelModule {
+    @Binds
+    fun bindsEmbeddedContentHelperFactory(
+        factory: DefaultEmbeddedContentHelperFactory
+    ): EmbeddedContentHelperFactory
+
+    @Binds
+    fun bindsCardAccountRangeRepositoryFactory(
+        defaultCardAccountRangeRepositoryFactory: DefaultCardAccountRangeRepositoryFactory
+    ): CardAccountRangeRepository.Factory
+
     @Binds
     fun bindsConfigurationHandler(
         handler: DefaultEmbeddedConfigurationHandler
