@@ -26,11 +26,10 @@
     <ID>LargeClass:SavedPaymentMethodMutatorTest.kt$SavedPaymentMethodMutatorTest</ID>
     <ID>LargeClass:USBankAccountFormViewModelTest.kt$USBankAccountFormViewModelTest</ID>
     <ID>LongMethod:AutocompleteScreen.kt$@Composable internal fun AutocompleteScreenUI(viewModel: AutocompleteViewModel)</ID>
-    <ID>LongMethod:ConfirmationOptionKtx.kt$internal fun PaymentSelection.toConfirmationOption( initializationMode: PaymentElementLoader.InitializationMode, configuration: CommonConfiguration, appearance: PaymentSheet.Appearance, linkConfiguration: LinkConfiguration?, ): ConfirmationHandler.Option?</ID>
     <ID>LongMethod:CustomerSheetScreen.kt$@Composable internal fun SelectPaymentMethod( viewState: CustomerSheetViewState.SelectPaymentMethod, viewActionHandler: (CustomerSheetViewAction) -> Unit, paymentMethodNameProvider: (PaymentMethodCode?) -> ResolvableString, modifier: Modifier = Modifier, )</ID>
-    <ID>LongMethod:DefaultConfirmationHandlerTest.kt$DefaultConfirmationHandlerTest$@Test fun `On lifecycle destroyed, should unregister all launchers`()</ID>
     <ID>LongMethod:DefaultConfirmationHandlerTest.kt$DefaultConfirmationHandlerTest$private fun test( someDefinitionAction: ConfirmationDefinition.Action&lt;SomeConfirmationDefinition.LauncherArgs> = ConfirmationDefinition.Action.Fail( cause = IllegalStateException("Failed!"), message = R.string.stripe_something_went_wrong.resolvableString, errorType = ConfirmationHandler.Result.Failed.ErrorType.Internal, ), someDefinitionResult: ConfirmationDefinition.Result = ConfirmationDefinition.Result.Failed( cause = IllegalStateException("Failed!"), message = R.string.stripe_something_went_wrong.resolvableString, type = ConfirmationHandler.Result.Failed.ErrorType.Internal, ), someOtherDefinitionAction: ConfirmationDefinition.Action&lt;SomeOtherConfirmationDefinition.LauncherArgs> = ConfirmationDefinition.Action.Fail( cause = IllegalStateException("Failed!"), message = R.string.stripe_something_went_wrong.resolvableString, errorType = ConfirmationHandler.Result.Failed.ErrorType.Internal, ), someOtherDefinitionResult: ConfirmationDefinition.Result = ConfirmationDefinition.Result.Failed( cause = IllegalStateException("Failed!"), message = R.string.stripe_something_went_wrong.resolvableString, type = ConfirmationHandler.Result.Failed.ErrorType.Internal, ), shouldRegister: Boolean = true, savedStateHandle: SavedStateHandle = SavedStateHandle(), dispatcher: CoroutineDispatcher = UnconfinedTestDispatcher(), scenarioTest: suspend Scenario.() -> Unit )</ID>
     <ID>LongMethod:EditPaymentMethod.kt$@Composable internal fun EditPaymentMethodUi( viewState: EditPaymentMethodViewState, viewActionHandler: (action: EditPaymentMethodViewAction) -> Unit, modifier: Modifier = Modifier )</ID>
+    <ID>LongMethod:EmbeddedContentHelper.kt$DefaultEmbeddedContentHelper$private fun createInteractor( coroutineScope: CoroutineScope, paymentMethodMetadata: PaymentMethodMetadata, ): PaymentMethodVerticalLayoutInteractor</ID>
     <ID>LongMethod:FormViewModelTest.kt$FormViewModelTest$@Test fun `Verify params are set when element address fields are complete`()</ID>
     <ID>LongMethod:FormViewModelTest.kt$FormViewModelTest$@Test fun `Verify params are set when required address fields are complete`()</ID>
     <ID>LongMethod:PaymentMethodMetadataTest.kt$PaymentMethodMetadataTest$@OptIn(ExperimentalCardBrandFilteringApi::class) @Test fun `should create metadata properly with elements session response, payment sheet config, and data specs`()</ID>
@@ -49,7 +48,6 @@
     <ID>MagicNumber:PrimaryButton.kt$PrimaryButton$0.5f</ID>
     <ID>MagicNumber:USBankAccountForm.kt$0.5f</ID>
     <ID>MaxLineLength:CardDefinition.kt$internal</ID>
-    <ID>MaxLineLength:CommonConfiguration.kt$CommonConfiguration$"secret. See CustomerSession API: https://docs.stripe.com/api/customer_sessions/create"</ID>
     <ID>MaxLineLength:CustomerRepositoryTest.kt$CustomerRepositoryTest$fun</ID>
     <ID>MaxLineLength:CustomerSheetViewModelTest.kt$CustomerSheetViewModelTest$fun</ID>
     <ID>MaxLineLength:CustomerSheetViewModelTest.kt$CustomerSheetViewModelTest$publishableKey = "pk_test_51HvTI7Lu5o3livep6t5AgBSkMvWoTtA0nyA7pVYDqpfLkRtWun7qZTYCOHCReprfLM464yaBeF72UFfB7cY9WG4a00ZnDtiC2C"</ID>
@@ -72,8 +70,6 @@
     <ID>MaxLineLength:SupportedPaymentMethod.kt$SupportedPaymentMethod$/** This describes the image in the LPM selector. These can be found internally [here](https://www.figma.com/file/2b9r3CJbyeVAmKi1VHV2h9/Mobile-Payment-Element?node-id=1128%3A0) */</ID>
     <ID>MaxLineLength:USBankAccountFormViewModelTest.kt$USBankAccountFormViewModelTest$fun</ID>
     <ID>MaximumLineLength:CardDefinition.kt$internal</ID>
-    <ID>MaximumLineLength:CommonConfiguration.kt$CommonConfiguration$ </ID>
-    <ID>ThrowsCount:CommonConfiguration.kt$CommonConfiguration$fun validate()</ID>
     <ID>TooManyFunctions:CustomerSheetEventReporter.kt$CustomerSheetEventReporter</ID>
     <ID>TooManyFunctions:DefaultCustomerSheetEventReporter.kt$DefaultCustomerSheetEventReporter : CustomerSheetEventReporter</ID>
     <ID>TooManyFunctions:DefaultEventReporter.kt$DefaultEventReporter : EventReporter</ID>
@@ -81,6 +77,7 @@
     <ID>TooManyFunctions:DelegateDrawable.kt$DelegateDrawable : Drawable</ID>
     <ID>TooManyFunctions:EventReporter.kt$EventReporter</ID>
     <ID>TooManyFunctions:PaymentMethodMetadata.kt$PaymentMethodMetadata : Parcelable</ID>
+    <ID>TooManyFunctions:SharedPaymentElementViewModel.kt$SharedPaymentElementViewModelModule</ID>
     <ID>UnusedPrivateClass:PaymentOptionsViewModelTest.kt$PaymentOptionsViewModelTest$MyHostActivity : AppCompatActivity</ID>
   </CurrentIssues>
 </SmellBaseline>
