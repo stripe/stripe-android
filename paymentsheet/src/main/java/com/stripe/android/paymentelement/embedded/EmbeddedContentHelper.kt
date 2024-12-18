@@ -264,7 +264,7 @@ internal class DefaultEmbeddedContentHelper @AssistedInject constructor(
     }
 
     @Parcelize
-    internal class State(
+   class State(
         val paymentMethodMetadata: PaymentMethodMetadata,
         val rowStyle: Embedded.RowStyle,
     ) : Parcelable
