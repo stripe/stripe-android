@@ -124,14 +124,6 @@ internal class WalletViewModel @Inject constructor(
         dismissWithResult(LinkActivityResult.Failed(fatalError))
     }
 
-    private fun onError(error: Throwable) {
-        _uiState.update {
-            it.copy(
-                errorMessage = error.message?.resolvableString
-            )
-        }
-    }
-
     fun onItemSelected(item: ConsumerPaymentDetails.PaymentDetails) {
         if (item == uiState.value.selectedItem) return
 
@@ -189,12 +181,21 @@ internal class WalletViewModel @Inject constructor(
                     shippingDetails = null
                 )
             )
-            when (val result = confirmationHandler.awaitResult()) {
+            val result = confirmationHandler.awaitResult()
+            when (result) {
+                is ConfirmationHandler.Result.Succeeded -> {
+                    dismissWithResult(LinkActivityResult.Completed)
+                }
                 is ConfirmationHandler.Result.Canceled -> {
                     dismissWithResult(LinkActivityResult.Canceled(LinkActivityResult.Canceled.Reason.BackPressed))
                 }
-                is ConfirmationHandler.Result.Failed -> onError(result.cause)
-                is ConfirmationHandler.Result.Succeeded -> Unit
+                is ConfirmationHandler.Result.Failed -> {
+                    _uiState.update {
+                        it.copy(
+                            errorMessage = result.message
+                        )
+                    }
+                }
                 null -> Unit
             }
         }
