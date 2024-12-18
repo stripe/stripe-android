@@ -45,7 +45,8 @@ internal class WalletViewModel @Inject constructor(
             selectedItem = null,
             isProcessing = false,
             hasCompleted = false,
-            primaryButtonLabel = completePaymentButtonLabel(configuration.stripeIntent)
+            primaryButtonLabel = completePaymentButtonLabel(configuration.stripeIntent),
+            errorMessage = null
         )
     )
 
@@ -95,22 +96,26 @@ internal class WalletViewModel @Inject constructor(
     fun onPrimaryButtonClicked() {
         val selectedItem = uiState.value.selectedItem ?: return
         viewModelScope.launch {
+            _uiState.update {
+                it.copy(isProcessing = true)
+            }
             val result = linkConfirmationHandler.confirm(
                 paymentDetails = selectedItem,
                 linkAccount = linkAccount
             )
             when (result) {
-                Result.Canceled -> {
-                    dismissWithResult(LinkActivityResult.Canceled(LinkActivityResult.Canceled.Reason.BackPressed))
-                }
+                Result.Canceled -> Unit
                 is Result.Failed -> {
                     _uiState.update {
                         it.copy(
-                            errorMessage = result.message
+                            errorMessage = result.message,
+                            isProcessing = false
                         )
                     }
                 }
-                Result.Succeeded -> Unit
+                Result.Succeeded -> {
+                    dismissWithResult(LinkActivityResult.Completed)
+                }
             }
         }
     }

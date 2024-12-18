@@ -24,7 +24,6 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentsheet.R
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -34,7 +33,7 @@ internal class LinkActivityViewModel @Inject constructor(
     confirmationHandlerFactory: ConfirmationHandler.Factory,
     private val linkAccountManager: LinkAccountManager,
 ) : ViewModel(), DefaultLifecycleObserver {
-    val confirmationHandler: ConfirmationHandler
+    val confirmationHandler: ConfirmationHandler = confirmationHandlerFactory.create(viewModelScope)
 
     private val _linkState = MutableStateFlow(
         value = LinkAppBarState(
@@ -51,22 +50,6 @@ internal class LinkActivityViewModel @Inject constructor(
 
     var navController: NavHostController? = null
     var dismissWithResult: ((LinkActivityResult) -> Unit)? = null
-
-    init {
-        confirmationHandler = confirmationHandlerFactory.create(viewModelScope)
-        viewModelScope.launch {
-
-            listenToConfirmationState()
-        }
-    }
-
-    private suspend fun listenToConfirmationState() {
-        confirmationHandler.state
-            .filterIsInstance<ConfirmationHandler.State.Complete>()
-            .collect {
-                dismissWithResult?.invoke(LinkActivityResult.Completed)
-            }
-    }
 
     fun registerFromActivity(
         activityResultCaller: ActivityResultCaller,

@@ -76,19 +76,12 @@ internal fun WalletBody(
     onPrimaryButtonClick: () -> Unit,
     onPayAnotherWayClick: () -> Unit,
 ) {
-    val context = LocalContext.current
     if (state.paymentDetailsList.isEmpty()) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .testTag(WALLET_LOADER_TAG),
-            contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator()
-        }
+        Loader()
         return
     }
 
+    val context = LocalContext.current
     val focusManager = LocalFocusManager.current
 
     LaunchedEffect(state.isProcessing) {
@@ -141,6 +134,18 @@ internal fun WalletBody(
             label = stringResource(id = R.string.stripe_wallet_pay_another_way),
             onClick = onPayAnotherWayClick
         )
+    }
+}
+
+@Composable
+private fun Loader() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .testTag(WALLET_LOADER_TAG),
+        contentAlignment = Alignment.Center
+    ) {
+        CircularProgressIndicator()
     }
 }
 

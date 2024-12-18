@@ -16,7 +16,8 @@ class WalletUiStateTest {
             selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails.firstOrNull(),
             hasCompleted = true,
             isProcessing = false,
-            primaryButtonLabel = LINK_WALLET_PRIMARY_BUTTON_LABEL
+            primaryButtonLabel = LINK_WALLET_PRIMARY_BUTTON_LABEL,
+            errorMessage = null
         )
 
         assertThat(state.primaryButtonState).isEqualTo(PrimaryButtonState.Completed)
@@ -29,7 +30,8 @@ class WalletUiStateTest {
             selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails.firstOrNull(),
             hasCompleted = false,
             isProcessing = true,
-            primaryButtonLabel = LINK_WALLET_PRIMARY_BUTTON_LABEL
+            primaryButtonLabel = LINK_WALLET_PRIMARY_BUTTON_LABEL,
+            errorMessage = null
         )
 
         assertThat(state.primaryButtonState).isEqualTo(PrimaryButtonState.Processing)
@@ -45,7 +47,8 @@ class WalletUiStateTest {
                 ),
             hasCompleted = false,
             isProcessing = false,
-            primaryButtonLabel = LINK_WALLET_PRIMARY_BUTTON_LABEL
+            primaryButtonLabel = LINK_WALLET_PRIMARY_BUTTON_LABEL,
+            errorMessage = null
         )
 
         assertThat(state.primaryButtonState).isEqualTo(PrimaryButtonState.Disabled)
@@ -61,7 +64,8 @@ class WalletUiStateTest {
                 ),
             hasCompleted = false,
             isProcessing = false,
-            primaryButtonLabel = LINK_WALLET_PRIMARY_BUTTON_LABEL
+            primaryButtonLabel = LINK_WALLET_PRIMARY_BUTTON_LABEL,
+            errorMessage = null
         )
 
         assertThat(state.primaryButtonState).isEqualTo(PrimaryButtonState.Disabled)
@@ -75,7 +79,8 @@ class WalletUiStateTest {
                 .copy(expiryYear = 2099),
             hasCompleted = false,
             isProcessing = false,
-            primaryButtonLabel = LINK_WALLET_PRIMARY_BUTTON_LABEL
+            primaryButtonLabel = LINK_WALLET_PRIMARY_BUTTON_LABEL,
+            errorMessage = null
         )
 
         assertThat(state.primaryButtonState).isEqualTo(PrimaryButtonState.Enabled)
@@ -88,7 +93,8 @@ class WalletUiStateTest {
             selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT,
             hasCompleted = false,
             isProcessing = false,
-            primaryButtonLabel = LINK_WALLET_PRIMARY_BUTTON_LABEL
+            primaryButtonLabel = LINK_WALLET_PRIMARY_BUTTON_LABEL,
+            errorMessage = null
         )
 
         assertThat(state.showBankAccountTerms).isTrue()
@@ -101,7 +107,8 @@ class WalletUiStateTest {
             selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
             hasCompleted = false,
             isProcessing = false,
-            primaryButtonLabel = LINK_WALLET_PRIMARY_BUTTON_LABEL
+            primaryButtonLabel = LINK_WALLET_PRIMARY_BUTTON_LABEL,
+            errorMessage = null
         )
 
         assertThat(state.showBankAccountTerms).isFalse()
