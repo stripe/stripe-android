@@ -27,8 +27,6 @@ import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
-import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
-import com.stripe.android.paymentelement.confirmation.DefaultConfirmationHandler
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
@@ -37,11 +35,9 @@ import com.stripe.android.repository.ConsumersApiServiceImpl
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.plus
 import javax.inject.Named
-import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
 @Module
@@ -65,11 +61,6 @@ internal interface NativeLinkModule {
     @Binds
     @NativeLinkScope
     fun stripeRepository(stripeRepository: StripeApiRepository): StripeRepository
-
-//    @Binds
-//    fun bindsConfirmationHandlerFactory(
-//        defaultConfirmationHandlerFactory: DefaultConfirmationHandler.Factory
-//    ): ConfirmationHandler.Factory
 
     companion object {
         @Provides
@@ -136,18 +127,6 @@ internal interface NativeLinkModule {
         @Named(ENABLE_LOGGING)
         @NativeLinkScope
         fun providesEnableLogging(): Boolean = BuildConfig.DEBUG
-
-//        @Provides
-//        @NativeLinkScope
-//        fun providesConfirmationHandler(
-//            confirmationHandlerFactory: ConfirmationHandler.Factory,
-//            scope: CoroutineScope,
-//            @IOContext workContext: CoroutineContext,
-//        ): ConfirmationHandler {
-//            return confirmationHandlerFactory.create(
-//                scope = scope.plus(workContext)
-//            )
-//        }
 
         @Provides
         @NativeLinkScope

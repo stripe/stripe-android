@@ -89,6 +89,12 @@ internal fun createLinkActivityResult(resultCode: Int, intent: Intent?): LinkAct
             }
         }
 
+        LinkActivity.RESULT_COMPLETE -> {
+            intent?.extras?.let {
+                BundleCompat.getParcelable(it, LinkActivityContract.EXTRA_RESULT, LinkActivityResult::class.java)
+            } ?: LinkActivityResult.Canceled()
+        }
+
         else -> {
             LinkActivityResult.Canceled()
         }
