@@ -11,6 +11,8 @@ import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.account.LinkAccountManager
+import com.stripe.android.link.confirmation.LinkConfirmationHandler
+import com.stripe.android.link.confirmation.Result
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.supportedPaymentMethodTypes
@@ -31,6 +33,7 @@ internal class WalletViewModel @Inject constructor(
     private val linkAccount: LinkAccount,
     private val linkAccountManager: LinkAccountManager,
     private val logger: Logger,
+    private val linkConfirmationHandler: LinkConfirmationHandler,
     private val navigateAndClearStack: (route: LinkScreen) -> Unit,
     private val dismissWithResult: (LinkActivityResult) -> Unit
 ) : ViewModel() {
@@ -42,7 +45,8 @@ internal class WalletViewModel @Inject constructor(
             selectedItem = null,
             isProcessing = false,
             hasCompleted = false,
-            primaryButtonLabel = completePaymentButtonLabel(configuration.stripeIntent)
+            primaryButtonLabel = completePaymentButtonLabel(configuration.stripeIntent),
+            errorMessage = null
         )
     )
 
@@ -89,7 +93,32 @@ internal class WalletViewModel @Inject constructor(
         }
     }
 
-    fun onPrimaryButtonClicked() = Unit
+    fun onPrimaryButtonClicked() {
+        val selectedItem = uiState.value.selectedItem ?: return
+        viewModelScope.launch {
+            _uiState.update {
+                it.copy(isProcessing = true)
+            }
+            val result = linkConfirmationHandler.confirm(
+                paymentDetails = selectedItem,
+                linkAccount = linkAccount
+            )
+            when (result) {
+                Result.Canceled -> Unit
+                is Result.Failed -> {
+                    _uiState.update {
+                        it.copy(
+                            errorMessage = result.message,
+                            isProcessing = false
+                        )
+                    }
+                }
+                Result.Succeeded -> {
+                    dismissWithResult(LinkActivityResult.Completed)
+                }
+            }
+        }
+    }
 
     fun onPayAnotherWayClicked() {
         dismissWithResult(LinkActivityResult.Canceled(LinkActivityResult.Canceled.Reason.PayAnotherWay))
@@ -121,6 +150,9 @@ internal class WalletViewModel @Inject constructor(
                         linkAccountManager = parentComponent.linkAccountManager,
                         logger = parentComponent.logger,
                         linkAccount = linkAccount,
+                        linkConfirmationHandler = parentComponent.linkConfirmationHandlerFactory.create(
+                            confirmationHandler = parentComponent.viewModel.confirmationHandler
+                        ),
                         navigateAndClearStack = navigateAndClearStack,
                         dismissWithResult = dismissWithResult
                     )

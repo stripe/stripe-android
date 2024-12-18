@@ -1,6 +1,8 @@
 package com.stripe.android.link
 
 import android.app.Application
+import androidx.activity.result.ActivityResultCaller
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SAVED_STATE_REGISTRY_OWNER_KEY
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.VIEW_MODEL_STORE_OWNER_KEY
@@ -15,6 +17,8 @@ import androidx.savedstate.SavedStateRegistryOwner
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.account.FakeLinkAccountManager
+import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -35,7 +39,11 @@ import kotlin.test.assertFailsWith
 internal class LinkActivityViewModelTest {
     private val dispatcher = UnconfinedTestDispatcher()
     private val linkAccountManager = FakeLinkAccountManager()
-    private val vm = LinkActivityViewModel(mock(), linkAccountManager)
+    val confirmationHandler = FakeConfirmationHandler()
+    private val confirmationHandlerFactory: ConfirmationHandler.Factory = ConfirmationHandler.Factory {
+        confirmationHandler
+    }
+    private val vm = LinkActivityViewModel(mock(), confirmationHandlerFactory, linkAccountManager)
     private val navController: NavHostController = mock()
     private val dismissWithResult: (LinkActivityResult) -> Unit = mock()
 
@@ -117,6 +125,19 @@ internal class LinkActivityViewModelTest {
         linkAccountManager.setLinkAccount(TestFactory.LINK_ACCOUNT)
 
         assertThat(vm.linkAccount).isEqualTo(TestFactory.LINK_ACCOUNT)
+    }
+
+    @Test
+    fun `vm register starts confirmation handler registration`() = runTest(dispatcher) {
+        val activityResultCaller: ActivityResultCaller = mock()
+        val lifecycleOwner: LifecycleOwner = mock()
+
+        confirmationHandler.registerTurbine.ensureAllEventsConsumed()
+        vm.registerFromActivity(activityResultCaller, lifecycleOwner)
+
+        val registerCall = confirmationHandler.registerTurbine.awaitItem()
+
+        assertThat(registerCall).isEqualTo(FakeConfirmationHandler.RegisterCall(activityResultCaller, lifecycleOwner))
     }
 
     private fun creationExtras(): CreationExtras {

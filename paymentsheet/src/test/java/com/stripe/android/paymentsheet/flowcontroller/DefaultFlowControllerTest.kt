@@ -1243,7 +1243,7 @@ internal class DefaultFlowControllerTest {
             )
 
             flowController.onLinkActivityResult(
-                LinkActivityResult.Completed(
+                LinkActivityResult.PaymentMethodObtained(
                     paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
                 )
             )
@@ -1930,7 +1930,7 @@ internal class DefaultFlowControllerTest {
         ) { _, _ -> }
 
         flowController.onLinkActivityResult(
-            LinkActivityResult.Completed(
+            LinkActivityResult.PaymentMethodObtained(
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(
                     card = PaymentMethodFixtures.CARD_PAYMENT_METHOD.card?.copy(
                         wallet = Wallet.LinkWallet(

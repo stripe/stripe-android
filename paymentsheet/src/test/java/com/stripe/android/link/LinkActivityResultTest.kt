@@ -3,6 +3,7 @@ package com.stripe.android.link
 import android.app.Activity
 import android.content.Intent
 import androidx.core.net.toUri
+import androidx.core.os.bundleOf
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -18,11 +19,11 @@ class LinkActivityResultTest {
         val intent = Intent()
         intent.data = redirectUrl.toUri()
         val result = createLinkActivityResult(LinkForegroundActivity.RESULT_COMPLETE, intent)
-        assertThat(result).isInstanceOf(LinkActivityResult.Completed::class.java)
-        val completed = result as LinkActivityResult.Completed
-        assertThat(completed.paymentMethod.type?.code).isEqualTo("card")
-        assertThat(completed.paymentMethod.card?.last4).isEqualTo("0000")
-        assertThat(completed.paymentMethod.id).isEqualTo("pm_1NJeErLu5o3P18ZpmXpCtIrR")
+        assertThat(result).isInstanceOf(LinkActivityResult.PaymentMethodObtained::class.java)
+        val paymentMethodObtained = result as LinkActivityResult.PaymentMethodObtained
+        assertThat(paymentMethodObtained.paymentMethod.type?.code).isEqualTo("card")
+        assertThat(paymentMethodObtained.paymentMethod.card?.last4).isEqualTo("0000")
+        assertThat(paymentMethodObtained.paymentMethod.id).isEqualTo("pm_1NJeErLu5o3P18ZpmXpCtIrR")
     }
 
     @Test
@@ -91,5 +92,23 @@ class LinkActivityResultTest {
         assertThat(result).isInstanceOf(LinkActivityResult.Canceled::class.java)
         val canceled = result as LinkActivityResult.Canceled
         assertThat(canceled.reason).isEqualTo(LinkActivityResult.Canceled.Reason.BackPressed)
+    }
+
+    @Test
+    fun `complete with activity result from native link`() {
+        val bundle = bundleOf(
+            LinkActivityContract.EXTRA_RESULT to LinkActivityResult.Completed
+        )
+        val intent = Intent()
+        intent.putExtras(bundle)
+        val result = createLinkActivityResult(LinkActivity.RESULT_COMPLETE, intent)
+        assertThat(result).isEqualTo(LinkActivityResult.Completed)
+    }
+
+    @Test
+    fun `complete with canceled result when native link result not found`() {
+        val intent = Intent()
+        val result = createLinkActivityResult(LinkActivity.RESULT_COMPLETE, intent)
+        assertThat(result).isEqualTo(LinkActivityResult.Canceled())
     }
 }
