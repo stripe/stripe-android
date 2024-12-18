@@ -5,6 +5,7 @@ import kotlin.time.Duration.Companion.minutes
 
 internal data class CachedCustomerEphemeralKey(
     val customerId: String,
+    val customerSessionClientSecret: String,
     val ephemeralKey: String,
     private val expiresAt: Int,
 ) {

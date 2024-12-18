@@ -745,6 +745,36 @@ class StripeApiRepository @JvmOverloads internal constructor(
     }
 
     /**
+     * Analytics event: [PaymentAnalyticsEvent.CustomerDetachPaymentMethod]
+     */
+    @Throws(
+        InvalidRequestException::class,
+        APIConnectionException::class,
+        APIException::class,
+        AuthenticationException::class,
+        CardException::class
+    )
+    override suspend fun detachPaymentMethod(
+        customerSessionClientSecret: String,
+        productUsageTokens: Set<String>,
+        paymentMethodId: String,
+        requestOptions: ApiRequest.Options
+    ): Result<PaymentMethod> {
+        return fetchStripeModelResult(
+            apiRequest = apiRequestFactory.createPost(
+                url = getElementsDetachPaymentMethodUrl(paymentMethodId),
+                options = requestOptions,
+                params = mapOf("customer_session_client_secret" to customerSessionClientSecret),
+            ),
+            jsonParser = PaymentMethodJsonParser()
+        ) {
+            fireAnalyticsRequest(
+                paymentAnalyticsRequestFactory.createDetachPaymentMethod(productUsageTokens)
+            )
+        }
+    }
+
+    /**
      * Retrieve a Customer's [PaymentMethod]s
      *
      * Analytics event: [PaymentAnalyticsEvent.CustomerRetrievePaymentMethods]
@@ -1378,6 +1408,14 @@ class StripeApiRepository @JvmOverloads internal constructor(
     @VisibleForTesting
     internal fun getDetachPaymentMethodUrl(paymentMethodId: String): String {
         return getApiUrl("payment_methods/%s/detach", paymentMethodId)
+    }
+
+    /**
+     * @return `https://api.stripe.com/v1/payment_methods/:id/detach`
+     */
+    @VisibleForTesting
+    internal fun getElementsDetachPaymentMethodUrl(paymentMethodId: String): String {
+        return getApiUrl("elements/payment_methods/%s/detach", paymentMethodId)
     }
 
     override suspend fun retrieveElementsSession(

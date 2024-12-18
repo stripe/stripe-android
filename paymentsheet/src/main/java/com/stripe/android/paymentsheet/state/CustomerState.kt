@@ -10,6 +10,7 @@ import kotlinx.parcelize.Parcelize
 internal data class CustomerState(
     val id: String,
     val ephemeralKeySecret: String,
+    val customerSessionClientSecret: String?,
     val paymentMethods: List<PaymentMethod>,
     val permissions: Permissions,
 ) : Parcelable {
@@ -30,6 +31,7 @@ internal data class CustomerState(
         internal fun createForCustomerSession(
             customer: ElementsSession.Customer,
             supportedSavedPaymentMethodTypes: List<PaymentMethod.Type>,
+            customerSessionClientSecret: String,
         ): CustomerState {
             val canRemovePaymentMethods = when (
                 val mobilePaymentElementComponent = customer.session.components.mobilePaymentElement
@@ -42,6 +44,7 @@ internal data class CustomerState(
             return CustomerState(
                 id = customer.session.customerId,
                 ephemeralKeySecret = customer.session.apiKey,
+                customerSessionClientSecret = customerSessionClientSecret,
                 paymentMethods = customer.paymentMethods.filter {
                     supportedSavedPaymentMethodTypes.contains(it.type)
                 },
@@ -70,6 +73,7 @@ internal data class CustomerState(
             return CustomerState(
                 id = customerId,
                 ephemeralKeySecret = accessType.ephemeralKeySecret,
+                customerSessionClientSecret = null,
                 paymentMethods = paymentMethods,
                 permissions = Permissions(
                     /*

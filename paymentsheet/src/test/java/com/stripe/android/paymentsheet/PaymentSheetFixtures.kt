@@ -90,6 +90,7 @@ internal object PaymentSheetFixtures {
     internal val EMPTY_CUSTOMER_STATE = CustomerState(
         id = defaultCustomerConfig.id,
         ephemeralKeySecret = defaultCustomerConfig.ephemeralKeySecret,
+        customerSessionClientSecret = null,
         paymentMethods = listOf(),
         permissions = CustomerState.Permissions(
             canRemovePaymentMethods = true,
@@ -151,6 +152,7 @@ internal object PaymentSheetFixtures {
                 customer = CustomerState(
                     id = config.customer?.id ?: "cus_1",
                     ephemeralKeySecret = config.customer?.ephemeralKeySecret ?: "client_secret",
+                    customerSessionClientSecret = null,
                     paymentMethods = paymentMethods,
                     permissions = CustomerState.Permissions(
                         canRemovePaymentMethods = true,

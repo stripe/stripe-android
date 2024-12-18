@@ -113,14 +113,26 @@ internal class CustomerApiRepository @Inject constructor(
                 paymentMethodId
             )
         } else {
-            stripeRepository.detachPaymentMethod(
-                productUsageTokens = productUsageTokens,
-                paymentMethodId = paymentMethodId,
-                requestOptions = ApiRequest.Options(
-                    apiKey = customerInfo.ephemeralKeySecret,
-                    stripeAccount = lazyPaymentConfig.get().stripeAccountId,
+            if (customerInfo.customerSessionClientSecret != null) {
+                stripeRepository.detachPaymentMethod(
+                    customerSessionClientSecret = customerInfo.customerSessionClientSecret,
+                    productUsageTokens = productUsageTokens,
+                    paymentMethodId = paymentMethodId,
+                    requestOptions = ApiRequest.Options(
+                        apiKey = customerInfo.ephemeralKeySecret,
+                        stripeAccount = lazyPaymentConfig.get().stripeAccountId,
+                    )
                 )
-            )
+            } else {
+                stripeRepository.detachPaymentMethod(
+                    productUsageTokens = productUsageTokens,
+                    paymentMethodId = paymentMethodId,
+                    requestOptions = ApiRequest.Options(
+                        apiKey = customerInfo.ephemeralKeySecret,
+                        stripeAccount = lazyPaymentConfig.get().stripeAccountId,
+                    )
+                )
+            }
         }
 
         return result.onFailure {
