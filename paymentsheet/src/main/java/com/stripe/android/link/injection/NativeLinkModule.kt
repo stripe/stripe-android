@@ -22,6 +22,8 @@ import com.stripe.android.link.account.DefaultLinkAccountManager
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.DefaultLinkEventsReporter
 import com.stripe.android.link.analytics.LinkEventsReporter
+import com.stripe.android.link.confirmation.DefaultLinkConfirmationHandler
+import com.stripe.android.link.confirmation.LinkConfirmationHandler
 import com.stripe.android.link.repositories.LinkApiRepository
 import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.networking.StripeApiRepository
@@ -119,7 +121,7 @@ internal interface NativeLinkModule {
 
         @Provides
         @NativeLinkScope
-        internal fun providesAnalyticsRequestExecutor(
+        fun providesAnalyticsRequestExecutor(
             executor: DefaultAnalyticsRequestExecutor
         ): AnalyticsRequestExecutor = executor
 
@@ -138,5 +140,11 @@ internal interface NativeLinkModule {
         @NativeLinkScope
         @Named(ALLOWS_MANUAL_CONFIRMATION)
         fun provideAllowsManualConfirmation() = true
+
+        @Provides
+        @NativeLinkScope
+        fun provideLinkConfirmationHandlerFactory(
+            factory: DefaultLinkConfirmationHandler.Factory
+        ): LinkConfirmationHandler.Factory = factory
     }
 }

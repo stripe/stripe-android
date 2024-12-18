@@ -98,12 +98,12 @@ class LinkActivityResultTest {
     @Test
     fun `complete with result from native link`() {
         val bundle = bundleOf(
-            LinkActivityContract.EXTRA_RESULT to LinkActivityResult.Completed(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+            LinkActivityContract.EXTRA_RESULT to LinkActivityResult.Completed
         )
         val intent = Intent()
         intent.putExtras(bundle)
         val result = createLinkActivityResult(LinkActivity.RESULT_COMPLETE, intent)
-        assertThat(result).isEqualTo(LinkActivityResult.Completed(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
+        assertThat(result).isEqualTo(LinkActivityResult.Completed)
     }
 
     @Test

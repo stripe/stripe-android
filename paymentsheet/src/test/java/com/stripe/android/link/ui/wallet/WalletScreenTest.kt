@@ -25,6 +25,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
 
 @RunWith(AndroidJUnit4::class)
 internal class WalletScreenTest {
@@ -174,6 +175,7 @@ internal class WalletScreenTest {
             linkAccount = TestFactory.LINK_ACCOUNT,
             linkAccountManager = linkAccountManager,
             logger = FakeLogger(),
+            confirmationHandler = mock(),
             navigateAndClearStack = {},
             dismissWithResult = {}
         )
