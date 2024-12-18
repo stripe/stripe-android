@@ -90,15 +90,20 @@ internal fun createLinkActivityResult(resultCode: Int, intent: Intent?): LinkAct
         }
 
         LinkActivity.RESULT_COMPLETE -> {
-            intent?.extras?.let {
-                BundleCompat.getParcelable(it, LinkActivityContract.EXTRA_RESULT, LinkActivityResult::class.java)
-            } ?: LinkActivityResult.Canceled()
+            handleNativeLinkResult(intent)
         }
 
         else -> {
             LinkActivityResult.Canceled()
         }
     }
+}
+
+private fun handleNativeLinkResult(intent: Intent?): LinkActivityResult {
+    val result = intent?.extras?.let {
+        BundleCompat.getParcelable(it, LinkActivityContract.EXTRA_RESULT, LinkActivityResult::class.java)
+    }
+    return result ?: LinkActivityResult.Canceled()
 }
 
 private fun String.parsePaymentMethod(): PaymentMethod? = try {

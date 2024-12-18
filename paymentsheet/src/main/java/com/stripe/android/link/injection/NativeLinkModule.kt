@@ -64,6 +64,7 @@ internal interface NativeLinkModule {
     @NativeLinkScope
     fun stripeRepository(stripeRepository: StripeApiRepository): StripeRepository
 
+    @SuppressWarnings("TooManyFunctions")
     companion object {
         @Provides
         @NativeLinkScope

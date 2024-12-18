@@ -16,7 +16,7 @@ internal interface LinkConfirmationHandler {
     }
 }
 
-sealed interface Result {
+internal sealed interface Result {
     data object Succeeded : Result
     data object Canceled : Result
     data class Failed(val message: ResolvableString) : Result
