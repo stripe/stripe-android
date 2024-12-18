@@ -63,11 +63,6 @@ internal fun PaymentMethodVerticalLayoutUI(
                 PaymentMethodVerticalLayoutInteractor.ViewAction.TransitionToManageSavedPaymentMethods
             )
         },
-        onEditPaymentMethod = {
-            interactor.handleViewAction(
-                PaymentMethodVerticalLayoutInteractor.ViewAction.EditPaymentMethod(it)
-            )
-        },
         onSelectSavedPaymentMethod = {
             interactor.handleViewAction(
                 PaymentMethodVerticalLayoutInteractor.ViewAction.SavedPaymentMethodSelected(it.paymentMethod)
@@ -96,7 +91,6 @@ internal fun PaymentMethodVerticalLayoutUI(
     isEnabled: Boolean,
     onViewMorePaymentMethods: () -> Unit,
     onManageOneSavedPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
-    onEditPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     onSelectSavedPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     imageLoader: StripeImageLoader,
     rowStyle: Embedded.RowStyle = Embedded.RowStyle.FloatingButton.default,
@@ -119,10 +113,8 @@ internal fun PaymentMethodVerticalLayoutUI(
                 isSelected = selection?.isSaved == true,
                 trailingContent = {
                     SavedPaymentMethodTrailingContent(
-                        displayedSavedPaymentMethod = displayedSavedPaymentMethod,
                         savedPaymentMethodAction = savedPaymentMethodAction,
                         onViewMorePaymentMethods = onViewMorePaymentMethods,
-                        onEditPaymentMethod = onEditPaymentMethod,
                         onManageOneSavedPaymentMethod = { onManageOneSavedPaymentMethod(displayedSavedPaymentMethod) },
                     )
                 },
@@ -153,17 +145,12 @@ internal fun PaymentMethodVerticalLayoutUI(
 
 @Composable
 private fun SavedPaymentMethodTrailingContent(
-    displayedSavedPaymentMethod: DisplayableSavedPaymentMethod,
     savedPaymentMethodAction: PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction,
     onViewMorePaymentMethods: () -> Unit,
     onManageOneSavedPaymentMethod: () -> Unit,
-    onEditPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
 ) {
     when (savedPaymentMethodAction) {
         PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.NONE -> Unit
-        PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.EDIT_CARD_BRAND -> {
-            EditButton(onClick = { onEditPaymentMethod(displayedSavedPaymentMethod) })
-        }
         PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ONE -> {
             EditButton(onClick = onManageOneSavedPaymentMethod)
         }

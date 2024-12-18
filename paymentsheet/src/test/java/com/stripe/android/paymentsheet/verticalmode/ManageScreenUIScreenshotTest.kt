@@ -3,24 +3,16 @@ package com.stripe.android.paymentsheet.verticalmode
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.screenshottesting.PaparazziRule
-import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.utils.screenshots.PaymentSheetAppearance
 import org.junit.Rule
 import org.junit.Test
 
 internal class ManageScreenUIScreenshotTest {
-
-    @get:Rule
-    val featureFlagTestRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.useNewUpdateCardScreen,
-        isEnabled = false
-    )
 
     @get:Rule
     val paparazziRule = PaparazziRule(
@@ -38,7 +30,6 @@ internal class ManageScreenUIScreenshotTest {
                         paymentMethods = savedPaymentMethods,
                         currentSelection = null,
                         isEditing = false,
-                        canRemove = true,
                         canEdit = true,
                     )
                 ),
@@ -55,7 +46,6 @@ internal class ManageScreenUIScreenshotTest {
                         paymentMethods = savedPaymentMethods,
                         currentSelection = savedPaymentMethods[1],
                         isEditing = false,
-                        canRemove = true,
                         canEdit = true,
                     )
                 ),
@@ -72,7 +62,6 @@ internal class ManageScreenUIScreenshotTest {
                         paymentMethods = savedPaymentMethods,
                         currentSelection = null,
                         isEditing = true,
-                        canRemove = true,
                         canEdit = true,
                     )
                 ),
@@ -82,7 +71,6 @@ internal class ManageScreenUIScreenshotTest {
 
     @Test
     fun testManageUIScreen_usesNewUpdateCardScreen_inEditMode() {
-        featureFlagTestRule.setEnabled(true)
         paparazziRule.snapshot {
             ManageScreenUI(
                 interactor = FakeManageScreenInteractor(
@@ -90,7 +78,6 @@ internal class ManageScreenUIScreenshotTest {
                         paymentMethods = savedPaymentMethods,
                         currentSelection = null,
                         isEditing = true,
-                        canRemove = true,
                         canEdit = true,
                     )
                 ),
@@ -109,7 +96,6 @@ internal class ManageScreenUIScreenshotTest {
                         ),
                         currentSelection = null,
                         isEditing = true,
-                        canRemove = false,
                         canEdit = true,
                     )
                 ),
