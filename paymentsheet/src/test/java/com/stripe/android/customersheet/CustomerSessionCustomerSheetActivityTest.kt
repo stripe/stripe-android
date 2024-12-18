@@ -462,7 +462,7 @@ class CustomerSessionCustomerSheetActivityTest {
         networkRule.enqueue(
             host("api.stripe.com"),
             method("POST"),
-            path("/v1/payment_methods/$id/detach")
+            path("/v1/elements/payment_methods/$id/detach")
         ) { response ->
             response.createPaymentMethodDetachResponse(id = id)
         }
