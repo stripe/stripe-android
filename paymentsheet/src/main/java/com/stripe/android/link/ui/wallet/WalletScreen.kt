@@ -41,6 +41,7 @@ import com.stripe.android.link.theme.HorizontalPadding
 import com.stripe.android.link.theme.linkColors
 import com.stripe.android.link.theme.linkShapes
 import com.stripe.android.link.ui.BottomSheetContent
+import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.PrimaryButton
 import com.stripe.android.link.ui.SecondaryButton
 import com.stripe.android.model.ConsumerPaymentDetails
@@ -90,6 +91,7 @@ internal fun WalletBody(
     showBottomSheetContent: (BottomSheetContent) -> Unit,
     hideBottomSheetContent: () -> Unit
 ) {
+    val context = LocalContext.current
     if (state.paymentDetailsList.isEmpty()) {
         Box(
             modifier = Modifier
@@ -131,6 +133,15 @@ internal fun WalletBody(
 
         AnimatedVisibility(state.showBankAccountTerms) {
             BankAccountTerms()
+        }
+
+        AnimatedVisibility(visible = state.errorMessage != null) {
+            ErrorText(
+                text = state.errorMessage?.resolve(context).orEmpty(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp)
+            )
         }
 
         Spacer(modifier = Modifier.height(16.dp))

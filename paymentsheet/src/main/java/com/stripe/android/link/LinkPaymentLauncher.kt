@@ -12,7 +12,6 @@ import javax.inject.Singleton
 /**
  * Launcher for an Activity that will confirm a payment using Link.
  */
-@Singleton
 internal class LinkPaymentLauncher @Inject internal constructor(
     linkAnalyticsComponentBuilder: LinkAnalyticsComponent.Builder,
     private val linkActivityContract: LinkActivityContract,
@@ -31,7 +30,11 @@ internal class LinkPaymentLauncher @Inject internal constructor(
             "LinkPaymentLauncher",
             linkActivityContract,
         ) { linkActivityResult ->
-            handleActivityResult(linkActivityResult, callback)
+            analyticsHelper.onLinkResult(linkActivityResult)
+            if (linkActivityResult is PaymentMethodObtained) {
+                linkStore.markLinkAsUsed()
+            }
+            callback(linkActivityResult)
         }
     }
 
@@ -42,22 +45,12 @@ internal class LinkPaymentLauncher @Inject internal constructor(
         linkActivityResultLauncher = activityResultCaller.registerForActivityResult(
             linkActivityContract
         ) { linkActivityResult ->
-            handleActivityResult(linkActivityResult, callback)
-        }
-    }
-
-    private fun handleActivityResult(
-        linkActivityResult: LinkActivityResult,
-        nextStep: (LinkActivityResult) -> Unit
-    ) {
-        analyticsHelper.onLinkResult(linkActivityResult)
-        when (linkActivityResult) {
-            is PaymentMethodObtained, LinkActivityResult.Completed -> {
+            analyticsHelper.onLinkResult(linkActivityResult)
+            if (linkActivityResult is PaymentMethodObtained) {
                 linkStore.markLinkAsUsed()
             }
-            is LinkActivityResult.Canceled, is LinkActivityResult.Failed -> Unit
+            callback(linkActivityResult)
         }
-        nextStep(linkActivityResult)
     }
 
     fun unregister() {
