@@ -31,6 +31,7 @@ import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.linkColors
 import com.stripe.android.link.theme.linkShapes
 import com.stripe.android.link.ui.cardedit.CardEditScreen
+import com.stripe.android.link.ui.cardedit.CardEditViewModel
 import com.stripe.android.link.ui.paymentmenthod.PaymentMethodScreen
 import com.stripe.android.link.ui.signup.SignUpScreen
 import com.stripe.android.link.ui.signup.SignUpViewModel
@@ -169,8 +170,21 @@ private fun Screens(
             WalletScreen(viewModel)
         }
 
-        composable(LinkScreen.CardEdit.route) {
-            CardEditScreen()
+        composable(LinkScreen.CardEdit.Route) { navBackStackEntry ->
+            /* Extracting the id from the route */
+            val paymentDetailsId = navBackStackEntry.arguments?.getString("paymentDetailsId")
+                ?: return@composable dismissWithResult(LinkActivityResult.Failed(NoLinkAccountFoundException()))
+            val linkAccount = getLinkAccount()
+                ?: return@composable dismissWithResult(LinkActivityResult.Failed(NoLinkAccountFoundException()))
+            val viewModel: CardEditViewModel = linkViewModel { parentComponent ->
+                CardEditViewModel.factory(
+                    parentComponent = parentComponent,
+                    linkAccount = linkAccount,
+                    dismissWithResult = dismissWithResult,
+                    paymentDetailsId = paymentDetailsId
+                )
+            }
+            CardEditScreen(viewModel)
         }
 
         composable(LinkScreen.PaymentMethod.route) {

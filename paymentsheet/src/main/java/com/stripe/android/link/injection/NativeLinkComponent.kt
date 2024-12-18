@@ -1,6 +1,7 @@
 package com.stripe.android.link.injection
 
 import android.content.Context
+import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
@@ -8,6 +9,7 @@ import com.stripe.android.link.LinkActivityViewModel
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.LinkEventsReporter
+import com.stripe.android.paymentsheet.addresselement.FormControllerModule
 import dagger.BindsInstance
 import dagger.Component
 import javax.inject.Named
@@ -21,6 +23,7 @@ internal annotation class NativeLinkScope
 @Component(
     modules = [
         NativeLinkModule::class,
+        FormControllerModule::class
     ]
 )
 internal interface NativeLinkComponent {
@@ -29,6 +32,7 @@ internal interface NativeLinkComponent {
     val linkEventsReporter: LinkEventsReporter
     val logger: Logger
     val viewModel: LinkActivityViewModel
+    val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory
 
     @Component.Builder
     interface Builder {

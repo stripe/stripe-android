@@ -82,8 +82,8 @@ internal class WalletViewModel @Inject constructor(
     }
 
     fun onItemSelected(item: ConsumerPaymentDetails.PaymentDetails) {
+        navigateAndClearStack(LinkScreen.CardEdit(item.id))
         if (item == uiState.value.selectedItem) return
-
         _uiState.update {
             it.copy(selectedItem = item)
         }

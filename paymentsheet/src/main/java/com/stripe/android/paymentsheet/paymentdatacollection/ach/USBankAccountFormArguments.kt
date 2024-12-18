@@ -6,6 +6,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
@@ -100,6 +101,32 @@ internal class USBankAccountFormArguments(
                 onUpdatePrimaryButtonState = viewModel::updatePrimaryButtonState,
                 onError = viewModel::onError,
                 incentive = paymentMethodMetadata.paymentMethodIncentive,
+            )
+        }
+
+        fun create(
+            stripeIntent: StripeIntent,
+            linkMode: LinkMode?,
+            shippingDetails: AddressDetails?
+        ): USBankAccountFormArguments {
+            return USBankAccountFormArguments(
+                showCheckbox = false,
+                hostedSurface = "hostedSurface",
+                instantDebits = false,
+                linkMode = linkMode,
+                onBehalfOf = null,
+                isCompleteFlow = false,
+                isPaymentFlow = stripeIntent is PaymentIntent,
+                stripeIntentId = stripeIntent.id,
+                clientSecret = stripeIntent.clientSecret,
+                shippingDetails = shippingDetails,
+                draftPaymentSelection = null,
+                onMandateTextChanged = { _, _ -> },
+                onLinkedBankAccountChanged = {},
+                onUpdatePrimaryButtonUIState = {},
+                onUpdatePrimaryButtonState = {},
+                onError = {},
+                incentive = null,
             )
         }
     }
