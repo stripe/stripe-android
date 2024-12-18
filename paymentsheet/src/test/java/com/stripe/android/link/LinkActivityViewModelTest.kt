@@ -17,9 +17,11 @@ import androidx.navigation.PopUpToBuilder
 import androidx.savedstate.SavedStateRegistryOwner
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.Logger
 import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.testing.FakeLogger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -321,12 +323,14 @@ internal class LinkActivityViewModelTest {
 
     private fun createViewModel(
         linkAccountManager: LinkAccountManager = FakeLinkAccountManager(),
+        logger: Logger = FakeLogger(),
         navController: NavHostController = navController(),
         dismissWithResult: (LinkActivityResult) -> Unit = {}
     ): LinkActivityViewModel {
         return LinkActivityViewModel(
             linkAccountManager = linkAccountManager,
             activityRetainedComponent = mock(),
+            logger = logger
         ).apply {
             this.navController = navController
             this.dismissWithResult = dismissWithResult

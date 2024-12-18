@@ -50,6 +50,7 @@ internal fun LinkContent(
     sheetState: ModalBottomSheetState,
     bottomSheetContent: BottomSheetContent?,
     onUpdateSheetContent: (BottomSheetContent?) -> Unit,
+    onLogout: () -> Unit,
     onBackPressed: () -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -79,6 +80,7 @@ internal fun LinkContent(
                 LinkAppBar(
                     state = appBarState,
                     onBackPressed = onBackPressed,
+                    onLogout = onLogout,
                     showBottomSheetContent = {
                         if (it == null) {
                             coroutineScope.launch {

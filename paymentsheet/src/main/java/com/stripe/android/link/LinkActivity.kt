@@ -52,7 +52,7 @@ internal class LinkActivity : ComponentActivity() {
             var bottomSheetContent by remember { mutableStateOf<BottomSheetContent?>(null) }
             val sheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
             val coroutineScope = rememberCoroutineScope()
-            val appBarState by vm.linkState.collectAsState()
+            val appBarState by vm.linkAppBarState.collectAsState()
 
             if (bottomSheetContent != null) {
                 DisposableEffect(bottomSheetContent) {
@@ -81,7 +81,8 @@ internal class LinkActivity : ComponentActivity() {
                 onUpdateSheetContent = {
                     bottomSheetContent = it
                 },
-                onBackPressed = onBackPressedDispatcher::onBackPressed
+                onBackPressed = onBackPressedDispatcher::onBackPressed,
+                onLogout = vm::logout
             )
         }
     }

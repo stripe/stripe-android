@@ -12,6 +12,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavHostController
+import com.stripe.android.core.Logger
 import com.stripe.android.link.LinkActivity.Companion.getArgs
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.injection.DaggerNativeLinkComponent
@@ -22,15 +23,18 @@ import com.stripe.android.link.ui.LinkAppBarState
 import com.stripe.android.paymentsheet.R
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 internal class LinkActivityViewModel @Inject constructor(
     val activityRetainedComponent: NativeLinkComponent,
     private val linkAccountManager: LinkAccountManager,
+    private val logger: Logger
 ) : ViewModel(), DefaultLifecycleObserver {
-    private val _linkState = MutableStateFlow(
+    private val _linkAppBarState = MutableStateFlow(
         value = LinkAppBarState(
             navigationIcon = R.drawable.stripe_link_close,
             showHeader = true,
@@ -38,7 +42,7 @@ internal class LinkActivityViewModel @Inject constructor(
             email = null,
         )
     )
-    val linkState: StateFlow<LinkAppBarState> = _linkState
+    val linkAppBarState: StateFlow<LinkAppBarState> = _linkAppBarState
 
     val linkAccount: LinkAccount?
         get() = linkAccountManager.linkAccount.value
@@ -46,9 +50,46 @@ internal class LinkActivityViewModel @Inject constructor(
     var navController: NavHostController? = null
     var dismissWithResult: ((LinkActivityResult) -> Unit)? = null
 
+    init {
+        listenForAppBarState()
+    }
+
+    private fun listenForAppBarState() {
+        viewModelScope.launch {
+            linkAccountManager.linkAccount.collectLatest { account ->
+                val showOverflowMenu = account?.email != null && account.accountStatus == AccountStatus.Verified
+                _linkAppBarState.update {
+                    it.copy(showOverflowMenu = showOverflowMenu)
+                }
+            }
+        }
+    }
+
     fun handleViewAction(action: LinkAction) {
         when (action) {
             LinkAction.BackPressed -> handleBackPressed()
+        }
+    }
+
+    fun logout() {
+        viewModelScope.launch {
+            linkAccountManager.logOut()
+                .fold(
+                    onSuccess = {
+                        dismissWithResult?.invoke(
+                            LinkActivityResult.Canceled(LinkActivityResult.Canceled.Reason.LoggedOut)
+                        )
+                    },
+                    onFailure = { e ->
+                        logger.error(
+                            msg = "failed to log out",
+                            t = e
+                        )
+                        dismissWithResult?.invoke(
+                            LinkActivityResult.Canceled(LinkActivityResult.Canceled.Reason.LoggedOut)
+                        )
+                    }
+                )
         }
     }
 
