@@ -9,6 +9,7 @@ import com.stripe.android.link.LinkActivityViewModel
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.LinkEventsReporter
+import com.stripe.android.link.confirmation.LinkConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.injection.DefaultConfirmationModule
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import dagger.BindsInstance
@@ -33,6 +34,7 @@ internal interface NativeLinkComponent {
     val configuration: LinkConfiguration
     val linkEventsReporter: LinkEventsReporter
     val logger: Logger
+    val linkConfirmationHandlerFactory: LinkConfirmationHandler.Factory
     val viewModel: LinkActivityViewModel
 
     @Component.Builder

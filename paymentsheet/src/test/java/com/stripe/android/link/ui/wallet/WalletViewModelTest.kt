@@ -18,6 +18,7 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
@@ -114,6 +115,7 @@ class WalletViewModelTest {
             linkAccount = TestFactory.LINK_ACCOUNT,
             linkAccountManager = linkAccountManager,
             logger = logger,
+            confirmationHandler = mock(),
             navigateAndClearStack = navigateAndClearStack,
             dismissWithResult = dismissWithResult
         )

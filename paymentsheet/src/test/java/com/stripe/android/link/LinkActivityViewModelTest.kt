@@ -35,7 +35,7 @@ import kotlin.test.assertFailsWith
 internal class LinkActivityViewModelTest {
     private val dispatcher = UnconfinedTestDispatcher()
     private val linkAccountManager = FakeLinkAccountManager()
-    private val vm = LinkActivityViewModel(mock(), linkAccountManager)
+    private val vm = LinkActivityViewModel(mock(), mock(), linkAccountManager)
     private val navController: NavHostController = mock()
     private val dismissWithResult: (LinkActivityResult) -> Unit = mock()
 

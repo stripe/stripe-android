@@ -3,6 +3,7 @@ package com.stripe.android.link
 import android.app.Activity
 import android.content.Intent
 import androidx.core.net.toUri
+import androidx.core.os.bundleOf
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -91,5 +92,23 @@ class LinkActivityResultTest {
         assertThat(result).isInstanceOf(LinkActivityResult.Canceled::class.java)
         val canceled = result as LinkActivityResult.Canceled
         assertThat(canceled.reason).isEqualTo(LinkActivityResult.Canceled.Reason.BackPressed)
+    }
+
+    @Test
+    fun `complete with activity result from native link`() {
+        val bundle = bundleOf(
+            LinkActivityContract.EXTRA_RESULT to LinkActivityResult.Completed
+        )
+        val intent = Intent()
+        intent.putExtras(bundle)
+        val result = createLinkActivityResult(LinkActivity.RESULT_COMPLETE, intent)
+        assertThat(result).isEqualTo(LinkActivityResult.Completed)
+    }
+
+    @Test
+    fun `complete with canceled result when native link result not found`() {
+        val intent = Intent()
+        val result = createLinkActivityResult(LinkActivity.RESULT_COMPLETE, intent)
+        assertThat(result).isEqualTo(LinkActivityResult.Canceled())
     }
 }
