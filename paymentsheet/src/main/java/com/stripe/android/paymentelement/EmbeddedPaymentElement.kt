@@ -22,6 +22,7 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
 import com.stripe.android.paymentelement.embedded.EmbeddedConfirmationHelper
 import com.stripe.android.paymentelement.embedded.SharedPaymentElementViewModel
+import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.ExternalPaymentMethodInterceptor
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -83,6 +84,34 @@ class EmbeddedPaymentElement private constructor(
      */
     fun clearPaymentOption() {
         sharedViewModel.clearPaymentOption()
+    }
+
+    /**
+     * Builder used in the creation of the [EmbeddedPaymentElement].
+     *
+     * Creation can be completed with [rememberEmbeddedPaymentElement].
+     */
+    @ExperimentalEmbeddedPaymentElementApi
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    class Builder(
+        /**
+         * Called when the customer confirms the payment or setup.
+         */
+        internal val createIntentCallback: CreateIntentCallback,
+        /**
+         * Called with the result of the payment.
+         */
+        internal val resultCallback: ResultCallback,
+    ) {
+        internal var externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler? = null
+            private set
+
+        /**
+         * Called when a user confirms payment for an external payment method.
+         */
+        fun externalPaymentMethodConfirmHandler(handler: ExternalPaymentMethodConfirmHandler) = apply {
+            this.externalPaymentMethodConfirmHandler = handler
+        }
     }
 
     /** Configuration for [EmbeddedPaymentElement] **/

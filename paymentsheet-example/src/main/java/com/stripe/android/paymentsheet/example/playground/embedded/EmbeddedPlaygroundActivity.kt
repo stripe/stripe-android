@@ -54,14 +54,14 @@ internal class EmbeddedPlaygroundActivity : AppCompatActivity(), ExternalPayment
             return
         }
 
+        val embeddedBuilder = EmbeddedPaymentElement.Builder(
+            createIntentCallback = { _, _ ->
+                CreateIntentResult.Success(playgroundState.clientSecret)
+            },
+            resultCallback = ::handleEmbeddedResult,
+        ).externalPaymentMethodConfirmHandler(this)
         setContent {
-            val embeddedPaymentElement = rememberEmbeddedPaymentElement(
-                createIntentCallback = { _, _ ->
-                    CreateIntentResult.Success(playgroundState.clientSecret)
-                },
-                externalPaymentMethodConfirmHandler = this,
-                resultCallback = ::handleEmbeddedResult,
-            )
+            val embeddedPaymentElement = rememberEmbeddedPaymentElement(embeddedBuilder)
 
             LaunchedEffect(embeddedPaymentElement) {
                 embeddedPaymentElement.configure(
