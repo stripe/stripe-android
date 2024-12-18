@@ -285,7 +285,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         return when (val accessType = customer?.accessType) {
             is PaymentSheet.CustomerAccessType.CustomerSession -> {
                 elementsSession.customer?.let { elementsSessionCustomer ->
-                    CustomerInfo.CustomerSession(elementsSessionCustomer)
+                    CustomerInfo.CustomerSession(elementsSessionCustomer, accessType.customerSessionClientSecret)
                 } ?: run {
                     val exception = IllegalStateException(
                         "Excepted 'customer' attribute as part of 'elements_session' response!"
@@ -325,7 +325,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 CustomerState.createForCustomerSession(
                     customer = customerInfo.elementsSessionCustomer,
                     configuration = configuration,
-                    supportedSavedPaymentMethodTypes = metadata.supportedSavedPaymentMethodTypes()
+                    supportedSavedPaymentMethodTypes = metadata.supportedSavedPaymentMethodTypes(),
+                    customerSessionClientSecret = customerInfo.customerSessionClientSecret,
                 )
             }
             is CustomerInfo.Legacy -> {
@@ -356,10 +357,14 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     ): List<PaymentMethod> {
         val paymentMethodTypes = metadata.supportedSavedPaymentMethodTypes()
 
+        val customerSession = (customerConfig.accessType as? PaymentSheet.CustomerAccessType.CustomerSession)
+        val customerSessionClientSecret = customerSession?.customerSessionClientSecret
+
         val paymentMethods = customerRepository.getPaymentMethods(
             customerInfo = CustomerRepository.CustomerInfo(
                 id = customerConfig.id,
-                ephemeralKeySecret = customerConfig.ephemeralKeySecret
+                ephemeralKeySecret = customerConfig.ephemeralKeySecret,
+                customerSessionClientSecret = customerSessionClientSecret,
             ),
             types = paymentMethodTypes,
             silentlyFail = metadata.stripeIntent.isLiveMode,
@@ -476,7 +481,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             customerRepository.retrieveCustomer(
                 CustomerRepository.CustomerInfo(
                     id = it.id,
-                    ephemeralKeySecret = it.ephemeralKeySecret
+                    ephemeralKeySecret = it.ephemeralKeySecret,
+                    customerSessionClientSecret = (it as? CustomerInfo.CustomerSession)?.customerSessionClientSecret,
                 )
             )
         }?.email
@@ -695,6 +701,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
 
         data class CustomerSession(
             val elementsSessionCustomer: ElementsSession.Customer,
+            val customerSessionClientSecret: String,
         ) : CustomerInfo {
             override val id: String = elementsSessionCustomer.session.customerId
             override val ephemeralKeySecret: String = elementsSessionCustomer.session.apiKey

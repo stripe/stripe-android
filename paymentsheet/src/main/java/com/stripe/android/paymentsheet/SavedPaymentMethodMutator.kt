@@ -145,12 +145,13 @@ internal class SavedPaymentMethodMutator(
         }
 
         return customerRepository.detachPaymentMethod(
-            CustomerRepository.CustomerInfo(
+            customerInfo = CustomerRepository.CustomerInfo(
                 id = currentCustomer.id,
-                ephemeralKeySecret = currentCustomer.ephemeralKeySecret
+                ephemeralKeySecret = currentCustomer.ephemeralKeySecret,
+                customerSessionClientSecret = currentCustomer.customerSessionClientSecret,
             ),
-            paymentMethodId,
-            currentCustomer.permissions.canRemoveDuplicates,
+            paymentMethodId = paymentMethodId,
+            canRemoveDuplicates = currentCustomer.permissions.canRemoveDuplicates,
         )
     }
 
@@ -234,7 +235,8 @@ internal class SavedPaymentMethodMutator(
         return customerRepository.updatePaymentMethod(
             customerInfo = CustomerRepository.CustomerInfo(
                 id = currentCustomer.id,
-                ephemeralKeySecret = currentCustomer.ephemeralKeySecret
+                ephemeralKeySecret = currentCustomer.ephemeralKeySecret,
+                customerSessionClientSecret = currentCustomer.customerSessionClientSecret,
             ),
             paymentMethodId = paymentMethod.id!!,
             params = PaymentMethodUpdateParams.createCard(

@@ -589,6 +589,7 @@ class SavedPaymentMethodMutatorTest {
                 CustomerState(
                     id = "cus_1",
                     ephemeralKeySecret = "ek_1",
+                    customerSessionClientSecret = null,
                     paymentMethods = listOf(),
                     permissions = CustomerState.Permissions(
                         canRemovePaymentMethods = true,
@@ -611,6 +612,7 @@ class SavedPaymentMethodMutatorTest {
                     customerInfo = CustomerRepository.CustomerInfo(
                         id = "cus_1",
                         ephemeralKeySecret = "ek_1",
+                        customerSessionClientSecret = null,
                     ),
                     canRemoveDuplicates = shouldRemoveDuplicates,
                 )

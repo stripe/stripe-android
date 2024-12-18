@@ -85,6 +85,7 @@ class PaymentOptionsItemsMapperTest {
         return CustomerState(
             id = "pi_123",
             ephemeralKeySecret = "ek_123",
+            customerSessionClientSecret = null,
             paymentMethods = paymentMethods,
             permissions = CustomerState.Permissions(
                 canRemovePaymentMethods = true,

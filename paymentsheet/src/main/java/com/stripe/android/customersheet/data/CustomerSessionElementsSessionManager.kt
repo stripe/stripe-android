@@ -95,7 +95,7 @@ internal class DefaultCustomerSessionElementsSessionManager @Inject constructor(
                 }.onFailure {
                     reportFailedElementsSessionLoad(it)
                 }.mapCatching { elementsSession ->
-                    createCustomerSessionElementsSession(elementsSession)
+                    createCustomerSessionElementsSession(elementsSession, customerSessionClientSecret.clientSecret)
                 }.onSuccess { customerSessionElementsSession ->
                     cachedCustomerEphemeralKey = customerSessionElementsSession.ephemeralKey
                 }.getOrThrow()
@@ -104,7 +104,8 @@ internal class DefaultCustomerSessionElementsSessionManager @Inject constructor(
     }
 
     private fun createCustomerSessionElementsSession(
-        elementsSession: ElementsSession
+        elementsSession: ElementsSession,
+        customerSessionClientSecret: String,
     ): CustomerSessionElementsSession {
         val customer = elementsSession.customer ?: run {
             errorReporter.report(
@@ -125,6 +126,7 @@ internal class DefaultCustomerSessionElementsSessionManager @Inject constructor(
             customer = customer,
             ephemeralKey = CachedCustomerEphemeralKey(
                 customerId = customerSession.customerId,
+                customerSessionClientSecret = customerSessionClientSecret,
                 ephemeralKey = customerSession.apiKey,
                 expiresAt = customerSession.apiKeyExpiry,
             )

@@ -70,6 +70,7 @@ internal class StripeCustomerAdapter @Inject internal constructor(
                 customerInfo = CustomerRepository.CustomerInfo(
                     id = customerEphemeralKey.customerId,
                     ephemeralKeySecret = customerEphemeralKey.ephemeralKey,
+                    customerSessionClientSecret = null,
                 ),
                 types = requestedTypes,
                 silentlyFail = false,
@@ -89,7 +90,8 @@ internal class StripeCustomerAdapter @Inject internal constructor(
             customerRepository.attachPaymentMethod(
                 customerInfo = CustomerRepository.CustomerInfo(
                     id = customerEphemeralKey.customerId,
-                    ephemeralKeySecret = customerEphemeralKey.ephemeralKey
+                    ephemeralKeySecret = customerEphemeralKey.ephemeralKey,
+                    customerSessionClientSecret = null,
                 ),
                 paymentMethodId = paymentMethodId
             ).getOrElse {
@@ -108,7 +110,8 @@ internal class StripeCustomerAdapter @Inject internal constructor(
             customerRepository.detachPaymentMethod(
                 customerInfo = CustomerRepository.CustomerInfo(
                     id = customerEphemeralKey.customerId,
-                    ephemeralKeySecret = customerEphemeralKey.ephemeralKey
+                    ephemeralKeySecret = customerEphemeralKey.ephemeralKey,
+                    customerSessionClientSecret = null,
                 ),
                 paymentMethodId = paymentMethodId,
                 canRemoveDuplicates = false,
@@ -129,7 +132,8 @@ internal class StripeCustomerAdapter @Inject internal constructor(
             customerRepository.updatePaymentMethod(
                 customerInfo = CustomerRepository.CustomerInfo(
                     id = customerEphemeralKey.customerId,
-                    ephemeralKeySecret = customerEphemeralKey.ephemeralKey
+                    ephemeralKeySecret = customerEphemeralKey.ephemeralKey,
+                    customerSessionClientSecret = null,
                 ),
                 paymentMethodId = paymentMethodId,
                 params = params
