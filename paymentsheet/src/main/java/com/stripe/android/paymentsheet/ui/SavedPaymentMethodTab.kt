@@ -250,35 +250,6 @@ private fun SavedPaymentMethodTabUISelected() {
     }
 }
 
-@Preview(name = "Payment option in removable mode")
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
-@Composable
-private fun SavedPaymentMethodTabUIRemovable() {
-    DefaultStripeThemePreviewRow {
-        SavedPaymentMethodTab(
-            viewWidth = 100.dp,
-            isSelected = false,
-            editState = PaymentOptionEditState.Modifiable,
-            shouldShowDefaultBadge = true,
-            isEnabled = true,
-            iconRes = R.drawable.stripe_ic_paymentsheet_card_visa,
-            labelText = "MasterCard",
-            description = "MasterCard",
-            onItemSelectedListener = {},
-        )
-        SavedPaymentMethodTab(
-            viewWidth = 100.dp,
-            isSelected = false,
-            editState = PaymentOptionEditState.Modifiable,
-            isEnabled = true,
-            iconRes = R.drawable.stripe_ic_paymentsheet_card_amex,
-            labelText = "AMEX",
-            description = "AMEX",
-            onItemSelectedListener = {},
-        )
-    }
-}
-
 @Preview(name = "Payment option in modifiable mode")
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
