@@ -22,13 +22,15 @@ class CustomerStateTest {
 
         val customerState = CustomerState.createForCustomerSession(
             customer = customer,
-            supportedSavedPaymentMethodTypes = listOf(PaymentMethod.Type.Card)
+            supportedSavedPaymentMethodTypes = listOf(PaymentMethod.Type.Card),
+            customerSessionClientSecret = "cuss_123",
         )
 
         assertThat(customerState).isEqualTo(
             CustomerState(
                 id = "cus_1",
                 ephemeralKeySecret = "ek_1",
+                customerSessionClientSecret = "cuss_123",
                 paymentMethods = paymentMethods,
                 permissions = CustomerState.Permissions(
                     canRemovePaymentMethods = false,
@@ -55,13 +57,15 @@ class CustomerStateTest {
 
         val customerState = CustomerState.createForCustomerSession(
             customer = customer,
-            supportedSavedPaymentMethodTypes = listOf(PaymentMethod.Type.Card)
+            supportedSavedPaymentMethodTypes = listOf(PaymentMethod.Type.Card),
+            customerSessionClientSecret = "cuss_123",
         )
 
         assertThat(customerState).isEqualTo(
             CustomerState(
                 id = "cus_1",
                 ephemeralKeySecret = "ek_1",
+                customerSessionClientSecret = "cuss_123",
                 paymentMethods = paymentMethods,
                 permissions = CustomerState.Permissions(
                     canRemovePaymentMethods = true,
@@ -88,13 +92,15 @@ class CustomerStateTest {
 
         val customerState = CustomerState.createForCustomerSession(
             customer = customer,
-            supportedSavedPaymentMethodTypes = listOf(PaymentMethod.Type.Card)
+            supportedSavedPaymentMethodTypes = listOf(PaymentMethod.Type.Card),
+            customerSessionClientSecret = "cuss_123",
         )
 
         assertThat(customerState).isEqualTo(
             CustomerState(
                 id = "cus_3",
                 ephemeralKeySecret = "ek_3",
+                customerSessionClientSecret = "cuss_123",
                 paymentMethods = paymentMethods,
                 permissions = CustomerState.Permissions(
                     canRemovePaymentMethods = false,
@@ -120,6 +126,7 @@ class CustomerStateTest {
             CustomerState(
                 id = "cus_1",
                 ephemeralKeySecret = "ek_1",
+                customerSessionClientSecret = null,
                 paymentMethods = paymentMethods,
                 permissions = CustomerState.Permissions(
                     // Always true for legacy ephemeral keys since un-scoped
@@ -151,7 +158,8 @@ class CustomerStateTest {
 
             val customerState = CustomerState.createForCustomerSession(
                 customer = customer,
-                supportedSavedPaymentMethodTypes = listOf(PaymentMethod.Type.Card)
+                supportedSavedPaymentMethodTypes = listOf(PaymentMethod.Type.Card),
+                customerSessionClientSecret = "cuss_123",
             )
 
             assertThat(customerState.paymentMethods).containsExactlyElementsIn(cards)

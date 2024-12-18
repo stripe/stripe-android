@@ -50,5 +50,6 @@ internal interface CustomerRepository {
     data class CustomerInfo(
         val id: String,
         val ephemeralKeySecret: String,
+        val customerSessionClientSecret: String?,
     )
 }

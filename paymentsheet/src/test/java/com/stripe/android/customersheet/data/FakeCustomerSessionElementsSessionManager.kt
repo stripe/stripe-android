@@ -11,6 +11,7 @@ internal class FakeCustomerSessionElementsSessionManager(
             customerId = "cus_1",
             ephemeralKey = "ek_123",
             expiresAt = 999999,
+            customerSessionClientSecret = "cuss_123",
         )
     ),
     private val intent: StripeIntent = SetupIntentFactory.create(),
@@ -52,6 +53,7 @@ internal class FakeCustomerSessionElementsSessionManager(
                 customerId = "cus_1",
                 ephemeralKey = "ek_123",
                 expiresAt = 999999,
+                customerSessionClientSecret = "cuss_123",
             ),
         )
     )

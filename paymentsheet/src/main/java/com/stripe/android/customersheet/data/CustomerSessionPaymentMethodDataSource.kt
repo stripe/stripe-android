@@ -32,7 +32,8 @@ internal class CustomerSessionPaymentMethodDataSource @Inject constructor(
                 customerRepository.updatePaymentMethod(
                     customerInfo = CustomerRepository.CustomerInfo(
                         id = ephemeralKey.customerId,
-                        ephemeralKeySecret = ephemeralKey.ephemeralKey
+                        ephemeralKeySecret = ephemeralKey.ephemeralKey,
+                        customerSessionClientSecret = ephemeralKey.customerSessionClientSecret,
                     ),
                     paymentMethodId = paymentMethodId,
                     params = params,
@@ -58,7 +59,8 @@ internal class CustomerSessionPaymentMethodDataSource @Inject constructor(
                 customerRepository.detachPaymentMethod(
                     customerInfo = CustomerRepository.CustomerInfo(
                         id = ephemeralKey.customerId,
-                        ephemeralKeySecret = ephemeralKey.ephemeralKey
+                        ephemeralKeySecret = ephemeralKey.ephemeralKey,
+                        customerSessionClientSecret = ephemeralKey.customerSessionClientSecret,
                     ),
                     canRemoveDuplicates = true,
                     paymentMethodId = paymentMethodId,

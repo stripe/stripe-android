@@ -121,6 +121,7 @@ internal class DefaultPaymentSheetLoaderTest {
                 customer = CustomerState(
                     id = config.customer!!.id,
                     ephemeralKeySecret = config.customer!!.ephemeralKeySecret,
+                    customerSessionClientSecret = null,
                     paymentMethods = PAYMENT_METHODS,
                     permissions = CustomerState.Permissions(
                         canRemovePaymentMethods = true,
@@ -1368,6 +1369,7 @@ internal class DefaultPaymentSheetLoaderTest {
                 CustomerState(
                     id = "cus_1",
                     ephemeralKeySecret = "ek_123",
+                    customerSessionClientSecret = "customer_client_secret",
                     paymentMethods = cards,
                     permissions = CustomerState.Permissions(
                         canRemovePaymentMethods = false,
@@ -1639,6 +1641,7 @@ internal class DefaultPaymentSheetLoaderTest {
                 CustomerState(
                     id = "cus_1",
                     ephemeralKeySecret = "ephemeral_key_secret",
+                    customerSessionClientSecret = null,
                     paymentMethods = cards,
                     permissions = CustomerState.Permissions(
                         canRemovePaymentMethods = true,
@@ -1781,6 +1784,7 @@ internal class DefaultPaymentSheetLoaderTest {
                 CustomerRepository.CustomerInfo(
                     id = "cus_1",
                     ephemeralKeySecret = "ek_123",
+                    customerSessionClientSecret = "cuss_1",
                 )
             )
         }
