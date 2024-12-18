@@ -5,9 +5,11 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkActivityResult
+import com.stripe.android.link.LinkActivityViewModel
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.account.LinkAccountManager
@@ -16,8 +18,13 @@ import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.supportedPaymentMethodTypes
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
+import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.R
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -31,6 +38,7 @@ internal class WalletViewModel @Inject constructor(
     private val linkAccount: LinkAccount,
     private val linkAccountManager: LinkAccountManager,
     private val logger: Logger,
+    private val confirmationHandler: ConfirmationHandler,
     private val navigateAndClearStack: (route: LinkScreen) -> Unit,
     private val dismissWithResult: (LinkActivityResult) -> Unit
 ) : ViewModel() {
@@ -81,6 +89,14 @@ internal class WalletViewModel @Inject constructor(
         dismissWithResult(LinkActivityResult.Failed(fatalError))
     }
 
+    private fun onError(error: Throwable) {
+        _uiState.update {
+            it.copy(
+                errorMessage = error.message?.resolvableString
+            )
+        }
+    }
+
     fun onItemSelected(item: ConsumerPaymentDetails.PaymentDetails) {
         if (item == uiState.value.selectedItem) return
 
@@ -89,7 +105,46 @@ internal class WalletViewModel @Inject constructor(
         }
     }
 
-    fun onPrimaryButtonClicked() = Unit
+    fun onPrimaryButtonClicked() {
+        val selectedItem = uiState.value.selectedItem ?: return
+        viewModelScope.launch {
+            confirmationHandler.start(
+                arguments = ConfirmationHandler.Args(
+                    intent = configuration.stripeIntent,
+                    confirmationOption = PaymentMethodConfirmationOption.New(
+                        createParams = createPaymentMethodCreateParams(
+                            selectedPaymentDetails = selectedItem,
+                            linkAccount = linkAccount
+                        ),
+                        optionsParams = null,
+                        shouldSave = false
+                    ),
+                    appearance = PaymentSheet.Appearance(),
+                    initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(configuration.stripeIntent.clientSecret ?: ""),
+                    shippingDetails = null
+                )
+            )
+            when (val result = confirmationHandler.awaitResult()) {
+                is ConfirmationHandler.Result.Canceled -> {
+                    dismissWithResult(LinkActivityResult.Canceled(LinkActivityResult.Canceled.Reason.BackPressed))
+                }
+                is ConfirmationHandler.Result.Failed -> onError(result.cause)
+                is ConfirmationHandler.Result.Succeeded -> Unit
+                null -> Unit
+            }
+        }
+    }
+
+    private fun createPaymentMethodCreateParams(
+        selectedPaymentDetails: ConsumerPaymentDetails.PaymentDetails,
+        linkAccount: LinkAccount,
+    ): PaymentMethodCreateParams {
+        return PaymentMethodCreateParams.createLink(
+            paymentDetailsId = selectedPaymentDetails.id,
+            consumerSessionClientSecret = linkAccount.clientSecret,
+            extraParams = emptyMap(),
+        )
+    }
 
     fun onPayAnotherWayClicked() {
         dismissWithResult(LinkActivityResult.Canceled(LinkActivityResult.Canceled.Reason.PayAnotherWay))
@@ -121,6 +176,7 @@ internal class WalletViewModel @Inject constructor(
                         linkAccountManager = parentComponent.linkAccountManager,
                         logger = parentComponent.logger,
                         linkAccount = linkAccount,
+                        confirmationHandler = parentComponent.viewModel.confirmationHandler,
                         navigateAndClearStack = navigateAndClearStack,
                         dismissWithResult = dismissWithResult
                     )
