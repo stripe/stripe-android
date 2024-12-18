@@ -122,6 +122,7 @@ internal class SharedPaymentElementViewModel @Inject constructor(
                 selectionHolder.set(state.paymentSelection)
                 embeddedContentHelper.dataLoaded(
                     paymentMethodMetadata = state.paymentMethodMetadata,
+                    rowStyle = configuration.appearance.embeddedAppearance.style
                 )
                 ConfigureResult.Succeeded()
             },

@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.verticalmode
 
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.screenshottesting.PaparazziRule
@@ -10,6 +11,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.mockito.kotlin.mock
 
+@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 internal class PaymentMethodVerticalLayoutUIScreenshotTest {
     @get:Rule
     val paparazziRule = PaparazziRule(PaymentSheetAppearance.entries)

@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement.embedded
 
+import android.os.Parcelable
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.core.injection.IOContext
@@ -7,10 +8,12 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.orEmpty
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.LinkInlineHandler
 import com.stripe.android.paymentsheet.NewOrExternalPaymentSelection
+import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -30,12 +33,14 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.parcelize.Parcelize
 import kotlin.coroutines.CoroutineContext
 
+@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 internal interface EmbeddedContentHelper {
     val embeddedContent: StateFlow<EmbeddedContent?>
 
-    fun dataLoaded(paymentMethodMetadata: PaymentMethodMetadata)
+    fun dataLoaded(paymentMethodMetadata: PaymentMethodMetadata, rowStyle: Embedded.RowStyle)
 }
 
 internal fun interface EmbeddedContentHelperFactory {
@@ -47,6 +52,7 @@ internal interface DefaultEmbeddedContentHelperFactory : EmbeddedContentHelperFa
     override fun create(coroutineScope: CoroutineScope): DefaultEmbeddedContentHelper
 }
 
+@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 internal class DefaultEmbeddedContentHelper @AssistedInject constructor(
     @Assisted private val coroutineScope: CoroutineScope,
     private val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
@@ -58,27 +64,28 @@ internal class DefaultEmbeddedContentHelper @AssistedInject constructor(
     private val selectionHolder: EmbeddedSelectionHolder,
 ) : EmbeddedContentHelper {
 
-    private val paymentMethodMetadata: StateFlow<PaymentMethodMetadata?> = savedStateHandle.getStateFlow(
-        key = PAYMENT_METHOD_METADATA_KEY_EMBEDDED_CONTENT,
-        initialValue = null,
-    )
     private val mandate: StateFlow<ResolvableString?> = savedStateHandle.getStateFlow(
         key = MANDATE_KEY_EMBEDDED_CONTENT,
         initialValue = null,
+    )
+    private val state: StateFlow<State?> = savedStateHandle.getStateFlow(
+        key = STATE_KEY_EMBEDDED_CONTENT,
+        initialValue = null
     )
     private val _embeddedContent = MutableStateFlow<EmbeddedContent?>(null)
     override val embeddedContent: StateFlow<EmbeddedContent?> = _embeddedContent.asStateFlow()
 
     init {
         coroutineScope.launch {
-            paymentMethodMetadata.collect { paymentMethodMetadata ->
-                _embeddedContent.value = if (paymentMethodMetadata == null) {
+            state.collect { state ->
+                _embeddedContent.value = if (state == null) {
                     null
                 } else {
                     EmbeddedContent(
                         interactor = createInteractor(
                             coroutineScope = coroutineScope,
-                            paymentMethodMetadata = paymentMethodMetadata,
+                            paymentMethodMetadata = state.paymentMethodMetadata,
+                            rowStyle = state.rowStyle
                         )
                     )
                 }
@@ -93,13 +100,17 @@ internal class DefaultEmbeddedContentHelper @AssistedInject constructor(
         }
     }
 
-    override fun dataLoaded(paymentMethodMetadata: PaymentMethodMetadata) {
-        savedStateHandle[PAYMENT_METHOD_METADATA_KEY_EMBEDDED_CONTENT] = paymentMethodMetadata
+    override fun dataLoaded(paymentMethodMetadata: PaymentMethodMetadata, rowStyle: Embedded.RowStyle) {
+        savedStateHandle[STATE_KEY_EMBEDDED_CONTENT] = State(
+            paymentMethodMetadata = paymentMethodMetadata,
+            rowStyle = rowStyle,
+        )
     }
 
     private fun createInteractor(
         coroutineScope: CoroutineScope,
         paymentMethodMetadata: PaymentMethodMetadata,
+        rowStyle: Embedded.RowStyle
     ): PaymentMethodVerticalLayoutInteractor {
         val paymentMethodIncentiveInteractor = PaymentMethodIncentiveInteractor(
             incentive = paymentMethodMetadata.paymentMethodIncentive,
@@ -164,6 +175,7 @@ internal class DefaultEmbeddedContentHelper @AssistedInject constructor(
             reportFormShown = eventReporter::onPaymentMethodFormShown,
             onUpdatePaymentMethod = savedPaymentMethodMutator::updatePaymentMethod,
             isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
+            rowStyle = rowStyle
         )
     }
 
@@ -251,8 +263,14 @@ internal class DefaultEmbeddedContentHelper @AssistedInject constructor(
         selectionHolder.set(paymentSelection)
     }
 
+    @Parcelize
+    class State(
+        val paymentMethodMetadata: PaymentMethodMetadata,
+        val rowStyle: Embedded.RowStyle,
+    ) : Parcelable
+
     companion object {
-        const val PAYMENT_METHOD_METADATA_KEY_EMBEDDED_CONTENT = "PAYMENT_METHOD_METADATA_KEY_EMBEDDED_CONTENT"
         const val MANDATE_KEY_EMBEDDED_CONTENT = "MANDATE_KEY_EMBEDDED_CONTENT"
+        const val STATE_KEY_EMBEDDED_CONTENT = "STATE_KEY_EMBEDDED_CONTENT"
     }
 }

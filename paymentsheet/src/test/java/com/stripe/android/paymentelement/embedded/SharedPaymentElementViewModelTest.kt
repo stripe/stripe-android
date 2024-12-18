@@ -13,6 +13,7 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.paymentMethodType
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
@@ -192,6 +193,53 @@ internal class SharedPaymentElementViewModelTest {
         }
         assertThat(selectionHolder.selection.value?.paymentMethodType).isEqualTo("google_pay")
         assertThat(embeddedContentHelper.dataLoadedTurbine.awaitItem()).isNotNull()
+    }
+
+    @Test
+    fun `configure correctly sets row style`() = testScenario {
+        val configuration = EmbeddedPaymentElement.Configuration
+            .Builder("Example, Inc.")
+            .appearance(
+                PaymentSheet.Appearance(
+                    embeddedAppearance = Embedded(
+                        Embedded.RowStyle.FlatWithRadio.defaultLight
+                    )
+                )
+            ).build()
+        configurationHandler.emit(
+            Result.success(
+                PaymentElementLoader.State(
+                    config = configuration.asCommonConfiguration(),
+                    customer = null,
+                    linkState = null,
+                    paymentSelection = PaymentSelection.GooglePay,
+                    validationError = null,
+                    paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                        stripeIntent = PaymentIntentFixtures.PI_SUCCEEDED,
+                        billingDetailsCollectionConfiguration = configuration
+                            .billingDetailsCollectionConfiguration,
+                        allowsDelayedPaymentMethods = configuration.allowsDelayedPaymentMethods,
+                        allowsPaymentMethodsRequiringShippingAddress = configuration
+                            .allowsPaymentMethodsRequiringShippingAddress,
+                        isGooglePayReady = true,
+                        cbcEligibility = CardBrandChoiceEligibility.Ineligible,
+                    ),
+                )
+            )
+        )
+        assertThat(
+            viewModel.configure(
+                PaymentSheet.IntentConfiguration(
+                    PaymentSheet.IntentConfiguration.Mode.Payment(5000, "USD"),
+                ),
+                configuration = configuration,
+            )
+        ).isInstanceOf<EmbeddedPaymentElement.ConfigureResult.Succeeded>()
+
+        embeddedContentHelper.dataLoadedTurbine.awaitItem().let {
+            assertThat(it).isNotNull()
+            assertThat(it.rowStyle).isInstanceOf<Embedded.RowStyle.FlatWithRadio>()
+        }
     }
 
     @Test

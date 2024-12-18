@@ -15,6 +15,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
+import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.ui.PaymentMethodIconFromResource
 import com.stripe.android.paymentsheet.ui.getLabel
 import com.stripe.android.paymentsheet.ui.getSavedPaymentMethodIcon
@@ -32,6 +33,7 @@ internal fun SavedPaymentMethodRowButton(
     isClickable: Boolean = isEnabled,
     isSelected: Boolean,
     modifier: Modifier = Modifier,
+    rowStyle: Embedded.RowStyle = Embedded.RowStyle.FloatingButton.default,
     onClick: () -> Unit = {},
     trailingContent: (@Composable RowScope.() -> Unit)? = null,
 ) {
@@ -71,9 +73,11 @@ internal fun SavedPaymentMethodRowButton(
             ),
         contentDescription = contentDescription,
         trailingContent = trailingContent,
+        style = rowStyle
     )
 }
 
+@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @Preview
 @Composable
 internal fun PreviewCardSavedPaymentMethodRowButton() {

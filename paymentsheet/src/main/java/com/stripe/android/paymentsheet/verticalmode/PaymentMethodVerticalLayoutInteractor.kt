@@ -7,10 +7,12 @@ import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.LinkInlineHandler
+import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.code
 import com.stripe.android.paymentsheet.forms.FormFieldValues
@@ -32,6 +34,7 @@ import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 import com.stripe.android.R as PaymentsCoreR
 
+@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 internal interface PaymentMethodVerticalLayoutInteractor {
     val isLiveMode: Boolean
 
@@ -47,6 +50,7 @@ internal interface PaymentMethodVerticalLayoutInteractor {
         val selection: PaymentSelection?,
         val displayedSavedPaymentMethod: DisplayableSavedPaymentMethod?,
         val availableSavedPaymentMethodAction: SavedPaymentMethodAction,
+        val rowType: Embedded.RowStyle
     )
 
     sealed interface ViewAction {
@@ -65,6 +69,7 @@ internal interface PaymentMethodVerticalLayoutInteractor {
     }
 }
 
+@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 internal class DefaultPaymentMethodVerticalLayoutInteractor(
     paymentMethodMetadata: PaymentMethodMetadata,
     processing: StateFlow<Boolean>,
@@ -91,6 +96,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val onUpdatePaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     override val isLiveMode: Boolean,
     dispatcher: CoroutineContext = Dispatchers.Default,
+    private val rowStyle: Embedded.RowStyle = Embedded.RowStyle.FloatingButton.default
 ) : PaymentMethodVerticalLayoutInteractor {
 
     sealed interface FormType {
@@ -233,6 +239,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             selection = mostRecentSelection,
             displayedSavedPaymentMethod = displayedSavedPaymentMethod,
             availableSavedPaymentMethodAction = action,
+            rowType = rowStyle
         )
     }
 

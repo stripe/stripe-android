@@ -13,6 +13,7 @@ import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.SetupIntentFixtures
+import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.analytics.code
 import com.stripe.android.paymentsheet.forms.FormFieldValues
@@ -34,6 +35,7 @@ import org.junit.Test
 import com.stripe.android.paymentsheet.R as PaymentSheetR
 
 @Suppress("LargeClass")
+@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 class DefaultPaymentMethodVerticalLayoutInteractorTest {
 
     @get:Rule

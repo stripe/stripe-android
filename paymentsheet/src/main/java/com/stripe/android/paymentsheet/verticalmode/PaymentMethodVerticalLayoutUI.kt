@@ -21,7 +21,9 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
+import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.code
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -37,6 +39,7 @@ internal const val TEST_TAG_VIEW_MORE = "TEST_TAG_VIEW_MORE"
 internal const val TEST_TAG_EDIT_SAVED_CARD = "TEST_TAG_VERTICAL_MODE_SAVED_PM_EDIT"
 internal const val TEST_TAG_SAVED_TEXT = "TEST_TAG_SAVED_TEXT"
 
+@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @Composable
 internal fun PaymentMethodVerticalLayoutUI(
     interactor: PaymentMethodVerticalLayoutInteractor,
@@ -77,10 +80,12 @@ internal fun PaymentMethodVerticalLayoutUI(
         },
         imageLoader = imageLoader,
         modifier = modifier
-            .testTag(TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT)
+            .testTag(TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT),
+        rowStyle = state.rowType
     )
 }
 
+@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @VisibleForTesting
 @Composable
 internal fun PaymentMethodVerticalLayoutUI(
@@ -94,6 +99,7 @@ internal fun PaymentMethodVerticalLayoutUI(
     onEditPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     onSelectSavedPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     imageLoader: StripeImageLoader,
+    rowStyle: Embedded.RowStyle = Embedded.RowStyle.FloatingButton.default,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -121,6 +127,7 @@ internal fun PaymentMethodVerticalLayoutUI(
                     )
                 },
                 onClick = { onSelectSavedPaymentMethod(displayedSavedPaymentMethod) },
+                rowStyle = rowStyle
             )
             Text(stringResource(id = R.string.stripe_paymentsheet_new_pm), style = textStyle, color = textColor)
         }
@@ -138,7 +145,8 @@ internal fun PaymentMethodVerticalLayoutUI(
             paymentMethods = paymentMethods,
             selectedIndex = selectedIndex,
             isEnabled = isEnabled,
-            imageLoader = imageLoader
+            imageLoader = imageLoader,
+            rowStyle = rowStyle
         )
     }
 }

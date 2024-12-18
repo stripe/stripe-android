@@ -2,11 +2,14 @@ package com.stripe.android.paymentsheet.verticalmode
 
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
+import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.ViewActionRecorder
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.StateFlow
 
+@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 internal class FakePaymentMethodVerticalLayoutInteractor(
     initialState: PaymentMethodVerticalLayoutInteractor.State,
     initialShowsWalletsHeader: Boolean = false,
@@ -35,6 +38,7 @@ internal class FakePaymentMethodVerticalLayoutInteractor(
                 displayedSavedPaymentMethod = null,
                 availableSavedPaymentMethodAction =
                 PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
+                rowType = Embedded.RowStyle.FloatingButton.default
             )
             return FakePaymentMethodVerticalLayoutInteractor(
                 initialState = initialState,

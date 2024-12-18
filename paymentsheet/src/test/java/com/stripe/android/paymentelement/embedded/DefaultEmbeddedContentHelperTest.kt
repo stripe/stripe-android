@@ -6,8 +6,10 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedContentHelper.Companion.MANDATE_KEY_EMBEDDED_CONTENT
-import com.stripe.android.paymentelement.embedded.DefaultEmbeddedContentHelper.Companion.PAYMENT_METHOD_METADATA_KEY_EMBEDDED_CONTENT
+import com.stripe.android.paymentelement.embedded.DefaultEmbeddedContentHelper.Companion.STATE_KEY_EMBEDDED_CONTENT
+import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
@@ -17,22 +19,28 @@ import kotlinx.coroutines.test.runTest
 import org.mockito.Mockito.mock
 import kotlin.test.Test
 
+@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 internal class DefaultEmbeddedContentHelperTest {
     @Test
     fun `dataLoaded updates savedStateHandle with paymentMethodMetadata`() = testScenario {
-        assertThat(savedStateHandle.get<PaymentMethodMetadata?>(PAYMENT_METHOD_METADATA_KEY_EMBEDDED_CONTENT))
+        assertThat(savedStateHandle.get<PaymentMethodMetadata?>(STATE_KEY_EMBEDDED_CONTENT))
             .isNull()
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
-        embeddedContentHelper.dataLoaded(paymentMethodMetadata)
-        assertThat(savedStateHandle.get<PaymentMethodMetadata?>(PAYMENT_METHOD_METADATA_KEY_EMBEDDED_CONTENT))
-            .isEqualTo(paymentMethodMetadata)
+        val rowStyle = Embedded.RowStyle.FlatWithRadio.defaultLight
+        embeddedContentHelper.dataLoaded(paymentMethodMetadata, rowStyle)
+        val state = savedStateHandle.get<DefaultEmbeddedContentHelper.State?>(STATE_KEY_EMBEDDED_CONTENT)
+        assertThat(state?.paymentMethodMetadata).isEqualTo(paymentMethodMetadata)
+        assertThat(state?.rowStyle).isEqualTo(rowStyle)
     }
 
     @Test
     fun `dataLoaded emits embeddedContent event`() = testScenario {
         embeddedContentHelper.embeddedContent.test {
             assertThat(awaitItem()).isNull()
-            embeddedContentHelper.dataLoaded(PaymentMethodMetadataFactory.create())
+            embeddedContentHelper.dataLoaded(
+                PaymentMethodMetadataFactory.create(),
+                Embedded.RowStyle.FlatWithRadio.defaultLight
+            )
             assertThat(awaitItem()).isNotNull()
         }
     }
@@ -41,7 +49,10 @@ internal class DefaultEmbeddedContentHelperTest {
     fun `setting mandate emits embeddedContent event`() = testScenario {
         embeddedContentHelper.embeddedContent.test {
             assertThat(awaitItem()).isNull()
-            embeddedContentHelper.dataLoaded(PaymentMethodMetadataFactory.create())
+            embeddedContentHelper.dataLoaded(
+                PaymentMethodMetadataFactory.create(),
+                Embedded.RowStyle.FlatWithRadio.defaultLight
+            )
             awaitItem().run {
                 assertThat(this).isNotNull()
                 assertThat(this?.mandate).isNull()
@@ -57,7 +68,13 @@ internal class DefaultEmbeddedContentHelperTest {
     @Test
     fun `initializing embeddedContentHelper with paymentMethodMetadata emits correct initial event`() = testScenario(
         setup = {
-            set(PAYMENT_METHOD_METADATA_KEY_EMBEDDED_CONTENT, PaymentMethodMetadataFactory.create())
+            set(
+                STATE_KEY_EMBEDDED_CONTENT,
+                DefaultEmbeddedContentHelper.State(
+                    PaymentMethodMetadataFactory.create(),
+                    Embedded.RowStyle.FloatingButton.default
+                )
+            )
         }
     ) {
         embeddedContentHelper.embeddedContent.test {
@@ -68,7 +85,13 @@ internal class DefaultEmbeddedContentHelperTest {
     @Test
     fun `initializing embeddedContentHelper with mandate emits correct initial event`() = testScenario(
         setup = {
-            set(PAYMENT_METHOD_METADATA_KEY_EMBEDDED_CONTENT, PaymentMethodMetadataFactory.create())
+            set(
+                STATE_KEY_EMBEDDED_CONTENT,
+                DefaultEmbeddedContentHelper.State(
+                    PaymentMethodMetadataFactory.create(),
+                    Embedded.RowStyle.FloatingButton.default
+                )
+            )
             set(MANDATE_KEY_EMBEDDED_CONTENT, "Hi".resolvableString)
         }
     ) {
