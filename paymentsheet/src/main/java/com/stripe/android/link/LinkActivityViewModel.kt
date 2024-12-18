@@ -105,7 +105,7 @@ internal class LinkActivityViewModel @Inject constructor(
         val navController = navController ?: return
         navController.navigate(screen.route) {
             if (clearStack) {
-                popUpTo(navController.graph.startDestinationId) {
+                popUpTo(navController.graph.id) {
                     inclusive = true
                 }
             }
@@ -132,8 +132,14 @@ internal class LinkActivityViewModel @Inject constructor(
                 AccountStatus.NeedsVerification, AccountStatus.VerificationStarted -> LinkScreen.Verification
                 AccountStatus.SignedOut, AccountStatus.Error -> LinkScreen.SignUp
             }
-            navController?.navigate(screen.route) {
+            navigate(screen, clearStack = true)
+
+            val navController = navController ?: return@launch
+            navController.navigate(screen.route) {
                 launchSingleTop = true
+                popUpTo(navController.graph.id) {
+                    inclusive = true
+                }
             }
         }
     }
