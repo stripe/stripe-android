@@ -143,6 +143,7 @@ internal interface NativeLinkModule {
         @Named(ENABLE_LOGGING)
         @NativeLinkScope
         fun providesEnableLogging(): Boolean = BuildConfig.DEBUG
+
         @Provides
         @NativeLinkScope
         fun providePaymentConfiguration(appContext: Context): PaymentConfiguration {

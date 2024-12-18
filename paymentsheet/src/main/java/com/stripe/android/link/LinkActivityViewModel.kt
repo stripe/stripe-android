@@ -1,7 +1,6 @@
 package com.stripe.android.link
 
 import android.app.Application
-import android.util.Log
 import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
@@ -53,7 +52,6 @@ internal class LinkActivityViewModel @Inject constructor(
     var dismissWithResult: ((LinkActivityResult) -> Unit)? = null
 
     init {
-        Log.d("TOLUWANI", "create new vm [${navController?.currentDestination?.route}]")
         viewModelScope.launch {
             listenToConfirmationState()
         }
@@ -67,15 +65,10 @@ internal class LinkActivityViewModel @Inject constructor(
             }
     }
 
-    /**
-     * Used to set up any dependencies that require a reference to the current Activity.
-     * Must be called from the Activity's `onCreate`.
-     */
     fun registerFromActivity(
         activityResultCaller: ActivityResultCaller,
         lifecycleOwner: LifecycleOwner,
     ) {
-        Log.d("TOLUWANI", "register")
         confirmationHandler.register(activityResultCaller, lifecycleOwner)
     }
 
@@ -139,7 +132,6 @@ internal class LinkActivityViewModel @Inject constructor(
                 val handle: SavedStateHandle = savedStateHandle ?: createSavedStateHandle()
                 val app = this[APPLICATION_KEY] as Application
                 val args: NativeLinkArgs = getArgs(handle) ?: throw NoArgsException()
-                Log.d("TOLUWANI", "creating new component")
 
                 DaggerNativeLinkComponent
                     .builder()

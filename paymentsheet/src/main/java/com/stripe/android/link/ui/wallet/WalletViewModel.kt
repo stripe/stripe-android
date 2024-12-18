@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkActivityResult
@@ -184,7 +183,9 @@ internal class WalletViewModel @Inject constructor(
                         shouldSave = false
                     ),
                     appearance = PaymentSheet.Appearance(),
-                    initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(configuration.stripeIntent.clientSecret ?: ""),
+                    initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                        clientSecret = configuration.stripeIntent.clientSecret ?: ""
+                    ),
                     shippingDetails = null
                 )
             )

@@ -6,7 +6,6 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetValue
@@ -21,8 +20,6 @@ import androidx.compose.runtime.setValue
 import androidx.core.os.bundleOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.stripe.android.core.Logger
@@ -33,9 +30,7 @@ import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.launch
 
 internal class LinkActivity : ComponentActivity() {
-    internal val viewModel: LinkActivityViewModel by viewModels {
-        LinkActivityViewModel.factory()
-    }
+    internal var viewModel: LinkActivityViewModel? = null
 
     @VisibleForTesting
     internal lateinit var navController: NavHostController
@@ -44,13 +39,13 @@ internal class LinkActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-//        try {
-//            viewModel = ViewModelProvider(this, LinkActivityViewModel.factory())[LinkActivityViewModel::class.java]
-//        } catch (e: NoArgsException) {
-//            Logger.getInstance(BuildConfig.DEBUG).error("Failed to create LinkActivityViewModel", e)
-//            setResult(Activity.RESULT_CANCELED)
-//            finish()
-//        }
+        try {
+            viewModel = ViewModelProvider(this, LinkActivityViewModel.factory())[LinkActivityViewModel::class.java]
+        } catch (e: NoArgsException) {
+            Logger.getInstance(BuildConfig.DEBUG).error("Failed to create LinkActivityViewModel", e)
+            setResult(Activity.RESULT_CANCELED)
+            finish()
+        }
 
         val vm = viewModel ?: return
         vm.registerFromActivity(

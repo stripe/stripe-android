@@ -7,9 +7,9 @@ import dagger.Module
 import dagger.Provides
 
 @Module
-internal object ViewModelModule {
+internal object LinkViewModelModule {
     @Provides
-    @NativeLinkScope  // Use your custom scope instead of @Singleton
+    @NativeLinkScope
     fun provideLinkActivityViewModel(
         component: NativeLinkComponent,
         defaultConfirmationHandlerFactory: DefaultConfirmationHandler.Factory,
