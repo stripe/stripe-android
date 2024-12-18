@@ -6,7 +6,7 @@ import com.stripe.android.link.account.LinkStore
 import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.mock
 
-object RecordingLinkStore {
+internal object RecordingLinkStore {
     fun noOp(): LinkStore {
         return mock()
     }
