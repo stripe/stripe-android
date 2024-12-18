@@ -5,6 +5,8 @@ import android.os.Bundle
 import android.view.View
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.ExperimentalMaterialApi
@@ -25,12 +27,15 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.stripe.android.connect.EmbeddedComponentManager
 import com.stripe.android.connect.PrivateBetaConnectSDK
+import com.stripe.android.connect.example.core.Async
 import com.stripe.android.connect.example.core.Success
 import com.stripe.android.connect.example.core.then
 import com.stripe.android.connect.example.ui.appearance.AppearanceView
 import com.stripe.android.connect.example.ui.appearance.AppearanceViewModel
 import com.stripe.android.connect.example.ui.embeddedcomponentmanagerloader.EmbeddedComponentLoaderViewModel
 import com.stripe.android.connect.example.ui.embeddedcomponentmanagerloader.EmbeddedComponentManagerLoader
+import com.stripe.android.connect.example.ui.embeddedcomponentmanagerloader.EmbeddedComponentManagerLoaderState
+import com.stripe.android.connect.example.ui.settings.SettingsViewModel
 import com.stripe.android.connect.example.ui.settings.settingsComposables
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -48,12 +53,20 @@ abstract class BasicExampleComponentActivity : FragmentActivity() {
     @get:StringRes
     abstract val titleRes: Int
 
+    private val settingsViewModel by viewModels<SettingsViewModel>()
+
     abstract fun createComponentView(context: Context, embeddedComponentManager: EmbeddedComponentManager): View
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         EmbeddedComponentManager.onActivityCreate(this@BasicExampleComponentActivity)
+
+        val settings = settingsViewModel.state.value
+        val edgeToEdgeEnabled = settings.presentationSettings.edgeToEdgeEnabled
+        if (edgeToEdgeEnabled) {
+            enableEdgeToEdge()
+        }
 
         setContent {
             BackHandler(onBack = ::finish)
@@ -64,6 +77,7 @@ abstract class BasicExampleComponentActivity : FragmentActivity() {
                     composable(BasicComponentExampleDestination.Component) {
                         ExampleComponentContent(
                             viewModel = viewModel,
+                            edgeToEdgeEnabled = edgeToEdgeEnabled,
                             openSettings = { navController.navigate(BasicComponentExampleDestination.Settings) },
                         )
                     }
@@ -73,15 +87,42 @@ abstract class BasicExampleComponentActivity : FragmentActivity() {
         }
     }
 
-    @OptIn(ExperimentalMaterialApi::class)
     @Composable
     private fun ExampleComponentContent(
         viewModel: EmbeddedComponentLoaderViewModel,
+        edgeToEdgeEnabled: Boolean,
         openSettings: () -> Unit,
     ) {
         val state by viewModel.state.collectAsState()
         val embeddedComponentAsync = state.embeddedComponentManagerAsync
 
+        if (edgeToEdgeEnabled) {
+            // don't render the scaffold if edge-to-edge is enabled so that we get an entirely
+            // full-screen experience
+            ExampleComponentView(
+                embeddedComponentManagerAsync = embeddedComponentAsync,
+                openSettings = openSettings,
+                reload = viewModel::reload,
+            )
+        } else {
+            ExampleComponentScaffold(
+                embeddedComponentManagerAsync = embeddedComponentAsync,
+            ) {
+                ExampleComponentView(
+                    embeddedComponentManagerAsync = embeddedComponentAsync,
+                    openSettings = openSettings,
+                    reload = viewModel::reload,
+                )
+            }
+        }
+    }
+
+    @OptIn(ExperimentalMaterialApi::class)
+    @Composable
+    private fun ExampleComponentScaffold(
+        embeddedComponentManagerAsync: Async<EmbeddedComponentManager>,
+        content: @Composable () -> Unit,
+    ) {
         val sheetState = rememberModalBottomSheetState(
             initialValue = ModalBottomSheetValue.Hidden,
             skipHalfExpanded = true,
@@ -101,27 +142,35 @@ abstract class BasicExampleComponentActivity : FragmentActivity() {
         ) {
             ConnectExampleScaffold(
                 title = stringResource(titleRes),
-                navigationIcon = (embeddedComponentAsync is Success).then {
+                navigationIcon = (embeddedComponentManagerAsync is Success).then {
                     {
                         BackIconButton(onClick = ::finish)
                     }
                 },
-                actions = (embeddedComponentAsync is Success).then {
+                actions = (embeddedComponentManagerAsync is Success).then {
                     {
                         CustomizeAppearanceIconButton(onClick = { coroutineScope.launch { sheetState.show() } })
                     }
                 } ?: { },
-            ) {
-                EmbeddedComponentManagerLoader(
-                    embeddedComponentAsync = embeddedComponentAsync,
-                    openSettings = openSettings,
-                    reload = viewModel::reload,
-                ) { embeddedComponentManager ->
-                    AndroidView(modifier = Modifier.fillMaxSize(), factory = { context ->
-                        createComponentView(context, embeddedComponentManager)
-                    })
-                }
-            }
+                content = content
+            )
+        }
+    }
+
+    @Composable
+    private fun ExampleComponentView(
+        embeddedComponentManagerAsync: Async<EmbeddedComponentManager>,
+        openSettings: () -> Unit,
+        reload: () -> Unit,
+    ) {
+        EmbeddedComponentManagerLoader(
+            embeddedComponentAsync = embeddedComponentManagerAsync,
+            openSettings = openSettings,
+            reload = reload,
+        ) { embeddedComponentManager ->
+            AndroidView(modifier = Modifier.fillMaxSize(), factory = { context ->
+                createComponentView(context, embeddedComponentManager)
+            })
         }
     }
 }
