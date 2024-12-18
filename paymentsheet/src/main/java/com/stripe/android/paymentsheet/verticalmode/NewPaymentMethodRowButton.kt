@@ -66,6 +66,7 @@ internal fun NewPaymentMethodRowButton(
     PaymentMethodRowButton(
         isEnabled = isEnabled,
         isSelected = isSelected,
+        shouldShowDefaultBadge = false,
         iconContent = {
             PaymentMethodIcon(
                 iconRes = iconRes,

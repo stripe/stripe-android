@@ -2,6 +2,7 @@
 
 package com.stripe.android.paymentsheet.ui
 
+import android.content.res.Configuration
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import androidx.compose.animation.AnimatedVisibility
@@ -59,10 +60,10 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSaved
 import com.stripe.android.paymentsheet.toPaymentSelection
 import com.stripe.android.ui.core.elements.CvcController
 import com.stripe.android.ui.core.elements.CvcElement
-import com.stripe.android.uicore.DefaultStripeTheme
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionCard
 import com.stripe.android.uicore.elements.SectionError
+import com.stripe.android.uicore.preview.DefaultStripeThemePreviewColumn
 import com.stripe.android.uicore.shouldUseDarkDynamicColor
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
@@ -164,46 +165,83 @@ internal fun SavedPaymentMethodTabLayoutUI(
     }
 }
 
+private val PREVIEW_PAYMENT_OPTION_ITEMS = listOf(
+    PaymentOptionsItem.AddCard,
+    PaymentOptionsItem.Link,
+    PaymentOptionsItem.GooglePay,
+    PaymentOptionsItem.SavedPaymentMethod(
+        DisplayableSavedPaymentMethod.create(
+            displayName = "4242".resolvableString,
+            paymentMethod = PaymentMethod(
+                id = "001",
+                created = null,
+                liveMode = false,
+                code = PaymentMethod.Type.Card.code,
+                type = PaymentMethod.Type.Card,
+                card = PaymentMethod.Card(
+                    brand = CardBrand.Visa,
+                    last4 = "4242",
+                )
+            ),
+            shouldShowDefaultBadge = true
+        ),
+    ),
+    PaymentOptionsItem.SavedPaymentMethod(
+        DisplayableSavedPaymentMethod.create(
+            displayName = "4242".resolvableString,
+            paymentMethod = PaymentMethod(
+                id = "002",
+                created = null,
+                liveMode = false,
+                code = PaymentMethod.Type.SepaDebit.code,
+                type = PaymentMethod.Type.SepaDebit,
+            )
+        ),
+    ),
+    PaymentOptionsItem.SavedPaymentMethod(
+        DisplayableSavedPaymentMethod.create(
+            displayName = "5555".resolvableString,
+            paymentMethod = PaymentMethod(
+                id = "003",
+                created = null,
+                liveMode = false,
+                code = PaymentMethod.Type.Card.code,
+                type = PaymentMethod.Type.Card,
+                card = PaymentMethod.Card(
+                    brand = CardBrand.MasterCard,
+                    last4 = "4242",
+                )
+            )
+        ),
+    ),
+)
+
 @Preview(widthDp = 700)
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES, widthDp = 700)
 @Composable
 private fun SavedPaymentMethodsTabLayoutPreview() {
-    DefaultStripeTheme {
+    DefaultStripeThemePreviewColumn {
         SavedPaymentMethodTabLayoutUI(
-            paymentOptionsItems = listOf(
-                PaymentOptionsItem.AddCard,
-                PaymentOptionsItem.Link,
-                PaymentOptionsItem.GooglePay,
-                PaymentOptionsItem.SavedPaymentMethod(
-                    DisplayableSavedPaymentMethod.create(
-                        displayName = "4242".resolvableString,
-                        paymentMethod = PaymentMethod(
-                            id = "001",
-                            created = null,
-                            liveMode = false,
-                            code = PaymentMethod.Type.Card.code,
-                            type = PaymentMethod.Type.Card,
-                            card = PaymentMethod.Card(
-                                brand = CardBrand.Visa,
-                                last4 = "4242",
-                            )
-                        )
-                    ),
-                ),
-                PaymentOptionsItem.SavedPaymentMethod(
-                    DisplayableSavedPaymentMethod.create(
-                        displayName = "4242".resolvableString,
-                        paymentMethod = PaymentMethod(
-                            id = "002",
-                            created = null,
-                            liveMode = false,
-                            code = PaymentMethod.Type.SepaDebit.code,
-                            type = PaymentMethod.Type.SepaDebit,
-                        )
-                    ),
-                ),
-            ),
+            paymentOptionsItems = PREVIEW_PAYMENT_OPTION_ITEMS,
             selectedPaymentOptionsItem = PaymentOptionsItem.AddCard,
             isEditing = false,
+            isProcessing = false,
+            onAddCardPressed = { },
+            onItemSelected = { },
+            onModifyItem = { },
+        )
+    }
+}
+
+@Preview(widthDp = 700)
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES, widthDp = 700)
+@Composable
+private fun SavedPaymentMethodsTabLayoutPreviewEditing() {
+    DefaultStripeThemePreviewColumn {
+        SavedPaymentMethodTabLayoutUI(
+            paymentOptionsItems = PREVIEW_PAYMENT_OPTION_ITEMS,
+            selectedPaymentOptionsItem = PaymentOptionsItem.AddCard,
+            isEditing = true,
             isProcessing = false,
             onAddCardPressed = { },
             onItemSelected = { },
@@ -378,6 +416,7 @@ private fun SavedPaymentMethodTab(
             isSelected = isSelected,
             isEnabled = isEnabled,
             isClickable = !isEditing,
+            shouldShowDefaultBadge = paymentMethod.displayableSavedPaymentMethod.shouldShowDefaultBadge,
             iconRes = paymentMethod.paymentMethod.getSavedPaymentMethodIcon(),
             labelIcon = labelIcon,
             labelText = labelText,
