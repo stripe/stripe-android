@@ -149,4 +149,6 @@
   <string name="stripe_upi_polling_payment_failed_title">Payment failed</string>
   <!-- Text shown on a button that when tapped opens a user's screen with their payment methods. -->
   <string name="stripe_view_more">View more</string>
+  <!-- Label for a default payment method. -->
+  <string name="stripe_paymentsheet_default_payment_method_label">Default</string>
 </resources>
