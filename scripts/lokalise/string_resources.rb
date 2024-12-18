@@ -8,7 +8,6 @@ class StringResources
         project_root = File.dirname(Dir.pwd)
         modules = [
             'identity',
-            'link',
             'paymentsheet',
             'payments-core',
             'payments-ui-core',

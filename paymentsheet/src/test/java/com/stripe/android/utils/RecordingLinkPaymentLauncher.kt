@@ -10,7 +10,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.mock
 
-object RecordingLinkPaymentLauncher {
+internal object RecordingLinkPaymentLauncher {
     fun noOp(): LinkPaymentLauncher {
         return mock()
     }

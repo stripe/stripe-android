@@ -18,7 +18,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flowOf
 import org.mockito.kotlin.mock
 
-class FakeLinkConfigurationCoordinator(
+internal class FakeLinkConfigurationCoordinator(
     private val attachNewCardToAccountResult: Result<LinkPaymentDetails> = Result.success(
         LinkPaymentDetails.New(
             paymentDetails = ConsumerPaymentDetails.Card(

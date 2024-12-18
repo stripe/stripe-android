@@ -10,7 +10,7 @@ import com.stripe.android.model.PaymentMethod
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 
-object LinkTestUtils {
+internal object LinkTestUtils {
     val LINK_SAVED_PAYMENT_DETAILS = LinkPaymentDetails.Saved(
         paymentDetails = ConsumerPaymentDetails.Card(
             id = "pm_123",

@@ -1,0 +1,261 @@
+package com.stripe.android.link.ui.wallet
+
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.RadioButton
+import androidx.compose.material.RadioButtonDefaults
+import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.stripe.android.link.theme.MinimumTouchTargetSize
+import com.stripe.android.link.theme.linkColors
+import com.stripe.android.link.theme.linkShapes
+import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.ConsumerPaymentDetails.Card
+import com.stripe.android.paymentsheet.R
+import com.stripe.android.R as StripeR
+import com.stripe.android.ui.core.R as StripeUiCoreR
+
+@Composable
+internal fun PaymentDetailsListItem(
+    modifier: Modifier = Modifier,
+    paymentDetails: ConsumerPaymentDetails.PaymentDetails,
+    enabled: Boolean,
+    isSelected: Boolean,
+    isUpdating: Boolean,
+    onClick: () -> Unit,
+    onMenuButtonClick: () -> Unit
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .defaultMinSize(minHeight = 56.dp)
+            .clickable(enabled = enabled, onClick = onClick),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        RadioButton(
+            selected = isSelected,
+            onClick = null,
+            modifier = Modifier
+                .testTag(WALLET_PAYMENT_DETAIL_ITEM_RADIO_BUTTON)
+                .padding(start = 20.dp, end = 6.dp),
+            colors = RadioButtonDefaults.colors(
+                selectedColor = MaterialTheme.linkColors.actionLabelLight,
+                unselectedColor = MaterialTheme.linkColors.disabledText
+            )
+        )
+        Column(
+            modifier = Modifier
+                .padding(vertical = 8.dp)
+                .weight(1f)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                PaymentDetails(paymentDetails = paymentDetails)
+
+                if (paymentDetails.isDefault) {
+                    DefaultTag()
+                }
+
+                val showWarning = (paymentDetails as? Card)?.isExpired ?: false
+                if (showWarning) {
+                    Icon(
+                        painter = painterResource(R.drawable.stripe_link_error),
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp),
+                        tint = MaterialTheme.linkColors.errorText
+                    )
+                }
+            }
+        }
+
+        MenuAndLoader(
+            enabled = enabled,
+            isUpdating = isUpdating,
+            onMenuButtonClick = onMenuButtonClick
+        )
+    }
+}
+
+@Composable
+private fun MenuAndLoader(
+    enabled: Boolean,
+    isUpdating: Boolean,
+    onMenuButtonClick: () -> Unit
+) {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .size(MinimumTouchTargetSize)
+            .padding(end = 12.dp)
+    ) {
+        if (isUpdating) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(24.dp),
+                strokeWidth = 2.dp
+            )
+        } else {
+            IconButton(
+                onClick = onMenuButtonClick,
+                enabled = enabled
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.MoreVert,
+                    contentDescription = stringResource(StripeR.string.stripe_edit),
+                    tint = MaterialTheme.linkColors.actionLabelLight,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun DefaultTag() {
+    Box(
+        modifier = Modifier
+            .background(
+                color = MaterialTheme.colors.secondary,
+                shape = MaterialTheme.linkShapes.extraSmall
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = stringResource(id = R.string.stripe_wallet_default),
+            modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
+            color = MaterialTheme.linkColors.disabledText,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Medium
+        )
+    }
+}
+
+@Composable
+internal fun RowScope.PaymentDetails(
+    modifier: Modifier = Modifier,
+    paymentDetails: ConsumerPaymentDetails.PaymentDetails,
+) {
+    when (paymentDetails) {
+        is Card -> {
+            CardInfo(
+                modifier = modifier,
+                last4 = paymentDetails.last4,
+                icon = paymentDetails.brand.icon,
+                contentDescription = paymentDetails.brand.displayName
+            )
+        }
+        is ConsumerPaymentDetails.BankAccount -> {
+            BankAccountInfo(bankAccount = paymentDetails)
+        }
+        is ConsumerPaymentDetails.Passthrough -> {
+            CardInfo(
+                modifier = modifier,
+                last4 = paymentDetails.last4,
+                icon = R.drawable.stripe_link_bank,
+                contentDescription = stringResource(R.string.stripe_wallet_passthrough_description)
+            )
+        }
+    }
+}
+
+@Composable
+private fun RowScope.CardInfo(
+    modifier: Modifier = Modifier,
+    last4: String,
+    icon: Int,
+    contentDescription: String? = null,
+) {
+    Row(
+        modifier = modifier.weight(1f),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Image(
+            painter = painterResource(id = icon),
+            contentDescription = contentDescription,
+            modifier = Modifier
+                .width(38.dp)
+                .padding(horizontal = 6.dp),
+            alignment = Alignment.Center,
+        )
+        Text(
+            text = stringResource(R.string.stripe_wallet_last4_prefix),
+            color = MaterialTheme.colors.onPrimary,
+        )
+        Text(
+            text = last4,
+            color = MaterialTheme.colors.onPrimary,
+            style = MaterialTheme.typography.h6
+        )
+    }
+}
+
+@Composable
+private fun RowScope.BankAccountInfo(
+    modifier: Modifier = Modifier,
+    bankAccount: ConsumerPaymentDetails.BankAccount,
+) {
+    Row(
+        modifier = modifier.weight(1f),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Image(
+            painter = painterResource(R.drawable.stripe_link_bank),
+            contentDescription = null,
+            modifier = Modifier
+                .width(38.dp)
+                .padding(horizontal = 6.dp),
+            alignment = Alignment.Center,
+            colorFilter = ColorFilter.tint(MaterialTheme.linkColors.actionLabelLight)
+        )
+        Column(horizontalAlignment = Alignment.Start) {
+            Text(
+                text = bankAccount.bankName ?: stringResource(StripeUiCoreR.string.stripe_payment_method_bank),
+                color = MaterialTheme.colors.onPrimary,
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 1,
+                style = MaterialTheme.typography.h6
+            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = stringResource(R.string.stripe_wallet_last4_prefix),
+                    color = MaterialTheme.colors.onSecondary,
+                    style = MaterialTheme.typography.body2
+                )
+                Text(
+                    text = bankAccount.last4,
+                    color = MaterialTheme.colors.onSecondary,
+                    style = MaterialTheme.typography.body2
+                )
+            }
+        }
+    }
+}
+
+internal const val WALLET_PAYMENT_DETAIL_ITEM_RADIO_BUTTON = "wallet_payment_detail_item_radio_button"
