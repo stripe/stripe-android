@@ -32,7 +32,7 @@ internal class LinkAnalyticsHelper @Inject internal constructor(
             is LinkActivityResult.Failed -> {
                 linkEventsReporter.onPopupError(linkActivityResult.error)
             }
-            LinkActivityResult.Completed -> TODO()
+            LinkActivityResult.Completed -> Unit
         }
     }
 

@@ -5,16 +5,11 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
-import com.stripe.android.customersheet.injection.CustomerSheetViewModelComponent.Builder
 import com.stripe.android.link.LinkActivityViewModel
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.LinkEventsReporter
-import com.stripe.android.paymentelement.confirmation.bacs.BacsConfirmationModule
-import com.stripe.android.paymentelement.confirmation.epms.ExternalPaymentMethodConfirmationModule
-import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationModule
 import com.stripe.android.paymentelement.confirmation.injection.DefaultConfirmationModule
-import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationModule
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import dagger.BindsInstance
 import dagger.Component
@@ -29,11 +24,8 @@ internal annotation class NativeLinkScope
 @Component(
     modules = [
         NativeLinkModule::class,
-        ViewModelModule::class,
+        LinkViewModelModule::class,
         DefaultConfirmationModule::class,
-//        LinkConfirmationModule::class,
-//        BacsConfirmationModule::class,
-//        ExternalPaymentMethodConfirmationModule::class,
     ]
 )
 internal interface NativeLinkComponent {

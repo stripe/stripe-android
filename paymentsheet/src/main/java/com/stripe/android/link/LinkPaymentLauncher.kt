@@ -7,7 +7,6 @@ import com.stripe.android.link.LinkActivityResult.PaymentMethodObtained
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.injection.LinkAnalyticsComponent
 import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Launcher for an Activity that will confirm a payment using Link.
