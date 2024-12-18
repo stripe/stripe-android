@@ -399,6 +399,28 @@ internal class CustomerRepositoryTest {
         }
 
     @Test
+    fun `detachPaymentMethod() should call elements endpoint when customerSessionClientSecret exists`() =
+        runTest {
+            givenElementsDetachPaymentMethodReturns(
+                Result.success(
+                    PaymentMethodFixtures.CARD_PAYMENT_METHOD
+                )
+            )
+
+            val result = repository.detachPaymentMethod(
+                customerInfo = CustomerRepository.CustomerInfo(
+                    id = "customer_id",
+                    ephemeralKeySecret = "ephemeral_key",
+                    customerSessionClientSecret = "cuss_123",
+                ),
+                paymentMethodId = "payment_method_id",
+                canRemoveDuplicates = false,
+            )
+
+            assertThat(result.getOrNull()).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        }
+
+    @Test
     fun `detachPaymentMethod() with 'canRemoveDuplicates' as 'true' should remove duplicate payment methods and remove provided payment method ID last`() =
         runTest {
             val paymentMethodsToRemove = createCardsWithSameFingerprint()
@@ -635,6 +657,21 @@ internal class CustomerRepositoryTest {
         stripeRepository.stub {
             onBlocking {
                 detachPaymentMethod(
+                    productUsageTokens = any(),
+                    paymentMethodId = anyString(),
+                    requestOptions = any(),
+                )
+            }.doReturn(result)
+        }
+    }
+
+    private fun givenElementsDetachPaymentMethodReturns(
+        result: Result<PaymentMethod>
+    ) {
+        stripeRepository.stub {
+            onBlocking {
+                detachPaymentMethod(
+                    customerSessionClientSecret = any(),
                     productUsageTokens = any(),
                     paymentMethodId = anyString(),
                     requestOptions = any(),
