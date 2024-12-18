@@ -60,7 +60,8 @@ internal class WalletViewModel @Inject constructor(
             selectedItem = null,
             isProcessing = false,
             hasCompleted = false,
-            primaryButtonLabel = completePaymentButtonLabel(configuration.stripeIntent)
+            primaryButtonLabel = completePaymentButtonLabel(configuration.stripeIntent),
+            errorMessage = null
         )
     )
 
@@ -192,7 +193,8 @@ internal class WalletViewModel @Inject constructor(
                 is ConfirmationHandler.Result.Failed -> {
                     _uiState.update {
                         it.copy(
-                            errorMessage = result.message
+                            errorMessage = result.message,
+                            isProcessing = false
                         )
                     }
                 }

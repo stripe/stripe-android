@@ -24,7 +24,8 @@ internal class WalletScreenScreenshotTest {
                 selectedItem = null,
                 isProcessing = false,
                 hasCompleted = false,
-                primaryButtonLabel = primaryButtonLabel
+                primaryButtonLabel = primaryButtonLabel,
+                errorMessage = null
             )
         )
     }
@@ -37,7 +38,8 @@ internal class WalletScreenScreenshotTest {
                 selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails.firstOrNull(),
                 isProcessing = false,
                 hasCompleted = false,
-                primaryButtonLabel = primaryButtonLabel
+                primaryButtonLabel = primaryButtonLabel,
+                errorMessage = null
             )
         )
     }
@@ -50,7 +52,8 @@ internal class WalletScreenScreenshotTest {
                 selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails.firstOrNull(),
                 isProcessing = false,
                 hasCompleted = false,
-                primaryButtonLabel = primaryButtonLabel
+                primaryButtonLabel = primaryButtonLabel,
+                errorMessage = null
             ),
             isExpanded = true
         )
@@ -64,7 +67,8 @@ internal class WalletScreenScreenshotTest {
                 selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails.firstOrNull(),
                 isProcessing = false,
                 hasCompleted = false,
-                primaryButtonLabel = primaryButtonLabel
+                primaryButtonLabel = primaryButtonLabel,
+                errorMessage = null
             ),
             isExpanded = true
         )
@@ -78,7 +82,8 @@ internal class WalletScreenScreenshotTest {
                 selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails.firstOrNull(),
                 isProcessing = true,
                 hasCompleted = false,
-                primaryButtonLabel = primaryButtonLabel
+                primaryButtonLabel = primaryButtonLabel,
+                errorMessage = null
             ),
             isExpanded = true
         )
@@ -99,7 +104,8 @@ internal class WalletScreenScreenshotTest {
                 selectedItem = paymentDetailsList.firstOrNull(),
                 isProcessing = false,
                 hasCompleted = false,
-                primaryButtonLabel = primaryButtonLabel
+                primaryButtonLabel = primaryButtonLabel,
+                errorMessage = null
             ),
             isExpanded = true
         )
@@ -120,7 +126,8 @@ internal class WalletScreenScreenshotTest {
                 selectedItem = paymentDetailsList.firstOrNull(),
                 isProcessing = false,
                 hasCompleted = false,
-                primaryButtonLabel = primaryButtonLabel
+                primaryButtonLabel = primaryButtonLabel,
+                errorMessage = null
             ),
             isExpanded = true
         )
@@ -136,7 +143,8 @@ internal class WalletScreenScreenshotTest {
                 },
                 isProcessing = false,
                 hasCompleted = false,
-                primaryButtonLabel = primaryButtonLabel
+                primaryButtonLabel = primaryButtonLabel,
+                errorMessage = null
             ),
             isExpanded = true
         )

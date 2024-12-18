@@ -14,6 +14,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.account.LinkAccountManager
+import com.stripe.android.link.confirmation.FakeLinkConfirmationHandler
 import com.stripe.android.link.ui.PrimaryButtonTag
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.testing.FakeLogger
@@ -25,7 +26,6 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.mock
 
 @RunWith(AndroidJUnit4::class)
 internal class WalletScreenTest {
@@ -175,7 +175,7 @@ internal class WalletScreenTest {
             linkAccount = TestFactory.LINK_ACCOUNT,
             linkAccountManager = linkAccountManager,
             logger = FakeLogger(),
-            confirmationHandler = mock(),
+            linkConfirmationHandler = FakeLinkConfirmationHandler(),
             navigateAndClearStack = {},
             dismissWithResult = {}
         )
