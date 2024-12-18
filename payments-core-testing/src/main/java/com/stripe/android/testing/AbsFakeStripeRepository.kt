@@ -182,6 +182,15 @@ abstract class AbsFakeStripeRepository : StripeRepository {
         TODO("Not yet implemented")
     }
 
+    override suspend fun detachPaymentMethod(
+        customerSessionClientSecret: String,
+        productUsageTokens: Set<String>,
+        paymentMethodId: String,
+        requestOptions: ApiRequest.Options
+    ): Result<PaymentMethod> {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun getPaymentMethods(
         listPaymentMethodsParams: ListPaymentMethodsParams,
         productUsageTokens: Set<String>,
