@@ -24,7 +24,6 @@ import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutI
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
-import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
