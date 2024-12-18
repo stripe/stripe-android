@@ -20,11 +20,11 @@ class LinkActivityResultTest {
         val intent = Intent()
         intent.data = redirectUrl.toUri()
         val result = createLinkActivityResult(LinkForegroundActivity.RESULT_COMPLETE, intent)
-        assertThat(result).isInstanceOf(LinkActivityResult.Completed::class.java)
-        val completed = result as LinkActivityResult.Completed
-        assertThat(completed.paymentMethod.type?.code).isEqualTo("card")
-        assertThat(completed.paymentMethod.card?.last4).isEqualTo("0000")
-        assertThat(completed.paymentMethod.id).isEqualTo("pm_1NJeErLu5o3P18ZpmXpCtIrR")
+        assertThat(result).isInstanceOf(LinkActivityResult.PaymentMethodObtained::class.java)
+        val paymentMethodObtained = result as LinkActivityResult.PaymentMethodObtained
+        assertThat(paymentMethodObtained.paymentMethod.type?.code).isEqualTo("card")
+        assertThat(paymentMethodObtained.paymentMethod.card?.last4).isEqualTo("0000")
+        assertThat(paymentMethodObtained.paymentMethod.id).isEqualTo("pm_1NJeErLu5o3P18ZpmXpCtIrR")
     }
 
     @Test

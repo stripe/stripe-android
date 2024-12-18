@@ -1,6 +1,8 @@
 package com.stripe.android.link
 
 import android.app.Application
+import android.util.Log
+import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
@@ -19,17 +21,22 @@ import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.LinkAppBarState
+import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentsheet.R
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 internal class LinkActivityViewModel @Inject constructor(
     val activityRetainedComponent: NativeLinkComponent,
+    confirmationHandlerFactory: ConfirmationHandler.Factory,
     private val linkAccountManager: LinkAccountManager,
 ) : ViewModel(), DefaultLifecycleObserver {
+    val confirmationHandler: ConfirmationHandler
+
     private val _linkState = MutableStateFlow(
         value = LinkAppBarState(
             navigationIcon = R.drawable.stripe_link_close,
@@ -45,6 +52,35 @@ internal class LinkActivityViewModel @Inject constructor(
 
     var navController: NavHostController? = null
     var dismissWithResult: ((LinkActivityResult) -> Unit)? = null
+
+    init {
+        Log.d("TOLUWANI", "create new vm [${navController?.currentDestination?.route}]")
+        confirmationHandler = confirmationHandlerFactory.create(viewModelScope)
+        viewModelScope.launch {
+
+            listenToConfirmationState()
+        }
+    }
+
+    private suspend fun listenToConfirmationState() {
+        confirmationHandler.state
+            .filterIsInstance<ConfirmationHandler.State.Complete>()
+            .collect {
+                dismissWithResult?.invoke(LinkActivityResult.Completed)
+            }
+    }
+
+    /**
+     * Used to set up any dependencies that require a reference to the current Activity.
+     * Must be called from the Activity's `onCreate`.
+     */
+    fun registerFromActivity(
+        activityResultCaller: ActivityResultCaller,
+        lifecycleOwner: LifecycleOwner,
+    ) {
+        Log.d("TOLUWANI", "register")
+        confirmationHandler.register(activityResultCaller, lifecycleOwner)
+    }
 
     fun handleViewAction(action: LinkAction) {
         when (action) {
@@ -106,6 +142,7 @@ internal class LinkActivityViewModel @Inject constructor(
                 val handle: SavedStateHandle = savedStateHandle ?: createSavedStateHandle()
                 val app = this[APPLICATION_KEY] as Application
                 val args: NativeLinkArgs = getArgs(handle) ?: throw NoArgsException()
+                Log.d("TOLUWANI", "creating new component")
 
                 DaggerNativeLinkComponent
                     .builder()
@@ -113,6 +150,7 @@ internal class LinkActivityViewModel @Inject constructor(
                     .publishableKeyProvider { args.publishableKey }
                     .stripeAccountIdProvider { args.stripeAccountId }
                     .context(app)
+                    .savedStateHandle(handle)
                     .build()
                     .viewModel
             }

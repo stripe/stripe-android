@@ -3,7 +3,7 @@ package com.stripe.android.link
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistry
-import com.stripe.android.link.LinkActivityResult.Completed
+import com.stripe.android.link.LinkActivityResult.PaymentMethodObtained
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.injection.LinkAnalyticsComponent
 import javax.inject.Inject
@@ -12,7 +12,6 @@ import javax.inject.Singleton
 /**
  * Launcher for an Activity that will confirm a payment using Link.
  */
-@Singleton
 internal class LinkPaymentLauncher @Inject internal constructor(
     linkAnalyticsComponentBuilder: LinkAnalyticsComponent.Builder,
     private val linkActivityContract: LinkActivityContract,
@@ -32,7 +31,7 @@ internal class LinkPaymentLauncher @Inject internal constructor(
             linkActivityContract,
         ) { linkActivityResult ->
             analyticsHelper.onLinkResult(linkActivityResult)
-            if (linkActivityResult is Completed) {
+            if (linkActivityResult is PaymentMethodObtained) {
                 linkStore.markLinkAsUsed()
             }
             callback(linkActivityResult)
@@ -47,7 +46,7 @@ internal class LinkPaymentLauncher @Inject internal constructor(
             linkActivityContract
         ) { linkActivityResult ->
             analyticsHelper.onLinkResult(linkActivityResult)
-            if (linkActivityResult is Completed) {
+            if (linkActivityResult is PaymentMethodObtained) {
                 linkStore.markLinkAsUsed()
             }
             callback(linkActivityResult)
