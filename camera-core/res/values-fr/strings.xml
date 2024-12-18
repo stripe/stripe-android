@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="stripe_camera_permission_denied_message" description="Message shown to the user when camera permission is denied">Veuillez autoriser l\'accès à la caméra pour numériser votre carte</string>
+    <string name="stripe_camera_permission_denied_ok" description="Affirmative button shown as part of the permission denied dialog">OK</string>
+    <string name="stripe_camera_permission_denied_cancel" description="Negative button shown as part of the permission denied dialog">Annuler</string>
+
+    <string name="stripe_error_camera_title" description="Title of the dialog shown to the user when an error using the camera occurs">Problème de caméra</string>
+    <string name="stripe_error_camera_open" description="Message of the dialog shown to the user when an error starting the camera occurs">La caméra n\'a pas pu être activée</string>
+    <string name="stripe_error_camera_access" description="Message of the dialog shown to the user when an error accessing the camera occurs">L\'autorisation a été refusée pour activer la caméra</string>
+    <string name="stripe_error_camera_unsupported" description="Message of the dialog shown to the user when the camera is not supported">Cet appareil ne prend pas en charge les fonctionnalités requises de la caméra</string>
+    <string name="stripe_error_camera_acknowledge_button" description="Affirmative button shown as part of the camera error dialog">Fermer</string>
+</resources>
