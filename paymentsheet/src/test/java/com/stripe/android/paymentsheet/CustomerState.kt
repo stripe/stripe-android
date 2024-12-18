@@ -11,6 +11,7 @@ internal fun createCustomerState(
     return CustomerState(
         id = "cus_1",
         ephemeralKeySecret = "ek_1",
+        customerSessionClientSecret = "cuss_123",
         paymentMethods = paymentMethods,
         permissions = CustomerState.Permissions(
             canRemovePaymentMethods = isRemoveEnabled,

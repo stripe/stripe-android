@@ -335,6 +335,7 @@ internal class PaymentSheetViewModelTest {
             customer = CustomerState(
                 id = "cus_2",
                 ephemeralKeySecret = "ek_123",
+                customerSessionClientSecret = null,
                 paymentMethods = paymentMethods,
                 permissions = CustomerState.Permissions(
                     canRemovePaymentMethods = true,
@@ -382,6 +383,7 @@ internal class PaymentSheetViewModelTest {
             CustomerRepository.CustomerInfo(
                 id = "cus_2",
                 ephemeralKeySecret = "ek_123",
+                customerSessionClientSecret = null,
             )
         )
     }
