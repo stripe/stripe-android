@@ -725,6 +725,15 @@ private fun EmbeddedPicker(
     }
     Divider()
 
+    IncrementDecrementItem("floatingButtonSpacingDp", embeddedAppearance.floatingButtonSpacingDp) {
+        updateEmbedded(
+            embeddedAppearance.copy(
+                floatingButtonSpacingDp = it
+            )
+        )
+    }
+    Divider()
+
     AppearanceToggle("topSeparatorEnabled", embeddedAppearance.topSeparatorEnabled) {
         updateEmbedded(
             embeddedAppearance.copy(
