@@ -15,7 +15,7 @@ require_relative 'version_bump_pr_steps'
 
 @step_index = 1
 @is_dry_run = false
-@deploy_branch = 'master'
+@deploy_branch = 'release/20.52'
 
 def execute_steps(steps, step_index)
   step_count = steps.length
@@ -60,7 +60,6 @@ end.parse!
 steps = [
     # Prep for making changes
     method(:check_permissions),
-    method(:validate_version_number),
     method(:ensure_clean_repo),
     method(:pull_latest),
 
@@ -72,10 +71,6 @@ steps = [
 
     # Create a Github release
     method(:create_github_release),
-
-    # Do docs updates
-    method(:generate_dokka),
-    method(:update_pay_server_docs),
 ]
 
 execute_steps(steps, @step_index)
