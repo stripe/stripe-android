@@ -28,7 +28,6 @@ def create_version_bump_pr()
     update_read_me()
     update_stripe_sdk_version()
     update_gradle_properties()
-    update_changelog()
     update_version()
     execute_or_fail("git commit -m \"Bump version to #{@version}\"")
 
