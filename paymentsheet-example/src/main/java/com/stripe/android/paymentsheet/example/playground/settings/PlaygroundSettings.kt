@@ -450,7 +450,8 @@ internal class PlaygroundSettings private constructor(
             CardBrandAcceptanceSettingsDefinition,
             FeatureFlagSettingsDefinition(FeatureFlags.useNewUpdateCardScreen),
             FeatureFlagSettingsDefinition(FeatureFlags.instantDebitsIncentives),
-        )
+            FeatureFlagSettingsDefinition(FeatureFlags.defaultPaymentMethod),
+            )
 
         private val nonUiSettingDefinitions: List<PlaygroundSettingDefinition<*>> = listOf(
             AppearanceSettingsDefinition,
