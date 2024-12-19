@@ -11,16 +11,11 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.ViewActionRecorder
-import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentMethodFactory
-import com.stripe.android.ui.core.elements.TEST_TAG_DIALOG_CONFIRM_BUTTON
-import com.stripe.android.ui.core.elements.TEST_TAG_DIALOG_DISMISS_BUTTON
-import com.stripe.android.ui.core.elements.TEST_TAG_SIMPLE_DIALOG
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -32,12 +27,6 @@ import kotlin.test.Test
 class ManageScreenUITest {
 
     @get:Rule
-    val featureFlagTestRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.useNewUpdateCardScreen,
-        isEnabled = false
-    )
-
-    @get:Rule
     val composeRule = createComposeRule()
 
     @Test
@@ -46,7 +35,6 @@ class ManageScreenUITest {
             paymentMethods = displayableSavedPaymentMethods,
             currentSelection = null,
             isEditing = false,
-            canRemove = true,
             canEdit = true,
         )
     ) {
@@ -71,7 +59,6 @@ class ManageScreenUITest {
                 ),
                 currentSelection = null,
                 isEditing = false,
-                canRemove = true,
                 canEdit = true,
             )
         ) {
@@ -89,7 +76,6 @@ class ManageScreenUITest {
             paymentMethods = displayableSavedPaymentMethods,
             currentSelection = null,
             isEditing = true,
-            canRemove = true,
             canEdit = true,
         )
     ) {
@@ -111,7 +97,6 @@ class ManageScreenUITest {
                 paymentMethods = displayableSavedPaymentMethods,
                 currentSelection = null,
                 isEditing = false,
-                canRemove = true,
                 canEdit = true,
             )
         ) {
@@ -128,36 +113,14 @@ class ManageScreenUITest {
         }
 
     @Test
-    fun clickingPaymentMethod_inEditMode_doesNothing() =
+    fun clickingPaymentMethod_inEditMode_sendsUpdatePaymentMethodViewAction() =
         runScenario(
             initialState = ManageScreenInteractor.State(
                 paymentMethods = displayableSavedPaymentMethods,
                 currentSelection = null,
                 isEditing = true,
-                canRemove = true,
-                canEdit = true,
-            )
-        ) {
-            assertThat(viewActionRecorder.viewActions).isEmpty()
-
-            composeRule.onNodeWithTag(
-                "${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_${displayableSavedPaymentMethods[0].paymentMethod.id}"
-            ).performClick()
-
-            assertThat(viewActionRecorder.viewActions).isEmpty()
-        }
-
-    @Test
-    fun clickingPaymentMethod_inEditMode_useNewUpdateCardScreen_updatesCard() =
-        runScenario(
-            initialState = ManageScreenInteractor.State(
-                paymentMethods = displayableSavedPaymentMethods,
-                currentSelection = null,
-                isEditing = true,
-                canRemove = true,
                 canEdit = true,
             ),
-            enableUseNewUpdateScreen = true,
         ) {
             assertThat(viewActionRecorder.viewActions).isEmpty()
 
@@ -177,7 +140,6 @@ class ManageScreenUITest {
             paymentMethods = displayableSavedPaymentMethods,
             currentSelection = displayableSavedPaymentMethods[1],
             isEditing = false,
-            canRemove = true,
             canEdit = true,
         )
     ) {
@@ -194,122 +156,12 @@ class ManageScreenUITest {
             paymentMethods = displayableSavedPaymentMethods,
             currentSelection = null,
             isEditing = true,
-            canRemove = true,
-            canEdit = true,
-        )
-    ) {
-        getDeleteIcon(displayableSavedPaymentMethods[0]).assertExists()
-        getDeleteIcon(displayableSavedPaymentMethods[1]).assertExists()
-        getDeleteIcon(displayableSavedPaymentMethods[2]).assertExists()
-
-        getEditIcon(displayableSavedPaymentMethods[0]).assertDoesNotExist()
-        getEditIcon(displayableSavedPaymentMethods[1]).assertDoesNotExist()
-        getEditIcon(displayableSavedPaymentMethods[2]).assertExists()
-    }
-
-    @Test
-    fun correctIconsAreShown_usesNewUpdateScreen_inEditMode() = runScenario(
-        initialState = ManageScreenInteractor.State(
-            paymentMethods = displayableSavedPaymentMethods,
-            currentSelection = null,
-            isEditing = true,
-            canRemove = true,
             canEdit = true,
         ),
-        enableUseNewUpdateScreen = true,
     ) {
         getChevronIcon(displayableSavedPaymentMethods[0]).assertExists()
         getChevronIcon(displayableSavedPaymentMethods[1]).assertExists()
         getChevronIcon(displayableSavedPaymentMethods[2]).assertExists()
-    }
-
-    @Test
-    fun correctIconsAreShown_whenCanNotDelete() = runScenario(
-        initialState = ManageScreenInteractor.State(
-            paymentMethods = listOf(cbcEligibleSavedPaymentMethod),
-            currentSelection = null,
-            isEditing = true,
-            canRemove = false,
-            canEdit = true,
-        )
-    ) {
-        getDeleteIcon(cbcEligibleSavedPaymentMethod).assertDoesNotExist()
-        getEditIcon(cbcEligibleSavedPaymentMethod).assertExists()
-    }
-
-    @Test
-    fun clickingDeleteIcon_displaysDialog_deletesOnConfirm() = runScenario(
-        initialState = ManageScreenInteractor.State(
-            paymentMethods = displayableSavedPaymentMethods,
-            currentSelection = null,
-            isEditing = true,
-            canRemove = true,
-            canEdit = true,
-        )
-    ) {
-        getDeleteIcon(displayableSavedPaymentMethods[0]).assertExists()
-        getDeleteIcon(displayableSavedPaymentMethods[0]).performClick()
-
-        composeRule.onNodeWithTag(TEST_TAG_DIALOG_CONFIRM_BUTTON).performClick()
-
-        viewActionRecorder.consume(
-            ManageScreenInteractor.ViewAction.DeletePaymentMethod(displayableSavedPaymentMethods[0])
-        )
-        assertThat(viewActionRecorder.viewActions).isEmpty()
-        composeRule.onNodeWithTag(TEST_TAG_SIMPLE_DIALOG).assertDoesNotExist()
-    }
-
-    @Test
-    fun clickingDeleteIcon_displaysDialog_doesNothingOnDismiss() = runScenario(
-        initialState = ManageScreenInteractor.State(
-            paymentMethods = displayableSavedPaymentMethods,
-            currentSelection = null,
-            isEditing = true,
-            canRemove = true,
-            canEdit = true,
-        )
-    ) {
-        getDeleteIcon(displayableSavedPaymentMethods[0]).assertExists()
-        getDeleteIcon(displayableSavedPaymentMethods[0]).performClick()
-
-        composeRule.onNodeWithTag(TEST_TAG_DIALOG_DISMISS_BUTTON).performClick()
-
-        assertThat(viewActionRecorder.viewActions).isEmpty()
-        composeRule.onNodeWithTag(TEST_TAG_SIMPLE_DIALOG).assertDoesNotExist()
-    }
-
-    @Test
-    fun clickingEditDialog_editsPaymentMethod() = runScenario(
-        initialState = ManageScreenInteractor.State(
-            paymentMethods = displayableSavedPaymentMethods,
-            currentSelection = null,
-            isEditing = true,
-            canRemove = true,
-            canEdit = true,
-        )
-    ) {
-        val editablePaymentMethod = displayableSavedPaymentMethods[2]
-        getEditIcon(editablePaymentMethod).assertExists()
-        getEditIcon(editablePaymentMethod).performClick()
-
-        viewActionRecorder.consume(
-            ManageScreenInteractor.ViewAction.EditPaymentMethod(editablePaymentMethod)
-        )
-        assertThat(viewActionRecorder.viewActions).isEmpty()
-    }
-
-    private fun getDeleteIcon(paymentMethod: DisplayableSavedPaymentMethod): SemanticsNodeInteraction {
-        return composeRule.onNodeWithTag(
-            "${TEST_TAG_MANAGE_SCREEN_DELETE_ICON}_${paymentMethod.paymentMethod.id}",
-            useUnmergedTree = true,
-        )
-    }
-
-    private fun getEditIcon(paymentMethod: DisplayableSavedPaymentMethod): SemanticsNodeInteraction {
-        return composeRule.onNodeWithTag(
-            "${TEST_TAG_MANAGE_SCREEN_EDIT_ICON}_${paymentMethod.paymentMethod.id}",
-            useUnmergedTree = true,
-        )
     }
 
     private fun getChevronIcon(paymentMethod: DisplayableSavedPaymentMethod): SemanticsNodeInteraction {
@@ -330,14 +182,10 @@ class ManageScreenUITest {
                 )
             }
 
-    private val cbcEligibleSavedPaymentMethod = displayableSavedPaymentMethods[2]
-
     private fun runScenario(
         initialState: ManageScreenInteractor.State,
-        enableUseNewUpdateScreen: Boolean = false,
         block: Scenario.() -> Unit
     ) {
-        featureFlagTestRule.setEnabled(enableUseNewUpdateScreen)
         val viewActionRecorder = ViewActionRecorder<ManageScreenInteractor.ViewAction>()
 
         val manageScreenInteractor = FakeManageScreenInteractor(

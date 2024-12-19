@@ -64,7 +64,7 @@ internal fun UpdatePaymentMethodUI(interactor: UpdatePaymentMethodInteractor, mo
         interactor.displayableSavedPaymentMethod.isModifiable()
 
     Column(
-        modifier = modifier.padding(horizontal = horizontalPadding),
+        modifier = modifier.padding(horizontal = horizontalPadding).testTag(UPDATE_PM_SCREEN_TEST_TAG),
     ) {
         when (val savedPaymentMethod = interactor.displayableSavedPaymentMethod.savedPaymentMethod) {
             is SavedPaymentMethod.Card -> CardDetailsUI(
@@ -532,3 +532,4 @@ internal const val UPDATE_PM_US_BANK_ACCOUNT_TEST_TAG = "update_payment_method_b
 internal const val UPDATE_PM_SEPA_DEBIT_TEST_TAG = "update_payment_method_sepa_debit_ui"
 internal const val UPDATE_PM_CARD_TEST_TAG = "update_payment_method_card_ui"
 internal const val UPDATE_PM_DETAILS_SUBTITLE_TEST_TAG = "update_payment_method_subtitle"
+internal const val UPDATE_PM_SCREEN_TEST_TAG = "update_payment_method_screen"

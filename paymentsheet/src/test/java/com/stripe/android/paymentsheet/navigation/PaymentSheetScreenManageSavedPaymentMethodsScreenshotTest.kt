@@ -47,7 +47,6 @@ internal class PaymentSheetScreenManageSavedPaymentMethodsScreenshotTest {
                 paymentMethods = displayableSavedPaymentMethods,
                 currentSelection = displayableSavedPaymentMethods.first(),
                 isEditing = false,
-                canRemove = true,
                 canEdit = true,
             )
         )
@@ -67,7 +66,6 @@ internal class PaymentSheetScreenManageSavedPaymentMethodsScreenshotTest {
                 paymentMethods = displayableSavedPaymentMethods,
                 currentSelection = null,
                 isEditing = true,
-                canRemove = true,
                 canEdit = true,
             )
         )

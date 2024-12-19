@@ -16,7 +16,6 @@ internal class FakeManageScreenInteractor(
                 emptyList(),
                 currentSelection = null,
                 isEditing = false,
-                canRemove = true,
                 canEdit = true,
             )
         )

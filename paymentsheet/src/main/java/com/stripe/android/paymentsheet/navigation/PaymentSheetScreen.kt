@@ -24,8 +24,6 @@ import com.stripe.android.paymentsheet.ui.SavedPaymentMethodsTopContentPadding
 import com.stripe.android.paymentsheet.ui.SelectSavedPaymentMethodsInteractor
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodUI
-import com.stripe.android.paymentsheet.verticalmode.ManageOneSavedPaymentMethodInteractor
-import com.stripe.android.paymentsheet.verticalmode.ManageOneSavedPaymentMethodUI
 import com.stripe.android.paymentsheet.verticalmode.ManageScreenInteractor
 import com.stripe.android.paymentsheet.verticalmode.ManageScreenUI
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor
@@ -460,40 +458,6 @@ internal sealed interface PaymentSheetScreen {
 
         override fun close() {
             interactor.close()
-        }
-    }
-
-    class ManageOneSavedPaymentMethod(private val interactor: ManageOneSavedPaymentMethodInteractor) :
-        PaymentSheetScreen {
-        override val buyButtonState = stateFlowOf(
-            BuyButtonState(visible = false)
-        )
-        override val showsContinueButton: Boolean = false
-        override val topContentPadding: Dp = 0.dp
-        override val bottomContentPadding: Dp = 0.dp
-        override val walletsDividerSpacing: Dp = verticalModeWalletsDividerSpacing
-        override val showsMandates: Boolean = false
-
-        override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
-            return stateFlowOf(
-                PaymentSheetTopBarStateFactory.create(
-                    hasBackStack = true,
-                    isLiveMode = interactor.state.isLiveMode,
-                    editable = PaymentSheetTopBarState.Editable.Never,
-                )
-            )
-        }
-
-        override fun title(isCompleteFlow: Boolean, isWalletEnabled: Boolean): StateFlow<ResolvableString?> {
-            return stateFlowOf(R.string.stripe_paymentsheet_remove_pm_title.resolvableString)
-        }
-
-        override fun showsWalletsHeader(isCompleteFlow: Boolean): StateFlow<Boolean> =
-            stateFlowOf(false)
-
-        @Composable
-        override fun Content(modifier: Modifier) {
-            ManageOneSavedPaymentMethodUI(interactor = interactor)
         }
     }
 

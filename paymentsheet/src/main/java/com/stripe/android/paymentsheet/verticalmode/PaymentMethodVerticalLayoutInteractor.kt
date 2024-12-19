@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet.verticalmode
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
@@ -58,12 +57,10 @@ internal interface PaymentMethodVerticalLayoutInteractor {
         data class OnManageOneSavedPaymentMethod(val savedPaymentMethod: DisplayableSavedPaymentMethod) : ViewAction
         data class PaymentMethodSelected(val selectedPaymentMethodCode: String) : ViewAction
         data class SavedPaymentMethodSelected(val savedPaymentMethod: PaymentMethod) : ViewAction
-        data class EditPaymentMethod(val savedPaymentMethod: DisplayableSavedPaymentMethod) : ViewAction
     }
 
     enum class SavedPaymentMethodAction {
         NONE,
-        EDIT_CARD_BRAND,
         MANAGE_ONE,
         MANAGE_ALL,
     }
@@ -78,13 +75,11 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val formTypeForCode: (code: String) -> FormType,
     private val onFormFieldValuesChanged: (formValues: FormFieldValues, selectedPaymentMethodCode: String) -> Unit,
     private val transitionToManageScreen: () -> Unit,
-    private val transitionToManageOneSavedPaymentMethodScreen: () -> Unit,
     private val transitionToFormScreen: (selectedPaymentMethodCode: String) -> Unit,
     paymentMethods: StateFlow<List<PaymentMethod>>,
     private val mostRecentlySelectedSavedPaymentMethod: StateFlow<PaymentMethod?>,
     private val providePaymentMethodName: (PaymentMethodCode?) -> ResolvableString,
     private val canRemove: StateFlow<Boolean>,
-    private val onEditPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     private val onSelectSavedPaymentMethod: (PaymentMethod) -> Unit,
     private val walletsState: StateFlow<WalletsState?>,
     private val canShowWalletsInline: Boolean,
@@ -142,16 +137,6 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                     val screen = PaymentSheetScreen.ManageSavedPaymentMethods(interactor = interactor)
                     viewModel.navigationHandler.transitionToWithDelay(screen)
                 },
-                transitionToManageOneSavedPaymentMethodScreen = {
-                    val interactor = DefaultManageOneSavedPaymentMethodInteractor.create(
-                        viewModel = viewModel,
-                        paymentMethodMetadata = paymentMethodMetadata,
-                        customerStateHolder = customerStateHolder,
-                        savedPaymentMethodMutator = viewModel.savedPaymentMethodMutator,
-                    )
-                    val screen = PaymentSheetScreen.ManageOneSavedPaymentMethod(interactor = interactor)
-                    viewModel.navigationHandler.transitionToWithDelay(screen)
-                },
                 transitionToFormScreen = { selectedPaymentMethodCode ->
                     val interactor = DefaultVerticalModeFormInteractor.create(
                         selectedPaymentMethodCode = selectedPaymentMethodCode,
@@ -167,7 +152,6 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 mostRecentlySelectedSavedPaymentMethod = customerStateHolder.mostRecentlySelectedSavedPaymentMethod,
                 providePaymentMethodName = viewModel.savedPaymentMethodMutator.providePaymentMethodName,
                 canRemove = viewModel.customerStateHolder.canRemove,
-                onEditPaymentMethod = { viewModel.savedPaymentMethodMutator.modifyPaymentMethod(it.paymentMethod) },
                 onSelectSavedPaymentMethod = {
                     viewModel.handlePaymentMethodSelected(PaymentSelection.Saved(it))
                 },
@@ -381,10 +365,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         canRemove: Boolean,
         savedPaymentMethod: DisplayableSavedPaymentMethod?,
     ): PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction {
-        return if (savedPaymentMethod?.isModifiable() == true) {
-            // Edit screen handles both canRemove variants.
-            PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.EDIT_CARD_BRAND
-        } else if (canRemove) {
+        return if (savedPaymentMethod?.isModifiable() == true || canRemove) {
             PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ONE
         } else {
             PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.NONE
@@ -416,18 +397,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 transitionToManageScreen()
             }
             is ViewAction.OnManageOneSavedPaymentMethod -> {
-                if (FeatureFlags.useNewUpdateCardScreen.isEnabled) {
-                    onUpdatePaymentMethod(viewAction.savedPaymentMethod)
-                } else {
-                    transitionToManageOneSavedPaymentMethodScreen()
-                }
-            }
-            is ViewAction.EditPaymentMethod -> {
-                if (FeatureFlags.useNewUpdateCardScreen.isEnabled) {
-                    onUpdatePaymentMethod(viewAction.savedPaymentMethod)
-                } else {
-                    onEditPaymentMethod(viewAction.savedPaymentMethod)
-                }
+                onUpdatePaymentMethod(viewAction.savedPaymentMethod)
             }
         }
     }

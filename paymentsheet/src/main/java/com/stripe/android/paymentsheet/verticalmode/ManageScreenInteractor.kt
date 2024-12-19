@@ -32,14 +32,11 @@ internal interface ManageScreenInteractor {
         val paymentMethods: List<DisplayableSavedPaymentMethod>,
         val currentSelection: DisplayableSavedPaymentMethod?,
         val isEditing: Boolean,
-        val canRemove: Boolean,
         val canEdit: Boolean,
     )
 
     sealed class ViewAction {
         data class SelectPaymentMethod(val paymentMethod: DisplayableSavedPaymentMethod) : ViewAction()
-        data class DeletePaymentMethod(val paymentMethod: DisplayableSavedPaymentMethod) : ViewAction()
-        data class EditPaymentMethod(val paymentMethod: DisplayableSavedPaymentMethod) : ViewAction()
         data class UpdatePaymentMethod(val paymentMethod: DisplayableSavedPaymentMethod) : ViewAction()
         data object ToggleEdit : ViewAction()
     }
@@ -50,13 +47,10 @@ internal class DefaultManageScreenInteractor(
     private val paymentMethodMetadata: PaymentMethodMetadata,
     private val selection: StateFlow<PaymentSelection?>,
     private val editing: StateFlow<Boolean>,
-    canRemove: StateFlow<Boolean>,
     private val canEdit: StateFlow<Boolean>,
     private val toggleEdit: () -> Unit,
     private val providePaymentMethodName: (PaymentMethodCode?) -> ResolvableString,
     private val onSelectPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
-    private val onDeletePaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
-    private val onEditPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     private val onUpdatePaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     private val navigateBack: (withDelay: Boolean) -> Unit,
     override val isLiveMode: Boolean,
@@ -83,9 +77,8 @@ internal class DefaultManageScreenInteractor(
         displayableSavedPaymentMethods,
         selection,
         editing,
-        canRemove,
         canEdit,
-    ) { displayablePaymentMethods, paymentSelection, editing, canRemove, canEdit ->
+    ) { displayablePaymentMethods, paymentSelection, editing, canEdit ->
         val currentSelection = if (editing) {
             null
         } else {
@@ -96,7 +89,6 @@ internal class DefaultManageScreenInteractor(
             paymentMethods = displayablePaymentMethods,
             currentSelection = currentSelection,
             isEditing = editing,
-            canRemove = canRemove,
             canEdit = canEdit,
         )
     }
@@ -123,8 +115,6 @@ internal class DefaultManageScreenInteractor(
         when (viewAction) {
             is ManageScreenInteractor.ViewAction.SelectPaymentMethod ->
                 handlePaymentMethodSelected(viewAction.paymentMethod)
-            is ManageScreenInteractor.ViewAction.DeletePaymentMethod -> onDeletePaymentMethod(viewAction.paymentMethod)
-            is ManageScreenInteractor.ViewAction.EditPaymentMethod -> onEditPaymentMethod(viewAction.paymentMethod)
             is ManageScreenInteractor.ViewAction.UpdatePaymentMethod -> onUpdatePaymentMethod(viewAction.paymentMethod)
             ManageScreenInteractor.ViewAction.ToggleEdit -> toggleEdit()
         }
@@ -158,7 +148,6 @@ internal class DefaultManageScreenInteractor(
                 selection = viewModel.selection,
                 editing = savedPaymentMethodMutator.editing,
                 canEdit = savedPaymentMethodMutator.canEdit,
-                canRemove = customerStateHolder.canRemove,
                 toggleEdit = savedPaymentMethodMutator::toggleEditing,
                 providePaymentMethodName = savedPaymentMethodMutator.providePaymentMethodName,
                 onSelectPaymentMethod = {
@@ -166,8 +155,6 @@ internal class DefaultManageScreenInteractor(
                     viewModel.updateSelection(savedPmSelection)
                     viewModel.eventReporter.onSelectPaymentOption(savedPmSelection)
                 },
-                onDeletePaymentMethod = { savedPaymentMethodMutator.removePaymentMethod(it.paymentMethod) },
-                onEditPaymentMethod = { savedPaymentMethodMutator.modifyPaymentMethod(it.paymentMethod) },
                 onUpdatePaymentMethod = { savedPaymentMethodMutator.updatePaymentMethod(it) },
                 navigateBack = { withDelay ->
                     if (withDelay) {

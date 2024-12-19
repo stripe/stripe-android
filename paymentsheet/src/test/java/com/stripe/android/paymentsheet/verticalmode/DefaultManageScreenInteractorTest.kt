@@ -105,39 +105,6 @@ class DefaultManageScreenInteractorTest {
     }
 
     @Test
-    fun cannotRemoveButCanEdit_hidesDeleteButton() {
-        var backPressed = false
-        fun handleBackPressed(withDelay: Boolean) {
-            assertThat(withDelay).isTrue()
-            assertThat(backPressed).isFalse()
-            backPressed = true
-        }
-
-        val paymentMethods = PaymentMethodFactory.cards(1)
-
-        runScenario(
-            initialPaymentMethods = paymentMethods,
-            currentSelection = PaymentSelection.Saved(paymentMethods[0]),
-            isEditing = true,
-            handleBackPressed = ::handleBackPressed,
-        ) {
-            assertThat(backPressed).isFalse()
-
-            paymentMethodsSource.value = paymentMethods
-            canEditSource.value = true
-            canRemoveSource.value = false
-
-            assertThat(backPressed).isFalse()
-
-            interactor.state.test {
-                awaitItem().run {
-                    assertThat(canRemove).isFalse()
-                }
-            }
-        }
-    }
-
-    @Test
     fun cannotRemoveOrEdit_removesAllButLastPaymentMethod_navsBackWhenEditingFinishes() {
         var backPressed = false
         fun handleBackPressed(withDelay: Boolean) {
@@ -305,17 +272,14 @@ class DefaultManageScreenInteractorTest {
             selection = selection,
             editing = editing,
             canEdit = canEdit,
-            canRemove = canRemove,
             toggleEdit = toggleEdit,
             providePaymentMethodName = { (it ?: "Missing name").resolvableString },
             onSelectPaymentMethod = onSelectPaymentMethod,
-            onDeletePaymentMethod = { notImplemented() },
-            onEditPaymentMethod = { notImplemented() },
             onUpdatePaymentMethod = { notImplemented() },
             navigateBack = handleBackPressed,
-            dispatcher = dispatcher,
             isLiveMode = true,
-            defaultPaymentMethodId = defaultPaymentMethodId
+            defaultPaymentMethodId = defaultPaymentMethodId,
+            dispatcher = dispatcher
         )
 
         TestParams(
