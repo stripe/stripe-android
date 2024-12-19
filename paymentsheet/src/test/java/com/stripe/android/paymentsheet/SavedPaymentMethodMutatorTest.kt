@@ -30,155 +30,6 @@ import org.mockito.Mockito.mock
 
 class SavedPaymentMethodMutatorTest {
     @Test
-    fun `canRemove is correct when no payment methods for customer`() = runScenario {
-        savedPaymentMethodMutator.canRemove.test {
-            assertThat(awaitItem()).isFalse()
-
-            customerStateHolder.setCustomerState(
-                createCustomerState(
-                    isRemoveEnabled = true,
-                    canRemoveLastPaymentMethod = true,
-                    paymentMethods = listOf()
-                )
-            )
-
-            // Should still be false so expect no more events
-            expectNoEvents()
-        }
-    }
-
-    @Test
-    fun `canRemove is correct when one payment method & can remove last payment method`() =
-        runScenario {
-            savedPaymentMethodMutator.canRemove.test {
-                assertThat(awaitItem()).isFalse()
-
-                customerStateHolder.setCustomerState(
-                    createCustomerState(
-                        isRemoveEnabled = true,
-                        canRemoveLastPaymentMethod = true,
-                        paymentMethods = PaymentMethodFactory.cards(1),
-                    )
-                )
-
-                assertThat(awaitItem()).isTrue()
-
-                ensureAllEventsConsumed()
-            }
-        }
-
-    @Test
-    fun `canRemove is correct when one payment method & cannot remove last payment method`() =
-        runScenario {
-            savedPaymentMethodMutator.canRemove.test {
-                assertThat(awaitItem()).isFalse()
-
-                customerStateHolder.setCustomerState(
-                    createCustomerState(
-                        isRemoveEnabled = true,
-                        canRemoveLastPaymentMethod = false,
-                        paymentMethods = PaymentMethodFactory.cards(1),
-                    )
-                )
-
-                // Should still be false so expect no more events
-                expectNoEvents()
-            }
-        }
-
-    @Test
-    fun `canRemove is correct when multiple payment methods & can remove last payment method`() =
-        runScenario {
-            savedPaymentMethodMutator.canRemove.test {
-                assertThat(awaitItem()).isFalse()
-
-                customerStateHolder.setCustomerState(
-                    createCustomerState(
-                        isRemoveEnabled = true,
-                        canRemoveLastPaymentMethod = true,
-                        paymentMethods = PaymentMethodFactory.cards(2),
-                    )
-                )
-
-                assertThat(awaitItem()).isTrue()
-            }
-        }
-
-    @Test
-    fun `canRemove is correct when multiple payment methods & cannot remove last payment method`() =
-        runScenario {
-            savedPaymentMethodMutator.canRemove.test {
-                assertThat(awaitItem()).isFalse()
-
-                customerStateHolder.setCustomerState(
-                    createCustomerState(
-                        isRemoveEnabled = true,
-                        canRemoveLastPaymentMethod = false,
-                        paymentMethods = PaymentMethodFactory.cards(2),
-                    )
-                )
-
-                assertThat(awaitItem()).isTrue()
-            }
-        }
-
-    @Test
-    fun `canRemove is correct when has remove permissions & can remove last payment method`() =
-        runScenario {
-            savedPaymentMethodMutator.canRemove.test {
-                assertThat(awaitItem()).isFalse()
-
-                customerStateHolder.setCustomerState(
-                    createCustomerState(
-                        paymentMethods = PaymentMethodFactory.cards(1),
-                        isRemoveEnabled = true,
-                        canRemoveLastPaymentMethod = true,
-                    )
-                )
-
-                assertThat(awaitItem()).isTrue()
-
-                ensureAllEventsConsumed()
-            }
-        }
-
-    @Test
-    fun `canRemove is correct when has remove permissions & canRemoveLastPaymentMethod is false`() =
-        runScenario {
-            savedPaymentMethodMutator.canRemove.test {
-                assertThat(awaitItem()).isFalse()
-
-                customerStateHolder.setCustomerState(
-                    createCustomerState(
-                        paymentMethods = PaymentMethodFactory.cards(1),
-                        isRemoveEnabled = true,
-                        canRemoveLastPaymentMethod = false,
-                    )
-                )
-
-                ensureAllEventsConsumed()
-            }
-        }
-
-    @Test
-    fun `canRemove is correct when does not remove permissions & canRemoveLastPaymentMethod is true`() =
-        runScenario {
-            savedPaymentMethodMutator.canRemove.test {
-                assertThat(awaitItem()).isFalse()
-
-                customerStateHolder.setCustomerState(
-                    createCustomerState(
-                        paymentMethods = PaymentMethodFactory.cards(1),
-                        isRemoveEnabled = false,
-                        canRemoveLastPaymentMethod = true,
-                    )
-                )
-
-                ensureAllEventsConsumed()
-            }
-        }
-
-    @Test
     fun `canEdit is correct when no payment methods`() = runScenario {
         savedPaymentMethodMutator.canEdit.test {
             assertThat(awaitItem()).isFalse()
@@ -730,23 +581,6 @@ class SavedPaymentMethodMutatorTest {
         calledUpdate.ensureAllEventsConsumed()
     }
 
-    private fun createCustomerState(
-        paymentMethods: List<PaymentMethod>,
-        isRemoveEnabled: Boolean,
-        canRemoveLastPaymentMethod: Boolean,
-    ): CustomerState {
-        return CustomerState(
-            id = "cus_1",
-            ephemeralKeySecret = "ek_1",
-            paymentMethods = paymentMethods,
-            permissions = CustomerState.Permissions(
-                canRemovePaymentMethods = isRemoveEnabled,
-                canRemoveDuplicates = true,
-                canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
-            )
-        )
-    }
-
     private fun removeDuplicatesTest(shouldRemoveDuplicates: Boolean) {
         val repository = FakeCustomerRepository()
 
@@ -755,12 +589,14 @@ class SavedPaymentMethodMutatorTest {
                 CustomerState(
                     id = "cus_1",
                     ephemeralKeySecret = "ek_1",
+                    customerSessionClientSecret = null,
                     paymentMethods = listOf(),
                     permissions = CustomerState.Permissions(
                         canRemovePaymentMethods = true,
                         canRemoveLastPaymentMethod = true,
                         canRemoveDuplicates = shouldRemoveDuplicates,
-                    )
+                    ),
+                    defaultPaymentMethodId = null
                 )
             )
 
@@ -776,6 +612,7 @@ class SavedPaymentMethodMutatorTest {
                     customerInfo = CustomerRepository.CustomerInfo(
                         id = "cus_1",
                         ephemeralKeySecret = "ek_1",
+                        customerSessionClientSecret = null,
                     ),
                     canRemoveDuplicates = shouldRemoveDuplicates,
                 )

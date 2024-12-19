@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.AnnotatedString
+import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
@@ -18,9 +19,12 @@ import com.stripe.android.common.ui.DelegateDrawable
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
+import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
 import com.stripe.android.paymentelement.embedded.EmbeddedConfirmationHelper
 import com.stripe.android.paymentelement.embedded.SharedPaymentElementViewModel
+import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
+import com.stripe.android.paymentsheet.ExternalPaymentMethodInterceptor
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.uicore.image.rememberDrawablePainter
@@ -73,6 +77,41 @@ class EmbeddedPaymentElement private constructor(
      */
     fun confirm() {
         embeddedConfirmationHelper.confirm()
+    }
+
+    /**
+     * Sets the current [paymentOption] to `null`.
+     */
+    fun clearPaymentOption() {
+        sharedViewModel.clearPaymentOption()
+    }
+
+    /**
+     * Builder used in the creation of the [EmbeddedPaymentElement].
+     *
+     * Creation can be completed with [rememberEmbeddedPaymentElement].
+     */
+    @ExperimentalEmbeddedPaymentElementApi
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    class Builder(
+        /**
+         * Called when the customer confirms the payment or setup.
+         */
+        internal val createIntentCallback: CreateIntentCallback,
+        /**
+         * Called with the result of the payment.
+         */
+        internal val resultCallback: ResultCallback,
+    ) {
+        internal var externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler? = null
+            private set
+
+        /**
+         * Called when a user confirms payment for an external payment method.
+         */
+        fun externalPaymentMethodConfirmHandler(handler: ExternalPaymentMethodConfirmHandler) = apply {
+            this.externalPaymentMethodConfirmHandler = handler
+        }
     }
 
     /** Configuration for [EmbeddedPaymentElement] **/
@@ -454,13 +493,21 @@ class EmbeddedPaymentElement private constructor(
                 owner = viewModelStoreOwner,
                 factory = SharedPaymentElementViewModel.Factory(statusBarColor)
             )[SharedPaymentElementViewModel::class.java]
+            lifecycleOwner.lifecycle.addObserver(
+                object : DefaultLifecycleObserver {
+                    override fun onDestroy(owner: LifecycleOwner) {
+                        IntentConfirmationInterceptor.createIntentCallback = null
+                        ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = null
+                    }
+                }
+            )
             return EmbeddedPaymentElement(
                 embeddedConfirmationHelper = EmbeddedConfirmationHelper(
                     confirmationHandler = sharedViewModel.confirmationHandler,
                     resultCallback = resultCallback,
                     activityResultCaller = activityResultCaller,
                     lifecycleOwner = lifecycleOwner,
-                    confirmationStateSupplier = { sharedViewModel.confirmationState }
+                    confirmationStateSupplier = { sharedViewModel.confirmationStateHolder.state },
                 ),
                 sharedViewModel = sharedViewModel,
             )

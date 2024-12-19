@@ -2,7 +2,6 @@ package com.stripe.android.customersheet
 
 import android.app.Application
 import androidx.compose.ui.test.assertIsEnabled
-import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.performClick
@@ -121,7 +120,7 @@ class CustomerSessionCustomerSheetActivityTest {
         }
 
     @Test
-    fun `When multiple PMs with CBC card but no remove permissions, should allow editing CBC card and disable rest`() =
+    fun `When multiple PMs with CBC card but no remove permissions, should allow editing all`() =
         runTest(
             cards = listOf(
                 PaymentMethodFactory.card(last4 = "4242", addCbcNetworks = true),
@@ -132,7 +131,9 @@ class CustomerSessionCustomerSheetActivityTest {
         ) {
             savedPaymentMethodsPage.onEditButton().performClick()
 
-            savedPaymentMethodsPage.onSavedPaymentMethod(last4 = "5544").assertIsNotEnabled()
+            val nonCbcCard = savedPaymentMethodsPage.onSavedPaymentMethod(last4 = "5544")
+            nonCbcCard.assertIsEnabled()
+            nonCbcCard.assertHasModifyBadge()
 
             val cbcCard = savedPaymentMethodsPage.onSavedPaymentMethod(last4 = "4242")
 
@@ -262,7 +263,8 @@ class CustomerSessionCustomerSheetActivityTest {
         allowsRemovalOfLastSavedPaymentMethod = true,
     ) {
         savedPaymentMethodsPage.onEditButton().performClick()
-        savedPaymentMethodsPage.onRemoveBadgeFor(last4 = "4242").performClick()
+        savedPaymentMethodsPage.onModifyBadgeFor(last4 = "4242").performClick()
+        savedPaymentMethodsPage.clickRemoveButton()
 
         enqueuePaymentMethods(
             cards = listOf(
@@ -460,7 +462,7 @@ class CustomerSessionCustomerSheetActivityTest {
         networkRule.enqueue(
             host("api.stripe.com"),
             method("POST"),
-            path("/v1/payment_methods/$id/detach")
+            path("/v1/elements/payment_methods/$id/detach")
         ) { response ->
             response.createPaymentMethodDetachResponse(id = id)
         }

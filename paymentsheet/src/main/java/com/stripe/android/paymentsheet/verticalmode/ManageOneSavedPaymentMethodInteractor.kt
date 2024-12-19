@@ -30,11 +30,13 @@ internal class DefaultManageOneSavedPaymentMethodInteractor(
     providePaymentMethodName: (PaymentMethodCode?) -> ResolvableString,
     private val onDeletePaymentMethod: (PaymentMethod) -> Unit,
     private val navigateBack: () -> Unit,
+    private val defaultPaymentMethodId: String?,
 ) : ManageOneSavedPaymentMethodInteractor {
     override val state = ManageOneSavedPaymentMethodInteractor.State(
         paymentMethod = paymentMethod.toDisplayableSavedPaymentMethod(
             providePaymentMethodName,
             paymentMethodMetadata,
+            defaultPaymentMethodId
         ),
         isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
     )
@@ -55,12 +57,15 @@ internal class DefaultManageOneSavedPaymentMethodInteractor(
             customerStateHolder: CustomerStateHolder,
             savedPaymentMethodMutator: SavedPaymentMethodMutator,
         ): ManageOneSavedPaymentMethodInteractor {
+            val defaultPaymentMethodId = savedPaymentMethodMutator.defaultPaymentMethodId.value
+                ?: customerStateHolder.customer.value?.defaultPaymentMethodId
             return DefaultManageOneSavedPaymentMethodInteractor(
                 paymentMethod = customerStateHolder.paymentMethods.value.first(),
                 paymentMethodMetadata = paymentMethodMetadata,
                 providePaymentMethodName = savedPaymentMethodMutator.providePaymentMethodName,
                 onDeletePaymentMethod = savedPaymentMethodMutator::removePaymentMethod,
                 navigateBack = viewModel::handleBackPressed,
+                defaultPaymentMethodId = defaultPaymentMethodId
             )
         }
     }

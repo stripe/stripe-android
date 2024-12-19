@@ -60,8 +60,9 @@ internal class CustomerRepositoryTest {
 
             repository.getPaymentMethods(
                 CustomerRepository.CustomerInfo(
-                    "customer_id",
-                    "ephemeral_key"
+                    id = "customer_id",
+                    ephemeralKeySecret = "ephemeral_key",
+                    customerSessionClientSecret = null,
                 ),
                 listOf(PaymentMethod.Type.Card),
                 true,
@@ -91,8 +92,9 @@ internal class CustomerRepositoryTest {
 
             repository.getPaymentMethods(
                 CustomerRepository.CustomerInfo(
-                    "customer_id",
-                    "ephemeral_key"
+                    id = "customer_id",
+                    ephemeralKeySecret = "ephemeral_key",
+                    customerSessionClientSecret = null,
                 ),
                 listOf(PaymentMethod.Type.Card, PaymentMethod.Type.PayPal),
                 true,
@@ -166,8 +168,9 @@ internal class CustomerRepositoryTest {
 
             val result = repository.getPaymentMethods(
                 CustomerRepository.CustomerInfo(
-                    "customer_id",
-                    "ephemeral_key"
+                    id = "customer_id",
+                    ephemeralKeySecret = "ephemeral_key",
+                    customerSessionClientSecret = null,
                 ),
                 listOf(PaymentMethod.Type.Card),
                 true,
@@ -225,8 +228,9 @@ internal class CustomerRepositoryTest {
 
         val result = repository.getPaymentMethods(
             CustomerRepository.CustomerInfo(
-                "customer_id",
-                "ephemeral_key"
+                id = "customer_id",
+                ephemeralKeySecret = "ephemeral_key",
+                customerSessionClientSecret = null,
             ),
             listOf(PaymentMethod.Type.Card),
             true,
@@ -246,8 +250,9 @@ internal class CustomerRepositoryTest {
 
             val result = repository.getPaymentMethods(
                 CustomerRepository.CustomerInfo(
-                    "customer_id",
-                    "ephemeral_key"
+                    id = "customer_id",
+                    ephemeralKeySecret = "ephemeral_key",
+                    customerSessionClientSecret = null,
                 ),
                 listOf(PaymentMethod.Type.Card),
                 silentlyFail = true,
@@ -267,8 +272,9 @@ internal class CustomerRepositoryTest {
 
             val result = repository.getPaymentMethods(
                 CustomerRepository.CustomerInfo(
-                    "customer_id",
-                    "ephemeral_key"
+                    id = "customer_id",
+                    ephemeralKeySecret = "ephemeral_key",
+                    customerSessionClientSecret = null,
                 ),
                 listOf(PaymentMethod.Type.Card),
                 silentlyFail = false,
@@ -295,8 +301,9 @@ internal class CustomerRepositoryTest {
             // Requesting 3 payment method types, the first request will fail
             val result = repository.getPaymentMethods(
                 CustomerRepository.CustomerInfo(
-                    "customer_id",
-                    "ephemeral_key"
+                    id = "customer_id",
+                    ephemeralKeySecret = "ephemeral_key",
+                    customerSessionClientSecret = null,
                 ),
                 listOf(PaymentMethod.Type.Card, PaymentMethod.Type.Card, PaymentMethod.Type.Card),
                 silentlyFail = true,
@@ -330,8 +337,9 @@ internal class CustomerRepositoryTest {
             // Requesting 3 payment method types, the first request will fail
             val result = repository.getPaymentMethods(
                 CustomerRepository.CustomerInfo(
-                    "customer_id",
-                    "ephemeral_key"
+                    id = "customer_id",
+                    ephemeralKeySecret = "ephemeral_key",
+                    customerSessionClientSecret = null,
                 ),
                 listOf(PaymentMethod.Type.Card, PaymentMethod.Type.Card, PaymentMethod.Type.Card),
                 silentlyFail = false,
@@ -359,8 +367,9 @@ internal class CustomerRepositoryTest {
 
             val result = repository.detachPaymentMethod(
                 customerInfo = CustomerRepository.CustomerInfo(
-                    "customer_id",
-                    "ephemeral_key"
+                    id = "customer_id",
+                    ephemeralKeySecret = "ephemeral_key",
+                    customerSessionClientSecret = null,
                 ),
                 paymentMethodId = "payment_method_id",
                 canRemoveDuplicates = false,
@@ -378,14 +387,37 @@ internal class CustomerRepositoryTest {
 
             val result = repository.detachPaymentMethod(
                 customerInfo = CustomerRepository.CustomerInfo(
-                    "customer_id",
-                    "ephemeral_key"
+                    id = "customer_id",
+                    ephemeralKeySecret = "ephemeral_key",
+                    customerSessionClientSecret = null,
                 ),
                 paymentMethodId = "payment_method_id",
                 canRemoveDuplicates = false,
             )
 
             assertThat(result.isFailure).isTrue()
+        }
+
+    @Test
+    fun `detachPaymentMethod() should call elements endpoint when customerSessionClientSecret exists`() =
+        runTest {
+            givenElementsDetachPaymentMethodReturns(
+                Result.success(
+                    PaymentMethodFixtures.CARD_PAYMENT_METHOD
+                )
+            )
+
+            val result = repository.detachPaymentMethod(
+                customerInfo = CustomerRepository.CustomerInfo(
+                    id = "customer_id",
+                    ephemeralKeySecret = "ephemeral_key",
+                    customerSessionClientSecret = "cuss_123",
+                ),
+                paymentMethodId = "payment_method_id",
+                canRemoveDuplicates = false,
+            )
+
+            assertThat(result.getOrNull()).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         }
 
     @Test
@@ -511,8 +543,9 @@ internal class CustomerRepositoryTest {
 
             val result = repository.attachPaymentMethod(
                 CustomerRepository.CustomerInfo(
-                    "customer_id",
-                    "ephemeral_key"
+                    id = "customer_id",
+                    ephemeralKeySecret = "ephemeral_key",
+                    customerSessionClientSecret = null,
                 ),
                 "payment_method_id"
             )
@@ -530,8 +563,9 @@ internal class CustomerRepositoryTest {
 
             val result = repository.attachPaymentMethod(
                 CustomerRepository.CustomerInfo(
-                    "customer_id",
-                    "ephemeral_key"
+                    id = "customer_id",
+                    ephemeralKeySecret = "ephemeral_key",
+                    customerSessionClientSecret = null,
                 ),
                 "payment_method_id"
             )
@@ -547,8 +581,9 @@ internal class CustomerRepositoryTest {
 
             val result = repository.updatePaymentMethod(
                 CustomerRepository.CustomerInfo(
-                    "customer_id",
-                    "ephemeral_key"
+                    id = "customer_id",
+                    ephemeralKeySecret = "ephemeral_key",
+                    customerSessionClientSecret = null,
                 ),
                 paymentMethodId = "payment_method_id",
                 params = PaymentMethodUpdateParams.createCard()
@@ -565,8 +600,9 @@ internal class CustomerRepositoryTest {
 
             val result = repository.updatePaymentMethod(
                 CustomerRepository.CustomerInfo(
-                    "customer_id",
-                    "ephemeral_key"
+                    id = "customer_id",
+                    ephemeralKeySecret = "ephemeral_key",
+                    customerSessionClientSecret = null,
                 ),
                 paymentMethodId = "payment_method_id",
                 params = PaymentMethodUpdateParams.createCard()
@@ -621,6 +657,21 @@ internal class CustomerRepositoryTest {
         stripeRepository.stub {
             onBlocking {
                 detachPaymentMethod(
+                    productUsageTokens = any(),
+                    paymentMethodId = anyString(),
+                    requestOptions = any(),
+                )
+            }.doReturn(result)
+        }
+    }
+
+    private fun givenElementsDetachPaymentMethodReturns(
+        result: Result<PaymentMethod>
+    ) {
+        stripeRepository.stub {
+            onBlocking {
+                detachPaymentMethod(
+                    customerSessionClientSecret = any(),
                     productUsageTokens = any(),
                     paymentMethodId = anyString(),
                     requestOptions = any(),
@@ -710,7 +761,8 @@ internal class CustomerRepositoryTest {
     private companion object {
         val FAKE_CUSTOMER_INFO = CustomerRepository.CustomerInfo(
             id = "customer_id",
-            ephemeralKeySecret = "ek_123"
+            ephemeralKeySecret = "ek_123",
+            customerSessionClientSecret = null,
         )
     }
 }

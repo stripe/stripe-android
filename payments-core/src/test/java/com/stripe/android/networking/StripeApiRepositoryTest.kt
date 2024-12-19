@@ -198,6 +198,18 @@ internal class StripeApiRepositoryTest {
     }
 
     @Test
+    fun testGetElementsDetachPaymentMethodUrl() {
+        val paymentMethodId = "pm_1ETDEa2eZvKYlo2CN5828c52"
+        val detachUrl = stripeApiRepository.getElementsDetachPaymentMethodUrl(paymentMethodId)
+        val expectedUrl = arrayOf(
+            "https://api.stripe.com/v1/elements/payment_methods/",
+            paymentMethodId,
+            "/detach"
+        ).joinToString("")
+        assertThat(detachUrl).isEqualTo(expectedUrl)
+    }
+
+    @Test
     fun testGetPaymentMethodsUrl() {
         assertThat(StripeApiRepository.paymentMethodsUrl)
             .isEqualTo("https://api.stripe.com/v1/payment_methods")

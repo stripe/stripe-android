@@ -90,6 +90,7 @@ class CustomerSessionPaymentMethodDataSourceTest {
                         customerId = "cus_1",
                         ephemeralKey = "ek_123",
                         expiresAt = 999999,
+                        customerSessionClientSecret = "cuss_123",
                     )
                 )
             )
@@ -173,6 +174,7 @@ class CustomerSessionPaymentMethodDataSourceTest {
                         customerId = "cus_1",
                         ephemeralKey = "ek_123",
                         expiresAt = 999999,
+                        customerSessionClientSecret = "cuss_123",
                     )
                 )
             )

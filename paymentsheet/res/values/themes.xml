@@ -37,4 +37,11 @@
         <item name="colorPrimary">@color/stripe_paymentsheet_form</item>
         <item name="colorAccent">@color/stripe_paymentsheet_form</item>
     </style>
+
+    <style name="StripeLinkBaseTheme" parent="@android:style/Theme.Translucent">
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowBackground">@color/stripe_link_window_background</item>
+        <item name="windowNoTitle">true</item>
+    </style>
 </resources>

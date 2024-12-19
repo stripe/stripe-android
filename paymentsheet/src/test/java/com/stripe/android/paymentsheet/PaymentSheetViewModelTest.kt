@@ -312,6 +312,7 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
+    @Suppress("LongMethod")
     fun `modifyPaymentMethod should use loaded customer info when modifying payment methods`() = runTest {
         val paymentMethods = listOf(CARD_WITH_NETWORKS_PAYMENT_METHOD)
 
@@ -334,12 +335,14 @@ internal class PaymentSheetViewModelTest {
             customer = CustomerState(
                 id = "cus_2",
                 ephemeralKeySecret = "ek_123",
+                customerSessionClientSecret = null,
                 paymentMethods = paymentMethods,
                 permissions = CustomerState.Permissions(
                     canRemovePaymentMethods = true,
                     canRemoveLastPaymentMethod = true,
                     canRemoveDuplicates = false,
                 ),
+                defaultPaymentMethodId = null
             ),
             customerRepository = customerRepository
         )
@@ -380,6 +383,7 @@ internal class PaymentSheetViewModelTest {
             CustomerRepository.CustomerInfo(
                 id = "cus_2",
                 ephemeralKeySecret = "ek_123",
+                customerSessionClientSecret = null,
             )
         )
     }

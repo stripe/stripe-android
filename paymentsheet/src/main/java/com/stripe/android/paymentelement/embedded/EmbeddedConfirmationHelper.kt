@@ -4,13 +4,10 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.common.model.asCommonConfiguration
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
-import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.coroutines.launch
 
 @ExperimentalEmbeddedPaymentElementApi
@@ -19,7 +16,7 @@ internal class EmbeddedConfirmationHelper(
     private val resultCallback: EmbeddedPaymentElement.ResultCallback,
     private val activityResultCaller: ActivityResultCaller,
     private val lifecycleOwner: LifecycleOwner,
-    private val confirmationStateSupplier: () -> State?,
+    private val confirmationStateSupplier: () -> EmbeddedConfirmationStateHolder.State?,
 ) {
     init {
         confirmationHandler.register(
@@ -50,25 +47,18 @@ internal class EmbeddedConfirmationHelper(
     }
 
     private fun confirmationArgs(): ConfirmationHandler.Args? {
-        val loadedState = confirmationStateSupplier() ?: return null
-        val confirmationOption = loadedState.selection?.toConfirmationOption(
-            configuration = loadedState.configuration.asCommonConfiguration(),
+        val confirmationState = confirmationStateSupplier() ?: return null
+        val confirmationOption = confirmationState.selection?.toConfirmationOption(
+            configuration = confirmationState.configuration.asCommonConfiguration(),
             linkConfiguration = null,
         ) ?: return null
 
         return ConfirmationHandler.Args(
-            intent = loadedState.paymentMethodMetadata.stripeIntent,
+            intent = confirmationState.paymentMethodMetadata.stripeIntent,
             confirmationOption = confirmationOption,
-            initializationMode = loadedState.initializationMode,
-            appearance = loadedState.configuration.appearance,
-            shippingDetails = loadedState.configuration.shippingDetails,
+            initializationMode = confirmationState.initializationMode,
+            appearance = confirmationState.configuration.appearance,
+            shippingDetails = confirmationState.configuration.shippingDetails,
         )
     }
-
-    data class State(
-        val paymentMethodMetadata: PaymentMethodMetadata,
-        val selection: PaymentSelection?,
-        val initializationMode: PaymentElementLoader.InitializationMode,
-        val configuration: EmbeddedPaymentElement.Configuration,
-    )
 }

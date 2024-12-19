@@ -11,8 +11,10 @@ import kotlinx.parcelize.Parcelize
 internal data class CustomerState(
     val id: String,
     val ephemeralKeySecret: String,
+    val customerSessionClientSecret: String?,
     val paymentMethods: List<PaymentMethod>,
     val permissions: Permissions,
+    val defaultPaymentMethodId: String?
 ) : Parcelable {
     @Parcelize
     data class Permissions(
@@ -33,6 +35,7 @@ internal data class CustomerState(
             configuration: CommonConfiguration,
             customer: ElementsSession.Customer,
             supportedSavedPaymentMethodTypes: List<PaymentMethod.Type>,
+            customerSessionClientSecret: String,
         ): CustomerState {
             val mobilePaymentElementComponent = customer.session.components.mobilePaymentElement
 
@@ -53,6 +56,7 @@ internal data class CustomerState(
             return CustomerState(
                 id = customer.session.customerId,
                 ephemeralKeySecret = customer.session.apiKey,
+                customerSessionClientSecret = customerSessionClientSecret,
                 paymentMethods = customer.paymentMethods.filter {
                     supportedSavedPaymentMethodTypes.contains(it.type)
                 },
@@ -61,7 +65,8 @@ internal data class CustomerState(
                     canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
                     // Should always remove duplicates when using `customer_session`
                     canRemoveDuplicates = true,
-                )
+                ),
+                defaultPaymentMethodId = customer.defaultPaymentMethod
             )
         }
 
@@ -83,6 +88,7 @@ internal data class CustomerState(
             return CustomerState(
                 id = customerId,
                 ephemeralKeySecret = accessType.ephemeralKeySecret,
+                customerSessionClientSecret = null,
                 paymentMethods = paymentMethods,
                 permissions = Permissions(
                     /*
@@ -102,7 +108,8 @@ internal data class CustomerState(
                      * un-scoped ephemeral keys.
                      */
                     canRemoveDuplicates = false,
-                )
+                ),
+                defaultPaymentMethodId = null
             )
         }
     }

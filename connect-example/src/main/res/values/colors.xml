@@ -52,4 +52,30 @@
     <color name="link_badge_neutral_background">#DEFECC</color>
     <color name="link_badge_neutral_text">#1C3944</color>
 
+    <!-- Dynamic Colors Theme -->
+    <color name="dynamic_colors_primary">#0969DA</color>
+    <color name="dynamic_colors_text">#24292F</color>
+    <color name="dynamic_colors_background">#FFFFFF</color>
+    <color name="dynamic_colors_button_primary_background">#0969DA</color>
+    <color name="dynamic_colors_button_primary_border">#261B1F24</color>
+    <color name="dynamic_colors_button_primary_text">#FFFFFF</color>
+    <color name="dynamic_colors_button_secondary_background">#F6F8FA</color>
+    <color name="dynamic_colors_button_secondary_border">#261B1F24</color>
+    <color name="dynamic_colors_button_secondary_text">#24292F</color>
+    <color name="dynamic_colors_border">#D7D7D7</color>
+    <color name="dynamic_colors_secondary_text">#57606A</color>
+    <color name="dynamic_colors_action_primary_text">#0969DA</color>
+    <color name="dynamic_colors_action_secondary_text">#6E7781</color>
+    <color name="dynamic_colors_form_accent">#0969DA</color>
+    <color name="dynamic_colors_form_highlight_border">#0969DA</color>
+    <color name="dynamic_colors_danger">#B35900</color>
+    <color name="dynamic_colors_badge_neutral_border">#8C959F</color>
+    <color name="dynamic_colors_badge_neutral_text">#6E7781</color>
+    <color name="dynamic_colors_badge_success_border">#218BFF</color>
+    <color name="dynamic_colors_badge_success_text">#0969DA</color>
+    <color name="dynamic_colors_badge_warning_border">#D4A72C</color>
+    <color name="dynamic_colors_badge_warning_text">#BF8700</color>
+    <color name="dynamic_colors_badge_danger_border">#DD7815</color>
+    <color name="dynamic_colors_badge_danger_text">#B35900</color>
+    <color name="dynamic_colors_offset_background">#F8F8F8</color>
 </resources>

@@ -29,7 +29,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.mockito.Mockito.mock
 
-class LinkConfirmationDefinitionTest {
+internal class LinkConfirmationDefinitionTest {
     @Test
     fun `'key' should be 'Link'`() {
         val definition = createLinkConfirmationDefinition()

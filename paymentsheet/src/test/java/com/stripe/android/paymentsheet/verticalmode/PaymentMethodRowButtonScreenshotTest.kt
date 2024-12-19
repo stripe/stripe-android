@@ -7,12 +7,16 @@ import androidx.compose.material.Text
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
+import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.ui.core.R
+import com.stripe.android.uicore.StripeThemeDefaults
 import org.junit.Rule
 import org.junit.Test
 
+@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 internal class PaymentMethodRowButtonScreenshotTest {
 
     @get:Rule
@@ -183,6 +187,34 @@ internal class PaymentMethodRowButtonScreenshotTest {
                 subtitle = null,
                 promoText = "$5",
                 onClick = {},
+            )
+        }
+    }
+
+    @Test
+    fun testStyleAppearance() {
+        val style = FloatingButton(
+            spacingDp = StripeThemeDefaults.floating.spacing,
+            additionalInsetsDp = 40f
+        )
+        paparazziRule.snapshot {
+            PaymentMethodRowButton(
+                isEnabled = true,
+                isSelected = false,
+                iconContent = {
+                    Image(
+                        painter = painterResource(id = R.drawable.stripe_ic_paymentsheet_pm_card),
+                        contentDescription = null
+                    )
+                },
+                title = "**** 4242",
+                subtitle = null,
+                promoText = null,
+                onClick = {},
+                style = style,
+                trailingContent = {
+                    Text(text = "View more")
+                }
             )
         }
     }

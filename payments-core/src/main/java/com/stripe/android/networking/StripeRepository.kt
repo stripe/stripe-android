@@ -171,6 +171,14 @@ interface StripeRepository {
     ): Result<PaymentMethod>
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    suspend fun detachPaymentMethod(
+        customerSessionClientSecret: String,
+        productUsageTokens: Set<String>,
+        paymentMethodId: String,
+        requestOptions: ApiRequest.Options
+    ): Result<PaymentMethod>
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun getPaymentMethods(
         listPaymentMethodsParams: ListPaymentMethodsParams,
         productUsageTokens: Set<String>,

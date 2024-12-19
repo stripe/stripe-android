@@ -16,8 +16,10 @@ internal open class FakeCustomerRepository(
     private val onGetPaymentMethods: () -> Result<List<PaymentMethod>> = {
         Result.success(paymentMethods)
     },
-    private val onDetachPaymentMethod: (paymentMethodId: String) -> Result<PaymentMethod> = {
-        Result.failure(NotImplementedError())
+    private val onDetachPaymentMethod: (paymentMethodId: String) -> Result<PaymentMethod> = { paymentMethodId ->
+        paymentMethods.find { it.id == paymentMethodId }?.let {
+            Result.success(it)
+        } ?: Result.failure(IllegalArgumentException("Could not find payment method to remove"))
     },
     private val onAttachPaymentMethod: () -> Result<PaymentMethod> = {
         Result.failure(NotImplementedError())

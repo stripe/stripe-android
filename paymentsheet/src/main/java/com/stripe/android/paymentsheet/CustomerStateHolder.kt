@@ -29,6 +29,19 @@ internal class CustomerStateHolder(
         initialValue = (selection.value as? PaymentSelection.Saved)?.paymentMethod
     )
 
+    val canRemove: StateFlow<Boolean> = customer.mapAsStateFlow { customerState ->
+        customerState?.run {
+            val hasRemovePermissions = customerState.permissions.canRemovePaymentMethods
+            val hasRemoveLastPaymentMethodPermissions = customerState.permissions.canRemoveLastPaymentMethod
+
+            when (paymentMethods.size) {
+                0 -> false
+                1 -> hasRemoveLastPaymentMethodPermissions && hasRemovePermissions
+                else -> hasRemovePermissions
+            }
+        } ?: false
+    }
+
     fun setCustomerState(customerState: CustomerState?) {
         savedStateHandle[SAVED_CUSTOMER] = customerState
     }

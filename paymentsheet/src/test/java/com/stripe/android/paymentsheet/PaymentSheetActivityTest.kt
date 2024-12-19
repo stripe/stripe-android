@@ -79,7 +79,7 @@ import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.SHEET_NAVIGATION_BUTTON_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
 import com.stripe.android.paymentsheet.ui.TEST_TAG_MODIFY_BADGE
-import com.stripe.android.paymentsheet.ui.TEST_TAG_REMOVE_BADGE
+import com.stripe.android.paymentsheet.ui.UPDATE_PM_REMOVE_BUTTON_TEST_TAG
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.TEST_TAG_DIALOG_CONFIRM_BUTTON
@@ -463,13 +463,18 @@ internal class PaymentSheetActivityTest {
             startEditing()
 
             composeTestRule.onNodeWithTag(
-                TEST_TAG_REMOVE_BADGE,
+                TEST_TAG_MODIFY_BADGE,
                 useUnmergedTree = true,
+            ).performClick()
+
+            composeTestRule.onNodeWithTag(
+                UPDATE_PM_REMOVE_BUTTON_TEST_TAG,
             ).performClick()
 
             composeTestRule.onNodeWithTag(TEST_TAG_DIALOG_CONFIRM_BUTTON).performClick()
 
             composeTestRule.waitForIdle()
+            testDispatcher.scheduler.advanceUntilIdle()
 
             assertThat(viewModel.navigationHandler.currentScreen.value)
                 .isInstanceOf(PaymentSheetScreen.AddFirstPaymentMethod::class.java)
@@ -578,7 +583,7 @@ internal class PaymentSheetActivityTest {
 
             startEditing()
             composeTestRule.onNodeWithTag(TEST_TAG_MODIFY_BADGE).performClick()
-            assertThat(awaitItem()).isInstanceOf<PaymentSheetScreen.EditPaymentMethod>()
+            assertThat(awaitItem()).isInstanceOf<PaymentSheetScreen.UpdatePaymentMethod>()
 
             pressBack()
             assertThat(awaitItem()).isInstanceOf<SelectSavedPaymentMethods>()

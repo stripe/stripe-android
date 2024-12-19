@@ -5,7 +5,6 @@ import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsEnabled
-import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasTestTag
@@ -21,10 +20,10 @@ import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_EDIT_BUTTON_TEST_TAG
-import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_EDIT_SCREEN_REMOVE_BUTTON
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TEST_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_MODIFY_BADGE
+import com.stripe.android.paymentsheet.ui.UPDATE_PM_REMOVE_BUTTON_TEST_TAG
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.PaymentMethodFactory
 import org.json.JSONArray
@@ -136,7 +135,7 @@ internal class CustomerSessionPaymentSheetActivityTest {
         }
 
     @Test
-    fun `When multiple PMs with CBC card but no remove permissions, should allow editing CBC card and disable rest`() =
+    fun `When multiple PMs with CBC card but no remove permissions, should allow editing all PMs`() =
         runTest(
             cards = listOf(
                 PaymentMethodFactory.card(last4 = "4242", addCbcNetworks = true),
@@ -148,7 +147,9 @@ internal class CustomerSessionPaymentSheetActivityTest {
         ) {
             composeTestRule.onEditButton().performClick()
 
-            composeTestRule.onSavedPaymentMethod(last4 = "5544").assertIsNotEnabled()
+            val nonCbcCard = composeTestRule.onSavedPaymentMethod(last4 = "5544")
+            nonCbcCard.assertIsEnabled()
+            nonCbcCard.assertHasModifyBadge()
 
             val cbcCard = composeTestRule.onSavedPaymentMethod(last4 = "4242")
 
@@ -178,7 +179,7 @@ internal class CustomerSessionPaymentSheetActivityTest {
 
             composeTestRule.onModifyBadgeFor(last4 = "4242").performClick()
 
-            composeTestRule.onEditScreenRemoveButton().assertIsEnabled()
+            composeTestRule.onUpdateScreenRemoveButton().assertIsEnabled()
         }
 
     @Test
@@ -200,7 +201,7 @@ internal class CustomerSessionPaymentSheetActivityTest {
 
             composeTestRule.onModifyBadgeFor(last4 = "4242").performClick()
 
-            composeTestRule.onEditScreenRemoveButton().assertDoesNotExist()
+            composeTestRule.onUpdateScreenRemoveButton().assertDoesNotExist()
         }
 
     @Test
@@ -222,7 +223,7 @@ internal class CustomerSessionPaymentSheetActivityTest {
 
             composeTestRule.onModifyBadgeFor(last4 = "4242").performClick()
 
-            composeTestRule.onEditScreenRemoveButton().assertDoesNotExist()
+            composeTestRule.onUpdateScreenRemoveButton().assertDoesNotExist()
         }
 
     @Test
@@ -244,7 +245,7 @@ internal class CustomerSessionPaymentSheetActivityTest {
 
             composeTestRule.onModifyBadgeFor(last4 = "4242").performClick()
 
-            composeTestRule.onEditScreenRemoveButton().assertIsEnabled()
+            composeTestRule.onUpdateScreenRemoveButton().assertIsEnabled()
         }
 
     @Test
@@ -266,7 +267,7 @@ internal class CustomerSessionPaymentSheetActivityTest {
 
             composeTestRule.onModifyBadgeFor(last4 = "4242").performClick()
 
-            composeTestRule.onEditScreenRemoveButton().assertDoesNotExist()
+            composeTestRule.onUpdateScreenRemoveButton().assertDoesNotExist()
         }
 
     @Test
@@ -288,7 +289,7 @@ internal class CustomerSessionPaymentSheetActivityTest {
 
             composeTestRule.onModifyBadgeFor(last4 = "4242").performClick()
 
-            composeTestRule.onEditScreenRemoveButton().assertDoesNotExist()
+            composeTestRule.onUpdateScreenRemoveButton().assertDoesNotExist()
         }
 
     private fun runTest(
@@ -359,9 +360,9 @@ internal class CustomerSessionPaymentSheetActivityTest {
         )
     }
 
-    private fun ComposeTestRule.onEditScreenRemoveButton(): SemanticsNodeInteraction {
+    private fun ComposeTestRule.onUpdateScreenRemoveButton(): SemanticsNodeInteraction {
         return onNode(
-            hasTestTag(PAYMENT_SHEET_EDIT_SCREEN_REMOVE_BUTTON)
+            hasTestTag(UPDATE_PM_REMOVE_BUTTON_TEST_TAG)
         )
     }
 

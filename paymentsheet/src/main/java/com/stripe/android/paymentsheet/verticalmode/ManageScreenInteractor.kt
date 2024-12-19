@@ -10,7 +10,6 @@ import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.utils.combineAsStateFlow
-import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -61,6 +60,7 @@ internal class DefaultManageScreenInteractor(
     private val onUpdatePaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     private val navigateBack: (withDelay: Boolean) -> Unit,
     override val isLiveMode: Boolean,
+    private val defaultPaymentMethodId: StateFlow<String?>,
     dispatcher: CoroutineContext = Dispatchers.Default,
 ) : ManageScreenInteractor {
 
@@ -69,9 +69,13 @@ internal class DefaultManageScreenInteractor(
     private val hasNavigatedBack: AtomicBoolean = AtomicBoolean(false)
 
     private val displayableSavedPaymentMethods: StateFlow<List<DisplayableSavedPaymentMethod>> =
-        paymentMethods.mapAsStateFlow { paymentMethods ->
+        combineAsStateFlow(paymentMethods, defaultPaymentMethodId) { paymentMethods, defaultPaymentMethodId ->
             paymentMethods.map {
-                it.toDisplayableSavedPaymentMethod(providePaymentMethodName, paymentMethodMetadata)
+                it.toDisplayableSavedPaymentMethod(
+                    providePaymentMethodName,
+                    paymentMethodMetadata,
+                    defaultPaymentMethodId
+                )
             }
         }
 
@@ -154,7 +158,7 @@ internal class DefaultManageScreenInteractor(
                 selection = viewModel.selection,
                 editing = savedPaymentMethodMutator.editing,
                 canEdit = savedPaymentMethodMutator.canEdit,
-                canRemove = savedPaymentMethodMutator.canRemove,
+                canRemove = customerStateHolder.canRemove,
                 toggleEdit = savedPaymentMethodMutator::toggleEditing,
                 providePaymentMethodName = savedPaymentMethodMutator.providePaymentMethodName,
                 onSelectPaymentMethod = {
@@ -173,6 +177,7 @@ internal class DefaultManageScreenInteractor(
                     }
                 },
                 isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
+                defaultPaymentMethodId = savedPaymentMethodMutator.defaultPaymentMethodId
             )
         }
 

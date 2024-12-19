@@ -9,9 +9,12 @@ import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Button
+import androidx.compose.material.Text
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -51,14 +54,14 @@ internal class EmbeddedPlaygroundActivity : AppCompatActivity(), ExternalPayment
             return
         }
 
+        val embeddedBuilder = EmbeddedPaymentElement.Builder(
+            createIntentCallback = { _, _ ->
+                CreateIntentResult.Success(playgroundState.clientSecret)
+            },
+            resultCallback = ::handleEmbeddedResult,
+        ).externalPaymentMethodConfirmHandler(this)
         setContent {
-            val embeddedPaymentElement = rememberEmbeddedPaymentElement(
-                createIntentCallback = { _, _ ->
-                    CreateIntentResult.Success(playgroundState.clientSecret)
-                },
-                externalPaymentMethodConfirmHandler = this,
-                resultCallback = ::handleEmbeddedResult,
-            )
+            val embeddedPaymentElement = rememberEmbeddedPaymentElement(embeddedBuilder)
 
             LaunchedEffect(embeddedPaymentElement) {
                 embeddedPaymentElement.configure(
@@ -89,6 +92,15 @@ internal class EmbeddedPlaygroundActivity : AppCompatActivity(), ExternalPayment
 
                     BuyButton(buyButtonEnabled = true) {
                         embeddedPaymentElement.confirm()
+                    }
+
+                    Button(
+                        onClick = {
+                            embeddedPaymentElement.clearPaymentOption()
+                        },
+                        Modifier.fillMaxWidth(),
+                    ) {
+                        Text("Clear selected")
                     }
                 }
             }
