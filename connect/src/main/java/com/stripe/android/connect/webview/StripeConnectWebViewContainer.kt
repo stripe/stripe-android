@@ -28,6 +28,7 @@ import com.stripe.android.connect.EmbeddedComponentManager
 import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.StripeEmbeddedComponent
 import com.stripe.android.connect.StripeEmbeddedComponentListener
+import com.stripe.android.connect.analytics.ConnectAnalyticsService
 import com.stripe.android.connect.appearance.Appearance
 import com.stripe.android.connect.databinding.StripeConnectWebviewBinding
 import com.stripe.android.connect.toJsonObject
@@ -94,6 +95,8 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
     private var viewBinding: StripeConnectWebviewBinding? = null
     private val webView get() = viewBinding?.stripeWebView
 
+    private var analyticsService: ConnectAnalyticsService? = null
+
     @VisibleForTesting
     internal val stripeWebViewClient = StripeConnectWebViewClient()
 
@@ -141,6 +144,7 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
             .also { this.viewBinding = it }
         initializeWebView(viewBinding.stripeWebView)
         bindViewToController()
+        analyticsService = ConnectAnalyticsService(view.context, isTestMode = false)
     }
 
     @VisibleForTesting
@@ -373,6 +377,8 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
         fun accountSessionClaimed(message: String) {
             val accountSessionClaimedMessage = ConnectJson.decodeFromString<AccountSessionClaimedMessage>(message)
             logger.debug("Account session claimed: $accountSessionClaimedMessage")
+
+            analyticsService?.merchantId = accountSessionClaimedMessage.merchantId
         }
 
         @JavascriptInterface
