@@ -14,7 +14,6 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.preview.DefaultStripeThemePreviewRow
 import com.stripe.android.uicore.stripeColors
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Composable
 internal fun DefaultPaymentMethodLabel(
     modifier: Modifier,
