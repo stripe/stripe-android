@@ -30,12 +30,11 @@ import com.stripe.android.uicore.strings.resolve
 internal fun SavedPaymentMethodRowButton(
     displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
     isEnabled: Boolean,
-    isClickable: Boolean = isEnabled,
     isSelected: Boolean,
     modifier: Modifier = Modifier,
     rowStyle: Embedded.RowStyle = Embedded.RowStyle.FloatingButton.default,
     onClick: () -> Unit = {},
-    trailingContent: (@Composable RowScope.() -> Unit)? = null,
+    trailingContent: @Composable() (RowScope.() -> Unit)? = null,
 ) {
     val contentDescription = displayableSavedPaymentMethod
         .getDescription()
@@ -49,7 +48,6 @@ internal fun SavedPaymentMethodRowButton(
     PaymentMethodRowButton(
         isEnabled = isEnabled,
         isSelected = isSelected,
-        isClickable = isClickable,
         iconContent = {
             val displayBrand = displayableSavedPaymentMethod.paymentMethod.card?.displayBrand
             PaymentMethodIconFromResource(

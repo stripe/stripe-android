@@ -111,15 +111,15 @@ internal fun PaymentMethodVerticalLayoutUI(
                 displayableSavedPaymentMethod = displayedSavedPaymentMethod,
                 isEnabled = isEnabled,
                 isSelected = selection?.isSaved == true,
+                rowStyle = rowStyle,
+                onClick = { onSelectSavedPaymentMethod(displayedSavedPaymentMethod) },
                 trailingContent = {
                     SavedPaymentMethodTrailingContent(
                         savedPaymentMethodAction = savedPaymentMethodAction,
                         onViewMorePaymentMethods = onViewMorePaymentMethods,
                         onManageOneSavedPaymentMethod = { onManageOneSavedPaymentMethod(displayedSavedPaymentMethod) },
                     )
-                },
-                onClick = { onSelectSavedPaymentMethod(displayedSavedPaymentMethod) },
-                rowStyle = rowStyle
+                }
             )
             Text(stringResource(id = R.string.stripe_paymentsheet_new_pm), style = textStyle, color = textColor)
         }
