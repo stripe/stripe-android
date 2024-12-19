@@ -48,6 +48,7 @@ internal class DocumentScanViewModel(
                     R.string.stripe_position_id_back
                 }
             }
+            //TODO(kentwilliams): This is a meaningless string, maybe error should be handled outside of state?
             is State.Error -> R.string.stripe_scanned
             is State.Scanned -> R.string.stripe_scanned
             is State.Scanning -> {

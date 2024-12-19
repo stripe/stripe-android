@@ -130,7 +130,9 @@ internal fun IdentityNavGraph(
                 DocumentScanScreen(
                     navController = navController,
                     identityViewModel = identityViewModel,
-                    documentScanViewModel = documentScanViewModel
+                    documentScanViewModel = documentScanViewModel,
+                    verificationFlowFinishable = verificationFlowFinishable
+
                 )
             }
             screen(SelfieWarmupDestination.ROUTE) {
@@ -306,6 +308,7 @@ internal fun IdentityNavGraph(
                         } else {
                             val destination = ErrorDestination.backButtonDestination(it)
                             if (destination == ErrorDestination.UNEXPECTED_ROUTE) {
+                                Log.d("IdentityNavGraph", "KENTWILLIAMS Unexpected Route, going to consent")
                                 navController.navigateTo(ConsentDestination)
                             } else {
                                 var shouldContinueNavigateUp = true

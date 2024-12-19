@@ -43,7 +43,9 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
 import com.stripe.android.camera.scanui.CameraView
+import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.identity.R
+import com.stripe.android.identity.VerificationFlowFinishable
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_LIVE_CAPTURE
 import com.stripe.android.identity.camera.DocumentScanCameraManager
 import com.stripe.android.identity.camera.IdentityCameraManager
@@ -68,7 +70,8 @@ internal const val VIEW_FINDER_ASPECT_RATIO = 1f
 internal fun DocumentScanScreen(
     navController: NavController,
     identityViewModel: IdentityViewModel,
-    documentScanViewModel: DocumentScanViewModel
+    documentScanViewModel: DocumentScanViewModel,
+    verificationFlowFinishable: VerificationFlowFinishable,
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -121,8 +124,8 @@ internal fun DocumentScanScreen(
             }
 
             is IdentityScanViewModel.State.Error -> {
-                navController.navigateToFinalErrorScreen(
-                    LocalContext.current
+                verificationFlowFinishable.finishWithResult(
+                    IdentityVerificationSheet.VerificationFlowResult.Failed((documentScannerState as IdentityScanViewModel.State.Error).exception)
                 )
             }
 
