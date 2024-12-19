@@ -1,20 +1,14 @@
 package com.stripe.android.connect.example.data
 
-import android.content.Context
 import com.github.kittinunf.fuel.core.FuelError
 import com.stripe.android.connect.EmbeddedComponentManager
 import com.stripe.android.connect.FetchClientSecretCallback.ClientSecretResultCallback
 import com.stripe.android.connect.PrivateBetaConnectSDK
-import com.stripe.android.connect.appearance.Appearance
 import com.stripe.android.connect.appearance.fonts.CustomFontSource
-import com.stripe.android.connect.example.ui.appearance.AppearanceInfo
 import com.stripe.android.core.BuildConfig
 import com.stripe.android.core.Logger
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.io.IOException
 import javax.inject.Inject
@@ -22,43 +16,27 @@ import javax.inject.Singleton
 
 @OptIn(PrivateBetaConnectSDK::class)
 @Singleton
-class EmbeddedComponentManagerProvider @Inject constructor(
-    @ApplicationContext private val context: Context,
+class EmbeddedComponentManagerFactory @Inject constructor(
     private val embeddedComponentService: EmbeddedComponentService,
     private val settingsService: SettingsService,
 ) {
-
-    // this factory manages the EmbeddedComponentManager instance, since it needs to wait for
-    // a publishable key to be received from the backend before building it.
-    // In the future it may manage multiple instances if needed.
-    private var embeddedComponentManager: EmbeddedComponentManager? = null
-
     private val loggingTag = this::class.java.simpleName
     private val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG)
     private val ioScope: CoroutineScope by lazy { CoroutineScope(Dispatchers.IO) }
 
-    fun initialize(scope: CoroutineScope): Job = scope.launch {
-        // Update appearance in the SDK whenever the appearance setting changes.
-        settingsService.getAppearanceIdFlow()
-            .collectLatest { appearanceId ->
-                embeddedComponentManager?.update(getAppearance(context, appearanceId))
-            }
-    }
-
     /**
-     * Provides the EmbeddedComponentManager instance, creating it if it doesn't exist.
-     * Throws [IllegalStateException] if an EmbeddedComponentManager cannot be created at this time.
+     * Creates an instance of [EmbeddedComponentManager].
+     * Returns null if it cannot be created at this time.
      */
-    fun provideEmbeddedComponentManager(): EmbeddedComponentManager? {
-        embeddedComponentManager?.let { return it } // return the embedded component manager if it already exists
+    fun createEmbeddedComponentManager(): EmbeddedComponentManager? {
+        val publishableKey = embeddedComponentService.publishableKey.value
+            ?: return null
 
-        val publishableKey = embeddedComponentService.publishableKey.value ?: return null
         return EmbeddedComponentManager(
             configuration = EmbeddedComponentManager.Configuration(
                 publishableKey = publishableKey,
             ),
             fetchClientSecretCallback = ::fetchClientSecret,
-            appearance = getAppearance(context, settingsService.getAppearanceId()),
             customFonts = listOf(
                 CustomFontSource(
                     "fonts/doto.ttf",
@@ -66,9 +44,7 @@ class EmbeddedComponentManagerProvider @Inject constructor(
                     weight = 1000,
                 )
             )
-        ).also {
-            embeddedComponentManager = it
-        }
+        )
     }
 
     /**
@@ -91,11 +67,5 @@ class EmbeddedComponentManagerProvider @Inject constructor(
                 clientSecretResultCallback.onResult(null)
             }
         }
-    }
-
-    private fun getAppearance(context: Context, appearanceId: AppearanceInfo.AppearanceId?): Appearance {
-        return appearanceId
-            ?.let { AppearanceInfo.getAppearance(it, context).appearance }
-            ?: Appearance()
     }
 }
