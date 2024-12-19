@@ -10,8 +10,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.paymentsheet.ui.Mandate
+import com.stripe.android.paymentsheet.verticalmode.PaymentMethodEmbeddedLayoutUI
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor
-import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutUI
 import com.stripe.android.uicore.strings.resolve
 
 @Immutable
@@ -33,7 +33,7 @@ internal data class EmbeddedContent(
 
     @Composable
     private fun EmbeddedVerticalList() {
-        PaymentMethodVerticalLayoutUI(
+        PaymentMethodEmbeddedLayoutUI(
             interactor = interactor,
             modifier = Modifier.padding(bottom = 8.dp),
         )
