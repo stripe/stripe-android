@@ -4,8 +4,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Icon
@@ -82,36 +82,39 @@ private fun PresentationSettingsView(
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
         ) {
-            Spacer(Modifier.requiredHeight(16.dp))
-            Row(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    modifier = Modifier.weight(1f),
-                    text = stringResource(R.string.use_xml_views)
-                )
-                Switch(
-                    checked = useXmlViews,
-                    onCheckedChange = { useXmlViews = it },
-                )
-            }
-
-            Spacer(Modifier.requiredHeight(16.dp))
-            Row(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    modifier = Modifier.weight(1f),
-                    text = stringResource(R.string.edge_to_edge_enabled)
-                )
-                Switch(
-                    checked = edgeToEdgeEnabled,
-                    onCheckedChange = { edgeToEdgeEnabled = it },
-                )
-            }
+            SettingsSwitchItem(
+                text = stringResource(R.string.use_xml_views),
+                isChecked = useXmlViews,
+                onCheckedChange = { useXmlViews = it }
+            )
+            SettingsSwitchItem(
+                text = stringResource(R.string.edge_to_edge_enabled),
+                isChecked = edgeToEdgeEnabled,
+                onCheckedChange = { edgeToEdgeEnabled = it }
+            )
         }
+    }
+}
+
+@Composable
+fun SettingsSwitchItem(
+    text: String,
+    isChecked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+) {
+    Spacer(Modifier.height(16.dp))
+    Row(
+        modifier = Modifier.padding(horizontal = 16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            modifier = Modifier.weight(1f),
+            text = text,
+        )
+        Switch(
+            checked = isChecked,
+            onCheckedChange = onCheckedChange,
+        )
     }
 }
 
@@ -122,5 +125,15 @@ private fun PresentationSettingsViewPreview() {
         presentationSettings = PresentationSettings(),
         onBack = {},
         onSave = {}
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun SettingsSwitchItemPreview() {
+    SettingsSwitchItem(
+        text = "Example",
+        isChecked = true,
+        onCheckedChange = { },
     )
 }
