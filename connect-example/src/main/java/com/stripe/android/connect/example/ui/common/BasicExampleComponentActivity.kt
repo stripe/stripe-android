@@ -70,8 +70,8 @@ abstract class BasicExampleComponentActivity : FragmentActivity() {
         EmbeddedComponentManager.onActivityCreate(this@BasicExampleComponentActivity)
 
         val settings = settingsViewModel.state.value
-        val edgeToEdgeEnabled = settings.presentationSettings.edgeToEdgeEnabled
-        if (edgeToEdgeEnabled) {
+        val enableEdgeToEdge = settings.presentationSettings.enableEdgeToEdge
+        if (enableEdgeToEdge) {
             enableEdgeToEdge()
         }
 
@@ -84,7 +84,7 @@ abstract class BasicExampleComponentActivity : FragmentActivity() {
                     composable(BasicComponentExampleDestination.Component) {
                         ExampleComponentContent(
                             viewModel = viewModel,
-                            edgeToEdgeEnabled = edgeToEdgeEnabled,
+                            enableEdgeToEdge = enableEdgeToEdge,
                             openSettings = { navController.navigate(BasicComponentExampleDestination.Settings) },
                         )
                     }
@@ -97,13 +97,13 @@ abstract class BasicExampleComponentActivity : FragmentActivity() {
     @Composable
     private fun ExampleComponentContent(
         viewModel: EmbeddedComponentLoaderViewModel,
-        edgeToEdgeEnabled: Boolean,
+        enableEdgeToEdge: Boolean,
         openSettings: () -> Unit,
     ) {
         val state by viewModel.state.collectAsState()
         val embeddedComponentAsync = state.embeddedComponentManagerAsync
 
-        if (edgeToEdgeEnabled) {
+        if (enableEdgeToEdge) {
             // don't render the scaffold if edge-to-edge is enabled so that we get an entirely
             // full-screen experience
             ExampleComponentView(

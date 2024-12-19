@@ -92,7 +92,7 @@ class SettingsService @Inject constructor(@ApplicationContext context: Context) 
             embedInTabBar = sharedPreferences.getBoolean(EMBED_IN_TABBAR, false),
             embedInNavBar = !sharedPreferences.getBoolean(DISABLE_EMBED_IN_NAVBAR, false),
             useXmlViews = sharedPreferences.getBoolean(USE_XML_VIEWS, false),
-            edgeToEdgeEnabled = sharedPreferences.getBoolean(EDGE_TO_EDGE_ENABLED, false)
+            enableEdgeToEdge = sharedPreferences.getBoolean(ENABLE_EDGE_TO_EDGE, false)
         )
     }
 
@@ -102,7 +102,7 @@ class SettingsService @Inject constructor(@ApplicationContext context: Context) 
             putBoolean(EMBED_IN_TABBAR, value.embedInTabBar)
             putBoolean(DISABLE_EMBED_IN_NAVBAR, !value.embedInNavBar)
             putBoolean(USE_XML_VIEWS, value.useXmlViews)
-            putBoolean(EDGE_TO_EDGE_ENABLED, value.edgeToEdgeEnabled)
+            putBoolean(ENABLE_EDGE_TO_EDGE, value.enableEdgeToEdge)
         }
     }
 
@@ -147,7 +147,7 @@ class SettingsService @Inject constructor(@ApplicationContext context: Context) 
         private const val DISABLE_EMBED_IN_NAVBAR = "DisableEmbedInNavbar"
         private const val EMBED_IN_TABBAR = "EmbedInTabbar"
         private const val USE_XML_VIEWS = "UseXmlViews"
-        private const val EDGE_TO_EDGE_ENABLED = "EdgeToEdgeEnabled"
+        private const val ENABLE_EDGE_TO_EDGE = "EnableEdgeToEdge"
         private const val ONBOARDING_TERMS_OF_SERVICE_URL = "OnboardingTermsOfServiceURL"
         private const val ONBOARDING_RECIPIENT_TERMS_OF_SERVICE_STRING = "OnboardingRecipientTermsOfServiceString"
         private const val ONBOARDING_PRIVACY_POLICY_STRING = "OnboardingPrivacyPolicyString"
@@ -197,7 +197,7 @@ data class PresentationSettings(
     val embedInTabBar: Boolean = false,
     val embedInNavBar: Boolean = false,
     val useXmlViews: Boolean = false,
-    val edgeToEdgeEnabled: Boolean = false,
+    val enableEdgeToEdge: Boolean = false,
 )
 
 enum class SkipTermsOfService { DEFAULT, SKIP, SHOW }
