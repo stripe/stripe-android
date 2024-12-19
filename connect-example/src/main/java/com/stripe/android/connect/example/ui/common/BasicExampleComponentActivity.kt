@@ -176,13 +176,13 @@ abstract class BasicExampleComponentActivity : FragmentActivity() {
             reload = reload,
         ) { embeddedComponentManager ->
             val context = LocalContext.current
-                    LaunchedEffect(context) {
-                        val appearanceInfo = settingsService.getAppearanceId()
-                            ?.let { AppearanceInfo.getAppearance(it, context).appearance }
-                            ?: return@LaunchedEffect
-                        embeddedComponentManager.update(appearanceInfo)
-                    }
-                    AndroidView(modifier = Modifier.fillMaxSize(), factory = {
+            LaunchedEffect(context) {
+                val appearanceInfo = settingsService.getAppearanceId()
+                    ?.let { AppearanceInfo.getAppearance(it, context).appearance }
+                    ?: return@LaunchedEffect
+                embeddedComponentManager.update(appearanceInfo)
+            }
+            AndroidView(modifier = Modifier.fillMaxSize(), factory = {
                 createComponentView(it, embeddedComponentManager)
             })
         }
