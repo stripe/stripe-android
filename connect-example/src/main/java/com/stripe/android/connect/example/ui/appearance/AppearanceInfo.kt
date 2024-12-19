@@ -27,6 +27,7 @@ data class AppearanceInfo(
         HotDog(R.string.appearance_hot_dog),
         OceanBreeze(R.string.appearance_ocean_breeze),
         Link(R.string.appearance_link),
+        Dynamic(R.string.appearance_dynamic),
         CustomFont(R.string.custom_font)
     }
 
@@ -38,6 +39,7 @@ data class AppearanceInfo(
                 AppearanceId.HotDog -> hotDogAppearance(context)
                 AppearanceId.OceanBreeze -> oceanBreezeAppearance(context)
                 AppearanceId.Link -> linkAppearance(context)
+                AppearanceId.Dynamic -> dynamicAppearance(context)
                 AppearanceId.CustomFont -> customFont()
             }
         }
@@ -145,6 +147,54 @@ data class AppearanceInfo(
                     colorText = ContextCompat.getColor(context, R.color.link_badge_neutral_text)
                 ),
                 cornerRadius = CornerRadius(base = 5f)
+            )
+        )
+
+        private fun dynamicAppearance(context: Context) = AppearanceInfo(
+            appearanceId = AppearanceId.Dynamic,
+            appearance = Appearance(
+                colors = Colors(
+                    primary = ContextCompat.getColor(context, R.color.dynamic_colors_primary),
+                    text = ContextCompat.getColor(context, R.color.dynamic_colors_text),
+                    background = ContextCompat.getColor(context, R.color.dynamic_colors_background),
+                    border = ContextCompat.getColor(context, R.color.dynamic_colors_border),
+                    secondaryText = ContextCompat.getColor(context, R.color.dynamic_colors_secondary_text),
+                    actionPrimaryText = ContextCompat.getColor(context, R.color.dynamic_colors_action_primary_text),
+                    actionSecondaryText = ContextCompat.getColor(context, R.color.dynamic_colors_action_secondary_text),
+                    formAccent = ContextCompat.getColor(context, R.color.dynamic_colors_form_accent),
+                    formHighlightBorder = ContextCompat.getColor(context, R.color.dynamic_colors_form_highlight_border),
+                    danger = ContextCompat.getColor(context, R.color.dynamic_colors_danger),
+                    offsetBackground = ContextCompat.getColor(context, R.color.dynamic_colors_offset_background),
+                ),
+                buttonPrimary = Button(
+                    colorBackground = ContextCompat.getColor(context, R.color.dynamic_colors_button_primary_background),
+                    colorBorder = ContextCompat.getColor(context, R.color.dynamic_colors_button_primary_border),
+                    colorText = ContextCompat.getColor(context, R.color.dynamic_colors_button_primary_text)
+                ),
+                buttonSecondary = Button(
+                    colorBackground = ContextCompat.getColor(
+                        context,
+                        R.color.dynamic_colors_button_secondary_background
+                    ),
+                    colorBorder = ContextCompat.getColor(context, R.color.dynamic_colors_button_secondary_border),
+                    colorText = ContextCompat.getColor(context, R.color.dynamic_colors_button_secondary_text)
+                ),
+                badgeSuccess = Badge(
+                    colorBorder = ContextCompat.getColor(context, R.color.dynamic_colors_badge_success_border),
+                    colorText = ContextCompat.getColor(context, R.color.dynamic_colors_badge_success_text)
+                ),
+                badgeNeutral = Badge(
+                    colorBorder = ContextCompat.getColor(context, R.color.dynamic_colors_badge_neutral_border),
+                    colorText = ContextCompat.getColor(context, R.color.dynamic_colors_badge_neutral_text),
+                ),
+                badgeWarning = Badge(
+                    colorBorder = ContextCompat.getColor(context, R.color.dynamic_colors_badge_warning_border),
+                    colorText = ContextCompat.getColor(context, R.color.dynamic_colors_badge_warning_text)
+                ),
+                badgeDanger = Badge(
+                    colorBorder = ContextCompat.getColor(context, R.color.dynamic_colors_badge_danger_border),
+                    colorText = ContextCompat.getColor(context, R.color.dynamic_colors_badge_danger_text)
+                ),
             )
         )
 

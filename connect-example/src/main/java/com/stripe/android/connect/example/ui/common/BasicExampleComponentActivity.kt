@@ -12,10 +12,12 @@ import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.fragment.app.FragmentActivity
@@ -27,6 +29,8 @@ import com.stripe.android.connect.EmbeddedComponentManager
 import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.example.core.Success
 import com.stripe.android.connect.example.core.then
+import com.stripe.android.connect.example.data.SettingsService
+import com.stripe.android.connect.example.ui.appearance.AppearanceInfo
 import com.stripe.android.connect.example.ui.appearance.AppearanceView
 import com.stripe.android.connect.example.ui.appearance.AppearanceViewModel
 import com.stripe.android.connect.example.ui.embeddedcomponentmanagerloader.EmbeddedComponentLoaderViewModel
@@ -34,6 +38,7 @@ import com.stripe.android.connect.example.ui.embeddedcomponentmanagerloader.Embe
 import com.stripe.android.connect.example.ui.settings.settingsComposables
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @Suppress("ConstPropertyName")
 private object BasicComponentExampleDestination {
@@ -49,6 +54,9 @@ abstract class BasicExampleComponentActivity : FragmentActivity() {
     abstract val titleRes: Int
 
     abstract fun createComponentView(context: Context, embeddedComponentManager: EmbeddedComponentManager): View
+
+    @Inject
+    lateinit var settingsService: SettingsService
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -117,8 +125,15 @@ abstract class BasicExampleComponentActivity : FragmentActivity() {
                     openSettings = openSettings,
                     reload = viewModel::reload,
                 ) { embeddedComponentManager ->
-                    AndroidView(modifier = Modifier.fillMaxSize(), factory = { context ->
-                        createComponentView(context, embeddedComponentManager)
+                    val context = LocalContext.current
+                    LaunchedEffect(context) {
+                        val appearanceInfo = settingsService.getAppearanceId()
+                            ?.let { AppearanceInfo.getAppearance(it, context).appearance }
+                            ?: return@LaunchedEffect
+                        embeddedComponentManager.update(appearanceInfo)
+                    }
+                    AndroidView(modifier = Modifier.fillMaxSize(), factory = {
+                        createComponentView(it, embeddedComponentManager)
                     })
                 }
             }
