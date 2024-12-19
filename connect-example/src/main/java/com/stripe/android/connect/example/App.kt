@@ -3,7 +3,6 @@ package com.stripe.android.connect.example
 import android.app.Application
 import android.os.StrictMode
 import com.github.kittinunf.fuel.core.FuelError
-import com.stripe.android.connect.example.data.EmbeddedComponentManagerProvider
 import com.stripe.android.connect.example.data.EmbeddedComponentService
 import com.stripe.android.core.Logger
 import dagger.hilt.android.HiltAndroidApp
@@ -18,8 +17,6 @@ import javax.inject.Inject
 class App : Application() {
 
     @Inject lateinit var embeddedComponentService: EmbeddedComponentService
-
-    @Inject lateinit var embeddedComponentManagerProvider: EmbeddedComponentManagerProvider
 
     private val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG)
 
@@ -44,7 +41,6 @@ class App : Application() {
         )
 
         attemptLoadPublishableKey()
-        embeddedComponentManagerProvider.initialize(GlobalScope)
     }
 
     private fun attemptLoadPublishableKey() {
