@@ -37,7 +37,10 @@ fun EmbeddedComponentManagerLoader(
 ) {
     val embeddedComponentManager = embeddedComponentAsync()
     when (embeddedComponentAsync) {
-        is Uninitialized, is Loading -> LoadingScreen()
+        is Uninitialized -> {
+            // Don't show anything to avoid flicker.
+        }
+        is Loading -> LoadingScreen()
         is Fail -> ErrorScreen(
             errorMessage = embeddedComponentAsync.error.message ?: stringResource(R.string.error_initializing),
             onReloadRequested = reload,
