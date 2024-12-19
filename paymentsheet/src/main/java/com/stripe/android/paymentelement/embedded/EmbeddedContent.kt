@@ -36,6 +36,7 @@ internal data class EmbeddedContent(
         PaymentMethodVerticalLayoutUI(
             interactor = interactor,
             modifier = Modifier.padding(bottom = 8.dp),
+            isEmbedded = true
         )
     }
 

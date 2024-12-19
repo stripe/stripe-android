@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -16,10 +17,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
@@ -43,7 +46,8 @@ internal const val TEST_TAG_SAVED_TEXT = "TEST_TAG_SAVED_TEXT"
 @Composable
 internal fun PaymentMethodVerticalLayoutUI(
     interactor: PaymentMethodVerticalLayoutInteractor,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isEmbedded: Boolean = false
 ) {
     val context = LocalContext.current
     val imageLoader = remember {
@@ -81,7 +85,8 @@ internal fun PaymentMethodVerticalLayoutUI(
         imageLoader = imageLoader,
         modifier = modifier
             .testTag(TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT),
-        rowStyle = state.rowType
+        rowStyle = state.rowType,
+        isEmbedded = isEmbedded
     )
 }
 
@@ -100,6 +105,54 @@ internal fun PaymentMethodVerticalLayoutUI(
     onSelectSavedPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     imageLoader: StripeImageLoader,
     rowStyle: Embedded.RowStyle = Embedded.RowStyle.FloatingButton.default,
+    isEmbedded: Boolean = false,
+    modifier: Modifier = Modifier,
+) {
+    if (isEmbedded) {
+        EmbeddedContent(
+            paymentMethods = paymentMethods,
+            displayedSavedPaymentMethod = displayedSavedPaymentMethod,
+            savedPaymentMethodAction = savedPaymentMethodAction,
+            selection = selection,
+            isEnabled = isEnabled,
+            onViewMorePaymentMethods = onViewMorePaymentMethods,
+            onManageOneSavedPaymentMethod = onManageOneSavedPaymentMethod,
+            onEditPaymentMethod = onEditPaymentMethod,
+            onSelectSavedPaymentMethod = onSelectSavedPaymentMethod,
+            imageLoader = imageLoader,
+            modifier = modifier,
+            rowStyle = rowStyle
+        )
+    } else {
+        VerticalModeContent(
+            paymentMethods = paymentMethods,
+            displayedSavedPaymentMethod = displayedSavedPaymentMethod,
+            savedPaymentMethodAction = savedPaymentMethodAction,
+            selection = selection,
+            isEnabled = isEnabled,
+            onViewMorePaymentMethods = onViewMorePaymentMethods,
+            onManageOneSavedPaymentMethod = onManageOneSavedPaymentMethod,
+            onEditPaymentMethod = onEditPaymentMethod,
+            onSelectSavedPaymentMethod = onSelectSavedPaymentMethod,
+            imageLoader = imageLoader,
+            modifier = modifier,
+        )
+    }
+}
+
+@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
+@Composable
+private fun VerticalModeContent(
+    paymentMethods: List<DisplayablePaymentMethod>,
+    displayedSavedPaymentMethod: DisplayableSavedPaymentMethod?,
+    savedPaymentMethodAction: PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction,
+    selection: PaymentSelection?,
+    isEnabled: Boolean,
+    onViewMorePaymentMethods: () -> Unit,
+    onManageOneSavedPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
+    onEditPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
+    onSelectSavedPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
+    imageLoader: StripeImageLoader,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -127,7 +180,6 @@ internal fun PaymentMethodVerticalLayoutUI(
                     )
                 },
                 onClick = { onSelectSavedPaymentMethod(displayedSavedPaymentMethod) },
-                rowStyle = rowStyle
             )
             Text(stringResource(id = R.string.stripe_paymentsheet_new_pm), style = textStyle, color = textColor)
         }
@@ -146,8 +198,78 @@ internal fun PaymentMethodVerticalLayoutUI(
             selectedIndex = selectedIndex,
             isEnabled = isEnabled,
             imageLoader = imageLoader,
-            rowStyle = rowStyle
         )
+    }
+}
+
+@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
+@Composable
+private fun EmbeddedContent(
+    paymentMethods: List<DisplayablePaymentMethod>,
+    displayedSavedPaymentMethod: DisplayableSavedPaymentMethod?,
+    savedPaymentMethodAction: PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction,
+    selection: PaymentSelection?,
+    isEnabled: Boolean,
+    onViewMorePaymentMethods: () -> Unit,
+    onManageOneSavedPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
+    onEditPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
+    onSelectSavedPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
+    imageLoader: StripeImageLoader,
+    rowStyle: Embedded.RowStyle,
+    modifier: Modifier = Modifier,
+) {
+    val arrangement = if (rowStyle is Embedded.RowStyle.FloatingButton) {
+        Arrangement.spacedBy(rowStyle.spacingDp.dp)
+    } else {
+        Arrangement.Top
+    }
+    Column(modifier = modifier, verticalArrangement = arrangement) {
+        if (rowStyle.topSeparatorEnabled()) OptionalEmbeddedDivider(rowStyle)
+        if (displayedSavedPaymentMethod != null) {
+            SavedPaymentMethodRowButton(
+                displayableSavedPaymentMethod = displayedSavedPaymentMethod,
+                isEnabled = isEnabled,
+                isSelected = selection?.isSaved == true,
+                trailingContent = {
+                    SavedPaymentMethodTrailingContent(
+                        displayedSavedPaymentMethod = displayedSavedPaymentMethod,
+                        savedPaymentMethodAction = savedPaymentMethodAction,
+                        onViewMorePaymentMethods = onViewMorePaymentMethods,
+                        onEditPaymentMethod = onEditPaymentMethod,
+                        onManageOneSavedPaymentMethod = { onManageOneSavedPaymentMethod(displayedSavedPaymentMethod) },
+                    )
+                },
+                onClick = { onSelectSavedPaymentMethod(displayedSavedPaymentMethod) },
+                rowStyle = rowStyle
+            )
+        }
+
+        OptionalEmbeddedDivider(rowStyle)
+
+        val selectedIndex = remember(selection, paymentMethods) {
+            if (selection == null || selection.isSaved) {
+                -1
+            } else {
+                val code = selection.code()
+                paymentMethods.indexOfFirst { it.code == code }
+            }
+        }
+
+        paymentMethods.forEachIndexed { index, item ->
+            NewPaymentMethodRowButton(
+                isEnabled = isEnabled,
+                isSelected = index == selectedIndex,
+                displayablePaymentMethod = item,
+                imageLoader = imageLoader,
+                rowStyle = rowStyle
+            )
+
+            if (index != paymentMethods.lastIndex) {
+                OptionalEmbeddedDivider(rowStyle)
+            } else if (rowStyle.bottomSeparatorEnabled()) {
+                OptionalEmbeddedDivider(rowStyle)
+            }
+        }
     }
 }
 
@@ -211,5 +333,69 @@ private fun ViewMoreButton(
             contentDescription = null,
             tint = MaterialTheme.colors.primary,
         )
+    }
+}
+
+@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
+@Composable
+private fun OptionalEmbeddedDivider(rowStyle: Embedded.RowStyle) {
+    if (rowStyle !is Embedded.RowStyle.FloatingButton) {
+        val color = Color(rowStyle.separatorColor())
+        val thickness = rowStyle.separatorThickness()
+        val modifier = if (rowStyle is Embedded.RowStyle.FlatWithRadio) {
+            Modifier.padding(start = rowStyle.separatorInsets() + 32.dp, end = rowStyle.separatorInsets())
+        } else {
+            Modifier.padding(horizontal = rowStyle.separatorInsets())
+        }
+        Divider(
+            color = color,
+            thickness = thickness,
+            modifier = modifier
+        )
+    }
+}
+
+@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
+private fun Embedded.RowStyle.bottomSeparatorEnabled(): Boolean {
+    return when (this) {
+        is Embedded.RowStyle.FloatingButton -> false
+        is Embedded.RowStyle.FlatWithRadio -> this.bottomSeparatorEnabled
+        is Embedded.RowStyle.FlatWithCheckmark -> this.bottomSeparatorEnabled
+    }
+}
+
+@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
+private fun Embedded.RowStyle.topSeparatorEnabled(): Boolean {
+    return when (this) {
+        is Embedded.RowStyle.FloatingButton -> false
+        is Embedded.RowStyle.FlatWithRadio -> this.topSeparatorEnabled
+        is Embedded.RowStyle.FlatWithCheckmark -> this.topSeparatorEnabled
+    }
+}
+
+@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
+private fun Embedded.RowStyle.separatorThickness(): Dp {
+    return when (this) {
+        is Embedded.RowStyle.FloatingButton -> 0.dp
+        is Embedded.RowStyle.FlatWithRadio -> this.separatorThicknessDp.dp
+        is Embedded.RowStyle.FlatWithCheckmark -> this.separatorThicknessDp.dp
+    }
+}
+
+@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
+private fun Embedded.RowStyle.separatorColor(): Int {
+    return when (this) {
+        is Embedded.RowStyle.FloatingButton -> 0
+        is Embedded.RowStyle.FlatWithRadio -> this.separatorColor
+        is Embedded.RowStyle.FlatWithCheckmark -> this.separatorColor
+    }
+}
+
+@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
+private fun Embedded.RowStyle.separatorInsets(): Dp {
+    return when (this) {
+        is Embedded.RowStyle.FloatingButton -> 0.dp
+        is Embedded.RowStyle.FlatWithRadio -> this.separatorInsetsDp.dp
+        is Embedded.RowStyle.FlatWithCheckmark -> this.separatorInsetsDp.dp
     }
 }
