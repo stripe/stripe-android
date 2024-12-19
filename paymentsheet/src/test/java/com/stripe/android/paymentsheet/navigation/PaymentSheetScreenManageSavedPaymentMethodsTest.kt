@@ -35,7 +35,6 @@ internal class PaymentSheetScreenManageSavedPaymentMethodsTest {
             paymentMethods = emptyList(),
             currentSelection = null,
             isEditing = isEditing,
-            canRemove = true,
             canEdit = true,
         )
     }
