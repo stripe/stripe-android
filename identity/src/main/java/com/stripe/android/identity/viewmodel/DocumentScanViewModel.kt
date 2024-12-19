@@ -48,7 +48,7 @@ internal class DocumentScanViewModel(
                     R.string.stripe_position_id_back
                 }
             }
-
+            is State.Error -> R.string.stripe_scanned
             is State.Scanned -> R.string.stripe_scanned
             is State.Scanning -> {
                 when (scannerState.scanState) {

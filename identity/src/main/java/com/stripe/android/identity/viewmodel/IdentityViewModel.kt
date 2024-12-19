@@ -85,6 +85,7 @@ import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.ui.IndividualCollectedStates
 import com.stripe.android.identity.utils.IdentityIO
 import com.stripe.android.identity.utils.IdentityImageHandler
+import com.stripe.android.identity.viewmodel.CameraViewModel.Companion
 import com.stripe.android.mlcore.base.InterpreterInitializer
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted

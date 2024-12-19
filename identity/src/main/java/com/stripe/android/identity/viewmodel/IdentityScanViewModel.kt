@@ -1,6 +1,7 @@
 package com.stripe.android.identity.viewmodel
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.camera.scanui.util.asRect
@@ -16,6 +17,7 @@ import com.stripe.android.identity.states.LaplacianBlurDetector
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
+import java.lang.Exception
 
 internal abstract class IdentityScanViewModel(
     private val applicationContext: Application,
@@ -51,6 +53,7 @@ internal abstract class IdentityScanViewModel(
 
         class Scanned(val result: IdentityAggregator.FinalResult) : State()
         class Timeout(val fromSelfie: Boolean) : State()
+        class Error(val exception: Exception) : State()
     }
 
     override suspend fun onInterimResult(result: IdentityAggregator.InterimResult) {
@@ -133,7 +136,10 @@ internal abstract class IdentityScanViewModel(
             viewFinder = cameraManager.requireCameraView().viewFinderWindowView.asRect(),
             lifecycleOwner = lifecycleOwner,
             coroutineScope = viewModelScope,
-            parameters = scanType
+            parameters = scanType,
+            errorHandler = { e ->
+                _scannerState.update { State.Error(e) }
+            }
         )
     }
 
