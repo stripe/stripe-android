@@ -6,7 +6,7 @@ class AttestationError(
     val errorType: ErrorType,
     message: String,
     cause: Throwable? = null
-) : Throwable(message, cause) {
+) : Exception(message, cause) {
 
     enum class ErrorType(
         val isRetriable: Boolean
