@@ -120,7 +120,7 @@ internal class IdentityScanFlow(
                     )
             } catch (e: IllegalStateException) {
                 withContext(Dispatchers.Main) {
-                    errorHandler(e)
+                    errorHandler?.invoke(e) ?: throw e
                 }
 
                 return@launch
