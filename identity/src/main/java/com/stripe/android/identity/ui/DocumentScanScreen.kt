@@ -123,12 +123,6 @@ internal fun DocumentScanScreen(
                 LoadingScreen()
             }
 
-            is IdentityScanViewModel.State.Error -> {
-                verificationFlowFinishable.finishWithResult(
-                    IdentityVerificationSheet.VerificationFlowResult.Failed((documentScannerState as IdentityScanViewModel.State.Error).exception)
-                )
-            }
-
             else -> { // can be Scanning or Scanned
                 DocumentCaptureScreen(
                     documentScannerState,

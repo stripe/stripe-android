@@ -25,7 +25,9 @@ import com.stripe.android.camera.framework.image.longerEdge
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.model.StripeFilePurpose
+import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.identity.IdentityVerificationSheetContract
+import com.stripe.android.identity.VerificationFlowFinishable
 import com.stripe.android.identity.analytics.AnalyticsState
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.analytics.ScreenTracker
@@ -103,6 +105,7 @@ import kotlin.coroutines.CoroutineContext
  */
 internal class IdentityViewModel constructor(
     application: Application,
+    private val verificationFlowFinishable: VerificationFlowFinishable,
     internal val verificationArgs: IdentityVerificationSheetContract.Args,
     internal val identityRepository: IdentityRepository,
     private val identityModelFetcher: IdentityModelFetcher,
@@ -1023,6 +1026,11 @@ internal class IdentityViewModel constructor(
                             it
                         )
                     )
+
+                    // Exit with failure
+                    verificationFlowFinishable.finishWithResult(
+                        IdentityVerificationSheet.VerificationFlowResult.Failed(it)
+                    )
                 }
             )
         }
@@ -1762,6 +1770,7 @@ internal class IdentityViewModel constructor(
 
     internal class IdentityViewModelFactory(
         private val applicationSupplier: () -> Application,
+        private val verificationFlowFinishable: VerificationFlowFinishable,
         private val uiContextSupplier: () -> CoroutineContext,
         private val workContextSupplier: () -> CoroutineContext,
         private val subcomponentSupplier: () -> IdentityActivitySubcomponent
@@ -1774,6 +1783,7 @@ internal class IdentityViewModel constructor(
 
             return IdentityViewModel(
                 applicationSupplier(),
+                verificationFlowFinishable,
                 subcomponent.verificationArgs,
                 subcomponent.identityRepository,
                 subcomponent.identityModelFetcher,

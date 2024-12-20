@@ -5,6 +5,8 @@ import android.util.Log
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.camera.scanui.util.asRect
+import com.stripe.android.identity.IdentityVerificationSheet
+import com.stripe.android.identity.VerificationFlowFinishable
 import com.stripe.android.identity.analytics.FPSTracker
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.analytics.ModelPerformanceTracker
@@ -14,17 +16,18 @@ import com.stripe.android.identity.ml.FaceDetectorOutput
 import com.stripe.android.identity.ml.IDDetectorOutput
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.states.LaplacianBlurDetector
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
-import java.lang.Exception
 
 internal abstract class IdentityScanViewModel(
     private val applicationContext: Application,
     open val fpsTracker: FPSTracker,
     open val identityAnalyticsRequestFactory: IdentityAnalyticsRequestFactory,
     modelPerformanceTracker: ModelPerformanceTracker,
-    laplacianBlurDetector: LaplacianBlurDetector
+    laplacianBlurDetector: LaplacianBlurDetector,
+    private val verificationFlowFinishable: VerificationFlowFinishable
 ) :
     CameraViewModel(
         modelPerformanceTracker,
@@ -53,7 +56,6 @@ internal abstract class IdentityScanViewModel(
 
         class Scanned(val result: IdentityAggregator.FinalResult) : State()
         class Timeout(val fromSelfie: Boolean) : State()
-        class Error(val exception: Exception) : State()
     }
 
     override suspend fun onInterimResult(result: IdentityAggregator.InterimResult) {
@@ -138,7 +140,9 @@ internal abstract class IdentityScanViewModel(
             coroutineScope = viewModelScope,
             parameters = scanType,
             errorHandler = { e ->
-                _scannerState.update { State.Error(e) }
+                verificationFlowFinishable.finishWithResult(
+                    IdentityVerificationSheet.VerificationFlowResult.Failed(e)
+                )
             }
         )
     }
