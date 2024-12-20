@@ -72,4 +72,32 @@ internal class SavedPaymentMethodRowButtonScreenshotTest {
             )
         }
     }
+
+    @Test
+    fun testSavedVisa_default() {
+
+        val savedDefaultVisa = DisplayableSavedPaymentMethod.create(
+            displayName = "···· 4242".resolvableString,
+            paymentMethod = PaymentMethod(
+                id = "001",
+                created = null,
+                liveMode = false,
+                code = PaymentMethod.Type.Card.code,
+                type = PaymentMethod.Type.Card,
+                card = PaymentMethod.Card(
+                    brand = CardBrand.Visa,
+                    last4 = "4242",
+                )
+            ),
+            shouldShowDefaultBadge = true,
+        )
+
+        paparazziRule.snapshot {
+            SavedPaymentMethodRowButton(
+                displayableSavedPaymentMethod = savedDefaultVisa,
+                isEnabled = false,
+                isSelected = false,
+            )
+        }
+    }
 }

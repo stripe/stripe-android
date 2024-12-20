@@ -7,10 +7,12 @@ import androidx.compose.material.Text
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
+import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.ui.core.R
 import com.stripe.android.uicore.StripeThemeDefaults
 import org.junit.Rule
@@ -18,6 +20,12 @@ import org.junit.Test
 
 @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 internal class PaymentMethodRowButtonScreenshotTest {
+
+    @get:Rule
+    val dpmFeatureFlagTestRule = FeatureFlagTestRule(
+        featureFlag = FeatureFlags.defaultPaymentMethod,
+        isEnabled = true
+    )
 
     @get:Rule
     val paparazziRule = PaparazziRule(
@@ -215,6 +223,48 @@ internal class PaymentMethodRowButtonScreenshotTest {
                 trailingContent = {
                     Text(text = "View more")
                 }
+            )
+        }
+    }
+
+    @Test
+    fun testDefault() {
+        paparazziRule.snapshot {
+            PaymentMethodRowButton(
+                isEnabled = true,
+                isSelected = false,
+                shouldShowDefaultBadge = true,
+                iconContent = {
+                    Image(
+                        painter = painterResource(id = R.drawable.stripe_ic_paymentsheet_pm_card),
+                        contentDescription = null
+                    )
+                },
+                title = "**** 4242",
+                subtitle = null,
+                promoText = null,
+                onClick = {},
+            )
+        }
+    }
+
+    @Test
+    fun testDefaultFeatureFlagDisabled() {
+        paparazziRule.snapshot {
+            PaymentMethodRowButton(
+                isEnabled = true,
+                isSelected = false,
+                shouldShowDefaultBadge = true,
+                iconContent = {
+                    Image(
+                        painter = painterResource(id = R.drawable.stripe_ic_paymentsheet_pm_card),
+                        contentDescription = null
+                    )
+                },
+                title = "**** 4242",
+                subtitle = null,
+                promoText = null,
+                onClick = {},
             )
         }
     }

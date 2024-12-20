@@ -117,6 +117,25 @@ internal class ManageScreenUIScreenshotTest {
         }
     }
 
+    @Test
+    fun testManageUIScreenWithDefaultPaymentMethod() {
+        paparazziRule.snapshot {
+            ManageScreenUI(
+                interactor = FakeManageScreenInteractor(
+                    initialState = ManageScreenInteractor.State(
+                        paymentMethods = listOf(
+                            PaymentMethodFixtures.CARD_PAYMENT_METHOD.toDisplayableSavedPaymentMethod(true)
+                        ),
+                        currentSelection = null,
+                        isEditing = false,
+                        canRemove = true,
+                        canEdit = true,
+                    )
+                ),
+            )
+        }
+    }
+
     private val savedPaymentMethods: List<DisplayableSavedPaymentMethod> = listOf(
         createCard("4242"),
         createCard("4000"),

@@ -36,6 +36,23 @@ class PaymentOptionScreenshotTest {
     }
 
     @Test
+    fun testDefaultEnabled() {
+        paparazziRule.snapshot {
+            SavedPaymentMethodTab(
+                viewWidth = 160.dp,
+                isSelected = false,
+                shouldShowDefaultBadge = true,
+                editState = PaymentOptionEditState.None,
+                isEnabled = true,
+                iconRes = R.drawable.stripe_ic_paymentsheet_card_visa,
+                labelText = "••••4242",
+                description = "Description",
+                onItemSelectedListener = {},
+            )
+        }
+    }
+
+    @Test
     fun testDisabled() {
         paparazziRule.snapshot {
             SavedPaymentMethodTab(
@@ -89,6 +106,23 @@ class PaymentOptionScreenshotTest {
             SavedPaymentMethodTab(
                 viewWidth = 160.dp,
                 isSelected = false,
+                editState = PaymentOptionEditState.Modifiable,
+                isEnabled = true,
+                iconRes = R.drawable.stripe_ic_paymentsheet_card_visa,
+                labelText = "••••4242",
+                description = "Description",
+                onItemSelectedListener = {},
+            )
+        }
+    }
+
+    @Test
+    fun testDefaultAndModifying() {
+        paparazziRule.snapshot {
+            SavedPaymentMethodTab(
+                viewWidth = 160.dp,
+                isSelected = false,
+                shouldShowDefaultBadge = true,
                 editState = PaymentOptionEditState.Modifiable,
                 isEnabled = true,
                 iconRes = R.drawable.stripe_ic_paymentsheet_card_visa,

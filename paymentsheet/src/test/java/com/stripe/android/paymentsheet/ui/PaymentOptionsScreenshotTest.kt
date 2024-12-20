@@ -126,11 +126,50 @@ class PaymentOptionsScreenshotTest {
         }
     }
 
+    @Test
+    fun testEditingAndRemoveDisabledWithModifiableItemsAndDefaultPaymentOption() {
+        paparazziRule.snapshot {
+            SavedPaymentMethodTabLayoutUI(
+                paymentOptionsItems = paymentOptionsItemsWithRemoveDisabledAndModifiableDefaultCard,
+                selectedPaymentOptionsItem = null,
+                isEditing = true,
+                isProcessing = false,
+                onAddCardPressed = {},
+                onItemSelected = {},
+                onModifyItem = {},
+                scrollState = LazyListState(firstVisibleItemIndex = 2),
+            )
+        }
+    }
+
     private val paymentOptionsItemsWithRemoveDisabledAndModifiableCard = listOf(
         PaymentOptionsItem.SavedPaymentMethod(
             DisplayableSavedPaymentMethod.create(
                 displayName = "Card".resolvableString,
                 paymentMethod = createCard("4242"),
+            ),
+        ),
+        PaymentOptionsItem.SavedPaymentMethod(
+            DisplayableSavedPaymentMethod.create(
+                displayName = "Card".resolvableString,
+                paymentMethod = createCard("4000"),
+            ),
+        ),
+        PaymentOptionsItem.SavedPaymentMethod(
+            DisplayableSavedPaymentMethod.create(
+                displayName = "Card".resolvableString,
+                paymentMethod = createCard("1234", addNetworks = true),
+                isCbcEligible = true,
+            ),
+        ),
+    )
+
+    private val paymentOptionsItemsWithRemoveDisabledAndModifiableDefaultCard = listOf(
+        PaymentOptionsItem.SavedPaymentMethod(
+            DisplayableSavedPaymentMethod.create(
+                displayName = "Card".resolvableString,
+                paymentMethod = createCard("4242"),
+                shouldShowDefaultBadge = true
             ),
         ),
         PaymentOptionsItem.SavedPaymentMethod(
