@@ -118,7 +118,7 @@ internal class IdentityScanFlow(
                             )
                         }
                     )
-            } catch (e: Exception) {
+            } catch (e: IllegalStateException) {
                 withContext(Dispatchers.Main) {
                     errorHandler(e)
                 }

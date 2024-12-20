@@ -880,14 +880,14 @@ internal class IdentityViewModel(
                         (
                             "sessionID: ${verificationArgs.verificationSessionId} and ephemeralKey: " +
                                 verificationArgs.ephemeralKeySecret
-                            ).let { msg ->
-                                _verificationPage.postValue(
-                                    Resource.error(
-                                        msg,
-                                        IllegalStateException(msg, it)
-                                    )
+                        ).let { msg ->
+                            _verificationPage.postValue(
+                                Resource.error(
+                                    msg,
+                                    IllegalStateException(msg, it)
                                 )
-                            }
+                            )
+                        }
                 }
             )
         }

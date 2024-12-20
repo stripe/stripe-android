@@ -5,7 +5,6 @@ import com.stripe.android.mlcore.base.InterpreterOptionsWrapper
 import com.stripe.android.mlcore.base.InterpreterWrapper
 import org.tensorflow.lite.Interpreter
 import java.io.File
-import kotlin.random.Random
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class InterpreterWrapperImpl constructor(file: File, options: InterpreterOptionsWrapper) : InterpreterWrapper {
