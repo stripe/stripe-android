@@ -1,9 +1,11 @@
 package com.stripe.attestation
 
+import androidx.annotation.RestrictTo
 import com.google.android.play.core.integrity.StandardIntegrityException
 import com.google.android.play.core.integrity.model.StandardIntegrityErrorCode
 import com.stripe.attestation.AttestationError.ErrorType.*
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class AttestationError(
     val errorType: ErrorType,
     message: String,
@@ -36,41 +38,39 @@ class AttestationError(
 
     companion object {
         fun fromException(exception: Throwable): AttestationError {
-            return if (exception is StandardIntegrityException) {
-                // see https://developer.android.com/google/play/integrity/error-codes#retryable_error_codes
-                val errorType = when (exception.errorCode) {
-                    StandardIntegrityErrorCode.API_NOT_AVAILABLE -> API_NOT_AVAILABLE
-                    StandardIntegrityErrorCode.APP_NOT_INSTALLED -> APP_NOT_INSTALLED
-                    StandardIntegrityErrorCode.APP_UID_MISMATCH -> APP_UID_MISMATCH
-                    StandardIntegrityErrorCode.CANNOT_BIND_TO_SERVICE -> CANNOT_BIND_TO_SERVICE
-                    StandardIntegrityErrorCode.CLIENT_TRANSIENT_ERROR -> CLIENT_TRANSIENT_ERROR
-                    StandardIntegrityErrorCode.CLOUD_PROJECT_NUMBER_IS_INVALID -> CLOUD_PROJECT_NUMBER_IS_INVALID
-                    StandardIntegrityErrorCode.GOOGLE_SERVER_UNAVAILABLE -> GOOGLE_SERVER_UNAVAILABLE
-                    StandardIntegrityErrorCode.INTEGRITY_TOKEN_PROVIDER_INVALID -> INTEGRITY_TOKEN_PROVIDER_INVALID
-                    StandardIntegrityErrorCode.INTERNAL_ERROR -> INTERNAL_ERROR
-                    StandardIntegrityErrorCode.NETWORK_ERROR -> NETWORK_ERROR
-                    StandardIntegrityErrorCode.NO_ERROR -> NO_ERROR
-                    StandardIntegrityErrorCode.PLAY_SERVICES_NOT_FOUND -> PLAY_SERVICES_NOT_FOUND
-                    StandardIntegrityErrorCode.PLAY_SERVICES_VERSION_OUTDATED -> PLAY_SERVICES_VERSION_OUTDATED
-                    StandardIntegrityErrorCode.PLAY_STORE_NOT_FOUND -> PLAY_STORE_NOT_FOUND
-                    StandardIntegrityErrorCode.PLAY_STORE_VERSION_OUTDATED -> PLAY_STORE_VERSION_OUTDATED
-                    StandardIntegrityErrorCode.REQUEST_HASH_TOO_LONG -> REQUEST_HASH_TOO_LONG
-                    StandardIntegrityErrorCode.TOO_MANY_REQUESTS -> TOO_MANY_REQUESTS
-                    else -> UNKNOWN
-                }
-                AttestationError(
-                    errorType = errorType,
+            return when (exception) {
+                is StandardIntegrityException -> AttestationError(
+                    errorType = mapErrorCodeToErrorType(exception.errorCode),
                     message = exception.message ?: "Integrity error occurred",
                     cause = exception
                 )
-            } else {
-                // Handle non-standard exceptions as unknown errors
-                AttestationError(
+                else -> AttestationError(
                     errorType = UNKNOWN,
                     message = "An unknown error occurred",
                     cause = exception
                 )
             }
+        }
+
+        private fun mapErrorCodeToErrorType(errorCode: Int): ErrorType = when (errorCode) {
+            StandardIntegrityErrorCode.API_NOT_AVAILABLE -> API_NOT_AVAILABLE
+            StandardIntegrityErrorCode.APP_NOT_INSTALLED -> APP_NOT_INSTALLED
+            StandardIntegrityErrorCode.APP_UID_MISMATCH -> APP_UID_MISMATCH
+            StandardIntegrityErrorCode.CANNOT_BIND_TO_SERVICE -> CANNOT_BIND_TO_SERVICE
+            StandardIntegrityErrorCode.CLIENT_TRANSIENT_ERROR -> CLIENT_TRANSIENT_ERROR
+            StandardIntegrityErrorCode.CLOUD_PROJECT_NUMBER_IS_INVALID -> CLOUD_PROJECT_NUMBER_IS_INVALID
+            StandardIntegrityErrorCode.GOOGLE_SERVER_UNAVAILABLE -> GOOGLE_SERVER_UNAVAILABLE
+            StandardIntegrityErrorCode.INTEGRITY_TOKEN_PROVIDER_INVALID -> INTEGRITY_TOKEN_PROVIDER_INVALID
+            StandardIntegrityErrorCode.INTERNAL_ERROR -> INTERNAL_ERROR
+            StandardIntegrityErrorCode.NETWORK_ERROR -> NETWORK_ERROR
+            StandardIntegrityErrorCode.NO_ERROR -> NO_ERROR
+            StandardIntegrityErrorCode.PLAY_SERVICES_NOT_FOUND -> PLAY_SERVICES_NOT_FOUND
+            StandardIntegrityErrorCode.PLAY_SERVICES_VERSION_OUTDATED -> PLAY_SERVICES_VERSION_OUTDATED
+            StandardIntegrityErrorCode.PLAY_STORE_NOT_FOUND -> PLAY_STORE_NOT_FOUND
+            StandardIntegrityErrorCode.PLAY_STORE_VERSION_OUTDATED -> PLAY_STORE_VERSION_OUTDATED
+            StandardIntegrityErrorCode.REQUEST_HASH_TOO_LONG -> REQUEST_HASH_TOO_LONG
+            StandardIntegrityErrorCode.TOO_MANY_REQUESTS -> TOO_MANY_REQUESTS
+            else -> UNKNOWN
         }
     }
 }
