@@ -20,7 +20,7 @@ interface IntegrityRequestManager {
      * Needs to be called before calling [requestToken].
      */
     suspend fun prepare(
-        maxRetries: Int = 1,
+        maxRetries: Int = 0,
     ): Result<Unit>
 
     /**
@@ -37,7 +37,7 @@ interface IntegrityRequestManager {
      */
     suspend fun requestToken(
         requestIdentifier: String? = null,
-        maxRetries: Int = 1,
+        maxRetries: Int = 0,
     ): Result<String>
 }
 
@@ -104,12 +104,13 @@ class IntegrityStandardRequestManager(
     }
 
     suspend fun <T> exponentialBackoff(
-        maxRetries: Int = MAX_RETRIES,
+        maxRetries: Int,
         initialDelay: Long = INITIAL_DELAY,
         block: suspend () -> Result<T>
     ): Result<T> {
         var currentDelay = initialDelay
-        repeat(maxRetries) { attempt ->
+        val totalTries = maxRetries + 1
+        repeat(totalTries) { attempt ->
             val result = block()
 
             if (result.isSuccess) {
@@ -139,7 +140,6 @@ class IntegrityStandardRequestManager(
     companion object {
         // Constants for the retry mechanism
         private const val INITIAL_DELAY = 2000L // Start with 2 seconds
-        private const val MAX_RETRIES = 2
         private const val MULTIPLIER = 2.0
     }
 }
