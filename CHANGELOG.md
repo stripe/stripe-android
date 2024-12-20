@@ -7,8 +7,7 @@
 * [CHANGED][9804](https://github.com/stripe/stripe-android/pull/9804) Changed the edit and remove saved payment method flow so that tapping 'Edit' displays an icon that leads to a new update payment method screen that displays payment method details for card (last 4 digits of card number, cvc and expiry date fields), US Bank account (name, email, last 4 digits of bank account), and SEPA debit (name, email, last 4 digits of IBAN).
 
 ### Identity
-* [FIXED] App crash when TFLite models fail to load
-* [ADDED] More error handling and validation for TFLite models
+* [FIXED][9812](https://github.com/stripe/stripe-android/pull/9812) App crash when TFLite models fail to load, added error handling and model validation
 
 ## 21.2.1 - 2024-12-02
 ### PaymentSheet
