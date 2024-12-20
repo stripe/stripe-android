@@ -8,9 +8,6 @@ class AttestationError(
     cause: Throwable? = null
 ) : Throwable(message, cause) {
 
-    /**
-     *
-     */
     enum class ErrorType(
         val isRetriable: Boolean
     ) {
