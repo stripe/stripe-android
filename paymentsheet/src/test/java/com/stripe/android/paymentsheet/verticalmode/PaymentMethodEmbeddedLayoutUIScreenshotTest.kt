@@ -99,6 +99,7 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
             )
         }
     }
+
     @Composable
     private fun TestPaymentMethodLayoutUi(
         rowStyle: Embedded.RowStyle

@@ -1,27 +1,7 @@
 package com.stripe.android.paymentsheet.verticalmode
 
 import android.os.Build
-import androidx.compose.foundation.layout.padding
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.test.assert
-import androidx.compose.ui.test.assertAll
-import androidx.compose.ui.test.isSelected
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onChildren
-import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.performClick
-import androidx.compose.ui.unit.dp
-import com.google.common.truth.Truth.assertThat
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
-import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
-import com.stripe.android.model.PaymentIntentFixtures
-import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
-import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
-import com.stripe.android.paymentsheet.ViewActionRecorder
-import com.stripe.android.paymentsheet.forms.FormFieldValues
-import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -35,7 +15,7 @@ internal class PaymentMethodVerticalLayoutUITest {
     @get:Rule
     val composeRule = createComposeRule()
 
-    private val helper =  PaymentMethodLayoutUITestHelper(
+    private val helper = PaymentMethodLayoutUITestHelper(
         composeRule,
         false
     )

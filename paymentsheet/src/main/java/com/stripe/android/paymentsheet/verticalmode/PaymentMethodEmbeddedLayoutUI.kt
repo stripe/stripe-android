@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.verticalmode
 
-import androidx.annotation.RestrictTo
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -24,7 +23,6 @@ import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.utils.collectAsState
 import org.jetbrains.annotations.VisibleForTesting
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 internal const val TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT = "TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT"
 
 @OptIn(ExperimentalEmbeddedPaymentElementApi::class)

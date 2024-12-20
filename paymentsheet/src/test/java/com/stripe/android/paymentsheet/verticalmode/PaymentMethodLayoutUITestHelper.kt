@@ -7,7 +7,6 @@ import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertAll
 import androidx.compose.ui.test.isSelected
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
-import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -23,8 +22,6 @@ import com.stripe.android.paymentsheet.ViewActionRecorder
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
-import org.junit.Rule
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
@@ -280,8 +277,7 @@ class PaymentMethodLayoutUITestHelper(
         composeRule.setContent {
             if (isEmbedded) {
                 PaymentMethodEmbeddedLayoutUI(interactor, Modifier.padding(horizontal = 20.dp))
-            }
-            else {
+            } else {
                 PaymentMethodVerticalLayoutUI(interactor, Modifier.padding(horizontal = 20.dp))
             }
         }
