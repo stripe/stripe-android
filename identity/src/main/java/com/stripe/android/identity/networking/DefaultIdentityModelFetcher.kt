@@ -18,7 +18,7 @@ internal class DefaultIdentityModelFetcher @Inject constructor(
             } else {
                 identityRepository.downloadModel(modelUrl).also {
                     if (!validateModel(tfliteFile)) {
-                        throw IllegalStateException("Downloaded model could not be loaded and failed validation")
+                        throw IllegalStateException("Invalid TFLite model, likely a corrupted download")
                     }
                 }
             }

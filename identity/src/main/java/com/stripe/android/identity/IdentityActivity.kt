@@ -62,10 +62,10 @@ internal class IdentityActivity :
     internal var viewModelFactory: ViewModelProvider.Factory =
         IdentityViewModel.IdentityViewModelFactory(
             { application },
-            this,
             { uiContext },
             { workContext },
-            { subcomponent }
+            { subcomponent },
+            { finishWithResult(it) }
         )
 
     private val starterArgs: IdentityVerificationSheetContract.Args by lazy {

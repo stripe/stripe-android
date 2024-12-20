@@ -9,12 +9,7 @@ import kotlin.random.Random
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class InterpreterWrapperImpl constructor(file: File, options: InterpreterOptionsWrapper) : InterpreterWrapper {
-    private val interpreter: Interpreter = try {
-        Interpreter(file, options.toInterpreterOptions())
-        throw IllegalArgumentException("Mock error loading")
-    } catch (e: IllegalArgumentException) {
-        throw InterpreterLoadingException("Failed to initialize TFLite interpreter", e)
-    }
+    private val interpreter: Interpreter = Interpreter(file, options.toInterpreterOptions())
 
     override fun runForMultipleInputsOutputs(inputs: Array<Any>, outputs: Map<Int, Any>) {
         interpreter.runForMultipleInputsOutputs(inputs, outputs)
@@ -39,8 +34,3 @@ private fun InterpreterOptionsWrapper.toInterpreterOptions(): Interpreter.Option
     }
     return ret
 }
-
-class InterpreterLoadingException(
-    message: String,
-    cause: Throwable? = null
-) : Exception(message, cause)

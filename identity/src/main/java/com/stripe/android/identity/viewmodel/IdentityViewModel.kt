@@ -87,7 +87,6 @@ import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.ui.IndividualCollectedStates
 import com.stripe.android.identity.utils.IdentityIO
 import com.stripe.android.identity.utils.IdentityImageHandler
-import com.stripe.android.identity.viewmodel.CameraViewModel.Companion
 import com.stripe.android.mlcore.base.InterpreterInitializer
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -105,7 +104,6 @@ import kotlin.coroutines.CoroutineContext
  */
 internal class IdentityViewModel constructor(
     application: Application,
-    private val verificationFlowFinishable: VerificationFlowFinishable,
     internal val verificationArgs: IdentityVerificationSheetContract.Args,
     internal val identityRepository: IdentityRepository,
     private val identityModelFetcher: IdentityModelFetcher,
@@ -116,7 +114,8 @@ internal class IdentityViewModel constructor(
     private val tfLiteInitializer: InterpreterInitializer,
     private val savedStateHandle: SavedStateHandle,
     @UIContext internal val uiContext: CoroutineContext,
-    @IOContext internal val workContext: CoroutineContext
+    @IOContext internal val workContext: CoroutineContext,
+    private val finishWithResult: (IdentityVerificationSheet.VerificationFlowResult) -> Unit
 ) : AndroidViewModel(application) {
 
     /**
@@ -883,13 +882,13 @@ internal class IdentityViewModel constructor(
                             "sessionID: ${verificationArgs.verificationSessionId} and ephemeralKey: " +
                                 verificationArgs.ephemeralKeySecret
                             ).let { msg ->
-                            _verificationPage.postValue(
-                                Resource.error(
-                                    msg,
-                                    IllegalStateException(msg, it)
+                                _verificationPage.postValue(
+                                    Resource.error(
+                                        msg,
+                                        IllegalStateException(msg, it)
+                                    )
                                 )
-                            )
-                        }
+                            }
                 }
             )
         }
@@ -1028,9 +1027,7 @@ internal class IdentityViewModel constructor(
                     )
 
                     // Exit with failure
-                    verificationFlowFinishable.finishWithResult(
-                        IdentityVerificationSheet.VerificationFlowResult.Failed(it)
-                    )
+                    finishWithResult(IdentityVerificationSheet.VerificationFlowResult.Failed(it))
                 }
             )
         }
@@ -1770,10 +1767,10 @@ internal class IdentityViewModel constructor(
 
     internal class IdentityViewModelFactory(
         private val applicationSupplier: () -> Application,
-        private val verificationFlowFinishable: VerificationFlowFinishable,
         private val uiContextSupplier: () -> CoroutineContext,
         private val workContextSupplier: () -> CoroutineContext,
-        private val subcomponentSupplier: () -> IdentityActivitySubcomponent
+        private val subcomponentSupplier: () -> IdentityActivitySubcomponent,
+        private val finishWithResult: (IdentityVerificationSheet.VerificationFlowResult) -> Unit,
     ) : ViewModelProvider.Factory {
 
         @Suppress("UNCHECKED_CAST")
@@ -1783,7 +1780,6 @@ internal class IdentityViewModel constructor(
 
             return IdentityViewModel(
                 applicationSupplier(),
-                verificationFlowFinishable,
                 subcomponent.verificationArgs,
                 subcomponent.identityRepository,
                 subcomponent.identityModelFetcher,
@@ -1794,7 +1790,8 @@ internal class IdentityViewModel constructor(
                 subcomponent.tfLiteInitializer,
                 savedStateHandle,
                 uiContextSupplier(),
-                workContextSupplier()
+                workContextSupplier(),
+                finishWithResult
             ) as T
         }
     }
