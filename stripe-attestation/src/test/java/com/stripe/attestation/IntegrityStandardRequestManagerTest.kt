@@ -26,7 +26,7 @@ class IntegrityStandardRequestManagerTest {
     }
 
     @Test
-    fun `prepare - success`() = runTest {
+    fun `prepare - success returns successful result`() = runTest {
         val tokenProvider = FakeStandardIntegrityTokenProvider(Tasks.forResult(FakeStandardIntegrityToken()))
         val integrityStandardRequestManager = buildRequestManager(
             prepareTask = Tasks.forResult(tokenProvider),
@@ -38,7 +38,7 @@ class IntegrityStandardRequestManagerTest {
     }
 
     @Test
-    fun `prepare - failure`() = runTest {
+    fun `prepare - failure on prepare task returns Attestation error`() = runTest {
         val integrityStandardRequestManager = buildRequestManager(
             prepareTask = Tasks.forException(Exception("Failed to build token provider")),
         )
@@ -46,6 +46,7 @@ class IntegrityStandardRequestManagerTest {
         val result = integrityStandardRequestManager.prepare()
 
         assert(result.isFailure)
+        assert(result.exceptionOrNull() is AttestationError)
     }
 
     @Test
@@ -72,6 +73,7 @@ class IntegrityStandardRequestManagerTest {
         val result = integrityStandardRequestManager.requestToken("requestIdentifier")
 
         assert(result.isFailure)
+        assert(result.exceptionOrNull() is AttestationError)
     }
 
     @After
