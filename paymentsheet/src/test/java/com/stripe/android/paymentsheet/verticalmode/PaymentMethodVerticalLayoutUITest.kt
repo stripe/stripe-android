@@ -78,28 +78,6 @@ internal class PaymentMethodVerticalLayoutUITest {
     }
 
     @Test
-    fun oneSavedPm_canBeModified_buttonIsEdit_editsPaymentMethod() = runScenario(
-        PaymentMethodVerticalLayoutInteractor.State(
-            displayablePaymentMethods = emptyList(),
-            isProcessing = false,
-            selection = null,
-            displayedSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
-            availableSavedPaymentMethodAction =
-            PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.EDIT_CARD_BRAND,
-            rowType = Embedded.RowStyle.FloatingButton.default
-        )
-    ) {
-        assertThat(viewActionRecorder.viewActions).isEmpty()
-        composeRule.onNodeWithTag(TEST_TAG_EDIT_SAVED_CARD).performClick()
-        viewActionRecorder.consume(
-            PaymentMethodVerticalLayoutInteractor.ViewAction.EditPaymentMethod(
-                PaymentMethodFixtures.displayableCard()
-            )
-        )
-        assertThat(viewActionRecorder.viewActions).isEmpty()
-    }
-
-    @Test
     fun oneSavedPm_cannotBeEdited_noSavedPaymentMethodButton() = runScenario(
         PaymentMethodVerticalLayoutInteractor.State(
             displayablePaymentMethods = emptyList(),

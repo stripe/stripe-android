@@ -149,16 +149,12 @@ internal class DefaultEmbeddedContentHelper @AssistedInject constructor(
             onFormFieldValuesChanged = formHelper::onFormFieldValuesChanged,
             transitionToManageScreen = {
             },
-            transitionToManageOneSavedPaymentMethodScreen = {
-            },
             transitionToFormScreen = {
             },
             paymentMethods = customerStateHolder.paymentMethods,
             mostRecentlySelectedSavedPaymentMethod = customerStateHolder.mostRecentlySelectedSavedPaymentMethod,
             providePaymentMethodName = savedPaymentMethodMutator.providePaymentMethodName,
             canRemove = customerStateHolder.canRemove,
-            onEditPaymentMethod = {
-            },
             onSelectSavedPaymentMethod = {
                 setSelection(PaymentSelection.Saved(it))
             },

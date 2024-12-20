@@ -51,11 +51,6 @@ internal fun PaymentMethodEmbeddedLayoutUI(
                 PaymentMethodVerticalLayoutInteractor.ViewAction.TransitionToManageSavedPaymentMethods
             )
         },
-        onEditPaymentMethod = {
-            interactor.handleViewAction(
-                PaymentMethodVerticalLayoutInteractor.ViewAction.EditPaymentMethod(it)
-            )
-        },
         onSelectSavedPaymentMethod = {
             interactor.handleViewAction(
                 PaymentMethodVerticalLayoutInteractor.ViewAction.SavedPaymentMethodSelected(it.paymentMethod)
@@ -84,7 +79,6 @@ internal fun PaymentMethodEmbeddedLayoutUI(
     isEnabled: Boolean,
     onViewMorePaymentMethods: () -> Unit,
     onManageOneSavedPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
-    onEditPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     onSelectSavedPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     imageLoader: StripeImageLoader,
     rowStyle: Embedded.RowStyle,
@@ -104,10 +98,8 @@ internal fun PaymentMethodEmbeddedLayoutUI(
                 isSelected = selection?.isSaved == true,
                 trailingContent = {
                     SavedPaymentMethodTrailingContent(
-                        displayedSavedPaymentMethod = displayedSavedPaymentMethod,
                         savedPaymentMethodAction = savedPaymentMethodAction,
                         onViewMorePaymentMethods = onViewMorePaymentMethods,
-                        onEditPaymentMethod = onEditPaymentMethod,
                         onManageOneSavedPaymentMethod = { onManageOneSavedPaymentMethod(displayedSavedPaymentMethod) },
                     )
                 },

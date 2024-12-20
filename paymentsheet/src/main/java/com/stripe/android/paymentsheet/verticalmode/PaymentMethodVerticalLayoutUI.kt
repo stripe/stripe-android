@@ -61,11 +61,6 @@ internal fun PaymentMethodVerticalLayoutUI(
                 PaymentMethodVerticalLayoutInteractor.ViewAction.TransitionToManageSavedPaymentMethods
             )
         },
-        onEditPaymentMethod = {
-            interactor.handleViewAction(
-                PaymentMethodVerticalLayoutInteractor.ViewAction.EditPaymentMethod(it)
-            )
-        },
         onSelectSavedPaymentMethod = {
             interactor.handleViewAction(
                 PaymentMethodVerticalLayoutInteractor.ViewAction.SavedPaymentMethodSelected(it.paymentMethod)
@@ -93,7 +88,6 @@ internal fun PaymentMethodVerticalLayoutUI(
     isEnabled: Boolean,
     onViewMorePaymentMethods: () -> Unit,
     onManageOneSavedPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
-    onEditPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     onSelectSavedPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     imageLoader: StripeImageLoader,
     modifier: Modifier = Modifier,
@@ -113,16 +107,14 @@ internal fun PaymentMethodVerticalLayoutUI(
                 displayableSavedPaymentMethod = displayedSavedPaymentMethod,
                 isEnabled = isEnabled,
                 isSelected = selection?.isSaved == true,
+                onClick = { onSelectSavedPaymentMethod(displayedSavedPaymentMethod) },
                 trailingContent = {
                     SavedPaymentMethodTrailingContent(
-                        displayedSavedPaymentMethod = displayedSavedPaymentMethod,
                         savedPaymentMethodAction = savedPaymentMethodAction,
                         onViewMorePaymentMethods = onViewMorePaymentMethods,
-                        onEditPaymentMethod = onEditPaymentMethod,
                         onManageOneSavedPaymentMethod = { onManageOneSavedPaymentMethod(displayedSavedPaymentMethod) },
                     )
-                },
-                onClick = { onSelectSavedPaymentMethod(displayedSavedPaymentMethod) },
+                }
             )
             Text(stringResource(id = R.string.stripe_paymentsheet_new_pm), style = textStyle, color = textColor)
         }
@@ -147,17 +139,12 @@ internal fun PaymentMethodVerticalLayoutUI(
 
 @Composable
 internal fun SavedPaymentMethodTrailingContent(
-    displayedSavedPaymentMethod: DisplayableSavedPaymentMethod,
     savedPaymentMethodAction: PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction,
     onViewMorePaymentMethods: () -> Unit,
     onManageOneSavedPaymentMethod: () -> Unit,
-    onEditPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
 ) {
     when (savedPaymentMethodAction) {
         PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.NONE -> Unit
-        PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.EDIT_CARD_BRAND -> {
-            EditButton(onClick = { onEditPaymentMethod(displayedSavedPaymentMethod) })
-        }
         PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ONE -> {
             EditButton(onClick = onManageOneSavedPaymentMethod)
         }
