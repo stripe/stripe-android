@@ -30,267 +30,56 @@ import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.Q])
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 internal class PaymentMethodVerticalLayoutUITest {
+
     @get:Rule
     val composeRule = createComposeRule()
 
+    private val helper =  PaymentMethodLayoutUITestHelper(
+        composeRule,
+        false
+    )
+
     @Test
-    fun clickingOnViewMore_transitionsToManageScreen() = runScenario(
-        PaymentMethodVerticalLayoutInteractor.State(
-            displayablePaymentMethods = emptyList(),
-            isProcessing = false,
-            selection = null,
-            displayedSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
-            availableSavedPaymentMethodAction =
-            PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
-            rowType = Embedded.RowStyle.FloatingButton.default
-        )
-    ) {
-        assertThat(viewActionRecorder.viewActions).isEmpty()
-        composeRule.onNodeWithTag(TEST_TAG_VIEW_MORE).performClick()
-        viewActionRecorder.consume(
-            PaymentMethodVerticalLayoutInteractor.ViewAction.TransitionToManageSavedPaymentMethods
-        )
-        assertThat(viewActionRecorder.viewActions).isEmpty()
+    fun clickingOnViewMore_transitionsToManageScreen() {
+        helper.clickingOnViewMore_transitionsToManageScreen()
     }
 
     @Test
-    fun oneSavedPm_canBeRemoved_buttonIsEdit_callsOnManageOneSavedPm() = runScenario(
-        PaymentMethodVerticalLayoutInteractor.State(
-            displayablePaymentMethods = emptyList(),
-            isProcessing = false,
-            selection = null,
-            displayedSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
-            availableSavedPaymentMethodAction =
-            PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ONE,
-            rowType = Embedded.RowStyle.FloatingButton.default
-        )
-    ) {
-        assertThat(viewActionRecorder.viewActions).isEmpty()
-        composeRule.onNodeWithTag(TEST_TAG_EDIT_SAVED_CARD).performClick()
-        viewActionRecorder.consume(
-            PaymentMethodVerticalLayoutInteractor.ViewAction.OnManageOneSavedPaymentMethod(
-                PaymentMethodFixtures.displayableCard()
-            )
-        )
-        assertThat(viewActionRecorder.viewActions).isEmpty()
+    fun oneSavedPm_canBeRemoved_buttonIsEdit_callsOnManageOneSavedPm() {
+        helper.oneSavedPm_canBeRemoved_buttonIsEdit_callsOnManageOneSavedPm()
     }
 
     @Test
-    fun oneSavedPm_cannotBeEdited_noSavedPaymentMethodButton() = runScenario(
-        PaymentMethodVerticalLayoutInteractor.State(
-            displayablePaymentMethods = emptyList(),
-            isProcessing = false,
-            selection = null,
-            displayedSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
-            availableSavedPaymentMethodAction =
-            PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.NONE,
-            rowType = Embedded.RowStyle.FloatingButton.default
-        )
-    ) {
-        composeRule.onNodeWithTag(
-            TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON + "_${PaymentMethodFixtures.displayableCard().paymentMethod.id}"
-        ).assertExists()
-
-        composeRule.onNodeWithTag(TEST_TAG_EDIT_SAVED_CARD).assertDoesNotExist()
-        composeRule.onNodeWithTag(TEST_TAG_VIEW_MORE).assertDoesNotExist()
+    fun oneSavedPm_cannotBeEdited_noSavedPaymentMethodButton() {
+        helper.oneSavedPm_cannotBeEdited_noSavedPaymentMethodButton()
     }
 
     @Test
     fun clickingOnNewPaymentMethod_callsOnClick() {
-        var onClickCalled = false
-        runScenario(
-            PaymentMethodVerticalLayoutInteractor.State(
-                displayablePaymentMethods = listOf(
-                    CardDefinition.uiDefinitionFactory().supportedPaymentMethod(CardDefinition, emptyList())!!
-                        .asDisplayablePaymentMethod(
-                            customerSavedPaymentMethods = emptyList(),
-                            incentive = null,
-                            onClick = { onClickCalled = true },
-                        ),
-                ),
-                isProcessing = false,
-                selection = null,
-                displayedSavedPaymentMethod = null,
-                availableSavedPaymentMethodAction =
-                PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
-                rowType = Embedded.RowStyle.FloatingButton.default
-            )
-        ) {
-            assertThat(onClickCalled).isFalse()
-            composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_card").performClick()
-            assertThat(onClickCalled).isTrue()
-            assertThat(viewActionRecorder.viewActions).isEmpty()
-        }
+        helper.clickingOnNewPaymentMethod_callsOnClick()
     }
 
     @Test
     fun clickingSavedPaymentMethod_callsSelectSavedPaymentMethod() {
-        val savedPaymentMethod = PaymentMethodFixtures.displayableCard()
-        runScenario(
-            PaymentMethodVerticalLayoutInteractor.State(
-                displayablePaymentMethods = emptyList(),
-                isProcessing = false,
-                selection = null,
-                displayedSavedPaymentMethod = savedPaymentMethod,
-                availableSavedPaymentMethodAction = PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.NONE,
-                rowType = Embedded.RowStyle.FloatingButton.default
-            )
-        ) {
-            assertThat(viewActionRecorder.viewActions).isEmpty()
-            composeRule.onNodeWithTag(
-                TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON + "_${savedPaymentMethod.paymentMethod.id}"
-            ).performClick()
-            viewActionRecorder.consume(
-                PaymentMethodVerticalLayoutInteractor.ViewAction.SavedPaymentMethodSelected(
-                    savedPaymentMethod.paymentMethod
-                )
-            )
-            assertThat(viewActionRecorder.viewActions).isEmpty()
-        }
+        helper.clickingSavedPaymentMethod_callsSelectSavedPaymentMethod()
     }
 
     @Test
-    fun allPaymentMethodsAreShown() = runScenario(
-        PaymentMethodVerticalLayoutInteractor.State(
-            displayablePaymentMethods = PaymentMethodMetadataFactory.create(
-                PaymentIntentFixtures.PI_WITH_PAYMENT_METHOD!!.copy(
-                    paymentMethodTypes = listOf("card", "cashapp", "klarna")
-                )
-            ).sortedSupportedPaymentMethods().map {
-                it.asDisplayablePaymentMethod(
-                    customerSavedPaymentMethods = emptyList(),
-                    incentive = null,
-                    onClick = {},
-                )
-            },
-            isProcessing = false,
-            selection = null,
-            displayedSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
-            availableSavedPaymentMethodAction =
-            PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
-            rowType = Embedded.RowStyle.FloatingButton.default
+    fun allPaymentMethodsAreShown() {
+        helper.allPaymentMethodsAreShown(
+            tag = TEST_TAG_NEW_PAYMENT_METHOD_VERTICAL_LAYOUT_UI,
+            childCount = 3
         )
-    ) {
-        assertThat(
-            composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_VERTICAL_LAYOUT_UI)
-                .onChildren().fetchSemanticsNodes().size
-        ).isEqualTo(3)
-
-        composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_card").assertExists()
-        composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_cashapp").assertExists()
-        composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_klarna").assertExists()
-
-        composeRule.onNodeWithTag(
-            TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON + "_${PaymentMethodFixtures.displayableCard().paymentMethod.id}"
-        ).assertExists()
     }
 
     @Test
-    fun savedPaymentMethodIsSelected_whenSelectionIsSavedPm() = runScenario(
-        PaymentMethodVerticalLayoutInteractor.State(
-            displayablePaymentMethods = PaymentMethodMetadataFactory.create(
-                PaymentIntentFixtures.PI_WITH_PAYMENT_METHOD!!.copy(
-                    paymentMethodTypes = listOf("card", "cashapp", "klarna")
-                )
-            ).sortedSupportedPaymentMethods().map {
-                it.asDisplayablePaymentMethod(
-                    customerSavedPaymentMethods = emptyList(),
-                    incentive = null,
-                    onClick = {},
-                )
-            },
-            isProcessing = false,
-            selection = PaymentSelection.Saved(PaymentMethodFixtures.displayableCard().paymentMethod),
-            displayedSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
-            availableSavedPaymentMethodAction =
-            PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
-            rowType = Embedded.RowStyle.FloatingButton.default
-        )
-    ) {
-        composeRule.onNodeWithTag(
-            TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON + "_${PaymentMethodFixtures.displayableCard().paymentMethod.id}"
-        ).assertExists()
-            .assert(isSelected())
-
-        composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_card")
-            .assertExists()
-            .onChildren().assertAll(isSelected().not())
-        composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_cashapp")
-            .assertExists()
-            .onChildren().assertAll(isSelected().not())
-        composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_klarna")
-            .assertExists()
-            .onChildren().assertAll(isSelected().not())
+    fun savedPaymentMethodIsSelected_whenSelectionIsSavedPm() {
+        helper.savedPaymentMethodIsSelected_whenSelectionIsSavedPm()
     }
 
     @Test
     fun correctLPMIsSelected() {
-        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-            PaymentIntentFixtures.PI_WITH_PAYMENT_METHOD!!.copy(
-                paymentMethodTypes = listOf("card", "cashapp", "klarna")
-            )
-        )
-        val supportedPaymentMethods = paymentMethodMetadata.sortedSupportedPaymentMethods()
-        val selection = FormFieldValues(
-            userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest,
-        ).transformToPaymentSelection(
-            paymentMethod = supportedPaymentMethods[1],
-            paymentMethodMetadata = paymentMethodMetadata,
-        )
-        runScenario(
-            PaymentMethodVerticalLayoutInteractor.State(
-                displayablePaymentMethods = supportedPaymentMethods.map {
-                    it.asDisplayablePaymentMethod(
-                        customerSavedPaymentMethods = emptyList(),
-                        incentive = null,
-                        onClick = {},
-                    )
-                },
-                isProcessing = false,
-                selection = selection,
-                displayedSavedPaymentMethod = null,
-                availableSavedPaymentMethodAction =
-                PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
-                rowType = Embedded.RowStyle.FloatingButton.default
-            )
-        ) {
-            assertThat(
-                composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_VERTICAL_LAYOUT_UI)
-                    .onChildren().fetchSemanticsNodes().size
-            ).isEqualTo(3)
-
-            composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_card")
-                .assertExists()
-                .onChildren().assertAll(isSelected().not())
-            composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_cashapp")
-                .assertExists()
-                .assert(isSelected())
-            composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_klarna")
-                .assertExists()
-                .onChildren().assertAll(isSelected().not())
-        }
+        helper.correctLPMIsSelected(TEST_TAG_NEW_PAYMENT_METHOD_VERTICAL_LAYOUT_UI)
     }
-
-    private fun runScenario(
-        initialState: PaymentMethodVerticalLayoutInteractor.State,
-        block: Scenario.() -> Unit
-    ) {
-        val viewActionRecorder = ViewActionRecorder<PaymentMethodVerticalLayoutInteractor.ViewAction>()
-        val interactor = FakePaymentMethodVerticalLayoutInteractor(
-            initialState = initialState,
-            viewActionRecorder = viewActionRecorder,
-        )
-
-        composeRule.setContent {
-            PaymentMethodVerticalLayoutUI(interactor, Modifier.padding(horizontal = 20.dp))
-        }
-
-        Scenario(viewActionRecorder).apply(block)
-    }
-
-    private data class Scenario(
-        val viewActionRecorder: ViewActionRecorder<PaymentMethodVerticalLayoutInteractor.ViewAction>,
-    )
 }
