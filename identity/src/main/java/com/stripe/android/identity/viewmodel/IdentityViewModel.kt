@@ -27,7 +27,6 @@ import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.model.StripeFilePurpose
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.identity.IdentityVerificationSheetContract
-import com.stripe.android.identity.VerificationFlowFinishable
 import com.stripe.android.identity.analytics.AnalyticsState
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.analytics.ScreenTracker
@@ -102,7 +101,7 @@ import kotlin.coroutines.CoroutineContext
 /**
  * ViewModel hosted by IdentityActivity, shared across fragments.
  */
-internal class IdentityViewModel constructor(
+internal class IdentityViewModel(
     application: Application,
     internal val verificationArgs: IdentityVerificationSheetContract.Args,
     internal val identityRepository: IdentityRepository,

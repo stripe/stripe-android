@@ -1,7 +1,6 @@
 package com.stripe.android.identity.viewmodel
 
 import android.app.Application
-import android.util.Log
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.camera.scanui.util.asRect
@@ -16,7 +15,6 @@ import com.stripe.android.identity.ml.FaceDetectorOutput
 import com.stripe.android.identity.ml.IDDetectorOutput
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.states.LaplacianBlurDetector
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update

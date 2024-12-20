@@ -12,4 +12,5 @@ internal object DocWarmupDestination : IdentityTopLevelDestination(
 
     override val destinationRoute = ROUTE
 }
+
 private const val DOC_WARMUP = "DocWarmup"

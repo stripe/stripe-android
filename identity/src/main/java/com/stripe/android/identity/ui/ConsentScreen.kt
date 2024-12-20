@@ -70,7 +70,7 @@ internal fun ConsentScreen(
     ) {
         val verificationPage = remember { it }
         val visitedIndividualWelcomePage by
-            identityViewModel.visitedIndividualWelcomeScreen.collectAsState()
+        identityViewModel.visitedIndividualWelcomeScreen.collectAsState()
         LaunchedEffect(Unit) {
             identityViewModel.updateAnalyticsState { oldState ->
                 oldState.copy(

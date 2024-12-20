@@ -3,7 +3,6 @@ package com.stripe.android.identity.camera
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Rect
-import android.util.Log
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.camera.CameraPreviewImage
 import com.stripe.android.camera.framework.AggregateResultListener
@@ -17,7 +16,6 @@ import com.stripe.android.identity.ml.AnalyzerInput
 import com.stripe.android.identity.ml.AnalyzerOutput
 import com.stripe.android.identity.ml.FaceDetectorAnalyzer
 import com.stripe.android.identity.ml.IDDetectorAnalyzer
-import com.stripe.android.identity.networking.DefaultIdentityRepository
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.states.LaplacianBlurDetector
