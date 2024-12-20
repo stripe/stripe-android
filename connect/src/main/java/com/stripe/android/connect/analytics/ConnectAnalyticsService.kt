@@ -2,6 +2,7 @@ package com.stripe.android.connect.analytics
 
 import android.app.Application
 import android.content.Context
+import com.stripe.android.connect.StripeEmbeddedComponent
 import com.stripe.android.core.BuildConfig
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.AnalyticsRequestV2
@@ -14,15 +15,19 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import java.util.UUID
 
 /**
  * Service for logging [AnalyticsRequestV2] for the Connect SDK.
+ * There should be one instance of AnalyticsService per instantiation of [StripeEmbeddedComponent].
  */
 internal class ConnectAnalyticsService(
     context: Context,
-    private val isTestMode: Boolean,
+    private val component: StripeEmbeddedComponent,
+    private val analyticsParams: ConnectAnalyticsParams,
 ) {
     internal var merchantId: String? = null
+    private val componentInstanceId: UUID = UUID.randomUUID()
 
     private val application: Application = context.applicationContext as Application
 
@@ -61,8 +66,10 @@ internal class ConnectAnalyticsService(
 
     private fun commonParams(): Map<String, Any?> {
         return mapOf(
-            "livemode" to !isTestMode,
             "merchantId" to merchantId,
+            "publishableKey" to analyticsParams.publishableKey,
+            "component" to component.componentName,
+            "componentInstance" to componentInstanceId.toString(),
         ).filterNot { (_, v) -> v == null }
     }
 
@@ -71,3 +78,7 @@ internal class ConnectAnalyticsService(
         const val ORIGIN = "stripe-connect-android"
     }
 }
+
+internal data class ConnectAnalyticsParams(
+    val publishableKey: String?,
+)

@@ -95,8 +95,6 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
     private var viewBinding: StripeConnectWebviewBinding? = null
     private val webView get() = viewBinding?.stripeWebView
 
-    private var analyticsService: ConnectAnalyticsService? = null
-
     @VisibleForTesting
     internal val stripeWebViewClient = StripeConnectWebViewClient()
 
@@ -144,7 +142,6 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
             .also { this.viewBinding = it }
         initializeWebView(viewBinding.stripeWebView)
         bindViewToController()
-        analyticsService = ConnectAnalyticsService(view.context, isTestMode = false)
     }
 
     @VisibleForTesting
@@ -187,6 +184,12 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
         if (this.controller != null) {
             throw IllegalStateException("Already initialized")
         }
+        val context = this.viewBinding?.root?.context ?: return
+        val analyticsService = ConnectAnalyticsService(
+            context = context,
+            component = embeddedComponent,
+            analyticsParams = embeddedComponentManager.getAnalyticsParams(),
+        )
         val oldProps = this.propsJson
         this.propsJson =
             when {
@@ -202,6 +205,7 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
             }
         this.controller = StripeConnectWebViewContainerController(
             view = this,
+            analyticsService = analyticsService,
             embeddedComponentManager = embeddedComponentManager,
             embeddedComponent = embeddedComponent,
             listener = listener,
@@ -378,7 +382,7 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
             val accountSessionClaimedMessage = ConnectJson.decodeFromString<AccountSessionClaimedMessage>(message)
             logger.debug("Account session claimed: $accountSessionClaimedMessage")
 
-            analyticsService?.merchantId = accountSessionClaimedMessage.merchantId
+            controller?.onMerchantIdChanged(accountSessionClaimedMessage.merchantId)
         }
 
         @JavascriptInterface

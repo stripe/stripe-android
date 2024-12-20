@@ -13,6 +13,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import androidx.core.content.ContextCompat.checkSelfPermission
+import com.stripe.android.connect.analytics.ConnectAnalyticsParams
 import com.stripe.android.connect.appearance.Appearance
 import com.stripe.android.connect.appearance.fonts.CustomFontSource
 import com.stripe.android.connect.util.findActivity
@@ -119,6 +120,18 @@ class EmbeddedComponentManager(
             append("#component=${component.componentName}")
             append("&publicKey=${configuration.publishableKey}")
         }
+    }
+
+    internal fun getAnalyticsParams(): ConnectAnalyticsParams {
+        val publishableKeyToLog = if (configuration.publishableKey.startsWith("uk_")) {
+            null // don't log "uk_" keys
+        } else {
+            configuration.publishableKey
+        }
+
+        return ConnectAnalyticsParams(
+            publishableKey = publishableKeyToLog,
+        )
     }
 
     /**
