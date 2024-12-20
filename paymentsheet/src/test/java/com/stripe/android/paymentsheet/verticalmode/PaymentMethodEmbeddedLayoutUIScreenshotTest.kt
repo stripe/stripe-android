@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.verticalmode
 
 import android.graphics.Color
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.toArgb
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
@@ -35,17 +36,7 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
     @Test
     fun testFloatingButton() {
         paparazziRule.snapshot {
-            PaymentMethodEmbeddedLayoutUI(
-                paymentMethods = paymentMethods,
-                displayedSavedPaymentMethod = savedPaymentMethod,
-                savedPaymentMethodAction =
-                PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
-                selection = PaymentSelection.Saved(savedPaymentMethod.paymentMethod),
-                isEnabled = true,
-                onViewMorePaymentMethods = {},
-                onSelectSavedPaymentMethod = {},
-                onManageOneSavedPaymentMethod = {},
-                imageLoader = mock(),
+            TestPaymentMethodLayoutUi(
                 rowStyle = getRowStyle(Embedded.RowStyle.FloatingButton)
             )
         }
@@ -54,17 +45,7 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
     @Test
     fun testFlatWitRadio() {
         paparazziRule.snapshot {
-            PaymentMethodEmbeddedLayoutUI(
-                paymentMethods = paymentMethods,
-                displayedSavedPaymentMethod = savedPaymentMethod,
-                savedPaymentMethodAction =
-                PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
-                selection = PaymentSelection.Saved(savedPaymentMethod.paymentMethod),
-                isEnabled = true,
-                onViewMorePaymentMethods = {},
-                onSelectSavedPaymentMethod = {},
-                onManageOneSavedPaymentMethod = {},
-                imageLoader = mock(),
+            TestPaymentMethodLayoutUi(
                 rowStyle = getRowStyle(Embedded.RowStyle.FlatWithRadio)
             )
         }
@@ -73,17 +54,7 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
     @Test
     fun testFlatWithCheckmark() {
         paparazziRule.snapshot {
-            PaymentMethodEmbeddedLayoutUI(
-                paymentMethods = paymentMethods,
-                displayedSavedPaymentMethod = savedPaymentMethod,
-                savedPaymentMethodAction =
-                PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
-                selection = PaymentSelection.Saved(savedPaymentMethod.paymentMethod),
-                isEnabled = true,
-                onViewMorePaymentMethods = {},
-                onSelectSavedPaymentMethod = {},
-                onManageOneSavedPaymentMethod = {},
-                imageLoader = mock(),
+            TestPaymentMethodLayoutUi(
                 rowStyle = getRowStyle(Embedded.RowStyle.FlatWithCheckmark)
             )
         }
@@ -92,17 +63,7 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
     @Test
     fun testSeparatorColorAndInsets() {
         paparazziRule.snapshot {
-            PaymentMethodEmbeddedLayoutUI(
-                paymentMethods = paymentMethods,
-                displayedSavedPaymentMethod = savedPaymentMethod,
-                savedPaymentMethodAction =
-                PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
-                selection = PaymentSelection.Saved(savedPaymentMethod.paymentMethod),
-                isEnabled = true,
-                onViewMorePaymentMethods = {},
-                onSelectSavedPaymentMethod = {},
-                onManageOneSavedPaymentMethod = {},
-                imageLoader = mock(),
+            TestPaymentMethodLayoutUi(
                 rowStyle = getRowStyle(
                     type = Embedded.RowStyle.FlatWithCheckmark,
                     separatorThicknessDp = 5f,
@@ -116,17 +77,7 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
     @Test
     fun testBottomSeparatorOnly() {
         paparazziRule.snapshot {
-            PaymentMethodEmbeddedLayoutUI(
-                paymentMethods = paymentMethods,
-                displayedSavedPaymentMethod = savedPaymentMethod,
-                savedPaymentMethodAction =
-                PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
-                selection = PaymentSelection.Saved(savedPaymentMethod.paymentMethod),
-                isEnabled = true,
-                onViewMorePaymentMethods = {},
-                onSelectSavedPaymentMethod = {},
-                onManageOneSavedPaymentMethod = {},
-                imageLoader = mock(),
+            TestPaymentMethodLayoutUi(
                 rowStyle = getRowStyle(
                     type = Embedded.RowStyle.FlatWithCheckmark,
                     topSeparatorEnabled = false,
@@ -139,17 +90,7 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
     @Test
     fun testTopSeparatorOnly() {
         paparazziRule.snapshot {
-            PaymentMethodEmbeddedLayoutUI(
-                paymentMethods = paymentMethods,
-                displayedSavedPaymentMethod = savedPaymentMethod,
-                savedPaymentMethodAction =
-                PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
-                selection = PaymentSelection.Saved(savedPaymentMethod.paymentMethod),
-                isEnabled = true,
-                onViewMorePaymentMethods = {},
-                onSelectSavedPaymentMethod = {},
-                onManageOneSavedPaymentMethod = {},
-                imageLoader = mock(),
+            TestPaymentMethodLayoutUi(
                 rowStyle = getRowStyle(
                     type = Embedded.RowStyle.FlatWithCheckmark,
                     topSeparatorEnabled = true,
@@ -158,48 +99,66 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
             )
         }
     }
-}
+    @Composable
+    private fun TestPaymentMethodLayoutUi(
+        rowStyle: Embedded.RowStyle
+    ) {
+        PaymentMethodEmbeddedLayoutUI(
+            paymentMethods = paymentMethods,
+            displayedSavedPaymentMethod = savedPaymentMethod,
+            savedPaymentMethodAction =
+            PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
+            selection = PaymentSelection.Saved(savedPaymentMethod.paymentMethod),
+            isEnabled = true,
+            onViewMorePaymentMethods = {},
+            onSelectSavedPaymentMethod = {},
+            onManageOneSavedPaymentMethod = {},
+            imageLoader = mock(),
+            rowStyle = rowStyle
+        )
+    }
 
-@Suppress("CyclomaticComplexMethod")
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
-internal fun <T> getRowStyle(
-    type: T,
-    separatorThicknessDp: Float? = null,
-    separatorColor: Int? = null,
-    separatorInsetsDp: Float? = null,
-    topSeparatorEnabled: Boolean? = null,
-    bottomSeparatorEnabled: Boolean? = null,
-    selectedColor: Int? = null,
-    unselectedColor: Int? = null,
-    additionalInsetsDp: Float? = null,
-    checkmarkColor: Int? = null,
-    checkmarkInsetDp: Float? = null,
-    spacingDp: Float? = null
-): Embedded.RowStyle {
-    return when (type) {
-        is Embedded.RowStyle.FlatWithRadio -> Embedded.RowStyle.FlatWithRadio(
-            separatorThicknessDp = separatorThicknessDp ?: StripeThemeDefaults.flat.separatorThickness,
-            separatorColor = separatorColor ?: StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
-            separatorInsetsDp = separatorInsetsDp ?: StripeThemeDefaults.flat.separatorInsets,
-            topSeparatorEnabled = topSeparatorEnabled ?: StripeThemeDefaults.flat.topSeparatorEnabled,
-            bottomSeparatorEnabled = bottomSeparatorEnabled ?: StripeThemeDefaults.flat.bottomSeparatorEnabled,
-            selectedColor = selectedColor ?: StripeThemeDefaults.colorsLight.materialColors.primary.toArgb(),
-            unselectedColor = unselectedColor ?: StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
-            additionalInsetsDp = additionalInsetsDp ?: StripeThemeDefaults.embeddedCommon.additionalInsetsDp
-        )
-        is Embedded.RowStyle.FlatWithCheckmark -> Embedded.RowStyle.FlatWithCheckmark(
-            separatorThicknessDp = separatorThicknessDp ?: StripeThemeDefaults.flat.separatorThickness,
-            separatorColor = separatorColor ?: StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
-            separatorInsetsDp = separatorInsetsDp ?: StripeThemeDefaults.flat.separatorInsets,
-            topSeparatorEnabled = topSeparatorEnabled ?: StripeThemeDefaults.flat.topSeparatorEnabled,
-            bottomSeparatorEnabled = bottomSeparatorEnabled ?: StripeThemeDefaults.flat.bottomSeparatorEnabled,
-            checkmarkColor = checkmarkColor ?: StripeThemeDefaults.colorsLight.materialColors.primary.toArgb(),
-            checkmarkInsetDp = checkmarkInsetDp ?: StripeThemeDefaults.embeddedCommon.checkmarkInsetDp,
-            additionalInsetsDp = additionalInsetsDp ?: StripeThemeDefaults.embeddedCommon.additionalInsetsDp
-        )
-        else -> Embedded.RowStyle.FloatingButton(
-            spacingDp = spacingDp ?: StripeThemeDefaults.floating.spacing,
-            additionalInsetsDp = additionalInsetsDp ?: StripeThemeDefaults.embeddedCommon.additionalInsetsDp
-        )
+    @Suppress("CyclomaticComplexMethod")
+    @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
+    private fun <T> getRowStyle(
+        type: T,
+        separatorThicknessDp: Float? = null,
+        separatorColor: Int? = null,
+        separatorInsetsDp: Float? = null,
+        topSeparatorEnabled: Boolean? = null,
+        bottomSeparatorEnabled: Boolean? = null,
+        selectedColor: Int? = null,
+        unselectedColor: Int? = null,
+        additionalInsetsDp: Float? = null,
+        checkmarkColor: Int? = null,
+        checkmarkInsetDp: Float? = null,
+        spacingDp: Float? = null
+    ): Embedded.RowStyle {
+        return when (type) {
+            is Embedded.RowStyle.FlatWithRadio -> Embedded.RowStyle.FlatWithRadio(
+                separatorThicknessDp = separatorThicknessDp ?: StripeThemeDefaults.flat.separatorThickness,
+                separatorColor = separatorColor ?: StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
+                separatorInsetsDp = separatorInsetsDp ?: StripeThemeDefaults.flat.separatorInsets,
+                topSeparatorEnabled = topSeparatorEnabled ?: StripeThemeDefaults.flat.topSeparatorEnabled,
+                bottomSeparatorEnabled = bottomSeparatorEnabled ?: StripeThemeDefaults.flat.bottomSeparatorEnabled,
+                selectedColor = selectedColor ?: StripeThemeDefaults.colorsLight.materialColors.primary.toArgb(),
+                unselectedColor = unselectedColor ?: StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
+                additionalInsetsDp = additionalInsetsDp ?: StripeThemeDefaults.embeddedCommon.additionalInsetsDp
+            )
+            is Embedded.RowStyle.FlatWithCheckmark -> Embedded.RowStyle.FlatWithCheckmark(
+                separatorThicknessDp = separatorThicknessDp ?: StripeThemeDefaults.flat.separatorThickness,
+                separatorColor = separatorColor ?: StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
+                separatorInsetsDp = separatorInsetsDp ?: StripeThemeDefaults.flat.separatorInsets,
+                topSeparatorEnabled = topSeparatorEnabled ?: StripeThemeDefaults.flat.topSeparatorEnabled,
+                bottomSeparatorEnabled = bottomSeparatorEnabled ?: StripeThemeDefaults.flat.bottomSeparatorEnabled,
+                checkmarkColor = checkmarkColor ?: StripeThemeDefaults.colorsLight.materialColors.primary.toArgb(),
+                checkmarkInsetDp = checkmarkInsetDp ?: StripeThemeDefaults.embeddedCommon.checkmarkInsetDp,
+                additionalInsetsDp = additionalInsetsDp ?: StripeThemeDefaults.embeddedCommon.additionalInsetsDp
+            )
+            else -> Embedded.RowStyle.FloatingButton(
+                spacingDp = spacingDp ?: StripeThemeDefaults.floating.spacing,
+                additionalInsetsDp = additionalInsetsDp ?: StripeThemeDefaults.embeddedCommon.additionalInsetsDp
+            )
+        }
     }
 }
