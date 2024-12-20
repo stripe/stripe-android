@@ -1,4 +1,4 @@
-package com.stripe.attestation;
+package com.stripe.attestation
 
 import com.google.android.play.core.integrity.StandardIntegrityException
 import com.google.android.play.core.integrity.model.StandardIntegrityErrorCode
