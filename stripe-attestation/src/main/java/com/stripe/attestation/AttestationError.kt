@@ -36,40 +36,37 @@ class AttestationError(
     }
 
     companion object {
-        fun fromException(exception: Throwable): AttestationError {
-            return when (exception) {
-                is StandardIntegrityException -> AttestationError(
-                    errorType = mapErrorCodeToErrorType(exception.errorCode),
-                    message = exception.message ?: "Integrity error occurred",
-                    cause = exception
-                )
-                else -> AttestationError(
-                    errorType = ErrorType.UNKNOWN,
-                    message = "An unknown error occurred",
-                    cause = exception
-                )
-            }
+        fun fromException(exception: Throwable): AttestationError = when (exception) {
+            is StandardIntegrityException -> AttestationError(
+                errorType = errorCodeToErrorTypeMap[exception.errorCode] ?: ErrorType.UNKNOWN,
+                message = exception.message ?: "Integrity error occurred",
+                cause = exception
+            )
+            else -> AttestationError(
+                errorType = ErrorType.UNKNOWN,
+                message = "An unknown error occurred",
+                cause = exception
+            )
         }
 
-        private fun mapErrorCodeToErrorType(errorCode: Int): ErrorType = when (errorCode) {
-            StandardIntegrityErrorCode.API_NOT_AVAILABLE -> ErrorType.API_NOT_AVAILABLE
-            StandardIntegrityErrorCode.APP_NOT_INSTALLED -> ErrorType.APP_NOT_INSTALLED
-            StandardIntegrityErrorCode.APP_UID_MISMATCH -> ErrorType.APP_UID_MISMATCH
-            StandardIntegrityErrorCode.CANNOT_BIND_TO_SERVICE -> ErrorType.CANNOT_BIND_TO_SERVICE
-            StandardIntegrityErrorCode.CLIENT_TRANSIENT_ERROR -> ErrorType.CLIENT_TRANSIENT_ERROR
-            StandardIntegrityErrorCode.CLOUD_PROJECT_NUMBER_IS_INVALID -> ErrorType.CLOUD_PROJECT_NUMBER_IS_INVALID
-            StandardIntegrityErrorCode.GOOGLE_SERVER_UNAVAILABLE -> ErrorType.GOOGLE_SERVER_UNAVAILABLE
-            StandardIntegrityErrorCode.INTEGRITY_TOKEN_PROVIDER_INVALID -> ErrorType.INTEGRITY_TOKEN_PROVIDER_INVALID
-            StandardIntegrityErrorCode.INTERNAL_ERROR -> ErrorType.INTERNAL_ERROR
-            StandardIntegrityErrorCode.NETWORK_ERROR -> ErrorType.NETWORK_ERROR
-            StandardIntegrityErrorCode.NO_ERROR -> ErrorType.NO_ERROR
-            StandardIntegrityErrorCode.PLAY_SERVICES_NOT_FOUND -> ErrorType.PLAY_SERVICES_NOT_FOUND
-            StandardIntegrityErrorCode.PLAY_SERVICES_VERSION_OUTDATED -> ErrorType.PLAY_SERVICES_VERSION_OUTDATED
-            StandardIntegrityErrorCode.PLAY_STORE_NOT_FOUND -> ErrorType.PLAY_STORE_NOT_FOUND
-            StandardIntegrityErrorCode.PLAY_STORE_VERSION_OUTDATED -> ErrorType.PLAY_STORE_VERSION_OUTDATED
-            StandardIntegrityErrorCode.REQUEST_HASH_TOO_LONG -> ErrorType.REQUEST_HASH_TOO_LONG
-            StandardIntegrityErrorCode.TOO_MANY_REQUESTS -> ErrorType.TOO_MANY_REQUESTS
-            else -> ErrorType.UNKNOWN
-        }
+        private val errorCodeToErrorTypeMap = mapOf(
+            StandardIntegrityErrorCode.API_NOT_AVAILABLE to ErrorType.API_NOT_AVAILABLE,
+            StandardIntegrityErrorCode.APP_NOT_INSTALLED to ErrorType.APP_NOT_INSTALLED,
+            StandardIntegrityErrorCode.APP_UID_MISMATCH to ErrorType.APP_UID_MISMATCH,
+            StandardIntegrityErrorCode.CANNOT_BIND_TO_SERVICE to ErrorType.CANNOT_BIND_TO_SERVICE,
+            StandardIntegrityErrorCode.CLIENT_TRANSIENT_ERROR to ErrorType.CLIENT_TRANSIENT_ERROR,
+            StandardIntegrityErrorCode.CLOUD_PROJECT_NUMBER_IS_INVALID to ErrorType.CLOUD_PROJECT_NUMBER_IS_INVALID,
+            StandardIntegrityErrorCode.GOOGLE_SERVER_UNAVAILABLE to ErrorType.GOOGLE_SERVER_UNAVAILABLE,
+            StandardIntegrityErrorCode.INTEGRITY_TOKEN_PROVIDER_INVALID to ErrorType.INTEGRITY_TOKEN_PROVIDER_INVALID,
+            StandardIntegrityErrorCode.INTERNAL_ERROR to ErrorType.INTERNAL_ERROR,
+            StandardIntegrityErrorCode.NETWORK_ERROR to ErrorType.NETWORK_ERROR,
+            StandardIntegrityErrorCode.NO_ERROR to ErrorType.NO_ERROR,
+            StandardIntegrityErrorCode.PLAY_SERVICES_NOT_FOUND to ErrorType.PLAY_SERVICES_NOT_FOUND,
+            StandardIntegrityErrorCode.PLAY_SERVICES_VERSION_OUTDATED to ErrorType.PLAY_SERVICES_VERSION_OUTDATED,
+            StandardIntegrityErrorCode.PLAY_STORE_NOT_FOUND to ErrorType.PLAY_STORE_NOT_FOUND,
+            StandardIntegrityErrorCode.PLAY_STORE_VERSION_OUTDATED to ErrorType.PLAY_STORE_VERSION_OUTDATED,
+            StandardIntegrityErrorCode.REQUEST_HASH_TOO_LONG to ErrorType.REQUEST_HASH_TOO_LONG,
+            StandardIntegrityErrorCode.TOO_MANY_REQUESTS to ErrorType.TOO_MANY_REQUESTS
+        )
     }
 }
