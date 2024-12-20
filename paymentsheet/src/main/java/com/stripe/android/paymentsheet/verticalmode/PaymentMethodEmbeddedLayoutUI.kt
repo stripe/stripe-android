@@ -25,7 +25,7 @@ import com.stripe.android.uicore.utils.collectAsState
 import org.jetbrains.annotations.VisibleForTesting
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-const val TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT = "TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT"
+internal const val TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT = "TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT"
 
 @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @Composable
@@ -148,7 +148,7 @@ internal fun PaymentMethodEmbeddedLayoutUI(
 @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @Composable
 private fun OptionalEmbeddedDivider(rowStyle: Embedded.RowStyle) {
-    if (rowStyle !is Embedded.RowStyle.FloatingButton) {
+    if (rowStyle.hasSeparators()) {
         val color = Color(rowStyle.separatorColor())
         val thickness = rowStyle.separatorThickness()
         val modifier = if (rowStyle is Embedded.RowStyle.FlatWithRadio) {
@@ -168,8 +168,8 @@ private fun OptionalEmbeddedDivider(rowStyle: Embedded.RowStyle) {
 private fun Embedded.RowStyle.bottomSeparatorEnabled(): Boolean {
     return when (this) {
         is Embedded.RowStyle.FloatingButton -> false
-        is Embedded.RowStyle.FlatWithRadio -> this.bottomSeparatorEnabled
-        is Embedded.RowStyle.FlatWithCheckmark -> this.bottomSeparatorEnabled
+        is Embedded.RowStyle.FlatWithRadio -> bottomSeparatorEnabled
+        is Embedded.RowStyle.FlatWithCheckmark -> bottomSeparatorEnabled
     }
 }
 
@@ -177,8 +177,8 @@ private fun Embedded.RowStyle.bottomSeparatorEnabled(): Boolean {
 private fun Embedded.RowStyle.topSeparatorEnabled(): Boolean {
     return when (this) {
         is Embedded.RowStyle.FloatingButton -> false
-        is Embedded.RowStyle.FlatWithRadio -> this.topSeparatorEnabled
-        is Embedded.RowStyle.FlatWithCheckmark -> this.topSeparatorEnabled
+        is Embedded.RowStyle.FlatWithRadio -> topSeparatorEnabled
+        is Embedded.RowStyle.FlatWithCheckmark -> topSeparatorEnabled
     }
 }
 
@@ -186,8 +186,8 @@ private fun Embedded.RowStyle.topSeparatorEnabled(): Boolean {
 private fun Embedded.RowStyle.separatorThickness(): Dp {
     return when (this) {
         is Embedded.RowStyle.FloatingButton -> 0.dp
-        is Embedded.RowStyle.FlatWithRadio -> this.separatorThicknessDp.dp
-        is Embedded.RowStyle.FlatWithCheckmark -> this.separatorThicknessDp.dp
+        is Embedded.RowStyle.FlatWithRadio -> separatorThicknessDp.dp
+        is Embedded.RowStyle.FlatWithCheckmark -> separatorThicknessDp.dp
     }
 }
 
@@ -195,8 +195,8 @@ private fun Embedded.RowStyle.separatorThickness(): Dp {
 private fun Embedded.RowStyle.separatorColor(): Int {
     return when (this) {
         is Embedded.RowStyle.FloatingButton -> 0
-        is Embedded.RowStyle.FlatWithRadio -> this.separatorColor
-        is Embedded.RowStyle.FlatWithCheckmark -> this.separatorColor
+        is Embedded.RowStyle.FlatWithRadio -> separatorColor
+        is Embedded.RowStyle.FlatWithCheckmark -> separatorColor
     }
 }
 
@@ -204,7 +204,7 @@ private fun Embedded.RowStyle.separatorColor(): Int {
 private fun Embedded.RowStyle.separatorInsets(): Dp {
     return when (this) {
         is Embedded.RowStyle.FloatingButton -> 0.dp
-        is Embedded.RowStyle.FlatWithRadio -> this.separatorInsetsDp.dp
-        is Embedded.RowStyle.FlatWithCheckmark -> this.separatorInsetsDp.dp
+        is Embedded.RowStyle.FlatWithRadio -> separatorInsetsDp.dp
+        is Embedded.RowStyle.FlatWithCheckmark -> separatorInsetsDp.dp
     }
 }
