@@ -83,7 +83,7 @@ internal class IdentityScanFlow(
         lifecycleOwner: LifecycleOwner,
         coroutineScope: CoroutineScope,
         parameters: IdentityScanState.ScanType,
-        errorHandler: ((e: Exception) -> Unit)?,
+        errorHandler: (e: Exception) -> Unit,
     ) {
         coroutineScope.launch {
             if (canceled) {
@@ -120,7 +120,7 @@ internal class IdentityScanFlow(
                     )
             } catch (e: IllegalStateException) {
                 withContext(Dispatchers.Main) {
-                    errorHandler?.invoke(e) ?: throw e
+                    errorHandler(e)
                 }
 
                 return@launch

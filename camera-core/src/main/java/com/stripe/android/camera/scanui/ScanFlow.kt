@@ -31,7 +31,7 @@ interface ScanFlow<Parameters, DataType> {
         lifecycleOwner: LifecycleOwner,
         coroutineScope: CoroutineScope,
         parameters: Parameters,
-        errorHandler: ((e: Exception) -> Unit)? = null
+        errorHandler: (e: Exception) -> Unit
     )
 
     /**
