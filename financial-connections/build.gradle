@@ -44,6 +44,7 @@ dependencies {
     implementation libs.kotlin.coroutines
     implementation libs.kotlin.coroutinesAndroid
     implementation libs.kotlin.serialization
+    implementation project(':stripe-attestation')
 
     debugImplementation libs.compose.uiTestManifest
     debugImplementation libs.compose.uiTooling
