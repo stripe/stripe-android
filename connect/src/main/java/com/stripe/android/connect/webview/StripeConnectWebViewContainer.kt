@@ -248,6 +248,8 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
 
     private fun bindViewState(state: StripeConnectWebViewContainerState) {
         val viewBinding = this.viewBinding ?: return
+        logger.debug("Binding view state: $state")
+        viewBinding.root.setBackgroundColor(state.backgroundColor)
         viewBinding.stripeWebView.setBackgroundColor(state.backgroundColor)
         viewBinding.stripeWebViewProgressBar.isVisible = state.isNativeLoadingIndicatorVisible
         viewBinding.stripeWebView.isVisible = !state.isNativeLoadingIndicatorVisible
