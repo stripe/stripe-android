@@ -22,6 +22,7 @@ interface ScanFlow<Parameters, DataType> {
      * @param lifecycleOwner: The activity that owns this flow. The flow will pause if the activity
      * is paused
      * @param coroutineScope: The coroutine scope used to run async tasks for this flow
+     * @param errorHandler: A handler to report errors to
      */
     fun startFlow(
         context: Context,
@@ -29,7 +30,8 @@ interface ScanFlow<Parameters, DataType> {
         viewFinder: Rect,
         lifecycleOwner: LifecycleOwner,
         coroutineScope: CoroutineScope,
-        parameters: Parameters
+        parameters: Parameters,
+        errorHandler: (e: Exception) -> Unit
     )
 
     /**

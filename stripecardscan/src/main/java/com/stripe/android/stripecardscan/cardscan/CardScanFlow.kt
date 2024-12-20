@@ -55,7 +55,8 @@ internal abstract class CardScanFlow(
         viewFinder: Rect,
         lifecycleOwner: LifecycleOwner,
         coroutineScope: CoroutineScope,
-        parameters: Unit?
+        parameters: Unit?,
+        errorHandler: (e: Exception) -> Unit
     ) = coroutineScope.launch(Dispatchers.Main) {
         if (canceled) {
             return@launch

@@ -259,7 +259,10 @@ class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
                 viewFinder = viewFinderWindow.asRect(),
                 lifecycleOwner = this,
                 coroutineScope = this,
-                parameters = null
+                parameters = null,
+                errorHandler = { e ->
+                    scanErrorListener.onResultFailure(e)
+                }
             )
         }
     }
