@@ -1,6 +1,5 @@
 package com.stripe.android.identity.ui
 
-import android.util.Log
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -43,13 +42,10 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
 import com.stripe.android.camera.scanui.CameraView
-import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.identity.R
-import com.stripe.android.identity.VerificationFlowFinishable
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_LIVE_CAPTURE
 import com.stripe.android.identity.camera.DocumentScanCameraManager
 import com.stripe.android.identity.camera.IdentityCameraManager
-import com.stripe.android.identity.navigation.navigateToFinalErrorScreen
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.states.IdentityScanState.Companion.isFront
 import com.stripe.android.identity.states.IdentityScanState.Companion.isNullOrFront
@@ -71,7 +67,6 @@ internal fun DocumentScanScreen(
     navController: NavController,
     identityViewModel: IdentityViewModel,
     documentScanViewModel: DocumentScanViewModel,
-    verificationFlowFinishable: VerificationFlowFinishable,
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -105,8 +100,6 @@ internal fun DocumentScanScreen(
         }
         val documentScannerState by documentScanViewModel.scannerState.collectAsState()
         val feedback by documentScanViewModel.scanFeedback.collectAsState()
-        // TODO: Maybe do another one similar to the above 2
-        // When you get an event that an error happened, do the navController.navigate to final error
 
         LiveCaptureLaunchedEffect(
             scannerState = documentScannerState,

@@ -131,8 +131,6 @@ internal fun IdentityNavGraph(
                     navController = navController,
                     identityViewModel = identityViewModel,
                     documentScanViewModel = documentScanViewModel,
-                    verificationFlowFinishable = verificationFlowFinishable
-
                 )
             }
             screen(SelfieWarmupDestination.ROUTE) {
