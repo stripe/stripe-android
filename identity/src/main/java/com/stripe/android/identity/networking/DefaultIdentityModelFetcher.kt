@@ -38,5 +38,3 @@ internal class DefaultIdentityModelFetcher @Inject constructor(
         }
     }
 }
-
-
