@@ -121,7 +121,7 @@ internal class LinkConfirmationDefinitionTest {
         val result = definition.toResult(
             confirmationOption = LINK_CONFIRMATION_OPTION,
             confirmationParameters = CONFIRMATION_PARAMETERS,
-            result = LinkActivityResult.Completed(paymentMethod),
+            result = LinkActivityResult.PaymentMethodObtained(paymentMethod),
             deferredIntentConfirmationType = null,
         )
 

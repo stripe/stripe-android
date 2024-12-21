@@ -15,9 +15,12 @@ internal sealed class LinkActivityResult : Parcelable {
      * Indicates that the flow was completed successfully.
      */
     @Parcelize
-    data class Completed(
+    data class PaymentMethodObtained(
         val paymentMethod: PaymentMethod
     ) : LinkActivityResult()
+
+    @Parcelize
+    data object Completed : LinkActivityResult()
 
     /**
      * The user cancelled the Link flow without completing it.
@@ -72,7 +75,7 @@ internal fun createLinkActivityResult(resultCode: Int, intent: Intent?): LinkAct
                     if (paymentMethod == null) {
                         LinkActivityResult.Canceled()
                     } else {
-                        LinkActivityResult.Completed(paymentMethod)
+                        LinkActivityResult.PaymentMethodObtained(paymentMethod)
                     }
                 }
 
@@ -86,10 +89,21 @@ internal fun createLinkActivityResult(resultCode: Int, intent: Intent?): LinkAct
             }
         }
 
+        LinkActivity.RESULT_COMPLETE -> {
+            handleNativeLinkResult(intent)
+        }
+
         else -> {
             LinkActivityResult.Canceled()
         }
     }
+}
+
+private fun handleNativeLinkResult(intent: Intent?): LinkActivityResult {
+    val result = intent?.extras?.let {
+        BundleCompat.getParcelable(it, LinkActivityContract.EXTRA_RESULT, LinkActivityResult::class.java)
+    }
+    return result ?: LinkActivityResult.Canceled()
 }
 
 private fun String.parsePaymentMethod(): PaymentMethod? = try {
