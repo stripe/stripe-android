@@ -9,30 +9,24 @@ internal class LookupConsumerAndStartVerification @Inject constructor(
     private val startVerification: StartVerification,
 ) {
 
-    /**
-     * Looks up a consumer account and starts verification.
-     *
-     * If the consumer account exists, starts verification.
-     * If the consumer account does not exist, calls [onConsumerNotFound].
-     * If there is an error looking up the consumer account, calls [onLookupError].
-     * If there is an error starting verification, calls [onStartVerificationError].
-     * If verification is started successfully, calls [onVerificationStarted].
-     */
+    sealed interface Result {
+        data class Success(val consumerSession: ConsumerSession) : Result
+        data object ConsumerNotFound : Result
+        data class LookupError(val error: Throwable) : Result
+        data class VerificationError(val error: Throwable) : Result
+    }
+
     suspend operator fun invoke(
         email: String,
         businessName: String?,
         verificationType: VerificationType,
-        onConsumerNotFound: suspend () -> Unit,
-        onLookupError: suspend (Throwable) -> Unit,
-        onStartVerification: suspend () -> Unit,
-        onVerificationStarted: suspend (ConsumerSession) -> Unit,
-        onStartVerificationError: suspend (Throwable) -> Unit
-    ) {
-        runCatching { lookupAccount(email) }
-            .onSuccess { session ->
+    ): Result {
+        return runCatching {
+            lookupAccount(email)
+        }.fold(
+            onSuccess = { session ->
                 if (session.exists) {
-                    onStartVerification()
-                    kotlin.runCatching {
+                    runCatching {
                         val consumerSecret = session.consumerSession!!.clientSecret
                         when (verificationType) {
                             VerificationType.EMAIL -> startVerification.email(
@@ -43,12 +37,17 @@ internal class LookupConsumerAndStartVerification @Inject constructor(
                                 consumerSessionClientSecret = consumerSecret
                             )
                         }
-                    }
-                        .onSuccess { onVerificationStarted(it) }
-                        .onFailure { onStartVerificationError(it) }
+                    }.fold(
+                        onSuccess = { Result.Success(it) },
+                        onFailure = { Result.VerificationError(it) }
+                    )
                 } else {
-                    onConsumerNotFound()
+                    Result.ConsumerNotFound
                 }
-            }.onFailure { onLookupError(it) }
+            },
+            onFailure = {
+                Result.LookupError(it)
+            },
+        )
     }
 }
