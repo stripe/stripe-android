@@ -1,11 +1,11 @@
 package com.stripe.android.paymentsheet.ui
 
 import android.content.res.Configuration
-import androidx.annotation.RestrictTo
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -19,7 +19,10 @@ internal fun DefaultPaymentMethodLabel(
     modifier: Modifier,
 ) {
     Text(
-        modifier = modifier,
+        modifier = modifier
+            .testTag(
+                "${TEST_TAG_DEFAULT_PAYMENT_METHOD_LABEL}"
+            ),
         text = stringResource(id = R.string.stripe_paymentsheet_default_payment_method_label),
         style = MaterialTheme.typography.caption.copy(fontWeight = FontWeight.Medium),
         color = MaterialTheme.stripeColors.placeholderText,
@@ -38,3 +41,5 @@ private fun DefaultPaymentMethodLabelPreview() {
         )
     }
 }
+
+internal const val TEST_TAG_DEFAULT_PAYMENT_METHOD_LABEL = "default_payment_method_label"

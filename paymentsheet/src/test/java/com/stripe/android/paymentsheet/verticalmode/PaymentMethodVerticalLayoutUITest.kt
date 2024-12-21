@@ -5,8 +5,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertAll
+import androidx.compose.ui.test.assertAny
+import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isSelected
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -19,6 +23,7 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.ViewActionRecorder
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.ui.TEST_TAG_DEFAULT_PAYMENT_METHOD_LABEL
 import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
 import org.junit.Rule
 import org.junit.Test
@@ -110,6 +115,7 @@ internal class PaymentMethodVerticalLayoutUITest {
 
         composeRule.onNodeWithTag(TEST_TAG_EDIT_SAVED_CARD).assertDoesNotExist()
         composeRule.onNodeWithTag(TEST_TAG_VIEW_MORE).assertDoesNotExist()
+        composeRule.onNodeWithTag(TEST_TAG_DEFAULT_PAYMENT_METHOD_LABEL, true).assertDoesNotExist()
     }
 
     @Test
@@ -197,6 +203,46 @@ internal class PaymentMethodVerticalLayoutUITest {
         composeRule.onNodeWithTag(
             TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON + "_${PaymentMethodFixtures.displayableCard().paymentMethod.id}"
         ).assertExists()
+
+        composeRule.onNodeWithTag(TEST_TAG_DEFAULT_PAYMENT_METHOD_LABEL, true).assertDoesNotExist()
+    }
+
+    @Test
+    fun allPaymentMethodsAreShownWithDefaultPaymentMethod() = runScenario(
+        PaymentMethodVerticalLayoutInteractor.State(
+            displayablePaymentMethods = PaymentMethodMetadataFactory.create(
+                PaymentIntentFixtures.PI_WITH_PAYMENT_METHOD!!.copy(
+                    paymentMethodTypes = listOf("card", "cashapp", "klarna")
+                )
+            ).sortedSupportedPaymentMethods().map {
+                it.asDisplayablePaymentMethod(
+                    customerSavedPaymentMethods = emptyList(),
+                    incentive = null,
+                    onClick = {},
+                )
+            },
+            isProcessing = false,
+            selection = null,
+            displayedSavedPaymentMethod = PaymentMethodFixtures.defaultDisplayableCard(),
+            availableSavedPaymentMethodAction =
+            PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
+        )
+    ) {
+        assertThat(
+            composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_VERTICAL_LAYOUT_UI)
+                .onChildren().fetchSemanticsNodes().size
+        ).isEqualTo(3)
+
+        composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_card").assertExists()
+        composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_cashapp").assertExists()
+        composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_klarna").assertExists()
+
+        composeRule.onNodeWithTag(
+            TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON + "_${PaymentMethodFixtures.defaultDisplayableCard().paymentMethod.id}"
+        ).assertExists()
+
+        // Only one default payment method label present
+        composeRule.onAllNodesWithTag(TEST_TAG_DEFAULT_PAYMENT_METHOD_LABEL, true).assertCountEquals(1)
     }
 
     @Test
@@ -234,6 +280,51 @@ internal class PaymentMethodVerticalLayoutUITest {
         composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_klarna")
             .assertExists()
             .onChildren().assertAll(isSelected().not())
+
+        composeRule.onNodeWithTag(TEST_TAG_DEFAULT_PAYMENT_METHOD_LABEL, true).assertDoesNotExist()
+    }
+
+    @Test
+    fun savedPaymentMethodIsSelected_whenSelectionIsDefaultSavedPm() = runScenario(
+        PaymentMethodVerticalLayoutInteractor.State(
+            displayablePaymentMethods = PaymentMethodMetadataFactory.create(
+                PaymentIntentFixtures.PI_WITH_PAYMENT_METHOD!!.copy(
+                    paymentMethodTypes = listOf("card", "cashapp", "klarna")
+                )
+            ).sortedSupportedPaymentMethods().map {
+                it.asDisplayablePaymentMethod(
+                    customerSavedPaymentMethods = emptyList(),
+                    incentive = null,
+                    onClick = {},
+                )
+            },
+            isProcessing = false,
+            selection = PaymentSelection.Saved(PaymentMethodFixtures.defaultDisplayableCard().paymentMethod),
+            displayedSavedPaymentMethod = PaymentMethodFixtures.defaultDisplayableCard(),
+            availableSavedPaymentMethodAction =
+            PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
+        )
+    ) {
+        composeRule.onNodeWithTag(
+            TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON + "_${PaymentMethodFixtures.defaultDisplayableCard().paymentMethod.id}"
+        ).assertExists()
+            .assert(isSelected())
+
+        composeRule.onNodeWithTag(
+            TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON + "_${PaymentMethodFixtures.defaultDisplayableCard().paymentMethod.id}"
+        ).onChildren().fetchSemanticsNodes()
+        composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_card")
+            .assertExists()
+            .onChildren().assertAll(isSelected().not())
+        composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_cashapp")
+            .assertExists()
+            .onChildren().assertAll(isSelected().not())
+        composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_klarna")
+            .assertExists()
+            .onChildren().assertAll(isSelected().not())
+
+        // Only one default payment method label present
+        composeRule.onAllNodesWithTag(TEST_TAG_DEFAULT_PAYMENT_METHOD_LABEL, true).assertCountEquals(1)
     }
 
     @Test
@@ -280,6 +371,8 @@ internal class PaymentMethodVerticalLayoutUITest {
             composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_klarna")
                 .assertExists()
                 .onChildren().assertAll(isSelected().not())
+
+            composeRule.onNodeWithTag(TEST_TAG_DEFAULT_PAYMENT_METHOD_LABEL, true).assertDoesNotExist()
         }
     }
 

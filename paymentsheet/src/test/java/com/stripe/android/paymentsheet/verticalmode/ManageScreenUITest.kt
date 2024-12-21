@@ -3,9 +3,11 @@ package com.stripe.android.paymentsheet.verticalmode
 import android.os.Build
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.hasContentDescriptionExactly
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -16,6 +18,7 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.ViewActionRecorder
+import com.stripe.android.paymentsheet.ui.TEST_TAG_DEFAULT_PAYMENT_METHOD_LABEL
 import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.ui.core.elements.TEST_TAG_DIALOG_CONFIRM_BUTTON
@@ -58,6 +61,71 @@ class ManageScreenUITest {
             composeRule.onNodeWithTag(
                 "${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_${savedPaymentMethod.paymentMethod.id}"
             ).assertExists()
+        }
+    }
+
+
+    @Test
+    fun allSavedPaymentMethodsAreShownWithDefault() = runScenario(
+        initialState = ManageScreenInteractor.State(
+            paymentMethods = displayableSavedPaymentMethodsWithDefault,
+            currentSelection = null,
+            isEditing = false,
+            canRemove = true,
+            canEdit = true,
+        )
+    ) {
+        assertThat(
+            composeRule.onNodeWithTag(TEST_TAG_MANAGE_SCREEN_SAVED_PMS_LIST).onChildren().fetchSemanticsNodes().size
+        ).isEqualTo(displayableSavedPaymentMethodsWithDefault.size)
+
+        for (savedPaymentMethod in displayableSavedPaymentMethodsWithDefault) {
+            composeRule.onNodeWithTag(
+                "${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_${savedPaymentMethod.paymentMethod.id}"
+            ).assertExists()
+        }
+
+        // Only 1 default payment method label
+        composeRule.onAllNodesWithTag(TEST_TAG_DEFAULT_PAYMENT_METHOD_LABEL).assertCountEquals(1)
+    }
+
+    @Test
+    fun paymentMethod_correctlyShowsAsDefault() {
+        val card = PaymentMethodFactory.card(last4 = "4242", addCbcNetworks = false)
+        runScenario(
+            initialState = ManageScreenInteractor.State(
+                paymentMethods = listOf(
+                    card.toDisplayableSavedPaymentMethod(true)
+                ),
+                currentSelection = null,
+                isEditing = false,
+                canRemove = true,
+                canEdit = true,
+            )
+        ) {
+            composeRule.onNodeWithTag(
+                TEST_TAG_DEFAULT_PAYMENT_METHOD_LABEL
+            ).assertExists()
+        }
+    }
+
+    @Test
+    fun paymentMethod_correctlyShowsAsNotDefault() {
+        val card = PaymentMethodFactory.card(last4 = "4242", addCbcNetworks = false)
+        runScenario(
+            initialState = ManageScreenInteractor.State(
+                paymentMethods = listOf(
+                    card.toDisplayableSavedPaymentMethod(false)
+                ),
+                currentSelection = null,
+                isEditing = false,
+                canRemove = true,
+                canEdit = true,
+            )
+        ) {
+            composeRule.onNodeWithTag(
+                TEST_TAG_DEFAULT_PAYMENT_METHOD_LABEL
+            ).assertDoesNotExist()
         }
     }
 
@@ -327,6 +395,18 @@ class ManageScreenUITest {
                     displayName = it.card!!.last4!!.resolvableString,
                     paymentMethod = it,
                     isCbcEligible = true
+                )
+            }
+
+    private val displayableSavedPaymentMethodsWithDefault =
+        PaymentMethodFixtures.createCards(3)
+            .plus(PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD)
+            .mapIndexed { idx, it ->
+                DisplayableSavedPaymentMethod.create(
+                    displayName = it.card!!.last4!!.resolvableString,
+                    paymentMethod = it,
+                    isCbcEligible = true,
+                    shouldShowDefaultBadge = idx == 0
                 )
             }
 

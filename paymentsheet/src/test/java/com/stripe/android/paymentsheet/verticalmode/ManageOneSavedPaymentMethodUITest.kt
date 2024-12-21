@@ -8,6 +8,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.ViewActionRecorder
+import com.stripe.android.paymentsheet.ui.TEST_TAG_DEFAULT_PAYMENT_METHOD_LABEL
 import com.stripe.android.ui.core.elements.TEST_TAG_DIALOG_CONFIRM_BUTTON
 import org.junit.Rule
 import org.junit.runner.RunWith
@@ -25,9 +26,27 @@ class ManageOneSavedPaymentMethodUITest {
     @Test
     fun savedPaymentMethod_isDisplayed() {
         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
-        runScenario(paymentMethod) {
+        runScenario(paymentMethod, shouldShowDefaultBadge = false) {
             composeRule.onNodeWithTag(
                 TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON + "_${paymentMethod.id}"
+            ).assertExists()
+
+            composeRule.onNodeWithTag(
+                TEST_TAG_DEFAULT_PAYMENT_METHOD_LABEL, true
+            ).assertDoesNotExist()
+        }
+    }
+
+    @Test
+    fun defaultSavedPaymentMethod_isDisplayed() {
+        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        runScenario(paymentMethod, shouldShowDefaultBadge = true) {
+            composeRule.onNodeWithTag(
+                TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON + "_${paymentMethod.id}"
+            ).assertExists()
+
+            composeRule.onNodeWithTag(
+                TEST_TAG_DEFAULT_PAYMENT_METHOD_LABEL, true
             ).assertExists()
         }
     }
@@ -35,7 +54,7 @@ class ManageOneSavedPaymentMethodUITest {
     @Test
     fun clickingDeleteIcon_callsDeletePaymentMethod() {
         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
-        runScenario(paymentMethod) {
+        runScenario(paymentMethod, shouldShowDefaultBadge = false) {
             assertThat(viewActionRecorder.viewActions).isEmpty()
 
             composeRule.onNodeWithTag(
@@ -53,13 +72,15 @@ class ManageOneSavedPaymentMethodUITest {
 
     private fun runScenario(
         paymentMethod: PaymentMethod,
-        block: Scenario.() -> Unit
+        shouldShowDefaultBadge: Boolean,
+        block: Scenario.() -> Unit,
     ) {
         val viewActionRecorder = ViewActionRecorder<ManageOneSavedPaymentMethodInteractor.ViewAction>()
 
         val manageScreenInteractor = FakeManageOneSavedPaymentMethodInteractor(
             paymentMethod = paymentMethod,
             viewActionRecorder = viewActionRecorder,
+            shouldShowDefaultBadge = shouldShowDefaultBadge
         )
 
         composeRule.setContent {
