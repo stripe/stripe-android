@@ -180,8 +180,12 @@ internal class ElementsSessionJsonParser(
         val customerSession = parseCustomerSession(json.optJSONObject(FIELD_CUSTOMER_SESSION))
             ?: return null
 
-        val defaultPaymentMethod = json.optString(FIELD_DEFAULT_PAYMENT_METHOD).takeIf {
-            it.isNotBlank()
+        val defaultPaymentMethod = if (FeatureFlags.defaultPaymentMethod.isEnabled) {
+            json.optString(FIELD_DEFAULT_PAYMENT_METHOD).takeIf {
+                it.isNotBlank()
+            }
+        } else {
+            null
         }
 
         return ElementsSession.Customer(
