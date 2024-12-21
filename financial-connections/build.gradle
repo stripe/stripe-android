@@ -23,6 +23,7 @@ dependencies {
     api project(":stripe-core")
     api project(":stripe-ui-core")
     api project(":payments-model")
+    implementation project(":stripe-attestation")
 
     implementation libs.androidx.activity
     implementation libs.androidx.annotation
