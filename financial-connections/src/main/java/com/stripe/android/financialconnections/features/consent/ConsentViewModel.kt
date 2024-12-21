@@ -6,6 +6,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnections
+import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ConsentAgree
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLoaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
@@ -14,6 +15,8 @@ import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.domain.AcceptConsent
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
+import com.stripe.android.financialconnections.domain.IsLinkWithStripe
+import com.stripe.android.financialconnections.domain.LookupAccount
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.DataAccess
@@ -50,6 +53,9 @@ internal class ConsentViewModel @AssistedInject constructor(
     private val handleClickableUrl: HandleClickableUrl,
     private val logger: Logger,
     private val presentSheet: PresentSheet,
+    private val lookupAccount: LookupAccount,
+    private val isLinkWithStripe: IsLinkWithStripe,
+    private val prefillDetails: ElementsSessionContext.PrefillDetails?,
 ) : FinancialConnectionsViewModel<ConsentState>(initialState, nativeAuthFlowCoordinator) {
 
     init {
@@ -99,9 +105,27 @@ internal class ConsentViewModel @AssistedInject constructor(
             eventTracker.track(ConsentAgree)
             val updatedManifest: FinancialConnectionsSessionManifest = acceptConsent()
             FinancialConnections.emitEvent(Name.CONSENT_ACQUIRED)
-            navigationManager.tryNavigateTo(updatedManifest.nextPane.destination(referrer = Pane.CONSENT))
+
+            val destination = determineNavigationDestination(updatedManifest)
+            navigationManager.tryNavigateTo(destination(referrer = Pane.CONSENT))
+
             updatedManifest
         }.execute { copy(acceptConsent = it) }
+    }
+
+    private suspend fun determineNavigationDestination(
+        manifest: FinancialConnectionsSessionManifest,
+    ): Destination {
+        val defaultDestination = manifest.nextPane.destination
+        val useManifestNextPane = !isLinkWithStripe() || manifest.accountholderCustomerEmailAddress != null
+
+        if (useManifestNextPane) {
+            return defaultDestination
+        }
+
+        val email = prefillDetails?.email ?: return defaultDestination
+        val hasExistingLinkAccount = runCatching { lookupAccount(email).exists }.getOrDefault(false)
+        return if (hasExistingLinkAccount) NetworkingLinkLoginWarmup else defaultDestination
     }
 
     fun onClickableTextClick(uri: String) = viewModelScope.launch {
