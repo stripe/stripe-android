@@ -10,14 +10,13 @@ import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.Q])
-internal class PaymentMethodVerticalLayoutUITest {
-
+class PaymentMethodEmbeddedLayoutUITest {
     @get:Rule
     val composeRule = createComposeRule()
 
     private val helper = PaymentMethodLayoutUITestHelper(
         composeRule,
-        false
+        true
     )
 
     @Test
@@ -48,8 +47,8 @@ internal class PaymentMethodVerticalLayoutUITest {
     @Test
     fun allPaymentMethodsAreShown() {
         helper.allPaymentMethodsAreShown(
-            tag = TEST_TAG_NEW_PAYMENT_METHOD_VERTICAL_LAYOUT_UI,
-            childCount = 3
+            tag = TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT,
+            childCount = 4
         )
     }
 
@@ -60,6 +59,6 @@ internal class PaymentMethodVerticalLayoutUITest {
 
     @Test
     fun correctLPMIsSelected() {
-        helper.correctLPMIsSelected(TEST_TAG_NEW_PAYMENT_METHOD_VERTICAL_LAYOUT_UI)
+        helper.correctLPMIsSelected(TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT)
     }
 }

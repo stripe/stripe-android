@@ -960,6 +960,8 @@ class PaymentSheet internal constructor(
             @Parcelize
             sealed class RowStyle : Parcelable {
 
+                internal abstract fun hasSeparators(): Boolean
+
                 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                 @ExperimentalEmbeddedPaymentElementApi
                 @Parcelize
@@ -1027,6 +1029,8 @@ class PaymentSheet internal constructor(
                         unselectedColor = unselectedColor.toArgb(),
                         additionalInsetsDp = context.getRawValueFromDimenResource(additionalInsetsDp)
                     )
+
+                    override fun hasSeparators() = true
 
                     internal companion object {
                         val defaultLight = FlatWithRadio(
@@ -1119,6 +1123,8 @@ class PaymentSheet internal constructor(
                         additionalInsetsDp = context.getRawValueFromDimenResource(additionalInsetsDp)
                     )
 
+                    override fun hasSeparators() = true
+
                     internal companion object {
                         val defaultLight = FlatWithCheckmark(
                             separatorThicknessDp = StripeThemeDefaults.flat.separatorThickness,
@@ -1166,6 +1172,8 @@ class PaymentSheet internal constructor(
                         spacingDp = context.getRawValueFromDimenResource(spacingDp),
                         additionalInsetsDp = context.getRawValueFromDimenResource(additionalInsetsDp)
                     )
+
+                    override fun hasSeparators() = false
 
                     internal companion object {
                         val default = FloatingButton(
