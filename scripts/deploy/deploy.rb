@@ -16,6 +16,7 @@ require_relative 'version_bump_pr_steps'
 @step_index = 1
 @is_dry_run = false
 @deploy_branch = 'master'
+@is_older_version = false
 
 def execute_steps(steps, step_index)
   step_count = steps.length
@@ -55,6 +56,11 @@ OptionParser.new do |opts|
   opts.on('--branch BRANCH', "Branch to deploy from") do |t|
       @deploy_branch = t
   end
+
+  opts.on('--release-older-version', "Indicates you are not releasing the newest version of stripe-android.") do |t|
+      @is_older_version = t
+  end
+
 end.parse!
 
 steps = [

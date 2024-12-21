@@ -5,6 +5,11 @@ require 'subprocess'
 require_relative 'common'
 
 def update_pay_server_docs()
+    if (@is_older_version)
+        rputs "Skipping updating pay server docs because this release is for an older version."
+        return
+    end
+
     puts 'Ensuring pay-server repo is up-to-date.'
     begin
         execute_or_fail("git -C ../pay-server checkout master")

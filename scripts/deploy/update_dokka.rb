@@ -3,6 +3,11 @@
 require_relative 'common'
 
 def generate_dokka()
+    if (@is_older_version)
+        rputs "Skipping updating dokka because this release is for an older version."
+        return
+    end
+
     dokka_change_description = "Generate dokka for #{@version}"
 
     begin

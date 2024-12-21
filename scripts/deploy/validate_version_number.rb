@@ -45,11 +45,15 @@ end
 def validate_target_version_is_newer(target_version)
     current_version = get_current_version()
     if !target_version_is_newer(target_version, current_version)
-        raise "Expected target version #{target_version} to be newer than #{current_version}."
+        raise "Expected target version #{target_version} to be newer than #{current_version}. If
+         the new version number is intentionally older, pass the `--release-older-version` flag to
+         the deploy script."
     end
 end
 
 def validate_version_number()
     validate_version_number_format(@version)
-    validate_target_version_is_newer(@version)
+    if (!@is_older_version)
+        validate_target_version_is_newer(@version)
+    end
 end
