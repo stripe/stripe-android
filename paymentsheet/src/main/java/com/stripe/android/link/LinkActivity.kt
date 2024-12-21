@@ -52,7 +52,7 @@ internal class LinkActivity : ComponentActivity() {
             var bottomSheetContent by remember { mutableStateOf<BottomSheetContent?>(null) }
             val sheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
             val coroutineScope = rememberCoroutineScope()
-            val appBarState by vm.linkState.collectAsState()
+            val appBarState by vm.linkAppBarState.collectAsState()
 
             if (bottomSheetContent != null) {
                 DisposableEffect(bottomSheetContent) {
@@ -81,17 +81,18 @@ internal class LinkActivity : ComponentActivity() {
                 onUpdateSheetContent = {
                     bottomSheetContent = it
                 },
-                onBackPressed = onBackPressedDispatcher::onBackPressed
+                onBackPressed = onBackPressedDispatcher::onBackPressed,
+                onLogout = vm::logout
             )
         }
     }
 
     private fun dismissWithResult(result: LinkActivityResult) {
         val bundle = bundleOf(
-            LinkActivityContract.EXTRA_RESULT to LinkActivityContract.Result(result)
+            LinkActivityContract.EXTRA_RESULT to result
         )
         this@LinkActivity.setResult(
-            Activity.RESULT_OK,
+            RESULT_COMPLETE,
             Intent().putExtras(bundle)
         )
         this@LinkActivity.finish()
@@ -104,6 +105,7 @@ internal class LinkActivity : ComponentActivity() {
 
     companion object {
         internal const val EXTRA_ARGS = "native_link_args"
+        internal const val RESULT_COMPLETE = 73563
 
         internal fun createIntent(
             context: Context,

@@ -15,6 +15,7 @@ import androidx.savedstate.SavedStateRegistryOwner
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.account.FakeLinkAccountManager
+import com.stripe.android.testing.FakeLogger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -35,7 +36,12 @@ import kotlin.test.assertFailsWith
 internal class LinkActivityViewModelTest {
     private val dispatcher = UnconfinedTestDispatcher()
     private val linkAccountManager = FakeLinkAccountManager()
-    private val vm = LinkActivityViewModel(mock(), linkAccountManager)
+    private val logger = FakeLogger()
+    private val vm = LinkActivityViewModel(
+        activityRetainedComponent = mock(),
+        linkAccountManager = linkAccountManager,
+        logger = logger
+    )
     private val navController: NavHostController = mock()
     private val dismissWithResult: (LinkActivityResult) -> Unit = mock()
 

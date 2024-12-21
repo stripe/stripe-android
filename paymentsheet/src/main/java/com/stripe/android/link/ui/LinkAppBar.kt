@@ -2,6 +2,7 @@ package com.stripe.android.link.ui
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -37,6 +38,7 @@ import com.stripe.android.ui.core.R as StripeUiCoreR
 internal fun LinkAppBar(
     state: LinkAppBarState,
     onBackPressed: () -> Unit,
+    onLogout: () -> Unit,
     showBottomSheetContent: (BottomSheetContent?) -> Unit
 ) {
     Row(
@@ -64,6 +66,7 @@ internal fun LinkAppBar(
 
         LinkAppBarAction(
             showOverflowMenu = state.showOverflowMenu,
+            onLogout = onLogout,
             showBottomSheetContent = showBottomSheetContent
         )
     }
@@ -85,8 +88,9 @@ private fun RowScope.LinkAppBarTitle(
             .padding(top = 18.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        LinkIcon(
-            tint = MaterialTheme.linkColors.linkLogo
+        Image(
+            painter = painterResource(R.drawable.stripe_link_logo),
+            contentDescription = stringResource(com.stripe.android.R.string.stripe_link),
         )
 
         AnimatedVisibility(visible = email != null) {
@@ -111,6 +115,7 @@ private fun RowScope.LinkAppBarTitle(
 @Composable
 private fun LinkAppBarAction(
     showOverflowMenu: Boolean,
+    onLogout: () -> Unit,
     showBottomSheetContent: (BottomSheetContent?) -> Unit
 ) {
     val overflowIconAlpha by animateFloatAsState(
@@ -120,7 +125,17 @@ private fun LinkAppBarAction(
 
     IconButton(
         onClick = {
-            showBottomSheetContent {}
+            showBottomSheetContent {
+                LinkLogoutSheet(
+                    onLogoutClick = {
+                        showBottomSheetContent(null)
+                        onLogout()
+                    },
+                    onCancelClick = {
+                        showBottomSheetContent(null)
+                    }
+                )
+            }
         },
         enabled = showOverflowMenu,
         modifier = Modifier
@@ -148,6 +163,7 @@ private fun LinkAppBarPreview() {
                     email = "email@example.com",
                 ),
                 onBackPressed = {},
+                onLogout = {},
                 showBottomSheetContent = {}
             )
         }
@@ -167,6 +183,7 @@ private fun LinkAppBarNoEmail() {
                     email = null,
                 ),
                 onBackPressed = {},
+                onLogout = {},
                 showBottomSheetContent = {}
             )
         }
@@ -186,6 +203,7 @@ private fun LinkAppBarChildScreen() {
                     email = "email@example.com",
                 ),
                 onBackPressed = {},
+                onLogout = {},
                 showBottomSheetContent = {}
             )
         }
@@ -205,6 +223,7 @@ private fun LinkAppBarChildScreenNoEmail() {
                     email = null,
                 ),
                 onBackPressed = {},
+                onLogout = {},
                 showBottomSheetContent = {}
             )
         }
