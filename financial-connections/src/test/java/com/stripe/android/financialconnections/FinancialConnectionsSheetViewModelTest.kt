@@ -34,8 +34,10 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession.StatusDetails
 import com.stripe.android.financialconnections.presentation.withState
+import com.stripe.android.financialconnections.utils.TestIntegrityRequestManager
 import com.stripe.android.model.IncentiveEligibilitySession
 import com.stripe.android.model.LinkMode
+import com.stripe.attestation.IntegrityRequestManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -44,6 +46,7 @@ import org.junit.Test
 import org.junit.rules.TestRule
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
@@ -88,12 +91,31 @@ class FinancialConnectionsSheetViewModelTest {
     }
 
     @Test
-    fun `init - if manifest not present in initial state, fetchManifest triggered`() =
+    fun `init - if manifest not present in initial state and attestation ready, fetchManifest triggered`() =
         runTest {
-            whenever(getOrFetchSync(any())).thenReturn(syncResponse)
-            createViewModel(defaultInitialState)
+            whenever(getOrFetchSync(any(), anyOrNull())).thenReturn(syncResponse)
+            createViewModel(
+                defaultInitialState,
+                integrityRequestManager = TestIntegrityRequestManager(
+                    prepareResult = Result.success(Unit)
+                )
+            )
 
-            verify(getOrFetchSync).invoke(refetchCondition = Always)
+            verify(getOrFetchSync).invoke(refetchCondition = Always, attestationInitialized = true)
+        }
+
+    @Test
+    fun `init - if manifest not present in initial state and attestation fails, fetchManifest triggered`() =
+        runTest {
+            whenever(getOrFetchSync(any(), anyOrNull())).thenReturn(syncResponse)
+            createViewModel(
+                defaultInitialState,
+                integrityRequestManager = TestIntegrityRequestManager(
+                    prepareResult = Result.failure(Exception())
+                )
+            )
+
+            verify(getOrFetchSync).invoke(refetchCondition = Always, attestationInitialized = false)
         }
 
     @Test
@@ -109,7 +131,7 @@ class FinancialConnectionsSheetViewModelTest {
     fun `init - When no browser available, AuthFlow closes and logs error`() = runTest {
         // Given
         whenever(browserManager.canOpenHttpsUrl()).thenReturn(false)
-        whenever(getOrFetchSync(any())).thenReturn(syncResponse)
+        whenever(getOrFetchSync(any(), any())).thenReturn(syncResponse)
 
         // When
         val viewModel = createViewModel(defaultInitialState)
@@ -139,7 +161,7 @@ class FinancialConnectionsSheetViewModelTest {
         runTest {
             // Given
             whenever(browserManager.canOpenHttpsUrl()).thenReturn(true)
-            whenever(getOrFetchSync(any())).thenReturn(syncResponse)
+            whenever(getOrFetchSync(any(), any())).thenReturn(syncResponse)
             whenever(nativeRouter.nativeAuthFlowEnabled(any())).thenReturn(false)
 
             // When
@@ -175,7 +197,7 @@ class FinancialConnectionsSheetViewModelTest {
         runTest {
             // Given
             whenever(browserManager.canOpenHttpsUrl()).thenReturn(true)
-            whenever(getOrFetchSync(any())).thenReturn(syncResponse)
+            whenever(getOrFetchSync(any(), any())).thenReturn(syncResponse)
             whenever(nativeRouter.nativeAuthFlowEnabled(any())).thenReturn(false)
 
             // When
@@ -210,7 +232,7 @@ class FinancialConnectionsSheetViewModelTest {
     fun `init - when instant debits flow, hosted auth url doesn't contain link_mode if unknown`() = runTest {
         // Given
         whenever(browserManager.canOpenHttpsUrl()).thenReturn(true)
-        whenever(getOrFetchSync(any())).thenReturn(syncResponse)
+        whenever(getOrFetchSync(any(), any())).thenReturn(syncResponse)
         whenever(nativeRouter.nativeAuthFlowEnabled(any())).thenReturn(false)
 
         // When
@@ -245,7 +267,7 @@ class FinancialConnectionsSheetViewModelTest {
     fun `init - when instant debits flow, hosted auth url contains incentive info if eligible`() = runTest {
         // Given
         whenever(browserManager.canOpenHttpsUrl()).thenReturn(true)
-        whenever(getOrFetchSync(any())).thenReturn(syncResponse)
+        whenever(getOrFetchSync(any(), any())).thenReturn(syncResponse)
         whenever(nativeRouter.nativeAuthFlowEnabled(any())).thenReturn(false)
 
         // When
@@ -281,7 +303,7 @@ class FinancialConnectionsSheetViewModelTest {
     fun `init - when instant debits flow, hosted auth url does not contain incentive info if not eligible`() = runTest {
         // Given
         whenever(browserManager.canOpenHttpsUrl()).thenReturn(true)
-        whenever(getOrFetchSync(any())).thenReturn(syncResponse)
+        whenever(getOrFetchSync(any(), any())).thenReturn(syncResponse)
         whenever(nativeRouter.nativeAuthFlowEnabled(any())).thenReturn(false)
 
         // When
@@ -317,7 +339,7 @@ class FinancialConnectionsSheetViewModelTest {
     fun `init - hosted auth url contains prefill details`() = runTest {
         // Given
         whenever(browserManager.canOpenHttpsUrl()).thenReturn(true)
-        whenever(getOrFetchSync(any())).thenReturn(syncResponse)
+        whenever(getOrFetchSync(any(), any())).thenReturn(syncResponse)
         whenever(nativeRouter.nativeAuthFlowEnabled(any())).thenReturn(false)
 
         // When
@@ -354,7 +376,7 @@ class FinancialConnectionsSheetViewModelTest {
     fun `init - hosted auth url contains billing details`() = runTest {
         // Given
         whenever(browserManager.canOpenHttpsUrl()).thenReturn(true)
-        whenever(getOrFetchSync(any())).thenReturn(syncResponse)
+        whenever(getOrFetchSync(any(), any())).thenReturn(syncResponse)
         whenever(nativeRouter.nativeAuthFlowEnabled(any())).thenReturn(false)
 
         // When
@@ -408,7 +430,7 @@ class FinancialConnectionsSheetViewModelTest {
     fun `init - when data flow and non-native, hosted auth url without query params is launched`() = runTest {
         // Given
         whenever(browserManager.canOpenHttpsUrl()).thenReturn(true)
-        whenever(getOrFetchSync(any())).thenReturn(syncResponse)
+        whenever(getOrFetchSync(any(), any())).thenReturn(syncResponse)
         whenever(nativeRouter.nativeAuthFlowEnabled(any())).thenReturn(false)
 
         // When
@@ -429,7 +451,7 @@ class FinancialConnectionsSheetViewModelTest {
     fun `handleOnNewIntent - wrong intent should fire analytics event and set fail result`() = runTest {
         // Given
         whenever(browserManager.canOpenHttpsUrl()).thenReturn(true)
-        whenever(getOrFetchSync(any())).thenReturn(syncResponse)
+        whenever(getOrFetchSync(any(), any())).thenReturn(syncResponse)
         val viewModel = createViewModel(defaultInitialState)
 
         // When
@@ -444,7 +466,7 @@ class FinancialConnectionsSheetViewModelTest {
     fun `handleOnNewIntent - on Link flows with invalid account, error is thrown`() {
         runTest {
             // Given
-            whenever(getOrFetchSync(any())).thenReturn(syncResponse)
+            whenever(getOrFetchSync(any(), any())).thenReturn(syncResponse)
             whenever(browserManager.canOpenHttpsUrl()).thenReturn(true)
             val viewModel = createViewModel(
                 defaultInitialState.copy(initialArgs = ForInstantDebits(configuration))
@@ -474,7 +496,7 @@ class FinancialConnectionsSheetViewModelTest {
             whenever(browserManager.canOpenHttpsUrl()).thenReturn(true)
             whenever(fetchFinancialConnectionsSession(any()))
                 .thenReturn(financialConnectionsSessionWithNoMoreAccounts)
-            whenever(getOrFetchSync(any())).thenReturn(syncResponse)
+            whenever(getOrFetchSync(any(), any())).thenReturn(syncResponse)
             val viewModel = createViewModel(defaultInitialState)
             val cancelIntent = cancelIntent()
 
@@ -495,7 +517,7 @@ class FinancialConnectionsSheetViewModelTest {
             whenever(browserManager.canOpenHttpsUrl()).thenReturn(true)
             whenever(fetchFinancialConnectionsSession(any()))
                 .thenReturn(financialConnectionsSessionWithNoMoreAccounts)
-            whenever(getOrFetchSync(any())).thenReturn(syncResponse)
+            whenever(getOrFetchSync(any(), any())).thenReturn(syncResponse)
             val viewModel = createViewModel(defaultInitialState)
 
             // When
@@ -520,7 +542,7 @@ class FinancialConnectionsSheetViewModelTest {
                 )
             )
             whenever(browserManager.canOpenHttpsUrl()).thenReturn(true)
-            whenever(getOrFetchSync(any())).thenReturn(syncResponse)
+            whenever(getOrFetchSync(any(), any())).thenReturn(syncResponse)
             whenever(fetchFinancialConnectionsSession(any())).thenReturn(expectedSession)
             val viewModel = createViewModel(defaultInitialState)
 
@@ -541,7 +563,7 @@ class FinancialConnectionsSheetViewModelTest {
     fun `handleOnNewIntent - when intent with unknown received, then finish with Result#Failed`() =
         runTest {
             // Given
-            whenever(getOrFetchSync(any())).thenReturn(syncResponse)
+            whenever(getOrFetchSync(any(), any())).thenReturn(syncResponse)
             val viewModel = createViewModel(defaultInitialState)
             val errorIntent = Intent()
 
@@ -563,7 +585,7 @@ class FinancialConnectionsSheetViewModelTest {
             // Given
             val expectedSession = financialConnectionsSession()
             whenever(browserManager.canOpenHttpsUrl()).thenReturn(true)
-            whenever(getOrFetchSync(any())).thenReturn(syncResponse)
+            whenever(getOrFetchSync(any(), any())).thenReturn(syncResponse)
             whenever(fetchFinancialConnectionsSession(any())).thenReturn(expectedSession)
 
             val viewModel = createViewModel(defaultInitialState)
@@ -590,7 +612,7 @@ class FinancialConnectionsSheetViewModelTest {
                 "skip_aggregation=true&referral_source=APP&client_redirect_url=123"
             val nativeRedirectUrl = "stripe-auth://native-redirect/com.example.app/$aggregatorUrl"
             val expectedSession = financialConnectionsSession()
-            whenever(getOrFetchSync(any())).thenReturn(syncResponse)
+            whenever(getOrFetchSync(any(), any())).thenReturn(syncResponse)
             whenever(fetchFinancialConnectionsSession(any())).thenReturn(expectedSession)
 
             val viewModel = createViewModel(defaultInitialState)
@@ -616,7 +638,7 @@ class FinancialConnectionsSheetViewModelTest {
                 "stripe-auth://link-accounts/com.example.app/authentication_return#$returnUrlQueryParams"
             val expectedSession = financialConnectionsSession()
             whenever(browserManager.canOpenHttpsUrl()).thenReturn(true)
-            whenever(getOrFetchSync(any())).thenReturn(syncResponse)
+            whenever(getOrFetchSync(any(), any())).thenReturn(syncResponse)
             whenever(fetchFinancialConnectionsSession(any())).thenReturn(expectedSession)
 
             val viewModel = createViewModel(defaultInitialState)
@@ -641,7 +663,7 @@ class FinancialConnectionsSheetViewModelTest {
             // Given
             val apiException = APIException()
             whenever(browserManager.canOpenHttpsUrl()).thenReturn(true)
-            whenever(getOrFetchSync(any())).thenReturn(syncResponse)
+            whenever(getOrFetchSync(any(), any())).thenReturn(syncResponse)
             whenever(fetchFinancialConnectionsSession.invoke(any())).thenAnswer { throw apiException }
             val viewModel = createViewModel(defaultInitialState)
 
@@ -662,7 +684,7 @@ class FinancialConnectionsSheetViewModelTest {
         runTest {
             // Given
             whenever(browserManager.canOpenHttpsUrl()).thenReturn(true)
-            whenever(getOrFetchSync(any())).thenReturn(syncResponse)
+            whenever(getOrFetchSync(any(), any())).thenReturn(syncResponse)
             whenever(fetchFinancialConnectionsSession(any())).thenAnswer { throw APIException() }
             val viewModel = createViewModel(defaultInitialState)
             // When
@@ -682,7 +704,7 @@ class FinancialConnectionsSheetViewModelTest {
         runTest {
             // Given
             whenever(browserManager.canOpenHttpsUrl()).thenReturn(true)
-            whenever(getOrFetchSync(any()))
+            whenever(getOrFetchSync(any(), any()))
                 .thenReturn(
                     syncResponse.copy(
                         manifest = sessionManifest().copy(
@@ -772,7 +794,7 @@ class FinancialConnectionsSheetViewModelTest {
         runTest {
             // Given
             whenever(browserManager.canOpenHttpsUrl()).thenReturn(true)
-            whenever(getOrFetchSync(any())).thenReturn(syncResponse)
+            whenever(getOrFetchSync(any(), any())).thenReturn(syncResponse)
 
             // When
             val viewModel = createViewModel(defaultInitialState)
@@ -807,7 +829,8 @@ class FinancialConnectionsSheetViewModelTest {
     )
 
     private fun createViewModel(
-        initialState: FinancialConnectionsSheetState
+        initialState: FinancialConnectionsSheetState,
+        integrityRequestManager: IntegrityRequestManager = TestIntegrityRequestManager()
     ): FinancialConnectionsSheetViewModel {
         return FinancialConnectionsSheetViewModel(
             applicationId = "com.example.app",
@@ -821,7 +844,7 @@ class FinancialConnectionsSheetViewModelTest {
             browserManager = browserManager,
             savedStateHandle = SavedStateHandle(),
             nativeAuthFlowCoordinator = mock(),
-            integrityRequestManager = mock(),
+            integrityRequestManager = integrityRequestManager,
             logger = Logger.noop()
         )
     }

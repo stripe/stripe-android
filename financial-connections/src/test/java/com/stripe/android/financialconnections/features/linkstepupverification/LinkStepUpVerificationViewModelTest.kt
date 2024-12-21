@@ -25,6 +25,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
@@ -137,7 +138,7 @@ class LinkStepUpVerificationViewModelTest {
     private suspend fun givenGetSyncReturns(
         syncResponse: SynchronizeSessionResponse = syncResponse()
     ) {
-        whenever(getOrFetchSync(any())).thenReturn(syncResponse)
+        whenever(getOrFetchSync(any(), anyOrNull())).thenReturn(syncResponse)
     }
 
     private suspend fun markLinkVerifiedReturns(

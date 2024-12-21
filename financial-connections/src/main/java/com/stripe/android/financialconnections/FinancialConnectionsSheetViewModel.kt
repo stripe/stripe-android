@@ -114,8 +114,11 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     private fun fetchManifest() {
         viewModelScope.launch {
             kotlin.runCatching {
-                prepareStandardRequestManager()
-                getOrFetchSync(refetchCondition = Always)
+                val attestationInitialized = prepareStandardRequestManager()
+                getOrFetchSync(
+                    refetchCondition = Always,
+                    attestationInitialized = attestationInitialized
+                )
             }.onFailure {
                 finishWithResult(stateFlow.value, Failed(it))
             }.onSuccess {
@@ -125,7 +128,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     }
 
     private suspend fun prepareStandardRequestManager(): Boolean {
-        val result = runCatching { integrityRequestManager.prepare() }
+        val result = integrityRequestManager.prepare()
         result.exceptionOrNull()?.let {
             analyticsTracker.track(
                 FinancialConnectionsAnalyticsEvent.Error(
