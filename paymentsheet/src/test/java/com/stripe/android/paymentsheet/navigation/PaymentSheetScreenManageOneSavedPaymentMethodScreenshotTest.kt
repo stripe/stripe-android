@@ -26,9 +26,21 @@ internal class PaymentSheetScreenManageOneSavedPaymentMethodScreenshotTest {
     val coroutineRule = CoroutineTestRule()
 
     @Test
-    fun displaysRemoveMode() {
+    fun displaysRemoveModeAndDoesNotShowRemoveMode() {
         val metadata = PaymentMethodMetadataFactory.create()
-        val interactor = FakeManageOneSavedPaymentMethodInteractor(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        val interactor = FakeManageOneSavedPaymentMethodInteractor(PaymentMethodFixtures.CARD_PAYMENT_METHOD, shouldShowDefaultBadge = false)
+        val initialScreen = ManageOneSavedPaymentMethod(interactor)
+        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen)
+
+        paparazziRule.snapshot {
+            PaymentSheetScreen(viewModel = viewModel, type = PaymentSheetFlowType.Complete)
+        }
+    }
+
+    @Test
+    fun displaysDefaultBadge() {
+        val metadata = PaymentMethodMetadataFactory.create()
+        val interactor = FakeManageOneSavedPaymentMethodInteractor(PaymentMethodFixtures.CARD_PAYMENT_METHOD, shouldShowDefaultBadge = true)
         val initialScreen = ManageOneSavedPaymentMethod(interactor)
         val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen)
 

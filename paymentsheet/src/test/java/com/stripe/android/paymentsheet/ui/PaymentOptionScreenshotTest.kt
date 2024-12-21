@@ -69,11 +69,45 @@ class PaymentOptionScreenshotTest {
     }
 
     @Test
+    fun testDefaultDisabled() {
+        paparazziRule.snapshot {
+            SavedPaymentMethodTab(
+                viewWidth = 160.dp,
+                isSelected = false,
+                shouldShowDefaultBadge = true,
+                editState = PaymentOptionEditState.None,
+                isEnabled = false,
+                iconRes = R.drawable.stripe_ic_paymentsheet_card_visa,
+                labelText = "••••4242",
+                description = "Description",
+                onItemSelectedListener = {},
+            )
+        }
+    }
+
+    @Test
     fun testSelected() {
         paparazziRule.snapshot {
             SavedPaymentMethodTab(
                 viewWidth = 160.dp,
                 isSelected = true,
+                editState = PaymentOptionEditState.None,
+                isEnabled = true,
+                iconRes = R.drawable.stripe_ic_paymentsheet_card_visa,
+                labelText = "••••4242",
+                description = "Description",
+                onItemSelectedListener = {},
+            )
+        }
+    }
+
+    @Test
+    fun testSelectedAndDefault() {
+        paparazziRule.snapshot {
+            SavedPaymentMethodTab(
+                viewWidth = 160.dp,
+                isSelected = true,
+                shouldShowDefaultBadge = true,
                 editState = PaymentOptionEditState.None,
                 isEnabled = true,
                 iconRes = R.drawable.stripe_ic_paymentsheet_card_visa,
@@ -101,6 +135,23 @@ class PaymentOptionScreenshotTest {
     }
 
     @Test
+    fun testSelectedAndDisabledAndDefault() {
+        paparazziRule.snapshot {
+            SavedPaymentMethodTab(
+                viewWidth = 160.dp,
+                isSelected = true,
+                shouldShowDefaultBadge = true,
+                editState = PaymentOptionEditState.None,
+                isEnabled = false,
+                iconRes = R.drawable.stripe_ic_paymentsheet_card_visa,
+                labelText = "••••4242",
+                description = "Description",
+                onItemSelectedListener = {},
+            )
+        }
+    }
+
+    @Test
     fun testModifying() {
         paparazziRule.snapshot {
             SavedPaymentMethodTab(
@@ -117,7 +168,7 @@ class PaymentOptionScreenshotTest {
     }
 
     @Test
-    fun testDefaultAndModifying() {
+    fun testModifyingAndDefault() {
         paparazziRule.snapshot {
             SavedPaymentMethodTab(
                 viewWidth = 160.dp,

@@ -38,6 +38,15 @@ internal class PaymentSheetScreenSelectSavedPaymentMethodsScreenshotTest {
         ),
     )
 
+    private val defaultSavedPaymentOptionItem = PaymentOptionsItem.SavedPaymentMethod(
+        displayableSavedPaymentMethod = DisplayableSavedPaymentMethod.create(
+            displayName = "Card 4444".resolvableString,
+            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+            isCbcEligible = true,
+            shouldShowDefaultBadge = true
+        ),
+    )
+
     @Test
     fun displaysSelectSavedPaymentMethods() {
         val metadata = PaymentMethodMetadataFactory.create()
@@ -96,6 +105,84 @@ internal class PaymentSheetScreenSelectSavedPaymentMethodsScreenshotTest {
             initialState = SelectSavedPaymentMethodsInteractor.State(
                 paymentOptionsItems = listOf(
                     PaymentOptionsItem.AddCard,
+                    savedPaymentOptionItem,
+                ),
+                selectedPaymentOptionsItem = savedPaymentOptionItem,
+                isEditing = false,
+                isProcessing = true,
+                canEdit = false,
+                canRemove = false,
+            )
+        )
+        val initialScreen = SelectSavedPaymentMethods(interactor)
+        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen)
+
+        paparazziRule.snapshot {
+            PaymentSheetScreen(viewModel = viewModel, type = PaymentSheetFlowType.Complete)
+        }
+    }
+
+    @Test
+    fun displaysSelectSavedPaymentMethodsWithDefault() {
+        val metadata = PaymentMethodMetadataFactory.create()
+        val interactor = FakeSelectSavedPaymentMethodsInteractor(
+            initialState = SelectSavedPaymentMethodsInteractor.State(
+                paymentOptionsItems = listOf(
+                    PaymentOptionsItem.AddCard,
+                    defaultSavedPaymentOptionItem,
+                    savedPaymentOptionItem,
+                ),
+                selectedPaymentOptionsItem = savedPaymentOptionItem,
+                isEditing = false,
+                isProcessing = false,
+                canEdit = true,
+                canRemove = true,
+            )
+        )
+        val initialScreen = SelectSavedPaymentMethods(interactor)
+        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen)
+        viewModel.primaryButtonUiStateSource.update { original ->
+            original?.copy(enabled = true)
+        }
+
+        paparazziRule.snapshot {
+            PaymentSheetScreen(viewModel = viewModel, type = PaymentSheetFlowType.Complete)
+        }
+    }
+
+    @Test
+    fun displaysSelectSavedPaymentMethodsInEditModeWithDefault() {
+        val metadata = PaymentMethodMetadataFactory.create()
+        val interactor = FakeSelectSavedPaymentMethodsInteractor(
+            initialState = SelectSavedPaymentMethodsInteractor.State(
+                paymentOptionsItems = listOf(
+                    PaymentOptionsItem.AddCard,
+                    defaultSavedPaymentOptionItem,
+                    savedPaymentOptionItem,
+                ),
+                selectedPaymentOptionsItem = savedPaymentOptionItem,
+                isEditing = true,
+                isProcessing = false,
+                canEdit = true,
+                canRemove = true,
+            )
+        )
+        val initialScreen = SelectSavedPaymentMethods(interactor)
+        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen)
+
+        paparazziRule.snapshot {
+            PaymentSheetScreen(viewModel = viewModel, type = PaymentSheetFlowType.Complete)
+        }
+    }
+
+    @Test
+    fun displaysSelectSavedPaymentMethodsInProcessingStateWithDefault() {
+        val metadata = PaymentMethodMetadataFactory.create()
+        val interactor = FakeSelectSavedPaymentMethodsInteractor(
+            initialState = SelectSavedPaymentMethodsInteractor.State(
+                paymentOptionsItems = listOf(
+                    PaymentOptionsItem.AddCard,
+                    defaultSavedPaymentOptionItem,
                     savedPaymentOptionItem,
                 ),
                 selectedPaymentOptionsItem = savedPaymentOptionItem,
