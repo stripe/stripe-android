@@ -116,8 +116,11 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     private fun initAuthFlow() {
         viewModelScope.launch {
             kotlin.runCatching {
-                prepareStandardRequestManager()
-                getOrFetchSync(refetchCondition = Always)
+                val attestationInitialized = prepareStandardRequestManager()
+                getOrFetchSync(
+                    refetchCondition = Always,
+                    attestationInitialized = attestationInitialized
+                )
             }.onFailure {
                 finishWithResult(stateFlow.value, Failed(it))
             }.onSuccess {

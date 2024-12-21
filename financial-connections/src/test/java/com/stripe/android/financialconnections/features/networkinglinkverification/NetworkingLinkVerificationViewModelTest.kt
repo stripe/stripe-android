@@ -311,7 +311,7 @@ class NetworkingLinkVerificationViewModelTest {
         val onStartVerificationCaptor = argumentCaptor<suspend () -> Unit>()
         val onVerificationStartedCaptor = argumentCaptor<suspend (ConsumerSession) -> Unit>()
 
-        whenever(getOrFetchSync(any())).thenReturn(
+        whenever(getOrFetchSync(any(), anyOrNull())).thenReturn(
             syncResponse(sessionManifest().copy(accountholderCustomerEmailAddress = consumerSession.emailAddress))
         )
         whenever(attachConsumerToLinkAccountSession.invoke(any())).thenReturn(Unit)
@@ -356,7 +356,7 @@ class NetworkingLinkVerificationViewModelTest {
         val onStartVerificationCaptor = argumentCaptor<suspend () -> Unit>()
         val onVerificationStartedCaptor = argumentCaptor<suspend (ConsumerSession) -> Unit>()
 
-        whenever(getOrFetchSync(any())).thenReturn(
+        whenever(getOrFetchSync(any(), anyOrNull())).thenReturn(
             syncResponse(sessionManifest().copy(accountholderCustomerEmailAddress = consumerSession.emailAddress))
         )
 
