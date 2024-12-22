@@ -30,6 +30,7 @@ internal class NetworkingLinkSignupPreviewParameterProvider :
                     initiallySelectedCountryCode = null,
                 ),
                 isInstantDebits = false,
+                appVerificationEnabled = false,
                 content = networkingLinkSignupPane(),
             )
         ),
@@ -49,6 +50,7 @@ internal class NetworkingLinkSignupPreviewParameterProvider :
                     initiallySelectedCountryCode = null,
                 ),
                 isInstantDebits = false,
+                appVerificationEnabled = false,
                 content = networkingLinkSignupPane(),
             )
         ),
@@ -74,6 +76,7 @@ internal class NetworkingLinkSignupPreviewParameterProvider :
                     initiallySelectedCountryCode = null,
                 ),
                 isInstantDebits = false,
+                appVerificationEnabled = false,
                 content = networkingLinkSignupPane(),
             )
         ),
@@ -99,6 +102,7 @@ internal class NetworkingLinkSignupPreviewParameterProvider :
                     initiallySelectedCountryCode = null,
                 ),
                 isInstantDebits = true,
+                appVerificationEnabled = false,
                 content = linkLoginPane(),
             )
         ),

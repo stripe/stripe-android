@@ -22,13 +22,14 @@ internal class LookupConsumerAndStartVerification @Inject constructor(
         email: String,
         businessName: String?,
         verificationType: VerificationType,
+        appVerificationEnabled: Boolean,
         onConsumerNotFound: suspend () -> Unit,
         onLookupError: suspend (Throwable) -> Unit,
         onStartVerification: suspend () -> Unit,
         onVerificationStarted: suspend (ConsumerSession) -> Unit,
         onStartVerificationError: suspend (Throwable) -> Unit
     ) {
-        runCatching { lookupAccount(email) }
+        runCatching { lookupAccount(email, appVerificationEnabled) }
             .onSuccess { session ->
                 if (session.exists) {
                     onStartVerification()

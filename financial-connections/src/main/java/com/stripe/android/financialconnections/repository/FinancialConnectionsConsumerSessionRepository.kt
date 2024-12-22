@@ -27,16 +27,22 @@ internal interface FinancialConnectionsConsumerSessionRepository {
 
     suspend fun getCachedConsumerSession(): CachedConsumerSession?
 
+    suspend fun postConsumerSession(
+        email: String,
+        clientSecret: String
+    ): ConsumerSessionLookup
+
+    suspend fun mobileLookupConsumerSession(
+        email: String,
+        verificationToken: String,
+        appId: String
+    ): ConsumerSessionLookup
+
     suspend fun signUp(
         email: String,
         phoneNumber: String,
         country: String,
     ): ConsumerSessionSignup
-
-    suspend fun lookupConsumerSession(
-        email: String,
-        clientSecret: String
-    ): ConsumerSessionLookup
 
     suspend fun startConsumerVerification(
         consumerSessionClientSecret: String,
@@ -121,15 +127,6 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
 
     override suspend fun getCachedConsumerSession(): CachedConsumerSession? = mutex.withLock {
         consumerSessionRepository.provideConsumerSession()
-    }
-
-    override suspend fun lookupConsumerSession(
-        email: String,
-        clientSecret: String
-    ): ConsumerSessionLookup = mutex.withLock {
-        postConsumerSession(email, clientSecret).also { lookup ->
-            updateCachedConsumerSessionFromLookup(lookup)
-        }
     }
 
     override suspend fun signUp(
@@ -238,14 +235,30 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
         ).getOrThrow()
     }
 
-    private suspend fun postConsumerSession(
+    override suspend fun postConsumerSession(
         email: String,
         clientSecret: String
     ): ConsumerSessionLookup = financialConnectionsConsumersApiService.postConsumerSession(
         email = email,
         clientSecret = clientSecret,
         requestSurface = requestSurface,
-    )
+    ).also {
+        updateCachedConsumerSessionFromLookup(it)
+    }
+
+    override suspend fun mobileLookupConsumerSession(
+        email: String,
+        verificationToken: String,
+        appId: String
+    ): ConsumerSessionLookup = consumersApiService.mobileLookupConsumerSession(
+        email = email,
+        verificationToken = verificationToken,
+        appId = appId,
+        requestSurface = requestSurface,
+        requestOptions = provideApiRequestOptions(useConsumerPublishableKey = false),
+    ).also {
+        updateCachedConsumerSessionFromLookup(it)
+    }
 
     private fun updateCachedConsumerSession(
         source: String,

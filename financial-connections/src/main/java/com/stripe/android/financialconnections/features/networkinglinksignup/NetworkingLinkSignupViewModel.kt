@@ -103,6 +103,7 @@ internal class NetworkingLinkSignupViewModel @AssistedInject constructor(
             NetworkingLinkSignupState.Payload(
                 content = requireNotNull(content),
                 merchantName = sync.manifest.getBusinessName(),
+                appVerificationEnabled = sync.manifest.appVerificationEnabled,
                 emailController = SimpleTextFieldController(
                     textFieldConfig = EmailConfig(label = R.string.stripe_networking_signup_email_label),
                     initialValue = sync.manifest.accountholderCustomerEmailAddress ?: prefillDetails?.email,
@@ -195,7 +196,7 @@ internal class NetworkingLinkSignupViewModel @AssistedInject constructor(
     /**
      * @param validEmail valid email, or null if entered email is invalid.
      */
-    private suspend fun onEmailEntered(
+    private fun onEmailEntered(
         validEmail: String?
     ) {
         setState { copy(validEmail = validEmail) }
@@ -203,7 +204,10 @@ internal class NetworkingLinkSignupViewModel @AssistedInject constructor(
             logger.debug("VALID EMAIL ADDRESS $validEmail.")
             searchJob += suspend {
                 delay(getLookupDelayMs(validEmail))
-                lookupAccount(validEmail)
+                lookupAccount(
+                    email = validEmail,
+                    verifiedFlow = stateFlow.value.payload()?.appVerificationEnabled == true
+                )
             }.execute { copy(lookupAccount = if (it.isCancellationError()) Uninitialized else it) }
         } else {
             setState { copy(lookupAccount = Uninitialized) }
@@ -342,6 +346,7 @@ internal data class NetworkingLinkSignupState(
     data class Payload(
         val merchantName: String?,
         val emailController: SimpleTextFieldController,
+        val appVerificationEnabled: Boolean,
         val phoneController: PhoneNumberController,
         val isInstantDebits: Boolean,
         val content: Content,
