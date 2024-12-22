@@ -59,6 +59,7 @@ internal object ApiKeyFixtures {
         id = "1234",
         instantVerificationDisabled = true,
         institutionSearchDisabled = true,
+        appVerificationEnabled = false,
         livemode = true,
         businessName = "businessName",
         manualEntryUsesMicrodeposits = true,

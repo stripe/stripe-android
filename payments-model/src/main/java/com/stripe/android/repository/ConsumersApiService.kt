@@ -16,6 +16,7 @@ import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSessionSignup
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.CustomEmailType
+import com.stripe.android.model.EmailSource
 import com.stripe.android.model.IncentiveEligibilitySession
 import com.stripe.android.model.SharePaymentDetails
 import com.stripe.android.model.UpdateAvailableIncentives
@@ -50,6 +51,16 @@ interface ConsumersApiService {
         email: String,
         requestSurface: String,
         requestOptions: ApiRequest.Options
+    ): ConsumerSessionLookup
+
+    suspend fun mobileLookupConsumerSession(
+        email: String,
+        emailSource: EmailSource,
+        requestSurface: String,
+        verificationToken: String,
+        appId: String,
+        requestOptions: ApiRequest.Options,
+        sessionId: String
     ): ConsumerSessionLookup
 
     suspend fun startConsumerVerification(
@@ -179,6 +190,37 @@ class ConsumersApiServiceImpl(
                 mapOf(
                     "request_surface" to requestSurface,
                     "email_address" to email.lowercase()
+                )
+            ),
+            responseJsonParser = ConsumerSessionLookupJsonParser()
+        )
+    }
+
+    /**
+     * Retrieves the ConsumerSession if the given email is associated with a Link account.
+     */
+    override suspend fun mobileLookupConsumerSession(
+        email: String,
+        emailSource: EmailSource,
+        requestSurface: String,
+        verificationToken: String,
+        appId: String,
+        requestOptions: ApiRequest.Options,
+        sessionId: String
+    ): ConsumerSessionLookup {
+        return executeRequestWithModelJsonParser(
+            stripeErrorJsonParser = stripeErrorJsonParser,
+            stripeNetworkClient = stripeNetworkClient,
+            request = apiRequestFactory.createPost(
+                mobileConsumerSessionLookupUrl,
+                requestOptions,
+                mapOf(
+                    "request_surface" to requestSurface,
+                    "email_address" to email.lowercase(),
+                    "android_verification_token" to verificationToken,
+                    "session_id" to sessionId,
+                    "email_source" to emailSource.backendValue,
+                    "app_id" to appId
                 )
             ),
             responseJsonParser = ConsumerSessionLookupJsonParser()
@@ -360,6 +402,12 @@ class ConsumersApiServiceImpl(
          */
         internal val consumerSessionLookupUrl: String =
             getApiUrl("consumers/sessions/lookup")
+
+        /**
+         * @return `https://api.stripe.com/v1/consumers/mobile/sessions/lookup`
+         */
+        internal val mobileConsumerSessionLookupUrl: String =
+            getApiUrl("consumers/mobile/sessions/lookup")
 
         /**
          * @return `https://api.stripe.com/v1/consumers/sessions/start_verification`

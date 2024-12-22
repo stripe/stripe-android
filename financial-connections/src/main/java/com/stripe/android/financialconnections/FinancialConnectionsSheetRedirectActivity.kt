@@ -5,6 +5,7 @@ import android.net.Uri
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.stripe.android.financialconnections.debug.DebugConfiguration
+import com.stripe.android.financialconnections.di.FinancialConnectionsSingletonSharedComponentHolder
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 
 /**
@@ -20,7 +21,9 @@ class FinancialConnectionsSheetRedirectActivity : AppCompatActivity() {
          */
         intent.data
             ?.let { uri ->
-                val uriWithDebugConfiguration = uri.overrideWithDebugConfiguration()
+                val uriWithDebugConfiguration = uri
+                    .overrideWithDebugConfiguration()
+                    .overrideIfIntegrityFailed()
                 uriWithDebugConfiguration.toIntent()
                     ?.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP)
                     ?.also { it.data = uriWithDebugConfiguration }
@@ -65,6 +68,21 @@ class FinancialConnectionsSheetRedirectActivity : AppCompatActivity() {
             true -> Uri.parse(toString().replace(HOST_LINK_ACCOUNTS, HOST_NATIVE_LINK_ACCOUNTS))
             false -> Uri.parse(toString().replace(HOST_NATIVE_LINK_ACCOUNTS, HOST_LINK_ACCOUNTS))
             null -> this
+        }
+
+    /**
+     * When an integrity verdict fails, clients will switch to the web flow locally but backend will still
+     * consider the flow native. This checks the local verdict state and overrides native deep links to web.
+     */
+    private fun Uri.overrideIfIntegrityFailed(): Uri =
+        when (
+            FinancialConnectionsSingletonSharedComponentHolder
+                .getComponent(application)
+                .integrityVerdictManager()
+                .verdictFailed()
+        ) {
+            true -> Uri.parse(toString().replace(HOST_NATIVE_LINK_ACCOUNTS, HOST_LINK_ACCOUNTS))
+            else -> this
         }
 
     private fun Uri.isFinancialConnectionsScheme(): Boolean {

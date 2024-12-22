@@ -36,10 +36,12 @@ import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsS
 import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsSessionForToken
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.GetOrFetchSync.RefetchCondition.Always
+import com.stripe.android.financialconnections.domain.IntegrityVerdictManager
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowRouter
 import com.stripe.android.financialconnections.exception.AppInitializationError
 import com.stripe.android.financialconnections.exception.CustomManualEntryRequiredError
+import com.stripe.android.financialconnections.features.error.isAttestationError
 import com.stripe.android.financialconnections.features.manualentry.isCustomManualEntryError
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.ForData
@@ -71,6 +73,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val getOrFetchSync: GetOrFetchSync,
     private val integrityRequestManager: IntegrityRequestManager,
+    private val integrityVerdictManager: IntegrityVerdictManager,
     private val fetchFinancialConnectionsSession: FetchFinancialConnectionsSession,
     private val fetchFinancialConnectionsSessionForToken: FetchFinancialConnectionsSessionForToken,
     private val logger: Logger,
@@ -130,6 +133,11 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     }
 
     private suspend fun prepareStandardRequestManager(): Boolean {
+        // If previously within the application session an integrity check failed
+        // do not initialize the request manager and directly launch the web flow.
+        if (integrityVerdictManager.verdictFailed()) {
+            return false
+        }
         val result = integrityRequestManager.prepare()
         result.onFailure {
             analyticsTracker.track(
@@ -525,6 +533,11 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         fromNative: Boolean = false,
         @StringRes finishMessage: Int? = null,
     ) {
+        if (result is Failed && result.error.isAttestationError) {
+            integrityVerdictManager.setVerdictFailed()
+            switchToWebFlow()
+            return
+        }
         eventReporter.onResult(state.initialArgs.configuration, result)
         // Native emits its own events before finishing.
         if (fromNative.not()) {
@@ -538,6 +551,35 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
             }
         }
         setState { copy(viewEffect = FinishWithResult(result, finishMessage)) }
+    }
+
+    /**
+     * On scenarios where native failed mid flow due to attestation errors, switch back to web flow.
+     */
+    private fun switchToWebFlow() {
+        viewModelScope.launch {
+            val sync = getOrFetchSync()
+            val hostedAuthUrl = HostedAuthUrlBuilder.create(
+                args = initialState.initialArgs,
+                manifest = sync.manifest,
+            )
+
+            if (hostedAuthUrl != null) {
+                setState {
+                    copy(
+                        manifest = manifest,
+                        // Use intermediate state to prevent the flow from closing in [onResume].
+                        webAuthFlowStatus = AuthFlowStatus.INTERMEDIATE_DEEPLINK,
+                        viewEffect = OpenAuthFlowWithUrl(hostedAuthUrl)
+                    )
+                }
+            } else {
+                finishWithResult(
+                    state = stateFlow.value,
+                    result = Failed(IllegalArgumentException("hostedAuthUrl is required to switch to web flow!"))
+                )
+            }
+        }
     }
 
     companion object {

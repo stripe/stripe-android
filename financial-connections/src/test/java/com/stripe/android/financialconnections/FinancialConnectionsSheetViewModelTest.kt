@@ -845,6 +845,7 @@ class FinancialConnectionsSheetViewModelTest {
             savedStateHandle = SavedStateHandle(),
             nativeAuthFlowCoordinator = mock(),
             integrityRequestManager = integrityRequestManager,
+            integrityVerdictManager = mock(),
             logger = Logger.noop()
         )
     }
