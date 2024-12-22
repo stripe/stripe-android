@@ -7,7 +7,7 @@ internal class TestHandleError : HandleError {
 
     private val invocations = mutableListOf<HandleErrorInvocation>()
 
-    override fun invoke(
+    override suspend fun invoke(
         extraMessage: String,
         error: Throwable,
         pane: FinancialConnectionsSessionManifest.Pane,

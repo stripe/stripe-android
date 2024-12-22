@@ -24,12 +24,14 @@ internal class NetworkingLinkSignupPreviewParameterProvider :
         payload = Success(
             NetworkingLinkSignupState.Payload(
                 merchantName = "Test",
+                prefilledEmail = null,
                 emailController = EmailConfig.createController(""),
                 phoneController = PhoneNumberController.createPhoneNumberController(
                     initialValue = "",
                     initiallySelectedCountryCode = null,
                 ),
                 isInstantDebits = false,
+                appVerificationEnabled = false,
                 content = networkingLinkSignupPane(),
             )
         ),
@@ -43,12 +45,14 @@ internal class NetworkingLinkSignupPreviewParameterProvider :
         payload = Success(
             NetworkingLinkSignupState.Payload(
                 merchantName = "Test",
+                prefilledEmail = null,
                 emailController = EmailConfig.createController("valid@email.com"),
                 phoneController = PhoneNumberController.createPhoneNumberController(
                     initialValue = "",
                     initiallySelectedCountryCode = null,
                 ),
                 isInstantDebits = false,
+                appVerificationEnabled = false,
                 content = networkingLinkSignupPane(),
             )
         ),
@@ -68,12 +72,14 @@ internal class NetworkingLinkSignupPreviewParameterProvider :
         payload = Success(
             NetworkingLinkSignupState.Payload(
                 merchantName = "Test",
+                prefilledEmail = null,
                 emailController = EmailConfig.createController("invalid_email.com"),
                 phoneController = PhoneNumberController.createPhoneNumberController(
                     initialValue = "",
                     initiallySelectedCountryCode = null,
                 ),
                 isInstantDebits = false,
+                appVerificationEnabled = false,
                 content = networkingLinkSignupPane(),
             )
         ),
@@ -93,12 +99,14 @@ internal class NetworkingLinkSignupPreviewParameterProvider :
         payload = Success(
             NetworkingLinkSignupState.Payload(
                 merchantName = "Test",
+                prefilledEmail = null,
                 emailController = EmailConfig.createController(initialValue = null),
                 phoneController = PhoneNumberController.createPhoneNumberController(
                     initialValue = "",
                     initiallySelectedCountryCode = null,
                 ),
                 isInstantDebits = true,
+                appVerificationEnabled = false,
                 content = linkLoginPane(),
             )
         ),

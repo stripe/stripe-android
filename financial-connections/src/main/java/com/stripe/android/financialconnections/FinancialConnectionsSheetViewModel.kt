@@ -40,6 +40,7 @@ import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowRouter
 import com.stripe.android.financialconnections.exception.AppInitializationError
 import com.stripe.android.financialconnections.exception.CustomManualEntryRequiredError
+import com.stripe.android.financialconnections.features.error.isAttestationError
 import com.stripe.android.financialconnections.features.manualentry.isCustomManualEntryError
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.ForData
@@ -521,6 +522,10 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         fromNative: Boolean = false,
         @StringRes finishMessage: Int? = null,
     ) {
+        if (result is Failed && result.error.isAttestationError()) {
+            switchToWebFlow()
+            return
+        }
         eventReporter.onResult(state.initialArgs.configuration, result)
         // Native emits its own events before finishing.
         if (fromNative.not()) {
@@ -534,6 +539,27 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
             }
         }
         setState { copy(viewEffect = FinishWithResult(result, finishMessage)) }
+    }
+
+    /**
+     * On scenarios where native failed mid flow due to attestation errors, switch back to web flow.
+     */
+    private fun switchToWebFlow() {
+        viewModelScope.launch {
+            val sync = getOrFetchSync()
+            val hostedAuthUrl = HostedAuthUrlBuilder.create(
+                args = initialState.initialArgs,
+                manifest = sync.manifest,
+            )!!
+            setState {
+                copy(
+                    manifest = manifest,
+                    // Use intermediate state to prevent the flow from closing in [onResume].
+                    webAuthFlowStatus = AuthFlowStatus.INTERMEDIATE_DEEPLINK,
+                    viewEffect = OpenAuthFlowWithUrl(hostedAuthUrl)
+                )
+            }
+        }
     }
 
     companion object {

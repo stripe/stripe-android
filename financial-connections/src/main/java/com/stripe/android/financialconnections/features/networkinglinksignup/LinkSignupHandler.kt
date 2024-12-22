@@ -27,7 +27,7 @@ internal interface LinkSignupHandler {
         state: NetworkingLinkSignupState,
     ): Pane
 
-    fun handleSignupFailure(
+    suspend fun handleSignupFailure(
         error: Throwable,
     )
 
@@ -65,7 +65,7 @@ internal class LinkSignupHandlerForInstantDebits @Inject constructor(
         navigationManager.tryNavigateTo(NetworkingLinkVerification(referrer = LINK_LOGIN))
     }
 
-    override fun handleSignupFailure(error: Throwable) {
+    override suspend fun handleSignupFailure(error: Throwable) {
         handleError(
             extraMessage = "Error creating a Link account",
             error = error,
@@ -107,7 +107,7 @@ internal class LinkSignupHandlerForNetworking @Inject constructor(
         navigationManager.tryNavigateTo(NetworkingSaveToLinkVerification(referrer = NETWORKING_LINK_SIGNUP_PANE))
     }
 
-    override fun handleSignupFailure(error: Throwable) {
+    override suspend fun handleSignupFailure(error: Throwable) {
         eventTracker.logError(
             extraMessage = "Error saving account to Link",
             error = error,

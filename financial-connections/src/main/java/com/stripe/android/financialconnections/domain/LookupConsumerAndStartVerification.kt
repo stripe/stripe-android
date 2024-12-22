@@ -1,6 +1,7 @@
 package com.stripe.android.financialconnections.domain
 
 import com.stripe.android.model.ConsumerSession
+import com.stripe.android.model.EmailSource
 import com.stripe.android.model.VerificationType
 import javax.inject.Inject
 
@@ -20,15 +21,23 @@ internal class LookupConsumerAndStartVerification @Inject constructor(
      */
     suspend operator fun invoke(
         email: String,
+        emailSource: EmailSource,
         businessName: String?,
         verificationType: VerificationType,
+        appVerificationEnabled: Boolean,
         onConsumerNotFound: suspend () -> Unit,
         onLookupError: suspend (Throwable) -> Unit,
         onStartVerification: suspend () -> Unit,
         onVerificationStarted: suspend (ConsumerSession) -> Unit,
         onStartVerificationError: suspend (Throwable) -> Unit
     ) {
-        runCatching { lookupAccount(email) }
+        runCatching {
+            lookupAccount(
+                email = email,
+                emailSource = emailSource,
+                verifiedFlow = appVerificationEnabled
+            )
+        }
             .onSuccess { session ->
                 if (session.exists) {
                     onStartVerification()
