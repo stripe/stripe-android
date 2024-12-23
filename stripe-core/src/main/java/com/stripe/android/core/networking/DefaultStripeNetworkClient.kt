@@ -62,7 +62,7 @@ class DefaultStripeNetworkClient @JvmOverloads constructor(
     private fun makeRequest(
         request: StripeRequest
     ): StripeResponse<String> {
-        return parseResponse(connectionFactory.create(request), request.url)
+        return parseResponse(connectionFactory.create(request), request.url).also { logger.info("WTF sent request $request") }
     }
 
     private fun makeRequestForFile(

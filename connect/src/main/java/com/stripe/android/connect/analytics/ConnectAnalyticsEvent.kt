@@ -5,7 +5,7 @@ package com.stripe.android.connect.analytics
  */
 internal sealed class ConnectAnalyticsEvent(
     val eventName: String,
-    val params: Map<String, Any?>? = null,
+    val params: Map<String, Any?> = mapOf(),
 ) {
     /**
      * A component was instantiated via create{ComponentType}.

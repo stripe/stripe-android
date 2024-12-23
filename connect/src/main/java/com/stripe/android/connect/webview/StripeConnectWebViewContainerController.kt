@@ -14,6 +14,7 @@ import com.stripe.android.connect.EmbeddedComponentManager
 import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.StripeEmbeddedComponent
 import com.stripe.android.connect.StripeEmbeddedComponentListener
+import com.stripe.android.connect.analytics.ConnectAnalyticsEvent
 import com.stripe.android.connect.analytics.ConnectAnalyticsService
 import com.stripe.android.connect.webview.serialization.ConnectInstanceJs
 import com.stripe.android.connect.webview.serialization.SetOnLoadError
@@ -61,6 +62,7 @@ internal class StripeConnectWebViewContainerController<Listener : StripeEmbedded
      */
     fun onPageStarted() {
         updateState { copy(isNativeLoadingIndicatorVisible = !receivedSetOnLoaderStart) }
+        analyticsService.track(ConnectAnalyticsEvent.ComponentViewed("page_view_id"))
     }
 
     /**

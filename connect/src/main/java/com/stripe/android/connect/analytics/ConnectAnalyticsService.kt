@@ -55,9 +55,18 @@ internal class ConnectAnalyticsService(
     @OptIn(DelicateCoroutinesApi::class)
     fun track(event: ConnectAnalyticsEvent) {
         GlobalScope.launch(Dispatchers.IO) {
+            // event-specific params should be included in both the top-level and event_metadata
+            // blob so that we can use them in prometheus alerts (which are only available for
+            // top-level events).
+            val params = commonParams() + event.params + if (event.params.isNotEmpty()) {
+                mapOf("event_metadata" to event.params)
+            } else {
+                emptyMap()
+            }
+
             val request = requestFactory.createRequest(
                 eventName = event.eventName,
-                additionalParams = event.params.orEmpty() + commonParams(),
+                additionalParams = params,
                 includeSDKParams = true,
             )
             requestExecutor.enqueue(request)
@@ -65,9 +74,8 @@ internal class ConnectAnalyticsService(
     }
 
     private fun commonParams(): Map<String, Any?> {
-        return mapOf(
+        return analyticsParams.toParamsMap() + mapOf(
             "merchantId" to merchantId,
-            "publishableKey" to analyticsParams.publishableKey,
             "component" to component.componentName,
             "componentInstance" to componentInstanceId.toString(),
         ).filterNot { (_, v) -> v == null }
@@ -80,5 +88,11 @@ internal class ConnectAnalyticsService(
 }
 
 internal data class ConnectAnalyticsParams(
-    val publishableKey: String?,
-)
+    private val publishableKey: String?,
+) {
+    internal fun toParamsMap(): Map<String, Any?> {
+        return mapOf(
+            "publishable_key" to publishableKey,
+        )
+    }
+}
