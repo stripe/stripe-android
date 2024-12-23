@@ -1,9 +1,9 @@
 package com.stripe.android.financialconnections.domain
 
+import com.stripe.android.financialconnections.di.ActivityRetainedScope
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
 import kotlinx.coroutines.flow.MutableSharedFlow
 import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * The AuthFlow state is centralized in the parent viewModel.
@@ -12,7 +12,7 @@ import javax.inject.Singleton
  * [com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewModel]
  *
  */
-@Singleton
+@ActivityRetainedScope
 internal class NativeAuthFlowCoordinator @Inject constructor() {
     private val flow = MutableSharedFlow<Message>()
 
