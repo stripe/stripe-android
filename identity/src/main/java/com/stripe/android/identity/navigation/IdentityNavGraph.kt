@@ -130,7 +130,7 @@ internal fun IdentityNavGraph(
                 DocumentScanScreen(
                     navController = navController,
                     identityViewModel = identityViewModel,
-                    documentScanViewModel = documentScanViewModel
+                    documentScanViewModel = documentScanViewModel,
                 )
             }
             screen(SelfieWarmupDestination.ROUTE) {

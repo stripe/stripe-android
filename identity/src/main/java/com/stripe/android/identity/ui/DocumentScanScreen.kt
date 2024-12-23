@@ -66,7 +66,7 @@ internal const val VIEW_FINDER_ASPECT_RATIO = 1f
 internal fun DocumentScanScreen(
     navController: NavController,
     identityViewModel: IdentityViewModel,
-    documentScanViewModel: DocumentScanViewModel
+    documentScanViewModel: DocumentScanViewModel,
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()

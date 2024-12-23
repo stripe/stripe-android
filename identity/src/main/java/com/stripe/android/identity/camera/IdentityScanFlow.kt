@@ -20,10 +20,12 @@ import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.states.LaplacianBlurDetector
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 
 /**
@@ -80,7 +82,8 @@ internal class IdentityScanFlow(
         viewFinder: Rect,
         lifecycleOwner: LifecycleOwner,
         coroutineScope: CoroutineScope,
-        parameters: IdentityScanState.ScanType
+        parameters: IdentityScanState.ScanType,
+        errorHandler: (e: Exception) -> Unit,
     ) {
         coroutineScope.launch {
             if (canceled) {
@@ -94,26 +97,34 @@ internal class IdentityScanFlow(
 
             requireNotNull(aggregator).bindToLifecycle(lifecycleOwner)
 
-            analyzerPool =
-                AnalyzerPool.of(
-                    if (parameters == IdentityScanState.ScanType.SELFIE) {
-                        FaceDetectorAnalyzer.Factory(
-                            requireNotNull(faceDetectorModelFile) {
-                                "Failed to initialize FaceDetectorAnalyzer, " +
-                                    "faceDetectorModelFile is null"
-                            },
-                            modelPerformanceTracker
-                        )
-                    } else {
-                        IDDetectorAnalyzer.Factory(
-                            idDetectorModelFile,
-                            verificationPage.documentCapture.models.idDetectorMinScore,
-                            modelPerformanceTracker,
-                            laplacianBlurDetector,
-                            identityAnalyticsRequestFactory,
-                        )
-                    }
-                )
+            try {
+                analyzerPool =
+                    AnalyzerPool.of(
+                        if (parameters == IdentityScanState.ScanType.SELFIE) {
+                            FaceDetectorAnalyzer.Factory(
+                                requireNotNull(faceDetectorModelFile) {
+                                    "Failed to initialize FaceDetectorAnalyzer, " +
+                                        "faceDetectorModelFile is null"
+                                },
+                                modelPerformanceTracker
+                            )
+                        } else {
+                            IDDetectorAnalyzer.Factory(
+                                idDetectorModelFile,
+                                verificationPage.documentCapture.models.idDetectorMinScore,
+                                modelPerformanceTracker,
+                                laplacianBlurDetector,
+                                identityAnalyticsRequestFactory,
+                            )
+                        }
+                    )
+            } catch (e: IllegalStateException) {
+                withContext(Dispatchers.Main) {
+                    errorHandler(e)
+                }
+
+                return@launch
+            }
 
             loop = ProcessBoundAnalyzerLoop(
                 analyzerPool = requireNotNull(analyzerPool),

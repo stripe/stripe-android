@@ -25,6 +25,7 @@ import com.stripe.android.camera.framework.image.longerEdge
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.model.StripeFilePurpose
+import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.identity.IdentityVerificationSheetContract
 import com.stripe.android.identity.analytics.AnalyticsState
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
@@ -100,7 +101,7 @@ import kotlin.coroutines.CoroutineContext
 /**
  * ViewModel hosted by IdentityActivity, shared across fragments.
  */
-internal class IdentityViewModel constructor(
+internal class IdentityViewModel(
     application: Application,
     internal val verificationArgs: IdentityVerificationSheetContract.Args,
     internal val identityRepository: IdentityRepository,
@@ -112,7 +113,8 @@ internal class IdentityViewModel constructor(
     private val tfLiteInitializer: InterpreterInitializer,
     private val savedStateHandle: SavedStateHandle,
     @UIContext internal val uiContext: CoroutineContext,
-    @IOContext internal val workContext: CoroutineContext
+    @IOContext internal val workContext: CoroutineContext,
+    private val finishWithResult: (IdentityVerificationSheet.VerificationFlowResult) -> Unit
 ) : AndroidViewModel(application) {
 
     /**
@@ -878,14 +880,10 @@ internal class IdentityViewModel constructor(
                         (
                             "sessionID: ${verificationArgs.verificationSessionId} and ephemeralKey: " +
                                 verificationArgs.ephemeralKeySecret
-                            ).let { msg ->
-                            _verificationPage.postValue(
-                                Resource.error(
-                                    msg,
-                                    IllegalStateException(msg, it)
-                                )
                             )
-                        }
+                            .let { msg ->
+                                _verificationPage.postValue(Resource.error(msg, IllegalStateException(msg, it)))
+                            }
                 }
             )
         }
@@ -1022,6 +1020,9 @@ internal class IdentityViewModel constructor(
                             it
                         )
                     )
+
+                    // Exit with failure
+                    finishWithResult(IdentityVerificationSheet.VerificationFlowResult.Failed(it))
                 }
             )
         }
@@ -1763,7 +1764,8 @@ internal class IdentityViewModel constructor(
         private val applicationSupplier: () -> Application,
         private val uiContextSupplier: () -> CoroutineContext,
         private val workContextSupplier: () -> CoroutineContext,
-        private val subcomponentSupplier: () -> IdentityActivitySubcomponent
+        private val subcomponentSupplier: () -> IdentityActivitySubcomponent,
+        private val finishWithResult: (IdentityVerificationSheet.VerificationFlowResult) -> Unit,
     ) : ViewModelProvider.Factory {
 
         @Suppress("UNCHECKED_CAST")
@@ -1783,7 +1785,8 @@ internal class IdentityViewModel constructor(
                 subcomponent.tfLiteInitializer,
                 savedStateHandle,
                 uiContextSupplier(),
-                workContextSupplier()
+                workContextSupplier(),
+                finishWithResult
             ) as T
         }
     }
