@@ -2,6 +2,8 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+## 21.3.0 - 2024-12-23
+
 ### Payments
 * [ADDED][9753](https://github.com/stripe/stripe-android/pull/9753) Added support for Crypto to API bindings.
 * [CHANGED][9804](https://github.com/stripe/stripe-android/pull/9804) Changed the edit and remove saved payment method flow so that tapping 'Edit' displays an icon that leads to a new update payment method screen that displays payment method details for card (last 4 digits of card number, cvc and expiry date fields), US Bank account (name, email, last 4 digits of bank account), and SEPA debit (name, email, last 4 digits of IBAN).
