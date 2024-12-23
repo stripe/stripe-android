@@ -961,6 +961,7 @@ class PaymentSheet internal constructor(
             sealed class RowStyle : Parcelable {
 
                 internal abstract fun hasSeparators(): Boolean
+                internal abstract fun startSeparatorHasDefaultInset(): Boolean
 
                 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                 @ExperimentalEmbeddedPaymentElementApi
@@ -1031,6 +1032,7 @@ class PaymentSheet internal constructor(
                     )
 
                     override fun hasSeparators() = true
+                    override fun startSeparatorHasDefaultInset() = true
 
                     internal companion object {
                         val defaultLight = FlatWithRadio(
@@ -1124,6 +1126,7 @@ class PaymentSheet internal constructor(
                     )
 
                     override fun hasSeparators() = true
+                    override fun startSeparatorHasDefaultInset() = false
 
                     internal companion object {
                         val defaultLight = FlatWithCheckmark(
@@ -1174,6 +1177,7 @@ class PaymentSheet internal constructor(
                     )
 
                     override fun hasSeparators() = false
+                    override fun startSeparatorHasDefaultInset() = false
 
                     internal companion object {
                         val default = FloatingButton(

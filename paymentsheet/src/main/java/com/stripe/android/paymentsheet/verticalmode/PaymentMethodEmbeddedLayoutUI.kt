@@ -126,9 +126,7 @@ internal fun PaymentMethodEmbeddedLayoutUI(
                 rowStyle = rowStyle
             )
 
-            if (index != paymentMethods.lastIndex) {
-                OptionalEmbeddedDivider(rowStyle)
-            } else if (rowStyle.bottomSeparatorEnabled()) {
+            if (index != paymentMethods.lastIndex || rowStyle.bottomSeparatorEnabled()) {
                 OptionalEmbeddedDivider(rowStyle)
             }
         }
@@ -141,15 +139,11 @@ private fun OptionalEmbeddedDivider(rowStyle: Embedded.RowStyle) {
     if (rowStyle.hasSeparators()) {
         val color = Color(rowStyle.separatorColor())
         val thickness = rowStyle.separatorThickness()
-        val modifier = if (rowStyle is Embedded.RowStyle.FlatWithRadio) {
-            Modifier.padding(start = rowStyle.separatorInsets() + 32.dp, end = rowStyle.separatorInsets())
-        } else {
-            Modifier.padding(horizontal = rowStyle.separatorInsets())
-        }
         Divider(
             color = color,
             thickness = thickness,
-            modifier = modifier
+            modifier = Modifier.padding(horizontal = rowStyle.separatorInsets()),
+            startIndent = if (rowStyle.startSeparatorHasDefaultInset()) 32.dp else 0.dp
         )
     }
 }
