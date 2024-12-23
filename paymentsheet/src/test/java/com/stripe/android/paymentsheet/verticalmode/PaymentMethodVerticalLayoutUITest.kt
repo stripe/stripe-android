@@ -33,7 +33,10 @@ import org.robolectric.annotation.Config
 @Config(sdk = [Build.VERSION_CODES.Q])
 @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 internal class PaymentMethodVerticalLayoutUITest(
-    private val testCase: TestCase
+    private val allPaymentMethodsTag: String,
+    private val allPaymentMethodsChildCount: Int,
+    private val layoutUI:
+    @Composable (interactor: FakePaymentMethodVerticalLayoutInteractor, modifier: Modifier) -> Unit
 ) {
     @get:Rule
     val composeRule = createComposeRule()
@@ -177,9 +180,9 @@ internal class PaymentMethodVerticalLayoutUITest(
         )
     ) {
         assertThat(
-            composeRule.onNodeWithTag(testCase.allPaymentMethodsTag)
+            composeRule.onNodeWithTag(allPaymentMethodsTag)
                 .onChildren().fetchSemanticsNodes().size
-        ).isEqualTo(testCase.allPaymentMethodsChildCount)
+        ).isEqualTo(allPaymentMethodsChildCount)
 
         composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_card").assertExists()
         composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_cashapp").assertExists()
@@ -287,7 +290,7 @@ internal class PaymentMethodVerticalLayoutUITest(
         )
 
         composeRule.setContent {
-            testCase.layoutUI.invoke(interactor, Modifier.padding(horizontal = 20.dp))
+            layoutUI.invoke(interactor, Modifier.padding(horizontal = 20.dp))
         }
 
         Scenario(viewActionRecorder).apply(block)
@@ -297,11 +300,11 @@ internal class PaymentMethodVerticalLayoutUITest(
         val viewActionRecorder: ViewActionRecorder<PaymentMethodVerticalLayoutInteractor.ViewAction>,
     )
 
-    internal companion object {
+    private companion object {
         @JvmStatic
-        @ParameterizedRobolectricTestRunner.Parameters(name = "{0}")
-        fun data(): List<TestCase> = listOf(
-            TestCase(
+        @ParameterizedRobolectricTestRunner.Parameters
+        fun data() = listOf(
+            parameters(
                 allPaymentMethodsTag = TEST_TAG_NEW_PAYMENT_METHOD_VERTICAL_LAYOUT_UI,
                 allPaymentMethodsChildCount = 3,
                 layoutUI = { interactor, modifier ->
@@ -309,11 +312,11 @@ internal class PaymentMethodVerticalLayoutUITest(
                 }
             )
         )
-    }
 
-    internal data class TestCase(
-        val allPaymentMethodsTag: String,
-        val allPaymentMethodsChildCount: Int,
-        val layoutUI: @Composable (interactor: FakePaymentMethodVerticalLayoutInteractor, modifier: Modifier) -> Unit
-    )
+        private fun parameters(
+            allPaymentMethodsTag: String,
+            allPaymentMethodsChildCount: Int,
+            layoutUI: @Composable (interactor: FakePaymentMethodVerticalLayoutInteractor, modifier: Modifier) -> Unit
+        ) = arrayOf(allPaymentMethodsTag, allPaymentMethodsChildCount, layoutUI)
+    }
 }
