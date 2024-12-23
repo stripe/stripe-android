@@ -43,7 +43,6 @@ import dagger.Provides
 import java.util.Locale
 import javax.inject.Named
 import javax.inject.Provider
-import javax.inject.Singleton
 
 @Module
 internal interface FinancialConnectionsSheetNativeModule {
@@ -51,7 +50,7 @@ internal interface FinancialConnectionsSheetNativeModule {
     @Binds
     fun bindsPresentNoticeSheet(impl: RealPresentSheet): PresentSheet
 
-    @Singleton
+    @ActivityRetainedScope
     @Binds
     fun bindsNavigationManager(
         impl: NavigationManagerImpl
@@ -63,7 +62,7 @@ internal interface FinancialConnectionsSheetNativeModule {
     ): HandleError
 
     @Binds
-    @Singleton
+    @ActivityRetainedScope
     fun bindsProvideApiRequestOptions(impl: RealProvideApiRequestOptions): ProvideApiRequestOptions
 
     @Binds
@@ -78,7 +77,7 @@ internal interface FinancialConnectionsSheetNativeModule {
 
     companion object {
         @Provides
-        @Singleton
+        @ActivityRetainedScope
         fun provideConsumersApiService(
             apiVersion: ApiVersion,
             stripeNetworkClient: StripeNetworkClient,
@@ -89,7 +88,7 @@ internal interface FinancialConnectionsSheetNativeModule {
             stripeNetworkClient = stripeNetworkClient
         )
 
-        @Singleton
+        @ActivityRetainedScope
         @Provides
         fun providesImageLoader(
             context: Application
@@ -98,7 +97,7 @@ internal interface FinancialConnectionsSheetNativeModule {
             diskCache = null,
         )
 
-        @Singleton
+        @ActivityRetainedScope
         @Provides
         fun providesFinancialConnectionsManifestRepository(
             requestExecutor: FinancialConnectionsRequestExecutor,
@@ -116,7 +115,7 @@ internal interface FinancialConnectionsSheetNativeModule {
             initialSync = initialSynchronizeSessionResponse
         )
 
-        @Singleton
+        @ActivityRetainedScope
         @Provides
         fun providesFinancialConnectionsConsumerSessionRepository(
             consumersApiService: ConsumersApiService,
@@ -140,7 +139,7 @@ internal interface FinancialConnectionsSheetNativeModule {
             elementsSessionContext = elementsSessionContext,
         )
 
-        @Singleton
+        @ActivityRetainedScope
         @Provides
         fun providesFinancialConnectionsAccountsRepository(
             requestExecutor: FinancialConnectionsRequestExecutor,
@@ -156,7 +155,7 @@ internal interface FinancialConnectionsSheetNativeModule {
             savedStateHandle = savedStateHandle,
         )
 
-        @Singleton
+        @ActivityRetainedScope
         @Provides
         fun providesFinancialConnectionsInstitutionsRepository(
             requestExecutor: FinancialConnectionsRequestExecutor,
