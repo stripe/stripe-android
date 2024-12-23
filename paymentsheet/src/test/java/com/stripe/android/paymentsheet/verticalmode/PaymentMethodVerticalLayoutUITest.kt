@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.verticalmode
 
 import android.os.Build
 import androidx.compose.foundation.layout.padding
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertAll
@@ -25,13 +26,18 @@ import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
+import org.robolectric.ParameterizedRobolectricTestRunner
 import org.robolectric.annotation.Config
 
-@RunWith(RobolectricTestRunner::class)
+@RunWith(ParameterizedRobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.Q])
 @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
-internal class PaymentMethodVerticalLayoutUITest {
+internal class PaymentMethodVerticalLayoutUITest(
+    private val allPaymentMethodsTag: String,
+    private val allPaymentMethodsChildCount: Int,
+    private val layoutUI:
+    @Composable (interactor: FakePaymentMethodVerticalLayoutInteractor, modifier: Modifier) -> Unit
+) {
     @get:Rule
     val composeRule = createComposeRule()
 
@@ -174,9 +180,9 @@ internal class PaymentMethodVerticalLayoutUITest {
         )
     ) {
         assertThat(
-            composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_VERTICAL_LAYOUT_UI)
+            composeRule.onNodeWithTag(allPaymentMethodsTag)
                 .onChildren().fetchSemanticsNodes().size
-        ).isEqualTo(3)
+        ).isEqualTo(allPaymentMethodsChildCount)
 
         composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_card").assertExists()
         composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_cashapp").assertExists()
@@ -284,7 +290,7 @@ internal class PaymentMethodVerticalLayoutUITest {
         )
 
         composeRule.setContent {
-            PaymentMethodVerticalLayoutUI(interactor, Modifier.padding(horizontal = 20.dp))
+            layoutUI.invoke(interactor, Modifier.padding(horizontal = 20.dp))
         }
 
         Scenario(viewActionRecorder).apply(block)
@@ -293,4 +299,24 @@ internal class PaymentMethodVerticalLayoutUITest {
     private data class Scenario(
         val viewActionRecorder: ViewActionRecorder<PaymentMethodVerticalLayoutInteractor.ViewAction>,
     )
+
+    private companion object {
+        @JvmStatic
+        @ParameterizedRobolectricTestRunner.Parameters
+        fun data() = listOf(
+            parameters(
+                allPaymentMethodsTag = TEST_TAG_NEW_PAYMENT_METHOD_VERTICAL_LAYOUT_UI,
+                allPaymentMethodsChildCount = 3,
+                layoutUI = { interactor, modifier ->
+                    PaymentMethodVerticalLayoutUI(interactor, modifier)
+                }
+            )
+        )
+
+        private fun parameters(
+            allPaymentMethodsTag: String,
+            allPaymentMethodsChildCount: Int,
+            layoutUI: @Composable (interactor: FakePaymentMethodVerticalLayoutInteractor, modifier: Modifier) -> Unit
+        ) = arrayOf(allPaymentMethodsTag, allPaymentMethodsChildCount, layoutUI)
+    }
 }
