@@ -46,6 +46,12 @@
   <string name="stripe_paymentsheet_bacs_protection_mandate">您的付款受 %s 保护。</string>
   <!-- Text displayed on manage bank account screen when bank account details are not editable. -->
   <string name="stripe_paymentsheet_bank_account_details_cannot_be_changed">无法更改银行账户详情。</string>
+  <!-- Text shown in the bank payment form when a promo is available and the user is paying, e.g. 'Get $5 back when you pay by bank. See terms'. Note that 'See terms' contains a non-breaking space. -->
+  <string name="stripe_paymentsheet_bank_payment_promo_for_payment"><![CDATA[用银行付款时获得 %s 的返现。 <a href=\"https://link.com/promotion-terms\">查看&#160;条款</a>]]></string>
+  <!-- Text shown in the bank payment form when a promo is available and the user is setting up an account, e.g. 'Get $5 back when you pay by bank. See terms'. Note that 'See terms' contains a non-breaking space. -->
+  <string name="stripe_paymentsheet_bank_payment_promo_for_setup"><![CDATA[首次用银行支付时获得 %s 的返现。<a href=\"https://link.com/promotion-terms\">查看&#160;条款</a>]]></string>
+  <!-- Label shown when paying with a bank account is not eligible for the incentive, e.g. 'No $5 promo' -->
+  <string name="stripe_paymentsheet_bank_payment_promo_ineligible">无 %s 返现促销</string>
   <!-- Text displayed on manage card screen when card details are not editable. -->
   <string name="stripe_paymentsheet_card_details_cannot_be_changed">无法更改银行卡详情。</string>
   <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
@@ -77,6 +83,8 @@
   <string name="stripe_paymentsheet_new_card">添加新卡</string>
   <!-- Title shown above a section containing payment methods that a customer can choose to pay with e.g. card, bank account, etc. -->
   <string name="stripe_paymentsheet_new_pm">新支付方式</string>
+  <!-- Text displayed on manage card screen when the only editable card detail is the card brand. -->
+  <string name="stripe_paymentsheet_only_card_brand_can_be_changed">只可更改银行卡品牌。</string>
   <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_using">或用以下方式支付</string>
   <!-- Title of a section containing a card form that will collect the payment information from the user. -->
