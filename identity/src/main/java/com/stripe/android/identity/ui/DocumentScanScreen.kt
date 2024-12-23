@@ -179,9 +179,9 @@ private fun DocumentCaptureScreen(
     }
 
     val title = if (targetScanType.isNullOrFront()) {
-        stringResource(id = R.string.stripe_front_of_id)
+        stringResource(id = R.string.stripe_front_of_id_document)
     } else {
-        stringResource(id = R.string.stripe_back_of_id)
+        stringResource(id = R.string.stripe_back_of_id_document)
     }
 
     Column(
