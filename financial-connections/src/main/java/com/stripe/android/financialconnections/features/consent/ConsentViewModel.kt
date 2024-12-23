@@ -45,7 +45,6 @@ internal class ConsentViewModel @AssistedInject constructor(
     @Assisted initialState: ConsentState,
     nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val acceptConsent: AcceptConsent,
-    private val integrityRequestManager: IntegrityRequestManager,
     private val getOrFetchSync: GetOrFetchSync,
     private val navigationManager: NavigationManager,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
@@ -55,11 +54,6 @@ internal class ConsentViewModel @AssistedInject constructor(
 ) : FinancialConnectionsViewModel<ConsentState>(initialState, nativeAuthFlowCoordinator) {
 
     init {
-        viewModelScope.launch {
-            integrityRequestManager.requestToken()
-                .onSuccess { logger.debug("Integrity token: $it") }
-                .onFailure { logger.error("Failed to get integrity token", it) }
-        }
         logErrors()
         suspend {
             val sync = getOrFetchSync()
