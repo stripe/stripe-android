@@ -13,7 +13,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.BlikDefinitio
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.BoletoDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CashAppPayDefinition
-import com.stripe.android.lpmfoundations.paymentmethod.definitions.CryptoDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.EpsDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.FpxDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.GiroPayDefinition
@@ -55,7 +54,6 @@ internal object PaymentMethodRegistry {
         BoletoDefinition,
         CardDefinition,
         CashAppPayDefinition,
-        CryptoDefinition,
         EpsDefinition,
         FpxDefinition,
         GiroPayDefinition,
