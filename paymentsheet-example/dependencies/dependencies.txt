@@ -1100,6 +1100,13 @@
 |    +--- project :stripe-ui-core (*)
 |    +--- project :payments-model (*)
 |    +--- org.jetbrains.kotlin:kotlin-stdlib:2.0.21 (*)
+|    +--- project :stripe-attestation
+|    |    +--- org.jetbrains.kotlin:kotlin-stdlib:2.0.21 (*)
+|    |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0 (*)
+|    |    \--- com.google.android.play:integrity:1.4.0
+|    |         +--- com.google.android.gms:play-services-basement:18.4.0 (*)
+|    |         +--- com.google.android.gms:play-services-tasks:18.2.0 (*)
+|    |         \--- com.google.android.play:core-common:2.0.4
 |    +--- androidx.activity:activity-ktx:1.8.2 (*)
 |    +--- androidx.annotation:annotation:1.9.0 (*)
 |    +--- androidx.appcompat:appcompat:1.7.0 (*)
