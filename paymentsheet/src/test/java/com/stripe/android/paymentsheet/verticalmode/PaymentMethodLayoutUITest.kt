@@ -32,7 +32,7 @@ import org.robolectric.annotation.Config
 @RunWith(ParameterizedRobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.Q])
 @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
-internal class PaymentMethodVerticalLayoutUITest(
+internal class PaymentMethodLayoutUITest(
     private val paymentMethodsTag: String,
     private val allPaymentMethodsChildCount: Int,
     private val layoutUI:
