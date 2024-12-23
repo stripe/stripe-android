@@ -34,6 +34,7 @@ import com.stripe.android.financialconnections.utils.Experiment.CONNECTIONS_CONS
 import com.stripe.android.financialconnections.utils.error
 import com.stripe.android.financialconnections.utils.experimentAssignment
 import com.stripe.android.financialconnections.utils.trackExposure
+import com.stripe.attestation.IntegrityRequestManager
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -44,6 +45,7 @@ internal class ConsentViewModel @AssistedInject constructor(
     @Assisted initialState: ConsentState,
     nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val acceptConsent: AcceptConsent,
+    private val integrityRequestManager: IntegrityRequestManager,
     private val getOrFetchSync: GetOrFetchSync,
     private val navigationManager: NavigationManager,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
@@ -53,6 +55,11 @@ internal class ConsentViewModel @AssistedInject constructor(
 ) : FinancialConnectionsViewModel<ConsentState>(initialState, nativeAuthFlowCoordinator) {
 
     init {
+        viewModelScope.launch {
+            integrityRequestManager.requestToken()
+                .onSuccess { logger.debug("Integrity token: $it") }
+                .onFailure { logger.error("Failed to get integrity token", it) }
+        }
         logErrors()
         suspend {
             val sync = getOrFetchSync()

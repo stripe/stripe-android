@@ -40,6 +40,10 @@ class IntegrityStandardRequestManager(
     private var integrityTokenProvider: StandardIntegrityTokenProvider? = null
 
     override suspend fun prepare(): Result<Unit> = runCatching {
+        if (integrityTokenProvider != null) {
+            return Result.success(Unit)
+        }
+
         val finishedTask: Task<StandardIntegrityTokenProvider> = standardIntegrityManager
             .prepareIntegrityToken(
                 PrepareIntegrityTokenRequest.builder()
