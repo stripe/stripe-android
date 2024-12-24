@@ -99,6 +99,7 @@ internal class NetworkingLinkVerificationViewModel @AssistedInject constructor(
         return InitData(
             businessName = manifest.businessName,
             emailAddress = requireNotNull(email),
+            appVerificationEnabled = manifest.appVerificationEnabled,
             initialInstitution = manifest.initialInstitution,
         )
     }
@@ -108,6 +109,7 @@ internal class NetworkingLinkVerificationViewModel @AssistedInject constructor(
     ) {
         lookupConsumerAndStartVerification(
             email = initData.emailAddress,
+            appVerificationEnabled = initData.appVerificationEnabled,
             businessName = initData.businessName,
             verificationType = VerificationType.SMS,
             onConsumerNotFound = {
@@ -228,6 +230,7 @@ internal class NetworkingLinkVerificationViewModel @AssistedInject constructor(
     private data class InitData(
         val businessName: String?,
         val emailAddress: String,
+        val appVerificationEnabled: Boolean,
         val initialInstitution: FinancialConnectionsInstitution?,
     )
 

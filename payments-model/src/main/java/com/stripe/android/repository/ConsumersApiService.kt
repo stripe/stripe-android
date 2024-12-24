@@ -50,6 +50,14 @@ interface ConsumersApiService {
         requestOptions: ApiRequest.Options
     ): ConsumerSessionLookup
 
+    suspend fun mobileLookupConsumerSession(
+        email: String,
+        requestSurface: String,
+        verificationToken: String,
+        appId: String,
+        requestOptions: ApiRequest.Options
+    ): ConsumerSessionLookup
+
     suspend fun startConsumerVerification(
         consumerSessionClientSecret: String,
         locale: Locale,
@@ -170,6 +178,35 @@ class ConsumersApiServiceImpl(
                 mapOf(
                     "request_surface" to requestSurface,
                     "email_address" to email.lowercase()
+                )
+            ),
+            responseJsonParser = ConsumerSessionLookupJsonParser()
+        )
+    }
+
+    /**
+     * Retrieves the ConsumerSession if the given email is associated with a Link account.
+     */
+    override suspend fun mobileLookupConsumerSession(
+        email: String,
+        requestSurface: String,
+        verificationToken: String,
+        appId: String,
+        requestOptions: ApiRequest.Options
+    ): ConsumerSessionLookup {
+        return executeRequestWithModelJsonParser(
+            stripeErrorJsonParser = stripeErrorJsonParser,
+            stripeNetworkClient = stripeNetworkClient,
+            request = apiRequestFactory.createPost(
+                mobileConsumerSessionLookupUrl,
+                requestOptions,
+                mapOf(
+                    "request_surface" to requestSurface,
+                    "email_address" to email.lowercase(),
+                    "android_verification_token" to verificationToken,
+                    "session_id" to "12345", // TODO (carlosmuvi): remove this when we have a real session id
+                    "email_source" to "user_action", // TODO (carlosmuvi): remove this when we have a real app id
+                    "app_id" to appId
                 )
             ),
             responseJsonParser = ConsumerSessionLookupJsonParser()
@@ -327,6 +364,12 @@ class ConsumersApiServiceImpl(
          */
         internal val consumerSessionLookupUrl: String =
             getApiUrl("consumers/sessions/lookup")
+
+        /**
+         * @return `https://api.stripe.com/v1/consumers/sessions/lookup`
+         */
+        internal val mobileConsumerSessionLookupUrl: String =
+            getApiUrl("consumers/mobile/sessions/lookup")
 
         /**
          * @return `https://api.stripe.com/v1/consumers/sessions/start_verification`
