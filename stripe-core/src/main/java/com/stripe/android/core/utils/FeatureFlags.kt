@@ -9,6 +9,7 @@ object FeatureFlags {
     val nativeLinkEnabled = FeatureFlag("Native Link")
     val useNewUpdateCardScreen = FeatureFlag("Enable new update card screen")
     val instantDebitsIncentives = FeatureFlag("Instant Bank Payments Incentives")
+    val defaultPaymentMethod = FeatureFlag("Default Payment Method")
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
