@@ -821,6 +821,7 @@ class FinancialConnectionsSheetViewModelTest {
             browserManager = browserManager,
             savedStateHandle = SavedStateHandle(),
             nativeAuthFlowCoordinator = mock(),
+            integrityRequestManager = mock(),
             logger = Logger.noop()
         )
     }

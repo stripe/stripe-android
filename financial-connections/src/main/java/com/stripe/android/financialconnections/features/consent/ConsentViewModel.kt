@@ -34,7 +34,6 @@ import com.stripe.android.financialconnections.utils.Experiment.CONNECTIONS_CONS
 import com.stripe.android.financialconnections.utils.error
 import com.stripe.android.financialconnections.utils.experimentAssignment
 import com.stripe.android.financialconnections.utils.trackExposure
-import com.stripe.attestation.IntegrityRequestManager
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
