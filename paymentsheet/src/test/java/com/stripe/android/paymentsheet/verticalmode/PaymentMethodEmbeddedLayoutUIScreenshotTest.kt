@@ -15,6 +15,7 @@ import com.stripe.android.utils.screenshots.PaymentSheetAppearance
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.kotlin.mock
+import kotlin.reflect.KClass
 
 @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 class PaymentMethodEmbeddedLayoutUIScreenshotTest {
@@ -37,7 +38,7 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
     fun testFloatingButton() {
         paparazziRule.snapshot {
             TestPaymentMethodLayoutUi(
-                rowStyle = getRowStyle(Embedded.RowStyle.FloatingButton)
+                rowStyle = getRowStyle(Embedded.RowStyle.FloatingButton::class)
             )
         }
     }
@@ -46,7 +47,7 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
     fun testFlatWitRadio() {
         paparazziRule.snapshot {
             TestPaymentMethodLayoutUi(
-                rowStyle = getRowStyle(Embedded.RowStyle.FlatWithRadio)
+                rowStyle = getRowStyle(Embedded.RowStyle.FlatWithRadio::class)
             )
         }
     }
@@ -55,7 +56,7 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
     fun testFlatWithCheckmark() {
         paparazziRule.snapshot {
             TestPaymentMethodLayoutUi(
-                rowStyle = getRowStyle(Embedded.RowStyle.FlatWithCheckmark)
+                rowStyle = getRowStyle(Embedded.RowStyle.FlatWithCheckmark::class)
             )
         }
     }
@@ -65,7 +66,7 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
         paparazziRule.snapshot {
             TestPaymentMethodLayoutUi(
                 rowStyle = getRowStyle(
-                    type = Embedded.RowStyle.FlatWithCheckmark,
+                    type = Embedded.RowStyle.FlatWithCheckmark::class,
                     separatorThicknessDp = 5f,
                     separatorColor = Color.CYAN,
                     separatorInsetsDp = 40f
@@ -79,7 +80,7 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
         paparazziRule.snapshot {
             TestPaymentMethodLayoutUi(
                 rowStyle = getRowStyle(
-                    type = Embedded.RowStyle.FlatWithCheckmark,
+                    type = Embedded.RowStyle.FlatWithCheckmark::class,
                     topSeparatorEnabled = false,
                     bottomSeparatorEnabled = true
                 )
@@ -92,7 +93,7 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
         paparazziRule.snapshot {
             TestPaymentMethodLayoutUi(
                 rowStyle = getRowStyle(
-                    type = Embedded.RowStyle.FlatWithCheckmark,
+                    type = Embedded.RowStyle.FlatWithCheckmark::class,
                     topSeparatorEnabled = true,
                     bottomSeparatorEnabled = false
                 )
@@ -121,8 +122,8 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
 
     @Suppress("CyclomaticComplexMethod")
     @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
-    private fun <T> getRowStyle(
-        type: T,
+    private fun <T : Embedded.RowStyle> getRowStyle(
+        type: KClass<T>,
         separatorThicknessDp: Float? = null,
         separatorColor: Int? = null,
         separatorInsetsDp: Float? = null,
@@ -136,7 +137,7 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
         spacingDp: Float? = null
     ): Embedded.RowStyle {
         return when (type) {
-            is Embedded.RowStyle.FlatWithRadio -> Embedded.RowStyle.FlatWithRadio(
+            Embedded.RowStyle.FlatWithRadio::class -> Embedded.RowStyle.FlatWithRadio(
                 separatorThicknessDp = separatorThicknessDp ?: StripeThemeDefaults.flat.separatorThickness,
                 separatorColor = separatorColor ?: StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
                 separatorInsetsDp = separatorInsetsDp ?: StripeThemeDefaults.flat.separatorInsets,
@@ -146,7 +147,7 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
                 unselectedColor = unselectedColor ?: StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
                 additionalInsetsDp = additionalInsetsDp ?: StripeThemeDefaults.embeddedCommon.additionalInsetsDp
             )
-            is Embedded.RowStyle.FlatWithCheckmark -> Embedded.RowStyle.FlatWithCheckmark(
+            Embedded.RowStyle.FlatWithCheckmark::class -> Embedded.RowStyle.FlatWithCheckmark(
                 separatorThicknessDp = separatorThicknessDp ?: StripeThemeDefaults.flat.separatorThickness,
                 separatorColor = separatorColor ?: StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
                 separatorInsetsDp = separatorInsetsDp ?: StripeThemeDefaults.flat.separatorInsets,
