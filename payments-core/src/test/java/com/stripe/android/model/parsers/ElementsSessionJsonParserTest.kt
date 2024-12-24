@@ -714,7 +714,20 @@ class ElementsSessionJsonParserTest {
 
         assertThat(elementsSession?.customer).isEqualTo(
             ElementsSession.Customer(
-                session = elementsSessionExpectedCustomerSession,
+                session = ElementsSession.Customer.Session(
+                    id = "cuss_123",
+                    apiKey = "ek_test_1234",
+                    apiKeyExpiry = 1713890664,
+                    customerId = "cus_1",
+                    liveMode = false,
+                    components = ElementsSession.Customer.Components(
+                        mobilePaymentElement = ElementsSession.Customer.Components.MobilePaymentElement.Disabled,
+                        customerSheet = ElementsSession.Customer.Components.CustomerSheet.Enabled(
+                            isPaymentMethodRemoveEnabled = true,
+                            canRemoveLastPaymentMethod = true,
+                        ),
+                    )
+                ),
                 defaultPaymentMethod = "pm_123",
                 paymentMethods = elementsSessionExpectedPaymentMethods
             )
