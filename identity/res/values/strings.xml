@@ -12,10 +12,8 @@
   <string name="stripe_back_of_dl">Back of driver\'s license</string>
   <!-- Description of the checkmark to indicate back of driver's license is uploaded, used for A11Y -->
   <string name="stripe_back_of_dl_selected">Back of driver license is selected</string>
-  <!-- Description of back of identity card image -->
-  <string name="stripe_back_of_id">Back of identity card</string>
-  <!-- Title of ID document scanning screen when scanning the back of an identity card -->
-  <string name="stripe_back_of_id_document">Back of identity document</string>
+  <!-- Description of back of identity document image -->
+  <string name="stripe_back_of_id">Back of identity document</string>
   <!-- Description of the checkmark to indicate back of ID is uploaded, used for A11Y -->
   <string name="stripe_back_of_id_selected">Back of ID is selected</string>
   <!-- Title displayed when requesting camera permissions -->
@@ -94,8 +92,8 @@
   <string name="stripe_file_upload">File Upload</string>
   <!-- Instructions for uploading images of drivers license -->
   <string name="stripe_file_upload_content_dl">Please upload images of the front and back of your driver\'s license</string>
-  <!-- Instructions for uploading images of identity card -->
-  <string name="stripe_file_upload_content_id">Please upload images of the front and back of your identity card</string>
+  <!-- Instructions for uploading images of identity document -->
+  <string name="stripe_file_upload_content_id">Please upload images of the front and back of your identity document</string>
   <!-- Instructions for uploading images of passport -->
   <string name="stripe_file_upload_content_passport">Please upload an image of your passport</string>
   <!-- Label for first (given) name field -->
@@ -106,10 +104,8 @@
   <string name="stripe_front_of_dl">Front of driver\'s license</string>
   <!-- Description of the checkmark to indicate front of driver's license is uploaded, used for A11Y -->
   <string name="stripe_front_of_dl_selected">Front of driver license is selected</string>
-  <!-- Description of front of identity card image -->
-  <string name="stripe_front_of_id">Front of identity card</string>
-  <!-- Title of ID document scanning screen when scanning the front of an identity card -->
-  <string name="stripe_front_of_id_document">Front of identity document</string>
+  <!-- Description of front of identity document image -->
+  <string name="stripe_front_of_id">Front of identity document</string>
   <!-- Description of the checkmark to indicate front of ID is uploaded, used for A11Y -->
   <string name="stripe_front_of_id_selected">Front of ID is selected</string>
   <!-- Button to go back to the previous screen -->
@@ -164,10 +160,10 @@
   <string name="stripe_position_dl_back">Flip your driver\'s license over to the other side</string>
   <!-- Instructional text for scanning front of a driver's license -->
   <string name="stripe_position_dl_front">Position your driver\'s license in the center of the frame</string>
-  <!-- Instructional text for scanning back of a identity card -->
-  <string name="stripe_position_id_back">Flip your identity card over to the other side</string>
-  <!-- Instructional text for scanning front of a identity card -->
-  <string name="stripe_position_id_front">Position your identity card in the center of the frame</string>
+  <!-- Instructional text for scanning back of a identity document -->
+  <string name="stripe_position_id_back">Flip your identity document over to the other side</string>
+  <!-- Instructional text for scanning front of a identity document -->
+  <string name="stripe_position_id_front">Position your identity document in the center of the frame</string>
   <!-- Instructional text for scanning a passport -->
   <string name="stripe_position_passport">Position your passport in the center of the frame</string>
   <!-- Instructional text for capturing selfie -->
