@@ -25,7 +25,7 @@ internal fun DefaultPaymentMethodLabel(
             .testTag(
                 TEST_TAG_DEFAULT_PAYMENT_METHOD_LABEL
             ),
-        text = stringResource(id = R.string.stripe_paymentsheet_default_payment_method_label),
+        text = stringResource(id = R.string.stripe_wallet_default),
         style = MaterialTheme.typography.caption.copy(fontWeight = FontWeight.Medium),
         color = MaterialTheme.stripeColors.placeholderText,
         maxLines = 1,
