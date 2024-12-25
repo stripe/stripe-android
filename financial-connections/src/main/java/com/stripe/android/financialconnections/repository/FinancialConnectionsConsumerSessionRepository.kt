@@ -18,6 +18,7 @@ import com.stripe.android.model.ConsumerSignUpConsentAction.EnteredPhoneNumberCl
 import com.stripe.android.model.CustomEmailType
 import com.stripe.android.model.EmailSource
 import com.stripe.android.model.SharePaymentDetails
+import com.stripe.android.model.SignUpParams
 import com.stripe.android.model.VerificationType
 import com.stripe.android.repository.ConsumersApiService
 import kotlinx.coroutines.sync.Mutex
@@ -44,6 +45,14 @@ internal interface FinancialConnectionsConsumerSessionRepository {
         email: String,
         phoneNumber: String,
         country: String,
+    ): ConsumerSessionSignup
+
+    suspend fun mobileSignUp(
+        email: String,
+        phoneNumber: String,
+        country: String,
+        verificationToken: String,
+        appId: String
     ): ConsumerSessionSignup
 
     suspend fun startConsumerVerification(
@@ -137,17 +146,49 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
         country: String,
     ): ConsumerSessionSignup = mutex.withLock {
         consumersApiService.signUp(
-            email = email,
-            phoneNumber = phoneNumber,
-            country = country,
-            name = null,
-            locale = locale,
-            amount = elementsSessionContext?.amount,
-            currency = elementsSessionContext?.currency,
-            incentiveEligibilitySession = elementsSessionContext?.incentiveEligibilitySession,
+            SignUpParams(
+                email = email,
+                phoneNumber = phoneNumber,
+                country = country,
+                name = null,
+                locale = locale,
+                amount = elementsSessionContext?.amount,
+                currency = elementsSessionContext?.currency,
+                incentiveEligibilitySession = elementsSessionContext?.incentiveEligibilitySession,
+                requestSurface = requestSurface,
+                consentAction = EnteredPhoneNumberClickedSaveToLink,
+                verificationToken = null,
+                appId = null,
+            ),
+            requestOptions = provideApiRequestOptions(useConsumerPublishableKey = false)
+        ).onSuccess { signup ->
+            updateCachedConsumerSessionFromSignup(signup)
+        }.getOrThrow()
+    }
+
+    override suspend fun mobileSignUp(
+        email: String,
+        phoneNumber: String,
+        country: String,
+        verificationToken: String,
+        appId: String
+    ): ConsumerSessionSignup = mutex.withLock {
+        consumersApiService.mobileSignUp(
+            SignUpParams(
+                email = email,
+                phoneNumber = phoneNumber,
+                country = country,
+                name = null,
+                locale = locale,
+                amount = elementsSessionContext?.amount,
+                currency = elementsSessionContext?.currency,
+                incentiveEligibilitySession = elementsSessionContext?.incentiveEligibilitySession,
+                requestSurface = requestSurface,
+                consentAction = EnteredPhoneNumberClickedSaveToLink,
+                verificationToken = verificationToken,
+                appId = appId,
+            ),
             requestOptions = provideApiRequestOptions(useConsumerPublishableKey = false),
-            requestSurface = requestSurface,
-            consentAction = EnteredPhoneNumberClickedSaveToLink,
         ).onSuccess { signup ->
             updateCachedConsumerSessionFromSignup(signup)
         }.getOrThrow()
