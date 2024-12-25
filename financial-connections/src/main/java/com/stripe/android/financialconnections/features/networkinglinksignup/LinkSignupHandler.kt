@@ -4,6 +4,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.Click
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.logError
+import com.stripe.android.financialconnections.di.APPLICATION_ID
 import com.stripe.android.financialconnections.domain.AttachConsumerToLinkAccountSession
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
@@ -19,12 +20,14 @@ import com.stripe.android.financialconnections.navigation.Destination.Networking
 import com.stripe.android.financialconnections.navigation.Destination.Success
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.repository.FinancialConnectionsConsumerSessionRepository
+import com.stripe.attestation.IntegrityRequestManager
 import javax.inject.Inject
+import javax.inject.Named
 
 internal interface LinkSignupHandler {
 
     suspend fun performSignup(
-        state: NetworkingLinkSignupState,
+        state: NetworkingLinkSignupState
     ): Pane
 
     fun handleSignupFailure(
@@ -37,8 +40,10 @@ internal interface LinkSignupHandler {
 internal class LinkSignupHandlerForInstantDebits @Inject constructor(
     private val consumerRepository: FinancialConnectionsConsumerSessionRepository,
     private val attachConsumerToLinkAccountSession: AttachConsumerToLinkAccountSession,
+    private val integrityRequestManager: IntegrityRequestManager,
     private val getOrFetchSync: GetOrFetchSync,
     private val navigationManager: NavigationManager,
+    @Named(APPLICATION_ID) private val applicationId: String,
     private val handleError: HandleError,
 ) : LinkSignupHandler {
 
@@ -47,18 +52,30 @@ internal class LinkSignupHandlerForInstantDebits @Inject constructor(
     ): Pane {
         val phoneController = state.payload()!!.phoneController
 
-        val signup = consumerRepository.signUp(
-            email = state.validEmail!!,
-            phoneNumber = state.validPhone!!,
-            country = phoneController.getCountryCode(),
-        )
+        val manifest = getOrFetchSync().manifest
+        val signup = if (manifest.appVerificationEnabled) {
+            val token = integrityRequestManager.requestToken().getOrThrow()
+            consumerRepository.mobileSignUp(
+                email = state.validEmail!!,
+                phoneNumber = state.validPhone!!,
+                country = phoneController.getCountryCode(),
+                verificationToken = token,
+                appId = applicationId
+            )
+        } else {
+            consumerRepository.signUp(
+                email = state.validEmail!!,
+                phoneNumber = state.validPhone!!,
+                country = phoneController.getCountryCode(),
+            )
+        }
 
         attachConsumerToLinkAccountSession(
             consumerSessionClientSecret = signup.consumerSession.clientSecret,
         )
 
-        val manifest = getOrFetchSync(refetchCondition = Always).manifest
-        return manifest.nextPane
+        // Refresh manifest to get the next pane
+        return getOrFetchSync(refetchCondition = Always).manifest.nextPane
     }
 
     override fun navigateToVerification() {
@@ -76,11 +93,14 @@ internal class LinkSignupHandlerForInstantDebits @Inject constructor(
 }
 
 internal class LinkSignupHandlerForNetworking @Inject constructor(
+    private val consumerRepository: FinancialConnectionsConsumerSessionRepository,
     private val getOrFetchSync: GetOrFetchSync,
     private val getCachedAccounts: GetCachedAccounts,
+    private val integrityRequestManager: IntegrityRequestManager,
     private val saveAccountToLink: SaveAccountToLink,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val navigationManager: NavigationManager,
+    @Named(APPLICATION_ID) private val applicationId: String,
     private val logger: Logger,
 ) : LinkSignupHandler {
 
@@ -92,14 +112,36 @@ internal class LinkSignupHandlerForNetworking @Inject constructor(
         val manifest = getOrFetchSync().manifest
         val phoneController = state.payload()!!.phoneController
         require(state.valid) { "Form invalid! ${state.validEmail} ${state.validPhone}" }
-        saveAccountToLink.new(
-            country = phoneController.getCountryCode(),
-            email = state.validEmail!!,
-            phoneNumber = state.validPhone!!,
-            selectedAccounts = selectedAccounts,
-            shouldPollAccountNumbers = manifest.isDataFlow,
-        )
 
+        if (manifest.appVerificationEnabled) {
+            // ** New signup flow on verified flows: 2 requests **
+            // 1. Mobile signup endpoint providing email + phone number
+            // 2. Separately call SaveAccountToLink with the newly created account.
+            val token = integrityRequestManager.requestToken().getOrThrow()
+            val signup = consumerRepository.mobileSignUp(
+                email = state.validEmail!!,
+                phoneNumber = state.validPhone!!,
+                country = phoneController.getCountryCode(),
+                verificationToken = token,
+                appId = applicationId,
+            )
+            saveAccountToLink.existing(
+                consumerSessionClientSecret = signup.consumerSession.clientSecret,
+                selectedAccounts = selectedAccounts,
+                shouldPollAccountNumbers = manifest.isDataFlow,
+            )
+        } else {
+            // ** Legacy signup endpoint on unverified flows: 1 request **
+            // SaveAccountToLink endpoint Signs up when providing email + phone number
+            // **and** saves accounts to Link in the same request.
+            saveAccountToLink.new(
+                country = phoneController.getCountryCode(),
+                email = state.validEmail!!,
+                phoneNumber = state.validPhone!!,
+                selectedAccounts = selectedAccounts,
+                shouldPollAccountNumbers = manifest.isDataFlow,
+            )
+        }
         return Pane.SUCCESS
     }
 

@@ -31,6 +31,8 @@
     <ID>SwallowedException:PollAttachPaymentAccount.kt$PollAttachPaymentAccount$e: StripeException</ID>
     <ID>SwallowedException:PollAuthorizationSessionAccounts.kt$PollAuthorizationSessionAccounts$e: StripeException</ID>
     <ID>SwallowedException:PostAuthorizationSession.kt$PostAuthorizationSession$e: StripeException</ID>
+    <ID>TooManyFunctions:FinancialConnectionsConsumerSessionRepository.kt$FinancialConnectionsConsumerSessionRepository</ID>
+    <ID>TooManyFunctions:FinancialConnectionsConsumerSessionRepository.kt$FinancialConnectionsConsumerSessionRepositoryImpl : FinancialConnectionsConsumerSessionRepository</ID>
     <ID>TooManyFunctions:FinancialConnectionsManifestRepository.kt$FinancialConnectionsManifestRepository</ID>
     <ID>TooManyFunctions:FinancialConnectionsManifestRepository.kt$FinancialConnectionsManifestRepositoryImpl : FinancialConnectionsManifestRepository</ID>
     <ID>TooManyFunctions:FinancialConnectionsSheetNativeViewModel.kt$FinancialConnectionsSheetNativeViewModel : FinancialConnectionsViewModelTopAppBarHost</ID>
