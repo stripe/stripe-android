@@ -14,11 +14,10 @@ import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSessionSignup
-import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.CustomEmailType
 import com.stripe.android.model.EmailSource
-import com.stripe.android.model.IncentiveEligibilitySession
 import com.stripe.android.model.SharePaymentDetails
+import com.stripe.android.model.SignUpParams
 import com.stripe.android.model.UpdateAvailableIncentives
 import com.stripe.android.model.VerificationType
 import com.stripe.android.model.parsers.AttachConsumerToLinkAccountSessionJsonParser
@@ -34,17 +33,13 @@ import java.util.Locale
 interface ConsumersApiService {
 
     suspend fun signUp(
-        email: String,
-        phoneNumber: String,
-        country: String,
-        name: String?,
-        locale: Locale?,
-        amount: Long?,
-        currency: String?,
-        incentiveEligibilitySession: IncentiveEligibilitySession?,
-        requestSurface: String,
-        consentAction: ConsumerSignUpConsentAction,
+        params: SignUpParams,
         requestOptions: ApiRequest.Options,
+    ): Result<ConsumerSessionSignup>
+
+    suspend fun mobileSignUp(
+        params: SignUpParams,
+        requestOptions: ApiRequest.Options
     ): Result<ConsumerSessionSignup>
 
     suspend fun lookupConsumerSession(
@@ -131,16 +126,7 @@ class ConsumersApiServiceImpl(
     )
 
     override suspend fun signUp(
-        email: String,
-        phoneNumber: String,
-        country: String,
-        name: String?,
-        locale: Locale?,
-        amount: Long?,
-        currency: String?,
-        incentiveEligibilitySession: IncentiveEligibilitySession?,
-        requestSurface: String,
-        consentAction: ConsumerSignUpConsentAction,
+        params: SignUpParams,
         requestOptions: ApiRequest.Options,
     ): Result<ConsumerSessionSignup> {
         return executeRequestWithResultParser(
@@ -149,26 +135,26 @@ class ConsumersApiServiceImpl(
             request = apiRequestFactory.createPost(
                 url = consumerAccountsSignUpUrl,
                 options = requestOptions,
-                params = mapOf(
-                    "email_address" to email.lowercase(),
-                    "phone_number" to phoneNumber,
-                    "country" to country,
-                    "country_inferring_method" to "PHONE_NUMBER",
-                    "amount" to amount,
-                    "currency" to currency,
-                    "consent_action" to consentAction.value,
-                    "request_surface" to requestSurface,
-                ).plus(
-                    locale?.let {
-                        mapOf("locale" to it.toLanguageTag())
-                    } ?: emptyMap()
-                ).plus(
-                    name?.let {
-                        mapOf("legal_name" to it)
-                    } ?: emptyMap()
-                ).plus(
-                    incentiveEligibilitySession?.toParamMap().orEmpty()
-                ),
+                params = params.toParamMap()
+            ),
+            responseJsonParser = ConsumerSessionSignupJsonParser,
+        )
+    }
+
+    /**
+     * Retrieves the ConsumerSession if the given email is associated with a Link account.
+     */
+    override suspend fun mobileSignUp(
+        params: SignUpParams,
+        requestOptions: ApiRequest.Options
+    ): Result<ConsumerSessionSignup> {
+        return executeRequestWithResultParser(
+            stripeErrorJsonParser = stripeErrorJsonParser,
+            stripeNetworkClient = stripeNetworkClient,
+            request = apiRequestFactory.createPost(
+                url = consumerMobileSignUpUrl,
+                options = requestOptions,
+                params = params.toParamMap()
             ),
             responseJsonParser = ConsumerSessionSignupJsonParser,
         )
@@ -399,6 +385,12 @@ class ConsumersApiServiceImpl(
          */
         internal val consumerAccountsSignUpUrl: String =
             getApiUrl("consumers/accounts/sign_up")
+
+        /**
+         * @return `https://api.stripe.com/v1/consumers/mobile/sign_up`
+         */
+        internal val consumerMobileSignUpUrl: String =
+            getApiUrl("consumers/mobile/sign_up")
 
         /**
          * @return `https://api.stripe.com/v1/consumers/sessions/lookup`

@@ -619,10 +619,13 @@ class NetworkingLinkSignupViewModelTest {
 
         return LinkSignupHandlerForNetworking(
             getOrFetchSync = getOrFetchSync,
+            consumerRepository = consumerSessionRepository(failOnSignup = false),
             getCachedAccounts = getCachedAccounts,
             saveAccountToLink = saveAccountToLink,
             eventTracker = eventTracker,
             navigationManager = navigationManager,
+            integrityRequestManager = mock(),
+            applicationId = "test",
             logger = Logger.noop(),
         )
     }
@@ -646,15 +649,7 @@ class NetworkingLinkSignupViewModelTest {
             )
         }
 
-        val consumerRepository = mock<FinancialConnectionsConsumerSessionRepository> {
-            if (failOnSignup) {
-                onBlocking { signUp(any(), any(), any()) } doAnswer {
-                    throw APIConnectionException()
-                }
-            } else {
-                onBlocking { signUp(any(), any(), any()) } doReturn consumerSessionSignup()
-            }
-        }
+        val consumerRepository = consumerSessionRepository(failOnSignup)
 
         return LinkSignupHandlerForInstantDebits(
             getOrFetchSync = getOrFetchSync,
@@ -664,7 +659,26 @@ class NetworkingLinkSignupViewModelTest {
             },
             navigationManager = navigationManager,
             handleError = handleError,
+            integrityRequestManager = mock(),
+            applicationId = "test",
         )
+    }
+
+    private fun consumerSessionRepository(failOnSignup: Boolean): FinancialConnectionsConsumerSessionRepository {
+        val consumerRepository = mock<FinancialConnectionsConsumerSessionRepository> {
+            if (failOnSignup) {
+                onBlocking { signUp(any(), any(), any()) } doAnswer {
+                    throw APIConnectionException()
+                }
+                onBlocking { mobileSignUp(any(), any(), any(), any(), any()) } doAnswer {
+                    throw APIConnectionException()
+                }
+            } else {
+                onBlocking { signUp(any(), any(), any()) } doReturn consumerSessionSignup()
+                onBlocking { mobileSignUp(any(), any(), any(), any(), any()) } doReturn consumerSessionSignup()
+            }
+        }
+        return consumerRepository
     }
 
     private fun networkingLinkSignupPane() = NetworkingLinkSignupPane(
