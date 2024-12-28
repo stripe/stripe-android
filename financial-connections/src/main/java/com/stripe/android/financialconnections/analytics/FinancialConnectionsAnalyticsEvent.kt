@@ -6,6 +6,7 @@ import com.stripe.android.financialconnections.exception.FinancialConnectionsErr
 import com.stripe.android.financialconnections.exception.WebAuthFlowFailedException
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.utils.filterNotNullValues
+import com.stripe.attestation.AttestationError
 
 /**
  * Event definitions for Financial Connections.
@@ -410,6 +411,48 @@ internal sealed class FinancialConnectionsAnalyticsEvent(
         ).filterNotNullValues()
     )
 
+    class AttestationInitSkipped(pane: Pane) : FinancialConnectionsAnalyticsEvent(
+        name = "attestation.init_skipped",
+        mapOf(
+            "pane" to pane.analyticsValue,
+        ).filterNotNullValues()
+    )
+
+    class AttestationInitFailed(
+        pane: Pane,
+        error: Throwable
+    ) : FinancialConnectionsAnalyticsEvent(
+        name = "attestation.init_failed",
+        mapOf(
+            "pane" to pane.analyticsValue,
+            "error_reason" to if (error is AttestationError) error.errorType.name else "unknown"
+        ).filterNotNullValues()
+    )
+
+    class AttestationRequestSucceeded(
+        pane: Pane,
+        endpoint: AttestationEndpoint
+    ) : FinancialConnectionsAnalyticsEvent(
+        name = "attestation.request_token_succeeded",
+        mapOf(
+            "pane" to pane.analyticsValue,
+            "api" to endpoint.analyticsValue
+        ).filterNotNullValues()
+    )
+
+    class AttestationRequestFailed(
+        pane: Pane,
+        endpoint: AttestationEndpoint,
+        error: Throwable,
+    ) : FinancialConnectionsAnalyticsEvent(
+        name = "attestation.request_token_failed",
+        mapOf(
+            "pane" to pane.analyticsValue,
+            "api" to endpoint.analyticsValue,
+            "error_reason" to if (error is AttestationError) error.errorType.name else "unknown"
+        )
+    )
+
     internal val Pane.analyticsValue
         get() = when (this) {
             // We want to log partner_auth regardless of the pane being shown full-screen or as a drawer.
@@ -442,6 +485,11 @@ internal sealed class FinancialConnectionsAnalyticsEvent(
         result = 31 * result + includePrefix.hashCode()
         result = 31 * result + eventName.hashCode()
         return result
+    }
+
+    enum class AttestationEndpoint(val analyticsValue: String) {
+        LOOKUP("consumer_session_lookup"),
+        SIGNUP("link_sign_up"),
     }
 }
 

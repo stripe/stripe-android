@@ -6,12 +6,12 @@ import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
 import com.stripe.android.financialconnections.domain.AttachConsumerToLinkAccountSession
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.HandleError
+import com.stripe.android.financialconnections.domain.RequestIntegrityToken
 import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.Payload
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.presentation.Async
 import com.stripe.android.financialconnections.repository.FinancialConnectionsConsumerSessionRepository
-import com.stripe.android.financialconnections.utils.TestIntegrityRequestManager
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.mockito.kotlin.any
@@ -29,7 +29,7 @@ class LinkSignupHandlerForInstantDebitsTest {
     private val consumerRepository = mock<FinancialConnectionsConsumerSessionRepository>()
     private val getOrFetchSync = mock<GetOrFetchSync>()
     private val attachConsumerToLinkAccountSession = mock<AttachConsumerToLinkAccountSession>()
-    private val integrityRequestManager = TestIntegrityRequestManager()
+    private val requestIntegrityToken = mock<RequestIntegrityToken>()
     private val navigationManager = mock<NavigationManager>()
     private val handleError = mock<HandleError>()
 
@@ -38,7 +38,7 @@ class LinkSignupHandlerForInstantDebitsTest {
         handler = LinkSignupHandlerForInstantDebits(
             consumerRepository,
             attachConsumerToLinkAccountSession,
-            integrityRequestManager,
+            requestIntegrityToken,
             getOrFetchSync,
             navigationManager,
             "applicationId",
@@ -61,6 +61,8 @@ class LinkSignupHandlerForInstantDebitsTest {
 
     @Test
     fun `performSignup should navigate to next pane on success`() = runTest {
+        val expectedToken = "token"
+        val expectedPane = Pane.INSTITUTION_PICKER
         val testState = NetworkingLinkSignupState(
             validEmail = "test@example.com",
             validPhone = "+123456789",
@@ -68,7 +70,7 @@ class LinkSignupHandlerForInstantDebitsTest {
             payload = Async.Success(validPayload)
         )
 
-        val expectedPane = Pane.INSTITUTION_PICKER
+        whenever(requestIntegrityToken(anyOrNull(), anyOrNull())).thenReturn(expectedToken)
         whenever(getOrFetchSync(anyOrNull(), anyOrNull())).thenReturn(
             syncResponse(
                 sessionManifest().copy(

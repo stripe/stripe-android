@@ -9,12 +9,12 @@ import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.domain.CachedPartnerAccount
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
+import com.stripe.android.financialconnections.domain.RequestIntegrityToken
 import com.stripe.android.financialconnections.domain.SaveAccountToLink
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.presentation.Async
 import com.stripe.android.financialconnections.repository.FinancialConnectionsConsumerSessionRepository
-import com.stripe.android.financialconnections.utils.TestIntegrityRequestManager
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -35,7 +35,7 @@ class LinkSignupHandlerForNetworkingTest {
     private val getOrFetchSync = mock<GetOrFetchSync>()
     private val getCachedAccounts = mock<GetCachedAccounts>()
     private val saveAccountToLink = mock<SaveAccountToLink>()
-    private val integrityRequestManager = TestIntegrityRequestManager()
+    private val requestIntegrityToken = mock<RequestIntegrityToken>()
     private val navigationManager = TestNavigationManager()
     private val eventTracker = mock<FinancialConnectionsAnalyticsTracker>()
     private val logger = mock<Logger>()
@@ -46,7 +46,7 @@ class LinkSignupHandlerForNetworkingTest {
             consumerRepository,
             getOrFetchSync,
             getCachedAccounts,
-            integrityRequestManager,
+            requestIntegrityToken,
             saveAccountToLink,
             eventTracker,
             navigationManager,
@@ -70,6 +70,7 @@ class LinkSignupHandlerForNetworkingTest {
 
     @Test
     fun `performSignup on verified flows should save account and return success pane on success`() = runTest {
+        val expectedToken = "token"
         val testState = NetworkingLinkSignupState(
             validEmail = "test@networking.com",
             validPhone = "+1987654321",
@@ -79,6 +80,7 @@ class LinkSignupHandlerForNetworkingTest {
 
         val expectedPane = Pane.SUCCESS
 
+        whenever(requestIntegrityToken(anyOrNull(), anyOrNull())).thenReturn(expectedToken)
         whenever(getOrFetchSync(anyOrNull(), anyOrNull())).thenReturn(
             syncResponse(sessionManifest().copy(appVerificationEnabled = true))
         )
@@ -99,7 +101,7 @@ class LinkSignupHandlerForNetworkingTest {
             email = eq("test@networking.com"),
             phoneNumber = eq("+1987654321"),
             country = eq("US"),
-            verificationToken = eq(integrityRequestManager.requestTokenResult.getOrThrow()),
+            verificationToken = eq(expectedToken),
             appId = eq("applicationId")
         )
         verify(saveAccountToLink).existing(any(), any(), any())
