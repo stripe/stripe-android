@@ -22,6 +22,8 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffe
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenNativeAuthFlow
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewModel.Companion.QUERY_PARAM_PAYMENT_METHOD
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.AttestationInitFailed
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.AttestationInitSucceeded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ErrorCode
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Metadata
@@ -129,17 +131,16 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     }
 
     private suspend fun prepareStandardRequestManager(): Boolean {
-        val result = integrityRequestManager.prepare()
-        result.exceptionOrNull()?.let {
-            analyticsTracker.track(
-                FinancialConnectionsAnalyticsEvent.Error(
-                    extraMessage = "Failed to warm up the IntegrityStandardRequestManager",
-                    pane = Pane.CONSENT,
-                    exception = it
-                )
-            )
-        }
-        return result.isSuccess
+        return integrityRequestManager.prepare().fold(
+            onSuccess = {
+                analyticsTracker.track(AttestationInitSucceeded())
+                true
+            },
+            onFailure = {
+                analyticsTracker.track(AttestationInitFailed(reason = it.message ?: "Unknown error"))
+                false
+            }
+        )
     }
 
     /**
