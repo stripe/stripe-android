@@ -44,6 +44,7 @@ class NetworkingLinkLoginWarmupViewModelTest {
         eventTracker = eventTracker,
         initialState = state,
         nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
+        prefillDetails = null,
     )
 
     @Test
