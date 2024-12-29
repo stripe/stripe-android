@@ -37,6 +37,7 @@ import com.stripe.android.financialconnections.repository.api.RealProvideApiRequ
 import com.stripe.android.repository.ConsumersApiService
 import com.stripe.android.repository.ConsumersApiServiceImpl
 import com.stripe.android.uicore.image.StripeImageLoader
+import com.stripe.attestation.IntegrityStandardRequestManager
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -103,6 +104,7 @@ internal interface FinancialConnectionsSheetNativeModule {
         fun providesFinancialConnectionsManifestRepository(
             requestExecutor: FinancialConnectionsRequestExecutor,
             apiRequestFactory: ApiRequest.Factory,
+            standardRequestManager: IntegrityStandardRequestManager,
             provideApiRequestOptions: ProvideApiRequestOptions,
             locale: Locale?,
             logger: Logger,
@@ -113,6 +115,7 @@ internal interface FinancialConnectionsSheetNativeModule {
             provideApiRequestOptions = provideApiRequestOptions,
             locale = locale ?: Locale.getDefault(),
             logger = logger,
+            standardRequestManager = standardRequestManager,
             initialSync = initialSynchronizeSessionResponse
         )
 
