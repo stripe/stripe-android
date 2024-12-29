@@ -63,11 +63,14 @@ import com.stripe.android.financialconnections.utils.error
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import java.util.Date
 import javax.inject.Named
 import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.AuthenticationStatus as Status
+
+private val NavigationDelayMillis = 500L
 
 internal class PartnerAuthViewModel @AssistedInject constructor(
     private val completeAuthorizationSession: CompleteAuthorizationSession,
@@ -410,6 +413,7 @@ internal class PartnerAuthViewModel @AssistedInject constructor(
                 AccountPicker(referrer = PANE)
             }
             FinancialConnections.emitEvent(Name.INSTITUTION_AUTHORIZED)
+            delay(NavigationDelayMillis)
             navigationManager.tryNavigateTo(nextPane)
         }.onFailure {
             eventTracker.logError(
