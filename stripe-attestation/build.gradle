@@ -12,6 +12,7 @@ dependencies {
     testImplementation testLibs.kotlin.annotations
     testImplementation testLibs.kotlin.coroutines
     testImplementation testLibs.kotlin.junit
+    testImplementation testLibs.mockito.kotlin
 }
 
 android {
