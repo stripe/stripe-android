@@ -6,6 +6,7 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.verticalmode.FakePaymentMethodVerticalLayoutInteractor
 import com.stripe.android.screenshottesting.PaparazziRule
 import org.junit.Rule
@@ -20,7 +21,10 @@ internal class EmbeddedContentScreenshotTest {
     fun displaysVerticalModeList() {
         val metadata = PaymentMethodMetadataFactory.create()
         val interactor = FakePaymentMethodVerticalLayoutInteractor.create(metadata)
-        val content = EmbeddedContent(interactor)
+        val content = EmbeddedContent(
+            interactor = interactor,
+            rowStyle = PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton.default
+        )
         paparazziRule.snapshot {
             content.Content()
         }
@@ -30,7 +34,11 @@ internal class EmbeddedContentScreenshotTest {
     fun displaysVerticalModeListWithMandate() {
         val metadata = PaymentMethodMetadataFactory.create()
         val interactor = FakePaymentMethodVerticalLayoutInteractor.create(metadata)
-        val content = EmbeddedContent(interactor, mandate = "Some mandate".resolvableString)
+        val content = EmbeddedContent(
+            interactor = interactor,
+            mandate = "Some mandate".resolvableString,
+            rowStyle = PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton.default
+        )
         paparazziRule.snapshot {
             content.Content()
         }

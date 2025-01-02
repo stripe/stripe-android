@@ -21,7 +21,7 @@ import com.stripe.android.uicore.strings.resolve
 internal data class EmbeddedContent(
     private val interactor: PaymentMethodVerticalLayoutInteractor,
     val mandate: ResolvableString? = null,
-    private val rowStyle: Embedded.RowStyle = Embedded.RowStyle.FloatingButton.default
+    private val rowStyle: Embedded.RowStyle
 ) {
     @Composable
     fun Content() {
