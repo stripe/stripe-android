@@ -69,7 +69,7 @@ internal class SupportabilityViewModelTest {
                 showManualEntry = false,
                 stripeException = APIException()
             )
-            whenever(getOrFetchSync(anyOrNull())).thenReturn(
+            whenever(getOrFetchSync(anyOrNull(), anyOrNull())).thenReturn(
                 syncResponse(sessionManifest().copy(activeInstitution = institution()))
             )
             whenever(createAuthorizationSession(any(), any())).thenAnswer {
@@ -94,7 +94,7 @@ internal class SupportabilityViewModelTest {
             activeInstitution = activeInstitution,
             activeAuthSession = activeAuthSession
         )
-        whenever(getOrFetchSync(anyOrNull())).thenReturn(syncResponse(manifest))
+        whenever(getOrFetchSync(anyOrNull(), anyOrNull())).thenReturn(syncResponse(manifest))
 
         val viewModel = createViewModel(SharedPartnerAuthState(Pane.PARTNER_AUTH_DRAWER))
 
@@ -124,7 +124,7 @@ internal class SupportabilityViewModelTest {
                 publicToken = "123456"
             )
 
-            whenever(getOrFetchSync(anyOrNull())).thenReturn(
+            whenever(getOrFetchSync(anyOrNull(), anyOrNull())).thenReturn(
                 syncResponse(
                     sessionManifest().copy(activeAuthSession = activeAuthSession)
                 )
@@ -149,7 +149,7 @@ internal class SupportabilityViewModelTest {
         val activeAuthSession = authorizationSession()
         val viewModel = createViewModel()
 
-        whenever(getOrFetchSync(anyOrNull())).thenReturn(
+        whenever(getOrFetchSync(anyOrNull(), anyOrNull())).thenReturn(
             syncResponse(
                 manifest = sessionManifest().copy(activeAuthSession = activeAuthSession)
             )
@@ -169,7 +169,7 @@ internal class SupportabilityViewModelTest {
             val activeAuthSession = authorizationSession().copy(_isOAuth = false)
             val viewModel = createViewModel()
 
-            whenever(getOrFetchSync(anyOrNull()))
+            whenever(getOrFetchSync(anyOrNull(), anyOrNull()))
                 .thenReturn(
                     syncResponse(
                         sessionManifest().copy(
@@ -203,7 +203,7 @@ internal class SupportabilityViewModelTest {
                 activeInstitution = activeInstitution
             )
             val syncResponse = syncResponse(manifest)
-            whenever(getOrFetchSync(anyOrNull())).thenReturn(syncResponse)
+            whenever(getOrFetchSync(anyOrNull(), anyOrNull())).thenReturn(syncResponse)
             whenever(createAuthorizationSession.invoke(any(), any())).thenReturn(activeAuthSession)
             // simulate that auth session succeeded in abstract auth:
             whenever(retrieveAuthorizationSession.invoke(any()))
@@ -232,7 +232,7 @@ internal class SupportabilityViewModelTest {
                 )
             )
             val syncResponse = syncResponse(manifest)
-            whenever(getOrFetchSync(anyOrNull())).thenReturn(syncResponse)
+            whenever(getOrFetchSync(anyOrNull(), anyOrNull())).thenReturn(syncResponse)
             whenever(createAuthorizationSession.invoke(any(), any())).thenReturn(activeAuthSession)
             // simulate that auth session succeeded in abstract auth:
             whenever(retrieveAuthorizationSession.invoke(any()))
@@ -270,7 +270,7 @@ internal class SupportabilityViewModelTest {
                 activeInstitution = activeInstitution
             )
             val syncResponse = syncResponse(manifest)
-            whenever(getOrFetchSync(anyOrNull())).thenReturn(syncResponse)
+            whenever(getOrFetchSync(anyOrNull(), anyOrNull())).thenReturn(syncResponse)
             whenever(createAuthorizationSession.invoke(any(), any())).thenReturn(activeAuthSession)
             // simulate that auth session succeeded in abstract auth:
             whenever(retrieveAuthorizationSession.invoke(any()))

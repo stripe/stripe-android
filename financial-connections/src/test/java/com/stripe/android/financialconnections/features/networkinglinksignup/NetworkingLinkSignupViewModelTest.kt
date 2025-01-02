@@ -42,6 +42,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
@@ -86,7 +87,7 @@ class NetworkingLinkSignupViewModelTest {
             accountholderCustomerEmailAddress = "test@test.com"
         )
 
-        whenever(getOrFetchSync(any())).thenReturn(
+        whenever(getOrFetchSync(anyOrNull(), anyOrNull())).thenReturn(
             syncResponse().copy(
                 manifest = manifest,
                 text = TextUpdate(
@@ -107,7 +108,7 @@ class NetworkingLinkSignupViewModelTest {
     fun `init - creates controllers with Elements billing details`() = runTest {
         val manifest = sessionManifest()
 
-        whenever(getOrFetchSync(any())).thenReturn(
+        whenever(getOrFetchSync(anyOrNull(), anyOrNull())).thenReturn(
             syncResponse().copy(
                 manifest = manifest,
                 text = TextUpdate(
@@ -148,7 +149,7 @@ class NetworkingLinkSignupViewModelTest {
             accountholderCustomerEmailAddress = "",
         )
 
-        whenever(getOrFetchSync(any())).thenReturn(
+        whenever(getOrFetchSync(anyOrNull(), anyOrNull())).thenReturn(
             syncResponse().copy(
                 manifest = manifest.copy(isLinkWithStripe = true),
                 text = TextUpdate(
@@ -171,7 +172,7 @@ class NetworkingLinkSignupViewModelTest {
             accountholderCustomerEmailAddress = "",
         )
 
-        whenever(getOrFetchSync(any())).thenReturn(
+        whenever(getOrFetchSync(anyOrNull(), anyOrNull())).thenReturn(
             syncResponse().copy(
                 manifest = manifest.copy(isLinkWithStripe = false),
                 text = TextUpdate(
@@ -191,7 +192,7 @@ class NetworkingLinkSignupViewModelTest {
     fun `Redirects to save-to-link verification screen if entering returning user email`() = runTest {
         val manifest = sessionManifest()
 
-        whenever(getOrFetchSync(any())).thenReturn(
+        whenever(getOrFetchSync(anyOrNull(), anyOrNull())).thenReturn(
             syncResponse().copy(
                 text = TextUpdate(
                     consent = null,
@@ -225,7 +226,7 @@ class NetworkingLinkSignupViewModelTest {
             isLinkWithStripe = true,
         )
 
-        whenever(getOrFetchSync(any())).thenReturn(
+        whenever(getOrFetchSync(anyOrNull(), anyOrNull())).thenReturn(
             syncResponse().copy(
                 manifest = manifest,
                 text = TextUpdate(
@@ -264,7 +265,7 @@ class NetworkingLinkSignupViewModelTest {
     fun `Enables Save To Link button if we encounter a returning user`() = runTest {
         val manifest = sessionManifest()
 
-        whenever(getOrFetchSync(any())).thenReturn(
+        whenever(getOrFetchSync(anyOrNull(), anyOrNull())).thenReturn(
             syncResponse().copy(
                 text = TextUpdate(
                     consent = null,
@@ -315,7 +316,7 @@ class NetworkingLinkSignupViewModelTest {
             isLinkWithStripe = false,
         )
 
-        whenever(getOrFetchSync(any())).thenReturn(
+        whenever(getOrFetchSync(anyOrNull(), anyOrNull())).thenReturn(
             syncResponse().copy(
                 manifest = manifest,
                 text = TextUpdate(
@@ -340,7 +341,7 @@ class NetworkingLinkSignupViewModelTest {
             isLinkWithStripe = true,
         )
 
-        whenever(getOrFetchSync(any())).thenReturn(
+        whenever(getOrFetchSync(anyOrNull(), anyOrNull())).thenReturn(
             syncResponse().copy(
                 manifest = manifest,
                 text = TextUpdate(
@@ -366,7 +367,7 @@ class NetworkingLinkSignupViewModelTest {
             text = TextUpdate(networkingLinkSignupPane = networkingLinkSignupPane()),
         )
 
-        whenever(getOrFetchSync(any())).thenReturn(syncResponse)
+        whenever(getOrFetchSync(anyOrNull(), anyOrNull())).thenReturn(syncResponse)
         whenever(lookupAccount(any())).thenReturn(ConsumerSessionLookup(exists = false))
 
         val viewModel = buildViewModel(
@@ -400,7 +401,7 @@ class NetworkingLinkSignupViewModelTest {
             text = TextUpdate(linkLoginPane = linkLoginPane()),
         )
 
-        whenever(getOrFetchSync(any())).thenReturn(initialSyncResponse)
+        whenever(getOrFetchSync(anyOrNull(), anyOrNull())).thenReturn(initialSyncResponse)
         whenever(lookupAccount(any())).thenReturn(ConsumerSessionLookup(exists = false))
 
         val viewModel = buildViewModel(
@@ -434,7 +435,7 @@ class NetworkingLinkSignupViewModelTest {
             text = TextUpdate(networkingLinkSignupPane = networkingLinkSignupPane()),
         )
 
-        whenever(getOrFetchSync(any())).thenReturn(syncResponse)
+        whenever(getOrFetchSync(anyOrNull(), anyOrNull())).thenReturn(syncResponse)
         whenever(lookupAccount(any())).thenReturn(ConsumerSessionLookup(exists = false))
 
         val viewModel = buildViewModel(
@@ -468,7 +469,7 @@ class NetworkingLinkSignupViewModelTest {
             text = TextUpdate(linkLoginPane = linkLoginPane()),
         )
 
-        whenever(getOrFetchSync(any())).thenReturn(initialSyncResponse)
+        whenever(getOrFetchSync(anyOrNull(), anyOrNull())).thenReturn(initialSyncResponse)
         whenever(lookupAccount(any())).thenReturn(ConsumerSessionLookup(exists = false))
 
         val viewModel = buildViewModel(
@@ -500,7 +501,7 @@ class NetworkingLinkSignupViewModelTest {
 
         val permissionException = PermissionException(stripeError = StripeError())
 
-        whenever(getOrFetchSync(any())).thenReturn(initialSyncResponse)
+        whenever(getOrFetchSync(anyOrNull(), anyOrNull())).thenReturn(initialSyncResponse)
         whenever(lookupAccount(any())).then {
             throw permissionException
         }
@@ -532,7 +533,7 @@ class NetworkingLinkSignupViewModelTest {
 
         val apiException = APIConnectionException()
 
-        whenever(getOrFetchSync(any())).thenReturn(initialSyncResponse)
+        whenever(getOrFetchSync(anyOrNull(), anyOrNull())).thenReturn(initialSyncResponse)
         whenever(lookupAccount(any())).then {
             throw apiException
         }
@@ -564,7 +565,7 @@ class NetworkingLinkSignupViewModelTest {
 
         val permissionException = PermissionException(stripeError = StripeError())
 
-        whenever(getOrFetchSync(any())).thenReturn(initialSyncResponse)
+        whenever(getOrFetchSync(anyOrNull(), anyOrNull())).thenReturn(initialSyncResponse)
         whenever(lookupAccount(any())).then {
             throw permissionException
         }
@@ -593,7 +594,7 @@ class NetworkingLinkSignupViewModelTest {
         )
 
         val getOrFetchSync = mock<GetOrFetchSync> {
-            onBlocking { invoke(any()) } doReturn syncResponse().copy(
+            onBlocking { invoke(any(), anyOrNull()) } doReturn syncResponse().copy(
                 manifest = manifest,
                 text = TextUpdate(
                     consent = null,
@@ -636,7 +637,7 @@ class NetworkingLinkSignupViewModelTest {
         )
 
         val getOrFetchSync = mock<GetOrFetchSync> {
-            onBlocking { invoke(any()) } doReturn syncResponse().copy(
+            onBlocking { invoke(any(), anyOrNull()) } doReturn syncResponse().copy(
                 manifest = manifest,
                 text = TextUpdate(
                     consent = null,
