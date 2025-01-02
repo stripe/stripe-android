@@ -28,7 +28,7 @@ class PaymentOptionTest {
             SavedPaymentMethodTab(
                 viewWidth = 100.dp,
                 isSelected = false,
-                editState = PaymentOptionEditState.None,
+                shouldShowModifyBadge = false,
                 isEnabled = true,
                 iconRes = R.drawable.stripe_ic_paymentsheet_card_visa,
                 labelText = label,

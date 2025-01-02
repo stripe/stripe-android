@@ -290,7 +290,7 @@ private fun AddCardTab(
 
     SavedPaymentMethodTab(
         viewWidth = width,
-        editState = PaymentOptionEditState.None,
+        shouldShowModifyBadge = false,
         isSelected = false,
         labelText = stringResource(R.string.stripe_paymentsheet_add_payment_method_button_label),
         isEnabled = isEnabled,
@@ -311,7 +311,7 @@ private fun GooglePayTab(
 ) {
     SavedPaymentMethodTab(
         viewWidth = width,
-        editState = PaymentOptionEditState.None,
+        shouldShowModifyBadge = false,
         isSelected = isSelected,
         isEnabled = isEnabled,
         iconRes = R.drawable.stripe_google_pay_mark,
@@ -332,7 +332,7 @@ private fun LinkTab(
 ) {
     SavedPaymentMethodTab(
         viewWidth = width,
-        editState = PaymentOptionEditState.None,
+        shouldShowModifyBadge = false,
         isSelected = isSelected,
         isEnabled = isEnabled,
         iconRes = R.drawable.stripe_ic_paymentsheet_link,
@@ -371,10 +371,7 @@ private fun SavedPaymentMethodTab(
     ) {
         SavedPaymentMethodTab(
             viewWidth = width,
-            editState = when {
-                isEnabled && isEditing -> PaymentOptionEditState.Modifiable
-                else -> PaymentOptionEditState.None
-            },
+            shouldShowModifyBadge = isEnabled && isEditing,
             isSelected = isSelected,
             isEnabled = isEnabled,
             isClickable = !isEditing,
