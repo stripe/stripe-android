@@ -99,7 +99,12 @@ internal class SharedPaymentElementViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             selectionHolder.selection.collect { selection ->
-                _paymentOption.value = paymentOptionDisplayDataFactory.create(selection)
+                val state = confirmationStateHolder.state
+                if (state == null) {
+                    _paymentOption.value = null
+                } else {
+                    _paymentOption.value = paymentOptionDisplayDataFactory.create(selection, state.paymentMethodMetadata)
+                }
             }
         }
     }
