@@ -29,7 +29,8 @@ internal const val TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT = "TEST_TAG_PAYMENT_M
 @Composable
 internal fun PaymentMethodEmbeddedLayoutUI(
     interactor: PaymentMethodVerticalLayoutInteractor,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    rowStyle: Embedded.RowStyle
 ) {
     val context = LocalContext.current
     val imageLoader = remember {
@@ -62,7 +63,7 @@ internal fun PaymentMethodEmbeddedLayoutUI(
         imageLoader = imageLoader,
         modifier = modifier
             .testTag(TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT),
-        rowStyle = state.rowType
+        rowStyle = rowStyle
     )
 }
 

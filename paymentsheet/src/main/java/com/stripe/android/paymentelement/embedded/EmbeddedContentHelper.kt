@@ -85,8 +85,8 @@ internal class DefaultEmbeddedContentHelper @AssistedInject constructor(
                         interactor = createInteractor(
                             coroutineScope = coroutineScope,
                             paymentMethodMetadata = state.paymentMethodMetadata,
-                            rowStyle = state.rowStyle
-                        )
+                        ),
+                        rowStyle = state.rowStyle
                     )
                 }
             }
@@ -110,7 +110,6 @@ internal class DefaultEmbeddedContentHelper @AssistedInject constructor(
     private fun createInteractor(
         coroutineScope: CoroutineScope,
         paymentMethodMetadata: PaymentMethodMetadata,
-        rowStyle: Embedded.RowStyle
     ): PaymentMethodVerticalLayoutInteractor {
         val paymentMethodIncentiveInteractor = PaymentMethodIncentiveInteractor(
             incentive = paymentMethodMetadata.paymentMethodIncentive,
@@ -171,7 +170,6 @@ internal class DefaultEmbeddedContentHelper @AssistedInject constructor(
             reportFormShown = eventReporter::onPaymentMethodFormShown,
             onUpdatePaymentMethod = savedPaymentMethodMutator::updatePaymentMethod,
             isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
-            rowStyle = rowStyle
         )
     }
 
