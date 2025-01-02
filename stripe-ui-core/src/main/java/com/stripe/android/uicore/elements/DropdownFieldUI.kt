@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
@@ -118,6 +119,11 @@ fun DropDown(
                 .clickable(
                     enabled = shouldEnable,
                     onClickLabel = stringResource(R.string.stripe_change),
+                    onClick = { expanded = true },
+                )
+                .selectable(
+                    selected = false,
+                    enabled = shouldEnable,
                     onClick = { expanded = true },
                 )
                 .testTag("DropDown:${if (controller.tinyMode) "tiny" else "normal"}")
