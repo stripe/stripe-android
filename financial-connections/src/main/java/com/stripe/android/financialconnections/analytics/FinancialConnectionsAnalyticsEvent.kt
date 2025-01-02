@@ -410,6 +410,32 @@ internal sealed class FinancialConnectionsAnalyticsEvent(
         ).filterNotNullValues()
     )
 
+    class AttestationInitSucceeded() : FinancialConnectionsAnalyticsEvent(
+        name = "attestation.init_succeeded"
+    )
+
+    class AttestationInitFailed(
+        reason: String
+    ) : FinancialConnectionsAnalyticsEvent(
+        name = "attestation.init_failed",
+        mapOf(
+            "reason" to reason
+        )
+    )
+
+    class AttestationRequestSucceeded() : FinancialConnectionsAnalyticsEvent(
+        name = "attestation.request_token_succeeded"
+    )
+
+    class AttestationRequestFailed(
+        reason: String
+    ) : FinancialConnectionsAnalyticsEvent(
+        name = "attestation.request_token_failed",
+        mapOf(
+            "reason" to reason
+        )
+    )
+
     internal val Pane.analyticsValue
         get() = when (this) {
             // We want to log partner_auth regardless of the pane being shown full-screen or as a drawer.
