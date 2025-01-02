@@ -19,17 +19,6 @@ import com.stripe.android.link.theme.MinimumTouchTargetSize
 import com.stripe.android.link.theme.linkColors
 
 /**
- * An item to be displayed in a [LinkMenu].
- *
- * @property textResId The resource ID of the text of the item
- * @property isDestructive Whether this item should be rendered with the error text color
- */
-internal interface LinkMenuItem {
-    val textResId: Int
-    val isDestructive: Boolean
-}
-
-/**
  * Displays a generic bottom sheet with the provided [items].
  *
  * @param items The list of items that implement [LinkMenuItem]
