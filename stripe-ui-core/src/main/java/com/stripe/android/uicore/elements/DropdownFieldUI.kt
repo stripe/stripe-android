@@ -1,5 +1,6 @@
 package com.stripe.android.uicore.elements
 
+import android.content.pm.PackageManager
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -32,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -121,11 +123,17 @@ fun DropDown(
                     onClickLabel = stringResource(R.string.stripe_change),
                     onClick = { expanded = true },
                 )
-                .selectable(
-                    selected = false,
-                    enabled = shouldEnable,
-                    onClick = { expanded = true },
-                )
+                .let {
+                    if (isAndroidTv()) {
+                        it.selectable(
+                            selected = false,
+                            enabled = shouldEnable,
+                            onClick = { expanded = true },
+                        )
+                    } else {
+                        it
+                    }
+                }
                 .testTag("DropDown:${if (controller.tinyMode) "tiny" else "normal"}")
         ) {
             if (controller.tinyMode) {
@@ -293,3 +301,8 @@ internal fun DropdownMenuItem(
 // Size defaults.
 internal val DropdownMenuItemDefaultMaxWidth = 280.dp
 internal val DropdownMenuItemDefaultMinHeight = 48.dp
+
+@Composable
+private fun isAndroidTv(): Boolean {
+    return LocalContext.current.packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK)
+}
