@@ -44,6 +44,8 @@ import com.stripe.android.financialconnections.utils.UriUtils
 import com.stripe.android.financialconnections.utils.error
 import com.stripe.android.financialconnections.utils.isCancellationError
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.EmailSource.CUSTOMER_OBJECT
+import com.stripe.android.model.EmailSource.USER_ACTION
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.InputController
 import com.stripe.android.uicore.elements.PhoneNumberController
@@ -100,12 +102,17 @@ internal class NetworkingLinkSignupViewModel @AssistedInject constructor(
 
             val prefillDetails = elementsSessionContext?.prefillDetails
 
+            val initialEmail = (sync.manifest.accountholderCustomerEmailAddress ?: prefillDetails?.email)
+                ?.takeIf { it.isNotBlank() }
+
             NetworkingLinkSignupState.Payload(
                 content = requireNotNull(content),
                 merchantName = sync.manifest.getBusinessName(),
+                appVerificationEnabled = sync.manifest.appVerificationEnabled,
+                prefilledEmail = initialEmail,
                 emailController = SimpleTextFieldController(
                     textFieldConfig = EmailConfig(label = R.string.stripe_networking_signup_email_label),
-                    initialValue = sync.manifest.accountholderCustomerEmailAddress ?: prefillDetails?.email,
+                    initialValue = initialEmail,
                     showOptionalLabel = false
                 ),
                 phoneController = PhoneNumberController.createPhoneNumberController(
@@ -195,7 +202,7 @@ internal class NetworkingLinkSignupViewModel @AssistedInject constructor(
     /**
      * @param validEmail valid email, or null if entered email is invalid.
      */
-    private suspend fun onEmailEntered(
+    private fun onEmailEntered(
         validEmail: String?
     ) {
         setState { copy(validEmail = validEmail) }
@@ -203,7 +210,12 @@ internal class NetworkingLinkSignupViewModel @AssistedInject constructor(
             logger.debug("VALID EMAIL ADDRESS $validEmail.")
             searchJob += suspend {
                 delay(getLookupDelayMs(validEmail))
-                lookupAccount(validEmail)
+                val payload = stateFlow.value.payload()
+                lookupAccount(
+                    email = validEmail,
+                    emailSource = if (payload?.prefilledEmail == validEmail) CUSTOMER_OBJECT else USER_ACTION,
+                    verifiedFlow = payload?.appVerificationEnabled == true
+                )
             }.execute { copy(lookupAccount = if (it.isCancellationError()) Uninitialized else it) }
         } else {
             setState { copy(lookupAccount = Uninitialized) }
@@ -342,6 +354,8 @@ internal data class NetworkingLinkSignupState(
     data class Payload(
         val merchantName: String?,
         val emailController: SimpleTextFieldController,
+        val appVerificationEnabled: Boolean,
+        val prefilledEmail: String?,
         val phoneController: PhoneNumberController,
         val isInstantDebits: Boolean,
         val content: Content,

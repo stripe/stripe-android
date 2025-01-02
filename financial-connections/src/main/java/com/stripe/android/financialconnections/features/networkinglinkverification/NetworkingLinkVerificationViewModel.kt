@@ -40,6 +40,7 @@ import com.stripe.android.financialconnections.presentation.FinancialConnections
 import com.stripe.android.financialconnections.repository.ConsumerSessionProvider
 import com.stripe.android.financialconnections.utils.error
 import com.stripe.android.model.ConsumerSession
+import com.stripe.android.model.EmailSource
 import com.stripe.android.model.VerificationType
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.OTPController
@@ -71,7 +72,6 @@ internal class NetworkingLinkVerificationViewModel @AssistedInject constructor(
         observeAsyncs()
         viewModelScope.launch {
             setState { copy(payload = Loading()) }
-
             runCatching {
                 buildInitData()
             }.onSuccess {
@@ -99,6 +99,7 @@ internal class NetworkingLinkVerificationViewModel @AssistedInject constructor(
         return InitData(
             businessName = manifest.businessName,
             emailAddress = requireNotNull(email),
+            appVerificationEnabled = manifest.appVerificationEnabled,
             initialInstitution = manifest.initialInstitution,
         )
     }
@@ -108,6 +109,8 @@ internal class NetworkingLinkVerificationViewModel @AssistedInject constructor(
     ) {
         lookupConsumerAndStartVerification(
             email = initData.emailAddress,
+            emailSource = EmailSource.CUSTOMER_OBJECT,
+            appVerificationEnabled = initData.appVerificationEnabled,
             businessName = initData.businessName,
             verificationType = VerificationType.SMS,
             onConsumerNotFound = {
@@ -228,6 +231,7 @@ internal class NetworkingLinkVerificationViewModel @AssistedInject constructor(
     private data class InitData(
         val businessName: String?,
         val emailAddress: String,
+        val appVerificationEnabled: Boolean,
         val initialInstitution: FinancialConnectionsInstitution?,
     )
 

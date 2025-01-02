@@ -25,6 +25,7 @@ import com.stripe.android.financialconnections.presentation.Async.Loading
 import com.stripe.android.financialconnections.repository.CachedConsumerSession
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import com.stripe.android.model.ConsumerSession
+import com.stripe.android.model.EmailSource
 import com.stripe.android.model.VerificationType
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
@@ -93,8 +94,10 @@ class NetworkingLinkVerificationViewModelTest {
 
         verify(lookupConsumerAndStartVerification).invoke(
             email = eq(consumerSession.emailAddress),
+            emailSource = eq(EmailSource.CUSTOMER_OBJECT),
             businessName = anyOrNull(),
             verificationType = any(),
+            appVerificationEnabled = eq(false),
             onConsumerNotFound = any(),
             onLookupError = any(),
             onStartVerification = any(),
@@ -107,6 +110,7 @@ class NetworkingLinkVerificationViewModelTest {
     fun `init - falls back to accountholder customer email if no consumer session in Instant Debits`() = runTest {
         val manifest = sessionManifest().copy(
             accountholderCustomerEmailAddress = "email@email.com",
+            appVerificationEnabled = true
         )
 
         whenever(getOrFetchSync()).thenReturn(
@@ -120,8 +124,10 @@ class NetworkingLinkVerificationViewModelTest {
 
         verify(lookupConsumerAndStartVerification).invoke(
             email = eq("email@email.com"),
-            businessName = anyOrNull(),
-            verificationType = any(),
+            emailSource = eq(EmailSource.CUSTOMER_OBJECT),
+            businessName = eq("businessName"),
+            verificationType = eq(VerificationType.SMS),
+            appVerificationEnabled = eq(true),
             onConsumerNotFound = any(),
             onLookupError = any(),
             onStartVerification = any(),
@@ -147,8 +153,10 @@ class NetworkingLinkVerificationViewModelTest {
 
         verify(lookupConsumerAndStartVerification).invoke(
             email = eq(email),
+            emailSource = eq(EmailSource.CUSTOMER_OBJECT),
             businessName = anyOrNull(),
             verificationType = eq(VerificationType.SMS),
+            appVerificationEnabled = eq(false),
             onConsumerNotFound = any(),
             onLookupError = any(),
             onStartVerification = onStartVerificationCaptor.capture(),
@@ -179,8 +187,10 @@ class NetworkingLinkVerificationViewModelTest {
 
         verify(lookupConsumerAndStartVerification).invoke(
             email = eq(email),
+            emailSource = eq(EmailSource.CUSTOMER_OBJECT),
             businessName = anyOrNull(),
             verificationType = eq(VerificationType.SMS),
+            appVerificationEnabled = eq(false),
             onConsumerNotFound = onConsumerNotFoundCaptor.capture(),
             onLookupError = any(),
             onStartVerification = any(),
@@ -224,8 +234,10 @@ class NetworkingLinkVerificationViewModelTest {
 
             verify(lookupConsumerAndStartVerification).invoke(
                 email = eq(email),
+                emailSource = eq(EmailSource.CUSTOMER_OBJECT),
                 businessName = anyOrNull(),
                 verificationType = eq(VerificationType.SMS),
+                appVerificationEnabled = eq(false),
                 onConsumerNotFound = any(),
                 onLookupError = any(),
                 onStartVerification = onStartVerificationCaptor.capture(),
@@ -279,8 +291,10 @@ class NetworkingLinkVerificationViewModelTest {
 
             verify(lookupConsumerAndStartVerification).invoke(
                 email = eq(email),
+                emailSource = eq(EmailSource.CUSTOMER_OBJECT),
                 businessName = anyOrNull(),
                 verificationType = eq(VerificationType.SMS),
+                appVerificationEnabled = eq(false),
                 onConsumerNotFound = any(),
                 onLookupError = any(),
                 onStartVerification = onStartVerificationCaptor.capture(),
@@ -320,8 +334,10 @@ class NetworkingLinkVerificationViewModelTest {
 
         verify(lookupConsumerAndStartVerification).invoke(
             email = eq(consumerSession.emailAddress),
+            emailSource = eq(EmailSource.CUSTOMER_OBJECT),
             businessName = anyOrNull(),
             verificationType = eq(VerificationType.SMS),
+            appVerificationEnabled = eq(false),
             onConsumerNotFound = any(),
             onLookupError = any(),
             onStartVerification = onStartVerificationCaptor.capture(),
@@ -368,8 +384,10 @@ class NetworkingLinkVerificationViewModelTest {
 
         verify(lookupConsumerAndStartVerification).invoke(
             email = eq(consumerSession.emailAddress),
+            emailSource = eq(EmailSource.CUSTOMER_OBJECT),
             businessName = anyOrNull(),
             verificationType = eq(VerificationType.SMS),
+            appVerificationEnabled = eq(false),
             onConsumerNotFound = any(),
             onLookupError = any(),
             onStartVerification = onStartVerificationCaptor.capture(),

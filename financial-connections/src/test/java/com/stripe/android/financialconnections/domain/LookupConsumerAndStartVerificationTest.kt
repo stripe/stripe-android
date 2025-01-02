@@ -2,6 +2,7 @@ package com.stripe.android.financialconnections.domain
 
 import com.stripe.android.financialconnections.ApiKeyFixtures.consumerSession
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.EmailSource
 import com.stripe.android.model.VerificationType
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
@@ -33,12 +34,20 @@ class LookupConsumerAndStartVerificationTest {
             errorMessage = null,
             consumerSession = null
         )
-        whenever(lookupAccount.invoke(email)).thenReturn(lookup)
+        whenever(
+            lookupAccount(
+                email = email,
+                emailSource = EmailSource.CUSTOMER_OBJECT,
+                verifiedFlow = true
+            )
+        ).thenReturn(lookup)
         var onConsumerNotFoundCalled = false
 
         // Act
         lookupConsumerAndStartVerification(
             email = email,
+            emailSource = EmailSource.CUSTOMER_OBJECT,
+            appVerificationEnabled = true,
             businessName = "Test Business",
             verificationType = VerificationType.EMAIL,
             onConsumerNotFound = { onConsumerNotFoundCalled = true },
@@ -66,7 +75,13 @@ class LookupConsumerAndStartVerificationTest {
             )
             val expectedVerificationType = VerificationType.EMAIL
 
-            whenever(lookupAccount(email)).thenReturn(lookup)
+            whenever(
+                lookupAccount(
+                    email = email,
+                    emailSource = EmailSource.CUSTOMER_OBJECT,
+                    verifiedFlow = true
+                )
+            ).thenReturn(lookup)
             whenever(
                 startVerification.email(
                     consumerSessionClientSecret = consumerSession.clientSecret,
@@ -82,6 +97,8 @@ class LookupConsumerAndStartVerificationTest {
             // Act
             lookupConsumerAndStartVerification(
                 email = email,
+                emailSource = EmailSource.CUSTOMER_OBJECT,
+                appVerificationEnabled = true,
                 businessName = "Test Business",
                 verificationType = expectedVerificationType,
                 onConsumerNotFound = { fail("onConsumerNotFound should not be called") },
@@ -105,12 +122,14 @@ class LookupConsumerAndStartVerificationTest {
         // Arrange
         val email = "test@test.com"
         val expectedException = RuntimeException("Mock lookupAccount exception")
-        whenever(lookupAccount(email)).thenThrow(expectedException)
+        whenever(lookupAccount(email, EmailSource.CUSTOMER_OBJECT, true)).thenThrow(expectedException)
         var onLookupErrorCalled = false
 
         // Act
         lookupConsumerAndStartVerification(
             email = email,
+            emailSource = EmailSource.CUSTOMER_OBJECT,
+            appVerificationEnabled = true,
             businessName = "Test Business",
             verificationType = VerificationType.EMAIL,
             onConsumerNotFound = { fail("onConsumerNotFound should not be called") },
@@ -137,7 +156,7 @@ class LookupConsumerAndStartVerificationTest {
         val expectedVerificationType = VerificationType.EMAIL
         val expectedException = RuntimeException("Mock startVerification exception")
 
-        whenever(lookupAccount(email)).thenReturn(lookup)
+        whenever(lookupAccount(email, EmailSource.CUSTOMER_OBJECT, true)).thenReturn(lookup)
         whenever(
             startVerification.email(
                 consumerSessionClientSecret = consumerSession.clientSecret,
@@ -149,6 +168,8 @@ class LookupConsumerAndStartVerificationTest {
         // Act
         lookupConsumerAndStartVerification(
             email = email,
+            emailSource = EmailSource.CUSTOMER_OBJECT,
+            appVerificationEnabled = true,
             businessName = "Test Business",
             verificationType = expectedVerificationType,
             onConsumerNotFound = { fail("onConsumerNotFound should not be called") },
