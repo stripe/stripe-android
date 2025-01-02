@@ -32,8 +32,8 @@ import org.robolectric.annotation.Config
 @RunWith(ParameterizedRobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.Q])
 @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
-internal class PaymentMethodVerticalLayoutUITest(
-    private val allPaymentMethodsTag: String,
+internal class PaymentMethodLayoutUITest(
+    private val paymentMethodsTag: String,
     private val allPaymentMethodsChildCount: Int,
     private val layoutUI:
     @Composable (interactor: FakePaymentMethodVerticalLayoutInteractor, modifier: Modifier) -> Unit
@@ -180,7 +180,7 @@ internal class PaymentMethodVerticalLayoutUITest(
         )
     ) {
         assertThat(
-            composeRule.onNodeWithTag(allPaymentMethodsTag)
+            composeRule.onNodeWithTag(paymentMethodsTag)
                 .onChildren().fetchSemanticsNodes().size
         ).isEqualTo(allPaymentMethodsChildCount)
 
@@ -263,7 +263,7 @@ internal class PaymentMethodVerticalLayoutUITest(
             )
         ) {
             assertThat(
-                composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_VERTICAL_LAYOUT_UI)
+                composeRule.onNodeWithTag(paymentMethodsTag)
                     .onChildren().fetchSemanticsNodes().size
             ).isEqualTo(3)
 
@@ -305,18 +305,25 @@ internal class PaymentMethodVerticalLayoutUITest(
         @ParameterizedRobolectricTestRunner.Parameters
         fun data() = listOf(
             parameters(
-                allPaymentMethodsTag = TEST_TAG_NEW_PAYMENT_METHOD_VERTICAL_LAYOUT_UI,
+                paymentMethodsTag = TEST_TAG_NEW_PAYMENT_METHOD_VERTICAL_LAYOUT_UI,
                 allPaymentMethodsChildCount = 3,
                 layoutUI = { interactor, modifier ->
                     PaymentMethodVerticalLayoutUI(interactor, modifier)
+                }
+            ),
+            parameters(
+                paymentMethodsTag = TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT,
+                allPaymentMethodsChildCount = 4,
+                layoutUI = { interactor, modifier ->
+                    PaymentMethodEmbeddedLayoutUI(interactor, modifier)
                 }
             )
         )
 
         private fun parameters(
-            allPaymentMethodsTag: String,
+            paymentMethodsTag: String,
             allPaymentMethodsChildCount: Int,
             layoutUI: @Composable (interactor: FakePaymentMethodVerticalLayoutInteractor, modifier: Modifier) -> Unit
-        ) = arrayOf(allPaymentMethodsTag, allPaymentMethodsChildCount, layoutUI)
+        ) = arrayOf(paymentMethodsTag, allPaymentMethodsChildCount, layoutUI)
     }
 }
