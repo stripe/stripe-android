@@ -104,9 +104,9 @@ internal fun PaymentMethodEmbeddedLayoutUI(
                 onClick = { onSelectSavedPaymentMethod(displayedSavedPaymentMethod) },
                 rowStyle = rowStyle
             )
-        }
 
-        OptionalEmbeddedDivider(rowStyle)
+            if (paymentMethods.isNotEmpty()) OptionalEmbeddedDivider(rowStyle)
+        }
 
         val selectedIndex = remember(selection, paymentMethods) {
             if (selection == null || selection.isSaved) {
@@ -126,10 +126,10 @@ internal fun PaymentMethodEmbeddedLayoutUI(
                 rowStyle = rowStyle
             )
 
-            if (index != paymentMethods.lastIndex || rowStyle.bottomSeparatorEnabled()) {
-                OptionalEmbeddedDivider(rowStyle)
-            }
+            if (index != paymentMethods.lastIndex) OptionalEmbeddedDivider(rowStyle)
         }
+
+        if (rowStyle.bottomSeparatorEnabled()) OptionalEmbeddedDivider(rowStyle)
     }
 }
 

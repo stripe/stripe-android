@@ -101,13 +101,45 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
         }
     }
 
+    @Test
+    fun testSavedPaymentMethodOnly() {
+        paparazziRule.snapshot {
+            TestPaymentMethodLayoutUi(
+                rowStyle = getRowStyle(
+                    type = Embedded.RowStyle.FlatWithCheckmark::class,
+                    topSeparatorEnabled = true,
+                    bottomSeparatorEnabled = true,
+                    separatorThicknessDp = 5f
+                ),
+                newPaymentMethods = listOf()
+            )
+        }
+    }
+
+    @Test
+    fun testNewPaymentMethodsOnly() {
+        paparazziRule.snapshot {
+            TestPaymentMethodLayoutUi(
+                rowStyle = getRowStyle(
+                    type = Embedded.RowStyle.FlatWithCheckmark::class,
+                    topSeparatorEnabled = true,
+                    bottomSeparatorEnabled = true,
+                    separatorThicknessDp = 5f
+                ),
+                displayableSavedPaymentMethod = null
+            )
+        }
+    }
+
     @Composable
     private fun TestPaymentMethodLayoutUi(
-        rowStyle: Embedded.RowStyle
+        rowStyle: Embedded.RowStyle,
+        displayableSavedPaymentMethod: DisplayableSavedPaymentMethod? = savedPaymentMethod,
+        newPaymentMethods: List<DisplayablePaymentMethod> = paymentMethods
     ) {
         PaymentMethodEmbeddedLayoutUI(
-            paymentMethods = paymentMethods,
-            displayedSavedPaymentMethod = savedPaymentMethod,
+            paymentMethods = newPaymentMethods,
+            displayedSavedPaymentMethod = displayableSavedPaymentMethod,
             savedPaymentMethodAction =
             PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
             selection = PaymentSelection.Saved(savedPaymentMethod.paymentMethod),
