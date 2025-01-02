@@ -3,15 +3,15 @@ package com.stripe.android.financialconnections.repository
 import android.os.Parcelable
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.di.ActivityRetainedScope
 import com.stripe.android.financialconnections.model.PaymentAccountParams
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Repository for attached payment accounts.
  */
-@Singleton
+@ActivityRetainedScope
 internal class AttachedPaymentAccountRepository @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val logger: Logger,

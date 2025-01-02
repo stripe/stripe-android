@@ -2,8 +2,6 @@ package com.stripe.android.financialconnections.di
 
 import android.app.Application
 import androidx.lifecycle.SavedStateHandle
-import com.stripe.android.core.injection.CoreCommonModule
-import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerViewModel
 import com.stripe.android.financialconnections.features.accountupdate.AccountUpdateRequiredViewModel
@@ -32,15 +30,13 @@ import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativ
 import dagger.BindsInstance
 import dagger.Component
 import javax.inject.Named
-import javax.inject.Singleton
 
-@Singleton
+@ActivityRetainedScope
 @Component(
+    dependencies = [FinancialConnectionsSingletonSharedComponent::class],
     modules = [
         FinancialConnectionsSheetNativeModule::class,
-        FinancialConnectionsSheetSharedModule::class,
-        CoreCommonModule::class,
-        CoroutineContextModule::class
+        FinancialConnectionsSheetSharedModule::class
     ]
 )
 internal interface FinancialConnectionsSheetNativeComponent {
@@ -90,6 +86,8 @@ internal interface FinancialConnectionsSheetNativeComponent {
 
         @BindsInstance
         fun configuration(configuration: FinancialConnectionsSheet.Configuration): Builder
+
+        fun sharedComponent(component: FinancialConnectionsSingletonSharedComponent): Builder
 
         fun build(): FinancialConnectionsSheetNativeComponent
     }
