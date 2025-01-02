@@ -448,7 +448,6 @@ internal class PlaygroundSettings private constructor(
             ExternalPaymentMethodSettingsDefinition,
             LayoutSettingsDefinition,
             CardBrandAcceptanceSettingsDefinition,
-            FeatureFlagSettingsDefinition(FeatureFlags.useNewUpdateCardScreen),
             FeatureFlagSettingsDefinition(FeatureFlags.instantDebitsIncentives),
         )
 
