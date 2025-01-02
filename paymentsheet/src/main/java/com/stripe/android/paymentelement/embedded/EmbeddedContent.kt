@@ -9,15 +9,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
+import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.ui.Mandate
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodEmbeddedLayoutUI
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor
 import com.stripe.android.uicore.strings.resolve
 
 @Immutable
+@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 internal data class EmbeddedContent(
     private val interactor: PaymentMethodVerticalLayoutInteractor,
     val mandate: ResolvableString? = null,
+    private val rowStyle: Embedded.RowStyle
 ) {
     @Composable
     fun Content() {
@@ -36,6 +40,7 @@ internal data class EmbeddedContent(
         PaymentMethodEmbeddedLayoutUI(
             interactor = interactor,
             modifier = Modifier.padding(bottom = 8.dp),
+            rowStyle = rowStyle
         )
     }
 

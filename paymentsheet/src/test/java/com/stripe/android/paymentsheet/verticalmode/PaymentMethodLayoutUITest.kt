@@ -50,7 +50,6 @@ internal class PaymentMethodLayoutUITest(
             displayedSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
             availableSavedPaymentMethodAction =
             PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
-            rowType = Embedded.RowStyle.FloatingButton.default
         )
     ) {
         assertThat(viewActionRecorder.viewActions).isEmpty()
@@ -70,7 +69,6 @@ internal class PaymentMethodLayoutUITest(
             displayedSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
             availableSavedPaymentMethodAction =
             PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ONE,
-            rowType = Embedded.RowStyle.FloatingButton.default
         )
     ) {
         assertThat(viewActionRecorder.viewActions).isEmpty()
@@ -92,7 +90,6 @@ internal class PaymentMethodLayoutUITest(
             displayedSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
             availableSavedPaymentMethodAction =
             PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.NONE,
-            rowType = Embedded.RowStyle.FloatingButton.default
         )
     ) {
         composeRule.onNodeWithTag(
@@ -121,7 +118,6 @@ internal class PaymentMethodLayoutUITest(
                 displayedSavedPaymentMethod = null,
                 availableSavedPaymentMethodAction =
                 PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
-                rowType = Embedded.RowStyle.FloatingButton.default
             )
         ) {
             assertThat(onClickCalled).isFalse()
@@ -141,7 +137,6 @@ internal class PaymentMethodLayoutUITest(
                 selection = null,
                 displayedSavedPaymentMethod = savedPaymentMethod,
                 availableSavedPaymentMethodAction = PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.NONE,
-                rowType = Embedded.RowStyle.FloatingButton.default
             )
         ) {
             assertThat(viewActionRecorder.viewActions).isEmpty()
@@ -176,7 +171,6 @@ internal class PaymentMethodLayoutUITest(
             displayedSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
             availableSavedPaymentMethodAction =
             PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
-            rowType = Embedded.RowStyle.FloatingButton.default
         )
     ) {
         assertThat(
@@ -212,7 +206,6 @@ internal class PaymentMethodLayoutUITest(
             displayedSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
             availableSavedPaymentMethodAction =
             PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
-            rowType = Embedded.RowStyle.FloatingButton.default
         )
     ) {
         composeRule.onNodeWithTag(
@@ -259,7 +252,6 @@ internal class PaymentMethodLayoutUITest(
                 displayedSavedPaymentMethod = null,
                 availableSavedPaymentMethodAction =
                 PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
-                rowType = Embedded.RowStyle.FloatingButton.default
             )
         ) {
             assertThat(
@@ -315,7 +307,7 @@ internal class PaymentMethodLayoutUITest(
                 paymentMethodsTag = TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT,
                 allPaymentMethodsChildCount = 4,
                 layoutUI = { interactor, modifier ->
-                    PaymentMethodEmbeddedLayoutUI(interactor, modifier)
+                    PaymentMethodEmbeddedLayoutUI(interactor, modifier, Embedded.RowStyle.FloatingButton.default)
                 }
             )
         )
