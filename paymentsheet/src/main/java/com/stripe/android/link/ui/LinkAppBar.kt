@@ -2,6 +2,7 @@ package com.stripe.android.link.ui
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -85,8 +86,9 @@ private fun RowScope.LinkAppBarTitle(
             .padding(top = 18.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        LinkIcon(
-            tint = MaterialTheme.linkColors.linkLogo
+        Image(
+            painter = painterResource(R.drawable.stripe_link_logo),
+            contentDescription = stringResource(com.stripe.android.R.string.stripe_link),
         )
 
         AnimatedVisibility(visible = email != null) {
