@@ -4,6 +4,9 @@ require 'openssl'
 require 'uri'
 
 class LokaliseClient
+    def nil_api_token_error
+        abort("Missing LOKALISE_API_TOKEN environment variable. Try \nexport LOKALISE_API_TOKEN=$(fetch-password lokalise-api-token-manual)\nin terminal ")
+    end
 
     def fetch_keys
         fetch_keys_from_lokalise
@@ -21,7 +24,7 @@ class LokaliseClient
 
         api_token = ENV['LOKALISE_API_TOKEN']
         if api_token.nil?
-            abort("Missing LOKALISE_API_TOKEN environment variable.")
+            nil_api_token_error()
         else
             request["X-Api-Token"] = api_token
         end
@@ -77,7 +80,7 @@ class LokaliseClient
 
         api_token = ENV['LOKALISE_API_TOKEN']
         if api_token.nil?
-            abort("Missing LOKALISE_API_TOKEN environment variable.")
+            nil_api_token_error()
         else
             request["X-Api-Token"] = api_token
         end
@@ -138,7 +141,7 @@ class LokaliseClient
 
         api_token = ENV['LOKALISE_API_TOKEN']
         if api_token.nil?
-            abort("Missing LOKALISE_API_TOKEN environment variable.")
+            nil_api_token_error()
         else
             request["X-Api-Token"] = api_token
         end
