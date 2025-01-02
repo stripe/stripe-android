@@ -88,10 +88,10 @@ internal class LinkActivity : ComponentActivity() {
 
     private fun dismissWithResult(result: LinkActivityResult) {
         val bundle = bundleOf(
-            LinkActivityContract.EXTRA_RESULT to LinkActivityContract.Result(result)
+            LinkActivityContract.EXTRA_RESULT to result
         )
         this@LinkActivity.setResult(
-            Activity.RESULT_OK,
+            RESULT_COMPLETE,
             Intent().putExtras(bundle)
         )
         this@LinkActivity.finish()
@@ -104,6 +104,7 @@ internal class LinkActivity : ComponentActivity() {
 
     companion object {
         internal const val EXTRA_ARGS = "native_link_args"
+        internal const val RESULT_COMPLETE = 73563
 
         internal fun createIntent(
             context: Context,
