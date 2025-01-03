@@ -61,7 +61,7 @@ internal val SavedPaymentMethodsTopContentPadding = 12.dp
 internal fun SavedPaymentMethodTab(
     viewWidth: Dp,
     isSelected: Boolean,
-    editState: PaymentOptionEditState,
+    shouldShowModifyBadge: Boolean,
     isEnabled: Boolean,
     isClickable: Boolean = isEnabled,
     iconRes: Int,
@@ -78,7 +78,7 @@ internal fun SavedPaymentMethodTab(
         badge = {
             SavedPaymentMethodBadge(
                 isSelected = isSelected,
-                editState = editState,
+                shouldShowModifyBadge = shouldShowModifyBadge,
                 onModifyListener = onModifyListener,
                 onModifyAccessibilityDescription = onModifyAccessibilityDescription
             )
@@ -117,20 +117,17 @@ internal fun SavedPaymentMethodTab(
 @Composable
 private fun SavedPaymentMethodBadge(
     isSelected: Boolean,
-    editState: PaymentOptionEditState,
+    shouldShowModifyBadge: Boolean,
     onModifyListener: (() -> Unit)? = null,
     onModifyAccessibilityDescription: String = ""
 ) {
-    when (editState) {
-        PaymentOptionEditState.Modifiable -> ModifyBadge(
+    if (shouldShowModifyBadge) {
+        ModifyBadge(
             onModifyAccessibilityDescription = onModifyAccessibilityDescription,
             onPressed = { onModifyListener?.invoke() },
             modifier = Modifier.offset(x = (-14).dp, y = 1.dp),
         )
-        PaymentOptionEditState.None -> Unit
-    }
-
-    if (isSelected) {
+    } else if (isSelected) {
         SelectedBadge(
             modifier = Modifier.offset(x = (-18).dp, y = 58.dp),
         )
@@ -219,7 +216,7 @@ private fun SavedPaymentMethodTabUISelected() {
         SavedPaymentMethodTab(
             viewWidth = 100.dp,
             isSelected = true,
-            editState = PaymentOptionEditState.None,
+            shouldShowModifyBadge = false,
             isEnabled = true,
             iconRes = R.drawable.stripe_ic_paymentsheet_card_visa,
             labelText = "MasterCard",
@@ -236,7 +233,7 @@ private fun SavedPaymentMethodTabUIModifiable() {
         SavedPaymentMethodTab(
             viewWidth = 100.dp,
             isSelected = false,
-            editState = PaymentOptionEditState.Modifiable,
+            shouldShowModifyBadge = true,
             isEnabled = true,
             iconRes = R.drawable.stripe_ic_paymentsheet_card_visa,
             labelText = "MasterCard",

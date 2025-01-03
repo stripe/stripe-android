@@ -110,8 +110,6 @@ object CountryUtils {
         return if (currentLocale == cachedCountriesLocale) {
             cachedOrderedLocalizedCountries
         } else {
-            cachedCountriesLocale = currentLocale
-
             val localizedCountries = localizedCountries(currentLocale)
             cachedOrderedLocalizedCountries = listOfNotNull(
                 localizedCountries.firstOrNull {
@@ -122,6 +120,8 @@ object CountryUtils {
                     .filterNot { it.code == currentLocale.getCountryCode() }
                     .sortedBy { formatNameForSorting(it.name) }
             )
+
+            cachedCountriesLocale = currentLocale
 
             cachedOrderedLocalizedCountries
         }
