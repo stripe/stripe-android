@@ -67,8 +67,8 @@ internal class LinkActivityViewModel @Inject constructor(
     private fun navigate(screen: LinkScreen, clearStack: Boolean, launchSingleTop: Boolean) {
         val navController = navController ?: return
         navController.navigate(screen.route) {
+            this.launchSingleTop = launchSingleTop
             if (clearStack) {
-                this.launchSingleTop = launchSingleTop
                 popUpTo(navController.graph.id) {
                     inclusive = true
                 }
