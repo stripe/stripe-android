@@ -21,7 +21,9 @@ import com.stripe.android.core.Logger
 import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.link.ui.LinkAppBarState
 import com.stripe.android.model.ConsumerSession
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.testing.FakeLogger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -369,6 +371,57 @@ internal class LinkActivityViewModelTest {
             verify(navOptionsBuilder, times(0)).popUpTo(any<String>(), any<PopUpToBuilder.() -> Unit>())
         }
         verify(navOptionsBuilder, never()).popUpTo(any<String>(), any())
+    }
+
+    @Test
+    fun `initial app bar state is correct`() = runTest {
+        val vm = createViewModel()
+
+        val initialState = vm.linkAppBarState.value
+        assertThat(initialState).isEqualTo(
+            LinkAppBarState(
+                navigationIcon = R.drawable.stripe_link_close,
+                showHeader = true,
+                showOverflowMenu = false,
+                email = null
+            )
+        )
+    }
+
+    @Test
+    fun `app bar state menu and email should be visible for verified account`() = runTest {
+        val linkAccountManager = FakeLinkAccountManager()
+        val vm = createViewModel(linkAccountManager = linkAccountManager)
+        linkAccountManager.setLinkAccount(TestFactory.LINK_ACCOUNT)
+
+        advanceUntilIdle()
+
+        assertThat(vm.linkAppBarState.value).isEqualTo(
+            LinkAppBarState(
+                navigationIcon = R.drawable.stripe_link_close,
+                showHeader = true,
+                showOverflowMenu = true,
+                email = TestFactory.LINK_ACCOUNT.email
+            )
+        )
+    }
+
+    @Test
+    fun `app bar state menu and email should be hidden for unverified account`() = runTest {
+        val linkAccountManager = FakeLinkAccountManager()
+        val vm = createViewModel(linkAccountManager = linkAccountManager)
+        linkAccountManager.setLinkAccount(TestFactory.LINK_ACCOUNT_NEEDS_VERIFICATION)
+
+        advanceUntilIdle()
+
+        assertThat(vm.linkAppBarState.value).isEqualTo(
+            LinkAppBarState(
+                navigationIcon = R.drawable.stripe_link_close,
+                showHeader = true,
+                showOverflowMenu = false,
+                email = null
+            )
+        )
     }
 
     private fun createViewModel(

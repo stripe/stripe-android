@@ -104,6 +104,12 @@ internal object TestFactory {
 
     val LINK_ACCOUNT = LinkAccount(CONSUMER_SESSION)
 
+    val LINK_ACCOUNT_NEEDS_VERIFICATION = LinkAccount(
+        consumerSession = CONSUMER_SESSION.copy(
+            verificationSessions = listOf()
+        )
+    )
+
     val CONSUMER_PAYMENT_DETAILS: ConsumerPaymentDetails = ConsumerPaymentDetails(
         paymentDetails = listOf(
             CONSUMER_PAYMENT_DETAILS_CARD,

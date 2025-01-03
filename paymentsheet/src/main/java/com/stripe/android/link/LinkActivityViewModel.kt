@@ -57,9 +57,12 @@ internal class LinkActivityViewModel @Inject constructor(
     private fun listenForAppBarState() {
         viewModelScope.launch {
             linkAccountManager.linkAccount.collectLatest { account ->
-                val showOverflowMenu = account?.email != null && account.accountStatus == AccountStatus.Verified
+                val accountVerified = account?.accountStatus == AccountStatus.Verified
                 _linkAppBarState.update {
-                    it.copy(showOverflowMenu = showOverflowMenu)
+                    it.copy(
+                        showOverflowMenu = accountVerified,
+                        email = account?.email?.takeIf { accountVerified },
+                    )
                 }
             }
         }
