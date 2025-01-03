@@ -14,7 +14,6 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.ui.DefaultAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor
-import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.PaymentMethodRemovalDelayMillis
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.PaymentOptionsItemsMapper
@@ -39,13 +38,6 @@ internal class SavedPaymentMethodMutator(
     private val clearSelection: () -> Unit,
     private val customerStateHolder: CustomerStateHolder,
     private val onPaymentMethodRemoved: () -> Unit,
-    private val onModifyPaymentMethod: (
-        paymentMethod: PaymentMethod,
-        paymentMethodName: ResolvableString,
-        canRemove: Boolean,
-        performRemove: suspend () -> Throwable?,
-        updateExecutor: suspend (brand: CardBrand) -> Result<PaymentMethod>,
-    ) -> Unit,
     private val onUpdatePaymentMethod: (
         DisplayableSavedPaymentMethod,
         canRemove: Boolean,
@@ -177,20 +169,6 @@ internal class SavedPaymentMethodMutator(
         onPaymentMethodRemoved()
     }
 
-    fun modifyPaymentMethod(paymentMethod: PaymentMethod) {
-        onModifyPaymentMethod(
-            paymentMethod,
-            providePaymentMethodName(paymentMethod.type?.code),
-            customerStateHolder.canRemove.value,
-            {
-                removePaymentMethodInEditScreen(paymentMethod)
-            },
-            { cardBrand ->
-                modifyCardPaymentMethod(paymentMethod, cardBrand)
-            }
-        )
-    }
-
     fun updatePaymentMethod(displayableSavedPaymentMethod: DisplayableSavedPaymentMethod) {
         val paymentMethod = displayableSavedPaymentMethod.paymentMethod
         onUpdatePaymentMethod(
@@ -292,50 +270,6 @@ internal class SavedPaymentMethodMutator(
             }
         }
 
-        private fun onModifyPaymentMethod(
-            viewModel: BaseSheetViewModel,
-            paymentMethod: PaymentMethod,
-            paymentMethodName: ResolvableString,
-            canRemove: Boolean,
-            performRemove: suspend () -> Throwable?,
-            updateExecutor: suspend (brand: CardBrand) -> Result<PaymentMethod>,
-        ) {
-            val isLiveMode = requireNotNull(viewModel.paymentMethodMetadata.value).stripeIntent.isLiveMode
-            viewModel.navigationHandler.transitionTo(
-                PaymentSheetScreen.EditPaymentMethod(
-                    viewModel.editInteractorFactory.create(
-                        initialPaymentMethod = paymentMethod,
-                        eventHandler = { event ->
-                            when (event) {
-                                is EditPaymentMethodViewInteractor.Event.ShowBrands -> {
-                                    viewModel.eventReporter.onShowPaymentOptionBrands(
-                                        source = EventReporter.CardBrandChoiceEventSource.Edit,
-                                        selectedBrand = event.brand
-                                    )
-                                }
-                                is EditPaymentMethodViewInteractor.Event.HideBrands -> {
-                                    viewModel.eventReporter.onHidePaymentOptionBrands(
-                                        source = EventReporter.CardBrandChoiceEventSource.Edit,
-                                        selectedBrand = event.brand
-                                    )
-                                }
-                            }
-                        },
-                        displayName = paymentMethodName,
-                        removeExecutor = { method ->
-                            performRemove()
-                        },
-                        updateExecutor = { method, brand ->
-                            updateExecutor(brand)
-                        },
-                        canRemove = canRemove,
-                        isLiveMode = isLiveMode,
-                        cardBrandFilter = PaymentSheetCardBrandFilter(viewModel.config.cardBrandAcceptance),
-                    ),
-                )
-            )
-        }
-
         private fun onUpdatePaymentMethod(
             viewModel: BaseSheetViewModel,
             displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
@@ -392,16 +326,6 @@ internal class SavedPaymentMethodMutator(
                 clearSelection = { viewModel.updateSelection(null) },
                 onPaymentMethodRemoved = {
                     onPaymentMethodRemoved(viewModel)
-                },
-                onModifyPaymentMethod = { paymentMethod, paymentMethodName, canRemove, performRemove, updateExecutor ->
-                    onModifyPaymentMethod(
-                        viewModel = viewModel,
-                        paymentMethod = paymentMethod,
-                        paymentMethodName = paymentMethodName,
-                        canRemove = canRemove,
-                        performRemove = performRemove,
-                        updateExecutor = updateExecutor,
-                    )
                 },
                 onUpdatePaymentMethod = { displayableSavedPaymentMethod, canRemove, performRemove, updateExecutor ->
                     onUpdatePaymentMethod(
