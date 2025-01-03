@@ -45,6 +45,20 @@ internal class CustomerSheetScreenshotTest {
     )
 
     @get:Rule
+    val paparazziWithEveryAppearance = PaparazziRule(
+        SystemAppearance.entries,
+        listOf(FontSize.DefaultFont),
+        listOf(
+            PaymentSheetAppearance.DefaultAppearance,
+            PaymentSheetAppearance.CustomAppearance,
+            PaymentSheetAppearance.CrazyAppearance
+        ),
+        boxModifier = Modifier
+            .padding(0.dp)
+            .fillMaxWidth(),
+    )
+
+    @get:Rule
     val coroutineRule = CoroutineTestRule()
 
     private val usBankAccountFormArguments = USBankAccountFormArguments(
@@ -300,7 +314,7 @@ internal class CustomerSheetScreenshotTest {
 
     @Test
     fun testConfirmCloseDialog() {
-        paparazzi.snapshot {
+        paparazziWithEveryAppearance.snapshot {
             CustomerSheetScreen(
                 viewState = addPaymentMethodViewState.copy(
                     paymentMethodCode = PaymentMethod.Type.USBankAccount.code,
