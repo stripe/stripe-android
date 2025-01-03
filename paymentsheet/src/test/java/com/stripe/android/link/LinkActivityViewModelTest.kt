@@ -36,6 +36,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
@@ -313,6 +314,8 @@ internal class LinkActivityViewModelTest {
             capturedPopUpToLambda.invoke(popUpToBuilder)
 
             assertThat(popUpToBuilder.inclusive).isTrue()
+        } else {
+            verify(navOptionsBuilder, times(0)).popUpTo(any<String>(), any<PopUpToBuilder.() -> Unit>())
         }
     }
 
