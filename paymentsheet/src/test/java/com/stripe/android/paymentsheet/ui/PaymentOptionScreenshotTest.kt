@@ -25,7 +25,7 @@ class PaymentOptionScreenshotTest {
             SavedPaymentMethodTab(
                 viewWidth = 160.dp,
                 isSelected = false,
-                editState = PaymentOptionEditState.None,
+                shouldShowModifyBadge = false,
                 isEnabled = true,
                 iconRes = R.drawable.stripe_ic_paymentsheet_card_visa,
                 labelText = "••••4242",
@@ -41,7 +41,7 @@ class PaymentOptionScreenshotTest {
             SavedPaymentMethodTab(
                 viewWidth = 160.dp,
                 isSelected = false,
-                editState = PaymentOptionEditState.None,
+                shouldShowModifyBadge = false,
                 isEnabled = false,
                 iconRes = R.drawable.stripe_ic_paymentsheet_card_visa,
                 labelText = "••••4242",
@@ -57,7 +57,7 @@ class PaymentOptionScreenshotTest {
             SavedPaymentMethodTab(
                 viewWidth = 160.dp,
                 isSelected = true,
-                editState = PaymentOptionEditState.None,
+                shouldShowModifyBadge = false,
                 isEnabled = true,
                 iconRes = R.drawable.stripe_ic_paymentsheet_card_visa,
                 labelText = "••••4242",
@@ -73,7 +73,7 @@ class PaymentOptionScreenshotTest {
             SavedPaymentMethodTab(
                 viewWidth = 160.dp,
                 isSelected = true,
-                editState = PaymentOptionEditState.None,
+                shouldShowModifyBadge = false,
                 isEnabled = false,
                 iconRes = R.drawable.stripe_ic_paymentsheet_card_visa,
                 labelText = "••••4242",
@@ -89,7 +89,7 @@ class PaymentOptionScreenshotTest {
             SavedPaymentMethodTab(
                 viewWidth = 160.dp,
                 isSelected = false,
-                editState = PaymentOptionEditState.Modifiable,
+                shouldShowModifyBadge = true,
                 isEnabled = true,
                 iconRes = R.drawable.stripe_ic_paymentsheet_card_visa,
                 labelText = "••••4242",
