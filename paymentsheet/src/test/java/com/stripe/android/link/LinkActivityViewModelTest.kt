@@ -235,7 +235,7 @@ internal class LinkActivityViewModelTest {
     }
 
     @Test
-    fun `onCreate should navigate to verification screen when account status is SignedOut`() = runTest {
+    fun `onCreate should navigate to signUp screen when account status is SignedOut`() = runTest {
         val linkAccountManager = FakeLinkAccountManager()
         val navController = navController()
 
@@ -256,7 +256,7 @@ internal class LinkActivityViewModelTest {
     }
 
     @Test
-    fun `onCreate should navigate to verification screen when account status is Error`() = runTest {
+    fun `onCreate should navigate to signUp screen when account status is Error`() = runTest {
         val linkAccountManager = FakeLinkAccountManager()
         val navController = navController()
 
