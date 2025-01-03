@@ -26,7 +26,6 @@ import com.stripe.android.customersheet.data.CustomerSheetIntentDataSource
 import com.stripe.android.customersheet.data.CustomerSheetPaymentMethodDataSource
 import com.stripe.android.customersheet.data.CustomerSheetSavedSelectionDataSource
 import com.stripe.android.customersheet.data.failureOrNull
-import com.stripe.android.customersheet.data.fold
 import com.stripe.android.customersheet.data.mapCatching
 import com.stripe.android.customersheet.data.onFailure
 import com.stripe.android.customersheet.data.onSuccess
@@ -264,7 +263,6 @@ internal class CustomerSheetViewModel(
             is CustomerSheetViewAction.OnDisallowedCardBrandEntered -> onDisallowedCardBrandEntered(viewAction.brand)
             is CustomerSheetViewAction.OnBackPressed -> onBackPressed()
             is CustomerSheetViewAction.OnEditPressed -> onEditPressed()
-            is CustomerSheetViewAction.OnItemRemoved -> onItemRemoved(viewAction.paymentMethod)
             is CustomerSheetViewAction.OnModifyItem -> onModifyItem(viewAction.paymentMethod)
             is CustomerSheetViewAction.OnItemSelected -> onItemSelected(viewAction.selection)
             is CustomerSheetViewAction.OnPrimaryButtonPressed -> onPrimaryButtonPressed()
@@ -487,17 +485,6 @@ internal class CustomerSheetViewModel(
         }
     }
 
-    private fun onItemRemoved(paymentMethod: PaymentMethod) {
-        viewModelScope.launch(workContext) {
-            val result = removePaymentMethod(paymentMethod)
-
-            result.fold(
-                onSuccess = ::removePaymentMethodFromState,
-                onFailure = { _, displayMessage -> handleFailureToRemovePaymentMethod(displayMessage) }
-            )
-        }
-    }
-
     private suspend fun removePaymentMethod(paymentMethod: PaymentMethod): CustomerSheetDataResult<PaymentMethod> {
         return awaitPaymentMethodDataSource().detachPaymentMethod(
             paymentMethodId = paymentMethod.id!!,
@@ -543,17 +530,6 @@ internal class CustomerSheetViewModel(
         viewModelScope.launch(workContext) {
             delay(PaymentMethodRemovalDelayMillis)
             removePaymentMethodFromState(paymentMethod)
-        }
-    }
-
-    private fun handleFailureToRemovePaymentMethod(
-        displayMessage: String?,
-    ) {
-        setSelectionConfirmationState { state ->
-            state.copy(
-                isConfirming = false,
-                error = displayMessage,
-            )
         }
     }
 
