@@ -20,7 +20,7 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
-class LinkPaymentLauncherTest {
+internal class LinkPaymentLauncherTest {
 
     @Test
     fun `register with ActivityResultRegistry should set up correct launcher`() {
@@ -128,7 +128,8 @@ class LinkPaymentLauncherTest {
             val activityResultRegistry: ActivityResultRegistry = mock()
             val linkAnalyticsHelper = TrackingLinkAnalyticsHelper()
 
-            val linkPaymentLauncher = createLinkPaymentLauncher(linkStore = linkStore, linkAnalyticsHelper = linkAnalyticsHelper)
+            val linkPaymentLauncher =
+                createLinkPaymentLauncher(linkStore = linkStore, linkAnalyticsHelper = linkAnalyticsHelper)
 
             whenever(
                 activityResultRegistry.register(
@@ -160,7 +161,8 @@ class LinkPaymentLauncherTest {
             val activityResultCaller: ActivityResultCaller = mock()
             val linkAnalyticsHelper = TrackingLinkAnalyticsHelper()
 
-            val linkPaymentLauncher = createLinkPaymentLauncher(linkStore = linkStore, linkAnalyticsHelper = linkAnalyticsHelper)
+            val linkPaymentLauncher =
+                createLinkPaymentLauncher(linkStore = linkStore, linkAnalyticsHelper = linkAnalyticsHelper)
 
             whenever(
                 activityResultCaller.registerForActivityResult(
@@ -181,7 +183,8 @@ class LinkPaymentLauncherTest {
             verify(linkStore).markLinkAsUsed()
             assertThat(callbackParam).isInstanceOf(LinkActivityResult.PaymentMethodObtained::class.java)
             assertThat(markAsUsedCalls.cancelAndConsumeRemainingEvents().size).isEqualTo(1)
-            assertThat(linkAnalyticsHelper.lastResult).isInstanceOf(LinkActivityResult.PaymentMethodObtained::class.java)
+            assertThat(linkAnalyticsHelper.lastResult)
+                .isInstanceOf(LinkActivityResult.PaymentMethodObtained::class.java)
         }
     }
 
@@ -191,7 +194,8 @@ class LinkPaymentLauncherTest {
             val activityResultRegistry: ActivityResultRegistry = mock()
             val linkAnalyticsHelper = TrackingLinkAnalyticsHelper()
 
-            val linkPaymentLauncher = createLinkPaymentLauncher(linkStore = linkStore, linkAnalyticsHelper = linkAnalyticsHelper)
+            val linkPaymentLauncher =
+                createLinkPaymentLauncher(linkStore = linkStore, linkAnalyticsHelper = linkAnalyticsHelper)
 
             whenever(
                 activityResultRegistry.register(
@@ -223,7 +227,8 @@ class LinkPaymentLauncherTest {
             val activityResultCaller: ActivityResultCaller = mock()
             val linkAnalyticsHelper = TrackingLinkAnalyticsHelper()
 
-            val linkPaymentLauncher = createLinkPaymentLauncher(linkStore = linkStore, linkAnalyticsHelper = linkAnalyticsHelper)
+            val linkPaymentLauncher =
+                createLinkPaymentLauncher(linkStore = linkStore, linkAnalyticsHelper = linkAnalyticsHelper)
 
             whenever(
                 activityResultCaller.registerForActivityResult(

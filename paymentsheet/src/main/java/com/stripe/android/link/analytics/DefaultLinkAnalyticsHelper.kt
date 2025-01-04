@@ -5,7 +5,7 @@ import javax.inject.Inject
 
 internal class DefaultLinkAnalyticsHelper @Inject internal constructor(
     private val linkEventsReporter: LinkEventsReporter,
-): LinkAnalyticsHelper {
+) : LinkAnalyticsHelper {
     override fun onLinkLaunched() {
         linkEventsReporter.onPopupShow()
     }

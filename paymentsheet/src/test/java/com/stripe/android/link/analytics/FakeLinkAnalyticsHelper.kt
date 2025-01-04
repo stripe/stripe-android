@@ -14,5 +14,4 @@ internal open class FakeLinkAnalyticsHelper : LinkAnalyticsHelper {
     override fun onLinkPopupSkipped() {
         TODO("Not yet implemented")
     }
-
 }
