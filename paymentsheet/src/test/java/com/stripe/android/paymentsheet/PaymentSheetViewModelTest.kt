@@ -969,7 +969,7 @@ internal class PaymentSheetViewModelTest {
                 assertThat(presentCalls.awaitItem()).isNotNull()
 
                 registerCall.callback(
-                    LinkActivityResult.Completed(
+                    LinkActivityResult.PaymentMethodObtained(
                         paymentMethod = CARD_WITH_NETWORKS_PAYMENT_METHOD
                     )
                 )

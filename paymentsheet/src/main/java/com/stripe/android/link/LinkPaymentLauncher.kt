@@ -3,7 +3,7 @@ package com.stripe.android.link
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistry
-import com.stripe.android.link.LinkActivityResult.Completed
+import com.stripe.android.link.LinkActivityResult.PaymentMethodObtained
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.injection.LinkAnalyticsComponent
 import javax.inject.Inject
@@ -32,8 +32,11 @@ internal class LinkPaymentLauncher @Inject internal constructor(
             linkActivityContract,
         ) { linkActivityResult ->
             analyticsHelper.onLinkResult(linkActivityResult)
-            if (linkActivityResult is Completed) {
-                linkStore.markLinkAsUsed()
+            when (linkActivityResult) {
+                is PaymentMethodObtained, LinkActivityResult.Completed -> {
+                    linkStore.markLinkAsUsed()
+                }
+                is LinkActivityResult.Canceled, is LinkActivityResult.Failed -> Unit
             }
             callback(linkActivityResult)
         }
@@ -47,8 +50,11 @@ internal class LinkPaymentLauncher @Inject internal constructor(
             linkActivityContract
         ) { linkActivityResult ->
             analyticsHelper.onLinkResult(linkActivityResult)
-            if (linkActivityResult is Completed) {
-                linkStore.markLinkAsUsed()
+            when (linkActivityResult) {
+                is PaymentMethodObtained, LinkActivityResult.Completed -> {
+                    linkStore.markLinkAsUsed()
+                }
+                is LinkActivityResult.Canceled, is LinkActivityResult.Failed -> Unit
             }
             callback(linkActivityResult)
         }

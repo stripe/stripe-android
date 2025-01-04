@@ -431,7 +431,7 @@ internal class DefaultFlowController @Inject internal constructor(
     fun onLinkActivityResult(result: LinkActivityResult): Unit = when (result) {
         is LinkActivityResult.Canceled -> onPaymentResult(PaymentResult.Canceled)
         is LinkActivityResult.Failed -> onPaymentResult(PaymentResult.Failed(result.error))
-        is LinkActivityResult.Completed -> {
+        is LinkActivityResult.PaymentMethodObtained -> {
             runCatching {
                 requireNotNull(viewModel.state)
             }.fold(
@@ -457,6 +457,13 @@ internal class DefaultFlowController @Inject internal constructor(
                     )
                 }
             )
+        }
+        LinkActivityResult.Completed -> {
+            eventReporter.onPaymentSuccess(
+                paymentSelection = PaymentSelection.Link,
+                deferredIntentConfirmationType = null
+            )
+            onPaymentResult(PaymentResult.Completed)
         }
     }
 

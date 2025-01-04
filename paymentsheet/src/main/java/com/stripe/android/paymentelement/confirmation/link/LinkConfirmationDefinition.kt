@@ -67,7 +67,7 @@ internal class LinkConfirmationDefinition(
         }
 
         return when (result) {
-            is LinkActivityResult.Completed -> ConfirmationDefinition.Result.NextStep(
+            is LinkActivityResult.PaymentMethodObtained -> ConfirmationDefinition.Result.NextStep(
                 confirmationOption = PaymentMethodConfirmationOption.Saved(
                     paymentMethod = result.paymentMethod,
                     optionsParams = null,
@@ -82,6 +82,12 @@ internal class LinkConfirmationDefinition(
             is LinkActivityResult.Canceled -> ConfirmationDefinition.Result.Canceled(
                 action = ConfirmationHandler.Result.Canceled.Action.InformCancellation,
             )
+            LinkActivityResult.Completed -> {
+                ConfirmationDefinition.Result.Succeeded(
+                    intent = confirmationParameters.intent,
+                    deferredIntentConfirmationType = deferredIntentConfirmationType
+                )
+            }
         }
     }
 }

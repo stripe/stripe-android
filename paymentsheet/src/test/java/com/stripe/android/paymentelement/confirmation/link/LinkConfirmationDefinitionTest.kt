@@ -113,7 +113,7 @@ internal class LinkConfirmationDefinitionTest {
     }
 
     @Test
-    fun `'toResult' should return 'NextStep' when result is 'Complete' & also mark Link as used`() = test {
+    fun `'toResult' should return 'NextStep' when result is 'PaymentMethodObtained' & also mark Link as used`() = test {
         val definition = createLinkConfirmationDefinition(linkStore = storeScenario.linkStore)
 
         val paymentMethod = PaymentMethodFactory.card()
@@ -121,7 +121,7 @@ internal class LinkConfirmationDefinitionTest {
         val result = definition.toResult(
             confirmationOption = LINK_CONFIRMATION_OPTION,
             confirmationParameters = CONFIRMATION_PARAMETERS,
-            result = LinkActivityResult.Completed(paymentMethod),
+            result = LinkActivityResult.PaymentMethodObtained(paymentMethod),
             deferredIntentConfirmationType = null,
         )
 
@@ -137,6 +137,26 @@ internal class LinkConfirmationDefinitionTest {
         assertThat(savedOption.paymentMethod).isEqualTo(paymentMethod)
         assertThat(savedOption.optionsParams).isNull()
 
+        assertThat(storeScenario.markAsUsedCalls.awaitItem()).isNotNull()
+    }
+
+    @Test
+    fun `'toResult' should return 'Succeeded' when result is 'Completed' & also mark Link as used`() = test {
+        val definition = createLinkConfirmationDefinition(linkStore = storeScenario.linkStore)
+
+        val result = definition.toResult(
+            confirmationOption = LINK_CONFIRMATION_OPTION,
+            confirmationParameters = CONFIRMATION_PARAMETERS,
+            result = LinkActivityResult.Completed,
+            deferredIntentConfirmationType = null,
+        )
+
+        assertThat(result).isEqualTo(
+            ConfirmationDefinition.Result.Succeeded(
+                intent = CONFIRMATION_PARAMETERS.intent,
+                deferredIntentConfirmationType = null
+            )
+        )
         assertThat(storeScenario.markAsUsedCalls.awaitItem()).isNotNull()
     }
 
