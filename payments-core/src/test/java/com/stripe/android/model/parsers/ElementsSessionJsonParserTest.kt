@@ -27,6 +27,12 @@ class ElementsSessionJsonParserTest {
         isEnabled = false,
     )
 
+    @get:Rule
+    val defaultPaymentMethodFeatureFlagRule = FeatureFlagTestRule(
+        featureFlag = FeatureFlags.defaultPaymentMethod,
+        isEnabled = true,
+    )
+
     @Test
     fun parsePaymentIntent_shouldCreateObjectWithOrderedPaymentMethods() {
         val elementsSession = ElementsSessionJsonParser(
@@ -515,6 +521,55 @@ class ElementsSessionJsonParserTest {
         assertThat(session?.externalPaymentMethodData).contains(venmo)
     }
 
+    private val elementsSessionExpectedCustomerSession = ElementsSession.Customer.Session(
+        id = "cuss_123",
+        apiKey = "ek_test_1234",
+        apiKeyExpiry = 1713890664,
+        customerId = "cus_1",
+        liveMode = false,
+        components = ElementsSession.Customer.Components(
+            mobilePaymentElement = ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
+                isPaymentMethodSaveEnabled = false,
+                isPaymentMethodRemoveEnabled = true,
+                canRemoveLastPaymentMethod = true,
+                allowRedisplayOverride = PaymentMethod.AllowRedisplay.LIMITED,
+            ),
+            customerSheet = ElementsSession.Customer.Components.CustomerSheet.Enabled(
+                isPaymentMethodRemoveEnabled = true,
+                canRemoveLastPaymentMethod = true,
+            ),
+        )
+    )
+
+    private val elementsSessionExpectedPaymentMethods = listOf(
+        PaymentMethod(
+            id = "pm_123",
+            customerId = "cus_1",
+            type = PaymentMethod.Type.Card,
+            code = "card",
+            created = 1550757934255,
+            liveMode = false,
+            billingDetails = null,
+            card = PaymentMethod.Card(
+                brand = CardBrand.Visa,
+                last4 = "4242",
+                expiryMonth = 8,
+                expiryYear = 2032,
+                country = "US",
+                funding = "credit",
+                fingerprint = "fingerprint123",
+                checks = PaymentMethod.Card.Checks(
+                    addressLine1Check = "unchecked",
+                    cvcCheck = "unchecked",
+                    addressPostalCodeCheck = null,
+                ),
+                threeDSecureUsage = PaymentMethod.Card.ThreeDSecureUsage(
+                    isSupported = true
+                )
+            )
+        )
+    )
+
     @Test
     fun `ElementsSession has expected customer session information in the response`() {
         val parser = ElementsSessionJsonParser(
@@ -531,54 +586,34 @@ class ElementsSessionJsonParserTest {
 
         assertThat(elementsSession?.customer).isEqualTo(
             ElementsSession.Customer(
-                session = ElementsSession.Customer.Session(
-                    id = "cuss_123",
-                    apiKey = "ek_test_1234",
-                    apiKeyExpiry = 1713890664,
-                    customerId = "cus_1",
-                    liveMode = false,
-                    components = ElementsSession.Customer.Components(
-                        mobilePaymentElement = ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
-                            isPaymentMethodSaveEnabled = false,
-                            isPaymentMethodRemoveEnabled = true,
-                            canRemoveLastPaymentMethod = true,
-                            allowRedisplayOverride = PaymentMethod.AllowRedisplay.LIMITED,
-                        ),
-                        customerSheet = ElementsSession.Customer.Components.CustomerSheet.Enabled(
-                            isPaymentMethodRemoveEnabled = true,
-                            canRemoveLastPaymentMethod = true,
-                        ),
-                    )
-                ),
+                session = elementsSessionExpectedCustomerSession,
                 defaultPaymentMethod = "pm_123",
-                paymentMethods = listOf(
-                    PaymentMethod(
-                        id = "pm_123",
-                        customerId = "cus_1",
-                        type = PaymentMethod.Type.Card,
-                        code = "card",
-                        created = 1550757934255,
-                        liveMode = false,
-                        billingDetails = null,
-                        card = PaymentMethod.Card(
-                            brand = CardBrand.Visa,
-                            last4 = "4242",
-                            expiryMonth = 8,
-                            expiryYear = 2032,
-                            country = "US",
-                            funding = "credit",
-                            fingerprint = "fingerprint123",
-                            checks = PaymentMethod.Card.Checks(
-                                addressLine1Check = "unchecked",
-                                cvcCheck = "unchecked",
-                                addressPostalCodeCheck = null,
-                            ),
-                            threeDSecureUsage = PaymentMethod.Card.ThreeDSecureUsage(
-                                isSupported = true
-                            )
-                        )
-                    )
-                )
+                paymentMethods = elementsSessionExpectedPaymentMethods
+            )
+        )
+    }
+
+    @Test
+    fun `ElementsSession has expected customer session information in the response when default disabled`() {
+        defaultPaymentMethodFeatureFlagRule.setEnabled(false)
+
+        val parser = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret",
+                customerSessionClientSecret = "customer_session_client_secret",
+                externalPaymentMethods = emptyList(),
+            ),
+            isLiveMode = false,
+        )
+
+        val intent = createPaymentIntentWithCustomerSession()
+        val elementsSession = parser.parse(intent)
+
+        assertThat(elementsSession?.customer).isEqualTo(
+            ElementsSession.Customer(
+                session = elementsSessionExpectedCustomerSession,
+                defaultPaymentMethod = null,
+                paymentMethods = elementsSessionExpectedPaymentMethods
             )
         )
     }
@@ -694,34 +729,7 @@ class ElementsSessionJsonParserTest {
                     )
                 ),
                 defaultPaymentMethod = "pm_123",
-                paymentMethods = listOf(
-                    PaymentMethod(
-                        id = "pm_123",
-                        customerId = "cus_1",
-                        type = PaymentMethod.Type.Card,
-                        code = "card",
-                        created = 1550757934255,
-                        liveMode = false,
-                        billingDetails = null,
-                        card = PaymentMethod.Card(
-                            brand = CardBrand.Visa,
-                            last4 = "4242",
-                            expiryMonth = 8,
-                            expiryYear = 2032,
-                            country = "US",
-                            funding = "credit",
-                            fingerprint = "fingerprint123",
-                            checks = PaymentMethod.Card.Checks(
-                                addressLine1Check = "unchecked",
-                                cvcCheck = "unchecked",
-                                addressPostalCodeCheck = null,
-                            ),
-                            threeDSecureUsage = PaymentMethod.Card.ThreeDSecureUsage(
-                                isSupported = true
-                            )
-                        )
-                    )
-                )
+                paymentMethods = elementsSessionExpectedPaymentMethods
             )
         )
     }
