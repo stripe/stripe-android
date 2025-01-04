@@ -45,8 +45,8 @@ class PaymentSheetAnalyticsListenerTest {
     }
 
     @Test
-    fun `reportPaymentSheetHidden reports for Edit`() = runScenario {
-        analyticsListener.reportPaymentSheetHidden(mock<PaymentSheetScreen.EditPaymentMethod>())
+    fun `reportPaymentSheetHidden reports for UpdatePaymentMethod`() = runScenario {
+        analyticsListener.reportPaymentSheetHidden(mock<PaymentSheetScreen.UpdatePaymentMethod>())
 
         verify(eventReporter).onHideEditablePaymentOption()
     }
@@ -59,9 +59,9 @@ class PaymentSheetAnalyticsListenerTest {
     }
 
     @Test
-    fun `onShowEditablePaymentOption is called when screen updates to EditPaymentMethod`() = runScenario {
+    fun `onShowEditablePaymentOption is called when screen updates to UpdatePaymentMethod`() = runScenario {
         verifyNoInteractions(eventReporter)
-        currentScreen.value = mock<PaymentSheetScreen.EditPaymentMethod>()
+        currentScreen.value = mock<PaymentSheetScreen.UpdatePaymentMethod>()
         testScheduler.advanceUntilIdle()
         verify(eventReporter).onShowEditablePaymentOption()
     }

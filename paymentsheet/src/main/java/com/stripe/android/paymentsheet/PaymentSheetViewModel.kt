@@ -50,7 +50,6 @@ import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.DefaultAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.DefaultSelectSavedPaymentMethodsInteractor
-import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.utils.canSave
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeInitialScreenFactory
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -85,7 +84,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     linkHandler: LinkHandler,
     confirmationHandlerFactory: ConfirmationHandler.Factory,
     cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
-    editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory,
     private val errorReporter: ErrorReporter,
     internal val cvcRecollectionHandler: CvcRecollectionHandler,
     private val cvcRecollectionInteractorFactory: CvcRecollectionInteractor.Factory
@@ -97,7 +95,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     savedStateHandle = savedStateHandle,
     linkHandler = linkHandler,
     cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
-    editInteractorFactory = editInteractorFactory,
     isCompleteFlow = true,
 ) {
 

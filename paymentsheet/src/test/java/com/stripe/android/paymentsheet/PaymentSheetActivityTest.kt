@@ -1176,7 +1176,6 @@ internal class PaymentSheetActivityTest {
                     errorReporter = FakeErrorReporter(),
                 ),
                 cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
-                editInteractorFactory = FakeEditPaymentMethodInteractor.Factory(),
                 errorReporter = FakeErrorReporter(),
                 cvcRecollectionHandler = cvcRecollectionHandler,
                 cvcRecollectionInteractorFactory = object : CvcRecollectionInteractor.Factory {

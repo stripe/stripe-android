@@ -5,6 +5,7 @@ import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.SavedPaymentMethod
@@ -64,6 +65,12 @@ internal interface UpdatePaymentMethodInteractor {
         val expiredErrorMessage: ResolvableString = com.stripe.android.R.string.stripe_expired_card.resolvableString
     }
 }
+
+internal typealias PaymentMethodRemoveOperation = suspend (paymentMethod: PaymentMethod) -> Throwable?
+internal typealias PaymentMethodUpdateOperation = suspend (
+    paymentMethod: PaymentMethod,
+    brand: CardBrand
+) -> Result<PaymentMethod>
 
 internal class DefaultUpdatePaymentMethodInteractor(
     override val isLiveMode: Boolean,
@@ -178,3 +185,5 @@ internal class DefaultUpdatePaymentMethodInteractor(
         }
     }
 }
+
+internal const val PaymentMethodRemovalDelayMillis = 600L

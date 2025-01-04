@@ -51,6 +51,7 @@ import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_SELECTION
 import com.stripe.android.model.PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD
 import com.stripe.android.model.PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD
+import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.model.SetupIntentFixtures
@@ -104,9 +105,8 @@ import com.stripe.android.paymentsheet.state.PaymentSheetLoadingException
 import com.stripe.android.paymentsheet.state.PaymentSheetLoadingException.PaymentIntentInTerminalState
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.ui.CardBrandChoice
-import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewAction
 import com.stripe.android.paymentsheet.ui.PrimaryButton
-import com.stripe.android.paymentsheet.utils.FakeEditPaymentMethodInteractorFactory
+import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_PROCESSING
@@ -185,7 +185,6 @@ internal class PaymentSheetViewModelTest {
         on { create(any(), any(), any(), any(), any(), any()) } doReturn googlePayLauncher
     }
     private val fakeIntentConfirmationInterceptor = FakeIntentConfirmationInterceptor()
-    private val fakeEditPaymentMethodInteractorFactory = FakeEditPaymentMethodInteractorFactory(testDispatcher)
     private val cvcRecollectionHandler = FakeCvcRecollectionHandler()
 
     private val linkConfigurationCoordinator = FakeLinkConfigurationCoordinator()
@@ -224,17 +223,19 @@ internal class PaymentSheetViewModelTest {
         viewModel.navigationHandler.currentScreen.test {
             awaitItem()
 
-            viewModel.savedPaymentMethodMutator.modifyPaymentMethod(CARD_WITH_NETWORKS_PAYMENT_METHOD)
+            viewModel.savedPaymentMethodMutator.updatePaymentMethod(
+                CARD_WITH_NETWORKS_PAYMENT_METHOD.toDisplayableSavedPaymentMethod()
+            )
 
             val currentScreen = awaitItem()
 
-            assertThat(currentScreen).isInstanceOf<PaymentSheetScreen.EditPaymentMethod>()
+            assertThat(currentScreen).isInstanceOf<PaymentSheetScreen.UpdatePaymentMethod>()
 
-            if (currentScreen is PaymentSheetScreen.EditPaymentMethod) {
+            if (currentScreen is PaymentSheetScreen.UpdatePaymentMethod) {
                 val interactor = currentScreen.interactor
 
                 interactor.handleViewAction(
-                    EditPaymentMethodViewAction.OnBrandChoiceOptionsShown
+                    UpdatePaymentMethodInteractor.ViewAction.BrandChoiceOptionsShown
                 )
 
                 verify(eventReporter).onShowPaymentOptionBrands(
@@ -256,22 +257,24 @@ internal class PaymentSheetViewModelTest {
         viewModel.navigationHandler.currentScreen.test {
             awaitItem()
 
-            viewModel.savedPaymentMethodMutator.modifyPaymentMethod(CARD_WITH_NETWORKS_PAYMENT_METHOD)
+            viewModel.savedPaymentMethodMutator.updatePaymentMethod(
+                CARD_WITH_NETWORKS_PAYMENT_METHOD.toDisplayableSavedPaymentMethod()
+            )
 
             val currentScreen = awaitItem()
 
-            assertThat(currentScreen).isInstanceOf<PaymentSheetScreen.EditPaymentMethod>()
+            assertThat(currentScreen).isInstanceOf<PaymentSheetScreen.UpdatePaymentMethod>()
 
-            if (currentScreen is PaymentSheetScreen.EditPaymentMethod) {
+            if (currentScreen is PaymentSheetScreen.UpdatePaymentMethod) {
                 val interactor = currentScreen.interactor
 
                 interactor.handleViewAction(
-                    EditPaymentMethodViewAction.OnBrandChoiceOptionsDismissed
+                    UpdatePaymentMethodInteractor.ViewAction.BrandChoiceOptionsDismissed
                 )
 
                 verify(eventReporter).onHidePaymentOptionBrands(
                     source = EventReporter.CardBrandChoiceEventSource.Edit,
-                    selectedBrand = null
+                    selectedBrand = CardBrand.CartesBancaires,
                 )
             }
         }
@@ -288,17 +291,19 @@ internal class PaymentSheetViewModelTest {
         viewModel.navigationHandler.currentScreen.test {
             awaitItem()
 
-            viewModel.savedPaymentMethodMutator.modifyPaymentMethod(CARD_WITH_NETWORKS_PAYMENT_METHOD)
+            viewModel.savedPaymentMethodMutator.updatePaymentMethod(
+                CARD_WITH_NETWORKS_PAYMENT_METHOD.toDisplayableSavedPaymentMethod()
+            )
 
             val currentScreen = awaitItem()
 
-            assertThat(currentScreen).isInstanceOf<PaymentSheetScreen.EditPaymentMethod>()
+            assertThat(currentScreen).isInstanceOf<PaymentSheetScreen.UpdatePaymentMethod>()
 
-            if (currentScreen is PaymentSheetScreen.EditPaymentMethod) {
+            if (currentScreen is PaymentSheetScreen.UpdatePaymentMethod) {
                 val interactor = currentScreen.interactor
 
                 interactor.handleViewAction(
-                    EditPaymentMethodViewAction.OnBrandChoiceChanged(
+                    UpdatePaymentMethodInteractor.ViewAction.BrandChoiceChanged(
                         CardBrandChoice(CardBrand.Visa)
                     )
                 )
@@ -350,22 +355,24 @@ internal class PaymentSheetViewModelTest {
         viewModel.navigationHandler.currentScreen.test {
             awaitItem()
 
-            viewModel.savedPaymentMethodMutator.modifyPaymentMethod(paymentMethods.first())
+            viewModel.savedPaymentMethodMutator.updatePaymentMethod(
+                paymentMethods.first().toDisplayableSavedPaymentMethod()
+            )
 
             val currentScreen = awaitItem()
 
-            assertThat(currentScreen).isInstanceOf<PaymentSheetScreen.EditPaymentMethod>()
+            assertThat(currentScreen).isInstanceOf<PaymentSheetScreen.UpdatePaymentMethod>()
 
-            if (currentScreen is PaymentSheetScreen.EditPaymentMethod) {
+            if (currentScreen is PaymentSheetScreen.UpdatePaymentMethod) {
                 val interactor = currentScreen.interactor
 
                 interactor.handleViewAction(
-                    EditPaymentMethodViewAction.OnBrandChoiceChanged(
+                    UpdatePaymentMethodInteractor.ViewAction.BrandChoiceChanged(
                         CardBrandChoice(CardBrand.Visa)
                     )
                 )
 
-                interactor.handleViewAction(EditPaymentMethodViewAction.OnUpdatePressed)
+                interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.SaveButtonPressed)
             }
 
             assertThat(awaitItem()).isInstanceOf<SelectSavedPaymentMethods>()
@@ -389,6 +396,7 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
+    @Suppress("LongMethod")
     fun `modifyPaymentMethod updates payment methods and sends event on successful update`() = runTest {
         val paymentMethods = PaymentMethodFixtures.createCards(5)
 
@@ -417,22 +425,24 @@ internal class PaymentSheetViewModelTest {
         viewModel.navigationHandler.currentScreen.test {
             awaitItem()
 
-            viewModel.savedPaymentMethodMutator.modifyPaymentMethod(firstPaymentMethod)
+            viewModel.savedPaymentMethodMutator.updatePaymentMethod(
+                firstPaymentMethod.toDisplayableSavedPaymentMethod()
+            )
 
             val currentScreen = awaitItem()
 
-            assertThat(currentScreen).isInstanceOf<PaymentSheetScreen.EditPaymentMethod>()
+            assertThat(currentScreen).isInstanceOf<PaymentSheetScreen.UpdatePaymentMethod>()
 
-            if (currentScreen is PaymentSheetScreen.EditPaymentMethod) {
+            if (currentScreen is PaymentSheetScreen.UpdatePaymentMethod) {
                 val interactor = currentScreen.interactor
 
                 interactor.handleViewAction(
-                    EditPaymentMethodViewAction.OnBrandChoiceChanged(
+                    UpdatePaymentMethodInteractor.ViewAction.BrandChoiceChanged(
                         CardBrandChoice(CardBrand.Visa)
                     )
                 )
 
-                interactor.handleViewAction(EditPaymentMethodViewAction.OnUpdatePressed)
+                interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.SaveButtonPressed)
             }
 
             assertThat(awaitItem()).isInstanceOf<SelectSavedPaymentMethods>()
@@ -487,22 +497,24 @@ internal class PaymentSheetViewModelTest {
         viewModel.navigationHandler.currentScreen.test {
             awaitItem()
 
-            viewModel.savedPaymentMethodMutator.modifyPaymentMethod(firstPaymentMethod)
+            viewModel.savedPaymentMethodMutator.updatePaymentMethod(
+                firstPaymentMethod.toDisplayableSavedPaymentMethod()
+            )
 
             val currentScreen = awaitItem()
 
-            assertThat(currentScreen).isInstanceOf<PaymentSheetScreen.EditPaymentMethod>()
+            assertThat(currentScreen).isInstanceOf<PaymentSheetScreen.UpdatePaymentMethod>()
 
-            if (currentScreen is PaymentSheetScreen.EditPaymentMethod) {
+            if (currentScreen is PaymentSheetScreen.UpdatePaymentMethod) {
                 val interactor = currentScreen.interactor
 
                 interactor.handleViewAction(
-                    EditPaymentMethodViewAction.OnBrandChoiceChanged(
+                    UpdatePaymentMethodInteractor.ViewAction.BrandChoiceChanged(
                         CardBrandChoice(CardBrand.Visa)
                     )
                 )
 
-                interactor.handleViewAction(EditPaymentMethodViewAction.OnUpdatePressed)
+                interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.SaveButtonPressed)
             }
         }
 
@@ -1675,7 +1687,9 @@ internal class PaymentSheetViewModelTest {
             customer = EMPTY_CUSTOMER_STATE.copy(paymentMethods = cards),
         )
 
-        viewModel.savedPaymentMethodMutator.modifyPaymentMethod(CARD_WITH_NETWORKS_PAYMENT_METHOD)
+        viewModel.savedPaymentMethodMutator.updatePaymentMethod(
+            CARD_WITH_NETWORKS_PAYMENT_METHOD.toDisplayableSavedPaymentMethod()
+        )
 
         verify(eventReporter).onShowEditablePaymentOption()
     }
@@ -1689,7 +1703,9 @@ internal class PaymentSheetViewModelTest {
             customer = EMPTY_CUSTOMER_STATE.copy(paymentMethods = cards),
         )
 
-        viewModel.savedPaymentMethodMutator.modifyPaymentMethod(CARD_WITH_NETWORKS_PAYMENT_METHOD)
+        viewModel.savedPaymentMethodMutator.updatePaymentMethod(
+            CARD_WITH_NETWORKS_PAYMENT_METHOD.toDisplayableSavedPaymentMethod()
+        )
         viewModel.handleBackPressed()
 
         verify(eventReporter).onHideEditablePaymentOption()
@@ -2616,17 +2632,19 @@ internal class PaymentSheetViewModelTest {
         viewModel.navigationHandler.currentScreen.test {
             awaitItem()
 
-            viewModel.savedPaymentMethodMutator.modifyPaymentMethod(CARD_WITH_NETWORKS_PAYMENT_METHOD)
+            viewModel.savedPaymentMethodMutator.updatePaymentMethod(
+                CARD_WITH_NETWORKS_PAYMENT_METHOD.toDisplayableSavedPaymentMethod()
+            )
 
             val currentScreen = awaitItem()
 
-            assertThat(currentScreen).isInstanceOf<PaymentSheetScreen.EditPaymentMethod>()
+            assertThat(currentScreen).isInstanceOf<PaymentSheetScreen.UpdatePaymentMethod>()
 
-            if (currentScreen is PaymentSheetScreen.EditPaymentMethod) {
+            if (currentScreen is PaymentSheetScreen.UpdatePaymentMethod) {
                 val interactor = currentScreen.interactor
 
                 interactor.handleViewAction(
-                    EditPaymentMethodViewAction.OnBrandChoiceChanged(
+                    UpdatePaymentMethodInteractor.ViewAction.BrandChoiceChanged(
                         CardBrandChoice(CardBrand.Visa)
                     )
                 )
@@ -3125,7 +3143,6 @@ internal class PaymentSheetViewModelTest {
                     linkLauncher = linkPaymentLauncher,
                 ),
                 cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
-                editInteractorFactory = fakeEditPaymentMethodInteractorFactory,
                 errorReporter = errorReporter,
                 cvcRecollectionHandler = cvcRecollectionHandler,
                 cvcRecollectionInteractorFactory = object : CvcRecollectionInteractor.Factory {

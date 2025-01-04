@@ -15,8 +15,6 @@ import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.Cvc
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionPaymentSheetScreen
 import com.stripe.android.paymentsheet.ui.AddPaymentMethod
 import com.stripe.android.paymentsheet.ui.AddPaymentMethodInteractor
-import com.stripe.android.paymentsheet.ui.EditPaymentMethod
-import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarStateFactory
 import com.stripe.android.paymentsheet.ui.SavedPaymentMethodTabLayoutUI
@@ -277,47 +275,6 @@ internal sealed interface PaymentSheetScreen {
         @Composable
         override fun Content(modifier: Modifier) {
             AddPaymentMethod(interactor = interactor, modifier)
-        }
-
-        override fun close() {
-            interactor.close()
-        }
-    }
-
-    class EditPaymentMethod(
-        val interactor: ModifiableEditPaymentMethodViewInteractor,
-    ) : PaymentSheetScreen, Closeable {
-
-        override val buyButtonState = stateFlowOf(
-            BuyButtonState(visible = false)
-        )
-        override val showsContinueButton: Boolean = false
-        override val topContentPadding: Dp = 0.dp
-        override val bottomContentPadding: Dp = 0.dp
-        override val walletsDividerSpacing: Dp = horizontalModeWalletsDividerSpacing
-        override val showsMandates: Boolean = false
-
-        override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
-            return stateFlowOf(
-                PaymentSheetTopBarStateFactory.create(
-                    hasBackStack = true,
-                    isLiveMode = interactor.isLiveMode,
-                    editable = PaymentSheetTopBarState.Editable.Never,
-                )
-            )
-        }
-
-        override fun title(isCompleteFlow: Boolean, isWalletEnabled: Boolean): StateFlow<ResolvableString?> {
-            return stateFlowOf(PaymentsCoreR.string.stripe_title_update_card.resolvableString)
-        }
-
-        override fun showsWalletsHeader(isCompleteFlow: Boolean): StateFlow<Boolean> {
-            return stateFlowOf(false)
-        }
-
-        @Composable
-        override fun Content(modifier: Modifier) {
-            EditPaymentMethod(interactor, modifier)
         }
 
         override fun close() {

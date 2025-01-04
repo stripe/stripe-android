@@ -27,7 +27,6 @@ import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.DefaultAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.DefaultSelectSavedPaymentMethodsInteractor
-import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeInitialScreenFactory
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -54,7 +53,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     linkHandler: LinkHandler,
     cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
-    editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory
 ) : BaseSheetViewModel(
     config = args.configuration,
     eventReporter = eventReporter,
@@ -62,7 +60,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
     workContext = workContext,
     savedStateHandle = savedStateHandle,
     linkHandler = linkHandler,
-    editInteractorFactory = editInteractorFactory,
     cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
     isCompleteFlow = false,
 ) {

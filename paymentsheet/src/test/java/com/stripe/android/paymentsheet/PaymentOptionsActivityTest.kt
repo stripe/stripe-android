@@ -457,7 +457,6 @@ internal class PaymentOptionsActivityTest {
                 savedStateHandle = savedStateHandle,
                 linkHandler = linkHandler,
                 cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
-                editInteractorFactory = mock()
             )
         }
 

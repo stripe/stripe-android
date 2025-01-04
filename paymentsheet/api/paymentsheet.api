@@ -2476,13 +2476,6 @@ public final class com/stripe/android/paymentsheet/ui/ComposableSingletons$Defau
 	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 }
 
-public final class com/stripe/android/paymentsheet/ui/ComposableSingletons$EditPaymentMethodKt {
-	public static final field INSTANCE Lcom/stripe/android/paymentsheet/ui/ComposableSingletons$EditPaymentMethodKt;
-	public static field lambda-1 Lkotlin/jvm/functions/Function2;
-	public fun <init> ()V
-	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
-}
-
 public final class com/stripe/android/paymentsheet/ui/ComposableSingletons$MandateTextKt {
 	public static final field INSTANCE Lcom/stripe/android/paymentsheet/ui/ComposableSingletons$MandateTextKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function2;

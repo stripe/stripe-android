@@ -195,8 +195,6 @@ internal class DefaultEmbeddedContentHelper @AssistedInject constructor(
             customerStateHolder = customerStateHolder,
             onPaymentMethodRemoved = {
             },
-            onModifyPaymentMethod = { _, _, _, _, _ ->
-            },
             onUpdatePaymentMethod = { _, _, _, _ ->
             },
             navigationPop = {

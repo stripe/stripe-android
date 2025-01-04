@@ -43,8 +43,6 @@ import com.stripe.android.paymentsheet.state.DefaultLinkAccountStatusProvider
 import com.stripe.android.paymentsheet.state.DefaultPaymentElementLoader
 import com.stripe.android.paymentsheet.state.LinkAccountStatusProvider
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
-import com.stripe.android.paymentsheet.ui.DefaultEditPaymentMethodViewInteractor
-import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import dagger.Binds
 import dagger.Lazy
 import dagger.Module
@@ -161,12 +159,6 @@ internal abstract class PaymentSheetCommonModule {
         @Singleton
         fun provideDurationProvider(): DurationProvider {
             return DefaultDurationProvider.instance
-        }
-
-        @Provides
-        @Singleton
-        fun providesEditPaymentMethodViewInteractorFactory(): ModifiableEditPaymentMethodViewInteractor.Factory {
-            return DefaultEditPaymentMethodViewInteractor.Factory
         }
 
         @Provides

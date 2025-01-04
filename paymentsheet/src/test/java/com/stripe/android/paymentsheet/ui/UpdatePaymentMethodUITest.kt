@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.ui
 
 import android.os.Build
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.test.assertContentDescriptionEquals
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextContains
@@ -416,6 +417,19 @@ class UpdatePaymentMethodUITest {
                 )
             )
             assertThat(viewActionRecorder.viewActions).isEmpty()
+        }
+    }
+
+    @Test
+    fun `Card drop down has accessibility label`() {
+        runScenario(
+            displayableSavedPaymentMethod = PaymentMethodFixtures
+                .CARD_WITH_NETWORKS_PAYMENT_METHOD
+                .toDisplayableSavedPaymentMethod(),
+            initialCardBrand = CardBrand.Visa,
+        ) {
+            composeRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG)
+                .assertContentDescriptionEquals("Visa")
         }
     }
 
