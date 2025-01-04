@@ -20,11 +20,11 @@ class LinkActivityResultTest {
         val intent = Intent()
         intent.data = redirectUrl.toUri()
         val result = createLinkActivityResult(LinkForegroundActivity.RESULT_COMPLETE, intent)
-        assertThat(result).isInstanceOf(LinkActivityResult.Completed::class.java)
-        val completed = result as LinkActivityResult.Completed
-        assertThat(completed.paymentMethod.type?.code).isEqualTo("card")
-        assertThat(completed.paymentMethod.card?.last4).isEqualTo("0000")
-        assertThat(completed.paymentMethod.id).isEqualTo("pm_1NJeErLu5o3P18ZpmXpCtIrR")
+        assertThat(result).isInstanceOf(LinkActivityResult.PaymentMethodObtained::class.java)
+        val paymentMethodObtained = result as LinkActivityResult.PaymentMethodObtained
+        assertThat(paymentMethodObtained.paymentMethod.type?.code).isEqualTo("card")
+        assertThat(paymentMethodObtained.paymentMethod.card?.last4).isEqualTo("0000")
+        assertThat(paymentMethodObtained.paymentMethod.id).isEqualTo("pm_1NJeErLu5o3P18ZpmXpCtIrR")
     }
 
     @Test
@@ -98,12 +98,15 @@ class LinkActivityResultTest {
     @Test
     fun `complete with result from native link`() {
         val bundle = bundleOf(
-            LinkActivityContract.EXTRA_RESULT to LinkActivityResult.Completed(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+            LinkActivityContract.EXTRA_RESULT to LinkActivityResult.PaymentMethodObtained(
+                paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+            )
         )
         val intent = Intent()
         intent.putExtras(bundle)
         val result = createLinkActivityResult(LinkActivity.RESULT_COMPLETE, intent)
-        assertThat(result).isEqualTo(LinkActivityResult.Completed(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
+        assertThat(result)
+            .isEqualTo(LinkActivityResult.PaymentMethodObtained(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
     }
 
     @Test

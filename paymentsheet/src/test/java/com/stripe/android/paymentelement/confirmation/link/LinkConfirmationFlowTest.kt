@@ -108,7 +108,7 @@ class LinkConfirmationFlowTest {
 
         assertThat(registerCall.activityResultCaller).isEqualTo(activityResultCaller)
 
-        registerCall.callback(LinkActivityResult.Completed(PAYMENT_METHOD))
+        registerCall.callback(LinkActivityResult.PaymentMethodObtained(PAYMENT_METHOD))
 
         assertThat(countDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
 

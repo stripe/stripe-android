@@ -28,6 +28,7 @@ import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
 import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.PaymentDetailsFixtures
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
@@ -116,6 +117,7 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.isA
 import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoMoreInteractions
 import org.mockito.kotlin.whenever
@@ -1227,7 +1229,7 @@ internal class DefaultFlowControllerTest {
     }
 
     @Test
-    fun `onLinkActivityResult() when Completed result should invoke confirm()`() =
+    fun `onLinkActivityResult() when PaymentMethodObtained result should invoke confirm()`() =
         runTest {
             val flowController = createFlowController()
 
@@ -1243,7 +1245,7 @@ internal class DefaultFlowControllerTest {
             )
 
             flowController.onLinkActivityResult(
-                LinkActivityResult.Completed(
+                LinkActivityResult.PaymentMethodObtained(
                     paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
                 )
             )
@@ -1252,6 +1254,25 @@ internal class DefaultFlowControllerTest {
                 argWhere { params: ConfirmPaymentIntentParams ->
                     params.paymentMethodId == "pm_123456789"
                 }
+            )
+        }
+
+    @Test
+    fun `onLinkActivityResult() when Completed result should invoke confirm()`() =
+        runTest {
+            val flowController = createFlowController()
+
+            flowController.configureExpectingSuccess(
+                configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
+            )
+
+            flowController.onLinkActivityResult(LinkActivityResult.Completed)
+
+            verify(paymentLauncher, times(0)).confirm(any<ConfirmPaymentIntentParams>())
+            verify(paymentLauncher, times(0)).confirm(any<ConfirmSetupIntentParams>())
+            verify(eventReporter).onPaymentSuccess(
+                paymentSelection = PaymentSelection.Link,
+                deferredIntentConfirmationType = null,
             )
         }
 
@@ -1930,7 +1951,7 @@ internal class DefaultFlowControllerTest {
         ) { _, _ -> }
 
         flowController.onLinkActivityResult(
-            LinkActivityResult.Completed(
+            LinkActivityResult.PaymentMethodObtained(
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(
                     card = PaymentMethodFixtures.CARD_PAYMENT_METHOD.card?.copy(
                         wallet = Wallet.LinkWallet(
