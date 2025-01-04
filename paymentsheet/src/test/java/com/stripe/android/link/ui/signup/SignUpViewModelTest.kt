@@ -66,8 +66,10 @@ internal class SignUpViewModelTest {
     @Test
     fun `When email is valid then lookup is triggered with delay`() = runTest(dispatcher) {
         val linkAccountManager = object : FakeLinkAccountManager() {
+            var lookupCalled = false
             override suspend fun lookupConsumer(email: String, startSession: Boolean): Result<LinkAccount?> {
-                return super.lookupConsumer(email, startSession)
+                lookupCalled = true
+                return Result.success(null)
             }
         }
         val viewModel = createViewModel(prefilledEmail = null, linkAccountManager = linkAccountManager)
@@ -82,7 +84,106 @@ internal class SignUpViewModelTest {
 
         assertThat(viewModel.emailController.fieldValue.value).isEqualTo("valid@email.com")
         assertThat(viewModel.contentState.signUpState).isEqualTo(SignUpState.InputtingRemainingFields)
+        assertThat(linkAccountManager.lookupCalled).isTrue()
     }
+
+    @Test
+    fun `When email is initially equal to config email, lookup is not triggered`() = runTest(dispatcher) {
+        val linkAccountManager = object : FakeLinkAccountManager() {
+            var lookupCalled = false
+            override suspend fun lookupConsumer(email: String, startSession: Boolean): Result<LinkAccount?> {
+                lookupCalled = true
+                return Result.success(null)
+            }
+        }
+        val viewModel = createViewModel(prefilledEmail = CUSTOMER_EMAIL, linkAccountManager = linkAccountManager)
+
+        // No change to email, should not trigger lookup
+        advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds)
+
+        assertThat(linkAccountManager.lookupCalled).isFalse()
+        assertThat(viewModel.contentState.signUpState).isEqualTo(SignUpState.InputtingRemainingFields)
+    }
+
+    @Test
+    fun `When email changes and then reverts to config email, lookup is triggered`() = runTest(dispatcher) {
+        val linkAccountManager = object : FakeLinkAccountManager() {
+            var lookupCalledCount = 0
+            override suspend fun lookupConsumer(email: String, startSession: Boolean): Result<LinkAccount?> {
+                lookupCalledCount++
+                return Result.success(null)
+            }
+        }
+        val viewModel = createViewModel(prefilledEmail = CUSTOMER_EMAIL, linkAccountManager = linkAccountManager)
+
+        // Change email
+        viewModel.emailController.onRawValueChange("different@email.com")
+        advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds)
+        assertThat(linkAccountManager.lookupCalledCount).isEqualTo(1)
+
+        // Revert to original email
+        viewModel.emailController.onRawValueChange(CUSTOMER_EMAIL)
+        advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds)
+        assertThat(linkAccountManager.lookupCalledCount).isEqualTo(2)
+    }
+
+    @Test
+    fun `When lookup finds existing account, navigate to appropriate screen`() = runTest(dispatcher) {
+        val linkEventsReporter = object : SignUpLinkEventsReporter() {
+            override fun onSignupCompleted(isInline: Boolean) {
+                calledCount += 1
+            }
+        }
+        val linkAccountManager = object : FakeLinkAccountManager() {
+            override suspend fun lookupConsumer(email: String, startSession: Boolean): Result<LinkAccount?> {
+                return Result.success(TestFactory.LINK_ACCOUNT)
+            }
+        }
+        val viewModel = createViewModel(
+            prefilledEmail = null,
+            linkAccountManager = linkAccountManager,
+            linkEventsReporter = linkEventsReporter
+        )
+
+        viewModel.emailController.onRawValueChange("existing@email.com")
+        advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds)
+
+        verify(navController).popBackStack(LinkScreen.Wallet.route, inclusive = false)
+    }
+
+    @Test
+    fun `When lookup fails, stay on input remaining fields state`() = runTest(dispatcher) {
+        val linkAccountManager = object : FakeLinkAccountManager() {
+            override suspend fun lookupConsumer(email: String, startSession: Boolean): Result<LinkAccount?> {
+                return Result.failure(RuntimeException("Lookup failed"))
+            }
+        }
+        val viewModel = createViewModel(prefilledEmail = null, linkAccountManager = linkAccountManager)
+
+        viewModel.emailController.onRawValueChange("valid@email.com")
+        advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds)
+
+        assertThat(viewModel.state.value.signUpState).isEqualTo(SignUpState.InputtingRemainingFields)
+    }
+
+    @Test
+    fun `When email is provided it should not trigger lookup and should collect remaining fields`() =
+        runTest(dispatcher) {
+            val linkAccountManager = object : FakeLinkAccountManager() {
+                var lookupCalled = false
+                override suspend fun lookupConsumer(email: String, startSession: Boolean): Result<LinkAccount?> {
+                    lookupCalled = true
+                    return Result.success(null)
+                }
+            }
+            val viewModel = createViewModel(prefilledEmail = CUSTOMER_EMAIL, linkAccountManager = linkAccountManager)
+
+            advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds)
+
+            assertThat(viewModel.state.value.signUpState).isEqualTo(SignUpState.InputtingRemainingFields)
+            assertThat(linkAccountManager.lookupCalled).isFalse()
+        }
+
 
     @Test
     fun `When email is provided it should not trigger lookup and should collect phone number`() = runTest(dispatcher) {
