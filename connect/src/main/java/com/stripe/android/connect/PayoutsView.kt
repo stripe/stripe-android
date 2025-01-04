@@ -4,6 +4,8 @@ import android.content.Context
 import android.util.AttributeSet
 import android.widget.FrameLayout
 import androidx.annotation.RestrictTo
+import com.stripe.android.connect.analytics.ConnectAnalyticsEvent
+import com.stripe.android.connect.analytics.ConnectAnalyticsService
 import com.stripe.android.connect.webview.StripeConnectWebViewContainer
 import com.stripe.android.connect.webview.StripeConnectWebViewContainerImpl
 
@@ -39,6 +41,11 @@ class PayoutsView private constructor(
 
     init {
         webViewContainerBehavior.initializeView(this)
+        ConnectAnalyticsService(this.context, isTestMode = true).track(
+            ConnectAnalyticsEvent.WebPageLoaded(
+                timeToLoad = 1.0,
+            )
+        )
     }
 }
 
