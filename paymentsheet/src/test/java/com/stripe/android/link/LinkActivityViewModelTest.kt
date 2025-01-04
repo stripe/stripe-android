@@ -17,9 +17,14 @@ import androidx.navigation.PopUpToBuilder
 import androidx.savedstate.SavedStateRegistryOwner
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.Logger
 import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.link.ui.LinkAppBarState
+import com.stripe.android.model.ConsumerSession
+import com.stripe.android.paymentsheet.R
+import com.stripe.android.testing.FakeLogger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -30,6 +35,7 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mockito.never
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.`when`
 import org.mockito.kotlin.any
@@ -146,6 +152,53 @@ internal class LinkActivityViewModelTest {
         linkAccountManager.setLinkAccount(TestFactory.LINK_ACCOUNT)
 
         assertThat(vm.linkAccount).isEqualTo(TestFactory.LINK_ACCOUNT)
+    }
+
+    fun `vm dismisses with cancellation result on successful log out`() = runTest(dispatcher) {
+        val linkAccountManager = object : FakeLinkAccountManager() {
+            var callCount = 0
+            override suspend fun logOut(): Result<ConsumerSession> {
+                callCount += 1
+                return Result.success(TestFactory.CONSUMER_SESSION)
+            }
+        }
+        linkAccountManager.setLinkAccount(TestFactory.LINK_ACCOUNT)
+
+        var result: LinkActivityResult? = null
+        fun dismissWithResult(r: LinkActivityResult) {
+            result = r
+        }
+
+        val vm = createViewModel(linkAccountManager = linkAccountManager)
+        vm.dismissWithResult = ::dismissWithResult
+
+        vm.logout()
+
+        assertThat(linkAccountManager.callCount).isEqualTo(1)
+        assertThat(result).isEqualTo(LinkActivityResult.Canceled(LinkActivityResult.Canceled.Reason.LoggedOut))
+    }
+
+    @Test
+    fun `vm dismisses with error log on failed log out`() = runTest(dispatcher) {
+        val error = Throwable("oops")
+        val linkAccountManager = FakeLinkAccountManager()
+        linkAccountManager.setLinkAccount(TestFactory.LINK_ACCOUNT)
+        linkAccountManager.logOutResult = Result.failure(error)
+
+        val logger = FakeLogger()
+
+        var result: LinkActivityResult? = null
+        fun dismissWithResult(r: LinkActivityResult) {
+            result = r
+        }
+
+        val vm = createViewModel(linkAccountManager = linkAccountManager, logger = logger)
+        vm.dismissWithResult = ::dismissWithResult
+
+        vm.logout()
+
+        assertThat(result).isEqualTo(LinkActivityResult.Canceled(LinkActivityResult.Canceled.Reason.LoggedOut))
+        assertThat(logger.errorLogs).containsExactly("failed to log out" to error)
     }
 
     @Test
@@ -317,16 +370,70 @@ internal class LinkActivityViewModelTest {
         } else {
             verify(navOptionsBuilder, times(0)).popUpTo(any<String>(), any<PopUpToBuilder.() -> Unit>())
         }
+        verify(navOptionsBuilder, never()).popUpTo(any<String>(), any())
+    }
+
+    @Test
+    fun `initial app bar state is correct`() = runTest {
+        val vm = createViewModel()
+
+        val initialState = vm.linkAppBarState.value
+        assertThat(initialState).isEqualTo(
+            LinkAppBarState(
+                navigationIcon = R.drawable.stripe_link_close,
+                showHeader = true,
+                showOverflowMenu = false,
+                email = null
+            )
+        )
+    }
+
+    @Test
+    fun `app bar state menu and email should be visible for verified account`() = runTest {
+        val linkAccountManager = FakeLinkAccountManager()
+        val vm = createViewModel(linkAccountManager = linkAccountManager)
+        linkAccountManager.setLinkAccount(TestFactory.LINK_ACCOUNT)
+
+        advanceUntilIdle()
+
+        assertThat(vm.linkAppBarState.value).isEqualTo(
+            LinkAppBarState(
+                navigationIcon = R.drawable.stripe_link_close,
+                showHeader = true,
+                showOverflowMenu = true,
+                email = TestFactory.LINK_ACCOUNT.email
+            )
+        )
+    }
+
+    @Test
+    fun `app bar state menu and email should be hidden for unverified account`() = runTest {
+        val linkAccountManager = FakeLinkAccountManager()
+        val vm = createViewModel(linkAccountManager = linkAccountManager)
+        linkAccountManager.setLinkAccount(TestFactory.LINK_ACCOUNT_NEEDS_VERIFICATION)
+
+        advanceUntilIdle()
+
+        assertThat(vm.linkAppBarState.value).isEqualTo(
+            LinkAppBarState(
+                navigationIcon = R.drawable.stripe_link_close,
+                showHeader = true,
+                showOverflowMenu = false,
+                email = null
+            )
+        )
     }
 
     private fun createViewModel(
         linkAccountManager: LinkAccountManager = FakeLinkAccountManager(),
+        logger: Logger = FakeLogger(),
         navController: NavHostController = navController(),
         dismissWithResult: (LinkActivityResult) -> Unit = {}
     ): LinkActivityViewModel {
         return LinkActivityViewModel(
             linkAccountManager = linkAccountManager,
             activityRetainedComponent = mock(),
+            logger = logger
         ).apply {
             this.navController = navController
             this.dismissWithResult = dismissWithResult
