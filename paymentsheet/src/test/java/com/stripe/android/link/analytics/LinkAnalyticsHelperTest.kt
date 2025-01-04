@@ -27,7 +27,7 @@ internal class LinkAnalyticsHelperTest {
         }
         val analyticsHelper = LinkAnalyticsHelper(eventReporter)
         analyticsHelper.onLinkResult(
-            linkActivityResult = LinkActivityResult.Completed(
+            linkActivityResult = LinkActivityResult.PaymentMethodObtained(
                 paymentMethod = PaymentMethod(
                     id = null,
                     created = null,

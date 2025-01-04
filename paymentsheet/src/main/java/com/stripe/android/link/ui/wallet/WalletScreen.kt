@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.link.theme.HorizontalPadding
 import com.stripe.android.link.theme.linkColors
 import com.stripe.android.link.theme.linkShapes
+import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.PrimaryButton
 import com.stripe.android.link.ui.SecondaryButton
 import com.stripe.android.model.ConsumerPaymentDetails
@@ -76,17 +77,11 @@ internal fun WalletBody(
     onPayAnotherWayClick: () -> Unit,
 ) {
     if (state.paymentDetailsList.isEmpty()) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .testTag(WALLET_LOADER_TAG),
-            contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator()
-        }
+        Loader()
         return
     }
 
+    val context = LocalContext.current
     val focusManager = LocalFocusManager.current
 
     LaunchedEffect(state.isProcessing) {
@@ -112,6 +107,15 @@ internal fun WalletBody(
             BankAccountTerms()
         }
 
+        AnimatedVisibility(visible = state.errorMessage != null) {
+            ErrorText(
+                text = state.errorMessage?.resolve(context).orEmpty(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp)
+            )
+        }
+
         Spacer(modifier = Modifier.height(16.dp))
 
         PrimaryButton(
@@ -130,6 +134,18 @@ internal fun WalletBody(
             label = stringResource(id = R.string.stripe_wallet_pay_another_way),
             onClick = onPayAnotherWayClick
         )
+    }
+}
+
+@Composable
+private fun Loader() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .testTag(WALLET_LOADER_TAG),
+        contentAlignment = Alignment.Center
+    ) {
+        CircularProgressIndicator()
     }
 }
 

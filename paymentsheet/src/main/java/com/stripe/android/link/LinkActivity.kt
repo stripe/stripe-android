@@ -48,6 +48,11 @@ internal class LinkActivity : ComponentActivity() {
         }
 
         val vm = viewModel ?: return
+        vm.registerFromActivity(
+            activityResultCaller = this,
+            lifecycleOwner = this,
+        )
+
         setContent {
             var bottomSheetContent by remember { mutableStateOf<BottomSheetContent?>(null) }
             val sheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)

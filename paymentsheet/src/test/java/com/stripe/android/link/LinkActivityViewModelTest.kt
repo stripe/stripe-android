@@ -1,6 +1,8 @@
 package com.stripe.android.link
 
 import android.app.Application
+import androidx.activity.result.ActivityResultCaller
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SAVED_STATE_REGISTRY_OWNER_KEY
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.VIEW_MODEL_STORE_OWNER_KEY
@@ -20,6 +22,8 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -319,14 +323,34 @@ internal class LinkActivityViewModelTest {
         }
     }
 
+    fun `vm register starts confirmation handler registration`() = runTest(dispatcher) {
+        val activityResultCaller: ActivityResultCaller = mock()
+        val lifecycleOwner: LifecycleOwner = mock()
+        val confirmationHandler = FakeConfirmationHandler()
+        val vm = createViewModel(
+            confirmationHandler = confirmationHandler
+        )
+
+        confirmationHandler.registerTurbine.ensureAllEventsConsumed()
+        vm.registerFromActivity(activityResultCaller, lifecycleOwner)
+
+        val registerCall = confirmationHandler.registerTurbine.awaitItem()
+
+        assertThat(registerCall).isEqualTo(FakeConfirmationHandler.RegisterCall(activityResultCaller, lifecycleOwner))
+    }
+
     private fun createViewModel(
         linkAccountManager: LinkAccountManager = FakeLinkAccountManager(),
+        confirmationHandler: ConfirmationHandler = FakeConfirmationHandler(),
         navController: NavHostController = navController(),
         dismissWithResult: (LinkActivityResult) -> Unit = {}
     ): LinkActivityViewModel {
         return LinkActivityViewModel(
             linkAccountManager = linkAccountManager,
             activityRetainedComponent = mock(),
+            confirmationHandlerFactory = {
+                confirmationHandler
+            }
         ).apply {
             this.navController = navController
             this.dismissWithResult = dismissWithResult
