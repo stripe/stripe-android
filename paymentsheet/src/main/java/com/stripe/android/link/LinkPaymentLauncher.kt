@@ -31,14 +31,7 @@ internal class LinkPaymentLauncher @Inject internal constructor(
             "LinkPaymentLauncher",
             linkActivityContract,
         ) { linkActivityResult ->
-            analyticsHelper.onLinkResult(linkActivityResult)
-            when (linkActivityResult) {
-                is PaymentMethodObtained, LinkActivityResult.Completed -> {
-                    linkStore.markLinkAsUsed()
-                }
-                is LinkActivityResult.Canceled, is LinkActivityResult.Failed -> Unit
-            }
-            callback(linkActivityResult)
+            handleActivityResult(linkActivityResult, callback)
         }
     }
 
@@ -49,15 +42,22 @@ internal class LinkPaymentLauncher @Inject internal constructor(
         linkActivityResultLauncher = activityResultCaller.registerForActivityResult(
             linkActivityContract
         ) { linkActivityResult ->
-            analyticsHelper.onLinkResult(linkActivityResult)
-            when (linkActivityResult) {
-                is PaymentMethodObtained, LinkActivityResult.Completed -> {
-                    linkStore.markLinkAsUsed()
-                }
-                is LinkActivityResult.Canceled, is LinkActivityResult.Failed -> Unit
-            }
-            callback(linkActivityResult)
+            handleActivityResult(linkActivityResult, callback)
         }
+    }
+
+    private fun handleActivityResult(
+        linkActivityResult: LinkActivityResult,
+        nextStep: (LinkActivityResult) -> Unit
+    ) {
+        analyticsHelper.onLinkResult(linkActivityResult)
+        when (linkActivityResult) {
+            is PaymentMethodObtained, LinkActivityResult.Completed -> {
+                linkStore.markLinkAsUsed()
+            }
+            is LinkActivityResult.Canceled, is LinkActivityResult.Failed -> Unit
+        }
+        nextStep(linkActivityResult)
     }
 
     fun unregister() {

@@ -5,7 +5,7 @@ import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.model.PaymentMethod
 import org.junit.Test
 
-internal class LinkAnalyticsHelperTest {
+internal class DefaultLinkAnalyticsHelperTest {
     @Test
     fun testOnLinkLaunchedCalls_onPopupShow() {
         val eventReporter = object : FakeLinkEventsReporter() {
@@ -13,7 +13,7 @@ internal class LinkAnalyticsHelperTest {
                 calledCount++
             }
         }
-        val analyticsHelper = LinkAnalyticsHelper(eventReporter)
+        val analyticsHelper = DefaultLinkAnalyticsHelper(eventReporter)
         analyticsHelper.onLinkLaunched()
         assertThat(eventReporter.calledCount).isEqualTo(1)
     }
@@ -25,7 +25,7 @@ internal class LinkAnalyticsHelperTest {
                 calledCount++
             }
         }
-        val analyticsHelper = LinkAnalyticsHelper(eventReporter)
+        val analyticsHelper = DefaultLinkAnalyticsHelper(eventReporter)
         analyticsHelper.onLinkResult(
             linkActivityResult = LinkActivityResult.PaymentMethodObtained(
                 paymentMethod = PaymentMethod(
@@ -47,7 +47,7 @@ internal class LinkAnalyticsHelperTest {
                 calledCount++
             }
         }
-        val analyticsHelper = LinkAnalyticsHelper(eventReporter)
+        val analyticsHelper = DefaultLinkAnalyticsHelper(eventReporter)
         analyticsHelper.onLinkResult(LinkActivityResult.Failed(IllegalStateException()))
         assertThat(eventReporter.calledCount).isEqualTo(1)
     }
@@ -59,7 +59,7 @@ internal class LinkAnalyticsHelperTest {
                 calledCount++
             }
         }
-        val analyticsHelper = LinkAnalyticsHelper(eventReporter)
+        val analyticsHelper = DefaultLinkAnalyticsHelper(eventReporter)
         analyticsHelper.onLinkResult(LinkActivityResult.Canceled(LinkActivityResult.Canceled.Reason.BackPressed))
         assertThat(eventReporter.calledCount).isEqualTo(1)
     }
@@ -71,7 +71,7 @@ internal class LinkAnalyticsHelperTest {
                 calledCount++
             }
         }
-        val analyticsHelper = LinkAnalyticsHelper(eventReporter)
+        val analyticsHelper = DefaultLinkAnalyticsHelper(eventReporter)
         analyticsHelper.onLinkResult(LinkActivityResult.Canceled(LinkActivityResult.Canceled.Reason.LoggedOut))
         assertThat(eventReporter.calledCount).isEqualTo(1)
     }
@@ -83,7 +83,7 @@ internal class LinkAnalyticsHelperTest {
                 calledCount++
             }
         }
-        val analyticsHelper = LinkAnalyticsHelper(eventReporter)
+        val analyticsHelper = DefaultLinkAnalyticsHelper(eventReporter)
         analyticsHelper.onLinkPopupSkipped()
         assertThat(eventReporter.calledCount).isEqualTo(1)
     }

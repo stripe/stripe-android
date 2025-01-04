@@ -1,5 +1,6 @@
 package com.stripe.android.link.injection
 
+import com.stripe.android.link.analytics.DefaultLinkAnalyticsHelper
 import com.stripe.android.link.analytics.DefaultLinkEventsReporter
 import com.stripe.android.link.analytics.LinkAnalyticsHelper
 import com.stripe.android.link.analytics.LinkEventsReporter
@@ -33,4 +34,8 @@ internal interface LinkAnalyticsModule {
     @Binds
     @LinkAnalyticsScope
     fun bindLinkEventsReporter(linkEventsReporter: DefaultLinkEventsReporter): LinkEventsReporter
+
+    @Binds
+    @LinkAnalyticsScope
+    fun bindLinkAnalyticsHelper(linkAnalyticsHelper: DefaultLinkAnalyticsHelper): LinkAnalyticsHelper
 }
