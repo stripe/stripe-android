@@ -28,7 +28,7 @@ import javax.inject.Inject
 
 internal class LinkActivityViewModel @Inject constructor(
     val activityRetainedComponent: NativeLinkComponent,
-    private val linkAccountManager: LinkAccountManager
+    private val linkAccountManager: LinkAccountManager,
 ) : ViewModel(), DefaultLifecycleObserver {
     private val _linkState = MutableStateFlow(
         value = LinkAppBarState(
@@ -61,10 +61,15 @@ internal class LinkActivityViewModel @Inject constructor(
     }
 
     fun navigate(screen: LinkScreen, clearStack: Boolean) {
+        navigate(screen, clearStack, launchSingleTop = false)
+    }
+
+    private fun navigate(screen: LinkScreen, clearStack: Boolean, launchSingleTop: Boolean) {
         val navController = navController ?: return
         navController.navigate(screen.route) {
+            this.launchSingleTop = launchSingleTop
             if (clearStack) {
-                popUpTo(navController.graph.startDestinationId) {
+                popUpTo(navController.graph.id) {
                     inclusive = true
                 }
             }
@@ -91,9 +96,7 @@ internal class LinkActivityViewModel @Inject constructor(
                 AccountStatus.NeedsVerification, AccountStatus.VerificationStarted -> LinkScreen.Verification
                 AccountStatus.SignedOut, AccountStatus.Error -> LinkScreen.SignUp
             }
-            navController?.navigate(screen.route) {
-                launchSingleTop = true
-            }
+            navigate(screen, clearStack = true, launchSingleTop = true)
         }
     }
 
