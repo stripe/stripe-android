@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.lpmfoundations.luxe.isSaveForFutureUseValueChangeable
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.LinkMode
@@ -99,6 +100,43 @@ internal class USBankAccountFormArguments(
                 onUpdatePrimaryButtonUIState = { viewModel.customPrimaryButtonUiState.update(it) },
                 onUpdatePrimaryButtonState = viewModel::updatePrimaryButtonState,
                 onError = viewModel::onError,
+                incentive = paymentMethodMetadata.paymentMethodIncentive,
+            )
+        }
+
+        fun create(
+            configuration: LinkConfiguration,
+            paymentMethodMetadata: PaymentMethodMetadata,
+            selectedPaymentMethodCode: String,
+            bankFormInteractor: BankFormInteractor,
+        ): USBankAccountFormArguments {
+            val isSaveForFutureUseValueChangeable = isSaveForFutureUseValueChangeable(
+                code = selectedPaymentMethodCode,
+                intent = paymentMethodMetadata.stripeIntent,
+                paymentMethodSaveConsentBehavior = paymentMethodMetadata.paymentMethodSaveConsentBehavior,
+                hasCustomerConfiguration = paymentMethodMetadata.hasCustomerConfiguration,
+            )
+            val instantDebits = selectedPaymentMethodCode == PaymentMethod.Type.Link.code
+            val stripeIntent = paymentMethodMetadata.stripeIntent
+            return USBankAccountFormArguments(
+                showCheckbox = isSaveForFutureUseValueChangeable &&
+                    // Instant Debits does not support saving for future use
+                    instantDebits.not(),
+                hostedSurface = "",
+                instantDebits = instantDebits,
+                linkMode = paymentMethodMetadata.linkMode,
+                onBehalfOf = null,
+                isCompleteFlow = false,
+                isPaymentFlow = stripeIntent is PaymentIntent,
+                stripeIntentId = stripeIntent.id,
+                clientSecret = stripeIntent.clientSecret,
+                shippingDetails = null,
+                draftPaymentSelection = null,
+                onMandateTextChanged = { _, _ ->},
+                onLinkedBankAccountChanged = bankFormInteractor::handleLinkedBankAccountChanged,
+                onUpdatePrimaryButtonUIState = {  },
+                onUpdatePrimaryButtonState = {},
+                onError = {},
                 incentive = paymentMethodMetadata.paymentMethodIncentive,
             )
         }
