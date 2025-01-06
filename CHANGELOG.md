@@ -2,6 +2,12 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+## 21.3.1 - 2025-01-06
+
+### PaymentSheet
+- [FIXED][9849](https://github.com/stripe/stripe-android/pull/9849) Fixes issue with `PaymentSheet` fields not being focusable on Android TV.
+- [FIXED][9835](https://github.com/stripe/stripe-android/pull/9835) Fixes issue with phone number formatting in which inputted Cyprus phone numbers was showing the wrong country code.
+
 ## 21.3.0 - 2024-12-23
 
 ### Payments
