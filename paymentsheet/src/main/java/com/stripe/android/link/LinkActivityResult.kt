@@ -12,13 +12,13 @@ import org.json.JSONObject
 
 internal sealed class LinkActivityResult : Parcelable {
     /**
-     * Indicates that the flow was completed successfully
+     * Indicates that the flow was completed successfully.
      */
     @Parcelize
     data object Completed : LinkActivityResult()
 
     /**
-     * Indicates that the user selected a payment method. This payment method should be used for confirmation.
+     * Indicates that the user selected a payment method. This payment method has not yet been confirmed.
      */
     @Parcelize
     data class PaymentMethodObtained(

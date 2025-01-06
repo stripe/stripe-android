@@ -7,7 +7,7 @@ import org.junit.Test
 
 internal class DefaultLinkAnalyticsHelperTest {
     @Test
-    fun testOnLinkLaunchedCalls_onPopupShow() {
+    fun `test onLinkLaunched calls onPopupShow`() {
         val eventReporter = object : FakeLinkEventsReporter() {
             override fun onPopupShow() {
                 calledCount++
@@ -19,7 +19,7 @@ internal class DefaultLinkAnalyticsHelperTest {
     }
 
     @Test
-    fun testOnLinkResultCalls_onPopupSuccess() {
+    fun `test onLinkResult with PaymentMethodObtained calls onPopupSuccess`() {
         val eventReporter = object : FakeLinkEventsReporter() {
             override fun onPopupSuccess() {
                 calledCount++
@@ -41,7 +41,19 @@ internal class DefaultLinkAnalyticsHelperTest {
     }
 
     @Test
-    fun testOnLinkResultCalls_onPopupError() {
+    fun `test onLinkResult with Completed calls onPopupSuccess`() {
+        val eventReporter = object : FakeLinkEventsReporter() {
+            override fun onPopupSuccess() {
+                calledCount++
+            }
+        }
+        val analyticsHelper = DefaultLinkAnalyticsHelper(eventReporter)
+        analyticsHelper.onLinkResult(LinkActivityResult.Completed)
+        assertThat(eventReporter.calledCount).isEqualTo(1)
+    }
+
+    @Test
+    fun `test onLinkResult with Failed calls onPopupError`() {
         val eventReporter = object : FakeLinkEventsReporter() {
             override fun onPopupError(error: Throwable) {
                 calledCount++
@@ -53,7 +65,7 @@ internal class DefaultLinkAnalyticsHelperTest {
     }
 
     @Test
-    fun testOnLinkResultCalls_onPopupCancel() {
+    fun `test onLinkResult with CanceledBackPressed calls onPopupCancel`() {
         val eventReporter = object : FakeLinkEventsReporter() {
             override fun onPopupCancel() {
                 calledCount++
@@ -65,7 +77,7 @@ internal class DefaultLinkAnalyticsHelperTest {
     }
 
     @Test
-    fun testOnLinkResultCalls_onPopupLogout() {
+    fun `test onLinkResult with CanceledLoggedOut calls onPopupLogout`() {
         val eventReporter = object : FakeLinkEventsReporter() {
             override fun onPopupLogout() {
                 calledCount++
@@ -77,7 +89,7 @@ internal class DefaultLinkAnalyticsHelperTest {
     }
 
     @Test
-    fun testOnLinkSkippedCalls_onPopupSkipped() {
+    fun `test onLinkPopupSkipped calls onPopupSkipped`() {
         val eventReporter = object : FakeLinkEventsReporter() {
             override fun onPopupSkipped() {
                 calledCount++
