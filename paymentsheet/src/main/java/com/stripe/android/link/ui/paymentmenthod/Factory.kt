@@ -4,6 +4,7 @@ import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentsheet.FormHelper
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.paymentsheet.verticalmode.BankFormInteractor
 
@@ -21,11 +22,13 @@ internal object Factory {
 
     fun formHelper(
         configuration: LinkConfiguration,
-        cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory
+        cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
+        selectionUpdater: (PaymentSelection?) -> Unit,
     ): FormHelper {
         return FormHelper.create(
             cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
-            paymentMethodMetadata = paymentMethodMetadata(configuration)
+            paymentMethodMetadata = paymentMethodMetadata(configuration),
+            selectionUpdater = selectionUpdater
         )
     }
 

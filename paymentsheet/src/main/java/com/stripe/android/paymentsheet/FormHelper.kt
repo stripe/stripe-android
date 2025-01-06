@@ -6,7 +6,6 @@ import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.uicore.elements.FormElement
 
 internal interface FormHelper {
-
     fun formElementsForCode(code: String): List<FormElement>
 
     fun createFormArguments(
