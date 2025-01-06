@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.state
 
 import android.os.Parcelable
 import com.stripe.android.common.model.CommonConfiguration
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -14,7 +15,7 @@ internal data class CustomerState(
     val customerSessionClientSecret: String?,
     val paymentMethods: List<PaymentMethod>,
     val permissions: Permissions,
-    val defaultPaymentMethodId: String?
+    private val defaultPaymentMethodId: String?
 ) : Parcelable {
     @Parcelize
     data class Permissions(
@@ -22,6 +23,14 @@ internal data class CustomerState(
         val canRemoveLastPaymentMethod: Boolean,
         val canRemoveDuplicates: Boolean,
     ) : Parcelable
+
+    fun getDefaultPaymentMethodId(): String? {
+        return if (FeatureFlags.enableDefaultPaymentMethods.isEnabled) {
+            this.defaultPaymentMethodId
+        } else {
+            null
+        }
+    }
 
     internal companion object {
         /**

@@ -59,7 +59,7 @@ internal class SavedPaymentMethodMutator(
     isNotPaymentFlow: Boolean,
 ) {
     val defaultPaymentMethodId: StateFlow<String?> = customerStateHolder.customer.mapAsStateFlow { customerState ->
-        customerState?.defaultPaymentMethodId
+        customerState?.getDefaultPaymentMethodId()
     }
 
     private val paymentOptionsItemsMapper: PaymentOptionsItemsMapper by lazy {

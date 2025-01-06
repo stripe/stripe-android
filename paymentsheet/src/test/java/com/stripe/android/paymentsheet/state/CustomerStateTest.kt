@@ -3,16 +3,26 @@ package com.stripe.android.paymentsheet.state
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
+import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentMethodFactory
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.junit.Test
 
 class CustomerStateTest {
+
+    @get:Rule
+    val enableDefaultPaymentMethods = FeatureFlagTestRule(
+        featureFlag = FeatureFlags.enableDefaultPaymentMethods,
+        isEnabled = true,
+    )
+
     @Test
     fun `Should create 'CustomerState' for customer session properly with permissions disabled`() {
         val paymentMethods = PaymentMethodFactory.cards(4)
@@ -163,7 +173,13 @@ class CustomerStateTest {
                 canRemoveDuplicates = true,
             )
         )
-        assertThat(customerState.defaultPaymentMethodId).isEqualTo(defaultPaymentMethodId)
+        assertThat(customerState.getDefaultPaymentMethodId()).isEqualTo(defaultPaymentMethodId)
+
+        enableDefaultPaymentMethods.setEnabled(false)
+        assertThat(customerState.getDefaultPaymentMethodId()).isNull()
+
+        enableDefaultPaymentMethods.setEnabled(true)
+        assertThat(customerState.getDefaultPaymentMethodId()).isEqualTo(defaultPaymentMethodId)
     }
 
     @Test
