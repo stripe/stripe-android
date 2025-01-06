@@ -60,6 +60,7 @@ fun SimpleDialogElementUI(
                         } else {
                             Color.Unspecified
                         },
+                        style = MaterialTheme.typography.body1
                     )
                 }
             },
@@ -70,7 +71,10 @@ fun SimpleDialogElementUI(
                         onDismissListener()
                     }
                 ) {
-                    Text(dismissText)
+                    Text(
+                        text = dismissText,
+                        style = MaterialTheme.typography.body1
+                    )
                 }
             }
         )
