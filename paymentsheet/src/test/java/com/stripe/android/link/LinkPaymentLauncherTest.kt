@@ -1,7 +1,5 @@
 package com.stripe.android.link
 
-import androidx.activity.result.ActivityResultCallback
-import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistry
 import androidx.activity.result.contract.ActivityResultContract
@@ -11,6 +9,7 @@ import com.stripe.android.link.analytics.FakeLinkAnalyticsHelper
 import com.stripe.android.link.analytics.LinkAnalyticsHelper
 import com.stripe.android.link.injection.LinkAnalyticsComponent
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentelement.confirmation.asCallbackFor
 import com.stripe.android.utils.DummyActivityResultCaller
 import com.stripe.android.utils.FakeActivityResultRegistry
 import com.stripe.android.utils.RecordingLinkStore
@@ -190,38 +189,32 @@ internal class LinkPaymentLauncherTest {
         expectedMarkAsUsedCalls: Int,
     ) = runTest {
         RecordingLinkStore.test {
-            val activityResultCaller: ActivityResultCaller = mock()
-            val activityResultLauncher: ActivityResultLauncher<LinkActivityContract.Args> = mock()
+            DummyActivityResultCaller.test {
+                val linkAnalyticsHelper = TrackingLinkAnalyticsHelper()
+                val linkPaymentLauncher = createLinkPaymentLauncher(
+                    linkAnalyticsHelper = linkAnalyticsHelper,
+                    linkStore = linkStore
+                )
 
-            val linkAnalyticsHelper = TrackingLinkAnalyticsHelper()
-            val linkPaymentLauncher = createLinkPaymentLauncher(
-                linkAnalyticsHelper = linkAnalyticsHelper,
-                linkStore = linkStore
-            )
+                var callbackParam: LinkActivityResult? = null
+                linkPaymentLauncher.register(activityResultCaller) { callbackParam = it }
 
-            setupActivityResultCallerMock(
-                activityResultCaller = activityResultCaller,
-                linkActivityContractProvider = { any() },
-                activityResultLauncher = activityResultLauncher
-            )
+                linkPaymentLauncher.present(TestFactory.LINK_CONFIGURATION)
 
-            setupActivityResultCallerCallback(
-                activityResultCaller = activityResultCaller,
-                linkActivityResult = linkActivityResult
-            )
+                val registerCall = awaitRegisterCall()
+                registerCall.callback.asCallbackFor<LinkActivityResult>().onActivityResult(linkActivityResult)
 
-            var callbackParam: LinkActivityResult? = null
-            linkPaymentLauncher.register(activityResultCaller) { callbackParam = it }
+                verifyActivityResultCallback(
+                    linkActivityResult = linkActivityResult,
+                    linkStore = linkStore,
+                    linkAnalyticsHelper = linkAnalyticsHelper,
+                    expectedMarkAsUsedCalls = expectedMarkAsUsedCalls,
+                    callbackResult = callbackParam,
+                )
 
-            linkPaymentLauncher.present(TestFactory.LINK_CONFIGURATION)
-
-            verifyActivityResultCallback(
-                linkActivityResult = linkActivityResult,
-                linkStore = linkStore,
-                linkAnalyticsHelper = linkAnalyticsHelper,
-                expectedMarkAsUsedCalls = expectedMarkAsUsedCalls,
-                callbackResult = callbackParam,
-            )
+                awaitLaunchCall()
+                awaitNextRegisteredLauncher()
+            }
         }
     }
 
@@ -256,19 +249,6 @@ internal class LinkPaymentLauncherTest {
         ).thenReturn(launcher)
     }
 
-    private fun setupActivityResultCallerMock(
-        activityResultCaller: ActivityResultCaller,
-        activityResultLauncher: ActivityResultLauncher<LinkActivityContract.Args>,
-        linkActivityContractProvider: () -> LinkActivityContract
-    ) {
-        whenever(
-            activityResultCaller.registerForActivityResult(
-                linkActivityContractProvider(),
-                any()
-            )
-        ).thenReturn(activityResultLauncher)
-    }
-
     private fun verifyActivityResultRegistryRegister(
         activityResultRegistry: ActivityResultRegistry,
         linkActivityContract: LinkActivityContract
@@ -278,22 +258,6 @@ internal class LinkPaymentLauncherTest {
             eq(linkActivityContract),
             any()
         )
-    }
-
-    private fun setupActivityResultCallerCallback(
-        activityResultCaller: ActivityResultCaller,
-        linkActivityResult: LinkActivityResult
-    ) {
-        whenever(
-            activityResultCaller.registerForActivityResult(
-                any<ActivityResultContract<LinkActivityContract.Args, LinkActivityResult>>(),
-                any()
-            )
-        ).thenAnswer { invocation ->
-            val callback = invocation.getArgument<ActivityResultCallback<LinkActivityResult>>(1)
-            callback.onActivityResult(linkActivityResult)
-            mock<ActivityResultLauncher<LinkActivityContract.Args>>()
-        }
     }
 
     private fun createLinkPaymentLauncher(
