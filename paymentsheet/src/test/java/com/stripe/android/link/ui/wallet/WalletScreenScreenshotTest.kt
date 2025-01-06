@@ -6,9 +6,14 @@ import com.stripe.android.link.TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT
 import com.stripe.android.link.TestFactory.CONSUMER_PAYMENT_DETAILS_CARD
 import com.stripe.android.link.TestFactory.CONSUMER_PAYMENT_DETAILS_PASSTHROUGH
 import com.stripe.android.link.theme.DefaultLinkTheme
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.CvcCheck
 import com.stripe.android.screenshottesting.PaparazziRule
+import com.stripe.android.ui.core.elements.CvcController
+import com.stripe.android.uicore.elements.DateConfig
+import com.stripe.android.uicore.elements.SimpleTextFieldController
+import com.stripe.android.uicore.utils.stateFlowOf
 import org.junit.Rule
 import org.junit.Test
 
@@ -160,7 +165,11 @@ internal class WalletScreenScreenshotTest {
                     onEditPaymentMethodClicked = {},
                     showBottomSheetContent = {},
                     hideBottomSheetContent = {},
-                    onAddNewPaymentMethodClicked = {}
+                    onAddNewPaymentMethodClicked = {},
+                    expiryDateController = SimpleTextFieldController(DateConfig()),
+                    cvcController = CvcController(
+                        cardBrandFlow = stateFlowOf(CardBrand.Unknown)
+                    )
                 )
             }
         }
