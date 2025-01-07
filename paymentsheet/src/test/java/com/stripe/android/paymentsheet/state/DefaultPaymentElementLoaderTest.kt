@@ -579,7 +579,7 @@ internal class DefaultPaymentElementLoaderTest {
                 phone = null,
                 billingCountryCode = "CA",
             ),
-            shippingValues = null,
+            shippingDetails = null,
             passthroughModeEnabled = false,
             cardBrandChoice = null,
             flags = emptyMap(),
@@ -606,7 +606,7 @@ internal class DefaultPaymentElementLoaderTest {
             initializedViaCompose = false,
         ).getOrThrow()
 
-        assertThat(result.linkState?.configuration?.shippingValues).isNotNull()
+        assertThat(result.linkState?.configuration?.shippingDetails).isNotNull()
     }
 
     @Test

@@ -59,7 +59,7 @@ internal object LinkTestUtils {
             merchantCountryCode = "US",
             passthroughModeEnabled = false,
             cardBrandChoice = null,
-            shippingValues = mapOf(),
+            shippingDetails = null,
         )
     }
 }

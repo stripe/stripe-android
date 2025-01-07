@@ -360,7 +360,7 @@ class ConfirmationHandlerOptionKtxTest {
                 phone = null,
                 billingCountryCode = "CA",
             ),
-            shippingValues = mapOf(),
+            shippingDetails = null,
             passthroughModeEnabled = false,
             cardBrandChoice = null,
             flags = mapOf()

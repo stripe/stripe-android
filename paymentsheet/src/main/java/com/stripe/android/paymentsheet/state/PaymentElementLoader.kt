@@ -27,7 +27,6 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.IntentConfiguration
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
-import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
@@ -471,12 +470,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             configuration.defaultBillingDetails?.phone
         }
 
-        val shippingAddress = if (shippingDetails?.isCheckboxSelected == true) {
-            shippingDetails.toIdentifierMap(configuration.defaultBillingDetails)
-        } else {
-            null
-        }
-
         val customerEmail = configuration.defaultBillingDetails?.email ?: customer?.let {
             customerRepository.retrieveCustomer(
                 CustomerRepository.CustomerInfo(
@@ -508,7 +501,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             merchantName = merchantName,
             merchantCountryCode = merchantCountry,
             customerInfo = customerInfo,
-            shippingValues = shippingAddress,
+            shippingDetails = shippingDetails?.takeIf { it.isCheckboxSelected == true },
             passthroughModeEnabled = passthroughModeEnabled,
             cardBrandChoice = cardBrandChoice,
             flags = flags,

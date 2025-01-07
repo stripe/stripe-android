@@ -43,7 +43,7 @@ internal class SignUpScreenTest {
         merchantCountryCode = "US",
         passthroughModeEnabled = false,
         cardBrandChoice = null,
-        shippingValues = mapOf(),
+        shippingDetails = null,
     )
     private val linkAccountManager = FakeLinkAccountManager()
     private val linkEventsReporter = object : FakeLinkEventsReporter() {

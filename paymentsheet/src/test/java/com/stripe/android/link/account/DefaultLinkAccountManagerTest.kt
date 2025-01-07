@@ -828,7 +828,7 @@ class DefaultLinkAccountManagerTest {
             ),
             merchantName = "Merchant",
             merchantCountryCode = "US",
-            shippingValues = null,
+            shippingDetails = null,
             passthroughModeEnabled = passthroughModeEnabled,
             flags = emptyMap(),
             cardBrandChoice = null,

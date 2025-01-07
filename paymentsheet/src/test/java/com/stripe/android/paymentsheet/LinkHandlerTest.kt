@@ -562,7 +562,7 @@ private fun defaultLinkConfiguration(
             phone = "1234567890",
             billingCountryCode = "US",
         ),
-        shippingValues = null,
+        shippingDetails = null,
         passthroughModeEnabled = false,
         cardBrandChoice = null,
         flags = emptyMap(),

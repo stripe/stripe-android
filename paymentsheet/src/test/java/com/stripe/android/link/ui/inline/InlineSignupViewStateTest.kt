@@ -91,7 +91,7 @@ class InlineSignupViewStateTest {
                 phone = "+15555555555",
                 billingCountryCode = "usd",
             ),
-            shippingValues = null,
+            shippingDetails = null,
             passthroughModeEnabled = false,
             flags = emptyMap(),
             cardBrandChoice = null,

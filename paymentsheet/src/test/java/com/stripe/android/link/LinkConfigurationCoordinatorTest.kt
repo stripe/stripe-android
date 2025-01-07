@@ -27,7 +27,7 @@ class LinkConfigurationCoordinatorTest {
             phone = CUSTOMER_PHONE,
             billingCountryCode = CUSTOMER_BILLING_COUNTRY_CODE,
         ),
-        shippingValues = null,
+        shippingDetails = null,
         passthroughModeEnabled = false,
         flags = emptyMap(),
         cardBrandChoice = null,
