@@ -58,11 +58,12 @@ internal class ConnectAnalyticsService(
             // event-specific params should be included in both the top-level and event_metadata
             // blob so that we can use them in prometheus alerts (which are only available for
             // top-level events).
-            val params = commonParams() + event.params + if (event.params.isNotEmpty()) {
+            val eventMetadata = event.params + if (event.params.isNotEmpty()) {
                 mapOf("event_metadata" to event.params)
             } else {
                 emptyMap()
             }
+            val params = commonParams() + event.params + eventMetadata
 
             val request = requestFactory.createRequest(
                 eventName = event.eventName,
