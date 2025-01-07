@@ -130,12 +130,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
     init {
         SessionSavedStateHandler.attachTo(this, savedStateHandle)
 
-        viewModelScope.launch {
-            linkHandler.processingState.collect { processingState ->
-                handleLinkProcessingState(processingState)
-            }
-        }
-
         // This is bad, but I don't think there's a better option
         PaymentSheet.FlowController.linkHandler = linkHandler
 
@@ -158,31 +152,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 customerStateHolder = customerStateHolder,
             )
         )
-    }
-
-    private fun handleLinkProcessingState(processingState: LinkHandler.ProcessingState) {
-        when (processingState) {
-            is LinkHandler.ProcessingState.PaymentDetailsCollected -> {
-                processingState.paymentSelection?.let {
-                    // Link PaymentDetails was created successfully, use it to confirm the Stripe Intent.
-                    updateSelection(it)
-                    onUserSelection()
-                } ?: run {
-                    // Creating Link PaymentDetails failed, fallback to regular checkout.
-                    // paymentSelection is already set to the card parameters from the form.
-                    onUserSelection()
-                }
-            }
-            LinkHandler.ProcessingState.Ready -> {
-                updatePrimaryButtonState(PrimaryButton.State.Ready)
-            }
-            LinkHandler.ProcessingState.Started -> {
-                updatePrimaryButtonState(PrimaryButton.State.StartProcessing)
-            }
-            LinkHandler.ProcessingState.CompleteWithoutLink -> {
-                onUserSelection()
-            }
-        }
     }
 
     override fun onUserCancel() {

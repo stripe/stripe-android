@@ -3,6 +3,8 @@ package com.stripe.android.paymentsheet
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.link.ui.inline.UserInput
+import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.linkinline.LinkInlineSignupConfirmationOption
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -15,11 +17,6 @@ import kotlinx.coroutines.launch
 
 internal class LinkInlineHandler(
     private val coroutineScope: CoroutineScope,
-    private val payWithLink: suspend (
-        userInput: UserInput?,
-        paymentSelection: PaymentSelection?,
-        shouldCompleteLinkInlineFlow: Boolean,
-    ) -> Unit,
     private val selection: StateFlow<PaymentSelection?>,
     private val updateLinkPrimaryButtonUiState: (PrimaryButton.UIState?) -> Unit,
     private val primaryButtonLabel: StateFlow<ResolvableString?>,
@@ -72,7 +69,7 @@ internal class LinkInlineHandler(
                 if (userInput != null && paymentSelection != null) {
                     PrimaryButton.UIState(
                         label = label,
-                        onClick = { payWithLinkInline(userInput) },
+                        onClick = {},
                         enabled = true,
                         lockVisible = shouldCompleteLinkFlowInline,
                     )
@@ -90,12 +87,6 @@ internal class LinkInlineHandler(
         )
     }
 
-    private fun payWithLinkInline(userInput: UserInput?) {
-        coroutineScope.launch {
-            payWithLink(userInput, selection.value, shouldCompleteLinkFlowInline)
-        }
-    }
-
     fun onStateUpdated(state: InlineSignupViewState) {
         linkInlineSignUpState.value = state
     }
@@ -104,7 +95,6 @@ internal class LinkInlineHandler(
         fun create(viewModel: BaseSheetViewModel, coroutineScope: CoroutineScope): LinkInlineHandler {
             return LinkInlineHandler(
                 coroutineScope = coroutineScope,
-                payWithLink = viewModel.linkHandler::payWithLinkInline,
                 selection = viewModel.selection,
                 updateLinkPrimaryButtonUiState = { viewModel.customPrimaryButtonUiState.value = it },
                 primaryButtonLabel = viewModel.primaryButtonUiState.mapAsStateFlow { it?.label },

@@ -76,10 +76,8 @@ internal class DefaultAddPaymentMethodInteractor(
             paymentMethodMetadata: PaymentMethodMetadata,
         ): AddPaymentMethodInteractor {
             val coroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
-            val linkInlineHandler = LinkInlineHandler.create(viewModel, coroutineScope)
             val formHelper = FormHelper.create(
                 viewModel = viewModel,
-                linkInlineHandler = linkInlineHandler,
                 paymentMethodMetadata = paymentMethodMetadata
             )
             val bankFormInteractor = BankFormInteractor.create(viewModel)

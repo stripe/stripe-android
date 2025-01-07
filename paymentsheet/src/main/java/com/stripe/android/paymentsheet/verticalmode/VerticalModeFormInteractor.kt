@@ -98,7 +98,6 @@ internal class DefaultVerticalModeFormInteractor(
             val coroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
             val formHelper = FormHelper.create(
                 viewModel = viewModel,
-                linkInlineHandler = LinkInlineHandler.create(viewModel, coroutineScope),
                 paymentMethodMetadata = paymentMethodMetadata
             )
             return DefaultVerticalModeFormInteractor(

@@ -8,6 +8,7 @@ import com.stripe.android.paymentelement.confirmation.bacs.BacsConfirmationOptio
 import com.stripe.android.paymentelement.confirmation.epms.ExternalPaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
+import com.stripe.android.paymentelement.confirmation.linkinline.LinkInlineSignupConfirmationOption
 import com.stripe.android.paymentsheet.model.PaymentSelection
 
 internal fun PaymentSelection.toConfirmationOption(
@@ -38,6 +39,22 @@ internal fun PaymentSelection.toConfirmationOption(
                     shouldSave = customerRequestedSave == PaymentSelection.CustomerRequestedSave.RequestReuse,
                 )
             }
+        }
+        is PaymentSelection.New.LinkInline -> linkConfiguration?.let {
+            LinkInlineSignupConfirmationOption(
+                createParams = paymentMethodCreateParams,
+                optionsParams = paymentMethodOptionsParams,
+                userInput = input,
+                linkConfiguration = linkConfiguration,
+                saveOption = when (customerRequestedSave) {
+                    PaymentSelection.CustomerRequestedSave.RequestReuse ->
+                        LinkInlineSignupConfirmationOption.PaymentMethodSaveOption.ReuseRequested
+                    PaymentSelection.CustomerRequestedSave.RequestNoReuse ->
+                        LinkInlineSignupConfirmationOption.PaymentMethodSaveOption.NoReuseRequested
+                    PaymentSelection.CustomerRequestedSave.NoRequest ->
+                        LinkInlineSignupConfirmationOption.PaymentMethodSaveOption.NoRequest
+                }
+            )
         }
         is PaymentSelection.New -> {
             if (paymentMethodCreateParams.typeCode == PaymentMethod.Type.BacsDebit.code) {

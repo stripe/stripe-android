@@ -12,7 +12,7 @@ import androidx.core.content.res.ResourcesCompat
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.orEmpty
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.link.LinkPaymentDetails
+import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -214,25 +214,18 @@ internal sealed class PaymentSelection : Parcelable {
 
         @Parcelize
         data class LinkInline(
-            val linkPaymentDetails: LinkPaymentDetails,
+            override val paymentMethodCreateParams: PaymentMethodCreateParams,
+            val brand: CardBrand,
             override val customerRequestedSave: CustomerRequestedSave,
+            override val paymentMethodOptionsParams: PaymentMethodOptionsParams? = null,
+            override val paymentMethodExtraParams: PaymentMethodExtraParams? = null,
+            val input: UserInput,
         ) : New() {
             @IgnoredOnParcel
-            private val paymentDetails = linkPaymentDetails.paymentDetails
+            private val last4: String = paymentMethodCreateParams.cardLast4().orEmpty()
 
             @IgnoredOnParcel
-            override val paymentMethodCreateParams = linkPaymentDetails.paymentMethodCreateParams
-
-            @IgnoredOnParcel
-            override val paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(
-                setupFutureUsage = customerRequestedSave.setupFutureUsage
-            )
-
-            @IgnoredOnParcel
-            override val paymentMethodExtraParams = null
-
-            @IgnoredOnParcel
-            val label = "···· ${paymentDetails.last4}"
+            val label = "···· $last4"
         }
 
         @Parcelize
@@ -391,7 +384,7 @@ internal val PaymentSelection.paymentMethodType: String
         PaymentSelection.Link -> "link"
         is PaymentSelection.New.Card -> paymentMethodCreateParams.typeCode
         is PaymentSelection.New.GenericPaymentMethod -> paymentMethodCreateParams.typeCode
-        is PaymentSelection.New.LinkInline -> linkPaymentDetails.paymentMethodCreateParams.typeCode
+        is PaymentSelection.New.LinkInline -> paymentMethodCreateParams.typeCode
         is PaymentSelection.New.USBankAccount -> paymentMethodCreateParams.typeCode
         is PaymentSelection.Saved -> paymentMethod.type?.name ?: "card"
     }
