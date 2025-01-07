@@ -26,7 +26,7 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
             val args = confirmationArgs(paymentDetails, linkAccount)
             confirmationHandler.start(args)
             val result = confirmationHandler.awaitResult()
-            return transformResult(result)
+            transformResult(result)
         }.getOrElse { error ->
             logger.error(
                 msg = "DefaultLinkConfirmationHandler: Failed to confirm payment",
