@@ -12,9 +12,13 @@ class PayoutsView private constructor(
     context: Context,
     attrs: AttributeSet?,
     defStyleAttr: Int,
-    webViewContainerBehavior: StripeConnectWebViewContainerImpl<PayoutsListener, EmptyProps>,
+    private val webViewContainerBehavior: StripeConnectWebViewContainerImpl<PayoutsListener, EmptyProps>,
 ) : FrameLayout(context, attrs, defStyleAttr),
     StripeConnectWebViewContainer<PayoutsListener, EmptyProps> by webViewContainerBehavior {
+
+    init {
+        webViewContainerBehavior.initializeView(this)
+    }
 
     @JvmOverloads
     @RestrictTo(RestrictTo.Scope.LIBRARY)
@@ -35,10 +39,14 @@ class PayoutsView private constructor(
             listenerDelegate = ComponentListenerDelegate.ignore(),
             props = EmptyProps,
         )
-    )
-
-    init {
-        webViewContainerBehavior.initializeView(this)
+    ) {
+        if (embeddedComponentManager != null) {
+            webViewContainerBehavior.initializeInternal(
+                embeddedComponentManager = embeddedComponentManager,
+                listener = listener,
+                propsJson = EmptyProps.toJsonObject(),
+            )
+        }
     }
 }
 
