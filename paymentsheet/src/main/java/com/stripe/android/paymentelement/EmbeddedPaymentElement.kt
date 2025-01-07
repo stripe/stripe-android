@@ -322,7 +322,6 @@ class EmbeddedPaymentElement private constructor(
              * **Note**: Card brand filtering is not currently supported in Link.
              */
             @ExperimentalCardBrandFilteringApi
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun cardBrandAcceptance(
                 cardBrandAcceptance: PaymentSheet.CardBrandAcceptance
             ) = apply {
