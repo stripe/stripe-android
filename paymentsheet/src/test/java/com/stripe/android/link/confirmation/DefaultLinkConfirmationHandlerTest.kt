@@ -5,6 +5,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.TestFactory
+import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
@@ -58,7 +59,7 @@ internal class DefaultLinkConfirmationHandlerTest {
                     initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                         clientSecret = configuration.stripeIntent.clientSecret ?: ""
                     ),
-                    shippingDetails = null
+                    shippingDetails = configuration.shippingDetails
                 )
             )
     }
@@ -90,7 +91,7 @@ internal class DefaultLinkConfirmationHandlerTest {
 
         Truth.assertThat(result).isEqualTo(Result.Failed(errorMessage))
         Truth.assertThat(logger.errorLogs)
-            .containsExactly("Failed to confirm payment" to error)
+            .containsExactly("DefaultLinkConfirmationHandler: Failed to confirm payment" to error)
     }
 
     @Test
@@ -130,7 +131,34 @@ internal class DefaultLinkConfirmationHandlerTest {
 
         Truth.assertThat(result).isEqualTo(Result.Failed(R.string.stripe_something_went_wrong.resolvableString))
         Truth.assertThat(logger.errorLogs)
-            .containsExactly("Payment confirmation returned null" to null)
+            .containsExactly("DefaultLinkConfirmationHandler: Payment confirmation returned null" to null)
+    }
+
+    @Test
+    fun `invalid client secret yields error result`() = runTest(dispatcher) {
+        val confirmationHandler = FakeConfirmationHandler()
+        val logger = FakeLogger()
+        val handler = createHandler(
+            confirmationHandler = confirmationHandler,
+            logger = logger,
+            configuration = TestFactory.LINK_CONFIGURATION.copy(
+                stripeIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
+                    clientSecret = null
+                )
+            )
+        )
+
+        confirmationHandler.awaitResultTurbine.add(null)
+
+        val result = handler.confirm(
+            paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+            linkAccount = TestFactory.LINK_ACCOUNT
+        )
+
+        Truth.assertThat(result).isEqualTo(Result.Failed(R.string.stripe_something_went_wrong.resolvableString))
+        Truth.assertThat(logger.errorLogs)
+            .containsExactly("DefaultLinkConfirmationHandler: Failed to confirm payment"
+                to DefaultLinkConfirmationHandler.NO_CLIENT_SECRET_FOUND)
     }
 
     private fun createHandler(
