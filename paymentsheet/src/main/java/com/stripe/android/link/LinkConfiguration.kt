@@ -2,7 +2,7 @@ package com.stripe.android.link
 
 import android.os.Parcelable
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -11,7 +11,7 @@ internal data class LinkConfiguration(
     val merchantName: String,
     val merchantCountryCode: String?,
     val customerInfo: CustomerInfo,
-    val shippingValues: Map<IdentifierSpec, String?>?,
+    val shippingDetails: AddressDetails?,
     val passthroughModeEnabled: Boolean,
     val flags: Map<String, Boolean>,
     val cardBrandChoice: CardBrandChoice?,

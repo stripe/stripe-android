@@ -948,7 +948,7 @@ internal class PaymentSheetViewModelTest {
                 merchantCountryCode = "US",
                 passthroughModeEnabled = false,
                 cardBrandChoice = null,
-                shippingValues = mapOf(),
+                shippingDetails = null,
             )
 
             val viewModel = createViewModel(
@@ -3335,7 +3335,7 @@ internal class PaymentSheetViewModelTest {
                 phone = null,
                 billingCountryCode = "US",
             ),
-            shippingValues = null,
+            shippingDetails = null,
             passthroughModeEnabled = false,
             cardBrandChoice = null,
             flags = emptyMap()

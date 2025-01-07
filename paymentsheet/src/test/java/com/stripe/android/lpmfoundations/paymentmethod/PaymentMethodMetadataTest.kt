@@ -1303,7 +1303,7 @@ internal class PaymentMethodMetadataTest {
                 ),
                 merchantName = "Merchant Inc.",
                 merchantCountryCode = "CA",
-                shippingValues = mapOf(),
+                shippingDetails = null,
                 flags = mapOf(),
                 cardBrandChoice = LinkConfiguration.CardBrandChoice(
                     eligible = true,

@@ -122,7 +122,7 @@ internal object TestFactory {
             phone = CUSTOMER_PHONE,
             billingCountryCode = CUSTOMER_BILLING_COUNTRY_CODE
         ),
-        shippingValues = null,
+        shippingDetails = null,
         flags = emptyMap(),
         cardBrandChoice = null,
         passthroughModeEnabled = false

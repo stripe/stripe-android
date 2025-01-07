@@ -221,7 +221,7 @@ internal class PopupPayloadTest {
             ),
             flags = emptyMap(),
             passthroughModeEnabled = true,
-            shippingValues = emptyMap(),
+            shippingDetails = null,
             cardBrandChoice = cardBrandChoice,
             stripeIntent = intent
         )

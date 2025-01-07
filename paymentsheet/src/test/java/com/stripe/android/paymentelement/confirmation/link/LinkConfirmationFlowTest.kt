@@ -156,7 +156,7 @@ class LinkConfirmationFlowTest {
                     phone = "+1123456789",
                     billingCountryCode = "CA"
                 ),
-                shippingValues = mapOf(),
+                shippingDetails = null,
                 passthroughModeEnabled = false,
                 flags = mapOf(),
                 cardBrandChoice = null,

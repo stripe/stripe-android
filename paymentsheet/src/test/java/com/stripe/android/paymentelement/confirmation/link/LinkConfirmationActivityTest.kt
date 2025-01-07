@@ -222,7 +222,7 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
                     phone = "+1234567890",
                     billingCountryCode = "CA",
                 ),
-                shippingValues = mapOf(),
+                shippingDetails = null,
                 passthroughModeEnabled = false,
                 flags = mapOf(),
                 cardBrandChoice = null,
