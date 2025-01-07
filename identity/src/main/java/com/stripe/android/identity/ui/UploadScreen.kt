@@ -389,7 +389,13 @@ private fun SingleSideUploadRow(
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(
-            text = stringResource(id = if (isFront) R.string.stripe_front_of_id_document else R.string.stripe_back_of_id_document),
+            text = stringResource(
+                id = if (isFront) {
+                    R.string.stripe_front_of_id_document
+                } else {
+                    R.string.stripe_back_of_id_document
+                }
+            ),
             modifier = Modifier.align(CenterVertically)
         )
         when (uploadUiState) {
