@@ -15,7 +15,7 @@ internal data class CustomerState(
     val customerSessionClientSecret: String?,
     val paymentMethods: List<PaymentMethod>,
     val permissions: Permissions,
-    private val defaultPaymentMethodId: String?
+    val defaultPaymentMethodId: String?
 ) : Parcelable {
     @Parcelize
     data class Permissions(
@@ -23,14 +23,6 @@ internal data class CustomerState(
         val canRemoveLastPaymentMethod: Boolean,
         val canRemoveDuplicates: Boolean,
     ) : Parcelable
-
-    fun getDefaultPaymentMethodId(): String? {
-        return if (FeatureFlags.enableDefaultPaymentMethods.isEnabled) {
-            this.defaultPaymentMethodId
-        } else {
-            null
-        }
-    }
 
     internal companion object {
         /**
@@ -75,7 +67,11 @@ internal data class CustomerState(
                     // Should always remove duplicates when using `customer_session`
                     canRemoveDuplicates = true,
                 ),
-                defaultPaymentMethodId = customer.defaultPaymentMethod
+                defaultPaymentMethodId = if (FeatureFlags.enableDefaultPaymentMethods.isEnabled) {
+                    customer.defaultPaymentMethod
+                } else {
+                    null
+                }
             )
         }
 
