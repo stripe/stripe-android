@@ -31,7 +31,7 @@ internal sealed class ConnectAnalyticsEvent(
      * Note: This should happen before component_loaded, so we won't yet have a page_view_id.
      */
     data class WebPageLoaded(
-        val timeToLoad: Double
+        val timeToLoad: Long
     ) : ConnectAnalyticsEvent(
         "component.web.page_loaded",
         mapOf("time_to_load" to timeToLoad.toString())
@@ -43,8 +43,8 @@ internal sealed class ConnectAnalyticsEvent(
      */
     data class WebComponentLoaded(
         val pageViewId: String,
-        val timeToLoad: Double,
-        val perceivedTimeToLoad: Double
+        val timeToLoad: Long,
+        val perceivedTimeToLoad: Long
     ) : ConnectAnalyticsEvent(
         "component.web.component_loaded",
         mapOf(

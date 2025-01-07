@@ -18,10 +18,13 @@ import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.StripeEmbeddedComponent
 import com.stripe.android.connect.StripeEmbeddedComponentListener
 import com.stripe.android.connect.analytics.ComponentAnalyticsService
+import com.stripe.android.connect.analytics.ConnectAnalyticsEvent
+import com.stripe.android.connect.util.Clock
 import com.stripe.android.connect.webview.serialization.ConnectInstanceJs
 import com.stripe.android.connect.webview.serialization.SetOnLoadError
 import com.stripe.android.connect.webview.serialization.SetOnLoaderStart
 import com.stripe.android.connect.webview.serialization.SetterFunctionCalledMessage
+import com.stripe.android.connect.webview.serialization.SetterFunctionCalledMessage.UnknownValue
 import com.stripe.android.core.Logger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -36,6 +39,7 @@ import kotlinx.coroutines.withContext
 internal class StripeConnectWebViewContainerController<Listener : StripeEmbeddedComponentListener>(
     private val view: StripeConnectWebViewContainerInternal,
     private val analyticsService: ComponentAnalyticsService,
+    private val clock: Clock,
     private val embeddedComponentManager: EmbeddedComponentManager,
     private val embeddedComponent: StripeEmbeddedComponent,
     private val listener: Listener?,
@@ -43,6 +47,10 @@ internal class StripeConnectWebViewContainerController<Listener : StripeEmbedded
     private val stripeIntentLauncher: StripeIntentLauncher = StripeIntentLauncherImpl(),
     private val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG),
 ) : DefaultLifecycleObserver {
+
+    init {
+        analyticsService.track(ConnectAnalyticsEvent.ComponentCreated)
+    }
 
     private val loggerTag = javaClass.simpleName
     private val _stateFlow = MutableStateFlow(StripeConnectWebViewContainerState())
@@ -57,7 +65,10 @@ internal class StripeConnectWebViewContainerController<Listener : StripeEmbedded
      * Callback to invoke when the view is attached.
      */
     fun onViewAttached() {
+        updateState { copy(didBeginLoadingMillis = clock.millis()) }
         view.loadUrl(embeddedComponentManager.getStripeURL(embeddedComponent))
+
+        analyticsService.track(ConnectAnalyticsEvent.ComponentViewed(stateFlow.value.pageViewId))
     }
 
     /**
@@ -65,6 +76,14 @@ internal class StripeConnectWebViewContainerController<Listener : StripeEmbedded
      */
     fun onPageStarted() {
         updateState { copy(isNativeLoadingIndicatorVisible = !receivedSetOnLoaderStart) }
+    }
+
+    /**
+     * Callback to invoke when the page finished loading.
+     */
+    fun onPageFinished() {
+        val timeToLoad = clock.millis() - (stateFlow.value.didBeginLoadingMillis ?: 0)
+        analyticsService.track(ConnectAnalyticsEvent.WebPageLoaded(timeToLoad))
     }
 
     /**
@@ -92,6 +111,11 @@ internal class StripeConnectWebViewContainerController<Listener : StripeEmbedded
         // don't send errors for requests that aren't for the main page load
         if (isMainPageLoad) {
             listener?.onLoadError(RuntimeException(errorString)) // TODO - wrap error better
+            analyticsService.track(ConnectAnalyticsEvent.WebErrorPageLoad(
+                status = httpStatusCode,
+                error = errorMessage,
+                url = requestUrl
+            ))
         }
     }
 
@@ -139,7 +163,7 @@ internal class StripeConnectWebViewContainerController<Listener : StripeEmbedded
                     embeddedComponentManager.appearanceFlow
                         .collectLatest { appearance ->
                             updateState { copy(appearance = appearance) }
-                            if (stateFlow.value.receivedPageDidLoad) {
+                            if (stateFlow.value.pageViewId != null) {
                                 view.updateConnectInstance(appearance)
                             }
                         }
@@ -215,9 +239,16 @@ internal class StripeConnectWebViewContainerController<Listener : StripeEmbedded
     /**
      * Callback to invoke upon receiving 'pageDidLoad' message.
      */
-    fun onReceivedPageDidLoad() {
+    fun onReceivedPageDidLoad(pageViewId: String) {
         view.updateConnectInstance(embeddedComponentManager.appearanceFlow.value)
-        updateState { copy(receivedPageDidLoad = true) }
+        updateState { copy(pageViewId = pageViewId) }
+
+        val timeToLoad = clock.millis() - (stateFlow.value.didBeginLoadingMillis ?: 0)
+        analyticsService.track(ConnectAnalyticsEvent.WebComponentLoaded(
+            pageViewId = pageViewId,
+            timeToLoad = timeToLoad,          // right now view onAttach and begin load happen at the same time,
+            perceivedTimeToLoad = timeToLoad, // so timeToLoad and perceivedTimeToLoad are the same value
+        ))
     }
 
     /**
@@ -239,6 +270,12 @@ internal class StripeConnectWebViewContainerController<Listener : StripeEmbedded
                 listener?.onLoadError(RuntimeException("${value.error.type}: ${value.error.message}"))
             }
             else -> {
+                if (value is UnknownValue) {
+                    analyticsService.track(ConnectAnalyticsEvent.WebWarnUnrecognizedSetter(
+                        setter = message.setter,
+                        pageViewId = stateFlow.value.pageViewId
+                    ))
+                }
                 with(listenerDelegate) {
                     listener?.delegate(message)
                 }

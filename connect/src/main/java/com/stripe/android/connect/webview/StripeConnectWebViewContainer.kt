@@ -33,6 +33,7 @@ import com.stripe.android.connect.StripeEmbeddedComponentListener
 import com.stripe.android.connect.appearance.Appearance
 import com.stripe.android.connect.databinding.StripeConnectWebviewBinding
 import com.stripe.android.connect.toJsonObject
+import com.stripe.android.connect.util.AndroidClock
 import com.stripe.android.connect.webview.serialization.AccountSessionClaimedMessage
 import com.stripe.android.connect.webview.serialization.ConnectInstanceJs
 import com.stripe.android.connect.webview.serialization.ConnectJson
@@ -202,6 +203,7 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
         this.controller = StripeConnectWebViewContainerController(
             view = this,
             analyticsService = analyticsService,
+            clock = AndroidClock(),
             embeddedComponentManager = embeddedComponentManager,
             embeddedComponent = embeddedComponent,
             listener = listener,
@@ -267,6 +269,10 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
     internal inner class StripeConnectWebViewClient : WebViewClient() {
         override fun onPageStarted(view: WebView, url: String?, favicon: Bitmap?) {
             controller?.onPageStarted()
+        }
+
+        override fun onPageFinished(view: WebView?, url: String?) {
+            controller?.onPageFinished()
         }
 
         override fun onReceivedHttpError(
@@ -388,7 +394,7 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
             val pageLoadMessage = ConnectJson.decodeFromString<PageLoadMessage>(message)
             logger.debug("Page did load: $pageLoadMessage")
 
-            controller?.onReceivedPageDidLoad()
+            controller?.onReceivedPageDidLoad(pageLoadMessage.pageViewId)
         }
 
         @JavascriptInterface
