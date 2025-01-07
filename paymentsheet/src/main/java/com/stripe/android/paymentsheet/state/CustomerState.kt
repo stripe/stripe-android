@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.state
 
 import android.os.Parcelable
 import com.stripe.android.common.model.CommonConfiguration
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -66,7 +67,11 @@ internal data class CustomerState(
                     // Should always remove duplicates when using `customer_session`
                     canRemoveDuplicates = true,
                 ),
-                defaultPaymentMethodId = customer.defaultPaymentMethod
+                defaultPaymentMethodId = if (FeatureFlags.enableDefaultPaymentMethods.isEnabled) {
+                    customer.defaultPaymentMethod
+                } else {
+                    null
+                }
             )
         }
 
