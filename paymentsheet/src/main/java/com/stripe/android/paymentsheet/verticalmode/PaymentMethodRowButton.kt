@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.verticalmode
 
+import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -38,9 +39,11 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle
+import com.stripe.android.paymentsheet.ui.DefaultPaymentMethodLabel
 import com.stripe.android.paymentsheet.ui.PaymentMethodIcon
 import com.stripe.android.paymentsheet.ui.PromoBadge
 import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconWidth
+import com.stripe.android.uicore.DefaultStripeTheme
 import com.stripe.android.uicore.getBorderStroke
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.stripeColors
@@ -51,6 +54,7 @@ internal fun PaymentMethodRowButton(
     isEnabled: Boolean,
     isSelected: Boolean,
     isClickable: Boolean = isEnabled,
+    shouldShowDefaultBadge: Boolean = false,
     iconContent: @Composable RowScope.() -> Unit,
     title: String,
     subtitle: String?,
@@ -87,7 +91,7 @@ internal fun PaymentMethodRowButton(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            RowButtonInnerContent(isEnabled, iconContent, title, subtitle, contentDescription)
+            RowButtonInnerContent(isEnabled, shouldShowDefaultBadge, iconContent, title, subtitle, contentDescription)
 
             if (style !is RowStyle.FlatWithCheckmark) {
                 Spacer(modifier = Modifier.weight(1f))
@@ -275,6 +279,7 @@ private fun RowButtonCheckmarkOuterContent(
 @Composable
 private fun RowButtonInnerContent(
     isEnabled: Boolean,
+    shouldShowDefaultBadge: Boolean = false,
     iconContent: @Composable RowScope.() -> Unit,
     title: String,
     subtitle: String?,
@@ -292,6 +297,13 @@ private fun RowButtonInnerContent(
             isEnabled = isEnabled,
             contentDescription = contentDescription
         )
+
+        if (shouldShowDefaultBadge) {
+            DefaultPaymentMethodLabel(
+                modifier = Modifier
+                    .padding(top = 4.dp, end = 6.dp, bottom = 4.dp)
+            )
+        }
     }
 }
 
@@ -326,30 +338,59 @@ private fun TitleContent(title: String, subtitle: String?, isEnabled: Boolean, c
 
 @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @Composable
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Preview
 private fun ButtonPreview() {
-    Row {
-        PaymentMethodRowButton(
-            isEnabled = true,
-            isSelected = true,
-            iconContent = {
-                PaymentMethodIcon(
-                    iconRes = com.stripe.android.ui.core.R.drawable.stripe_ic_paymentsheet_pm_card,
-                    iconUrl = null,
-                    imageLoader = StripeImageLoader(LocalContext.current.applicationContext),
-                    iconRequiresTinting = true,
-                    modifier = Modifier.height(22.dp).width(22.dp),
-                    contentAlignment = Alignment.Center,
-                )
-            },
-            title = "•••• 4242",
-            subtitle = null,
-            promoText = null,
-            onClick = {},
-            style = RowStyle.FloatingButton.default,
-            trailingContent = {
-                Text("Edit")
-            }
-        )
+    DefaultStripeTheme {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            PaymentMethodRowButton(
+                isEnabled = true,
+                isSelected = true,
+                shouldShowDefaultBadge = true,
+                iconContent = {
+                    PaymentMethodIcon(
+                        iconRes = com.stripe.android.ui.core.R.drawable.stripe_ic_paymentsheet_pm_card,
+                        iconUrl = null,
+                        imageLoader = StripeImageLoader(LocalContext.current.applicationContext),
+                        iconRequiresTinting = true,
+                        modifier = Modifier.height(22.dp).width(22.dp),
+                        contentAlignment = Alignment.Center,
+                    )
+                },
+                title = "•••• 4242",
+                subtitle = null,
+                promoText = null,
+                onClick = {},
+                style = RowStyle.FloatingButton.default,
+                trailingContent = {
+                    Text("Edit")
+                }
+            )
+            PaymentMethodRowButton(
+                isEnabled = false,
+                isSelected = false,
+                shouldShowDefaultBadge = false,
+                iconContent = {
+                    PaymentMethodIcon(
+                        iconRes = com.stripe.android.ui.core.R.drawable.stripe_ic_paymentsheet_pm_card,
+                        iconUrl = null,
+                        imageLoader = StripeImageLoader(LocalContext.current.applicationContext),
+                        iconRequiresTinting = true,
+                        modifier = Modifier.height(22.dp).width(22.dp),
+                        contentAlignment = Alignment.Center,
+                    )
+                },
+                title = "•••• 4242",
+                subtitle = null,
+                promoText = null,
+                onClick = {},
+                style = RowStyle.FloatingButton.default,
+                trailingContent = {
+                    Text("Edit")
+                }
+            )
+        }
     }
 }
