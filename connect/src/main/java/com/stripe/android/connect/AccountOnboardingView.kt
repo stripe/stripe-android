@@ -18,9 +18,27 @@ class AccountOnboardingView private constructor(
     context: Context,
     attrs: AttributeSet?,
     defStyleAttr: Int,
-    webViewContainerBehavior: StripeConnectWebViewContainerImpl<AccountOnboardingListener, AccountOnboardingProps>,
+    private val webViewContainerBehavior: StripeConnectWebViewContainerImpl<AccountOnboardingListener, AccountOnboardingProps>,
 ) : FrameLayout(context, attrs, defStyleAttr),
     StripeConnectWebViewContainer<AccountOnboardingListener, AccountOnboardingProps> by webViewContainerBehavior {
+
+    init {
+        context.withStyledAttributes(attrs, R.styleable.StripeAccountOnboardingView, defStyleAttr, 0) {
+            val props = AccountOnboardingProps(
+                fullTermsOfServiceUrl = getString(
+                    R.styleable.StripeAccountOnboardingView_stripeFullTermsOfServiceUrl
+                ),
+                recipientTermsOfServiceUrl = getString(
+                    R.styleable.StripeAccountOnboardingView_stripeRecipientTermsOfServiceUrl
+                ),
+                privacyPolicyUrl = getString(
+                    R.styleable.StripeAccountOnboardingView_stripePrivacyPolicyUrl
+                ),
+            )
+            webViewContainerBehavior.setPropsFromXml(props)
+        }
+        webViewContainerBehavior.initializeView(this)
+    }
 
     @JvmOverloads
     @RestrictTo(RestrictTo.Scope.LIBRARY)
@@ -42,24 +60,14 @@ class AccountOnboardingView private constructor(
             listenerDelegate = AccountOnboardingListenerDelegate,
             props = props,
         )
-    )
-
-    init {
-        context.withStyledAttributes(attrs, R.styleable.StripeAccountOnboardingView, defStyleAttr, 0) {
-            val props = AccountOnboardingProps(
-                fullTermsOfServiceUrl = getString(
-                    R.styleable.StripeAccountOnboardingView_stripeFullTermsOfServiceUrl
-                ),
-                recipientTermsOfServiceUrl = getString(
-                    R.styleable.StripeAccountOnboardingView_stripeRecipientTermsOfServiceUrl
-                ),
-                privacyPolicyUrl = getString(
-                    R.styleable.StripeAccountOnboardingView_stripePrivacyPolicyUrl
-                ),
+    ) {
+        if (embeddedComponentManager != null) {
+            webViewContainerBehavior.initializeInternal(
+                embeddedComponentManager = embeddedComponentManager,
+                listener = listener,
+                propsJson = props?.toJsonObject(),
             )
-            webViewContainerBehavior.setPropsFromXml(props)
         }
-        webViewContainerBehavior.initializeView(this)
     }
 }
 

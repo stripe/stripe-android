@@ -177,7 +177,7 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
 
     // Must be called after initializeView(). The view binding must be inflated
     // at the time this function is called.
-    fun initializeInternal(
+    internal fun initializeInternal(
         embeddedComponentManager: EmbeddedComponentManager,
         listener: Listener?,
         propsJson: JsonObject?,
