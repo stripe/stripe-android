@@ -18,7 +18,7 @@ class AccountOnboardingView private constructor(
     context: Context,
     attrs: AttributeSet?,
     defStyleAttr: Int,
-    private val webViewContainerBehavior:
+    webViewContainerBehavior:
     StripeConnectWebViewContainerImpl<AccountOnboardingListener, AccountOnboardingProps>,
 ) : FrameLayout(context, attrs, defStyleAttr),
     StripeConnectWebViewContainer<AccountOnboardingListener, AccountOnboardingProps> by webViewContainerBehavior {

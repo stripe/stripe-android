@@ -12,7 +12,7 @@ class PayoutsView private constructor(
     context: Context,
     attrs: AttributeSet?,
     defStyleAttr: Int,
-    private val webViewContainerBehavior: StripeConnectWebViewContainerImpl<PayoutsListener, EmptyProps>,
+    webViewContainerBehavior: StripeConnectWebViewContainerImpl<PayoutsListener, EmptyProps>,
 ) : FrameLayout(context, attrs, defStyleAttr),
     StripeConnectWebViewContainer<PayoutsListener, EmptyProps> by webViewContainerBehavior {
 
