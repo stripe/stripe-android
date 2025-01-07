@@ -14,6 +14,7 @@ import com.stripe.android.connect.EmbeddedComponentManager
 import com.stripe.android.connect.PayoutsListener
 import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.StripeEmbeddedComponent
+import com.stripe.android.connect.analytics.ConnectAnalyticsService
 import com.stripe.android.connect.appearance.Appearance
 import com.stripe.android.connect.appearance.Colors
 import com.stripe.android.connect.webview.serialization.SetOnLoadError
@@ -51,6 +52,7 @@ class StripeConnectWebViewContainerControllerTest {
     private val mockContext: Context = mock()
     private val mockPermissionRequest: PermissionRequest = mock()
     private val view: StripeConnectWebViewContainerInternal = mock()
+    private val analyticsService: ConnectAnalyticsService = mock()
     private val embeddedComponentManager: EmbeddedComponentManager = mock()
     private val embeddedComponent: StripeEmbeddedComponent = StripeEmbeddedComponent.PAYOUTS
 
@@ -74,6 +76,7 @@ class StripeConnectWebViewContainerControllerTest {
 
         controller = StripeConnectWebViewContainerController(
             view = view,
+            analyticsService = analyticsService,
             embeddedComponentManager = embeddedComponentManager,
             embeddedComponent = embeddedComponent,
             listener = listener,
@@ -271,5 +274,11 @@ class StripeConnectWebViewContainerControllerTest {
         controller.onPermissionRequest(mockContext, mockPermissionRequest)
 
         verify(mockPermissionRequest).deny()
+    }
+
+    @Test
+    fun `onMerchantIdChanged updates analytics service`() {
+        controller.onMerchantIdChanged("merchant_id")
+        verify(analyticsService).merchantId = "merchant_id"
     }
 }
