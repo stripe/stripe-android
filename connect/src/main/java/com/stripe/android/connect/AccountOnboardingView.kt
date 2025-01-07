@@ -23,24 +23,6 @@ class AccountOnboardingView private constructor(
 ) : FrameLayout(context, attrs, defStyleAttr),
     StripeConnectWebViewContainer<AccountOnboardingListener, AccountOnboardingProps> by webViewContainerBehavior {
 
-    init {
-        context.withStyledAttributes(attrs, R.styleable.StripeAccountOnboardingView, defStyleAttr, 0) {
-            val props = AccountOnboardingProps(
-                fullTermsOfServiceUrl = getString(
-                    R.styleable.StripeAccountOnboardingView_stripeFullTermsOfServiceUrl
-                ),
-                recipientTermsOfServiceUrl = getString(
-                    R.styleable.StripeAccountOnboardingView_stripeRecipientTermsOfServiceUrl
-                ),
-                privacyPolicyUrl = getString(
-                    R.styleable.StripeAccountOnboardingView_stripePrivacyPolicyUrl
-                ),
-            )
-            webViewContainerBehavior.setPropsFromXml(props)
-        }
-        webViewContainerBehavior.initializeView(this)
-    }
-
     @JvmOverloads
     @RestrictTo(RestrictTo.Scope.LIBRARY)
     constructor(
@@ -61,14 +43,24 @@ class AccountOnboardingView private constructor(
             listenerDelegate = AccountOnboardingListenerDelegate,
             props = props,
         )
-    ) {
-        if (embeddedComponentManager != null) {
-            webViewContainerBehavior.initializeInternal(
-                embeddedComponentManager = embeddedComponentManager,
-                listener = listener,
-                propsJson = props?.toJsonObject(),
+    )
+
+    init {
+        context.withStyledAttributes(attrs, R.styleable.StripeAccountOnboardingView, defStyleAttr, 0) {
+            val props = AccountOnboardingProps(
+                fullTermsOfServiceUrl = getString(
+                    R.styleable.StripeAccountOnboardingView_stripeFullTermsOfServiceUrl
+                ),
+                recipientTermsOfServiceUrl = getString(
+                    R.styleable.StripeAccountOnboardingView_stripeRecipientTermsOfServiceUrl
+                ),
+                privacyPolicyUrl = getString(
+                    R.styleable.StripeAccountOnboardingView_stripePrivacyPolicyUrl
+                ),
             )
+            webViewContainerBehavior.setPropsFromXml(props)
         }
+        webViewContainerBehavior.initializeView(this)
     }
 }
 

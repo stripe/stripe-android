@@ -28,7 +28,6 @@ import com.stripe.android.connect.EmbeddedComponentManager
 import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.StripeEmbeddedComponent
 import com.stripe.android.connect.StripeEmbeddedComponentListener
-import com.stripe.android.connect.analytics.ConnectAnalyticsService
 import com.stripe.android.connect.appearance.Appearance
 import com.stripe.android.connect.databinding.StripeConnectWebviewBinding
 import com.stripe.android.connect.toJsonObject
@@ -141,6 +140,7 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
         )
             .also { this.viewBinding = it }
         initializeWebView(viewBinding.stripeWebView)
+        bindViewToController()
     }
 
     @VisibleForTesting
@@ -175,9 +175,7 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
         )
     }
 
-    // Must be called after initializeView(). The view binding must be inflated
-    // at the time this function is called.
-    internal fun initializeInternal(
+    private fun initializeInternal(
         embeddedComponentManager: EmbeddedComponentManager,
         listener: Listener?,
         propsJson: JsonObject?,
@@ -185,12 +183,6 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
         if (this.controller != null) {
             throw IllegalStateException("Already initialized")
         }
-        val context = this.viewBinding?.root?.context ?: return
-        val analyticsService = ConnectAnalyticsService(
-            context = context,
-            component = embeddedComponent,
-            analyticsParams = embeddedComponentManager.getAnalyticsParams(),
-        )
         val oldProps = this.propsJson
         this.propsJson =
             when {
@@ -204,6 +196,7 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
                     }
                 }
             }
+        val analyticsService = embeddedComponentManager.getComponentAnalyticsService(embeddedComponent)
         this.controller = StripeConnectWebViewContainerController(
             view = this,
             analyticsService = analyticsService,

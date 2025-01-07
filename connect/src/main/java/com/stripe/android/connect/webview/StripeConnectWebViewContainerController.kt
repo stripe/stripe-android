@@ -14,7 +14,7 @@ import com.stripe.android.connect.EmbeddedComponentManager
 import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.StripeEmbeddedComponent
 import com.stripe.android.connect.StripeEmbeddedComponentListener
-import com.stripe.android.connect.analytics.ConnectAnalyticsService
+import com.stripe.android.connect.analytics.ComponentAnalyticsService
 import com.stripe.android.connect.webview.serialization.ConnectInstanceJs
 import com.stripe.android.connect.webview.serialization.SetOnLoadError
 import com.stripe.android.connect.webview.serialization.SetOnLoaderStart
@@ -32,7 +32,7 @@ import kotlinx.coroutines.withContext
 @OptIn(PrivateBetaConnectSDK::class)
 internal class StripeConnectWebViewContainerController<Listener : StripeEmbeddedComponentListener>(
     private val view: StripeConnectWebViewContainerInternal,
-    private val analyticsService: ConnectAnalyticsService,
+    private val analyticsService: ComponentAnalyticsService,
     private val embeddedComponentManager: EmbeddedComponentManager,
     private val embeddedComponent: StripeEmbeddedComponent,
     private val listener: Listener?,
