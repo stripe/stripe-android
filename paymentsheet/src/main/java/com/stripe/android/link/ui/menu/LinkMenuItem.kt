@@ -5,7 +5,7 @@ import com.stripe.android.core.strings.ResolvableString
 /**
  * An item to be displayed in a [LinkMenu].
  *
- * @property text The resource ID of the text of the item
+ * @property text The text content of the item
  * @property isDestructive Whether this item should be rendered with the error text color
  */
 internal interface LinkMenuItem {
