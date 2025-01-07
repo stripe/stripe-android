@@ -15,12 +15,15 @@ internal sealed class LinkActivityResult : Parcelable {
      * Indicates that the flow was completed successfully.
      */
     @Parcelize
+    data object Completed : LinkActivityResult()
+
+    /**
+     * Indicates that the user selected a payment method. This payment method has not yet been confirmed.
+     */
+    @Parcelize
     data class PaymentMethodObtained(
         val paymentMethod: PaymentMethod
     ) : LinkActivityResult()
-
-    @Parcelize
-    data object Completed : LinkActivityResult()
 
     /**
      * The user cancelled the Link flow without completing it.

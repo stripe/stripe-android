@@ -7,10 +7,12 @@ import com.stripe.android.link.LinkActivityResult.PaymentMethodObtained
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.injection.LinkAnalyticsComponent
 import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * Launcher for an Activity that will confirm a payment using Link.
  */
+@Singleton
 internal class LinkPaymentLauncher @Inject internal constructor(
     linkAnalyticsComponentBuilder: LinkAnalyticsComponent.Builder,
     private val linkActivityContract: LinkActivityContract,
@@ -29,11 +31,7 @@ internal class LinkPaymentLauncher @Inject internal constructor(
             "LinkPaymentLauncher",
             linkActivityContract,
         ) { linkActivityResult ->
-            analyticsHelper.onLinkResult(linkActivityResult)
-            if (linkActivityResult is PaymentMethodObtained) {
-                linkStore.markLinkAsUsed()
-            }
-            callback(linkActivityResult)
+            handleActivityResult(linkActivityResult, callback)
         }
     }
 
@@ -44,12 +42,22 @@ internal class LinkPaymentLauncher @Inject internal constructor(
         linkActivityResultLauncher = activityResultCaller.registerForActivityResult(
             linkActivityContract
         ) { linkActivityResult ->
-            analyticsHelper.onLinkResult(linkActivityResult)
-            if (linkActivityResult is PaymentMethodObtained) {
+            handleActivityResult(linkActivityResult, callback)
+        }
+    }
+
+    private fun handleActivityResult(
+        linkActivityResult: LinkActivityResult,
+        nextStep: (LinkActivityResult) -> Unit
+    ) {
+        analyticsHelper.onLinkResult(linkActivityResult)
+        when (linkActivityResult) {
+            is PaymentMethodObtained, LinkActivityResult.Completed -> {
                 linkStore.markLinkAsUsed()
             }
-            callback(linkActivityResult)
+            is LinkActivityResult.Canceled, is LinkActivityResult.Failed -> Unit
         }
+        nextStep(linkActivityResult)
     }
 
     fun unregister() {

@@ -360,7 +360,7 @@ internal class DefaultFlowController @Inject internal constructor(
             }
         }
     }
-
+    
     @JvmSynthetic
     internal fun onPaymentOptionResult(
         paymentOptionResult: PaymentOptionResult?

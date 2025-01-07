@@ -82,7 +82,7 @@ internal class LinkConfirmationDefinition(
             is LinkActivityResult.Canceled -> ConfirmationDefinition.Result.Canceled(
                 action = ConfirmationHandler.Result.Canceled.Action.InformCancellation,
             )
-            is LinkActivityResult.Completed -> {
+            LinkActivityResult.Completed -> {
                 ConfirmationDefinition.Result.Succeeded(
                     intent = confirmationParameters.intent,
                     deferredIntentConfirmationType = deferredIntentConfirmationType
