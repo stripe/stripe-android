@@ -235,6 +235,72 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
+    fun `Should default to google if customer has no payment methods and no last used payment method`() =
+        runTest {
+            prefsRepository.savePaymentSelection(null)
+
+            val loader = createPaymentElementLoader(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                isGooglePayReady = true,
+                customerRepo = FakeCustomerRepository(paymentMethods = emptyList()),
+            )
+
+            val result = loader.load(
+                initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                    clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+                ),
+                paymentSheetConfiguration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+                initializedViaCompose = false,
+            ).getOrThrow()
+
+            assertThat(result.paymentSelection).isEqualTo(PaymentSelection.GooglePay)
+        }
+
+    @Test
+    fun `Should default to no payment method google pay is not ready`() =
+        runTest {
+            prefsRepository.savePaymentSelection(null)
+
+            val loader = createPaymentElementLoader(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                isGooglePayReady = false,
+                customerRepo = FakeCustomerRepository(paymentMethods = emptyList()),
+            )
+
+            val result = loader.load(
+                initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                    clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+                ),
+                paymentSheetConfiguration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+                initializedViaCompose = false,
+            ).getOrThrow()
+
+            assertThat(result.paymentSelection).isNull()
+        }
+
+    @Test
+    fun `Should default to no payment method google pay is not configured`() =
+        runTest {
+            prefsRepository.savePaymentSelection(null)
+
+            val loader = createPaymentElementLoader(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                isGooglePayReady = true,
+                customerRepo = FakeCustomerRepository(paymentMethods = emptyList()),
+            )
+
+            val result = loader.load(
+                initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                    clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+                ),
+                paymentSheetConfiguration = PaymentSheetFixtures.CONFIG_CUSTOMER,
+                initializedViaCompose = false,
+            ).getOrThrow()
+
+            assertThat(result.paymentSelection).isNull()
+        }
+
+    @Test
     fun `Should default to no payment method if customer has no payment methods and no last used payment method`() =
         runTest {
             prefsRepository.savePaymentSelection(null)
@@ -243,6 +309,7 @@ internal class DefaultPaymentElementLoaderTest {
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
                 isGooglePayReady = true,
                 customerRepo = FakeCustomerRepository(paymentMethods = emptyList()),
+                isGooglePayEnabledFromBackend = false,
             )
 
             val result = loader.load(

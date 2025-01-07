@@ -195,7 +195,11 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         }
 
         val initialPaymentSelection = async {
-            retrieveInitialPaymentSelection(savedSelection, customer)
+            retrieveInitialPaymentSelection(
+                savedSelection = savedSelection,
+                customer = customer,
+                isGooglePayReady = isGooglePayReady,
+            )
         }
 
         val stripeIntent = elementsSession.stripeIntent
@@ -541,7 +545,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
 
     private suspend fun retrieveInitialPaymentSelection(
         savedSelection: Deferred<SavedSelection>,
-        customer: Deferred<CustomerState?>
+        customer: Deferred<CustomerState?>,
+        isGooglePayReady: Boolean,
     ): PaymentSelection? {
         return when (val selection = savedSelection.await()) {
             is SavedSelection.GooglePay -> PaymentSelection.GooglePay
@@ -551,6 +556,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             }
             is SavedSelection.None -> null
         } ?: customer.await()?.paymentMethods?.firstOrNull()?.toPaymentSelection()
+            ?: PaymentSelection.GooglePay.takeIf { isGooglePayReady }
     }
 
     private suspend fun retrieveSavedSelection(
