@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.theme.HorizontalPadding
@@ -51,6 +52,7 @@ private fun LinkBottomSheetRow(
     item: LinkMenuItem,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
@@ -58,7 +60,7 @@ private fun LinkBottomSheetRow(
             .fillMaxWidth()
     ) {
         Text(
-            text = stringResource(item.textResId),
+            text = item.text.resolve(context),
             color = if (item.isDestructive) {
                 MaterialTheme.linkColors.errorText
             } else {

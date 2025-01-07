@@ -3,6 +3,7 @@ package com.stripe.android.link.ui.wallet
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.ui.menu.LinkMenu
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.paymentsheet.R
@@ -26,7 +27,11 @@ internal fun WalletPaymentMethodMenu(
                 add(WalletPaymentMethodMenuItem.SetAsDefault)
             }
 
-            add(WalletPaymentMethodMenuItem.RemoveItem(textResId = paymentDetails.removeLabel))
+            add(
+                element = WalletPaymentMethodMenuItem.RemoveItem(
+                    text = paymentDetails.removeLabel.resolvableString
+                )
+            )
             add(WalletPaymentMethodMenuItem.Cancel)
         }
     }
