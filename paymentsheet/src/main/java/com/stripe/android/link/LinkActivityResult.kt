@@ -15,7 +15,13 @@ internal sealed class LinkActivityResult : Parcelable {
      * Indicates that the flow was completed successfully.
      */
     @Parcelize
-    data class Completed(
+    data object Completed : LinkActivityResult()
+
+    /**
+     * Indicates that the user selected a payment method. This payment method has not yet been confirmed.
+     */
+    @Parcelize
+    data class PaymentMethodObtained(
         val paymentMethod: PaymentMethod
     ) : LinkActivityResult()
 
@@ -72,7 +78,7 @@ internal fun createLinkActivityResult(resultCode: Int, intent: Intent?): LinkAct
                     if (paymentMethod == null) {
                         LinkActivityResult.Canceled()
                     } else {
-                        LinkActivityResult.Completed(paymentMethod)
+                        LinkActivityResult.PaymentMethodObtained(paymentMethod)
                     }
                 }
 

@@ -737,7 +737,7 @@ internal class PaymentSheetActivityTest {
 
             assertThat(viewModel.walletsProcessingState.value).isEqualTo(WalletsProcessingState.Processing)
 
-            registerCall.callback(LinkActivityResult.Completed(PAYMENT_METHODS.first()))
+            registerCall.callback(LinkActivityResult.PaymentMethodObtained(PAYMENT_METHODS.first()))
 
             assertThat(viewModel.walletsProcessingState.value).isEqualTo(WalletsProcessingState.Processing)
 

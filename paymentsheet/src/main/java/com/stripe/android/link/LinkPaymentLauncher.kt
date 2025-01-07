@@ -3,7 +3,7 @@ package com.stripe.android.link
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistry
-import com.stripe.android.link.LinkActivityResult.Completed
+import com.stripe.android.link.LinkActivityResult.PaymentMethodObtained
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.injection.LinkAnalyticsComponent
 import javax.inject.Inject
@@ -31,11 +31,7 @@ internal class LinkPaymentLauncher @Inject internal constructor(
             "LinkPaymentLauncher",
             linkActivityContract,
         ) { linkActivityResult ->
-            analyticsHelper.onLinkResult(linkActivityResult)
-            if (linkActivityResult is Completed) {
-                linkStore.markLinkAsUsed()
-            }
-            callback(linkActivityResult)
+            handleActivityResult(linkActivityResult, callback)
         }
     }
 
@@ -46,12 +42,22 @@ internal class LinkPaymentLauncher @Inject internal constructor(
         linkActivityResultLauncher = activityResultCaller.registerForActivityResult(
             linkActivityContract
         ) { linkActivityResult ->
-            analyticsHelper.onLinkResult(linkActivityResult)
-            if (linkActivityResult is Completed) {
+            handleActivityResult(linkActivityResult, callback)
+        }
+    }
+
+    private fun handleActivityResult(
+        linkActivityResult: LinkActivityResult,
+        nextStep: (LinkActivityResult) -> Unit
+    ) {
+        analyticsHelper.onLinkResult(linkActivityResult)
+        when (linkActivityResult) {
+            is PaymentMethodObtained, LinkActivityResult.Completed -> {
                 linkStore.markLinkAsUsed()
             }
-            callback(linkActivityResult)
+            is LinkActivityResult.Canceled, is LinkActivityResult.Failed -> Unit
         }
+        nextStep(linkActivityResult)
     }
 
     fun unregister() {

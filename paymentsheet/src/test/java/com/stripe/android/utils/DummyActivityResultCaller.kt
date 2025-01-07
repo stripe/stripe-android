@@ -13,6 +13,7 @@ class DummyActivityResultCaller private constructor() : ActivityResultCaller {
     private val registeredLaunchers = Turbine<ActivityResultLauncher<*>>()
     private val registerCalls = Turbine<RegisterCall<*, *>>()
     private val launchCalls = Turbine<Any?>()
+    private val unregisterCalls = Turbine<Unit>()
 
     override fun <I : Any?, O : Any?> registerForActivityResult(
         contract: ActivityResultContract<I, O>,
@@ -26,7 +27,7 @@ class DummyActivityResultCaller private constructor() : ActivityResultCaller {
             }
 
             override fun unregister() {
-                error("Not implemented")
+                unregisterCalls.add(Unit)
             }
 
             override fun getContract(): ActivityResultContract<I, *> {
@@ -50,7 +51,7 @@ class DummyActivityResultCaller private constructor() : ActivityResultCaller {
             }
 
             override fun unregister() {
-                error("Not implemented")
+                unregisterCalls.add(Unit)
             }
 
             override fun getContract(): ActivityResultContract<I, *> {
@@ -71,6 +72,7 @@ class DummyActivityResultCaller private constructor() : ActivityResultCaller {
     class Scenario(
         val activityResultCaller: ActivityResultCaller,
         private val registerCalls: ReceiveTurbine<RegisterCall<*, *>>,
+        private val unregisterCalls: ReceiveTurbine<Unit>,
         private val launchCalls: ReceiveTurbine<Any?>,
         private val registeredLaunchers: ReceiveTurbine<ActivityResultLauncher<*>>,
     ) {
@@ -80,6 +82,10 @@ class DummyActivityResultCaller private constructor() : ActivityResultCaller {
 
         suspend fun awaitRegisterCall(): RegisterCall<*, *> {
             return registerCalls.awaitItem()
+        }
+
+        suspend fun awaitUnregisterCall() {
+            return unregisterCalls.awaitItem()
         }
 
         suspend fun awaitLaunchCall(): Any? {
@@ -97,6 +103,7 @@ class DummyActivityResultCaller private constructor() : ActivityResultCaller {
                 registerCalls = activityResultCaller.registerCalls,
                 launchCalls = activityResultCaller.launchCalls,
                 registeredLaunchers = activityResultCaller.registeredLaunchers,
+                unregisterCalls = activityResultCaller.unregisterCalls
             ).apply {
                 block(this)
                 activityResultCaller.registerCalls.ensureAllEventsConsumed()
