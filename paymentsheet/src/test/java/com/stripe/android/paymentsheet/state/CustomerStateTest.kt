@@ -165,7 +165,7 @@ class CustomerStateTest {
     }
 
     @Test
-    fun `Should create 'CustomerState' for customer session properly with nonnull defaultPaymentMethodId and feature flag on`() {
+    fun `Create 'CustomerState' for customer session with nonnull defaultPaymentMethodId & flag on`() {
         val defaultPaymentMethodId = "aaa111"
 
         enableDefaultPaymentMethods.setEnabled(true)
@@ -177,7 +177,7 @@ class CustomerStateTest {
     }
 
     @Test
-    fun `Should create 'CustomerState' for customer session properly with nonnull defaultPaymentMethodId and feature flag off`() {
+    fun `Create 'CustomerState' for customer session with nonnull defaultPaymentMethodId & flag off`() {
         val defaultPaymentMethodId = "aaa111"
 
         enableDefaultPaymentMethods.setEnabled(false)
@@ -189,7 +189,7 @@ class CustomerStateTest {
     }
 
     @Test
-    fun `Should create 'CustomerState' for customer session properly with null defaultPaymentMethodId and feature flag on`() {
+    fun `Create 'CustomerState' for customer session with null defaultPaymentMethodId & flag on`() {
         val defaultPaymentMethodId = null
 
         enableDefaultPaymentMethods.setEnabled(true)
@@ -201,7 +201,7 @@ class CustomerStateTest {
     }
 
     @Test
-    fun `Should create 'CustomerState' for customer session properly with null defaultPaymentMethodId and feature flag off`() {
+    fun `Create 'CustomerState' for customer session with null defaultPaymentMethodId & flag off`() {
         val defaultPaymentMethodId = null
 
         enableDefaultPaymentMethods.setEnabled(false)
