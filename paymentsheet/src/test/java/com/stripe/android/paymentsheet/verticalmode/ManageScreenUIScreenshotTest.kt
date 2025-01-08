@@ -124,9 +124,7 @@ internal class ManageScreenUIScreenshotTest {
                 interactor = FakeManageScreenInteractor(
                     initialState = ManageScreenInteractor.State(
                         paymentMethods = listOf(
-                            PaymentMethodFixtures.CARD_PAYMENT_METHOD.toDisplayableSavedPaymentMethod(
-                                shouldShowDefaultBadge = true
-                            )
+                            PaymentMethodFixtures.defaultDisplayableCard()
                         ),
                         currentSelection = null,
                         isEditing = false,
