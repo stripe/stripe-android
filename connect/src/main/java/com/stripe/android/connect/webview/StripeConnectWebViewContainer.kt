@@ -3,10 +3,12 @@ package com.stripe.android.connect.webview
 import android.annotation.SuppressLint
 import android.content.res.ColorStateList
 import android.graphics.Bitmap
+import android.net.Uri
 import android.os.Build
 import android.view.LayoutInflater
 import android.webkit.JavascriptInterface
 import android.webkit.PermissionRequest
+import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
@@ -319,6 +321,25 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
             // currently a no-op since we don't hold any state from the permission
             // request and delegate all the UI to the Android system, meaning
             // there's no way for us to cancel any permissions UI
+        }
+
+        override fun onShowFileChooser(
+            webView: WebView,
+            filePathCallback: ValueCallback<Array<Uri>>,
+            fileChooserParams: FileChooserParams
+        ): Boolean {
+            val lifecycleScope = webView.findViewTreeLifecycleOwner()?.lifecycleScope
+                ?: return false
+            val controller = controller
+                ?: return false
+            lifecycleScope.launch {
+                controller.onChooseFile(
+                    context = webView.context,
+                    filePathCallback = filePathCallback,
+                    requestIntent = fileChooserParams.createIntent()
+                )
+            }
+            return true
         }
     }
 

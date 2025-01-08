@@ -1,7 +1,10 @@
 package com.stripe.android.connect.webview
 
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.webkit.PermissionRequest
+import android.webkit.ValueCallback
 import android.webkit.WebResourceRequest
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
@@ -183,6 +186,15 @@ internal class StripeConnectWebViewContainerController<Listener : StripeEmbedded
                 request.deny()
             }
         }
+    }
+
+    suspend fun onChooseFile(
+        context: Context,
+        filePathCallback: ValueCallback<Array<Uri>>,
+        requestIntent: Intent
+    ) {
+        val result = embeddedComponentManager.chooseFile(context, requestIntent)
+        filePathCallback.onReceiveValue(result)
     }
 
     /**
