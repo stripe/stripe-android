@@ -14,7 +14,7 @@ import com.stripe.android.connect.EmbeddedComponentManager
 import com.stripe.android.connect.PayoutsListener
 import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.StripeEmbeddedComponent
-import com.stripe.android.connect.analytics.ConnectAnalyticsService
+import com.stripe.android.connect.analytics.ComponentAnalyticsService
 import com.stripe.android.connect.appearance.Appearance
 import com.stripe.android.connect.appearance.Colors
 import com.stripe.android.connect.webview.serialization.SetOnLoadError
@@ -52,7 +52,7 @@ class StripeConnectWebViewContainerControllerTest {
     private val mockContext: Context = mock()
     private val mockPermissionRequest: PermissionRequest = mock()
     private val view: StripeConnectWebViewContainerInternal = mock()
-    private val analyticsService: ConnectAnalyticsService = mock()
+    private val analyticsService: ComponentAnalyticsService = mock()
     private val embeddedComponentManager: EmbeddedComponentManager = mock()
     private val embeddedComponent: StripeEmbeddedComponent = StripeEmbeddedComponent.PAYOUTS
 

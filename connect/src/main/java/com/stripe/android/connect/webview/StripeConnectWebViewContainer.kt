@@ -208,9 +208,6 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
         bindViewToController()
     }
 
-    // Must be called after initializeInternal(). The controller
-    // must be initialized and view binding inflated at the time
-    // this function is called.
     private fun bindViewToController() {
         val view = this.viewBinding?.root ?: return
         val controller = this.controller ?: return
