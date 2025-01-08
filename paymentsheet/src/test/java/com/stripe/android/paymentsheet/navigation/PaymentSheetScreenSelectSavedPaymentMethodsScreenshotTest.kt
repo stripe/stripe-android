@@ -41,7 +41,8 @@ internal class PaymentSheetScreenSelectSavedPaymentMethodsScreenshotTest {
     private val defaultSavedPaymentOptionItem = PaymentOptionsItem.SavedPaymentMethod(
         displayableSavedPaymentMethod = DisplayableSavedPaymentMethod.create(
             displayName = "Card 5555".resolvableString,
-            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+            // different payment method ids are needed
+            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_234567890"),
             shouldShowDefaultBadge = true,
             isCbcEligible = true,
         ),
