@@ -18,6 +18,7 @@ import com.stripe.android.connect.StripeEmbeddedComponent
 import com.stripe.android.connect.analytics.ComponentAnalyticsService
 import com.stripe.android.connect.appearance.Appearance
 import com.stripe.android.connect.appearance.Colors
+import com.stripe.android.connect.util.Clock
 import com.stripe.android.connect.webview.serialization.SetOnLoadError
 import com.stripe.android.connect.webview.serialization.SetOnLoadError.LoadError
 import com.stripe.android.connect.webview.serialization.SetOnLoaderStart
@@ -54,6 +55,7 @@ class StripeConnectWebViewContainerControllerTest {
     private val mockPermissionRequest: PermissionRequest = mock()
     private val view: StripeConnectWebViewContainerInternal = mock()
     private val analyticsService: ComponentAnalyticsService = mock()
+    private val androidClock: Clock = mock()
     private val embeddedComponentManager: EmbeddedComponentManager = mock()
     private val embeddedComponent: StripeEmbeddedComponent = StripeEmbeddedComponent.PAYOUTS
 
@@ -74,10 +76,12 @@ class StripeConnectWebViewContainerControllerTest {
         Dispatchers.setMain(Dispatchers.Unconfined)
 
         whenever(embeddedComponentManager.appearanceFlow) doReturn appearanceFlow
+        whenever(embeddedComponentManager.getStripeURL(any())) doReturn "https://example.com"
 
         controller = StripeConnectWebViewContainerController(
             view = view,
             analyticsService = analyticsService,
+            clock = androidClock,
             embeddedComponentManager = embeddedComponentManager,
             embeddedComponent = embeddedComponent,
             listener = listener,
@@ -165,7 +169,7 @@ class StripeConnectWebViewContainerControllerTest {
     @Test
     fun `should handle SetOnLoaderStart`() = runTest {
         val message = SetterFunctionCalledMessage(SetOnLoaderStart(""))
-        controller.onPageStarted()
+        controller.onPageStarted("https://example.com")
         controller.onReceivedSetterFunctionCalled(message)
 
         val state = controller.stateFlow.value
@@ -227,11 +231,11 @@ class StripeConnectWebViewContainerControllerTest {
 
         appearanceFlow.emit(appearances[0])
         controller.onViewAttached()
-        controller.onPageStarted()
+        controller.onPageStarted("https://example.com")
         verify(view, never()).updateConnectInstance(any())
 
         // Should update appearance when pageDidLoad is received.
-        controller.onReceivedPageDidLoad()
+        controller.onReceivedPageDidLoad("page_view_id")
 
         // Should update again when appearance changes.
         appearanceFlow.emit(appearances[1])
