@@ -21,7 +21,7 @@ internal class FormHelper(
     private val paymentMethodMetadata: PaymentMethodMetadata,
     private val newPaymentSelectionProvider: () -> NewOrExternalPaymentSelection?,
     private val selectionUpdater: (PaymentSelection?) -> Unit,
-    private val linkConfigurationCoordinator: LinkConfigurationCoordinator,
+    private val linkConfigurationCoordinator: LinkConfigurationCoordinator?,
     private val onLinkInlineSignupStateChanged: (InlineSignupViewState) -> Unit,
 ) {
     companion object {
@@ -41,6 +41,21 @@ internal class FormHelper(
                 selectionUpdater = {
                     viewModel.updateSelection(it)
                 }
+            )
+        }
+
+        fun create(
+            cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
+            paymentMethodMetadata: PaymentMethodMetadata,
+            selectionUpdater: (PaymentSelection?) -> Unit,
+        ): FormHelper {
+            return FormHelper(
+                cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
+                paymentMethodMetadata = paymentMethodMetadata,
+                newPaymentSelectionProvider = { null },
+                linkConfigurationCoordinator = null,
+                onLinkInlineSignupStateChanged = {},
+                selectionUpdater = selectionUpdater
             )
         }
     }

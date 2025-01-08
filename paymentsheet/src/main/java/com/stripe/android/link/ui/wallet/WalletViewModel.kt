@@ -7,7 +7,6 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
-import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkScreen
@@ -16,17 +15,13 @@ import com.stripe.android.link.confirmation.LinkConfirmationHandler
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.supportedPaymentMethodTypes
+import com.stripe.android.link.ui.completePaymentButtonLabel
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
-import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.model.SetupIntent
-import com.stripe.android.model.StripeIntent
-import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
-import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.CardDetailsUtil.createExpiryDateFormFieldValues
 import com.stripe.android.ui.core.elements.CvcController
 import com.stripe.android.uicore.elements.DateConfig
@@ -38,6 +33,12 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.Result
+import kotlin.String
+import kotlin.Throwable
+import kotlin.Unit
+import kotlin.fold
+import kotlin.takeIf
 import com.stripe.android.link.confirmation.Result as LinkConfirmationResult
 
 internal class WalletViewModel @Inject constructor(
@@ -226,18 +227,6 @@ internal class WalletViewModel @Inject constructor(
     @SuppressWarnings("UnusedParameter")
     fun onEditPaymentMethodClicked(item: ConsumerPaymentDetails.PaymentDetails) {
         navigate(LinkScreen.CardEdit)
-    }
-
-    private fun completePaymentButtonLabel(
-        stripeIntent: StripeIntent,
-    ) = when (stripeIntent) {
-        is PaymentIntent -> {
-            Amount(
-                requireNotNull(stripeIntent.amount),
-                requireNotNull(stripeIntent.currency)
-            ).buildPayButtonLabel()
-        }
-        is SetupIntent -> R.string.stripe_setup_button_label.resolvableString
     }
 
     companion object {

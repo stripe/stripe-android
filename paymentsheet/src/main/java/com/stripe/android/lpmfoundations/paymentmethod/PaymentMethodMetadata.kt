@@ -2,8 +2,11 @@ package com.stripe.android.lpmfoundations.paymentmethod
 
 import android.os.Parcelable
 import com.stripe.android.CardBrandFilter
+import com.stripe.android.ExperimentalCardBrandFilteringApi
+import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.customersheet.CustomerSheet
+import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.lpmfoundations.FormHeaderInformation
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.ExternalPaymentMethodUiDefinitionFactory
@@ -293,6 +296,38 @@ internal data class PaymentMethodMetadata(
                 paymentMethodIncentive = null,
                 externalPaymentMethodSpecs = emptyList(),
                 cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance)
+            )
+        }
+
+        @OptIn(ExperimentalCardBrandFilteringApi::class)
+        internal fun create(
+            configuration: LinkConfiguration,
+            sharedDataSpecs: List<SharedDataSpec>,
+            externalPaymentMethodSpecs: List<ExternalPaymentMethodSpec>,
+            linkInlineConfiguration: LinkInlineConfiguration?,
+        ): PaymentMethodMetadata {
+            return PaymentMethodMetadata(
+                stripeIntent = configuration.stripeIntent,
+                billingDetailsCollectionConfiguration = ConfigurationDefaults.billingDetailsCollectionConfiguration,
+                allowsDelayedPaymentMethods = false,
+                allowsPaymentMethodsRequiringShippingAddress = false,
+                paymentMethodOrder = ConfigurationDefaults.paymentMethodOrder,
+                cbcEligibility = CardBrandChoiceEligibility.create(
+                    isEligible = false,
+                    preferredNetworks = emptyList(),
+                ),
+                merchantName = configuration.merchantName,
+                defaultBillingDetails = null,
+                shippingDetails = null,
+                hasCustomerConfiguration = true,
+                sharedDataSpecs = sharedDataSpecs,
+                externalPaymentMethodSpecs = externalPaymentMethodSpecs,
+                paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Disabled(null),
+                linkInlineConfiguration = linkInlineConfiguration,
+                linkMode = null,
+                paymentMethodIncentive = null,
+                isGooglePayReady = false,
+                cardBrandFilter = PaymentSheetCardBrandFilter(PaymentSheet.CardBrandAcceptance.all())
             )
         }
     }

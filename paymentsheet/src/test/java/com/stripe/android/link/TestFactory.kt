@@ -2,6 +2,9 @@ package com.stripe.android.link
 
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.link.model.LinkAccount
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.formElements
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
 import com.stripe.android.model.ConsumerPaymentDetails
@@ -10,8 +13,12 @@ import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSessionSignup
 import com.stripe.android.model.CvcCheck
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.ui.core.Amount
+import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import org.mockito.kotlin.mock
 
 internal object TestFactory {
@@ -132,4 +139,18 @@ internal object TestFactory {
         requireNotNull(PaymentIntentFixtures.PI_SUCCEEDED.amount),
         requireNotNull(PaymentIntentFixtures.PI_SUCCEEDED.currency)
     ).buildPayButtonLabel()
+
+    val CARD_FORM_ARGS = FormArguments(
+        paymentMethodCode = PaymentMethod.Type.Card.code,
+        cbcEligibility = CardBrandChoiceEligibility.Ineligible,
+        merchantName = "Example, Inc.",
+        amount = Amount(1000, "USD"),
+        billingDetails = null,
+        shippingDetails = null,
+        billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
+        hasIntentToSetup = false,
+        paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
+    )
+
+    val CARD_FORM_ELEMENTS = CardDefinition.formElements()
 }

@@ -5,6 +5,8 @@ import androidx.core.os.LocaleListCompat
 import com.stripe.android.BuildConfig
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.Stripe
+import com.stripe.android.cards.CardAccountRangeRepository
+import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
@@ -32,6 +34,8 @@ import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
+import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.repository.ConsumersApiService
 import com.stripe.android.repository.ConsumersApiServiceImpl
 import dagger.Binds
@@ -62,6 +66,16 @@ internal interface NativeLinkModule {
     @Binds
     @NativeLinkScope
     fun stripeRepository(stripeRepository: StripeApiRepository): StripeRepository
+
+    @Binds
+    @NativeLinkScope
+    fun bindsCardAccountRangeRepositoryFactory(
+        defaultCardAccountRangeRepositoryFactory: DefaultCardAccountRangeRepositoryFactory
+    ): CardAccountRangeRepository.Factory
+
+    @Binds
+    @NativeLinkScope
+    fun bindsEventReporter(eventReporter: DefaultEventReporter): EventReporter
 
     @SuppressWarnings("TooManyFunctions")
     companion object {
@@ -146,5 +160,7 @@ internal interface NativeLinkModule {
         fun provideLinkConfirmationHandlerFactory(
             factory: DefaultLinkConfirmationHandler.Factory
         ): LinkConfirmationHandler.Factory = factory
+
+        fun provideEventReporterMode(): EventReporter.Mode = EventReporter.Mode.Custom
     }
 }
