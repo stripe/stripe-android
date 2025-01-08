@@ -4,7 +4,6 @@ import android.os.Build
 import androidx.compose.ui.test.assertContentDescriptionEquals
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.onParent
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.paymentsheet.R
@@ -39,7 +38,6 @@ class PaymentOptionTest {
 
         composeTestRule
             .onNodeWithText(label)
-            .onParent()
             .assertContentDescriptionEquals("Card ending in 4 2 4 2 ")
     }
 }

@@ -59,13 +59,13 @@ internal val SavedPaymentMethodsTopContentPadding = 12.dp
 
 @Composable
 internal fun SavedPaymentMethodTab(
+    modifier: Modifier = Modifier,
     viewWidth: Dp,
     isSelected: Boolean,
     shouldShowModifyBadge: Boolean,
     isEnabled: Boolean,
     isClickable: Boolean = isEnabled,
     iconRes: Int,
-    modifier: Modifier = Modifier,
     iconTint: Color? = null,
     @DrawableRes labelIcon: Int? = null,
     labelText: String = "",
@@ -84,14 +84,19 @@ internal fun SavedPaymentMethodTab(
             )
         },
         content = {
-            Column {
+            Column(
+                modifier = Modifier
+                    .testTag("${SAVED_PAYMENT_METHOD_CARD_TEST_TAG}_$labelText")
+                    .selectable(
+                        selected = isSelected,
+                        enabled = isClickable,
+                        onClick = onItemSelectedListener,
+                    ),
+            ) {
                 SavedPaymentMethodCard(
                     isSelected = isSelected,
-                    isClickable = isClickable,
-                    labelText = labelText,
                     iconRes = iconRes,
                     iconTint = iconTint,
-                    onItemSelectedListener = onItemSelectedListener,
                 )
 
                 LpmSelectorText(
@@ -137,11 +142,8 @@ private fun SavedPaymentMethodBadge(
 @Composable
 private fun SavedPaymentMethodCard(
     isSelected: Boolean,
-    isClickable: Boolean,
     iconRes: Int,
     iconTint: Color?,
-    labelText: String,
-    onItemSelectedListener: (() -> Unit),
     modifier: Modifier = Modifier,
 ) {
     SectionCard(
@@ -156,12 +158,6 @@ private fun SavedPaymentMethodCard(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .fillMaxSize()
-                .testTag("${SAVED_PAYMENT_METHOD_CARD_TEST_TAG}_$labelText")
-                .selectable(
-                    selected = isSelected,
-                    enabled = isClickable,
-                    onClick = onItemSelectedListener,
-                ),
         ) {
             Image(
                 painter = painterResource(iconRes),
