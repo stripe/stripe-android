@@ -48,7 +48,10 @@ internal class DefaultLinkConfirmationHandlerTest {
         confirmationHandler.startTurbine.awaitItem().assertConfirmationArgs(
             configuration = configuration,
             linkAccount = TestFactory.LINK_ACCOUNT,
-            paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD
+            paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+            initMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = configuration.stripeIntent.clientSecret.orEmpty()
+            )
         )
     }
 
@@ -80,11 +83,9 @@ internal class DefaultLinkConfirmationHandlerTest {
             configuration = configuration,
             linkAccount = TestFactory.LINK_ACCOUNT,
             paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
-            initMode = {
-                PaymentElementLoader.InitializationMode.SetupIntent(
-                    clientSecret = configuration.stripeIntent.clientSecret.orEmpty()
-                )
-            }
+            initMode = PaymentElementLoader.InitializationMode.SetupIntent(
+                clientSecret = configuration.stripeIntent.clientSecret.orEmpty()
+            )
         )
     }
 
@@ -191,11 +192,7 @@ internal class DefaultLinkConfirmationHandlerTest {
         configuration: LinkConfiguration,
         paymentDetails: ConsumerPaymentDetails.PaymentDetails,
         linkAccount: LinkAccount,
-        initMode: () -> PaymentElementLoader.InitializationMode = {
-            PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = configuration.stripeIntent.clientSecret.orEmpty()
-            )
-        }
+        initMode: PaymentElementLoader.InitializationMode
     ) {
         assertThat(intent).isEqualTo(configuration.stripeIntent)
         val option = confirmationOption as PaymentMethodConfirmationOption.New
@@ -207,7 +204,7 @@ internal class DefaultLinkConfirmationHandlerTest {
             )
         )
         assertThat(shippingDetails).isEqualTo(configuration.shippingDetails)
-        assertThat(initializationMode).isEqualTo(initMode())
+        assertThat(initializationMode).isEqualTo(initMode)
     }
 
     private fun createHandler(
