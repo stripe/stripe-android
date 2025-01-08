@@ -223,6 +223,7 @@ class EmbeddedComponentManager(
                     // ensure we remove the activity and its launcher from our map, and unregister
                     // this activity from future callbacks
                     requestPermissionLaunchers.remove(destroyedActivity)
+                    chooseFileLaunchers.remove(destroyedActivity)
                     if (destroyedActivity == activity) {
                         application.unregisterActivityLifecycleCallbacks(this)
                     }
