@@ -54,7 +54,7 @@ internal fun PaymentMethodRowButton(
     isEnabled: Boolean,
     isSelected: Boolean,
     isClickable: Boolean = isEnabled,
-    shouldShowDefaultBadge: Boolean = false,
+    shouldShowDefaultBadge: Boolean,
     iconContent: @Composable RowScope.() -> Unit,
     title: String,
     subtitle: String?,
@@ -279,7 +279,7 @@ private fun RowButtonCheckmarkOuterContent(
 @Composable
 private fun RowButtonInnerContent(
     isEnabled: Boolean,
-    shouldShowDefaultBadge: Boolean = false,
+    shouldShowDefaultBadge: Boolean,
     iconContent: @Composable RowScope.() -> Unit,
     title: String,
     subtitle: String?,
