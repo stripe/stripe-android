@@ -103,4 +103,38 @@ class PaymentOptionScreenshotTest {
             )
         }
     }
+
+    @Test
+    fun testDefaultNotEditing() {
+        paparazziRule.snapshot {
+            SavedPaymentMethodTab(
+                viewWidth = 160.dp,
+                isSelected = false,
+                shouldShowModifyBadge = false,
+                shouldShowDefaultBadge = true,
+                isEnabled = true,
+                iconRes = R.drawable.stripe_ic_paymentsheet_card_visa,
+                labelText = "••••8431",
+                description = "Description",
+                onItemSelectedListener = {},
+            )
+        }
+    }
+
+    @Test
+    fun testDefaultEditing() {
+        paparazziRule.snapshot {
+            SavedPaymentMethodTab(
+                viewWidth = 160.dp,
+                isSelected = false,
+                shouldShowModifyBadge = true,
+                shouldShowDefaultBadge = true,
+                isEnabled = true,
+                iconRes = R.drawable.stripe_ic_paymentsheet_card_visa,
+                labelText = "••••8431",
+                description = "Description",
+                onItemSelectedListener = {},
+            )
+        }
+    }
 }
