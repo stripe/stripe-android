@@ -28,6 +28,7 @@ class PaymentOptionTest {
                 viewWidth = 100.dp,
                 isSelected = false,
                 shouldShowModifyBadge = false,
+                shouldShowDefaultBadge = false,
                 isEnabled = true,
                 iconRes = R.drawable.stripe_ic_paymentsheet_card_visa,
                 labelText = label,
