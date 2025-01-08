@@ -1,7 +1,11 @@
 package com.stripe.android.core.networking
 
+import android.adservices.appsetid.AppSetId
+import android.adservices.appsetid.AppSetIdManager
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Build
+import android.provider.Settings
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.utils.ContextUtils.packageInfo
 import com.stripe.android.core.utils.PluginDetector
@@ -49,6 +53,7 @@ class AnalyticsRequestV2Factory(
     )
 
     // Common SDK related parameters, need dedicated ingestion logic on server side.
+    @SuppressLint("HardwareIds")
     private fun sdkParams() = mapOf(
         AnalyticsFields.OS_VERSION to Build.VERSION.SDK_INT,
         PARAM_SDK_PLATFORM to "android",
@@ -56,6 +61,7 @@ class AnalyticsRequestV2Factory(
         AnalyticsFields.DEVICE_TYPE to "${Build.MANUFACTURER}_${Build.BRAND}_${Build.MODEL}",
         AnalyticsFields.APP_NAME to getAppName(),
         AnalyticsFields.APP_VERSION to appContext.packageInfo?.versionCode,
+        AnalyticsFields.DEVICE_ID to Settings.Secure.getString(appContext.contentResolver, Settings.Secure.ANDROID_ID),
         PARAM_PLUGIN_TYPE to pluginType,
         PARAM_PLATFORM_INFO to mapOf(
             PARAM_PACKAGE_NAME to appContext.packageName

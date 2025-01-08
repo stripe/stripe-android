@@ -30,6 +30,7 @@ class AnalyticsRequestV2FactoryTest {
         AnalyticsFields.DEVICE_TYPE,
         AnalyticsFields.APP_NAME,
         AnalyticsFields.APP_VERSION,
+        AnalyticsFields.DEVICE_ID,
         PARAM_PLUGIN_TYPE,
         PARAM_PLATFORM_INFO
     )
