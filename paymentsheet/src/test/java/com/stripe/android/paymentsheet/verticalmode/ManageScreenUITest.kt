@@ -248,11 +248,7 @@ class ManageScreenUITest {
         PaymentMethodFixtures.createCards(3)
             .plus(PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD)
             .mapIndexed { idx, it ->
-                if (idx == 0) {
-                    it.toDisplayableSavedPaymentMethod(shouldShowDefaultBadge = true)
-                } else {
-                    it.toDisplayableSavedPaymentMethod(shouldShowDefaultBadge = false)
-                }
+                it.toDisplayableSavedPaymentMethod(shouldShowDefaultBadge = idx == 0)
             }
 
     private fun runScenario(
