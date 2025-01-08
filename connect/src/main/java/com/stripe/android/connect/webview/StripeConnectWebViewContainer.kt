@@ -301,8 +301,7 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
     }
 
     /**
-     * A [WebChromeClient] that provides additional functionality for Stripe Connect Embedded Component WebViews,
-     * namely around permissions.
+     * A [WebChromeClient] that provides additional functionality for Stripe Connect Embedded Component WebViews.
      */
     internal inner class StripeConnectWebChromeClient : WebChromeClient() {
         override fun onPermissionRequest(request: PermissionRequest) {
@@ -330,7 +329,7 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
         ): Boolean {
             val lifecycleScope = webView.findViewTreeLifecycleOwner()?.lifecycleScope
                 ?: return false
-            val controller = controller
+            val controller = this@StripeConnectWebViewContainerImpl.controller
                 ?: return false
             lifecycleScope.launch {
                 controller.onChooseFile(
