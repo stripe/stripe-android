@@ -74,8 +74,18 @@ internal class StripeConnectWebViewContainerController<Listener : StripeEmbedded
     /**
      * Callback to invoke when the page started loading.
      */
-    fun onPageStarted() {
+    fun onPageStarted(url: String?) {
         updateState { copy(isNativeLoadingIndicatorVisible = !receivedSetOnLoaderStart) }
+
+        if (url != null) {
+            val pageLoadUrl = Uri.parse(url)
+            val expectedUrl = Uri.parse(embeddedComponentManager.getStripeURL(embeddedComponent))
+            if (pageLoadUrl.host != expectedUrl.host || pageLoadUrl.path != expectedUrl.path) {
+                // expected URL doesn't match what we navigated to
+                val sanitizedUrl = pageLoadUrl.buildUpon().clearQuery().build().toString()
+                analyticsService.track(ConnectAnalyticsEvent.WebErrorUnexpectedNavigation(sanitizedUrl))
+            }
+        }
     }
 
     /**
@@ -134,8 +144,11 @@ internal class StripeConnectWebViewContainerController<Listener : StripeEmbedded
     fun shouldOverrideUrlLoading(context: Context, request: WebResourceRequest): Boolean {
         val url = request.url
         return if (url.host?.lowercase() in ALLOWLISTED_HOSTS) {
-            // TODO - add an analytic event here to track this unexpected behavior
             logger.warning("($loggerTag) Received pop-up for allow-listed host: $url")
+            analyticsService.track(ConnectAnalyticsEvent.ClientError(
+                error = "Unexpected pop-up",
+                errorMessage = "Received pop-up for allow-listed host: $url"
+            ))
             false // Allow the request to propagate so we open URL in WebView, but this is not an expected operation
         } else if (
             url.scheme.equals("https", ignoreCase = true) || url.scheme.equals("http", ignoreCase = true)
@@ -201,7 +214,10 @@ internal class StripeConnectWebViewContainerController<Listener : StripeEmbedded
         if (permissionsRequested.isEmpty()) { // all calls to PermissionRequest must be on the main thread
             withContext(Dispatchers.Main) {
                 request.deny() // no supported permissions were requested, so reject the request
-                // TODO - add an analytic event here to track this unexpected behavior
+                analyticsService.track(ConnectAnalyticsEvent.ClientError(
+                    error = "Unexpected permissions request",
+                    errorMessage = "Unexpected permissions ${request.resources.joinToString()} requested"
+                ))
                 logger.warning(
                     "($loggerTag) Denying permission - ${request.resources.joinToString()} are not supported"
                 )

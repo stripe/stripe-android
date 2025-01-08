@@ -183,7 +183,7 @@ internal sealed class ConnectAnalyticsEvent(
 
     /**
      * The web page navigated somewhere other than the component wrapper URL
-     * (e.g. https://connect-js.stripe.com/v1.0/ios-webview.html)
+     * (e.g. https://connect-js.stripe.com/v1.0/android_webview.html)
      */
     data class WebErrorUnexpectedNavigation(
         val url: String
@@ -196,17 +196,13 @@ internal sealed class ConnectAnalyticsEvent(
      * Catch-all event for unexpected client-side errors.
      */
     data class ClientError(
-        val domain: String,
-        val code: Int,
-        val file: String,
-        val line: Int
+        val error: String,
+        val errorMessage: String? = null,
     ) : ConnectAnalyticsEvent(
         "client_error",
         mapOf(
-            "domain" to domain,
-            "code" to code.toString(),
-            "file" to file,
-            "line" to line.toString()
+            "error" to error,
+            "errorMessage" to errorMessage,
         )
     )
 }

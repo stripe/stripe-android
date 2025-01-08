@@ -268,7 +268,7 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
     @VisibleForTesting
     internal inner class StripeConnectWebViewClient : WebViewClient() {
         override fun onPageStarted(view: WebView, url: String?, favicon: Bitmap?) {
-            controller?.onPageStarted()
+            controller?.onPageStarted(url)
         }
 
         override fun onPageFinished(view: WebView?, url: String?) {
