@@ -416,8 +416,8 @@ class EmbeddedPaymentElement private constructor(
         val paymentMethodType: String,
 
         /**
-         * If you set configuration.hidesMandateText = true, this text must be displayed to the customer near your “Buy”
-         *  button to comply with regulations.
+         * If you set [Configuration.Builder.embeddedViewDisplaysMandateText] to `false`, this text must be displayed to
+         * the customer near your "Buy" button to comply with regulations.
          */
         val mandateText: AnnotatedString?,
     ) {
