@@ -242,23 +242,18 @@ class ManageScreenUITest {
         PaymentMethodFixtures.createCards(2)
             .plus(PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD)
             .map {
-                DisplayableSavedPaymentMethod.create(
-                    displayName = it.card!!.last4!!.resolvableString,
-                    paymentMethod = it,
-                    isCbcEligible = true
-                )
+                it.toDisplayableSavedPaymentMethod(shouldShowDefaultBadge = false)
             }
 
     private val displayableSavedPaymentMethodsWithDefault =
         PaymentMethodFixtures.createCards(3)
             .plus(PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD)
             .mapIndexed { idx, it ->
-                DisplayableSavedPaymentMethod.create(
-                    displayName = it.card!!.last4!!.resolvableString,
-                    paymentMethod = it,
-                    isCbcEligible = true,
-                    shouldShowDefaultBadge = idx == 0
-                )
+                if (idx == 0) {
+                    it.toDisplayableSavedPaymentMethod(shouldShowDefaultBadge = true)
+                } else {
+                    it.toDisplayableSavedPaymentMethod(shouldShowDefaultBadge = false)
+                }
             }
 
     private fun runScenario(
