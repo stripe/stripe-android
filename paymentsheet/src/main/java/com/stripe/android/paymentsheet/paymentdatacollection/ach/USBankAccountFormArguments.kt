@@ -105,7 +105,6 @@ internal class USBankAccountFormArguments(
         }
 
         fun create(
-            configuration: LinkConfiguration,
             paymentMethodMetadata: PaymentMethodMetadata,
             selectedPaymentMethodCode: String,
             bankFormInteractor: BankFormInteractor,
@@ -132,11 +131,11 @@ internal class USBankAccountFormArguments(
                 clientSecret = stripeIntent.clientSecret,
                 shippingDetails = null,
                 draftPaymentSelection = null,
-                onMandateTextChanged = { _, _ ->},
+                onMandateTextChanged = { _, _ -> },
                 onLinkedBankAccountChanged = bankFormInteractor::handleLinkedBankAccountChanged,
-                onUpdatePrimaryButtonUIState = {  },
+                onUpdatePrimaryButtonUIState = { },
                 onUpdatePrimaryButtonState = {},
-                onError = {},
+                onError = { },
                 incentive = paymentMethodMetadata.paymentMethodIncentive,
             )
         }

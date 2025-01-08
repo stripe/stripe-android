@@ -7,7 +7,7 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import org.junit.Test
 
-class PaymentOptionsStateFactoryTest {
+class PaymentOptionsPaymentMethodStateFactoryTest {
 
     @Test
     fun `Returns current selection if available`() {

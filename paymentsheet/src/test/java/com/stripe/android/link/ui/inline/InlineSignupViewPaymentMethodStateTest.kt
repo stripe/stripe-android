@@ -5,7 +5,7 @@ import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.testing.PaymentIntentFactory
 import org.junit.Test
 
-class InlineSignupViewStateTest {
+class InlineSignupViewPaymentMethodStateTest {
 
     @Test
     fun `Allows full prefill if showing instead of save-for-future-use for US customers`() {

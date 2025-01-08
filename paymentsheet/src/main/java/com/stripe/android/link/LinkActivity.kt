@@ -29,7 +29,6 @@ import com.stripe.android.link.ui.BottomSheetContent
 import com.stripe.android.link.ui.LinkContent
 import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.elements.events.LocalCardBrandDisallowedReporter
 import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventReporter
 import com.stripe.android.uicore.elements.LocalAutofillEventReporter

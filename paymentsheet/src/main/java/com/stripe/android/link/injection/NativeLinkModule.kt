@@ -43,7 +43,6 @@ import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.Dispatchers
 import javax.inject.Named
-import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
 @Module

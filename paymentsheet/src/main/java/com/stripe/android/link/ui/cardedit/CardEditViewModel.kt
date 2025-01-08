@@ -11,7 +11,6 @@ import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.supportedPaymentMethodTypes
 import com.stripe.android.link.ui.paymentmenthod.Factory
 import com.stripe.android.model.ConsumerPaymentDetails
-import com.stripe.android.paymentsheet.analytics.code
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
