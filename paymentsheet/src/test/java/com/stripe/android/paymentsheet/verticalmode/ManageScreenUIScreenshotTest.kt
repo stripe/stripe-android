@@ -117,6 +117,26 @@ internal class ManageScreenUIScreenshotTest {
         )
     }
 
+    @Test
+    fun testManageUIScreenWithDefaultPaymentMethod() {
+        paparazziRule.snapshot {
+            ManageScreenUI(
+                interactor = FakeManageScreenInteractor(
+                    initialState = ManageScreenInteractor.State(
+                        paymentMethods = listOf(
+                            PaymentMethodFixtures.CARD_PAYMENT_METHOD.toDisplayableSavedPaymentMethod(
+                                shouldShowDefaultBadge = true
+                            )
+                        ),
+                        currentSelection = null,
+                        isEditing = false,
+                        canEdit = true,
+                    )
+                ),
+            )
+        }
+    }
+
     private fun createUsBank(last4: String): PaymentMethod {
         val original = PaymentMethodFixtures.US_BANK_ACCOUNT
         return original.copy(usBankAccount = original.usBankAccount?.copy(last4 = last4))
