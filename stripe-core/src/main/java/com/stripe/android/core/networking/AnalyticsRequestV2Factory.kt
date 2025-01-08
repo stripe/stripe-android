@@ -1,7 +1,5 @@
 package com.stripe.android.core.networking
 
-import android.adservices.appsetid.AppSetId
-import android.adservices.appsetid.AppSetIdManager
 import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Build
