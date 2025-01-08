@@ -44,7 +44,6 @@ class PaymentOptionTest {
         composeTestRule.onNodeWithTag(TEST_TAG_DEFAULT_PAYMENT_METHOD_LABEL).assertDoesNotExist()
     }
 
-
     @Test
     fun `SavedPaymentMethodTab created corrected when edited`() {
         val label = "Card ending in 4242"

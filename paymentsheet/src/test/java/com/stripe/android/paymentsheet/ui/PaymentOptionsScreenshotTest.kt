@@ -126,7 +126,6 @@ class PaymentOptionsScreenshotTest {
         }
     }
 
-
     @Test
     fun testEditingAndRemoveDisabledWithModifiableItemsAndDefaultPaymentOption() {
         paparazziRule.snapshot {
