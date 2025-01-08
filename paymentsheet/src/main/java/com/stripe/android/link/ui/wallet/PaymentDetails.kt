@@ -123,6 +123,8 @@ private fun MenuAndLoader(
             )
         } else {
             IconButton(
+                modifier = Modifier
+                    .testTag(WALLET_PAYMENT_DETAIL_ITEM_MENU_BUTTON),
                 onClick = onMenuButtonClick,
                 enabled = enabled
             ) {
@@ -259,3 +261,4 @@ private fun RowScope.BankAccountInfo(
 }
 
 internal const val WALLET_PAYMENT_DETAIL_ITEM_RADIO_BUTTON = "wallet_payment_detail_item_radio_button"
+internal const val WALLET_PAYMENT_DETAIL_ITEM_MENU_BUTTON = "wallet_payment_detail_item_menu_button"

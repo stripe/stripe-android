@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.theme.HorizontalPadding
 import com.stripe.android.link.theme.MinimumTouchTargetSize
@@ -38,9 +39,11 @@ internal fun LinkMenu(
         for (item in items) {
             LinkBottomSheetRow(
                 item = item,
-                modifier = Modifier.clickable {
-                    onItemPress(item)
-                }
+                modifier = Modifier
+                    .testTag(item.tag)
+                    .clickable {
+                        onItemPress(item)
+                    }
             )
         }
     }

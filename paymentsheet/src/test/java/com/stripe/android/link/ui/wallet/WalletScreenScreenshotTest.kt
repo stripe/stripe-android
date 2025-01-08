@@ -154,7 +154,12 @@ internal class WalletScreenScreenshotTest {
                     onItemSelected = {},
                     onExpandedChanged = {},
                     onPrimaryButtonClick = {},
-                    onPayAnotherWayClick = {}
+                    onPayAnotherWayClicked = {},
+                    onRemoveClicked = {},
+                    onSetDefaultClicked = {},
+                    onEditPaymentMethodClicked = {},
+                    showBottomSheetContent = {},
+                    onAddNewPaymentMethodClicked = {}
                 )
             }
         }

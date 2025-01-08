@@ -31,6 +31,7 @@ internal class WalletViewModel @Inject constructor(
     private val linkAccount: LinkAccount,
     private val linkAccountManager: LinkAccountManager,
     private val logger: Logger,
+    private val navigate: (route: LinkScreen) -> Unit,
     private val navigateAndClearStack: (route: LinkScreen) -> Unit,
     private val dismissWithResult: (LinkActivityResult) -> Unit
 ) : ViewModel() {
@@ -95,6 +96,14 @@ internal class WalletViewModel @Inject constructor(
         dismissWithResult(LinkActivityResult.Canceled(LinkActivityResult.Canceled.Reason.PayAnotherWay))
     }
 
+    fun onAddNewPaymentMethodClicked() {
+        navigate(LinkScreen.PaymentMethod)
+    }
+
+    fun onEditPaymentMethodClicked(item: ConsumerPaymentDetails.PaymentDetails) {
+        navigate(LinkScreen.CardEdit(item.id))
+    }
+
     private fun completePaymentButtonLabel(
         stripeIntent: StripeIntent,
     ) = when (stripeIntent) {
@@ -111,6 +120,7 @@ internal class WalletViewModel @Inject constructor(
         fun factory(
             parentComponent: NativeLinkComponent,
             linkAccount: LinkAccount,
+            navigate: (route: LinkScreen) -> Unit,
             navigateAndClearStack: (route: LinkScreen) -> Unit,
             dismissWithResult: (LinkActivityResult) -> Unit
         ): ViewModelProvider.Factory {
@@ -121,6 +131,7 @@ internal class WalletViewModel @Inject constructor(
                         linkAccountManager = parentComponent.linkAccountManager,
                         logger = parentComponent.logger,
                         linkAccount = linkAccount,
+                        navigate = navigate,
                         navigateAndClearStack = navigateAndClearStack,
                         dismissWithResult = dismissWithResult
                     )

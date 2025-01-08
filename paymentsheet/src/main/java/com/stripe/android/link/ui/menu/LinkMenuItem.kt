@@ -10,5 +10,6 @@ import com.stripe.android.core.strings.ResolvableString
  */
 internal interface LinkMenuItem {
     val text: ResolvableString
+    val tag: String
     val isDestructive: Boolean
 }

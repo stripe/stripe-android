@@ -94,6 +94,9 @@ internal fun LinkContent(
                 Screens(
                     navController = navController,
                     goBack = viewModel::goBack,
+                    navigate = { screen ->
+                        viewModel.navigate(screen, clearStack = false)
+                    },
                     navigateAndClearStack = { screen ->
                         viewModel.navigate(screen, clearStack = true)
                     },
@@ -102,7 +105,8 @@ internal fun LinkContent(
                     },
                     getLinkAccount = {
                         viewModel.linkAccount
-                    }
+                    },
+                    showBottomSheetContent = onUpdateSheetContent
                 )
             }
         }
@@ -114,21 +118,17 @@ private fun Screens(
     navController: NavHostController,
     getLinkAccount: () -> LinkAccount?,
     goBack: () -> Unit,
+    navigate: (route: LinkScreen) -> Unit,
     navigateAndClearStack: (route: LinkScreen) -> Unit,
-    dismissWithResult: (LinkActivityResult) -> Unit
+    dismissWithResult: (LinkActivityResult) -> Unit,
+    showBottomSheetContent: (BottomSheetContent?) -> Unit
 ) {
     NavHost(
         navController = navController,
         startDestination = LinkScreen.Loading.route
     ) {
         composable(LinkScreen.Loading.route) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
-            }
+            Loader()
         }
 
         composable(LinkScreen.SignUp.route) {
@@ -162,19 +162,34 @@ private fun Screens(
                 WalletViewModel.factory(
                     parentComponent = parentComponent,
                     linkAccount = linkAccount,
+                    navigate = navigate,
                     navigateAndClearStack = navigateAndClearStack,
                     dismissWithResult = dismissWithResult
                 )
             }
-            WalletScreen(viewModel)
+            WalletScreen(
+                viewModel = viewModel,
+                showBottomSheetContent = showBottomSheetContent
+            )
         }
 
-        composable(LinkScreen.CardEdit.route) {
+        composable(LinkScreen.CardEdit.ROUTE) {
             CardEditScreen()
         }
 
         composable(LinkScreen.PaymentMethod.route) {
             PaymentMethodScreen()
         }
+    }
+}
+
+@Composable
+private fun Loader() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        CircularProgressIndicator()
     }
 }
