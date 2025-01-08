@@ -218,4 +218,25 @@ internal class PaymentMethodRowButtonScreenshotTest {
             )
         }
     }
+
+    @Test
+    fun testDefault() {
+        paparazziRule.snapshot {
+            PaymentMethodRowButton(
+                isEnabled = true,
+                isSelected = false,
+                shouldShowDefaultBadge = true,
+                iconContent = {
+                    Image(
+                        painter = painterResource(id = R.drawable.stripe_ic_paymentsheet_pm_card),
+                        contentDescription = null
+                    )
+                },
+                title = "**** 4242",
+                subtitle = null,
+                promoText = null,
+                onClick = {},
+            )
+        }
+    }
 }
