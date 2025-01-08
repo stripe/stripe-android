@@ -6,7 +6,7 @@ package com.stripe.android.connect.util
  *
  * Also useful for mocking in tests.
  */
-interface Clock {
+internal interface Clock {
 
     /**
      * Return the current system time in milliseconds
@@ -18,6 +18,6 @@ interface Clock {
  * A [Clock] that depends on Android APIs. To be replaced by java.time.Clock when all consumers
  * support > SDK 26.
  */
-class AndroidClock : Clock {
+internal class AndroidClock : Clock {
     override fun millis(): Long = System.currentTimeMillis()
 }
