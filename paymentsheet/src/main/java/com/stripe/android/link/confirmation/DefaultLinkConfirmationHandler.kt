@@ -5,7 +5,9 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -22,7 +24,7 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
         paymentDetails: ConsumerPaymentDetails.PaymentDetails,
         linkAccount: LinkAccount
     ): Result {
-        return kotlin.runCatching {
+        return runCatching {
             val args = confirmationArgs(paymentDetails, linkAccount)
             confirmationHandler.start(args)
             val result = confirmationHandler.awaitResult()
@@ -69,12 +71,21 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
                 shouldSave = false
             ),
             appearance = PaymentSheet.Appearance(),
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = configuration.stripeIntent.clientSecret
-                    ?: throw NO_CLIENT_SECRET_FOUND
-            ),
+            initializationMode = initializationMode(),
             shippingDetails = configuration.shippingDetails
         )
+    }
+
+    private fun initializationMode(): PaymentElementLoader.InitializationMode {
+        val clientSecret = configuration.stripeIntent.clientSecret ?: throw NO_CLIENT_SECRET_FOUND
+        return when (configuration.stripeIntent) {
+            is PaymentIntent -> {
+                PaymentElementLoader.InitializationMode.PaymentIntent(clientSecret)
+            }
+            is SetupIntent -> {
+                PaymentElementLoader.InitializationMode.SetupIntent(clientSecret)
+            }
+        }
     }
 
     private fun createPaymentMethodCreateParams(
@@ -102,6 +113,6 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
     }
 
     companion object {
-        val NO_CLIENT_SECRET_FOUND = IllegalStateException("no client secret found")
+        val NO_CLIENT_SECRET_FOUND = IllegalStateException("No client secret found.")
     }
 }

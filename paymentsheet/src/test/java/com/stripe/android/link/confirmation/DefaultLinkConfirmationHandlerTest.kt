@@ -1,16 +1,18 @@
 package com.stripe.android.link.confirmation
 
-import com.google.common.truth.Truth
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.TestFactory
+import com.stripe.android.link.model.LinkAccount
+import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.FakeLogger
@@ -26,7 +28,8 @@ internal class DefaultLinkConfirmationHandlerTest {
         val configuration = TestFactory.LINK_CONFIGURATION
         val confirmationHandler = FakeConfirmationHandler()
         val handler = createHandler(
-            confirmationHandler = confirmationHandler
+            confirmationHandler = confirmationHandler,
+            configuration = configuration
         )
 
         confirmationHandler.awaitResultTurbine.add(
@@ -41,27 +44,48 @@ internal class DefaultLinkConfirmationHandlerTest {
             linkAccount = TestFactory.LINK_ACCOUNT
         )
 
-        Truth.assertThat(result).isEqualTo(Result.Succeeded)
-        Truth.assertThat(confirmationHandler.startTurbine.awaitItem())
-            .isEqualTo(
-                ConfirmationHandler.Args(
-                    intent = configuration.stripeIntent,
-                    confirmationOption = PaymentMethodConfirmationOption.New(
-                        createParams = PaymentMethodCreateParams.createLink(
-                            paymentDetailsId = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.id,
-                            consumerSessionClientSecret = TestFactory.LINK_ACCOUNT.clientSecret,
-                            extraParams = emptyMap(),
-                        ),
-                        optionsParams = null,
-                        shouldSave = false
-                    ),
-                    appearance = PaymentSheet.Appearance(),
-                    initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                        clientSecret = configuration.stripeIntent.clientSecret ?: ""
-                    ),
-                    shippingDetails = configuration.shippingDetails
-                )
+        assertThat(result).isEqualTo(Result.Succeeded)
+        confirmationHandler.startTurbine.awaitItem().assertConfirmationArgs(
+            configuration = configuration,
+            linkAccount = TestFactory.LINK_ACCOUNT,
+            paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD
+        )
+    }
+
+    @Test
+    fun `successful confirmation yields success result with setup intent`() = runTest(dispatcher) {
+        val configuration = TestFactory.LINK_CONFIGURATION.copy(
+            stripeIntent = SetupIntentFixtures.SI_SUCCEEDED
+        )
+        val confirmationHandler = FakeConfirmationHandler()
+        val handler = createHandler(
+            confirmationHandler = confirmationHandler,
+            configuration = configuration
+        )
+
+        confirmationHandler.awaitResultTurbine.add(
+            item = ConfirmationHandler.Result.Succeeded(
+                intent = configuration.stripeIntent,
+                deferredIntentConfirmationType = null
             )
+        )
+
+        val result = handler.confirm(
+            paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+            linkAccount = TestFactory.LINK_ACCOUNT
+        )
+
+        assertThat(result).isEqualTo(Result.Succeeded)
+        confirmationHandler.startTurbine.awaitItem().assertConfirmationArgs(
+            configuration = configuration,
+            linkAccount = TestFactory.LINK_ACCOUNT,
+            paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+            initMode = {
+                PaymentElementLoader.InitializationMode.SetupIntent(
+                    clientSecret = configuration.stripeIntent.clientSecret.orEmpty()
+                )
+            }
+        )
     }
 
     @Test
@@ -89,8 +113,8 @@ internal class DefaultLinkConfirmationHandlerTest {
             linkAccount = TestFactory.LINK_ACCOUNT
         )
 
-        Truth.assertThat(result).isEqualTo(Result.Failed(errorMessage))
-        Truth.assertThat(logger.errorLogs)
+        assertThat(result).isEqualTo(Result.Failed(errorMessage))
+        assertThat(logger.errorLogs)
             .containsExactly("DefaultLinkConfirmationHandler: Failed to confirm payment" to error)
     }
 
@@ -110,7 +134,7 @@ internal class DefaultLinkConfirmationHandlerTest {
             linkAccount = TestFactory.LINK_ACCOUNT
         )
 
-        Truth.assertThat(result).isEqualTo(Result.Canceled)
+        assertThat(result).isEqualTo(Result.Canceled)
     }
 
     @Test
@@ -129,8 +153,8 @@ internal class DefaultLinkConfirmationHandlerTest {
             linkAccount = TestFactory.LINK_ACCOUNT
         )
 
-        Truth.assertThat(result).isEqualTo(Result.Failed(R.string.stripe_something_went_wrong.resolvableString))
-        Truth.assertThat(logger.errorLogs)
+        assertThat(result).isEqualTo(Result.Failed(R.string.stripe_something_went_wrong.resolvableString))
+        assertThat(logger.errorLogs)
             .containsExactly("DefaultLinkConfirmationHandler: Payment confirmation returned null" to null)
     }
 
@@ -155,12 +179,35 @@ internal class DefaultLinkConfirmationHandlerTest {
             linkAccount = TestFactory.LINK_ACCOUNT
         )
 
-        Truth.assertThat(result).isEqualTo(Result.Failed(R.string.stripe_something_went_wrong.resolvableString))
-        Truth.assertThat(logger.errorLogs)
+        assertThat(result).isEqualTo(Result.Failed(R.string.stripe_something_went_wrong.resolvableString))
+        assertThat(logger.errorLogs)
             .containsExactly(
                 "DefaultLinkConfirmationHandler: Failed to confirm payment"
                     to DefaultLinkConfirmationHandler.NO_CLIENT_SECRET_FOUND
             )
+    }
+
+    private fun ConfirmationHandler.Args.assertConfirmationArgs(
+        configuration: LinkConfiguration,
+        paymentDetails: ConsumerPaymentDetails.PaymentDetails,
+        linkAccount: LinkAccount,
+        initMode: () -> PaymentElementLoader.InitializationMode = {
+            PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = configuration.stripeIntent.clientSecret.orEmpty()
+            )
+        }
+    ) {
+        assertThat(intent).isEqualTo(configuration.stripeIntent)
+        val option = confirmationOption as PaymentMethodConfirmationOption.New
+        assertThat(option.createParams).isEqualTo(
+            PaymentMethodCreateParams.createLink(
+                paymentDetailsId = paymentDetails.id,
+                consumerSessionClientSecret = linkAccount.clientSecret,
+                extraParams = emptyMap(),
+            )
+        )
+        assertThat(shippingDetails).isEqualTo(configuration.shippingDetails)
+        assertThat(initializationMode).isEqualTo(initMode())
     }
 
     private fun createHandler(
