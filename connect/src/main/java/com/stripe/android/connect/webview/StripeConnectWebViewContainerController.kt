@@ -129,6 +129,19 @@ internal class StripeConnectWebViewContainerController<Listener : StripeEmbedded
         }
     }
 
+    fun onErrorDeserializingWebMessage(
+        webMessage: String,
+        error: String,
+        errorMessage: String?,
+    ) {
+        analyticsService.track(ConnectAnalyticsEvent.WebErrorDeserializeMessage(
+            message = webMessage,
+            error = error,
+            errorDescription = errorMessage,
+            pageViewId = stateFlow.value.pageViewId,
+        ))
+    }
+
     /**
      * Callback whenever the merchant ID changes, such as in the
      */
