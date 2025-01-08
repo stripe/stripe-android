@@ -127,10 +127,26 @@ class PaymentOptionsScreenshotTest {
     }
 
     @Test
-    fun testEditingAndRemoveDisabledWithModifiableItemsAndDefaultPaymentOption() {
+    fun testDefaultPaymentOptionNotEditing() {
         paparazziRule.snapshot {
             SavedPaymentMethodTabLayoutUI(
-                paymentOptionsItems = paymentOptionsItemsWithRemoveDisabledAndModifiableDefaultCard,
+                paymentOptionsItems = paymentOptionsItemsWithDefaultCard,
+                selectedPaymentOptionsItem = null,
+                isEditing = false,
+                isProcessing = false,
+                onAddCardPressed = {},
+                onItemSelected = {},
+                onModifyItem = {},
+                scrollState = LazyListState(firstVisibleItemIndex = 2),
+            )
+        }
+    }
+
+    @Test
+    fun testDefaultPaymentOptionEditing() {
+        paparazziRule.snapshot {
+            SavedPaymentMethodTabLayoutUI(
+                paymentOptionsItems = paymentOptionsItemsWithDefaultCard,
                 selectedPaymentOptionsItem = null,
                 isEditing = true,
                 isProcessing = false,
@@ -164,7 +180,7 @@ class PaymentOptionsScreenshotTest {
         ),
     )
 
-    private val paymentOptionsItemsWithRemoveDisabledAndModifiableDefaultCard = listOf(
+    private val paymentOptionsItemsWithDefaultCard = listOf(
         PaymentOptionsItem.SavedPaymentMethod(
             DisplayableSavedPaymentMethod.create(
                 displayName = "Card".resolvableString,
