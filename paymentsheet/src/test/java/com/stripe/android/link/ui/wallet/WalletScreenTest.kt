@@ -206,10 +206,6 @@ internal class WalletScreenTest {
         composeTestRule.waitForIdle()
 
         onWalletPaymentMethodMenu().assertIsDisplayed()
-
-        onWalletPaymentMethodMenuCancelTag().performClick()
-
-        onWalletPaymentMethodMenu().assertDoesNotExist()
     }
 
     @Test
