@@ -80,9 +80,13 @@ internal class StripeConnectWebViewContainerController<Listener : StripeEmbedded
         if (url != null) {
             val pageLoadUrl = Uri.parse(url)
             val expectedUrl = Uri.parse(embeddedComponentManager.getStripeURL(embeddedComponent))
-            if (pageLoadUrl.host != expectedUrl.host || pageLoadUrl.path != expectedUrl.path) {
+            if (
+                pageLoadUrl.scheme != expectedUrl.scheme ||
+                pageLoadUrl.host != expectedUrl.host ||
+                pageLoadUrl.path != expectedUrl.path
+            ) {
                 // expected URL doesn't match what we navigated to
-                val sanitizedUrl = pageLoadUrl.buildUpon().clearQuery().build().toString()
+                val sanitizedUrl = pageLoadUrl.buildUpon().clearQuery().fragment(null).build().toString()
                 analyticsService.track(ConnectAnalyticsEvent.WebErrorUnexpectedNavigation(sanitizedUrl))
             }
         }
@@ -236,11 +240,11 @@ internal class StripeConnectWebViewContainerController<Listener : StripeEmbedded
                 analyticsService.track(
                     ConnectAnalyticsEvent.ClientError(
                         error = "Unexpected permissions request",
-                        errorMessage = "Unexpected permissions ${request.resources.joinToString()} requested"
+                        errorMessage = "Unexpected permissions '${request.resources.joinToString()}' requested"
                     )
                 )
                 logger.warning(
-                    "($loggerTag) Denying permission - ${request.resources.joinToString()} are not supported"
+                    "($loggerTag) Denying permission - '${request.resources.joinToString()}' are not supported"
                 )
             }
             return
