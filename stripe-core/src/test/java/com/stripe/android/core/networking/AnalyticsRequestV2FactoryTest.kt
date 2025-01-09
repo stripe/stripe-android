@@ -1,6 +1,7 @@
 package com.stripe.android.core.networking
 
 import android.content.Context
+import android.provider.Settings
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.networking.AnalyticsRequestV2.Companion.PARAM_CLIENT_ID
@@ -8,9 +9,11 @@ import com.stripe.android.core.networking.AnalyticsRequestV2Factory.Companion.PA
 import com.stripe.android.core.networking.AnalyticsRequestV2Factory.Companion.PARAM_PLUGIN_TYPE
 import com.stripe.android.core.networking.AnalyticsRequestV2Factory.Companion.PARAM_SDK_PLATFORM
 import com.stripe.android.core.networking.AnalyticsRequestV2Factory.Companion.PARAM_SDK_VERSION
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.shadows.ShadowSettings
 import java.net.URLEncoder
 
 @RunWith(RobolectricTestRunner::class)
@@ -34,6 +37,12 @@ class AnalyticsRequestV2FactoryTest {
         PARAM_PLUGIN_TYPE,
         PARAM_PLATFORM_INFO
     )
+
+    @Before
+    fun setup() {
+        // set the android_id to a known value for testing
+        Settings.Secure.putString(context.contentResolver, Settings.Secure.ANDROID_ID, "android_id")
+    }
 
     @Test
     fun `verify clientId and origin`() {
