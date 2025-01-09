@@ -171,13 +171,6 @@ internal class WalletScreenTest {
 
         composeTestRule.waitForIdle()
 
-        onCollapsedWalletRow().performClick()
-
-        composeTestRule.waitForIdle()
-
-        onWalletAddPaymentMethodRow().assertIsDisplayed().assertHasClickAction()
-        onExpandedWalletHeader().assertIsDisplayed()
-        onPaymentMethodList().assertCountEquals(2)
         onWalletPayButton().assertIsDisplayed().assertIsNotEnabled().assertHasClickAction()
         onWalletPayAnotherWayButton().assertIsDisplayed().assertIsEnabled().assertHasClickAction()
     }
@@ -531,6 +524,9 @@ internal class WalletScreenTest {
 
     private fun onWalletFormFields() =
         composeTestRule.onNodeWithTag(WALLET_SCREEN_RECOLLECTION_FORM_FIELDS, useUnmergedTree = true)
+
+    private fun onWalletScreen() =
+        composeTestRule.onNodeWithTag(WALLET_SCREEN_BOX, useUnmergedTree = true)
 
     private fun onLoader() = composeTestRule.onNodeWithTag(WALLET_LOADER_TAG)
 

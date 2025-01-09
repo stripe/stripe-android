@@ -59,7 +59,6 @@ import com.stripe.android.uicore.elements.SimpleTextElement
 import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.text.Html
 import com.stripe.android.uicore.utils.collectAsState
-import java.util.UUID
 
 @Composable
 internal fun WalletScreen(
