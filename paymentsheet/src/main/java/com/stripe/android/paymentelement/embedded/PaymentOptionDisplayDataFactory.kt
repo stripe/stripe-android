@@ -30,7 +30,7 @@ internal class PaymentOptionDisplayDataFactory @Inject constructor(
             is PaymentSelection.New -> {
                 paymentMethodMetadata.formElementsForCode(
                     code = selection.paymentMethodType,
-                    uiDefinitionFactoryArgumentsFactory = UiDefinitionFactoryHelper.embeddedUiDefinitionFactory
+                    uiDefinitionFactoryArgumentsFactory = NullUiDefinitionFactoryHelper.nullEmbeddedUiDefinitionFactory
                 )?.firstNotNullOfOrNull { it.mandateText }
             }
             is PaymentSelection.Saved -> {

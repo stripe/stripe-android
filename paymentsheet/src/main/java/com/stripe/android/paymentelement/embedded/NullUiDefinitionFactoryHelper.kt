@@ -8,8 +8,8 @@ import com.stripe.android.networking.StripeRepository
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.StateFlow
 
-internal object UiDefinitionFactoryHelper {
-    val embeddedUiDefinitionFactory = UiDefinitionFactory.Arguments.Factory.Default(
+internal object NullUiDefinitionFactoryHelper {
+    val nullEmbeddedUiDefinitionFactory = UiDefinitionFactory.Arguments.Factory.Default(
         cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
         linkConfigurationCoordinator = null,
         onLinkInlineSignupStateChanged = {
