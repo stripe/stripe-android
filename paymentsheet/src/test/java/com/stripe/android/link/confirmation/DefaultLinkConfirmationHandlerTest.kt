@@ -41,7 +41,8 @@ internal class DefaultLinkConfirmationHandlerTest {
 
         val result = handler.confirm(
             paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
-            linkAccount = TestFactory.LINK_ACCOUNT
+            linkAccount = TestFactory.LINK_ACCOUNT,
+            cvc = "333"
         )
 
         assertThat(result).isEqualTo(Result.Succeeded)
@@ -49,6 +50,7 @@ internal class DefaultLinkConfirmationHandlerTest {
             configuration = configuration,
             linkAccount = TestFactory.LINK_ACCOUNT,
             paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+            cvc = CVC,
             initMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = configuration.stripeIntent.clientSecret.orEmpty()
             )
@@ -83,6 +85,7 @@ internal class DefaultLinkConfirmationHandlerTest {
             configuration = configuration,
             linkAccount = TestFactory.LINK_ACCOUNT,
             paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+            cvc = null,
             initMode = PaymentElementLoader.InitializationMode.SetupIntent(
                 clientSecret = configuration.stripeIntent.clientSecret.orEmpty()
             )
@@ -192,6 +195,7 @@ internal class DefaultLinkConfirmationHandlerTest {
         configuration: LinkConfiguration,
         paymentDetails: ConsumerPaymentDetails.PaymentDetails,
         linkAccount: LinkAccount,
+        cvc: String?,
         initMode: PaymentElementLoader.InitializationMode
     ) {
         assertThat(intent).isEqualTo(configuration.stripeIntent)
@@ -200,7 +204,7 @@ internal class DefaultLinkConfirmationHandlerTest {
             PaymentMethodCreateParams.createLink(
                 paymentDetailsId = paymentDetails.id,
                 consumerSessionClientSecret = linkAccount.clientSecret,
-                extraParams = emptyMap(),
+                extraParams = cvc?.let { mapOf("card" to mapOf("cvc" to cvc)) },
             )
         )
         assertThat(shippingDetails).isEqualTo(configuration.shippingDetails)
@@ -219,5 +223,9 @@ internal class DefaultLinkConfirmationHandlerTest {
         )
         confirmationHandler.validate()
         return handler
+    }
+
+    companion object {
+        private const val CVC = "333"
     }
 }

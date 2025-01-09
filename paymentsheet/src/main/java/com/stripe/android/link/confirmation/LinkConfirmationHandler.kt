@@ -8,7 +8,8 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 internal interface LinkConfirmationHandler {
     suspend fun confirm(
         paymentDetails: ConsumerPaymentDetails.PaymentDetails,
-        linkAccount: LinkAccount
+        linkAccount: LinkAccount,
+        cvc: String? = null
     ): Result
 
     fun interface Factory {

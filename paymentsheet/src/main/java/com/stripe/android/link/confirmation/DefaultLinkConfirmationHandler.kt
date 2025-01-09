@@ -22,10 +22,11 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
 ) : LinkConfirmationHandler {
     override suspend fun confirm(
         paymentDetails: ConsumerPaymentDetails.PaymentDetails,
-        linkAccount: LinkAccount
+        linkAccount: LinkAccount,
+        cvc: String?
     ): Result {
         return runCatching {
-            val args = confirmationArgs(paymentDetails, linkAccount)
+            val args = confirmationArgs(paymentDetails, linkAccount, cvc)
             confirmationHandler.start(args)
             val result = confirmationHandler.awaitResult()
             transformResult(result)
@@ -58,14 +59,16 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
 
     private fun confirmationArgs(
         paymentDetails: ConsumerPaymentDetails.PaymentDetails,
-        linkAccount: LinkAccount
+        linkAccount: LinkAccount,
+        cvc: String?
     ): ConfirmationHandler.Args {
         return ConfirmationHandler.Args(
             intent = configuration.stripeIntent,
             confirmationOption = PaymentMethodConfirmationOption.New(
                 createParams = createPaymentMethodCreateParams(
                     selectedPaymentDetails = paymentDetails,
-                    linkAccount = linkAccount
+                    linkAccount = linkAccount,
+                    cvc = cvc
                 ),
                 optionsParams = null,
                 shouldSave = false
@@ -91,11 +94,12 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
     private fun createPaymentMethodCreateParams(
         selectedPaymentDetails: ConsumerPaymentDetails.PaymentDetails,
         linkAccount: LinkAccount,
+        cvc: String?
     ): PaymentMethodCreateParams {
         return PaymentMethodCreateParams.createLink(
             paymentDetailsId = selectedPaymentDetails.id,
             consumerSessionClientSecret = linkAccount.clientSecret,
-            extraParams = emptyMap(),
+            extraParams = cvc?.let { mapOf("card" to mapOf("cvc" to cvc)) },
         )
     }
 
