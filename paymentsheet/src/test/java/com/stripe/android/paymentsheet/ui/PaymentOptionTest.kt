@@ -21,7 +21,7 @@ class PaymentOptionTest {
     val composeTestRule = createComposeRule()
 
     @Test
-    fun `SavedPaymentMethodTab created corrected`() {
+    fun `SavedPaymentMethodTab created correctly`() {
         val label = "Card ending in 4242"
 
         composeTestRule.setContent {
@@ -45,7 +45,7 @@ class PaymentOptionTest {
     }
 
     @Test
-    fun `SavedPaymentMethodTab created corrected when edited`() {
+    fun `SavedPaymentMethodTab created correctly when edited`() {
         val label = "Card ending in 4242"
 
         composeTestRule.setContent {
@@ -66,7 +66,7 @@ class PaymentOptionTest {
     }
 
     @Test
-    fun `SavedPaymentMethodTab created corrected when not edited and default`() {
+    fun `SavedPaymentMethodTab created correctly when not edited and default`() {
         val label = "Card ending in 4242"
 
         composeTestRule.setContent {
@@ -87,7 +87,7 @@ class PaymentOptionTest {
     }
 
     @Test
-    fun `SavedPaymentMethodTab created corrected when edited and default`() {
+    fun `SavedPaymentMethodTab created correctly when edited and default`() {
         val label = "Card ending in 4242"
 
         composeTestRule.setContent {
