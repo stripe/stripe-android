@@ -13,6 +13,9 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import androidx.core.content.ContextCompat.checkSelfPermission
+import com.stripe.android.connect.analytics.ComponentAnalyticsService
+import com.stripe.android.connect.analytics.ConnectAnalyticsService
+import com.stripe.android.connect.analytics.DefaultConnectAnalyticsService
 import com.stripe.android.connect.appearance.Appearance
 import com.stripe.android.connect.appearance.fonts.CustomFontSource
 import com.stripe.android.connect.util.findActivity
@@ -169,6 +172,22 @@ class EmbeddedComponentManager(
         return permissionsFlow.first()
     }
 
+    internal fun getComponentAnalyticsService(component: StripeEmbeddedComponent): ComponentAnalyticsService {
+        val analyticsService = checkNotNull(connectAnalyticsService) {
+            "ConnectAnalyticsService is not initialized"
+        }
+        val publishableKeyToLog = if (configuration.publishableKey.startsWith("uk_")) {
+            null // don't log "uk_" keys
+        } else {
+            configuration.publishableKey
+        }
+        return ComponentAnalyticsService(
+            analyticsService = analyticsService,
+            component = component,
+            publishableKey = publishableKeyToLog,
+        )
+    }
+
     // Configuration
 
     @PrivateBetaConnectSDK
@@ -180,6 +199,8 @@ class EmbeddedComponentManager(
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
+        private var connectAnalyticsService: ConnectAnalyticsService? = null
+
         @VisibleForTesting
         internal val permissionsFlow: MutableSharedFlow<Boolean> = MutableSharedFlow(extraBufferCapacity = 1)
         private val launcherMap = mutableMapOf<Activity, ActivityResultLauncher<String>>()
@@ -193,6 +214,12 @@ class EmbeddedComponentManager(
          */
         fun onActivityCreate(activity: ComponentActivity) {
             val application = activity.application
+
+            if (connectAnalyticsService == null) {
+                connectAnalyticsService = DefaultConnectAnalyticsService(
+                    application = application,
+                )
+            }
 
             application.registerActivityLifecycleCallbacks(object : ActivityLifecycleCallbacks {
                 override fun onActivityDestroyed(destroyedActivity: Activity) {

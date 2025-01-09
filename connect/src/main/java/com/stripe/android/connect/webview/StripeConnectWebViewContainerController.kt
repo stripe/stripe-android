@@ -14,6 +14,7 @@ import com.stripe.android.connect.EmbeddedComponentManager
 import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.StripeEmbeddedComponent
 import com.stripe.android.connect.StripeEmbeddedComponentListener
+import com.stripe.android.connect.analytics.ComponentAnalyticsService
 import com.stripe.android.connect.webview.serialization.ConnectInstanceJs
 import com.stripe.android.connect.webview.serialization.SetOnLoadError
 import com.stripe.android.connect.webview.serialization.SetOnLoaderStart
@@ -27,9 +28,11 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+@Suppress("TooManyFunctions")
 @OptIn(PrivateBetaConnectSDK::class)
 internal class StripeConnectWebViewContainerController<Listener : StripeEmbeddedComponentListener>(
     private val view: StripeConnectWebViewContainerInternal,
+    private val analyticsService: ComponentAnalyticsService,
     private val embeddedComponentManager: EmbeddedComponentManager,
     private val embeddedComponent: StripeEmbeddedComponent,
     private val listener: Listener?,
@@ -87,6 +90,13 @@ internal class StripeConnectWebViewContainerController<Listener : StripeEmbedded
         if (isMainPageLoad) {
             listener?.onLoadError(RuntimeException(errorString)) // TODO - wrap error better
         }
+    }
+
+    /**
+     * Callback whenever the merchant ID changes, such as in the
+     */
+    fun onMerchantIdChanged(merchantId: String) {
+        analyticsService.merchantId = merchantId
     }
 
     /**

@@ -196,8 +196,10 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
                     }
                 }
             }
+        val analyticsService = embeddedComponentManager.getComponentAnalyticsService(embeddedComponent)
         this.controller = StripeConnectWebViewContainerController(
             view = this,
+            analyticsService = analyticsService,
             embeddedComponentManager = embeddedComponentManager,
             embeddedComponent = embeddedComponent,
             listener = listener,
@@ -373,6 +375,8 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
         fun accountSessionClaimed(message: String) {
             val accountSessionClaimedMessage = ConnectJson.decodeFromString<AccountSessionClaimedMessage>(message)
             logger.debug("Account session claimed: $accountSessionClaimedMessage")
+
+            controller?.onMerchantIdChanged(accountSessionClaimedMessage.merchantId)
         }
 
         @JavascriptInterface
