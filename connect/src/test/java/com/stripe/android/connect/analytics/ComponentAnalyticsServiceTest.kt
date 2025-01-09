@@ -83,11 +83,13 @@ class ComponentAnalyticsServiceTest {
             "publishableKey123"
         )
 
-        componentAnalyticsService.track(ConnectAnalyticsEvent.WebComponentLoaded(
-            pageViewId = "pageViewId123",
-            timeToLoad = 100.0,
-            perceivedTimeToLoad = 50.0,
-        ))
+        componentAnalyticsService.track(
+            ConnectAnalyticsEvent.WebComponentLoaded(
+                pageViewId = "pageViewId123",
+                timeToLoad = 100.0,
+                perceivedTimeToLoad = 50.0,
+            )
+        )
         val mapCaptor = argumentCaptor<Map<String, Any?>>()
         verify(analyticsService).track(any(), mapCaptor.capture())
         val params = mapCaptor.firstValue

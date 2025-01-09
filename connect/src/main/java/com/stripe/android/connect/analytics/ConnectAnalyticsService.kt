@@ -3,7 +3,6 @@ package com.stripe.android.connect.analytics
 import android.app.Application
 import com.stripe.android.core.BuildConfig
 import com.stripe.android.core.Logger
-import com.stripe.android.core.networking.AnalyticsRequestV2
 import com.stripe.android.core.networking.AnalyticsRequestV2Factory
 import com.stripe.android.core.networking.DefaultAnalyticsRequestV2Executor
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
