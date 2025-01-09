@@ -597,13 +597,20 @@ internal object PaymentMethodFixtures {
         return CARD_PAYMENT_METHOD.toDisplayableSavedPaymentMethod()
     }
 
-    fun PaymentMethod.toDisplayableSavedPaymentMethod(): DisplayableSavedPaymentMethod {
+    fun defaultDisplayableCard(): DisplayableSavedPaymentMethod {
+        return CARD_PAYMENT_METHOD.toDisplayableSavedPaymentMethod(shouldShowDefaultBadge = true)
+    }
+
+    fun PaymentMethod.toDisplayableSavedPaymentMethod(
+        shouldShowDefaultBadge: Boolean = false
+    ): DisplayableSavedPaymentMethod {
         return DisplayableSavedPaymentMethod.create(
             displayName = (
                 this.card?.last4 ?: this.usBankAccount?.last4 ?: this.sepaDebit?.last4 ?: ""
                 ).resolvableString,
             paymentMethod = this,
             isCbcEligible = true,
+            shouldShowDefaultBadge = shouldShowDefaultBadge
         )
     }
 

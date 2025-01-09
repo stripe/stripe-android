@@ -6,6 +6,7 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.screenshottesting.FontSize
@@ -69,6 +70,19 @@ internal class SavedPaymentMethodRowButtonScreenshotTest {
         paparazziRule.snapshot {
             SavedPaymentMethodRowButton(
                 displayableSavedPaymentMethod = savedVisa,
+                isEnabled = false,
+                isSelected = false,
+            )
+        }
+    }
+
+    @Test
+    fun testSavedVisa_default() {
+        val savedDefaultVisa = PaymentMethodFixtures.defaultDisplayableCard()
+
+        paparazziRule.snapshot {
+            SavedPaymentMethodRowButton(
+                displayableSavedPaymentMethod = savedDefaultVisa,
                 isEnabled = false,
                 isSelected = false,
             )

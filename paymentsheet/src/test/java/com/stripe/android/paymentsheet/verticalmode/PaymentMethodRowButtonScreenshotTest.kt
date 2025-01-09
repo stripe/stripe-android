@@ -43,6 +43,7 @@ internal class PaymentMethodRowButtonScreenshotTest {
                 subtitle = null,
                 promoText = null,
                 onClick = {},
+                shouldShowDefaultBadge = false,
             )
         }
     }
@@ -63,6 +64,7 @@ internal class PaymentMethodRowButtonScreenshotTest {
                 subtitle = null,
                 promoText = null,
                 onClick = {},
+                shouldShowDefaultBadge = false,
             )
         }
     }
@@ -83,6 +85,7 @@ internal class PaymentMethodRowButtonScreenshotTest {
                 subtitle = null,
                 promoText = null,
                 onClick = {},
+                shouldShowDefaultBadge = false,
             )
         }
     }
@@ -103,6 +106,7 @@ internal class PaymentMethodRowButtonScreenshotTest {
                 subtitle = "Please click me, I'm fancy",
                 promoText = null,
                 onClick = {},
+                shouldShowDefaultBadge = false,
             )
         }
     }
@@ -124,6 +128,7 @@ internal class PaymentMethodRowButtonScreenshotTest {
                     "forever.",
                 promoText = null,
                 onClick = {},
+                shouldShowDefaultBadge = false,
             )
         }
     }
@@ -146,7 +151,8 @@ internal class PaymentMethodRowButtonScreenshotTest {
                 onClick = {},
                 trailingContent = {
                     Text(text = "View more")
-                }
+                },
+                shouldShowDefaultBadge = false,
             )
         }
     }
@@ -167,6 +173,7 @@ internal class PaymentMethodRowButtonScreenshotTest {
                 subtitle = null,
                 promoText = "$5",
                 onClick = {},
+                shouldShowDefaultBadge = false,
             )
         }
     }
@@ -187,6 +194,7 @@ internal class PaymentMethodRowButtonScreenshotTest {
                 subtitle = null,
                 promoText = "$5",
                 onClick = {},
+                shouldShowDefaultBadge = false,
             )
         }
     }
@@ -214,7 +222,29 @@ internal class PaymentMethodRowButtonScreenshotTest {
                 style = style,
                 trailingContent = {
                     Text(text = "View more")
-                }
+                },
+                shouldShowDefaultBadge = false,
+            )
+        }
+    }
+
+    @Test
+    fun testDefault() {
+        paparazziRule.snapshot {
+            PaymentMethodRowButton(
+                isEnabled = true,
+                isSelected = false,
+                shouldShowDefaultBadge = true,
+                iconContent = {
+                    Image(
+                        painter = painterResource(id = R.drawable.stripe_ic_paymentsheet_pm_card),
+                        contentDescription = null
+                    )
+                },
+                title = "**** 4242",
+                subtitle = null,
+                promoText = null,
+                onClick = {},
             )
         }
     }

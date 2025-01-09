@@ -44,7 +44,8 @@ internal class PaymentMethodRowRadioButtonScreenshotTest {
                 subtitle = null,
                 promoText = null,
                 onClick = {},
-                style = FlatWithRadio.defaultLight
+                style = FlatWithRadio.defaultLight,
+                shouldShowDefaultBadge = false,
             )
         }
     }
@@ -66,6 +67,7 @@ internal class PaymentMethodRowRadioButtonScreenshotTest {
                 promoText = null,
                 onClick = {},
                 style = FlatWithRadio.defaultLight,
+                shouldShowDefaultBadge = false,
             )
         }
     }
@@ -87,6 +89,7 @@ internal class PaymentMethodRowRadioButtonScreenshotTest {
                 promoText = null,
                 onClick = {},
                 style = FlatWithRadio.defaultLight,
+                shouldShowDefaultBadge = false,
             )
         }
     }
@@ -108,6 +111,7 @@ internal class PaymentMethodRowRadioButtonScreenshotTest {
                 promoText = null,
                 onClick = {},
                 style = FlatWithRadio.defaultLight,
+                shouldShowDefaultBadge = false,
             )
         }
     }
@@ -130,6 +134,7 @@ internal class PaymentMethodRowRadioButtonScreenshotTest {
                 promoText = null,
                 onClick = {},
                 style = FlatWithRadio.defaultLight,
+                shouldShowDefaultBadge = false,
             )
         }
     }
@@ -153,7 +158,8 @@ internal class PaymentMethodRowRadioButtonScreenshotTest {
                 style = FlatWithRadio.defaultLight,
                 trailingContent = {
                     Text(text = "View more")
-                }
+                },
+                shouldShowDefaultBadge = false,
             )
         }
     }
@@ -187,7 +193,8 @@ internal class PaymentMethodRowRadioButtonScreenshotTest {
                 style = style,
                 trailingContent = {
                     Text(text = "View more")
-                }
+                },
+                shouldShowDefaultBadge = false,
             )
         }
     }
