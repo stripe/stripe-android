@@ -1,6 +1,8 @@
 package com.stripe.android.paymentelement.embedded
 
 import android.content.Context
+import androidx.compose.ui.text.AnnotatedString
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -16,9 +18,30 @@ internal class PaymentOptionDisplayDataFactory @Inject constructor(
     private val iconLoader: PaymentSelection.IconLoader,
     private val context: Context,
 ) {
-    fun create(selection: PaymentSelection?): EmbeddedPaymentElement.PaymentOptionDisplayData? {
+    fun create(
+        selection: PaymentSelection?,
+        paymentMethodMetadata: PaymentMethodMetadata,
+    ): EmbeddedPaymentElement.PaymentOptionDisplayData? {
         if (selection == null) {
             return null
+        }
+
+        val mandate = when (selection) {
+            is PaymentSelection.New -> {
+                paymentMethodMetadata.formElementsForCode(
+                    code = selection.paymentMethodType,
+                    uiDefinitionFactoryArgumentsFactory = NullUiDefinitionFactoryHelper.nullEmbeddedUiDefinitionFactory
+                )?.firstNotNullOfOrNull { it.mandateText }
+            }
+            is PaymentSelection.Saved -> {
+                selection.mandateText(
+                    paymentMethodMetadata.merchantName,
+                    paymentMethodMetadata.hasIntentToSetup()
+                )
+            }
+            is PaymentSelection.ExternalPaymentMethod -> null
+            PaymentSelection.GooglePay -> null
+            PaymentSelection.Link -> null
         }
 
         return EmbeddedPaymentElement.PaymentOptionDisplayData(
@@ -32,7 +55,7 @@ internal class PaymentOptionDisplayDataFactory @Inject constructor(
             },
             billingDetails = null,
             paymentMethodType = selection.paymentMethodType,
-            mandateText = null,
+            mandateText = if (mandate == null) null else AnnotatedString(mandate.resolve(context))
         )
     }
 }
