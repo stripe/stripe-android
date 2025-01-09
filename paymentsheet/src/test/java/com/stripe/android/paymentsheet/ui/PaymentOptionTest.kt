@@ -104,6 +104,6 @@ class PaymentOptionTest {
             )
         }
 
-        composeTestRule.onNodeWithTag(TEST_TAG_DEFAULT_PAYMENT_METHOD_LABEL).assertExists()
+        composeTestRule.onNodeWithTag(testTag = TEST_TAG_DEFAULT_PAYMENT_METHOD_LABEL, useUnmergedTree = true).assertExists()
     }
 }
