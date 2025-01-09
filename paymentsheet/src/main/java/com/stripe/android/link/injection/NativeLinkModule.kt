@@ -3,6 +3,7 @@ package com.stripe.android.link.injection
 import android.content.Context
 import androidx.core.os.LocaleListCompat
 import com.stripe.android.BuildConfig
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.Stripe
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ENABLE_LOGGING
@@ -21,10 +22,13 @@ import com.stripe.android.link.account.DefaultLinkAccountManager
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.DefaultLinkEventsReporter
 import com.stripe.android.link.analytics.LinkEventsReporter
+import com.stripe.android.link.confirmation.DefaultLinkConfirmationHandler
+import com.stripe.android.link.confirmation.LinkConfirmationHandler
 import com.stripe.android.link.repositories.LinkApiRepository
 import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
@@ -59,6 +63,7 @@ internal interface NativeLinkModule {
     @NativeLinkScope
     fun stripeRepository(stripeRepository: StripeApiRepository): StripeRepository
 
+    @SuppressWarnings("TooManyFunctions")
     companion object {
         @Provides
         @NativeLinkScope
@@ -116,7 +121,7 @@ internal interface NativeLinkModule {
 
         @Provides
         @NativeLinkScope
-        internal fun providesAnalyticsRequestExecutor(
+        fun providesAnalyticsRequestExecutor(
             executor: DefaultAnalyticsRequestExecutor
         ): AnalyticsRequestExecutor = executor
 
@@ -124,5 +129,22 @@ internal interface NativeLinkModule {
         @Named(ENABLE_LOGGING)
         @NativeLinkScope
         fun providesEnableLogging(): Boolean = BuildConfig.DEBUG
+
+        @Provides
+        @NativeLinkScope
+        fun providePaymentConfiguration(appContext: Context): PaymentConfiguration {
+            return PaymentConfiguration.getInstance(appContext)
+        }
+
+        @Provides
+        @NativeLinkScope
+        @Named(ALLOWS_MANUAL_CONFIRMATION)
+        fun provideAllowsManualConfirmation() = true
+
+        @Provides
+        @NativeLinkScope
+        fun provideLinkConfirmationHandlerFactory(
+            factory: DefaultLinkConfirmationHandler.Factory
+        ): LinkConfirmationHandler.Factory = factory
     }
 }
