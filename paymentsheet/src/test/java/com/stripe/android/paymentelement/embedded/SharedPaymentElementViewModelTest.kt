@@ -9,6 +9,9 @@ import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
@@ -299,6 +302,52 @@ internal class SharedPaymentElementViewModelTest {
             viewModel.clearPaymentOption()
             assertThat(selectionHolder.selection.value?.paymentMethodType).isNull()
             assertThat(awaitItem()).isNull()
+        }
+        assertThat(embeddedContentHelper.dataLoadedTurbine.awaitItem()).isNotNull()
+    }
+
+    @Test
+    fun `selecting PaymentOption with mandate attaches mandate to paymentMethodMetadata`() = testScenario {
+        val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
+        configurationHandler.emit(
+            Result.success(
+                PaymentElementLoader.State(
+                    config = configuration.asCommonConfiguration(),
+                    customer = null,
+                    linkState = null,
+                    paymentSelection = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION.copy(
+                        paymentMethodCreateParams = PaymentMethodCreateParams(code = "cashapp", requiresMandate = true)
+                    ),
+                    validationError = null,
+                    paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                        stripeIntent = SetupIntentFixtures.SI_SUCCEEDED.copy(
+                            paymentMethodTypes = listOf("card", "cashapp"),
+                        ),
+                        billingDetailsCollectionConfiguration = configuration
+                            .billingDetailsCollectionConfiguration,
+                        allowsDelayedPaymentMethods = configuration.allowsDelayedPaymentMethods,
+                        allowsPaymentMethodsRequiringShippingAddress = configuration
+                            .allowsPaymentMethodsRequiringShippingAddress,
+                        isGooglePayReady = true,
+                        cbcEligibility = CardBrandChoiceEligibility.Ineligible,
+                    ),
+                )
+            )
+        )
+
+        assertThat(selectionHolder.selection.value?.paymentMethodType).isNull()
+        viewModel.paymentOption.test {
+            assertThat(awaitItem()).isNull()
+
+            assertThat(
+                viewModel.configure(
+                    PaymentSheet.IntentConfiguration(
+                        PaymentSheet.IntentConfiguration.Mode.Setup("USD"),
+                    ),
+                    configuration = configuration,
+                )
+            ).isInstanceOf<EmbeddedPaymentElement.ConfigureResult.Succeeded>()
+            assertThat(awaitItem()?.mandateText).isNotNull()
         }
         assertThat(embeddedContentHelper.dataLoadedTurbine.awaitItem()).isNotNull()
     }
