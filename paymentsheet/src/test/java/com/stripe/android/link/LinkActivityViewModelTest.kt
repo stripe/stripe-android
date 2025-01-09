@@ -20,6 +20,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.testing.CoroutineTestRule
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -317,6 +318,7 @@ internal class LinkActivityViewModelTest {
         return LinkActivityViewModel(
             linkAccountManager = linkAccountManager,
             activityRetainedComponent = mock(),
+            confirmationHandlerFactory = { FakeConfirmationHandler() }
         ).apply {
             this.navController = navController
             this.dismissWithResult = dismissWithResult

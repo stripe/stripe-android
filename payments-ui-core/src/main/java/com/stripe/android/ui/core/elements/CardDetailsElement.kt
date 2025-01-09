@@ -1,5 +1,6 @@
 package com.stripe.android.ui.core.elements
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.cards.CardAccountRangeRepository
@@ -106,6 +107,14 @@ internal class CardDetailsElement(
         }
         return combineAsStateFlow(flows) { it.toList() }
     }
+}
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun createExpiryDateFormFieldValues(entry: FormFieldEntry): Map<IdentifierSpec, FormFieldEntry> {
+    return mapOf(
+        IdentifierSpec.CardExpMonth to getExpiryMonthFormFieldEntry(entry),
+        IdentifierSpec.CardExpYear to getExpiryYearFormFieldEntry(entry)
+    )
 }
 
 private fun getExpiryMonthFormFieldEntry(entry: FormFieldEntry): FormFieldEntry {
