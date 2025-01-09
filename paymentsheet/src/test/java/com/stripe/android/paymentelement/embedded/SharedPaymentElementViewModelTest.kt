@@ -338,6 +338,16 @@ internal class SharedPaymentElementViewModelTest {
         )
     }
 
+    @Test
+    fun `selecting google pay does not attach mandate to paymentMethodMetadata`() {
+        mandateTest(
+            paymentSelection = PaymentSelection.GooglePay,
+            validate = {
+                assertThat(it?.mandateText).isNull()
+            }
+        )
+    }
+
     private fun mandateTest(
         paymentSelection: PaymentSelection,
         validate: (paymentOption: EmbeddedPaymentElement.PaymentOptionDisplayData?) -> Unit
