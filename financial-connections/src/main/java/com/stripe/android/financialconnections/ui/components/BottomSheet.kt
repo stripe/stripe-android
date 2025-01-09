@@ -1,10 +1,10 @@
 package com.stripe.android.financialconnections.ui.components
 
+import androidx.compose.material.navigation.BottomSheetNavigator
+import androidx.compose.material.navigation.ModalBottomSheetLayout
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.stripe.android.financialconnections.navigation.bottomsheet.BottomSheetNavigator
-import com.stripe.android.financialconnections.navigation.bottomsheet.ModalBottomSheetLayout
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.Neutral900
 import com.stripe.android.uicore.elements.bottomsheet.StripeBottomSheetLayout

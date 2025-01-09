@@ -36,6 +36,7 @@ dependencies {
     implementation libs.compose.material
     implementation libs.compose.materialIcons
     implementation libs.compose.navigation
+    implementation libs.compose.materialNavigation
     implementation libs.compose.ui
     implementation libs.compose.uiToolingPreview
     implementation libs.showkaseAnnotation
