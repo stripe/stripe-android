@@ -1,5 +1,10 @@
 package com.stripe.android.paymentsheet
 
+import android.view.accessibility.AccessibilityNodeInfo
+import android.widget.Button
+import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.matcher.ViewMatchers.withId
+import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.core.utils.urlEncode
@@ -363,5 +368,50 @@ internal class PaymentSheetTest {
 
         page.fillCvcRecollection("123")
         page.clickPrimaryButton()
+    }
+
+    @Test
+    fun testPrimaryButtonAccessibility() = runPaymentSheetTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-requires_payment_method.json")
+        }
+
+        testContext.presentPaymentSheet {
+            presentWithPaymentIntent(
+                paymentIntentClientSecret = "pi_example_secret_example",
+                configuration = defaultConfiguration,
+            )
+        }
+
+        page.fillOutCardDetails()
+
+        onView(withId(R.id.primary_button)).check { view, _ ->
+            val nodeInfo = AccessibilityNodeInfo()
+            view.onInitializeAccessibilityNodeInfo(nodeInfo)
+            assertThat(nodeInfo.contentDescription).isEqualTo("Pay \$50.99")
+            assertThat(nodeInfo.className).isEqualTo(Button::class.java.name)
+            assertThat(nodeInfo.isClickable).isTrue()
+            assertThat(nodeInfo.isEnabled).isTrue()
+        }
+
+        page.clearCard()
+
+        onView(withId(R.id.primary_button)).check { view, _ ->
+            val nodeInfo = AccessibilityNodeInfo()
+            view.onInitializeAccessibilityNodeInfo(nodeInfo)
+            assertThat(nodeInfo.contentDescription).isEqualTo("Pay \$50.99")
+            assertThat(nodeInfo.className).isEqualTo(Button::class.java.name)
+            assertThat(nodeInfo.isEnabled).isFalse()
+        }
+
+        testContext.markTestSucceeded()
     }
 }

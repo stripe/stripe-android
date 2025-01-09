@@ -5,6 +5,8 @@ import android.content.res.ColorStateList
 import android.graphics.drawable.GradientDrawable
 import android.util.AttributeSet
 import android.view.LayoutInflater
+import android.view.accessibility.AccessibilityNodeInfo
+import android.widget.Button
 import android.widget.FrameLayout
 import androidx.annotation.ColorInt
 import androidx.annotation.DrawableRes
@@ -15,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.withStyledAttributes
@@ -207,6 +210,11 @@ internal class PrimaryButton @JvmOverloads constructor(
         updateAlpha()
     }
 
+    override fun onInitializeAccessibilityNodeInfo(info: AccessibilityNodeInfo?) {
+        super.onInitializeAccessibilityNodeInfo(info)
+        info?.className = Button::class.java.name
+    }
+
     fun updateUiState(uiState: UIState?) {
         isVisible = uiState != null
 
@@ -220,6 +228,8 @@ internal class PrimaryButton @JvmOverloads constructor(
             lockVisible = uiState.lockVisible
             viewBinding.lockIcon.isVisible = lockVisible
             setOnClickListener { uiState.onClick() }
+
+            contentDescription = uiState.label.resolve(context)
         }
     }
 
@@ -292,6 +302,7 @@ private fun LabelUI(label: String, color: Int?) {
             style = StripeTheme.primaryButtonStyle.getComposeTextStyle(),
             modifier = Modifier
                 .padding(start = 4.dp, end = 4.dp, top = 4.dp, bottom = 5.dp)
+                .clearAndSetSemantics { /* accessibility should be handled by PrimaryButton */ }
         )
     }
 }
