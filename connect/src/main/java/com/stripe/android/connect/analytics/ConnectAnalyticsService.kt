@@ -15,9 +15,8 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 /**
- * Service for logging [AnalyticsRequestV2] for the Connect SDK.
- * This service is very simple. Consumers should prefer [ComponentAnalyticsService] instead,
- * which uses this service internally.
+ * Analytics service configured for Connect SDK.
+ * Consumers should prefer [ComponentAnalyticsService] instead as this service is very simple.
  */
 internal class ConnectAnalyticsService(application: Application) {
     private val analyticsRequestStorage = RealAnalyticsRequestV2Storage(application)
