@@ -17,7 +17,11 @@ import kotlinx.coroutines.launch
  * Analytics service configured for Connect SDK.
  * Consumers should prefer [ComponentAnalyticsService] instead as this service is very simple.
  */
-internal class ConnectAnalyticsService(application: Application) {
+internal interface ConnectAnalyticsService {
+    fun track(eventName: String, params: Map<String, Any?>)
+}
+
+internal class DefaultConnectAnalyticsService(application: Application) : ConnectAnalyticsService {
     private val analyticsRequestStorage = RealAnalyticsRequestV2Storage(application)
     private val logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG)
     private val networkClient = DefaultStripeNetworkClient()
@@ -40,7 +44,7 @@ internal class ConnectAnalyticsService(application: Application) {
     )
 
     @OptIn(DelicateCoroutinesApi::class)
-    fun track(eventName: String, params: Map<String, Any?>) {
+    override fun track(eventName: String, params: Map<String, Any?>) {
         GlobalScope.launch(Dispatchers.IO) {
             val request = requestFactory.createRequest(
                 eventName = eventName,

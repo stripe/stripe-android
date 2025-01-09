@@ -15,6 +15,7 @@ import androidx.annotation.VisibleForTesting
 import androidx.core.content.ContextCompat.checkSelfPermission
 import com.stripe.android.connect.analytics.ComponentAnalyticsService
 import com.stripe.android.connect.analytics.ConnectAnalyticsService
+import com.stripe.android.connect.analytics.DefaultConnectAnalyticsService
 import com.stripe.android.connect.appearance.Appearance
 import com.stripe.android.connect.appearance.fonts.CustomFontSource
 import com.stripe.android.connect.util.findActivity
@@ -215,7 +216,7 @@ class EmbeddedComponentManager(
             val application = activity.application
 
             if (connectAnalyticsService == null) {
-                connectAnalyticsService = ConnectAnalyticsService(
+                connectAnalyticsService = DefaultConnectAnalyticsService(
                     application = application,
                 )
             }
