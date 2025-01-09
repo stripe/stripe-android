@@ -194,8 +194,13 @@ internal class StripeConnectWebViewContainerController<Listener : StripeEmbedded
         filePathCallback: ValueCallback<Array<Uri>>,
         requestIntent: Intent
     ) {
-        val result = embeddedComponentManager.chooseFile(context, requestIntent)
-        filePathCallback.onReceiveValue(result)
+        var result: Array<Uri>? = null
+        try {
+            result = embeddedComponentManager.chooseFile(context, requestIntent)
+        } finally {
+            // Ensure `filePathCallback` always gets a value.
+            filePathCallback.onReceiveValue(result)
+        }
     }
 
     /**
