@@ -307,7 +307,41 @@ internal class SharedPaymentElementViewModelTest {
     }
 
     @Test
-    fun `selecting PaymentOption with mandate attaches mandate to paymentMethodMetadata`() = testScenario {
+    fun `selecting lpm PaymentOption with mandate attaches mandate to paymentMethodMetadata`() {
+        mandateTest(
+            paymentSelection = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION.copy(
+                paymentMethodCreateParams = PaymentMethodCreateParams(code = "cashapp", requiresMandate = true)
+            ),
+            validate = {
+                assertThat(it?.mandateText).isNotNull()
+            }
+        )
+    }
+
+    @Test
+    fun `selecting saved card does not attach mandate to paymentMethodMetadata`() {
+        mandateTest(
+            paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+            validate = {
+                assertThat(it?.mandateText).isNull()
+            }
+        )
+    }
+
+    @Test
+    fun `selecting new card does attach mandate to paymentMethodMetadata`() {
+        mandateTest(
+            paymentSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
+            validate = {
+                assertThat(it?.mandateText).isNotNull()
+            }
+        )
+    }
+
+    private fun mandateTest(
+        paymentSelection: PaymentSelection,
+        validate: (paymentOption: EmbeddedPaymentElement.PaymentOptionDisplayData?) -> Unit
+    ) = testScenario {
         val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
         configurationHandler.emit(
             Result.success(
@@ -315,9 +349,7 @@ internal class SharedPaymentElementViewModelTest {
                     config = configuration.asCommonConfiguration(),
                     customer = null,
                     linkState = null,
-                    paymentSelection = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION.copy(
-                        paymentMethodCreateParams = PaymentMethodCreateParams(code = "cashapp", requiresMandate = true)
-                    ),
+                    paymentSelection = paymentSelection,
                     validationError = null,
                     paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                         stripeIntent = SetupIntentFixtures.SI_SUCCEEDED.copy(
@@ -347,7 +379,7 @@ internal class SharedPaymentElementViewModelTest {
                     configuration = configuration,
                 )
             ).isInstanceOf<EmbeddedPaymentElement.ConfigureResult.Succeeded>()
-            assertThat(awaitItem()?.mandateText).isNotNull()
+            validate.invoke(awaitItem())
         }
         assertThat(embeddedContentHelper.dataLoadedTurbine.awaitItem()).isNotNull()
     }
