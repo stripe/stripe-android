@@ -4,7 +4,9 @@ import android.Manifest
 import android.app.Activity
 import android.app.Application.ActivityLifecycleCallbacks
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
@@ -19,6 +21,7 @@ import com.stripe.android.connect.analytics.DefaultConnectAnalyticsService
 import com.stripe.android.connect.appearance.Appearance
 import com.stripe.android.connect.appearance.fonts.CustomFontSource
 import com.stripe.android.connect.util.findActivity
+import com.stripe.android.connect.webview.ChooseFileActivityResultContract
 import com.stripe.android.connect.webview.serialization.ConnectInstanceJs
 import com.stripe.android.connect.webview.serialization.toJs
 import com.stripe.android.core.Logger
@@ -60,7 +63,7 @@ class EmbeddedComponentManager(
         val activity = checkNotNull(context.findActivity()) {
             "You must create an AccountOnboardingView from an Activity"
         }
-        checkNotNull(launcherMap[activity]) {
+        checkNotNull(requestPermissionLaunchers[activity]) {
             "You must call EmbeddedComponentManager.onActivityCreate in your Activity.onCreate function"
         }
 
@@ -83,7 +86,7 @@ class EmbeddedComponentManager(
         val activity = checkNotNull(context.findActivity()) {
             "You must create a PayoutsView from an Activity"
         }
-        checkNotNull(launcherMap[activity]) {
+        checkNotNull(requestPermissionLaunchers[activity]) {
             "You must call EmbeddedComponentManager.onActivityCreate in your Activity.onCreate function"
         }
 
@@ -151,6 +154,26 @@ class EmbeddedComponentManager(
             return true
         }
 
+        val launcher = getLauncher(context, requestPermissionLaunchers, "Error launching camera permission request")
+            ?: return null
+        launcher.launch(Manifest.permission.CAMERA)
+
+        return permissionsFlow.first()
+    }
+
+    internal suspend fun chooseFile(context: Context, requestIntent: Intent): Array<Uri>? {
+        val launcher = getLauncher(context, chooseFileLaunchers, "Error choosing file")
+            ?: return null
+        launcher.launch(requestIntent)
+
+        return chooseFileResultFlow.first()
+    }
+
+    private fun <I> getLauncher(
+        context: Context,
+        launchers: Map<Activity, ActivityResultLauncher<I>>,
+        errorMessage: String,
+    ): ActivityResultLauncher<I>? {
         val activity = context.findActivity()
         if (activity == null) {
             logger.warning("($loggerTag) You must create the EmbeddedComponent view from an Activity")
@@ -159,17 +182,14 @@ class EmbeddedComponentManager(
                 error("You must create an AccountOnboardingView from an Activity")
             }
         }
-        val launcher = launcherMap[activity]
+        val launcher = launchers[activity]
         if (launcher == null) {
             logger.warning(
-                "($loggerTag) Error launching camera permission request. " +
+                "($loggerTag) $errorMessage " +
                     "Did you call EmbeddedComponentManager.onActivityCreate in your Activity.onCreate function?"
             )
-            return null
         }
-        launcher.launch(Manifest.permission.CAMERA)
-
-        return permissionsFlow.first()
+        return launcher
     }
 
     internal fun getComponentAnalyticsService(component: StripeEmbeddedComponent): ComponentAnalyticsService {
@@ -203,7 +223,11 @@ class EmbeddedComponentManager(
 
         @VisibleForTesting
         internal val permissionsFlow: MutableSharedFlow<Boolean> = MutableSharedFlow(extraBufferCapacity = 1)
-        private val launcherMap = mutableMapOf<Activity, ActivityResultLauncher<String>>()
+        private val requestPermissionLaunchers = mutableMapOf<Activity, ActivityResultLauncher<String>>()
+
+        @VisibleForTesting
+        internal val chooseFileResultFlow: MutableSharedFlow<Array<Uri>?> = MutableSharedFlow(extraBufferCapacity = 1)
+        private val chooseFileLaunchers = mutableMapOf<Activity, ActivityResultLauncher<Intent>>()
 
         /**
          * Hooks the [EmbeddedComponentManager] into this activity's lifecycle.
@@ -225,30 +249,47 @@ class EmbeddedComponentManager(
                 override fun onActivityDestroyed(destroyedActivity: Activity) {
                     // ensure we remove the activity and its launcher from our map, and unregister
                     // this activity from future callbacks
-                    launcherMap.remove(destroyedActivity)
+                    requestPermissionLaunchers.remove(destroyedActivity)
+                    chooseFileLaunchers.remove(destroyedActivity)
                     if (destroyedActivity == activity) {
                         application.unregisterActivityLifecycleCallbacks(this)
                     }
                 }
 
-                override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) { /* no-op */ }
+                override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
+                    /* no-op */
+                }
 
-                override fun onActivityStarted(activity: Activity) { /* no-op */ }
+                override fun onActivityStarted(activity: Activity) {
+                    /* no-op */
+                }
 
-                override fun onActivityResumed(activity: Activity) { /* no-op */ }
+                override fun onActivityResumed(activity: Activity) {
+                    /* no-op */
+                }
 
-                override fun onActivityPaused(activity: Activity) { /* no-op */ }
+                override fun onActivityPaused(activity: Activity) {
+                    /* no-op */
+                }
 
-                override fun onActivityStopped(activity: Activity) { /* no-op */ }
+                override fun onActivityStopped(activity: Activity) {
+                    /* no-op */
+                }
 
-                override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) { /* no-op */ }
+                override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {
+                    /* no-op */
+                }
             })
 
-            launcherMap[activity] = activity.registerForActivityResult(
-                ActivityResultContracts.RequestPermission()
-            ) { isGranted ->
-                permissionsFlow.tryEmit(isGranted)
-            }
+            requestPermissionLaunchers[activity] =
+                activity.registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+                    permissionsFlow.tryEmit(isGranted)
+                }
+
+            chooseFileLaunchers[activity] =
+                activity.registerForActivityResult(ChooseFileActivityResultContract()) { result ->
+                    chooseFileResultFlow.tryEmit(result)
+                }
         }
     }
 }

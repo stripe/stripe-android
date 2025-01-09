@@ -1,7 +1,10 @@
 package com.stripe.android.connect.webview
 
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.webkit.PermissionRequest
+import android.webkit.ValueCallback
 import android.webkit.WebResourceRequest
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
@@ -30,6 +33,7 @@ import kotlinx.coroutines.withContext
 
 @Suppress("TooManyFunctions")
 @OptIn(PrivateBetaConnectSDK::class)
+@Suppress("TooManyFunctions")
 internal class StripeConnectWebViewContainerController<Listener : StripeEmbeddedComponentListener>(
     private val view: StripeConnectWebViewContainerInternal,
     private val analyticsService: ComponentAnalyticsService,
@@ -192,6 +196,20 @@ internal class StripeConnectWebViewContainerController<Listener : StripeEmbedded
                 logger.debug("($loggerTag) Denying permission - user denied permission")
                 request.deny()
             }
+        }
+    }
+
+    suspend fun onChooseFile(
+        context: Context,
+        filePathCallback: ValueCallback<Array<Uri>>,
+        requestIntent: Intent
+    ) {
+        var result: Array<Uri>? = null
+        try {
+            result = embeddedComponentManager.chooseFile(context, requestIntent)
+        } finally {
+            // Ensure `filePathCallback` always gets a value.
+            filePathCallback.onReceiveValue(result)
         }
     }
 

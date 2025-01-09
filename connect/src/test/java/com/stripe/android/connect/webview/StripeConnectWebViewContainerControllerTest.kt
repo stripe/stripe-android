@@ -2,6 +2,7 @@ package com.stripe.android.connect.webview
 
 import android.Manifest
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.net.Uri
@@ -239,6 +240,22 @@ class StripeConnectWebViewContainerControllerTest {
             verify(view).updateConnectInstance(appearances[0])
             verify(view).updateConnectInstance(appearances[1])
         }
+    }
+
+    @Test
+    fun `onChooseFile should delegate to manager`() = runTest {
+        val intent = Intent()
+        val expected = arrayOf(Uri.parse("content://path/to/file"))
+        var actual: Array<Uri>? = null
+        wheneverBlocking { embeddedComponentManager.chooseFile(mockContext, intent) } doReturn expected
+
+        controller.onChooseFile(
+            context = mockContext,
+            filePathCallback = { actual = it },
+            requestIntent = intent
+        )
+
+        assertThat(actual).isEqualTo(expected)
     }
 
     @Test

@@ -2,8 +2,11 @@ package com.stripe.android.connect
 
 import android.Manifest
 import android.app.Application
+import android.content.Intent
+import android.net.Uri
 import androidx.activity.ComponentActivity
 import androidx.test.core.app.ApplicationProvider
+import com.google.common.truth.Truth.assertThat
 import junit.framework.TestCase.assertFalse
 import kotlinx.coroutines.async
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -111,5 +114,19 @@ class EmbeddedComponentManagerTest {
         shadowApplication.denyPermissions(Manifest.permission.CAMERA)
 
         assertNull(embeddedComponentManager.requestCameraPermission(testActivity))
+    }
+
+    @Test
+    fun `chooseFile returns correct response`() = runTest {
+        EmbeddedComponentManager.onActivityCreate(testActivity)
+        val resultAsync = async {
+            embeddedComponentManager.chooseFile(testActivity, Intent())
+        }
+        advanceUntilIdle()
+        val expected = arrayOf(Uri.parse("content://test"))
+        EmbeddedComponentManager.chooseFileResultFlow.emit(expected) // Simulate a file being chosen.
+        val actual = resultAsync.await()
+
+        assertThat(actual).isEqualTo(expected)
     }
 }
