@@ -307,6 +307,59 @@ internal class SharedPaymentElementViewModelTest {
     }
 
     @Test
+    fun `configure correctly sets billing details`() = testScenario {
+        val billingDetails = PaymentSheet.BillingDetails(
+            name = "Jenny Rosen",
+            email = "foo@bar.com",
+            phone = "+13105551234",
+            address = PaymentSheet.Address(
+                postalCode = "94111",
+                country = "US",
+            ),
+        )
+        val configuration = EmbeddedPaymentElement.Configuration
+            .Builder("Example, Inc.")
+            .defaultBillingDetails(billingDetails)
+            .build()
+        configurationHandler.emit(
+            Result.success(
+                PaymentElementLoader.State(
+                    config = configuration.asCommonConfiguration(),
+                    customer = null,
+                    linkState = null,
+                    paymentSelection = PaymentSelection.GooglePay,
+                    validationError = null,
+                    paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                        stripeIntent = PaymentIntentFixtures.PI_SUCCEEDED,
+                        billingDetailsCollectionConfiguration = configuration
+                            .billingDetailsCollectionConfiguration,
+                        allowsDelayedPaymentMethods = configuration.allowsDelayedPaymentMethods,
+                        allowsPaymentMethodsRequiringShippingAddress = configuration
+                            .allowsPaymentMethodsRequiringShippingAddress,
+                        isGooglePayReady = true,
+                        cbcEligibility = CardBrandChoiceEligibility.Ineligible,
+                    ),
+                )
+            )
+        )
+        assertThat(selectionHolder.selection.value?.paymentMethodType).isNull()
+        viewModel.paymentOption.test {
+            assertThat(awaitItem()).isNull()
+
+            assertThat(
+                viewModel.configure(
+                    PaymentSheet.IntentConfiguration(
+                        PaymentSheet.IntentConfiguration.Mode.Setup("USD"),
+                    ),
+                    configuration = configuration,
+                )
+            ).isInstanceOf<EmbeddedPaymentElement.ConfigureResult.Succeeded>()
+            assertThat(awaitItem()?.billingDetails).isEqualTo(billingDetails)
+        }
+        assertThat(embeddedContentHelper.dataLoadedTurbine.awaitItem()).isNotNull()
+    }
+
+    @Test
     fun `selecting lpm PaymentOption with mandate attaches mandate to paymentMethodMetadata`() {
         mandateTest(
             paymentSelection = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION.copy(

@@ -106,6 +106,7 @@ internal class SharedPaymentElementViewModel @Inject constructor(
                     _paymentOption.value = paymentOptionDisplayDataFactory.create(
                         selection = selection,
                         paymentMethodMetadata = state.paymentMethodMetadata,
+                        billingDetails = state.configuration.defaultBillingDetails
                     )
                 }
             }
