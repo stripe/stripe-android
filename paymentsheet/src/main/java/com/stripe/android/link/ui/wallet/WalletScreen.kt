@@ -168,6 +168,7 @@ internal fun WalletBody(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 CardDetailsRecollectionForm(
+                    paymentDetails = selectedCard,
                     expiryDateController = expiryDateController,
                     cvcController = cvcController,
                     isCardExpired = selectedCard.isExpired
@@ -455,14 +456,14 @@ private fun BankAccountTerms() {
 
 @Composable
 internal fun CardDetailsRecollectionForm(
+    paymentDetails: ConsumerPaymentDetails.PaymentDetails,
     expiryDateController: TextFieldController,
     cvcController: CvcController,
     isCardExpired: Boolean,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-    val uuid = rememberSaveable { "row_${UUID.randomUUID()}" }
-    val rowElement = remember(expiryDateController, cvcController) {
+    val rowElement = remember(paymentDetails) {
         val rowFields = buildList {
             if (isCardExpired) {
                 add(
@@ -482,7 +483,7 @@ internal fun CardDetailsRecollectionForm(
         }
 
         RowElement(
-            _identifier = IdentifierSpec.Generic(uuid),
+            _identifier = IdentifierSpec.Generic(paymentDetails.id),
             fields = rowFields,
             controller = RowController(rowFields)
         )
