@@ -56,6 +56,7 @@ import kotlin.coroutines.CoroutineContext
 )
 internal abstract class PaymentSheetCommonModule {
 
+    @Singleton
     @Binds
     abstract fun bindsEventReporter(eventReporter: DefaultEventReporter): EventReporter
 

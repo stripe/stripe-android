@@ -6,10 +6,15 @@ import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.completePaymentButtonLabel
 import com.stripe.android.link.ui.paymentmenthod.PaymentMethodState
 import com.stripe.android.link.ui.paymentmenthod.PaymentMethodViewModel
+import com.stripe.android.link.ui.paymentmenthod.UpdateSelection
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.paymentsheet.FormHelper
+import com.stripe.android.paymentsheet.FakeFormHelper
 import com.stripe.android.paymentsheet.forms.FormFieldValues
+import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
+import com.stripe.android.uicore.elements.FormElement
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -19,11 +24,6 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.any
-import org.mockito.kotlin.eq
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
@@ -58,8 +58,16 @@ class PaymentMethodViewModelTest {
 
     @Test
     fun `test selection state gets updated when form values change`() = runTest {
-        val formHelper: FormHelper = mock()
-        val formValues: FormFieldValues = mock()
+        var paramFormValues: FormFieldValues? = null
+        val formHelper = object : PaymentMethodFormHelper() {
+            override fun onFormFieldValuesChanged(formValues: FormFieldValues?, selectedPaymentMethodCode: String) {
+                paramFormValues = formValues
+                super.onFormFieldValuesChanged(formValues, selectedPaymentMethodCode)
+            }
+        }
+        val formValues = FormFieldValues(
+            userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest
+        )
 
         val vm = createViewModel(
             formHelper = formHelper,
@@ -69,24 +77,40 @@ class PaymentMethodViewModelTest {
 
         assertThat(vm.state.value.paymentSelection).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
         assertThat(vm.state.value.primaryButtonState).isEqualTo(PrimaryButtonState.Enabled)
-        verify(formHelper).onFormFieldValuesChanged(eq(formValues), eq(PaymentMethod.Type.Card.code))
+        assertThat(paramFormValues).isEqualTo(formValues)
     }
 
     private fun createViewModel(
-        formHelper: FormHelper = mock(),
+        formHelper: PaymentMethodFormHelper = PaymentMethodFormHelper(),
     ): PaymentMethodViewModel {
-        whenever(formHelper.formElementsForCode(PaymentMethod.Type.Card.code))
-            .thenReturn(TestFactory.CARD_FORM_ELEMENTS)
-        whenever(formHelper.createFormArguments(PaymentMethod.Type.Card.code))
-            .thenReturn(TestFactory.CARD_FORM_ARGS)
         return PaymentMethodViewModel(
             configuration = TestFactory.LINK_CONFIGURATION,
-            formHelperFactory = { selectionUpdater ->
-                whenever(formHelper.onFormFieldValuesChanged(any(), any())).thenAnswer {
-                    selectionUpdater(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
-                }
+            formHelperFactory = { updateSelection ->
+                formHelper.updateSelection = updateSelection
                 formHelper
             }
         )
+    }
+}
+
+private open class PaymentMethodFormHelper : FakeFormHelper() {
+    var updateSelection: UpdateSelection? = null
+
+    override fun onFormFieldValuesChanged(formValues: FormFieldValues?, selectedPaymentMethodCode: String) {
+        updateSelection?.invoke(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+    }
+
+    override fun formElementsForCode(code: String): List<FormElement> {
+        require(code == PaymentMethod.Type.Card.code) {
+            "$code payment not supported"
+        }
+        return TestFactory.CARD_FORM_ELEMENTS
+    }
+
+    override fun createFormArguments(paymentMethodCode: PaymentMethodCode): FormArguments {
+        require(paymentMethodCode == PaymentMethod.Type.Card.code) {
+            "$paymentMethodCode payment not supported"
+        }
+        return TestFactory.CARD_FORM_ARGS
     }
 }

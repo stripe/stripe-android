@@ -4,7 +4,7 @@ import com.stripe.android.lpmfoundations.FormHeaderInformation
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.paymentsheet.CustomerStateHolder
-import com.stripe.android.paymentsheet.FormHelper
+import com.stripe.android.paymentsheet.DefaultFormHelper
 import com.stripe.android.paymentsheet.LinkInlineHandler
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
@@ -103,7 +103,7 @@ internal class DefaultVerticalModeFormInteractor(
             bankFormInteractor: BankFormInteractor,
         ): VerticalModeFormInteractor {
             val coroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
-            val formHelper = FormHelper.create(
+            val formHelper = DefaultFormHelper.create(
                 viewModel = viewModel,
                 linkInlineHandler = LinkInlineHandler.create(viewModel, coroutineScope),
                 paymentMethodMetadata = paymentMethodMetadata

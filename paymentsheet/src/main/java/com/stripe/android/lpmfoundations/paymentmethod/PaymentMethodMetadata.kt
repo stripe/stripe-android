@@ -302,9 +302,6 @@ internal data class PaymentMethodMetadata(
         @OptIn(ExperimentalCardBrandFilteringApi::class)
         internal fun create(
             configuration: LinkConfiguration,
-            sharedDataSpecs: List<SharedDataSpec>,
-            externalPaymentMethodSpecs: List<ExternalPaymentMethodSpec>,
-            linkInlineConfiguration: LinkInlineConfiguration?,
         ): PaymentMethodMetadata {
             return PaymentMethodMetadata(
                 stripeIntent = configuration.stripeIntent,
@@ -320,10 +317,10 @@ internal data class PaymentMethodMetadata(
                 defaultBillingDetails = null,
                 shippingDetails = null,
                 hasCustomerConfiguration = true,
-                sharedDataSpecs = sharedDataSpecs,
-                externalPaymentMethodSpecs = externalPaymentMethodSpecs,
+                sharedDataSpecs = emptyList(),
+                externalPaymentMethodSpecs = emptyList(),
                 paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Disabled(null),
-                linkInlineConfiguration = linkInlineConfiguration,
+                linkInlineConfiguration = null,
                 linkMode = null,
                 paymentMethodIncentive = null,
                 isGooglePayReady = false,

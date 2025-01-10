@@ -10,6 +10,7 @@ import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.completePaymentButtonLabel
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentsheet.DefaultFormHelper
 import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -64,13 +65,10 @@ internal class PaymentMethodViewModel @Inject constructor(
                     PaymentMethodViewModel(
                         configuration = parentComponent.configuration,
                         formHelperFactory = { selectionUpdater ->
-                            FormHelper.create(
+                            DefaultFormHelper.create(
                                 cardAccountRangeRepositoryFactory = parentComponent.cardAccountRangeRepositoryFactory,
                                 paymentMethodMetadata = PaymentMethodMetadata.create(
                                     configuration = parentComponent.configuration,
-                                    sharedDataSpecs = emptyList(),
-                                    externalPaymentMethodSpecs = emptyList(),
-                                    linkInlineConfiguration = null
                                 ),
                                 selectionUpdater = selectionUpdater
                             )
