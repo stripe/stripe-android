@@ -86,8 +86,8 @@ class ComponentAnalyticsServiceTest {
         componentAnalyticsService.track(
             ConnectAnalyticsEvent.WebComponentLoaded(
                 pageViewId = "pageViewId123",
-                timeToLoad = 100.0,
-                perceivedTimeToLoad = 50.0,
+                timeToLoad = 100L,
+                perceivedTimeToLoad = 50L,
             )
         )
         val mapCaptor = argumentCaptor<Map<String, Any?>>()
