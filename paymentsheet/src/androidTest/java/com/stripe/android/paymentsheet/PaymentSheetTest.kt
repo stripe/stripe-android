@@ -1,10 +1,5 @@
 package com.stripe.android.paymentsheet
 
-import android.view.accessibility.AccessibilityNodeInfo
-import android.widget.Button
-import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.matcher.ViewMatchers.withId
-import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.core.utils.urlEncode
@@ -393,24 +388,17 @@ internal class PaymentSheetTest {
 
         page.fillOutCardDetails()
 
-        onView(withId(R.id.primary_button)).check { view, _ ->
-            val nodeInfo = AccessibilityNodeInfo()
-            view.onInitializeAccessibilityNodeInfo(nodeInfo)
-            assertThat(nodeInfo.contentDescription).isEqualTo("Pay \$50.99")
-            assertThat(nodeInfo.className).isEqualTo(Button::class.java.name)
-            assertThat(nodeInfo.isClickable).isTrue()
-            assertThat(nodeInfo.isEnabled).isTrue()
-        }
+        page.assertPrimaryButton(
+            expectedContentDescription = "Pay \$50.99",
+            canPay = true
+        )
 
         page.clearCard()
 
-        onView(withId(R.id.primary_button)).check { view, _ ->
-            val nodeInfo = AccessibilityNodeInfo()
-            view.onInitializeAccessibilityNodeInfo(nodeInfo)
-            assertThat(nodeInfo.contentDescription).isEqualTo("Pay \$50.99")
-            assertThat(nodeInfo.className).isEqualTo(Button::class.java.name)
-            assertThat(nodeInfo.isEnabled).isFalse()
-        }
+        page.assertPrimaryButton(
+            expectedContentDescription = "Pay \$50.99",
+            canPay = false
+        )
 
         testContext.markTestSucceeded()
     }

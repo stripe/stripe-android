@@ -214,7 +214,9 @@ internal class PrimaryButton @JvmOverloads constructor(
 
     override fun onInitializeAccessibilityNodeInfo(info: AccessibilityNodeInfo?) {
         super.onInitializeAccessibilityNodeInfo(info)
+        // Indicate this custom view is a button, so TalkBack can announce it as such.
         info?.className = Button::class.java.name
+        info?.isEnabled = false
     }
 
     fun updateUiState(uiState: UIState?) {
@@ -305,7 +307,10 @@ private fun LabelUI(label: String, color: Int?) {
             style = StripeTheme.primaryButtonStyle.getComposeTextStyle(),
             modifier = Modifier
                 .padding(start = 4.dp, end = 4.dp, top = 4.dp, bottom = 5.dp)
-                .semantics { invisibleToUser() }
+                .semantics {
+                    // Accessibility should be handled by its parent, PrimaryButton.
+                    invisibleToUser()
+                }
         )
     }
 }
