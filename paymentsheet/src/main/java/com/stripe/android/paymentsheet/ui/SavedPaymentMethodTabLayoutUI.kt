@@ -335,7 +335,7 @@ private fun LinkTab(
         shouldShowModifyBadge = false,
         isSelected = isSelected,
         isEnabled = isEnabled,
-        iconRes = R.drawable.stripe_ic_paymentsheet_link,
+        iconRes = getLinkIcon(shouldOverrideSystemTheme = true, showLightIcon = !MaterialTheme.stripeColors.component.shouldUseDarkDynamicColor()),
         iconTint = null,
         labelText = stringResource(StripeR.string.stripe_link),
         description = stringResource(StripeR.string.stripe_link),

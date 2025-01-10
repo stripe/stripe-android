@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <drawable name="stripe_ic_paymentsheet_link_ref">@drawable/stripe_ic_paymentsheet_link_dark</drawable>
+</resources>

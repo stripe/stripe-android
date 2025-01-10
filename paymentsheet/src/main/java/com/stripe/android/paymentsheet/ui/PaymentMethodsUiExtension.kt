@@ -36,6 +36,19 @@ internal fun CardBrand.getCardBrandIcon(): Int = when (this) {
 }
 
 @DrawableRes
+internal fun PaymentMethod.getSavedPaymentMethodIconForVerticalMode(): Int {
+    return when (type) {
+        PaymentMethod.Type.Card -> {
+            val brand = CardBrand.fromCode(card?.displayBrand).takeIf { it != Unknown } ?: card?.brand
+            brand?.getCardBrandIconForVerticalMode()
+        }
+        PaymentMethod.Type.SepaDebit -> R.drawable.stripe_ic_paymentsheet_sepa
+        PaymentMethod.Type.USBankAccount -> usBankAccount?.bankName?.let { TransformToBankIcon(it) }
+        else -> null
+    } ?: R.drawable.stripe_ic_paymentsheet_card_unknown
+}
+
+@DrawableRes
 internal fun CardBrand.getCardBrandIconForVerticalMode(): Int = when (this) {
     CardBrand.Visa -> com.stripe.payments.model.R.drawable.stripe_ic_visa_unpadded
     CardBrand.AmericanExpress -> com.stripe.payments.model.R.drawable.stripe_ic_amex_unpadded
