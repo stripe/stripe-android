@@ -13,6 +13,10 @@ internal class PaymentMethodIncentiveInteractor(
     private val _displayedIncentive = MutableStateFlow(incentive)
     val displayedIncentive: StateFlow<PaymentMethodIncentive?> = _displayedIncentive.asStateFlow()
 
+    fun setEligible(eligible: Boolean) {
+        _displayedIncentive.value = if (eligible) incentive else null
+    }
+
     companion object {
 
         fun create(viewModel: BaseSheetViewModel): PaymentMethodIncentiveInteractor {

@@ -14,6 +14,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.lpmfoundations.paymentmethod.link.LinkFormElement
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.elements.CardBillingAddressElement
 import com.stripe.android.ui.core.elements.CardDetailsSectionElement
@@ -52,13 +53,16 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
         iconRequiresTinting = true,
     )
 
-    override fun createFormHeaderInformation(customerHasSavedPaymentMethods: Boolean): FormHeaderInformation {
+    override fun createFormHeaderInformation(
+        customerHasSavedPaymentMethods: Boolean,
+        incentive: PaymentMethodIncentive?,
+    ): FormHeaderInformation {
         val displayName = if (customerHasSavedPaymentMethods) {
             PaymentsUiCoreR.string.stripe_paymentsheet_add_new_card
         } else {
             PaymentsUiCoreR.string.stripe_paymentsheet_add_card
         }
-        return createSupportedPaymentMethod().asFormHeaderInformation().copy(
+        return createSupportedPaymentMethod().asFormHeaderInformation(incentive).copy(
             displayName = displayName.resolvableString,
             shouldShowIcon = false,
         )

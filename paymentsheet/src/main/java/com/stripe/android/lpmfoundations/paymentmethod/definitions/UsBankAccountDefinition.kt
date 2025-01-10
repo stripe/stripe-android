@@ -8,6 +8,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.ui.core.R
 import com.stripe.android.uicore.elements.FormElement
 
@@ -39,8 +40,11 @@ private object UsBankAccountUiDefinitionFactory : UiDefinitionFactory.Simple {
         darkThemeIconUrl = null,
     )
 
-    override fun createFormHeaderInformation(customerHasSavedPaymentMethods: Boolean): FormHeaderInformation {
-        return createSupportedPaymentMethod().asFormHeaderInformation().copy(
+    override fun createFormHeaderInformation(
+        customerHasSavedPaymentMethods: Boolean,
+        incentive: PaymentMethodIncentive?,
+    ): FormHeaderInformation {
+        return createSupportedPaymentMethod().asFormHeaderInformation(incentive).copy(
             displayName = R.string.stripe_paymentsheet_add_us_bank_account.resolvableString,
             shouldShowIcon = false,
         )
