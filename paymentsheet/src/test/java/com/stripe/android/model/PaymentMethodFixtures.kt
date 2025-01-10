@@ -598,7 +598,10 @@ internal object PaymentMethodFixtures {
     }
 
     fun defaultDisplayableCard(): DisplayableSavedPaymentMethod {
-        return CARD_PAYMENT_METHOD.toDisplayableSavedPaymentMethod(shouldShowDefaultBadge = true)
+        return CARD_PAYMENT_METHOD.copy(
+            id = "pm_234567890",
+
+        ).toDisplayableSavedPaymentMethod(shouldShowDefaultBadge = true)
     }
 
     fun PaymentMethod.toDisplayableSavedPaymentMethod(

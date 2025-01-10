@@ -3,10 +3,8 @@ package com.stripe.android.paymentsheet.navigation
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.FakeSelectSavedPaymentMethodsInteractor
 import com.stripe.android.paymentsheet.PaymentOptionsItem
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
@@ -31,41 +29,55 @@ internal class PaymentSheetScreenSelectSavedPaymentMethodsScreenshotTest {
     val coroutineRule = CoroutineTestRule()
 
     private val savedPaymentOptionItem = PaymentOptionsItem.SavedPaymentMethod(
-        displayableSavedPaymentMethod = DisplayableSavedPaymentMethod.create(
-            displayName = "Card 4242".resolvableString,
-            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
-            isCbcEligible = true,
-        ),
+        displayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
     )
 
     private val defaultSavedPaymentOptionItem = PaymentOptionsItem.SavedPaymentMethod(
-        displayableSavedPaymentMethod = DisplayableSavedPaymentMethod.create(
-            displayName = "Card 5555".resolvableString,
-            // different payment method ids are needed
-            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_234567890"),
-            shouldShowDefaultBadge = true,
-            isCbcEligible = true,
-        ),
+        displayableSavedPaymentMethod = PaymentMethodFixtures.defaultDisplayableCard(),
     )
 
-    @Test
-    fun displaysSelectSavedPaymentMethods() {
+    private fun getTestViewModel(
+        includeDefaultPaymentMethod: Boolean = false,
+        isEditing: Boolean = false,
+        isProcessing: Boolean = false,
+        canEdit: Boolean = true,
+        canRemove: Boolean = true,
+    ): FakeBaseSheetViewModel {
         val metadata = PaymentMethodMetadataFactory.create()
         val interactor = FakeSelectSavedPaymentMethodsInteractor(
             initialState = SelectSavedPaymentMethodsInteractor.State(
-                paymentOptionsItems = listOf(
-                    PaymentOptionsItem.AddCard,
-                    savedPaymentOptionItem,
-                ),
+                paymentOptionsItems = if (includeDefaultPaymentMethod) {
+                    listOf(
+                        PaymentOptionsItem.AddCard,
+                        defaultSavedPaymentOptionItem,
+                        savedPaymentOptionItem,
+                    )
+                } else {
+                    listOf(
+                        PaymentOptionsItem.AddCard,
+                        savedPaymentOptionItem,
+                    )
+                },
                 selectedPaymentOptionsItem = savedPaymentOptionItem,
-                isEditing = false,
-                isProcessing = false,
-                canEdit = true,
-                canRemove = true,
+                isEditing = isEditing,
+                isProcessing = isProcessing,
+                canEdit = canEdit,
+                canRemove = canRemove,
             )
         )
         val initialScreen = SelectSavedPaymentMethods(interactor)
-        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen)
+        return FakeBaseSheetViewModel.create(metadata, initialScreen)
+    }
+
+    @Test
+    fun displaysSelectSavedPaymentMethods() {
+        val viewModel = getTestViewModel(
+            includeDefaultPaymentMethod = false,
+            isEditing = false,
+            isProcessing = false,
+            canEdit = true,
+            canRemove = true,
+        )
         viewModel.primaryButtonUiStateSource.update { original ->
             original?.copy(enabled = true)
         }
@@ -77,22 +89,13 @@ internal class PaymentSheetScreenSelectSavedPaymentMethodsScreenshotTest {
 
     @Test
     fun displaysSelectSavedPaymentMethodsInEditMode() {
-        val metadata = PaymentMethodMetadataFactory.create()
-        val interactor = FakeSelectSavedPaymentMethodsInteractor(
-            initialState = SelectSavedPaymentMethodsInteractor.State(
-                paymentOptionsItems = listOf(
-                    PaymentOptionsItem.AddCard,
-                    savedPaymentOptionItem,
-                ),
-                selectedPaymentOptionsItem = savedPaymentOptionItem,
-                isEditing = true,
-                isProcessing = false,
-                canEdit = true,
-                canRemove = true,
-            )
+        val viewModel = getTestViewModel(
+            includeDefaultPaymentMethod = false,
+            isEditing = true,
+            isProcessing = false,
+            canEdit = true,
+            canRemove = true,
         )
-        val initialScreen = SelectSavedPaymentMethods(interactor)
-        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen)
 
         paparazziRule.snapshot {
             PaymentSheetScreen(viewModel = viewModel, type = PaymentSheetFlowType.Complete)
@@ -101,22 +104,13 @@ internal class PaymentSheetScreenSelectSavedPaymentMethodsScreenshotTest {
 
     @Test
     fun displaysSelectSavedPaymentMethodsInProcessingState() {
-        val metadata = PaymentMethodMetadataFactory.create()
-        val interactor = FakeSelectSavedPaymentMethodsInteractor(
-            initialState = SelectSavedPaymentMethodsInteractor.State(
-                paymentOptionsItems = listOf(
-                    PaymentOptionsItem.AddCard,
-                    savedPaymentOptionItem,
-                ),
-                selectedPaymentOptionsItem = savedPaymentOptionItem,
-                isEditing = false,
-                isProcessing = true,
-                canEdit = false,
-                canRemove = false,
-            )
+        val viewModel = getTestViewModel(
+            includeDefaultPaymentMethod = false,
+            isEditing = false,
+            isProcessing = true,
+            canEdit = false,
+            canRemove = false,
         )
-        val initialScreen = SelectSavedPaymentMethods(interactor)
-        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen)
 
         paparazziRule.snapshot {
             PaymentSheetScreen(viewModel = viewModel, type = PaymentSheetFlowType.Complete)
@@ -125,51 +119,13 @@ internal class PaymentSheetScreenSelectSavedPaymentMethodsScreenshotTest {
 
     @Test
     fun displaysSelectSavedPaymentMethodsWithDefault() {
-        val metadata = PaymentMethodMetadataFactory.create()
-        val interactor = FakeSelectSavedPaymentMethodsInteractor(
-            initialState = SelectSavedPaymentMethodsInteractor.State(
-                paymentOptionsItems = listOf(
-                    PaymentOptionsItem.AddCard,
-                    defaultSavedPaymentOptionItem,
-                    savedPaymentOptionItem,
-                ),
-                selectedPaymentOptionsItem = savedPaymentOptionItem,
-                isEditing = false,
-                isProcessing = false,
-                canEdit = true,
-                canRemove = true,
-            )
+        val viewModel = getTestViewModel(
+            includeDefaultPaymentMethod = true,
+            isEditing = true,
+            isProcessing = false,
+            canEdit = true,
+            canRemove = true,
         )
-        val initialScreen = SelectSavedPaymentMethods(interactor)
-        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen)
-        viewModel.primaryButtonUiStateSource.update { original ->
-            original?.copy(enabled = true)
-        }
-
-        paparazziRule.snapshot {
-            PaymentSheetScreen(viewModel = viewModel, type = PaymentSheetFlowType.Complete)
-        }
-    }
-
-    @Test
-    fun displaysSelectSavedPaymentMethodsInEditModeWithDefault() {
-        val metadata = PaymentMethodMetadataFactory.create()
-        val interactor = FakeSelectSavedPaymentMethodsInteractor(
-            initialState = SelectSavedPaymentMethodsInteractor.State(
-                paymentOptionsItems = listOf(
-                    PaymentOptionsItem.AddCard,
-                    defaultSavedPaymentOptionItem,
-                    savedPaymentOptionItem,
-                ),
-                selectedPaymentOptionsItem = savedPaymentOptionItem,
-                isEditing = true,
-                isProcessing = false,
-                canEdit = true,
-                canRemove = true,
-            )
-        )
-        val initialScreen = SelectSavedPaymentMethods(interactor)
-        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen)
 
         paparazziRule.snapshot {
             PaymentSheetScreen(viewModel = viewModel, type = PaymentSheetFlowType.Complete)
