@@ -231,7 +231,11 @@ internal class InstitutionPickerViewModel @AssistedInject constructor(
      */
     private fun navigateToPartnerAuth(authSession: FinancialConnectionsAuthorizationSession) {
         navigationManager.tryNavigateTo(
-            PartnerAuth(referrer = PANE)
+            if (authSession.isOAuth) {
+                PartnerAuthDrawer(referrer = PANE)
+            } else {
+                PartnerAuth(referrer = PANE)
+            }
         )
     }
 

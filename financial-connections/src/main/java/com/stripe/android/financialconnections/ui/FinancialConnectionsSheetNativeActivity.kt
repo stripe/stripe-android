@@ -10,6 +10,8 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.animation.core.AnimationSpec
+import androidx.compose.animation.core.SpringSpec
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.navigation.BottomSheetNavigator
 import androidx.compose.material.navigation.rememberBottomSheetNavigator
@@ -169,12 +171,7 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity() {
         val initialDestination = remember(initialPane) { initialPane.destination }
         val topAppBarState by viewModel.topAppBarState.collectAsState()
 
-        val sheetState = rememberModalBottomSheetState(
-            ModalBottomSheetValue.Hidden,
-            skipHalfExpanded = true
-        )
-
-        val bottomSheetNavigator = remember { BottomSheetNavigator(sheetState) }
+        val bottomSheetNavigator = rememberBottomSheetNavigator()
         val navController = rememberNavController(bottomSheetNavigator)
         val keyboardController = rememberKeyboardController()
 
@@ -231,6 +228,19 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    @Composable
+    private fun rememberBottomSheetNavigator(
+        animationSpec: AnimationSpec<Float> = SpringSpec(),
+        skipHalfExpanded: Boolean = true,
+    ): BottomSheetNavigator {
+        val sheetState = rememberModalBottomSheetState(
+            ModalBottomSheetValue.Hidden,
+            animationSpec = animationSpec,
+            skipHalfExpanded = skipHalfExpanded,
+        )
+        return remember(sheetState) { BottomSheetNavigator(sheetState) }
     }
 
     /**
