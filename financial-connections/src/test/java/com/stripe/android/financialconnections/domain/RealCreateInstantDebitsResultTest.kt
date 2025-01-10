@@ -221,13 +221,15 @@ class RealCreateInstantDebitsResultTest {
                 consumerSessionClientSecret = eq("clientSecret"),
             )
         ).thenReturn(
-            UpdateAvailableIncentives(
-                data = listOf(
-                    LinkConsumerIncentive(
-                        incentiveParams = LinkConsumerIncentive.IncentiveParams(
-                            paymentMethod = "link_instant_debits",
-                        ),
-                        incentiveDisplayText = "$5",
+            Result.success(
+                UpdateAvailableIncentives(
+                    data = listOf(
+                        LinkConsumerIncentive(
+                            incentiveParams = LinkConsumerIncentive.IncentiveParams(
+                                paymentMethod = "link_instant_debits",
+                            ),
+                            incentiveDisplayText = "$5",
+                        )
                     )
                 )
             )
