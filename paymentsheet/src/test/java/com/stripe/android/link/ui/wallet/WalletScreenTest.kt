@@ -63,7 +63,11 @@ internal class WalletScreenTest {
         )
         val viewModel = createViewModel(linkAccountManager)
         composeTestRule.setContent {
-            WalletScreen(viewModel) {}
+            WalletScreen(
+                viewModel = viewModel,
+                showBottomSheetContent = {},
+                hideBottomSheetContent = {}
+            )
         }
         composeTestRule.waitForIdle()
 
@@ -90,7 +94,11 @@ internal class WalletScreenTest {
         )
         val viewModel = createViewModel(linkAccountManager)
         composeTestRule.setContent {
-            WalletScreen(viewModel) {}
+            WalletScreen(
+                viewModel = viewModel,
+                showBottomSheetContent = {},
+                hideBottomSheetContent = {}
+            )
         }
         composeTestRule.waitForIdle()
 
@@ -115,7 +123,11 @@ internal class WalletScreenTest {
         )
         val viewModel = createViewModel(linkAccountManager)
         composeTestRule.setContent {
-            WalletScreen(viewModel) {}
+            WalletScreen(
+                viewModel = viewModel,
+                showBottomSheetContent = {},
+                hideBottomSheetContent = {}
+            )
         }
 
         composeTestRule.waitForIdle()
@@ -146,7 +158,11 @@ internal class WalletScreenTest {
         )
         val viewModel = createViewModel(linkAccountManager)
         composeTestRule.setContent {
-            WalletScreen(viewModel) {}
+            WalletScreen(
+                viewModel = viewModel,
+                showBottomSheetContent = {},
+                hideBottomSheetContent = {}
+            )
         }
 
         composeTestRule.waitForIdle()
@@ -169,7 +185,11 @@ internal class WalletScreenTest {
 
         val viewModel = createViewModel(linkAccountManager)
         composeTestRule.setContent {
-            WalletScreen(viewModel) {}
+            WalletScreen(
+                viewModel = viewModel,
+                showBottomSheetContent = {},
+                hideBottomSheetContent = {}
+            )
         }
 
         composeTestRule.waitForIdle()
@@ -184,9 +204,15 @@ internal class WalletScreenTest {
         composeTestRule.setContent {
             var sheetContent by remember { mutableStateOf<BottomSheetContent?>(null) }
             Box {
-                WalletScreen(viewModel) {
-                    sheetContent = it
-                }
+                WalletScreen(
+                    viewModel = viewModel,
+                    showBottomSheetContent = {
+                        sheetContent = it
+                    },
+                    hideBottomSheetContent = {
+                        sheetContent = null
+                    }
+                )
 
                 sheetContent?.let {
                     Column { it() }
@@ -261,9 +287,13 @@ internal class WalletScreenTest {
                     onEditPaymentMethodClicked = {
                         onEditPaymentMethodClickedCounter += 1
                     },
-                ) {
-                    sheetContent = it
-                }
+                    showBottomSheetContent = {
+                        sheetContent = it
+                    },
+                    hideBottomSheetContent = {
+                        sheetContent = null
+                    }
+                )
 
                 sheetContent?.let {
                     Column { it() }
@@ -294,7 +324,8 @@ internal class WalletScreenTest {
         onRemoveClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit = {},
         onSetDefaultClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit = {},
         onEditPaymentMethodClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit = {},
-        showBottomSheetContent: (BottomSheetContent?) -> Unit
+        showBottomSheetContent: (BottomSheetContent?) -> Unit,
+        hideBottomSheetContent: () -> Unit
     ) {
         val paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails
             .filterIsInstance<ConsumerPaymentDetails.Card>()
@@ -316,6 +347,7 @@ internal class WalletScreenTest {
             onSetDefaultClicked = onSetDefaultClicked,
             onEditPaymentMethodClicked = onEditPaymentMethodClicked,
             showBottomSheetContent = showBottomSheetContent,
+            hideBottomSheetContent = hideBottomSheetContent,
             onAddNewPaymentMethodClicked = {}
         )
     }

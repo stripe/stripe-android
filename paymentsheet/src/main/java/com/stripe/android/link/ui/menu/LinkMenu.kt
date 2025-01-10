@@ -40,7 +40,7 @@ internal fun LinkMenu(
             LinkBottomSheetRow(
                 item = item,
                 modifier = Modifier
-                    .testTag(item.tag)
+                    .testTag(item.testTag)
                     .clickable {
                         onItemPress(item)
                     }

@@ -51,7 +51,8 @@ import com.stripe.android.uicore.utils.collectAsState
 @Composable
 internal fun WalletScreen(
     viewModel: WalletViewModel,
-    showBottomSheetContent: (BottomSheetContent?) -> Unit
+    showBottomSheetContent: (BottomSheetContent) -> Unit,
+    hideBottomSheetContent: () -> Unit
 ) {
     val state by viewModel.uiState.collectAsState()
     var isExpanded by rememberSaveable { mutableStateOf(false) }
@@ -69,6 +70,7 @@ internal fun WalletScreen(
         onEditPaymentMethodClicked = viewModel::onEditPaymentMethodClicked,
         onSetDefaultClicked = {},
         showBottomSheetContent = showBottomSheetContent,
+        hideBottomSheetContent = hideBottomSheetContent,
         onAddNewPaymentMethodClicked = viewModel::onAddNewPaymentMethodClicked
     )
 }
@@ -85,7 +87,8 @@ internal fun WalletBody(
     onEditPaymentMethodClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onSetDefaultClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onRemoveClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
-    showBottomSheetContent: (BottomSheetContent?) -> Unit
+    showBottomSheetContent: (BottomSheetContent) -> Unit,
+    hideBottomSheetContent: () -> Unit
 ) {
     if (state.paymentDetailsList.isEmpty()) {
         Box(
@@ -123,6 +126,7 @@ internal fun WalletBody(
             onSetDefaultClicked = onSetDefaultClicked,
             onEditPaymentMethodClicked = onEditPaymentMethodClicked,
             onAddNewPaymentMethodClicked = onAddNewPaymentMethodClicked,
+            hideBottomSheetContent = hideBottomSheetContent
         )
 
         AnimatedVisibility(state.showBankAccountTerms) {
@@ -160,7 +164,8 @@ private fun PaymentMethodSection(
     onEditPaymentMethodClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onSetDefaultClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onRemoveClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
-    showBottomSheetContent: (BottomSheetContent?) -> Unit
+    showBottomSheetContent: (BottomSheetContent) -> Unit,
+    hideBottomSheetContent: () -> Unit
 ) {
     Box(
         modifier = Modifier
@@ -178,19 +183,19 @@ private fun PaymentMethodSection(
                                 .testTag(WALLET_SCREEN_MENU_SHEET_TAG),
                             paymentDetails = it,
                             onEditClick = {
-                                showBottomSheetContent(null)
+                                hideBottomSheetContent()
                                 onEditPaymentMethodClicked(it)
                             },
                             onSetDefaultClick = {
-                                showBottomSheetContent(null)
+                                hideBottomSheetContent()
                                 onSetDefaultClicked(it)
                             },
                             onRemoveClick = {
-                                showBottomSheetContent(null)
+                                hideBottomSheetContent()
                                 onRemoveClicked(it)
                             },
                             onCancelClick = {
-                                showBottomSheetContent(null)
+                                hideBottomSheetContent()
                             }
                         )
                     }

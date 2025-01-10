@@ -41,6 +41,7 @@ import com.stripe.android.link.ui.wallet.WalletViewModel
 import com.stripe.android.ui.core.CircularProgressIndicator
 import kotlinx.coroutines.launch
 
+@SuppressWarnings("LongMethod")
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 internal fun LinkContent(
@@ -106,7 +107,10 @@ internal fun LinkContent(
                     getLinkAccount = {
                         viewModel.linkAccount
                     },
-                    showBottomSheetContent = onUpdateSheetContent
+                    showBottomSheetContent = onUpdateSheetContent,
+                    hideBottomSheetContent = {
+                        onUpdateSheetContent(null)
+                    }
                 )
             }
         }
@@ -121,7 +125,8 @@ private fun Screens(
     navigate: (route: LinkScreen) -> Unit,
     navigateAndClearStack: (route: LinkScreen) -> Unit,
     dismissWithResult: (LinkActivityResult) -> Unit,
-    showBottomSheetContent: (BottomSheetContent?) -> Unit
+    showBottomSheetContent: (BottomSheetContent?) -> Unit,
+    hideBottomSheetContent: () -> Unit
 ) {
     NavHost(
         navController = navController,
@@ -169,7 +174,8 @@ private fun Screens(
             }
             WalletScreen(
                 viewModel = viewModel,
-                showBottomSheetContent = showBottomSheetContent
+                showBottomSheetContent = showBottomSheetContent,
+                hideBottomSheetContent = hideBottomSheetContent
             )
         }
 

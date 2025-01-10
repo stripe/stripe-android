@@ -159,6 +159,7 @@ internal class WalletScreenScreenshotTest {
                     onSetDefaultClicked = {},
                     onEditPaymentMethodClicked = {},
                     showBottomSheetContent = {},
+                    hideBottomSheetContent = {},
                     onAddNewPaymentMethodClicked = {}
                 )
             }
