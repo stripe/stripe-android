@@ -21,6 +21,7 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffe
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenAuthFlowWithUrl
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenNativeAuthFlow
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewModel.Companion.QUERY_PARAM_PAYMENT_METHOD
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ErrorCode
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Metadata
@@ -58,6 +59,7 @@ import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarSta
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.utils.parcelable
+import com.stripe.attestation.IntegrityRequestManager
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -68,6 +70,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     @Named(APPLICATION_ID) private val applicationId: String,
     savedStateHandle: SavedStateHandle,
     private val getOrFetchSync: GetOrFetchSync,
+    private val integrityRequestManager: IntegrityRequestManager,
     private val fetchFinancialConnectionsSession: FetchFinancialConnectionsSession,
     private val fetchFinancialConnectionsSessionForToken: FetchFinancialConnectionsSessionForToken,
     private val logger: Logger,
@@ -86,7 +89,9 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         if (initialState.initialArgs.isValid()) {
             eventReporter.onPresented(initialState.initialArgs.configuration)
             // avoid re-fetching manifest if already exists (this will happen on process recreations)
-            if (initialState.manifest == null) fetchManifest()
+            if (initialState.manifest == null) {
+                initAuthFlow()
+            }
         } else {
             val result = Failed(
                 IllegalStateException("Invalid configuration provided when instantiating activity")
@@ -108,9 +113,10 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
      * Fetches the [FinancialConnectionsSessionManifest] from the Stripe API to get the hosted auth flow URL
      * as well as the success and cancel callback URLs to verify.
      */
-    private fun fetchManifest() {
+    private fun initAuthFlow() {
         viewModelScope.launch {
             kotlin.runCatching {
+                prepareStandardRequestManager()
                 getOrFetchSync(refetchCondition = Always)
             }.onFailure {
                 finishWithResult(stateFlow.value, Failed(it))
@@ -118,6 +124,20 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                 openAuthFlow(it)
             }
         }
+    }
+
+    private suspend fun prepareStandardRequestManager(): Boolean {
+        val result = integrityRequestManager.prepare()
+        result.onFailure {
+            analyticsTracker.track(
+                FinancialConnectionsAnalyticsEvent.Error(
+                    extraMessage = "Failed to warm up the IntegrityStandardRequestManager",
+                    pane = Pane.CONSENT,
+                    exception = it
+                )
+            )
+        }
+        return result.isSuccess
     }
 
     /**

@@ -1,9 +1,15 @@
 package com.stripe.android.financialconnections.di
 
 import android.app.Application
+import com.stripe.android.core.Logger
+import com.stripe.attestation.BuildConfig
+import com.stripe.attestation.IntegrityRequestManager
+import com.stripe.attestation.IntegrityStandardRequestManager
+import com.stripe.attestation.RealStandardIntegrityManagerFactory
 import dagger.BindsInstance
 import dagger.Component
 import dagger.Module
+import dagger.Provides
 import javax.inject.Singleton
 
 /**
@@ -32,6 +38,8 @@ internal object FinancialConnectionsSingletonSharedComponentHolder {
 @Component(modules = [FinancialConnectionsSingletonSharedModule::class])
 internal interface FinancialConnectionsSingletonSharedComponent {
 
+    fun providesIntegrityRequestManager(): IntegrityRequestManager
+
     @Component.Factory
     interface Factory {
         fun create(@BindsInstance application: Application): FinancialConnectionsSingletonSharedComponent
@@ -39,4 +47,15 @@ internal interface FinancialConnectionsSingletonSharedComponent {
 }
 
 @Module
-internal class FinancialConnectionsSingletonSharedModule
+internal class FinancialConnectionsSingletonSharedModule {
+
+    @Provides
+    @Singleton
+    fun providesIntegrityStandardRequestManager(
+        context: Application
+    ): IntegrityRequestManager = IntegrityStandardRequestManager(
+        cloudProjectNumber = 527113280969, // stripe-financial-connections
+        logError = { message, error -> Logger.getInstance(BuildConfig.DEBUG).error(message, error) },
+        factory = RealStandardIntegrityManagerFactory(context)
+    )
+}
