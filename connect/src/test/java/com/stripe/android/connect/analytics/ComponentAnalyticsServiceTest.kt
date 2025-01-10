@@ -96,14 +96,14 @@ class ComponentAnalyticsServiceTest {
 
         val expectedMetadata = mapOf(
             "page_view_id" to "pageViewId123",
-            "time_to_load" to "100.0",
-            "perceived_time_to_load" to "50.0",
+            "time_to_load" to "100",
+            "perceived_time_to_load" to "50",
         )
         assertContains(params, "event_metadata")
         assertEquals(expectedMetadata, params["event_metadata"])
         assertEquals("pageViewId123", params["page_view_id"])
-        assertEquals("100.0", params["time_to_load"])
-        assertEquals("50.0", params["perceived_time_to_load"])
+        assertEquals("100", params["time_to_load"])
+        assertEquals("50", params["perceived_time_to_load"])
     }
 
     @Test
