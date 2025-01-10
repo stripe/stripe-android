@@ -42,7 +42,7 @@ internal class DefaultLinkConfirmationHandlerTest {
         val result = handler.confirm(
             paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
             linkAccount = TestFactory.LINK_ACCOUNT,
-            cvc = "333"
+            cvc = CVC
         )
 
         assertThat(result).isEqualTo(Result.Succeeded)
