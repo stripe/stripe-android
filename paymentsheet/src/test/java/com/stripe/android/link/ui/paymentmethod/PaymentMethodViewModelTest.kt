@@ -57,7 +57,7 @@ class PaymentMethodViewModelTest {
     }
 
     @Test
-    fun `test selection state gets updated when form values change`() = runTest {
+    fun `test selection and button state gets updated when form values change`() = runTest {
         var paramFormValues: FormFieldValues? = null
         val formHelper = object : PaymentMethodFormHelper() {
             override fun onFormFieldValuesChanged(formValues: FormFieldValues?, selectedPaymentMethodCode: String) {
@@ -78,6 +78,13 @@ class PaymentMethodViewModelTest {
         assertThat(vm.state.value.paymentSelection).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
         assertThat(vm.state.value.primaryButtonState).isEqualTo(PrimaryButtonState.Enabled)
         assertThat(paramFormValues).isEqualTo(formValues)
+
+        formHelper.paymentSelection = null
+        vm.formValuesChanged(null)
+
+        assertThat(vm.state.value.paymentSelection).isNull()
+        assertThat(vm.state.value.primaryButtonState).isEqualTo(PrimaryButtonState.Disabled)
+        assertThat(paramFormValues).isNull()
     }
 
     private fun createViewModel(
@@ -95,9 +102,10 @@ class PaymentMethodViewModelTest {
 
 private open class PaymentMethodFormHelper : FakeFormHelper() {
     var updateSelection: UpdateSelection? = null
+    var paymentSelection: PaymentSelection? = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
 
     override fun onFormFieldValuesChanged(formValues: FormFieldValues?, selectedPaymentMethodCode: String) {
-        updateSelection?.invoke(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+        updateSelection?.invoke(paymentSelection)
     }
 
     override fun formElementsForCode(code: String): List<FormElement> {
