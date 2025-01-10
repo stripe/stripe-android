@@ -112,8 +112,8 @@ internal fun SavedPaymentMethodTab(
                         }
                 )
 
-                // only show default badge when editing
-                if (shouldShowDefaultBadge && shouldShowModifyBadge) {
+                // Only show default badge when editing
+                if (shouldShowDefaultBadge) {
                     DefaultPaymentMethodLabel(
                         modifier = Modifier
                             .padding(top = 4.dp, start = 6.dp, end = 6.dp)

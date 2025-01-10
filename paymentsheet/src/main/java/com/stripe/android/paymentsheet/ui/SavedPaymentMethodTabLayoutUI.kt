@@ -410,7 +410,7 @@ private fun SavedPaymentMethodTab(
         SavedPaymentMethodTab(
             viewWidth = width,
             shouldShowModifyBadge = isEnabled && isEditing,
-            shouldShowDefaultBadge = paymentMethod.displayableSavedPaymentMethod.shouldShowDefaultBadge,
+            shouldShowDefaultBadge = paymentMethod.displayableSavedPaymentMethod.shouldShowDefaultBadge && isEditing,
             isSelected = isSelected,
             isEnabled = isEnabled,
             isClickable = !isEditing,
