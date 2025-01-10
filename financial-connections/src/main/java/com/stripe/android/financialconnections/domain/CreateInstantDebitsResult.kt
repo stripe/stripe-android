@@ -61,14 +61,15 @@ internal class RealCreateInstantDebitsResult @Inject constructor(
         val incentiveEligibilitySessionId = elementsSessionContext?.incentiveEligibilitySession?.id
 
         val eligibleForIncentive = if (incentiveEligibilitySessionId != null) {
-            val availableIncentives = runCatching {
+            runCatching {
                 consumerRepository.updateAvailableIncentives(
                     sessionId = incentiveEligibilitySessionId,
                     consumerSessionClientSecret = clientSecret,
                 )
-            }.getOrNull()
-
-            availableIncentives?.data?.isNotEmpty() == true
+            }.fold(
+                onSuccess = { it.data.isNotEmpty() },
+                onFailure = { false },
+            )
         } else {
             false
         }
