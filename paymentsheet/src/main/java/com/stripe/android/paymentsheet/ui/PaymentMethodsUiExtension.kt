@@ -61,6 +61,17 @@ internal fun CardBrand.getCardBrandIconForVerticalMode(): Int = when (this) {
     Unknown -> R.drawable.stripe_ic_paymentsheet_card_unknown
 }
 
+@DrawableRes
+internal fun getLinkIcon(shouldOverrideSystemTheme: Boolean = false, showLightIcon: Boolean = false): Int {
+    if (!shouldOverrideSystemTheme) {
+        return R.drawable.stripe_ic_paymentsheet_link_ref
+    } else if (showLightIcon) {
+        return R.drawable.stripe_ic_paymentsheet_link_light
+    } else {
+        return R.drawable.stripe_ic_paymentsheet_link_dark
+    }
+}
+
 internal fun PaymentMethod.getLabel(): ResolvableString? = when (type) {
     PaymentMethod.Type.Card -> createCardLabel(card?.last4)
     PaymentMethod.Type.SepaDebit -> resolvableString(
