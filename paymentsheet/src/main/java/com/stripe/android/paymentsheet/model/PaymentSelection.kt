@@ -22,6 +22,7 @@ import com.stripe.android.model.PaymentMethod.Type.USBankAccount
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.BankFormScreenState
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountTextBuilder
@@ -395,3 +396,35 @@ internal val PaymentSelection.paymentMethodType: String
         is PaymentSelection.New.USBankAccount -> paymentMethodCreateParams.typeCode
         is PaymentSelection.Saved -> paymentMethod.type?.name ?: "card"
     }
+
+internal val PaymentSelection.billingDetails: PaymentMethod.BillingDetails?
+    get() = when (this) {
+        is PaymentSelection.ExternalPaymentMethod -> billingDetails
+        PaymentSelection.GooglePay -> null
+        PaymentSelection.Link -> null
+        is PaymentSelection.New.Card -> paymentMethodCreateParams.billingDetails
+        is PaymentSelection.New.GenericPaymentMethod -> paymentMethodCreateParams.billingDetails
+        is PaymentSelection.New.LinkInline -> linkPaymentDetails.paymentMethodCreateParams.billingDetails
+        is PaymentSelection.New.USBankAccount -> paymentMethodCreateParams.billingDetails
+        is PaymentSelection.Saved -> paymentMethod.billingDetails
+    }
+
+internal fun PaymentMethod.BillingDetails?.toPaymentSheetBillingDetails(): PaymentSheet.BillingDetails? {
+    return if (this == null) {
+        null
+    } else {
+        PaymentSheet.BillingDetails(
+            address = PaymentSheet.Address(
+                city = address?.city,
+                country = address?.country,
+                line1 = address?.line1,
+                line2 = address?.line2,
+                postalCode = address?.postalCode,
+                state = address?.state
+            ),
+            email = email,
+            name = name,
+            phone = phone
+        )
+    }
+}

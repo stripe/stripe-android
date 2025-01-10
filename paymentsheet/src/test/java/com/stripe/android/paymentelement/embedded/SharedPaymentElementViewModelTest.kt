@@ -8,7 +8,9 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.SetupIntentFixtures
@@ -19,6 +21,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.paymentMethodType
+import com.stripe.android.paymentsheet.model.toPaymentSheetBillingDetails
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import kotlinx.coroutines.CoroutineScope
@@ -307,61 +310,53 @@ internal class SharedPaymentElementViewModelTest {
     }
 
     @Test
-    fun `configure correctly sets billing details`() = testScenario {
-        val billingDetails = PaymentSheet.BillingDetails(
-            name = "Jenny Rosen",
-            email = "foo@bar.com",
-            phone = "+13105551234",
-            address = PaymentSheet.Address(
-                postalCode = "94111",
-                country = "US",
+    fun `configure attaches default billing details when attachDefaultsToPaymentMethod is true`() {
+        paymentOptionDisplayDataTest(
+            paymentSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION.copy(
+                paymentMethodCreateParams = PaymentMethodCreateParams(
+                    code = "card",
+                    requiresMandate = false,
+                    billingDetails = paymentMethodBillingDetails
+                )
             ),
+            attachDefaultBillingDetails = true,
+            validate = {
+                assertThat(it?.billingDetails).isEqualTo(paymentSheetBillingDetails)
+            }
         )
-        val configuration = EmbeddedPaymentElement.Configuration
-            .Builder("Example, Inc.")
-            .defaultBillingDetails(billingDetails)
-            .build()
-        configurationHandler.emit(
-            Result.success(
-                PaymentElementLoader.State(
-                    config = configuration.asCommonConfiguration(),
-                    customer = null,
-                    linkState = null,
-                    paymentSelection = PaymentSelection.GooglePay,
-                    validationError = null,
-                    paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-                        stripeIntent = PaymentIntentFixtures.PI_SUCCEEDED,
-                        billingDetailsCollectionConfiguration = configuration
-                            .billingDetailsCollectionConfiguration,
-                        allowsDelayedPaymentMethods = configuration.allowsDelayedPaymentMethods,
-                        allowsPaymentMethodsRequiringShippingAddress = configuration
-                            .allowsPaymentMethodsRequiringShippingAddress,
-                        isGooglePayReady = true,
-                        cbcEligibility = CardBrandChoiceEligibility.Ineligible,
-                    ),
-                )
-            )
-        )
-        assertThat(selectionHolder.selection.value?.paymentMethodType).isNull()
-        viewModel.paymentOption.test {
-            assertThat(awaitItem()).isNull()
+    }
 
-            assertThat(
-                viewModel.configure(
-                    PaymentSheet.IntentConfiguration(
-                        PaymentSheet.IntentConfiguration.Mode.Setup("USD"),
-                    ),
-                    configuration = configuration,
+    @Test
+    fun `configure attaches payment method billing details when attachDefaultsToPaymentMethod is false`() {
+        paymentOptionDisplayDataTest(
+            paymentSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION.copy(
+                paymentMethodCreateParams = PaymentMethodCreateParams(
+                    code = "card",
+                    requiresMandate = false,
+                    billingDetails = paymentMethodBillingDetails
                 )
-            ).isInstanceOf<EmbeddedPaymentElement.ConfigureResult.Succeeded>()
-            assertThat(awaitItem()?.billingDetails).isEqualTo(billingDetails)
-        }
-        assertThat(embeddedContentHelper.dataLoadedTurbine.awaitItem()).isNotNull()
+            ),
+            attachDefaultBillingDetails = false,
+            validate = {
+                assertThat(it?.billingDetails).isEqualTo(paymentMethodBillingDetails.toPaymentSheetBillingDetails())
+            }
+        )
+    }
+
+    @Test
+    fun `configure does not attach billing details for google pay`() {
+        paymentOptionDisplayDataTest(
+            paymentSelection = PaymentSelection.GooglePay,
+            attachDefaultBillingDetails = false,
+            validate = {
+                assertThat(it?.billingDetails).isNull()
+            }
+        )
     }
 
     @Test
     fun `selecting lpm PaymentOption with mandate attaches mandate to paymentMethodMetadata`() {
-        mandateTest(
+        paymentOptionDisplayDataTest(
             paymentSelection = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION.copy(
                 paymentMethodCreateParams = PaymentMethodCreateParams(code = "cashapp", requiresMandate = true)
             ),
@@ -373,7 +368,7 @@ internal class SharedPaymentElementViewModelTest {
 
     @Test
     fun `selecting saved card does not attach mandate to paymentMethodMetadata`() {
-        mandateTest(
+        paymentOptionDisplayDataTest(
             paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
             validate = {
                 assertThat(it?.mandateText).isNull()
@@ -383,7 +378,7 @@ internal class SharedPaymentElementViewModelTest {
 
     @Test
     fun `selecting new card does attach mandate to paymentMethodMetadata`() {
-        mandateTest(
+        paymentOptionDisplayDataTest(
             paymentSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
             validate = {
                 assertThat(it?.mandateText).isNotNull()
@@ -393,7 +388,7 @@ internal class SharedPaymentElementViewModelTest {
 
     @Test
     fun `selecting google pay does not attach mandate to paymentMethodMetadata`() {
-        mandateTest(
+        paymentOptionDisplayDataTest(
             paymentSelection = PaymentSelection.GooglePay,
             validate = {
                 assertThat(it?.mandateText).isNull()
@@ -401,11 +396,20 @@ internal class SharedPaymentElementViewModelTest {
         )
     }
 
-    private fun mandateTest(
+    private fun paymentOptionDisplayDataTest(
         paymentSelection: PaymentSelection,
+        attachDefaultBillingDetails: Boolean = false,
         validate: (paymentOption: EmbeddedPaymentElement.PaymentOptionDisplayData?) -> Unit
     ) = testScenario {
-        val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
+        val configuration = EmbeddedPaymentElement.Configuration
+            .Builder("Example, Inc.")
+            .defaultBillingDetails(paymentSheetBillingDetails)
+            .billingDetailsCollectionConfiguration(
+                PaymentSheet.BillingDetailsCollectionConfiguration(
+                    attachDefaultsToPaymentMethod = attachDefaultBillingDetails
+                )
+            )
+            .build()
         configurationHandler.emit(
             Result.success(
                 PaymentElementLoader.State(
@@ -442,7 +446,7 @@ internal class SharedPaymentElementViewModelTest {
                     configuration = configuration,
                 )
             ).isInstanceOf<EmbeddedPaymentElement.ConfigureResult.Succeeded>()
-            validate.invoke(awaitItem())
+            validate(awaitItem())
         }
         assertThat(embeddedContentHelper.dataLoadedTurbine.awaitItem()).isNotNull()
     }
@@ -511,5 +515,24 @@ internal class SharedPaymentElementViewModelTest {
         ): Result<PaymentElementLoader.State> {
             return turbine.awaitItem()
         }
+    }
+    companion object {
+        private val paymentSheetBillingDetails = PaymentSheet.BillingDetails(
+            name = "Jenny Rosen",
+            email = "foo@bar.com",
+            phone = "+13105551234",
+            address = PaymentSheet.Address(
+                postalCode = "94111",
+                country = "US",
+            ),
+        )
+        private val paymentMethodBillingDetails = PaymentMethod.BillingDetails(
+            address = Address(
+                city = "San Francisco"
+            ),
+            email = "llama@stripe.com",
+            name = "Larry Llama",
+            phone = "+15555555555"
+        )
     }
 }
