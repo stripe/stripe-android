@@ -15,8 +15,27 @@ import com.stripe.android.uicore.utils.collectAsState
 
 @Composable
 internal fun PartnerAuthScreen(inModal: Boolean) {
-    val isReady = lifecycleAwareState()
-    if (isReady.value) {
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val isReady = remember { mutableStateOf(false) }
+
+    // Track the lifecycle to update the readiness state
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            when (event) {
+                Lifecycle.Event.ON_CREATE -> isReady.value = true
+                Lifecycle.Event.ON_DESTROY -> isReady.value = false
+                else -> Unit
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+
+    // Only do state collection and UI updates when ready
+    if (!inModal || isReady.value) {
         val viewModel: PartnerAuthViewModel = paneViewModel {
             PartnerAuthViewModel.factory(
                 parentComponent = it,
@@ -35,27 +54,4 @@ internal fun PartnerAuthScreen(inModal: Boolean) {
             onViewEffectLaunched = viewModel::onViewEffectLaunched
         )
     }
-}
-
-@Composable
-internal fun lifecycleAwareState(): State<Boolean> {
-    val lifecycleOwner = LocalLifecycleOwner.current
-    val isReady = remember { mutableStateOf(false) }
-
-    DisposableEffect(lifecycleOwner) {
-        val observer = LifecycleEventObserver { _, event ->
-            when (event) {
-                Lifecycle.Event.ON_RESUME -> isReady.value = true
-                Lifecycle.Event.ON_DESTROY -> isReady.value = false
-                else -> Unit
-            }
-        }
-        lifecycleOwner.lifecycle.addObserver(observer)
-
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
-        }
-    }
-
-    return isReady
 }
