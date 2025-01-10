@@ -143,7 +143,7 @@ internal enum class PrimaryButtonState(val isBlocking: Boolean) {
     Completed(true)
 }
 
-fun completePaymentButtonLabel(
+internal fun completePaymentButtonLabel(
     stripeIntent: StripeIntent,
 ) = when (stripeIntent) {
     is PaymentIntent -> {
