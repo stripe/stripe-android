@@ -42,12 +42,17 @@ internal class CvcRecollectionHandlerImpl : CvcRecollectionHandler {
         val hasNotRecollectedCvcAlready = optionsParams == null || !optionsParams.hasAlreadyRecollectedCvc()
 
         return paymentMethod.isCard() &&
+            paymentMethod.hasNoWallet() &&
             cvcRecollectionEnabled(stripeIntent, initializationMode) &&
             hasNotRecollectedCvcAlready
     }
 
     private fun PaymentMethod.isCard(): Boolean {
         return type == PaymentMethod.Type.Card
+    }
+
+    private fun PaymentMethod.hasNoWallet(): Boolean {
+        return card?.wallet == null
     }
 
     private fun StripeIntent.supportsCvcRecollection(): Boolean {
