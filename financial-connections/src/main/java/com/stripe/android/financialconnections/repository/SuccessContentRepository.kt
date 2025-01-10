@@ -2,13 +2,13 @@ package com.stripe.android.financialconnections.repository
 
 import android.os.Parcelable
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.financialconnections.di.ActivityRetainedScope
 import com.stripe.android.financialconnections.repository.SuccessContentRepository.State
 import com.stripe.android.financialconnections.ui.TextResource
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
+@ActivityRetainedScope
 internal class SuccessContentRepository @Inject constructor(
     savedStateHandle: SavedStateHandle,
 ) : PersistingRepository<State>(

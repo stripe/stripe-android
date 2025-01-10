@@ -30,6 +30,7 @@ import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.browser.BrowserManager
 import com.stripe.android.financialconnections.di.APPLICATION_ID
 import com.stripe.android.financialconnections.di.DaggerFinancialConnectionsSheetComponent
+import com.stripe.android.financialconnections.di.FinancialConnectionsSingletonSharedComponentHolder
 import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsSession
 import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsSessionForToken
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
@@ -529,6 +530,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                     .builder()
                     .application(app)
                     .savedStateHandle(savedStateHandle)
+                    .sharedComponent(FinancialConnectionsSingletonSharedComponentHolder.getComponent(app))
                     .initialState(state)
                     .configuration(state.initialArgs.configuration)
                     .build().viewModel
