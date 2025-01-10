@@ -5,7 +5,7 @@ import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.uicore.elements.FormElement
 
-internal abstract class FakeFormHelper: FormHelper {
+internal abstract class FakeFormHelper : FormHelper {
     override fun formElementsForCode(code: String): List<FormElement> {
         TODO("Not yet implemented")
     }
