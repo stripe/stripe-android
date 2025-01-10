@@ -20,6 +20,7 @@ internal class RecordingConfirmationDefinition<
     TLauncherResult
     > {
     private val optionCalls = Turbine<OptionCall>()
+    private val canConfirmCalls = Turbine<CanConfirmCall>()
     private val toResultCalls = Turbine<ToResultCall<TConfirmationOption, TLauncherResult>>()
     private val createLauncherCalls = Turbine<CreateLauncherCall<TLauncherResult>>()
     private val unregisterCalls = Turbine<UnregisterCall<TLauncher>>()
@@ -32,6 +33,15 @@ internal class RecordingConfirmationDefinition<
         optionCalls.add(OptionCall(confirmationOption))
 
         return definition.option(confirmationOption)
+    }
+
+    override fun canConfirm(
+        confirmationOption: TConfirmationOption,
+        confirmationParameters: ConfirmationDefinition.Parameters
+    ): Boolean {
+        canConfirmCalls.add(CanConfirmCall(confirmationOption, confirmationParameters))
+
+        return definition.canConfirm(confirmationOption, confirmationParameters)
     }
 
     override fun toResult(
@@ -94,6 +104,11 @@ internal class RecordingConfirmationDefinition<
         val option: ConfirmationHandler.Option,
     )
 
+    class CanConfirmCall(
+        val option: ConfirmationHandler.Option,
+        val confirmationParameters: ConfirmationDefinition.Parameters,
+    )
+
     class ToResultCall<TConfirmationOption : ConfirmationHandler.Option, TLauncherResult>(
         val confirmationOption: TConfirmationOption,
         val confirmationParameters: ConfirmationDefinition.Parameters,
@@ -130,6 +145,7 @@ internal class RecordingConfirmationDefinition<
         >(
         val definition: ConfirmationDefinition<TConfirmationOption, TLauncher, TLauncherArgs, TLauncherResult>,
         val optionCalls: ReceiveTurbine<OptionCall>,
+        val canConfirmCalls: ReceiveTurbine<CanConfirmCall>,
         val toResultCalls: ReceiveTurbine<ToResultCall<TConfirmationOption, TLauncherResult>>,
         val createLauncherCalls: ReceiveTurbine<CreateLauncherCall<TLauncherResult>>,
         val unregisterCalls: ReceiveTurbine<UnregisterCall<TLauncher>>,
@@ -153,6 +169,7 @@ internal class RecordingConfirmationDefinition<
                 Scenario(
                     definition = recordingDefinition,
                     optionCalls = recordingDefinition.optionCalls,
+                    canConfirmCalls = recordingDefinition.canConfirmCalls,
                     toResultCalls = recordingDefinition.toResultCalls,
                     createLauncherCalls = recordingDefinition.createLauncherCalls,
                     unregisterCalls = recordingDefinition.unregisterCalls,
@@ -162,6 +179,7 @@ internal class RecordingConfirmationDefinition<
             )
 
             recordingDefinition.optionCalls.ensureAllEventsConsumed()
+            recordingDefinition.canConfirmCalls.ensureAllEventsConsumed()
             recordingDefinition.toResultCalls.ensureAllEventsConsumed()
             recordingDefinition.createLauncherCalls.ensureAllEventsConsumed()
             recordingDefinition.unregisterCalls.ensureAllEventsConsumed()

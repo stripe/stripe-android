@@ -67,7 +67,6 @@ import com.stripe.android.paymentsheet.addresselement.AddressElementActivityCont
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
-import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandlerImpl
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
@@ -2215,7 +2214,7 @@ internal class DefaultFlowControllerTest {
                 eq(false)
             )
 
-            enqueueConfirmAndVerifyPaymentSelection(cvc, viewModel)
+            enqueueConfirmAndVerifyPaymentSelection(cvc)
         } else {
             verify(launcher, never()).launch(any(), any(), any())
         }
@@ -2226,7 +2225,6 @@ internal class DefaultFlowControllerTest {
 
     private fun enqueueConfirmAndVerifyPaymentSelection(
         cvc: String,
-        viewModel: FlowControllerViewModel
     ) {
         fakeIntentConfirmationInterceptor.enqueueConfirmStep(
             confirmParams = ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
@@ -2239,8 +2237,7 @@ internal class DefaultFlowControllerTest {
         verifyPaymentSelection(
             clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
             paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-            expectedPaymentMethodOptions = (viewModel.paymentSelection as? PaymentSelection.Saved)
-                ?.paymentMethodOptionsParams
+            expectedPaymentMethodOptions = PaymentMethodOptionsParams.Card(cvc = cvc)
         )
     }
 
@@ -2330,20 +2327,19 @@ internal class DefaultFlowControllerTest {
             paymentSelectionUpdater = { _, _, newState, _ -> newState.paymentSelection },
         ),
         errorReporter = errorReporter,
-        cvcRecollectionLauncherFactory = cvcRecollectionLauncherFactory,
         initializedViaCompose = false,
         confirmationHandler = createTestConfirmationHandlerFactory(
             bacsMandateConfirmationLauncherFactory = bacsMandateConfirmationLauncherFactory,
             googlePayPaymentMethodLauncherFactory = googlePayPaymentMethodLauncherFactory,
             intentConfirmationInterceptor = fakeIntentConfirmationInterceptor,
             stripePaymentLauncherAssistedFactory = paymentLauncherAssistedFactory,
+            cvcRecollectionLauncherFactory = cvcRecollectionLauncherFactory,
             paymentConfiguration = PaymentConfiguration.getInstance(context),
             linkLauncher = linkPaymentLauncher,
             errorReporter = errorReporter,
             savedStateHandle = viewModel.handle,
             statusBarColor = STATUS_BAR_COLOR,
         ).create(testScope),
-        cvcRecollectionHandler = CvcRecollectionHandlerImpl()
     )
 
     private fun createViewModel(): FlowControllerViewModel {

@@ -79,6 +79,7 @@ import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
 import com.stripe.android.paymentsheet.cvcrecollection.FakeCvcRecollectionHandler
+import com.stripe.android.paymentsheet.cvcrecollection.RecordingCvcRecollectionLauncherFactory
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
@@ -3145,6 +3146,7 @@ internal class PaymentSheetViewModelTest {
                     statusBarColor = args.statusBarColor,
                     errorReporter = FakeErrorReporter(),
                     linkLauncher = linkPaymentLauncher,
+                    cvcRecollectionLauncherFactory = RecordingCvcRecollectionLauncherFactory.noOp(),
                 ),
                 cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
                 errorReporter = errorReporter,
