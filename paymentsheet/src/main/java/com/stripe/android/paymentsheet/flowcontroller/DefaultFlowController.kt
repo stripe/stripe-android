@@ -16,7 +16,6 @@ import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
@@ -36,15 +35,10 @@ import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
-import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
 import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.isLink
-import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionContract
-import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionLauncher
-import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionLauncherFactory
-import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionResult
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
@@ -78,15 +72,12 @@ internal class DefaultFlowController @Inject internal constructor(
     private val confirmationHandler: ConfirmationHandler,
     @Named(ENABLE_LOGGING) private val enableLogging: Boolean,
     @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
-    cvcRecollectionLauncherFactory: CvcRecollectionLauncherFactory,
     private val configurationHandler: FlowControllerConfigurationHandler,
     private val errorReporter: ErrorReporter,
     @InitializedViaCompose private val initializedViaCompose: Boolean,
-    private val cvcRecollectionHandler: CvcRecollectionHandler
 ) : PaymentSheet.FlowController {
     private val paymentOptionActivityLauncher: ActivityResultLauncher<PaymentOptionContract.Args>
     private val sepaMandateActivityLauncher: ActivityResultLauncher<SepaMandateContract.Args>
-    private val cvcRecollectionLauncher: CvcRecollectionLauncher
 
     /**
      * [FlowControllerComponent] is hold to inject into [Activity]s and created
@@ -123,19 +114,9 @@ internal class DefaultFlowController @Inject internal constructor(
             ::onSepaMandateResult,
         )
 
-        val cvcRecollectionActivityLauncher = activityResultCaller.registerForActivityResult(
-            CvcRecollectionContract(),
-            ::onCvcRecollectionResult
-        )
-
-        cvcRecollectionLauncher = cvcRecollectionLauncherFactory.create(
-            cvcRecollectionActivityLauncher
-        )
-
         val activityResultLaunchers = setOf(
             paymentOptionActivityLauncher,
             sepaMandateActivityLauncher,
-            cvcRecollectionActivityLauncher
         )
 
         lifecycleOwner.lifecycle.addObserver(
@@ -327,21 +308,6 @@ internal class DefaultFlowController @Inject internal constructor(
                     merchantName = state.config.merchantDisplayName
                 )
             )
-        } else if (
-            cvcRecollectionHandler.requiresCVCRecollection(
-                stripeIntent = state.stripeIntent,
-                paymentMethod = paymentSelection.paymentMethod,
-                optionsParams = paymentSelection.paymentMethodOptionsParams,
-                initializationMode = initializationMode,
-            )
-        ) {
-            cvcRecollectionHandler.launch(paymentSelection.paymentMethod) { cvcRecollectionData ->
-                cvcRecollectionLauncher.launch(
-                    data = cvcRecollectionData,
-                    appearance = getPaymentAppearance(),
-                    isLiveMode = state.stripeIntent.isLiveMode
-                )
-            }
         } else {
             confirmPaymentSelection(paymentSelection, state, appearance, initializationMode)
         }
@@ -390,36 +356,6 @@ internal class DefaultFlowController @Inject internal constructor(
                         message = exception.stripeErrorMessage(),
                         type = ConfirmationHandler.Result.Failed.ErrorType.Internal,
                     )
-                )
-            }
-        }
-    }
-
-    internal fun onCvcRecollectionResult(
-        result: CvcRecollectionResult
-    ) {
-        when (result) {
-            is CvcRecollectionResult.Cancelled -> Unit
-            is CvcRecollectionResult.Confirmed -> {
-                (viewModel.paymentSelection as? PaymentSelection.Saved)?.let {
-                    val selection = PaymentSelection.Saved(
-                        paymentMethod = it.paymentMethod,
-                        walletType = it.walletType,
-                        paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(
-                            cvc = result.cvc,
-                        )
-                    )
-                    viewModel.paymentSelection = selection
-                    confirm()
-                } ?: paymentResultCallback.onPaymentSheetResult(
-                    PaymentSheetResult.Failed(
-                        CvcRecollectionException(
-                            type = CvcRecollectionException.Type.IncorrectSelection
-                        )
-                    )
-                )
-                errorReporter.report(
-                    ErrorReporter.UnexpectedErrorEvent.CVC_RECOLLECTION_UNEXPECTED_PAYMENT_SELECTION
                 )
             }
         }
@@ -628,22 +564,6 @@ internal class DefaultFlowController @Inject internal constructor(
         is PaymentResult.Completed -> PaymentSheetResult.Completed
         is PaymentResult.Canceled -> PaymentSheetResult.Canceled
         is PaymentResult.Failed -> PaymentSheetResult.Failed(throwable)
-    }
-
-    private fun getPaymentAppearance(): PaymentSheet.Appearance {
-        return viewModel.state?.config?.appearance ?: PaymentSheet.Appearance()
-    }
-
-    class CvcRecollectionException(
-        val type: Type
-    ) : Exception() {
-        override val message: String = when (type) {
-            Type.IncorrectSelection -> "PaymentSelection must be PaymentSelection.Saved for CVC recollection"
-        }
-
-        enum class Type {
-            IncorrectSelection
-        }
     }
 
     @Parcelize

@@ -22,6 +22,11 @@ internal interface ConfirmationDefinition<
         confirmationOption: ConfirmationHandler.Option,
     ): TConfirmationOption?
 
+    fun canConfirm(
+        confirmationOption: TConfirmationOption,
+        confirmationParameters: Parameters,
+    ): Boolean = true
+
     suspend fun action(
         confirmationOption: TConfirmationOption,
         confirmationParameters: Parameters,

@@ -35,7 +35,7 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement.PaymentOptionDis
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
-import com.stripe.android.paymentelement.confirmation.injection.PaymentElementConfirmationModule
+import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentElementConfirmationModule
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
@@ -47,8 +47,6 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
-import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandlerImpl
 import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
@@ -165,7 +163,7 @@ internal class SharedPaymentElementViewModel @Inject constructor(
         GooglePayLauncherModule::class,
         CoreCommonModule::class,
         StripeRepositoryModule::class,
-        PaymentElementConfirmationModule::class,
+        ExtendedPaymentElementConfirmationModule::class,
     ]
 )
 internal interface SharedPaymentElementViewModelComponent {
@@ -290,11 +288,6 @@ internal interface SharedPaymentElementViewModelModule {
                 customerConfig?.id,
                 workContext
             )
-        }
-
-        @Provides
-        fun provideCVCRecollectionHandler(): CvcRecollectionHandler {
-            return CvcRecollectionHandlerImpl()
         }
 
         @Provides

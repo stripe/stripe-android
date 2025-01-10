@@ -32,8 +32,13 @@ internal class ConfirmationMediator<
 
     val key = definition.key
 
-    fun canConfirm(confirmationOption: ConfirmationHandler.Option): Boolean {
-        return definition.option(confirmationOption) != null
+    fun canConfirm(
+        confirmationOption: ConfirmationHandler.Option,
+        confirmationParameters: ConfirmationDefinition.Parameters,
+    ): Boolean {
+        return definition.option(confirmationOption)?.let {
+            definition.canConfirm(it, confirmationParameters)
+        } ?: false
     }
 
     fun register(

@@ -5,6 +5,8 @@ import android.content.Context
 import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
+import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandlerImpl
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -34,5 +36,11 @@ internal abstract class PaymentSheetLauncherModule {
         @Singleton
         @Named(ALLOWS_MANUAL_CONFIRMATION)
         fun provideAllowsManualConfirmation() = false
+
+        @Provides
+        @Singleton
+        fun provideCVCRecollectionHandler(): CvcRecollectionHandler {
+            return CvcRecollectionHandlerImpl()
+        }
     }
 }
