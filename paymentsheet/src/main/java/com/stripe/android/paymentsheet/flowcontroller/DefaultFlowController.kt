@@ -15,7 +15,6 @@ import androidx.lifecycle.lifecycleScope
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.ENABLE_LOGGING
-import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -288,17 +287,25 @@ internal class DefaultFlowController @Inject internal constructor(
             return
         }
 
+        val initializationMode = requireNotNull(initializationMode)
+
         when (val paymentSelection = viewModel.paymentSelection) {
             is PaymentSelection.Link,
             is PaymentSelection.New.LinkInline,
             is PaymentSelection.GooglePay,
             is PaymentSelection.ExternalPaymentMethod,
             is PaymentSelection.New,
-            null -> confirmPaymentSelection(paymentSelection, state.paymentSheetState, state.config.appearance)
+            null -> confirmPaymentSelection(
+                paymentSelection = paymentSelection,
+                state = state.paymentSheetState,
+                appearance = state.config.appearance,
+                initializationMode = initializationMode,
+            )
             is PaymentSelection.Saved -> confirmSavedPaymentMethod(
                 paymentSelection = paymentSelection,
                 state = state.paymentSheetState,
                 appearance = state.config.appearance,
+                initializationMode = initializationMode,
             )
         }
     }
@@ -307,6 +314,7 @@ internal class DefaultFlowController @Inject internal constructor(
         paymentSelection: PaymentSelection.Saved,
         state: PaymentSheetState.Full,
         appearance: PaymentSheet.Appearance,
+        initializationMode: PaymentElementLoader.InitializationMode,
     ) {
         if (paymentSelection.paymentMethod.type == PaymentMethod.Type.SepaDebit &&
             viewModel.paymentSelection?.hasAcknowledgedSepaMandate == false
@@ -322,11 +330,12 @@ internal class DefaultFlowController @Inject internal constructor(
         } else if (
             cvcRecollectionHandler.requiresCVCRecollection(
                 stripeIntent = state.stripeIntent,
-                paymentSelection = paymentSelection,
-                initializationMode = initializationMode
+                paymentMethod = paymentSelection.paymentMethod,
+                optionsParams = paymentSelection.paymentMethodOptionsParams,
+                initializationMode = initializationMode,
             )
         ) {
-            cvcRecollectionHandler.launch(paymentSelection) { cvcRecollectionData ->
+            cvcRecollectionHandler.launch(paymentSelection.paymentMethod) { cvcRecollectionData ->
                 cvcRecollectionLauncher.launch(
                     data = cvcRecollectionData,
                     appearance = getPaymentAppearance(),
@@ -334,7 +343,7 @@ internal class DefaultFlowController @Inject internal constructor(
                 )
             }
         } else {
-            confirmPaymentSelection(paymentSelection, state, appearance)
+            confirmPaymentSelection(paymentSelection, state, appearance, initializationMode)
         }
     }
 
@@ -343,10 +352,9 @@ internal class DefaultFlowController @Inject internal constructor(
         paymentSelection: PaymentSelection?,
         state: PaymentSheetState.Full,
         appearance: PaymentSheet.Appearance,
+        initializationMode: PaymentElementLoader.InitializationMode,
     ) {
         viewModelScope.launch {
-            val initializationMode = requireNotNull(initializationMode)
-
             val confirmationOption = paymentSelection?.toConfirmationOption(
                 configuration = state.config,
                 linkConfiguration = state.linkState?.configuration,
@@ -393,77 +401,27 @@ internal class DefaultFlowController @Inject internal constructor(
         when (result) {
             is CvcRecollectionResult.Cancelled -> Unit
             is CvcRecollectionResult.Confirmed -> {
-                runCatching {
-                    requireNotNull(viewModel.state)
-                }.fold(
-                    onSuccess = { state ->
-                        (viewModel.paymentSelection as? PaymentSelection.Saved)?.let {
-                            val selection = PaymentSelection.Saved(
-                                paymentMethod = it.paymentMethod,
-                                walletType = it.walletType,
-                                paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(
-                                    cvc = result.cvc,
-                                )
-                            )
-                            viewModel.paymentSelection = selection
-                            confirmPaymentSelection(selection, state.paymentSheetState, state.config.appearance)
-                        } ?: paymentResultCallback.onPaymentSheetResult(
-                            PaymentSheetResult.Failed(
-                                CvcRecollectionException(
-                                    type = CvcRecollectionException.Type.IncorrectSelection
-                                )
-                            )
+                (viewModel.paymentSelection as? PaymentSelection.Saved)?.let {
+                    val selection = PaymentSelection.Saved(
+                        paymentMethod = it.paymentMethod,
+                        walletType = it.walletType,
+                        paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(
+                            cvc = result.cvc,
                         )
-                        errorReporter.report(
-                            ErrorReporter.UnexpectedErrorEvent.CVC_RECOLLECTION_UNEXPECTED_PAYMENT_SELECTION
+                    )
+                    viewModel.paymentSelection = selection
+                    confirm()
+                } ?: paymentResultCallback.onPaymentSheetResult(
+                    PaymentSheetResult.Failed(
+                        CvcRecollectionException(
+                            type = CvcRecollectionException.Type.IncorrectSelection
                         )
-                    },
-                    onFailure = { error ->
-                        paymentResultCallback.onPaymentSheetResult(
-                            PaymentSheetResult.Failed(error)
-                        )
-                    }
+                    )
+                )
+                errorReporter.report(
+                    ErrorReporter.UnexpectedErrorEvent.CVC_RECOLLECTION_UNEXPECTED_PAYMENT_SELECTION
                 )
             }
-        }
-    }
-
-    fun onLinkActivityResult(result: LinkActivityResult): Unit = when (result) {
-        is LinkActivityResult.Canceled -> onPaymentResult(PaymentResult.Canceled)
-        is LinkActivityResult.Failed -> onPaymentResult(PaymentResult.Failed(result.error))
-        is LinkActivityResult.PaymentMethodObtained -> {
-            runCatching {
-                requireNotNull(viewModel.state)
-            }.fold(
-                onSuccess = { state ->
-                    val paymentSelection = PaymentSelection.Saved(
-                        result.paymentMethod,
-                        PaymentSelection.Saved.WalletType.Link,
-                    )
-                    viewModel.paymentSelection = paymentSelection
-                    confirmPaymentSelection(
-                        paymentSelection,
-                        state.paymentSheetState,
-                        state.config.appearance,
-                    )
-                },
-                onFailure = { error ->
-                    eventReporter.onPaymentFailure(
-                        paymentSelection = PaymentSelection.Link,
-                        error = PaymentSheetConfirmationError.InvalidState,
-                    )
-                    paymentResultCallback.onPaymentSheetResult(
-                        PaymentSheetResult.Failed(error)
-                    )
-                }
-            )
-        }
-        LinkActivityResult.Completed -> {
-            eventReporter.onPaymentSuccess(
-                paymentSelection = PaymentSelection.Link,
-                deferredIntentConfirmationType = null
-            )
-            onPaymentResult(PaymentResult.Completed)
         }
     }
 

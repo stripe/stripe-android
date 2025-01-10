@@ -1,22 +1,26 @@
 package com.stripe.android.paymentsheet.cvcrecollection
 
+import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionData
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 
 internal interface CvcRecollectionHandler {
-    fun launch(paymentSelection: PaymentSelection?, launch: (CvcRecollectionData) -> Unit)
+    fun launch(
+        paymentMethod: PaymentMethod,
+        launch: (CvcRecollectionData) -> Unit
+    )
 
     fun cvcRecollectionEnabled(
-        stripeIntent: StripeIntent?,
-        initializationMode: PaymentElementLoader.InitializationMode?,
+        stripeIntent: StripeIntent,
+        initializationMode: PaymentElementLoader.InitializationMode,
     ): Boolean
 
     fun requiresCVCRecollection(
-        stripeIntent: StripeIntent?,
-        paymentSelection: PaymentSelection?,
-        initializationMode: PaymentElementLoader.InitializationMode?,
-        extraRequirements: () -> Boolean = { true }
+        stripeIntent: StripeIntent,
+        paymentMethod: PaymentMethod,
+        optionsParams: PaymentMethodOptionsParams?,
+        initializationMode: PaymentElementLoader.InitializationMode,
     ): Boolean
 }

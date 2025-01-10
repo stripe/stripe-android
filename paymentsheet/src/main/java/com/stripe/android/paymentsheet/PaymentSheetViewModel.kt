@@ -359,11 +359,13 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     fun checkout() {
-        if (shouldLaunchCvcRecollectionScreen()) {
-            launchCvcRecollection()
+        val currentSelection = selection.value
+
+        if (currentSelection is PaymentSelection.Saved && shouldLaunchCvcRecollectionScreen(currentSelection)) {
+            launchCvcRecollection(currentSelection)
             return
         }
-        checkout(selection.value, CheckoutIdentifier.SheetBottomBuy)
+        checkout(currentSelection, CheckoutIdentifier.SheetBottomBuy)
     }
 
     fun checkoutWithGooglePay() {
@@ -395,10 +397,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
-    private fun launchCvcRecollection() {
-        cvcRecollectionHandler.launch(
-            paymentSelection = selection.value
-        ) { cvcRecollectionData ->
+    private fun launchCvcRecollection(selection: PaymentSelection.Saved) {
+        cvcRecollectionHandler.launch(selection.paymentMethod) { cvcRecollectionData ->
             val interactor = cvcRecollectionInteractorFactory.create(
                 args = Args(
                     lastFour = cvcRecollectionData.lastFour ?: "",
@@ -454,7 +454,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     @Suppress("ComplexCondition")
     private fun paymentSelectionWithCvcIfEnabled(paymentSelection: PaymentSelection?): PaymentSelection? {
         if (paymentSelection !is PaymentSelection.Saved) return paymentSelection
-        return if (shouldAttachCvc()) {
+        return if (shouldAttachCvc(paymentSelection)) {
             val paymentMethodOptionsParams =
                 (paymentSelection.paymentMethodOptionsParams as? PaymentMethodOptionsParams.Card)
                     ?: PaymentMethodOptionsParams.Card()

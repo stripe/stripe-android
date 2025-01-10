@@ -2771,27 +2771,29 @@ internal class PaymentSheetViewModelTest {
             )
         )
 
+        val savedSelection = PaymentSelection.Saved(CARD_PAYMENT_METHOD)
+
         cvcRecollectionHandler.requiresCVCRecollection = true
-        assertThat(viewModel.shouldLaunchCvcRecollectionScreen()).isTrue()
-        assertThat(viewModel.shouldAttachCvc()).isFalse()
+        assertThat(viewModel.shouldLaunchCvcRecollectionScreen(savedSelection)).isTrue()
+        assertThat(viewModel.shouldAttachCvc(savedSelection)).isFalse()
 
         viewModel.checkout()
-        assertThat(viewModel.shouldLaunchCvcRecollectionScreen()).isFalse()
-        assertThat(viewModel.shouldAttachCvc()).isFalse()
+        assertThat(viewModel.shouldLaunchCvcRecollectionScreen(savedSelection)).isFalse()
+        assertThat(viewModel.shouldAttachCvc(savedSelection)).isFalse()
 
         cvcRecollectionHandler.requiresCVCRecollection = false
-        assertThat(viewModel.shouldAttachCvc()).isFalse()
-        assertThat(viewModel.shouldLaunchCvcRecollectionScreen()).isFalse()
+        assertThat(viewModel.shouldAttachCvc(savedSelection)).isFalse()
+        assertThat(viewModel.shouldLaunchCvcRecollectionScreen(savedSelection)).isFalse()
 
         viewModel = createViewModel()
 
         cvcRecollectionHandler.requiresCVCRecollection = true
-        assertThat(viewModel.shouldLaunchCvcRecollectionScreen()).isFalse()
-        assertThat(viewModel.shouldAttachCvc()).isTrue()
+        assertThat(viewModel.shouldLaunchCvcRecollectionScreen(savedSelection)).isFalse()
+        assertThat(viewModel.shouldAttachCvc(savedSelection)).isTrue()
 
         cvcRecollectionHandler.requiresCVCRecollection = false
-        assertThat(viewModel.shouldAttachCvc()).isFalse()
-        assertThat(viewModel.shouldLaunchCvcRecollectionScreen()).isFalse()
+        assertThat(viewModel.shouldAttachCvc(savedSelection)).isFalse()
+        assertThat(viewModel.shouldLaunchCvcRecollectionScreen(savedSelection)).isFalse()
     }
 
     @Test
@@ -2804,27 +2806,29 @@ internal class PaymentSheetViewModelTest {
             )
         )
 
+        val savedSelection = PaymentSelection.Saved(CARD_PAYMENT_METHOD)
+
         cvcRecollectionHandler.requiresCVCRecollection = true
-        assertThat(viewModel.shouldLaunchCvcRecollectionScreen()).isTrue()
-        assertThat(viewModel.shouldAttachCvc()).isFalse()
+        assertThat(viewModel.shouldLaunchCvcRecollectionScreen(savedSelection)).isTrue()
+        assertThat(viewModel.shouldAttachCvc(savedSelection)).isFalse()
 
         viewModel.checkout()
-        assertThat(viewModel.shouldLaunchCvcRecollectionScreen()).isFalse()
-        assertThat(viewModel.shouldAttachCvc()).isFalse()
+        assertThat(viewModel.shouldLaunchCvcRecollectionScreen(savedSelection)).isFalse()
+        assertThat(viewModel.shouldAttachCvc(savedSelection)).isFalse()
 
         cvcRecollectionHandler.requiresCVCRecollection = false
-        assertThat(viewModel.shouldAttachCvc()).isFalse()
-        assertThat(viewModel.shouldLaunchCvcRecollectionScreen()).isFalse()
+        assertThat(viewModel.shouldAttachCvc(savedSelection)).isFalse()
+        assertThat(viewModel.shouldLaunchCvcRecollectionScreen(savedSelection)).isFalse()
 
         viewModel = createViewModel()
 
         cvcRecollectionHandler.requiresCVCRecollection = true
-        assertThat(viewModel.shouldLaunchCvcRecollectionScreen()).isFalse()
-        assertThat(viewModel.shouldAttachCvc()).isTrue()
+        assertThat(viewModel.shouldLaunchCvcRecollectionScreen(savedSelection)).isFalse()
+        assertThat(viewModel.shouldAttachCvc(savedSelection)).isTrue()
 
         cvcRecollectionHandler.requiresCVCRecollection = false
-        assertThat(viewModel.shouldAttachCvc()).isFalse()
-        assertThat(viewModel.shouldLaunchCvcRecollectionScreen()).isFalse()
+        assertThat(viewModel.shouldAttachCvc(savedSelection)).isFalse()
+        assertThat(viewModel.shouldLaunchCvcRecollectionScreen(savedSelection)).isFalse()
     }
 
     @Test
