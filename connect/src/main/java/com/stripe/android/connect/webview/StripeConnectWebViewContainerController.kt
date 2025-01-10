@@ -33,7 +33,6 @@ import kotlinx.coroutines.withContext
 
 @Suppress("TooManyFunctions")
 @OptIn(PrivateBetaConnectSDK::class)
-@Suppress("TooManyFunctions")
 internal class StripeConnectWebViewContainerController<Listener : StripeEmbeddedComponentListener>(
     private val view: StripeConnectWebViewContainerInternal,
     private val analyticsService: ComponentAnalyticsService,
