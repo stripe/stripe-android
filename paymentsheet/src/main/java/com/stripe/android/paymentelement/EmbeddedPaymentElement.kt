@@ -144,7 +144,7 @@ class EmbeddedPaymentElement private constructor(
             /**
              * Your customer-facing business name.
              */
-            private var merchantDisplayName: String
+            private val merchantDisplayName: String
         ) {
             private var customer: PaymentSheet.CustomerConfiguration? = ConfigurationDefaults.customer
             private var googlePay: PaymentSheet.GooglePayConfiguration? = ConfigurationDefaults.googlePay
@@ -165,12 +165,6 @@ class EmbeddedPaymentElement private constructor(
             private var cardBrandAcceptance: PaymentSheet.CardBrandAcceptance =
                 ConfigurationDefaults.cardBrandAcceptance
             private var embeddedViewDisplaysMandateText: Boolean = ConfigurationDefaults.embeddedViewDisplaysMandateText
-
-            /**
-             * Your customer-facing business name.
-             */
-            fun merchantDisplayName(merchantDisplayName: String) =
-                apply { this.merchantDisplayName = merchantDisplayName }
 
             /**
              * If set, the customer can select a previously saved payment method.
