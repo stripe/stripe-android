@@ -37,11 +37,11 @@ internal class PaymentSheetScreenSelectSavedPaymentMethodsScreenshotTest {
     )
 
     private fun getTestViewModel(
-        includeDefaultPaymentMethod: Boolean = false,
-        isEditing: Boolean = false,
-        isProcessing: Boolean = false,
-        canEdit: Boolean = true,
-        canRemove: Boolean = true,
+        includeDefaultPaymentMethod: Boolean,
+        isEditing: Boolean,
+        isProcessing: Boolean,
+        canEdit: Boolean,
+        canRemove: Boolean,
     ): FakeBaseSheetViewModel {
         val metadata = PaymentMethodMetadataFactory.create()
         val interactor = FakeSelectSavedPaymentMethodsInteractor(
