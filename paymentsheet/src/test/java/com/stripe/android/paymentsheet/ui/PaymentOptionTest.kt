@@ -20,7 +20,7 @@ class PaymentOptionTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
-    private fun setComposeTestRuleContent(
+    private fun paymentOptionTestHelper(
         label: String = "Card ending in 4242",
         shouldShowModifyBadge: Boolean,
         shouldShowDefaultBadge: Boolean,
@@ -44,7 +44,7 @@ class PaymentOptionTest {
     fun `Turns card label into screen reader-friendly text`() {
         val label = "Card ending in 4242"
 
-        setComposeTestRuleContent(
+        paymentOptionTestHelper(
             label = label,
             shouldShowModifyBadge = false,
             shouldShowDefaultBadge = false,
@@ -52,14 +52,13 @@ class PaymentOptionTest {
         composeTestRule
             .onNodeWithText(label)
             .assertContentDescriptionEquals("Card ending in 4 2 4 2 ")
-        composeTestRule.onNodeWithTag(TEST_TAG_DEFAULT_PAYMENT_METHOD_LABEL).assertDoesNotExist()
     }
 
     @Test
-    fun `Correctly doesn't show default badge when not modifying and not default`() {
+    fun `Correctly hides default badge when not modifying and not default`() {
         val label = "Card ending in 4242"
 
-        setComposeTestRuleContent(
+        paymentOptionTestHelper(
             label = label,
             shouldShowModifyBadge = false,
             shouldShowDefaultBadge = false,
@@ -69,7 +68,7 @@ class PaymentOptionTest {
 
     @Test
     fun `Correctly hides default badge when modifying and not default`() {
-        setComposeTestRuleContent(
+        paymentOptionTestHelper(
             shouldShowModifyBadge = true,
             shouldShowDefaultBadge = false,
         )
@@ -78,7 +77,7 @@ class PaymentOptionTest {
 
     @Test
     fun `Correctly hides default badge when not modifying and default`() {
-        setComposeTestRuleContent(
+        paymentOptionTestHelper(
             shouldShowModifyBadge = false,
             shouldShowDefaultBadge = true,
         )
@@ -88,7 +87,7 @@ class PaymentOptionTest {
 
     @Test
     fun `Correctly shows default badge when modifying and default`() {
-        setComposeTestRuleContent(
+        paymentOptionTestHelper(
             shouldShowModifyBadge = true,
             shouldShowDefaultBadge = true,
         )

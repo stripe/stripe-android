@@ -19,122 +19,84 @@ class PaymentOptionScreenshotTest {
         FontSize.entries,
     )
 
-    @Test
-    fun testEnabled() {
+    private fun paymentOptionScreenshotTestHelper(
+        isSelected: Boolean,
+        shouldShowModifyBadge: Boolean,
+        shouldShowDefaultBadge: Boolean,
+        isEnabled: Boolean,
+    ) {
         paparazziRule.snapshot {
             SavedPaymentMethodTab(
+                isSelected = isSelected,
+                shouldShowModifyBadge = shouldShowModifyBadge,
+                shouldShowDefaultBadge = shouldShowDefaultBadge,
+                isEnabled = isEnabled,
                 viewWidth = 160.dp,
-                isSelected = false,
-                shouldShowModifyBadge = false,
-                shouldShowDefaultBadge = false,
-                isEnabled = true,
                 iconRes = R.drawable.stripe_ic_paymentsheet_card_visa,
                 labelText = "••••4242",
                 description = "Description",
                 onItemSelectedListener = {},
             )
         }
+    }
+
+    @Test
+    fun testEnabled() {
+        paymentOptionScreenshotTestHelper(
+            isSelected = false,
+            shouldShowModifyBadge = false,
+            shouldShowDefaultBadge = false,
+            isEnabled = true,
+        )
     }
 
     @Test
     fun testDisabled() {
-        paparazziRule.snapshot {
-            SavedPaymentMethodTab(
-                viewWidth = 160.dp,
-                isSelected = false,
-                shouldShowModifyBadge = false,
-                shouldShowDefaultBadge = false,
-                isEnabled = false,
-                iconRes = R.drawable.stripe_ic_paymentsheet_card_visa,
-                labelText = "••••4242",
-                description = "Description",
-                onItemSelectedListener = {},
-            )
-        }
+        paymentOptionScreenshotTestHelper(
+            isSelected = false,
+            shouldShowModifyBadge = false,
+            shouldShowDefaultBadge = false,
+            isEnabled = false,
+        )
     }
 
     @Test
     fun testSelected() {
-        paparazziRule.snapshot {
-            SavedPaymentMethodTab(
-                viewWidth = 160.dp,
-                isSelected = true,
-                shouldShowModifyBadge = false,
-                shouldShowDefaultBadge = false,
-                isEnabled = true,
-                iconRes = R.drawable.stripe_ic_paymentsheet_card_visa,
-                labelText = "••••4242",
-                description = "Description",
-                onItemSelectedListener = {},
-            )
-        }
+        paymentOptionScreenshotTestHelper(
+            isSelected = true,
+            shouldShowModifyBadge = false,
+            shouldShowDefaultBadge = false,
+            isEnabled = true,
+        )
     }
 
     @Test
     fun testSelectedAndDisabled() {
-        paparazziRule.snapshot {
-            SavedPaymentMethodTab(
-                viewWidth = 160.dp,
-                isSelected = true,
-                shouldShowModifyBadge = false,
-                shouldShowDefaultBadge = false,
-                isEnabled = false,
-                iconRes = R.drawable.stripe_ic_paymentsheet_card_visa,
-                labelText = "••••4242",
-                description = "Description",
-                onItemSelectedListener = {},
-            )
-        }
+        paymentOptionScreenshotTestHelper(
+            isSelected = true,
+            shouldShowModifyBadge = false,
+            shouldShowDefaultBadge = false,
+            isEnabled = false,
+        )
     }
 
     @Test
     fun testModifying() {
-        paparazziRule.snapshot {
-            SavedPaymentMethodTab(
-                viewWidth = 160.dp,
-                isSelected = false,
-                shouldShowModifyBadge = true,
-                shouldShowDefaultBadge = false,
-                isEnabled = true,
-                iconRes = R.drawable.stripe_ic_paymentsheet_card_visa,
-                labelText = "••••4242",
-                description = "Description",
-                onItemSelectedListener = {},
-            )
-        }
-    }
-
-    @Test
-    fun testDefaultNotEditing() {
-        paparazziRule.snapshot {
-            SavedPaymentMethodTab(
-                viewWidth = 160.dp,
-                isSelected = false,
-                shouldShowModifyBadge = false,
-                shouldShowDefaultBadge = true,
-                isEnabled = true,
-                iconRes = R.drawable.stripe_ic_paymentsheet_card_visa,
-                labelText = "••••8431",
-                description = "Description",
-                onItemSelectedListener = {},
-            )
-        }
+        paymentOptionScreenshotTestHelper(
+            isSelected = false,
+            shouldShowModifyBadge = true,
+            shouldShowDefaultBadge = false,
+            isEnabled = true,
+        )
     }
 
     @Test
     fun testDefaultEditing() {
-        paparazziRule.snapshot {
-            SavedPaymentMethodTab(
-                viewWidth = 160.dp,
-                isSelected = false,
-                shouldShowModifyBadge = true,
-                shouldShowDefaultBadge = true,
-                isEnabled = true,
-                iconRes = R.drawable.stripe_ic_paymentsheet_card_visa,
-                labelText = "••••8431",
-                description = "Description",
-                onItemSelectedListener = {},
-            )
-        }
+        paymentOptionScreenshotTestHelper(
+            isSelected = false,
+            shouldShowModifyBadge = true,
+            shouldShowDefaultBadge = true,
+            isEnabled = true,
+        )
     }
 }

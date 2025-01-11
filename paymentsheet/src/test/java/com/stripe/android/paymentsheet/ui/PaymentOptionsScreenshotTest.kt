@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.ui
 
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
@@ -15,22 +16,36 @@ class PaymentOptionsScreenshotTest {
     @get:Rule
     val paparazziRule = PaparazziRule()
 
-    @Test
-    fun testWidthLessThanScreen() {
+    private fun paymentOptionsScreenshotTestHelper(
+        paymentOptionsItems: List<PaymentOptionsItem>,
+        selectedPaymentOptionsItem: PaymentOptionsItem?,
+        isEditing: Boolean,
+        scrollState: LazyListState? = null,
+    ) {
         paparazziRule.snapshot {
             SavedPaymentMethodTabLayoutUI(
-                paymentOptionsItems = listOf(
-                    PaymentOptionsItem.AddCard,
-                    PaymentOptionsItem.Link,
-                ),
-                selectedPaymentOptionsItem = PaymentOptionsItem.Link,
-                isEditing = false,
+                paymentOptionsItems = paymentOptionsItems,
+                selectedPaymentOptionsItem = selectedPaymentOptionsItem,
+                isEditing = isEditing,
                 isProcessing = false,
                 onAddCardPressed = {},
                 onItemSelected = {},
                 onModifyItem = {},
+                scrollState = scrollState ?: rememberLazyListState()
             )
         }
+    }
+
+    @Test
+    fun testWidthLessThanScreen() {
+        paymentOptionsScreenshotTestHelper(
+            paymentOptionsItems = listOf(
+                PaymentOptionsItem.AddCard,
+                PaymentOptionsItem.Link,
+            ),
+            selectedPaymentOptionsItem = PaymentOptionsItem.Link,
+            isEditing = false,
+        )
     }
 
     @Test
@@ -58,17 +73,11 @@ class PaymentOptionsScreenshotTest {
             ),
         )
 
-        paparazziRule.snapshot {
-            SavedPaymentMethodTabLayoutUI(
-                paymentOptionsItems = paymentOptionsItems,
-                selectedPaymentOptionsItem = paymentOptionsItems[1],
-                isEditing = false,
-                isProcessing = false,
-                onAddCardPressed = {},
-                onItemSelected = {},
-                onModifyItem = {},
-            )
-        }
+        paymentOptionsScreenshotTestHelper(
+            paymentOptionsItems = paymentOptionsItems,
+            selectedPaymentOptionsItem = paymentOptionsItems[1],
+            isEditing = false,
+        )
     }
 
     @Test
@@ -96,112 +105,78 @@ class PaymentOptionsScreenshotTest {
             ),
         )
 
-        paparazziRule.snapshot {
-            SavedPaymentMethodTabLayoutUI(
-                paymentOptionsItems = paymentOptionsItems,
-                selectedPaymentOptionsItem = paymentOptionsItems[1],
-                isEditing = false,
-                isProcessing = false,
-                onAddCardPressed = {},
-                onItemSelected = {},
-                onModifyItem = {},
-                scrollState = LazyListState(firstVisibleItemIndex = 2),
-            )
-        }
+        paymentOptionsScreenshotTestHelper(
+            paymentOptionsItems = paymentOptionsItems,
+            selectedPaymentOptionsItem = paymentOptionsItems[1],
+            isEditing = false,
+            scrollState = LazyListState(firstVisibleItemIndex = 2),
+        )
     }
 
     @Test
     fun testEditingAndRemoveDisabledWithModifiableItems() {
-        paparazziRule.snapshot {
-            SavedPaymentMethodTabLayoutUI(
-                paymentOptionsItems = paymentOptionsItemsWithRemoveDisabledAndModifiableCard,
-                selectedPaymentOptionsItem = null,
-                isEditing = true,
-                isProcessing = false,
-                onAddCardPressed = {},
-                onItemSelected = {},
-                onModifyItem = {},
-                scrollState = LazyListState(firstVisibleItemIndex = 2),
-            )
-        }
-    }
+        val paymentOptionsItems = listOf(
+            PaymentOptionsItem.SavedPaymentMethod(
+                DisplayableSavedPaymentMethod.create(
+                    displayName = "Card".resolvableString,
+                    paymentMethod = createCard("4242"),
+                ),
+            ),
+            PaymentOptionsItem.SavedPaymentMethod(
+                DisplayableSavedPaymentMethod.create(
+                    displayName = "Card".resolvableString,
+                    paymentMethod = createCard("4000"),
+                ),
+            ),
+            PaymentOptionsItem.SavedPaymentMethod(
+                DisplayableSavedPaymentMethod.create(
+                    displayName = "Card".resolvableString,
+                    paymentMethod = createCard("1234", addNetworks = true),
+                    isCbcEligible = true,
+                ),
+            ),
+        )
 
-    @Test
-    fun testDefaultPaymentOptionNotEditing() {
-        paparazziRule.snapshot {
-            SavedPaymentMethodTabLayoutUI(
-                paymentOptionsItems = paymentOptionsItemsWithDefaultCard,
-                selectedPaymentOptionsItem = null,
-                isEditing = false,
-                isProcessing = false,
-                onAddCardPressed = {},
-                onItemSelected = {},
-                onModifyItem = {},
-                scrollState = LazyListState(firstVisibleItemIndex = 2),
-            )
-        }
+        paymentOptionsScreenshotTestHelper(
+            paymentOptionsItems = paymentOptionsItems,
+            selectedPaymentOptionsItem = null,
+            isEditing = true,
+            scrollState = LazyListState(firstVisibleItemIndex = 2),
+        )
     }
 
     @Test
     fun testDefaultPaymentOptionEditing() {
-        paparazziRule.snapshot {
-            SavedPaymentMethodTabLayoutUI(
-                paymentOptionsItems = paymentOptionsItemsWithDefaultCard,
-                selectedPaymentOptionsItem = null,
-                isEditing = true,
-                isProcessing = false,
-                onAddCardPressed = {},
-                onItemSelected = {},
-                onModifyItem = {},
-                scrollState = LazyListState(firstVisibleItemIndex = 2),
-            )
-        }
+        val paymentOptionsItemsWithDefaultCard = listOf(
+            PaymentOptionsItem.SavedPaymentMethod(
+                DisplayableSavedPaymentMethod.create(
+                    displayName = "Card".resolvableString,
+                    paymentMethod = createCard("8431"),
+                    shouldShowDefaultBadge = true
+                ),
+            ),
+            PaymentOptionsItem.SavedPaymentMethod(
+                DisplayableSavedPaymentMethod.create(
+                    displayName = "Card".resolvableString,
+                    paymentMethod = createCard("4000"),
+                ),
+            ),
+            PaymentOptionsItem.SavedPaymentMethod(
+                DisplayableSavedPaymentMethod.create(
+                    displayName = "Card".resolvableString,
+                    paymentMethod = createCard("1234", addNetworks = true),
+                    isCbcEligible = true,
+                ),
+            ),
+        )
+
+        paymentOptionsScreenshotTestHelper(
+            paymentOptionsItems = paymentOptionsItemsWithDefaultCard,
+            selectedPaymentOptionsItem = null,
+            isEditing = true,
+            scrollState = LazyListState(firstVisibleItemIndex = 2),
+        )
     }
-
-    private val paymentOptionsItemsWithRemoveDisabledAndModifiableCard = listOf(
-        PaymentOptionsItem.SavedPaymentMethod(
-            DisplayableSavedPaymentMethod.create(
-                displayName = "Card".resolvableString,
-                paymentMethod = createCard("4242"),
-            ),
-        ),
-        PaymentOptionsItem.SavedPaymentMethod(
-            DisplayableSavedPaymentMethod.create(
-                displayName = "Card".resolvableString,
-                paymentMethod = createCard("4000"),
-            ),
-        ),
-        PaymentOptionsItem.SavedPaymentMethod(
-            DisplayableSavedPaymentMethod.create(
-                displayName = "Card".resolvableString,
-                paymentMethod = createCard("1234", addNetworks = true),
-                isCbcEligible = true,
-            ),
-        ),
-    )
-
-    private val paymentOptionsItemsWithDefaultCard = listOf(
-        PaymentOptionsItem.SavedPaymentMethod(
-            DisplayableSavedPaymentMethod.create(
-                displayName = "Card".resolvableString,
-                paymentMethod = createCard("8431"),
-                shouldShowDefaultBadge = true
-            ),
-        ),
-        PaymentOptionsItem.SavedPaymentMethod(
-            DisplayableSavedPaymentMethod.create(
-                displayName = "Card".resolvableString,
-                paymentMethod = createCard("4000"),
-            ),
-        ),
-        PaymentOptionsItem.SavedPaymentMethod(
-            DisplayableSavedPaymentMethod.create(
-                displayName = "Card".resolvableString,
-                paymentMethod = createCard("1234", addNetworks = true),
-                isCbcEligible = true,
-            ),
-        ),
-    )
 
     private fun createCard(last4: String, addNetworks: Boolean = false): PaymentMethod {
         val original = PaymentMethodFixtures.createCard()
