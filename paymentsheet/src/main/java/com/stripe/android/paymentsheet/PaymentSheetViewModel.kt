@@ -215,12 +215,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     init {
         SessionSavedStateHandler.attachTo(this, savedStateHandle)
 
-        viewModelScope.launch {
-            linkHandler.processingState.collect { processingState ->
-                handleLinkProcessingState(processingState)
-            }
-        }
-
         val isDeferred = args.initializationMode is PaymentElementLoader.InitializationMode.DeferredIntent
 
         eventReporter.onInit(
@@ -230,33 +224,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
         viewModelScope.launch(workContext) {
             loadPaymentSheetState()
-        }
-    }
-
-    private fun handleLinkProcessingState(processingState: LinkHandler.ProcessingState) {
-        when (processingState) {
-            is LinkHandler.ProcessingState.PaymentDetailsCollected -> {
-                processingState.paymentSelection?.let {
-                    // Link PaymentDetails was created successfully, use it to confirm the Stripe Intent.
-                    updateSelection(it)
-                    checkout(selection.value, CheckoutIdentifier.SheetBottomBuy)
-                } ?: run {
-                    // Link PaymentDetails creating failed, fallback to regular checkout.
-                    // paymentSelection is already set to the card parameters from the form.
-                    checkout(selection.value, CheckoutIdentifier.SheetBottomBuy)
-                }
-            }
-            LinkHandler.ProcessingState.Ready -> {
-                this.checkoutIdentifier = CheckoutIdentifier.SheetBottomBuy
-                viewState.value = PaymentSheetViewState.Reset()
-            }
-            LinkHandler.ProcessingState.Started -> {
-                this.checkoutIdentifier = CheckoutIdentifier.SheetBottomBuy
-                viewState.value = PaymentSheetViewState.StartProcessing
-            }
-            LinkHandler.ProcessingState.CompleteWithoutLink -> {
-                checkout()
-            }
         }
     }
 

@@ -101,8 +101,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             customerStateHolder: CustomerStateHolder,
             bankFormInteractor: BankFormInteractor,
         ): PaymentMethodVerticalLayoutInteractor {
-            val linkInlineHandler = LinkInlineHandler.create(viewModel, viewModel.viewModelScope)
-            val formHelper = FormHelper.create(viewModel, linkInlineHandler, paymentMethodMetadata)
+            val formHelper = FormHelper.create(viewModel, paymentMethodMetadata)
             return DefaultPaymentMethodVerticalLayoutInteractor(
                 paymentMethodMetadata = paymentMethodMetadata,
                 processing = viewModel.processing,

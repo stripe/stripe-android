@@ -46,8 +46,7 @@ internal object VerticalModeInitialScreenFactory {
             (viewModel.selection.value as? PaymentSelection.New?)?.let { newPaymentSelection ->
                 val paymentMethodCode = newPaymentSelection.paymentMethodCreateParams.typeCode
 
-                val linkInlineHandler = LinkInlineHandler.create(viewModel, viewModel.viewModelScope)
-                val formHelper = FormHelper.create(viewModel, linkInlineHandler, paymentMethodMetadata)
+                val formHelper = FormHelper.create(viewModel, paymentMethodMetadata)
 
                 if (formHelper.requiresFormScreen(paymentMethodCode)) {
                     add(

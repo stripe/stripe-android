@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet
 
+import androidx.lifecycle.viewModelScope
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.ui.inline.InlineSignupViewState
@@ -15,29 +16,78 @@ import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.elements.FormElement
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.launch
 
 internal class FormHelper(
+    private val coroutineScope: CoroutineScope,
     private val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
     private val paymentMethodMetadata: PaymentMethodMetadata,
     private val newPaymentSelectionProvider: () -> NewOrExternalPaymentSelection?,
     private val selectionUpdater: (PaymentSelection?) -> Unit,
     private val linkConfigurationCoordinator: LinkConfigurationCoordinator,
-    private val onLinkInlineSignupStateChanged: (InlineSignupViewState) -> Unit,
 ) {
+    private val lastFormValues = MutableSharedFlow<Pair<FormFieldValues?, String>>()
+    private val lastSignupState = MutableStateFlow<InlineSignupViewState?>(null)
+    private val paymentSelection: Flow<PaymentSelection?> = combine(
+        lastFormValues,
+        lastSignupState,
+    ) { formValues, inlineSignupViewState ->
+        val paymentSelection = formValues.first?.transformToPaymentSelection(
+            paymentMethod = supportedPaymentMethodForCode(formValues.second),
+            paymentMethodMetadata = paymentMethodMetadata,
+        ) ?: return@combine null
+
+        if (paymentSelection !is PaymentSelection.New.Card) {
+            return@combine paymentSelection
+        }
+
+        if (inlineSignupViewState != null && inlineSignupViewState.useLink) {
+            val userInput = inlineSignupViewState.userInput
+
+            if (userInput != null) {
+                PaymentSelection.New.LinkInline(
+                    paymentMethodCreateParams = paymentSelection.paymentMethodCreateParams,
+                    paymentMethodOptionsParams = paymentSelection.paymentMethodOptionsParams,
+                    paymentMethodExtraParams = paymentSelection.paymentMethodExtraParams,
+                    customerRequestedSave = paymentSelection.customerRequestedSave,
+                    brand = paymentSelection.brand,
+                    input = userInput,
+                )
+            } else {
+                null
+            }
+        } else {
+            paymentSelection
+        }
+    }
+
+    init {
+        coroutineScope.launch {
+            paymentSelection.collectLatest {
+                selectionUpdater(it)
+            }
+        }
+    }
+
     companion object {
         fun create(
             viewModel: BaseSheetViewModel,
-            linkInlineHandler: LinkInlineHandler,
             paymentMethodMetadata: PaymentMethodMetadata
         ): FormHelper {
             return FormHelper(
+                coroutineScope = viewModel.viewModelScope,
                 cardAccountRangeRepositoryFactory = viewModel.cardAccountRangeRepositoryFactory,
                 paymentMethodMetadata = paymentMethodMetadata,
                 newPaymentSelectionProvider = {
                     viewModel.newPaymentSelection
                 },
                 linkConfigurationCoordinator = viewModel.linkHandler.linkConfigurationCoordinator,
-                onLinkInlineSignupStateChanged = linkInlineHandler::onStateUpdated,
                 selectionUpdater = {
                     viewModel.updateSelection(it)
                 }
@@ -53,7 +103,9 @@ internal class FormHelper(
             uiDefinitionFactoryArgumentsFactory = UiDefinitionFactory.Arguments.Factory.Default(
                 cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
                 linkConfigurationCoordinator = linkConfigurationCoordinator,
-                onLinkInlineSignupStateChanged = onLinkInlineSignupStateChanged,
+                onLinkInlineSignupStateChanged = {
+                    lastSignupState.value = it
+                },
                 paymentMethodCreateParams = currentSelection?.getPaymentMethodCreateParams(),
                 paymentMethodExtraParams = currentSelection?.getPaymentMethodExtraParams(),
             ),
@@ -70,11 +122,9 @@ internal class FormHelper(
     }
 
     fun onFormFieldValuesChanged(formValues: FormFieldValues?, selectedPaymentMethodCode: String) {
-        val newSelection = formValues?.transformToPaymentSelection(
-            paymentMethod = supportedPaymentMethodForCode(selectedPaymentMethodCode),
-            paymentMethodMetadata = paymentMethodMetadata,
-        )
-        selectionUpdater(newSelection)
+        coroutineScope.launch {
+            lastFormValues.emit(formValues to selectedPaymentMethodCode)
+        }
     }
 
     fun requiresFormScreen(selectedPaymentMethodCode: String): Boolean {
