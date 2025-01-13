@@ -114,7 +114,7 @@ class WalletViewModelTest {
 
         vm.onEditPaymentMethodClicked(TestFactory.CONSUMER_PAYMENT_DETAILS_CARD)
 
-        assertThat(navScreen).isEqualTo(LinkScreen.CardEdit(TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.id))
+        assertThat(navScreen).isEqualTo(LinkScreen.CardEdit)
     }
 
     @Test
