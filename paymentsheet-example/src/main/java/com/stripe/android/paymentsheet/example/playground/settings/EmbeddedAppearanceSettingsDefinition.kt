@@ -49,7 +49,8 @@ internal enum class EmbeddedRow {
 internal data class EmbeddedAppearance(
     val embeddedRowStyle: EmbeddedRow = EmbeddedRow.FlatWithRadio,
     val separatorThicknessDp: Float = 1.0f,
-    val separatorInsetsDp: Float = 0.0f,
+    val startSeparatorInset: Float = 0.0f,
+    val endSeparatorInset: Float = 0.0f,
     val additionalInsetsDp: Float = 4.0f,
     val checkmarkInsetsDp: Float = 12.0f,
     val floatingButtonSpacingDp: Float = 12.0f,
@@ -65,7 +66,8 @@ internal data class EmbeddedAppearance(
             EmbeddedRow.FlatWithRadio -> PaymentSheet.Appearance.Embedded.RowStyle.FlatWithRadio(
                 separatorThicknessDp = separatorThicknessDp,
                 separatorColor = separatorColor,
-                separatorInsetsDp = separatorInsetsDp,
+                startSeparatorInsetDp = startSeparatorInset,
+                endSeparatorInsetDp = endSeparatorInset,
                 topSeparatorEnabled = topSeparatorEnabled,
                 bottomSeparatorEnabled = bottomSeparatorEnabled,
                 selectedColor = selectedColor,
@@ -75,7 +77,8 @@ internal data class EmbeddedAppearance(
             EmbeddedRow.FlatWithCheckmark -> PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark(
                 separatorThicknessDp = separatorThicknessDp,
                 separatorColor = separatorColor,
-                separatorInsetsDp = separatorInsetsDp,
+                startSeparatorInsetDp = startSeparatorInset,
+                endSeparatorInsetDp = endSeparatorInset,
                 topSeparatorEnabled = topSeparatorEnabled,
                 bottomSeparatorEnabled = bottomSeparatorEnabled,
                 checkmarkColor = checkmarkColor,
