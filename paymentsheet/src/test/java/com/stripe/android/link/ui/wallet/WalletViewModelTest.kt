@@ -380,6 +380,7 @@ class WalletViewModelTest {
         viewModel.onPrimaryButtonClicked()
 
         assertThat(viewModel.uiState.value.errorMessage).isEqualTo(confirmationResult.message)
+        assertThat(viewModel.uiState.value.isProcessing).isFalse()
         assertThat(result).isNull()
     }
 

@@ -189,7 +189,10 @@ internal class WalletViewModel @Inject constructor(
             LinkConfirmationResult.Canceled -> Unit
             is LinkConfirmationResult.Failed -> {
                 _uiState.update {
-                    it.copy(errorMessage = result.message)
+                    it.copy(
+                        errorMessage = result.message,
+                        isProcessing = false
+                    )
                 }
             }
             LinkConfirmationResult.Succeeded -> {
