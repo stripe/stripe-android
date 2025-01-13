@@ -37,6 +37,7 @@ import com.stripe.android.connect.util.AndroidClock
 import com.stripe.android.connect.webview.serialization.AccountSessionClaimedMessage
 import com.stripe.android.connect.webview.serialization.ConnectInstanceJs
 import com.stripe.android.connect.webview.serialization.ConnectJson
+import com.stripe.android.connect.webview.serialization.OpenFinancialConnectionsMessage
 import com.stripe.android.connect.webview.serialization.PageLoadMessage
 import com.stripe.android.connect.webview.serialization.SecureWebViewMessage
 import com.stripe.android.connect.webview.serialization.SetterFunctionCalledMessage
@@ -415,6 +416,12 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
             logger.debug("Account session claimed: $accountSessionClaimedMessage")
 
             controller?.onMerchantIdChanged(accountSessionClaimedMessage.merchantId)
+        }
+
+        @JavascriptInterface
+        fun openFinancialConnections(message: String) {
+            val parsed = ConnectJson.decodeFromString<OpenFinancialConnectionsMessage>(message)
+            logger.debug("openFinancialConnections: $parsed")
         }
 
         @JavascriptInterface

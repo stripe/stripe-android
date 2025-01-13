@@ -8,6 +8,13 @@ internal data class AccountSessionClaimedMessage(
 )
 
 @Serializable
+internal data class OpenFinancialConnectionsMessage(
+    val id: String,
+    val clientSecret: String,
+    val connectedAccountId: String,
+)
+
+@Serializable
 internal data class PageLoadMessage(
     val pageViewId: String
 )
