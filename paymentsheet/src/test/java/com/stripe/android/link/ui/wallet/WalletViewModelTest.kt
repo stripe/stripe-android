@@ -213,7 +213,7 @@ class WalletViewModelTest {
 
         assertThat(linkAccountManager.updateParamsUsed?.id).isEqualTo(expiredCard.id)
         val card = linkAccountManager.updateParamsUsed?.cardPaymentMethodCreateParamsMap
-            ?.get("card") as? Map<String, Any>
+            ?.get("card") as? Map<*, *>
         assertThat(card).isEqualTo(
             mapOf(
                 "exp_month" to updatedCard.expiryMonth.toString(),
