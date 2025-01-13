@@ -69,7 +69,8 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
                     type = Embedded.RowStyle.FlatWithCheckmark::class,
                     separatorThicknessDp = 5f,
                     separatorColor = Color.CYAN,
-                    separatorInsetsDp = 40f
+                    startSeparatorInset = 40f,
+                    endSeparatorInset = 40f,
                 )
             )
         }
@@ -158,7 +159,8 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
         type: KClass<T>,
         separatorThicknessDp: Float? = null,
         separatorColor: Int? = null,
-        separatorInsetsDp: Float? = null,
+        startSeparatorInset: Float? = null,
+        endSeparatorInset: Float? = null,
         topSeparatorEnabled: Boolean? = null,
         bottomSeparatorEnabled: Boolean? = null,
         selectedColor: Int? = null,
@@ -172,7 +174,8 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
             Embedded.RowStyle.FlatWithRadio::class -> Embedded.RowStyle.FlatWithRadio(
                 separatorThicknessDp = separatorThicknessDp ?: StripeThemeDefaults.flat.separatorThickness,
                 separatorColor = separatorColor ?: StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
-                separatorInsetsDp = separatorInsetsDp ?: StripeThemeDefaults.flat.separatorInsets,
+                startSeparatorInsetDp = startSeparatorInset ?: StripeThemeDefaults.flat.separatorInsets,
+                endSeparatorInsetDp = endSeparatorInset ?: StripeThemeDefaults.flat.separatorInsets,
                 topSeparatorEnabled = topSeparatorEnabled ?: StripeThemeDefaults.flat.topSeparatorEnabled,
                 bottomSeparatorEnabled = bottomSeparatorEnabled ?: StripeThemeDefaults.flat.bottomSeparatorEnabled,
                 selectedColor = selectedColor ?: StripeThemeDefaults.colorsLight.materialColors.primary.toArgb(),
@@ -182,7 +185,8 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
             Embedded.RowStyle.FlatWithCheckmark::class -> Embedded.RowStyle.FlatWithCheckmark(
                 separatorThicknessDp = separatorThicknessDp ?: StripeThemeDefaults.flat.separatorThickness,
                 separatorColor = separatorColor ?: StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
-                separatorInsetsDp = separatorInsetsDp ?: StripeThemeDefaults.flat.separatorInsets,
+                startSeparatorInsetDp = startSeparatorInset ?: StripeThemeDefaults.flat.separatorInsets,
+                endSeparatorInsetDp = endSeparatorInset ?: StripeThemeDefaults.flat.separatorInsets,
                 topSeparatorEnabled = topSeparatorEnabled ?: StripeThemeDefaults.flat.topSeparatorEnabled,
                 bottomSeparatorEnabled = bottomSeparatorEnabled ?: StripeThemeDefaults.flat.bottomSeparatorEnabled,
                 checkmarkColor = checkmarkColor ?: StripeThemeDefaults.colorsLight.materialColors.primary.toArgb(),

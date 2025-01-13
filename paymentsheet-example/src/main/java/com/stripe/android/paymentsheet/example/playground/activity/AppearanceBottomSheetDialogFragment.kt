@@ -689,10 +689,19 @@ private fun EmbeddedPicker(
     )
     Divider()
 
-    IncrementDecrementItem("separatorInsetsDp", embeddedAppearance.separatorInsetsDp) {
+    IncrementDecrementItem("startSeparatorInsetDp", embeddedAppearance.startSeparatorInset) {
         updateEmbedded(
             embeddedAppearance.copy(
-                separatorInsetsDp = it
+                startSeparatorInset = it
+            )
+        )
+    }
+    Divider()
+
+    IncrementDecrementItem("endSeparatorInsetDp", embeddedAppearance.endSeparatorInset) {
+        updateEmbedded(
+            embeddedAppearance.copy(
+                endSeparatorInset = it
             )
         )
     }

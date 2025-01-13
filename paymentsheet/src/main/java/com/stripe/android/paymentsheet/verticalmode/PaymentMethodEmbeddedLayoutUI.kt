@@ -143,7 +143,10 @@ private fun OptionalEmbeddedDivider(rowStyle: Embedded.RowStyle) {
         Divider(
             color = color,
             thickness = thickness,
-            modifier = Modifier.padding(horizontal = rowStyle.separatorInsets()),
+            modifier = Modifier.padding(
+                start = rowStyle.startSeparatorInset(),
+                end = rowStyle.endSeparatorInset()
+            ),
             startIndent = if (rowStyle.startSeparatorHasDefaultInset()) 32.dp else 0.dp
         )
     }
@@ -186,10 +189,19 @@ private fun Embedded.RowStyle.separatorColor(): Int {
 }
 
 @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
-private fun Embedded.RowStyle.separatorInsets(): Dp {
+private fun Embedded.RowStyle.startSeparatorInset(): Dp {
     return when (this) {
         is Embedded.RowStyle.FloatingButton -> 0.dp
-        is Embedded.RowStyle.FlatWithRadio -> separatorInsetsDp.dp
-        is Embedded.RowStyle.FlatWithCheckmark -> separatorInsetsDp.dp
+        is Embedded.RowStyle.FlatWithRadio -> startSeparatorInsetDp.dp
+        is Embedded.RowStyle.FlatWithCheckmark -> startSeparatorInsetDp.dp
+    }
+}
+
+@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
+private fun Embedded.RowStyle.endSeparatorInset(): Dp {
+    return when (this) {
+        is Embedded.RowStyle.FloatingButton -> 0.dp
+        is Embedded.RowStyle.FlatWithRadio -> endSeparatorInsetDp.dp
+        is Embedded.RowStyle.FlatWithCheckmark -> endSeparatorInsetDp.dp
     }
 }
