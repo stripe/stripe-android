@@ -129,7 +129,19 @@ internal fun SavedPaymentMethodTabLayoutUI(
     modifier: Modifier = Modifier,
     scrollState: LazyListState = rememberLazyListState(),
 ) {
-    BoxWithConstraints(modifier = modifier.fillMaxWidth().testTag(SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG)) {
+    val focusRequester = remember { FocusRequester() }
+    LaunchedEffect(isEditing) {
+        if (isEditing) {
+            focusRequester.requestFocus()
+        }
+    }
+
+    BoxWithConstraints(
+        modifier = modifier
+            .fillMaxWidth()
+            .testTag(SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG)
+            .focusRequester(focusRequester)
+    ) {
         val width = rememberItemWidth(maxWidth)
 
         LazyRow(
