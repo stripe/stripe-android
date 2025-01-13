@@ -7,8 +7,8 @@ import com.stripe.android.core.BuildConfig
 object FeatureFlags {
     // Add any feature flags here
     val nativeLinkEnabled = FeatureFlag("Native Link")
-    val instantDebitsDeferredIntent = FeatureFlag("IBP Deferred")
-    val useNewUpdateCardScreen = FeatureFlag("Enable new update card screen")
+    val instantDebitsIncentives = FeatureFlag("Instant Bank Payments Incentives")
+    val enableDefaultPaymentMethods = FeatureFlag("Enable Default Payment Methods")
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

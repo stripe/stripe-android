@@ -7,6 +7,7 @@ import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.R
 import kotlinx.parcelize.Parcelize
 
@@ -29,21 +30,28 @@ internal class ConfirmationMediator<
             savedStateHandle[parametersKey] = value
         }
 
-    fun canConfirm(confirmationOption: ConfirmationHandler.Option): Boolean {
-        return definition.option(confirmationOption) != null
+    val key = definition.key
+
+    fun canConfirm(
+        confirmationOption: ConfirmationHandler.Option,
+        confirmationParameters: ConfirmationDefinition.Parameters,
+    ): Boolean {
+        return definition.option(confirmationOption)?.let {
+            definition.canConfirm(it, confirmationParameters)
+        } ?: false
     }
 
     fun register(
         activityResultCaller: ActivityResultCaller,
-        onResult: (ConfirmationHandler.Result) -> Unit,
+        onResult: (ConfirmationDefinition.Result) -> Unit,
     ) {
         launcher = definition.createLauncher(
             activityResultCaller
         ) { result ->
             val confirmationResult = persistedParameters?.let { params ->
-                definition.toPaymentConfirmationResult(
+                definition.toResult(
                     confirmationOption = params.confirmationOption,
-                    intent = params.intent,
+                    confirmationParameters = params.confirmationParameters,
                     result = result,
                     deferredIntentConfirmationType = params.deferredIntentConfirmationType
                 )
@@ -52,7 +60,7 @@ internal class ConfirmationMediator<
                     "Arguments should have been initialized before handling result!"
                 )
 
-                ConfirmationHandler.Result.Failed(
+                ConfirmationDefinition.Result.Failed(
                     cause = exception,
                     message = exception.stripeErrorMessage(),
                     type = ConfirmationHandler.Result.Failed.ErrorType.Internal,
@@ -64,12 +72,16 @@ internal class ConfirmationMediator<
     }
 
     fun unregister() {
+        launcher?.let {
+            definition.unregister(it)
+        }
+
         launcher = null
     }
 
     suspend fun action(
         option: ConfirmationHandler.Option,
-        intent: StripeIntent
+        parameters: ConfirmationDefinition.Parameters,
     ): Action {
         val confirmationOption = definition.option(option)
             ?: return Action.Fail(
@@ -81,14 +93,14 @@ internal class ConfirmationMediator<
                 errorType = ConfirmationHandler.Result.Failed.ErrorType.Internal,
             )
 
-        return when (val action = definition.action(confirmationOption, intent)) {
-            is ConfirmationDefinition.ConfirmationAction.Launch -> {
+        return when (val action = definition.action(confirmationOption, parameters)) {
+            is ConfirmationDefinition.Action.Launch -> {
                 launcher?.let {
                     Action.Launch(
                         launch = {
                             persistedParameters = Parameters(
                                 confirmationOption = confirmationOption,
-                                intent = intent,
+                                confirmationParameters = parameters,
                                 deferredIntentConfirmationType = action.deferredIntentConfirmationType,
                             )
 
@@ -96,9 +108,10 @@ internal class ConfirmationMediator<
                                 launcher = it,
                                 arguments = action.launcherArguments,
                                 confirmationOption = confirmationOption,
-                                intent = intent,
+                                confirmationParameters = parameters,
                             )
                         },
+                        receivesResultInProcess = action.receivesResultInProcess,
                     )
                 } ?: run {
                     val exception = IllegalStateException(
@@ -112,14 +125,14 @@ internal class ConfirmationMediator<
                     )
                 }
             }
-            is ConfirmationDefinition.ConfirmationAction.Complete -> {
+            is ConfirmationDefinition.Action.Complete -> {
                 Action.Complete(
                     intent = action.intent,
                     confirmationOption = action.confirmationOption,
                     deferredIntentConfirmationType = action.deferredIntentConfirmationType,
                 )
             }
-            is ConfirmationDefinition.ConfirmationAction.Fail -> {
+            is ConfirmationDefinition.Action.Fail -> {
                 Action.Fail(
                     cause = action.cause,
                     message = action.message,
@@ -132,6 +145,7 @@ internal class ConfirmationMediator<
     sealed interface Action {
         class Launch(
             val launch: () -> Unit,
+            val receivesResultInProcess: Boolean,
         ) : Action
 
         data class Fail(
@@ -150,7 +164,7 @@ internal class ConfirmationMediator<
     @Parcelize
     internal data class Parameters<TConfirmationOption : ConfirmationHandler.Option>(
         val confirmationOption: TConfirmationOption,
-        val intent: StripeIntent,
+        val confirmationParameters: ConfirmationDefinition.Parameters,
         val deferredIntentConfirmationType: DeferredIntentConfirmationType?,
     ) : Parcelable
 

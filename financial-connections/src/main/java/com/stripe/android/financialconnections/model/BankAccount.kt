@@ -19,6 +19,10 @@ data class BankAccount(
 
     @SerialName(value = "bank_name") val bankName: String? = null,
 
-    @SerialName(value = "routing_number") val routingNumber: String? = null
+    @SerialName(value = "routing_number") val routingNumber: String? = null,
+
+    // Whether the account is to be verified with microdeposits.
+    // This field isn't part of the API response and is being set later on.
+    val usesMicrodeposits: Boolean = true,
 
 ) : PaymentAccount()

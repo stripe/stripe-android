@@ -233,7 +233,10 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
             viewFinder = viewBinding.cameraView.viewFinderWindowView.asRect(),
             lifecycleOwner = this,
             coroutineScope = this,
-            parameters = null
+            parameters = null,
+            errorHandler = { e ->
+                scanErrorListener.onResultFailure(e)
+            }
         )
     }
 

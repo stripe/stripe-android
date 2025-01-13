@@ -39,6 +39,8 @@ import com.stripe.android.paymentsheet.example.playground.settings.Country
 import com.stripe.android.paymentsheet.example.playground.settings.CustomEndpointDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
+import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedAppearance
+import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedAppearanceSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationType
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
@@ -414,6 +416,13 @@ internal class PaymentSheetPlaygroundViewModel(
         status.value = StatusMessage(statusMessage)
     }
 
+    fun onEmbeddedResult(success: Boolean) {
+        if (success) {
+            setPlaygroundState(null)
+            status.value = StatusMessage(SUCCESS_RESULT)
+        }
+    }
+
     fun onCustomerSheetCallback(result: CustomerSheetResult) {
         val statusMessage = when (result) {
             is CustomerSheetResult.Canceled -> {
@@ -572,6 +581,21 @@ internal class PaymentSheetPlaygroundViewModel(
         playgroundSettingsFlow.value?.let { settings ->
             settings[CustomEndpointDefinition] = backendUrl
             playgroundSettingsFlow.value = settings
+            setPlaygroundState(
+                state.value?.let { state ->
+                    val updatedSnapshot = settings.snapshot()
+                    when (state) {
+                        is PlaygroundState.Customer -> state.copy(snapshot = updatedSnapshot)
+                        is PlaygroundState.Payment -> state.copy(snapshot = updatedSnapshot)
+                    }
+                }
+            )
+        }
+    }
+
+    fun updateEmbeddedAppearance(appearanceSetting: EmbeddedAppearanceSettingsDefinition, value: EmbeddedAppearance) {
+        playgroundSettingsFlow.value?.let { settings ->
+            settings[appearanceSetting] = value
             setPlaygroundState(
                 state.value?.let { state ->
                     val updatedSnapshot = settings.snapshot()

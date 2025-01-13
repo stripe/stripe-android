@@ -6,6 +6,7 @@ import com.stripe.android.core.injection.IOContext
 import com.stripe.android.customersheet.CustomerAdapter
 import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
 import com.stripe.android.customersheet.CustomerPermissions
+import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.map
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.ElementsSession
@@ -34,7 +35,9 @@ internal class CustomerAdapterDataSource @Inject constructor(
     CustomerSheetIntentDataSource {
     override val canCreateSetupIntents: Boolean = customerAdapter.canCreateSetupIntents
 
-    override suspend fun loadCustomerSheetSession(): CustomerSheetDataResult<CustomerSheetSession> {
+    override suspend fun loadCustomerSheetSession(
+        configuration: CustomerSheet.Configuration,
+    ): CustomerSheetDataResult<CustomerSheetSession> {
         return workContext.runCatching {
             val elementsSessionResult = async {
                 fetchElementsSession()
@@ -59,6 +62,7 @@ internal class CustomerAdapterDataSource @Inject constructor(
                 paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
                 savedSelection = savedSelection,
                 permissions = CustomerPermissions(
+                    canRemoveLastPaymentMethod = configuration.allowsRemovalOfLastSavedPaymentMethod,
                     // Always `true` for `Adapter` use case
                     canRemovePaymentMethods = true,
                 )

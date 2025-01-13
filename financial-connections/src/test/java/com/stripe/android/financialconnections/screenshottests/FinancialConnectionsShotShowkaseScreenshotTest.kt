@@ -85,6 +85,12 @@ class ComponentTestPreview(
     private val showkaseBrowserComponent: ShowkaseBrowserComponent
 ) {
     @Composable
-    fun Content() = showkaseBrowserComponent.component()
-    override fun toString(): String = showkaseBrowserComponent.componentKey
+    fun Content() {
+        showkaseBrowserComponent.component()
+    }
+
+    override fun toString(): String {
+        // Remove the long prefix to prevent `File name too long` errors
+        return showkaseBrowserComponent.componentKey.replace("com.stripe.android.financialconnections.", "")
+    }
 }

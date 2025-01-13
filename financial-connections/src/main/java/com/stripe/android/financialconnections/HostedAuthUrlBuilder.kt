@@ -6,6 +6,7 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheet.Element
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.utils.toApiParams
+import com.stripe.android.model.IncentiveEligibilitySession
 import com.stripe.android.model.LinkMode
 
 internal object HostedAuthUrlBuilder {
@@ -20,6 +21,7 @@ internal object HostedAuthUrlBuilder {
             linkMode = args.elementsSessionContext?.linkMode,
             billingDetails = args.elementsSessionContext?.billingDetails,
             prefillDetails = args.elementsSessionContext?.prefillDetails,
+            incentiveEligibilitySession = args.elementsSessionContext?.incentiveEligibilitySession,
         )
     }
 
@@ -29,6 +31,7 @@ internal object HostedAuthUrlBuilder {
         linkMode: LinkMode?,
         billingDetails: BillingDetails?,
         prefillDetails: PrefillDetails?,
+        incentiveEligibilitySession: IncentiveEligibilitySession?,
     ): String? {
         if (hostedAuthUrl == null) {
             return null
@@ -40,8 +43,10 @@ internal object HostedAuthUrlBuilder {
             // takes place on the web side of the flow and the payment method ID is returned to the app.
             queryParams.add("return_payment_method=true")
             queryParams.add("expand_payment_method=true")
+            queryParams.add("instantDebitsIncentive=${incentiveEligibilitySession != null}")
             linkMode?.let { queryParams.add("link_mode=${it.value}") }
             billingDetails?.let { queryParams.add(makeBillingDetailsQueryParams(it)) }
+            incentiveEligibilitySession?.let { queryParams.add("incentiveEligibilitySession=${it.id}") }
         }
 
         prefillDetails?.run {

@@ -198,6 +198,9 @@ public final class com/stripe/android/model/CardFunding : java/lang/Enum {
 	public static fun values ()[Lcom/stripe/android/model/CardFunding;
 }
 
+public final class com/stripe/android/model/ConsumerPaymentDetails$BankAccount$Companion {
+}
+
 public final class com/stripe/android/model/ConsumerPaymentDetails$BankAccount$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/ConsumerPaymentDetails$BankAccount;
@@ -214,6 +217,9 @@ public final class com/stripe/android/model/ConsumerPaymentDetails$BillingAddres
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public final class com/stripe/android/model/ConsumerPaymentDetails$Card$Companion {
+}
+
 public final class com/stripe/android/model/ConsumerPaymentDetails$Card$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/ConsumerPaymentDetails$Card;
@@ -228,6 +234,9 @@ public final class com/stripe/android/model/ConsumerPaymentDetails$Creator : and
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/model/ConsumerPaymentDetails;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/model/ConsumerPaymentDetails$Passthrough$Companion {
 }
 
 public final class com/stripe/android/model/ConsumerPaymentDetails$Passthrough$Creator : android/os/Parcelable$Creator {
@@ -251,6 +260,14 @@ public final class com/stripe/android/model/ConsumerPaymentDetailsCreateParams$C
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/ConsumerPaymentDetailsCreateParams$Card;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/model/ConsumerPaymentDetailsCreateParams$Card;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/model/ConsumerPaymentDetailsUpdateParams$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/ConsumerPaymentDetailsUpdateParams;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/model/ConsumerPaymentDetailsUpdateParams;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
@@ -362,6 +379,46 @@ public final class com/stripe/android/model/ConsumerSessionSignup$Creator : andr
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public final class com/stripe/android/model/IncentiveEligibilitySession$DeferredIntent$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/IncentiveEligibilitySession$DeferredIntent;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/model/IncentiveEligibilitySession$DeferredIntent;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/model/IncentiveEligibilitySession$PaymentIntent$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/IncentiveEligibilitySession$PaymentIntent;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/model/IncentiveEligibilitySession$PaymentIntent;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/model/IncentiveEligibilitySession$SetupIntent$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/IncentiveEligibilitySession$SetupIntent;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/model/IncentiveEligibilitySession$SetupIntent;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/model/LinkConsumerIncentive$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/LinkConsumerIncentive;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/model/LinkConsumerIncentive;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/model/LinkConsumerIncentive$IncentiveParams$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/LinkConsumerIncentive$IncentiveParams;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/model/LinkConsumerIncentive$IncentiveParams;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public final class com/stripe/android/model/SharePaymentDetails$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/SharePaymentDetails;
@@ -444,6 +501,14 @@ public final class com/stripe/android/model/TokenizationMethod : java/lang/Enum 
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/model/TokenizationMethod;
 	public static fun values ()[Lcom/stripe/android/model/TokenizationMethod;
+}
+
+public final class com/stripe/android/model/UpdateAvailableIncentives$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/UpdateAvailableIncentives;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/model/UpdateAvailableIncentives;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
 public final class com/stripe/payments/model/BuildConfig {

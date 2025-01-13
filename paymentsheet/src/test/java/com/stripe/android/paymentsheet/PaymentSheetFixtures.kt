@@ -39,7 +39,7 @@ internal object PaymentSheetFixtures {
         merchantDisplayName = MERCHANT_DISPLAY_NAME,
         customer = PaymentSheet.CustomerConfiguration(
             "customer_id",
-            "ephemeral_key"
+            "ek_123"
         ),
         googlePay = ConfigFixtures.GOOGLE_PAY,
         primaryButtonColor = ColorStateList.valueOf(Color.BLACK),
@@ -82,7 +82,7 @@ internal object PaymentSheetFixtures {
 
     private val defaultCustomerConfig = PaymentSheet.CustomerConfiguration(
         id = "customer_id",
-        ephemeralKeySecret = "ephemeral_key"
+        ephemeralKeySecret = "ek_6bpdbs8volf6ods1y6tf8oy9p9g64ehr"
     )
 
     internal val CONFIG_CUSTOMER = PaymentSheet.Configuration(
@@ -94,11 +94,14 @@ internal object PaymentSheetFixtures {
     internal val EMPTY_CUSTOMER_STATE = CustomerState(
         id = defaultCustomerConfig.id,
         ephemeralKeySecret = defaultCustomerConfig.ephemeralKeySecret,
+        customerSessionClientSecret = null,
         paymentMethods = listOf(),
         permissions = CustomerState.Permissions(
             canRemovePaymentMethods = true,
+            canRemoveLastPaymentMethod = true,
             canRemoveDuplicates = false,
-        )
+        ),
+        defaultPaymentMethodId = null
     )
 
     internal val CONFIG_GOOGLEPAY
@@ -139,7 +142,6 @@ internal object PaymentSheetFixtures {
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         ),
         configuration = CONFIG_GOOGLEPAY,
-        statusBarColor = STATUS_BAR_COLOR,
         enableLogging = false,
         productUsage = mock()
     )
@@ -157,11 +159,14 @@ internal object PaymentSheetFixtures {
                 customer = CustomerState(
                     id = config.customer?.id ?: "cus_1",
                     ephemeralKeySecret = config.customer?.ephemeralKeySecret ?: "client_secret",
+                    customerSessionClientSecret = null,
                     paymentMethods = paymentMethods,
                     permissions = CustomerState.Permissions(
                         canRemovePaymentMethods = true,
+                        canRemoveLastPaymentMethod = true,
                         canRemoveDuplicates = false,
-                    )
+                    ),
+                    defaultPaymentMethodId = null
                 ),
                 config = config.asCommonConfiguration(),
                 paymentSelection = paymentSelection,

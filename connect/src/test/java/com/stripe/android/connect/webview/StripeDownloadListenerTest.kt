@@ -6,8 +6,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.mockito.kotlin.any
@@ -39,6 +41,11 @@ class StripeDownloadListenerTest {
         initDownloadListener()
     }
 
+    @After
+    fun tearDown() {
+        Dispatchers.resetMain()
+    }
+
     private fun initDownloadListener(
         context: Context = this.context,
         stripeDownloadManager: StripeDownloadManager = this.stripeDownloadManager,
@@ -65,7 +72,7 @@ class StripeDownloadListenerTest {
         testScope.testScheduler.advanceUntilIdle()
 
         verify(stripeDownloadManager).enqueueDownload(url, contentDisposition, mimeType)
-        verify(stripeToastManager).showToast(any())
+        verify(stripeToastManager).showToast(any(), any())
     }
 
     @Test
@@ -74,7 +81,7 @@ class StripeDownloadListenerTest {
         testScope.testScheduler.advanceUntilIdle()
 
         verifyNoInteractions(stripeDownloadManager)
-        verify(stripeToastManager).showToast(any())
+        verify(stripeToastManager).showToast(any(), any())
     }
 
     @Test
@@ -90,6 +97,6 @@ class StripeDownloadListenerTest {
         stripeDownloadListener.onDownloadStart(url, userAgent, contentDisposition, mimeType, contentLength)
         testScope.testScheduler.advanceUntilIdle()
 
-        verify(stripeToastManager).showToast(any())
+        verify(stripeToastManager).showToast(any(), any())
     }
 }

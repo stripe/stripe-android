@@ -11,11 +11,17 @@ internal object BankFormScreenStateFactory {
         sessionId: String,
         isVerifyingWithMicrodeposits: Boolean = false,
         mandateText: ResolvableString = "Some legal text".resolvableString,
+        promoText: String? = null,
+        eligibleForPromo: Boolean = true,
+        bankName: String = "Stripe Bank",
     ): BankFormScreenState {
         return create(
             resultIdentifier = BankFormScreenState.ResultIdentifier.Session(sessionId),
             isVerifyingWithMicrodeposits = isVerifyingWithMicrodeposits,
             mandateText = mandateText,
+            promoText = promoText,
+            eligibleForPromo = eligibleForPromo,
+            bankName = bankName,
         )
     }
 
@@ -28,6 +34,8 @@ internal object BankFormScreenStateFactory {
             resultIdentifier = BankFormScreenState.ResultIdentifier.PaymentMethod(paymentMethod),
             isVerifyingWithMicrodeposits = isVerifyingWithMicrodeposits,
             mandateText = mandateText,
+            promoText = null,
+            eligibleForPromo = false,
         )
     }
 
@@ -35,17 +43,23 @@ internal object BankFormScreenStateFactory {
         resultIdentifier: BankFormScreenState.ResultIdentifier,
         isVerifyingWithMicrodeposits: Boolean,
         mandateText: ResolvableString,
+        promoText: String?,
+        eligibleForPromo: Boolean,
+        bankName: String = "Stripe Bank",
     ): BankFormScreenState {
         return BankFormScreenState(
+            isPaymentFlow = true,
             linkedBankAccount = BankFormScreenState.LinkedBankAccount(
                 resultIdentifier = resultIdentifier,
                 financialConnectionsSessionId = "session_1234",
                 intentId = "intent_1234",
-                bankName = "Stripe Bank",
+                bankName = bankName,
                 last4 = "6789",
                 mandateText = mandateText,
                 isVerifyingWithMicrodeposits = isVerifyingWithMicrodeposits,
-            )
+                eligibleForIncentive = eligibleForPromo,
+            ),
+            promoText = promoText,
         )
     }
 }

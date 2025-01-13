@@ -1,22 +1,14 @@
 package com.stripe.android.paymentsheet.injection
 
 import android.content.Context
-import androidx.lifecycle.SavedStateHandle
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.utils.UserFacingLogger
-import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
-import com.stripe.android.paymentelement.confirmation.DefaultConfirmationHandler
-import com.stripe.android.paymentelement.confirmation.IntentConfirmationInterceptor
-import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
+import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PaymentSheetContractV2
 import com.stripe.android.paymentsheet.PrefsRepository
-import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncherFactory
 import dagger.Module
 import dagger.Provides
-import javax.inject.Provider
+import javax.inject.Named
 import kotlin.coroutines.CoroutineContext
 
 @Module
@@ -28,27 +20,9 @@ internal class PaymentSheetViewModelModule(private val starterArgs: PaymentSheet
     }
 
     @Provides
-    fun providesIntentConfirmationHandlerFactory(
-        savedStateHandle: SavedStateHandle,
-        paymentConfigurationProvider: Provider<PaymentConfiguration>,
-        bacsMandateConfirmationLauncherFactory: BacsMandateConfirmationLauncherFactory,
-        googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory,
-        stripePaymentLauncherAssistedFactory: StripePaymentLauncherAssistedFactory,
-        intentConfirmationInterceptor: IntentConfirmationInterceptor,
-        errorReporter: ErrorReporter,
-        logger: UserFacingLogger,
-    ): DefaultConfirmationHandler.Factory {
-        return DefaultConfirmationHandler.Factory(
-            intentConfirmationInterceptor = intentConfirmationInterceptor,
-            paymentConfigurationProvider = paymentConfigurationProvider,
-            stripePaymentLauncherAssistedFactory = stripePaymentLauncherAssistedFactory,
-            bacsMandateConfirmationLauncherFactory = bacsMandateConfirmationLauncherFactory,
-            googlePayPaymentMethodLauncherFactory = googlePayPaymentMethodLauncherFactory,
-            statusBarColor = { starterArgs.statusBarColor },
-            savedStateHandle = savedStateHandle,
-            errorReporter = errorReporter,
-            logger = logger,
-        )
+    @Named(STATUS_BAR_COLOR)
+    fun providesStatusBarColor(): Int? {
+        return starterArgs.statusBarColor
     }
 
     @Provides

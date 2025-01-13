@@ -570,8 +570,10 @@ class CustomerSheet internal constructor(
                 activityResultRegistryOwner = activityResultRegistryOwner,
                 integrationType = integration.type,
                 paymentOptionFactory = PaymentOptionFactory(
-                    resources = application.resources,
-                    imageLoader = StripeImageLoader(application),
+                    iconLoader = PaymentSelection.IconLoader(
+                        resources = application.resources,
+                        imageLoader = StripeImageLoader(application),
+                    ),
                     context = application,
                 ),
                 callback = callback,

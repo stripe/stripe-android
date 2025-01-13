@@ -4,7 +4,6 @@ import android.app.Application
 import android.content.Context
 import android.content.res.Resources
 import androidx.core.os.LocaleListCompat
-import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.BuildConfig
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
@@ -18,27 +17,20 @@ import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.networking.NetworkTypeDetector
 import com.stripe.android.core.utils.ContextUtils.packageInfo
+import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.customersheet.CustomerSheetLoader
 import com.stripe.android.customersheet.DefaultCustomerSheetLoader
 import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
 import com.stripe.android.customersheet.analytics.DefaultCustomerSheetEventReporter
-import com.stripe.android.paymentelement.confirmation.DefaultConfirmationHandler
-import com.stripe.android.paymentelement.confirmation.DefaultIntentConfirmationInterceptor
-import com.stripe.android.paymentelement.confirmation.IntentConfirmationInterceptor
+import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnectionsAvailable
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
-import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
-import com.stripe.android.paymentsheet.injection.ALLOWS_MANUAL_CONFIRMATION
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncherFactory
-import com.stripe.android.paymentsheet.paymentdatacollection.bacs.DefaultBacsMandateConfirmationLauncherFactory
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.repositories.RealElementsSessionRepository
-import com.stripe.android.paymentsheet.ui.DefaultEditPaymentMethodViewInteractor
-import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -49,12 +41,6 @@ import kotlin.coroutines.CoroutineContext
 
 @Module
 internal interface CustomerSheetViewModelModule {
-
-    @Binds
-    fun bindsIntentConfirmationInterceptor(
-        impl: DefaultIntentConfirmationInterceptor,
-    ): IntentConfirmationInterceptor
-
     @Binds
     fun bindsCustomerSheetEventReporter(
         impl: DefaultCustomerSheetEventReporter
@@ -114,6 +100,9 @@ internal interface CustomerSheetViewModelModule {
         ): () -> Boolean = { paymentConfiguration.get().publishableKey.startsWith("pk_live") }
 
         @Provides
+        fun providesUserFacingLogger(): UserFacingLogger? = null
+
+        @Provides
         internal fun provideAnalyticsRequestFactory(
             application: Application,
             paymentConfiguration: Provider<PaymentConfiguration>
@@ -133,33 +122,6 @@ internal interface CustomerSheetViewModelModule {
             analyticsRequestFactory = analyticsRequestFactory,
             analyticsRequestExecutor = analyticsRequestExecutor,
         )
-
-        @Provides
-        fun providesBacsMandateConfirmationLauncherFactory(): BacsMandateConfirmationLauncherFactory =
-            DefaultBacsMandateConfirmationLauncherFactory
-
-        @Provides
-        fun providesIntentConfirmationHandlerFactory(
-            savedStateHandle: SavedStateHandle,
-            paymentConfigurationProvider: Provider<PaymentConfiguration>,
-            bacsMandateConfirmationLauncherFactory: BacsMandateConfirmationLauncherFactory,
-            stripePaymentLauncherAssistedFactory: StripePaymentLauncherAssistedFactory,
-            statusBarColor: Int?,
-            intentConfirmationInterceptor: IntentConfirmationInterceptor,
-            errorReporter: ErrorReporter
-        ): DefaultConfirmationHandler.Factory {
-            return DefaultConfirmationHandler.Factory(
-                intentConfirmationInterceptor = intentConfirmationInterceptor,
-                paymentConfigurationProvider = paymentConfigurationProvider,
-                stripePaymentLauncherAssistedFactory = stripePaymentLauncherAssistedFactory,
-                googlePayPaymentMethodLauncherFactory = null,
-                bacsMandateConfirmationLauncherFactory = bacsMandateConfirmationLauncherFactory,
-                statusBarColor = { statusBarColor },
-                savedStateHandle = savedStateHandle,
-                errorReporter = errorReporter,
-                logger = null
-            )
-        }
 
         @Provides
         fun resources(application: Application): Resources {
@@ -205,11 +167,6 @@ internal interface CustomerSheetViewModelModule {
 
         @Provides
         fun savedPaymentSelection(): PaymentSelection? = savedPaymentSelection
-
-        @Provides
-        fun providesEditPaymentMethodViewInteractorFactory(): ModifiableEditPaymentMethodViewInteractor.Factory {
-            return DefaultEditPaymentMethodViewInteractor.Factory
-        }
 
         private val savedPaymentSelection: PaymentSelection? = null
     }

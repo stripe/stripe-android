@@ -3,23 +3,27 @@ package com.stripe.android.paymentelement.confirmation
 import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
-import com.stripe.android.CardBrandFilter
 import com.stripe.android.core.strings.ResolvableString
-import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.parcelize.Parcelize
-import com.stripe.android.model.PaymentMethod as PaymentMethodModel
 
 /**
  * This interface handles the confirmation process of a [StripeIntent] and/or external payment. This interface is
  * intended to run only one confirmation process at a time.
  */
 internal interface ConfirmationHandler {
+    /**
+     * Indicates if this handler has been reloaded from process death. This occurs if the handler was confirming
+     * an intent before did not complete the process before process death.
+     */
+    val hasReloadedFromProcessDeath: Boolean
+
     /**
      * An observable indicating the current confirmation state of the handler.
      */
@@ -34,7 +38,7 @@ internal interface ConfirmationHandler {
     fun register(activityResultCaller: ActivityResultCaller, lifecycleOwner: LifecycleOwner)
 
     /**
-     * Starts the confirmation process. Results can be received through [state] or through [awaitIntentResult].
+     * Starts the confirmation process. Results can be received through [state] or through [awaitResult].
      *
      * @param arguments required set of arguments in order to start the confirmation process
      */
@@ -45,7 +49,15 @@ internal interface ConfirmationHandler {
      *
      * @return confirmation result or null if no confirmation process has been started
      */
-    suspend fun awaitIntentResult(): Result?
+    suspend fun awaitResult(): Result?
+
+    /**
+     * A factory for creating a [ConfirmationHandler] instance using a provided [CoroutineScope]. This scope is
+     * used to launch confirmation tasks.
+     */
+    fun interface Factory {
+        fun create(scope: CoroutineScope): ConfirmationHandler
+    }
 
     /**
      * Defines the set of arguments requires for beginning the confirmation process
@@ -60,7 +72,22 @@ internal interface ConfirmationHandler {
         /**
          * The confirmation option used to in order to potentially confirm the intent
          */
-        val confirmationOption: Option
+        val confirmationOption: Option,
+
+        /**
+         * Appearance values to be used when styling the launched activities
+         */
+        val appearance: PaymentSheet.Appearance,
+
+        /**
+         * The mode that a Payment Element product was initialized with
+         */
+        val initializationMode: PaymentElementLoader.InitializationMode,
+
+        /**
+         * The shipping details of the customer that can be attached during the confirmation flow
+         */
+        val shippingDetails: AddressDetails?
     ) : Parcelable
 
     /**
@@ -73,17 +100,11 @@ internal interface ConfirmationHandler {
         data object Idle : State
 
         /**
-         * Indicates the the handler is currently performing pre-confirmation steps before starting confirmation.
-         */
-        data class Preconfirming(
-            val confirmationOption: Option?,
-            val inPreconfirmFlow: Boolean,
-        ) : State
-
-        /**
          * Indicates the the handler is currently confirming.
          */
-        data object Confirming : State
+        data class Confirming(
+            val option: Option,
+        ) : State
 
         /**
          * Indicates that the handler has completed confirming and contains a [Result] regarding the confirmation
@@ -182,61 +203,5 @@ internal interface ConfirmationHandler {
         }
     }
 
-    sealed interface Option : Parcelable {
-        @Parcelize
-        data class GooglePay(
-            val initializationMode: PaymentElementLoader.InitializationMode,
-            val shippingDetails: AddressDetails?,
-            val config: Config,
-        ) : Option {
-            @Parcelize
-            data class Config(
-                val environment: PaymentSheet.GooglePayConfiguration.Environment?,
-                val merchantName: String,
-                val merchantCountryCode: String,
-                val merchantCurrencyCode: String?,
-                val customAmount: Long?,
-                val customLabel: String?,
-                val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
-                val cardBrandFilter: CardBrandFilter
-            ) : Parcelable
-        }
-
-        @Parcelize
-        data class ExternalPaymentMethod(
-            val type: String,
-            val billingDetails: PaymentMethodModel.BillingDetails?,
-        ) : Option
-
-        @Parcelize
-        data class BacsPaymentMethod(
-            val initializationMode: PaymentElementLoader.InitializationMode,
-            val shippingDetails: AddressDetails?,
-            val createParams: PaymentMethodCreateParams,
-            val optionsParams: PaymentMethodOptionsParams?,
-            val appearance: PaymentSheet.Appearance,
-        ) : Option
-
-        sealed interface PaymentMethod : Option {
-            val initializationMode: PaymentElementLoader.InitializationMode
-            val shippingDetails: AddressDetails?
-
-            @Parcelize
-            data class Saved(
-                override val initializationMode: PaymentElementLoader.InitializationMode,
-                override val shippingDetails: AddressDetails?,
-                val paymentMethod: com.stripe.android.model.PaymentMethod,
-                val optionsParams: PaymentMethodOptionsParams?,
-            ) : PaymentMethod
-
-            @Parcelize
-            data class New(
-                override val initializationMode: PaymentElementLoader.InitializationMode,
-                override val shippingDetails: AddressDetails?,
-                val createParams: PaymentMethodCreateParams,
-                val optionsParams: PaymentMethodOptionsParams?,
-                val shouldSave: Boolean
-            ) : PaymentMethod
-        }
-    }
+    interface Option : Parcelable
 }

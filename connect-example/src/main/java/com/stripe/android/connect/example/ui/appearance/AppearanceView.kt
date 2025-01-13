@@ -1,8 +1,6 @@
 package com.stripe.android.connect.example.ui.appearance
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,8 +10,8 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.RadioButton
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -21,24 +19,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.stripe.android.connect.example.MainContent
 import com.stripe.android.connect.example.R
+import com.stripe.android.connect.example.ui.common.ConnectExampleScaffold
 
 @Composable
 fun AppearanceView(
-    onDismiss: () -> Unit,
-    viewModel: AppearanceViewModel = viewModel()
+    viewModel: AppearanceViewModel,
+    onDismiss: () -> Unit
 ) {
     val state by viewModel.state.collectAsState()
 
-    BackHandler { onDismiss() }
-    MainContent(
+    ConnectExampleScaffold(
         title = stringResource(R.string.customize_appearance),
         navigationIcon = {
             IconButton(onClick = onDismiss) {
                 Icon(
-                    imageVector = Icons.AutoMirrored.Default.ArrowBack,
+                    imageVector = Icons.Default.Close,
                     contentDescription = stringResource(R.string.cancel)
                 )
             }
@@ -73,24 +69,24 @@ private fun SelectAnAppearance(
     onAppearanceSelected: (AppearanceInfo.AppearanceId) -> Unit,
 ) {
     Column(
-        modifier = Modifier.padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        modifier = Modifier.padding(vertical = 16.dp),
     ) {
         appearances.forEach { appearance ->
             Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
                 modifier = Modifier
+                    .clickable { onAppearanceSelected(appearance) }
                     .fillMaxWidth()
-                    .clickable { onAppearanceSelected(appearance) },
+                    .padding(vertical = 8.dp, horizontal = 16.dp),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 RadioButton(
                     selected = appearance == selectedAppearance,
                     onClick = null, // onClick handled by row
                 )
-                Column {
-                    Text(text = stringResource(appearance.displayNameRes))
-                }
+                Text(
+                    modifier = Modifier.padding(start = 16.dp),
+                    text = stringResource(appearance.displayNameRes)
+                )
             }
         }
     }

@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.identity.R
+import com.stripe.android.identity.VerificationFlowFinishable
 import com.stripe.android.identity.analytics.FPSTracker
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.analytics.ModelPerformanceTracker
@@ -24,13 +25,15 @@ internal class SelfieScanViewModel(
     override val fpsTracker: FPSTracker,
     override val identityAnalyticsRequestFactory: IdentityAnalyticsRequestFactory,
     modelPerformanceTracker: ModelPerformanceTracker,
-    laplacianBlurDetector: LaplacianBlurDetector
+    laplacianBlurDetector: LaplacianBlurDetector,
+    private val verificationFlowFinishable: VerificationFlowFinishable
 ) : IdentityScanViewModel(
     applicationContext,
     fpsTracker,
     identityAnalyticsRequestFactory,
     modelPerformanceTracker,
-    laplacianBlurDetector
+    laplacianBlurDetector,
+    verificationFlowFinishable
 ) {
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -58,6 +61,7 @@ internal class SelfieScanViewModel(
         )
 
     internal class SelfieScanViewModelFactory @Inject constructor(
+        private val verificationFlowFinishable: VerificationFlowFinishable,
         private val modelPerformanceTracker: ModelPerformanceTracker,
         private val laplacianBlurDetector: LaplacianBlurDetector,
         private val fpsTracker: FPSTracker,
@@ -70,7 +74,8 @@ internal class SelfieScanViewModel(
                 fpsTracker,
                 identityAnalyticsRequestFactory,
                 modelPerformanceTracker,
-                laplacianBlurDetector
+                laplacianBlurDetector,
+                verificationFlowFinishable
             ) as T
         }
     }

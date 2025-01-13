@@ -60,18 +60,35 @@ data class ChallengeResponseData constructor(
                 return !acsHtml.isNullOrBlank()
             }
 
-            // required fields for text, single-select, multi-select, and OOB
-            if (
+            // required fields for text, single-select, multi-select
+            val isTextOrSelectType = uiType == UiType.Text ||
+                uiType == UiType.SingleSelect ||
+                uiType == UiType.MultiSelect
+
+            if (isTextOrSelectType &&
                 setOf(
                     challengeInfoHeader,
                     challengeInfoLabel,
-                    challengeInfoText,
-                    whyInfoLabel,
-                    whyInfoText,
-                    expandInfoLabel,
-                    expandInfoText,
-                    resendInformationLabel
-                ).all { it.isNullOrBlank() }
+                    challengeInfoText
+                ).any { it.isNullOrBlank() }
+            ) {
+                return false
+            }
+
+            // required fields for oob
+            if (uiType == UiType.OutOfBand && setOf(
+                    challengeInfoHeader,
+                    challengeInfoText
+                ).any { it.isNullOrBlank() }
+            ) {
+                return false
+            }
+
+            if (!oobContinueLabel.isNullOrEmpty() &&
+                (
+                    challengeInfoHeader.isNullOrEmpty() &&
+                        challengeInfoText.isNullOrEmpty()
+                    )
             ) {
                 return false
             }
@@ -87,7 +104,7 @@ data class ChallengeResponseData constructor(
             }
 
             if (uiType == UiType.SingleSelect || uiType == UiType.MultiSelect) {
-                if (challengeSelectOptions == null || challengeSelectOptions.isEmpty()) {
+                if (challengeSelectOptions.isNullOrEmpty()) {
                     return false
                 }
             }
@@ -298,6 +315,7 @@ data class ChallengeResponseData constructor(
 
         private const val YES_VALUE = "Y"
         private const val NO_VALUE = "N"
+        private const val WHITELIST_INFO_TEXT_MAX_LENGTH = 64
 
         private val YES_NO_VALUES = listOf(YES_VALUE, NO_VALUE)
 
@@ -397,6 +415,13 @@ data class ChallengeResponseData constructor(
             if (!cresData.isValidForUi) {
                 throw ChallengeResponseParseException
                     .createRequiredDataElementMissing("UI fields missing")
+            }
+
+            if (cresData.whitelistingInfoText != null &&
+                cresData.whitelistingInfoText.length > WHITELIST_INFO_TEXT_MAX_LENGTH
+            ) {
+                throw ChallengeResponseParseException
+                    .createInvalidDataElementFormat("Whitelisting info text exceeds length.")
             }
 
             return cresData
@@ -554,6 +579,18 @@ data class ChallengeResponseData constructor(
             if (encodedHtml.isNullOrBlank() && uiType == UiType.Html) {
                 throw ChallengeResponseParseException
                     .createRequiredDataElementMissing(FIELD_ACS_HTML)
+            }
+
+            val containsBadHTML = encodedHtml == null ||
+                encodedHtml.contains("\n") ||
+                encodedHtml.contains(" ") ||
+                encodedHtml.contains("+") ||
+                encodedHtml.contains("/")
+            val endsWithBadSuffix = encodedHtml != null && encodedHtml.endsWith("=")
+
+            if (uiType == UiType.Html && (containsBadHTML || endsWithBadSuffix)) {
+                throw ChallengeResponseParseException
+                    .createInvalidDataElementFormat(FIELD_ACS_HTML)
             }
 
             return decodeHtml(encodedHtml)

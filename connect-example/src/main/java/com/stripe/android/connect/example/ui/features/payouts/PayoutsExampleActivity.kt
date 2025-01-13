@@ -1,71 +1,50 @@
 package com.stripe.android.connect.example.ui.features.payouts
 
-import android.os.Bundle
-import androidx.activity.compose.BackHandler
-import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.viewinterop.AndroidView
-import androidx.fragment.app.FragmentActivity
-import com.stripe.android.connect.BuildConfig
+import android.content.Context
+import android.view.LayoutInflater
+import android.view.View
+import android.widget.Toast
+import androidx.activity.viewModels
 import com.stripe.android.connect.EmbeddedComponentManager
+import com.stripe.android.connect.EmptyProps
+import com.stripe.android.connect.PayoutsListener
 import com.stripe.android.connect.PrivateBetaConnectSDK
-import com.stripe.android.connect.example.BasicComponentExampleContent
-import com.stripe.android.connect.example.ConnectSdkExampleTheme
 import com.stripe.android.connect.example.R
-import com.stripe.android.connect.example.data.EmbeddedComponentManagerProvider
-import com.stripe.android.connect.example.ui.common.BackIconButton
-import com.stripe.android.core.Logger
+import com.stripe.android.connect.example.databinding.ViewPayoutsExampleBinding
+import com.stripe.android.connect.example.ui.common.BasicExampleComponentActivity
+import com.stripe.android.connect.example.ui.settings.SettingsViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 
 @OptIn(PrivateBetaConnectSDK::class)
 @AndroidEntryPoint
-class PayoutsExampleActivity : FragmentActivity() {
+class PayoutsExampleActivity : BasicExampleComponentActivity() {
+    override val titleRes: Int = R.string.payouts
 
-    @Inject lateinit var embeddedComponentManagerProvider: EmbeddedComponentManagerProvider
+    private val settingsViewModel by viewModels<SettingsViewModel>()
 
-    private val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG)
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        val embeddedComponentManager = try {
-            embeddedComponentManagerProvider.provideEmbeddedComponentManager()
-        } catch (e: IllegalStateException) {
-            // TODO - handle app restoration more gracefully
-            logger.error("(PayoutsExampleActivity) Error retrieving EmbeddedComponentManager: $e")
-            finish() // we don't have an embedded component manager, so go back to MainActivity to get one
-            return
-        }
-
-        setContent {
-            ConnectSdkExampleTheme {
-                BasicComponentExampleContent(
-                    title = stringResource(R.string.payouts),
-                    navigationIcon = {
-                        BackIconButton(onClick = this@PayoutsExampleActivity::finish)
-                    }
-                ) {
-                    PayoutsComponentWrapper(
+    override fun createComponentView(context: Context, embeddedComponentManager: EmbeddedComponentManager): View {
+        val settings = settingsViewModel.state.value
+        val listener = Listener()
+        return if (settings.presentationSettings.useXmlViews) {
+            ViewPayoutsExampleBinding.inflate(LayoutInflater.from(context)).root
+                .apply {
+                    initialize(
                         embeddedComponentManager = embeddedComponentManager,
-                        onDismiss = this@PayoutsExampleActivity::finish,
+                        listener = listener,
+                        props = EmptyProps
                     )
                 }
-            }
+        } else {
+            embeddedComponentManager.createPayoutsView(
+                context = context,
+                listener = listener,
+            )
         }
     }
 
-    @OptIn(PrivateBetaConnectSDK::class)
-    @Composable
-    private fun PayoutsComponentWrapper(
-        embeddedComponentManager: EmbeddedComponentManager,
-        onDismiss: () -> Unit,
-    ) {
-        BackHandler(onBack = onDismiss)
-        AndroidView(modifier = Modifier.fillMaxSize(), factory = { context ->
-            embeddedComponentManager.createPayoutsView(context)
-        })
+    private inner class Listener : PayoutsListener {
+        override fun onLoadError(error: Throwable) {
+            Toast.makeText(this@PayoutsExampleActivity, error.message, Toast.LENGTH_LONG).show()
+        }
     }
 }

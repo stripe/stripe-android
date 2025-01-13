@@ -53,6 +53,7 @@ import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT_SECRET
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.CreateFinancialConnectionsSessionForDeferredPaymentParams
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
@@ -747,6 +748,36 @@ class StripeApiRepository @JvmOverloads internal constructor(
     }
 
     /**
+     * Analytics event: [PaymentAnalyticsEvent.CustomerDetachPaymentMethod]
+     */
+    @Throws(
+        InvalidRequestException::class,
+        APIConnectionException::class,
+        APIException::class,
+        AuthenticationException::class,
+        CardException::class
+    )
+    override suspend fun detachPaymentMethod(
+        customerSessionClientSecret: String,
+        productUsageTokens: Set<String>,
+        paymentMethodId: String,
+        requestOptions: ApiRequest.Options
+    ): Result<PaymentMethod> {
+        return fetchStripeModelResult(
+            apiRequest = apiRequestFactory.createPost(
+                url = getElementsDetachPaymentMethodUrl(paymentMethodId),
+                options = requestOptions,
+                params = mapOf("customer_session_client_secret" to customerSessionClientSecret),
+            ),
+            jsonParser = PaymentMethodJsonParser()
+        ) {
+            fireAnalyticsRequest(
+                paymentAnalyticsRequestFactory.createDetachPaymentMethod(productUsageTokens)
+            )
+        }
+    }
+
+    /**
      * Retrieve a Customer's [PaymentMethod]s
      *
      * Analytics event: [PaymentAnalyticsEvent.CustomerRetrievePaymentMethods]
@@ -1382,6 +1413,14 @@ class StripeApiRepository @JvmOverloads internal constructor(
         return getApiUrl("payment_methods/%s/detach", paymentMethodId)
     }
 
+    /**
+     * @return `https://api.stripe.com/v1/payment_methods/:id/detach`
+     */
+    @VisibleForTesting
+    internal fun getElementsDetachPaymentMethodUrl(paymentMethodId: String): String {
+        return getApiUrl("elements/payment_methods/%s/detach", paymentMethodId)
+    }
+
     override suspend fun retrieveElementsSession(
         params: ElementsSessionParams,
         options: ApiRequest.Options,
@@ -1452,6 +1491,50 @@ class StripeApiRepository @JvmOverloads internal constructor(
                         "consumer_session_client_secret" to clientSecret
                     ),
                     "types" to paymentMethodTypes.toList()
+                )
+            ),
+            ConsumerPaymentDetailsJsonParser
+        )
+    }
+
+    override suspend fun deletePaymentDetails(
+        clientSecret: String,
+        paymentDetailsId: String,
+        requestOptions: ApiRequest.Options
+    ): Result<Unit> {
+        return runCatching {
+            makeApiRequest(
+                apiRequestFactory.createDelete(
+                    getConsumerPaymentDetailsUrl(paymentDetailsId),
+                    requestOptions,
+                    mapOf(
+                        "request_surface" to "android_payment_element",
+                        "credentials" to mapOf(
+                            "consumer_session_client_secret" to clientSecret
+                        )
+                    )
+                ),
+                onResponse = {}
+            )
+        }
+    }
+
+    override suspend fun updatePaymentDetails(
+        clientSecret: String,
+        paymentDetailsUpdateParams: ConsumerPaymentDetailsUpdateParams,
+        requestOptions: ApiRequest.Options
+    ): Result<ConsumerPaymentDetails> {
+        return fetchStripeModelResult(
+            apiRequestFactory.createPost(
+                getConsumerPaymentDetailsUrl(paymentDetailsUpdateParams.id),
+                requestOptions,
+                mapOf(
+                    "request_surface" to "android_payment_element",
+                    "credentials" to mapOf(
+                        "consumer_session_client_secret" to clientSecret
+                    )
+                ).plus(
+                    paymentDetailsUpdateParams.toParamMap()
                 )
             ),
             ConsumerPaymentDetailsJsonParser

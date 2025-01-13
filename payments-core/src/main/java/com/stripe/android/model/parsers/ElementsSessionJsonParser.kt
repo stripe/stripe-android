@@ -3,6 +3,7 @@ package com.stripe.android.model.parsers
 import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.core.model.parsers.ModelJsonParser.Companion.jsonArrayToList
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.DeferredIntentParams
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSessionParams
@@ -148,12 +149,19 @@ internal class ElementsSessionJsonParser(
             parseLinkFlags(linkSettingsJson)
         } ?: emptyMap()
 
+        val linkConsumerIncentive = if (FeatureFlags.instantDebitsIncentives.isEnabled) {
+            json?.let { LinkConsumerIncentiveJsonParser.parse(it) }
+        } else {
+            null
+        }
+
         return ElementsSession.LinkSettings(
             linkFundingSources = jsonArrayToList(linkFundingSources),
             linkPassthroughModeEnabled = linkPassthroughModeEnabled,
             linkMode = linkMode,
             linkFlags = linkFlags,
             disableLinkSignup = disableLinkSignup,
+            linkConsumerIncentive = linkConsumerIncentive,
         )
     }
 
@@ -235,6 +243,7 @@ internal class ElementsSessionJsonParser(
 
             val paymentMethodSaveFeature = paymentSheetFeatures.optString(FIELD_PAYMENT_METHOD_SAVE)
             val paymentMethodRemoveFeature = paymentSheetFeatures.optString(FIELD_PAYMENT_METHOD_REMOVE)
+            val paymentMethodRemoveLastFeature = paymentSheetFeatures.optString(FIELD_PAYMENT_METHOD_REMOVE_LAST)
             val allowRedisplayOverrideValue = paymentSheetFeatures
                 .optString(FIELD_PAYMENT_METHOD_ALLOW_REDISPLAY_OVERRIDE)
 
@@ -245,6 +254,7 @@ internal class ElementsSessionJsonParser(
             ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
                 isPaymentMethodSaveEnabled = paymentMethodSaveFeature == VALUE_ENABLED,
                 isPaymentMethodRemoveEnabled = paymentMethodRemoveFeature == VALUE_ENABLED,
+                canRemoveLastPaymentMethod = paymentMethodRemoveLastFeature == VALUE_ENABLED,
                 allowRedisplayOverride = allowRedisplayOverride,
             )
         } else {
@@ -263,9 +273,11 @@ internal class ElementsSessionJsonParser(
             val customerSheetFeatures = json.optJSONObject(FIELD_FEATURES) ?: return null
 
             val paymentMethodRemoveFeature = customerSheetFeatures.optString(FIELD_PAYMENT_METHOD_REMOVE)
+            val paymentMethodRemoveLastFeature = customerSheetFeatures.optString(FIELD_PAYMENT_METHOD_REMOVE_LAST)
 
             ElementsSession.Customer.Components.CustomerSheet.Enabled(
                 isPaymentMethodRemoveEnabled = paymentMethodRemoveFeature == VALUE_ENABLED,
+                canRemoveLastPaymentMethod = paymentMethodRemoveLastFeature == VALUE_ENABLED,
             )
         } else {
             ElementsSession.Customer.Components.CustomerSheet.Disabled
@@ -341,6 +353,7 @@ internal class ElementsSessionJsonParser(
         private const val FIELD_PAYMENT_METHOD_REMOVE = "payment_method_remove"
         private const val FIELD_PAYMENT_METHOD_ALLOW_REDISPLAY_OVERRIDE =
             "payment_method_save_allow_redisplay_override"
+        private const val FIELD_PAYMENT_METHOD_REMOVE_LAST = "payment_method_remove_last"
         private const val VALUE_ENABLED = FIELD_ENABLED
         const val FIELD_GOOGLE_PAY_PREFERENCE = "google_pay_preference"
 

@@ -5,6 +5,15 @@ require 'uri'
 
 class LokaliseClient
 
+    def set_request_x_api_token(request)
+        api_token = ENV['LOKALISE_API_TOKEN']
+        if api_token.nil?
+            abort("Missing LOKALISE_API_TOKEN environment variable. Try \nexport LOKALISE_API_TOKEN=$(fetch-password lokalise-api-token-manual)\nin terminal ")
+        else
+            request["X-Api-Token"] = api_token
+        end
+    end
+
     def fetch_keys
         fetch_keys_from_lokalise
     end
@@ -19,12 +28,7 @@ class LokaliseClient
         request["accept"] = 'application/json'
         request["content-type"] = 'application/json'
 
-        api_token = ENV['LOKALISE_API_TOKEN']
-        if api_token.nil?
-            abort("Missing LOKALISE_API_TOKEN environment variable.")
-        else
-            request["X-Api-Token"] = api_token
-        end
+        set_request_x_api_token(request)
 
         request_body = {
             "keys": [
@@ -75,12 +79,7 @@ class LokaliseClient
         request["accept"] = 'application/json'
         request["content-type"] = 'application/json'
 
-        api_token = ENV['LOKALISE_API_TOKEN']
-        if api_token.nil?
-            abort("Missing LOKALISE_API_TOKEN environment variable.")
-        else
-            request["X-Api-Token"] = api_token
-        end
+        set_request_x_api_token(request)
 
         existing_key['key_name']['android'] = key_object[:key_name]
         existing_key['filenames']['android'] = key_object[:filename]
@@ -136,12 +135,7 @@ class LokaliseClient
         request = Net::HTTP::Get.new(url)
         request["accept"] = 'application/json'
 
-        api_token = ENV['LOKALISE_API_TOKEN']
-        if api_token.nil?
-            abort("Missing LOKALISE_API_TOKEN environment variable.")
-        else
-            request["X-Api-Token"] = api_token
-        end
+        set_request_x_api_token(request)
 
         response = http.request(request)
         hash = JSON.parse(response.read_body)

@@ -1,29 +1,43 @@
 package com.stripe.android.paymentelement
 
+import android.graphics.drawable.Drawable
 import android.os.Parcelable
-import androidx.activity.ComponentActivity
+import androidx.activity.result.ActivityResultCaller
 import androidx.annotation.RestrictTo
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.AnnotatedString
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.ExperimentalCardBrandFilteringApi
 import com.stripe.android.common.configuration.ConfigurationDefaults
+import com.stripe.android.common.ui.DelegateDrawable
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.SetupIntent
+import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
+import com.stripe.android.paymentelement.embedded.EmbeddedConfirmationHelper
 import com.stripe.android.paymentelement.embedded.SharedPaymentElementViewModel
+import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
+import com.stripe.android.paymentsheet.ExternalPaymentMethodInterceptor
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.uicore.image.rememberDrawablePainter
+import com.stripe.android.uicore.utils.collectAsState
 import dev.drewhamilton.poko.Poko
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.parcelize.Parcelize
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @ExperimentalEmbeddedPaymentElementApi
-class EmbeddedPaymentElement internal constructor(
-    private val sharedViewModel: SharedPaymentElementViewModel
+class EmbeddedPaymentElement private constructor(
+    private val embeddedConfirmationHelper: EmbeddedConfirmationHelper,
+    private val sharedViewModel: SharedPaymentElementViewModel,
 ) {
     /**
      * Contains information about the customer's selected payment option.
@@ -52,7 +66,52 @@ class EmbeddedPaymentElement internal constructor(
      */
     @Composable
     fun Content() {
-        Text("Hello World!")
+        val embeddedContent by sharedViewModel.embeddedContent.collectAsState()
+        embeddedContent?.Content()
+    }
+
+    /**
+     * Asynchronously confirms the currently selected payment options.
+     *
+     * Results will be delivered to the [ResultCallback] supplied during initialization of [EmbeddedPaymentElement].
+     */
+    fun confirm() {
+        embeddedConfirmationHelper.confirm()
+    }
+
+    /**
+     * Sets the current [paymentOption] to `null`.
+     */
+    fun clearPaymentOption() {
+        sharedViewModel.clearPaymentOption()
+    }
+
+    /**
+     * Builder used in the creation of the [EmbeddedPaymentElement].
+     *
+     * Creation can be completed with [rememberEmbeddedPaymentElement].
+     */
+    @ExperimentalEmbeddedPaymentElementApi
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    class Builder(
+        /**
+         * Called when the customer confirms the payment or setup.
+         */
+        internal val createIntentCallback: CreateIntentCallback,
+        /**
+         * Called with the result of the payment.
+         */
+        internal val resultCallback: ResultCallback,
+    ) {
+        internal var externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler? = null
+            private set
+
+        /**
+         * Called when a user confirms payment for an external payment method.
+         */
+        fun externalPaymentMethodConfirmHandler(handler: ExternalPaymentMethodConfirmHandler) = apply {
+            this.externalPaymentMethodConfirmHandler = handler
+        }
     }
 
     /** Configuration for [EmbeddedPaymentElement] **/
@@ -85,7 +144,7 @@ class EmbeddedPaymentElement internal constructor(
             /**
              * Your customer-facing business name.
              */
-            private var merchantDisplayName: String
+            private val merchantDisplayName: String
         ) {
             private var customer: PaymentSheet.CustomerConfiguration? = ConfigurationDefaults.customer
             private var googlePay: PaymentSheet.GooglePayConfiguration? = ConfigurationDefaults.googlePay
@@ -106,12 +165,6 @@ class EmbeddedPaymentElement internal constructor(
             private var cardBrandAcceptance: PaymentSheet.CardBrandAcceptance =
                 ConfigurationDefaults.cardBrandAcceptance
             private var embeddedViewDisplaysMandateText: Boolean = ConfigurationDefaults.embeddedViewDisplaysMandateText
-
-            /**
-             * Your customer-facing business name.
-             */
-            fun merchantDisplayName(merchantDisplayName: String) =
-                apply { this.merchantDisplayName = merchantDisplayName }
 
             /**
              * If set, the customer can select a previously saved payment method.
@@ -263,7 +316,6 @@ class EmbeddedPaymentElement internal constructor(
              * **Note**: Card brand filtering is not currently supported in Link.
              */
             @ExperimentalCardBrandFilteringApi
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun cardBrandAcceptance(
                 cardBrandAcceptance: PaymentSheet.CardBrandAcceptance
             ) = apply {
@@ -333,10 +385,7 @@ class EmbeddedPaymentElement internal constructor(
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @ExperimentalEmbeddedPaymentElementApi
     class PaymentOptionDisplayData internal constructor(
-        /**
-         * An image representing a payment method; e.g. the Google Pay logo or a VISA logo.
-         */
-        val iconPainter: Painter,
+        private val imageLoader: suspend () -> Drawable,
 
         /**
          * A user facing string representing the payment method; e.g. "Google Pay" or "···· 4242" for a card.
@@ -360,21 +409,101 @@ class EmbeddedPaymentElement internal constructor(
         val paymentMethodType: String,
 
         /**
-         * If you set configuration.hidesMandateText = true, this text must be displayed to the customer near your “Buy”
-         *  button to comply with regulations.
+         * If you set [Configuration.Builder.embeddedViewDisplaysMandateText] to `false`, this text must be displayed to
+         * the customer near your "Buy" button to comply with regulations.
          */
         val mandateText: AnnotatedString?,
-    )
+    ) {
+        private val iconDrawable: Drawable by lazy {
+            DelegateDrawable(imageLoader)
+        }
 
+        /**
+         * An image representing a payment method; e.g. the Google Pay logo or a VISA logo.
+         */
+        val iconPainter: Painter
+            @Composable
+            get() = rememberDrawablePainter(iconDrawable)
+    }
+
+    /**
+     * The result of an attempt to confirm a [PaymentIntent] or [SetupIntent].
+     */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    companion object {
+    @ExperimentalEmbeddedPaymentElementApi
+    sealed interface Result {
+        /**
+         * The customer completed the payment or setup.
+         * The payment may still be processing at this point; don't assume money has successfully moved.
+         *
+         * Your app should transition to a generic receipt view (e.g. a screen that displays "Your order
+         * is confirmed!"), and fulfill the order (e.g. ship the product to the customer) after
+         * receiving a successful payment event from Stripe.
+         *
+         * See [Stripe's documentation](https://stripe.com/docs/payments/handling-payment-events).
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @ExperimentalEmbeddedPaymentElementApi
-        fun create(activity: ComponentActivity): EmbeddedPaymentElement {
+        class Completed internal constructor() : Result
+
+        /**
+         * The customer canceled the payment or setup attempt.
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @ExperimentalEmbeddedPaymentElementApi
+        class Canceled internal constructor() : Result
+
+        /**
+         * The payment or setup attempt failed.
+         *
+         * @param error The error encountered by the customer.
+         */
+        @Poko
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @ExperimentalEmbeddedPaymentElementApi
+        class Failed internal constructor(val error: Throwable) : Result
+    }
+
+    /**
+     * Callback that is invoked when a [Result] is available.
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @ExperimentalEmbeddedPaymentElementApi
+    fun interface ResultCallback {
+        fun onResult(result: Result)
+    }
+
+    internal companion object {
+        @ExperimentalEmbeddedPaymentElementApi
+        fun create(
+            statusBarColor: Int?,
+            activityResultCaller: ActivityResultCaller,
+            viewModelStoreOwner: ViewModelStoreOwner,
+            lifecycleOwner: LifecycleOwner,
+            resultCallback: ResultCallback,
+        ): EmbeddedPaymentElement {
             val sharedViewModel = ViewModelProvider(
-                owner = activity,
-                factory = SharedPaymentElementViewModel.Factory()
+                owner = viewModelStoreOwner,
+                factory = SharedPaymentElementViewModel.Factory(statusBarColor)
             )[SharedPaymentElementViewModel::class.java]
-            return EmbeddedPaymentElement(sharedViewModel)
+            lifecycleOwner.lifecycle.addObserver(
+                object : DefaultLifecycleObserver {
+                    override fun onDestroy(owner: LifecycleOwner) {
+                        IntentConfirmationInterceptor.createIntentCallback = null
+                        ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = null
+                    }
+                }
+            )
+            return EmbeddedPaymentElement(
+                embeddedConfirmationHelper = EmbeddedConfirmationHelper(
+                    confirmationHandler = sharedViewModel.confirmationHandler,
+                    resultCallback = resultCallback,
+                    activityResultCaller = activityResultCaller,
+                    lifecycleOwner = lifecycleOwner,
+                    confirmationStateSupplier = { sharedViewModel.confirmationStateHolder.state },
+                ),
+                sharedViewModel = sharedViewModel,
+            )
         }
     }
 }

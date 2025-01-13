@@ -16,7 +16,9 @@ import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSessionSignup
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.CustomEmailType
+import com.stripe.android.model.IncentiveEligibilitySession
 import com.stripe.android.model.SharePaymentDetails
+import com.stripe.android.model.UpdateAvailableIncentives
 import com.stripe.android.model.VerificationType
 import com.stripe.android.model.parsers.AttachConsumerToLinkAccountSessionJsonParser
 import com.stripe.android.model.parsers.ConsumerPaymentDetailsJsonParser
@@ -24,6 +26,7 @@ import com.stripe.android.model.parsers.ConsumerSessionJsonParser
 import com.stripe.android.model.parsers.ConsumerSessionLookupJsonParser
 import com.stripe.android.model.parsers.ConsumerSessionSignupJsonParser
 import com.stripe.android.model.parsers.SharePaymentDetailsJsonParser
+import com.stripe.android.model.parsers.UpdateAvailableIncentivesJsonParser
 import java.util.Locale
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
@@ -37,8 +40,7 @@ interface ConsumersApiService {
         locale: Locale?,
         amount: Long?,
         currency: String?,
-        paymentIntentId: String?,
-        setupIntentId: String?,
+        incentiveEligibilitySession: IncentiveEligibilitySession?,
         requestSurface: String,
         consentAction: ConsumerSignUpConsentAction,
         requestOptions: ApiRequest.Options,
@@ -91,6 +93,13 @@ interface ConsumersApiService {
         requestOptions: ApiRequest.Options,
         extraParams: Map<String, Any?>,
     ): Result<SharePaymentDetails>
+
+    suspend fun updateAvailableIncentives(
+        sessionId: String,
+        consumerSessionClientSecret: String,
+        requestSurface: String,
+        requestOptions: ApiRequest.Options,
+    ): Result<UpdateAvailableIncentives>
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
@@ -117,8 +126,7 @@ class ConsumersApiServiceImpl(
         locale: Locale?,
         amount: Long?,
         currency: String?,
-        paymentIntentId: String?,
-        setupIntentId: String?,
+        incentiveEligibilitySession: IncentiveEligibilitySession?,
         requestSurface: String,
         consentAction: ConsumerSignUpConsentAction,
         requestOptions: ApiRequest.Options,
@@ -147,13 +155,7 @@ class ConsumersApiServiceImpl(
                         mapOf("legal_name" to it)
                     } ?: emptyMap()
                 ).plus(
-                    paymentIntentId?.let {
-                        mapOf("financial_incentive[payment_intent]" to it)
-                    }.orEmpty()
-                ).plus(
-                    setupIntentId?.let {
-                        mapOf("financial_incentive[setup_intent]" to it)
-                    }.orEmpty()
+                    incentiveEligibilitySession?.toParamMap().orEmpty()
                 ),
             ),
             responseJsonParser = ConsumerSessionSignupJsonParser,
@@ -321,6 +323,30 @@ class ConsumersApiServiceImpl(
         )
     }
 
+    override suspend fun updateAvailableIncentives(
+        sessionId: String,
+        consumerSessionClientSecret: String,
+        requestSurface: String,
+        requestOptions: ApiRequest.Options,
+    ): Result<UpdateAvailableIncentives> {
+        return executeRequestWithResultParser(
+            stripeErrorJsonParser = stripeErrorJsonParser,
+            stripeNetworkClient = stripeNetworkClient,
+            request = apiRequestFactory.createPost(
+                url = updateAvailableIncentivesUrl,
+                options = requestOptions,
+                params = mapOf(
+                    "request_surface" to requestSurface,
+                    "session_id" to sessionId,
+                    "credentials" to mapOf(
+                        "consumer_session_client_secret" to consumerSessionClientSecret
+                    ),
+                ),
+            ),
+            responseJsonParser = UpdateAvailableIncentivesJsonParser,
+        )
+    }
+
     internal companion object {
 
         /**
@@ -362,6 +388,11 @@ class ConsumersApiServiceImpl(
          * @return `https://api.stripe.com/v1/consumers/payment_details/share`
          */
         private val sharePaymentDetails: String = getApiUrl("consumers/payment_details/share")
+
+        /**
+         * @return `https://api.stripe.com/v1/consumers/incentives/update_available`
+         */
+        private val updateAvailableIncentivesUrl: String = getApiUrl("consumers/incentives/update_available")
 
         private fun getApiUrl(path: String): String {
             return "${ApiRequest.API_HOST}/v1/$path"

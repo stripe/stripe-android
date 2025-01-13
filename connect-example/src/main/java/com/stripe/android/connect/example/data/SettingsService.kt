@@ -3,6 +3,8 @@ package com.stripe.android.connect.example.data
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
+import com.stripe.android.connect.AccountOnboardingProps
+import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.example.ui.appearance.AppearanceInfo
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.channels.awaitClose
@@ -42,7 +44,7 @@ class SettingsService @Inject constructor(@ApplicationContext context: Context) 
     fun getAppearanceIdFlow(): Flow<AppearanceInfo.AppearanceId?> {
         return observePref(APPEARANCE_ID_KEY) { prefs, key ->
             val appearanceId = prefs.getString(key, null) ?: return@observePref null
-            AppearanceInfo.AppearanceId.valueOf(appearanceId)
+            AppearanceInfo.AppearanceId.entries.firstOrNull { it.name == appearanceId }
         }
     }
 
@@ -88,7 +90,9 @@ class SettingsService @Inject constructor(@ApplicationContext context: Context) 
         return PresentationSettings(
             presentationStyleIsPush = !sharedPreferences.getBoolean(PRESENTATION_IS_MODAL, false),
             embedInTabBar = sharedPreferences.getBoolean(EMBED_IN_TABBAR, false),
-            embedInNavBar = !sharedPreferences.getBoolean(DISABLE_EMBED_IN_NAVBAR, false)
+            embedInNavBar = !sharedPreferences.getBoolean(DISABLE_EMBED_IN_NAVBAR, false),
+            useXmlViews = sharedPreferences.getBoolean(USE_XML_VIEWS, false),
+            enableEdgeToEdge = sharedPreferences.getBoolean(ENABLE_EDGE_TO_EDGE, false)
         )
     }
 
@@ -97,6 +101,8 @@ class SettingsService @Inject constructor(@ApplicationContext context: Context) 
             putBoolean(PRESENTATION_IS_MODAL, !value.presentationStyleIsPush)
             putBoolean(EMBED_IN_TABBAR, value.embedInTabBar)
             putBoolean(DISABLE_EMBED_IN_NAVBAR, !value.embedInNavBar)
+            putBoolean(USE_XML_VIEWS, value.useXmlViews)
+            putBoolean(ENABLE_EDGE_TO_EDGE, value.enableEdgeToEdge)
         }
     }
 
@@ -140,6 +146,8 @@ class SettingsService @Inject constructor(@ApplicationContext context: Context) 
         private const val PRESENTATION_IS_MODAL = "PresentationIsModal"
         private const val DISABLE_EMBED_IN_NAVBAR = "DisableEmbedInNavbar"
         private const val EMBED_IN_TABBAR = "EmbedInTabbar"
+        private const val USE_XML_VIEWS = "UseXmlViews"
+        private const val ENABLE_EDGE_TO_EDGE = "EnableEdgeToEdge"
         private const val ONBOARDING_TERMS_OF_SERVICE_URL = "OnboardingTermsOfServiceURL"
         private const val ONBOARDING_RECIPIENT_TERMS_OF_SERVICE_STRING = "OnboardingRecipientTermsOfServiceString"
         private const val ONBOARDING_PRIVACY_POLICY_STRING = "OnboardingPrivacyPolicyString"
@@ -150,20 +158,48 @@ class SettingsService @Inject constructor(@ApplicationContext context: Context) 
 }
 
 data class OnboardingSettings(
-    val fullTermsOfServiceString: String?,
-    val recipientTermsOfServiceString: String?,
-    val privacyPolicyString: String?,
-    val skipTermsOfService: SkipTermsOfService,
-    val fieldOption: FieldOption,
-    val futureRequirement: FutureRequirement
-)
+    val fullTermsOfServiceString: String? = null,
+    val recipientTermsOfServiceString: String? = null,
+    val privacyPolicyString: String? = null,
+    val skipTermsOfService: SkipTermsOfService = SkipTermsOfService.DEFAULT,
+    val fieldOption: FieldOption = FieldOption.DEFAULT,
+    val futureRequirement: FutureRequirement = FutureRequirement.DEFAULT,
+) {
+    @OptIn(PrivateBetaConnectSDK::class)
+    fun toProps(): AccountOnboardingProps {
+        return AccountOnboardingProps(
+            fullTermsOfServiceUrl = fullTermsOfServiceString,
+            recipientTermsOfServiceUrl = recipientTermsOfServiceString,
+            privacyPolicyUrl = privacyPolicyString,
+            skipTermsOfServiceCollection = when (skipTermsOfService) {
+                SkipTermsOfService.DEFAULT -> null
+                SkipTermsOfService.SKIP -> true
+                SkipTermsOfService.SHOW -> false
+            },
+            collectionOptions = AccountOnboardingProps.CollectionOptions(
+                fields = when (fieldOption) {
+                    FieldOption.DEFAULT -> null
+                    FieldOption.CURRENTLY_DUE -> AccountOnboardingProps.FieldOption.CURRENTLY_DUE
+                    FieldOption.EVENTUALLY_DUE -> AccountOnboardingProps.FieldOption.EVENTUALLY_DUE
+                },
+                futureRequirements = when (futureRequirement) {
+                    FutureRequirement.DEFAULT -> null
+                    FutureRequirement.OMIT -> AccountOnboardingProps.FutureRequirementOption.OMIT
+                    FutureRequirement.INCLUDE -> AccountOnboardingProps.FutureRequirementOption.INCLUDE
+                }
+            ),
+        )
+    }
+}
 
 data class PresentationSettings(
-    val presentationStyleIsPush: Boolean,
-    val embedInTabBar: Boolean,
-    val embedInNavBar: Boolean
+    val presentationStyleIsPush: Boolean = false,
+    val embedInTabBar: Boolean = false,
+    val embedInNavBar: Boolean = false,
+    val useXmlViews: Boolean = false,
+    val enableEdgeToEdge: Boolean = false,
 )
 
 enum class SkipTermsOfService { DEFAULT, SKIP, SHOW }
-enum class FieldOption { DEFAULT, OPTIONAL, REQUIRED }
-enum class FutureRequirement { DEFAULT, INCLUDE, EXCLUDE }
+enum class FieldOption { DEFAULT, CURRENTLY_DUE, EVENTUALLY_DUE }
+enum class FutureRequirement { DEFAULT, OMIT, INCLUDE }

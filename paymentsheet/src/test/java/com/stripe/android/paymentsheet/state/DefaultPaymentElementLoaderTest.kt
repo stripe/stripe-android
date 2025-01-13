@@ -123,12 +123,15 @@ internal class DefaultPaymentElementLoaderTest {
                 config = config.asCommonConfiguration(),
                 customer = CustomerState(
                     id = config.customer!!.id,
-                    ephemeralKeySecret = config.customer.ephemeralKeySecret,
+                    ephemeralKeySecret = config.customer!!.ephemeralKeySecret,
+                    customerSessionClientSecret = null,
                     paymentMethods = PAYMENT_METHODS,
                     permissions = CustomerState.Permissions(
                         canRemovePaymentMethods = true,
+                        canRemoveLastPaymentMethod = true,
                         canRemoveDuplicates = false,
                     ),
+                    defaultPaymentMethodId = null
                 ),
                 paymentSelection = PaymentSelection.Saved(
                     paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
@@ -232,6 +235,72 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
+    fun `Should default to google if customer has no payment methods and no last used payment method`() =
+        runTest {
+            prefsRepository.savePaymentSelection(null)
+
+            val loader = createPaymentElementLoader(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                isGooglePayReady = true,
+                customerRepo = FakeCustomerRepository(paymentMethods = emptyList()),
+            )
+
+            val result = loader.load(
+                initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                    clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+                ),
+                paymentSheetConfiguration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+                initializedViaCompose = false,
+            ).getOrThrow()
+
+            assertThat(result.paymentSelection).isEqualTo(PaymentSelection.GooglePay)
+        }
+
+    @Test
+    fun `Should default to no payment method google pay is not ready`() =
+        runTest {
+            prefsRepository.savePaymentSelection(null)
+
+            val loader = createPaymentElementLoader(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                isGooglePayReady = false,
+                customerRepo = FakeCustomerRepository(paymentMethods = emptyList()),
+            )
+
+            val result = loader.load(
+                initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                    clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+                ),
+                paymentSheetConfiguration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+                initializedViaCompose = false,
+            ).getOrThrow()
+
+            assertThat(result.paymentSelection).isNull()
+        }
+
+    @Test
+    fun `Should default to no payment method google pay is not configured`() =
+        runTest {
+            prefsRepository.savePaymentSelection(null)
+
+            val loader = createPaymentElementLoader(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                isGooglePayReady = true,
+                customerRepo = FakeCustomerRepository(paymentMethods = emptyList()),
+            )
+
+            val result = loader.load(
+                initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                    clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+                ),
+                paymentSheetConfiguration = PaymentSheetFixtures.CONFIG_CUSTOMER,
+                initializedViaCompose = false,
+            ).getOrThrow()
+
+            assertThat(result.paymentSelection).isNull()
+        }
+
+    @Test
     fun `Should default to no payment method if customer has no payment methods and no last used payment method`() =
         runTest {
             prefsRepository.savePaymentSelection(null)
@@ -240,6 +309,7 @@ internal class DefaultPaymentElementLoaderTest {
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
                 isGooglePayReady = true,
                 customerRepo = FakeCustomerRepository(paymentMethods = emptyList()),
+                isGooglePayEnabledFromBackend = false,
             )
 
             val result = loader.load(
@@ -487,7 +557,7 @@ internal class DefaultPaymentElementLoaderTest {
             paymentSheetConfiguration = mockConfiguration(
                 customer = PaymentSheet.CustomerConfiguration(
                     id = "some_id",
-                    ephemeralKeySecret = "some_key"
+                    ephemeralKeySecret = "ek_123",
                 )
             ),
             initializedViaCompose = false,
@@ -576,7 +646,7 @@ internal class DefaultPaymentElementLoaderTest {
                 phone = null,
                 billingCountryCode = "CA",
             ),
-            shippingValues = null,
+            shippingDetails = null,
             passthroughModeEnabled = false,
             cardBrandChoice = null,
             flags = emptyMap(),
@@ -603,7 +673,7 @@ internal class DefaultPaymentElementLoaderTest {
             initializedViaCompose = false,
         ).getOrThrow()
 
-        assertThat(result.linkState?.configuration?.shippingValues).isNotNull()
+        assertThat(result.linkState?.configuration?.shippingDetails).isNotNull()
     }
 
     @Test
@@ -616,6 +686,7 @@ internal class DefaultPaymentElementLoaderTest {
                 linkMode = LinkMode.Passthrough,
                 linkFlags = emptyMap(),
                 disableLinkSignup = false,
+                linkConsumerIncentive = null,
             )
         )
 
@@ -647,6 +718,7 @@ internal class DefaultPaymentElementLoaderTest {
                     "link_passthrough_mode_enabled" to true,
                 ),
                 disableLinkSignup = false,
+                linkConsumerIncentive = null,
             )
         )
 
@@ -722,6 +794,7 @@ internal class DefaultPaymentElementLoaderTest {
                 linkMode = LinkMode.LinkPaymentMethod,
                 linkFlags = mapOf(),
                 disableLinkSignup = false,
+                linkConsumerIncentive = null,
             ),
             linkStore = mock {
                 on { hasUsedLink() } doReturn true
@@ -748,6 +821,7 @@ internal class DefaultPaymentElementLoaderTest {
                 linkMode = LinkMode.LinkPaymentMethod,
                 linkFlags = mapOf(),
                 disableLinkSignup = true,
+                linkConsumerIncentive = null,
             )
         )
 
@@ -907,7 +981,7 @@ internal class DefaultPaymentElementLoaderTest {
             paymentSheetConfiguration = mockConfiguration(
                 customer = PaymentSheet.CustomerConfiguration(
                     id = "id",
-                    ephemeralKeySecret = "key"
+                    ephemeralKeySecret = "ek_123",
                 ),
             ),
             initializedViaCompose = false,
@@ -931,7 +1005,7 @@ internal class DefaultPaymentElementLoaderTest {
             paymentSheetConfiguration = mockConfiguration(
                 customer = PaymentSheet.CustomerConfiguration(
                     id = "id",
-                    ephemeralKeySecret = "key",
+                    ephemeralKeySecret = "ek_123",
                 ),
             ),
             initializedViaCompose = false,
@@ -977,7 +1051,7 @@ internal class DefaultPaymentElementLoaderTest {
                 merchantDisplayName = "Some Name",
                 customer = PaymentSheet.CustomerConfiguration(
                     id = "cus_123",
-                    ephemeralKeySecret = "some_secret",
+                    ephemeralKeySecret = "ek_123",
                 ),
             ),
             initializedViaCompose = false,
@@ -1187,7 +1261,7 @@ internal class DefaultPaymentElementLoaderTest {
                 merchantDisplayName = "Some Name",
                 customer = PaymentSheet.CustomerConfiguration(
                     id = "cus_123",
-                    ephemeralKeySecret = "some_secret",
+                    ephemeralKeySecret = "ek_123",
                 ),
             ),
             initializedViaCompose = false,
@@ -1373,11 +1447,14 @@ internal class DefaultPaymentElementLoaderTest {
                 CustomerState(
                     id = "cus_1",
                     ephemeralKeySecret = "ek_123",
+                    customerSessionClientSecret = "customer_client_secret",
                     paymentMethods = cards,
                     permissions = CustomerState.Permissions(
                         canRemovePaymentMethods = false,
+                        canRemoveLastPaymentMethod = false,
                         canRemoveDuplicates = true,
                     ),
+                    defaultPaymentMethodId = null
                 )
             )
         }
@@ -1392,6 +1469,7 @@ internal class DefaultPaymentElementLoaderTest {
                     session = createElementsSessionCustomerSession(
                         ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
                             isPaymentMethodRemoveEnabled = true,
+                            canRemoveLastPaymentMethod = true,
                             isPaymentMethodSaveEnabled = false,
                             allowRedisplayOverride = null,
                         )
@@ -1417,6 +1495,7 @@ internal class DefaultPaymentElementLoaderTest {
             assertThat(state.customer?.permissions).isEqualTo(
                 CustomerState.Permissions(
                     canRemovePaymentMethods = true,
+                    canRemoveLastPaymentMethod = true,
                     canRemoveDuplicates = true,
                 )
             )
@@ -1433,6 +1512,7 @@ internal class DefaultPaymentElementLoaderTest {
                         ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
                             isPaymentMethodRemoveEnabled = false,
                             isPaymentMethodSaveEnabled = false,
+                            canRemoveLastPaymentMethod = true,
                             allowRedisplayOverride = null,
                         )
                     ),
@@ -1457,6 +1537,7 @@ internal class DefaultPaymentElementLoaderTest {
             assertThat(state.customer?.permissions).isEqualTo(
                 CustomerState.Permissions(
                     canRemovePaymentMethods = false,
+                    canRemoveLastPaymentMethod = true,
                     canRemoveDuplicates = true,
                 )
             )
@@ -1473,6 +1554,7 @@ internal class DefaultPaymentElementLoaderTest {
                         ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
                             isPaymentMethodRemoveEnabled = false,
                             isPaymentMethodSaveEnabled = false,
+                            canRemoveLastPaymentMethod = true,
                             allowRedisplayOverride = null,
                         )
                     ),
@@ -1497,6 +1579,7 @@ internal class DefaultPaymentElementLoaderTest {
             assertThat(state.customer?.permissions).isEqualTo(
                 CustomerState.Permissions(
                     canRemovePaymentMethods = false,
+                    canRemoveLastPaymentMethod = true,
                     canRemoveDuplicates = true,
                 )
             )
@@ -1515,7 +1598,7 @@ internal class DefaultPaymentElementLoaderTest {
                     merchantDisplayName = "Merchant, Inc.",
                     customer = PaymentSheet.CustomerConfiguration(
                         id = "cus_1",
-                        ephemeralKeySecret = "ephemeral_key",
+                        ephemeralKeySecret = "ek_123",
                     ),
                 ),
                 initializedViaCompose = false,
@@ -1524,6 +1607,7 @@ internal class DefaultPaymentElementLoaderTest {
             assertThat(state.customer?.permissions).isEqualTo(
                 CustomerState.Permissions(
                     canRemovePaymentMethods = true,
+                    canRemoveLastPaymentMethod = true,
                     canRemoveDuplicates = false,
                 )
             )
@@ -1632,7 +1716,7 @@ internal class DefaultPaymentElementLoaderTest {
                     merchantDisplayName = "Merchant, Inc.",
                     customer = PaymentSheet.CustomerConfiguration(
                         id = "cus_1",
-                        ephemeralKeySecret = "ephemeral_key_secret",
+                        ephemeralKeySecret = "ek_123",
                     ),
                 ),
                 initializedViaCompose = false,
@@ -1643,12 +1727,15 @@ internal class DefaultPaymentElementLoaderTest {
             assertThat(state.customer).isEqualTo(
                 CustomerState(
                     id = "cus_1",
-                    ephemeralKeySecret = "ephemeral_key_secret",
+                    ephemeralKeySecret = "ek_123",
+                    customerSessionClientSecret = null,
                     paymentMethods = cards,
                     permissions = CustomerState.Permissions(
                         canRemovePaymentMethods = true,
+                        canRemoveLastPaymentMethod = true,
                         canRemoveDuplicates = false,
                     ),
+                    defaultPaymentMethodId = null
                 )
             )
         }
@@ -1786,6 +1873,7 @@ internal class DefaultPaymentElementLoaderTest {
                 CustomerRepository.CustomerInfo(
                     id = "cus_1",
                     ephemeralKeySecret = "ek_123",
+                    customerSessionClientSecret = "cuss_1",
                 )
             )
         }
@@ -2103,6 +2191,73 @@ internal class DefaultPaymentElementLoaderTest {
         )
     }
 
+    @Test
+    fun `When using 'LegacyEphemeralKey',last PM permission should be true if config value is true`() =
+        removeLastPaymentMethodTest(
+            customer = PaymentSheet.CustomerConfiguration(
+                id = "cus_1",
+                ephemeralKeySecret = "ek_123",
+            ),
+            canRemoveLastPaymentMethodFromConfig = true,
+        ) { permissions ->
+            assertThat(permissions.canRemoveLastPaymentMethod).isTrue()
+        }
+
+    @OptIn(ExperimentalCustomerSessionApi::class)
+    @Test
+    fun `When using 'CustomerSession', last PM permission should be true if server & config value is true`() =
+        removeLastPaymentMethodTest(
+            customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                id = "cus_1",
+                clientSecret = "cuss_123",
+            ),
+            canRemoveLastPaymentMethodFromServer = true,
+            canRemoveLastPaymentMethodFromConfig = true,
+        ) { permissions ->
+            assertThat(permissions.canRemoveLastPaymentMethod).isTrue()
+        }
+
+    private fun removeLastPaymentMethodTest(
+        customer: PaymentSheet.CustomerConfiguration,
+        shouldDisableMobilePaymentElement: Boolean = false,
+        canRemoveLastPaymentMethodFromServer: Boolean = true,
+        canRemoveLastPaymentMethodFromConfig: Boolean = true,
+        test: (CustomerState.Permissions) -> Unit,
+    ) = runTest {
+        val loader = createPaymentElementLoader(
+            customer = ElementsSession.Customer(
+                paymentMethods = PaymentMethodFactory.cards(4),
+                session = createElementsSessionCustomerSession(
+                    if (shouldDisableMobilePaymentElement) {
+                        ElementsSession.Customer.Components.MobilePaymentElement.Disabled
+                    } else {
+                        ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
+                            isPaymentMethodRemoveEnabled = false,
+                            isPaymentMethodSaveEnabled = false,
+                            canRemoveLastPaymentMethod = canRemoveLastPaymentMethodFromServer,
+                            allowRedisplayOverride = null,
+                        )
+                    }
+                ),
+                defaultPaymentMethod = null,
+            )
+        )
+
+        val state = loader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = "client_secret"
+            ),
+            paymentSheetConfiguration = PaymentSheet.Configuration(
+                merchantDisplayName = "Merchant, Inc.",
+                customer = customer,
+                allowsRemovalOfLastSavedPaymentMethod = canRemoveLastPaymentMethodFromConfig
+            ),
+            initializedViaCompose = false,
+        ).getOrThrow()
+
+        test(requireNotNull(state.customer).permissions)
+    }
+
     private suspend fun testExternalPaymentMethods(
         requestedExternalPaymentMethods: List<String>,
         externalPaymentMethodData: String?,
@@ -2143,7 +2298,7 @@ internal class DefaultPaymentElementLoaderTest {
                 merchantDisplayName = "Some Name",
                 customer = PaymentSheet.CustomerConfiguration(
                     id = "cus_123",
-                    ephemeralKeySecret = "some_secret",
+                    ephemeralKeySecret = "ek_123",
                 ),
             ),
             initializedViaCompose = false,
@@ -2168,6 +2323,7 @@ internal class DefaultPaymentElementLoaderTest {
             linkMode = if (passthroughModeEnabled) LinkMode.Passthrough else LinkMode.LinkPaymentMethod,
             linkFlags = mapOf(),
             disableLinkSignup = false,
+            linkConsumerIncentive = null,
         )
     }
 
@@ -2195,6 +2351,7 @@ internal class DefaultPaymentElementLoaderTest {
                 ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
                     isPaymentMethodSaveEnabled = it,
                     isPaymentMethodRemoveEnabled = true,
+                    canRemoveLastPaymentMethod = true,
                     allowRedisplayOverride = null,
                 )
             } ?: ElementsSession.Customer.Components.MobilePaymentElement.Disabled
@@ -2289,7 +2446,7 @@ internal class DefaultPaymentElementLoaderTest {
             merchantDisplayName = "Some Name",
             customer = PaymentSheet.CustomerConfiguration(
                 id = "cus_123",
-                ephemeralKeySecret = "some_secret",
+                ephemeralKeySecret = "ek_123",
             ),
         )
         private val DEFAULT_INITIALIZATION_MODE = PaymentElementLoader.InitializationMode.PaymentIntent(

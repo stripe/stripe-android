@@ -418,6 +418,7 @@ internal class PlaygroundSettings private constructor(
             CustomerSessionSettingsDefinition,
             CustomerSessionSaveSettingsDefinition,
             CustomerSessionRemoveSettingsDefinition,
+            CustomerSessionRemoveLastSettingsDefinition,
             CustomerSessionRedisplaySettingsDefinition,
             CustomerSessionRedisplayFiltersSettingsDefinition,
             CustomerSessionOverrideRedisplaySettingsDefinition,
@@ -447,14 +448,15 @@ internal class PlaygroundSettings private constructor(
             ExternalPaymentMethodSettingsDefinition,
             LayoutSettingsDefinition,
             CardBrandAcceptanceSettingsDefinition,
-            FeatureFlagSettingsDefinition(FeatureFlags.useNewUpdateCardScreen),
-            FeatureFlagSettingsDefinition(FeatureFlags.instantDebitsDeferredIntent),
+            FeatureFlagSettingsDefinition(FeatureFlags.instantDebitsIncentives),
+            FeatureFlagSettingsDefinition(FeatureFlags.enableDefaultPaymentMethods),
         )
 
         private val nonUiSettingDefinitions: List<PlaygroundSettingDefinition<*>> = listOf(
             AppearanceSettingsDefinition,
             CustomEndpointDefinition,
             ShippingAddressSettingsDefinition,
+            EmbeddedAppearanceSettingsDefinition
         )
 
         private val allSettingDefinitions: List<PlaygroundSettingDefinition<*>> =

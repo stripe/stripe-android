@@ -9,39 +9,38 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named
-import javax.inject.Singleton
 
 @Module
 internal object FinancialConnectionsSheetConfigurationModule {
 
     @Provides
     @Named(PUBLISHABLE_KEY)
-    @Singleton
+    @ActivityRetainedScope
     fun providesPublishableKey(
         configuration: FinancialConnectionsSheet.Configuration
     ): String = configuration.publishableKey
 
     @Provides
     @Named(STRIPE_ACCOUNT_ID)
-    @Singleton
+    @ActivityRetainedScope
     fun providesStripeAccountId(
         configuration: FinancialConnectionsSheet.Configuration
     ): String? = configuration.stripeAccountId
 
     @Provides
     @Named(ENABLE_LOGGING)
-    @Singleton
+    @ActivityRetainedScope
     fun providesEnableLogging(): Boolean = BuildConfig.DEBUG
 
     @Provides
-    @Singleton
+    @ActivityRetainedScope
     @Named(APPLICATION_ID)
     fun providesApplicationId(
         application: Application
     ): String = application.packageName
 
     @Provides
-    @Singleton
+    @ActivityRetainedScope
     fun providesApiVersion(): ApiVersion = ApiVersion(
         betas = setOf("financial_connections_client_api_beta=v1")
     )

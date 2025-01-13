@@ -22,7 +22,7 @@ internal object PaymentMethodFixtures {
         ),
         country = "US",
         expiryMonth = 8,
-        expiryYear = 2022,
+        expiryYear = 2029,
         fingerprint = "fingerprint123",
         funding = "credit",
         last4 = "4242",
@@ -73,6 +73,25 @@ internal object PaymentMethodFixtures {
         billingDetails = BILLING_DETAILS,
         customerId = "cus_AQsHpvKfKwJDrF",
         card = CARD_WITH_NETWORKS,
+        code = "card"
+    )
+
+    val EXPIRED_CARD_PAYMENT_METHOD = PaymentMethod(
+        id = "pm_123456789",
+        created = 1550757934255L,
+        liveMode = true,
+        type = PaymentMethod.Type.Card,
+        billingDetails = BILLING_DETAILS,
+        customerId = "cus_AQsHpvKfKwJDrF",
+        card = CARD_WITH_NETWORKS.copy(
+            displayBrand = "visa",
+            networks = PaymentMethod.Card.Networks(
+                available = setOf("visa", "cartes_bancaires"),
+                preferred = "visa",
+            ),
+            expiryMonth = 4,
+            expiryYear = 2024,
+        ),
         code = "card"
     )
 
@@ -449,7 +468,7 @@ internal object PaymentMethodFixtures {
     )
 
     val US_BANK_PAYMENT_SELECTION = PaymentSelection.New.USBankAccount(
-        labelResource = "Test",
+        label = "Test",
         iconResource = 0,
         paymentMethodCreateParams = mock(),
         customerRequestedSave = mock(),
@@ -578,11 +597,20 @@ internal object PaymentMethodFixtures {
         return CARD_PAYMENT_METHOD.toDisplayableSavedPaymentMethod()
     }
 
-    fun PaymentMethod.toDisplayableSavedPaymentMethod(): DisplayableSavedPaymentMethod {
+    fun defaultDisplayableCard(): DisplayableSavedPaymentMethod {
+        return CARD_PAYMENT_METHOD.toDisplayableSavedPaymentMethod(shouldShowDefaultBadge = true)
+    }
+
+    fun PaymentMethod.toDisplayableSavedPaymentMethod(
+        shouldShowDefaultBadge: Boolean = false
+    ): DisplayableSavedPaymentMethod {
         return DisplayableSavedPaymentMethod.create(
-            displayName = (this.card?.last4 ?: this.usBankAccount?.last4 ?: "").resolvableString,
+            displayName = (
+                this.card?.last4 ?: this.usBankAccount?.last4 ?: this.sepaDebit?.last4 ?: ""
+                ).resolvableString,
             paymentMethod = this,
             isCbcEligible = true,
+            shouldShowDefaultBadge = shouldShowDefaultBadge
         )
     }
 

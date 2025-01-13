@@ -21,6 +21,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.code
@@ -60,11 +61,6 @@ internal fun PaymentMethodVerticalLayoutUI(
                 PaymentMethodVerticalLayoutInteractor.ViewAction.TransitionToManageSavedPaymentMethods
             )
         },
-        onEditPaymentMethod = {
-            interactor.handleViewAction(
-                PaymentMethodVerticalLayoutInteractor.ViewAction.EditPaymentMethod(it)
-            )
-        },
         onSelectSavedPaymentMethod = {
             interactor.handleViewAction(
                 PaymentMethodVerticalLayoutInteractor.ViewAction.SavedPaymentMethodSelected(it.paymentMethod)
@@ -77,11 +73,11 @@ internal fun PaymentMethodVerticalLayoutUI(
         },
         imageLoader = imageLoader,
         modifier = modifier
-            .padding(horizontal = 20.dp)
             .testTag(TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT)
     )
 }
 
+@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @VisibleForTesting
 @Composable
 internal fun PaymentMethodVerticalLayoutUI(
@@ -92,7 +88,6 @@ internal fun PaymentMethodVerticalLayoutUI(
     isEnabled: Boolean,
     onViewMorePaymentMethods: () -> Unit,
     onManageOneSavedPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
-    onEditPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     onSelectSavedPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     imageLoader: StripeImageLoader,
     modifier: Modifier = Modifier,
@@ -112,16 +107,14 @@ internal fun PaymentMethodVerticalLayoutUI(
                 displayableSavedPaymentMethod = displayedSavedPaymentMethod,
                 isEnabled = isEnabled,
                 isSelected = selection?.isSaved == true,
+                onClick = { onSelectSavedPaymentMethod(displayedSavedPaymentMethod) },
                 trailingContent = {
                     SavedPaymentMethodTrailingContent(
-                        displayedSavedPaymentMethod = displayedSavedPaymentMethod,
                         savedPaymentMethodAction = savedPaymentMethodAction,
                         onViewMorePaymentMethods = onViewMorePaymentMethods,
-                        onEditPaymentMethod = onEditPaymentMethod,
                         onManageOneSavedPaymentMethod = { onManageOneSavedPaymentMethod(displayedSavedPaymentMethod) },
                     )
-                },
-                onClick = { onSelectSavedPaymentMethod(displayedSavedPaymentMethod) },
+                }
             )
             Text(stringResource(id = R.string.stripe_paymentsheet_new_pm), style = textStyle, color = textColor)
         }
@@ -139,24 +132,19 @@ internal fun PaymentMethodVerticalLayoutUI(
             paymentMethods = paymentMethods,
             selectedIndex = selectedIndex,
             isEnabled = isEnabled,
-            imageLoader = imageLoader
+            imageLoader = imageLoader,
         )
     }
 }
 
 @Composable
-private fun SavedPaymentMethodTrailingContent(
-    displayedSavedPaymentMethod: DisplayableSavedPaymentMethod,
+internal fun SavedPaymentMethodTrailingContent(
     savedPaymentMethodAction: PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction,
     onViewMorePaymentMethods: () -> Unit,
     onManageOneSavedPaymentMethod: () -> Unit,
-    onEditPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
 ) {
     when (savedPaymentMethodAction) {
         PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.NONE -> Unit
-        PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.EDIT_CARD_BRAND -> {
-            EditButton(onClick = { onEditPaymentMethod(displayedSavedPaymentMethod) })
-        }
         PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ONE -> {
             EditButton(onClick = onManageOneSavedPaymentMethod)
         }

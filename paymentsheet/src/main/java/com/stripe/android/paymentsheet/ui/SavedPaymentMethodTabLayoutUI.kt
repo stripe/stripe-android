@@ -48,7 +48,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
@@ -102,11 +101,6 @@ internal fun SavedPaymentMethodTabLayoutUI(
                 SelectSavedPaymentMethodsInteractor.ViewAction.EditPaymentMethod(it)
             )
         },
-        onItemRemoved = {
-            interactor.handleViewAction(
-                SelectSavedPaymentMethodsInteractor.ViewAction.DeletePaymentMethod(it)
-            )
-        },
         modifier = modifier,
     )
 
@@ -132,7 +126,6 @@ internal fun SavedPaymentMethodTabLayoutUI(
     onAddCardPressed: () -> Unit,
     onItemSelected: (PaymentSelection?) -> Unit,
     onModifyItem: (DisplayableSavedPaymentMethod) -> Unit,
-    onItemRemoved: (PaymentMethod) -> Unit,
     modifier: Modifier = Modifier,
     scrollState: LazyListState = rememberLazyListState(),
 ) {
@@ -160,7 +153,6 @@ internal fun SavedPaymentMethodTabLayoutUI(
                     isSelected = isSelected,
                     onAddCardPressed = onAddCardPressed,
                     onItemSelected = onItemSelected,
-                    onItemRemoved = onItemRemoved,
                     onModifyItem = onModifyItem,
                     modifier = Modifier
                         .semantics { testTagsAsResourceId = true }
@@ -196,7 +188,6 @@ private fun SavedPaymentMethodsTabLayoutPreview() {
                             )
                         )
                     ),
-                    canRemovePaymentMethods = true,
                 ),
                 PaymentOptionsItem.SavedPaymentMethod(
                     DisplayableSavedPaymentMethod.create(
@@ -209,7 +200,6 @@ private fun SavedPaymentMethodsTabLayoutPreview() {
                             type = PaymentMethod.Type.SepaDebit,
                         )
                     ),
-                    canRemovePaymentMethods = true,
                 ),
             ),
             selectedPaymentOptionsItem = PaymentOptionsItem.AddCard,
@@ -218,7 +208,6 @@ private fun SavedPaymentMethodsTabLayoutPreview() {
             onAddCardPressed = { },
             onItemSelected = { },
             onModifyItem = { },
-            onItemRemoved = { },
         )
     }
 }
@@ -242,7 +231,6 @@ private fun SavedPaymentMethodTab(
     onAddCardPressed: () -> Unit,
     onItemSelected: (PaymentSelection?) -> Unit,
     onModifyItem: (DisplayableSavedPaymentMethod) -> Unit,
-    onItemRemoved: (PaymentMethod) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     when (item) {
@@ -278,11 +266,9 @@ private fun SavedPaymentMethodTab(
                 width = width,
                 isEnabled = isEnabled,
                 isEditing = isEditing,
-                isModifiable = item.isModifiable,
                 isSelected = isSelected,
                 onItemSelected = onItemSelected,
                 onModifyItem = onModifyItem,
-                onItemRemoved = onItemRemoved,
                 modifier = modifier,
             )
         }
@@ -304,10 +290,10 @@ private fun AddCardTab(
 
     SavedPaymentMethodTab(
         viewWidth = width,
-        editState = PaymentOptionEditState.None,
+        shouldShowModifyBadge = false,
         isSelected = false,
-        isEnabled = isEnabled,
         labelText = stringResource(R.string.stripe_paymentsheet_add_payment_method_button_label),
+        isEnabled = isEnabled,
         iconRes = iconRes,
         onItemSelectedListener = onAddCardPressed,
         description = stringResource(R.string.stripe_add_new_payment_method),
@@ -325,7 +311,7 @@ private fun GooglePayTab(
 ) {
     SavedPaymentMethodTab(
         viewWidth = width,
-        editState = PaymentOptionEditState.None,
+        shouldShowModifyBadge = false,
         isSelected = isSelected,
         isEnabled = isEnabled,
         iconRes = R.drawable.stripe_google_pay_mark,
@@ -346,7 +332,7 @@ private fun LinkTab(
 ) {
     SavedPaymentMethodTab(
         viewWidth = width,
-        editState = PaymentOptionEditState.None,
+        shouldShowModifyBadge = false,
         isSelected = isSelected,
         isEnabled = isEnabled,
         iconRes = R.drawable.stripe_ic_paymentsheet_link,
@@ -364,11 +350,9 @@ private fun SavedPaymentMethodTab(
     width: Dp,
     isEnabled: Boolean,
     isEditing: Boolean,
-    isModifiable: Boolean,
     isSelected: Boolean,
     onItemSelected: (PaymentSelection?) -> Unit,
     onModifyItem: (DisplayableSavedPaymentMethod) -> Unit,
-    onItemRemoved: (PaymentMethod) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val labelIcon = paymentMethod.paymentMethod.getLabelIcon()
@@ -387,19 +371,13 @@ private fun SavedPaymentMethodTab(
     ) {
         SavedPaymentMethodTab(
             viewWidth = width,
-            editState = when {
-                isEnabled && isEditing && (isModifiable || FeatureFlags.useNewUpdateCardScreen.isEnabled) ->
-                    PaymentOptionEditState.Modifiable
-                isEnabled && isEditing -> PaymentOptionEditState.Removable
-                else -> PaymentOptionEditState.None
-            },
+            shouldShowModifyBadge = isEnabled && isEditing,
             isSelected = isSelected,
             isEnabled = isEnabled,
             isClickable = !isEditing,
             iconRes = paymentMethod.paymentMethod.getSavedPaymentMethodIcon(),
             labelIcon = labelIcon,
             labelText = labelText,
-            paymentMethod = paymentMethod.displayableSavedPaymentMethod,
             description = paymentMethod
                 .displayableSavedPaymentMethod
                 .getDescription()
@@ -409,12 +387,6 @@ private fun SavedPaymentMethodTab(
             onModifyAccessibilityDescription = paymentMethod
                 .displayableSavedPaymentMethod
                 .getModifyDescription()
-                .resolve()
-                .readNumbersAsIndividualDigits(),
-            onRemoveListener = { onItemRemoved(paymentMethod.paymentMethod) },
-            onRemoveAccessibilityDescription = paymentMethod
-                .displayableSavedPaymentMethod
-                .getRemoveDescription()
                 .resolve()
                 .readNumbersAsIndividualDigits(),
             onItemSelectedListener = {

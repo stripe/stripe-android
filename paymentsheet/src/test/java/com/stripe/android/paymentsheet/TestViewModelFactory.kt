@@ -16,7 +16,6 @@ internal object TestViewModelFactory {
         ) -> T
     ): T {
         val linkHandler = LinkHandler(
-            linkLauncher = mock(),
             linkConfigurationCoordinator = linkConfigurationCoordinator,
             savedStateHandle = savedStateHandle,
             linkAnalyticsComponentBuilder = mock(),

@@ -93,6 +93,7 @@ internal class DefaultVerticalModeFormInteractor(
             viewModel: BaseSheetViewModel,
             paymentMethodMetadata: PaymentMethodMetadata,
             customerStateHolder: CustomerStateHolder,
+            bankFormInteractor: BankFormInteractor,
         ): VerticalModeFormInteractor {
             val coroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
             val formHelper = FormHelper.create(
@@ -109,7 +110,8 @@ internal class DefaultVerticalModeFormInteractor(
                     viewModel = viewModel,
                     paymentMethodMetadata = paymentMethodMetadata,
                     hostedSurface = CollectBankAccountLauncher.HOSTED_SURFACE_PAYMENT_ELEMENT,
-                    selectedPaymentMethodCode = selectedPaymentMethodCode
+                    selectedPaymentMethodCode = selectedPaymentMethodCode,
+                    bankFormInteractor = bankFormInteractor,
                 ),
                 headerInformation = paymentMethodMetadata.formHeaderInformationForCode(
                     selectedPaymentMethodCode,

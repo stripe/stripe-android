@@ -180,7 +180,8 @@ internal class VerticalModePaymentSheetActivityTest {
         managePage.waitUntilVisible()
         verticalModePage.assertHasSelectedSavedPaymentMethod("pm_12345")
         managePage.clickEdit()
-        managePage.clickRemove("pm_12345")
+        managePage.clickEdit("pm_12345")
+        editPage.clickRemove()
         managePage.clickDone()
         Espresso.pressBack()
 
@@ -207,8 +208,12 @@ internal class VerticalModePaymentSheetActivityTest {
         managePage.waitUntilVisible()
         verticalModePage.assertHasSelectedSavedPaymentMethod("pm_12345")
         managePage.clickEdit()
-        managePage.clickRemove("pm_12345")
-        managePage.clickRemove("pm_67890")
+        managePage.clickEdit("pm_12345")
+        editPage.clickRemove()
+
+        managePage.waitUntilVisible()
+        managePage.clickEdit("pm_67890")
+        editPage.clickRemove()
 
         verticalModePage.waitUntilVisible()
         verticalModePage.assertDoesNotHaveSavedPaymentMethods()
@@ -229,8 +234,7 @@ internal class VerticalModePaymentSheetActivityTest {
         verticalModePage.assertPrimaryButton(isEnabled())
 
         verticalModePage.clickEdit()
-        managePage.waitUntilRemoveVisible("pm_12345")
-        managePage.clickRemove("pm_12345")
+        editPage.clickRemove()
 
         verticalModePage.waitUntilVisible()
         verticalModePage.assertDoesNotHaveSavedPaymentMethods()
@@ -610,8 +614,7 @@ internal class VerticalModePaymentSheetActivityTest {
             method("POST"),
             path("/v1/payment_methods/$paymentMethodId/detach"),
         ) { response ->
-            // We ignore the result.
-            response.setResponseCode(500)
+            response.setResponseCode(200)
         }
     }
 

@@ -7,7 +7,6 @@ import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.R
 import com.stripe.android.common.model.asCommonConfiguration
-import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkConfigurationCoordinator
@@ -21,6 +20,7 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures.DEFAULT_CARD
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.updateState
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -31,10 +31,8 @@ import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.paymentsheet.state.WalletsState
-import com.stripe.android.paymentsheet.ui.DefaultEditPaymentMethodViewInteractor
-import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewAction
-import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
@@ -666,7 +664,6 @@ internal class PaymentOptionsViewModelTest {
 
         val viewModel = createViewModel(
             args = args,
-            editInteractorFactory = DefaultEditPaymentMethodViewInteractor.Factory,
         )
 
         turbineScope {
@@ -677,13 +674,12 @@ internal class PaymentOptionsViewModelTest {
 
             assertThat(paymentMethodsTurbine.awaitItem()).containsExactlyElementsIn(cards).inOrder()
 
-            viewModel.savedPaymentMethodMutator.modifyPaymentMethod(paymentMethodToRemove)
+            viewModel.savedPaymentMethodMutator.updatePaymentMethod(
+                paymentMethodToRemove.toDisplayableSavedPaymentMethod()
+            )
 
-            val editViewState = screenTurbine.awaitItem() as PaymentSheetScreen.EditPaymentMethod
-            editViewState.interactor.handleViewAction(EditPaymentMethodViewAction.OnRemovePressed)
-
-            screenTurbine.expectNoEvents()
-            editViewState.interactor.handleViewAction(EditPaymentMethodViewAction.OnRemoveConfirmed)
+            val editViewState = screenTurbine.awaitItem() as PaymentSheetScreen.UpdatePaymentMethod
+            editViewState.interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.RemovePaymentMethod)
 
             assertThat(screenTurbine.awaitItem()).isInstanceOf<SelectSavedPaymentMethods>()
 
@@ -692,49 +688,6 @@ internal class PaymentOptionsViewModelTest {
             testScheduler.advanceUntilIdle()
 
             assertThat(paymentMethodsTurbine.awaitItem()).containsExactly(cards[1], cards[2]).inOrder()
-
-            screenTurbine.ensureAllEventsConsumed()
-            screenTurbine.cancelAndIgnoreRemainingEvents()
-
-            paymentMethodsTurbine.ensureAllEventsConsumed()
-            paymentMethodsTurbine.cancelAndIgnoreRemainingEvents()
-        }
-    }
-
-    @Test
-    fun `Correctly updates state when removing payment method in edit screen fails`() = runTest(testDispatcher) {
-        Dispatchers.setMain(testDispatcher)
-
-        val cards = PaymentMethodFactory.cards(3)
-        val paymentMethodToRemove = cards.first()
-
-        whenever(customerRepository.detachPaymentMethod(any(), eq(paymentMethodToRemove.id!!), eq(false))).thenReturn(
-            Result.failure(APIConnectionException())
-        )
-
-        val args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
-            paymentMethods = cards,
-        )
-
-        val viewModel = createViewModel(
-            args = args,
-            editInteractorFactory = DefaultEditPaymentMethodViewInteractor.Factory,
-        )
-
-        turbineScope {
-            val screenTurbine = viewModel.navigationHandler.currentScreen.testIn(this)
-            val paymentMethodsTurbine = viewModel.customerStateHolder.paymentMethods.testIn(this)
-
-            assertThat(screenTurbine.awaitItem()).isInstanceOf<SelectSavedPaymentMethods>()
-
-            assertThat(paymentMethodsTurbine.awaitItem()).containsExactlyElementsIn(cards).inOrder()
-
-            viewModel.savedPaymentMethodMutator.modifyPaymentMethod(paymentMethodToRemove)
-
-            val editViewState = screenTurbine.awaitItem() as PaymentSheetScreen.EditPaymentMethod
-            editViewState.interactor.handleViewAction(EditPaymentMethodViewAction.OnRemovePressed)
-
-            testScheduler.advanceUntilIdle()
 
             screenTurbine.ensureAllEventsConsumed()
             screenTurbine.cancelAndIgnoreRemainingEvents()
@@ -825,7 +778,6 @@ internal class PaymentOptionsViewModelTest {
     private fun createViewModel(
         args: PaymentOptionContract.Args = PAYMENT_OPTION_CONTRACT_ARGS,
         linkState: LinkState? = args.state.linkState,
-        editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory = mock(),
         linkConfigurationCoordinator: LinkConfigurationCoordinator = FakeLinkConfigurationCoordinator()
     ) = TestViewModelFactory.create(linkConfigurationCoordinator) { linkHandler, savedStateHandle ->
         PaymentOptionsViewModel(
@@ -836,7 +788,6 @@ internal class PaymentOptionsViewModelTest {
             savedStateHandle = savedStateHandle,
             linkHandler = linkHandler,
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
-            editInteractorFactory = editInteractorFactory,
         )
     }
 
@@ -889,7 +840,6 @@ internal class PaymentOptionsViewModelTest {
                 ),
             ),
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
-            statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR,
             enableLogging = false,
             productUsage = mock()
         )

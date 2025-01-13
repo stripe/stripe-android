@@ -10,14 +10,13 @@ import kotlinx.coroutines.launch
  * Provides an interface for various download and file operations. Useful for mocking in tests.
  */
 internal interface StripeToastManager {
-    fun showToast(toastString: String)
+    fun showToast(context: Context, toastString: String)
 }
 
 internal class StripeToastManagerImpl(
-    private val context: Context,
     private val scope: CoroutineScope = MainScope()
 ) : StripeToastManager {
-    override fun showToast(toastString: String) {
+    override fun showToast(context: Context, toastString: String) {
         scope.launch {
             Toast.makeText(context, toastString, Toast.LENGTH_LONG).show()
         }

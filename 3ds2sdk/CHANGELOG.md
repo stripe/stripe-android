@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 6.2.0 - 2024-11-19
+- [#9639](https://github.com/stripe/stripe-android/pull/9639) Update 3DS spec to 2.2
+
 ## 6.1.8 - 2024-01-25
 - [#11535](https://git.corp.stripe.com/stripe-internal/android/pull/11535) Add tink to proguard rules.
 

@@ -66,7 +66,7 @@ internal const val VIEW_FINDER_ASPECT_RATIO = 1f
 internal fun DocumentScanScreen(
     navController: NavController,
     identityViewModel: IdentityViewModel,
-    documentScanViewModel: DocumentScanViewModel
+    documentScanViewModel: DocumentScanViewModel,
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -179,9 +179,9 @@ private fun DocumentCaptureScreen(
     }
 
     val title = if (targetScanType.isNullOrFront()) {
-        stringResource(id = R.string.stripe_front_of_id)
+        stringResource(id = R.string.stripe_front_of_id_document)
     } else {
-        stringResource(id = R.string.stripe_back_of_id)
+        stringResource(id = R.string.stripe_back_of_id_document)
     }
 
     Column(

@@ -34,7 +34,7 @@
     <ID>LongMethod:CardFormViewTest.kt$CardFormViewTest$@Test fun testCardValidCallback()</ID>
     <ID>LongMethod:CardInputWidget.kt$CardInputWidget$private fun initView(attrs: AttributeSet?)</ID>
     <ID>LongMethod:CollectBankAccountViewModel.kt$CollectBankAccountViewModel$private suspend fun createFinancialConnectionsSession()</ID>
-    <ID>LongMethod:ElementsSessionFixtures.kt$ElementsSessionFixtures$fun createPaymentIntentWithCustomerSession( allowRedisplay: String? = "limited" ): JSONObject</ID>
+    <ID>LongMethod:ElementsSessionFixtures.kt$ElementsSessionFixtures$fun createPaymentIntentWithCustomerSession( allowRedisplay: String? = "limited", paymentMethodRemoveFeature: String? = "enabled", paymentMethodRemoveLastFeature: String? = "enabled", ): JSONObject</ID>
     <ID>LongMethod:ElementsSessionJsonParserTest.kt$ElementsSessionJsonParserTest$@Test fun `ElementsSession has expected customer session information in the response`()</ID>
     <ID>LongMethod:GooglePayJsonFactoryTest.kt$GooglePayJsonFactoryTest$@Test fun testCreatePaymentMethodRequestJson()</ID>
     <ID>LongMethod:PaymentAuthConfigTest.kt$PaymentAuthConfigTest$@Test fun testUiCustomizationWrapper()</ID>
@@ -57,10 +57,6 @@
     <ID>MagicNumber:CardInputWidgetPlacement.kt$CardInputWidgetPlacement$3</ID>
     <ID>MagicNumber:CardInputWidgetPlacement.kt$CardInputWidgetPlacement$4</ID>
     <ID>MagicNumber:CardInputWidgetPlacement.kt$CardInputWidgetPlacement$5</ID>
-    <ID>MagicNumber:DateUtils.kt$DateUtils$100</ID>
-    <ID>MagicNumber:DateUtils.kt$DateUtils$12</ID>
-    <ID>MagicNumber:DateUtils.kt$DateUtils$20</ID>
-    <ID>MagicNumber:DateUtils.kt$DateUtils$80</ID>
     <ID>MagicNumber:ExpirationDate.kt$ExpirationDate.Unvalidated$3</ID>
     <ID>MagicNumber:PaymentAuthConfig.kt$PaymentAuthConfig.Stripe3ds2Config$5</ID>
     <ID>MagicNumber:PaymentAuthConfig.kt$PaymentAuthConfig.Stripe3ds2Config$99</ID>

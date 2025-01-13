@@ -25,9 +25,6 @@ internal interface FlowControllerComponent {
         ): Builder
 
         @BindsInstance
-        fun statusBarColor(statusBarColor: () -> Int?): Builder
-
-        @BindsInstance
         fun paymentOptionCallback(paymentOptionCallback: PaymentOptionCallback): Builder
 
         @BindsInstance

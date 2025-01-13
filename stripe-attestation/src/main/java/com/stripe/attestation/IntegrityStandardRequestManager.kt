@@ -40,6 +40,10 @@ class IntegrityStandardRequestManager(
     private var integrityTokenProvider: StandardIntegrityTokenProvider? = null
 
     override suspend fun prepare(): Result<Unit> = runCatching {
+        if (integrityTokenProvider != null) {
+            return Result.success(Unit)
+        }
+
         val finishedTask: Task<StandardIntegrityTokenProvider> = standardIntegrityManager
             .prepareIntegrityToken(
                 PrepareIntegrityTokenRequest.builder()
@@ -49,9 +53,13 @@ class IntegrityStandardRequestManager(
 
         finishedTask.toResult()
             .onSuccess { integrityTokenProvider = it }
-            .onFailure { error -> logError("Integrity: Failed to prepare integrity token", error) }
             .getOrThrow()
     }
+        .map {}
+        .recoverCatching {
+            logError("Integrity - Failed to prepare integrity token", it)
+            throw AttestationError.fromException(it)
+        }
 
     override suspend fun requestToken(
         requestIdentifier: String?,
@@ -69,9 +77,10 @@ class IntegrityStandardRequestManager(
                 .build()
         ).awaitTask()
 
-        finishedTask.toResult()
-            .mapCatching { it.token() }
-            .onFailure { error -> logError("Integrity - Failed to request integrity token", error) }
-            .getOrThrow()
-    }
+        finishedTask.toResult().getOrThrow()
+    }.map { it.token() }
+        .recoverCatching {
+            logError("Integrity - Failed to request integrity token", it)
+            throw AttestationError.fromException(it)
+        }
 }

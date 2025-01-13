@@ -1,12 +1,9 @@
 package com.stripe.android.paymentsheet
 
-import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.SavedStateHandle
-import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.LinkPaymentDetails
-import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.analytics.LinkAnalyticsHelper
 import com.stripe.android.link.injection.LinkAnalyticsComponent
@@ -17,7 +14,6 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.wallets.Wallet
-import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_PROCESSING
@@ -33,7 +29,6 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 internal class LinkHandler @Inject constructor(
-    private val linkLauncher: LinkPaymentLauncher,
     val linkConfigurationCoordinator: LinkConfigurationCoordinator,
     private val savedStateHandle: SavedStateHandle,
     private val linkStore: LinkStore,
@@ -42,21 +37,11 @@ internal class LinkHandler @Inject constructor(
     sealed class ProcessingState {
         data object Ready : ProcessingState()
 
-        data object Launched : ProcessingState()
-
         data object Started : ProcessingState()
 
         data class PaymentDetailsCollected(
             val paymentSelection: PaymentSelection?
         ) : ProcessingState()
-
-        data class Error(val message: String?) : ProcessingState()
-
-        data object Cancelled : ProcessingState()
-
-        data class PaymentMethodCollected(val paymentMethod: PaymentMethod) : ProcessingState()
-
-        data class CompletedWithPaymentResult(val result: PaymentResult) : ProcessingState()
 
         data object CompleteWithoutLink : ProcessingState()
     }
@@ -69,21 +54,10 @@ internal class LinkHandler @Inject constructor(
     val isLinkEnabled: StateFlow<Boolean?> = _isLinkEnabled
 
     private val _linkConfiguration = MutableStateFlow<LinkConfiguration?>(null)
-    private val linkConfiguration: StateFlow<LinkConfiguration?> = _linkConfiguration.asStateFlow()
+    val linkConfiguration: StateFlow<LinkConfiguration?> = _linkConfiguration.asStateFlow()
 
     private val linkAnalyticsHelper: LinkAnalyticsHelper by lazy {
         linkAnalyticsComponentBuilder.build().linkAnalyticsHelper
-    }
-
-    fun registerFromActivity(activityResultCaller: ActivityResultCaller) {
-        linkLauncher.register(
-            activityResultCaller,
-            ::onLinkActivityResult,
-        )
-    }
-
-    fun unregisterFromActivity() {
-        linkLauncher.unregister()
     }
 
     fun setupLink(state: LinkState?) {
@@ -198,38 +172,6 @@ internal class LinkHandler @Inject constructor(
         }
     }
 
-    fun launchLink() {
-        val config = _linkConfiguration.value ?: return
-
-        linkLauncher.present(
-            config,
-        )
-
-        _processingState.tryEmit(ProcessingState.Launched)
-    }
-
-    /**
-     * Method called with the result of launching the Link UI to collect a payment.
-     */
-    fun onLinkActivityResult(result: LinkActivityResult) {
-        val paymentMethod = (result as? LinkActivityResult.Completed)?.paymentMethod
-        val cancelPaymentFlow = result is LinkActivityResult.Canceled &&
-            result.reason == LinkActivityResult.Canceled.Reason.BackPressed
-
-        if (paymentMethod != null) {
-            // If payment was completed inside the Link UI, dismiss immediately.
-            _processingState.tryEmit(ProcessingState.PaymentMethodCollected(paymentMethod))
-            linkStore.markLinkAsUsed()
-        } else if (cancelPaymentFlow) {
-            // We launched the user straight into Link, but they decided to exit out of it.
-            _processingState.tryEmit(ProcessingState.Cancelled)
-        } else {
-            val paymentResult = result.convertToPaymentResult()
-            _processingState.tryEmit(ProcessingState.CompletedWithPaymentResult(paymentResult))
-            linkStore.markLinkAsUsed()
-        }
-    }
-
     @OptIn(DelicateCoroutinesApi::class)
     fun logOut() {
         val configuration = linkConfiguration.value ?: return
@@ -239,11 +181,4 @@ internal class LinkHandler @Inject constructor(
             linkConfigurationCoordinator.logOut(configuration = configuration)
         }
     }
-
-    private fun LinkActivityResult.convertToPaymentResult() =
-        when (this) {
-            is LinkActivityResult.Completed -> PaymentResult.Completed
-            is LinkActivityResult.Canceled -> PaymentResult.Canceled
-            is LinkActivityResult.Failed -> PaymentResult.Failed(error)
-        }
 }

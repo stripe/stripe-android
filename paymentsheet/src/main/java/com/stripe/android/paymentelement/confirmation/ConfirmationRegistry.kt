@@ -8,7 +8,13 @@ internal class ConfirmationRegistry(
     fun createConfirmationMediators(
         savedStateHandle: SavedStateHandle
     ): List<ConfirmationMediator<*, *, *, *>> {
-        return confirmationDefinitions.map { definition ->
+        /*
+         * We need to sort the mediators in order to guarantee the order of registered launchers. See the following
+         * documentation regarding this topic: https://developer.android.com/training/basics/intents/result#register
+         */
+        return confirmationDefinitions.sortedBy { definition ->
+            definition.key
+        }.map { definition ->
             ConfirmationMediator(savedStateHandle, definition)
         }
     }

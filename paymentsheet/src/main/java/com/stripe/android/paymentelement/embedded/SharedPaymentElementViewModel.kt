@@ -1,12 +1,16 @@
 package com.stripe.android.paymentelement.embedded
 
 import android.content.Context
+import android.content.res.Resources
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.cards.CardAccountRangeRepository
+import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
@@ -29,9 +33,13 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.EmbeddedPaymentElement.ConfigureResult
 import com.stripe.android.paymentelement.EmbeddedPaymentElement.PaymentOptionDisplayData
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
+import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
+import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentElementConfirmationModule
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
+import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
@@ -39,8 +47,6 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
-import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandlerImpl
 import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
@@ -49,6 +55,7 @@ import com.stripe.android.paymentsheet.state.DefaultLinkAccountStatusProvider
 import com.stripe.android.paymentsheet.state.DefaultPaymentElementLoader
 import com.stripe.android.paymentsheet.state.LinkAccountStatusProvider
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.uicore.image.StripeImageLoader
 import dagger.Binds
 import dagger.BindsInstance
 import dagger.Component
@@ -58,6 +65,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.plus
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Provider
@@ -65,12 +74,41 @@ import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 import kotlin.reflect.KClass
 
+@Singleton
 @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 internal class SharedPaymentElementViewModel @Inject constructor(
+    confirmationStateHolderFactory: EmbeddedConfirmationStateHolderFactory,
+    confirmationHandlerFactory: ConfirmationHandler.Factory,
+    @IOContext ioContext: CoroutineContext,
     private val configurationHandler: EmbeddedConfigurationHandler,
+    private val paymentOptionDisplayDataFactory: PaymentOptionDisplayDataFactory,
+    private val selectionHolder: EmbeddedSelectionHolder,
+    embeddedContentHelperFactory: EmbeddedContentHelperFactory,
 ) : ViewModel() {
     private val _paymentOption: MutableStateFlow<PaymentOptionDisplayData?> = MutableStateFlow(null)
     val paymentOption: StateFlow<PaymentOptionDisplayData?> = _paymentOption.asStateFlow()
+
+    val confirmationStateHolder = confirmationStateHolderFactory.create(viewModelScope)
+    val confirmationHandler = confirmationHandlerFactory.create(viewModelScope + ioContext)
+
+    private val embeddedContentHelper = embeddedContentHelperFactory.create(viewModelScope)
+    val embeddedContent: StateFlow<EmbeddedContent?> = embeddedContentHelper.embeddedContent
+
+    init {
+        viewModelScope.launch {
+            selectionHolder.selection.collect { selection ->
+                val state = confirmationStateHolder.state
+                if (state == null) {
+                    _paymentOption.value = null
+                } else {
+                    _paymentOption.value = paymentOptionDisplayDataFactory.create(
+                        selection = selection,
+                        paymentMethodMetadata = state.paymentMethodMetadata,
+                    )
+                }
+            }
+        }
+    }
 
     suspend fun configure(
         intentConfiguration: PaymentSheet.IntentConfiguration,
@@ -80,7 +118,18 @@ internal class SharedPaymentElementViewModel @Inject constructor(
             intentConfiguration = intentConfiguration,
             configuration = configuration,
         ).fold(
-            onSuccess = {
+            onSuccess = { state ->
+                confirmationStateHolder.state = EmbeddedConfirmationStateHolder.State(
+                    paymentMethodMetadata = state.paymentMethodMetadata,
+                    selection = state.paymentSelection,
+                    initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(intentConfiguration),
+                    configuration = configuration,
+                )
+                selectionHolder.set(state.paymentSelection)
+                embeddedContentHelper.dataLoaded(
+                    paymentMethodMetadata = state.paymentMethodMetadata,
+                    rowStyle = configuration.appearance.embeddedAppearance.style
+                )
                 ConfigureResult.Succeeded()
             },
             onFailure = { error ->
@@ -89,11 +138,16 @@ internal class SharedPaymentElementViewModel @Inject constructor(
         )
     }
 
-    class Factory : ViewModelProvider.Factory {
+    fun clearPaymentOption() {
+        selectionHolder.set(null)
+    }
+
+    class Factory(private val statusBarColor: Int?) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: KClass<T>, extras: CreationExtras): T {
             val component = DaggerSharedPaymentElementViewModelComponent.builder()
                 .savedStateHandle(extras.createSavedStateHandle())
                 .context(extras.requireApplication())
+                .statusBarColor(statusBarColor)
                 .build()
             @Suppress("UNCHECKED_CAST")
             return component.viewModel as T
@@ -109,6 +163,7 @@ internal class SharedPaymentElementViewModel @Inject constructor(
         GooglePayLauncherModule::class,
         CoreCommonModule::class,
         StripeRepositoryModule::class,
+        ExtendedPaymentElementConfirmationModule::class,
     ]
 )
 internal interface SharedPaymentElementViewModelComponent {
@@ -122,6 +177,9 @@ internal interface SharedPaymentElementViewModelComponent {
         @BindsInstance
         fun context(context: Context): Builder
 
+        @BindsInstance
+        fun statusBarColor(@Named(STATUS_BAR_COLOR) statusBarColor: Int?): Builder
+
         fun build(): SharedPaymentElementViewModelComponent
     }
 }
@@ -134,6 +192,16 @@ internal interface SharedPaymentElementViewModelComponent {
     ],
 )
 internal interface SharedPaymentElementViewModelModule {
+    @Binds
+    fun bindsEmbeddedContentHelperFactory(
+        factory: DefaultEmbeddedContentHelperFactory
+    ): EmbeddedContentHelperFactory
+
+    @Binds
+    fun bindsCardAccountRangeRepositoryFactory(
+        defaultCardAccountRangeRepositoryFactory: DefaultCardAccountRangeRepositoryFactory
+    ): CardAccountRangeRepository.Factory
+
     @Binds
     fun bindsConfigurationHandler(
         handler: DefaultEmbeddedConfigurationHandler
@@ -168,13 +236,18 @@ internal interface SharedPaymentElementViewModelModule {
     @Suppress("TooManyFunctions")
     companion object {
         @Provides
+        @Singleton
+        @Named(ALLOWS_MANUAL_CONFIRMATION)
+        fun provideAllowsManualConfirmation() = true
+
+        @Provides
         fun provideEventReporterMode(): EventReporter.Mode {
             return EventReporter.Mode.Embedded
         }
 
         @Provides
         @Named(PRODUCT_USAGE)
-        fun provideProductUsageTokens() = setOf("Embedded")
+        fun provideProductUsageTokens() = setOf("EmbeddedPaymentElement")
 
         /**
          * Provides a non-singleton PaymentConfiguration.
@@ -218,11 +291,6 @@ internal interface SharedPaymentElementViewModelModule {
         }
 
         @Provides
-        fun provideCVCRecollectionHandler(): CvcRecollectionHandler {
-            return CvcRecollectionHandlerImpl()
-        }
-
-        @Provides
         fun provideDurationProvider(): DurationProvider {
             return DefaultDurationProvider.instance
         }
@@ -243,6 +311,17 @@ internal interface SharedPaymentElementViewModelModule {
         @IOContext
         fun ioContext(): CoroutineContext {
             return Dispatchers.IO
+        }
+
+        @Provides
+        fun provideResources(context: Context): Resources {
+            return context.resources
+        }
+
+        @Provides
+        @Singleton
+        fun provideStripeImageLoader(context: Context): StripeImageLoader {
+            return StripeImageLoader(context)
         }
     }
 }

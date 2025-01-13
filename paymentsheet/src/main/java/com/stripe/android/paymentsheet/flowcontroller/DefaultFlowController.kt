@@ -9,30 +9,20 @@ import androidx.annotation.VisibleForTesting
 import androidx.core.app.ActivityOptionsCompat
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.SavedStateViewModelFactory
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.lifecycleScope
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.ENABLE_LOGGING
-import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.utils.UserFacingLogger
-import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
-import com.stripe.android.link.LinkActivityResult
-import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
-import com.stripe.android.paymentelement.confirmation.DefaultConfirmationHandler
-import com.stripe.android.paymentelement.confirmation.DeferredIntentConfirmationType
-import com.stripe.android.paymentelement.confirmation.IntentConfirmationInterceptor
+import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
+import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.paymentlauncher.PaymentResult
-import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.ExternalPaymentMethodInterceptor
 import com.stripe.android.paymentsheet.InitializedViaCompose
 import com.stripe.android.paymentsheet.PaymentOptionCallback
@@ -45,16 +35,10 @@ import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
-import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
 import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.isLink
-import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncherFactory
-import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionContract
-import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionLauncher
-import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionLauncherFactory
-import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionResult
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
@@ -62,25 +46,20 @@ import com.stripe.android.paymentsheet.ui.SepaMandateContract
 import com.stripe.android.paymentsheet.ui.SepaMandateResult
 import com.stripe.android.paymentsheet.utils.canSave
 import com.stripe.android.uicore.utils.AnimationConstants
-import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.plus
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 import javax.inject.Named
-import javax.inject.Provider
-import kotlin.coroutines.CoroutineContext
 
 @FlowControllerScope
 internal class DefaultFlowController @Inject internal constructor(
     // Properties provided through FlowControllerComponent.Builder
     private val viewModelScope: CoroutineScope,
     private val lifecycleOwner: LifecycleOwner,
-    private val statusBarColor: () -> Int?,
     private val paymentOptionFactory: PaymentOptionFactory,
     private val paymentOptionCallback: PaymentOptionCallback,
     private val paymentResultCallback: PaymentSheetResultCallback,
@@ -90,47 +69,21 @@ internal class DefaultFlowController @Inject internal constructor(
     private val context: Context,
     private val eventReporter: EventReporter,
     private val viewModel: FlowControllerViewModel,
-    paymentLauncherFactory: StripePaymentLauncherAssistedFactory,
-    /**
-     * [PaymentConfiguration] is [Lazy] because the client might set publishableKey and
-     * stripeAccountId after creating a [DefaultFlowController].
-     */
-    lazyPaymentConfiguration: Provider<PaymentConfiguration>,
+    private val confirmationHandler: ConfirmationHandler,
     @Named(ENABLE_LOGGING) private val enableLogging: Boolean,
     @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
-    googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory,
-    bacsMandateConfirmationLauncherFactory: BacsMandateConfirmationLauncherFactory,
-    cvcRecollectionLauncherFactory: CvcRecollectionLauncherFactory,
-    private val linkLauncher: LinkPaymentLauncher,
     private val configurationHandler: FlowControllerConfigurationHandler,
-    intentConfirmationInterceptor: IntentConfirmationInterceptor,
     private val errorReporter: ErrorReporter,
     @InitializedViaCompose private val initializedViaCompose: Boolean,
-    @IOContext workContext: CoroutineContext,
-    logger: UserFacingLogger,
-    private val cvcRecollectionHandler: CvcRecollectionHandler
 ) : PaymentSheet.FlowController {
     private val paymentOptionActivityLauncher: ActivityResultLauncher<PaymentOptionContract.Args>
     private val sepaMandateActivityLauncher: ActivityResultLauncher<SepaMandateContract.Args>
-    private val cvcRecollectionLauncher: CvcRecollectionLauncher
 
     /**
      * [FlowControllerComponent] is hold to inject into [Activity]s and created
      * after [DefaultFlowController].
      */
     lateinit var flowControllerComponent: FlowControllerComponent
-
-    private val confirmationHandler = DefaultConfirmationHandler.Factory(
-        intentConfirmationInterceptor = intentConfirmationInterceptor,
-        paymentConfigurationProvider = lazyPaymentConfiguration,
-        statusBarColor = { null },
-        savedStateHandle = viewModel.handle,
-        bacsMandateConfirmationLauncherFactory = bacsMandateConfirmationLauncherFactory,
-        stripePaymentLauncherAssistedFactory = paymentLauncherFactory,
-        googlePayPaymentMethodLauncherFactory = googlePayPaymentMethodLauncherFactory,
-        errorReporter = errorReporter,
-        logger = logger,
-    ).create(viewModelScope.plus(workContext))
 
     private val initializationMode: PaymentElementLoader.InitializationMode?
         get() = viewModel.previousConfigureRequest?.initializationMode
@@ -161,31 +114,15 @@ internal class DefaultFlowController @Inject internal constructor(
             ::onSepaMandateResult,
         )
 
-        val cvcRecollectionActivityLauncher = activityResultCaller.registerForActivityResult(
-            CvcRecollectionContract(),
-            ::onCvcRecollectionResult
-        )
-
-        cvcRecollectionLauncher = cvcRecollectionLauncherFactory.create(
-            cvcRecollectionActivityLauncher
-        )
-
         val activityResultLaunchers = setOf(
             paymentOptionActivityLauncher,
             sepaMandateActivityLauncher,
-            cvcRecollectionActivityLauncher
-        )
-
-        linkLauncher.register(
-            activityResultCaller = activityResultCaller,
-            callback = ::onLinkActivityResult,
         )
 
         lifecycleOwner.lifecycle.addObserver(
             object : DefaultLifecycleObserver {
                 override fun onDestroy(owner: LifecycleOwner) {
                     activityResultLaunchers.forEach { it.unregister() }
-                    linkLauncher.unregister()
                     PaymentSheet.FlowController.linkHandler = null
                     IntentConfirmationInterceptor.createIntentCallback = null
                     ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = null
@@ -197,7 +134,6 @@ internal class DefaultFlowController @Inject internal constructor(
             confirmationHandler.state.collectLatest { state ->
                 when (state) {
                     is ConfirmationHandler.State.Idle,
-                    is ConfirmationHandler.State.Preconfirming,
                     is ConfirmationHandler.State.Confirming -> Unit
                     is ConfirmationHandler.State.Complete -> onIntentResult(state.result)
                 }
@@ -297,7 +233,6 @@ internal class DefaultFlowController @Inject internal constructor(
         val args = PaymentOptionContract.Args(
             state = state.paymentSheetState.copy(paymentSelection = viewModel.paymentSelection),
             configuration = state.config,
-            statusBarColor = statusBarColor(),
             enableLogging = enableLogging,
             productUsage = productUsage,
         )
@@ -333,21 +268,25 @@ internal class DefaultFlowController @Inject internal constructor(
             return
         }
 
+        val initializationMode = requireNotNull(initializationMode)
+
         when (val paymentSelection = viewModel.paymentSelection) {
             is PaymentSelection.Link,
-            is PaymentSelection.New.LinkInline -> confirmLink(
-                paymentSelection = paymentSelection,
-                state = state.paymentSheetState,
-                appearance = state.config.appearance,
-            )
+            is PaymentSelection.New.LinkInline,
             is PaymentSelection.GooglePay,
             is PaymentSelection.ExternalPaymentMethod,
             is PaymentSelection.New,
-            null -> confirmPaymentSelection(paymentSelection, state.paymentSheetState, state.config.appearance)
+            null -> confirmPaymentSelection(
+                paymentSelection = paymentSelection,
+                state = state.paymentSheetState,
+                appearance = state.config.appearance,
+                initializationMode = initializationMode,
+            )
             is PaymentSelection.Saved -> confirmSavedPaymentMethod(
                 paymentSelection = paymentSelection,
                 state = state.paymentSheetState,
                 appearance = state.config.appearance,
+                initializationMode = initializationMode,
             )
         }
     }
@@ -356,6 +295,7 @@ internal class DefaultFlowController @Inject internal constructor(
         paymentSelection: PaymentSelection.Saved,
         state: PaymentSheetState.Full,
         appearance: PaymentSheet.Appearance,
+        initializationMode: PaymentElementLoader.InitializationMode,
     ) {
         if (paymentSelection.paymentMethod.type == PaymentMethod.Type.SepaDebit &&
             viewModel.paymentSelection?.hasAcknowledgedSepaMandate == false
@@ -368,22 +308,8 @@ internal class DefaultFlowController @Inject internal constructor(
                     merchantName = state.config.merchantDisplayName
                 )
             )
-        } else if (
-            cvcRecollectionHandler.requiresCVCRecollection(
-                stripeIntent = state.stripeIntent,
-                paymentSelection = paymentSelection,
-                initializationMode = initializationMode
-            )
-        ) {
-            cvcRecollectionHandler.launch(paymentSelection) { cvcRecollectionData ->
-                cvcRecollectionLauncher.launch(
-                    data = cvcRecollectionData,
-                    appearance = getPaymentAppearance(),
-                    isLiveMode = state.stripeIntent.isLiveMode
-                )
-            }
         } else {
-            confirmPaymentSelection(paymentSelection, state, appearance)
+            confirmPaymentSelection(paymentSelection, state, appearance, initializationMode)
         }
     }
 
@@ -392,14 +318,12 @@ internal class DefaultFlowController @Inject internal constructor(
         paymentSelection: PaymentSelection?,
         state: PaymentSheetState.Full,
         appearance: PaymentSheet.Appearance,
+        initializationMode: PaymentElementLoader.InitializationMode,
     ) {
         viewModelScope.launch {
-            val initializationMode = requireNotNull(initializationMode)
-
             val confirmationOption = paymentSelection?.toConfirmationOption(
-                initializationMode = initializationMode,
                 configuration = state.config,
-                appearance = appearance,
+                linkConfiguration = state.linkState?.configuration,
             )
 
             confirmationOption?.let { option ->
@@ -409,6 +333,9 @@ internal class DefaultFlowController @Inject internal constructor(
                     arguments = ConfirmationHandler.Args(
                         confirmationOption = option,
                         intent = stripeIntent,
+                        initializationMode = initializationMode,
+                        appearance = appearance,
+                        shippingDetails = state.config.shippingDetails,
                     )
                 )
             } ?: run {
@@ -431,79 +358,6 @@ internal class DefaultFlowController @Inject internal constructor(
                     )
                 )
             }
-        }
-    }
-
-    internal fun onCvcRecollectionResult(
-        result: CvcRecollectionResult
-    ) {
-        when (result) {
-            is CvcRecollectionResult.Cancelled -> Unit
-            is CvcRecollectionResult.Confirmed -> {
-                runCatching {
-                    requireNotNull(viewModel.state)
-                }.fold(
-                    onSuccess = { state ->
-                        (viewModel.paymentSelection as? PaymentSelection.Saved)?.let {
-                            val selection = PaymentSelection.Saved(
-                                paymentMethod = it.paymentMethod,
-                                walletType = it.walletType,
-                                paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(
-                                    cvc = result.cvc,
-                                )
-                            )
-                            viewModel.paymentSelection = selection
-                            confirmPaymentSelection(selection, state.paymentSheetState, state.config.appearance)
-                        } ?: paymentResultCallback.onPaymentSheetResult(
-                            PaymentSheetResult.Failed(
-                                CvcRecollectionException(
-                                    type = CvcRecollectionException.Type.IncorrectSelection
-                                )
-                            )
-                        )
-                        errorReporter.report(
-                            ErrorReporter.UnexpectedErrorEvent.CVC_RECOLLECTION_UNEXPECTED_PAYMENT_SELECTION
-                        )
-                    },
-                    onFailure = { error ->
-                        paymentResultCallback.onPaymentSheetResult(
-                            PaymentSheetResult.Failed(error)
-                        )
-                    }
-                )
-            }
-        }
-    }
-
-    fun onLinkActivityResult(result: LinkActivityResult): Unit = when (result) {
-        is LinkActivityResult.Canceled -> onPaymentResult(PaymentResult.Canceled)
-        is LinkActivityResult.Failed -> onPaymentResult(PaymentResult.Failed(result.error))
-        is LinkActivityResult.Completed -> {
-            runCatching {
-                requireNotNull(viewModel.state)
-            }.fold(
-                onSuccess = { state ->
-                    val paymentSelection = PaymentSelection.Saved(
-                        result.paymentMethod,
-                        PaymentSelection.Saved.WalletType.Link,
-                    )
-                    viewModel.paymentSelection = paymentSelection
-                    confirmPaymentSelection(
-                        paymentSelection,
-                        state.paymentSheetState,
-                        state.config.appearance,
-                    )
-                },
-                onFailure = { error ->
-                    eventReporter.onPaymentFailure(
-                        paymentSelection = PaymentSelection.Link,
-                        error = PaymentSheetConfirmationError.InvalidState,
-                    )
-                    paymentResultCallback.onPaymentSheetResult(
-                        PaymentSheetResult.Failed(error)
-                    )
-                }
-            )
         }
     }
 
@@ -690,22 +544,6 @@ internal class DefaultFlowController @Inject internal constructor(
         }
     }
 
-    private fun confirmLink(
-        paymentSelection: PaymentSelection,
-        state: PaymentSheetState.Full,
-        appearance: PaymentSheet.Appearance,
-    ) {
-        val linkConfig = requireNotNull(state.linkState).configuration
-
-        if (paymentSelection is PaymentSelection.Link) {
-            // User selected Link as the payment method, not inline
-            linkLauncher.present(linkConfig)
-        } else {
-            // New user paying inline, complete without launching Link
-            confirmPaymentSelection(paymentSelection, state, appearance)
-        }
-    }
-
     private fun ConfirmationHandler.Result.Failed.ErrorType.toConfirmationError(
         cause: Throwable
     ): PaymentSheetConfirmationError? {
@@ -726,22 +564,6 @@ internal class DefaultFlowController @Inject internal constructor(
         is PaymentResult.Completed -> PaymentSheetResult.Completed
         is PaymentResult.Canceled -> PaymentSheetResult.Canceled
         is PaymentResult.Failed -> PaymentSheetResult.Failed(throwable)
-    }
-
-    private fun getPaymentAppearance(): PaymentSheet.Appearance {
-        return viewModel.state?.config?.appearance ?: PaymentSheet.Appearance()
-    }
-
-    class CvcRecollectionException(
-        val type: Type
-    ) : Exception() {
-        override val message: String = when (type) {
-            Type.IncorrectSelection -> "PaymentSelection must be PaymentSelection.Saved for CVC recollection"
-        }
-
-        enum class Type {
-            IncorrectSelection
-        }
     }
 
     @Parcelize
@@ -778,7 +600,7 @@ internal class DefaultFlowController @Inject internal constructor(
         ): PaymentSheet.FlowController {
             val flowControllerViewModel = ViewModelProvider(
                 owner = viewModelStoreOwner,
-                factory = SavedStateViewModelFactory()
+                factory = FlowControllerViewModel.Factory(statusBarColor())
             )[FlowControllerViewModel::class.java]
 
             val flowControllerStateComponent = flowControllerViewModel.flowControllerStateComponent
@@ -787,7 +609,6 @@ internal class DefaultFlowController @Inject internal constructor(
                 flowControllerStateComponent.flowControllerComponentBuilder
                     .lifeCycleOwner(lifecycleOwner)
                     .activityResultCaller(activityResultCaller)
-                    .statusBarColor(statusBarColor)
                     .paymentOptionCallback(paymentOptionCallback)
                     .paymentResultCallback(paymentResultCallback)
                     .initializedViaCompose(initializedViaCompose)

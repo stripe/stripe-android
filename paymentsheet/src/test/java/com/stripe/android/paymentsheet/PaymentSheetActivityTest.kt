@@ -42,6 +42,7 @@ import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLaun
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfigurationCoordinator
+import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.LinkButtonTestTag
 import com.stripe.android.model.CardBrand
@@ -51,7 +52,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
-import com.stripe.android.paymentelement.confirmation.DefaultConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.createTestConfirmationHandlerFactory
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherFactory
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
@@ -59,6 +60,7 @@ import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssisted
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.cvcrecollection.FakeCvcRecollectionHandler
+import com.stripe.android.paymentsheet.cvcrecollection.RecordingCvcRecollectionLauncherFactory
 import com.stripe.android.paymentsheet.databinding.StripePrimaryButtonBinding
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
@@ -78,8 +80,7 @@ import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.SHEET_NAVIGATION_BUTTON_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
 import com.stripe.android.paymentsheet.ui.TEST_TAG_MODIFY_BADGE
-import com.stripe.android.paymentsheet.ui.TEST_TAG_REMOVE_BADGE
-import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
+import com.stripe.android.paymentsheet.ui.UPDATE_PM_REMOVE_BUTTON_TEST_TAG
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.TEST_TAG_DIALOG_CONFIRM_BUTTON
@@ -90,6 +91,7 @@ import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import com.stripe.android.utils.FakePaymentElementLoader
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
+import com.stripe.android.utils.RecordingLinkPaymentLauncher
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
 import com.stripe.android.utils.injectableActivityScenario
 import kotlinx.coroutines.CoroutineScope
@@ -462,13 +464,18 @@ internal class PaymentSheetActivityTest {
             startEditing()
 
             composeTestRule.onNodeWithTag(
-                TEST_TAG_REMOVE_BADGE,
+                TEST_TAG_MODIFY_BADGE,
                 useUnmergedTree = true,
+            ).performClick()
+
+            composeTestRule.onNodeWithTag(
+                UPDATE_PM_REMOVE_BUTTON_TEST_TAG,
             ).performClick()
 
             composeTestRule.onNodeWithTag(TEST_TAG_DIALOG_CONFIRM_BUTTON).performClick()
 
             composeTestRule.waitForIdle()
+            testDispatcher.scheduler.advanceUntilIdle()
 
             assertThat(viewModel.navigationHandler.currentScreen.value)
                 .isInstanceOf(PaymentSheetScreen.AddFirstPaymentMethod::class.java)
@@ -577,7 +584,7 @@ internal class PaymentSheetActivityTest {
 
             startEditing()
             composeTestRule.onNodeWithTag(TEST_TAG_MODIFY_BADGE).performClick()
-            assertThat(awaitItem()).isInstanceOf<PaymentSheetScreen.EditPaymentMethod>()
+            assertThat(awaitItem()).isInstanceOf<PaymentSheetScreen.UpdatePaymentMethod>()
 
             pressBack()
             assertThat(awaitItem()).isInstanceOf<SelectSavedPaymentMethods>()
@@ -710,22 +717,28 @@ internal class PaymentSheetActivityTest {
     }
 
     @Test
-    fun `link flow updates the payment sheet before and after`() {
-        val viewModel = createViewModel(isLinkAvailable = true)
-        val scenario = activityScenario(viewModel)
+    fun `link flow updates the payment sheet before and after`() = runTest {
+        RecordingLinkPaymentLauncher.test {
+            val viewModel = createViewModel(isLinkAvailable = true, linkPaymentLauncher = launcher)
+            val scenario = activityScenario(viewModel)
 
-        scenario.launch(intent).onActivity {
-            viewModel.checkoutIdentifier = CheckoutIdentifier.SheetTopWallet
+            scenario.launch(intent).onActivity {
+                viewModel.checkoutIdentifier = CheckoutIdentifier.SheetTopWallet
 
-            composeTestRule
-                .onNodeWithTag(LinkButtonTestTag)
-                .performClick()
+                composeTestRule
+                    .onNodeWithTag(LinkButtonTestTag)
+                    .performClick()
 
-            composeTestRule.waitForIdle()
+                composeTestRule.waitForIdle()
+            }
+
+            val registerCall = registerCalls.awaitItem()
+
+            assertThat(presentCalls.awaitItem()).isNotNull()
 
             assertThat(viewModel.walletsProcessingState.value).isEqualTo(WalletsProcessingState.Processing)
 
-            viewModel.linkHandler.onLinkActivityResult(LinkActivityResult.Completed(PAYMENT_METHODS.first()))
+            registerCall.callback(LinkActivityResult.PaymentMethodObtained(PAYMENT_METHODS.first()))
 
             assertThat(viewModel.walletsProcessingState.value).isEqualTo(WalletsProcessingState.Processing)
 
@@ -1119,6 +1132,7 @@ internal class PaymentSheetActivityTest {
         loadDelay: Duration = Duration.ZERO,
         isGooglePayAvailable: Boolean = false,
         isLinkAvailable: Boolean = false,
+        linkPaymentLauncher: LinkPaymentLauncher = RecordingLinkPaymentLauncher.noOp(),
         initialPaymentSelection: PaymentSelection? = paymentMethods.firstOrNull()?.let { PaymentSelection.Saved(it) },
         args: PaymentSheetContractV2.Args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
         cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
@@ -1151,19 +1165,19 @@ internal class PaymentSheetActivityTest {
                 workContext = testDispatcher,
                 savedStateHandle = savedStateHandle,
                 linkHandler = linkHandler,
-                confirmationHandlerFactory = DefaultConfirmationHandler.Factory(
+                confirmationHandlerFactory = createTestConfirmationHandlerFactory(
                     intentConfirmationInterceptor = fakeIntentConfirmationInterceptor,
                     savedStateHandle = savedStateHandle,
                     stripePaymentLauncherAssistedFactory = stripePaymentLauncherAssistedFactory,
                     bacsMandateConfirmationLauncherFactory = { FakeBacsMandateConfirmationLauncher() },
                     googlePayPaymentMethodLauncherFactory = googlePayPaymentMethodLauncherFactory,
-                    paymentConfigurationProvider = { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY) },
-                    statusBarColor = { args.statusBarColor },
+                    paymentConfiguration = PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
+                    statusBarColor = args.statusBarColor,
+                    linkLauncher = linkPaymentLauncher,
                     errorReporter = FakeErrorReporter(),
-                    logger = FakeUserFacingLogger(),
+                    cvcRecollectionLauncherFactory = RecordingCvcRecollectionLauncherFactory.noOp(),
                 ),
                 cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
-                editInteractorFactory = FakeEditPaymentMethodInteractor.Factory(),
                 errorReporter = FakeErrorReporter(),
                 cvcRecollectionHandler = cvcRecollectionHandler,
                 cvcRecollectionInteractorFactory = object : CvcRecollectionInteractor.Factory {

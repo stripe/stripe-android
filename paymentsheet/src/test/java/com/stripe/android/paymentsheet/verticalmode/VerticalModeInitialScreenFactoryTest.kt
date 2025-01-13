@@ -71,11 +71,14 @@ class VerticalModeInitialScreenFactoryTest {
                 CustomerState(
                     id = "cus_foobar",
                     ephemeralKeySecret = "ek_123",
+                    customerSessionClientSecret = null,
                     paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
                     permissions = CustomerState.Permissions(
                         canRemovePaymentMethods = true,
+                        canRemoveLastPaymentMethod = true,
                         canRemoveDuplicates = true,
-                    )
+                    ),
+                    defaultPaymentMethodId = null
                 )
             )
         }

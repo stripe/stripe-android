@@ -27,15 +27,14 @@ import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConf
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSelection.CustomerRequestedSave
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
+import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.utils.BankFormScreenStateFactory
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
+import org.junit.Rule
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
@@ -45,8 +44,6 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
@@ -54,6 +51,7 @@ class USBankAccountFormViewModelTest {
 
     private val defaultArgs = USBankAccountFormViewModel.Args(
         instantDebits = false,
+        incentive = null,
         formArgs = FormArguments(
             paymentMethodCode = PaymentMethod.Type.USBankAccount.code,
             merchantName = MERCHANT_NAME,
@@ -81,15 +79,8 @@ class USBankAccountFormViewModelTest {
     private val mockCollectBankAccountLauncher = mock<CollectBankAccountLauncher>()
     private val savedStateHandle = SavedStateHandle()
 
-    @BeforeTest
-    fun setUp() {
-        Dispatchers.setMain(UnconfinedTestDispatcher())
-    }
-
-    @AfterTest
-    fun tearDown() {
-        Dispatchers.resetMain()
-    }
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule()
 
     @Test
     fun `when email and name is valid then required fields are filled`() =
@@ -152,7 +143,7 @@ class USBankAccountFormViewModelTest {
 
         viewModel.linkedAccount.test {
             skipItems(1)
-            viewModel.handleCollectBankAccountResult(mockUnverifiedBankAccount())
+            viewModel.handleCollectBankAccountResult(mockManuallyEnteredBankAccount(usesMicrodeposits = true))
 
             val screenState = awaitItem()?.screenState
             assertThat(screenState?.linkedBankAccount?.isVerifyingWithMicrodeposits).isTrue()
@@ -173,7 +164,7 @@ class USBankAccountFormViewModelTest {
     @Test
     fun `Transitions to correct screen state when collecting an unverified bank account in custom flow`() = runTest {
         val viewModel = createViewModel(defaultArgs.copy(isCompleteFlow = false))
-        val bankAccount = mockUnverifiedBankAccount()
+        val bankAccount = mockManuallyEnteredBankAccount(usesMicrodeposits = true)
 
         viewModel.linkedAccount.test {
             skipItems(1)
@@ -267,7 +258,7 @@ class USBankAccountFormViewModelTest {
             defaultArgs.copy(
                 formArgs = defaultArgs.formArgs.copy(billingDetails = null),
                 savedPaymentMethod = PaymentSelection.New.USBankAccount(
-                    labelResource = "Test",
+                    label = "Test",
                     iconResource = 0,
                     paymentMethodCreateParams = mock(),
                     customerRequestedSave = mock(),
@@ -312,7 +303,7 @@ class USBankAccountFormViewModelTest {
                     ),
                 ),
                 savedPaymentMethod = PaymentSelection.New.USBankAccount(
-                    labelResource = "Test",
+                    label = "Test",
                     iconResource = 0,
                     paymentMethodCreateParams = mock(),
                     customerRequestedSave = mock(),
@@ -373,7 +364,7 @@ class USBankAccountFormViewModelTest {
         )
 
         val screenStates = listOf(
-            BankFormScreenState(),
+            BankFormScreenState(isPaymentFlow = true),
             BankFormScreenStateFactory.createWithSession(
                 sessionId = "session_1234",
                 isVerifyingWithMicrodeposits = false,
@@ -390,7 +381,7 @@ class USBankAccountFormViewModelTest {
             val viewModel = createViewModel(
                 defaultArgs.copy(
                     savedPaymentMethod = PaymentSelection.New.USBankAccount(
-                        labelResource = "Test",
+                        label = "Test",
                         iconResource = 0,
                         paymentMethodCreateParams = mock(),
                         customerRequestedSave = mock(),
@@ -715,7 +706,6 @@ class USBankAccountFormViewModelTest {
                     name = "Jenny Rose",
                     email = "email@email.com",
                     elementsSessionContext = ElementsSessionContext(
-                        initializationMode = ElementsSessionContext.InitializationMode.DeferredIntent,
                         amount = 5099,
                         currency = "usd",
                         linkMode = LinkMode.LinkPaymentMethod,
@@ -728,6 +718,7 @@ class USBankAccountFormViewModelTest {
                             phone = null,
                             phoneCountryCode = "US",
                         ),
+                        incentiveEligibilitySession = null,
                     ),
                 )
             ),
@@ -764,7 +755,6 @@ class USBankAccountFormViewModelTest {
                     name = "Jenny Rose",
                     email = "email@email.com",
                     elementsSessionContext = ElementsSessionContext(
-                        initializationMode = ElementsSessionContext.InitializationMode.DeferredIntent,
                         amount = null,
                         currency = null,
                         linkMode = LinkMode.LinkPaymentMethod,
@@ -777,6 +767,7 @@ class USBankAccountFormViewModelTest {
                             phone = null,
                             phoneCountryCode = "US",
                         ),
+                        incentiveEligibilitySession = null,
                     ),
                 )
             ),
@@ -937,7 +928,6 @@ class USBankAccountFormViewModelTest {
                     name = "Some Name",
                     email = "email@email.com",
                     elementsSessionContext = ElementsSessionContext(
-                        initializationMode = ElementsSessionContext.InitializationMode.PaymentIntent("id_12345"),
                         amount = 5099,
                         currency = "usd",
                         linkMode = null,
@@ -950,6 +940,7 @@ class USBankAccountFormViewModelTest {
                             phone = null,
                             phoneCountryCode = "US",
                         ),
+                        incentiveEligibilitySession = null,
                     ),
                 )
             ),
@@ -979,7 +970,6 @@ class USBankAccountFormViewModelTest {
                 CollectBankAccountConfiguration.InstantDebits(
                     email = "email@email.com",
                     elementsSessionContext = ElementsSessionContext(
-                        initializationMode = ElementsSessionContext.InitializationMode.PaymentIntent("id_12345"),
                         amount = 5099,
                         currency = "usd",
                         linkMode = LinkMode.LinkCardBrand,
@@ -991,6 +981,7 @@ class USBankAccountFormViewModelTest {
                             phone = null,
                             phoneCountryCode = "US",
                         ),
+                        incentiveEligibilitySession = null,
                     ),
                 )
             ),
@@ -1034,7 +1025,30 @@ class USBankAccountFormViewModelTest {
         viewModel.currentScreenState.test {
             assertThat(awaitItem().linkedBankAccount).isNull()
 
-            val unverifiedAccount = mockUnverifiedBankAccount()
+            val unverifiedAccount = mockManuallyEnteredBankAccount(usesMicrodeposits = true)
+            viewModel.handleCollectBankAccountResult(unverifiedAccount)
+
+            val mandateCollectionViewState = awaitItem()
+            assertThat(mandateCollectionViewState.linkedBankAccount?.mandateText).isEqualTo(expectedResult)
+        }
+    }
+
+    @Test
+    fun `Produces correct mandate text when skipping verification for manually entered account`() = runTest {
+        val viewModel = createViewModel()
+
+        val expectedResult = USBankAccountTextBuilder.buildMandateAndMicrodepositsText(
+            merchantName = MERCHANT_NAME,
+            isVerifyingMicrodeposits = false,
+            isSaveForFutureUseSelected = false,
+            isSetupFlow = false,
+            isInstantDebits = false,
+        )
+
+        viewModel.currentScreenState.test {
+            assertThat(awaitItem().linkedBankAccount).isNull()
+
+            val unverifiedAccount = mockManuallyEnteredBankAccount(usesMicrodeposits = false)
             viewModel.handleCollectBankAccountResult(unverifiedAccount)
 
             val mandateCollectionViewState = awaitItem()
@@ -1446,7 +1460,7 @@ class USBankAccountFormViewModelTest {
         )
     }
 
-    private fun mockUnverifiedBankAccount(): CollectBankAccountResultInternal.Completed {
+    private fun mockManuallyEnteredBankAccount(usesMicrodeposits: Boolean): CollectBankAccountResultInternal.Completed {
         val paymentIntent = mock<PaymentIntent>()
         val financialConnectionsSession = mock<FinancialConnectionsSession>()
         whenever(paymentIntent.id).thenReturn(defaultArgs.clientSecret)
@@ -1456,7 +1470,8 @@ class USBankAccountFormViewModelTest {
                 id = "123",
                 last4 = "4567",
                 bankName = "Test",
-                routingNumber = "123"
+                routingNumber = "123",
+                usesMicrodeposits = usesMicrodeposits,
             )
         )
 

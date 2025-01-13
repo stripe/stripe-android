@@ -49,6 +49,7 @@ internal class IdentityScanViewModelTest {
         mockFpsTracker,
         mockIdentityAnalyticsRequestFactory,
         mock(),
+        mock(),
         mock()
     ) {
         override val scanFeedback = MutableStateFlow(null)

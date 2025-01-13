@@ -594,6 +594,17 @@
 |    |    +--- org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3 (*)
 |    |    \--- org.jetbrains.kotlin:kotlin-parcelize-runtime:2.0.21 (*)
 |    +--- org.jetbrains.kotlin:kotlin-stdlib:2.0.21 (*)
+|    +--- project :stripe-attestation
+|    |    +--- org.jetbrains.kotlin:kotlin-stdlib:2.0.21 (*)
+|    |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0 (*)
+|    |    \--- com.google.android.play:integrity:1.4.0
+|    |         +--- com.google.android.gms:play-services-basement:18.4.0
+|    |         |    +--- androidx.collection:collection:1.0.0 -> 1.4.0 (*)
+|    |         |    +--- androidx.core:core:1.2.0 -> 1.13.1 (*)
+|    |         |    \--- androidx.fragment:fragment:1.1.0 -> 1.8.4 (*)
+|    |         +--- com.google.android.gms:play-services-tasks:18.2.0
+|    |         |    \--- com.google.android.gms:play-services-basement:18.4.0 (*)
+|    |         \--- com.google.android.play:core-common:2.0.4
 |    +--- androidx.activity:activity-ktx:1.8.2 (*)
 |    +--- androidx.annotation:annotation:1.9.0 (*)
 |    +--- androidx.appcompat:appcompat:1.7.0 (*)
@@ -847,11 +858,7 @@
 |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3 -> 1.9.0
 |    |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0 (*)
 |    |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.9.0 (*)
-|    |    +--- com.google.android.gms:play-services-tasks:16.0.1 -> 18.2.0
-|    |    |    \--- com.google.android.gms:play-services-basement:18.4.0
-|    |    |         +--- androidx.collection:collection:1.0.0 -> 1.4.0 (*)
-|    |    |         +--- androidx.core:core:1.2.0 -> 1.13.1 (*)
-|    |    |         \--- androidx.fragment:fragment:1.1.0 -> 1.8.4 (*)
+|    |    +--- com.google.android.gms:play-services-tasks:16.0.1 -> 18.2.0 (*)
 |    |    \--- org.jetbrains.kotlin:kotlin-stdlib:2.0.0 -> 2.0.21 (*)
 |    +--- com.google.android.material:material:1.12.0 (*)
 |    +--- com.google.android.gms:play-services-wallet:19.4.0
@@ -872,11 +879,11 @@
 |    |    |    \--- com.google.android.gms:play-services-basement:18.0.0 -> 18.4.0 (*)
 |    |    \--- com.google.android.gms:play-services-tasks:18.2.0 (*)
 |    +--- com.google.android.instantapps:instantapps:1.1.0
-|    +--- com.stripe:stripe-3ds2-android:6.1.8
-|    |    +--- org.jetbrains.kotlin:kotlin-parcelize-runtime:1.9.10 -> 2.0.21 (*)
-|    |    +--- androidx.appcompat:appcompat:1.6.1 -> 1.7.0 (*)
-|    |    +--- com.google.android.material:material:1.11.0 -> 1.12.0 (*)
-|    |    +--- androidx.lifecycle:lifecycle-livedata-ktx:2.7.0 -> 2.8.6
+|    +--- com.stripe:stripe-3ds2-android:6.2.0
+|    |    +--- org.jetbrains.kotlin:kotlin-parcelize-runtime:2.0.21 (*)
+|    |    +--- androidx.appcompat:appcompat:1.7.0 (*)
+|    |    +--- com.google.android.material:material:1.12.0 (*)
+|    |    +--- androidx.lifecycle:lifecycle-livedata-ktx:2.8.6
 |    |    |    +--- androidx.lifecycle:lifecycle-livedata:2.8.6 (*)
 |    |    |    +--- androidx.lifecycle:lifecycle-livedata-core-ktx:2.8.6 (*)
 |    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 -> 2.0.21 (*)
@@ -894,79 +901,48 @@
 |    |    |    +--- androidx.lifecycle:lifecycle-process:2.8.6 (c)
 |    |    |    +--- androidx.lifecycle:lifecycle-common:2.8.6 (c)
 |    |    |    \--- androidx.lifecycle:lifecycle-service:2.8.6 (c)
-|    |    +--- androidx.core:core-ktx:1.12.0 -> 1.13.1 (*)
+|    |    +--- androidx.core:core-ktx:1.13.1 (*)
 |    |    +--- androidx.activity:activity-ktx:1.8.2 (*)
-|    |    +--- androidx.fragment:fragment-ktx:1.6.2 -> 1.8.4 (*)
-|    |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3 -> 1.9.0 (*)
-|    |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3 -> 1.9.0 (*)
-|    |    +--- org.bouncycastle:bcprov-jdk15to18:1.69
-|    |    +--- com.nimbusds:nimbus-jose-jwt:9.21
-|    |    |    \--- com.github.stephenc.jcip:jcip-annotations:1.0-1
-|    |    +--- androidx.databinding:viewbinding:8.2.1 -> 8.7.1 (*)
-|    |    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.10 (*)
+|    |    +--- androidx.fragment:fragment-ktx:1.8.4 (*)
+|    |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0 (*)
+|    |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0 (*)
+|    |    +--- org.bouncycastle:bcprov-jdk15to18:1.79
+|    |    +--- com.nimbusds:nimbus-jose-jwt:9.46
+|    |    +--- androidx.databinding:viewbinding:8.7.1 (*)
+|    |    \--- org.jetbrains.kotlin:kotlin-stdlib:2.0.21 (*)
 |    \--- org.jetbrains.kotlin:kotlin-parcelize-runtime:2.0.21 (*)
 +--- project :paymentsheet
 |    +--- project :payments-core (*)
 |    +--- androidx.databinding:viewbinding:8.7.1 (*)
 |    +--- org.jetbrains.kotlin:kotlin-stdlib:2.0.21 (*)
-|    +--- project :link
+|    +--- project :payments-ui-core
+|    |    +--- androidx.databinding:viewbinding:8.7.1 (*)
 |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:2.0.21 (*)
-|    |    +--- project :payments-core (*)
 |    |    +--- project :stripe-core (*)
-|    |    +--- project :payments-ui-core
-|    |    |    +--- androidx.databinding:viewbinding:8.7.1 (*)
-|    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:2.0.21 (*)
-|    |    |    +--- project :stripe-core (*)
-|    |    |    +--- project :payments-core (*)
-|    |    |    +--- project :stripe-ui-core (*)
-|    |    |    +--- androidx.constraintlayout:constraintlayout:2.1.4 (*)
-|    |    |    +--- androidx.core:core-ktx:1.13.1 (*)
-|    |    |    +--- androidx.annotation:annotation:1.9.0 (*)
-|    |    |    +--- androidx.appcompat:appcompat:1.7.0 (*)
-|    |    |    +--- com.google.android.material:material:1.12.0 (*)
-|    |    |    +--- com.google.dagger:dagger:2.52 (*)
-|    |    |    +--- androidx.compose.ui:ui:1.6.8 (*)
-|    |    |    +--- androidx.compose.foundation:foundation:1.6.8 (*)
-|    |    |    +--- androidx.compose.material:material:1.6.8 (*)
-|    |    |    +--- androidx.compose.material:material-icons-core:1.6.8 (*)
-|    |    |    +--- androidx.activity:activity-compose:1.8.2 (*)
-|    |    |    +--- com.google.accompanist:accompanist-flowlayout:0.34.0
-|    |    |    |    +--- androidx.compose.foundation:foundation:1.6.0 -> 1.6.8 (*)
-|    |    |    |    +--- androidx.compose.ui:ui-util:1.6.0 -> 1.6.8 (*)
-|    |    |    |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4 -> 1.9.0 (*)
-|    |    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.9.22 -> 2.0.21 (*)
-|    |    |    +--- androidx.compose.ui:ui-tooling-preview:1.6.8 (*)
-|    |    |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0 (*)
-|    |    |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0 (*)
-|    |    |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3 -> 1.9.0 (*)
-|    |    |    +--- org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3 (*)
-|    |    |    \--- org.jetbrains.kotlin:kotlin-parcelize-runtime:2.0.21 (*)
+|    |    +--- project :payments-core (*)
 |    |    +--- project :stripe-ui-core (*)
-|    |    +--- androidx.appcompat:appcompat:1.7.0 (*)
-|    |    +--- androidx.browser:browser:1.8.0 (*)
 |    |    +--- androidx.constraintlayout:constraintlayout:2.1.4 (*)
-|    |    +--- androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.6 (*)
-|    |    +--- com.google.dagger:dagger:2.52 (*)
+|    |    +--- androidx.core:core-ktx:1.13.1 (*)
+|    |    +--- androidx.annotation:annotation:1.9.0 (*)
+|    |    +--- androidx.appcompat:appcompat:1.7.0 (*)
 |    |    +--- com.google.android.material:material:1.12.0 (*)
-|    |    +--- androidx.activity:activity-compose:1.8.2 (*)
+|    |    +--- com.google.dagger:dagger:2.52 (*)
+|    |    +--- androidx.compose.ui:ui:1.6.8 (*)
 |    |    +--- androidx.compose.foundation:foundation:1.6.8 (*)
 |    |    +--- androidx.compose.material:material:1.6.8 (*)
 |    |    +--- androidx.compose.material:material-icons-core:1.6.8 (*)
-|    |    +--- androidx.compose.ui:ui:1.6.8 (*)
-|    |    +--- androidx.navigation:navigation-compose:2.7.7 (*)
-|    |    +--- androidx.compose.runtime:runtime-livedata:1.6.8 -> 1.7.1
-|    |    |    +--- androidx.compose.runtime:runtime:1.7.1 (*)
-|    |    |    +--- androidx.lifecycle:lifecycle-livedata:2.6.1 -> 2.8.6 (*)
-|    |    |    +--- androidx.lifecycle:lifecycle-runtime:2.6.1 -> 2.8.6 (*)
-|    |    |    +--- androidx.lifecycle:lifecycle-runtime-compose:2.8.3 -> 2.8.6 (*)
-|    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 -> 2.0.21 (*)
-|    |    |    +--- androidx.compose.runtime:runtime:1.7.1 (c)
-|    |    |    \--- androidx.compose.runtime:runtime-saveable:1.7.1 (c)
-|    |    +--- com.google.accompanist:accompanist-flowlayout:0.34.0 (*)
+|    |    +--- androidx.activity:activity-compose:1.8.2 (*)
+|    |    +--- com.google.accompanist:accompanist-flowlayout:0.34.0
+|    |    |    +--- androidx.compose.foundation:foundation:1.6.0 -> 1.6.8 (*)
+|    |    |    +--- androidx.compose.ui:ui-util:1.6.0 -> 1.6.8 (*)
+|    |    |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4 -> 1.9.0 (*)
+|    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.9.22 -> 2.0.21 (*)
 |    |    +--- androidx.compose.ui:ui-tooling-preview:1.6.8 (*)
+|    |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0 (*)
+|    |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0 (*)
+|    |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3 -> 1.9.0 (*)
 |    |    +--- org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3 (*)
 |    |    \--- org.jetbrains.kotlin:kotlin-parcelize-runtime:2.0.21 (*)
-|    +--- project :payments-ui-core (*)
 |    +--- project :stripe-ui-core (*)
 |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0 (*)
 |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0 (*)
@@ -1072,7 +1048,14 @@
 +--- androidx.activity:activity-compose:1.8.2 (*)
 +--- androidx.compose.material:material:1.6.8 (*)
 +--- androidx.compose.material:material-icons-core:1.6.8 (*)
-+--- androidx.compose.runtime:runtime-livedata:1.6.8 -> 1.7.1 (*)
++--- androidx.compose.runtime:runtime-livedata:1.6.8 -> 1.7.1
+|    +--- androidx.compose.runtime:runtime:1.7.1 (*)
+|    +--- androidx.lifecycle:lifecycle-livedata:2.6.1 -> 2.8.6 (*)
+|    +--- androidx.lifecycle:lifecycle-runtime:2.6.1 -> 2.8.6 (*)
+|    +--- androidx.lifecycle:lifecycle-runtime-compose:2.8.3 -> 2.8.6 (*)
+|    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 -> 2.0.21 (*)
+|    +--- androidx.compose.runtime:runtime:1.7.1 (c)
+|    \--- androidx.compose.runtime:runtime-saveable:1.7.1 (c)
 +--- androidx.compose.ui:ui:1.6.8 (*)
 +--- androidx.compose.ui:ui-tooling-preview:1.6.8 (*)
 +--- com.squareup.okhttp3:logging-interceptor:4.12.0

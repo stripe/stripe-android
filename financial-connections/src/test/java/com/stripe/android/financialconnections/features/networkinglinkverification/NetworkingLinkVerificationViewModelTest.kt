@@ -163,7 +163,7 @@ class NetworkingLinkVerificationViewModelTest {
     fun `otpEntered - attaches consumer to LAS and navigates to account picker in Instant Debits`() = runTest {
         val consumerSession = consumerSession()
 
-        whenever(getOrFetchSync(any())).thenReturn(
+        whenever(getOrFetchSync(any(), anyOrNull())).thenReturn(
             syncResponse(sessionManifest().copy(accountholderCustomerEmailAddress = consumerSession.emailAddress))
         )
         whenever(startVerification.sms(any())).doReturn(consumerSession)
@@ -193,7 +193,7 @@ class NetworkingLinkVerificationViewModelTest {
     fun `otpEntered - shows terminal error if failing to attach consumer to LAS in Instant Debits`() = runTest {
         val consumerSession = consumerSession()
 
-        whenever(getOrFetchSync(any())).thenReturn(
+        whenever(getOrFetchSync(any(), anyOrNull())).thenReturn(
             syncResponse(sessionManifest().copy(accountholderCustomerEmailAddress = consumerSession.emailAddress))
         )
 

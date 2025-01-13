@@ -1242,6 +1242,25 @@ constructor(
         }
 
         /**
+         * Helper method to create [PaymentMethodCreateParams] with [PaymentMethod.Type.Crypto] as the payment
+         * method type
+         */
+        @JvmStatic
+        @JvmOverloads
+        fun createCrypto(
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = PaymentMethod.Type.Crypto,
+                billingDetails = billingDetails,
+                metadata = metadata,
+                allowRedisplay = allowRedisplay,
+            )
+        }
+
+        /**
          * Helper method to create [PaymentMethodCreateParams] with [Swish] as the payment
          * method type.
          */

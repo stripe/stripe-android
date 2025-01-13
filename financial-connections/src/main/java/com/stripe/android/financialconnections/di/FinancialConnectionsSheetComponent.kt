@@ -2,22 +2,18 @@ package com.stripe.android.financialconnections.di
 
 import android.app.Application
 import androidx.lifecycle.SavedStateHandle
-import com.stripe.android.core.injection.CoreCommonModule
-import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.FinancialConnectionsSheetState
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewModel
 import dagger.BindsInstance
 import dagger.Component
-import javax.inject.Singleton
 
-@Singleton
+@ActivityRetainedScope
 @Component(
+    dependencies = [FinancialConnectionsSingletonSharedComponent::class],
     modules = [
         FinancialConnectionsSheetModule::class,
         FinancialConnectionsSheetSharedModule::class,
-        CoroutineContextModule::class,
-        CoreCommonModule::class
     ]
 )
 internal interface FinancialConnectionsSheetComponent {
@@ -36,6 +32,8 @@ internal interface FinancialConnectionsSheetComponent {
 
         @BindsInstance
         fun configuration(configuration: FinancialConnectionsSheet.Configuration): Builder
+
+        fun sharedComponent(component: FinancialConnectionsSingletonSharedComponent): Builder
 
         fun build(): FinancialConnectionsSheetComponent
     }

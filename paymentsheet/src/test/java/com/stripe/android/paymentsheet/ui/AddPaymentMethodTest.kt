@@ -251,6 +251,7 @@ internal class AddPaymentMethodTest {
             paymentSelection = null,
             processing = false,
             usBankAccountFormArguments = mock(),
+            incentive = null,
         )
 
         val viewActionRecorder = ViewActionRecorder<AddPaymentMethodInteractor.ViewAction>()

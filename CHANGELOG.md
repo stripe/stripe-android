@@ -2,6 +2,34 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+## 21.3.1 - 2025-01-06
+
+### PaymentSheet
+- [FIXED][9849](https://github.com/stripe/stripe-android/pull/9849) Fixes issue with `PaymentSheet` fields not being focusable on Android TV.
+- [FIXED][9835](https://github.com/stripe/stripe-android/pull/9835) Fixes issue with phone number formatting in which inputted Cyprus phone numbers was showing the wrong country code.
+
+## 21.3.0 - 2024-12-23
+
+### Payments
+* [ADDED][9753](https://github.com/stripe/stripe-android/pull/9753) Added support for Crypto to API bindings.
+* [CHANGED][9804](https://github.com/stripe/stripe-android/pull/9804) Changed the edit and remove saved payment method flow so that tapping 'Edit' displays an icon that leads to a new update payment method screen that displays payment method details for card (last 4 digits of card number, cvc and expiry date fields), US Bank account (name, email, last 4 digits of bank account), and SEPA debit (name, email, last 4 digits of IBAN).
+
+### Identity
+* [FIXED][9812](https://github.com/stripe/stripe-android/pull/9812) App crash when TFLite models fail to load, added error handling and model validation.
+
+## 21.2.1 - 2024-12-02
+### PaymentSheet
+- [FIXED][9695](https://github.com/stripe/stripe-android/pull/9695) US Bank Account now supports the `instant_or_skip` verification method.
+
+## 21.2.0 - 2024-11-19
+### Payments
+- [ADDED][9672](https://github.com/stripe/stripe-android/pull/9672) Update `stripe-3ds2-android` to version 6.2.0 which upgrades 3DS spec from 2.1 to 2.2
+
+## 21.1.0 - 2024-11-18
+### PaymentSheet
+- [ADDED] Support for card brand filtering in private beta.
+- [ADDED][9635](https://github.com/stripe/stripe-android/pull/9635) Instant Bank Payments are now available when using deferred intents.
+
 ## 21.0.1 - 2024-11-11
 
 ### PaymentSheet
@@ -15,7 +43,7 @@
 ## 21.0.0 - 2024-11-04
 
 ### PaymentSheet
-- [CHANGED] [9498](https://github.com/stripe/stripe-android/pull/9498) The default value of `PaymentSheet.Configuration.Builder.paymentMethodLayout` has changed from Horizontal to Automatic.
+- [CHANGED][9498](https://github.com/stripe/stripe-android/pull/9498) The default value of `PaymentSheet.Configuration.Builder.paymentMethodLayout` has changed from Horizontal to Automatic.
 
 ### Basic Integration
 * [REMOVED][9501](https://github.com/stripe/stripe-android/pull/9501) Basic Integration has been removed. [Please use Mobile Payment Element instead](https://docs.stripe.com/payments/mobile/migrating-to-mobile-payment-element-from-basic-integration).
@@ -30,7 +58,7 @@ Dependencies updated in [9512](https://github.com/stripe/stripe-android/pull/951
 ## 20.53.0 - 2024-10-21
 
 ### PaymentSheet
-* [ADDED] [9429](https://github.com/stripe/stripe-android/pull/9429) `PaymentSheet.PaymentMethodLayout` is now generally available. Configure the layout of payment methods in the sheet using `PaymentSheet.Configuration.Builder.paymentMethodLayout` to display them either horizontally, vertically, or let Stripe optimize the layout automatically.
+* [ADDED][9429](https://github.com/stripe/stripe-android/pull/9429) `PaymentSheet.PaymentMethodLayout` is now generally available. Configure the layout of payment methods in the sheet using `PaymentSheet.Configuration.Builder.paymentMethodLayout` to display them either horizontally, vertically, or let Stripe optimize the layout automatically.
 
 Dependencies updated in [9345](https://github.com/stripe/stripe-android/pull/9345) and [9469](https://github.com/stripe/stripe-android/pull/9469) and [9473](https://github.com/stripe/stripe-android/pull/9473):
 * Bumped Accompanist from 0.32.0 to 0.34.0.

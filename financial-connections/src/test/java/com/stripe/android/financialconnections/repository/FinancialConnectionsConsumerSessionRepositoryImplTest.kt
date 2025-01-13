@@ -11,7 +11,6 @@ import com.stripe.android.financialconnections.ApiKeyFixtures.consumerSession
 import com.stripe.android.financialconnections.ApiKeyFixtures.consumerSessionSignup
 import com.stripe.android.financialconnections.ApiKeyFixtures.verifiedConsumerSession
 import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext
-import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext.InitializationMode
 import com.stripe.android.financialconnections.repository.api.FinancialConnectionsConsumersApiService
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSession.VerificationSession.SessionState
@@ -19,6 +18,7 @@ import com.stripe.android.model.ConsumerSession.VerificationSession.SessionType
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSessionSignup
 import com.stripe.android.model.CustomEmailType
+import com.stripe.android.model.IncentiveEligibilitySession
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.SharePaymentDetails
 import com.stripe.android.model.VerificationType
@@ -28,7 +28,6 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.eq
-import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
@@ -89,8 +88,7 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
                 locale = anyOrNull(),
                 amount = anyOrNull(),
                 currency = anyOrNull(),
-                paymentIntentId = anyOrNull(),
-                setupIntentId = anyOrNull(),
+                incentiveEligibilitySession = anyOrNull(),
                 consentAction = anyOrNull(),
                 requestSurface = anyOrNull(),
                 requestOptions = anyOrNull(),
@@ -147,8 +145,7 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
                 locale = anyOrNull(),
                 amount = eq(1234),
                 currency = eq("cad"),
-                paymentIntentId = eq("pi_123"),
-                setupIntentId = isNull(),
+                incentiveEligibilitySession = eq(IncentiveEligibilitySession.PaymentIntent("pi_123")),
                 consentAction = anyOrNull(),
                 requestSurface = anyOrNull(),
                 requestOptions = anyOrNull(),
@@ -159,7 +156,6 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
 
         val repository = buildRepository(
             elementsSessionContext = ElementsSessionContext(
-                initializationMode = InitializationMode.PaymentIntent("pi_123"),
                 amount = 1234,
                 currency = "cad",
                 linkMode = LinkMode.LinkPaymentMethod,
@@ -169,6 +165,7 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
                     phone = null,
                     phoneCountryCode = null,
                 ),
+                incentiveEligibilitySession = IncentiveEligibilitySession.PaymentIntent("pi_123"),
             )
         )
 
@@ -341,8 +338,7 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
                 locale = anyOrNull(),
                 amount = anyOrNull(),
                 currency = anyOrNull(),
-                paymentIntentId = anyOrNull(),
-                setupIntentId = anyOrNull(),
+                incentiveEligibilitySession = anyOrNull(),
                 consentAction = anyOrNull(),
                 requestSurface = anyOrNull(),
                 requestOptions = anyOrNull(),
@@ -363,8 +359,7 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
             locale = anyOrNull(),
             amount = anyOrNull(),
             currency = anyOrNull(),
-            paymentIntentId = anyOrNull(),
-            setupIntentId = anyOrNull(),
+            incentiveEligibilitySession = anyOrNull(),
             requestSurface = eq("android_connections"),
             consentAction = anyOrNull(),
             requestOptions = anyOrNull(),
@@ -384,8 +379,7 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
                 locale = anyOrNull(),
                 amount = anyOrNull(),
                 currency = anyOrNull(),
-                paymentIntentId = anyOrNull(),
-                setupIntentId = anyOrNull(),
+                incentiveEligibilitySession = anyOrNull(),
                 consentAction = anyOrNull(),
                 requestSurface = anyOrNull(),
                 requestOptions = anyOrNull(),
@@ -406,8 +400,7 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
             locale = anyOrNull(),
             amount = anyOrNull(),
             currency = anyOrNull(),
-            paymentIntentId = anyOrNull(),
-            setupIntentId = anyOrNull(),
+            incentiveEligibilitySession = anyOrNull(),
             requestSurface = eq("android_instant_debits"),
             consentAction = anyOrNull(),
             requestOptions = anyOrNull(),

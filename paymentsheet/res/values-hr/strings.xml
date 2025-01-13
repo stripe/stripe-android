@@ -44,6 +44,16 @@
   <string name="stripe_paymentsheet_bacs_notice_mandate">Osim toga, e-poštom zaprimit ćete obavijest dva dana prije terećenja o svakom iznosu koji će biti terećen prema ovom nalogu. Plaćanja će se na vašem bankovnom izvodu prikazivati kao \'%s\'.</string>
   <!-- Message shown as part of overall Bacs Mandate indicating that their payments are protected by a defined guarantee -->
   <string name="stripe_paymentsheet_bacs_protection_mandate">Vaša plaćanja zaštićuje %s.</string>
+  <!-- Text displayed on manage bank account screen when bank account details are not editable. -->
+  <string name="stripe_paymentsheet_bank_account_details_cannot_be_changed">Podaci o bankovnom računu ne mogu se mijenjati.</string>
+  <!-- Text shown in the bank payment form when a promo is available and the user is paying, e.g. 'Get $5 back when you pay by bank. See terms'. Note that 'See terms' contains a non-breaking space. -->
+  <string name="stripe_paymentsheet_bank_payment_promo_for_payment"><![CDATA[Dobit ćete %s povrat novca kada plaćate bankovnim prijenosom. <a href=\"https://link.com/promotion-terms\">Pogledajte&#160;uvjete</a>]]></string>
+  <!-- Text shown in the bank payment form when a promo is available and the user is setting up an account, e.g. 'Get $5 back when you pay by bank. See terms'. Note that 'See terms' contains a non-breaking space. -->
+  <string name="stripe_paymentsheet_bank_payment_promo_for_setup"><![CDATA[Dobijte %s povrat sredstava za prvu uplatu bankovnim prijenosom. <a href=\"https://link.com/promotion-terms\">Pogledajte&#160;uvjete</a>]]></string>
+  <!-- Label shown when paying with a bank account is not eligible for the incentive, e.g. 'No $5 promo' -->
+  <string name="stripe_paymentsheet_bank_payment_promo_ineligible">Nema %s posebnih ponuda</string>
+  <!-- Text displayed on manage card screen when card details are not editable. -->
+  <string name="stripe_paymentsheet_card_details_cannot_be_changed">Podaci o kreditnoj kartici ne mogu se mijenjati.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
   <string name="stripe_paymentsheet_card_mandate">Davanjem podataka o kartici dopuštate poduzeću %s da tereti vašu karticu za buduća plaćanja u skladu sa svojim uvjetima.</string>
   <!-- Title shown above a carousel containing available payment methods -->
@@ -55,8 +65,14 @@
   <string name="stripe_paymentsheet_confirm_your_cvc">Potvrdite svoj CVC</string>
   <!-- Text for a button that allows manual entry of an address -->
   <string name="stripe_paymentsheet_enter_address_manually">Unesite adresu ručno</string>
+  <!-- Title shown above a view containing a customer's bank account that they can delete or update -->
+  <string name="stripe_paymentsheet_manage_bank_account">Upravljajte bankovnim računom u SAD-u</string>
+  <!-- Title shown above a view containing a customer's card payment methods that they can delete or update -->
+  <string name="stripe_paymentsheet_manage_card">Upravljajte karticom</string>
   <!-- Title shown above a view containing the customer's card payment methods that they can delete or update -->
   <string name="stripe_paymentsheet_manage_payment_methods">Upravljanje načinima plaćanja</string>
+  <!-- Title shown above a view containing a customer's SEPA debit account that they can delete or update -->
+  <string name="stripe_paymentsheet_manage_sepa_debit">Upravljajte SEPA terećenjem</string>
   <!-- Title shown above a carousel containing the customer's payment methods -->
   <string name="stripe_paymentsheet_manage_your_payment_methods">Upravljajte svojim metodama plaćanja</string>
   <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->
@@ -67,6 +83,8 @@
   <string name="stripe_paymentsheet_new_card">Nova kartica</string>
   <!-- Title shown above a section containing payment methods that a customer can choose to pay with e.g. card, bank account, etc. -->
   <string name="stripe_paymentsheet_new_pm">Novi način plaćanja</string>
+  <!-- Text displayed on manage card screen when the only editable card detail is the card brand. -->
+  <string name="stripe_paymentsheet_only_card_brand_can_be_changed">Samo se marka kartice može promijeniti.</string>
   <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_using">Ili platite koristeći</string>
   <!-- Title of a section containing a card form that will collect the payment information from the user. -->
@@ -111,6 +129,8 @@
   <string name="stripe_paymentsheet_select_payment_method">Odaberite način plaćanja</string>
   <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
   <string name="stripe_paymentsheet_select_your_payment_method">Odaberite način plaćanja</string>
+  <!-- Text displayed on manage SEPA debit screen when SEPA debit details are not editable. -->
+  <string name="stripe_paymentsheet_sepa_debit_details_cannot_be_changed">Podaci o SEPA terećenju ne mogu se mijenjati.</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">Ukupno: %s</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
@@ -129,4 +149,6 @@
   <string name="stripe_upi_polling_payment_failed_title">Plaćanje nije uspjelo</string>
   <!-- Text shown on a button that when tapped opens a user's screen with their payment methods. -->
   <string name="stripe_view_more">Vidi više</string>
+  <!-- Label for identifying the default payment method. -->
+  <string name="stripe_wallet_default">Zadano</string>
 </resources>

@@ -24,15 +24,12 @@ import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -41,79 +38,77 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.stripe.android.connect.example.ConnectSdkExampleTheme
-import com.stripe.android.connect.example.MainContent
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.example.R
+import com.stripe.android.connect.example.core.Success
+import com.stripe.android.connect.example.core.then
 import com.stripe.android.connect.example.ui.appearance.AppearanceView
+import com.stripe.android.connect.example.ui.appearance.AppearanceViewModel
 import com.stripe.android.connect.example.ui.common.BetaBadge
+import com.stripe.android.connect.example.ui.common.ConnectExampleScaffold
+import com.stripe.android.connect.example.ui.common.CustomizeAppearanceIconButton
+import com.stripe.android.connect.example.ui.embeddedcomponentmanagerloader.EmbeddedComponentLoaderViewModel
+import com.stripe.android.connect.example.ui.embeddedcomponentmanagerloader.EmbeddedComponentManagerLoader
 import com.stripe.android.connect.example.ui.features.accountonboarding.AccountOnboardingExampleActivity
 import com.stripe.android.connect.example.ui.features.payouts.PayoutsExampleActivity
-import com.stripe.android.connect.example.ui.settings.SettingsView
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(PrivateBetaConnectSDK::class, ExperimentalMaterialApi::class)
 @Composable
-fun ComponentPickerScreen(
-    onReloadRequested: () -> Unit,
+fun ComponentPickerContent(
+    viewModel: EmbeddedComponentLoaderViewModel,
+    openSettings: () -> Unit,
 ) {
+    val state by viewModel.state.collectAsState()
+    val embeddedComponentAsync = state.embeddedComponentManagerAsync
+
     val sheetState = rememberModalBottomSheetState(
         initialValue = ModalBottomSheetValue.Hidden,
         skipHalfExpanded = true,
     )
-    var sheetType by rememberSaveable { mutableStateOf(SheetType.SETTINGS) }
     val coroutineScope = rememberCoroutineScope()
-    fun toggleSettingsSheet(newSheetType: SheetType) {
-        coroutineScope.launch {
-            if (!sheetState.isVisible) {
-                sheetType = newSheetType
-                sheetState.show()
-            } else {
-                sheetState.hide()
-            }
-        }
-    }
 
-    MainContent(
-        title = stringResource(R.string.connect_sdk_example),
-        actions = {
-            IconButton(onClick = { toggleSettingsSheet(SheetType.SETTINGS) }) {
-                Icon(
-                    imageVector = Icons.Default.Settings,
-                    contentDescription = stringResource(R.string.settings),
-                )
-            }
-            IconButton(onClick = { toggleSettingsSheet(SheetType.APPEARANCE) }) {
-                Icon(
-                    imageVector = Icons.Default.MoreVert,
-                    contentDescription = stringResource(R.string.customize_appearance),
-                )
-            }
+    ModalBottomSheetLayout(
+        modifier = Modifier.fillMaxSize(),
+        sheetState = sheetState,
+        sheetContent = {
+            val appearanceViewModel = hiltViewModel<AppearanceViewModel>()
+            AppearanceView(
+                viewModel = appearanceViewModel,
+                onDismiss = { coroutineScope.launch { sheetState.hide() } },
+            )
         },
     ) {
-        ModalBottomSheetLayout(
-            modifier = Modifier.fillMaxSize(),
-            sheetState = sheetState,
-            sheetContent = {
-                when (sheetType) {
-                    SheetType.SETTINGS -> SettingsView(
-                        onDismiss = { coroutineScope.launch { sheetState.hide() } },
-                        onReloadRequested = onReloadRequested,
-                    )
-                    SheetType.APPEARANCE -> AppearanceView(
-                        onDismiss = { coroutineScope.launch { sheetState.hide() } },
-                    )
+        ConnectExampleScaffold(
+            title = stringResource(R.string.connect_sdk_example),
+            actions = (embeddedComponentAsync is Success).then {
+                {
+                    IconButton(onClick = openSettings) {
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = stringResource(R.string.settings),
+                        )
+                    }
+                    CustomizeAppearanceIconButton(onClick = { coroutineScope.launch { sheetState.show() } })
                 }
-            },
+            } ?: { },
         ) {
-            ComponentList()
+            EmbeddedComponentManagerLoader(
+                embeddedComponentAsync = embeddedComponentAsync,
+                reload = viewModel::reload,
+                openSettings = openSettings,
+            ) {
+                ComponentPickerList()
+            }
         }
     }
 }
 
 @Composable
-private fun ComponentList(components: List<MenuItem> = menuItems) {
+fun ComponentPickerList() {
     LazyColumn {
-        items(components) { menuItem ->
+        items(menuItems) { menuItem ->
             MenuRowItem(menuItem)
         }
     }
@@ -166,11 +161,6 @@ private fun LazyItemScope.MenuRowItem(menuItem: MenuItem) {
     }
 }
 
-private enum class SheetType {
-    SETTINGS,
-    APPEARANCE,
-}
-
 private data class MenuItem(
     @StringRes val title: Int,
     @StringRes val subtitle: Int,
@@ -193,10 +183,10 @@ private val menuItems = listOf(
     ),
 )
 
+// Previews
+
 @Composable
 @Preview(showBackground = true)
 private fun ComponentListPreview() {
-    ConnectSdkExampleTheme {
-        ComponentList(menuItems)
-    }
+    ComponentPickerList()
 }

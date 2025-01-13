@@ -11,6 +11,7 @@ internal class FakeCustomerSessionElementsSessionManager(
             customerId = "cus_1",
             ephemeralKey = "ek_123",
             expiresAt = 999999,
+            customerSessionClientSecret = "cuss_123",
         )
     ),
     private val intent: StripeIntent = SetupIntentFactory.create(),
@@ -18,6 +19,7 @@ internal class FakeCustomerSessionElementsSessionManager(
     private val customerSheetComponent: ElementsSession.Customer.Components.CustomerSheet =
         ElementsSession.Customer.Components.CustomerSheet.Enabled(
             isPaymentMethodRemoveEnabled = true,
+            canRemoveLastPaymentMethod = true,
         ),
     private val customer: ElementsSession.Customer = ElementsSession.Customer(
         session = ElementsSession.Customer.Session(
@@ -52,6 +54,7 @@ internal class FakeCustomerSessionElementsSessionManager(
                 customerId = "cus_1",
                 ephemeralKey = "ek_123",
                 expiresAt = 999999,
+                customerSessionClientSecret = "cuss_123",
             ),
         )
     )

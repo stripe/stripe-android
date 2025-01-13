@@ -23,7 +23,6 @@ import com.stripe.android.paymentsheet.navigation.NavigationHandler
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
-import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.elements.CvcConfig
 import com.stripe.android.ui.core.elements.CvcController
@@ -49,7 +48,6 @@ internal abstract class BaseSheetViewModel(
     val workContext: CoroutineContext = Dispatchers.IO,
     val savedStateHandle: SavedStateHandle,
     val linkHandler: LinkHandler,
-    val editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory,
     val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
     val isCompleteFlow: Boolean,
 ) : ViewModel() {
@@ -140,10 +138,6 @@ internal abstract class BaseSheetViewModel(
     }
 
     abstract fun handlePaymentMethodSelected(selection: PaymentSelection?)
-
-    fun handleLinkedBankAccountChanged(selection: PaymentSelection.New.USBankAccount?) {
-        updateSelection(selection)
-    }
 
     fun updateSelection(selection: PaymentSelection?) {
         when (selection) {

@@ -105,39 +105,6 @@ class DefaultManageScreenInteractorTest {
     }
 
     @Test
-    fun cannotRemoveButCanEdit_hidesDeleteButton() {
-        var backPressed = false
-        fun handleBackPressed(withDelay: Boolean) {
-            assertThat(withDelay).isTrue()
-            assertThat(backPressed).isFalse()
-            backPressed = true
-        }
-
-        val paymentMethods = PaymentMethodFactory.cards(1)
-
-        runScenario(
-            initialPaymentMethods = paymentMethods,
-            currentSelection = PaymentSelection.Saved(paymentMethods[0]),
-            isEditing = true,
-            handleBackPressed = ::handleBackPressed,
-        ) {
-            assertThat(backPressed).isFalse()
-
-            paymentMethodsSource.value = paymentMethods
-            canEditSource.value = true
-            canRemoveSource.value = false
-
-            assertThat(backPressed).isFalse()
-
-            interactor.state.test {
-                awaitItem().run {
-                    assertThat(canRemove).isFalse()
-                }
-            }
-        }
-    }
-
-    @Test
     fun cannotRemoveOrEdit_removesAllButLastPaymentMethod_navsBackWhenEditingFinishes() {
         var backPressed = false
         fun handleBackPressed(withDelay: Boolean) {
@@ -245,6 +212,38 @@ class DefaultManageScreenInteractorTest {
         }
     }
 
+    @Test
+    fun `displayableSavedPaymentMethods updated correctly when defaultPaymentMethodId updated`() {
+        val initialPaymentMethods = PaymentMethodFixtures.createCards(3)
+        runScenario(initialPaymentMethods, currentSelection = null) {
+            interactor.state.test {
+                defaultPaymentMethodSource.value = null
+                var updatedState = awaitItem()
+                assertThat(updatedState.paymentMethods[0].shouldShowDefaultBadge).isFalse()
+                assertThat(updatedState.paymentMethods[1].shouldShowDefaultBadge).isFalse()
+                assertThat(updatedState.paymentMethods[2].shouldShowDefaultBadge).isFalse()
+
+                defaultPaymentMethodSource.value = initialPaymentMethods[0].id
+                updatedState = awaitItem()
+                assertThat(updatedState.paymentMethods[0].shouldShowDefaultBadge).isTrue()
+                assertThat(updatedState.paymentMethods[1].shouldShowDefaultBadge).isFalse()
+                assertThat(updatedState.paymentMethods[2].shouldShowDefaultBadge).isFalse()
+
+                defaultPaymentMethodSource.value = initialPaymentMethods[1].id
+                updatedState = awaitItem()
+                assertThat(updatedState.paymentMethods[0].shouldShowDefaultBadge).isFalse()
+                assertThat(updatedState.paymentMethods[1].shouldShowDefaultBadge).isTrue()
+                assertThat(updatedState.paymentMethods[2].shouldShowDefaultBadge).isFalse()
+
+                defaultPaymentMethodSource.value = null
+                updatedState = awaitItem()
+                assertThat(updatedState.paymentMethods[0].shouldShowDefaultBadge).isFalse()
+                assertThat(updatedState.paymentMethods[1].shouldShowDefaultBadge).isFalse()
+                assertThat(updatedState.paymentMethods[2].shouldShowDefaultBadge).isFalse()
+            }
+        }
+    }
+
     private val notImplemented: () -> Nothing = { throw AssertionError("Not implemented") }
 
     private fun runScenario(
@@ -262,6 +261,7 @@ class DefaultManageScreenInteractorTest {
         val canEdit = MutableStateFlow(true)
         val canRemove = MutableStateFlow(true)
         val dispatcher = UnconfinedTestDispatcher()
+        val defaultPaymentMethodId: MutableStateFlow<String?> = MutableStateFlow(null)
 
         val interactor = DefaultManageScreenInteractor(
             paymentMethods = paymentMethods,
@@ -272,16 +272,14 @@ class DefaultManageScreenInteractorTest {
             selection = selection,
             editing = editing,
             canEdit = canEdit,
-            canRemove = canRemove,
             toggleEdit = toggleEdit,
             providePaymentMethodName = { (it ?: "Missing name").resolvableString },
             onSelectPaymentMethod = onSelectPaymentMethod,
-            onDeletePaymentMethod = { notImplemented() },
-            onEditPaymentMethod = { notImplemented() },
             onUpdatePaymentMethod = { notImplemented() },
             navigateBack = handleBackPressed,
-            dispatcher = dispatcher,
             isLiveMode = true,
+            defaultPaymentMethodId = defaultPaymentMethodId,
+            dispatcher = dispatcher
         )
 
         TestParams(
@@ -290,6 +288,7 @@ class DefaultManageScreenInteractorTest {
             editingSource = editing,
             canEditSource = canEdit,
             canRemoveSource = canRemove,
+            defaultPaymentMethodSource = defaultPaymentMethodId
         ).apply {
             runTest {
                 testBlock()
@@ -302,6 +301,7 @@ class DefaultManageScreenInteractorTest {
         val paymentMethodsSource: MutableStateFlow<List<PaymentMethod>>,
         val editingSource: MutableStateFlow<Boolean>,
         val canEditSource: MutableStateFlow<Boolean>,
-        val canRemoveSource: MutableStateFlow<Boolean,>
+        val canRemoveSource: MutableStateFlow<Boolean>,
+        val defaultPaymentMethodSource: MutableStateFlow<String?>,
     )
 }

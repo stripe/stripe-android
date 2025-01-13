@@ -2,11 +2,15 @@ package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
 import android.os.Parcelable
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.paymentsheet.R
 import kotlinx.parcelize.Parcelize
 import com.stripe.android.model.PaymentMethod as PaymentMethodModel
 
 @Parcelize
 internal data class BankFormScreenState(
+    private val isPaymentFlow: Boolean,
+    private val promoText: String? = null,
     private val _isProcessing: Boolean = false,
     val linkedBankAccount: LinkedBankAccount? = null,
     val error: ResolvableString? = null,
@@ -14,6 +18,24 @@ internal data class BankFormScreenState(
 
     val isProcessing: Boolean
         get() = _isProcessing && linkedBankAccount == null
+
+    val promoBadgeState: PromoBadgeState?
+        get() = if (promoText != null && linkedBankAccount != null) {
+            PromoBadgeState(promoText, eligible = linkedBankAccount.eligibleForIncentive)
+        } else {
+            null
+        }
+
+    val promoDisclaimerText: ResolvableString?
+        get() = promoText?.let {
+            if (linkedBankAccount?.eligibleForIncentive == false) {
+                return null
+            } else if (isPaymentFlow) {
+                resolvableString(R.string.stripe_paymentsheet_bank_payment_promo_for_payment, it)
+            } else {
+                resolvableString(R.string.stripe_paymentsheet_bank_payment_promo_for_setup, it)
+            }
+        }
 
     fun processing(): BankFormScreenState {
         return copy(_isProcessing = true)
@@ -28,7 +50,13 @@ internal data class BankFormScreenState(
         val financialConnectionsSessionId: String?,
         val mandateText: ResolvableString,
         val isVerifyingWithMicrodeposits: Boolean,
+        val eligibleForIncentive: Boolean = false,
     ) : Parcelable
+
+    data class PromoBadgeState(
+        val promoText: String,
+        val eligible: Boolean,
+    )
 
     sealed interface ResultIdentifier : Parcelable {
         @Parcelize

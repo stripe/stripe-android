@@ -1,7 +1,7 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.bacs
 
 import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.bacs.BacsConfirmationOption
 
 internal data class BacsMandateData(
     val name: String,
@@ -11,7 +11,7 @@ internal data class BacsMandateData(
 ) {
     companion object {
         fun fromConfirmationOption(
-            confirmationOption: ConfirmationHandler.Option.BacsPaymentMethod,
+            confirmationOption: BacsConfirmationOption,
         ): BacsMandateData? {
             val overrideParams = confirmationOption.createParams
 

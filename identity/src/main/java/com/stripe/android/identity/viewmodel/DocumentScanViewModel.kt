@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.identity.R
+import com.stripe.android.identity.VerificationFlowFinishable
 import com.stripe.android.identity.analytics.FPSTracker
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.analytics.ModelPerformanceTracker
@@ -26,13 +27,15 @@ internal class DocumentScanViewModel(
     override val fpsTracker: FPSTracker,
     override val identityAnalyticsRequestFactory: IdentityAnalyticsRequestFactory,
     modelPerformanceTracker: ModelPerformanceTracker,
-    laplacianBlurDetector: LaplacianBlurDetector
+    laplacianBlurDetector: LaplacianBlurDetector,
+    verificationFlowFinishable: VerificationFlowFinishable
 ) : IdentityScanViewModel(
     applicationContext,
     fpsTracker,
     identityAnalyticsRequestFactory,
     modelPerformanceTracker,
-    laplacianBlurDetector
+    laplacianBlurDetector,
+    verificationFlowFinishable
 ) {
 
     @OptIn(FlowPreview::class)
@@ -48,7 +51,6 @@ internal class DocumentScanViewModel(
                     R.string.stripe_position_id_back
                 }
             }
-
             is State.Scanned -> R.string.stripe_scanned
             is State.Scanning -> {
                 when (scannerState.scanState) {
@@ -87,6 +89,7 @@ internal class DocumentScanViewModel(
         }
 
     internal class DocumentScanViewModelFactory @Inject constructor(
+        private val verificationFlowFinishable: VerificationFlowFinishable,
         private val modelPerformanceTracker: ModelPerformanceTracker,
         private val laplacianBlurDetector: LaplacianBlurDetector,
         private val fpsTracker: FPSTracker,
@@ -99,7 +102,8 @@ internal class DocumentScanViewModel(
                 fpsTracker,
                 identityAnalyticsRequestFactory,
                 modelPerformanceTracker,
-                laplacianBlurDetector
+                laplacianBlurDetector,
+                verificationFlowFinishable
             ) as T
         }
     }

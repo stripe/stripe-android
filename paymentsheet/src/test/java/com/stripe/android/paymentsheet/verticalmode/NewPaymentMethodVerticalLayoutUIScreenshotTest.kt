@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.verticalmode
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.ExternalPaymentMethodUiDefinitionFactory
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.ui.core.R
 import com.stripe.android.utils.MockPaymentMethodsFactory
@@ -10,12 +11,19 @@ import org.junit.Rule
 import org.junit.Test
 import org.mockito.kotlin.mock
 
+@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 internal class NewPaymentMethodVerticalLayoutUIScreenshotTest {
     @get:Rule
     val paparazziRule = PaparazziRule()
 
     private val paymentMethods: List<DisplayablePaymentMethod> by lazy {
-        MockPaymentMethodsFactory.create().map { it.asDisplayablePaymentMethod(emptyList()) { } }
+        MockPaymentMethodsFactory.create().map {
+            it.asDisplayablePaymentMethod(
+                customerSavedPaymentMethods = emptyList(),
+                incentive = null,
+                onClick = {},
+            )
+        }
     }
 
     @Test
@@ -37,7 +45,12 @@ internal class NewPaymentMethodVerticalLayoutUIScreenshotTest {
             displayNameResource = R.string.stripe_paymentsheet_payment_method_us_bank_account,
             iconResource = R.drawable.stripe_ic_paymentsheet_pm_bank,
             iconRequiresTinting = true
-        ).asDisplayablePaymentMethod(emptyList()) { }
+        ).asDisplayablePaymentMethod(
+            customerSavedPaymentMethods = emptyList(),
+            incentive = null,
+            onClick = {},
+        )
+
         val paymentMethods = paymentMethods.toMutableList()
         paymentMethods.add(1, bankPaymentMethod)
         paparazziRule.snapshot {
@@ -68,7 +81,11 @@ internal class NewPaymentMethodVerticalLayoutUIScreenshotTest {
         val paymentMethods = listOf(
             ExternalPaymentMethodUiDefinitionFactory(
                 PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC
-            ).createSupportedPaymentMethod().asDisplayablePaymentMethod(emptyList()) { }
+            ).createSupportedPaymentMethod().asDisplayablePaymentMethod(
+                customerSavedPaymentMethods = emptyList(),
+                incentive = null,
+                onClick = {},
+            )
         ).plus(paymentMethods)
         paparazziRule.snapshot {
             NewPaymentMethodVerticalLayoutUI(

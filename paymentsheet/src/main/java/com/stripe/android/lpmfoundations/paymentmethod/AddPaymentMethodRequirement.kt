@@ -1,6 +1,5 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod.Type.USBankAccount
@@ -51,11 +50,18 @@ internal enum class AddPaymentMethodRequirement {
     /** Requires a valid us bank verification method. */
     ValidUsBankVerificationMethod {
         override fun isMetBy(metadata: PaymentMethodMetadata): Boolean {
+            // Verification method is always 'automatic' for deferred intents
+            val isDeferred = metadata.stripeIntent.clientSecret == null
+            return isDeferred || supportedVerificationMethodForNonDeferredIntent(metadata)
+        }
+
+        private fun supportedVerificationMethodForNonDeferredIntent(
+            metadata: PaymentMethodMetadata,
+        ): Boolean {
             val pmo = metadata.stripeIntent.getPaymentMethodOptions()[USBankAccount.code]
             val verificationMethod = (pmo as? Map<*, *>)?.get("verification_method") as? String
-            val supportsVerificationMethod = verificationMethod in setOf("instant", "automatic")
-            val isDeferred = metadata.stripeIntent.clientSecret == null
-            return supportsVerificationMethod || isDeferred
+            val supportsVerificationMethod = verificationMethod in setOf("automatic", "instant", "instant_or_skip")
+            return supportsVerificationMethod
         }
     },
 
@@ -81,9 +87,7 @@ private val PaymentMethodMetadata.supportsMobileInstantDebitsFlow: Boolean
         val paymentMethodTypes = stripeIntent.paymentMethodTypes
         val noUsBankAccount = USBankAccount.code !in paymentMethodTypes
         val supportsBankAccounts = "bank_account" in stripeIntent.linkFundingSources
-        val isDeferred = stripeIntent.clientSecret == null
-        return noUsBankAccount && supportsBankAccounts && canShowBankForm &&
-            (!isDeferred || FeatureFlags.instantDebitsDeferredIntent.isEnabled)
+        return noUsBankAccount && supportsBankAccounts && canShowBankForm
     }
 
 private val PaymentMethodMetadata.canShowBankForm: Boolean

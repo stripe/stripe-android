@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.example.playground.activity
 
+import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -35,6 +36,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Slider
+import androidx.compose.material.Switch
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material.TopAppBar
@@ -61,11 +63,15 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.fragment.app.setFragmentResult
 import com.godaddy.android.colorpicker.ClassicColorPicker
 import com.godaddy.android.colorpicker.HsvColor
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.R
+import com.stripe.android.paymentsheet.example.playground.activity.AppearanceBottomSheetDialogFragment.Companion.EMBEDDED_KEY
+import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedAppearance
+import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedRow
 
 private val BASE_FONT_SIZE = 20.sp
 private val BASE_PADDING = 8.dp
@@ -73,25 +79,48 @@ private val SECTION_LABEL_COLOR = Color(159, 159, 169)
 
 internal class AppearanceBottomSheetDialogFragment : BottomSheetDialogFragment() {
 
+    private var embeddedAppearance by mutableStateOf(EmbeddedAppearance())
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        embeddedAppearance = arguments.getEmbeddedAppearance()
+
         return ComposeView(requireContext()).apply {
             setContent {
                 AppearancePicker(
                     currentAppearance = AppearanceStore.state,
                     updateAppearance = { AppearanceStore.state = it },
+                    embeddedAppearance = embeddedAppearance,
+                    updateEmbedded = { embeddedAppearance = it },
+                    resetAppearance = ::resetAppearance
                 )
             }
         }
+    }
+
+    private fun resetAppearance() {
+        AppearanceStore.reset()
+        embeddedAppearance = EmbeddedAppearance()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        val result = Bundle().apply {
+            putParcelable(EMBEDDED_KEY, embeddedAppearance)
+        }
+        setFragmentResult(REQUEST_KEY, result)
     }
 
     companion object {
         fun newInstance(): AppearanceBottomSheetDialogFragment {
             return AppearanceBottomSheetDialogFragment()
         }
+
+        const val REQUEST_KEY = "REQUEST_KEY"
+        const val EMBEDDED_KEY = "EMBEDDED_APPEARANCE"
     }
 }
 
@@ -99,6 +128,9 @@ internal class AppearanceBottomSheetDialogFragment : BottomSheetDialogFragment()
 private fun AppearancePicker(
     currentAppearance: PaymentSheet.Appearance,
     updateAppearance: (PaymentSheet.Appearance) -> Unit,
+    embeddedAppearance: EmbeddedAppearance,
+    updateEmbedded: (EmbeddedAppearance) -> Unit,
+    resetAppearance: () -> Unit,
 ) {
     val scrollState = rememberScrollState()
     val nestedScrollConnection = rememberNestedScrollInteropConnection()
@@ -108,7 +140,9 @@ private fun AppearancePicker(
             TopAppBar(
                 title = { Text("Appearance") },
                 actions = {
-                    TextButton(onClick = AppearanceStore::reset) {
+                    TextButton(onClick = {
+                        resetAppearance()
+                    }) {
                         Text(text = stringResource(R.string.reset))
                     }
                 },
@@ -149,6 +183,12 @@ private fun AppearancePicker(
                 PrimaryButton(
                     currentAppearance = currentAppearance,
                     updateAppearance = updateAppearance,
+                )
+            }
+            CustomizationCard("Embedded") {
+                EmbeddedPicker(
+                    embeddedAppearance = embeddedAppearance,
+                    updateEmbedded = updateEmbedded
                 )
             }
 
@@ -590,11 +630,135 @@ private fun PrimaryButton(
 }
 
 @Composable
-private fun ColorItem(
+private fun EmbeddedPicker(
+    embeddedAppearance: EmbeddedAppearance,
+    updateEmbedded: (EmbeddedAppearance) -> Unit
+) {
+    RowStyleDropDown(embeddedAppearance.embeddedRowStyle) { style ->
+        updateEmbedded(
+            embeddedAppearance.copy(
+                embeddedRowStyle = style
+            )
+        )
+    }
+    ColorItem(
+        label = "separatorColor",
+        currentColor = Color(embeddedAppearance.separatorColor),
+        onColorPicked = {
+            embeddedAppearance.copy(
+                separatorColor = it.toArgb()
+            )
+        },
+        updateAppearance = updateEmbedded,
+    )
+    Divider()
+
+    ColorItem(
+        label = "selectedColor",
+        currentColor = Color(embeddedAppearance.selectedColor),
+        onColorPicked = {
+            embeddedAppearance.copy(
+                selectedColor = it.toArgb()
+            )
+        },
+        updateAppearance = updateEmbedded,
+    )
+    Divider()
+
+    ColorItem(
+        label = "unselectedColor",
+        currentColor = Color(embeddedAppearance.unselectedColor),
+        onColorPicked = {
+            embeddedAppearance.copy(
+                unselectedColor = it.toArgb()
+            )
+        },
+        updateAppearance = updateEmbedded,
+    )
+    Divider()
+
+    ColorItem(
+        label = "checkmarkColor",
+        currentColor = Color(embeddedAppearance.checkmarkColor),
+        onColorPicked = {
+            embeddedAppearance.copy(
+                checkmarkColor = it.toArgb()
+            )
+        },
+        updateAppearance = updateEmbedded,
+    )
+    Divider()
+
+    IncrementDecrementItem("separatorInsetsDp", embeddedAppearance.separatorInsetsDp) {
+        updateEmbedded(
+            embeddedAppearance.copy(
+                separatorInsetsDp = it
+            )
+        )
+    }
+    Divider()
+
+    IncrementDecrementItem("separatorThicknessDp", embeddedAppearance.separatorThicknessDp) {
+        updateEmbedded(
+            embeddedAppearance.copy(
+                separatorThicknessDp = it
+            )
+        )
+    }
+    Divider()
+
+    IncrementDecrementItem("additionalInsetsDp", embeddedAppearance.additionalInsetsDp) {
+        updateEmbedded(
+            embeddedAppearance.copy(
+                additionalInsetsDp = it
+            )
+        )
+    }
+    Divider()
+
+    IncrementDecrementItem("checkmarkInsetsDp", embeddedAppearance.checkmarkInsetsDp) {
+        updateEmbedded(
+            embeddedAppearance.copy(
+                checkmarkInsetsDp = it
+            )
+        )
+    }
+    Divider()
+
+    IncrementDecrementItem("floatingButtonSpacingDp", embeddedAppearance.floatingButtonSpacingDp) {
+        updateEmbedded(
+            embeddedAppearance.copy(
+                floatingButtonSpacingDp = it
+            )
+        )
+    }
+    Divider()
+
+    AppearanceToggle("topSeparatorEnabled", embeddedAppearance.topSeparatorEnabled) {
+        updateEmbedded(
+            embeddedAppearance.copy(
+                topSeparatorEnabled = it
+            )
+        )
+    }
+    Divider()
+
+    AppearanceToggle("bottomSeparatorEnabled", embeddedAppearance.bottomSeparatorEnabled) {
+        updateEmbedded(
+            embeddedAppearance.copy(
+                bottomSeparatorEnabled = it
+            )
+        )
+    }
+    Divider()
+}
+
+@Composable
+private fun <T> ColorItem(
     label: String,
     currentColor: Color,
-    onColorPicked: (Color) -> PaymentSheet.Appearance,
-    updateAppearance: (PaymentSheet.Appearance) -> Unit,
+    onColorPicked: (Color) -> T,
+    updateAppearance: (T) -> Unit,
 ) {
     val openDialog = remember { mutableStateOf(false) }
     ColorPicker(openDialog, currentColor) {
@@ -725,6 +889,26 @@ private fun IncrementDecrementItem(label: String, value: Float, onValueChange: (
 }
 
 @Composable
+private fun AppearanceToggle(label: String, value: Boolean, onValueChange: (Boolean) -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(all = BASE_PADDING),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(text = "$label: $value", fontSize = BASE_FONT_SIZE)
+        Spacer(modifier = Modifier.weight(1f))
+        Switch(
+            checked = value,
+            onCheckedChange = {
+                onValueChange(it)
+            }
+        )
+    }
+}
+
+@Composable
 private fun FontScaleSlider(sliderPosition: Float, onValueChange: (Float) -> Unit) {
     Text(
         text = "sizeScaleFactor: $sliderPosition",
@@ -738,6 +922,43 @@ private fun FontScaleSlider(sliderPosition: Float, onValueChange: (Float) -> Uni
             onValueChange(it)
         }
     )
+}
+
+@Composable
+private fun RowStyleDropDown(style: EmbeddedRow, rowStyleSelectedCallback: (EmbeddedRow) -> Unit) {
+    var expanded by remember { mutableStateOf(false) }
+
+    Row(
+        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(all = BASE_PADDING)
+            .wrapContentSize(Alignment.TopStart)
+    ) {
+        Text(
+            text = "RowStyle: $style",
+            fontSize = BASE_FONT_SIZE,
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(onClick = { expanded = true })
+        )
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            EmbeddedRow.entries.forEach {
+                DropdownMenuItem(
+                    onClick = {
+                        expanded = false
+                        rowStyleSelectedCallback(it)
+                    }
+                ) {
+                    Text(it.name)
+                }
+            }
+        }
+    }
 }
 
 @Composable
@@ -799,4 +1020,14 @@ private fun getFontFromResource(fontResId: Int?): FontFamily {
     } ?: run {
         FontFamily.Default
     }
+}
+
+internal fun Bundle?.getEmbeddedAppearance(): EmbeddedAppearance {
+    val appearance = if (SDK_INT >= 33) {
+        this?.getParcelable(EMBEDDED_KEY, EmbeddedAppearance::class.java)
+    } else {
+        @Suppress("DEPRECATION")
+        this?.getParcelable(EMBEDDED_KEY)
+    }
+    return appearance ?: EmbeddedAppearance()
 }

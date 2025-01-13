@@ -44,6 +44,16 @@
   <string name="stripe_paymentsheet_bacs_notice_mandate">Επιπλέον, θα λάβετε προηγούμενη ειδοποίηση δύο ημερών μέσω email για οποιοδήποτε ποσό πρόκειται να χρεωθεί στο πλαίσιο αυτής της οδηγίας. Οι πληρωμές θα εμφανίζονται ως \"%s\" στο αντίγραφο κίνησης του τραπεζικού λογαριασμού σας.</string>
   <!-- Message shown as part of overall Bacs Mandate indicating that their payments are protected by a defined guarantee -->
   <string name="stripe_paymentsheet_bacs_protection_mandate">Οι πληρωμές σας προστατεύονται από το %s.</string>
+  <!-- Text displayed on manage bank account screen when bank account details are not editable. -->
+  <string name="stripe_paymentsheet_bank_account_details_cannot_be_changed">Δεν είναι δυνατή η αλλαγή των στοιχείων τραπεζικού λογαριασμού.</string>
+  <!-- Text shown in the bank payment form when a promo is available and the user is paying, e.g. 'Get $5 back when you pay by bank. See terms'. Note that 'See terms' contains a non-breaking space. -->
+  <string name="stripe_paymentsheet_bank_payment_promo_for_payment"><![CDATA[Λάβετε επιστροφή %s όταν πληρώσετε μέσω τράπεζας. <a href=\"https://link.com/promotion-terms\">Δείτε τους όρους</a>]]></string>
+  <!-- Text shown in the bank payment form when a promo is available and the user is setting up an account, e.g. 'Get $5 back when you pay by bank. See terms'. Note that 'See terms' contains a non-breaking space. -->
+  <string name="stripe_paymentsheet_bank_payment_promo_for_setup"><![CDATA[Λάβετε επιστροφή %s όταν πληρώσετε για πρώτη φορά με την τράπεζά σας. <a href=\"https://link.com/promotion-terms\">Δείτε τους όρους</a>]]></string>
+  <!-- Label shown when paying with a bank account is not eligible for the incentive, e.g. 'No $5 promo' -->
+  <string name="stripe_paymentsheet_bank_payment_promo_ineligible">Χωρίς προώθηση %s</string>
+  <!-- Text displayed on manage card screen when card details are not editable. -->
+  <string name="stripe_paymentsheet_card_details_cannot_be_changed">Δεν είναι δυνατή η αλλαγή των στοιχείων κάρτας.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
   <string name="stripe_paymentsheet_card_mandate">Με την παροχή των στοιχείων της κάρτας σας, επιτρέπετε στην %s να χρεώνει την κάρτα σας για μελλοντικές πληρωμές σύμφωνα με τους όρους της.</string>
   <!-- Title shown above a carousel containing available payment methods -->
@@ -55,8 +65,14 @@
   <string name="stripe_paymentsheet_confirm_your_cvc">Επιβεβαιώστε τον κωδικό CVC</string>
   <!-- Text for a button that allows manual entry of an address -->
   <string name="stripe_paymentsheet_enter_address_manually">Πληκτρολογήστε τη διεύθυνση</string>
+  <!-- Title shown above a view containing a customer's bank account that they can delete or update -->
+  <string name="stripe_paymentsheet_manage_bank_account">Διαχείριση τραπεζικού λογαριασμού στις Ηνωμένες Πολιτείες</string>
+  <!-- Title shown above a view containing a customer's card payment methods that they can delete or update -->
+  <string name="stripe_paymentsheet_manage_card">Διαχείριση κάρτας</string>
   <!-- Title shown above a view containing the customer's card payment methods that they can delete or update -->
   <string name="stripe_paymentsheet_manage_payment_methods">Διαχείριση μεθόδων πληρωμής</string>
+  <!-- Title shown above a view containing a customer's SEPA debit account that they can delete or update -->
+  <string name="stripe_paymentsheet_manage_sepa_debit">Διαχείριση χρέωσης SEPA</string>
   <!-- Title shown above a carousel containing the customer's payment methods -->
   <string name="stripe_paymentsheet_manage_your_payment_methods">Διαχειριστείτε τις μεθόδους πληρωμής σας</string>
   <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->
@@ -67,6 +83,8 @@
   <string name="stripe_paymentsheet_new_card">Νέα κάρτα</string>
   <!-- Title shown above a section containing payment methods that a customer can choose to pay with e.g. card, bank account, etc. -->
   <string name="stripe_paymentsheet_new_pm">Νέα μέθοδος πληρωμής</string>
+  <!-- Text displayed on manage card screen when the only editable card detail is the card brand. -->
+  <string name="stripe_paymentsheet_only_card_brand_can_be_changed">Μπορείτε να αλλάξετε μόνο την επωνυμία κάρτας.</string>
   <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_using">Ή πληρωμή χρησιμοποιώντας</string>
   <!-- Title of a section containing a card form that will collect the payment information from the user. -->
@@ -111,6 +129,8 @@
   <string name="stripe_paymentsheet_select_payment_method">Επιλέξτε μέθοδο πληρωμής</string>
   <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
   <string name="stripe_paymentsheet_select_your_payment_method">Επιλέξτε τη μέθοδο πληρωμής σας</string>
+  <!-- Text displayed on manage SEPA debit screen when SEPA debit details are not editable. -->
+  <string name="stripe_paymentsheet_sepa_debit_details_cannot_be_changed">Δεν είναι δυνατή η αλλαγή των στοιχείων χρέωσης SEPA.</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">Σύνολο: %s</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
@@ -129,4 +149,6 @@
   <string name="stripe_upi_polling_payment_failed_title">Η πληρωμή απέτυχε</string>
   <!-- Text shown on a button that when tapped opens a user's screen with their payment methods. -->
   <string name="stripe_view_more">Προβολή περισσότερων</string>
+  <!-- Label for identifying the default payment method. -->
+  <string name="stripe_wallet_default">Προεπιλογή</string>
 </resources>

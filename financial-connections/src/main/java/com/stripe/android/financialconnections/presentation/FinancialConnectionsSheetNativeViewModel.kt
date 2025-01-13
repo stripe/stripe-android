@@ -26,8 +26,10 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Metadata
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
 import com.stripe.android.financialconnections.di.APPLICATION_ID
+import com.stripe.android.financialconnections.di.ActivityRetainedScope
 import com.stripe.android.financialconnections.di.DaggerFinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
+import com.stripe.android.financialconnections.di.FinancialConnectionsSingletonSharedComponentHolder
 import com.stripe.android.financialconnections.domain.CompleteFinancialConnectionsSession
 import com.stripe.android.financialconnections.domain.CreateInstantDebitsResult
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
@@ -45,6 +47,7 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
 import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
+import com.stripe.android.financialconnections.model.update
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.destination
@@ -72,9 +75,8 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 import javax.inject.Named
-import javax.inject.Singleton
 
-@Singleton
+@ActivityRetainedScope
 internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     /**
      * Exposes parent dagger component (activity viewModel scoped so that it survives config changes)
@@ -371,10 +373,14 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                 manualEntry = session.paymentAccount is BankAccount,
             )
         )
+
+        val usesMicrodeposits = stateFlow.value.manualEntryUsesMicrodeposits
+        val updatedSession = session.update(usesMicrodeposits = usesMicrodeposits)
+
         finishWithResult(
             Completed(
-                financialConnectionsSession = session,
-                token = session.parsedToken
+                financialConnectionsSession = updatedSession,
+                token = updatedSession.parsedToken,
             )
         )
     }
@@ -385,7 +391,9 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
         }
 
         val result = if (instantDebits != null) {
-            Completed(instantDebits = instantDebits)
+            Completed(
+                instantDebits = instantDebits,
+            )
         } else {
             Failed(
                 error = UnclassifiedError(
@@ -486,6 +494,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                     .initialSyncResponse(args.initialSyncResponse.takeIf { state.firstInit })
                     .application(app)
                     .configuration(state.configuration)
+                    .sharedComponent(FinancialConnectionsSingletonSharedComponentHolder.getComponent(app))
                     .savedStateHandle(savedStateHandle)
                     .initialState(state)
                     .build()
@@ -514,6 +523,7 @@ internal data class FinancialConnectionsSheetNativeState(
     val initialPane: Pane,
     val theme: Theme,
     val isLinkWithStripe: Boolean,
+    val manualEntryUsesMicrodeposits: Boolean,
     val elementsSessionContext: ElementsSessionContext?,
 ) {
 
@@ -535,6 +545,7 @@ internal data class FinancialConnectionsSheetNativeState(
         theme = args.initialSyncResponse.manifest.theme?.toLocalTheme() ?: Theme.default,
         viewEffect = null,
         isLinkWithStripe = args.initialSyncResponse.manifest.isLinkWithStripe ?: false,
+        manualEntryUsesMicrodeposits = args.initialSyncResponse.manifest.manualEntryUsesMicrodeposits,
         elementsSessionContext = args.elementsSessionContext,
     )
 

@@ -9,9 +9,11 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.paymentsheet.verticalmode.BankFormInteractor
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import kotlinx.coroutines.flow.update
 
@@ -39,6 +41,7 @@ import kotlinx.coroutines.flow.update
  */
 internal class USBankAccountFormArguments(
     val instantDebits: Boolean,
+    val incentive: PaymentMethodIncentive?,
     val linkMode: LinkMode?,
     val onBehalfOf: String?,
     val showCheckbox: Boolean,
@@ -61,6 +64,7 @@ internal class USBankAccountFormArguments(
             paymentMethodMetadata: PaymentMethodMetadata,
             hostedSurface: String,
             selectedPaymentMethodCode: String,
+            bankFormInteractor: BankFormInteractor,
         ): USBankAccountFormArguments {
             val isSaveForFutureUseValueChangeable = isSaveForFutureUseValueChangeable(
                 code = selectedPaymentMethodCode,
@@ -91,10 +95,11 @@ internal class USBankAccountFormArguments(
                 shippingDetails = viewModel.config.shippingDetails,
                 draftPaymentSelection = viewModel.newPaymentSelection?.paymentSelection,
                 onMandateTextChanged = viewModel.mandateHandler::updateMandateText,
-                onLinkedBankAccountChanged = viewModel::handleLinkedBankAccountChanged,
+                onLinkedBankAccountChanged = bankFormInteractor::handleLinkedBankAccountChanged,
                 onUpdatePrimaryButtonUIState = { viewModel.customPrimaryButtonUiState.update(it) },
                 onUpdatePrimaryButtonState = viewModel::updatePrimaryButtonState,
-                onError = viewModel::onError
+                onError = viewModel::onError,
+                incentive = paymentMethodMetadata.paymentMethodIncentive,
             )
         }
     }

@@ -11,10 +11,10 @@ import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
-import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarStateFactory
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.FormElement
 
@@ -28,7 +28,7 @@ internal sealed class CustomerSheetViewState(
     fun shouldDisplayDismissConfirmationModal(): Boolean {
         return when (this) {
             is Loading,
-            is EditPaymentMethod,
+            is UpdatePaymentMethod,
             is SelectPaymentMethod -> {
                 false
             }
@@ -126,8 +126,8 @@ internal sealed class CustomerSheetViewState(
         }
     }
 
-    data class EditPaymentMethod(
-        val editPaymentMethodInteractor: ModifiableEditPaymentMethodViewInteractor,
+    data class UpdatePaymentMethod(
+        val updatePaymentMethodInteractor: UpdatePaymentMethodInteractor,
         override val isLiveMode: Boolean,
     ) : CustomerSheetViewState(
         isLiveMode = isLiveMode,

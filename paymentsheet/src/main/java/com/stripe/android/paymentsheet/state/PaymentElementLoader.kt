@@ -27,7 +27,6 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.IntentConfiguration
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
-import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
@@ -189,12 +188,17 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 customerInfo = customerInfo,
                 metadata = metadata.await(),
                 savedSelection = savedSelection,
+                configuration = configuration,
                 cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance)
             )
         }
 
         val initialPaymentSelection = async {
-            retrieveInitialPaymentSelection(savedSelection, customer)
+            retrieveInitialPaymentSelection(
+                savedSelection = savedSelection,
+                customer = customer,
+                isGooglePayReady = isGooglePayReady,
+            )
         }
 
         val stripeIntent = elementsSession.stripeIntent
@@ -284,7 +288,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         return when (val accessType = customer?.accessType) {
             is PaymentSheet.CustomerAccessType.CustomerSession -> {
                 elementsSession.customer?.let { elementsSessionCustomer ->
-                    CustomerInfo.CustomerSession(elementsSessionCustomer)
+                    CustomerInfo.CustomerSession(elementsSessionCustomer, accessType.customerSessionClientSecret)
                 } ?: run {
                     val exception = IllegalStateException(
                         "Excepted 'customer' attribute as part of 'elements_session' response!"
@@ -313,6 +317,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     }
 
     private suspend fun createCustomerState(
+        configuration: CommonConfiguration,
         customerInfo: CustomerInfo?,
         metadata: PaymentMethodMetadata,
         savedSelection: Deferred<SavedSelection>,
@@ -322,13 +327,16 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             is CustomerInfo.CustomerSession -> {
                 CustomerState.createForCustomerSession(
                     customer = customerInfo.elementsSessionCustomer,
-                    supportedSavedPaymentMethodTypes = metadata.supportedSavedPaymentMethodTypes()
+                    configuration = configuration,
+                    supportedSavedPaymentMethodTypes = metadata.supportedSavedPaymentMethodTypes(),
+                    customerSessionClientSecret = customerInfo.customerSessionClientSecret,
                 )
             }
             is CustomerInfo.Legacy -> {
                 CustomerState.createForLegacyEphemeralKey(
                     customerId = customerInfo.id,
                     accessType = customerInfo.accessType,
+                    configuration = configuration,
                     paymentMethods = retrieveCustomerPaymentMethods(
                         metadata = metadata,
                         customerConfig = customerInfo.customerConfig,
@@ -352,10 +360,14 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     ): List<PaymentMethod> {
         val paymentMethodTypes = metadata.supportedSavedPaymentMethodTypes()
 
+        val customerSession = (customerConfig.accessType as? PaymentSheet.CustomerAccessType.CustomerSession)
+        val customerSessionClientSecret = customerSession?.customerSessionClientSecret
+
         val paymentMethods = customerRepository.getPaymentMethods(
             customerInfo = CustomerRepository.CustomerInfo(
                 id = customerConfig.id,
-                ephemeralKeySecret = customerConfig.ephemeralKeySecret
+                ephemeralKeySecret = customerConfig.ephemeralKeySecret,
+                customerSessionClientSecret = customerSessionClientSecret,
             ),
             types = paymentMethodTypes,
             silentlyFail = metadata.stripeIntent.isLiveMode,
@@ -462,17 +474,12 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             configuration.defaultBillingDetails?.phone
         }
 
-        val shippingAddress = if (shippingDetails?.isCheckboxSelected == true) {
-            shippingDetails.toIdentifierMap(configuration.defaultBillingDetails)
-        } else {
-            null
-        }
-
         val customerEmail = configuration.defaultBillingDetails?.email ?: customer?.let {
             customerRepository.retrieveCustomer(
                 CustomerRepository.CustomerInfo(
                     id = it.id,
-                    ephemeralKeySecret = it.ephemeralKeySecret
+                    ephemeralKeySecret = it.ephemeralKeySecret,
+                    customerSessionClientSecret = (it as? CustomerInfo.CustomerSession)?.customerSessionClientSecret,
                 )
             )
         }?.email
@@ -498,7 +505,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             merchantName = merchantName,
             merchantCountryCode = merchantCountry,
             customerInfo = customerInfo,
-            shippingValues = shippingAddress,
+            shippingDetails = shippingDetails?.takeIf { it.isCheckboxSelected == true },
             passthroughModeEnabled = passthroughModeEnabled,
             cardBrandChoice = cardBrandChoice,
             flags = flags,
@@ -531,7 +538,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
 
     private suspend fun retrieveInitialPaymentSelection(
         savedSelection: Deferred<SavedSelection>,
-        customer: Deferred<CustomerState?>
+        customer: Deferred<CustomerState?>,
+        isGooglePayReady: Boolean,
     ): PaymentSelection? {
         return when (val selection = savedSelection.await()) {
             is SavedSelection.GooglePay -> PaymentSelection.GooglePay
@@ -541,6 +549,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             }
             is SavedSelection.None -> null
         } ?: customer.await()?.paymentMethods?.firstOrNull()?.toPaymentSelection()
+            ?: PaymentSelection.GooglePay.takeIf { isGooglePayReady }
     }
 
     private suspend fun retrieveSavedSelection(
@@ -691,6 +700,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
 
         data class CustomerSession(
             val elementsSessionCustomer: ElementsSession.Customer,
+            val customerSessionClientSecret: String,
         ) : CustomerInfo {
             override val id: String = elementsSessionCustomer.session.customerId
             override val ephemeralKeySecret: String = elementsSessionCustomer.session.apiKey

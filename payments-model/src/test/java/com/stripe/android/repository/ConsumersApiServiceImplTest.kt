@@ -12,6 +12,7 @@ import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSignUpConsentAction
+import com.stripe.android.model.IncentiveEligibilitySession
 import com.stripe.android.model.VerificationType
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
@@ -67,8 +68,7 @@ class ConsumersApiServiceImplTest {
             locale = Locale.US,
             amount = 1234,
             currency = "cad",
-            paymentIntentId = "pi_123",
-            setupIntentId = null,
+            incentiveEligibilitySession = IncentiveEligibilitySession.PaymentIntent("pi_123"),
             consentAction = ConsumerSignUpConsentAction.Checkbox,
             requestSurface = requestSurface,
             requestOptions = DEFAULT_OPTIONS,

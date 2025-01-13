@@ -21,6 +21,7 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffe
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenAuthFlowWithUrl
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenNativeAuthFlow
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewModel.Companion.QUERY_PARAM_PAYMENT_METHOD
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ErrorCode
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Metadata
@@ -30,6 +31,7 @@ import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.browser.BrowserManager
 import com.stripe.android.financialconnections.di.APPLICATION_ID
 import com.stripe.android.financialconnections.di.DaggerFinancialConnectionsSheetComponent
+import com.stripe.android.financialconnections.di.FinancialConnectionsSingletonSharedComponentHolder
 import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsSession
 import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsSessionForToken
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
@@ -52,10 +54,12 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
+import com.stripe.android.financialconnections.model.update
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.utils.parcelable
+import com.stripe.attestation.IntegrityRequestManager
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -66,6 +70,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     @Named(APPLICATION_ID) private val applicationId: String,
     savedStateHandle: SavedStateHandle,
     private val getOrFetchSync: GetOrFetchSync,
+    private val integrityRequestManager: IntegrityRequestManager,
     private val fetchFinancialConnectionsSession: FetchFinancialConnectionsSession,
     private val fetchFinancialConnectionsSessionForToken: FetchFinancialConnectionsSessionForToken,
     private val logger: Logger,
@@ -84,7 +89,9 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         if (initialState.initialArgs.isValid()) {
             eventReporter.onPresented(initialState.initialArgs.configuration)
             // avoid re-fetching manifest if already exists (this will happen on process recreations)
-            if (initialState.manifest == null) fetchManifest()
+            if (initialState.manifest == null) {
+                initAuthFlow()
+            }
         } else {
             val result = Failed(
                 IllegalStateException("Invalid configuration provided when instantiating activity")
@@ -106,16 +113,34 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
      * Fetches the [FinancialConnectionsSessionManifest] from the Stripe API to get the hosted auth flow URL
      * as well as the success and cancel callback URLs to verify.
      */
-    private fun fetchManifest() {
+    private fun initAuthFlow() {
         viewModelScope.launch {
             kotlin.runCatching {
-                getOrFetchSync(refetchCondition = Always)
+                val attestationInitialized = prepareStandardRequestManager()
+                getOrFetchSync(
+                    refetchCondition = Always,
+                    attestationInitialized = attestationInitialized
+                )
             }.onFailure {
                 finishWithResult(stateFlow.value, Failed(it))
             }.onSuccess {
                 openAuthFlow(it)
             }
         }
+    }
+
+    private suspend fun prepareStandardRequestManager(): Boolean {
+        val result = integrityRequestManager.prepare()
+        result.onFailure {
+            analyticsTracker.track(
+                FinancialConnectionsAnalyticsEvent.Error(
+                    extraMessage = "Failed to warm up the IntegrityStandardRequestManager",
+                    pane = Pane.CONSENT,
+                    exception = it
+                )
+            )
+        }
+        return result.isSuccess
     }
 
     /**
@@ -297,10 +322,11 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         viewModelScope.launch {
             kotlin.runCatching {
                 fetchFinancialConnectionsSession(state.sessionSecret)
-            }.onSuccess {
+            }.onSuccess { session ->
+                val updatedSession = session.update(state.manifest)
                 finishWithResult(
                     state = state,
-                    result = Completed(financialConnectionsSession = it)
+                    result = Completed(financialConnectionsSession = updatedSession)
                 )
             }.onFailure { error ->
                 finishWithResult(stateFlow.value, Failed(error))
@@ -320,9 +346,13 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
             kotlin.runCatching {
                 fetchFinancialConnectionsSessionForToken(clientSecret = state.sessionSecret)
             }.onSuccess { (las, token) ->
+                val updatedSession = las.update(state.manifest)
                 finishWithResult(
                     state = state,
-                    result = Completed(financialConnectionsSession = las, token = token)
+                    result = Completed(
+                        financialConnectionsSession = updatedSession,
+                        token = token,
+                    )
                 )
             }.onFailure { error ->
                 finishWithResult(stateFlow.value, Failed(error))
@@ -455,7 +485,9 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                             instantDebits = InstantDebitsResult(
                                 encodedPaymentMethod = paymentMethod,
                                 last4 = url.getQueryParameter(QUERY_PARAM_LAST4),
-                                bankName = url.getQueryParameter(QUERY_BANK_NAME)
+                                bankName = url.getQueryParameter(QUERY_BANK_NAME),
+                                // TODO(tillh-stripe): Pull this from the URL
+                                eligibleForIncentive = false,
                             ),
                             financialConnectionsSession = null,
                             token = null
@@ -523,6 +555,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                     .builder()
                     .application(app)
                     .savedStateHandle(savedStateHandle)
+                    .sharedComponent(FinancialConnectionsSingletonSharedComponentHolder.getComponent(app))
                     .initialState(state)
                     .configuration(state.initialArgs.configuration)
                     .build().viewModel

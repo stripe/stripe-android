@@ -36,7 +36,6 @@ internal class PaymentSheetScreenSelectSavedPaymentMethodsScreenshotTest {
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             isCbcEligible = true,
         ),
-        canRemovePaymentMethods = true,
     )
 
     @Test

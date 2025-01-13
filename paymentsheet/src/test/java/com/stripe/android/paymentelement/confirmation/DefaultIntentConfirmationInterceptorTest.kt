@@ -14,6 +14,10 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.paymentelement.confirmation.intent.DefaultIntentConfirmationInterceptor
+import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
+import com.stripe.android.paymentelement.confirmation.intent.InvalidDeferredIntentUsageException
+import com.stripe.android.paymentelement.confirmation.intent.intercept
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -96,14 +100,14 @@ class DefaultIntentConfirmationInterceptorTest {
             val interceptor = createIntentConfirmationInterceptor()
 
             val nextStep = interceptor.intercept(
-                confirmationOption = ConfirmationHandler.Option.PaymentMethod.Saved(
-                    initializationMode = InitializationMode.PaymentIntent("pi_1234_secret_4321"),
-                    shippingDetails = null,
+                confirmationOption = PaymentMethodConfirmationOption.Saved(
                     paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                     optionsParams = PaymentMethodOptionsParams.Card(
                         setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
                     )
                 ),
+                initializationMode = InitializationMode.PaymentIntent("pi_1234_secret_4321"),
+                shippingDetails = null,
             )
 
             val confirmNextStep = nextStep as? IntentConfirmationInterceptor.NextStep.Confirm

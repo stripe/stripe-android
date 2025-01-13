@@ -19,8 +19,6 @@ import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.RealLinkConfigurationCoordinator
 import com.stripe.android.link.injection.LinkAnalyticsComponent
 import com.stripe.android.link.injection.LinkComponent
-import com.stripe.android.paymentelement.confirmation.DefaultIntentConfirmationInterceptor
-import com.stripe.android.paymentelement.confirmation.IntentConfirmationInterceptor
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
 import com.stripe.android.paymentsheet.BuildConfig
@@ -29,16 +27,10 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
-import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandlerImpl
 import com.stripe.android.paymentsheet.flowcontroller.DefaultPaymentSelectionUpdater
 import com.stripe.android.paymentsheet.flowcontroller.PaymentSelectionUpdater
-import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncherFactory
-import com.stripe.android.paymentsheet.paymentdatacollection.bacs.DefaultBacsMandateConfirmationLauncherFactory
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionInteractor
-import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionLauncherFactory
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.DefaultCvcRecollectionInteractor
-import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.DefaultCvcRecollectionLauncherFactory
 import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
@@ -47,8 +39,6 @@ import com.stripe.android.paymentsheet.state.DefaultLinkAccountStatusProvider
 import com.stripe.android.paymentsheet.state.DefaultPaymentElementLoader
 import com.stripe.android.paymentsheet.state.LinkAccountStatusProvider
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
-import com.stripe.android.paymentsheet.ui.DefaultEditPaymentMethodViewInteractor
-import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import dagger.Binds
 import dagger.Lazy
 import dagger.Module
@@ -90,11 +80,6 @@ internal abstract class PaymentSheetCommonModule {
     abstract fun bindsLinkAccountStatusProvider(
         impl: DefaultLinkAccountStatusProvider,
     ): LinkAccountStatusProvider
-
-    @Binds
-    abstract fun bindsIntentConfirmationInterceptor(
-        impl: DefaultIntentConfirmationInterceptor,
-    ): IntentConfirmationInterceptor
 
     @Binds
     abstract fun bindsPaymentSheetUpdater(
@@ -156,32 +141,8 @@ internal abstract class PaymentSheetCommonModule {
 
         @Provides
         @Singleton
-        fun provideBacsMandateConfirmationLauncherFactory(): BacsMandateConfirmationLauncherFactory {
-            return DefaultBacsMandateConfirmationLauncherFactory
-        }
-
-        @Provides
-        @Singleton
-        fun provideCvcRecollectionLauncherFactory(): CvcRecollectionLauncherFactory {
-            return DefaultCvcRecollectionLauncherFactory
-        }
-
-        @Provides
-        @Singleton
-        fun provideCVCRecollectionHandler(): CvcRecollectionHandler {
-            return CvcRecollectionHandlerImpl()
-        }
-
-        @Provides
-        @Singleton
         fun provideDurationProvider(): DurationProvider {
             return DefaultDurationProvider.instance
-        }
-
-        @Provides
-        @Singleton
-        fun providesEditPaymentMethodViewInteractorFactory(): ModifiableEditPaymentMethodViewInteractor.Factory {
-            return DefaultEditPaymentMethodViewInteractor.Factory
         }
 
         @Provides

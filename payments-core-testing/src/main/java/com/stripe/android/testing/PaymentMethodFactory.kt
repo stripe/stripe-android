@@ -48,10 +48,10 @@ object PaymentMethodFactory {
         } else {
             "pm_1234"
         }
-        return card(id)
+        return card(id = id)
     }
 
-    fun card(id: String): PaymentMethod {
+    fun card(id: String?): PaymentMethod {
         return PaymentMethod(
             id = id,
             created = 123456789L,
@@ -166,6 +166,8 @@ object PaymentMethodFactory {
         cardJson.put("display_brand", card?.displayBrand)
         cardJson.put("brand", card?.brand?.code)
         cardJson.put("last4", card?.last4)
+        cardJson.put("exp_month", card?.expiryMonth)
+        cardJson.put("exp_year", card?.expiryYear)
 
         val networks = paymentMethod.card?.networks
         val networksJson = JSONObject()
@@ -175,10 +177,12 @@ object PaymentMethodFactory {
             availableJson.put(it)
         }
 
-        networksJson.put("available", availableJson)
-        networksJson.put("preferred", networks?.preferred)
+        if (availableJson.length() > 0) {
+            networksJson.put("available", availableJson)
+            networksJson.put("preferred", networks?.preferred)
 
-        cardJson.put("networks", networksJson)
+            cardJson.put("networks", networksJson)
+        }
 
         paymentMethodJson.put("card", cardJson)
 

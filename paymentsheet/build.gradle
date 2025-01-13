@@ -8,7 +8,6 @@ apply plugin: 'app.cash.paparazzi'
 apply plugin: 'dev.drewhamilton.poko'
 
 dependencies {
-    implementation project(":link")
     api project(":payments-core")
     implementation project(':payments-ui-core')
     implementation project(':stripe-ui-core')
@@ -54,7 +53,6 @@ dependencies {
     debugImplementation libs.compose.uiTooling
     debugImplementation libs.compose.uiTestManifest
 
-    testImplementation project(':link')
     testImplementation project(':financial-connections')
     testImplementation project(':network-testing')
     testImplementation project(':payments-core-testing')
@@ -84,6 +82,8 @@ dependencies {
 
     // temporary fix for running compose test in RobolectricTestRunner, see https://github.com/robolectric/robolectric/issues/6593
     testImplementation testLibs.espresso.core
+
+    kspTest libs.daggerCompiler
 
     androidTestImplementation project(':network-testing')
     androidTestImplementation project(':payments-core-testing')

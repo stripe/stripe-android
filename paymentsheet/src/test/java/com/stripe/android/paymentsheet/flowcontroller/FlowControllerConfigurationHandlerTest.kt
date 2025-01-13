@@ -9,7 +9,7 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.model.PaymentIntentFixtures
-import com.stripe.android.paymentelement.confirmation.IntentConfirmationInterceptor
+import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
@@ -17,20 +17,17 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.SessionTestRule
 import com.stripe.android.utils.FakePaymentElementLoader
 import com.stripe.android.utils.IntentConfirmationInterceptorTestRule
 import com.stripe.android.utils.RelayingPaymentElementLoader
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -59,21 +56,18 @@ class FlowControllerConfigurationHandlerTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private lateinit var viewModel: FlowControllerViewModel
 
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule(testDispatcher)
+
     @Before
     fun setup() {
-        Dispatchers.setMain(testDispatcher)
-
         PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
 
         viewModel = FlowControllerViewModel(
             application = ApplicationProvider.getApplicationContext(),
-            handle = SavedStateHandle()
+            handle = SavedStateHandle(),
+            statusBarColor = null,
         )
-    }
-
-    @After
-    fun after() {
-        Dispatchers.resetMain()
     }
 
     @Test
@@ -308,7 +302,7 @@ class FlowControllerConfigurationHandlerTest {
         }
 
         assertThat(configureErrors.awaitItem()?.message)
-            .isEqualTo("When a CustomerConfiguration is passed to PaymentSheet, the ephemeralKeySecret cannot be an empty string.")
+            .isEqualTo("Conflicting ephemeralKeySecrets between CustomerConfiguration and CustomerConfiguration.customerAccessType")
     }
 
     @Test

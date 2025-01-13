@@ -32,6 +32,7 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.ConsumerFixtures
+import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.CreateFinancialConnectionsSessionForDeferredPaymentParams
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
 import com.stripe.android.model.DeferredIntentParams
@@ -190,6 +191,18 @@ internal class StripeApiRepositoryTest {
         val detachUrl = stripeApiRepository.getDetachPaymentMethodUrl(paymentMethodId)
         val expectedUrl = arrayOf(
             "https://api.stripe.com/v1/payment_methods/",
+            paymentMethodId,
+            "/detach"
+        ).joinToString("")
+        assertThat(detachUrl).isEqualTo(expectedUrl)
+    }
+
+    @Test
+    fun testGetElementsDetachPaymentMethodUrl() {
+        val paymentMethodId = "pm_1ETDEa2eZvKYlo2CN5828c52"
+        val detachUrl = stripeApiRepository.getElementsDetachPaymentMethodUrl(paymentMethodId)
+        val expectedUrl = arrayOf(
+            "https://api.stripe.com/v1/elements/payment_methods/",
             paymentMethodId,
             "/detach"
         ).joinToString("")
@@ -2750,6 +2763,79 @@ internal class StripeApiRepositoryTest {
             assertThat(credentials["consumer_session_client_secret"]).isEqualTo(clientSecret)
             assertThat(params["types"] as? List<*>).containsExactlyElementsIn(paymentMethodTypes.toList())
         }
+
+    @Test
+    fun `deletePaymentDetails() sends all parameters`() = runTest {
+        val stripeResponse = StripeResponse(
+            200,
+            "",
+            emptyMap()
+        )
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+            .thenReturn(stripeResponse)
+
+        val clientSecret = "secret"
+        val paymentDetailsId = "id"
+        create().deletePaymentDetails(
+            clientSecret,
+            paymentDetailsId,
+            DEFAULT_OPTIONS
+        )
+
+        verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+        val request = apiRequestArgumentCaptor.firstValue
+        val params = requireNotNull(request.params)
+
+        assertThat(
+            "https://api.stripe.com/v1/consumers/payment_details/$paymentDetailsId",
+        ).isEqualTo(request.baseUrl)
+
+        assertThat(params["request_surface"]).isEqualTo("android_payment_element")
+        val credentials = params["credentials"] as Map<*, *>
+        assertThat(credentials["consumer_session_client_secret"]).isEqualTo(clientSecret)
+    }
+
+    @Test
+    fun `updatePaymentDetails() sends all parameters`() = runTest {
+        val stripeResponse = StripeResponse(
+            200,
+            ConsumerFixtures.CONSUMER_SINGLE_CARD_PAYMENT_DETAILS_JSON.toString(),
+            emptyMap()
+        )
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+            .thenReturn(stripeResponse)
+
+        val id = "id"
+        val clientSecret = "secret"
+        val isDefault = true
+        val paymentDetailsUpdateParams = ConsumerPaymentDetailsUpdateParams(
+            id,
+            isDefault,
+            PaymentMethodCreateParamsFixtures.DEFAULT_CARD.toParamMap()
+        )
+        create().updatePaymentDetails(
+            clientSecret,
+            paymentDetailsUpdateParams,
+            DEFAULT_OPTIONS
+        )
+
+        verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+        val params = requireNotNull(apiRequestArgumentCaptor.firstValue.params)
+
+        with(params) {
+            assertThat(this["request_surface"]).isEqualTo("android_payment_element")
+            withNestedParams("credentials") {
+                assertThat(this["consumer_session_client_secret"]).isEqualTo(clientSecret)
+            }
+            assertThat(this["is_default"]).isEqualTo(true)
+            assertThat(this["exp_month"]).isEqualTo(1)
+            assertThat(this["exp_year"]).isEqualTo(2054)
+            withNestedParams("billing_address") {
+                assertThat(this["country_code"]).isEqualTo("US")
+                assertThat(this["postal_code"]).isEqualTo("94111")
+            }
+        }
+    }
 
     /**
      * Helper DSL to validate nested params.

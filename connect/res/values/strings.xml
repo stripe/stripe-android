@@ -4,4 +4,5 @@
     <string name="stripe_downloading_file">Downloading file</string>
     <string name="stripe_download_complete">Download complete</string>
     <string name="stripe_unable_to_download_file">Unable to download file</string>
+    <string name="stripe_failed_to_open_url">Failed to open URL: %s</string>
 </resources>

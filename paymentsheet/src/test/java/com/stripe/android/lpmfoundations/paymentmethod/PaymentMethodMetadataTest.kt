@@ -790,6 +790,7 @@ internal class PaymentMethodMetadataTest {
             linkInlineConfiguration = linkInlineConfiguration,
             linkMode = null,
             cardBrandFilter = PaymentSheetCardBrandFilter(cardBrandAcceptance),
+            paymentMethodIncentive = null,
         )
 
         assertThat(metadata).isEqualTo(expectedMetadata)
@@ -854,6 +855,7 @@ internal class PaymentMethodMetadataTest {
             linkInlineConfiguration = null,
             linkMode = null,
             cardBrandFilter = PaymentSheetCardBrandFilter(cardBrandAcceptance),
+            paymentMethodIncentive = null,
         )
 
         assertThat(metadata).isEqualTo(expectedMetadata)
@@ -865,6 +867,7 @@ internal class PaymentMethodMetadataTest {
             mobilePaymentElementComponent = ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
                 isPaymentMethodSaveEnabled = true,
                 isPaymentMethodRemoveEnabled = true,
+                canRemoveLastPaymentMethod = true,
                 allowRedisplayOverride = null,
             )
         )
@@ -878,6 +881,7 @@ internal class PaymentMethodMetadataTest {
             mobilePaymentElementComponent = ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
                 isPaymentMethodSaveEnabled = false,
                 isPaymentMethodRemoveEnabled = true,
+                canRemoveLastPaymentMethod = true,
                 allowRedisplayOverride = null,
             ),
         )
@@ -1299,7 +1303,7 @@ internal class PaymentMethodMetadataTest {
                 ),
                 merchantName = "Merchant Inc.",
                 merchantCountryCode = "CA",
-                shippingValues = mapOf(),
+                shippingDetails = null,
                 flags = mapOf(),
                 cardBrandChoice = LinkConfiguration.CardBrandChoice(
                     eligible = true,

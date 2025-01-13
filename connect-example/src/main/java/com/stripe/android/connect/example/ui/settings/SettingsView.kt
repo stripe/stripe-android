@@ -1,6 +1,5 @@
 package com.stripe.android.connect.example.ui.settings
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -29,23 +28,23 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.stripe.android.connect.example.MainContent
 import com.stripe.android.connect.example.R
+import com.stripe.android.connect.example.ui.common.ConnectExampleScaffold
 import com.stripe.android.connect.example.ui.settings.SettingsViewModel.SettingsState.DemoMerchant
 
 @Composable
 fun SettingsView(
+    viewModel: SettingsViewModel,
     onDismiss: () -> Unit,
     onReloadRequested: () -> Unit,
-    viewModel: SettingsViewModel = viewModel()
+    openOnboardingSettings: () -> Unit,
+    openPresentationSettings: () -> Unit,
 ) {
     val state by viewModel.state.collectAsState()
     var serverUrlDidChange = rememberSaveable { false }
 
-    BackHandler { onDismiss() }
     LaunchedEffect(state.serverUrl) { serverUrlDidChange = true } // track if the serverURL ever changes
-    MainContent(
+    ConnectExampleScaffold(
         title = stringResource(R.string.settings),
         navigationIcon = {
             IconButton(onClick = onDismiss) {
@@ -84,6 +83,12 @@ fun SettingsView(
                 )
             }
             item {
+                ComponentSettings(openOnboardingSettings = openOnboardingSettings)
+            }
+            item {
+                PresentationSettingsSection(openPresentationSettings = openPresentationSettings)
+            }
+            item {
                 ApiServerSettings(
                     serverUrl = state.serverUrl,
                     onServerUrlChanged = viewModel::onServerUrlChanged,
@@ -105,7 +110,7 @@ private fun SelectAnAccount(
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Text(stringResource(R.string.select_demo_account), style = MaterialTheme.typography.h6)
+        SettingsSectionHeader(stringResource(R.string.select_demo_account))
         accounts.forEach { merchant ->
             when (merchant) {
                 is DemoMerchant.Merchant -> {
@@ -153,13 +158,37 @@ private fun SelectAnAccount(
 }
 
 @Composable
+private fun ComponentSettings(
+    openOnboardingSettings: () -> Unit,
+) {
+    SettingsSectionHeader(stringResource(R.string.component_settings))
+    Spacer(modifier = Modifier.height(8.dp))
+    SettingsNavigationItem(
+        text = stringResource(R.string.account_onboarding),
+        onClick = openOnboardingSettings
+    )
+}
+
+@Composable
+private fun PresentationSettingsSection(
+    openPresentationSettings: () -> Unit
+) {
+    SettingsSectionHeader(stringResource(R.string.presentation_settings))
+    Spacer(modifier = Modifier.height(8.dp))
+    SettingsNavigationItem(
+        text = stringResource(R.string.presentation_settings),
+        onClick = openPresentationSettings
+    )
+}
+
+@Composable
 private fun ApiServerSettings(
     serverUrl: String,
     onServerUrlChanged: (String) -> Unit,
     resetServerUrlEnabled: Boolean,
     resetServerUrlClicked: () -> Unit,
 ) {
-    Text(stringResource(R.string.api_server_settings), style = MaterialTheme.typography.h6)
+    SettingsSectionHeader(stringResource(R.string.api_server_settings))
     Spacer(modifier = Modifier.height(8.dp))
     OutlinedTextField(
         value = serverUrl,
