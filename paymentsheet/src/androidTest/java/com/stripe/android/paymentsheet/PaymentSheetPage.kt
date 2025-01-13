@@ -2,6 +2,8 @@
 
 package com.stripe.android.paymentsheet
 
+import android.view.accessibility.AccessibilityNodeInfo
+import android.widget.Button
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
@@ -19,6 +21,9 @@ import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTextReplacement
 import androidx.test.espresso.Espresso
+import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.matcher.ViewMatchers.withId
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.ui.FORM_ELEMENT_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
@@ -150,6 +155,21 @@ internal class PaymentSheetPage(
         composeTestRule.onNode(hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG))
             .performScrollTo()
             .performClick()
+    }
+
+    fun assertPrimaryButton(expectedContentDescription: String, canPay: Boolean) {
+        onView(withId(R.id.primary_button)).check { view, _ ->
+            val nodeInfo = AccessibilityNodeInfo()
+            view.onInitializeAccessibilityNodeInfo(nodeInfo)
+            assertThat(nodeInfo.contentDescription).isEqualTo(expectedContentDescription)
+            assertThat(nodeInfo.className).isEqualTo(Button::class.java.name)
+            if (canPay) {
+                assertThat(nodeInfo.isClickable).isTrue()
+                assertThat(nodeInfo.isEnabled).isTrue()
+            } else {
+                assertThat(nodeInfo.isEnabled).isFalse()
+            }
+        }
     }
 
     fun fillCvcRecollection(cvc: String) {

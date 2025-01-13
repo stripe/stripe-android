@@ -364,4 +364,42 @@ internal class PaymentSheetTest {
         page.fillCvcRecollection("123")
         page.clickPrimaryButton()
     }
+
+    @Test
+    fun testPrimaryButtonAccessibility() = runPaymentSheetTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-requires_payment_method.json")
+        }
+
+        testContext.presentPaymentSheet {
+            presentWithPaymentIntent(
+                paymentIntentClientSecret = "pi_example_secret_example",
+                configuration = defaultConfiguration,
+            )
+        }
+
+        page.fillOutCardDetails()
+
+        page.assertPrimaryButton(
+            expectedContentDescription = "Pay \$50.99",
+            canPay = true
+        )
+
+        page.clearCard()
+
+        page.assertPrimaryButton(
+            expectedContentDescription = "Pay \$50.99",
+            canPay = false
+        )
+
+        testContext.markTestSucceeded()
+    }
 }
