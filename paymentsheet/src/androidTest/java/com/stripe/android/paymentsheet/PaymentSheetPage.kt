@@ -22,10 +22,6 @@ import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTextReplacement
 import androidx.test.espresso.Espresso
 import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.matcher.ViewMatchers
-import androidx.test.espresso.matcher.ViewMatchers.isClickable
-import androidx.test.espresso.matcher.ViewMatchers.isNotEnabled
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.ui.FORM_ELEMENT_TEST_TAG
@@ -168,10 +164,10 @@ internal class PaymentSheetPage(
             assertThat(nodeInfo.contentDescription).isEqualTo(expectedContentDescription)
             assertThat(nodeInfo.className).isEqualTo(Button::class.java.name)
             if (canPay) {
-                matches(isClickable())
-                matches(ViewMatchers.isEnabled())
+                assertThat(nodeInfo.isClickable).isTrue()
+                assertThat(nodeInfo.isEnabled).isTrue()
             } else {
-                matches(isNotEnabled())
+                assertThat(nodeInfo.isEnabled).isFalse()
             }
         }
     }
