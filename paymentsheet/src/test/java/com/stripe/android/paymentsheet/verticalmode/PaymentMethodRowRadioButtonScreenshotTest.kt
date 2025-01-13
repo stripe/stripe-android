@@ -169,7 +169,8 @@ internal class PaymentMethodRowRadioButtonScreenshotTest {
         val style = FlatWithRadio(
             separatorThicknessDp = StripeThemeDefaults.flat.separatorThickness,
             separatorColor = StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
-            separatorInsetsDp = StripeThemeDefaults.flat.separatorInsets,
+            startSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets,
+            endSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets,
             topSeparatorEnabled = StripeThemeDefaults.flat.topSeparatorEnabled,
             bottomSeparatorEnabled = StripeThemeDefaults.flat.bottomSeparatorEnabled,
             selectedColor = StripeThemeDefaults.colorsLight.materialColors.error.toArgb(),
