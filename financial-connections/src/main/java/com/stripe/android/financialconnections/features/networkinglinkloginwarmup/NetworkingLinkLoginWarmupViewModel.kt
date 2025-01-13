@@ -50,7 +50,8 @@ internal class NetworkingLinkLoginWarmupViewModel @AssistedInject constructor(
             eventTracker.track(PaneLoaded(PANE))
             NetworkingLinkLoginWarmupState.Payload(
                 merchantName = manifest.getBusinessName(),
-                email = requireNotNull(manifest.getRedactedEmail())
+                redactedEmail = requireNotNull(manifest.getRedactedEmail()),
+                email = requireNotNull(manifest.accountholderCustomerEmailAddress)
             )
         }.execute { copy(payload = it) }
     }
@@ -191,6 +192,7 @@ internal data class NetworkingLinkLoginWarmupState(
 
     data class Payload(
         val merchantName: String?,
-        val email: String
+        val email: String,
+        val redactedEmail: String
     )
 }

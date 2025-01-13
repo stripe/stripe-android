@@ -21,6 +21,7 @@ internal class NetworkingLinkLoginWarmupPreviewParameterProvider :
         payload = Success(
             NetworkingLinkLoginWarmupState.Payload(
                 merchantName = "Test",
+                redactedEmail = "emai***@test.com",
                 email = "email@test.com"
             )
         ),
@@ -44,6 +45,7 @@ internal class NetworkingLinkLoginWarmupPreviewParameterProvider :
         payload = Success(
             NetworkingLinkLoginWarmupState.Payload(
                 merchantName = "Test",
+                redactedEmail = "emai***@test.com",
                 email = "email@test.com"
             )
         ),
@@ -55,6 +57,7 @@ internal class NetworkingLinkLoginWarmupPreviewParameterProvider :
         payload = Success(
             NetworkingLinkLoginWarmupState.Payload(
                 merchantName = "Test",
+                redactedEmail = "emai***@test.com",
                 email = "email@test.com"
             )
         ),
@@ -66,6 +69,7 @@ internal class NetworkingLinkLoginWarmupPreviewParameterProvider :
         payload = Success(
             NetworkingLinkLoginWarmupState.Payload(
                 merchantName = "Test",
+                redactedEmail = "emai***@test.com",
                 email = "email@test.com"
             )
         ),

@@ -79,7 +79,7 @@ private fun NetworkingLinkLoginWarmupContent(
         lazyListState = lazyListState,
         body = {
             item { HeaderSection() }
-            item { ExistingEmailSection(email = state.payload()?.email ?: "") }
+            item { ExistingEmailSection(email = state.payload()?.redactedEmail ?: "") }
         },
         footer = {
             Footer(
