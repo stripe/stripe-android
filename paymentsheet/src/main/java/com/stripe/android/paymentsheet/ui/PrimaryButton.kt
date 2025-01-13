@@ -216,7 +216,7 @@ internal class PrimaryButton @JvmOverloads constructor(
         super.onInitializeAccessibilityNodeInfo(info)
         // Indicate this custom view is a button, so TalkBack can announce it as such.
         info?.className = Button::class.java.name
-        info?.isEnabled = false
+        info?.isEnabled = isEnabled
     }
 
     fun updateUiState(uiState: UIState?) {
