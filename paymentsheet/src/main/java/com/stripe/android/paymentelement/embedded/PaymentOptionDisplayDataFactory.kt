@@ -61,7 +61,7 @@ internal class PaymentOptionDisplayDataFactory @Inject constructor(
             billingDetails = if (attachDefaultBillingDetails) {
                 billingDetails
             } else {
-                selection.billingDetails.toPaymentSheetBillingDetails()
+                selection.billingDetails?.toPaymentSheetBillingDetails()
             },
             paymentMethodType = selection.paymentMethodType,
             mandateText = if (mandate == null) null else AnnotatedString(mandate.resolve(context))

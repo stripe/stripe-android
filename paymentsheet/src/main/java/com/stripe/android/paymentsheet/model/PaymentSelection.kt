@@ -409,22 +409,18 @@ internal val PaymentSelection.billingDetails: PaymentMethod.BillingDetails?
         is PaymentSelection.Saved -> paymentMethod.billingDetails
     }
 
-internal fun PaymentMethod.BillingDetails?.toPaymentSheetBillingDetails(): PaymentSheet.BillingDetails? {
-    return if (this == null) {
-        null
-    } else {
-        PaymentSheet.BillingDetails(
-            address = PaymentSheet.Address(
-                city = address?.city,
-                country = address?.country,
-                line1 = address?.line1,
-                line2 = address?.line2,
-                postalCode = address?.postalCode,
-                state = address?.state
-            ),
-            email = email,
-            name = name,
-            phone = phone
-        )
-    }
+internal fun PaymentMethod.BillingDetails.toPaymentSheetBillingDetails(): PaymentSheet.BillingDetails {
+    return PaymentSheet.BillingDetails(
+        address = PaymentSheet.Address(
+            city = address?.city,
+            country = address?.country,
+            line1 = address?.line1,
+            line2 = address?.line2,
+            postalCode = address?.postalCode,
+            state = address?.state
+        ),
+        email = email,
+        name = name,
+        phone = phone
+    )
 }
