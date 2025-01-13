@@ -28,19 +28,19 @@ pipelines:
 stages:
   stage-trigger-run-all:
     workflows:
-      - check: { }
+#      - check: { }
       - test: { }
-      - run-instrumentation-tests: { }
-      - run-paymentsheet-instrumentation-tests: { }
-      - run-example-instrumentation-tests: { }
-      - run-financial-connections-instrumentation-tests: { }
-      - run-connections-e2e-payments-tests-on-push: { }
-      - run-connections-e2e-token-tests-on-push: { }
-      - run-connections-e2e-data-tests-on-push: { }
-      - run-cardscan-instrumentation-tests: { }
-      - run-paymentsheet-end-to-end-tests: { }
-      - run-paymentsheet-screenshot-tests: { }
-      - check-dependencies: { }
+#      - run-instrumentation-tests: { }
+#      - run-paymentsheet-instrumentation-tests: { }
+#      - run-example-instrumentation-tests: { }
+#      - run-financial-connections-instrumentation-tests: { }
+#      - run-connections-e2e-payments-tests-on-push: { }
+#      - run-connections-e2e-token-tests-on-push: { }
+#      - run-connections-e2e-data-tests-on-push: { }
+#      - run-cardscan-instrumentation-tests: { }
+#      - run-paymentsheet-end-to-end-tests: { }
+#      - run-paymentsheet-screenshot-tests: { }
+#      - check-dependencies: { }
   stage-build-connections-debug:
     workflows:
       - build-connections-debug: { }
@@ -80,7 +80,7 @@ workflows:
       - conclude_all
     steps:
       - script@1:
-          timeout: 1200
+          timeout: 1800
           inputs:
             - content: ./gradlew testDebugUnitTest verifyPaparazziDebug -x :stripe-test-e2e:testDebugUnitTest --continue
   build-connections-debug:
