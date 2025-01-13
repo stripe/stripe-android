@@ -89,6 +89,7 @@ internal class NetworkingLinkLoginWarmupViewModel @AssistedInject constructor(
 
         suspend {
             eventTracker.track(Click("click.continue", PANE))
+            // Trigger a lookup call to ensure we cache a consumer session for posterior verification.
             lookupAccount(payload.email)
             navigationManager.tryNavigateTo(Destination.NetworkingLinkVerification(referrer = PANE))
         }.execute {
