@@ -48,6 +48,33 @@ internal fun CardBrand.getCardBrandIconForVerticalMode(): Int = when (this) {
     Unknown -> R.drawable.stripe_ic_paymentsheet_card_unknown
 }
 
+@DrawableRes
+internal fun getLinkIcon(showNightIcon: Boolean? = null): Int {
+    return getOverridableIcon(
+        showNightIcon = showNightIcon ?: false,
+        systemThemeAwareIconRef = R.drawable.stripe_ic_paymentsheet_link_ref,
+        nightIcon = R.drawable.stripe_ic_paymentsheet_link_night,
+        dayIcon = R.drawable.stripe_ic_paymentsheet_link_day
+    )
+}
+
+// If you don't want to override the system theme, then leave showNightIcon null.
+@DrawableRes
+private fun getOverridableIcon(
+    showNightIcon: Boolean?,
+    @DrawableRes systemThemeAwareIconRef: Int,
+    @DrawableRes nightIcon: Int,
+    @DrawableRes dayIcon: Int
+): Int {
+    if (showNightIcon == null) {
+        return systemThemeAwareIconRef
+    } else if (showNightIcon) {
+        return nightIcon
+    } else {
+        return dayIcon
+    }
+}
+
 internal fun PaymentMethod.getLabel(): ResolvableString? = when (type) {
     PaymentMethod.Type.Card -> createCardLabel(card?.last4)
     PaymentMethod.Type.SepaDebit -> resolvableString(

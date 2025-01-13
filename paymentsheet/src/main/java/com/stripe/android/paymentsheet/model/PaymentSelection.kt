@@ -28,6 +28,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountTe
 import com.stripe.android.paymentsheet.ui.createCardLabel
 import com.stripe.android.paymentsheet.ui.getCardBrandIcon
 import com.stripe.android.paymentsheet.ui.getLabel
+import com.stripe.android.paymentsheet.ui.getLinkIcon
 import com.stripe.android.paymentsheet.ui.getSavedPaymentMethodIcon
 import com.stripe.android.uicore.image.StripeImageLoader
 import kotlinx.parcelize.IgnoredOnParcel
@@ -317,10 +318,10 @@ internal val PaymentSelection.drawableResourceId: Int
     get() = when (this) {
         is PaymentSelection.ExternalPaymentMethod -> iconResource
         PaymentSelection.GooglePay -> R.drawable.stripe_google_pay_mark
-        PaymentSelection.Link -> R.drawable.stripe_ic_paymentsheet_link
+        PaymentSelection.Link -> getLinkIcon()
         is PaymentSelection.New.Card -> brand.getCardBrandIcon()
         is PaymentSelection.New.GenericPaymentMethod -> iconResource
-        is PaymentSelection.New.LinkInline -> R.drawable.stripe_ic_paymentsheet_link
+        is PaymentSelection.New.LinkInline -> getLinkIcon()
         is PaymentSelection.New.USBankAccount -> iconResource
         is PaymentSelection.Saved -> getSavedIcon(this)
     }
@@ -329,7 +330,7 @@ private fun getSavedIcon(selection: PaymentSelection.Saved): Int {
     return when (val resourceId = selection.paymentMethod.getSavedPaymentMethodIcon()) {
         R.drawable.stripe_ic_paymentsheet_card_unknown -> {
             when (selection.walletType) {
-                PaymentSelection.Saved.WalletType.Link -> R.drawable.stripe_ic_paymentsheet_link
+                PaymentSelection.Saved.WalletType.Link -> getLinkIcon()
                 PaymentSelection.Saved.WalletType.GooglePay -> R.drawable.stripe_google_pay_mark
                 else -> resourceId
             }
