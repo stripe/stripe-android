@@ -93,9 +93,38 @@ class WalletViewModelTest {
         assertThat(navScreen).isEqualTo(LinkScreen.PaymentMethod)
     }
 
+    @Test
+    fun `viewmodel should open card edit screen when onEditPaymentMethodClicked`() = runTest(dispatcher) {
+        var navScreen: LinkScreen? = null
+        fun navigate(screen: LinkScreen) {
+            navScreen = screen
+        }
+
+        val vm = createViewModel(navigate = ::navigate)
+
+        vm.onEditPaymentMethodClicked(TestFactory.CONSUMER_PAYMENT_DETAILS_CARD)
+
+        assertThat(navScreen).isEqualTo(LinkScreen.CardEdit)
+    }
+
+    @Test
+    fun `viewmodel should open payment method screen when onAddNewPaymentMethodClicked`() = runTest(dispatcher) {
+        var navScreen: LinkScreen? = null
+        fun navigate(screen: LinkScreen) {
+            navScreen = screen
+        }
+
+        val vm = createViewModel(navigate = ::navigate)
+
+        vm.onAddNewPaymentMethodClicked()
+
+        assertThat(navScreen).isEqualTo(LinkScreen.PaymentMethod)
+    }
+
     private fun createViewModel(
         linkAccountManager: LinkAccountManager = FakeLinkAccountManager(),
         logger: Logger = FakeLogger(),
+        navigate: (route: LinkScreen) -> Unit = {},
         navigateAndClearStack: (route: LinkScreen) -> Unit = {},
         dismissWithResult: (LinkActivityResult) -> Unit = {}
     ): WalletViewModel {
@@ -104,6 +133,7 @@ class WalletViewModelTest {
             linkAccount = TestFactory.LINK_ACCOUNT,
             linkAccountManager = linkAccountManager,
             logger = logger,
+            navigate = navigate,
             navigateAndClearStack = navigateAndClearStack,
             dismissWithResult = dismissWithResult
         )
