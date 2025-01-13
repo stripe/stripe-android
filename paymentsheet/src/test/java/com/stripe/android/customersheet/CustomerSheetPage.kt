@@ -4,8 +4,8 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.hasTextExactly
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
+import com.stripe.android.common.ui.performClickWithKeyboard
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_METHOD_CARD_TEST_TAG
 
 internal class CustomerSheetPage(
@@ -14,7 +14,7 @@ internal class CustomerSheetPage(
     fun clickOnText(text: String) {
         waitForText(text)
 
-        composeTestRule.onNode(hasText(text, ignoreCase = true)).performClick()
+        composeTestRule.onNode(hasText(text, ignoreCase = true)).performClickWithKeyboard()
     }
 
     fun clickPaymentOptionItem(text: String) {
@@ -25,7 +25,7 @@ internal class CustomerSheetPage(
         }
 
         composeTestRule.onNodeWithTag("${SAVED_PAYMENT_METHOD_CARD_TEST_TAG}_$text")
-            .performClick()
+            .performClickWithKeyboard()
 
         composeTestRule.waitForIdle()
     }

@@ -8,8 +8,8 @@ import androidx.compose.ui.test.isNotDisplayed
 import androidx.compose.ui.test.isSelected
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import com.stripe.android.common.ui.performClickWithKeyboard
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_MANDATE_TEXT_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
@@ -42,7 +42,7 @@ internal class VerticalModePage(
     fun clickOnNewLpm(paymentMethodCode: PaymentMethodCode) {
         composeTestRule.onNode(hasTestTag("${TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON}_$paymentMethodCode"))
             .performScrollTo()
-            .performClick()
+            .performClickWithKeyboard()
     }
 
     fun assertLpmIsSelected(paymentMethodCode: PaymentMethodCode) {
@@ -105,14 +105,14 @@ internal class VerticalModePage(
             .onNodeWithTag("${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_$paymentMethodId")
 
         composeTestRule.waitUntil { savedPaymentMethod.isDisplayed() }
-        savedPaymentMethod.performClick()
+        savedPaymentMethod.performClickWithKeyboard()
     }
 
     fun clickViewMore() {
-        composeTestRule.onNodeWithTag(TEST_TAG_VIEW_MORE).performClick()
+        composeTestRule.onNodeWithTag(TEST_TAG_VIEW_MORE).performClickWithKeyboard()
     }
 
     fun clickEdit() {
-        composeTestRule.onNodeWithTag(TEST_TAG_EDIT_SAVED_CARD).performClick()
+        composeTestRule.onNodeWithTag(TEST_TAG_EDIT_SAVED_CARD).performClickWithKeyboard()
     }
 }

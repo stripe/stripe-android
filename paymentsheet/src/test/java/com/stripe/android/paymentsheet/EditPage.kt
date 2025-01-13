@@ -1,9 +1,12 @@
 package com.stripe.android.paymentsheet
 
 import androidx.compose.ui.test.SemanticsNodeInteraction
+import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.isFocusable
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.performClick
+import com.stripe.android.common.ui.performClickWithKeyboard
 import com.stripe.android.paymentsheet.ui.UPDATE_PM_REMOVE_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.UPDATE_PM_SAVE_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.UPDATE_PM_SCREEN_TEST_TAG
@@ -22,16 +25,16 @@ internal class EditPage(
 
     fun setCardBrand(cardBrand: String) {
         composeTestRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG)
-            .performClick()
+            .performClickWithKeyboard()
 
         composeTestRule.onNodeWithTag("${TEST_TAG_DROP_DOWN_CHOICE}_$cardBrand")
-            .performClick()
+            .performClickWithKeyboard()
     }
 
     fun assertNotInDropdown(cardBrand: String) {
         // Click on the dropdown menu to expand it
         composeTestRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG)
-            .performClick()
+            .performClickWithKeyboard()
 
         // Attempt to find the node with the specified cardBrand
         // and assert that it does not exist
@@ -40,20 +43,20 @@ internal class EditPage(
 
         // Optionally, close the dropdown menu if it's still open
         composeTestRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG)
-            .performClick()
+            .performClickWithKeyboard()
     }
 
     fun update() {
-        composeTestRule.onNodeWithTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG)
-            .performClick()
+        composeTestRule.onNode(hasAnyAncestor(hasTestTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG)).and(isFocusable()))
+            .performClickWithKeyboard()
     }
 
     fun onRemoveButton(): SemanticsNodeInteraction {
-        return composeTestRule.onNodeWithTag(UPDATE_PM_REMOVE_BUTTON_TEST_TAG)
+        return composeTestRule.onNode(hasAnyAncestor(hasTestTag(UPDATE_PM_REMOVE_BUTTON_TEST_TAG)).and(isFocusable()))
     }
 
     fun clickRemove() {
-        onRemoveButton().performClick()
-        composeTestRule.onNodeWithTag(TEST_TAG_DIALOG_CONFIRM_BUTTON).performClick()
+        onRemoveButton().performClickWithKeyboard()
+        composeTestRule.onNodeWithTag(TEST_TAG_DIALOG_CONFIRM_BUTTON).performClickWithKeyboard()
     }
 }
