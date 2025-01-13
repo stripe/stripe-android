@@ -124,7 +124,10 @@ class EmbeddedComponentManagerTest {
         }
         advanceUntilIdle()
         val expected = arrayOf(Uri.parse("content://test"))
-        EmbeddedComponentManager.chooseFileResultFlow.emit(expected) // Simulate a file being chosen.
+        // Simulate a file being chosen.
+        EmbeddedComponentManager.chooseFileResultFlow.emit(
+            EmbeddedComponentManager.ActivityResult(testActivity, expected)
+        )
         val actual = resultAsync.await()
 
         assertThat(actual).isEqualTo(expected)

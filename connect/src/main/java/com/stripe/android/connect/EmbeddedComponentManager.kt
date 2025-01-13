@@ -154,26 +154,30 @@ class EmbeddedComponentManager(
             return true
         }
 
-        val launcher = getLauncher(context, requestPermissionLaunchers, "Error launching camera permission request")
-            ?: return null
+        val (_, launcher) =
+            getLauncher(context, requestPermissionLaunchers, "Error launching camera permission request")
+                ?: return null
         launcher.launch(Manifest.permission.CAMERA)
 
         return permissionsFlow.first()
     }
 
     internal suspend fun chooseFile(context: Context, requestIntent: Intent): Array<Uri>? {
-        val launcher = getLauncher(context, chooseFileLaunchers, "Error choosing file")
-            ?: return null
+        val (activity, launcher) =
+            getLauncher(context, chooseFileLaunchers, "Error choosing file")
+                ?: return null
         launcher.launch(requestIntent)
 
-        return chooseFileResultFlow.first()
+        return chooseFileResultFlow
+            .first { it.activity == activity }
+            .result
     }
 
     private fun <I> getLauncher(
         context: Context,
         launchers: Map<Activity, ActivityResultLauncher<I>>,
         errorMessage: String,
-    ): ActivityResultLauncher<I>? {
+    ): Pair<Activity, ActivityResultLauncher<I>>? {
         val activity = context.findActivity()
         if (activity == null) {
             logger.warning("($loggerTag) You must create the EmbeddedComponent view from an Activity")
@@ -181,6 +185,7 @@ class EmbeddedComponentManager(
                 // crash if in debug mode so that developers are more likely to catch this error.
                 error("You must create an AccountOnboardingView from an Activity")
             }
+            return null
         }
         val launcher = launchers[activity]
         if (launcher == null) {
@@ -188,8 +193,9 @@ class EmbeddedComponentManager(
                 "($loggerTag) $errorMessage " +
                     "Did you call EmbeddedComponentManager.onActivityCreate in your Activity.onCreate function?"
             )
+            return null
         }
-        return launcher
+        return activity to launcher
     }
 
     internal fun getComponentAnalyticsService(component: StripeEmbeddedComponent): ComponentAnalyticsService {
@@ -226,7 +232,8 @@ class EmbeddedComponentManager(
         private val requestPermissionLaunchers = mutableMapOf<Activity, ActivityResultLauncher<String>>()
 
         @VisibleForTesting
-        internal val chooseFileResultFlow: MutableSharedFlow<Array<Uri>?> = MutableSharedFlow(extraBufferCapacity = 1)
+        internal val chooseFileResultFlow: MutableSharedFlow<ActivityResult<Array<Uri>?>> =
+            MutableSharedFlow(extraBufferCapacity = 1)
         private val chooseFileLaunchers = mutableMapOf<Activity, ActivityResultLauncher<Intent>>()
 
         /**
@@ -288,8 +295,10 @@ class EmbeddedComponentManager(
 
             chooseFileLaunchers[activity] =
                 activity.registerForActivityResult(ChooseFileActivityResultContract()) { result ->
-                    chooseFileResultFlow.tryEmit(result)
+                    chooseFileResultFlow.tryEmit(ActivityResult(activity, result))
                 }
         }
     }
+
+    internal class ActivityResult<T>(val activity: Activity, val result: T)
 }
