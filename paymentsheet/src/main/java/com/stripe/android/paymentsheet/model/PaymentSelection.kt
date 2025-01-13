@@ -402,7 +402,6 @@ internal val PaymentSelection.billingDetails: PaymentMethod.BillingDetails?
         is PaymentSelection.ExternalPaymentMethod -> billingDetails
         PaymentSelection.GooglePay -> null
         PaymentSelection.Link -> null
-        is PaymentSelection.New.LinkInline -> linkPaymentDetails.paymentMethodCreateParams.billingDetails
         is PaymentSelection.New -> paymentMethodCreateParams.billingDetails
         is PaymentSelection.Saved -> paymentMethod.billingDetails
     }
