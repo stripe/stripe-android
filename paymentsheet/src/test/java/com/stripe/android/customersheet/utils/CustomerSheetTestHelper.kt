@@ -36,6 +36,7 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
+import com.stripe.android.paymentsheet.cvcrecollection.RecordingCvcRecollectionLauncherFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.FakeBacsMandateConfirmationLauncher
 import com.stripe.android.testing.FakeErrorReporter
@@ -140,6 +141,7 @@ internal object CustomerSheetTestHelper {
                 savedStateHandle = SavedStateHandle(),
                 errorReporter = FakeErrorReporter(),
                 linkLauncher = RecordingLinkPaymentLauncher.noOp(),
+                cvcRecollectionLauncherFactory = RecordingCvcRecollectionLauncherFactory.noOp(),
             ),
             eventReporter = eventReporter,
             customerSheetLoader = customerSheetLoader,

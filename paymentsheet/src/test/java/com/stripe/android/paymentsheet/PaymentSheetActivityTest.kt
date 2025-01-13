@@ -60,6 +60,7 @@ import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssisted
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.cvcrecollection.FakeCvcRecollectionHandler
+import com.stripe.android.paymentsheet.cvcrecollection.RecordingCvcRecollectionLauncherFactory
 import com.stripe.android.paymentsheet.databinding.StripePrimaryButtonBinding
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
@@ -1174,6 +1175,7 @@ internal class PaymentSheetActivityTest {
                     statusBarColor = args.statusBarColor,
                     linkLauncher = linkPaymentLauncher,
                     errorReporter = FakeErrorReporter(),
+                    cvcRecollectionLauncherFactory = RecordingCvcRecollectionLauncherFactory.noOp(),
                 ),
                 cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
                 errorReporter = FakeErrorReporter(),

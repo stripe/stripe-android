@@ -112,8 +112,10 @@ internal class DefaultConfirmationHandler(
 
         _state.value = ConfirmationHandler.State.Confirming(confirmationOption)
 
+        val parameters = arguments.toParameters()
+
         val mediator = mediators.find { mediator ->
-            mediator.canConfirm(confirmationOption)
+            mediator.canConfirm(confirmationOption, parameters)
         } ?: run {
             errorReporter.report(
                 errorEvent = ErrorReporter
@@ -139,7 +141,7 @@ internal class DefaultConfirmationHandler(
             return
         }
 
-        when (val action = mediator.action(confirmationOption, arguments.toParameters())) {
+        when (val action = mediator.action(confirmationOption, parameters)) {
             is ConfirmationMediator.Action.Launch -> {
                 storeIsAwaitingForResult(
                     key = mediator.key,

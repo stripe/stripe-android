@@ -290,6 +290,43 @@ class DefaultConfirmationHandlerTest {
     }
 
     @Test
+    fun `On 'start' with 'SomeDefinition' option, should fail if no confirmable definitions`() = test(
+        someDefinitionIsConfirmable = false,
+    ) {
+        confirmationHandler.state.test {
+            assertIdleState()
+
+            confirmationHandler.start(createArguments(SomeConfirmationDefinition.Option))
+
+            assertSomeDefinitionConfirmingState()
+
+            assertThat(someDefinitionScenario.optionCalls.awaitItem().option)
+                .isEqualTo(SomeConfirmationDefinition.Option)
+
+            val canConfirmCall = someDefinitionScenario.canConfirmCalls.awaitItem()
+
+            assertThat(canConfirmCall.option).isEqualTo(SomeConfirmationDefinition.Option)
+            assertThat(canConfirmCall.confirmationParameters).isEqualTo(CONFIRMATION_PARAMETERS)
+
+            assertThat(someOtherDefinitionScenario.optionCalls.awaitItem().option)
+                .isEqualTo(SomeConfirmationDefinition.Option)
+
+            val completeState = awaitCompleteState()
+            val failedResult = completeState.result.assertFailed()
+
+            assertThat(failedResult.cause).isInstanceOf<IllegalStateException>()
+            assertThat(failedResult.cause.message).isEqualTo(
+                "Attempted to confirm invalid com.stripe.android.paymentelement.confirmation" +
+                    ".DefaultConfirmationHandlerTest.SomeConfirmationDefinition.Option confirmation type"
+            )
+            assertThat(failedResult.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
+            assertThat(failedResult.type).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Internal)
+
+            confirmationHandler.assertAwaitResultCallReceivesSameResult(completeState)
+        }
+    }
+
+    @Test
     fun `On next step result, should move to next definition and complete from after its result`() = test(
         someDefinitionAction = ConfirmationDefinition.Action.Launch(
             launcherArguments = SomeConfirmationDefinition.LauncherArgs,
@@ -618,6 +655,7 @@ class DefaultConfirmationHandlerTest {
                 message = R.string.stripe_something_went_wrong.resolvableString,
                 type = ConfirmationHandler.Result.Failed.ErrorType.Internal,
             ),
+        someDefinitionIsConfirmable: Boolean = true,
         someOtherDefinitionAction: ConfirmationDefinition.Action<SomeOtherConfirmationDefinition.LauncherArgs> =
             ConfirmationDefinition.Action.Fail(
                 cause = IllegalStateException("Failed!"),
@@ -639,6 +677,7 @@ class DefaultConfirmationHandlerTest {
             SomeConfirmationDefinition(
                 action = someDefinitionAction,
                 result = someDefinitionResult,
+                isConfirmable = someDefinitionIsConfirmable,
             )
         ) {
             val someDefinitionScenario = this
@@ -716,7 +755,7 @@ class DefaultConfirmationHandlerTest {
         mediators: List<ConfirmationMediator<*, *, *, *>> = listOf(
             ConfirmationMediator(
                 savedStateHandle = savedStateHandle,
-                definition = SomeConfirmationDefinition()
+                definition = SomeConfirmationDefinition(isConfirmable = true)
             )
         ),
         errorReporter: ErrorReporter = FakeErrorReporter(),
@@ -777,6 +816,12 @@ class DefaultConfirmationHandlerTest {
          */
         assertThat(someDefinitionScenario.optionCalls.awaitItem().option)
             .isEqualTo(SomeConfirmationDefinition.Option)
+
+        val canConfirmCall = someDefinitionScenario.canConfirmCalls.awaitItem()
+
+        assertThat(canConfirmCall.option).isEqualTo(SomeConfirmationDefinition.Option)
+        assertThat(canConfirmCall.confirmationParameters).isEqualTo(CONFIRMATION_PARAMETERS)
+
         assertThat(someDefinitionScenario.optionCalls.awaitItem().option)
             .isEqualTo(SomeConfirmationDefinition.Option)
 
@@ -816,6 +861,12 @@ class DefaultConfirmationHandlerTest {
             .isEqualTo(SomeOtherConfirmationDefinition.Option)
         assertThat(someOtherDefinitionScenario.optionCalls.awaitItem().option)
             .isEqualTo(SomeOtherConfirmationDefinition.Option)
+
+        val canConfirmCall = someOtherDefinitionScenario.canConfirmCalls.awaitItem()
+
+        assertThat(canConfirmCall.option).isEqualTo(SomeOtherConfirmationDefinition.Option)
+        assertThat(canConfirmCall.confirmationParameters).isEqualTo(CONFIRMATION_PARAMETERS)
+
         assertThat(someOtherDefinitionScenario.optionCalls.awaitItem().option)
             .isEqualTo(SomeOtherConfirmationDefinition.Option)
 
@@ -923,6 +974,7 @@ class DefaultConfirmationHandlerTest {
         result: ConfirmationDefinition.Result = ConfirmationDefinition.Result.Canceled(
             action = ConfirmationHandler.Result.Canceled.Action.InformCancellation,
         ),
+        private val isConfirmable: Boolean,
     ) : FakeConfirmationDefinition<
         SomeConfirmationDefinition.Option,
         SomeConfirmationDefinition.Launcher,
@@ -937,6 +989,13 @@ class DefaultConfirmationHandlerTest {
 
         override fun option(confirmationOption: ConfirmationHandler.Option): Option? {
             return confirmationOption as? Option
+        }
+
+        override fun canConfirm(
+            confirmationOption: Option,
+            confirmationParameters: ConfirmationDefinition.Parameters
+        ): Boolean {
+            return isConfirmable
         }
 
         @Parcelize

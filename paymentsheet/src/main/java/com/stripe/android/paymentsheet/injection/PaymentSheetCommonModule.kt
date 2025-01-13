@@ -27,14 +27,10 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
-import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandlerImpl
 import com.stripe.android.paymentsheet.flowcontroller.DefaultPaymentSelectionUpdater
 import com.stripe.android.paymentsheet.flowcontroller.PaymentSelectionUpdater
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionInteractor
-import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionLauncherFactory
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.DefaultCvcRecollectionInteractor
-import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.DefaultCvcRecollectionLauncherFactory
 import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
@@ -141,18 +137,6 @@ internal abstract class PaymentSheetCommonModule {
                 customerConfig?.id,
                 workContext
             )
-        }
-
-        @Provides
-        @Singleton
-        fun provideCvcRecollectionLauncherFactory(): CvcRecollectionLauncherFactory {
-            return DefaultCvcRecollectionLauncherFactory
-        }
-
-        @Provides
-        @Singleton
-        fun provideCVCRecollectionHandler(): CvcRecollectionHandler {
-            return CvcRecollectionHandlerImpl()
         }
 
         @Provides

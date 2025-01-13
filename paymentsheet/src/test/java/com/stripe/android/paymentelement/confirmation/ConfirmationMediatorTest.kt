@@ -39,7 +39,13 @@ class ConfirmationMediatorTest {
 
         val canConfirm = mediator.canConfirm(
             confirmationOption = TestConfirmationDefinition.Option,
+            confirmationParameters = CONFIRMATION_PARAMETERS,
         )
+
+        val canConfirmCall = canConfirmCalls.awaitItem()
+
+        assertThat(canConfirmCall.option).isEqualTo(TestConfirmationDefinition.Option)
+        assertThat(canConfirmCall.confirmationParameters).isEqualTo(CONFIRMATION_PARAMETERS)
 
         assertThat(optionCalls.awaitItem().option).isEqualTo(TestConfirmationDefinition.Option)
         assertThat(canConfirm).isTrue()
@@ -54,9 +60,31 @@ class ConfirmationMediatorTest {
 
         val canConfirm = mediator.canConfirm(
             confirmationOption = InvalidTestConfirmationOption,
+            confirmationParameters = CONFIRMATION_PARAMETERS,
         )
 
         assertThat(optionCalls.awaitItem().option).isEqualTo(InvalidTestConfirmationOption)
+        assertThat(canConfirm).isFalse()
+    }
+
+    @Test
+    fun `On can confirm, should return false if not confirmable`() = test(isConfirmable = false) {
+        val mediator = ConfirmationMediator(
+            savedStateHandle = SavedStateHandle(),
+            definition = definition,
+        )
+
+        val canConfirm = mediator.canConfirm(
+            confirmationOption = TestConfirmationDefinition.Option,
+            confirmationParameters = CONFIRMATION_PARAMETERS,
+        )
+
+        val canConfirmCall = canConfirmCalls.awaitItem()
+
+        assertThat(canConfirmCall.option).isEqualTo(TestConfirmationDefinition.Option)
+        assertThat(canConfirmCall.confirmationParameters).isEqualTo(CONFIRMATION_PARAMETERS)
+
+        assertThat(optionCalls.awaitItem().option).isEqualTo(TestConfirmationDefinition.Option)
         assertThat(canConfirm).isFalse()
     }
 
@@ -488,6 +516,7 @@ class ConfirmationMediatorTest {
         result: ConfirmationDefinition.Result = ConfirmationDefinition.Result.Canceled(
             action = ConfirmationHandler.Result.Canceled.Action.InformCancellation,
         ),
+        isConfirmable: Boolean = true,
         scenarioTest: suspend RecordingConfirmationDefinition.Scenario<
             TestConfirmationDefinition.Option,
             TestConfirmationDefinition.Launcher,
@@ -495,7 +524,7 @@ class ConfirmationMediatorTest {
             TestConfirmationDefinition.LauncherResult,
             >.() -> Unit
     ) = runTest {
-        RecordingConfirmationDefinition.test(TestConfirmationDefinition(action, result), scenarioTest)
+        RecordingConfirmationDefinition.test(TestConfirmationDefinition(action, result, isConfirmable), scenarioTest)
     }
 
     private fun ConfirmationMediator.Action.asFail(): ConfirmationMediator.Action.Fail {
@@ -513,6 +542,7 @@ class ConfirmationMediatorTest {
     private class TestConfirmationDefinition(
         action: ConfirmationDefinition.Action<LauncherArgs>,
         result: ConfirmationDefinition.Result,
+        private val isConfirmable: Boolean,
     ) : FakeConfirmationDefinition<
         TestConfirmationDefinition.Option,
         TestConfirmationDefinition.Launcher,
@@ -524,6 +554,13 @@ class ConfirmationMediatorTest {
         result = result,
     ) {
         override val key: String = "Test"
+
+        override fun canConfirm(
+            confirmationOption: Option,
+            confirmationParameters: ConfirmationDefinition.Parameters
+        ): Boolean {
+            return isConfirmable
+        }
 
         override fun option(confirmationOption: ConfirmationHandler.Option): Option? {
             return confirmationOption as? Option
