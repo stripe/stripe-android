@@ -485,7 +485,9 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                             instantDebits = InstantDebitsResult(
                                 encodedPaymentMethod = paymentMethod,
                                 last4 = url.getQueryParameter(QUERY_PARAM_LAST4),
-                                bankName = url.getQueryParameter(QUERY_BANK_NAME)
+                                bankName = url.getQueryParameter(QUERY_BANK_NAME),
+                                // TODO(tillh-stripe): Pull this from the URL
+                                eligibleForIncentive = false,
                             ),
                             financialConnectionsSession = null,
                             token = null

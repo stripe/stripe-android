@@ -327,6 +327,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
                     encodedPaymentMethod = encodedPaymentMethod,
                     last4 = "4242",
                     bankName = "Stripe Bank",
+                    eligibleForIncentive = false,
                 )
             },
         )
@@ -339,6 +340,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
                     encodedPaymentMethod = encodedPaymentMethod,
                     last4 = "4242",
                     bankName = "Stripe Bank",
+                    eligibleForIncentive = false,
                 ),
             )
         )
@@ -382,6 +384,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
                     encodedPaymentMethod = encodedPaymentMethod,
                     last4 = "4242",
                     bankName = "Stripe Bank",
+                    eligibleForIncentive = false,
                 )
             },
         )
