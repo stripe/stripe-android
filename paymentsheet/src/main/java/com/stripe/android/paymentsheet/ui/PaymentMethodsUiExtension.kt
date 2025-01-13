@@ -51,7 +51,7 @@ internal fun CardBrand.getCardBrandIconForVerticalMode(): Int = when (this) {
 @DrawableRes
 internal fun getLinkIcon(showNightIcon: Boolean? = null): Int {
     return getOverridableIcon(
-        showNightIcon = showNightIcon ?: false,
+        showNightIcon = showNightIcon,
         systemThemeAwareIconRef = R.drawable.stripe_ic_paymentsheet_link_ref,
         nightIcon = R.drawable.stripe_ic_paymentsheet_link_night,
         dayIcon = R.drawable.stripe_ic_paymentsheet_link_day
