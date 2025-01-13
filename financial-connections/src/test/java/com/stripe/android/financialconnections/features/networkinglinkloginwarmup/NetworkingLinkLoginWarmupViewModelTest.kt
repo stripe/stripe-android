@@ -17,6 +17,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -49,7 +50,7 @@ class NetworkingLinkLoginWarmupViewModelTest {
     @Test
     fun `init - payload error navigates to error screen`() = runTest {
         val error = RuntimeException("Failed to fetch manifest")
-        whenever(getOrFetchSync(any())).thenAnswer { throw error }
+        whenever(getOrFetchSync(any(), anyOrNull())).thenAnswer { throw error }
 
         buildViewModel(NetworkingLinkLoginWarmupState())
 
