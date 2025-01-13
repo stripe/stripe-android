@@ -6,11 +6,13 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.billingDetails
 import com.stripe.android.paymentsheet.model.darkThemeIconUrl
 import com.stripe.android.paymentsheet.model.drawableResourceId
 import com.stripe.android.paymentsheet.model.label
 import com.stripe.android.paymentsheet.model.lightThemeIconUrl
 import com.stripe.android.paymentsheet.model.paymentMethodType
+import com.stripe.android.paymentsheet.model.toPaymentSheetBillingDetails
 import javax.inject.Inject
 
 @ExperimentalEmbeddedPaymentElementApi
@@ -53,7 +55,7 @@ internal class PaymentOptionDisplayDataFactory @Inject constructor(
                     darkThemeIconUrl = selection.darkThemeIconUrl,
                 )
             },
-            billingDetails = null,
+            billingDetails = selection.billingDetails?.toPaymentSheetBillingDetails(),
             paymentMethodType = selection.paymentMethodType,
             mandateText = if (mandate == null) null else AnnotatedString(mandate.resolve(context))
         )
