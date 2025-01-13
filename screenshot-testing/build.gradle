@@ -11,6 +11,7 @@ dependencies {
 
     // Implemented here instead of using plugin which implements with testImplementation
     api("app.cash.paparazzi:paparazzi:${versions.paparazzi}") {
+        exclude group: "androidx.annotation", module: "annotation-jvm"
         exclude group: 'jakarta.activation'
         exclude group: 'com.android.tools.ddms', module: 'ddmlib'
         exclude module: 'layoutlib-native-jdk11'
