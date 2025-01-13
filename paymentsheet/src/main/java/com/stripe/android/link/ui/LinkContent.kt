@@ -179,7 +179,7 @@ private fun Screens(
             )
         }
 
-        composable(LinkScreen.CardEdit.ROUTE) {
+        composable(LinkScreen.CardEdit.route) {
             CardEditScreen()
         }
 

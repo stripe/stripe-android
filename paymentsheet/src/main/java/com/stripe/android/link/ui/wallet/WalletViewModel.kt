@@ -100,8 +100,9 @@ internal class WalletViewModel @Inject constructor(
         navigate(LinkScreen.PaymentMethod)
     }
 
+    @SuppressWarnings("UnusedParameter")
     fun onEditPaymentMethodClicked(item: ConsumerPaymentDetails.PaymentDetails) {
-        navigate(LinkScreen.CardEdit(item.id))
+        navigate(LinkScreen.CardEdit)
     }
 
     private fun completePaymentButtonLabel(

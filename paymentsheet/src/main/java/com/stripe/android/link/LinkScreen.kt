@@ -5,10 +5,6 @@ internal sealed class LinkScreen(val route: String) {
     data object Verification : LinkScreen("verification")
     data object Wallet : LinkScreen("wallet")
     data object PaymentMethod : LinkScreen("paymentMethod")
-    data class CardEdit(val paymentDetailsId: String) : LinkScreen(ROUTE) {
-        companion object {
-            const val ROUTE = "cardEdit/{paymentDetailsId}"
-        }
-    }
+    data object CardEdit : LinkScreen("cardEdit")
     data object SignUp : LinkScreen("signUp")
 }
