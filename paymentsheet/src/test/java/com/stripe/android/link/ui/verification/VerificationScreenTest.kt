@@ -15,13 +15,11 @@ import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.FakeLinkEventsReporter
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.model.LinkAccount
+import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -33,10 +31,8 @@ internal class VerificationScreenTest {
     @get:Rule
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
-    @Before
-    fun setup() {
-        Dispatchers.setMain(dispatcher)
-    }
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule(dispatcher)
 
     @Test
     fun `title, email and otp should be displayed on screen load`() = runTest(dispatcher) {

@@ -13,35 +13,28 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.paymentsheet.createTestActivityRule
-import kotlinx.coroutines.Dispatchers
+import com.stripe.android.testing.CoroutineTestRule
 import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.setMain
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
-import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 class FlowControllerFactoryTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
-    private val testDispatcher = StandardTestDispatcher()
 
     @get:Rule
     internal val testActivityRule = createTestActivityRule<TestActivity>()
 
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule(StandardTestDispatcher())
+
     @BeforeTest
     fun before() {
         PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
-        Dispatchers.setMain(testDispatcher)
-    }
-
-    @AfterTest
-    fun cleanup() {
-        Dispatchers.resetMain()
     }
 
     @Test

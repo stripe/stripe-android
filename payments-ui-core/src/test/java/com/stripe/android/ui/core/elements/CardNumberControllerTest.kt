@@ -28,14 +28,11 @@ import com.stripe.android.uicore.elements.TextFieldIcon
 import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.FakeCardBrandFilter
 import com.stripe.android.utils.TestUtils.idleLooper
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import org.junit.After
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -44,7 +41,6 @@ import org.mockito.Mockito.verify
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verifyNoInteractions
 import org.robolectric.RobolectricTestRunner
-import kotlin.test.DefaultAsserter.assertEquals
 import kotlin.test.assertEquals
 import com.stripe.android.R as StripeR
 import com.stripe.android.uicore.R as StripeUiCoreR
@@ -56,11 +52,6 @@ internal class CardNumberControllerTest {
     val composeTestRule = createComposeRule()
 
     private val testDispatcher = UnconfinedTestDispatcher()
-
-    @After
-    fun cleanup() {
-        Dispatchers.resetMain()
-    }
 
     @Test
     fun `When invalid card number verify visible error`() = runTest {

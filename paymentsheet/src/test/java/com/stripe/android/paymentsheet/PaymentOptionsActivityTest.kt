@@ -48,9 +48,7 @@ import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
 import com.stripe.android.utils.injectableActivityScenario
 import com.stripe.android.view.ActivityStarter
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.resetMain
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -90,7 +88,6 @@ internal class PaymentOptionsActivityTest {
 
     @AfterTest
     fun cleanup() {
-        Dispatchers.resetMain()
         WeakMapInjectorRegistry.clear()
     }
 

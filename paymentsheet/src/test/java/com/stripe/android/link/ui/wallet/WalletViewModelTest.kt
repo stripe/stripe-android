@@ -8,14 +8,11 @@ import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import org.junit.After
-import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -24,15 +21,8 @@ import org.robolectric.RobolectricTestRunner
 class WalletViewModelTest {
     private val dispatcher = UnconfinedTestDispatcher()
 
-    @Before
-    fun setUp() {
-        Dispatchers.setMain(dispatcher)
-    }
-
-    @After
-    fun tearDown() {
-        Dispatchers.resetMain()
-    }
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule(dispatcher)
 
     @Test
     fun `viewmodel should load payment methods on init`() = runTest(dispatcher) {
