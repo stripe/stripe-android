@@ -11,14 +11,13 @@ import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.signup.SignUpState
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.PaymentIntent
+import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.uicore.elements.PhoneNumberController
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.doReturn
@@ -26,23 +25,14 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
 
 @RunWith(RobolectricTestRunner::class)
 class InlineSignupViewModelTest {
     private val linkAccountManager = FakeLinkAccountManager()
     private val linkEventsReporter = mock<LinkEventsReporter>()
 
-    @BeforeTest
-    fun setUp() {
-        Dispatchers.setMain(UnconfinedTestDispatcher())
-    }
-
-    @AfterTest
-    fun tearDown() {
-        Dispatchers.resetMain()
-    }
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule()
 
     @Test
     fun `When email and phone are provided it should prefill all values`() =

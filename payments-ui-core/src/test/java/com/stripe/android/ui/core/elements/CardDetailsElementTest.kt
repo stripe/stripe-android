@@ -8,17 +8,14 @@ import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.stripecardscan.R
+import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.TextFieldIcon
 import com.stripe.android.uicore.forms.FormFieldEntry
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import org.junit.After
-import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -31,15 +28,8 @@ class CardDetailsElementTest {
     private val context =
         ContextThemeWrapper(ApplicationProvider.getApplicationContext(), R.style.StripeCardScanDefaultTheme)
 
-    @Before
-    fun before() {
-        Dispatchers.setMain(testDispatcher)
-    }
-
-    @After
-    fun after() {
-        Dispatchers.resetMain()
-    }
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule(testDispatcher)
 
     @Test
     fun `test form field values returned and expiration date parsing`() = runTest {

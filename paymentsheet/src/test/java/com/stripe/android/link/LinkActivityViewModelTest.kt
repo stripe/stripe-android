@@ -20,14 +20,11 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.model.AccountStatus
-import kotlinx.coroutines.Dispatchers
+import com.stripe.android.testing.CoroutineTestRule
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import org.junit.After
-import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.spy
@@ -48,15 +45,8 @@ internal class LinkActivityViewModelTest {
 
     private val application: Application = ApplicationProvider.getApplicationContext()
 
-    @Before
-    fun setUp() {
-        Dispatchers.setMain(dispatcher)
-    }
-
-    @After
-    fun tearDown() {
-        Dispatchers.resetMain()
-    }
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule(dispatcher)
 
     @Test
     fun `test that cancel result is called on back pressed with empty stack`() = runTest(dispatcher) {

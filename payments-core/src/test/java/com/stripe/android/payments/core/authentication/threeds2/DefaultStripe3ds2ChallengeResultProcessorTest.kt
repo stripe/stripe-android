@@ -20,16 +20,13 @@ import com.stripe.android.stripe3ds2.transaction.ChallengeResult
 import com.stripe.android.stripe3ds2.transaction.IntentData
 import com.stripe.android.stripe3ds2.transactions.UiType
 import com.stripe.android.testing.AbsFakeStripeRepository
-import kotlinx.coroutines.Dispatchers
+import com.stripe.android.testing.CoroutineTestRule
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
+import org.junit.Rule
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
@@ -57,15 +54,8 @@ class DefaultStripe3ds2ChallengeResultProcessorTest {
         testDispatcher
     )
 
-    @BeforeTest
-    fun before() {
-        Dispatchers.setMain(testDispatcher)
-    }
-
-    @AfterTest
-    fun cleanup() {
-        Dispatchers.resetMain()
-    }
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule(testDispatcher)
 
     @Test
     fun `process() when completion endpoint call succeeds should return expected flowOutcome`() =

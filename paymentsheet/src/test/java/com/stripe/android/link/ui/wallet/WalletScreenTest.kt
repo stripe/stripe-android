@@ -16,12 +16,10 @@ import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.ui.PrimaryButtonTag
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -33,10 +31,8 @@ internal class WalletScreenTest {
     @get:Rule
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
-    @Before
-    fun setup() {
-        Dispatchers.setMain(dispatcher)
-    }
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule(dispatcher)
 
     @Test
     fun `wallet list is collapsed on start`() = runTest(dispatcher) {

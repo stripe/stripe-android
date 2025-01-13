@@ -47,11 +47,9 @@ import com.stripe.android.utils.FakeCardElementConfigRepository
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.createTestActivityRule
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.runner.RunWith
@@ -61,7 +59,6 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import java.util.concurrent.TimeUnit
-import kotlin.test.AfterTest
 import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -105,11 +102,6 @@ internal class CardNumberEditTextTest {
     ).also {
         it.completionCallback = completionCallback
         it.brandChangeCallback = brandChangeCallback
-    }
-
-    @AfterTest
-    fun cleanup() {
-        Dispatchers.resetMain()
     }
 
     @Test
