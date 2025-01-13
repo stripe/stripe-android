@@ -5,7 +5,6 @@ import androidx.compose.ui.text.AnnotatedString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.billingDetails
 import com.stripe.android.paymentsheet.model.darkThemeIconUrl
@@ -24,8 +23,6 @@ internal class PaymentOptionDisplayDataFactory @Inject constructor(
     fun create(
         selection: PaymentSelection?,
         paymentMethodMetadata: PaymentMethodMetadata,
-        billingDetails: PaymentSheet.BillingDetails?,
-        attachDefaultBillingDetails: Boolean,
     ): EmbeddedPaymentElement.PaymentOptionDisplayData? {
         if (selection == null) {
             return null
@@ -58,11 +55,7 @@ internal class PaymentOptionDisplayDataFactory @Inject constructor(
                     darkThemeIconUrl = selection.darkThemeIconUrl,
                 )
             },
-            billingDetails = if (attachDefaultBillingDetails) {
-                billingDetails
-            } else {
-                selection.billingDetails?.toPaymentSheetBillingDetails()
-            },
+            billingDetails = selection.billingDetails?.toPaymentSheetBillingDetails(),
             paymentMethodType = selection.paymentMethodType,
             mandateText = if (mandate == null) null else AnnotatedString(mandate.resolve(context))
         )
