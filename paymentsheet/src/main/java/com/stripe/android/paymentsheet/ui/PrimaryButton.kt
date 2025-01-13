@@ -308,7 +308,9 @@ private fun LabelUI(label: String, color: Int?) {
             modifier = Modifier
                 .padding(start = 4.dp, end = 4.dp, top = 4.dp, bottom = 5.dp)
                 .semantics {
-                    // Accessibility should be handled by its parent, PrimaryButton.
+                    // This shouldn't be visible for accessibility purposes
+                    // due to the content description and the click listener
+                    // being defined outside of compose, in PrimaryButton.
                     invisibleToUser()
                 }
         )
