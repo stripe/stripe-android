@@ -20,33 +20,12 @@ class PaymentOptionTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
-    private fun paymentOptionTestHelper(
-        label: String = "Card ending in 4242",
-        shouldShowModifyBadge: Boolean,
-        shouldShowDefaultBadge: Boolean,
-    ) {
-        composeTestRule.setContent {
-            SavedPaymentMethodTab(
-                viewWidth = 100.dp,
-                isSelected = false,
-                shouldShowModifyBadge = shouldShowModifyBadge,
-                shouldShowDefaultBadge = shouldShowDefaultBadge,
-                isEnabled = true,
-                iconRes = R.drawable.stripe_ic_paymentsheet_card_visa,
-                labelText = label,
-                description = label,
-                onItemSelectedListener = {},
-            )
-        }
-    }
-
     @Test
     fun `Turns card label into screen reader-friendly text`() {
         val label = "Card ending in 4242"
 
-        paymentOptionTestHelper(
+        setSavedPaymentMethodTabComposeTestRule(
             label = label,
-            shouldShowModifyBadge = false,
             shouldShowDefaultBadge = false,
         )
         composeTestRule
@@ -55,40 +34,19 @@ class PaymentOptionTest {
     }
 
     @Test
-    fun `Correctly hides default badge when not modifying and not default`() {
-        val label = "Card ending in 4242"
-
-        paymentOptionTestHelper(
-            label = label,
-            shouldShowModifyBadge = false,
+    fun `Correctly hides default badge when not default`() {
+        setSavedPaymentMethodTabComposeTestRule(
             shouldShowDefaultBadge = false,
         )
-        composeTestRule.onNodeWithTag(TEST_TAG_DEFAULT_PAYMENT_METHOD_LABEL).assertDoesNotExist()
+        composeTestRule.onNodeWithTag(
+            TEST_TAG_DEFAULT_PAYMENT_METHOD_LABEL,
+            useUnmergedTree = true
+        ).assertDoesNotExist()
     }
 
     @Test
-    fun `Correctly hides default badge when modifying and not default`() {
-        paymentOptionTestHelper(
-            shouldShowModifyBadge = true,
-            shouldShowDefaultBadge = false,
-        )
-        composeTestRule.onNodeWithTag(TEST_TAG_DEFAULT_PAYMENT_METHOD_LABEL).assertDoesNotExist()
-    }
-
-    @Test
-    fun `Correctly hides default badge when not modifying and default`() {
-        paymentOptionTestHelper(
-            shouldShowModifyBadge = false,
-            shouldShowDefaultBadge = true,
-        )
-
-        composeTestRule.onNodeWithTag(TEST_TAG_DEFAULT_PAYMENT_METHOD_LABEL).assertDoesNotExist()
-    }
-
-    @Test
-    fun `Correctly shows default badge when modifying and default`() {
-        paymentOptionTestHelper(
-            shouldShowModifyBadge = true,
+    fun `Correctly shows default badge when default`() {
+        setSavedPaymentMethodTabComposeTestRule(
             shouldShowDefaultBadge = true,
         )
 
@@ -96,5 +54,24 @@ class PaymentOptionTest {
             testTag = TEST_TAG_DEFAULT_PAYMENT_METHOD_LABEL,
             useUnmergedTree = true
         ).assertExists()
+    }
+
+    private fun setSavedPaymentMethodTabComposeTestRule(
+        label: String = "Card ending in 4242",
+        shouldShowDefaultBadge: Boolean,
+    ) {
+        composeTestRule.setContent {
+            SavedPaymentMethodTab(
+                viewWidth = 100.dp,
+                isSelected = false,
+                shouldShowModifyBadge = false,
+                shouldShowDefaultBadge = shouldShowDefaultBadge,
+                isEnabled = true,
+                iconRes = R.drawable.stripe_ic_paymentsheet_card_visa,
+                labelText = label,
+                description = label,
+                onItemSelectedListener = {},
+            )
+        }
     }
 }
