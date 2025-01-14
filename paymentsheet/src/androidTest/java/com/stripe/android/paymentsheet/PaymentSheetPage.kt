@@ -75,6 +75,16 @@ internal class PaymentSheetPage(
         clickViewWithText("Save your info for secure 1-click checkout with Link")
     }
 
+    fun clickEditButton() {
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
+
+        waitForText("EDIT")
+        composeTestRule
+            .onNodeWithText("EDIT")
+            .performClick()
+    }
+
     fun clickOnSaveForFutureUsage() {
         Espresso.onIdle()
         composeTestRule.waitForIdle()

@@ -1,5 +1,7 @@
 package com.stripe.android.paymentsheet
 
+import androidx.compose.ui.test.assertIsFocused
+import androidx.compose.ui.test.onAllNodesWithTag
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.core.utils.urlEncode
@@ -8,6 +10,7 @@ import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
+import com.stripe.android.paymentsheet.ui.TEST_TAG_MODIFY_BADGE
 import com.stripe.android.paymentsheet.utils.IntegrationType
 import com.stripe.android.paymentsheet.utils.IntegrationTypeProvider
 import com.stripe.android.paymentsheet.utils.TestRules
@@ -399,6 +402,52 @@ internal class PaymentSheetTest {
             expectedContentDescription = "Pay \$50.99",
             canPay = false
         )
+
+        testContext.markTestSucceeded()
+    }
+
+    @Test
+    fun testFocusFirstEditBadgeOnEdit() = runPaymentSheetTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-requires_cvc_recollection.json")
+        }
+
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/payment_methods"),
+        ) { response ->
+            response.testBodyFromFile("payment-methods-get-success.json")
+        }
+
+        testContext.presentPaymentSheet {
+            presentWithPaymentIntent(
+                paymentIntentClientSecret = "pi_example_secret_example",
+                configuration = PaymentSheet.Configuration(
+                    merchantDisplayName = "Merchant, Inc.",
+                    customer = PaymentSheet.CustomerConfiguration(
+                        id = "cus_1",
+                        ephemeralKeySecret = "ek_123",
+                    ),
+                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                ),
+            )
+        }
+
+        page.clickEditButton()
+
+        // Check that the first badge is focused
+        composeTestRule
+            .onAllNodesWithTag(TEST_TAG_MODIFY_BADGE)[0]
+            .assertIsFocused()
 
         testContext.markTestSucceeded()
     }
