@@ -21,7 +21,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import com.stripe.android.model.CardBrand
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
 import com.stripe.android.uicore.DefaultStripeTheme
@@ -30,12 +29,10 @@ import com.stripe.android.uicore.stripeColors
 import org.junit.Rule
 import org.junit.Test
 
-class PaymentMethodsUiExtensionTest {
+class PaymentMethodsUiExtensionScreenshotTest {
     @get:Rule
     val paparazziRule = PaparazziRule(
         SystemAppearance.entries,
-//        PaymentSheetAppearance.entries,
-//        FontSize.entries,
     )
 
     @Composable
@@ -44,38 +41,6 @@ class PaymentMethodsUiExtensionTest {
             Color.DarkGray
         } else {
             Color.LightGray
-        }
-    }
-
-    @Composable
-    private fun PaymentMethodsUiExtensionTestHelper(
-        title: String = "",
-        @DrawableRes icons: List<Int>,
-        backgroundColorOverride: Color? = null
-    ) {
-        DefaultStripeTheme {
-            LazyColumn (
-                modifier = Modifier
-                    .width(150.dp),
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                item {
-                    Text(title)
-                }
-                items(
-                    items = icons,
-                    key = {
-                        "icon_${it}"
-                    }
-                ) { iconRes ->
-                    iconCard(
-                        iconRes,
-                        backgroundColorOverride
-                    )
-                }
-            }
         }
     }
 
@@ -110,7 +75,7 @@ class PaymentMethodsUiExtensionTest {
     @Test
     fun `Drawable Reference points to correct drawable without override`() {
         paparazziRule.snapshot {
-            PaymentMethodsUiExtensionTestHelper(
+            iconAndThemesTestComposable(
                 title = "no override\nisDarkTheme ${isSystemInDarkTheme()}",
                 icons = listOf(
                     getLinkIcon(),
@@ -122,7 +87,7 @@ class PaymentMethodsUiExtensionTest {
     @Test
     fun `Drawable Reference points to correct drawable with override and light`() {
         paparazziRule.snapshot {
-            PaymentMethodsUiExtensionTestHelper(
+            iconAndThemesTestComposable(
                 title = "override show light\nisDarkTheme ${isSystemInDarkTheme()}",
                 icons = listOf(
                     getLinkIcon(showNightIcon = true),
@@ -135,13 +100,45 @@ class PaymentMethodsUiExtensionTest {
     @Test
     fun `Drawable Reference points to correct drawable with override and dark`() {
         paparazziRule.snapshot {
-            PaymentMethodsUiExtensionTestHelper(
+            iconAndThemesTestComposable(
                 title = "override show dark\nisDarkTheme ${isSystemInDarkTheme()}",
                 icons = listOf(
                     getLinkIcon(showNightIcon = false),
                 ),
                 backgroundColorOverride = getSectionCardColor()
             )
+        }
+    }
+
+    @Composable
+    private fun iconAndThemesTestComposable(
+        title: String = "",
+        @DrawableRes icons: List<Int>,
+        backgroundColorOverride: Color? = null
+    ) {
+        DefaultStripeTheme {
+            LazyColumn(
+                modifier = Modifier
+                    .width(150.dp),
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                item {
+                    Text(title)
+                }
+                items(
+                    items = icons,
+                    key = {
+                        "icon_$it"
+                    }
+                ) { iconRes ->
+                    iconCard(
+                        iconRes,
+                        backgroundColorOverride
+                    )
+                }
+            }
         }
     }
 }
