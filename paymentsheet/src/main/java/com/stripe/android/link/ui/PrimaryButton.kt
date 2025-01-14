@@ -27,11 +27,17 @@ import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.PrimaryButtonHeight
 import com.stripe.android.link.theme.linkColors
 import com.stripe.android.link.theme.linkShapes
+import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.SetupIntent
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.ui.core.Amount
+import com.stripe.android.ui.core.R as uiCoreR
 
 @Composable
 internal fun PrimaryButton(
@@ -137,6 +143,18 @@ internal enum class PrimaryButtonState(val isBlocking: Boolean) {
     Completed(true)
 }
 
+internal fun completePaymentButtonLabel(
+    stripeIntent: StripeIntent,
+) = when (stripeIntent) {
+    is PaymentIntent -> {
+        Amount(
+            requireNotNull(stripeIntent.amount),
+            requireNotNull(stripeIntent.currency)
+        ).buildPayButtonLabel()
+    }
+    is SetupIntent -> uiCoreR.string.stripe_setup_button_label.resolvableString
+}
+
 private val PrimaryButtonIconWidth = 13.dp
 private val PrimaryButtonIconHeight = 16.dp
 internal const val ProgressIndicatorTestTag = "CircularProgressIndicator"
@@ -151,7 +169,7 @@ private fun PrimaryButtonPreview() {
             label = "Testing",
             state = PrimaryButtonState.Enabled,
             onButtonClick = { },
-            iconEnd = com.stripe.android.ui.core.R.drawable.stripe_ic_lock
+            iconEnd = uiCoreR.drawable.stripe_ic_lock
         )
     }
 }

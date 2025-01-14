@@ -2,6 +2,7 @@ package com.stripe.android.link.injection
 
 import android.content.Context
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
@@ -34,6 +35,7 @@ internal interface NativeLinkComponent {
     val linkEventsReporter: LinkEventsReporter
     val logger: Logger
     val linkConfirmationHandlerFactory: LinkConfirmationHandler.Factory
+    val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory
     val viewModel: LinkActivityViewModel
 
     @Component.Builder

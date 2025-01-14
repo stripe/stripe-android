@@ -215,7 +215,7 @@ internal class FormHelperTest {
         newPaymentSelectionProvider: () -> NewOrExternalPaymentSelection? = { throw AssertionError("Not implemented") },
         selectionUpdater: (PaymentSelection?) -> Unit = { throw AssertionError("Not implemented") },
     ): FormHelper {
-        return FormHelper(
+        return DefaultFormHelper(
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
             paymentMethodMetadata = paymentMethodMetadata,
             newPaymentSelectionProvider = newPaymentSelectionProvider,

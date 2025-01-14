@@ -10,6 +10,7 @@ import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.CustomerStateHolder
+import com.stripe.android.paymentsheet.DefaultFormHelper
 import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.LinkInlineHandler
 import com.stripe.android.paymentsheet.NewOrExternalPaymentSelection
@@ -213,7 +214,7 @@ internal class DefaultEmbeddedContentHelper @AssistedInject constructor(
         paymentMethodMetadata: PaymentMethodMetadata,
     ): FormHelper {
         val linkInlineHandler = createLinkInlineHandler(coroutineScope)
-        return FormHelper(
+        return DefaultFormHelper(
             cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
             paymentMethodMetadata = paymentMethodMetadata,
             newPaymentSelectionProvider = {
