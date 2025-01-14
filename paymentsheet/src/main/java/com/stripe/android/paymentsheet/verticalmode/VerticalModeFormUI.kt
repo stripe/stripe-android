@@ -23,6 +23,7 @@ import com.stripe.android.lpmfoundations.FormHeaderInformation
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.FormElement
 import com.stripe.android.paymentsheet.ui.PaymentMethodIcon
+import com.stripe.android.paymentsheet.ui.PromoBadge
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
@@ -109,5 +110,12 @@ internal fun VerticalModeFormHeaderUI(
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.testTag(TEST_TAG_HEADER_TITLE)
         )
+
+        if (formHeaderInformation.promoBadge != null) {
+            PromoBadge(
+                text = formHeaderInformation.promoBadge,
+                modifier = Modifier.padding(start = 12.dp),
+            )
+        }
     }
 }

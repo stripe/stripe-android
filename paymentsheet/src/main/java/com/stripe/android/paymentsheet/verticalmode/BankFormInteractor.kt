@@ -10,8 +10,7 @@ internal class BankFormInteractor(
 
     fun handleLinkedBankAccountChanged(selection: PaymentSelection.New.USBankAccount?) {
         updateSelection(selection)
-
-        // TODO(tillh-stripe): Update incentive badge here
+        paymentMethodIncentiveInteractor.setEligible(selection == null)
     }
 
     companion object {

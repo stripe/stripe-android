@@ -12,6 +12,7 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
+import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.SharedDataSpec
 import com.stripe.android.uicore.elements.FormElement
@@ -75,8 +76,11 @@ internal sealed interface UiDefinitionFactory {
             sharedDataSpec: SharedDataSpec,
         ): SupportedPaymentMethod
 
-        fun createFormHeaderInformation(sharedDataSpec: SharedDataSpec): FormHeaderInformation {
-            return createSupportedPaymentMethod(sharedDataSpec).asFormHeaderInformation()
+        fun createFormHeaderInformation(
+            sharedDataSpec: SharedDataSpec,
+            incentive: PaymentMethodIncentive?,
+        ): FormHeaderInformation {
+            return createSupportedPaymentMethod(sharedDataSpec).asFormHeaderInformation(incentive)
         }
 
         fun createFormElements(
@@ -93,8 +97,11 @@ internal sealed interface UiDefinitionFactory {
     interface Simple : UiDefinitionFactory {
         fun createSupportedPaymentMethod(): SupportedPaymentMethod
 
-        fun createFormHeaderInformation(customerHasSavedPaymentMethods: Boolean): FormHeaderInformation {
-            return createSupportedPaymentMethod().asFormHeaderInformation()
+        fun createFormHeaderInformation(
+            customerHasSavedPaymentMethods: Boolean,
+            incentive: PaymentMethodIncentive?,
+        ): FormHeaderInformation {
+            return createSupportedPaymentMethod().asFormHeaderInformation(incentive)
         }
 
         fun createFormElements(metadata: PaymentMethodMetadata, arguments: Arguments): List<FormElement>
@@ -138,13 +145,19 @@ internal sealed interface UiDefinitionFactory {
         customerHasSavedPaymentMethods: Boolean,
     ): FormHeaderInformation? = when (this) {
         is Simple -> {
-            createFormHeaderInformation(customerHasSavedPaymentMethods = customerHasSavedPaymentMethods)
+            createFormHeaderInformation(
+                customerHasSavedPaymentMethods = customerHasSavedPaymentMethods,
+                incentive = metadata.paymentMethodIncentive,
+            )
         }
 
         is RequiresSharedDataSpec -> {
             val sharedDataSpec = sharedDataSpecs.firstOrNull { it.type == definition.type.code }
             if (sharedDataSpec != null) {
-                createFormHeaderInformation(sharedDataSpec)
+                createFormHeaderInformation(
+                    sharedDataSpec = sharedDataSpec,
+                    incentive = metadata.paymentMethodIncentive,
+                )
             } else {
                 null
             }

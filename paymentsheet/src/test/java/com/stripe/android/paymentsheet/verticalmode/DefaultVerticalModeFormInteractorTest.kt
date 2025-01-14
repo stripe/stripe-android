@@ -7,6 +7,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormInteractor.ViewAction
+import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -98,6 +99,7 @@ internal class DefaultVerticalModeFormInteractorTest {
             canGoBackDelegate = canGoBackDelegate,
             processing = processing,
             coroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
+            paymentMethodIncentive = stateFlowOf(null),
         )
 
         TestParams(

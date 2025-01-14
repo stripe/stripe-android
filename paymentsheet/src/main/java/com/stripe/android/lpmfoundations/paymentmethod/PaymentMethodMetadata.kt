@@ -178,7 +178,8 @@ internal data class PaymentMethodMetadata(
     ): FormHeaderInformation? {
         return if (isExternalPaymentMethod(code)) {
             getUiDefinitionFactoryForExternalPaymentMethod(code)?.createFormHeaderInformation(
-                customerHasSavedPaymentMethods = customerHasSavedPaymentMethods
+                customerHasSavedPaymentMethods = customerHasSavedPaymentMethods,
+                incentive = null,
             )
         } else {
             val definition = supportedPaymentMethodDefinitions().firstOrNull { it.type.code == code } ?: return null

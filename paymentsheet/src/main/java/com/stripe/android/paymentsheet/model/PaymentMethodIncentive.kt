@@ -12,8 +12,10 @@ internal data class PaymentMethodIncentive(
     val displayText: String,
 ) : Parcelable {
 
-    fun matches(code: PaymentMethodCode): Boolean {
-        return identifier == "link_instant_debits" && code == PaymentMethod.Type.Link.code
+    fun takeIfMatches(code: PaymentMethodCode): PaymentMethodIncentive? {
+        return this.takeIf {
+            identifier == "link_instant_debits" && code == PaymentMethod.Type.Link.code
+        }
     }
 }
 
