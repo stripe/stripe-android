@@ -1,7 +1,9 @@
 package com.stripe.android.paymentsheet
 
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -20,6 +22,7 @@ import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TEST_TAG
+import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
 import com.stripe.android.paymentsheet.utils.ActivityLaunchObserver
 import com.stripe.android.paymentsheet.utils.IntegrationType
 import com.stripe.android.paymentsheet.utils.TestRules
@@ -817,6 +820,77 @@ internal class FlowControllerTest {
         testContext.configureCallbackTurbine.expectNoEvents()
         page.clickPrimaryButton()
         assertThat(testContext.configureCallbackTurbine.awaitItem()?.label).endsWith("4242")
+        testContext.markTestSucceeded()
+    }
+
+    /**
+     * Tests the default ordering of payment methods when Elements session fetch fails.
+     *
+     * This test verifies that:
+     * 1. When Elements session request fails (400 response)
+     * 2. And a subsequent payment intent fetch succeeds
+     * 3. The payment methods are displayed in the expected default order:
+     *    - Card
+     *    - Afterpay/Clearpay
+     *    - Klarna
+     *    - Affirm
+     *    Note: US Bank Account and Link are excluded based on configuration
+     */
+    @Test
+    fun testDefaultPaymentMethodOrderWithFailedSession(
+        @TestParameter integrationType: IntegrationType,
+    ) = runFlowControllerTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.enqueue(
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.setResponseCode(400)
+        }
+
+        networkRule.enqueue(
+            method("GET"),
+            path("/v1/payment_intents/pi_example"),
+        ) { response ->
+            response.testBodyFromFile("payment-intent-get-requires_payment_method.json")
+        }
+
+        testContext.configureFlowController {
+            configureWithPaymentIntent(
+                paymentIntentClientSecret = "pi_example_secret_example",
+                configuration = PaymentSheet.Configuration.Builder("Example, Inc.")
+                    .allowsDelayedPaymentMethods(true)
+                    .allowsPaymentMethodsRequiringShippingAddress(true)
+                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
+                    .build(),
+                callback = { success, error ->
+                    assertThat(success).isTrue()
+                    assertThat(error).isNull()
+                    presentPaymentOptions()
+                }
+            )
+        }
+
+        val actualTags = composeTestRule
+            .onNodeWithTag(TEST_TAG_LIST, true)
+            .onChildren()
+            .fetchSemanticsNodes()
+            .map { it.config[SemanticsProperties.TestTag] }
+
+        assertThat(actualTags).isEqualTo(
+            listOf(
+                "card",
+                "afterpay_clearpay",
+                "klarna",
+                // "us_bank_account", this is not in the list per configuration
+                "affirm",
+                // "link", this is not in the list per configuration
+            ).map { TEST_TAG_LIST + it }
+        )
+
         testContext.markTestSucceeded()
     }
 }
