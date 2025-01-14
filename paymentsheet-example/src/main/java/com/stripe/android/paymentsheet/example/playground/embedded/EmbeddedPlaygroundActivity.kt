@@ -8,6 +8,7 @@ import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -15,6 +16,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -27,6 +29,7 @@ import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.activity.FawryActivity
+import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedViewDisplaysMandateSettingDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
 import com.stripe.android.paymentsheet.example.samples.ui.shared.BuyButton
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentMethodSelector
@@ -60,6 +63,7 @@ internal class EmbeddedPlaygroundActivity : AppCompatActivity(), ExternalPayment
             },
             resultCallback = ::handleEmbeddedResult,
         ).externalPaymentMethodConfirmHandler(this)
+        val embeddedViewDisplaysMandateText = playgroundState.snapshot[EmbeddedViewDisplaysMandateSettingDefinition]
         setContent {
             val embeddedPaymentElement = rememberEmbeddedPaymentElement(embeddedBuilder)
 
@@ -82,28 +86,47 @@ internal class EmbeddedPlaygroundActivity : AppCompatActivity(), ExternalPayment
                 val selectedPaymentOption by embeddedPaymentElement.paymentOption.collectAsState()
 
                 selectedPaymentOption?.let { selectedPaymentOption ->
-                    PaymentMethodSelector(
-                        isEnabled = true,
-                        paymentMethodLabel = selectedPaymentOption.label,
-                        paymentMethodPainter = selectedPaymentOption.iconPainter,
-                        clickable = false,
-                        onClick = { },
+                    EmbeddedContentWithSelectedPaymentOption(
+                        embeddedPaymentElement = embeddedPaymentElement,
+                        selectedPaymentOption = selectedPaymentOption,
+                        embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
                     )
-
-                    BuyButton(buyButtonEnabled = true) {
-                        embeddedPaymentElement.confirm()
-                    }
-
-                    Button(
-                        onClick = {
-                            embeddedPaymentElement.clearPaymentOption()
-                        },
-                        Modifier.fillMaxWidth(),
-                    ) {
-                        Text("Clear selected")
-                    }
                 }
             }
+        }
+    }
+
+    @Composable
+    private fun ColumnScope.EmbeddedContentWithSelectedPaymentOption(
+        embeddedPaymentElement: EmbeddedPaymentElement,
+        selectedPaymentOption: EmbeddedPaymentElement.PaymentOptionDisplayData,
+        embeddedViewDisplaysMandateText: Boolean,
+    ) {
+        PaymentMethodSelector(
+            isEnabled = true,
+            paymentMethodLabel = selectedPaymentOption.label,
+            paymentMethodPainter = selectedPaymentOption.iconPainter,
+            clickable = false,
+            onClick = { },
+        )
+
+        if (!embeddedViewDisplaysMandateText) {
+            selectedPaymentOption.mandateText?.let { mandateText ->
+                Text(mandateText)
+            }
+        }
+
+        BuyButton(buyButtonEnabled = true) {
+            embeddedPaymentElement.confirm()
+        }
+
+        Button(
+            onClick = {
+                embeddedPaymentElement.clearPaymentOption()
+            },
+            Modifier.fillMaxWidth(),
+        ) {
+            Text("Clear selected")
         }
     }
 
