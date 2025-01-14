@@ -632,7 +632,7 @@ internal class WalletScreenTest {
 
     private fun onWalletFormFields() =
         composeTestRule.onNodeWithTag(WALLET_SCREEN_RECOLLECTION_FORM_FIELDS, useUnmergedTree = true)
-    
+
     private fun onLoader() = composeTestRule.onNodeWithTag(WALLET_LOADER_TAG)
 
     private fun onWalletPaymentMethodRowMenuButton() =
