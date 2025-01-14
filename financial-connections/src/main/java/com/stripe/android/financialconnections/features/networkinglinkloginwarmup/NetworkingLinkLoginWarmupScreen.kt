@@ -79,11 +79,12 @@ private fun NetworkingLinkLoginWarmupContent(
         lazyListState = lazyListState,
         body = {
             item { HeaderSection() }
-            item { ExistingEmailSection(email = state.payload()?.email ?: "") }
+            item { ExistingEmailSection(email = state.payload()?.redactedEmail ?: "") }
         },
         footer = {
             Footer(
-                loading = state.disableNetworkingAsync is Loading || state.payload() == null,
+                primaryButtonLoading = state.continueAsync is Loading,
+                secondaryButtonLoading = state.disableNetworkingAsync is Loading,
                 secondaryButtonLabel = state.secondaryButtonLabel,
                 onContinueClick = onContinueClick,
                 onSkipClicked = onSkipClicked,
@@ -115,15 +116,18 @@ private fun HeaderSection() {
 @Composable
 @OptIn(ExperimentalComposeUiApi::class)
 private fun Footer(
-    loading: Boolean,
+    primaryButtonLoading: Boolean,
+    secondaryButtonLoading: Boolean,
     secondaryButtonLabel: Int,
     onContinueClick: () -> Unit,
     onSkipClicked: () -> Unit
 ) {
+    val enableButtons = !primaryButtonLoading && !secondaryButtonLoading
+
     Column {
         FinancialConnectionsButton(
-            loading = false,
-            enabled = loading.not(),
+            loading = primaryButtonLoading,
+            enabled = enableButtons,
             type = Type.Primary,
             onClick = onContinueClick,
             modifier = Modifier
@@ -135,8 +139,8 @@ private fun Footer(
         }
         Spacer(modifier = Modifier.size(16.dp))
         FinancialConnectionsButton(
-            loading = false,
-            enabled = loading.not(),
+            loading = secondaryButtonLoading,
+            enabled = enableButtons,
             type = Type.Secondary,
             onClick = { onSkipClicked() },
             modifier = Modifier

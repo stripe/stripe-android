@@ -195,7 +195,7 @@ internal class NetworkingLinkSignupViewModel @AssistedInject constructor(
     /**
      * @param validEmail valid email, or null if entered email is invalid.
      */
-    private suspend fun onEmailEntered(
+    private fun onEmailEntered(
         validEmail: String?
     ) {
         setState { copy(validEmail = validEmail) }
