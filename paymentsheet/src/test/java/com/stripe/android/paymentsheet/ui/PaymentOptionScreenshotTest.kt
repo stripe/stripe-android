@@ -19,7 +19,67 @@ class PaymentOptionScreenshotTest {
         FontSize.entries,
     )
 
-    private fun paymentOptionScreenshotTestHelper(
+    @Test
+    fun testEnabled() {
+        createSavedPaymentMethodTabScreenshot(
+            isSelected = false,
+            shouldShowModifyBadge = false,
+            shouldShowDefaultBadge = false,
+            isEnabled = true,
+        )
+    }
+
+    @Test
+    fun testDisabled() {
+        createSavedPaymentMethodTabScreenshot(
+            isSelected = false,
+            shouldShowModifyBadge = false,
+            shouldShowDefaultBadge = false,
+            isEnabled = false,
+        )
+    }
+
+    @Test
+    fun testSelected() {
+        createSavedPaymentMethodTabScreenshot(
+            isSelected = true,
+            shouldShowModifyBadge = false,
+            shouldShowDefaultBadge = false,
+            isEnabled = true,
+        )
+    }
+
+    @Test
+    fun testSelectedAndDisabled() {
+        createSavedPaymentMethodTabScreenshot(
+            isSelected = true,
+            shouldShowModifyBadge = false,
+            shouldShowDefaultBadge = false,
+            isEnabled = false,
+        )
+    }
+
+    @Test
+    fun testModifying() {
+        createSavedPaymentMethodTabScreenshot(
+            isSelected = false,
+            shouldShowModifyBadge = true,
+            shouldShowDefaultBadge = false,
+            isEnabled = true,
+        )
+    }
+
+    @Test
+    fun testDefaultEditing() {
+        createSavedPaymentMethodTabScreenshot(
+            isSelected = false,
+            shouldShowModifyBadge = true,
+            shouldShowDefaultBadge = true,
+            isEnabled = true,
+        )
+    }
+
+    private fun createSavedPaymentMethodTabScreenshot(
         isSelected: Boolean,
         shouldShowModifyBadge: Boolean,
         shouldShowDefaultBadge: Boolean,
@@ -38,65 +98,5 @@ class PaymentOptionScreenshotTest {
                 onItemSelectedListener = {},
             )
         }
-    }
-
-    @Test
-    fun testEnabled() {
-        paymentOptionScreenshotTestHelper(
-            isSelected = false,
-            shouldShowModifyBadge = false,
-            shouldShowDefaultBadge = false,
-            isEnabled = true,
-        )
-    }
-
-    @Test
-    fun testDisabled() {
-        paymentOptionScreenshotTestHelper(
-            isSelected = false,
-            shouldShowModifyBadge = false,
-            shouldShowDefaultBadge = false,
-            isEnabled = false,
-        )
-    }
-
-    @Test
-    fun testSelected() {
-        paymentOptionScreenshotTestHelper(
-            isSelected = true,
-            shouldShowModifyBadge = false,
-            shouldShowDefaultBadge = false,
-            isEnabled = true,
-        )
-    }
-
-    @Test
-    fun testSelectedAndDisabled() {
-        paymentOptionScreenshotTestHelper(
-            isSelected = true,
-            shouldShowModifyBadge = false,
-            shouldShowDefaultBadge = false,
-            isEnabled = false,
-        )
-    }
-
-    @Test
-    fun testModifying() {
-        paymentOptionScreenshotTestHelper(
-            isSelected = false,
-            shouldShowModifyBadge = true,
-            shouldShowDefaultBadge = false,
-            isEnabled = true,
-        )
-    }
-
-    @Test
-    fun testDefaultEditing() {
-        paymentOptionScreenshotTestHelper(
-            isSelected = false,
-            shouldShowModifyBadge = true,
-            shouldShowDefaultBadge = true,
-            isEnabled = true,
-        )
     }
 }

@@ -16,29 +16,9 @@ class PaymentOptionsScreenshotTest {
     @get:Rule
     val paparazziRule = PaparazziRule()
 
-    private fun paymentOptionsScreenshotTestHelper(
-        paymentOptionsItems: List<PaymentOptionsItem>,
-        selectedPaymentOptionsItem: PaymentOptionsItem?,
-        isEditing: Boolean,
-        scrollState: LazyListState? = null,
-    ) {
-        paparazziRule.snapshot {
-            SavedPaymentMethodTabLayoutUI(
-                paymentOptionsItems = paymentOptionsItems,
-                selectedPaymentOptionsItem = selectedPaymentOptionsItem,
-                isEditing = isEditing,
-                isProcessing = false,
-                onAddCardPressed = {},
-                onItemSelected = {},
-                onModifyItem = {},
-                scrollState = scrollState ?: rememberLazyListState()
-            )
-        }
-    }
-
     @Test
     fun testWidthLessThanScreen() {
-        paymentOptionsScreenshotTestHelper(
+        createSavedPaymentMethodTabLayoutUiScreenshot(
             paymentOptionsItems = listOf(
                 PaymentOptionsItem.AddCard,
                 PaymentOptionsItem.Link,
@@ -73,7 +53,7 @@ class PaymentOptionsScreenshotTest {
             ),
         )
 
-        paymentOptionsScreenshotTestHelper(
+        createSavedPaymentMethodTabLayoutUiScreenshot(
             paymentOptionsItems = paymentOptionsItems,
             selectedPaymentOptionsItem = paymentOptionsItems[1],
             isEditing = false,
@@ -105,7 +85,7 @@ class PaymentOptionsScreenshotTest {
             ),
         )
 
-        paymentOptionsScreenshotTestHelper(
+        createSavedPaymentMethodTabLayoutUiScreenshot(
             paymentOptionsItems = paymentOptionsItems,
             selectedPaymentOptionsItem = paymentOptionsItems[1],
             isEditing = false,
@@ -137,7 +117,7 @@ class PaymentOptionsScreenshotTest {
             ),
         )
 
-        paymentOptionsScreenshotTestHelper(
+        createSavedPaymentMethodTabLayoutUiScreenshot(
             paymentOptionsItems = paymentOptionsItems,
             selectedPaymentOptionsItem = null,
             isEditing = true,
@@ -170,12 +150,32 @@ class PaymentOptionsScreenshotTest {
             ),
         )
 
-        paymentOptionsScreenshotTestHelper(
+        createSavedPaymentMethodTabLayoutUiScreenshot(
             paymentOptionsItems = paymentOptionsItemsWithDefaultCard,
             selectedPaymentOptionsItem = null,
             isEditing = true,
             scrollState = LazyListState(firstVisibleItemIndex = 2),
         )
+    }
+
+    private fun createSavedPaymentMethodTabLayoutUiScreenshot(
+        paymentOptionsItems: List<PaymentOptionsItem>,
+        selectedPaymentOptionsItem: PaymentOptionsItem?,
+        isEditing: Boolean,
+        scrollState: LazyListState? = null,
+    ) {
+        paparazziRule.snapshot {
+            SavedPaymentMethodTabLayoutUI(
+                paymentOptionsItems = paymentOptionsItems,
+                selectedPaymentOptionsItem = selectedPaymentOptionsItem,
+                isEditing = isEditing,
+                isProcessing = false,
+                onAddCardPressed = {},
+                onItemSelected = {},
+                onModifyItem = {},
+                scrollState = scrollState ?: rememberLazyListState()
+            )
+        }
     }
 
     private fun createCard(last4: String, addNetworks: Boolean = false): PaymentMethod {
