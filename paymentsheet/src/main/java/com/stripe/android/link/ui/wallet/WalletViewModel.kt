@@ -27,8 +27,8 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
 import com.stripe.android.ui.core.R
+import com.stripe.android.ui.core.elements.CardDetailsUtil.createExpiryDateFormFieldValues
 import com.stripe.android.ui.core.elements.CvcController
-import com.stripe.android.ui.core.elements.createExpiryDateFormFieldValues
 import com.stripe.android.uicore.elements.DateConfig
 import com.stripe.android.uicore.elements.SimpleTextFieldController
 import com.stripe.android.uicore.utils.mapAsStateFlow
