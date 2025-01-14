@@ -44,6 +44,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import com.stripe.android.link.confirmation.Result as LinkConfirmationResult
 
 @RunWith(AndroidJUnit4::class)
 internal class WalletScreenTest {
@@ -300,7 +301,13 @@ internal class WalletScreenTest {
 
         onWalletPayButton().assertIsEnabled().performClick()
 
-        onWalletDialogTag().assertIsDisplayed()
+        composeTestRule.waitForIdle()
+
+        onWalletDialogTag().assertIsDisplayed().performClick()
+
+        composeTestRule.waitForIdle()
+
+        onWalletDialogTag().assertDoesNotExist()
     }
 
     @Test
@@ -369,7 +376,7 @@ internal class WalletScreenTest {
     }
 
     @Test
-    fun `pay button state switches to processing state during payment2`() = runTest(dispatcher) {
+    fun `error message is displayed when payment confirmation fails`() = runTest(dispatcher) {
         val cardRequiringCvc = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(
             expiryYear = 2999,
             cvcCheck = CvcCheck.Pass
@@ -379,7 +386,7 @@ internal class WalletScreenTest {
             ConsumerPaymentDetails(paymentDetails = listOf(cardRequiringCvc))
         )
         val linkConfirmationHandler = FakeLinkConfirmationHandler()
-        linkConfirmationHandler.confirmResult = com.stripe.android.link.confirmation.Result.Failed("oops".resolvableString)
+        linkConfirmationHandler.confirmResult = LinkConfirmationResult.Failed("oops".resolvableString)
 
         val viewModel = createViewModel(
             linkAccountManager = linkAccountManager,
