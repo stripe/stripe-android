@@ -127,29 +127,6 @@ class PaymentOptionsScreenshotTest {
 
     @Test
     fun testDefaultPaymentOptionEditing() {
-        val paymentOptionsItemsWithDefaultCard = listOf(
-            PaymentOptionsItem.SavedPaymentMethod(
-                DisplayableSavedPaymentMethod.create(
-                    displayName = "Card".resolvableString,
-                    paymentMethod = createCard("8431"),
-                    shouldShowDefaultBadge = true
-                ),
-            ),
-            PaymentOptionsItem.SavedPaymentMethod(
-                DisplayableSavedPaymentMethod.create(
-                    displayName = "Card".resolvableString,
-                    paymentMethod = createCard("4000"),
-                ),
-            ),
-            PaymentOptionsItem.SavedPaymentMethod(
-                DisplayableSavedPaymentMethod.create(
-                    displayName = "Card".resolvableString,
-                    paymentMethod = createCard("1234", addNetworks = true),
-                    isCbcEligible = true,
-                ),
-            ),
-        )
-
         createSavedPaymentMethodTabLayoutUiScreenshot(
             paymentOptionsItems = paymentOptionsItemsWithDefaultCard,
             selectedPaymentOptionsItem = null,
@@ -157,6 +134,39 @@ class PaymentOptionsScreenshotTest {
             scrollState = LazyListState(firstVisibleItemIndex = 2),
         )
     }
+
+    @Test
+    fun testDefaultPaymentOptionNotEditing() {
+        createSavedPaymentMethodTabLayoutUiScreenshot(
+            paymentOptionsItems = paymentOptionsItemsWithDefaultCard,
+            selectedPaymentOptionsItem = null,
+            isEditing = false,
+            scrollState = LazyListState(firstVisibleItemIndex = 2),
+        )
+    }
+
+    private val paymentOptionsItemsWithDefaultCard = listOf(
+        PaymentOptionsItem.SavedPaymentMethod(
+            DisplayableSavedPaymentMethod.create(
+                displayName = "Card".resolvableString,
+                paymentMethod = createCard("8431"),
+                shouldShowDefaultBadge = true
+            ),
+        ),
+        PaymentOptionsItem.SavedPaymentMethod(
+            DisplayableSavedPaymentMethod.create(
+                displayName = "Card".resolvableString,
+                paymentMethod = createCard("4000"),
+            ),
+        ),
+        PaymentOptionsItem.SavedPaymentMethod(
+            DisplayableSavedPaymentMethod.create(
+                displayName = "Card".resolvableString,
+                paymentMethod = createCard("1234", addNetworks = true),
+                isCbcEligible = true,
+            ),
+        ),
+    )
 
     private fun createSavedPaymentMethodTabLayoutUiScreenshot(
         paymentOptionsItems: List<PaymentOptionsItem>,
