@@ -68,7 +68,7 @@ internal class LinkActivityViewModel @Inject constructor(
         navigate(screen, clearStack, launchSingleTop = false)
     }
 
-    fun registerFromActivity(
+    fun registerActivityForConfirmation(
         activityResultCaller: ActivityResultCaller,
         lifecycleOwner: LifecycleOwner,
     ) {

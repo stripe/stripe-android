@@ -48,7 +48,7 @@ internal class LinkActivity : ComponentActivity() {
         }
 
         val vm = viewModel ?: return
-        vm.registerFromActivity(
+        vm.registerActivityForConfirmation(
             activityResultCaller = this,
             lifecycleOwner = this,
         )
