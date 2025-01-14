@@ -473,6 +473,7 @@ internal class WalletScreenTest {
             showBottomSheetContent = showBottomSheetContent,
             hideBottomSheetContent = hideBottomSheetContent,
             onAddNewPaymentMethodClicked = {},
+            onDismissAlert = {},
             expiryDateController = SimpleTextFieldController(DateConfig()),
             cvcController = CvcController(cardBrandFlow = stateFlowOf(CardBrand.Visa))
         )

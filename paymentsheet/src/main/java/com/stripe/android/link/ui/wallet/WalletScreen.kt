@@ -15,10 +15,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.AlertDialog
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -85,7 +87,8 @@ internal fun WalletScreen(
         onSetDefaultClicked = {},
         showBottomSheetContent = showBottomSheetContent,
         hideBottomSheetContent = hideBottomSheetContent,
-        onAddNewPaymentMethodClicked = viewModel::onAddNewPaymentMethodClicked
+        onAddNewPaymentMethodClicked = viewModel::onAddNewPaymentMethodClicked,
+        onDismissAlert = viewModel::onDismissAlert
     )
 }
 
@@ -101,6 +104,7 @@ internal fun WalletBody(
     onAddNewPaymentMethodClicked: () -> Unit,
     onPrimaryButtonClick: () -> Unit,
     onPayAnotherWayClicked: () -> Unit,
+    onDismissAlert: () -> Unit,
     onEditPaymentMethodClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onSetDefaultClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onRemoveClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
@@ -118,6 +122,23 @@ internal fun WalletBody(
             CircularProgressIndicator()
         }
         return
+    }
+
+    if (state.alertMessage != null) {
+        AlertDialog(
+            text = { Text(state.alertMessage.resolve(context)) },
+            onDismissRequest = onDismissAlert,
+            confirmButton = {
+                TextButton(
+                    onClick = onDismissAlert
+                ) {
+                    Text(
+                        text = android.R.string.ok.resolvableString.resolve(context),
+                        color = MaterialTheme.linkColors.actionLabel
+                    )
+                }
+            }
+        )
     }
 
     val focusManager = LocalFocusManager.current

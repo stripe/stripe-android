@@ -1,5 +1,6 @@
 package com.stripe.android.link.ui.wallet
 
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT
@@ -13,6 +14,7 @@ import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.ui.core.elements.CvcController
 import com.stripe.android.uicore.elements.DateConfig
 import com.stripe.android.uicore.elements.SimpleTextFieldController
+import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.uicore.utils.stateFlowOf
 import org.junit.Rule
 import org.junit.Test
@@ -24,12 +26,9 @@ internal class WalletScreenScreenshotTest {
     @Test
     fun testEmptyState() {
         snapshot(
-            state = WalletUiState(
+            state = walletUiState(
                 paymentDetailsList = emptyList(),
                 selectedItem = null,
-                isProcessing = false,
-                hasCompleted = false,
-                primaryButtonLabel = primaryButtonLabel
             )
         )
     }
@@ -37,26 +36,14 @@ internal class WalletScreenScreenshotTest {
     @Test
     fun testCollapsedState() {
         snapshot(
-            state = WalletUiState(
-                paymentDetailsList = TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails,
-                selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails.firstOrNull(),
-                isProcessing = false,
-                hasCompleted = false,
-                primaryButtonLabel = primaryButtonLabel
-            )
+            state = walletUiState()
         )
     }
 
     @Test
     fun testExpandedState() {
         snapshot(
-            state = WalletUiState(
-                paymentDetailsList = TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails,
-                selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails.firstOrNull(),
-                isProcessing = false,
-                hasCompleted = false,
-                primaryButtonLabel = primaryButtonLabel
-            ),
+            state = walletUiState(),
             isExpanded = true
         )
     }
@@ -64,13 +51,7 @@ internal class WalletScreenScreenshotTest {
     @Test
     fun testPayButtonCompletedState() {
         snapshot(
-            state = WalletUiState(
-                paymentDetailsList = TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails,
-                selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails.firstOrNull(),
-                isProcessing = false,
-                hasCompleted = false,
-                primaryButtonLabel = primaryButtonLabel
-            ),
+            state = walletUiState(),
             isExpanded = true
         )
     }
@@ -78,12 +59,8 @@ internal class WalletScreenScreenshotTest {
     @Test
     fun testPayButtonProcessingState() {
         snapshot(
-            state = WalletUiState(
-                paymentDetailsList = TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails,
-                selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails.firstOrNull(),
+            state = walletUiState(
                 isProcessing = true,
-                hasCompleted = false,
-                primaryButtonLabel = primaryButtonLabel
             ),
             isExpanded = true
         )
@@ -99,12 +76,9 @@ internal class WalletScreenScreenshotTest {
             CONSUMER_PAYMENT_DETAILS_PASSTHROUGH,
         )
         snapshot(
-            state = WalletUiState(
+            state = walletUiState(
                 paymentDetailsList = paymentDetailsList,
                 selectedItem = paymentDetailsList.firstOrNull(),
-                isProcessing = false,
-                hasCompleted = false,
-                primaryButtonLabel = primaryButtonLabel
             ),
             isExpanded = true
         )
@@ -120,12 +94,9 @@ internal class WalletScreenScreenshotTest {
             CONSUMER_PAYMENT_DETAILS_PASSTHROUGH,
         )
         snapshot(
-            state = WalletUiState(
+            state = walletUiState(
                 paymentDetailsList = paymentDetailsList,
                 selectedItem = paymentDetailsList.firstOrNull(),
-                isProcessing = false,
-                hasCompleted = false,
-                primaryButtonLabel = primaryButtonLabel
             ),
             isExpanded = true
         )
@@ -134,16 +105,44 @@ internal class WalletScreenScreenshotTest {
     @Test
     fun testBankAccountSelectedState() {
         snapshot(
-            state = WalletUiState(
-                paymentDetailsList = TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails,
+            state = walletUiState(
                 selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails.firstOrNull {
                     it is ConsumerPaymentDetails.BankAccount
                 },
-                isProcessing = false,
-                hasCompleted = false,
-                primaryButtonLabel = primaryButtonLabel
             ),
             isExpanded = true
+        )
+    }
+
+    @Test
+    fun testAlertMessage() {
+        snapshot(
+            state = walletUiState(
+                alertMessage = "Something went wrong".resolvableString
+            ),
+            isExpanded = true
+        )
+    }
+
+    private fun walletUiState(
+        paymentDetailsList: List<ConsumerPaymentDetails.PaymentDetails> =
+            TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails,
+        selectedItem: ConsumerPaymentDetails.PaymentDetails? = paymentDetailsList.firstOrNull(),
+        hasCompleted: Boolean = false,
+        isProcessing: Boolean = false,
+        expiryDateInput: FormFieldEntry = FormFieldEntry(null),
+        cvcInput: FormFieldEntry = FormFieldEntry(null),
+        alertMessage: ResolvableString? = null
+    ): WalletUiState {
+        return WalletUiState(
+            paymentDetailsList = paymentDetailsList,
+            selectedItem = selectedItem,
+            hasCompleted = hasCompleted,
+            isProcessing = isProcessing,
+            primaryButtonLabel = primaryButtonLabel,
+            expiryDateInput = expiryDateInput,
+            cvcInput = cvcInput,
+            alertMessage = alertMessage
         )
     }
 
@@ -166,6 +165,7 @@ internal class WalletScreenScreenshotTest {
                     showBottomSheetContent = {},
                     hideBottomSheetContent = {},
                     onAddNewPaymentMethodClicked = {},
+                    onDismissAlert = {},
                     expiryDateController = SimpleTextFieldController(DateConfig()),
                     cvcController = CvcController(
                         cardBrandFlow = stateFlowOf(CardBrand.Unknown)
