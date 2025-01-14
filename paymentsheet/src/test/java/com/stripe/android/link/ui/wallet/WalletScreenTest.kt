@@ -196,6 +196,7 @@ internal class WalletScreenTest {
         onPaymentMethodList().assertCountEquals(0)
     }
 
+    @Test
     fun `recollection form is displayed for expired card`() = runTest(dispatcher) {
         val expiredCard = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(expiryYear = 1999)
         val linkAccountManager = FakeLinkAccountManager()
