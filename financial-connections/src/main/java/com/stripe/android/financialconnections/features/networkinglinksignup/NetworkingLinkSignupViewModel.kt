@@ -21,7 +21,6 @@ import com.stripe.android.financialconnections.domain.GetOrFetchSync.RefetchCond
 import com.stripe.android.financialconnections.domain.HandleError
 import com.stripe.android.financialconnections.domain.LookupAccount
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
-import com.stripe.android.financialconnections.domain.StartVerification
 import com.stripe.android.financialconnections.features.common.getBusinessName
 import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.Legal
@@ -65,7 +64,6 @@ internal class NetworkingLinkSignupViewModel @AssistedInject constructor(
     @Assisted initialState: NetworkingLinkSignupState,
     nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val lookupAccount: LookupAccount,
-    private val startVerification: StartVerification,
     private val uriUtils: UriUtils,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val getOrFetchSync: GetOrFetchSync,
@@ -205,15 +203,7 @@ internal class NetworkingLinkSignupViewModel @AssistedInject constructor(
             logger.debug("VALID EMAIL ADDRESS $validEmail.")
             searchJob += suspend {
                 delay(getLookupDelayMs(validEmail))
-
-                val lookup = lookupAccount(validEmail)
-                val clientSecret = lookup.consumerSession?.clientSecret
-
-                if (lookup.exists && clientSecret != null) {
-                    startVerification.sms(consumerSessionClientSecret = clientSecret)
-                }
-
-                lookup
+                lookupAccount(validEmail)
             }.execute { copy(lookupAccount = if (it.isCancellationError()) Uninitialized else it) }
         } else {
             setState { copy(lookupAccount = Uninitialized) }
