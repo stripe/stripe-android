@@ -15,6 +15,7 @@ object CardDetailsUtil {
         )
     }
 
+    @SuppressWarnings("MagicNumber")
     internal fun getExpiryMonthFormFieldEntry(entry: FormFieldEntry): FormFieldEntry {
         var month = -1
         entry.value?.let { date ->
@@ -29,6 +30,7 @@ object CardDetailsUtil {
         )
     }
 
+    @SuppressWarnings("MagicNumber")
     internal fun getExpiryYearFormFieldEntry(entry: FormFieldEntry): FormFieldEntry {
         var year = -1
         entry.value?.let { date ->

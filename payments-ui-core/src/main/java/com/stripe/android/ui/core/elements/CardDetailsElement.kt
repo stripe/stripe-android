@@ -1,6 +1,5 @@
 package com.stripe.android.ui.core.elements
 
-import androidx.annotation.RestrictTo
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.cards.CardAccountRangeRepository
@@ -12,7 +11,6 @@ import com.stripe.android.ui.core.elements.CardDetailsUtil.getExpiryYearFormFiel
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionFieldErrorController
 import com.stripe.android.uicore.elements.SectionMultiFieldElement
-import com.stripe.android.uicore.elements.convertTo4DigitDate
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
