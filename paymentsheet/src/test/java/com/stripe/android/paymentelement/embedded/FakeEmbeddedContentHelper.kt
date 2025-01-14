@@ -14,8 +14,18 @@ internal class FakeEmbeddedContentHelper(
     private val _dataLoadedTurbine = Turbine<DefaultEmbeddedContentHelper.State>()
     val dataLoadedTurbine: ReceiveTurbine<DefaultEmbeddedContentHelper.State> = _dataLoadedTurbine
 
-    override fun dataLoaded(paymentMethodMetadata: PaymentMethodMetadata, rowStyle: Embedded.RowStyle) {
-        _dataLoadedTurbine.add(DefaultEmbeddedContentHelper.State(paymentMethodMetadata, rowStyle))
+    override fun dataLoaded(
+        paymentMethodMetadata: PaymentMethodMetadata,
+        rowStyle: Embedded.RowStyle,
+        embeddedViewDisplaysMandateText: Boolean,
+    ) {
+        _dataLoadedTurbine.add(
+            DefaultEmbeddedContentHelper.State(
+                paymentMethodMetadata = paymentMethodMetadata,
+                rowStyle = rowStyle,
+                embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
+            )
+        )
     }
 
     fun validate() {

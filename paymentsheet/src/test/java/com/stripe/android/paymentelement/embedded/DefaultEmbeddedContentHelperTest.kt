@@ -27,7 +27,7 @@ internal class DefaultEmbeddedContentHelperTest {
             .isNull()
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
         val rowStyle = Embedded.RowStyle.FlatWithRadio.defaultLight
-        embeddedContentHelper.dataLoaded(paymentMethodMetadata, rowStyle)
+        embeddedContentHelper.dataLoaded(paymentMethodMetadata, rowStyle, embeddedViewDisplaysMandateText = true)
         val state = savedStateHandle.get<DefaultEmbeddedContentHelper.State?>(STATE_KEY_EMBEDDED_CONTENT)
         assertThat(state?.paymentMethodMetadata).isEqualTo(paymentMethodMetadata)
         assertThat(state?.rowStyle).isEqualTo(rowStyle)
@@ -39,7 +39,8 @@ internal class DefaultEmbeddedContentHelperTest {
             assertThat(awaitItem()).isNull()
             embeddedContentHelper.dataLoaded(
                 PaymentMethodMetadataFactory.create(),
-                Embedded.RowStyle.FlatWithRadio.defaultLight
+                Embedded.RowStyle.FlatWithRadio.defaultLight,
+                embeddedViewDisplaysMandateText = true,
             )
             assertThat(awaitItem()).isNotNull()
         }
@@ -51,7 +52,8 @@ internal class DefaultEmbeddedContentHelperTest {
             assertThat(awaitItem()).isNull()
             embeddedContentHelper.dataLoaded(
                 PaymentMethodMetadataFactory.create(),
-                Embedded.RowStyle.FlatWithRadio.defaultLight
+                Embedded.RowStyle.FlatWithRadio.defaultLight,
+                embeddedViewDisplaysMandateText = true,
             )
             awaitItem().run {
                 assertThat(this).isNotNull()
@@ -66,13 +68,32 @@ internal class DefaultEmbeddedContentHelperTest {
     }
 
     @Test
+    fun `setting mandate when embeddedViewDisplaysMandateText does not emit event with mandate`() = testScenario {
+        embeddedContentHelper.embeddedContent.test {
+            assertThat(awaitItem()).isNull()
+            embeddedContentHelper.dataLoaded(
+                PaymentMethodMetadataFactory.create(),
+                Embedded.RowStyle.FlatWithRadio.defaultLight,
+                embeddedViewDisplaysMandateText = false,
+            )
+            awaitItem().run {
+                assertThat(this).isNotNull()
+                assertThat(this?.mandate).isNull()
+            }
+            savedStateHandle[MANDATE_KEY_EMBEDDED_CONTENT] = "Hi".resolvableString
+            ensureAllEventsConsumed() // Updating the mandate shouldn't emit any more events.
+        }
+    }
+
+    @Test
     fun `initializing embeddedContentHelper with paymentMethodMetadata emits correct initial event`() = testScenario(
         setup = {
             set(
                 STATE_KEY_EMBEDDED_CONTENT,
                 DefaultEmbeddedContentHelper.State(
                     PaymentMethodMetadataFactory.create(),
-                    Embedded.RowStyle.FloatingButton.default
+                    Embedded.RowStyle.FloatingButton.default,
+                    embeddedViewDisplaysMandateText = true,
                 )
             )
         }
@@ -89,7 +110,8 @@ internal class DefaultEmbeddedContentHelperTest {
                 STATE_KEY_EMBEDDED_CONTENT,
                 DefaultEmbeddedContentHelper.State(
                     PaymentMethodMetadataFactory.create(),
-                    Embedded.RowStyle.FloatingButton.default
+                    Embedded.RowStyle.FloatingButton.default,
+                    embeddedViewDisplaysMandateText = true
                 )
             )
             set(MANDATE_KEY_EMBEDDED_CONTENT, "Hi".resolvableString)

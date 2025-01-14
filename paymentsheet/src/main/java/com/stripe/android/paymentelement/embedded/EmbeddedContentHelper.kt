@@ -40,7 +40,11 @@ import kotlin.coroutines.CoroutineContext
 internal interface EmbeddedContentHelper {
     val embeddedContent: StateFlow<EmbeddedContent?>
 
-    fun dataLoaded(paymentMethodMetadata: PaymentMethodMetadata, rowStyle: Embedded.RowStyle)
+    fun dataLoaded(
+        paymentMethodMetadata: PaymentMethodMetadata,
+        rowStyle: Embedded.RowStyle,
+        embeddedViewDisplaysMandateText: Boolean,
+    )
 }
 
 internal fun interface EmbeddedContentHelperFactory {
@@ -93,17 +97,24 @@ internal class DefaultEmbeddedContentHelper @AssistedInject constructor(
         }
         coroutineScope.launch {
             mandate.collect { mandate ->
-                _embeddedContent.update { originalEmbeddedContent ->
-                    originalEmbeddedContent?.copy(mandate = mandate)
+                if (state.value?.embeddedViewDisplaysMandateText == true) {
+                    _embeddedContent.update { originalEmbeddedContent ->
+                        originalEmbeddedContent?.copy(mandate = mandate)
+                    }
                 }
             }
         }
     }
 
-    override fun dataLoaded(paymentMethodMetadata: PaymentMethodMetadata, rowStyle: Embedded.RowStyle) {
+    override fun dataLoaded(
+        paymentMethodMetadata: PaymentMethodMetadata,
+        rowStyle: Embedded.RowStyle,
+        embeddedViewDisplaysMandateText: Boolean,
+    ) {
         savedStateHandle[STATE_KEY_EMBEDDED_CONTENT] = State(
             paymentMethodMetadata = paymentMethodMetadata,
             rowStyle = rowStyle,
+            embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
         )
     }
 
@@ -261,6 +272,7 @@ internal class DefaultEmbeddedContentHelper @AssistedInject constructor(
     class State(
         val paymentMethodMetadata: PaymentMethodMetadata,
         val rowStyle: Embedded.RowStyle,
+        val embeddedViewDisplaysMandateText: Boolean,
     ) : Parcelable
 
     companion object {
