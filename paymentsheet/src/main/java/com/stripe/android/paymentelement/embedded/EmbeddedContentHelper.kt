@@ -165,7 +165,7 @@ internal class DefaultEmbeddedContentHelper @AssistedInject constructor(
             updateSelection = { updatedSelection ->
                 setSelection(updatedSelection)
             },
-            isCurrentScreen = stateFlowOf(false),
+            isCurrentScreen = stateFlowOf(true),
             reportPaymentMethodTypeSelected = eventReporter::onSelectPaymentMethod,
             reportFormShown = eventReporter::onPaymentMethodFormShown,
             onUpdatePaymentMethod = savedPaymentMethodMutator::updatePaymentMethod,
@@ -251,7 +251,9 @@ internal class DefaultEmbeddedContentHelper @AssistedInject constructor(
     }
 
     private fun setSelection(paymentSelection: PaymentSelection?) {
-        savedStateHandle[MANDATE_KEY_EMBEDDED_CONTENT] = null
+        if (paymentSelection != selectionHolder.selection.value) {
+            savedStateHandle[MANDATE_KEY_EMBEDDED_CONTENT] = null
+        }
         selectionHolder.set(paymentSelection)
     }
 
