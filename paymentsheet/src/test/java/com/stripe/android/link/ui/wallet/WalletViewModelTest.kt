@@ -8,7 +8,6 @@ import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.FakeLinkAccountManager
-import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.confirmation.FakeLinkConfirmationHandler
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
 import com.stripe.android.model.ConsumerPaymentDetails
@@ -24,11 +23,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.Result
-import kotlin.RuntimeException
-import kotlin.String
-import kotlin.Throwable
-import kotlin.Unit
-import kotlin.to
 import com.stripe.android.link.confirmation.Result as LinkConfirmationResult
 
 @RunWith(RobolectricTestRunner::class)
@@ -40,20 +34,14 @@ class WalletViewModelTest {
 
     @Test
     fun `viewmodel should load payment methods on init`() = runTest(dispatcher) {
-        val linkAccountManager = object : FakeLinkAccountManager() {
-            var paymentMethodTypes: Set<String>? = null
-            override suspend fun listPaymentDetails(paymentMethodTypes: Set<String>): Result<ConsumerPaymentDetails> {
-                this.paymentMethodTypes = paymentMethodTypes
-                return super.listPaymentDetails(paymentMethodTypes)
-            }
-        }
+        val linkAccountManager = WalletLinkAccountManager()
 
         val viewModel = createViewModel(
             linkAccountManager = linkAccountManager
         )
 
-        assertThat(linkAccountManager.paymentMethodTypes)
-            .containsExactlyElementsIn(TestFactory.LINK_CONFIGURATION.stripeIntent.paymentMethodTypes)
+        assertThat(linkAccountManager.listPaymentDetailsCalls)
+            .containsExactly(TestFactory.LINK_CONFIGURATION.stripeIntent.paymentMethodTypes.toSet())
 
         assertThat(viewModel.uiState.value).isEqualTo(
             WalletUiState(
@@ -71,7 +59,7 @@ class WalletViewModelTest {
     @Test
     fun `viewmodel should dismiss with failure on load payment method failure`() = runTest(dispatcher) {
         val error = Throwable("oops")
-        val linkAccountManager = FakeLinkAccountManager()
+        val linkAccountManager = WalletLinkAccountManager()
         linkAccountManager.listPaymentDetailsResult = Result.failure(error)
 
         var linkActivityResult: LinkActivityResult? = null
@@ -93,7 +81,7 @@ class WalletViewModelTest {
 
     @Test
     fun `viewmodel should open payment method screen when none is available`() = runTest(dispatcher) {
-        val linkAccountManager = FakeLinkAccountManager()
+        val linkAccountManager = WalletLinkAccountManager()
         linkAccountManager.listPaymentDetailsResult = Result.success(ConsumerPaymentDetails(emptyList()))
 
         var navScreen: LinkScreen? = null
@@ -182,17 +170,10 @@ class WalletViewModelTest {
     fun `performPaymentConfirmation updates expired card successfully`() = runTest(dispatcher) {
         val expiredCard = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(expiryYear = 1999)
         val updatedCard = expiredCard.copy(expiryYear = 2099)
-        val linkAccountManager = object : FakeLinkAccountManager() {
-            var updateParamsUsed: ConsumerPaymentDetailsUpdateParams? = null
-            override suspend fun updatePaymentDetails(
-                updateParams: ConsumerPaymentDetailsUpdateParams
-            ): Result<ConsumerPaymentDetails> {
-                updateParamsUsed = updateParams
-                return Result.success(
-                    ConsumerPaymentDetails(paymentDetails = listOf(updatedCard))
-                )
-            }
-        }
+        val linkAccountManager = WalletLinkAccountManager()
+        linkAccountManager.updatePaymentDetailsResult = Result.success(
+            ConsumerPaymentDetails(paymentDetails = listOf(updatedCard))
+        )
         linkAccountManager.listPaymentDetailsResult = Result.success(
             ConsumerPaymentDetails(paymentDetails = listOf(expiredCard))
         )
@@ -211,9 +192,11 @@ class WalletViewModelTest {
         assertThat(viewModel.uiState.value.isProcessing).isTrue()
         assertThat(viewModel.uiState.value.alertMessage).isNull()
 
-        assertThat(linkAccountManager.updateParamsUsed?.id).isEqualTo(expiredCard.id)
-        val card = linkAccountManager.updateParamsUsed?.cardPaymentMethodCreateParamsMap
+        val updateParamsUsed = linkAccountManager.updatePaymentDetailsCalls.firstOrNull()
+        val card = updateParamsUsed?.cardPaymentMethodCreateParamsMap
             ?.get("card") as? Map<*, *>
+
+        assertThat(updateParamsUsed?.id).isEqualTo(expiredCard.id)
         assertThat(card).isEqualTo(
             mapOf(
                 "exp_month" to updatedCard.expiryMonth.toString(),
@@ -234,7 +217,7 @@ class WalletViewModelTest {
     fun `performPaymentConfirmation handles update failure`() = runTest(dispatcher) {
         val error = RuntimeException("Update failed")
         val expiredCard = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(expiryYear = 1999)
-        val linkAccountManager = FakeLinkAccountManager()
+        val linkAccountManager = WalletLinkAccountManager()
         linkAccountManager.listPaymentDetailsResult = Result.success(
             ConsumerPaymentDetails(paymentDetails = listOf(expiredCard))
         )
@@ -261,21 +244,7 @@ class WalletViewModelTest {
     @Test
     fun `performPaymentConfirmation skips update for non-expired card`() = runTest(dispatcher) {
         val validCard = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(expiryYear = 2099)
-        val linkAccountManager = object : FakeLinkAccountManager() {
-            var updatePaymentDetailsCalls = 0
-            override suspend fun updatePaymentDetails(
-                updateParams: ConsumerPaymentDetailsUpdateParams
-            ): Result<ConsumerPaymentDetails> {
-                updatePaymentDetailsCalls += 1
-                return super.updatePaymentDetails(updateParams)
-            }
-
-            override suspend fun listPaymentDetails(paymentMethodTypes: Set<String>): Result<ConsumerPaymentDetails> {
-                return Result.success(
-                    value = ConsumerPaymentDetails(paymentDetails = listOf(validCard))
-                )
-            }
-        }
+        val linkAccountManager = WalletLinkAccountManager()
 
         val linkConfirmationHandler = FakeLinkConfirmationHandler()
 
@@ -287,7 +256,7 @@ class WalletViewModelTest {
 
         viewModel.onPrimaryButtonClicked()
 
-        assertThat(linkAccountManager.updatePaymentDetailsCalls).isEqualTo(0)
+        assertThat(linkAccountManager.updatePaymentDetailsCalls).isEmpty()
 
         assertThat(linkConfirmationHandler.calls).containsExactly(
             FakeLinkConfirmationHandler.Call(
@@ -301,21 +270,10 @@ class WalletViewModelTest {
     @Test
     fun `performPaymentConfirmation dismisses with Completed result on success`() = runTest(dispatcher) {
         val validCard = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(expiryYear = 2099)
-        val linkAccountManager = object : FakeLinkAccountManager() {
-            var updatePaymentDetailsCalls = 0
-            override suspend fun updatePaymentDetails(
-                updateParams: ConsumerPaymentDetailsUpdateParams
-            ): Result<ConsumerPaymentDetails> {
-                updatePaymentDetailsCalls += 1
-                return super.updatePaymentDetails(updateParams)
-            }
-
-            override suspend fun listPaymentDetails(paymentMethodTypes: Set<String>): Result<ConsumerPaymentDetails> {
-                return Result.success(
-                    value = ConsumerPaymentDetails(paymentDetails = listOf(validCard))
-                )
-            }
-        }
+        val linkAccountManager = WalletLinkAccountManager()
+        linkAccountManager.listPaymentDetailsResult = Result.success(
+            value = ConsumerPaymentDetails(paymentDetails = listOf(validCard))
+        )
 
         val linkConfirmationHandler = FakeLinkConfirmationHandler()
 
@@ -331,7 +289,7 @@ class WalletViewModelTest {
 
         viewModel.onPrimaryButtonClicked()
 
-        assertThat(linkAccountManager.updatePaymentDetailsCalls).isEqualTo(0)
+        assertThat(linkAccountManager.updatePaymentDetailsCalls).isEmpty()
 
         assertThat(linkConfirmationHandler.calls).containsExactly(
             FakeLinkConfirmationHandler.Call(
@@ -348,21 +306,10 @@ class WalletViewModelTest {
     fun `performPaymentConfirmation displays error on failure result`() = runTest(dispatcher) {
         val confirmationResult = LinkConfirmationResult.Failed("oops".resolvableString)
         val validCard = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(expiryYear = 2099)
-        val linkAccountManager = object : FakeLinkAccountManager() {
-            var updatePaymentDetailsCalls = 0
-            override suspend fun updatePaymentDetails(
-                updateParams: ConsumerPaymentDetailsUpdateParams
-            ): Result<ConsumerPaymentDetails> {
-                updatePaymentDetailsCalls += 1
-                return super.updatePaymentDetails(updateParams)
-            }
-
-            override suspend fun listPaymentDetails(paymentMethodTypes: Set<String>): Result<ConsumerPaymentDetails> {
-                return Result.success(
-                    value = ConsumerPaymentDetails(paymentDetails = listOf(validCard))
-                )
-            }
-        }
+        val linkAccountManager = WalletLinkAccountManager()
+        linkAccountManager.listPaymentDetailsResult = Result.success(
+            value = ConsumerPaymentDetails(paymentDetails = listOf(validCard))
+        )
 
         val linkConfirmationHandler = FakeLinkConfirmationHandler()
         linkConfirmationHandler.confirmResult = confirmationResult
@@ -388,21 +335,10 @@ class WalletViewModelTest {
     fun `performPaymentConfirmation does nothing on canceled result`() = runTest(dispatcher) {
         val confirmationResult = LinkConfirmationResult.Canceled
         val validCard = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(expiryYear = 2099)
-        val linkAccountManager = object : FakeLinkAccountManager() {
-            var updatePaymentDetailsCalls = 0
-            override suspend fun updatePaymentDetails(
-                updateParams: ConsumerPaymentDetailsUpdateParams
-            ): Result<ConsumerPaymentDetails> {
-                updatePaymentDetailsCalls += 1
-                return super.updatePaymentDetails(updateParams)
-            }
-
-            override suspend fun listPaymentDetails(paymentMethodTypes: Set<String>): Result<ConsumerPaymentDetails> {
-                return Result.success(
-                    value = ConsumerPaymentDetails(paymentDetails = listOf(validCard))
-                )
-            }
-        }
+        val linkAccountManager = WalletLinkAccountManager()
+        linkAccountManager.listPaymentDetailsResult = Result.success(
+            value = ConsumerPaymentDetails(paymentDetails = listOf(validCard))
+        )
 
         val linkConfirmationHandler = FakeLinkConfirmationHandler()
         linkConfirmationHandler.confirmResult = confirmationResult
@@ -424,7 +360,7 @@ class WalletViewModelTest {
     }
 
     private fun createViewModel(
-        linkAccountManager: LinkAccountManager = FakeLinkAccountManager(),
+        linkAccountManager: WalletLinkAccountManager = WalletLinkAccountManager(),
         logger: Logger = FakeLogger(),
         linkConfirmationHandler: LinkConfirmationHandler = FakeLinkConfirmationHandler(),
         navigate: (route: LinkScreen) -> Unit = {},
@@ -441,5 +377,21 @@ class WalletViewModelTest {
             navigateAndClearStack = navigateAndClearStack,
             dismissWithResult = dismissWithResult
         )
+    }
+}
+
+private class WalletLinkAccountManager : FakeLinkAccountManager() {
+    val listPaymentDetailsCalls = arrayListOf<Set<String>>()
+    val updatePaymentDetailsCalls = arrayListOf<ConsumerPaymentDetailsUpdateParams>()
+    override suspend fun listPaymentDetails(paymentMethodTypes: Set<String>): Result<ConsumerPaymentDetails> {
+        listPaymentDetailsCalls.add(paymentMethodTypes)
+        return super.listPaymentDetails(paymentMethodTypes)
+    }
+
+    override suspend fun updatePaymentDetails(
+        updateParams: ConsumerPaymentDetailsUpdateParams
+    ): Result<ConsumerPaymentDetails> {
+        updatePaymentDetailsCalls.add(updateParams)
+        return super.updatePaymentDetails(updateParams)
     }
 }

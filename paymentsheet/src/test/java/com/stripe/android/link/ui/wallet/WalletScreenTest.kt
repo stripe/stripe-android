@@ -25,9 +25,9 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.account.LinkAccountManager
-import com.stripe.android.link.ui.BottomSheetContent
 import com.stripe.android.link.confirmation.FakeLinkConfirmationHandler
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
+import com.stripe.android.link.ui.BottomSheetContent
 import com.stripe.android.link.ui.PrimaryButtonTag
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.testing.CoroutineTestRule
