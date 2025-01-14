@@ -20,6 +20,7 @@ import com.stripe.android.model.VerificationType
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.repository.ConsumersApiService
+import com.stripe.attestation.IntegrityRequestManager
 import kotlinx.coroutines.withContext
 import java.util.Locale
 import javax.inject.Inject
@@ -37,6 +38,7 @@ internal class LinkApiRepository @Inject constructor(
     @IOContext private val workContext: CoroutineContext,
     private val locale: Locale?,
     private val errorReporter: ErrorReporter,
+    private val integrityRequestManager: IntegrityRequestManager
 ) : LinkRepository {
 
     override suspend fun lookupConsumer(
@@ -47,6 +49,20 @@ internal class LinkApiRepository @Inject constructor(
                 consumersApiService.lookupConsumerSession(
                     email = email,
                     requestSurface = REQUEST_SURFACE,
+                    requestOptions = buildRequestOptions(),
+                )
+            )
+        }
+    }
+
+    override suspend fun lookupConsumerV2(email: String): Result<ConsumerSessionLookup> {
+        val integrityResult = integrityRequestManager.requestToken()
+        runCatching {
+            requireNotNull(
+                consumersApiService.lookupConsumerSessionV2(
+                    email = email,
+                    requestSurface = REQUEST_SURFACE,
+                    attestationToken = integrityResult.getOrNull(),
                     requestOptions = buildRequestOptions(),
                 )
             )

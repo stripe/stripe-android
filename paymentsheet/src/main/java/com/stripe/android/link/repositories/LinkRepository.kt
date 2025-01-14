@@ -23,6 +23,13 @@ internal interface LinkRepository {
     ): Result<ConsumerSessionLookup>
 
     /**
+     * Check if the email already has a link account.
+     */
+    suspend fun lookupConsumerV2(
+        email: String,
+    ): Result<ConsumerSessionLookup>
+
+    /**
      * Sign up for a new Link account.
      */
     suspend fun consumerSignUp(

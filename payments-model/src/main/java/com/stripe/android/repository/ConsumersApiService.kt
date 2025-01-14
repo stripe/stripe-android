@@ -52,6 +52,13 @@ interface ConsumersApiService {
         requestOptions: ApiRequest.Options
     ): ConsumerSessionLookup
 
+    suspend fun lookupConsumerSessionV2(
+        email: String,
+        requestSurface: String,
+        attestationToken: String?,
+        requestOptions: ApiRequest.Options
+    ): ConsumerSessionLookup
+
     suspend fun startConsumerVerification(
         consumerSessionClientSecret: String,
         locale: Locale,
@@ -179,6 +186,28 @@ class ConsumersApiServiceImpl(
                 mapOf(
                     "request_surface" to requestSurface,
                     "email_address" to email.lowercase()
+                )
+            ),
+            responseJsonParser = ConsumerSessionLookupJsonParser()
+        )
+    }
+
+    override suspend fun lookupConsumerSessionV2(
+        email: String,
+        requestSurface: String,
+        attestationToken: String?,
+        requestOptions: ApiRequest.Options
+    ): ConsumerSessionLookup {
+        return executeRequestWithModelJsonParser(
+            stripeErrorJsonParser = stripeErrorJsonParser,
+            stripeNetworkClient = stripeNetworkClient,
+            request = apiRequestFactory.createPost(
+                mobileConsumerSessionLookupUrl,
+                requestOptions,
+                mapOf(
+                    "request_surface" to requestSurface,
+                    "email_address" to email.lowercase(),
+                    "attestation_token" to attestationToken
                 )
             ),
             responseJsonParser = ConsumerSessionLookupJsonParser()
@@ -360,6 +389,12 @@ class ConsumersApiServiceImpl(
          */
         internal val consumerSessionLookupUrl: String =
             getApiUrl("consumers/sessions/lookup")
+
+        /**
+         * @return `https://api.stripe.com/v1/consumers/mobile/sessions/lookup`
+         */
+        internal val mobileConsumerSessionLookupUrl: String =
+            getApiUrl("consumers/mobile/sessions/lookup")
 
         /**
          * @return `https://api.stripe.com/v1/consumers/sessions/start_verification`
