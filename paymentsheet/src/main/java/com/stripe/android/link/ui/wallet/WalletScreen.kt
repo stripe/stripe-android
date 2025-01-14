@@ -126,6 +126,8 @@ internal fun WalletBody(
 
     if (state.alertMessage != null) {
         AlertDialog(
+            modifier = Modifier
+                .testTag(WALLET_SCREEN_DIALOG_TAG),
             text = { Text(state.alertMessage.resolve(context)) },
             onDismissRequest = onDismissAlert,
             confirmButton = {
@@ -178,6 +180,7 @@ internal fun WalletBody(
             ErrorText(
                 text = state.errorMessage?.resolve(context).orEmpty(),
                 modifier = Modifier
+                    .testTag(WALLET_SCREEN_ERROR_TAG)
                     .fillMaxWidth()
                     .padding(top = 16.dp)
             )
@@ -556,3 +559,5 @@ internal const val WALLET_SCREEN_RECOLLECTION_FORM_ERROR = "wallet_screen_recoll
 internal const val WALLET_SCREEN_RECOLLECTION_FORM_FIELDS = "wallet_screen_recollection_form_fields"
 internal const val WALLET_SCREEN_BOX = "wallet_screen_box"
 internal const val WALLET_SCREEN_MENU_SHEET_TAG = "wallet_screen_menu_sheet_tag"
+internal const val WALLET_SCREEN_DIALOG_TAG = "wallet_screen_dialog_tag"
+internal const val WALLET_SCREEN_ERROR_TAG = "wallet_screen_error_tag"
