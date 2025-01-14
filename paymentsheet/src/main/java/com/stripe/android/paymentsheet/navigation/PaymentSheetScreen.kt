@@ -359,7 +359,7 @@ internal sealed interface PaymentSheetScreen {
 
         @Composable
         override fun Content(modifier: Modifier) {
-            VerticalModeFormUI(interactor, modifier)
+            VerticalModeFormUI(interactor, showsWalletHeader, modifier)
         }
 
         override fun close() {
