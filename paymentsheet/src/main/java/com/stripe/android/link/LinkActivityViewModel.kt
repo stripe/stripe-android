@@ -24,6 +24,7 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentsheet.R
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -57,11 +58,11 @@ internal class LinkActivityViewModel @Inject constructor(
     }
 
     private suspend fun listenToConfirmationState() {
-        confirmationHandler.state
-            .filterIsInstance<ConfirmationHandler.State.Complete>()
-            .collect {
-                dismissWithResult?.invoke(LinkActivityResult.Completed)
-            }
+//        confirmationHandler.state
+//            .filterIsInstance<ConfirmationHandler.State.Complete>()
+//            .collect {
+//                dismissWithResult?.invoke(LinkActivityResult.Completed)
+//            }
     }
 
     fun registerFromActivity(
