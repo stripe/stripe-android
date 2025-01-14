@@ -270,7 +270,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         incentive: PaymentMethodIncentive?,
     ): List<DisplayablePaymentMethod> {
         val lpms = supportedPaymentMethods.map { supportedPaymentMethod ->
-            val paymentMethodIncentive = incentive?.takeIf { it.matches(supportedPaymentMethod.code) }
+            val paymentMethodIncentive = incentive?.takeIfMatches(supportedPaymentMethod.code)
             supportedPaymentMethod.asDisplayablePaymentMethod(paymentMethods, paymentMethodIncentive) {
                 handleViewAction(ViewAction.PaymentMethodSelected(supportedPaymentMethod.code))
             }

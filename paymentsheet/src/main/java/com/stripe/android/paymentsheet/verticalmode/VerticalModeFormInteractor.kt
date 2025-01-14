@@ -70,7 +70,7 @@ internal class DefaultVerticalModeFormInteractor(
             formArguments = formArguments,
             formElements = formElements,
             headerInformation = headerInformation?.copy(
-                promoBadge = paymentMethodIncentive?.takeIf { it.matches(selectedPaymentMethodCode) }?.displayText,
+                promoBadge = paymentMethodIncentive?.takeIfMatches(selectedPaymentMethodCode)?.displayText,
             ),
         )
     }
