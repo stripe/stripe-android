@@ -5,31 +5,46 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.account.LinkAccountManager
+import com.stripe.android.link.confirmation.LinkConfirmationHandler
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.supportedPaymentMethodTypes
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.ui.core.Amount
+import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
 import com.stripe.android.ui.core.R
+import com.stripe.android.ui.core.elements.CardDetailsUtil.createExpiryDateFormFieldValues
+import com.stripe.android.ui.core.elements.CvcController
+import com.stripe.android.uicore.elements.DateConfig
+import com.stripe.android.uicore.elements.SimpleTextFieldController
+import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.stripe.android.link.confirmation.Result as LinkConfirmationResult
 
 internal class WalletViewModel @Inject constructor(
     private val configuration: LinkConfiguration,
     private val linkAccount: LinkAccount,
     private val linkAccountManager: LinkAccountManager,
+    private val linkConfirmationHandler: LinkConfirmationHandler,
     private val logger: Logger,
     private val navigate: (route: LinkScreen) -> Unit,
     private val navigateAndClearStack: (route: LinkScreen) -> Unit,
@@ -49,8 +64,33 @@ internal class WalletViewModel @Inject constructor(
 
     val uiState: StateFlow<WalletUiState> = _uiState
 
+    val expiryDateController = SimpleTextFieldController(
+        textFieldConfig = DateConfig()
+    )
+    val cvcController = CvcController(
+        cardBrandFlow = uiState.mapAsStateFlow {
+            (it.selectedItem as? ConsumerPaymentDetails.Card)?.brand ?: CardBrand.Unknown
+        }
+    )
+
     init {
         loadPaymentDetails()
+
+        viewModelScope.launch {
+            expiryDateController.formFieldValue.collectLatest { input ->
+                _uiState.update {
+                    it.copy(expiryDateInput = input)
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            cvcController.formFieldValue.collectLatest { input ->
+                _uiState.update {
+                    it.copy(cvcInput = input)
+                }
+            }
+        }
     }
 
     private fun loadPaymentDetails() {
@@ -85,12 +125,95 @@ internal class WalletViewModel @Inject constructor(
     fun onItemSelected(item: ConsumerPaymentDetails.PaymentDetails) {
         if (item == uiState.value.selectedItem) return
 
+        expiryDateController.onRawValueChange("")
+        cvcController.onRawValueChange("")
+
         _uiState.update {
             it.copy(selectedItem = item)
         }
     }
 
-    fun onPrimaryButtonClicked() = Unit
+    fun onPrimaryButtonClicked() {
+        val paymentDetail = _uiState.value.selectedItem ?: return
+        _uiState.update {
+            it.copy(isProcessing = true)
+        }
+
+        viewModelScope.launch {
+            performPaymentConfirmation(paymentDetail)
+        }
+    }
+
+    private suspend fun performPaymentConfirmation(
+        selectedPaymentDetails: ConsumerPaymentDetails.PaymentDetails,
+    ) {
+        val card = selectedPaymentDetails as? ConsumerPaymentDetails.Card
+        val isExpired = card != null && card.isExpired
+
+        if (isExpired) {
+            performPaymentDetailsUpdate(selectedPaymentDetails).fold(
+                onSuccess = { result ->
+                    val updatedPaymentDetails = result.paymentDetails.single {
+                        it.id == selectedPaymentDetails.id
+                    }
+                    performPaymentConfirmation(updatedPaymentDetails)
+                },
+                onFailure = { error ->
+                    _uiState.update {
+                        it.copy(
+                            alertMessage = error.stripeErrorMessage(),
+                            isProcessing = false
+                        )
+                    }
+                }
+            )
+        } else {
+            // Confirm payment with LinkConfirmationHandler
+            performPaymentConfirmationWithCvc(
+                selectedPaymentDetails = selectedPaymentDetails,
+                cvc = cvcController.formFieldValue.value.takeIf { it.isComplete }?.value
+            )
+        }
+    }
+
+    private suspend fun performPaymentConfirmationWithCvc(
+        selectedPaymentDetails: ConsumerPaymentDetails.PaymentDetails,
+        cvc: String?
+    ) {
+        val result = linkConfirmationHandler.confirm(
+            paymentDetails = selectedPaymentDetails,
+            linkAccount = linkAccount,
+            cvc = cvc
+        )
+        when (result) {
+            LinkConfirmationResult.Canceled -> Unit
+            is LinkConfirmationResult.Failed -> {
+                _uiState.update {
+                    it.copy(
+                        errorMessage = result.message,
+                        isProcessing = false
+                    )
+                }
+            }
+            LinkConfirmationResult.Succeeded -> {
+                dismissWithResult(LinkActivityResult.Completed)
+            }
+        }
+    }
+
+    private suspend fun performPaymentDetailsUpdate(
+        selectedPaymentDetails: ConsumerPaymentDetails.PaymentDetails
+    ): Result<ConsumerPaymentDetails> {
+        val paymentMethodCreateParams = uiState.value.toPaymentMethodCreateParams()
+
+        val updateParams = ConsumerPaymentDetailsUpdateParams(
+            id = selectedPaymentDetails.id,
+            isDefault = selectedPaymentDetails.isDefault,
+            cardPaymentMethodCreateParamsMap = paymentMethodCreateParams.toParamMap()
+        )
+
+        return linkAccountManager.updatePaymentDetails(updateParams)
+    }
 
     fun onPayAnotherWayClicked() {
         dismissWithResult(LinkActivityResult.Canceled(LinkActivityResult.Canceled.Reason.PayAnotherWay))
@@ -130,6 +253,9 @@ internal class WalletViewModel @Inject constructor(
                     WalletViewModel(
                         configuration = parentComponent.configuration,
                         linkAccountManager = parentComponent.linkAccountManager,
+                        linkConfirmationHandler = parentComponent.linkConfirmationHandlerFactory.create(
+                            confirmationHandler = parentComponent.viewModel.confirmationHandler
+                        ),
                         logger = parentComponent.logger,
                         linkAccount = linkAccount,
                         navigate = navigate,
@@ -140,4 +266,13 @@ internal class WalletViewModel @Inject constructor(
             }
         }
     }
+}
+
+private fun WalletUiState.toPaymentMethodCreateParams(): PaymentMethodCreateParams {
+    val expiryDateValues = createExpiryDateFormFieldValues(expiryDateInput)
+    return FieldValuesToParamsMapConverter.transformToPaymentMethodCreateParams(
+        fieldValuePairs = expiryDateValues,
+        code = PaymentMethod.Type.Card.code,
+        requiresMandate = false
+    )
 }
