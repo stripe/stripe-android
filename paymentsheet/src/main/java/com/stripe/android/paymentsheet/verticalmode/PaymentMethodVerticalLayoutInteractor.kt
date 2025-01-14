@@ -227,7 +227,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     init {
         coroutineScope.launch {
             selection.collect {
-                if (it == null) {
+                if (it == null && !isCurrentScreen.value) {
                     return@collect
                 }
 

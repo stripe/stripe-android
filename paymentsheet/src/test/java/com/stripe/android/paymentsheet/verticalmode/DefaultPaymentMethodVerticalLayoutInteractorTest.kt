@@ -835,7 +835,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     }
 
     @Test
-    fun verticalModeScreenSelection_isNeverUpdatedToNull() {
+    fun verticalModeScreenSelection_isNotUpdatedToNullWhenOnAnotherScreen() {
         val expectedPaymentSelection = PaymentSelection.Link
         runScenario(initialSelection = expectedPaymentSelection, updateSelection = {}) {
             selectionSource.value = null
@@ -843,6 +843,22 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             interactor.state.test {
                 awaitItem().run {
                     assertThat(selection).isEqualTo(expectedPaymentSelection)
+                }
+            }
+        }
+    }
+
+    @Test
+    fun verticalModeScreenSelection_isUpdatedToNullWhenCurrentScreen() {
+        runScenario(initialSelection = PaymentSelection.Link, updateSelection = {}) {
+            interactor.state.test {
+                awaitItem().run {
+                    assertThat(selection).isEqualTo(PaymentSelection.Link)
+                }
+                isCurrentScreenSource.value = true
+                selectionSource.value = null
+                awaitItem().run {
+                    assertThat(selection).isNull()
                 }
             }
         }
