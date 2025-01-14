@@ -1,6 +1,7 @@
 package com.stripe.android.financialconnections.example
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -10,9 +11,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -87,6 +93,9 @@ class FinancialConnectionsLauncherActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                window.isNavigationBarContrastEnforced = false
+            }
             FinancialConnectionsExampleTheme {
                 MainScreen(items = items)
             }
@@ -100,7 +109,14 @@ class FinancialConnectionsLauncherActivity : AppCompatActivity() {
             groupedItems.keys.map { key -> key to key.collapsable.takeIf { it } }.toMutableStateMap()
         }
 
-        LazyColumn {
+        LazyColumn(
+            modifier = Modifier
+                .padding(
+                    paddingValues = WindowInsets.systemBars.only(
+                        WindowInsetsSides.Horizontal + WindowInsetsSides.Top
+                    ).asPaddingValues()
+                )
+        ) {
             groupedItems.forEach {
                 section(
                     section = it.key,

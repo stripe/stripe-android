@@ -5,8 +5,13 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.material.Button
 import androidx.compose.material.Divider
 import androidx.compose.material.LinearProgressIndicator
@@ -56,7 +61,15 @@ class FinancialConnectionsComposeExampleActivity : AppCompatActivity() {
         state: FinancialConnectionsExampleState,
         onButtonClick: () -> Unit
     ) {
-        Column(modifier = Modifier.padding(horizontal = 10.dp)) {
+        Column(
+            modifier = Modifier
+                .padding(horizontal = 10.dp)
+                .padding(
+                    paddingValues = WindowInsets.systemBars.only(
+                        WindowInsetsSides.Horizontal + WindowInsetsSides.Top
+                    ).asPaddingValues()
+                )
+        ) {
             if (state.loading) {
                 LinearProgressIndicator(
                     modifier = Modifier.fillMaxWidth(),
