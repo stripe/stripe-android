@@ -404,7 +404,7 @@ class EmbeddedPaymentElement private constructor(
          * - If this is an external payment method, see
          *      https://stripe.com/docs/payments/external-payment-methods?platform=ios#available-external-payment-methods
          *      for possible values.
-         * - If this is Apple Pay, the value is "apple_pay".
+         * - If this is Google Pay, the value is "google_pay".
          */
         val paymentMethodType: String,
 
