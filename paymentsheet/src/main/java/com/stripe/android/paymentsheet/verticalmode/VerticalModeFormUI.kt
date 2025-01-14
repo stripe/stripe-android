@@ -32,7 +32,11 @@ import com.stripe.android.uicore.utils.collectAsState
 internal const val TEST_TAG_HEADER_TITLE = "TEST_TAG_HEADER_TITLE"
 
 @Composable
-internal fun VerticalModeFormUI(interactor: VerticalModeFormInteractor, modifier: Modifier = Modifier) {
+internal fun VerticalModeFormUI(
+    interactor: VerticalModeFormInteractor,
+    showsWalletHeader: Boolean,
+    modifier: Modifier = Modifier
+) {
     val horizontalPadding = dimensionResource(
         id = R.dimen.stripe_paymentsheet_outer_spacing_horizontal
     )
@@ -43,7 +47,7 @@ internal fun VerticalModeFormUI(interactor: VerticalModeFormInteractor, modifier
     Column(modifier) {
         val headerInformation = state.headerInformation
         val enabled = !state.isProcessing
-        if (headerInformation != null) {
+        if (headerInformation != null && !showsWalletHeader) {
             VerticalModeFormHeaderUI(isEnabled = enabled, formHeaderInformation = headerInformation)
         }
 

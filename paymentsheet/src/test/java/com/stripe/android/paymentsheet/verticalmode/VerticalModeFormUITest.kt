@@ -103,7 +103,7 @@ internal class VerticalModeFormUITest {
                 LocalCardNumberCompletedEventReporter provides { },
                 LocalCardBrandDisallowedReporter provides { }
             ) {
-                VerticalModeFormUI(interactor)
+                VerticalModeFormUI(interactor, showsWalletHeader = false)
             }
         }
 

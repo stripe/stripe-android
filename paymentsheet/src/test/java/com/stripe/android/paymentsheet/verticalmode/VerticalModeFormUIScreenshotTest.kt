@@ -184,6 +184,7 @@ internal class VerticalModeFormUIScreenshotTest {
         paymentMethodCode: PaymentMethodCode,
         metadata: PaymentMethodMetadata,
         isProcessing: Boolean = false,
+        showsWalletHeader: Boolean = false,
     ) {
         ViewModelStoreOwnerContext {
             VerticalModeFormUI(
@@ -192,6 +193,7 @@ internal class VerticalModeFormUIScreenshotTest {
                     metadata = metadata,
                     isProcessing = isProcessing,
                 ),
+                showsWalletHeader = showsWalletHeader,
             )
         }
     }
