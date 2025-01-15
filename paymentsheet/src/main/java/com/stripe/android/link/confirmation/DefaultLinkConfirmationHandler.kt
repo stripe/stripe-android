@@ -10,8 +10,10 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
+import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import javax.inject.Inject
 
@@ -27,6 +29,24 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
     ): Result {
         return runCatching {
             val args = confirmationArgs(paymentDetails, linkAccount, cvc)
+            confirmationHandler.start(args)
+            val result = confirmationHandler.awaitResult()
+            transformResult(result)
+        }.getOrElse { error ->
+            logger.error(
+                msg = "DefaultLinkConfirmationHandler: Failed to confirm payment",
+                t = error
+            )
+            Result.Failed(R.string.stripe_something_went_wrong.resolvableString)
+        }
+    }
+
+    override suspend fun confirm(
+        paymentSelection: PaymentSelection,
+        linkAccount: LinkAccount
+    ): Result {
+        return runCatching {
+            val args = confirmationArgs(paymentSelection)
             confirmationHandler.start(args)
             val result = confirmationHandler.awaitResult()
             transformResult(result)
@@ -79,6 +99,22 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
         )
     }
 
+    private fun confirmationArgs(
+        paymentSelection: PaymentSelection,
+    ): ConfirmationHandler.Args {
+        val confirmationOption = paymentSelection.toConfirmationOption(
+            linkConfiguration = configuration,
+            configuration = null
+        )
+        return ConfirmationHandler.Args(
+            intent = configuration.stripeIntent,
+            confirmationOption = confirmationOption ?: throw UNABLE_TO_CREATE_CONFIRMATION_OPTION,
+            appearance = PaymentSheet.Appearance(),
+            initializationMode = initializationMode(),
+            shippingDetails = configuration.shippingDetails
+        )
+    }
+
     private fun initializationMode(): PaymentElementLoader.InitializationMode {
         val clientSecret = configuration.stripeIntent.clientSecret ?: throw NO_CLIENT_SECRET_FOUND
         return when (configuration.stripeIntent) {
@@ -118,5 +154,6 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
 
     companion object {
         val NO_CLIENT_SECRET_FOUND = IllegalStateException("No client secret found.")
+        val UNABLE_TO_CREATE_CONFIRMATION_OPTION = IllegalStateException("Unable to create confirmation option.")
     }
 }

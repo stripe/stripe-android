@@ -4,12 +4,18 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentsheet.model.PaymentSelection
 
 internal interface LinkConfirmationHandler {
     suspend fun confirm(
         paymentDetails: ConsumerPaymentDetails.PaymentDetails,
         linkAccount: LinkAccount,
         cvc: String? = null
+    ): Result
+
+    suspend fun confirm(
+        paymentSelection: PaymentSelection,
+        linkAccount: LinkAccount,
     ): Result
 
     fun interface Factory {

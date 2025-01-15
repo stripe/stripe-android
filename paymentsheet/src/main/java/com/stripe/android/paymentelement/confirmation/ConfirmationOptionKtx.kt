@@ -11,7 +11,7 @@ import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOptio
 import com.stripe.android.paymentsheet.model.PaymentSelection
 
 internal fun PaymentSelection.toConfirmationOption(
-    configuration: CommonConfiguration,
+    configuration: CommonConfiguration?,
     linkConfiguration: LinkConfiguration?,
 ): ConfirmationHandler.Option? {
     return when (this) {
@@ -53,7 +53,7 @@ internal fun PaymentSelection.toConfirmationOption(
                 )
             }
         }
-        is PaymentSelection.GooglePay -> configuration.googlePay?.let { googlePay ->
+        is PaymentSelection.GooglePay -> configuration?.googlePay?.let { googlePay ->
             GooglePayConfirmationOption(
                 config = GooglePayConfirmationOption.Config(
                     environment = googlePay.environment,
