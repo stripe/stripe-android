@@ -16,7 +16,6 @@ internal sealed interface PaymentSheetState : Parcelable {
     data class Full(
         val config: CommonConfiguration,
         val customer: CustomerState?,
-        val linkState: LinkState?,
         val paymentSelection: PaymentSelection?,
         val validationError: PaymentSheetLoadingException?,
         val paymentMethodMetadata: PaymentMethodMetadata,
@@ -24,7 +23,6 @@ internal sealed interface PaymentSheetState : Parcelable {
         constructor(state: PaymentElementLoader.State) : this(
             config = state.config,
             customer = state.customer,
-            linkState = state.linkState,
             paymentSelection = state.paymentSelection,
             validationError = state.validationError,
             paymentMethodMetadata = state.paymentMethodMetadata,

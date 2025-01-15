@@ -765,6 +765,7 @@ internal class PaymentMethodMetadataTest {
             externalPaymentMethodSpecs = externalPaymentMethodSpecs,
             isGooglePayReady = false,
             linkInlineConfiguration = linkInlineConfiguration,
+            linkState = null,
         )
 
         val expectedMetadata = PaymentMethodMetadata(
@@ -789,6 +790,7 @@ internal class PaymentMethodMetadataTest {
             isGooglePayReady = false,
             linkInlineConfiguration = linkInlineConfiguration,
             linkMode = null,
+            linkState = null,
             cardBrandFilter = PaymentSheetCardBrandFilter(cardBrandAcceptance),
             paymentMethodIncentive = null,
         )
@@ -854,6 +856,7 @@ internal class PaymentMethodMetadataTest {
             financialConnectionsAvailable = false,
             linkInlineConfiguration = null,
             linkMode = null,
+            linkState = null,
             cardBrandFilter = PaymentSheetCardBrandFilter(cardBrandAcceptance),
             paymentMethodIncentive = null,
         )
@@ -924,6 +927,7 @@ internal class PaymentMethodMetadataTest {
             externalPaymentMethodSpecs = listOf(),
             isGooglePayReady = false,
             linkInlineConfiguration = null,
+            linkState = null,
         )
     }
 

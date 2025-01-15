@@ -139,7 +139,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
         // This is bad, but I don't think there's a better option
         PaymentSheet.FlowController.linkHandler = linkHandler
 
-        linkHandler.setupLink(args.state.linkState)
+        linkHandler.setupLink(args.state.paymentMethodMetadata.linkState)
 
         // After recovering from don't keep activities the paymentMethodMetadata will be saved,
         // calling setPaymentMethodMetadata would require the repository be initialized, which

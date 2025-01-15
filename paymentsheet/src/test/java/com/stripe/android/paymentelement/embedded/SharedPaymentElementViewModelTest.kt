@@ -38,7 +38,6 @@ internal class SharedPaymentElementViewModelTest {
                 PaymentElementLoader.State(
                     config = configuration.asCommonConfiguration(),
                     customer = null,
-                    linkState = null,
                     paymentSelection = null,
                     validationError = null,
                     paymentMethodMetadata = PaymentMethodMetadataFactory.create(
@@ -78,7 +77,6 @@ internal class SharedPaymentElementViewModelTest {
                 PaymentElementLoader.State(
                     config = configuration.asCommonConfiguration(),
                     customer = null,
-                    linkState = null,
                     paymentSelection = PaymentSelection.GooglePay,
                     validationError = null,
                     paymentMethodMetadata = PaymentMethodMetadataFactory.create(
@@ -120,7 +118,6 @@ internal class SharedPaymentElementViewModelTest {
                 PaymentElementLoader.State(
                     config = configuration.asCommonConfiguration(),
                     customer = null,
-                    linkState = null,
                     paymentSelection = null,
                     validationError = null,
                     paymentMethodMetadata = PaymentMethodMetadataFactory.create(
@@ -159,7 +156,6 @@ internal class SharedPaymentElementViewModelTest {
                 PaymentElementLoader.State(
                     config = configuration.asCommonConfiguration(),
                     customer = null,
-                    linkState = null,
                     paymentSelection = PaymentSelection.GooglePay,
                     validationError = null,
                     paymentMethodMetadata = PaymentMethodMetadataFactory.create(
@@ -211,7 +207,6 @@ internal class SharedPaymentElementViewModelTest {
                 PaymentElementLoader.State(
                     config = configuration.asCommonConfiguration(),
                     customer = null,
-                    linkState = null,
                     paymentSelection = PaymentSelection.GooglePay,
                     validationError = null,
                     paymentMethodMetadata = PaymentMethodMetadataFactory.create(
@@ -264,7 +259,6 @@ internal class SharedPaymentElementViewModelTest {
                 PaymentElementLoader.State(
                     config = configuration.asCommonConfiguration(),
                     customer = null,
-                    linkState = null,
                     paymentSelection = PaymentSelection.GooglePay,
                     validationError = null,
                     paymentMethodMetadata = PaymentMethodMetadataFactory.create(

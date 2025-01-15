@@ -98,7 +98,6 @@ internal interface PaymentElementLoader {
     data class State(
         val config: CommonConfiguration,
         val customer: CustomerState?,
-        val linkState: LinkState?,
         val paymentSelection: PaymentSelection?,
         val validationError: PaymentSheetLoadingException?,
         val paymentMethodMetadata: PaymentMethodMetadata,
@@ -214,7 +213,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         val state = PaymentElementLoader.State(
             config = configuration,
             customer = customer.await(),
-            linkState = linkState.await(),
             paymentSelection = initialPaymentSelection.await(),
             validationError = stripeIntent.validate(),
             paymentMethodMetadata = paymentMethodMetadata,
@@ -276,6 +274,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             externalPaymentMethodSpecs = externalPaymentMethodSpecs,
             isGooglePayReady = isGooglePayReady,
             linkInlineConfiguration = createLinkInlineConfiguration(linkState),
+            linkState = linkState,
         )
     }
 

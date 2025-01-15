@@ -451,7 +451,6 @@ internal class DefaultFlowControllerTest {
                 customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
                 config = PaymentSheet.Configuration("com.stripe.android.paymentsheet.test").asCommonConfiguration(),
                 paymentSelection = null,
-                linkState = null,
                 validationError = null,
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(allowsDelayedPaymentMethods = false),
             ),
@@ -665,7 +664,6 @@ internal class DefaultFlowControllerTest {
                 customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
                     paymentMethods = PAYMENT_METHODS
                 ),
-                linkState = null,
                 paymentSelection = initialSelection,
                 validationError = null,
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
@@ -706,7 +704,6 @@ internal class DefaultFlowControllerTest {
                 customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
                     paymentMethods = PAYMENT_METHODS
                 ),
-                linkState = null,
                 paymentSelection = initialSelection,
                 validationError = null,
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
@@ -750,7 +747,6 @@ internal class DefaultFlowControllerTest {
                 customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
                     paymentMethods = PAYMENT_METHODS
                 ),
-                linkState = null,
                 paymentSelection = initialSelection,
                 validationError = null,
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
@@ -2400,7 +2396,6 @@ internal class DefaultFlowControllerTest {
             customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
                 paymentMethods = PAYMENT_METHODS
             ),
-            linkState = null,
             paymentSelection = null,
             validationError = null,
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(),

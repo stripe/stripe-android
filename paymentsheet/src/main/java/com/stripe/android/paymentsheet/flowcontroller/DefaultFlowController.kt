@@ -323,7 +323,7 @@ internal class DefaultFlowController @Inject internal constructor(
         viewModelScope.launch {
             val confirmationOption = paymentSelection?.toConfirmationOption(
                 configuration = state.config,
-                linkConfiguration = state.linkState?.configuration,
+                linkConfiguration = state.paymentMethodMetadata.linkState?.configuration,
             )
 
             confirmationOption?.let { option ->

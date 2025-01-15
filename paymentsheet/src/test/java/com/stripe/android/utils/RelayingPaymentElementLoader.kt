@@ -24,7 +24,6 @@ internal class RelayingPaymentElementLoader : PaymentElementLoader {
                     customer = null,
                     config = PaymentSheet.Configuration("Example").asCommonConfiguration(),
                     paymentSelection = null,
-                    linkState = null,
                     validationError = validationError,
                     paymentMethodMetadata = PaymentMethodMetadataFactory.create(stripeIntent = stripeIntent),
                 ),

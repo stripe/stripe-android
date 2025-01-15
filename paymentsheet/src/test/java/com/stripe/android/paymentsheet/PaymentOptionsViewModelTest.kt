@@ -777,11 +777,17 @@ internal class PaymentOptionsViewModelTest {
 
     private fun createViewModel(
         args: PaymentOptionContract.Args = PAYMENT_OPTION_CONTRACT_ARGS,
-        linkState: LinkState? = args.state.linkState,
+        linkState: LinkState? = args.state.paymentMethodMetadata.linkState,
         linkConfigurationCoordinator: LinkConfigurationCoordinator = FakeLinkConfigurationCoordinator()
     ) = TestViewModelFactory.create(linkConfigurationCoordinator) { linkHandler, savedStateHandle ->
         PaymentOptionsViewModel(
-            args = args.copy(state = args.state.copy(linkState = linkState)),
+            args = args.copy(
+                state = args.state.copy(
+                    paymentMethodMetadata = args.state.paymentMethodMetadata.copy(
+                        linkState = linkState
+                    )
+                )
+            ),
             eventReporter = eventReporter,
             customerRepository = customerRepository,
             workContext = testDispatcher,
@@ -832,7 +838,6 @@ internal class PaymentOptionsViewModelTest {
                 customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
                 config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.asCommonConfiguration(),
                 paymentSelection = null,
-                linkState = null,
                 validationError = null,
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                     stripeIntent = PAYMENT_INTENT,
