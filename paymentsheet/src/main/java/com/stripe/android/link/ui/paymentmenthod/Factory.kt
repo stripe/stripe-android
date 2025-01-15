@@ -3,6 +3,7 @@ package com.stripe.android.link.ui.paymentmenthod
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.paymentsheet.DefaultFormHelper
 import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.paymentsheet.verticalmode.BankFormInteractor
@@ -13,9 +14,6 @@ internal object Factory {
     ): PaymentMethodMetadata {
         return PaymentMethodMetadata.create(
             configuration = configuration,
-            sharedDataSpecs = emptyList(),
-            externalPaymentMethodSpecs = emptyList(),
-            linkInlineConfiguration = null
         )
     }
 
@@ -24,7 +22,7 @@ internal object Factory {
         cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
         selectionUpdater: UpdateSelection,
     ): FormHelper {
-        return FormHelper.create(
+        return DefaultFormHelper.create(
             cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
             paymentMethodMetadata = paymentMethodMetadata(configuration),
             selectionUpdater = selectionUpdater
