@@ -5,7 +5,7 @@ import com.stripe.android.R
 import com.stripe.android.model.CardBrand
 import org.junit.Test
 
-class CvcStateTest {
+class CvcPaymentMethodStateTest {
 
     @Test
     fun `cvc state has correct label for non amex card`() {

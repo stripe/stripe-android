@@ -43,6 +43,8 @@ internal class PaymentMethodViewModel @Inject constructor(
         )
     }
 
+    fun onPayClicked() = Unit
+
     private fun updateSelection(selection: PaymentSelection?) {
         _state.update {
             it.copy(

@@ -11,6 +11,8 @@ import com.stripe.android.link.analytics.DefaultLinkEventsReporter
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.repositories.LinkApiRepository
 import com.stripe.android.link.repositories.LinkRepository
+import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.repository.ConsumersApiService
 import com.stripe.android.repository.ConsumersApiServiceImpl
 import dagger.Binds
@@ -20,6 +22,10 @@ import kotlin.coroutines.CoroutineContext
 
 @Module
 internal interface LinkModule {
+    @Binds
+    @LinkScope
+    fun bindsEventReporter(eventReporter: DefaultEventReporter): EventReporter
+
     @Binds
     @LinkScope
     fun bindLinkRepository(linkApiRepository: LinkApiRepository): LinkRepository

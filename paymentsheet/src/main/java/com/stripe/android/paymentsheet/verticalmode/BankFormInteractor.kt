@@ -21,5 +21,12 @@ internal class BankFormInteractor(
                 paymentMethodIncentiveInteractor = PaymentMethodIncentiveInteractor.create(viewModel),
             )
         }
+
+        fun create(updateSelection: (PaymentSelection.New.USBankAccount?) -> Unit): BankFormInteractor {
+            return BankFormInteractor(
+                updateSelection = updateSelection,
+                paymentMethodIncentiveInteractor = PaymentMethodIncentiveInteractor(null),
+            )
+        }
     }
 }
