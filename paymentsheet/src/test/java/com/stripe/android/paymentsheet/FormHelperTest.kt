@@ -10,7 +10,6 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParams.Companion.getNameFromParams
-import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.ui.core.Amount
@@ -173,7 +172,7 @@ internal class FormHelperTest {
             userRequestedReuse = customerRequestedSave,
         )
 
-        val formHelper = createFormHelper {  }
+        val formHelper = createFormHelper { }
         val params = formHelper.getPaymentMethodParams(formFieldValues, "card")
 
         assertThat(params?.paymentMethodCreateParams?.let { getNameFromParams(it) }).isEqualTo(name)

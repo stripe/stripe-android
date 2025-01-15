@@ -1,23 +1,28 @@
 package com.stripe.android.link.ui.paymentmethod
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.TestFactory
+import com.stripe.android.link.account.FakeLinkAccountManager
+import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.confirmation.FakeLinkConfirmationHandler
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.completePaymentButtonLabel
 import com.stripe.android.link.ui.paymentmenthod.PaymentMethodState
 import com.stripe.android.link.ui.paymentmenthod.PaymentMethodViewModel
-import com.stripe.android.link.ui.paymentmenthod.UpdateSelection
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
-import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.paymentsheet.FormHelper
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
+import com.stripe.android.testing.FakeLogger
 import com.stripe.android.uicore.elements.FormElement
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -74,46 +79,83 @@ class PaymentMethodViewModelTest {
 
         vm.formValuesChanged(formValues)
 
-        assertThat(vm.state.value.paymentSelection).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+        assertThat(vm.state.value.paymentMethodCreateParams).isEqualTo(PaymentMethodCreateParamsFixtures.DEFAULT_CARD)
         assertThat(vm.state.value.primaryButtonState).isEqualTo(PrimaryButtonState.Enabled)
-        assertThat(formHelper.onFormFieldValuesChangedCalls).containsExactly(
-            PaymentMethodFormHelper.OnFormFieldValuesChangedCall(
+        assertThat(formHelper.getPaymentMethodParamsCalls).containsExactly(
+            PaymentMethodFormHelper.GetPaymentMethodParamsCall(
                 formValues = formValues,
                 selectedPaymentMethodCode = PaymentMethod.Type.Card.code
             )
         )
 
-        formHelper.paymentSelection = null
+        formHelper.paymentMethodCreateParams = null
         vm.formValuesChanged(null)
 
-        assertThat(vm.state.value.paymentSelection).isNull()
+        assertThat(vm.state.value.paymentMethodCreateParams).isNull()
         assertThat(vm.state.value.primaryButtonState).isEqualTo(PrimaryButtonState.Disabled)
-        assertThat(formHelper.onFormFieldValuesChangedCalls.last().formValues).isNull()
+        assertThat(formHelper.getPaymentMethodParamsCalls.last().formValues).isNull()
     }
 
     @Test
     fun `onPayClicked confirms payment successfully`() = runTest {
         val linkConfirmationHandler = FakeLinkConfirmationHandler()
+        val linkAccountManager = FakeLinkAccountManager()
         var result: LinkActivityResult? = null
         val viewModel = createViewModel(
             linkConfirmationHandler = linkConfirmationHandler,
+            linkAccountManager = linkAccountManager,
             dismissWithResult = { result = it }
         )
 
-        // Simulate form completion
-        viewModel.formValuesChanged(FormFieldValues(userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest))
+        viewModel.formValuesChanged(
+            formValues = FormFieldValues(userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest)
+        )
 
         viewModel.onPayClicked()
 
         assertThat(linkConfirmationHandler.calls).containsExactly(
-            FakeLinkConfirmationHandler.Call.WithPaymentSelection(
-                paymentSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
-                linkAccount = TestFactory.LINK_ACCOUNT
+            FakeLinkConfirmationHandler.Call.WithPaymentDetails(
+                paymentDetails = TestFactory.LINK_NEW_PAYMENT_DETAILS.paymentDetails,
+                linkAccount = TestFactory.LINK_ACCOUNT,
+                cvc = null
             )
         )
 
         assertThat(result).isEqualTo(LinkActivityResult.Completed)
         assertThat(viewModel.state.value.primaryButtonState).isEqualTo(PrimaryButtonState.Processing)
+    }
+
+    @Test
+    fun `onPayClicked handles payment method creation failure correctly`() = runTest {
+        val error = Throwable("oops")
+        val linkConfirmationHandler = FakeLinkConfirmationHandler()
+        val linkAccountManager = FakeLinkAccountManager()
+        val logger = FakeLogger()
+        var result: LinkActivityResult? = null
+
+        linkAccountManager.createCardPaymentDetailsResult = Result.failure(error)
+
+        val viewModel = createViewModel(
+            linkConfirmationHandler = linkConfirmationHandler,
+            linkAccountManager = linkAccountManager,
+            logger = logger,
+            dismissWithResult = { result = it }
+        )
+
+        viewModel.formValuesChanged(
+            formValues = FormFieldValues(userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest)
+        )
+
+        viewModel.onPayClicked()
+
+        assertThat(linkConfirmationHandler.calls).isEmpty()
+
+        assertThat(result).isEqualTo(null)
+        assertThat(viewModel.state.value.primaryButtonState).isEqualTo(PrimaryButtonState.Enabled)
+        assertThat(viewModel.state.value.errorMessage).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
+        assertThat(logger.errorLogs).containsExactly(
+            "PaymentMethodViewModel: Failed to create card payment details" to error
+        )
     }
 
     @Test
@@ -124,8 +166,9 @@ class PaymentMethodViewModelTest {
 
         val viewModel = createViewModel(linkConfirmationHandler = linkConfirmationHandler)
 
-        // Simulate form completion
-        viewModel.formValuesChanged(FormFieldValues(userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest))
+        viewModel.formValuesChanged(
+            formValues = FormFieldValues(userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest)
+        )
 
         viewModel.onPayClicked()
 
@@ -141,8 +184,9 @@ class PaymentMethodViewModelTest {
 
         val viewModel = createViewModel(linkConfirmationHandler = linkConfirmationHandler)
 
-        // Simulate form completion
-        viewModel.formValuesChanged(FormFieldValues(userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest))
+        viewModel.formValuesChanged(
+            formValues = FormFieldValues(userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest)
+        )
 
         viewModel.onPayClicked()
 
@@ -165,6 +209,8 @@ class PaymentMethodViewModelTest {
     private fun createViewModel(
         formHelper: PaymentMethodFormHelper = PaymentMethodFormHelper(),
         linkConfirmationHandler: LinkConfirmationHandler = FakeLinkConfirmationHandler(),
+        linkAccountManager: LinkAccountManager = FakeLinkAccountManager(),
+        logger: Logger = FakeLogger(),
         dismissWithResult: (LinkActivityResult) -> Unit = {}
     ): PaymentMethodViewModel {
         return PaymentMethodViewModel(
@@ -172,34 +218,35 @@ class PaymentMethodViewModelTest {
             linkAccount = TestFactory.LINK_ACCOUNT,
             linkConfirmationHandler = linkConfirmationHandler,
             dismissWithResult = dismissWithResult,
-            formHelperFactory = { updateSelection ->
-                formHelper.updateSelection = updateSelection
-                formHelper
-            }
+            formHelper = formHelper,
+            logger = logger,
+            linkAccountManager = linkAccountManager
         )
     }
 }
 
 private class PaymentMethodFormHelper : FormHelper {
-    var updateSelection: UpdateSelection? = null
-    var paymentSelection: PaymentSelection? = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
-    val onFormFieldValuesChangedCalls = arrayListOf<OnFormFieldValuesChangedCall>()
+    var paymentMethodCreateParams: PaymentMethodCreateParams? = PaymentMethodCreateParamsFixtures.DEFAULT_CARD
+    val getPaymentMethodParamsCalls = arrayListOf<GetPaymentMethodParamsCall>()
 
     override fun onFormFieldValuesChanged(formValues: FormFieldValues?, selectedPaymentMethodCode: String) {
-        onFormFieldValuesChangedCalls.add(
-            OnFormFieldValuesChangedCall(
-                formValues = formValues,
-                selectedPaymentMethodCode = selectedPaymentMethodCode
-            )
-        )
-        updateSelection?.invoke(paymentSelection)
+        TODO("Not yet implemented")
     }
 
     override fun getPaymentMethodParams(
         formValues: FormFieldValues?,
         selectedPaymentMethodCode: String
     ): FormHelper.PaymentMethodParams? {
-        TODO("Not yet implemented")
+        require(selectedPaymentMethodCode == PaymentMethod.Type.Card.code) {
+            "$selectedPaymentMethodCode payment not supported"
+        }
+        getPaymentMethodParamsCalls.add(
+            GetPaymentMethodParamsCall(
+                formValues = formValues,
+                selectedPaymentMethodCode = selectedPaymentMethodCode
+            )
+        )
+        return paymentMethodCreateParams?.let { FormHelper.PaymentMethodParams(it) }
     }
 
     override fun requiresFormScreen(selectedPaymentMethodCode: String): Boolean {
@@ -220,7 +267,7 @@ private class PaymentMethodFormHelper : FormHelper {
         return TestFactory.CARD_FORM_ARGS
     }
 
-    data class OnFormFieldValuesChangedCall(
+    data class GetPaymentMethodParamsCall(
         val formValues: FormFieldValues?,
         val selectedPaymentMethodCode: String
     )

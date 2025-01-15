@@ -5,8 +5,11 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.stripe.android.common.exception.stripeErrorMessage
+import com.stripe.android.core.Logger
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
 import com.stripe.android.link.confirmation.Result
 import com.stripe.android.link.injection.NativeLinkComponent
@@ -14,11 +17,11 @@ import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.completePaymentButtonLabel
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.DefaultFormHelper
 import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.forms.FormFieldValues
-import com.stripe.android.paymentsheet.model.PaymentSelection
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -28,11 +31,12 @@ import javax.inject.Inject
 internal class PaymentMethodViewModel @Inject constructor(
     private val configuration: LinkConfiguration,
     private val linkAccount: LinkAccount,
+    private val linkAccountManager: LinkAccountManager,
     private val linkConfirmationHandler: LinkConfirmationHandler,
-    private val formHelperFactory: (UpdateSelection) -> FormHelper,
+    private val logger: Logger,
+    private val formHelper: FormHelper,
     private val dismissWithResult: (LinkActivityResult) -> Unit
 ) : ViewModel() {
-    private val formHelper = formHelperFactory(::updateSelection)
     private val _state = MutableStateFlow(
         PaymentMethodState(
             isProcessing = false,
@@ -46,45 +50,60 @@ internal class PaymentMethodViewModel @Inject constructor(
     val state: StateFlow<PaymentMethodState> = _state
 
     fun formValuesChanged(formValues: FormFieldValues?) {
-        formHelper.onFormFieldValuesChanged(
+        val params = formHelper.getPaymentMethodParams(
             formValues = formValues,
             selectedPaymentMethodCode = PaymentMethod.Type.Card.code
         )
-    }
-
-    fun onPayClicked() {
-        val paymentSelection = _state.value.paymentSelection ?: return
-        viewModelScope.launch {
-            updateButtonState(PrimaryButtonState.Processing)
-            val result = linkConfirmationHandler.confirm(
-                paymentSelection = paymentSelection,
-                linkAccount = linkAccount
-            )
-            when (result) {
-                Result.Canceled -> {
-                    updateButtonState(PrimaryButtonState.Enabled)
-                }
-                is Result.Failed -> {
-                    updateButtonState(PrimaryButtonState.Enabled)
-                    _state.update { it.copy(errorMessage = result.message) }
-                }
-                Result.Succeeded -> {
-                    dismissWithResult(LinkActivityResult.Completed)
-                }
-            }
-        }
-    }
-
-    private fun updateSelection(selection: PaymentSelection?) {
         _state.update {
             it.copy(
-                paymentSelection = selection,
-                primaryButtonState = if (selection != null) {
+                paymentMethodCreateParams = params?.paymentMethodCreateParams,
+                primaryButtonState = if (params != null) {
                     PrimaryButtonState.Enabled
                 } else {
                     PrimaryButtonState.Disabled
                 }
             )
+        }
+    }
+
+    fun onPayClicked() {
+        val paymentMethodCreateParams = _state.value.paymentMethodCreateParams ?: return
+        viewModelScope.launch {
+            updateButtonState(PrimaryButtonState.Processing)
+            linkAccountManager.createCardPaymentDetails(paymentMethodCreateParams)
+                .fold(
+                    onSuccess = { linkPaymentDetails ->
+                        performConfirmation(linkPaymentDetails.paymentDetails)
+                    },
+                    onFailure = { error ->
+                        updateButtonState(PrimaryButtonState.Enabled)
+                        _state.update { it.copy(errorMessage = error.stripeErrorMessage()) }
+                        logger.error(
+                            msg = "PaymentMethodViewModel: Failed to create card payment details",
+                            t = error
+                        )
+                    }
+                )
+        }
+    }
+
+    private suspend fun performConfirmation(paymentDetails: ConsumerPaymentDetails.PaymentDetails) {
+        val result = linkConfirmationHandler.confirm(
+            paymentDetails = paymentDetails,
+            linkAccount = linkAccount,
+            cvc = null
+        )
+        when (result) {
+            Result.Canceled -> {
+                updateButtonState(PrimaryButtonState.Enabled)
+            }
+            is Result.Failed -> {
+                updateButtonState(PrimaryButtonState.Enabled)
+                _state.update { it.copy(errorMessage = result.message) }
+            }
+            Result.Succeeded -> {
+                dismissWithResult(LinkActivityResult.Completed)
+            }
         }
     }
 
@@ -107,18 +126,17 @@ internal class PaymentMethodViewModel @Inject constructor(
                     PaymentMethodViewModel(
                         configuration = parentComponent.configuration,
                         linkAccount = linkAccount,
+                        linkAccountManager = parentComponent.linkAccountManager,
                         linkConfirmationHandler = parentComponent.linkConfirmationHandlerFactory.create(
                             confirmationHandler = parentComponent.viewModel.confirmationHandler
                         ),
-                        formHelperFactory = { selectionUpdater ->
-                            DefaultFormHelper.create(
-                                cardAccountRangeRepositoryFactory = parentComponent.cardAccountRangeRepositoryFactory,
-                                paymentMethodMetadata = PaymentMethodMetadata.create(
-                                    configuration = parentComponent.configuration,
-                                ),
-                                selectionUpdater = selectionUpdater
-                            )
-                        },
+                        formHelper = DefaultFormHelper.create(
+                            cardAccountRangeRepositoryFactory = parentComponent.cardAccountRangeRepositoryFactory,
+                            paymentMethodMetadata = PaymentMethodMetadata.create(
+                                configuration = parentComponent.configuration,
+                            ),
+                        ),
+                        logger = parentComponent.logger,
                         dismissWithResult = dismissWithResult
                     )
                 }
