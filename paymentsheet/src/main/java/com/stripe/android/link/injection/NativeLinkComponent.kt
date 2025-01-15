@@ -26,6 +26,7 @@ internal annotation class NativeLinkScope
 @Component(
     modules = [
         NativeLinkModule::class,
+        LinkViewModelModule::class,
         DefaultConfirmationModule::class,
     ]
 )

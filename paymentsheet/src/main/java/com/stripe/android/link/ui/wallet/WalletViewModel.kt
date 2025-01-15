@@ -224,6 +224,12 @@ internal class WalletViewModel @Inject constructor(
         navigate(LinkScreen.PaymentMethod)
     }
 
+    fun onDismissAlert() {
+        _uiState.update {
+            it.copy(alertMessage = null)
+        }
+    }
+
     @SuppressWarnings("UnusedParameter")
     fun onEditPaymentMethodClicked(item: ConsumerPaymentDetails.PaymentDetails) {
         navigate(LinkScreen.CardEdit)

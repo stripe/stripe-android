@@ -1,6 +1,7 @@
 package com.stripe.android.link
 
 import android.app.Application
+import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
@@ -65,6 +66,13 @@ internal class LinkActivityViewModel @Inject constructor(
 
     fun navigate(screen: LinkScreen, clearStack: Boolean) {
         navigate(screen, clearStack, launchSingleTop = false)
+    }
+
+    fun registerActivityForConfirmation(
+        activityResultCaller: ActivityResultCaller,
+        lifecycleOwner: LifecycleOwner,
+    ) {
+        confirmationHandler.register(activityResultCaller, lifecycleOwner)
     }
 
     private fun navigate(screen: LinkScreen, clearStack: Boolean, launchSingleTop: Boolean) {

@@ -28,15 +28,23 @@ import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.confirmation.FakeLinkConfirmationHandler
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
 import com.stripe.android.link.ui.BottomSheetContent
+import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.PrimaryButtonTag
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.CvcCheck
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
+import com.stripe.android.ui.core.elements.CvcController
+import com.stripe.android.uicore.elements.DateConfig
+import com.stripe.android.uicore.elements.SimpleTextFieldController
+import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import com.stripe.android.link.confirmation.Result as LinkConfirmationResult
 
 @RunWith(AndroidJUnit4::class)
 internal class WalletScreenTest {
@@ -165,13 +173,6 @@ internal class WalletScreenTest {
 
         composeTestRule.waitForIdle()
 
-        onCollapsedWalletRow().performClick()
-
-        composeTestRule.waitForIdle()
-
-        onWalletAddPaymentMethodRow().assertIsDisplayed().assertHasClickAction()
-        onExpandedWalletHeader().assertIsDisplayed()
-        onPaymentMethodList().assertCountEquals(2)
         onWalletPayButton().assertIsDisplayed().assertIsNotEnabled().assertHasClickAction()
         onWalletPayAnotherWayButton().assertIsDisplayed().assertIsEnabled().assertHasClickAction()
     }
@@ -194,6 +195,253 @@ internal class WalletScreenTest {
 
         onLoader().assertIsDisplayed()
         onPaymentMethodList().assertCountEquals(0)
+    }
+
+    @Test
+    fun `recollection form is displayed for expired card`() = runTest(dispatcher) {
+        val expiredCard = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(expiryYear = 1999)
+        val linkAccountManager = FakeLinkAccountManager()
+        linkAccountManager.listPaymentDetailsResult = Result.success(
+            ConsumerPaymentDetails(paymentDetails = listOf(expiredCard))
+        )
+        val viewModel = createViewModel(linkAccountManager)
+        composeTestRule.setContent {
+            WalletScreen(
+                viewModel = viewModel,
+                showBottomSheetContent = {},
+                hideBottomSheetContent = {}
+            )
+        }
+        composeTestRule.waitForIdle()
+
+        onWalletPayButton().assertIsNotEnabled()
+        onWalletFormError().assertIsDisplayed()
+        onWalletFormFields().assertIsDisplayed()
+        onWalletPayButton().assertIsNotEnabled()
+    }
+
+    @Test
+    fun `recollection form is displayed for card requiring CVC`() = runTest(dispatcher) {
+        val cardRequiringCvc = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(
+            cvcCheck = CvcCheck.Unchecked
+        )
+        val linkAccountManager = FakeLinkAccountManager()
+        linkAccountManager.listPaymentDetailsResult = Result.success(
+            ConsumerPaymentDetails(paymentDetails = listOf(cardRequiringCvc))
+        )
+        val viewModel = createViewModel(linkAccountManager)
+        composeTestRule.setContent {
+            WalletScreen(
+                viewModel = viewModel,
+                showBottomSheetContent = {},
+                hideBottomSheetContent = {}
+            )
+        }
+        composeTestRule.waitForIdle()
+
+        onWalletPayButton().assertIsNotEnabled()
+        onWalletFormError().assertIsDisplayed()
+        onWalletFormFields().assertIsDisplayed()
+        onWalletPayButton().assertIsNotEnabled()
+    }
+
+    @Test
+    fun `pay button is enabled after filling recollection form for expired card`() = runTest(dispatcher) {
+        val expiredCard = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(expiryYear = 1999)
+        val linkAccountManager = FakeLinkAccountManager()
+        linkAccountManager.listPaymentDetailsResult = Result.success(
+            ConsumerPaymentDetails(paymentDetails = listOf(expiredCard))
+        )
+        val viewModel = createViewModel(linkAccountManager)
+        composeTestRule.setContent {
+            WalletScreen(
+                viewModel = viewModel,
+                showBottomSheetContent = {},
+                hideBottomSheetContent = {}
+            )
+        }
+        composeTestRule.waitForIdle()
+
+        onWalletPayButton().assertIsNotEnabled()
+
+        viewModel.expiryDateController.onRawValueChange("1225")
+        viewModel.cvcController.onRawValueChange("123")
+
+        composeTestRule.waitForIdle()
+
+        onWalletPayButton().assertIsEnabled()
+        onWalletDialogTag().assertDoesNotExist()
+    }
+
+    @Test
+    fun `alert is displayed after expiry update failure`() = runTest(dispatcher) {
+        val error = Throwable("oops")
+        val expiredCard = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(expiryYear = 1999)
+        val linkAccountManager = FakeLinkAccountManager()
+        linkAccountManager.listPaymentDetailsResult = Result.success(
+            ConsumerPaymentDetails(paymentDetails = listOf(expiredCard))
+        )
+        linkAccountManager.updatePaymentDetailsResult = Result.failure(error)
+        val viewModel = createViewModel(linkAccountManager)
+        composeTestRule.setContent {
+            WalletScreen(
+                viewModel = viewModel,
+                showBottomSheetContent = {},
+                hideBottomSheetContent = {}
+            )
+        }
+        composeTestRule.waitForIdle()
+
+        onWalletPayButton().assertIsNotEnabled()
+
+        viewModel.expiryDateController.onRawValueChange("1225")
+        viewModel.cvcController.onRawValueChange("123")
+
+        composeTestRule.waitForIdle()
+
+        onWalletPayButton()
+            .assertIsEnabled()
+            .performClick()
+
+        composeTestRule.waitForIdle()
+
+        onWalletDialogTag()
+            .assertIsDisplayed()
+
+        onWalletDialogButtonTag()
+            .assertIsDisplayed()
+            .performClick()
+
+        composeTestRule.waitForIdle()
+
+        onWalletDialogTag().assertDoesNotExist()
+    }
+
+    @Test
+    fun `pay button is enabled after filling CVC for card requiring CVC`() = runTest(dispatcher) {
+        val cardRequiringCvc = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(
+            cvcCheck = CvcCheck.Unchecked
+        )
+        val linkAccountManager = FakeLinkAccountManager()
+        linkAccountManager.listPaymentDetailsResult = Result.success(
+            ConsumerPaymentDetails(paymentDetails = listOf(cardRequiringCvc))
+        )
+        val viewModel = createViewModel(linkAccountManager)
+        composeTestRule.setContent {
+            WalletScreen(
+                viewModel = viewModel,
+                showBottomSheetContent = {},
+                hideBottomSheetContent = {}
+            )
+        }
+        composeTestRule.waitForIdle()
+
+        onWalletPayButton().assertIsNotEnabled()
+
+        viewModel.cvcController.onRawValueChange("123")
+
+        composeTestRule.waitForIdle()
+
+        onWalletPayButton().assertIsEnabled()
+    }
+
+    @Test
+    fun `pay button state switches to processing state during payment`() = runTest(dispatcher) {
+        val cardRequiringCvc = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(
+            expiryYear = 2999,
+            cvcCheck = CvcCheck.Pass
+        )
+        val linkAccountManager = FakeLinkAccountManager()
+        linkAccountManager.listPaymentDetailsResult = Result.success(
+            ConsumerPaymentDetails(paymentDetails = listOf(cardRequiringCvc))
+        )
+        val linkConfirmationHandler = FakeLinkConfirmationHandler()
+        linkConfirmationHandler.confirmResult = com.stripe.android.link.confirmation.Result.Succeeded
+
+        val viewModel = createViewModel(
+            linkAccountManager = linkAccountManager,
+            linkConfirmationHandler = linkConfirmationHandler
+        )
+        composeTestRule.setContent {
+            WalletScreen(
+                viewModel = viewModel,
+                showBottomSheetContent = {},
+                hideBottomSheetContent = {}
+            )
+        }
+        composeTestRule.waitForIdle()
+
+        onWalletPayButton().assertIsEnabled()
+
+        onWalletPayButton().performClick()
+
+        composeTestRule.waitForIdle()
+
+        onWalletErrorTag().assertDoesNotExist()
+
+        assertThat(viewModel.uiState.value.primaryButtonState).isEqualTo(PrimaryButtonState.Processing)
+    }
+
+    @Test
+    fun `error message is displayed when payment confirmation fails`() = runTest(dispatcher) {
+        val cardRequiringCvc = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(
+            expiryYear = 2999,
+            cvcCheck = CvcCheck.Pass
+        )
+        val linkAccountManager = FakeLinkAccountManager()
+        linkAccountManager.listPaymentDetailsResult = Result.success(
+            ConsumerPaymentDetails(paymentDetails = listOf(cardRequiringCvc))
+        )
+        val linkConfirmationHandler = FakeLinkConfirmationHandler()
+        linkConfirmationHandler.confirmResult = LinkConfirmationResult.Failed("oops".resolvableString)
+
+        val viewModel = createViewModel(
+            linkAccountManager = linkAccountManager,
+            linkConfirmationHandler = linkConfirmationHandler
+        )
+        composeTestRule.setContent {
+            WalletScreen(
+                viewModel = viewModel,
+                showBottomSheetContent = {},
+                hideBottomSheetContent = {}
+            )
+        }
+        composeTestRule.waitForIdle()
+
+        onWalletPayButton().assertIsEnabled()
+
+        onWalletPayButton().performClick()
+
+        composeTestRule.waitForIdle()
+
+        onWalletErrorTag().assertIsDisplayed()
+
+        assertThat(viewModel.uiState.value.primaryButtonState).isEqualTo(PrimaryButtonState.Enabled)
+    }
+
+    @Test
+    fun `recollection form is not displayed for valid card`() = runTest(dispatcher) {
+        val validCard = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(
+            expiryYear = 2099,
+            cvcCheck = CvcCheck.Pass
+        )
+        val linkAccountManager = FakeLinkAccountManager()
+        linkAccountManager.listPaymentDetailsResult = Result.success(
+            ConsumerPaymentDetails(paymentDetails = listOf(validCard))
+        )
+        val viewModel = createViewModel(linkAccountManager)
+        composeTestRule.setContent {
+            WalletScreen(
+                viewModel = viewModel,
+                showBottomSheetContent = {},
+                hideBottomSheetContent = {}
+            )
+        }
+        composeTestRule.waitForIdle()
+
+        onWalletFormError().assertDoesNotExist()
+        onWalletFormFields().assertDoesNotExist()
+        onWalletPayButton().assertIsEnabled()
     }
 
     @Test
@@ -346,7 +594,10 @@ internal class WalletScreenTest {
             onEditPaymentMethodClicked = onEditPaymentMethodClicked,
             showBottomSheetContent = showBottomSheetContent,
             hideBottomSheetContent = hideBottomSheetContent,
-            onAddNewPaymentMethodClicked = {}
+            onAddNewPaymentMethodClicked = {},
+            onDismissAlert = {},
+            expiryDateController = SimpleTextFieldController(DateConfig()),
+            cvcController = CvcController(cardBrandFlow = stateFlowOf(CardBrand.Visa))
         )
     }
 
@@ -391,6 +642,12 @@ internal class WalletScreenTest {
     private fun onWalletPayAnotherWayButton() =
         composeTestRule.onNodeWithTag(WALLET_SCREEN_PAY_ANOTHER_WAY_BUTTON, useUnmergedTree = true)
 
+    private fun onWalletFormError() =
+        composeTestRule.onNodeWithTag(WALLET_SCREEN_RECOLLECTION_FORM_ERROR, useUnmergedTree = true)
+
+    private fun onWalletFormFields() =
+        composeTestRule.onNodeWithTag(WALLET_SCREEN_RECOLLECTION_FORM_FIELDS, useUnmergedTree = true)
+
     private fun onLoader() = composeTestRule.onNodeWithTag(WALLET_LOADER_TAG)
 
     private fun onWalletPaymentMethodRowMenuButton() =
@@ -410,4 +667,11 @@ internal class WalletScreenTest {
 
     private fun onWalletPaymentMethodMenuSetAsDefaultTag() =
         composeTestRule.onNodeWithTag(WALLET_MENU_SET_AS_DEFAULT_TAG, useUnmergedTree = true)
+
+    private fun onWalletDialogTag() = composeTestRule.onNodeWithTag(WALLET_SCREEN_DIALOG_TAG, useUnmergedTree = true)
+
+    private fun onWalletDialogButtonTag() = composeTestRule
+        .onNodeWithTag(WALLET_SCREEN_DIALOG_BUTTON_TAG, useUnmergedTree = true)
+
+    private fun onWalletErrorTag() = composeTestRule.onNodeWithTag(WALLET_SCREEN_ERROR_TAG, useUnmergedTree = true)
 }
