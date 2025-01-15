@@ -670,7 +670,8 @@ internal class WalletScreenTest {
 
     private fun onWalletDialogTag() = composeTestRule.onNodeWithTag(WALLET_SCREEN_DIALOG_TAG, useUnmergedTree = true)
 
-    private fun onWalletDialogButtonTag() = composeTestRule.onNodeWithTag(WALLET_SCREEN_DIALOG_BUTTON_TAG, useUnmergedTree = true)
+    private fun onWalletDialogButtonTag() = composeTestRule
+        .onNodeWithTag(WALLET_SCREEN_DIALOG_BUTTON_TAG, useUnmergedTree = true)
 
     private fun onWalletErrorTag() = composeTestRule.onNodeWithTag(WALLET_SCREEN_ERROR_TAG, useUnmergedTree = true)
 }
