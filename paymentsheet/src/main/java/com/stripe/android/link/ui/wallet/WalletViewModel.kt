@@ -258,10 +258,8 @@ internal class WalletViewModel @Inject constructor(
             )
             linkAccountManager.updatePaymentDetails(updateParams)
                 .fold(
-                    onSuccess = { paymentDetails ->
-                        _uiState.update {
-                            it.updateWithResponse(paymentDetails)
-                        }
+                    onSuccess = {
+                        loadPaymentDetails()
                     },
                     onFailure = { error ->
                         logger.error(

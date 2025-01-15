@@ -371,10 +371,14 @@ class WalletViewModelTest {
         val updatedCard1 = card1.copy(isDefault = true)
         val updatedCard2 = card2.copy(isDefault = false)
         linkAccountManager.updatePaymentDetailsResult = Result.success(
-            ConsumerPaymentDetails(paymentDetails = listOf(updatedCard1, updatedCard2))
+            ConsumerPaymentDetails(paymentDetails = listOf(updatedCard1))
         )
 
         val viewModel = createViewModel(linkAccountManager = linkAccountManager)
+
+        linkAccountManager.listPaymentDetailsResult = Result.success(
+            ConsumerPaymentDetails(paymentDetails = listOf(updatedCard1, updatedCard2))
+        )
 
         viewModel.onSetDefaultClicked(card1)
 
@@ -387,6 +391,7 @@ class WalletViewModelTest {
         )
 
         assertThat(viewModel.uiState.value.paymentDetailsList).containsExactly(updatedCard1, updatedCard2)
+        assertThat(linkAccountManager.listPaymentDetailsCalls.size).isEqualTo(2)
         assertThat(viewModel.uiState.value.isProcessing).isFalse()
         assertThat(viewModel.uiState.value.alertMessage).isNull()
     }
