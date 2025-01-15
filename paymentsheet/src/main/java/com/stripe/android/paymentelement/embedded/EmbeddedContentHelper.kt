@@ -19,6 +19,7 @@ import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
+import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.verticalmode.DefaultPaymentMethodVerticalLayoutInteractor
 import com.stripe.android.paymentsheet.verticalmode.DefaultPaymentMethodVerticalLayoutInteractor.FormType
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodIncentiveInteractor
@@ -67,16 +68,19 @@ internal class DefaultEmbeddedContentHelper @AssistedInject constructor(
     @IOContext private val workContext: CoroutineContext,
     private val customerRepository: CustomerRepository,
     private val selectionHolder: EmbeddedSelectionHolder,
+    private val embeddedWalletsHelper: EmbeddedWalletsHelper,
 ) : EmbeddedContentHelper {
 
     private val mandate: StateFlow<ResolvableString?> = savedStateHandle.getStateFlow(
         key = MANDATE_KEY_EMBEDDED_CONTENT,
         initialValue = null,
     )
+
     private val state: StateFlow<State?> = savedStateHandle.getStateFlow(
         key = STATE_KEY_EMBEDDED_CONTENT,
         initialValue = null
     )
+
     private val _embeddedContent = MutableStateFlow<EmbeddedContent?>(null)
     override val embeddedContent: StateFlow<EmbeddedContent?> = _embeddedContent.asStateFlow()
 
@@ -90,6 +94,7 @@ internal class DefaultEmbeddedContentHelper @AssistedInject constructor(
                         interactor = createInteractor(
                             coroutineScope = coroutineScope,
                             paymentMethodMetadata = state.paymentMethodMetadata,
+                            walletsState = embeddedWalletsHelper.walletsState(state.paymentMethodMetadata),
                         ),
                         rowStyle = state.rowStyle
                     )
@@ -122,6 +127,7 @@ internal class DefaultEmbeddedContentHelper @AssistedInject constructor(
     private fun createInteractor(
         coroutineScope: CoroutineScope,
         paymentMethodMetadata: PaymentMethodMetadata,
+        walletsState: StateFlow<WalletsState?>,
     ): PaymentMethodVerticalLayoutInteractor {
         val paymentMethodIncentiveInteractor = PaymentMethodIncentiveInteractor(
             incentive = paymentMethodMetadata.paymentMethodIncentive,
@@ -169,8 +175,9 @@ internal class DefaultEmbeddedContentHelper @AssistedInject constructor(
             onSelectSavedPaymentMethod = {
                 setSelection(PaymentSelection.Saved(it))
             },
-            walletsState = stateFlowOf(null),
+            walletsState = walletsState,
             canShowWalletsInline = true,
+            canShowWalletButtons = false,
             onMandateTextUpdated = { updatedMandate ->
                 savedStateHandle[MANDATE_KEY_EMBEDDED_CONTENT] = updatedMandate
             },
