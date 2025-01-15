@@ -14,7 +14,7 @@ internal class LinkActivityContract @Inject internal constructor(
 ) : ActivityResultContract<LinkActivityContract.Args, LinkActivityResult>() {
 
     override fun createIntent(context: Context, input: Args): Intent {
-        return if (FeatureFlags.nativeLinkEnabled.isEnabled) {
+        return if (FeatureFlags.nativeLinkEnabled.isEnabled && input.configuration.nativeLinkEnabled) {
             nativeIntent(context, input)
         } else {
             webIntent(context, input)
