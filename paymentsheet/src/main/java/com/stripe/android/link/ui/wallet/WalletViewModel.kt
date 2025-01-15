@@ -231,16 +231,10 @@ internal class WalletViewModel @Inject constructor(
                         loadPaymentDetails(selectedItemId = uiState.value.selectedItem?.id)
                     },
                     onFailure = { error ->
-                        logger.error(
-                            msg = "WalletViewModel: Failed to delete payment method",
-                            t = error
+                        updateErrorMessageAndStopProcessing(
+                            error = error,
+                            message = "Failed to delete payment method"
                         )
-                        _uiState.update {
-                            it.copy(
-                                alertMessage = error.stripeErrorMessage(),
-                                isProcessing = false
-                            )
-                        }
                     }
                 )
         }
@@ -262,16 +256,10 @@ internal class WalletViewModel @Inject constructor(
                         loadPaymentDetails()
                     },
                     onFailure = { error ->
-                        logger.error(
-                            msg = "WalletViewModel: Failed to set payment method as default",
-                            t = error
+                        updateErrorMessageAndStopProcessing(
+                            error = error,
+                            message = "Failed to set payment method as default"
                         )
-                        _uiState.update {
-                            it.copy(
-                                alertMessage = error.stripeErrorMessage(),
-                                isProcessing = false
-                            )
-                        }
                     }
                 )
         }
@@ -290,6 +278,22 @@ internal class WalletViewModel @Inject constructor(
     @SuppressWarnings("UnusedParameter")
     fun onEditPaymentMethodClicked(item: ConsumerPaymentDetails.PaymentDetails) {
         navigate(LinkScreen.CardEdit)
+    }
+
+    private fun updateErrorMessageAndStopProcessing(
+        error: Throwable,
+        message: String
+    ) {
+        logger.error(
+            msg = "WalletViewModel: $message",
+            t = error
+        )
+        _uiState.update {
+            it.copy(
+                alertMessage = error.stripeErrorMessage(),
+                isProcessing = false
+            )
+        }
     }
 
     companion object {
