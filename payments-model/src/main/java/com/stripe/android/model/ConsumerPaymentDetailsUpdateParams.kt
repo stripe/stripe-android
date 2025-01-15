@@ -7,7 +7,7 @@ import kotlinx.parcelize.RawValue
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Parcelize
-class ConsumerPaymentDetailsUpdateParams(
+data class ConsumerPaymentDetailsUpdateParams(
     val id: String,
     val isDefault: Boolean? = null,
     val cardPaymentMethodCreateParamsMap: Map<String, @RawValue Any>? = null
