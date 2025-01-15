@@ -63,6 +63,7 @@ internal fun SavedPaymentMethodTab(
     viewWidth: Dp,
     isSelected: Boolean,
     shouldShowModifyBadge: Boolean,
+    shouldShowDefaultBadge: Boolean,
     isEnabled: Boolean,
     isClickable: Boolean = isEnabled,
     iconRes: Int,
@@ -110,6 +111,13 @@ internal fun SavedPaymentMethodTab(
                             contentDescription = description.readNumbersAsIndividualDigits()
                         }
                 )
+
+                if (shouldShowDefaultBadge) {
+                    DefaultPaymentMethodLabel(
+                        modifier = Modifier
+                            .padding(top = 4.dp, start = 6.dp, end = 6.dp)
+                    )
+                }
             }
         },
         modifier = modifier
@@ -213,6 +221,7 @@ private fun SavedPaymentMethodTabUISelected() {
             viewWidth = 100.dp,
             isSelected = true,
             shouldShowModifyBadge = false,
+            shouldShowDefaultBadge = false,
             isEnabled = true,
             iconRes = R.drawable.stripe_ic_paymentsheet_card_visa,
             labelText = "MasterCard",
@@ -230,6 +239,25 @@ private fun SavedPaymentMethodTabUIModifiable() {
             viewWidth = 100.dp,
             isSelected = false,
             shouldShowModifyBadge = true,
+            shouldShowDefaultBadge = false,
+            isEnabled = true,
+            iconRes = R.drawable.stripe_ic_paymentsheet_card_visa,
+            labelText = "MasterCard",
+            description = "MasterCard",
+            onItemSelectedListener = {},
+        )
+    }
+}
+
+@Preview(name = "Default Payment option in modifiable mode")
+@Composable
+private fun DefaultSavedPaymentMethodTabUIModifiable() {
+    StripeTheme {
+        SavedPaymentMethodTab(
+            viewWidth = 100.dp,
+            isSelected = false,
+            shouldShowModifyBadge = true,
+            shouldShowDefaultBadge = true,
             isEnabled = true,
             iconRes = R.drawable.stripe_ic_paymentsheet_card_visa,
             labelText = "MasterCard",
