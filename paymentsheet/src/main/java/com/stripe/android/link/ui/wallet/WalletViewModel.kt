@@ -233,7 +233,7 @@ internal class WalletViewModel @Inject constructor(
                     onFailure = { error ->
                         updateErrorMessageAndStopProcessing(
                             error = error,
-                            message = "Failed to delete payment method"
+                            loggerMessage = "Failed to delete payment method"
                         )
                     }
                 )
@@ -258,7 +258,7 @@ internal class WalletViewModel @Inject constructor(
                     onFailure = { error ->
                         updateErrorMessageAndStopProcessing(
                             error = error,
-                            message = "Failed to set payment method as default"
+                            loggerMessage = "Failed to set payment method as default"
                         )
                     }
                 )
@@ -282,10 +282,10 @@ internal class WalletViewModel @Inject constructor(
 
     private fun updateErrorMessageAndStopProcessing(
         error: Throwable,
-        message: String
+        loggerMessage: String
     ) {
         logger.error(
-            msg = "WalletViewModel: $message",
+            msg = "WalletViewModel: $loggerMessage",
             t = error
         )
         _uiState.update {
