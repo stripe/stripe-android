@@ -10,6 +10,7 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParams.Companion.getNameFromParams
+import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.ui.core.Amount
@@ -157,6 +158,26 @@ internal class FormHelperTest {
             }
         ).onFormFieldValuesChanged(formFieldValues, "card")
         assertThat(hasCalledSelectionUpdater).isTrue()
+    }
+
+    @Test
+    fun `getPaymentMethodParams returns correct payment method params`() {
+        val cardBrand = "visa"
+        val name = "Joe"
+        val customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
+        val formFieldValues = FormFieldValues(
+            fieldValuePairs = mapOf(
+                IdentifierSpec.CardBrand to FormFieldEntry(cardBrand, true),
+                IdentifierSpec.Name to FormFieldEntry(name, true),
+            ),
+            userRequestedReuse = customerRequestedSave,
+        )
+
+        val formHelper = createFormHelper {  }
+        val params = formHelper.getPaymentMethodParams(formFieldValues, "card")
+
+        assertThat(params?.paymentMethodCreateParams?.let { getNameFromParams(it) }).isEqualTo(name)
+        assertThat(params?.paymentMethodCreateParams?.typeCode).isEqualTo("card")
     }
 
     @Test

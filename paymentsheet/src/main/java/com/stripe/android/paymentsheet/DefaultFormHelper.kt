@@ -8,10 +8,14 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
+import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
+import com.stripe.android.paymentsheet.ui.transformToPaymentMethodOptionsParams
 import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.elements.FormElement
@@ -40,7 +44,7 @@ internal class DefaultFormHelper(
                 onLinkInlineSignupStateChanged = linkInlineHandler::onStateUpdated,
                 selectionUpdater = {
                     viewModel.updateSelection(it)
-                }
+                },
             )
         }
 
@@ -55,7 +59,7 @@ internal class DefaultFormHelper(
                 newPaymentSelectionProvider = { null },
                 linkConfigurationCoordinator = null,
                 onLinkInlineSignupStateChanged = {},
-                selectionUpdater = selectionUpdater
+                selectionUpdater = selectionUpdater,
             )
         }
     }
@@ -90,6 +94,20 @@ internal class DefaultFormHelper(
             paymentMethodMetadata = paymentMethodMetadata,
         )
         selectionUpdater(newSelection)
+    }
+
+    override fun getPaymentMethodParams(
+        formValues: FormFieldValues?,
+        selectedPaymentMethodCode: String
+    ): FormHelper.PaymentMethodParams? {
+        return formValues?.let {
+            FormHelper.PaymentMethodParams(
+                paymentMethodCreateParams = it.transformToPaymentMethodCreateParams(
+                    paymentMethodCode = selectedPaymentMethodCode,
+                    paymentMethodMetadata = paymentMethodMetadata
+                ),
+            )
+        }
     }
 
     override fun requiresFormScreen(selectedPaymentMethodCode: String): Boolean {
