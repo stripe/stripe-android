@@ -115,11 +115,11 @@ internal class SharedPaymentElementViewModel @Inject constructor(
 
     fun initEmbeddedActivityLauncher(activityResultCaller: ActivityResultCaller, lifecycleOwner: LifecycleOwner) {
         val launcher = DefaultEmbeddedActivityLauncher(activityResultCaller, lifecycleOwner, selectionHolder)
-        setLaunchForm(launcher::launchForm)
+        setFormLauncher(launcher.formLauncher)
     }
 
-    private fun setLaunchForm(launch: (code: String, paymentMethodMetaData: PaymentMethodMetadata?) -> Unit) {
-        embeddedContentHelper.setLaunchForm(launch)
+    private fun setFormLauncher(launch: ((code: String, paymentMethodMetadata: PaymentMethodMetadata?) -> Unit)?) {
+        embeddedContentHelper.setFormLauncher(launch)
     }
 
     suspend fun configure(

@@ -21,15 +21,15 @@ import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
 
 internal class FormActivity : AppCompatActivity() {
-    private val args: FormContract.Args by lazy {
-        FormContract.Args.fromIntent(intent) ?: throw IllegalStateException(
-            "Args required"
-        )
+    private val args: FormContract.Args? by lazy {
+        FormContract.Args.fromIntent(intent)
     }
 
     @OptIn(ExperimentalMaterialApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        if (args == null) finish()
 
         setContent {
             StripeTheme {
@@ -44,7 +44,7 @@ internal class FormActivity : AppCompatActivity() {
                         finish()
                     }
                 ) {
-                    Text(args.selectedPaymentMethodCode)
+                    Text(args?.selectedPaymentMethodCode ?: "Whoops")
                 }
             }
         }
@@ -54,7 +54,6 @@ internal class FormActivity : AppCompatActivity() {
         super.finish()
         fadeOut()
     }
-
 }
 
 internal sealed interface FormResult : Parcelable {
@@ -81,8 +80,6 @@ internal sealed interface FormResult : Parcelable {
         }
     }
 }
-
-
 
 internal class FormContract : ActivityResultContract<FormContract.Args, FormResult>() {
     override fun createIntent(context: Context, input: Args): Intent {
@@ -112,4 +109,3 @@ internal class FormContract : ActivityResultContract<FormContract.Args, FormResu
         internal const val EXTRA_ARGS: String = "extra_activity_args"
     }
 }
-

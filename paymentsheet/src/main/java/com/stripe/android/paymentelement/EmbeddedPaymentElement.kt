@@ -16,13 +16,10 @@ import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.ExperimentalCardBrandFilteringApi
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.ui.DelegateDrawable
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
-import com.stripe.android.paymentelement.embedded.DefaultEmbeddedActivityLauncher
-import com.stripe.android.paymentelement.embedded.EmbeddedActivityLauncher
 import com.stripe.android.paymentelement.embedded.EmbeddedConfirmationHelper
 import com.stripe.android.paymentelement.embedded.SharedPaymentElementViewModel
 import com.stripe.android.paymentsheet.CreateIntentCallback
@@ -48,6 +45,7 @@ class EmbeddedPaymentElement private constructor(
     init {
         sharedViewModel.initEmbeddedActivityLauncher(activityResultCaller, lifecycleOwner)
     }
+
     /**
      * Contains information about the customer's selected payment option.
      * Use this to display the payment option in your own UI.

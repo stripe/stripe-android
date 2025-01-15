@@ -7,7 +7,7 @@ import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 
 internal interface EmbeddedActivityLauncher {
-    fun launchForm(code: String, paymentMethodMetadata: PaymentMethodMetadata?)
+    var formLauncher: ((code: String, paymentMethodMetadata: PaymentMethodMetadata?) -> Unit)?
 }
 
 internal class DefaultEmbeddedActivityLauncher(
@@ -20,9 +20,14 @@ internal class DefaultEmbeddedActivityLauncher(
         activityResultCaller.registerForActivityResult(
             FormContract()
         ) { result ->
-            if (result is FormResult.Complete){
+            if (result is FormResult.Complete) {
                 selectionHolder.set(result.selection)
             }
+        }
+
+    override var formLauncher: ((code: String, paymentMethodMetadata: PaymentMethodMetadata?) -> Unit)? =
+        { code, metadata ->
+            formActivityLauncher.launch(FormContract.Args(code, metadata))
         }
 
     init {
@@ -30,13 +35,10 @@ internal class DefaultEmbeddedActivityLauncher(
             object : DefaultLifecycleObserver {
                 override fun onDestroy(owner: LifecycleOwner) {
                     formActivityLauncher.unregister()
+                    formLauncher = null
                     super.onDestroy(owner)
                 }
             }
         )
-    }
-
-    override fun launchForm(code: String, paymentMethodMetadata: PaymentMethodMetadata?) {
-        formActivityLauncher.launch(FormContract.Args(code, paymentMethodMetadata))
     }
 }
