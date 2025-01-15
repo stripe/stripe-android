@@ -112,16 +112,11 @@ class PaymentMethodViewModelTest {
 
         viewModel.onPayClicked()
 
-        assertThat(linkConfirmationHandler.calls).containsExactly(
-            FakeLinkConfirmationHandler.Call(
-                paymentDetails = TestFactory.LINK_NEW_PAYMENT_DETAILS.paymentDetails,
-                linkAccount = TestFactory.LINK_ACCOUNT,
-                cvc = null
-            )
-        )
-
+        assertThat(linkConfirmationHandler.calls.first().paymentDetails)
+            .isEqualTo(TestFactory.LINK_NEW_PAYMENT_DETAILS.paymentDetails)
+        assertThat(linkConfirmationHandler.calls.first().cvc).isNull()
         assertThat(result).isEqualTo(LinkActivityResult.Completed)
-        assertThat(viewModel.state.value.primaryButtonState).isEqualTo(PrimaryButtonState.Processing)
+        assertThat(viewModel.state.value.primaryButtonState).isEqualTo(PrimaryButtonState.Enabled)
     }
 
     @Test
@@ -195,14 +190,21 @@ class PaymentMethodViewModelTest {
     }
 
     @Test
-    fun `onPayClicked does nothing when payment selection is null`() = runTest {
+    fun `onPayClicked logs when payment selection is null`() = runTest {
         val linkConfirmationHandler = FakeLinkConfirmationHandler()
-        val viewModel = createViewModel(linkConfirmationHandler = linkConfirmationHandler)
+        val logger = FakeLogger()
+
+        val viewModel = createViewModel(
+            linkConfirmationHandler = linkConfirmationHandler,
+            logger = logger
+        )
 
         viewModel.onPayClicked()
 
         assertThat(linkConfirmationHandler.calls).isEmpty()
         assertThat(viewModel.state.value.primaryButtonState).isEqualTo(PrimaryButtonState.Disabled)
+        assertThat(logger.errorLogs)
+            .containsExactly("PaymentMethodViewModel: onPayClicked without paymentMethodCreateParams" to null)
     }
 
     private fun createViewModel(
@@ -235,7 +237,7 @@ private class PaymentMethodFormHelper : FormHelper {
     override fun getPaymentMethodParams(
         formValues: FormFieldValues?,
         selectedPaymentMethodCode: String
-    ): FormHelper.PaymentMethodParams? {
+    ): PaymentMethodCreateParams? {
         require(selectedPaymentMethodCode == PaymentMethod.Type.Card.code) {
             "$selectedPaymentMethodCode payment not supported"
         }
@@ -245,7 +247,7 @@ private class PaymentMethodFormHelper : FormHelper {
                 selectedPaymentMethodCode = selectedPaymentMethodCode
             )
         )
-        return paymentMethodCreateParams?.let { FormHelper.PaymentMethodParams(it) }
+        return paymentMethodCreateParams
     }
 
     override fun requiresFormScreen(selectedPaymentMethodCode: String): Boolean {

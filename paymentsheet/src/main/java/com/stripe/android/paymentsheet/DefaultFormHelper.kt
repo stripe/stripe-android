@@ -8,6 +8,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -95,15 +96,11 @@ internal class DefaultFormHelper(
     override fun getPaymentMethodParams(
         formValues: FormFieldValues?,
         selectedPaymentMethodCode: String
-    ): FormHelper.PaymentMethodParams? {
-        return formValues?.let {
-            FormHelper.PaymentMethodParams(
-                paymentMethodCreateParams = it.transformToPaymentMethodCreateParams(
-                    paymentMethodCode = selectedPaymentMethodCode,
-                    paymentMethodMetadata = paymentMethodMetadata
-                ),
-            )
-        }
+    ): PaymentMethodCreateParams? {
+        return formValues?.transformToPaymentMethodCreateParams(
+            paymentMethodCode = selectedPaymentMethodCode,
+            paymentMethodMetadata = paymentMethodMetadata
+        )
     }
 
     override fun requiresFormScreen(selectedPaymentMethodCode: String): Boolean {

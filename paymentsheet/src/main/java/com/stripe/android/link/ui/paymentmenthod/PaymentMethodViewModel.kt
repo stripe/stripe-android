@@ -55,7 +55,7 @@ internal class PaymentMethodViewModel @Inject constructor(
         )
         _state.update {
             it.copy(
-                paymentMethodCreateParams = params?.paymentMethodCreateParams,
+                paymentMethodCreateParams = params,
                 primaryButtonState = if (params != null) {
                     PrimaryButtonState.Enabled
                 } else {
@@ -66,7 +66,11 @@ internal class PaymentMethodViewModel @Inject constructor(
     }
 
     fun onPayClicked() {
-        val paymentMethodCreateParams = _state.value.paymentMethodCreateParams ?: return
+        val paymentMethodCreateParams = _state.value.paymentMethodCreateParams
+        if (paymentMethodCreateParams == null) {
+            logger.error("PaymentMethodViewModel: onPayClicked without paymentMethodCreateParams")
+            return
+        }
         viewModelScope.launch {
             updateButtonState(PrimaryButtonState.Processing)
             linkAccountManager.createCardPaymentDetails(paymentMethodCreateParams)
@@ -75,7 +79,6 @@ internal class PaymentMethodViewModel @Inject constructor(
                         performConfirmation(linkPaymentDetails.paymentDetails)
                     },
                     onFailure = { error ->
-                        updateButtonState(PrimaryButtonState.Enabled)
                         _state.update {
                             it.copy(
                                 errorMessage = error.stripeErrorMessage()
@@ -88,6 +91,7 @@ internal class PaymentMethodViewModel @Inject constructor(
                     }
                 )
         }
+        updateButtonState(PrimaryButtonState.Enabled)
     }
 
     private suspend fun performConfirmation(paymentDetails: ConsumerPaymentDetails.PaymentDetails) {
@@ -97,11 +101,8 @@ internal class PaymentMethodViewModel @Inject constructor(
             cvc = null
         )
         when (result) {
-            Result.Canceled -> {
-                updateButtonState(PrimaryButtonState.Enabled)
-            }
+            Result.Canceled -> Unit
             is Result.Failed -> {
-                updateButtonState(PrimaryButtonState.Enabled)
                 _state.update { it.copy(errorMessage = result.message) }
             }
             Result.Succeeded -> {

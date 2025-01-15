@@ -16,11 +16,10 @@ internal interface FormHelper {
 
     fun onFormFieldValuesChanged(formValues: FormFieldValues?, selectedPaymentMethodCode: String)
 
-    fun getPaymentMethodParams(formValues: FormFieldValues?, selectedPaymentMethodCode: String): PaymentMethodParams?
+    fun getPaymentMethodParams(
+        formValues: FormFieldValues?,
+        selectedPaymentMethodCode: String
+    ): PaymentMethodCreateParams?
 
     fun requiresFormScreen(selectedPaymentMethodCode: String): Boolean
-
-    data class PaymentMethodParams(
-        val paymentMethodCreateParams: PaymentMethodCreateParams,
-    )
 }

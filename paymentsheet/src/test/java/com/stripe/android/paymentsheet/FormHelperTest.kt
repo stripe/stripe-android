@@ -175,8 +175,8 @@ internal class FormHelperTest {
         val formHelper = createFormHelper { }
         val params = formHelper.getPaymentMethodParams(formFieldValues, "card")
 
-        assertThat(params?.paymentMethodCreateParams?.let { getNameFromParams(it) }).isEqualTo(name)
-        assertThat(params?.paymentMethodCreateParams?.typeCode).isEqualTo("card")
+        assertThat(params?.let { getNameFromParams(it) }).isEqualTo(name)
+        assertThat(params?.typeCode).isEqualTo("card")
     }
 
     @Test
