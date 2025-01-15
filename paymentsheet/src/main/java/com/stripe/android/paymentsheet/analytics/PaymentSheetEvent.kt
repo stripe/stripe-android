@@ -472,12 +472,13 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         private fun analyticsValue(
             paymentSelection: PaymentSelection?
         ) = when (paymentSelection) {
-            PaymentSelection.GooglePay -> "googlepay"
+            is PaymentSelection.GooglePay -> "googlepay"
             is PaymentSelection.Saved -> "savedpm"
-            PaymentSelection.Link,
+            is PaymentSelection.Link,
             is PaymentSelection.New.LinkInline -> "link"
             is PaymentSelection.New -> "newpm"
-            else -> "unknown"
+            is PaymentSelection.ExternalPaymentMethod -> "epm"
+            null -> "unknown"
         }
 
         private fun formatEventName(mode: EventReporter.Mode, eventName: String): String {
