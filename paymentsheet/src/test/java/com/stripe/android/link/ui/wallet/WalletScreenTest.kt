@@ -274,7 +274,7 @@ internal class WalletScreenTest {
     }
 
     @Test
-    fun `alert is displayed is enabled after expiry update failure`() = runTest(dispatcher) {
+    fun `alert is displayed after expiry update failure`() = runTest(dispatcher) {
         val error = Throwable("oops")
         val expiredCard = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(expiryYear = 1999)
         val linkAccountManager = FakeLinkAccountManager()
@@ -306,6 +306,9 @@ internal class WalletScreenTest {
         composeTestRule.waitForIdle()
 
         onWalletDialogTag()
+            .assertIsDisplayed()
+
+        onWalletDialogButtonTag()
             .assertIsDisplayed()
             .performClick()
 
@@ -666,6 +669,8 @@ internal class WalletScreenTest {
         composeTestRule.onNodeWithTag(WALLET_MENU_SET_AS_DEFAULT_TAG, useUnmergedTree = true)
 
     private fun onWalletDialogTag() = composeTestRule.onNodeWithTag(WALLET_SCREEN_DIALOG_TAG, useUnmergedTree = true)
+
+    private fun onWalletDialogButtonTag() = composeTestRule.onNodeWithTag(WALLET_SCREEN_DIALOG_BUTTON_TAG, useUnmergedTree = true)
 
     private fun onWalletErrorTag() = composeTestRule.onNodeWithTag(WALLET_SCREEN_ERROR_TAG, useUnmergedTree = true)
 }

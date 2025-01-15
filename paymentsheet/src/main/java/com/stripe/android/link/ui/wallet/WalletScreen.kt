@@ -125,6 +125,8 @@ internal fun WalletBody(
             onDismissRequest = onDismissAlert,
             confirmButton = {
                 TextButton(
+                    modifier = Modifier
+                        .testTag(WALLET_SCREEN_DIALOG_BUTTON_TAG),
                     onClick = onDismissAlert
                 ) {
                     Text(
@@ -567,4 +569,5 @@ internal const val WALLET_SCREEN_RECOLLECTION_FORM_FIELDS = "wallet_screen_recol
 internal const val WALLET_SCREEN_BOX = "wallet_screen_box"
 internal const val WALLET_SCREEN_MENU_SHEET_TAG = "wallet_screen_menu_sheet_tag"
 internal const val WALLET_SCREEN_DIALOG_TAG = "wallet_screen_dialog_tag"
+internal const val WALLET_SCREEN_DIALOG_BUTTON_TAG = "wallet_screen_dialog_button_tag"
 internal const val WALLET_SCREEN_ERROR_TAG = "wallet_screen_error_tag"
