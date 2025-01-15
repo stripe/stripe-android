@@ -707,7 +707,7 @@ class PaymentSheetEventTest {
         assertThat(
             newPMEvent.eventName
         ).isEqualTo(
-            "mc_complete_payment_epm_success"
+            "mc_complete_payment_newpm_success"
         )
         assertThat(
             newPMEvent.params
@@ -748,7 +748,7 @@ class PaymentSheetEventTest {
         assertThat(
             newPMEvent.eventName
         ).isEqualTo(
-            "mc_complete_payment_epm_failure"
+            "mc_complete_payment_newpm_failure"
         )
         assertThat(
             newPMEvent.params

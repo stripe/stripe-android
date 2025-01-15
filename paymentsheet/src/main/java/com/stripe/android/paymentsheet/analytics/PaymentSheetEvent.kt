@@ -476,8 +476,8 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
             is PaymentSelection.Saved -> "savedpm"
             is PaymentSelection.Link,
             is PaymentSelection.New.LinkInline -> "link"
+            is PaymentSelection.ExternalPaymentMethod,
             is PaymentSelection.New -> "newpm"
-            is PaymentSelection.ExternalPaymentMethod -> "epm"
             null -> "unknown"
         }
 
