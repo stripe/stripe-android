@@ -40,6 +40,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.unit.dp
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.theme.HorizontalPadding
 import com.stripe.android.link.theme.linkColors
@@ -92,7 +93,6 @@ internal fun WalletScreen(
     )
 }
 
-@SuppressWarnings("LongMethod")
 @Composable
 internal fun WalletBody(
     state: WalletUiState,
@@ -118,23 +118,9 @@ internal fun WalletBody(
     }
 
     if (state.alertMessage != null) {
-        AlertDialog(
-            modifier = Modifier
-                .testTag(WALLET_SCREEN_DIALOG_TAG),
-            text = { Text(state.alertMessage.resolve(context)) },
-            onDismissRequest = onDismissAlert,
-            confirmButton = {
-                TextButton(
-                    modifier = Modifier
-                        .testTag(WALLET_SCREEN_DIALOG_BUTTON_TAG),
-                    onClick = onDismissAlert
-                ) {
-                    Text(
-                        text = android.R.string.ok.resolvableString.resolve(context),
-                        color = MaterialTheme.linkColors.actionLabel
-                    )
-                }
-            }
+        AlertMessage(
+            alertMessage = state.alertMessage,
+            onDismissAlert = onDismissAlert
         )
     }
 
@@ -169,19 +155,7 @@ internal fun WalletBody(
             BankAccountTerms()
         }
 
-        AnimatedVisibility(
-            visible = state.errorMessage != null
-        ) {
-            if (state.errorMessage != null) {
-                ErrorText(
-                    text = state.errorMessage.resolve(context),
-                    modifier = Modifier
-                        .testTag(WALLET_SCREEN_ERROR_TAG)
-                        .fillMaxWidth()
-                        .padding(top = 16.dp)
-                )
-            }
-        }
+        ErrorSection(state.errorMessage)
 
         state.selectedCard?.let { selectedCard ->
             if (selectedCard.requiresCardDetailsRecollection) {
@@ -198,23 +172,53 @@ internal fun WalletBody(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        PrimaryButton(
-            modifier = Modifier
-                .testTag(WALLET_SCREEN_PAY_BUTTON),
-            label = state.primaryButtonLabel.resolve(LocalContext.current),
-            state = state.primaryButtonState,
-            onButtonClick = onPrimaryButtonClick,
-            iconEnd = com.stripe.android.ui.core.R.drawable.stripe_ic_lock
-        )
-
-        SecondaryButton(
-            modifier = Modifier
-                .testTag(WALLET_SCREEN_PAY_ANOTHER_WAY_BUTTON),
-            enabled = !state.primaryButtonState.isBlocking,
-            label = stringResource(id = R.string.stripe_wallet_pay_another_way),
-            onClick = onPayAnotherWayClicked
+        ActionSection(
+            state = state,
+            onPrimaryButtonClick = onPrimaryButtonClick,
+            onPayAnotherWayClicked = onPayAnotherWayClicked
         )
     }
+}
+
+@Composable
+private fun ErrorSection(errorMessage: ResolvableString?) {
+    AnimatedVisibility(
+        visible = errorMessage != null
+    ) {
+        if (errorMessage != null) {
+            ErrorText(
+                text = errorMessage.resolve(LocalContext.current),
+                modifier = Modifier
+                    .testTag(WALLET_SCREEN_ERROR_TAG)
+                    .fillMaxWidth()
+                    .padding(top = 16.dp)
+            )
+        }
+    }
+}
+
+@Composable
+private fun ActionSection(
+    state: WalletUiState,
+    onPrimaryButtonClick: () -> Unit,
+    onPayAnotherWayClicked: () -> Unit
+) {
+    PrimaryButton(
+        modifier = Modifier
+            .testTag(WALLET_SCREEN_PAY_BUTTON),
+        label = state.primaryButtonLabel.resolve(LocalContext.current),
+        state = state.primaryButtonState,
+        onButtonClick = onPrimaryButtonClick,
+        iconEnd = com.stripe.android.ui.core.R.drawable.stripe_ic_lock
+    )
+
+    SecondaryButton(
+        modifier = Modifier
+            .testTag(WALLET_SCREEN_PAY_ANOTHER_WAY_BUTTON),
+        enabled = !state.primaryButtonState.isBlocking,
+        label = stringResource(id = R.string.stripe_wallet_pay_another_way),
+        onClick = onPayAnotherWayClicked
+    )
 }
 
 @Composable
@@ -546,6 +550,32 @@ private fun Loader() {
     ) {
         CircularProgressIndicator()
     }
+}
+
+@Composable
+private fun AlertMessage(
+    alertMessage: ResolvableString,
+    onDismissAlert: () -> Unit
+) {
+    val context = LocalContext.current
+    AlertDialog(
+        modifier = Modifier
+            .testTag(WALLET_SCREEN_DIALOG_TAG),
+        text = { Text(alertMessage.resolve(context)) },
+        onDismissRequest = onDismissAlert,
+        confirmButton = {
+            TextButton(
+                modifier = Modifier
+                    .testTag(WALLET_SCREEN_DIALOG_BUTTON_TAG),
+                onClick = onDismissAlert
+            ) {
+                Text(
+                    text = android.R.string.ok.resolvableString.resolve(context),
+                    color = MaterialTheme.linkColors.actionLabel
+                )
+            }
+        }
+    )
 }
 
 private fun String.replaceHyperlinks() = this.replace(
