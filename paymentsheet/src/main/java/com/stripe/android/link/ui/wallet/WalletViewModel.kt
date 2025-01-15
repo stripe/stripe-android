@@ -94,7 +94,7 @@ internal class WalletViewModel @Inject constructor(
         }
     }
 
-    private fun loadPaymentDetails() {
+    private fun loadPaymentDetails(selectedItemId: String? = null) {
         _uiState.update {
             it.setProcessing()
         }
@@ -105,7 +105,7 @@ internal class WalletViewModel @Inject constructor(
             ).fold(
                 onSuccess = { response ->
                     _uiState.update {
-                        it.updateWithResponse(response)
+                        it.updateWithResponse(response, selectedItemId = selectedItemId)
                     }
 
                     if (response.paymentDetails.isEmpty()) {
@@ -220,6 +220,51 @@ internal class WalletViewModel @Inject constructor(
         dismissWithResult(LinkActivityResult.Canceled(LinkActivityResult.Canceled.Reason.PayAnotherWay))
     }
 
+    fun onRemoveClicked(item: ConsumerPaymentDetails.PaymentDetails) {
+        _uiState.update {
+            it.setProcessing()
+        }
+        viewModelScope.launch {
+            linkAccountManager.deletePaymentDetails(item.id)
+                .fold(
+                    onSuccess = {
+                        loadPaymentDetails(selectedItemId = uiState.value.selectedItem?.id)
+                    },
+                    onFailure = { error ->
+                        updateErrorMessageAndStopProcessing(
+                            error = error,
+                            loggerMessage = "Failed to delete payment method"
+                        )
+                    }
+                )
+        }
+    }
+
+    fun onSetDefaultClicked(item: ConsumerPaymentDetails.PaymentDetails) {
+        _uiState.update {
+            it.setProcessing()
+        }
+        viewModelScope.launch {
+            val updateParams = ConsumerPaymentDetailsUpdateParams(
+                id = item.id,
+                isDefault = true,
+                cardPaymentMethodCreateParamsMap = null
+            )
+            linkAccountManager.updatePaymentDetails(updateParams)
+                .fold(
+                    onSuccess = {
+                        loadPaymentDetails()
+                    },
+                    onFailure = { error ->
+                        updateErrorMessageAndStopProcessing(
+                            error = error,
+                            loggerMessage = "Failed to set payment method as default"
+                        )
+                    }
+                )
+        }
+    }
+
     fun onAddNewPaymentMethodClicked() {
         navigate(LinkScreen.PaymentMethod)
     }
@@ -233,6 +278,22 @@ internal class WalletViewModel @Inject constructor(
     @SuppressWarnings("UnusedParameter")
     fun onEditPaymentMethodClicked(item: ConsumerPaymentDetails.PaymentDetails) {
         navigate(LinkScreen.CardEdit)
+    }
+
+    private fun updateErrorMessageAndStopProcessing(
+        error: Throwable,
+        loggerMessage: String
+    ) {
+        logger.error(
+            msg = "WalletViewModel: $loggerMessage",
+            t = error
+        )
+        _uiState.update {
+            it.copy(
+                alertMessage = error.stripeErrorMessage(),
+                isProcessing = false
+            )
+        }
     }
 
     companion object {

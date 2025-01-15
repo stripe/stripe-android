@@ -33,6 +33,7 @@ internal open class FakeLinkAccountManager : LinkAccountManager {
     )
     var listPaymentDetailsResult: Result<ConsumerPaymentDetails> = Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS)
     var updatePaymentDetailsResult = Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS)
+    var deletePaymentDetailsResult: Result<Unit> = Result.success(Unit)
     var linkAccountFromLookupResult: LinkAccount? = null
     override var consumerPublishableKey: String? = null
 
@@ -88,7 +89,7 @@ internal open class FakeLinkAccountManager : LinkAccountManager {
         return listPaymentDetailsResult
     }
 
-    override suspend fun deletePaymentDetails(paymentDetailsId: String) = Result.success(Unit)
+    override suspend fun deletePaymentDetails(paymentDetailsId: String) = deletePaymentDetailsResult
     override suspend fun updatePaymentDetails(
         updateParams: ConsumerPaymentDetailsUpdateParams
     ): Result<ConsumerPaymentDetails> {

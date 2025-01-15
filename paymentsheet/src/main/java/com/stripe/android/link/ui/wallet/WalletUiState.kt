@@ -55,10 +55,16 @@ internal data class WalletUiState(
 
     fun updateWithResponse(
         response: ConsumerPaymentDetails,
+        selectedItemId: String? = null
     ): WalletUiState {
+        val selectedItem = if (selectedItemId != null) {
+            response.paymentDetails.firstOrNull { it.id == selectedItemId }
+        } else {
+            response.paymentDetails.firstOrNull()
+        }
         return copy(
             paymentDetailsList = response.paymentDetails,
-            selectedItem = response.paymentDetails.firstOrNull(),
+            selectedItem = selectedItem,
             isProcessing = false
         )
     }

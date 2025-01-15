@@ -359,6 +359,115 @@ class WalletViewModelTest {
         assertThat(result).isNull()
     }
 
+    @Test
+    fun `onSetDefaultClicked updates payment method as default successfully`() = runTest(dispatcher) {
+        val card1 = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(id = "card1", isDefault = false)
+        val card2 = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(id = "card2", isDefault = true)
+        val linkAccountManager = WalletLinkAccountManager()
+        linkAccountManager.listPaymentDetailsResult = Result.success(
+            ConsumerPaymentDetails(paymentDetails = listOf(card1, card2))
+        )
+
+        val updatedCard1 = card1.copy(isDefault = true)
+        val updatedCard2 = card2.copy(isDefault = false)
+        linkAccountManager.updatePaymentDetailsResult = Result.success(
+            ConsumerPaymentDetails(paymentDetails = listOf(updatedCard1))
+        )
+
+        val viewModel = createViewModel(linkAccountManager = linkAccountManager)
+
+        linkAccountManager.listPaymentDetailsResult = Result.success(
+            ConsumerPaymentDetails(paymentDetails = listOf(updatedCard1, updatedCard2))
+        )
+
+        viewModel.onSetDefaultClicked(card1)
+
+        assertThat(linkAccountManager.updatePaymentDetailsCalls).containsExactly(
+            ConsumerPaymentDetailsUpdateParams(
+                id = "card1",
+                isDefault = true,
+                cardPaymentMethodCreateParamsMap = null
+            )
+        )
+
+        assertThat(viewModel.uiState.value.paymentDetailsList).containsExactly(updatedCard1, updatedCard2)
+        assertThat(linkAccountManager.listPaymentDetailsCalls.size).isEqualTo(2)
+        assertThat(viewModel.uiState.value.isProcessing).isFalse()
+        assertThat(viewModel.uiState.value.alertMessage).isNull()
+    }
+
+    @Test
+    fun `onSetDefaultClicked handles update failure`() = runTest(dispatcher) {
+        val error = RuntimeException("Update failed")
+        val card = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(id = "card1", isDefault = false)
+        val linkAccountManager = WalletLinkAccountManager()
+        linkAccountManager.listPaymentDetailsResult = Result.success(
+            ConsumerPaymentDetails(paymentDetails = listOf(card))
+        )
+        linkAccountManager.updatePaymentDetailsResult = Result.failure(error)
+
+        val logger = FakeLogger()
+        val viewModel = createViewModel(
+            linkAccountManager = linkAccountManager,
+            logger = logger
+        )
+
+        viewModel.onSetDefaultClicked(card)
+
+        assertThat(viewModel.uiState.value.isProcessing).isFalse()
+        assertThat(viewModel.uiState.value.alertMessage).isEqualTo(error.stripeErrorMessage())
+        assertThat(logger.errorLogs).contains("WalletViewModel: Failed to set payment method as default" to error)
+    }
+
+    @Test
+    fun `onRemoveClicked deletes payment method successfully`() = runTest(dispatcher) {
+        val card1 = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(id = "card1")
+        val card2 = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(id = "card2")
+        val linkAccountManager = WalletLinkAccountManager()
+        linkAccountManager.listPaymentDetailsResult = Result.success(
+            ConsumerPaymentDetails(paymentDetails = listOf(card1, card2))
+        )
+
+        val viewModel = createViewModel(linkAccountManager = linkAccountManager)
+
+        advanceUntilIdle()
+
+        linkAccountManager.listPaymentDetailsResult = Result.success(
+            ConsumerPaymentDetails(paymentDetails = listOf(card2))
+        )
+
+        viewModel.onRemoveClicked(card1)
+
+        assertThat(linkAccountManager.deletePaymentDetailsCalls).containsExactly("card1")
+
+        // Verify that loadPaymentDetails is called after successful deletion
+        assertThat(linkAccountManager.listPaymentDetailsCalls.size).isEqualTo(2)
+        assertThat(viewModel.uiState.value.paymentDetailsList).containsExactly(card2)
+    }
+
+    @Test
+    fun `onRemoveClicked handles deletion failure`() = runTest(dispatcher) {
+        val error = RuntimeException("Deletion failed")
+        val card = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(id = "card1")
+        val linkAccountManager = WalletLinkAccountManager()
+        linkAccountManager.listPaymentDetailsResult = Result.success(
+            ConsumerPaymentDetails(paymentDetails = listOf(card))
+        )
+        linkAccountManager.deletePaymentDetailsResult = Result.failure(error)
+
+        val logger = FakeLogger()
+        val viewModel = createViewModel(
+            linkAccountManager = linkAccountManager,
+            logger = logger
+        )
+
+        viewModel.onRemoveClicked(card)
+
+        assertThat(viewModel.uiState.value.isProcessing).isFalse()
+        assertThat(viewModel.uiState.value.alertMessage).isEqualTo(error.stripeErrorMessage())
+        assertThat(logger.errorLogs).contains("WalletViewModel: Failed to delete payment method" to error)
+    }
+
     private fun createViewModel(
         linkAccountManager: WalletLinkAccountManager = WalletLinkAccountManager(),
         logger: Logger = FakeLogger(),
@@ -383,6 +492,8 @@ class WalletViewModelTest {
 private class WalletLinkAccountManager : FakeLinkAccountManager() {
     val listPaymentDetailsCalls = arrayListOf<Set<String>>()
     val updatePaymentDetailsCalls = arrayListOf<ConsumerPaymentDetailsUpdateParams>()
+    val deletePaymentDetailsCalls = arrayListOf<String>()
+
     override suspend fun listPaymentDetails(paymentMethodTypes: Set<String>): Result<ConsumerPaymentDetails> {
         listPaymentDetailsCalls.add(paymentMethodTypes)
         return super.listPaymentDetails(paymentMethodTypes)
@@ -393,5 +504,10 @@ private class WalletLinkAccountManager : FakeLinkAccountManager() {
     ): Result<ConsumerPaymentDetails> {
         updatePaymentDetailsCalls.add(updateParams)
         return super.updatePaymentDetails(updateParams)
+    }
+
+    override suspend fun deletePaymentDetails(paymentDetailsId: String): Result<Unit> {
+        deletePaymentDetailsCalls.add(paymentDetailsId)
+        return super.deletePaymentDetails(paymentDetailsId)
     }
 }
