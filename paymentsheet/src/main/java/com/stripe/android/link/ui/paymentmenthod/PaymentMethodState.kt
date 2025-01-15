@@ -7,7 +7,6 @@ import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.uicore.elements.FormElement
 
 internal data class PaymentMethodState(
-    val isProcessing: Boolean,
     val formArguments: FormArguments,
     val formElements: List<FormElement>,
     val primaryButtonState: PrimaryButtonState,

@@ -57,7 +57,6 @@ class PaymentMethodViewModelTest {
 
         assertThat(vm.state.value).isEqualTo(
             PaymentMethodState(
-                isProcessing = false,
                 formArguments = TestFactory.CARD_FORM_ARGS,
                 formElements = TestFactory.CARD_FORM_ELEMENTS,
                 primaryButtonState = PrimaryButtonState.Disabled,

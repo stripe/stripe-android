@@ -39,7 +39,6 @@ internal class PaymentMethodViewModel @Inject constructor(
 ) : ViewModel() {
     private val _state = MutableStateFlow(
         PaymentMethodState(
-            isProcessing = false,
             formElements = formHelper.formElementsForCode(PaymentMethod.Type.Card.code),
             formArguments = formHelper.createFormArguments(PaymentMethod.Type.Card.code),
             primaryButtonState = PrimaryButtonState.Disabled,
