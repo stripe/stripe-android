@@ -3,15 +3,19 @@ package com.stripe.android.link.ui.paymentmenthod
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.PrimaryButton
 import com.stripe.android.link.ui.ScrollableTopLevelColumn
-import com.stripe.android.paymentsheet.ui.ErrorMessage
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.PaymentMethodForm
 import com.stripe.android.uicore.utils.collectAsState
 import java.util.UUID
@@ -25,6 +29,12 @@ internal fun PaymentMethodScreen(
     val uuid = rememberSaveable { UUID.randomUUID().toString() }
 
     ScrollableTopLevelColumn {
+        Text(
+            modifier = Modifier
+                .padding(bottom = 32.dp),
+            text = R.string.stripe_add_payment_method.resolvableString.resolve(context),
+            style = MaterialTheme.typography.h2
+        )
         PaymentMethodForm(
             uuid = uuid,
             args = state.formArguments,
@@ -38,11 +48,11 @@ internal fun PaymentMethodScreen(
         AnimatedVisibility(
             visible = state.errorMessage != null
         ) {
-            ErrorMessage(
+            ErrorText(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 16.dp),
-                error = state.errorMessage?.resolve(context).orEmpty()
+                text = state.errorMessage?.resolve(context).orEmpty()
             )
         }
 

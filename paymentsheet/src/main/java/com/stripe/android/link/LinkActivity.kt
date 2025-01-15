@@ -78,7 +78,6 @@ internal class LinkActivity : ComponentActivity() {
                 }
             }
 
-
             EventReporterProvider(
                 eventReporter = vm.eventReporter
             ) {
