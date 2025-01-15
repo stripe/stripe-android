@@ -72,3 +72,52 @@ internal fun PaymentSelection.toConfirmationOption(
         }
     }
 }
+
+internal fun PaymentSelection.toConfirmationOption(
+    linkConfiguration: LinkConfiguration,
+): ConfirmationHandler.Option? {
+    return when (this) {
+        is PaymentSelection.Saved -> PaymentMethodConfirmationOption.Saved(
+            paymentMethod = paymentMethod,
+            optionsParams = paymentMethodOptionsParams,
+        )
+        is PaymentSelection.ExternalPaymentMethod -> ExternalPaymentMethodConfirmationOption(
+            type = type,
+            billingDetails = billingDetails,
+        )
+        is PaymentSelection.New.USBankAccount -> {
+            if (instantDebits != null) {
+                // For Instant Debits, we create the PaymentMethod inside the bank auth flow. Therefore,
+                // we can just use the already created object here.
+                PaymentMethodConfirmationOption.Saved(
+                    paymentMethod = instantDebits.paymentMethod,
+                    optionsParams = paymentMethodOptionsParams,
+                )
+            } else {
+                PaymentMethodConfirmationOption.New(
+                    createParams = paymentMethodCreateParams,
+                    optionsParams = paymentMethodOptionsParams,
+                    shouldSave = customerRequestedSave == PaymentSelection.CustomerRequestedSave.RequestReuse,
+                )
+            }
+        }
+        is PaymentSelection.New -> {
+            if (paymentMethodCreateParams.typeCode == PaymentMethod.Type.BacsDebit.code) {
+                BacsConfirmationOption(
+                    createParams = paymentMethodCreateParams,
+                    optionsParams = paymentMethodOptionsParams,
+                )
+            } else {
+                PaymentMethodConfirmationOption.New(
+                    createParams = paymentMethodCreateParams,
+                    optionsParams = paymentMethodOptionsParams,
+                    shouldSave = customerRequestedSave == PaymentSelection.CustomerRequestedSave.RequestReuse,
+                )
+            }
+        }
+        is PaymentSelection.GooglePay -> null
+        is PaymentSelection.Link -> {
+            LinkConfirmationOption(configuration = linkConfiguration)
+        }
+    }
+}

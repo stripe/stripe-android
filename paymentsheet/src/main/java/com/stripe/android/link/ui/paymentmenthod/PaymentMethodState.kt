@@ -12,5 +12,6 @@ internal data class PaymentMethodState(
     val formElements: List<FormElement>,
     val primaryButtonState: PrimaryButtonState,
     val primaryButtonLabel: ResolvableString,
-    val paymentSelection: PaymentSelection? = null
+    val paymentSelection: PaymentSelection? = null,
+    val errorMessage: ResolvableString? = null
 )
