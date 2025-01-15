@@ -7,6 +7,8 @@ trigger_map:
     pipeline: main-trigger-pipeline
   - pull_request_source_branch: '*'
     pipeline: main-trigger-pipeline
+  - tag: '*'
+    pipeline: sdk-release-pipeline
 app:
   envs:
     - GRADLE_OPTS: -Dkotlin.incremental=false
@@ -25,6 +27,9 @@ pipelines:
       - stage-build-connections-release: { }
       - stage-run-connections-e2e-tests: { }
       - stage-notify-connections-e2e-failure: { }
+  sdk-release-pipeline:
+    stages:
+      - build-and-deploy-connections-example: { }
 stages:
   stage-trigger-run-all:
     workflows:
@@ -57,6 +62,9 @@ stages:
     should_always_run: true
     workflows:
       - notify-connections-e2e-failure: { }
+  stage-build-and-deploy:
+    workflows:
+      - build-and-deploy: { }
 workflows:
   check:
     before_run:
@@ -182,6 +190,28 @@ workflows:
           inputs:
             - event_description: Android E2E tests failing! $BITRISE_BUILD_URL
             - integration_key: $AUX_PAGERDUTY_INTEGRATION_KEY
+  build-and-deploy-connections-example:
+    before_run:
+      - prepare_all
+    steps:
+      - android-build@1:
+          inputs:
+            - build-type: aab
+            - module: financial-connections-example
+      - deploy-to-bitrise-io: {}
+      - sign-apk@1:
+          inputs:
+            - keystore_url: "$ANDROID_KEYSTORE_URL"
+            - keystore_password: "$ANDROID_KEYSTORE_PASSWORD"
+            - keystore_alias: "$ANDROID_KEYSTORE_ALIAS"
+            - private_key_password: "$ANDROID_KEYSTORE_PRIVATE_KEY_PASSWORD"
+      - google-play-deploy@1:
+          inputs:
+            - service_account_json_key_path: "$GOOGLE_PLAY_JSON_KEY"
+            - package_name: "com.stripe.android.financialconnections.example"
+            - track: alpha
+    after_run:
+      - conclude_all
   maestro-paymentsheet:
     before_run:
       - start_emulator
