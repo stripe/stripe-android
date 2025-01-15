@@ -47,7 +47,7 @@ internal interface EmbeddedContentHelper {
         embeddedViewDisplaysMandateText: Boolean,
     )
 
-    fun setEmbeddedActivityLauncher(embeddedActivityLauncher: EmbeddedActivityLauncher)
+    fun setLaunchForm(launchForm: (code: String, paymentMethodMetaData: PaymentMethodMetadata?) -> Unit)
 }
 
 internal fun interface EmbeddedContentHelperFactory {
@@ -82,7 +82,7 @@ internal class DefaultEmbeddedContentHelper @AssistedInject constructor(
     private val _embeddedContent = MutableStateFlow<EmbeddedContent?>(null)
     override val embeddedContent: StateFlow<EmbeddedContent?> = _embeddedContent.asStateFlow()
 
-    private var embeddedActivityLauncher: EmbeddedActivityLauncher? = null
+    private var launchForm: ((code: String, paymentMethodMetaData: PaymentMethodMetadata?) -> Unit)? = null
 
     init {
         coroutineScope.launch {
@@ -123,8 +123,10 @@ internal class DefaultEmbeddedContentHelper @AssistedInject constructor(
         )
     }
 
-    override fun setEmbeddedActivityLauncher(embeddedActivityLauncher: EmbeddedActivityLauncher) {
-        this.embeddedActivityLauncher = embeddedActivityLauncher
+    override fun setLaunchForm(
+        launchForm: (code: String, paymentMethodMetaData: PaymentMethodMetadata?) -> Unit
+    ) {
+        this.launchForm = launchForm
     }
 
     private fun createInteractor(
@@ -169,10 +171,7 @@ internal class DefaultEmbeddedContentHelper @AssistedInject constructor(
             transitionToManageScreen = {
             },
             transitionToFormScreen = {
-                embeddedActivityLauncher?.launchForm(
-                    FormContract.Args(it, state.value?.paymentMethodMetadata),
-                    ::setSelection
-                )
+                launchForm?.invoke(it, state.value?.paymentMethodMetadata)
             },
             paymentMethods = customerStateHolder.paymentMethods,
             mostRecentlySelectedSavedPaymentMethod = customerStateHolder.mostRecentlySelectedSavedPaymentMethod,

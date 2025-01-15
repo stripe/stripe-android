@@ -2,6 +2,8 @@ package com.stripe.android.paymentelement.embedded
 
 import android.content.Context
 import android.content.res.Resources
+import androidx.activity.result.ActivityResultCaller
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -29,6 +31,7 @@ import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.RealLinkConfigurationCoordinator
 import com.stripe.android.link.injection.LinkAnalyticsComponent
 import com.stripe.android.link.injection.LinkComponent
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.EmbeddedPaymentElement.ConfigureResult
 import com.stripe.android.paymentelement.EmbeddedPaymentElement.PaymentOptionDisplayData
@@ -82,8 +85,9 @@ internal class SharedPaymentElementViewModel @Inject constructor(
     @IOContext ioContext: CoroutineContext,
     private val configurationHandler: EmbeddedConfigurationHandler,
     private val paymentOptionDisplayDataFactory: PaymentOptionDisplayDataFactory,
-    private val selectionHolder: EmbeddedSelectionHolder,
+    val selectionHolder: EmbeddedSelectionHolder,
     embeddedContentHelperFactory: EmbeddedContentHelperFactory,
+    private val embeddedActivityLauncherFactory: EmbeddedActivityLauncherFactory
 ) : ViewModel() {
     private val _paymentOption: MutableStateFlow<PaymentOptionDisplayData?> = MutableStateFlow(null)
     val paymentOption: StateFlow<PaymentOptionDisplayData?> = _paymentOption.asStateFlow()
@@ -110,8 +114,13 @@ internal class SharedPaymentElementViewModel @Inject constructor(
         }
     }
 
-    fun setEmbeddedActivityLauncher(embeddedActivityLauncher: EmbeddedActivityLauncher) {
-        embeddedContentHelper.setEmbeddedActivityLauncher(embeddedActivityLauncher)
+    fun initEmbeddedActivityLauncher(activityResultCaller: ActivityResultCaller, lifecycleOwner: LifecycleOwner) {
+        val launcher = embeddedActivityLauncherFactory.create(activityResultCaller, lifecycleOwner)
+        setLaunchForm(launcher::launchForm)
+    }
+
+    private fun setLaunchForm(launch: (code: String, paymentMethodMetaData: PaymentMethodMetadata?) -> Unit) {
+        embeddedContentHelper.setLaunchForm(launch)
     }
 
     suspend fun configure(
@@ -211,6 +220,11 @@ internal interface SharedPaymentElementViewModelModule {
     fun bindsConfigurationHandler(
         handler: DefaultEmbeddedConfigurationHandler
     ): EmbeddedConfigurationHandler
+
+    @Binds
+    fun bindsEmbeddedActivityLauncherFactory(
+        factory: DefaultEmbeddedActivityLauncherFactory
+    ): EmbeddedActivityLauncherFactory
 
     @Singleton
     @Binds

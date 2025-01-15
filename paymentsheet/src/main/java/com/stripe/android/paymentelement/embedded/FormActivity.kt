@@ -20,7 +20,7 @@ import com.stripe.android.uicore.utils.fadeOut
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
 
-class FormActivity : AppCompatActivity() {
+internal class FormActivity : AppCompatActivity() {
     private val args: FormContract.Args by lazy {
         FormContract.Args.fromIntent(intent) ?: throw IllegalStateException(
             "Args required"

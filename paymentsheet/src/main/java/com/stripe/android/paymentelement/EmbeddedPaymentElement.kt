@@ -16,11 +16,13 @@ import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.ExperimentalCardBrandFilteringApi
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.ui.DelegateDrawable
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedActivityLauncher
+import com.stripe.android.paymentelement.embedded.EmbeddedActivityLauncher
 import com.stripe.android.paymentelement.embedded.EmbeddedConfirmationHelper
 import com.stripe.android.paymentelement.embedded.SharedPaymentElementViewModel
 import com.stripe.android.paymentsheet.CreateIntentCallback
@@ -39,11 +41,12 @@ import kotlinx.parcelize.Parcelize
 class EmbeddedPaymentElement private constructor(
     private val embeddedConfirmationHelper: EmbeddedConfirmationHelper,
     private val sharedViewModel: SharedPaymentElementViewModel,
-    private val embeddedActivityLauncher: DefaultEmbeddedActivityLauncher
+    private val activityResultCaller: ActivityResultCaller,
+    private val lifecycleOwner: LifecycleOwner
 ) {
 
     init {
-        sharedViewModel.setEmbeddedActivityLauncher(embeddedActivityLauncher)
+        sharedViewModel.initEmbeddedActivityLauncher(activityResultCaller, lifecycleOwner)
     }
     /**
      * Contains information about the customer's selected payment option.
@@ -509,7 +512,8 @@ class EmbeddedPaymentElement private constructor(
                     confirmationStateSupplier = { sharedViewModel.confirmationStateHolder.state },
                 ),
                 sharedViewModel = sharedViewModel,
-                embeddedActivityLauncher = DefaultEmbeddedActivityLauncher(activityResultCaller, lifecycleOwner)
+                activityResultCaller = activityResultCaller,
+                lifecycleOwner = lifecycleOwner
             )
         }
     }

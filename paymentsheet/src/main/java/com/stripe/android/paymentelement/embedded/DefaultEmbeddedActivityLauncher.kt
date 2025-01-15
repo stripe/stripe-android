@@ -4,38 +4,54 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
-import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 
 internal interface EmbeddedActivityLauncher {
-    fun launchForm(args: FormContract.Args, onSelected: (paymentSelection: PaymentSelection) -> Unit)
+    fun launchForm(code: String, paymentMethodMetadata: PaymentMethodMetadata?)
 }
 
-internal class DefaultEmbeddedActivityLauncher(
-    private val activityResultCaller: ActivityResultCaller,
-    private val lifecycleOwner: LifecycleOwner,
+internal class DefaultEmbeddedActivityLauncher @AssistedInject constructor(
+    @Assisted private val activityResultCaller: ActivityResultCaller,
+    @Assisted private val lifecycleOwner: LifecycleOwner,
+    private val selectionHolder: EmbeddedSelectionHolder
 ) : EmbeddedActivityLauncher {
 
-    private var formActivityLauncher: ActivityResultLauncher<FormContract.Args>? = null
+    private var formActivityLauncher: ActivityResultLauncher<FormContract.Args> =
+        activityResultCaller.registerForActivityResult(
+            FormContract()
+        ) { result ->
+            if (result is FormResult.Complete){
+                selectionHolder.set(result.selection)
+            }
+        }
 
     init {
         lifecycleOwner.lifecycle.addObserver(
             object : DefaultLifecycleObserver {
                 override fun onDestroy(owner: LifecycleOwner) {
-                    formActivityLauncher?.unregister()
+                    formActivityLauncher.unregister()
                     super.onDestroy(owner)
                 }
             }
         )
     }
 
-    override fun launchForm(args: FormContract.Args, onSelected: (paymentSelection: PaymentSelection) -> Unit) {
-        if (formActivityLauncher == null ) {
-            formActivityLauncher = activityResultCaller.registerForActivityResult(
-                FormContract()
-            ) { result ->
-                if (result is FormResult.Complete) onSelected(result.selection)
-            }
-        }
-        formActivityLauncher?.launch(args)
+    override fun launchForm(code: String, paymentMethodMetadata: PaymentMethodMetadata?) {
+        formActivityLauncher.launch(FormContract.Args(code, paymentMethodMetadata))
     }
+}
+
+internal fun interface EmbeddedActivityLauncherFactory {
+    fun create(activityResultCaller: ActivityResultCaller, lifecycleOwner: LifecycleOwner): EmbeddedActivityLauncher
+}
+
+@AssistedFactory
+internal interface DefaultEmbeddedActivityLauncherFactory : EmbeddedActivityLauncherFactory {
+    override fun create(
+        activityResultCaller: ActivityResultCaller,
+        lifecycleOwner: LifecycleOwner
+    ): DefaultEmbeddedActivityLauncher
 }
