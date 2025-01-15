@@ -85,9 +85,8 @@ internal class SharedPaymentElementViewModel @Inject constructor(
     @IOContext ioContext: CoroutineContext,
     private val configurationHandler: EmbeddedConfigurationHandler,
     private val paymentOptionDisplayDataFactory: PaymentOptionDisplayDataFactory,
-    val selectionHolder: EmbeddedSelectionHolder,
+    private val selectionHolder: EmbeddedSelectionHolder,
     embeddedContentHelperFactory: EmbeddedContentHelperFactory,
-    private val embeddedActivityLauncherFactory: EmbeddedActivityLauncherFactory
 ) : ViewModel() {
     private val _paymentOption: MutableStateFlow<PaymentOptionDisplayData?> = MutableStateFlow(null)
     val paymentOption: StateFlow<PaymentOptionDisplayData?> = _paymentOption.asStateFlow()
@@ -115,7 +114,7 @@ internal class SharedPaymentElementViewModel @Inject constructor(
     }
 
     fun initEmbeddedActivityLauncher(activityResultCaller: ActivityResultCaller, lifecycleOwner: LifecycleOwner) {
-        val launcher = embeddedActivityLauncherFactory.create(activityResultCaller, lifecycleOwner)
+        val launcher = DefaultEmbeddedActivityLauncher(activityResultCaller, lifecycleOwner, selectionHolder)
         setLaunchForm(launcher::launchForm)
     }
 
@@ -220,11 +219,6 @@ internal interface SharedPaymentElementViewModelModule {
     fun bindsConfigurationHandler(
         handler: DefaultEmbeddedConfigurationHandler
     ): EmbeddedConfigurationHandler
-
-    @Binds
-    fun bindsEmbeddedActivityLauncherFactory(
-        factory: DefaultEmbeddedActivityLauncherFactory
-    ): EmbeddedActivityLauncherFactory
 
     @Singleton
     @Binds
