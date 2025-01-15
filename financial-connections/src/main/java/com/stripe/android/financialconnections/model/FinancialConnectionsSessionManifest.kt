@@ -72,6 +72,9 @@ internal data class FinancialConnectionsSessionManifest(
     @SerialName(value = "institution_search_disabled")
     val institutionSearchDisabled: Boolean,
 
+    @SerialName(value = "app_verification_enabled")
+    val appVerificationEnabled: Boolean,
+
     @SerialName(value = "livemode")
     val livemode: Boolean,
 

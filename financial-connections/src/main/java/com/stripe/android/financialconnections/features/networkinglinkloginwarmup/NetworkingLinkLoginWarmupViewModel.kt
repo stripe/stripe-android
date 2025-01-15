@@ -28,6 +28,7 @@ import com.stripe.android.financialconnections.presentation.Async
 import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeState
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
+import com.stripe.android.model.EmailSource
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -51,7 +52,9 @@ internal class NetworkingLinkLoginWarmupViewModel @AssistedInject constructor(
             NetworkingLinkLoginWarmupState.Payload(
                 merchantName = manifest.getBusinessName(),
                 redactedEmail = requireNotNull(manifest.getRedactedEmail()),
-                email = requireNotNull(manifest.accountholderCustomerEmailAddress)
+                email = requireNotNull(manifest.accountholderCustomerEmailAddress),
+                sessionId = manifest.id,
+                verifiedFlow = manifest.appVerificationEnabled
             )
         }.execute { copy(payload = it) }
     }
@@ -91,7 +94,12 @@ internal class NetworkingLinkLoginWarmupViewModel @AssistedInject constructor(
         suspend {
             eventTracker.track(Click("click.continue", PANE))
             // Trigger a lookup call to ensure we cache a consumer session for posterior verification.
-            lookupAccount(payload.email)
+            lookupAccount(
+                email = payload.email,
+                emailSource = EmailSource.CUSTOMER_OBJECT,
+                sessionId = payload.sessionId,
+                verifiedFlow = payload.verifiedFlow
+            )
             navigationManager.tryNavigateTo(Destination.NetworkingLinkVerification(referrer = PANE))
         }.execute {
             copy(continueAsync = it)
@@ -193,6 +201,8 @@ internal data class NetworkingLinkLoginWarmupState(
     data class Payload(
         val merchantName: String?,
         val email: String,
-        val redactedEmail: String
+        val redactedEmail: String,
+        val verifiedFlow: Boolean,
+        val sessionId: String
     )
 }

@@ -25,12 +25,15 @@ internal class NetworkingLinkSignupPreviewParameterProvider :
             NetworkingLinkSignupState.Payload(
                 merchantName = "Test",
                 emailController = EmailConfig.createController(""),
+                appVerificationEnabled = false,
+                prefilledEmail = null,
                 phoneController = PhoneNumberController.createPhoneNumberController(
                     initialValue = "",
                     initiallySelectedCountryCode = null,
                 ),
                 isInstantDebits = false,
                 content = networkingLinkSignupPane(),
+                sessionId = "fcsess_1234",
             )
         ),
         validEmail = null,
@@ -44,12 +47,15 @@ internal class NetworkingLinkSignupPreviewParameterProvider :
             NetworkingLinkSignupState.Payload(
                 merchantName = "Test",
                 emailController = EmailConfig.createController("valid@email.com"),
+                appVerificationEnabled = false,
+                prefilledEmail = null,
                 phoneController = PhoneNumberController.createPhoneNumberController(
                     initialValue = "",
                     initiallySelectedCountryCode = null,
                 ),
                 isInstantDebits = false,
                 content = networkingLinkSignupPane(),
+                sessionId = "fcsess_1234",
             )
         ),
         validEmail = "test@test.com",
@@ -69,12 +75,15 @@ internal class NetworkingLinkSignupPreviewParameterProvider :
             NetworkingLinkSignupState.Payload(
                 merchantName = "Test",
                 emailController = EmailConfig.createController("invalid_email.com"),
+                appVerificationEnabled = false,
+                prefilledEmail = null,
                 phoneController = PhoneNumberController.createPhoneNumberController(
                     initialValue = "",
                     initiallySelectedCountryCode = null,
                 ),
                 isInstantDebits = false,
                 content = networkingLinkSignupPane(),
+                sessionId = "fcsess_1234",
             )
         ),
         validEmail = "test@test.com",
@@ -94,12 +103,15 @@ internal class NetworkingLinkSignupPreviewParameterProvider :
             NetworkingLinkSignupState.Payload(
                 merchantName = "Test",
                 emailController = EmailConfig.createController(initialValue = null),
+                appVerificationEnabled = false,
+                prefilledEmail = null,
                 phoneController = PhoneNumberController.createPhoneNumberController(
                     initialValue = "",
                     initiallySelectedCountryCode = null,
                 ),
                 isInstantDebits = true,
                 content = linkLoginPane(),
+                sessionId = "fcsess_1234",
             )
         ),
         validEmail = null,

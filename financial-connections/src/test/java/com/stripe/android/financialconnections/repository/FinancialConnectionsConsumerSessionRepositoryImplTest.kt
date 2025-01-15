@@ -199,7 +199,7 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
         // ensures there's no cached consumer session
         assertThat(repository.getCachedConsumerSession()).isNull()
 
-        val result = repository.lookupConsumerSession(email, clientSecret)
+        val result = repository.postConsumerSession(email, clientSecret)
 
         assertThat(result).isEqualTo(consumerSessionLookup)
 
