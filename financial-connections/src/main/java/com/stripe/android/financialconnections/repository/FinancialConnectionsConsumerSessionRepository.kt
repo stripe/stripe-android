@@ -72,6 +72,7 @@ internal interface FinancialConnectionsConsumerSessionRepository {
 
     suspend fun updateAvailableIncentives(
         sessionId: String,
+        paymentDetailsId: String,
         consumerSessionClientSecret: String,
     ): Result<UpdateAvailableIncentives>
 
@@ -246,10 +247,12 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
 
     override suspend fun updateAvailableIncentives(
         sessionId: String,
+        paymentDetailsId: String,
         consumerSessionClientSecret: String,
     ): Result<UpdateAvailableIncentives> {
         return consumersApiService.updateAvailableIncentives(
             sessionId = sessionId,
+            paymentDetailsId = paymentDetailsId,
             consumerSessionClientSecret = consumerSessionClientSecret,
             requestSurface = requestSurface,
             requestOptions = provideApiRequestOptions(useConsumerPublishableKey = true),

@@ -96,6 +96,7 @@ interface ConsumersApiService {
 
     suspend fun updateAvailableIncentives(
         sessionId: String,
+        paymentDetailsId: String,
         consumerSessionClientSecret: String,
         requestSurface: String,
         requestOptions: ApiRequest.Options,
@@ -325,6 +326,7 @@ class ConsumersApiServiceImpl(
 
     override suspend fun updateAvailableIncentives(
         sessionId: String,
+        paymentDetailsId: String,
         consumerSessionClientSecret: String,
         requestSurface: String,
         requestOptions: ApiRequest.Options,
@@ -338,6 +340,7 @@ class ConsumersApiServiceImpl(
                 params = mapOf(
                     "request_surface" to requestSurface,
                     "session_id" to sessionId,
+                    "payment_details_id" to paymentDetailsId,
                     "credentials" to mapOf(
                         "consumer_session_client_secret" to consumerSessionClientSecret
                     ),

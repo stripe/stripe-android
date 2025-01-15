@@ -63,6 +63,7 @@ internal class RealCreateInstantDebitsResult @Inject constructor(
         val eligibleForIncentive = if (incentiveEligibilitySessionId != null) {
             consumerRepository.updateAvailableIncentives(
                 sessionId = incentiveEligibilitySessionId,
+                paymentDetailsId = paymentDetails.id,
                 consumerSessionClientSecret = clientSecret,
             ).map {
                 it.data.isNotEmpty()
