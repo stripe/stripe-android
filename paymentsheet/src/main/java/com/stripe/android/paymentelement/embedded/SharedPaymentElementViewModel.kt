@@ -208,6 +208,9 @@ internal interface SharedPaymentElementViewModelModule {
         handler: DefaultEmbeddedConfigurationHandler
     ): EmbeddedConfigurationHandler
 
+    @Binds
+    fun bindsWalletsHelper(helper: DefaultEmbeddedWalletsHelper): EmbeddedWalletsHelper
+
     @Singleton
     @Binds
     fun bindsEventReporter(eventReporter: DefaultEventReporter): EventReporter

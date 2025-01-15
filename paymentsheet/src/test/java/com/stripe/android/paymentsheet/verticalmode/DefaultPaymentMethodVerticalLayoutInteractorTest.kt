@@ -625,6 +625,32 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     }
 
     @Test
+    fun stateDoesReturnsWalletPaymentMethodsWhenInEmbeddedAndGooglePayIsNotAvailable() = runScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "cashapp")
+            )
+        ),
+        canShowWalletsInline = true,
+        canShowWalletButtons = false,
+    ) {
+        walletsState.value = WalletsState(
+            link = WalletsState.Link("email@email.com"),
+            googlePay = null,
+            buttonsEnabled = true,
+            dividerTextResource = 0,
+            onGooglePayPressed = {},
+            onLinkPressed = {},
+        )
+        interactor.state.test {
+            awaitItem().run {
+                assertThat(displayablePaymentMethods.map { it.code })
+                    .isEqualTo(listOf("card", "link", "cashapp"))
+            }
+        }
+    }
+
+    @Test
     fun handleViewAction_PaymentMethodSelected_transitionsToFormScreen_whenFieldsAllowUserInteraction() {
         var calledFormScreenFactory = false
         var reportedSelectedPaymentMethodType: PaymentMethodCode? = null
@@ -1041,6 +1067,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         onSelectSavedPaymentMethod: (PaymentMethod) -> Unit = { notImplemented() },
         onUpdatePaymentMethod: (DisplayableSavedPaymentMethod) -> Unit = { notImplemented() },
         canShowWalletsInline: Boolean = false,
+        canShowWalletButtons: Boolean = true,
         updateSelection: (PaymentSelection?) -> Unit = { notImplemented() },
         onMandateTextUpdated: (ResolvableString?) -> Unit = { notImplemented() },
         reportPaymentMethodTypeSelected: (PaymentMethodCode) -> Unit = { notImplemented() },
@@ -1073,6 +1100,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             onSelectSavedPaymentMethod = onSelectSavedPaymentMethod,
             walletsState = walletsState,
             canShowWalletsInline = canShowWalletsInline,
+            canShowWalletButtons = canShowWalletButtons,
             onMandateTextUpdated = onMandateTextUpdated,
             updateSelection = { paymentSelection ->
                 selection.value = paymentSelection

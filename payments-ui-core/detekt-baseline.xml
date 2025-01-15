@@ -14,8 +14,6 @@
     <ID>LongMethod:TransformGoogleToStripeAddressTest.kt$TransformGoogleToStripeAddressTest$@Test fun `test US address with sublocality`()</ID>
     <ID>LongMethod:TransformGoogleToStripeAddressTest.kt$TransformGoogleToStripeAddressTest$@Test fun `test US address without sublocality`()</ID>
     <ID>LongMethod:TransformGoogleToStripeAddressTest.kt$TransformGoogleToStripeAddressTest$@Test fun `test should not combine dependent locality - US`()</ID>
-    <ID>MagicNumber:CardDetailsElement.kt$2000</ID>
-    <ID>MagicNumber:CardDetailsElement.kt$4</ID>
     <ID>MagicNumber:CardNumberVisualTransformation.kt$CardNumberVisualTransformation$14</ID>
     <ID>MagicNumber:CardNumberVisualTransformation.kt$CardNumberVisualTransformation$15</ID>
     <ID>MagicNumber:CardNumberVisualTransformation.kt$CardNumberVisualTransformation$16</ID>

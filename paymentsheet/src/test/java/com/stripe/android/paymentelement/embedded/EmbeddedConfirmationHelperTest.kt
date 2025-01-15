@@ -11,9 +11,13 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
+import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.paymentsheet.utils.LinkTestUtils
 import com.stripe.android.testing.CoroutineTestRule
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
@@ -70,7 +74,27 @@ internal class EmbeddedConfirmationHelperTest {
     fun confirmCallsConfirmationHandlerStart() = testScenario {
         assertThat(confirmationHandler.registerTurbine.awaitItem()).isNotNull()
         confirmationHelper.confirm()
-        assertThat(confirmationHandler.startTurbine.awaitItem()).isNotNull()
+        val args = confirmationHandler.startTurbine.awaitItem()
+        assertThat(args.confirmationOption).isInstanceOf<GooglePayConfirmationOption>()
+    }
+
+    @Test
+    fun confirmCallsConfirmationHandlerStartWithLink() = testScenario(
+        loadedState = defaultLoadedState().copy(
+            selection = PaymentSelection.Link,
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                linkState = LinkState(
+                    configuration = LinkTestUtils.createLinkConfiguration(),
+                    loginState = LinkState.LoginState.NeedsVerification,
+                    signupMode = null,
+                )
+            )
+        )
+    ) {
+        assertThat(confirmationHandler.registerTurbine.awaitItem()).isNotNull()
+        confirmationHelper.confirm()
+        val args = confirmationHandler.startTurbine.awaitItem()
+        assertThat(args.confirmationOption).isInstanceOf<LinkConfirmationOption>()
     }
 
     private fun defaultLoadedState(): EmbeddedConfirmationStateHolder.State {

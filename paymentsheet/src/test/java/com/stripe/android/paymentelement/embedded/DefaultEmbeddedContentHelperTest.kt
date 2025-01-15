@@ -10,6 +10,7 @@ import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedContentHelper.Companion.MANDATE_KEY_EMBEDDED_CONTENT
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedContentHelper.Companion.STATE_KEY_EMBEDDED_CONTENT
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
+import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
@@ -145,6 +146,7 @@ internal class DefaultEmbeddedContentHelperTest {
             workContext = Dispatchers.Unconfined,
             customerRepository = FakeCustomerRepository(),
             selectionHolder = EmbeddedSelectionHolder(savedStateHandle),
+            embeddedWalletsHelper = { stateFlowOf(null) },
         )
         Scenario(
             embeddedContentHelper = embeddedContentHelper,

@@ -50,7 +50,7 @@ internal class EmbeddedConfirmationHelper(
         val confirmationState = confirmationStateSupplier() ?: return null
         val confirmationOption = confirmationState.selection?.toConfirmationOption(
             configuration = confirmationState.configuration.asCommonConfiguration(),
-            linkConfiguration = null,
+            linkConfiguration = confirmationState.paymentMethodMetadata.linkState?.configuration,
         ) ?: return null
 
         return ConfirmationHandler.Args(
