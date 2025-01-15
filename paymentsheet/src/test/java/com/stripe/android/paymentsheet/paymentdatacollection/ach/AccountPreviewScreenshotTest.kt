@@ -151,7 +151,7 @@ internal class AccountPreviewScreenshotTest {
                     sessionId = "session_1234",
                     promoText = "$5",
                     eligibleForPromo = false,
-                    bankName = "SuperDuperUltraLongBankName",
+                    bankName = "SuperDuperUltraLongBankNameOMG",
                 ),
                 instantDebits = true,
                 isPaymentFlow = true,
