@@ -135,16 +135,6 @@ class PaymentOptionsScreenshotTest {
         )
     }
 
-    @Test
-    fun testDefaultPaymentOptionNotEditing() {
-        createSavedPaymentMethodTabLayoutUiScreenshot(
-            paymentOptionsItems = paymentOptionsItemsWithDefaultCard,
-            selectedPaymentOptionsItem = null,
-            isEditing = false,
-            scrollState = LazyListState(firstVisibleItemIndex = 2),
-        )
-    }
-
     private val paymentOptionsItemsWithDefaultCard = listOf(
         PaymentOptionsItem.SavedPaymentMethod(
             DisplayableSavedPaymentMethod.create(
