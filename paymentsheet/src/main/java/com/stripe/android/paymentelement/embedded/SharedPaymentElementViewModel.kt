@@ -110,6 +110,10 @@ internal class SharedPaymentElementViewModel @Inject constructor(
         }
     }
 
+    fun setEmbeddedActivityLauncher(embeddedActivityLauncher: EmbeddedActivityLauncher) {
+        embeddedContentHelper.setEmbeddedActivityLauncher(embeddedActivityLauncher)
+    }
+
     suspend fun configure(
         intentConfiguration: PaymentSheet.IntentConfiguration,
         configuration: EmbeddedPaymentElement.Configuration,

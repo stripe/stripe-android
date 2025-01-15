@@ -20,6 +20,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
+import com.stripe.android.paymentelement.embedded.DefaultEmbeddedActivityLauncher
 import com.stripe.android.paymentelement.embedded.EmbeddedConfirmationHelper
 import com.stripe.android.paymentelement.embedded.SharedPaymentElementViewModel
 import com.stripe.android.paymentsheet.CreateIntentCallback
@@ -38,7 +39,12 @@ import kotlinx.parcelize.Parcelize
 class EmbeddedPaymentElement private constructor(
     private val embeddedConfirmationHelper: EmbeddedConfirmationHelper,
     private val sharedViewModel: SharedPaymentElementViewModel,
+    private val embeddedActivityLauncher: DefaultEmbeddedActivityLauncher
 ) {
+
+    init {
+        sharedViewModel.setEmbeddedActivityLauncher(embeddedActivityLauncher)
+    }
     /**
      * Contains information about the customer's selected payment option.
      * Use this to display the payment option in your own UI.
@@ -503,6 +509,7 @@ class EmbeddedPaymentElement private constructor(
                     confirmationStateSupplier = { sharedViewModel.confirmationStateHolder.state },
                 ),
                 sharedViewModel = sharedViewModel,
+                embeddedActivityLauncher = DefaultEmbeddedActivityLauncher(activityResultCaller, lifecycleOwner)
             )
         }
     }
