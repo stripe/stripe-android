@@ -136,7 +136,6 @@ internal class DefaultPaymentElementLoaderTest {
                 paymentSelection = PaymentSelection.Saved(
                     paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                 ),
-                linkState = null,
                 validationError = null,
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                     stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
@@ -577,7 +576,7 @@ internal class DefaultPaymentElementLoaderTest {
             initializedViaCompose = false,
         ).getOrThrow()
 
-        assertThat(result.linkState?.loginState).isEqualTo(LinkState.LoginState.LoggedIn)
+        assertThat(result.paymentMethodMetadata.linkState?.loginState).isEqualTo(LinkState.LoginState.LoggedIn)
     }
 
     @Test
@@ -590,7 +589,7 @@ internal class DefaultPaymentElementLoaderTest {
             initializedViaCompose = false,
         ).getOrThrow()
 
-        assertThat(result.linkState?.loginState).isEqualTo(LinkState.LoginState.NeedsVerification)
+        assertThat(result.paymentMethodMetadata.linkState?.loginState).isEqualTo(LinkState.LoginState.NeedsVerification)
     }
 
     @Test
@@ -603,7 +602,7 @@ internal class DefaultPaymentElementLoaderTest {
             initializedViaCompose = false,
         ).getOrThrow()
 
-        assertThat(result.linkState?.loginState).isEqualTo(LinkState.LoginState.NeedsVerification)
+        assertThat(result.paymentMethodMetadata.linkState?.loginState).isEqualTo(LinkState.LoginState.NeedsVerification)
     }
 
     @Test
@@ -616,7 +615,7 @@ internal class DefaultPaymentElementLoaderTest {
             initializedViaCompose = false,
         ).getOrThrow()
 
-        assertThat(result.linkState?.loginState).isEqualTo(LinkState.LoginState.LoggedOut)
+        assertThat(result.paymentMethodMetadata.linkState?.loginState).isEqualTo(LinkState.LoginState.LoggedOut)
     }
 
     @Test
@@ -652,7 +651,7 @@ internal class DefaultPaymentElementLoaderTest {
             flags = emptyMap(),
         )
 
-        assertThat(result.linkState?.configuration).isEqualTo(expectedLinkConfig)
+        assertThat(result.paymentMethodMetadata.linkState?.configuration).isEqualTo(expectedLinkConfig)
     }
 
     @Test
@@ -673,7 +672,7 @@ internal class DefaultPaymentElementLoaderTest {
             initializedViaCompose = false,
         ).getOrThrow()
 
-        assertThat(result.linkState?.configuration?.shippingDetails).isNotNull()
+        assertThat(result.paymentMethodMetadata.linkState?.configuration?.shippingDetails).isNotNull()
     }
 
     @Test
@@ -696,7 +695,7 @@ internal class DefaultPaymentElementLoaderTest {
             initializedViaCompose = false,
         ).getOrThrow()
 
-        assertThat(result.linkState?.configuration?.passthroughModeEnabled).isTrue()
+        assertThat(result.paymentMethodMetadata.linkState?.configuration?.passthroughModeEnabled).isTrue()
     }
 
     @Test
@@ -739,7 +738,7 @@ internal class DefaultPaymentElementLoaderTest {
             "link_passthrough_mode_enabled" to true,
         )
 
-        assertThat(result.linkState?.configuration?.flags).containsExactlyEntriesIn(expectedFlags)
+        assertThat(result.paymentMethodMetadata.linkState?.configuration?.flags).containsExactlyEntriesIn(expectedFlags)
     }
 
     @Test
@@ -757,7 +756,7 @@ internal class DefaultPaymentElementLoaderTest {
             initializedViaCompose = false,
         ).getOrThrow()
 
-        val cardBrandChoice = result.linkState?.configuration?.cardBrandChoice
+        val cardBrandChoice = result.paymentMethodMetadata.linkState?.configuration?.cardBrandChoice
 
         assertThat(cardBrandChoice?.eligible).isTrue()
         assertThat(cardBrandChoice?.preferredNetworks).isEqualTo(listOf("cartes_bancaires"))
@@ -778,7 +777,7 @@ internal class DefaultPaymentElementLoaderTest {
             initializedViaCompose = false,
         ).getOrThrow()
 
-        val cardBrandChoice = result.linkState?.configuration?.cardBrandChoice
+        val cardBrandChoice = result.paymentMethodMetadata.linkState?.configuration?.cardBrandChoice
 
         assertThat(cardBrandChoice?.eligible).isFalse()
         assertThat(cardBrandChoice?.preferredNetworks).isEqualTo(listOf("cartes_bancaires"))
@@ -807,7 +806,7 @@ internal class DefaultPaymentElementLoaderTest {
             initializedViaCompose = false,
         ).getOrThrow()
 
-        assertThat(result.linkState?.signupMode).isNull()
+        assertThat(result.paymentMethodMetadata.linkState?.signupMode).isNull()
         assertThat(result.paymentMethodMetadata.linkInlineConfiguration?.signupMode).isNull()
     }
 
@@ -831,7 +830,7 @@ internal class DefaultPaymentElementLoaderTest {
             initializedViaCompose = false,
         ).getOrThrow()
 
-        assertThat(result.linkState?.signupMode).isNull()
+        assertThat(result.paymentMethodMetadata.linkState?.signupMode).isNull()
         assertThat(result.paymentMethodMetadata.linkInlineConfiguration?.signupMode).isNull()
     }
 
@@ -850,7 +849,7 @@ internal class DefaultPaymentElementLoaderTest {
             initializedViaCompose = false,
         ).getOrThrow()
 
-        assertThat(result.linkState?.signupMode).isNull()
+        assertThat(result.paymentMethodMetadata.linkState?.signupMode).isNull()
         assertThat(result.paymentMethodMetadata.linkInlineConfiguration?.signupMode).isNull()
     }
 
@@ -866,7 +865,7 @@ internal class DefaultPaymentElementLoaderTest {
             initializedViaCompose = false,
         ).getOrThrow()
 
-        assertThat(result.linkState?.signupMode).isNull()
+        assertThat(result.paymentMethodMetadata.linkState?.signupMode).isNull()
         assertThat(result.paymentMethodMetadata.linkInlineConfiguration?.signupMode).isNull()
     }
 
@@ -882,7 +881,7 @@ internal class DefaultPaymentElementLoaderTest {
             initializedViaCompose = false,
         ).getOrThrow()
 
-        assertThat(result.linkState?.signupMode).isNull()
+        assertThat(result.paymentMethodMetadata.linkState?.signupMode).isNull()
         assertThat(result.paymentMethodMetadata.linkInlineConfiguration?.signupMode).isNull()
     }
 
@@ -898,7 +897,7 @@ internal class DefaultPaymentElementLoaderTest {
             initializedViaCompose = false,
         ).getOrThrow()
 
-        assertThat(result.linkState?.signupMode).isNull()
+        assertThat(result.paymentMethodMetadata.linkState?.signupMode).isNull()
         assertThat(result.paymentMethodMetadata.linkInlineConfiguration?.signupMode).isNull()
     }
 
@@ -917,7 +916,7 @@ internal class DefaultPaymentElementLoaderTest {
             initializedViaCompose = false,
         ).getOrThrow()
 
-        assertThat(result.linkState?.signupMode).isEqualTo(InsteadOfSaveForFutureUse)
+        assertThat(result.paymentMethodMetadata.linkState?.signupMode).isEqualTo(InsteadOfSaveForFutureUse)
         assertThat(result.paymentMethodMetadata.linkInlineConfiguration?.signupMode)
             .isEqualTo(InsteadOfSaveForFutureUse)
     }
@@ -934,7 +933,7 @@ internal class DefaultPaymentElementLoaderTest {
             initializedViaCompose = false,
         ).getOrThrow()
 
-        assertThat(result.linkState?.signupMode).isEqualTo(InsteadOfSaveForFutureUse)
+        assertThat(result.paymentMethodMetadata.linkState?.signupMode).isEqualTo(InsteadOfSaveForFutureUse)
         assertThat(result.paymentMethodMetadata.linkInlineConfiguration?.signupMode)
             .isEqualTo(InsteadOfSaveForFutureUse)
     }
@@ -960,7 +959,8 @@ internal class DefaultPaymentElementLoaderTest {
             initializedViaCompose = false,
         ).getOrThrow()
 
-        assertThat(result.linkState?.configuration?.customerInfo?.phone).isEqualTo(shippingDetails.phoneNumber)
+        assertThat(result.paymentMethodMetadata.linkState?.configuration?.customerInfo?.phone)
+            .isEqualTo(shippingDetails.phoneNumber)
     }
 
     @Test
@@ -987,7 +987,8 @@ internal class DefaultPaymentElementLoaderTest {
             initializedViaCompose = false,
         ).getOrThrow()
 
-        assertThat(result.linkState?.configuration?.customerInfo?.email).isEqualTo("email@stripe.com")
+        assertThat(result.paymentMethodMetadata.linkState?.configuration?.customerInfo?.email)
+            .isEqualTo("email@stripe.com")
     }
 
     @Test
@@ -1242,7 +1243,7 @@ internal class DefaultPaymentElementLoaderTest {
             initializedViaCompose = false,
         ).getOrThrow()
 
-        assertThat(result.linkState?.signupMode).isEqualTo(InsteadOfSaveForFutureUse)
+        assertThat(result.paymentMethodMetadata.linkState?.signupMode).isEqualTo(InsteadOfSaveForFutureUse)
         assertThat(result.paymentMethodMetadata.linkInlineConfiguration?.signupMode)
             .isEqualTo(InsteadOfSaveForFutureUse)
     }
@@ -1267,7 +1268,7 @@ internal class DefaultPaymentElementLoaderTest {
             initializedViaCompose = false,
         ).getOrThrow()
 
-        assertThat(result.linkState?.signupMode).isEqualTo(AlongsideSaveForFutureUse)
+        assertThat(result.paymentMethodMetadata.linkState?.signupMode).isEqualTo(AlongsideSaveForFutureUse)
         assertThat(result.paymentMethodMetadata.linkInlineConfiguration?.signupMode)
             .isEqualTo(AlongsideSaveForFutureUse)
     }
@@ -1287,7 +1288,7 @@ internal class DefaultPaymentElementLoaderTest {
             initializedViaCompose = false,
         ).getOrThrow()
 
-        assertThat(result.linkState?.signupMode).isEqualTo(InsteadOfSaveForFutureUse)
+        assertThat(result.paymentMethodMetadata.linkState?.signupMode).isEqualTo(InsteadOfSaveForFutureUse)
         assertThat(result.paymentMethodMetadata.linkInlineConfiguration?.signupMode)
             .isEqualTo(InsteadOfSaveForFutureUse)
     }
@@ -1307,7 +1308,7 @@ internal class DefaultPaymentElementLoaderTest {
             initializedViaCompose = false,
         ).getOrThrow()
 
-        assertThat(result.linkState?.signupMode).isEqualTo(AlongsideSaveForFutureUse)
+        assertThat(result.paymentMethodMetadata.linkState?.signupMode).isEqualTo(AlongsideSaveForFutureUse)
         assertThat(result.paymentMethodMetadata.linkInlineConfiguration?.signupMode)
             .isEqualTo(AlongsideSaveForFutureUse)
     }
@@ -1329,7 +1330,7 @@ internal class DefaultPaymentElementLoaderTest {
             initializedViaCompose = false,
         ).getOrThrow()
 
-        assertThat(result.linkState).isNull()
+        assertThat(result.paymentMethodMetadata.linkState).isNull()
         assertThat(result.paymentMethodMetadata.linkInlineConfiguration).isNull()
     }
 

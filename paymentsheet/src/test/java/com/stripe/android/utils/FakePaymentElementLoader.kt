@@ -49,7 +49,6 @@ internal class FakePaymentElementLoader(
                 PaymentElementLoader.State(
                     config = configuration,
                     customer = customer,
-                    linkState = linkState,
                     paymentSelection = paymentSelection,
                     validationError = validationError,
                     paymentMethodMetadata = PaymentMethodMetadataFactory.create(
@@ -61,6 +60,7 @@ internal class FakePaymentElementLoader(
                             .allowsPaymentMethodsRequiringShippingAddress,
                         isGooglePayReady = isGooglePayAvailable,
                         cbcEligibility = cbcEligibility,
+                        linkState = linkState,
                     ),
                 )
             )

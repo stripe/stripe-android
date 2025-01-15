@@ -269,7 +269,6 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
                 PaymentElementLoader.State(
                     config = configuration,
                     customer = null,
-                    linkState = null,
                     paymentSelection = null,
                     validationError = null,
                     paymentMethodMetadata = PaymentMethodMetadataFactory.create(

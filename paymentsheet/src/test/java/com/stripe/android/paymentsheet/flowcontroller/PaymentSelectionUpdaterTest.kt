@@ -361,7 +361,6 @@ class PaymentSelectionUpdaterTest {
             customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
                 paymentMethods = customerPaymentMethods
             ),
-            linkState = null,
             paymentSelection = paymentSelection,
             validationError = null,
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
@@ -392,7 +391,6 @@ class PaymentSelectionUpdaterTest {
             customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
                 paymentMethods = customerPaymentMethods
             ),
-            linkState = null,
             paymentSelection = paymentSelection,
             validationError = null,
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(

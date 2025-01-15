@@ -137,7 +137,6 @@ internal object PaymentSheetFixtures {
             customer = EMPTY_CUSTOMER_STATE,
             config = CONFIG_GOOGLEPAY.asCommonConfiguration(),
             paymentSelection = null,
-            linkState = null,
             validationError = null,
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         ),
@@ -152,7 +151,7 @@ internal object PaymentSheetFixtures {
         stripeIntent: StripeIntent = state.stripeIntent,
         config: PaymentSheet.Configuration = configuration,
         paymentSelection: PaymentSelection? = state.paymentSelection,
-        linkState: LinkState? = state.linkState,
+        linkState: LinkState? = state.paymentMethodMetadata.linkState,
     ): PaymentOptionContract.Args {
         return copy(
             state = state.copy(
@@ -170,10 +169,10 @@ internal object PaymentSheetFixtures {
                 ),
                 config = config.asCommonConfiguration(),
                 paymentSelection = paymentSelection,
-                linkState = linkState,
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                     stripeIntent = stripeIntent,
                     isGooglePayReady = isGooglePayReady,
+                    linkState = linkState,
                 ),
             ),
             configuration = config,
