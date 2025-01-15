@@ -46,8 +46,8 @@ class EmbeddedPaymentElement private constructor(
     val paymentOption: StateFlow<PaymentOptionDisplayData?> = sharedViewModel.paymentOption
 
     /**
-     * Call this method to initialize [EmbeddedPaymentElement] or when the IntentConfiguration values you used to
-     *  initialize [EmbeddedPaymentElement] (amount, currency, etc.) change.
+     * Call this method to configure [EmbeddedPaymentElement] or when the IntentConfiguration values you used to
+     *  configure [EmbeddedPaymentElement] (amount, currency, etc.) change.
      *
      * This ensures the appropriate payment methods are displayed, collect the right fields, etc.
      * - Note: Upon completion, [paymentOption] may become null if it's no longer available.
@@ -71,7 +71,7 @@ class EmbeddedPaymentElement private constructor(
     }
 
     /**
-     * Asynchronously confirms the currently selected payment options.
+     * Asynchronously confirms the currently selected payment option.
      *
      * Results will be delivered to the [ResultCallback] supplied during initialization of [EmbeddedPaymentElement].
      */
@@ -358,7 +358,7 @@ class EmbeddedPaymentElement private constructor(
     }
 
     /**
-     * The result of an [configure] call.
+     * The result of a [configure] call.
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @ExperimentalEmbeddedPaymentElementApi
