@@ -19,6 +19,7 @@ import org.junit.runners.model.Statement
 class PaparazziRule(
     vararg configOptions: List<PaparazziConfigOption>,
     private val boxModifier: Modifier = Modifier,
+    private val includeStripeTheme: Boolean = true,
 ) : TestRule {
 
     private val testCases: List<TestCase> = configOptions.toTestCases()
@@ -66,15 +67,24 @@ class PaparazziRule(
 
                             paparazzi.snapshot {
                                 CompositionLocalProvider(LocalInspectionMode provides true) {
-                                    StripeTheme {
-                                        Surface(color = MaterialTheme.colors.surface) {
-                                            Box(
-                                                contentAlignment = Alignment.Center,
-                                                modifier = boxModifier,
-                                            ) {
-                                                content()
+                                    @Composable
+                                    fun boxContent() {
+                                        Box(
+                                            contentAlignment = Alignment.Center,
+                                            modifier = boxModifier,
+                                        ) {
+                                            content()
+                                        }
+                                    }
+
+                                    if (includeStripeTheme) {
+                                        StripeTheme {
+                                            Surface(color = MaterialTheme.colors.surface) {
+                                                boxContent()
                                             }
                                         }
+                                    } else {
+                                        boxContent()
                                     }
                                 }
                             }
