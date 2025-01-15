@@ -205,7 +205,7 @@ class WalletViewModelTest {
         )
 
         assertThat(linkConfirmationHandler.calls).containsExactly(
-            FakeLinkConfirmationHandler.Call(
+            FakeLinkConfirmationHandler.Call.WithPaymentDetails(
                 paymentDetails = updatedCard,
                 linkAccount = TestFactory.LINK_ACCOUNT,
                 cvc = "123"
@@ -259,7 +259,7 @@ class WalletViewModelTest {
         assertThat(linkAccountManager.updatePaymentDetailsCalls).isEmpty()
 
         assertThat(linkConfirmationHandler.calls).containsExactly(
-            FakeLinkConfirmationHandler.Call(
+            FakeLinkConfirmationHandler.Call.WithPaymentDetails(
                 paymentDetails = validCard,
                 linkAccount = TestFactory.LINK_ACCOUNT,
                 cvc = null
@@ -292,7 +292,7 @@ class WalletViewModelTest {
         assertThat(linkAccountManager.updatePaymentDetailsCalls).isEmpty()
 
         assertThat(linkConfirmationHandler.calls).containsExactly(
-            FakeLinkConfirmationHandler.Call(
+            FakeLinkConfirmationHandler.Call.WithPaymentDetails(
                 paymentDetails = validCard,
                 cvc = null,
                 linkAccount = TestFactory.LINK_ACCOUNT
