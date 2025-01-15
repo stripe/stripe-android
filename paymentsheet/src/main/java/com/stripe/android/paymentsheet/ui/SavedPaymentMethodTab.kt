@@ -8,6 +8,7 @@ import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -138,7 +139,7 @@ private fun SavedPaymentMethodBadge(
         ModifyBadge(
             onModifyAccessibilityDescription = onModifyAccessibilityDescription,
             onPressed = { onModifyListener?.invoke() },
-            modifier = Modifier.offset(x = (-14).dp, y = 1.dp),
+            modifier = Modifier.offset(x = (-14).dp, y = 1.dp).focusable(),
         )
     } else if (isSelected) {
         SelectedBadge(
