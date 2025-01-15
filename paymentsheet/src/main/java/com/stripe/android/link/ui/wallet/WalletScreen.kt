@@ -113,14 +113,7 @@ internal fun WalletBody(
 ) {
     val context = LocalContext.current
     if (state.paymentDetailsList.isEmpty()) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .testTag(WALLET_LOADER_TAG),
-            contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator()
-        }
+        Loader()
         return
     }
 
@@ -177,13 +170,15 @@ internal fun WalletBody(
         AnimatedVisibility(
             visible = state.errorMessage != null
         ) {
-            ErrorText(
-                text = state.errorMessage?.resolve(context).orEmpty(),
-                modifier = Modifier
-                    .testTag(WALLET_SCREEN_ERROR_TAG)
-                    .fillMaxWidth()
-                    .padding(top = 16.dp)
-            )
+            if (state.errorMessage != null) {
+                ErrorText(
+                    text = state.errorMessage.resolve(context),
+                    modifier = Modifier
+                        .testTag(WALLET_SCREEN_ERROR_TAG)
+                        .fillMaxWidth()
+                        .padding(top = 16.dp)
+                )
+            }
         }
 
         state.selectedCard?.let { selectedCard ->
@@ -536,6 +531,18 @@ internal fun CardDetailsRecollectionForm(
             hiddenIdentifiers = emptySet(),
             lastTextFieldIdentifier = rowElement.fields.last().identifier
         )
+    }
+}
+
+@Composable
+private fun Loader() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .testTag(WALLET_LOADER_TAG),
+        contentAlignment = Alignment.Center
+    ) {
+        CircularProgressIndicator()
     }
 }
 

@@ -32,8 +32,8 @@ import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.PrimaryButtonTag
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
-import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.model.CvcCheck
+import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
 import com.stripe.android.ui.core.elements.CvcController
 import com.stripe.android.uicore.elements.DateConfig
@@ -299,11 +299,15 @@ internal class WalletScreenTest {
 
         composeTestRule.waitForIdle()
 
-        onWalletPayButton().assertIsEnabled().performClick()
+        onWalletPayButton()
+            .assertIsEnabled()
+            .performClick()
 
         composeTestRule.waitForIdle()
 
-        onWalletDialogTag().assertIsDisplayed().performClick()
+        onWalletDialogTag()
+            .assertIsDisplayed()
+            .performClick()
 
         composeTestRule.waitForIdle()
 
