@@ -160,6 +160,26 @@ internal class FormHelperTest {
     }
 
     @Test
+    fun `getPaymentMethodParams returns correct payment method params`() {
+        val cardBrand = "visa"
+        val name = "Joe"
+        val customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
+        val formFieldValues = FormFieldValues(
+            fieldValuePairs = mapOf(
+                IdentifierSpec.CardBrand to FormFieldEntry(cardBrand, true),
+                IdentifierSpec.Name to FormFieldEntry(name, true),
+            ),
+            userRequestedReuse = customerRequestedSave,
+        )
+
+        val formHelper = createFormHelper { }
+        val params = formHelper.getPaymentMethodParams(formFieldValues, "card")
+
+        assertThat(params?.let { getNameFromParams(it) }).isEqualTo(name)
+        assertThat(params?.typeCode).isEqualTo("card")
+    }
+
+    @Test
     fun `requiresFormScreen returns false for an LPM with no fields`() {
         val formHelper = createFormHelper(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
