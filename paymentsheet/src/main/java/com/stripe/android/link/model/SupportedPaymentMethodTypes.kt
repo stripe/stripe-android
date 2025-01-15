@@ -23,6 +23,5 @@ internal fun StripeIntent.supportedPaymentMethodTypes(linkAccount: LinkAccount) 
 
 private val supportedPaymentMethodTypes = setOf(
     ConsumerPaymentDetails.Card.TYPE,
-    ConsumerPaymentDetails.BankAccount.TYPE,
     ConsumerPaymentDetails.Passthrough.TYPE
 )
