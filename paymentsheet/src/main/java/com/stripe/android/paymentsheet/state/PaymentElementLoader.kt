@@ -349,7 +349,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         return customerState?.let { state ->
             state.copy(
                 paymentMethods = state.paymentMethods
-                    .withLastUsedPaymentMethodFirst(
+                    .withDefaultPaymentMethodOrLastUsedPaymentMethodFirst(
                         savedSelection = savedSelection.await(),
                         defaultPaymentMethodId = state.defaultPaymentMethodId
                     ).filter { cardBrandFilter.isAccepted(it) }
@@ -719,7 +719,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     }
 }
 
-private fun List<PaymentMethod>.withLastUsedPaymentMethodFirst(
+private fun List<PaymentMethod>.withDefaultPaymentMethodOrLastUsedPaymentMethodFirst(
     savedSelection: SavedSelection,
     defaultPaymentMethodId: String?
 ): List<PaymentMethod> {
