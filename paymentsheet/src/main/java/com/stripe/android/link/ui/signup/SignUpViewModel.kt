@@ -67,6 +67,8 @@ internal class SignUpViewModel @Inject constructor(
     )
 
     val state: StateFlow<SignUpScreenState> = _state
+    private var emailHasChanged = false
+
 
     init {
         viewModelScope.launch {
@@ -102,11 +104,36 @@ internal class SignUpViewModel @Inject constructor(
         }.collectLatest { email ->
             delay(LOOKUP_DEBOUNCE)
             if (email != null) {
-                updateSignUpState(SignUpState.InputtingRemainingFields)
+                if (email != configuration.customerInfo.email || emailHasChanged) {
+                    lookupEmail(email)
+                } else {
+                    updateSignUpState(SignUpState.InputtingRemainingFields)
+                }
             } else {
                 updateSignUpState(SignUpState.InputtingPrimaryField)
             }
+
+            if (email != configuration.customerInfo.email) {
+                emailHasChanged = true
+            }
         }
+    }
+
+    private suspend fun lookupEmail(email: String) {
+        linkAccountManager.lookupConsumer(email)
+            .fold(
+                onSuccess = { linkAccount ->
+                    if (linkAccount != null) {
+                        onAccountFetched(linkAccount)
+                        linkEventsReporter.onSignupCompleted()
+                    } else {
+                        updateSignUpState(SignUpState.InputtingRemainingFields)
+                    }
+                },
+                onFailure = {
+                    updateSignUpState(SignUpState.InputtingRemainingFields)
+                }
+            )
     }
 
     fun onSignUpClick() {
