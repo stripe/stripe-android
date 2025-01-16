@@ -322,6 +322,7 @@ class PaymentSheet internal constructor(
      * @param onBehalfOf The account (if any) for which the funds of the intent are intended. See
      * [our docs](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-on_behalf_of) for more info.
      */
+    @Poko
     @Parcelize
     class IntentConfiguration @JvmOverloads constructor(
         val mode: Mode,
