@@ -22,7 +22,6 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.DefaultFormHelper
 import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.forms.FormFieldValues
-import com.stripe.android.uicore.elements.IdentifierSpec
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -49,14 +48,11 @@ internal class PaymentMethodViewModel @Inject constructor(
 
     val state: StateFlow<PaymentMethodState> = _state
 
-    private val cvcState = MutableStateFlow<String?>(null)
-
     fun formValuesChanged(formValues: FormFieldValues?) {
         val paymentMethodCreateParams = formHelper.getPaymentMethodParams(
             formValues = formValues,
             selectedPaymentMethodCode = PaymentMethod.Type.Card.code
         )
-        cvcState.value = formValues?.fieldValuePairs?.get(IdentifierSpec.CardCvc)?.value
         _state.update {
             it.copy(
                 paymentMethodCreateParams = paymentMethodCreateParams,
@@ -80,9 +76,10 @@ internal class PaymentMethodViewModel @Inject constructor(
             linkAccountManager.createCardPaymentDetails(paymentMethodCreateParams)
                 .fold(
                     onSuccess = { linkPaymentDetails ->
+                        val cardMap = paymentMethodCreateParams.toParamMap()["card"] as? Map<*, *>?
                         performConfirmation(
                             paymentDetails = linkPaymentDetails.paymentDetails,
-                            cvc = cvcState.value
+                            cvc = cardMap?.get("cvc") as? String?
                         )
                         updateButtonState(PrimaryButtonState.Enabled)
                     },
