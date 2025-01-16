@@ -77,7 +77,10 @@ internal class PaymentMethodViewModel @Inject constructor(
                 .fold(
                     onSuccess = { linkPaymentDetails ->
                         val cardMap = paymentMethodCreateParams.toParamMap()["card"] as? Map<*, *>?
-                        performConfirmation(linkPaymentDetails.paymentDetails, cardMap?.get("cvc") as? String?)
+                        performConfirmation(
+                            paymentDetails = linkPaymentDetails.paymentDetails,
+                            cvc = cardMap?.get("cvc") as? String?
+                        )
                         updateButtonState(PrimaryButtonState.Enabled)
                     },
                     onFailure = { error ->
