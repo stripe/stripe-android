@@ -1,14 +1,8 @@
 package com.stripe.android.link
 
-import android.app.Activity
-import android.content.Intent
 import android.os.Parcelable
-import android.util.Base64
-import androidx.core.os.BundleCompat
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import kotlinx.parcelize.Parcelize
-import org.json.JSONObject
 
 internal sealed class LinkActivityResult : Parcelable {
     /**

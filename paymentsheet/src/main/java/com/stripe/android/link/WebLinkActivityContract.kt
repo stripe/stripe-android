@@ -79,6 +79,7 @@ internal class WebLinkActivityContract @Inject internal constructor(
         }
     }
 
+    @SuppressWarnings("TooGenericExceptionCaught", "SwallowedException")
     private fun String.parsePaymentMethod(): PaymentMethod? = try {
         val decodedPaymentMethod = String(Base64.decode(this, 0), Charsets.UTF_8)
         val paymentMethod = PaymentMethodJsonParser()

@@ -3,9 +3,11 @@ package com.stripe.android.link
 import android.app.Activity
 import android.content.Intent
 import androidx.core.os.BundleCompat
+import androidx.core.os.bundleOf
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.model.PaymentMethodFixtures
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -50,11 +52,57 @@ class NativeLinkActivityContractTest {
     }
 
     @Test
+    fun `complete with result from native link`() {
+        val expectedResult = LinkActivityResult.PaymentMethodObtained(
+            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        )
+
+        val contract = NativeLinkActivityContract()
+
+        val result = contract.parseResult(
+            resultCode = LinkActivity.RESULT_COMPLETE,
+            intent = intent(expectedResult)
+        )
+
+        assertThat(result).isEqualTo(expectedResult)
+    }
+
+    @Test
+    fun `complete with canceled result when result not found`() {
+        val contract = NativeLinkActivityContract()
+
+        val result = contract.parseResult(
+            resultCode = LinkActivity.RESULT_COMPLETE,
+            intent = Intent()
+        )
+
+        assertThat(result).isEqualTo(LinkActivityResult.Canceled())
+    }
+
+    @Test
+    fun `unknown result code results in canceled`() {
+        val contract = NativeLinkActivityContract()
+
+        val result = contract.parseResult(42, Intent())
+
+        assertThat(result).isEqualTo(LinkActivityResult.Canceled())
+    }
+
+    @Test
     fun `canceled result code is handled correctly`() {
         val contract = NativeLinkActivityContract()
 
         val result = contract.parseResult(Activity.RESULT_CANCELED, Intent())
 
         assertThat(result).isEqualTo(LinkActivityResult.Canceled())
+    }
+
+    private fun intent(result: LinkActivityResult): Intent {
+        val bundle = bundleOf(
+            LinkActivityContract.EXTRA_RESULT to result
+        )
+        return Intent().apply {
+            putExtras(bundle)
+        }
     }
 }

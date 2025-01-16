@@ -8,8 +8,8 @@ import androidx.core.os.BundleCompat
 import com.stripe.android.PaymentConfiguration
 import javax.inject.Inject
 
-internal class NativeLinkActivityContract @Inject constructor(
-) : ActivityResultContract<LinkActivityContract.Args, LinkActivityResult>() {
+internal class NativeLinkActivityContract @Inject constructor() :
+    ActivityResultContract<LinkActivityContract.Args, LinkActivityResult>() {
     override fun createIntent(context: Context, input: LinkActivityContract.Args): Intent {
         val paymentConfiguration = PaymentConfiguration.getInstance(context)
         return LinkActivity.createIntent(

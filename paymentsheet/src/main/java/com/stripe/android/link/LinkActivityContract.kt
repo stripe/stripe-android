@@ -43,6 +43,6 @@ internal class LinkActivityContract @Inject internal constructor(
     companion object {
         internal const val EXTRA_RESULT =
             "com.stripe.android.link.LinkActivityContract.extra_result"
-        private const val EXTRA_USED_NATIVE_CONTRACT = "used_native_contract"
+        internal const val EXTRA_USED_NATIVE_CONTRACT = "used_native_contract"
     }
 }
