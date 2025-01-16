@@ -43,6 +43,7 @@ class IntegrityStandardRequestManager(
         if (integrityTokenProvider != null) {
             return Result.success(Unit)
         }
+        throw Exception("hi")
 
         val finishedTask: Task<StandardIntegrityTokenProvider> = standardIntegrityManager
             .prepareIntegrityToken(

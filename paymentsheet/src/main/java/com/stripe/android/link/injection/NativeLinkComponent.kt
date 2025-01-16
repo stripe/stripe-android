@@ -1,11 +1,13 @@
 package com.stripe.android.link.injection
 
+import android.app.Application
 import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
+import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkActivityViewModel
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.account.LinkAccountManager
@@ -36,6 +38,7 @@ internal interface NativeLinkComponent {
     val linkEventsReporter: LinkEventsReporter
     val logger: Logger
     val linkConfirmationHandlerFactory: LinkConfirmationHandler.Factory
+    val linkActivityContract: LinkActivityContract
     val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory
     val viewModel: LinkActivityViewModel
 
@@ -58,6 +61,9 @@ internal interface NativeLinkComponent {
 
         @BindsInstance
         fun statusBarColor(@Named(STATUS_BAR_COLOR) statusBarColor: Int?): Builder
+
+        @BindsInstance
+        fun application(application: Application): Builder
 
         fun build(): NativeLinkComponent
     }

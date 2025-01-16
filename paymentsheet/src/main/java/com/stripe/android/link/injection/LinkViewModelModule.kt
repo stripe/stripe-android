@@ -1,8 +1,10 @@
 package com.stripe.android.link.injection
 
+import com.stripe.android.core.Logger
 import com.stripe.android.link.LinkActivityViewModel
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.paymentelement.confirmation.DefaultConfirmationHandler
+import com.stripe.attestation.IntegrityRequestManager
 import dagger.Module
 import dagger.Provides
 
@@ -13,12 +15,16 @@ internal object LinkViewModelModule {
     fun provideLinkActivityViewModel(
         component: NativeLinkComponent,
         defaultConfirmationHandlerFactory: DefaultConfirmationHandler.Factory,
-        linkAccountManager: LinkAccountManager
+        linkAccountManager: LinkAccountManager,
+        logger: Logger,
+        integrityRequestManager: IntegrityRequestManager
     ): LinkActivityViewModel {
         return LinkActivityViewModel(
-            component,
-            defaultConfirmationHandlerFactory,
-            linkAccountManager
+            activityRetainedComponent = component,
+            confirmationHandlerFactory = defaultConfirmationHandlerFactory,
+            linkAccountManager = linkAccountManager,
+            logger = logger,
+            integrityRequestManager = integrityRequestManager
         )
     }
 }
