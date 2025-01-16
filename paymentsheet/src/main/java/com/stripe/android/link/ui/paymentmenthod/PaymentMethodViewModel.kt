@@ -76,7 +76,7 @@ internal class PaymentMethodViewModel @Inject constructor(
             linkAccountManager.createCardPaymentDetails(paymentMethodCreateParams)
                 .fold(
                     onSuccess = { linkPaymentDetails ->
-                        val cardMap = paymentMethodCreateParams.toParamMap()["card"] as? Map<String, Any?>?
+                        val cardMap = paymentMethodCreateParams.toParamMap()["card"] as? Map<*, *>?
                         performConfirmation(linkPaymentDetails.paymentDetails, cardMap?.get("cvc") as? String?)
                         updateButtonState(PrimaryButtonState.Enabled)
                     },

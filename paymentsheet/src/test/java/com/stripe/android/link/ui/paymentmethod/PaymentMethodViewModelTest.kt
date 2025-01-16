@@ -109,7 +109,7 @@ class PaymentMethodViewModelTest {
 
         assertThat(linkConfirmationHandler.calls.first().paymentDetails)
             .isEqualTo(TestFactory.LINK_NEW_PAYMENT_DETAILS.paymentDetails)
-        assertThat(linkConfirmationHandler.calls.first().cvc).isNull()
+        assertThat(linkConfirmationHandler.calls.first().cvc).isEqualTo("111")
         assertThat(result).isEqualTo(LinkActivityResult.Completed)
         assertThat(viewModel.state.value.primaryButtonState).isEqualTo(PrimaryButtonState.Enabled)
     }
