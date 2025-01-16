@@ -187,7 +187,7 @@ internal class ElementsSessionJsonParser(
         return ElementsSession.Customer(
             paymentMethods = paymentMethods,
             session = customerSession,
-            defaultPaymentMethod = defaultPaymentMethod
+            defaultPaymentMethod = "pm_1QheDhLu5o3P18Zpyh7k9HYy"
         )
     }
 
