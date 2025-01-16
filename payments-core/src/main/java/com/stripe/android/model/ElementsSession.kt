@@ -37,7 +37,7 @@ data class ElementsSession(
             return (allowsLink && hasValidFundingSource) || linkPassthroughModeEnabled
         }
 
-    val isNativeLinkEnabled: Boolean
+    val useAttestationEndpointsForLink: Boolean
         get() = linkSettings?.useAttestationEndpoints ?: false
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

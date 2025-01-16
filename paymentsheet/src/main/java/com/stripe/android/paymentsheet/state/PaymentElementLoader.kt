@@ -396,7 +396,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 passthroughModeEnabled = elementsSession.linkPassthroughModeEnabled,
                 linkSignUpDisabled = elementsSession.disableLinkSignup,
                 flags = elementsSession.linkFlags,
-                nativeLinkEnabled = elementsSession.isNativeLinkEnabled
+                useAttestationEndpointsForLink = elementsSession.useAttestationEndpointsForLink
             )
         } else {
             null
@@ -411,7 +411,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         passthroughModeEnabled: Boolean,
         linkSignUpDisabled: Boolean,
         flags: Map<String, Boolean>,
-        nativeLinkEnabled: Boolean
+        useAttestationEndpointsForLink: Boolean
     ): LinkState {
         val linkConfig = createLinkConfiguration(
             configuration = configuration,
@@ -420,7 +420,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             merchantCountry = merchantCountry,
             passthroughModeEnabled = passthroughModeEnabled,
             flags = flags,
-            nativeLinkEnabled = nativeLinkEnabled
+            useAttestationEndpointsForLink = useAttestationEndpointsForLink
         )
 
         val accountStatus = accountStatusProvider(linkConfig)
@@ -470,7 +470,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         merchantCountry: String?,
         passthroughModeEnabled: Boolean,
         flags: Map<String, Boolean>,
-        nativeLinkEnabled: Boolean
+        useAttestationEndpointsForLink: Boolean
     ): LinkConfiguration {
         val shippingDetails: AddressDetails? = configuration.shippingDetails
 
@@ -515,7 +515,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             passthroughModeEnabled = passthroughModeEnabled,
             cardBrandChoice = cardBrandChoice,
             flags = flags,
-            nativeLinkEnabled = nativeLinkEnabled
+            useAttestationEndpointsForLink = elementsSession.stripeIntent.isLiveMode.not() || useAttestationEndpointsForLink
         )
     }
 
