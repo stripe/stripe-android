@@ -515,7 +515,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             passthroughModeEnabled = passthroughModeEnabled,
             cardBrandChoice = cardBrandChoice,
             flags = flags,
-            useAttestationEndpointsForLink = elementsSession.stripeIntent.isLiveMode.not() || useAttestationEndpointsForLink
+            useAttestationEndpointsForLink = useAttestationEndpointsForLink
         )
     }
 
