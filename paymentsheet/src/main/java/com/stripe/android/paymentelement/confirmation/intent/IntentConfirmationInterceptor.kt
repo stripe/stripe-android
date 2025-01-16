@@ -25,6 +25,7 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import javax.inject.Inject
 import javax.inject.Named
+import com.stripe.android.R as PaymentsCoreR
 
 internal interface IntentConfirmationInterceptor {
 
@@ -251,9 +252,16 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
             }
 
             else -> {
-                error(
-                    "${CreateIntentCallback::class.java.simpleName} must be implemented " +
-                        "when using IntentConfiguration with PaymentSheet"
+                val error = "${CreateIntentCallback::class.java.simpleName} must be implemented " +
+                    "when using IntentConfiguration with PaymentSheet"
+
+                NextStep.Fail(
+                    cause = IllegalStateException(error),
+                    message = if (requestOptions.apiKeyIsLiveMode) {
+                        PaymentsCoreR.string.stripe_internal_error.resolvableString
+                    } else {
+                        error.resolvableString
+                    }
                 )
             }
         }

@@ -36,7 +36,7 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import java.util.Objects
-import kotlin.test.assertFailsWith
+import com.stripe.android.R as PaymentsCoreR
 
 @RunWith(RobolectricTestRunner::class)
 class DefaultIntentConfirmationInterceptorTest {
@@ -126,30 +126,32 @@ class DefaultIntentConfirmationInterceptorTest {
     fun `Fails if invoked without a confirm callback for existing payment method`() = runTest {
         val interceptor = DefaultIntentConfirmationInterceptor(
             stripeRepository = object : AbsFakeStripeRepository() {},
-            publishableKeyProvider = { "pk" },
+            publishableKeyProvider = { "pk_test_123" },
             stripeAccountIdProvider = { null },
             allowsManualConfirmation = false,
         )
 
-        val error = assertFailsWith<IllegalStateException> {
-            interceptor.intercept(
-                initializationMode = InitializationMode.DeferredIntent(
-                    intentConfiguration = PaymentSheet.IntentConfiguration(
-                        mode = PaymentSheet.IntentConfiguration.Mode.Payment(
-                            amount = 1099L,
-                            currency = "usd",
-                        ),
+        val nextStep = interceptor.intercept(
+            initializationMode = InitializationMode.DeferredIntent(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 1099L,
+                        currency = "usd",
                     ),
                 ),
-                paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
-                paymentMethodOptionsParams = null,
-                shippingValues = null,
-            )
-        }
-
-        assertThat(error.message).isEqualTo(
-            "CreateIntentCallback must be implemented when using IntentConfiguration with PaymentSheet"
+            ),
+            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+            paymentMethodOptionsParams = null,
+            shippingValues = null,
         )
+
+        assertThat(nextStep).isInstanceOf<IntentConfirmationInterceptor.NextStep.Fail>()
+
+        val failedStep = nextStep.asFail()
+
+        assertThat(failedStep.cause).isInstanceOf<IllegalStateException>()
+        assertThat(failedStep.cause.message).isEqualTo(CREATE_INTENT_CALLBACK_MESSAGE)
+        assertThat(failedStep.message).isEqualTo(CREATE_INTENT_CALLBACK_MESSAGE.resolvableString)
     }
 
     @Test
@@ -163,23 +165,57 @@ class DefaultIntentConfirmationInterceptorTest {
                     return Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
                 }
             },
-            publishableKeyProvider = { "pk" },
+            publishableKeyProvider = { "pk_test_123" },
             stripeAccountIdProvider = { null },
             allowsManualConfirmation = false,
         )
 
-        val error = assertFailsWith<IllegalStateException> {
-            interceptor.intercept(
-                initializationMode = InitializationMode.DeferredIntent(mock()),
-                paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-                shippingValues = null,
-                customerRequestedSave = false,
-            )
-        }
-
-        assertThat(error.message).isEqualTo(
-            "CreateIntentCallback must be implemented when using IntentConfiguration with PaymentSheet"
+        val nextStep = interceptor.intercept(
+            initializationMode = InitializationMode.DeferredIntent(mock()),
+            paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+            shippingValues = null,
+            customerRequestedSave = false,
         )
+
+        assertThat(nextStep).isInstanceOf<IntentConfirmationInterceptor.NextStep.Fail>()
+
+        val failedStep = nextStep.asFail()
+
+        assertThat(failedStep.cause).isInstanceOf<IllegalStateException>()
+        assertThat(failedStep.cause.message).isEqualTo(CREATE_INTENT_CALLBACK_MESSAGE)
+        assertThat(failedStep.message).isEqualTo(CREATE_INTENT_CALLBACK_MESSAGE.resolvableString)
+    }
+
+    @Test
+    fun `Message for live key when error without confirm callback is user friendly`() = runTest {
+        val interceptor = DefaultIntentConfirmationInterceptor(
+            stripeRepository = object : AbsFakeStripeRepository() {},
+            publishableKeyProvider = { "pk_live_123" },
+            stripeAccountIdProvider = { null },
+            allowsManualConfirmation = false,
+        )
+
+        val nextStep = interceptor.intercept(
+            initializationMode = InitializationMode.DeferredIntent(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 1099L,
+                        currency = "usd",
+                    ),
+                ),
+            ),
+            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+            paymentMethodOptionsParams = null,
+            shippingValues = null,
+        )
+
+        assertThat(nextStep).isInstanceOf<IntentConfirmationInterceptor.NextStep.Fail>()
+
+        val failedStep = nextStep.asFail()
+
+        assertThat(failedStep.cause).isInstanceOf<IllegalStateException>()
+        assertThat(failedStep.cause.message).isEqualTo(CREATE_INTENT_CALLBACK_MESSAGE)
+        assertThat(failedStep.message).isEqualTo(PaymentsCoreR.string.stripe_internal_error.resolvableString)
     }
 
     @Test
@@ -641,5 +677,10 @@ class DefaultIntentConfirmationInterceptorTest {
         override fun equals(other: Any?): Boolean {
             return other is TestException && other.message == message
         }
+    }
+
+    private companion object {
+        const val CREATE_INTENT_CALLBACK_MESSAGE =
+            "CreateIntentCallback must be implemented when using IntentConfiguration with PaymentSheet"
     }
 }
