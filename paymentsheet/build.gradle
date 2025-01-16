@@ -12,6 +12,7 @@ dependencies {
     implementation project(':payments-ui-core')
     implementation project(':stripe-ui-core')
     compileOnly project(':financial-connections')
+    implementation project(":stripe-attestation")
 
     // Kotlin
     implementation libs.kotlin.coroutines

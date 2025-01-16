@@ -1,5 +1,6 @@
 package com.stripe.android.link.injection
 
+import android.app.Application
 import android.content.Context
 import androidx.core.os.LocaleListCompat
 import com.stripe.android.BuildConfig
@@ -38,11 +39,15 @@ import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.repository.ConsumersApiService
 import com.stripe.android.repository.ConsumersApiServiceImpl
+import com.stripe.attestation.IntegrityRequestManager
+import com.stripe.attestation.IntegrityStandardRequestManager
+import com.stripe.attestation.RealStandardIntegrityManagerFactory
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.Dispatchers
 import javax.inject.Named
+import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
 @Module
@@ -163,6 +168,14 @@ internal interface NativeLinkModule {
 
         @Provides
         @NativeLinkScope
+        fun providesIntegrityStandardRequestManager(
+            context: Application
+        ): IntegrityRequestManager = IntegrityStandardRequestManager(
+            cloudProjectNumber = 577365562050, // stripe-payments-sdk-prod
+            logError = { message, error -> Logger.getInstance(com.stripe.attestation.BuildConfig.DEBUG).error(message, error) },
+            factory = RealStandardIntegrityManagerFactory(context)
+        )
+
         fun provideEventReporterMode(): EventReporter.Mode = EventReporter.Mode.Custom
     }
 }
