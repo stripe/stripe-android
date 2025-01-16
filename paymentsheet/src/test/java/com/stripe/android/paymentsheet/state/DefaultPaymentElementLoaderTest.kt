@@ -1955,170 +1955,91 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `Emits correct loaded event when Link is unavailable`() = runTest {
-        val loader = createPaymentElementLoader(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+        testEmitsCorrectEvent(
+            givenStripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("card"),
-            )
-        )
-
-        loader.load(
+            ),
+            givenLinkSettings = null,
             initializationMode = DEFAULT_INITIALIZATION_MODE,
-            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
-            initializedViaCompose = true,
-        )
-
-        verify(eventReporter).onLoadSucceeded(
-            paymentSelection = null,
-            linkMode = null,
-            googlePaySupported = true,
-            currency = "usd",
-            initializationMode = DEFAULT_INITIALIZATION_MODE,
-            orderedLpms = listOf("card"),
-            requireCvcRecollection = false
+            expectedLinkMode = null,
+            expectedPaymentMethodTypes = listOf("card"),
         )
     }
 
     @Test
     fun `Emits correct event when Link is in payment method mode`() = runTest {
-        val loader = createPaymentElementLoader(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+        testEmitsCorrectEvent(
+            givenStripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("card", "link"),
             ),
-            linkSettings = createLinkSettings(passthroughModeEnabled = false),
-        )
-
-        loader.load(
+            givenLinkSettings = createLinkSettings(passthroughModeEnabled = false),
             initializationMode = DEFAULT_INITIALIZATION_MODE,
-            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
-            initializedViaCompose = true,
-        )
-
-        verify(eventReporter).onLoadSucceeded(
-            paymentSelection = null,
-            linkMode = LinkMode.LinkPaymentMethod,
-            googlePaySupported = true,
-            currency = "usd",
-            initializationMode = DEFAULT_INITIALIZATION_MODE,
-            orderedLpms = listOf("card", "link"),
-            requireCvcRecollection = false
+            expectedLinkMode = LinkMode.LinkPaymentMethod,
+            expectedPaymentMethodTypes = listOf("card", "link"),
         )
     }
 
     @Test
     fun `Emits correct event when Link is in passthrough mode`() = runTest {
-        val loader = createPaymentElementLoader(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+        testEmitsCorrectEvent(
+            givenStripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("card", "link"),
             ),
-            linkSettings = createLinkSettings(passthroughModeEnabled = true),
-        )
-
-        loader.load(
+            givenLinkSettings = createLinkSettings(passthroughModeEnabled = true),
             initializationMode = DEFAULT_INITIALIZATION_MODE,
-            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
-            initializedViaCompose = true,
-        )
-
-        verify(eventReporter).onLoadSucceeded(
-            paymentSelection = null,
-            linkMode = LinkMode.Passthrough,
-            googlePaySupported = true,
-            currency = "usd",
-            initializationMode = DEFAULT_INITIALIZATION_MODE,
-            orderedLpms = listOf("card", "link"),
-            requireCvcRecollection = false
+            expectedLinkMode = LinkMode.Passthrough,
+            expectedPaymentMethodTypes = listOf("card", "link"),
         )
     }
 
     @Test
     fun `Emits correct event when CVC recollection is required`() = runTest {
-        val loader = createPaymentElementLoader(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_CVC_RECOLLECTION,
-            linkSettings = createLinkSettings(passthroughModeEnabled = false),
-        )
-
-        loader.load(
+        testEmitsCorrectEvent(
+            givenStripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_CVC_RECOLLECTION,
+            givenLinkSettings = createLinkSettings(passthroughModeEnabled = false),
             initializationMode = DEFAULT_INITIALIZATION_MODE,
-            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
-            initializedViaCompose = true
-        )
-
-        verify(eventReporter).onLoadSucceeded(
-            paymentSelection = null,
-            linkMode = LinkMode.LinkPaymentMethod,
-            googlePaySupported = true,
-            currency = "usd",
-            initializationMode = DEFAULT_INITIALIZATION_MODE,
-            orderedLpms = listOf("card", "link"),
-            requireCvcRecollection = true
+            expectedLinkMode = LinkMode.LinkPaymentMethod,
+            expectedPaymentMethodTypes = listOf("card", "link"),
+            expectedRequireCvcRecollection = true,
         )
     }
 
     @Test
     fun `Emits correct event when CVC recollection is required for deferred`() = runTest {
-        val loader = createPaymentElementLoader(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-            linkSettings = createLinkSettings(passthroughModeEnabled = false),
-        )
-
-        val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-            intentConfiguration = PaymentSheet.IntentConfiguration(
-                mode = PaymentSheet.IntentConfiguration.Mode.Payment(
-                    amount = 100L,
-                    currency = "usd"
-                ),
-                requireCvcRecollection = true
-            )
-        )
-
-        loader.load(
-            initializationMode = initializationMode,
-            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
-            initializedViaCompose = true
-        )
-
-        verify(eventReporter).onLoadSucceeded(
-            paymentSelection = null,
-            linkMode = LinkMode.LinkPaymentMethod,
-            googlePaySupported = true,
-            currency = "usd",
-            initializationMode = initializationMode,
-            orderedLpms = listOf("card", "link"),
-            requireCvcRecollection = true
+        testEmitsCorrectEvent(
+            givenStripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            givenLinkSettings = createLinkSettings(passthroughModeEnabled = false),
+            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 100L,
+                        currency = "usd"
+                    ),
+                    requireCvcRecollection = true
+                )
+            ),
+            expectedLinkMode = LinkMode.LinkPaymentMethod,
+            expectedPaymentMethodTypes = listOf("card", "link"),
+            expectedRequireCvcRecollection = true,
         )
     }
 
     @Test
     fun `Emits correct event when CVC recollection is required on intent but not deferred config`() = runTest {
-        val loader = createPaymentElementLoader(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_CVC_RECOLLECTION,
-            linkSettings = createLinkSettings(passthroughModeEnabled = false),
-        )
-
-        val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-            intentConfiguration = PaymentSheet.IntentConfiguration(
-                mode = PaymentSheet.IntentConfiguration.Mode.Payment(
-                    amount = 100L,
-                    currency = "usd"
-                ),
-                requireCvcRecollection = false
-            )
-        )
-
-        loader.load(
-            initializationMode = initializationMode,
-            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
-            initializedViaCompose = true
-        )
-
-        verify(eventReporter).onLoadSucceeded(
-            paymentSelection = null,
-            linkMode = LinkMode.LinkPaymentMethod,
-            googlePaySupported = true,
-            currency = "usd",
-            initializationMode = initializationMode,
-            orderedLpms = listOf("card", "link"),
-            requireCvcRecollection = false
+        testEmitsCorrectEvent(
+            givenStripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_CVC_RECOLLECTION,
+            givenLinkSettings = createLinkSettings(passthroughModeEnabled = false),
+            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 100L,
+                        currency = "usd"
+                    ),
+                    requireCvcRecollection = false
+                )
+            ),
+            expectedLinkMode = LinkMode.LinkPaymentMethod,
+            expectedPaymentMethodTypes = listOf("card", "link"),
         )
     }
 
@@ -2433,6 +2354,48 @@ internal class DefaultPaymentElementLoaderTest {
         configuration = paymentSheetConfiguration.asCommonConfiguration(),
         isReloadingAfterProcessDeath = isReloadingAfterProcessDeath,
         initializedViaCompose = initializedViaCompose,
+    )
+
+    private suspend fun testEmitsCorrectEvent(
+        givenStripeIntent: StripeIntent,
+        givenLinkSettings: ElementsSession.LinkSettings?,
+        initializationMode: PaymentElementLoader.InitializationMode = DEFAULT_INITIALIZATION_MODE,
+        expectedLinkMode: LinkMode?,
+        expectedPaymentMethodTypes: List<String>,
+        expectedRequireCvcRecollection: Boolean = false
+    ) {
+        val loader = createPaymentElementLoader(
+            stripeIntent = givenStripeIntent,
+            linkSettings = givenLinkSettings
+        )
+
+        loader.load(
+            initializationMode = initializationMode,
+            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
+            initializedViaCompose = true,
+        )
+
+        verify(eventReporter).onLoadSucceeded(
+            paymentSelection = null,
+            linkMode = expectedLinkMode,
+            googlePaySupported = true,
+            currency = "usd",
+            initializationMode = initializationMode,
+            orderedLpms = expectedPaymentMethodTypes,
+            requireCvcRecollection = expectedRequireCvcRecollection
+        )
+    }
+
+    private val customerSessionForTestingPaymentMethods = ElementsSession.Customer.Session(
+        id = "cuss_1",
+        customerId = "cus_1",
+        liveMode = false,
+        apiKey = "ek_123",
+        apiKeyExpiry = 555555555,
+        components = ElementsSession.Customer.Components(
+            mobilePaymentElement = ElementsSession.Customer.Components.MobilePaymentElement.Disabled,
+            customerSheet = ElementsSession.Customer.Components.CustomerSheet.Disabled,
+        ),
     )
 
     @OptIn(ExperimentalCustomerSessionApi::class)
