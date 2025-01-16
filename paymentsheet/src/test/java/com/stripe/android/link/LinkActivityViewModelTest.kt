@@ -24,6 +24,8 @@ import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
+import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.utils.DummyActivityResultCaller
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -338,12 +340,14 @@ internal class LinkActivityViewModelTest {
     private fun createViewModel(
         linkAccountManager: LinkAccountManager = FakeLinkAccountManager(),
         confirmationHandler: ConfirmationHandler = FakeConfirmationHandler(),
+        eventReporter: EventReporter = FakeEventReporter(),
         navController: NavHostController = navController(),
         dismissWithResult: (LinkActivityResult) -> Unit = {}
     ): LinkActivityViewModel {
         return LinkActivityViewModel(
             linkAccountManager = linkAccountManager,
             activityRetainedComponent = mock(),
+            eventReporter = eventReporter,
             confirmationHandlerFactory = { confirmationHandler }
         ).apply {
             this.navController = navController

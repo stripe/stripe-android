@@ -22,6 +22,7 @@ import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.LinkAppBarState
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
@@ -32,6 +33,7 @@ internal class LinkActivityViewModel @Inject constructor(
     val activityRetainedComponent: NativeLinkComponent,
     confirmationHandlerFactory: ConfirmationHandler.Factory,
     private val linkAccountManager: LinkAccountManager,
+    val eventReporter: EventReporter,
 ) : ViewModel(), DefaultLifecycleObserver {
     val confirmationHandler = confirmationHandlerFactory.create(viewModelScope)
     private val _linkState = MutableStateFlow(
