@@ -13,14 +13,23 @@ internal class LinkActivityContract @Inject internal constructor(
 
     override fun createIntent(context: Context, input: Args): Intent {
         return if (FeatureFlags.nativeLinkEnabled.isEnabled && input.configuration.useAttestationEndpointsForLink) {
-            nativeLinkActivityContract.createIntent(context, input)
+            nativeLinkActivityContract.createIntent(context, input).apply {
+                putExtra(EXTRA_USED_NATIVE_CONTRACT, true)
+            }
         } else {
-            webLinkActivityContract.createIntent(context, input)
+            webLinkActivityContract.createIntent(context, input).apply {
+                putExtra(EXTRA_USED_NATIVE_CONTRACT, false)
+            }
         }
     }
 
     override fun parseResult(resultCode: Int, intent: Intent?): LinkActivityResult {
-        return createLinkActivityResult(resultCode, intent)
+        val usedNativeContract = intent?.getBooleanExtra(EXTRA_USED_NATIVE_CONTRACT, false) ?: false
+        return if (usedNativeContract) {
+            nativeLinkActivityContract.parseResult(resultCode, intent)
+        } else {
+            webLinkActivityContract.parseResult(resultCode, intent)
+        }
     }
 
     data class Args internal constructor(
@@ -34,5 +43,6 @@ internal class LinkActivityContract @Inject internal constructor(
     companion object {
         internal const val EXTRA_RESULT =
             "com.stripe.android.link.LinkActivityContract.extra_result"
+        private const val EXTRA_USED_NATIVE_CONTRACT = "used_native_contract"
     }
 }
