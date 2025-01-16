@@ -13,6 +13,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavHostController
+import com.stripe.android.core.Logger
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.LinkActivity.Companion.getArgs
 import com.stripe.android.link.account.LinkAccountManager
@@ -37,6 +38,7 @@ internal class LinkActivityViewModel @Inject constructor(
     private val linkAccountManager: LinkAccountManager,
     val eventReporter: EventReporter,
     private val integrityRequestManager: IntegrityRequestManager,
+    private val logger: Logger
 ) : ViewModel(), DefaultLifecycleObserver {
     val confirmationHandler = confirmationHandlerFactory.create(viewModelScope)
     private val _linkState = MutableStateFlow(

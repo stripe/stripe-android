@@ -7,6 +7,7 @@ import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
+import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkActivityViewModel
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.WebLinkActivityContract
@@ -39,6 +40,7 @@ internal interface NativeLinkComponent {
     val logger: Logger
     val linkConfirmationHandlerFactory: LinkConfirmationHandler.Factory
     val webLinkActivityContract: WebLinkActivityContract
+    val linkActivityContract: LinkActivityContract
     val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory
     val viewModel: LinkActivityViewModel
 

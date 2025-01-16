@@ -18,6 +18,7 @@ internal object LinkViewModelModule {
         defaultConfirmationHandlerFactory: DefaultConfirmationHandler.Factory,
         linkAccountManager: LinkAccountManager,
         eventReporter: EventReporter,
+        logger: Logger,
         integrityRequestManager: IntegrityRequestManager
     ): LinkActivityViewModel {
         return LinkActivityViewModel(
@@ -25,7 +26,8 @@ internal object LinkViewModelModule {
             confirmationHandlerFactory = defaultConfirmationHandlerFactory,
             linkAccountManager = linkAccountManager,
             eventReporter = eventReporter,
-            integrityRequestManager = integrityRequestManager
+            integrityRequestManager = integrityRequestManager,
+            logger = logger
         )
     }
 }
