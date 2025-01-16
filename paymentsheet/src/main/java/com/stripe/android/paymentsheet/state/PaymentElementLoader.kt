@@ -723,20 +723,20 @@ private fun List<PaymentMethod>.withLastUsedPaymentMethodFirst(
     savedSelection: SavedSelection,
     defaultPaymentMethodId: String?
 ): List<PaymentMethod> {
-    val defaultPaymentMethodIndex = if (defaultPaymentMethodId != null) {
+    val defaultPaymentMethodIndex = defaultPaymentMethodId?.let {
         indexOfFirst { it.id == defaultPaymentMethodId }
-    } else {
-        (savedSelection as? SavedSelection.PaymentMethod)?.let {
-            indexOfFirst { it.id == savedSelection.id }.takeIf { it != -1 }
-        }
     }
 
-    return if (defaultPaymentMethodIndex != null) {
-        val primaryPaymentMethod = get(defaultPaymentMethodIndex)
-        listOf(primaryPaymentMethod) + (this - primaryPaymentMethod)
-    } else {
-        this
+    val savedSelectionIndex = (savedSelection as? SavedSelection.PaymentMethod)?.let {
+        indexOfFirst { it.id == savedSelection.id }.takeIf { it != -1 }
     }
+
+    val primaryPaymentMethodIndex = defaultPaymentMethodIndex ?: savedSelectionIndex
+
+    return primaryPaymentMethodIndex?.let {
+        val primaryPaymentMethod = get(primaryPaymentMethodIndex)
+        listOf(primaryPaymentMethod) + (this - primaryPaymentMethod)
+    } ?: this
 }
 
 private fun PaymentMethod.toPaymentSelection(): PaymentSelection.Saved {
