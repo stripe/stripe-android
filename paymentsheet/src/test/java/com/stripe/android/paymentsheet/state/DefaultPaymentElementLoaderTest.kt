@@ -564,10 +564,7 @@ internal class DefaultPaymentElementLoaderTest {
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
             paymentSheetConfiguration = mockConfiguration(
-                customer = PaymentSheet.CustomerConfiguration(
-                    id = "some_id",
-                    ephemeralKeySecret = "ek_123",
-                )
+                customer = defaultCustomerConfigurationForTestingEphemeralKeys,
             ),
             initializedViaCompose = false,
         ).getOrThrow()
@@ -988,10 +985,7 @@ internal class DefaultPaymentElementLoaderTest {
         val result = loader.load(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = mockConfiguration(
-                customer = PaymentSheet.CustomerConfiguration(
-                    id = "id",
-                    ephemeralKeySecret = "ek_123",
-                ),
+                customer = defaultCustomerConfigurationForTestingEphemeralKeys,
             ),
             initializedViaCompose = false,
         ).getOrThrow()
@@ -1012,10 +1006,7 @@ internal class DefaultPaymentElementLoaderTest {
         val result = loader.load(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = mockConfiguration(
-                customer = PaymentSheet.CustomerConfiguration(
-                    id = "id",
-                    ephemeralKeySecret = "ek_123",
-                ),
+                customer = defaultCustomerConfigurationForTestingEphemeralKeys,
             ),
             initializedViaCompose = false,
         ).getOrThrow()
@@ -1421,16 +1412,8 @@ internal class DefaultPaymentElementLoaderTest {
                 customerRepo = repository,
                 customer = ElementsSession.Customer(
                     paymentMethods = cards,
-                    session = ElementsSession.Customer.Session(
-                        id = "cuss_1",
-                        customerId = "cus_1",
-                        liveMode = false,
-                        apiKey = "ek_123",
-                        apiKeyExpiry = 555555555,
-                        components = ElementsSession.Customer.Components(
-                            mobilePaymentElement = ElementsSession.Customer.Components.MobilePaymentElement.Disabled,
-                            customerSheet = ElementsSession.Customer.Components.CustomerSheet.Disabled,
-                        ),
+                    session = createElementsSessionCustomerSession(
+                        mobilePaymentElementComponent = ElementsSession.Customer.Components.MobilePaymentElement.Disabled,
                     ),
                     defaultPaymentMethod = null,
                 )
@@ -1749,7 +1732,6 @@ internal class DefaultPaymentElementLoaderTest {
             )
         }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
     @Test
     fun `When using 'CustomerSession', move last-used customer payment method to the front of the list`() = runTest {
         val paymentMethods = PaymentMethodFixtures.createCards(10)
@@ -1760,16 +1742,8 @@ internal class DefaultPaymentElementLoaderTest {
         val loader = createPaymentElementLoader(
             customer = ElementsSession.Customer(
                 paymentMethods = paymentMethods,
-                session = ElementsSession.Customer.Session(
-                    id = "cuss_1",
-                    customerId = "cus_1",
-                    liveMode = false,
-                    apiKey = "ek_123",
-                    apiKeyExpiry = 555555555,
-                    components = ElementsSession.Customer.Components(
-                        mobilePaymentElement = ElementsSession.Customer.Components.MobilePaymentElement.Disabled,
-                        customerSheet = ElementsSession.Customer.Components.CustomerSheet.Disabled,
-                    ),
+                session = createElementsSessionCustomerSession(
+                    mobilePaymentElementComponent = ElementsSession.Customer.Components.MobilePaymentElement.Disabled,
                 ),
                 defaultPaymentMethod = null,
             )
@@ -1778,10 +1752,7 @@ internal class DefaultPaymentElementLoaderTest {
         val result = loader.load(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = mockConfiguration(
-                customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
-                    id = "id",
-                    clientSecret = "cuss_1",
-                ),
+                customer = defaultCustomerConfigurationForTestingCustomerSessions,
             ),
             initializedViaCompose = false,
         ).getOrThrow()
@@ -1792,7 +1763,6 @@ internal class DefaultPaymentElementLoaderTest {
         assertThat(observedElements).containsExactlyElementsIn(expectedElements).inOrder()
     }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
     @Test
     fun `When using 'CustomerSession', payment methods should be filtered by supported saved payment methods`() =
         runTest {
@@ -1815,10 +1785,7 @@ internal class DefaultPaymentElementLoaderTest {
             val result = loader.load(
                 initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
                 paymentSheetConfiguration = mockConfiguration(
-                    customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
-                        id = "id",
-                        clientSecret = "cuss_1",
-                    ),
+                    customer = defaultCustomerConfigurationForTestingCustomerSessions,
                     allowsDelayedPaymentMethods = true,
                 ),
                 initializedViaCompose = false,
@@ -1833,7 +1800,6 @@ internal class DefaultPaymentElementLoaderTest {
                 .containsExactlyElementsIn(expectedPaymentMethods)
         }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
     @Test
     fun `When using 'CustomerSession' & no default billing details, customer email for Link config is fetched using 'elements_session' ephemeral key`() =
         runTest {
@@ -1851,16 +1817,8 @@ internal class DefaultPaymentElementLoaderTest {
                 customerRepo = customerRepository,
                 customer = ElementsSession.Customer(
                     paymentMethods = PaymentMethodFactory.cards(1),
-                    session = ElementsSession.Customer.Session(
-                        id = "cuss_1",
-                        customerId = "cus_1",
-                        liveMode = false,
-                        apiKey = "ek_123",
-                        apiKeyExpiry = 555555555,
-                        components = ElementsSession.Customer.Components(
-                            mobilePaymentElement = ElementsSession.Customer.Components.MobilePaymentElement.Disabled,
-                            customerSheet = ElementsSession.Customer.Components.CustomerSheet.Disabled,
-                        ),
+                    session = createElementsSessionCustomerSession(
+                        mobilePaymentElementComponent = ElementsSession.Customer.Components.MobilePaymentElement.Disabled,
                     ),
                     defaultPaymentMethod = null,
                 )
@@ -1869,10 +1827,7 @@ internal class DefaultPaymentElementLoaderTest {
             loader.load(
                 initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
                 paymentSheetConfiguration = mockConfiguration(
-                    customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
-                        id = "id",
-                        clientSecret = "cuss_1",
-                    ),
+                    customer = defaultCustomerConfigurationForTestingCustomerSessions,
                     defaultBillingDetails = null
                 ),
                 initializedViaCompose = false,
@@ -1887,7 +1842,6 @@ internal class DefaultPaymentElementLoaderTest {
             )
         }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
     @Test
     fun `When using 'CustomerSession' & has a default saved Stripe payment method, should call 'ElementsSessionRepository' with default id`() =
         runTest {
@@ -1910,10 +1864,7 @@ internal class DefaultPaymentElementLoaderTest {
             loader.load(
                 initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
                 paymentSheetConfiguration = mockConfiguration(
-                    customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
-                        id = "id",
-                        clientSecret = "cuss_1",
-                    ),
+                    customer = defaultCustomerConfigurationForTestingCustomerSessions,
                 ),
                 initializedViaCompose = false,
             )
@@ -1941,10 +1892,7 @@ internal class DefaultPaymentElementLoaderTest {
             loader.load(
                 initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
                 paymentSheetConfiguration = mockConfiguration(
-                    customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
-                        id = "id",
-                        clientSecret = "cuss_1",
-                    ),
+                    customer = defaultCustomerConfigurationForTestingCustomerSessions,
                 ),
                 initializedViaCompose = false,
             )
@@ -1997,10 +1945,7 @@ internal class DefaultPaymentElementLoaderTest {
             loader.load(
                 initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
                 paymentSheetConfiguration = mockConfiguration(
-                    customer = PaymentSheet.CustomerConfiguration(
-                        id = "id",
-                        ephemeralKeySecret = "ek_123",
-                    ),
+                    customer = defaultCustomerConfigurationForTestingEphemeralKeys,
                 ),
                 initializedViaCompose = false,
             )
@@ -2390,16 +2335,8 @@ internal class DefaultPaymentElementLoaderTest {
     ): ElementsSession.Customer {
         return ElementsSession.Customer(
             paymentMethods = paymentMethods,
-            session = ElementsSession.Customer.Session(
-                id = "cuss_1",
-                customerId = "cus_1",
-                liveMode = false,
-                apiKey = "ek_123",
-                apiKeyExpiry = 555555555,
-                components = ElementsSession.Customer.Components(
-                    mobilePaymentElement = mobilePaymentElementComponent,
-                    customerSheet = ElementsSession.Customer.Components.CustomerSheet.Disabled,
-                ),
+            session = createElementsSessionCustomerSession(
+                mobilePaymentElementComponent = mobilePaymentElementComponent
             ),
             defaultPaymentMethod = null,
         )
@@ -2497,6 +2434,19 @@ internal class DefaultPaymentElementLoaderTest {
         isReloadingAfterProcessDeath = isReloadingAfterProcessDeath,
         initializedViaCompose = initializedViaCompose,
     )
+
+    @OptIn(ExperimentalCustomerSessionApi::class)
+    private val defaultCustomerConfigurationForTestingCustomerSessions =
+        PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+            id = "id",
+            clientSecret = "cuss_1",
+        )
+
+    private val defaultCustomerConfigurationForTestingEphemeralKeys =
+        PaymentSheet.CustomerConfiguration(
+            id = "id",
+            ephemeralKeySecret = "ek_123",
+        )
 
     @OptIn(ExperimentalCustomerSessionApi::class)
     private suspend fun testOrderingOfPaymentMethodsWithDefaultPaymentMethodId(
