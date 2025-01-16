@@ -7,20 +7,14 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
@@ -28,6 +22,7 @@ import com.stripe.android.paymentelement.rememberEmbeddedPaymentElement
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
+import com.stripe.android.paymentsheet.example.playground.PlaygroundTheme
 import com.stripe.android.paymentsheet.example.playground.activity.FawryActivity
 import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedViewDisplaysMandateSettingDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
@@ -74,25 +69,22 @@ internal class EmbeddedPlaygroundActivity : AppCompatActivity(), ExternalPayment
                 )
             }
 
-            val scrollState = rememberScrollState()
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(scrollState)
-                    .padding(16.dp)
-            ) {
-                embeddedPaymentElement.Content()
+            PlaygroundTheme(
+                content = {
+                    embeddedPaymentElement.Content()
+                },
+                bottomBarContent = {
+                    val selectedPaymentOption by embeddedPaymentElement.paymentOption.collectAsState()
 
-                val selectedPaymentOption by embeddedPaymentElement.paymentOption.collectAsState()
-
-                selectedPaymentOption?.let { selectedPaymentOption ->
-                    EmbeddedContentWithSelectedPaymentOption(
-                        embeddedPaymentElement = embeddedPaymentElement,
-                        selectedPaymentOption = selectedPaymentOption,
-                        embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
-                    )
+                    selectedPaymentOption?.let { selectedPaymentOption ->
+                        EmbeddedContentWithSelectedPaymentOption(
+                            embeddedPaymentElement = embeddedPaymentElement,
+                            selectedPaymentOption = selectedPaymentOption,
+                            embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
+                        )
+                    }
                 }
-            }
+            )
         }
     }
 

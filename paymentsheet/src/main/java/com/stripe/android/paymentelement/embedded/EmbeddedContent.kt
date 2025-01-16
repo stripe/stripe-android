@@ -1,8 +1,10 @@
 package com.stripe.android.paymentelement.embedded
 
 import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Modifier
@@ -14,6 +16,7 @@ import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.ui.Mandate
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodEmbeddedLayoutUI
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor
+import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.strings.resolve
 
 @Immutable
@@ -25,13 +28,16 @@ internal data class EmbeddedContent(
 ) {
     @Composable
     fun Content() {
-        Column(
-            modifier = Modifier
-                .padding(top = 8.dp)
-                .animateContentSize()
-        ) {
-            EmbeddedVerticalList()
-            EmbeddedMandate()
+        StripeTheme {
+            Column(
+                modifier = Modifier
+                    .background(MaterialTheme.colors.surface)
+                    .padding(top = 8.dp)
+                    .animateContentSize()
+            ) {
+                EmbeddedVerticalList()
+                EmbeddedMandate()
+            }
         }
     }
 
