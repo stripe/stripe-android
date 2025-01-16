@@ -52,15 +52,15 @@ internal class PaymentMethodViewModel @Inject constructor(
     private val cvcState = MutableStateFlow<String?>(null)
 
     fun formValuesChanged(formValues: FormFieldValues?) {
-        val params = formHelper.getPaymentMethodParams(
+        val paymentMethodCreateParams = formHelper.getPaymentMethodParams(
             formValues = formValues,
             selectedPaymentMethodCode = PaymentMethod.Type.Card.code
         )
         cvcState.value = formValues?.fieldValuePairs?.get(IdentifierSpec.CardCvc)?.value
         _state.update {
             it.copy(
-                paymentMethodCreateParams = params,
-                primaryButtonState = if (params != null) {
+                paymentMethodCreateParams = paymentMethodCreateParams,
+                primaryButtonState = if (paymentMethodCreateParams != null) {
                     PrimaryButtonState.Enabled
                 } else {
                     PrimaryButtonState.Disabled
