@@ -5,7 +5,6 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.performClick
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
@@ -14,6 +13,7 @@ import androidx.test.espresso.Espresso.pressBack
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.StripeIntentResult
+import com.stripe.android.common.ui.performClickWithKeyboard
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.paymentsheet.R
@@ -70,7 +70,7 @@ internal class PollingActivityTest {
         scenario.onActivity {
             composeTestRule
                 .onNodeWithText("Cancel and pay another way")
-                .performClick()
+                .performClickWithKeyboard()
 
             waitForActivityFinish()
 
@@ -93,7 +93,7 @@ internal class PollingActivityTest {
 
             composeTestRule
                 .onNodeWithContentDescription("Back")
-                .performClick()
+                .performClickWithKeyboard()
 
             waitForActivityFinish()
 
