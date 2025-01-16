@@ -15,6 +15,7 @@ import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSessionSignup
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.SignUpParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.VerificationType
 import com.stripe.android.networking.StripeRepository
@@ -61,17 +62,19 @@ internal class LinkApiRepository @Inject constructor(
         consentAction: ConsumerSignUpConsentAction
     ): Result<ConsumerSessionSignup> = withContext(workContext) {
         consumersApiService.signUp(
-            email = email,
-            phoneNumber = phone,
-            country = country,
-            name = name,
-            locale = locale,
-            amount = null,
-            currency = null,
-            incentiveEligibilitySession = null,
-            consentAction = consentAction,
+            SignUpParams(
+                email = email,
+                phoneNumber = phone,
+                country = country,
+                name = name,
+                locale = locale,
+                amount = null,
+                currency = null,
+                incentiveEligibilitySession = null,
+                consentAction = consentAction,
+                requestSurface = REQUEST_SURFACE
+            ),
             requestOptions = buildRequestOptions(),
-            requestSurface = REQUEST_SURFACE,
         )
     }
 
