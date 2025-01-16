@@ -26,7 +26,7 @@ internal interface TransformToBankIcon {
                     StripeR.drawable.stripe_ic_bank_suntrust,
                 Regex("Silicon Valley Bank", RegexOption.IGNORE_CASE) to
                     StripeR.drawable.stripe_ic_bank_svb,
-                Regex("Stripe|TestInstitution", RegexOption.IGNORE_CASE) to
+                Regex("Stripe|Test Institution", RegexOption.IGNORE_CASE) to
                     StripeR.drawable.stripe_ic_bank_stripe,
                 Regex("TD Bank", RegexOption.IGNORE_CASE) to
                     StripeR.drawable.stripe_ic_bank_td,
