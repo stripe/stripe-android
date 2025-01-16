@@ -47,7 +47,6 @@ import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.Dispatchers
 import javax.inject.Named
-import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
 @Module
@@ -172,7 +171,9 @@ internal interface NativeLinkModule {
             context: Application
         ): IntegrityRequestManager = IntegrityStandardRequestManager(
             cloudProjectNumber = 577365562050, // stripe-payments-sdk-prod
-            logError = { message, error -> Logger.getInstance(com.stripe.attestation.BuildConfig.DEBUG).error(message, error) },
+            logError = { message, error ->
+                Logger.getInstance(com.stripe.attestation.BuildConfig.DEBUG).error(message, error)
+            },
             factory = RealStandardIntegrityManagerFactory(context)
         )
 

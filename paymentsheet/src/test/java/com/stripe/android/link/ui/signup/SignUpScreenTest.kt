@@ -42,6 +42,7 @@ internal class SignUpScreenTest {
         passthroughModeEnabled = false,
         cardBrandChoice = null,
         shippingDetails = null,
+        useAttestationEndpointsForLink = true,
     )
     private val linkAccountManager = FakeLinkAccountManager()
     private val linkEventsReporter = object : FakeLinkEventsReporter() {

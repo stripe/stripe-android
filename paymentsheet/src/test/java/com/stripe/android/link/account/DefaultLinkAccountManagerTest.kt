@@ -832,6 +832,7 @@ class DefaultLinkAccountManagerTest {
             passthroughModeEnabled = passthroughModeEnabled,
             flags = emptyMap(),
             cardBrandChoice = null,
+            useAttestationEndpointsForLink = true,
         ),
         linkRepository,
         linkEventsReporter,

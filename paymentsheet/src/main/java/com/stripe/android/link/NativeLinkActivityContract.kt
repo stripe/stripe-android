@@ -6,8 +6,8 @@ import androidx.activity.result.contract.ActivityResultContract
 import com.stripe.android.PaymentConfiguration
 import javax.inject.Inject
 
-internal class NativeLinkActivityContract @Inject internal constructor(
-) : ActivityResultContract<LinkActivityContract.Args, LinkActivityResult>()  {
+internal class NativeLinkActivityContract @Inject constructor() :
+    ActivityResultContract<LinkActivityContract.Args, LinkActivityResult>() {
     override fun createIntent(context: Context, input: LinkActivityContract.Args): Intent {
         val paymentConfiguration = PaymentConfiguration.getInstance(context)
         return LinkActivity.createIntent(

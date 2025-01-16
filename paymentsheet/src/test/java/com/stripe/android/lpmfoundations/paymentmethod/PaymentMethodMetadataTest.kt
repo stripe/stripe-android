@@ -1314,6 +1314,7 @@ internal class PaymentMethodMetadataTest {
                     preferredNetworks = listOf("cartes_bancaires")
                 ),
                 passthroughModeEnabled = false,
+                useAttestationEndpointsForLink = true,
             ),
         )
     }

@@ -223,7 +223,8 @@ internal class PopupPayloadTest {
             passthroughModeEnabled = true,
             shippingDetails = null,
             cardBrandChoice = cardBrandChoice,
-            stripeIntent = intent
+            stripeIntent = intent,
+            useAttestationEndpointsForLink = true
         )
     }
 

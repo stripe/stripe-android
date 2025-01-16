@@ -658,6 +658,7 @@ internal class DefaultPaymentElementLoaderTest {
             passthroughModeEnabled = false,
             cardBrandChoice = null,
             flags = emptyMap(),
+            useAttestationEndpointsForLink = true,
         )
 
         assertThat(result.paymentMethodMetadata.linkState?.configuration).isEqualTo(expectedLinkConfig)
@@ -695,6 +696,7 @@ internal class DefaultPaymentElementLoaderTest {
                 linkFlags = emptyMap(),
                 disableLinkSignup = false,
                 linkConsumerIncentive = null,
+                useAttestationEndpoints = true,
             )
         )
 
@@ -727,6 +729,7 @@ internal class DefaultPaymentElementLoaderTest {
                 ),
                 disableLinkSignup = false,
                 linkConsumerIncentive = null,
+                useAttestationEndpoints = true,
             )
         )
 
@@ -803,6 +806,7 @@ internal class DefaultPaymentElementLoaderTest {
                 linkFlags = mapOf(),
                 disableLinkSignup = false,
                 linkConsumerIncentive = null,
+                useAttestationEndpoints = true,
             ),
             linkStore = mock {
                 on { hasUsedLink() } doReturn true
@@ -830,6 +834,7 @@ internal class DefaultPaymentElementLoaderTest {
                 linkFlags = mapOf(),
                 disableLinkSignup = true,
                 linkConsumerIncentive = null,
+                useAttestationEndpoints = true,
             )
         )
 
@@ -2350,6 +2355,7 @@ internal class DefaultPaymentElementLoaderTest {
             linkFlags = mapOf(),
             disableLinkSignup = false,
             linkConsumerIncentive = null,
+            useAttestationEndpoints = true,
         )
     }
 

@@ -13,7 +13,6 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavHostController
-import com.stripe.android.core.Logger
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.LinkActivity.Companion.getArgs
 import com.stripe.android.link.account.LinkAccountManager
@@ -38,7 +37,6 @@ internal class LinkActivityViewModel @Inject constructor(
     private val linkAccountManager: LinkAccountManager,
     val eventReporter: EventReporter,
     private val integrityRequestManager: IntegrityRequestManager,
-    private val logger: Logger
 ) : ViewModel(), DefaultLifecycleObserver {
     val confirmationHandler = confirmationHandlerFactory.create(viewModelScope)
     private val _linkState = MutableStateFlow(
@@ -122,12 +120,13 @@ internal class LinkActivityViewModel @Inject constructor(
     }
 
     private suspend fun warmUpIntegrityManager(): Boolean {
-        if (activityRetainedComponent.configuration.useAttestationEndpointsForLink.not()) return true
+        val configuration = activityRetainedComponent.configuration
+        if (configuration.stripeIntent.isLiveMode.not()) return true
+        if (configuration.useAttestationEndpointsForLink.not()) return true
 
         val result = integrityRequestManager.prepare()
         val error = result.exceptionOrNull()
         if (error != null) {
-            logger.error("", error)
             FeatureFlags.nativeLinkEnabled.setEnabled(false)
             launchWebFlow?.invoke(activityRetainedComponent.configuration)
             return false

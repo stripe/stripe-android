@@ -566,6 +566,7 @@ private fun defaultLinkConfiguration(
         passthroughModeEnabled = false,
         cardBrandChoice = null,
         flags = emptyMap(),
+        useAttestationEndpointsForLink = true,
     )
 }
 

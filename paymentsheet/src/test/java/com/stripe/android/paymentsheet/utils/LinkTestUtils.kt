@@ -60,6 +60,7 @@ internal object LinkTestUtils {
             passthroughModeEnabled = false,
             cardBrandChoice = null,
             shippingDetails = null,
+            useAttestationEndpointsForLink = true,
         )
     }
 }

@@ -282,6 +282,7 @@ internal class LinkConfirmationDefinitionTest {
                 passthroughModeEnabled = false,
                 flags = mapOf(),
                 cardBrandChoice = null,
+                useAttestationEndpointsForLink = true,
             ),
         )
     }

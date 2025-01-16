@@ -95,6 +95,7 @@ class InlineSignupViewStateTest {
             passthroughModeEnabled = false,
             flags = emptyMap(),
             cardBrandChoice = null,
+            useAttestationEndpointsForLink = true,
         )
     }
 }
