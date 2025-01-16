@@ -99,7 +99,10 @@ internal class PaymentMethodViewModel @Inject constructor(
         }
     }
 
-    private suspend fun performConfirmation(paymentDetails: ConsumerPaymentDetails.PaymentDetails, cvc: String?) {
+    private suspend fun performConfirmation(
+        paymentDetails: ConsumerPaymentDetails.PaymentDetails,
+        cvc: String?
+    ) {
         val result = linkConfirmationHandler.confirm(
             paymentDetails = paymentDetails,
             linkAccount = linkAccount,
