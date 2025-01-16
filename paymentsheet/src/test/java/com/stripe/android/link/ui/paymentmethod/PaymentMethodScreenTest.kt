@@ -3,15 +3,18 @@ package com.stripe.android.link.ui.paymentmethod
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.test.SemanticsNodeInteraction
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onChild
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextReplacement
+import androidx.compose.ui.test.printToString
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.TestFactory
@@ -43,7 +46,7 @@ internal class PaymentMethodScreenTest {
     val coroutineTestRule = CoroutineTestRule(dispatcher)
 
     @Test
-    fun `no error message on successful payment`() {
+    fun `form fields are displayed correctly`() {
         val linkAccountManager = FakeLinkAccountManager()
 
         screen(
@@ -62,6 +65,19 @@ internal class PaymentMethodScreenTest {
             .scrollToAndAssertDisplayed()
             .assertIsEnabled()
         onErrorText().assertIsNotDisplayed()
+    }
+
+    @Test
+    fun `no error message on successful payment`() {
+        val linkAccountManager = FakeLinkAccountManager()
+
+        screen(
+            viewModel = createViewModel(
+                linkAccountManager = linkAccountManager
+            )
+        )
+
+        composeTestRule.waitForIdle()
 
         fillCardDetails()
 
@@ -85,15 +101,6 @@ internal class PaymentMethodScreenTest {
 
         composeTestRule.waitForIdle()
 
-        onCardNumber().assertExists()
-        onCvc().assertIsDisplayed()
-        onExpiryDate().assertIsDisplayed()
-        onZipCode().scrollToAndAssertDisplayed()
-        onPayButton()
-            .scrollToAndAssertDisplayed()
-            .assertIsEnabled()
-        onErrorText().assertDoesNotExist()
-
         fillCardDetails()
 
         linkAccountManager.createCardPaymentDetailsResult = Result.failure(Throwable("oops"))
@@ -105,7 +112,12 @@ internal class PaymentMethodScreenTest {
 
         composeTestRule.waitForIdle()
 
-        onErrorText().scrollToAndAssertDisplayed()
+        onErrorText()
+            .scrollToAndAssertDisplayed()
+            .onChild()
+            .assert(hasText("Something went wrong"))
+
+        println(onErrorText().printToString())
     }
 
     @Test
@@ -120,15 +132,6 @@ internal class PaymentMethodScreenTest {
 
         composeTestRule.waitForIdle()
 
-        onCardNumber().assertExists()
-        onCvc().assertIsDisplayed()
-        onExpiryDate().assertIsDisplayed()
-        onZipCode().scrollToAndAssertDisplayed()
-        onPayButton()
-            .scrollToAndAssertDisplayed()
-            .assertIsEnabled()
-        onErrorText().assertDoesNotExist()
-
         fillCardDetails()
 
         linkConfirmationHandler.confirmResult = LinkConfirmationResult.Failed("oops".resolvableString)
@@ -138,7 +141,10 @@ internal class PaymentMethodScreenTest {
             .assertIsEnabled()
             .performClick()
 
-        onErrorText().scrollToAndAssertDisplayed()
+        onErrorText()
+            .scrollToAndAssertDisplayed()
+            .onChild()
+            .assert(hasText("oops"))
     }
 
     private fun fillCardDetails() {
@@ -186,7 +192,7 @@ internal class PaymentMethodScreenTest {
 
     private fun onZipCode() = composeTestRule.onNode(hasText("ZIP Code"))
 
-    private fun onErrorText() = composeTestRule.onNodeWithTag(PAYMENT_METHOD_ERROR_TAG, useUnmergedTree = true)
+    private fun onErrorText() = composeTestRule.onNodeWithTag(PAYMENT_METHOD_ERROR_TAG, useUnmergedTree = false)
 
     private fun SemanticsNodeInteraction.scrollToAndAssertDisplayed(): SemanticsNodeInteraction {
         return assertExists()
