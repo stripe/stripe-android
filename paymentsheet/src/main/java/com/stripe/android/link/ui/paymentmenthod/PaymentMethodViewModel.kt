@@ -76,7 +76,9 @@ internal class PaymentMethodViewModel @Inject constructor(
             linkAccountManager.createCardPaymentDetails(paymentMethodCreateParams)
                 .fold(
                     onSuccess = { linkPaymentDetails ->
-                        performConfirmation(linkPaymentDetails.paymentDetails)
+                        val cardMap = paymentMethodCreateParams.toParamMap()["card"] as? Map<String, Any?>?
+                        performConfirmation(linkPaymentDetails.paymentDetails, cardMap?.get("cvc") as? String?)
+                        updateButtonState(PrimaryButtonState.Enabled)
                     },
                     onFailure = { error ->
                         _state.update {
@@ -84,6 +86,7 @@ internal class PaymentMethodViewModel @Inject constructor(
                                 errorMessage = error.stripeErrorMessage()
                             )
                         }
+                        updateButtonState(PrimaryButtonState.Enabled)
                         logger.error(
                             msg = "PaymentMethodViewModel: Failed to create card payment details",
                             t = error
@@ -91,14 +94,13 @@ internal class PaymentMethodViewModel @Inject constructor(
                     }
                 )
         }
-        updateButtonState(PrimaryButtonState.Enabled)
     }
 
-    private suspend fun performConfirmation(paymentDetails: ConsumerPaymentDetails.PaymentDetails) {
+    private suspend fun performConfirmation(paymentDetails: ConsumerPaymentDetails.PaymentDetails, cvc: String?) {
         val result = linkConfirmationHandler.confirm(
             paymentDetails = paymentDetails,
             linkAccount = linkAccount,
-            cvc = null
+            cvc = cvc
         )
         when (result) {
             Result.Canceled -> Unit
