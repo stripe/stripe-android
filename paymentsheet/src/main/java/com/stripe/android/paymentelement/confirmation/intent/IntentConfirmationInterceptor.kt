@@ -17,6 +17,7 @@ import com.stripe.android.model.setupFutureUsage
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor.NextStep
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.DeferredIntentValidator
@@ -107,6 +108,7 @@ internal class InvalidDeferredIntentUsageException : StripeException() {
 
 internal class DefaultIntentConfirmationInterceptor @Inject constructor(
     private val stripeRepository: StripeRepository,
+    private val errorReporter: ErrorReporter,
     @Named(ALLOWS_MANUAL_CONFIRMATION) private val allowsManualConfirmation: Boolean,
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
     @Named(STRIPE_ACCOUNT_ID) private val stripeAccountIdProvider: () -> String?,
@@ -254,6 +256,8 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
             else -> {
                 val error = "${CreateIntentCallback::class.java.simpleName} must be implemented " +
                     "when using IntentConfiguration with PaymentSheet"
+
+                errorReporter.report(ErrorReporter.ExpectedErrorEvent.CREATE_INTENT_CALLBACK_NULL)
 
                 NextStep.Fail(
                     cause = IllegalStateException(error),

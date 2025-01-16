@@ -152,6 +152,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         EXTERNAL_PAYMENT_METHOD_LAUNCHER_NULL(
             eventName = "paymentsheet.external_payment_method.launcher_is_null"
         ),
+        CREATE_INTENT_CALLBACK_NULL(
+            eventName = "paymentsheet.create_intent_callback.is_null"
+        ),
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

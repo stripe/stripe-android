@@ -18,12 +18,14 @@ import com.stripe.android.paymentelement.confirmation.intent.DefaultIntentConfir
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
 import com.stripe.android.paymentelement.confirmation.intent.InvalidDeferredIntentUsageException
 import com.stripe.android.paymentelement.confirmation.intent.intercept
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.state.PaymentElementLoader.InitializationMode
 import com.stripe.android.testing.AbsFakeStripeRepository
+import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.utils.IntentConfirmationInterceptorTestRule
 import kotlinx.coroutines.test.runTest
@@ -50,6 +52,7 @@ class DefaultIntentConfirmationInterceptorTest {
             stripeRepository = object : AbsFakeStripeRepository() {},
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
+            errorReporter = FakeErrorReporter(),
             allowsManualConfirmation = false,
         )
 
@@ -75,6 +78,7 @@ class DefaultIntentConfirmationInterceptorTest {
             stripeRepository = object : AbsFakeStripeRepository() {},
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
+            errorReporter = FakeErrorReporter(),
             allowsManualConfirmation = false,
         )
 
@@ -124,10 +128,12 @@ class DefaultIntentConfirmationInterceptorTest {
 
     @Test
     fun `Fails if invoked without a confirm callback for existing payment method`() = runTest {
+        val errorReporter = FakeErrorReporter()
         val interceptor = DefaultIntentConfirmationInterceptor(
             stripeRepository = object : AbsFakeStripeRepository() {},
             publishableKeyProvider = { "pk_test_123" },
             stripeAccountIdProvider = { null },
+            errorReporter = errorReporter,
             allowsManualConfirmation = false,
         )
 
@@ -152,10 +158,15 @@ class DefaultIntentConfirmationInterceptorTest {
         assertThat(failedStep.cause).isInstanceOf<IllegalStateException>()
         assertThat(failedStep.cause.message).isEqualTo(CREATE_INTENT_CALLBACK_MESSAGE)
         assertThat(failedStep.message).isEqualTo(CREATE_INTENT_CALLBACK_MESSAGE.resolvableString)
+
+        assertThat(errorReporter.getLoggedErrors()).containsExactly(
+            ErrorReporter.ExpectedErrorEvent.CREATE_INTENT_CALLBACK_NULL.eventName,
+        )
     }
 
     @Test
     fun `Fails if invoked without a confirm callback for new payment method`() = runTest {
+        val errorReporter = FakeErrorReporter()
         val interceptor = DefaultIntentConfirmationInterceptor(
             stripeRepository = object : AbsFakeStripeRepository() {
                 override suspend fun createPaymentMethod(
@@ -167,6 +178,7 @@ class DefaultIntentConfirmationInterceptorTest {
             },
             publishableKeyProvider = { "pk_test_123" },
             stripeAccountIdProvider = { null },
+            errorReporter = errorReporter,
             allowsManualConfirmation = false,
         )
 
@@ -184,14 +196,20 @@ class DefaultIntentConfirmationInterceptorTest {
         assertThat(failedStep.cause).isInstanceOf<IllegalStateException>()
         assertThat(failedStep.cause.message).isEqualTo(CREATE_INTENT_CALLBACK_MESSAGE)
         assertThat(failedStep.message).isEqualTo(CREATE_INTENT_CALLBACK_MESSAGE.resolvableString)
+
+        assertThat(errorReporter.getLoggedErrors()).containsExactly(
+            ErrorReporter.ExpectedErrorEvent.CREATE_INTENT_CALLBACK_NULL.eventName,
+        )
     }
 
     @Test
     fun `Message for live key when error without confirm callback is user friendly`() = runTest {
+        val errorReporter = FakeErrorReporter()
         val interceptor = DefaultIntentConfirmationInterceptor(
             stripeRepository = object : AbsFakeStripeRepository() {},
             publishableKeyProvider = { "pk_live_123" },
             stripeAccountIdProvider = { null },
+            errorReporter = errorReporter,
             allowsManualConfirmation = false,
         )
 
@@ -216,6 +234,10 @@ class DefaultIntentConfirmationInterceptorTest {
         assertThat(failedStep.cause).isInstanceOf<IllegalStateException>()
         assertThat(failedStep.cause.message).isEqualTo(CREATE_INTENT_CALLBACK_MESSAGE)
         assertThat(failedStep.message).isEqualTo(PaymentsCoreR.string.stripe_internal_error.resolvableString)
+
+        assertThat(errorReporter.getLoggedErrors()).containsExactly(
+            ErrorReporter.ExpectedErrorEvent.CREATE_INTENT_CALLBACK_NULL.eventName,
+        )
     }
 
     @Test
@@ -237,6 +259,7 @@ class DefaultIntentConfirmationInterceptorTest {
             },
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
+            errorReporter = FakeErrorReporter(),
             allowsManualConfirmation = false,
         )
 
@@ -277,6 +300,7 @@ class DefaultIntentConfirmationInterceptorTest {
             },
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
+            errorReporter = FakeErrorReporter(),
             allowsManualConfirmation = false,
         )
 
@@ -303,6 +327,7 @@ class DefaultIntentConfirmationInterceptorTest {
             stripeRepository = mock(),
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
+            errorReporter = FakeErrorReporter(),
             allowsManualConfirmation = false,
         )
 
@@ -331,6 +356,7 @@ class DefaultIntentConfirmationInterceptorTest {
             stripeRepository = mock(),
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
+            errorReporter = FakeErrorReporter(),
             allowsManualConfirmation = false,
         )
 
@@ -371,6 +397,7 @@ class DefaultIntentConfirmationInterceptorTest {
             },
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
+            errorReporter = FakeErrorReporter(),
             allowsManualConfirmation = false,
         )
 
@@ -409,6 +436,7 @@ class DefaultIntentConfirmationInterceptorTest {
             },
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
+            errorReporter = FakeErrorReporter(),
             allowsManualConfirmation = false,
         )
 
@@ -454,6 +482,7 @@ class DefaultIntentConfirmationInterceptorTest {
             },
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
+            errorReporter = FakeErrorReporter(),
             allowsManualConfirmation = false,
         )
 
@@ -495,6 +524,7 @@ class DefaultIntentConfirmationInterceptorTest {
             },
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
+            errorReporter = FakeErrorReporter(),
             allowsManualConfirmation = false,
         )
 
@@ -536,6 +566,7 @@ class DefaultIntentConfirmationInterceptorTest {
             stripeRepository = stripeRepository,
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
+            errorReporter = FakeErrorReporter(),
             allowsManualConfirmation = false,
         )
 
@@ -576,6 +607,7 @@ class DefaultIntentConfirmationInterceptorTest {
                 ),
                 publishableKeyProvider = { "pk" },
                 stripeAccountIdProvider = { null },
+                errorReporter = FakeErrorReporter(),
                 allowsManualConfirmation = false,
             )
 
@@ -630,6 +662,7 @@ class DefaultIntentConfirmationInterceptorTest {
             stripeRepository = object : AbsFakeStripeRepository() {},
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
+            errorReporter = FakeErrorReporter(),
             allowsManualConfirmation = false,
         )
     }
