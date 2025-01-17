@@ -14,6 +14,7 @@ import com.stripe.android.model.ConsumerSessionSignup
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.SignUpParams
 import com.stripe.android.model.VerificationType
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -124,16 +125,18 @@ class LinkApiRepositoryTest {
         )
 
         verify(consumersApiService).signUp(
-            email = email,
-            phoneNumber = phone,
-            country = country,
-            name = name,
-            locale = Locale.US,
-            amount = null,
-            currency = null,
-            incentiveEligibilitySession = null,
-            requestSurface = "android_payment_element",
-            consentAction = ConsumerSignUpConsentAction.Checkbox,
+            SignUpParams(
+                email = email,
+                phoneNumber = phone,
+                country = country,
+                name = name,
+                locale = Locale.US,
+                amount = null,
+                currency = null,
+                incentiveEligibilitySession = null,
+                requestSurface = "android_payment_element",
+                consentAction = ConsumerSignUpConsentAction.Checkbox,
+            ),
             requestOptions = ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID),
         )
     }
@@ -143,16 +146,7 @@ class LinkApiRepositoryTest {
         val consumerSession = mock<ConsumerSessionSignup>()
         whenever(
             consumersApiService.signUp(
-                email = any(),
-                phoneNumber = any(),
-                country = any(),
-                name = anyOrNull(),
-                locale = anyOrNull(),
-                amount = anyOrNull(),
-                currency = anyOrNull(),
-                incentiveEligibilitySession = anyOrNull(),
-                requestSurface = any(),
-                consentAction = any(),
+                params = any(),
                 requestOptions = any()
             )
         ).thenReturn(Result.success(consumerSession))
@@ -173,16 +167,7 @@ class LinkApiRepositoryTest {
     fun `consumerSignUp catches exception and returns failure`() = runTest {
         whenever(
             consumersApiService.signUp(
-                email = any(),
-                phoneNumber = any(),
-                country = any(),
-                name = anyOrNull(),
-                locale = anyOrNull(),
-                amount = anyOrNull(),
-                currency = anyOrNull(),
-                incentiveEligibilitySession = anyOrNull(),
-                requestSurface = any(),
-                consentAction = any(),
+                params = any(),
                 requestOptions = any()
             )
         ).thenReturn(Result.failure(RuntimeException("error")))

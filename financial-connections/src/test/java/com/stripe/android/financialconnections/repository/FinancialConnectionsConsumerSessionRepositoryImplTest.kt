@@ -26,7 +26,9 @@ import com.stripe.android.repository.ConsumersApiService
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
+import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.argThat
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
@@ -81,17 +83,8 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
 
         whenever(
             consumersApiService.signUp(
-                email = anyOrNull(),
-                phoneNumber = anyOrNull(),
-                country = anyOrNull(),
-                name = anyOrNull(),
-                locale = anyOrNull(),
-                amount = anyOrNull(),
-                currency = anyOrNull(),
-                incentiveEligibilitySession = anyOrNull(),
-                consentAction = anyOrNull(),
-                requestSurface = anyOrNull(),
-                requestOptions = anyOrNull(),
+                params = any(),
+                requestOptions = anyOrNull()
             )
         ).thenReturn(Result.success(consumerSessionSignup))
 
@@ -138,16 +131,10 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
 
         whenever(
             consumersApiService.signUp(
-                email = anyOrNull(),
-                phoneNumber = anyOrNull(),
-                country = anyOrNull(),
-                name = anyOrNull(),
-                locale = anyOrNull(),
-                amount = eq(1234),
-                currency = eq("cad"),
-                incentiveEligibilitySession = eq(IncentiveEligibilitySession.PaymentIntent("pi_123")),
-                consentAction = anyOrNull(),
-                requestSurface = anyOrNull(),
+                params = argThat {
+                    currency == "cad" &&
+                        incentiveEligibilitySession == IncentiveEligibilitySession.PaymentIntent("pi_123")
+                },
                 requestOptions = anyOrNull(),
             )
         ).thenReturn(
@@ -331,17 +318,8 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
 
         whenever(
             consumersApiService.signUp(
-                email = anyOrNull(),
-                phoneNumber = anyOrNull(),
-                country = anyOrNull(),
-                name = anyOrNull(),
-                locale = anyOrNull(),
-                amount = anyOrNull(),
-                currency = anyOrNull(),
-                incentiveEligibilitySession = anyOrNull(),
-                consentAction = anyOrNull(),
-                requestSurface = anyOrNull(),
-                requestOptions = anyOrNull(),
+                params = any(),
+                requestOptions = anyOrNull()
             )
         ).thenReturn(Result.success(consumerSessionSignup()))
 
@@ -352,17 +330,8 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
         )
 
         verify(consumersApiService).signUp(
-            email = anyOrNull(),
-            phoneNumber = anyOrNull(),
-            country = anyOrNull(),
-            name = anyOrNull(),
-            locale = anyOrNull(),
-            amount = anyOrNull(),
-            currency = anyOrNull(),
-            incentiveEligibilitySession = anyOrNull(),
-            requestSurface = eq("android_connections"),
-            consentAction = anyOrNull(),
-            requestOptions = anyOrNull(),
+            params = argThat { requestSurface == "android_connections" },
+            requestOptions = anyOrNull()
         )
     }
 
@@ -372,17 +341,8 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
 
         whenever(
             consumersApiService.signUp(
-                email = anyOrNull(),
-                phoneNumber = anyOrNull(),
-                country = anyOrNull(),
-                name = anyOrNull(),
-                locale = anyOrNull(),
-                amount = anyOrNull(),
-                currency = anyOrNull(),
-                incentiveEligibilitySession = anyOrNull(),
-                consentAction = anyOrNull(),
-                requestSurface = anyOrNull(),
-                requestOptions = anyOrNull(),
+                params = any(),
+                requestOptions = anyOrNull()
             )
         ).thenReturn(Result.success(consumerSessionSignup()))
 
@@ -393,17 +353,10 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
         )
 
         verify(consumersApiService).signUp(
-            email = anyOrNull(),
-            phoneNumber = anyOrNull(),
-            country = anyOrNull(),
-            name = anyOrNull(),
-            locale = anyOrNull(),
-            amount = anyOrNull(),
-            currency = anyOrNull(),
-            incentiveEligibilitySession = anyOrNull(),
-            requestSurface = eq("android_instant_debits"),
-            consentAction = anyOrNull(),
-            requestOptions = anyOrNull(),
+            params = argThat {
+                requestSurface == "android_instant_debits"
+            },
+            requestOptions = anyOrNull()
         )
     }
 

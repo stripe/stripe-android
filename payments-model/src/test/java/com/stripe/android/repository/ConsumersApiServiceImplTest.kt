@@ -13,6 +13,7 @@ import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.IncentiveEligibilitySession
+import com.stripe.android.model.SignUpParams
 import com.stripe.android.model.VerificationType
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
@@ -61,16 +62,18 @@ class ConsumersApiServiceImplTest {
         }
 
         val signup = consumersApiService.signUp(
-            email = email,
-            phoneNumber = "+15555555568",
-            country = "US",
-            name = null,
-            locale = Locale.US,
-            amount = 1234,
-            currency = "cad",
-            incentiveEligibilitySession = IncentiveEligibilitySession.PaymentIntent("pi_123"),
-            consentAction = ConsumerSignUpConsentAction.Checkbox,
-            requestSurface = requestSurface,
+            SignUpParams(
+                email = email,
+                phoneNumber = "+15555555568",
+                country = "US",
+                name = null,
+                locale = Locale.US,
+                amount = 1234,
+                currency = "cad",
+                incentiveEligibilitySession = IncentiveEligibilitySession.PaymentIntent("pi_123"),
+                consentAction = ConsumerSignUpConsentAction.Checkbox,
+                requestSurface = requestSurface,
+            ),
             requestOptions = DEFAULT_OPTIONS,
         ).getOrThrow()
 

@@ -2,6 +2,7 @@ package com.stripe.android.financialconnections.repository
 
 import com.stripe.android.core.Logger
 import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext
 import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext.BillingDetails
 import com.stripe.android.financialconnections.domain.IsLinkWithStripe
@@ -18,6 +19,7 @@ import com.stripe.android.model.ConsumerSignUpConsentAction.EnteredPhoneNumberCl
 import com.stripe.android.model.CustomEmailType
 import com.stripe.android.model.EmailSource
 import com.stripe.android.model.SharePaymentDetails
+import com.stripe.android.model.SignUpParams
 import com.stripe.android.model.UpdateAvailableIncentives
 import com.stripe.android.model.VerificationType
 import com.stripe.android.repository.ConsumersApiService
@@ -46,6 +48,14 @@ internal interface FinancialConnectionsConsumerSessionRepository {
         email: String,
         phoneNumber: String,
         country: String,
+    ): ConsumerSessionSignup
+
+    suspend fun mobileSignUp(
+        email: String,
+        phoneNumber: String,
+        country: String,
+        verificationToken: String,
+        appId: String
     ): ConsumerSessionSignup
 
     suspend fun startConsumerVerification(
@@ -142,9 +152,38 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
     override suspend fun signUp(
         email: String,
         phoneNumber: String,
+        country: String
+    ): ConsumerSessionSignup = performSignUp(
+        email = email,
+        phoneNumber = phoneNumber,
+        country = country,
+        signupCall = consumersApiService::signUp
+    )
+
+    override suspend fun mobileSignUp(
+        email: String,
+        phoneNumber: String,
         country: String,
+        verificationToken: String,
+        appId: String
+    ): ConsumerSessionSignup = performSignUp(
+        email = email,
+        phoneNumber = phoneNumber,
+        country = country,
+        verificationToken = verificationToken,
+        appId = appId,
+        signupCall = consumersApiService::mobileSignUp
+    )
+
+    private suspend fun performSignUp(
+        email: String,
+        phoneNumber: String,
+        country: String,
+        verificationToken: String? = null,
+        appId: String? = null,
+        signupCall: suspend (SignUpParams, ApiRequest.Options) -> Result<ConsumerSessionSignup>
     ): ConsumerSessionSignup = mutex.withLock {
-        consumersApiService.signUp(
+        val signUpParams = SignUpParams(
             email = email,
             phoneNumber = phoneNumber,
             country = country,
@@ -153,12 +192,16 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
             amount = elementsSessionContext?.amount,
             currency = elementsSessionContext?.currency,
             incentiveEligibilitySession = elementsSessionContext?.incentiveEligibilitySession,
-            requestOptions = provideApiRequestOptions(useConsumerPublishableKey = false),
             requestSurface = requestSurface,
             consentAction = EnteredPhoneNumberClickedSaveToLink,
-        ).onSuccess { signup ->
-            updateCachedConsumerSessionFromSignup(signup)
-        }.getOrThrow()
+            verificationToken = verificationToken,
+            appId = appId
+        )
+
+        // Make the API call using the given lambda function
+        signupCall(signUpParams, provideApiRequestOptions(useConsumerPublishableKey = false))
+            .onSuccess { signup -> updateCachedConsumerSessionFromSignup(signup) }
+            .getOrThrow()
     }
 
     override suspend fun startConsumerVerification(
