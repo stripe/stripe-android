@@ -24,7 +24,7 @@ import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-class EmbeddedActivityLauncherTest {
+internal class EmbeddedActivityLauncherTest {
 
     private lateinit var activityResultCaller: ActivityResultCaller
     private lateinit var lifecycleOwner: TestLifecycleOwner

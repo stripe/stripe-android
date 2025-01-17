@@ -13,7 +13,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-class FormActivityTest {
+internal class FormActivityTest {
 
     private lateinit var scenario: ActivityScenario<FormActivity>
     private lateinit var context: Context
