@@ -1564,7 +1564,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
             params.locale.let { this["locale"] = it }
             params.customerSessionClientSecret?.let { this["customer_session_client_secret"] = it }
             params.externalPaymentMethods.takeIf { it.isNotEmpty() }?.let { this["external_payment_methods"] = it }
-            params.defaultPaymentMethodId?.let { this["client_default_payment_method"] = it }
+            params.savedPaymentMethodSelectionId?.let { this["client_default_payment_method"] = it }
             (params as? ElementsSessionParams.DeferredIntentType)?.let { type ->
                 this.putAll(type.deferredIntentParams.toQueryParams())
             }

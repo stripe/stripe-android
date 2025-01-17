@@ -84,7 +84,7 @@ internal class DefaultCustomerSessionElementsSessionManager @Inject constructor(
                             paymentMethodTypes = intentConfiguration.paymentMethodTypes,
                         )
                     ),
-                    defaultPaymentMethodId = savedSelection?.id,
+                    savedPaymentMethodSelectionId = savedSelection?.id,
                     customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
                         id = customerSessionClientSecret.customerId,
                         clientSecret = customerSessionClientSecret.clientSecret,

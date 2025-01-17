@@ -116,7 +116,7 @@ internal class CustomerAdapterDataSource @Inject constructor(
             initializationMode,
             customer = null,
             externalPaymentMethods = emptyList(),
-            defaultPaymentMethodId = null,
+            savedPaymentMethodSelectionId = null,
         ).onSuccess {
             errorReporter.report(
                 errorEvent = ErrorReporter.SuccessEvent.CUSTOMER_SHEET_ELEMENTS_SESSION_LOAD_SUCCESS,
