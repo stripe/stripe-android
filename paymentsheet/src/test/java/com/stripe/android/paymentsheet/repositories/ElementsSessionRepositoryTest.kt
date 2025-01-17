@@ -53,7 +53,7 @@ internal class ElementsSessionRepositoryTest {
                 ),
                 customer = null,
                 externalPaymentMethods = emptyList(),
-                defaultPaymentMethodId = null,
+                savedPaymentMethodSelectionId = null,
             ).getOrThrow()
         }
 
@@ -82,7 +82,7 @@ internal class ElementsSessionRepositoryTest {
                     ),
                     customer = null,
                     externalPaymentMethods = emptyList(),
-                    defaultPaymentMethodId = null,
+                    savedPaymentMethodSelectionId = null,
                 ).getOrThrow()
             }
 
@@ -108,7 +108,7 @@ internal class ElementsSessionRepositoryTest {
                     ),
                     customer = null,
                     externalPaymentMethods = emptyList(),
-                    defaultPaymentMethodId = null,
+                    savedPaymentMethodSelectionId = null,
                 ).getOrThrow()
             }
 
@@ -140,7 +140,7 @@ internal class ElementsSessionRepositoryTest {
             ),
             customer = null,
             externalPaymentMethods = emptyList(),
-            defaultPaymentMethodId = null,
+            savedPaymentMethodSelectionId = null,
         ).getOrThrow()
 
         val argumentCaptor: KArgumentCaptor<ElementsSessionParams> = argumentCaptor()
@@ -177,7 +177,7 @@ internal class ElementsSessionRepositoryTest {
             ),
             customer = null,
             externalPaymentMethods = emptyList(),
-            defaultPaymentMethodId = null,
+            savedPaymentMethodSelectionId = null,
         )
 
         assertThat(session.isSuccess).isTrue()
@@ -210,7 +210,7 @@ internal class ElementsSessionRepositoryTest {
             ),
             customer = null,
             externalPaymentMethods = emptyList(),
-            defaultPaymentMethodId = null,
+            savedPaymentMethodSelectionId = null,
         )
 
         assertThat(session.isSuccess).isTrue()
@@ -246,7 +246,7 @@ internal class ElementsSessionRepositoryTest {
                 clientSecret = "customer_session_client_secret"
             ),
             externalPaymentMethods = emptyList(),
-            defaultPaymentMethodId = null,
+            savedPaymentMethodSelectionId = null,
         )
 
         verify(stripeRepository).retrieveElementsSession(
@@ -255,7 +255,7 @@ internal class ElementsSessionRepositoryTest {
                     clientSecret = "client_secret",
                     customerSessionClientSecret = "customer_session_client_secret",
                     externalPaymentMethods = emptyList(),
-                    defaultPaymentMethodId = null,
+                    savedPaymentMethodSelectionId = null,
                 )
             ),
             options = any()
@@ -287,7 +287,7 @@ internal class ElementsSessionRepositoryTest {
             ),
             customer = null,
             externalPaymentMethods = emptyList(),
-            defaultPaymentMethodId = "pm_123",
+            savedPaymentMethodSelectionId = "pm_123",
         )
 
         verify(stripeRepository).retrieveElementsSession(
@@ -295,7 +295,7 @@ internal class ElementsSessionRepositoryTest {
                 ElementsSessionParams.PaymentIntentType(
                     clientSecret = "client_secret",
                     externalPaymentMethods = emptyList(),
-                    defaultPaymentMethodId = "pm_123",
+                    savedPaymentMethodSelectionId = "pm_123",
                 )
             ),
             options = any()

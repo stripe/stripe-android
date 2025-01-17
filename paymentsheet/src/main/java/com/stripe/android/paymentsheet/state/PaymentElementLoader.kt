@@ -147,7 +147,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             initializationMode = initializationMode,
             customer = configuration.customer,
             externalPaymentMethods = configuration.externalPaymentMethods,
-            defaultPaymentMethodId = savedPaymentMethodSelection?.id,
+            savedPaymentMethodSelectionId = savedPaymentMethodSelection?.id,
         ).getOrThrow()
 
         val customerInfo = createCustomerInfo(
@@ -233,13 +233,13 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         initializationMode: PaymentElementLoader.InitializationMode,
         customer: PaymentSheet.CustomerConfiguration?,
         externalPaymentMethods: List<String>,
-        defaultPaymentMethodId: String?,
+        savedPaymentMethodSelectionId: String?,
     ): Result<ElementsSession> {
         return elementsSessionRepository.get(
             initializationMode = initializationMode,
             customer = customer,
             externalPaymentMethods = externalPaymentMethods,
-            defaultPaymentMethodId = defaultPaymentMethodId
+            savedPaymentMethodSelectionId = savedPaymentMethodSelectionId
         )
     }
 

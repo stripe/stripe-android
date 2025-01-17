@@ -2569,7 +2569,7 @@ internal class StripeApiRepositoryTest {
             params = ElementsSessionParams.PaymentIntentType(
                 clientSecret = "client_secret",
                 externalPaymentMethods = emptyList(),
-                defaultPaymentMethodId = "pm_123",
+                savedPaymentMethodSelectionId = "pm_123",
             ),
             options = DEFAULT_OPTIONS,
         )
@@ -2601,7 +2601,7 @@ internal class StripeApiRepositoryTest {
         create().retrieveElementsSession(
             params = ElementsSessionParams.PaymentIntentType(
                 clientSecret = "client_secret",
-                defaultPaymentMethodId = null,
+                savedPaymentMethodSelectionId = null,
                 externalPaymentMethods = emptyList(),
             ),
             options = DEFAULT_OPTIONS,

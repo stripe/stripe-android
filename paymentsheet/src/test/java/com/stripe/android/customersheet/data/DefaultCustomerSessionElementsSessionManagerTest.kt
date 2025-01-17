@@ -53,7 +53,7 @@ class DefaultCustomerSessionElementsSessionManagerTest {
 
         val lastParams = elementsSessionRepository.lastParams
 
-        assertThat(lastParams?.defaultPaymentMethodId).isEqualTo("pm_123")
+        assertThat(lastParams?.savedPaymentMethodSelectionId).isEqualTo("pm_123")
         assertThat(lastParams?.externalPaymentMethods).isEmpty()
 
         val initializationMode = lastParams?.initializationMode

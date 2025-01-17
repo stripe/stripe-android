@@ -1919,7 +1919,7 @@ internal class DefaultPaymentElementLoaderTest {
                 initializedViaCompose = false,
             )
 
-            assertThat(repository.lastParams?.defaultPaymentMethodId)
+            assertThat(repository.lastParams?.savedPaymentMethodSelectionId)
                 .isEqualTo("pm_1234321")
         }
 
@@ -1950,7 +1950,7 @@ internal class DefaultPaymentElementLoaderTest {
                 initializedViaCompose = false,
             )
 
-            assertThat(repository.lastParams?.defaultPaymentMethodId).isNull()
+            assertThat(repository.lastParams?.savedPaymentMethodSelectionId).isNull()
         }
 
     @Test
@@ -1999,7 +1999,7 @@ internal class DefaultPaymentElementLoaderTest {
                 initializedViaCompose = false,
             )
 
-            assertThat(repository.lastParams?.defaultPaymentMethodId).isNull()
+            assertThat(repository.lastParams?.savedPaymentMethodSelectionId).isNull()
         }
 
     @Test

@@ -25,7 +25,7 @@ internal interface ElementsSessionRepository {
         initializationMode: PaymentElementLoader.InitializationMode,
         customer: PaymentSheet.CustomerConfiguration?,
         externalPaymentMethods: List<String>,
-        defaultPaymentMethodId: String?,
+        savedPaymentMethodSelectionId: String?,
     ): Result<ElementsSession>
 }
 
@@ -50,12 +50,12 @@ internal class RealElementsSessionRepository @Inject constructor(
         initializationMode: PaymentElementLoader.InitializationMode,
         customer: PaymentSheet.CustomerConfiguration?,
         externalPaymentMethods: List<String>,
-        defaultPaymentMethodId: String?,
+        savedPaymentMethodSelectionId: String?,
     ): Result<ElementsSession> {
         val params = initializationMode.toElementsSessionParams(
             customer = customer,
             externalPaymentMethods = externalPaymentMethods,
-            defaultPaymentMethodId = defaultPaymentMethodId,
+            savedPaymentMethodSelectionId = savedPaymentMethodSelectionId,
         )
 
         val elementsSession = stripeRepository.retrieveElementsSession(
@@ -113,7 +113,7 @@ private fun StripeIntent.withoutWeChatPay(): StripeIntent {
 internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
     customer: PaymentSheet.CustomerConfiguration?,
     externalPaymentMethods: List<String>,
-    defaultPaymentMethodId: String?,
+    savedPaymentMethodSelectionId: String?,
 ): ElementsSessionParams {
     val customerSessionClientSecret = customer?.toElementSessionParam()
 
@@ -123,7 +123,7 @@ internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
                 clientSecret = clientSecret,
                 customerSessionClientSecret = customerSessionClientSecret,
                 externalPaymentMethods = externalPaymentMethods,
-                defaultPaymentMethodId = defaultPaymentMethodId,
+                savedPaymentMethodSelectionId = savedPaymentMethodSelectionId,
             )
         }
 
@@ -132,7 +132,7 @@ internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
                 clientSecret = clientSecret,
                 customerSessionClientSecret = customerSessionClientSecret,
                 externalPaymentMethods = externalPaymentMethods,
-                defaultPaymentMethodId = defaultPaymentMethodId,
+                savedPaymentMethodSelectionId = savedPaymentMethodSelectionId,
             )
         }
 
@@ -141,7 +141,7 @@ internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
                 deferredIntentParams = intentConfiguration.toDeferredIntentParams(),
                 externalPaymentMethods = externalPaymentMethods,
                 customerSessionClientSecret = customerSessionClientSecret,
-                defaultPaymentMethodId = defaultPaymentMethodId,
+                savedPaymentMethodSelectionId = savedPaymentMethodSelectionId,
             )
         }
     }
