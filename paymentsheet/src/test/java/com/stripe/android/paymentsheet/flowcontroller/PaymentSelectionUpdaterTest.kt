@@ -326,10 +326,7 @@ class PaymentSelectionUpdaterTest {
         val existingSelection = PaymentSelection.GooglePay
 
         val newConfig = defaultPaymentSheetConfiguration.copy(
-            customer = PaymentSheet.CustomerConfiguration(
-                id = "id1",
-                ephemeralKeySecret = "ek_123",
-            )
+            defaultBillingDetails = PaymentSheet.BillingDetails(email = "hi-jay@example.com")
         )
         val newState = mockPaymentSheetStateWithPaymentIntent(
             config = newConfig

@@ -1,0 +1,40 @@
+package com.stripe.android.common.model
+
+import com.stripe.android.ExperimentalCardBrandFilteringApi
+import com.stripe.android.model.CardBrand
+import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.addresselement.AddressDetails
+
+internal object CommonConfigurationFactory {
+    @OptIn(ExperimentalCardBrandFilteringApi::class)
+    fun create(
+        merchantDisplayName: String = "Example, Inc.",
+        customer: PaymentSheet.CustomerConfiguration? = null,
+        googlePay: PaymentSheet.GooglePayConfiguration? = null,
+        defaultBillingDetails: PaymentSheet.BillingDetails? = null,
+        shippingDetails: AddressDetails? = null,
+        allowsDelayedPaymentMethods: Boolean = true,
+        allowsPaymentMethodsRequiringShippingAddress: Boolean = true,
+        billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
+            PaymentSheet.BillingDetailsCollectionConfiguration(),
+        preferredNetworks: List<CardBrand> = emptyList(),
+        allowsRemovalOfLastSavedPaymentMethod: Boolean = true,
+        paymentMethodOrder: List<String> = emptyList(),
+        externalPaymentMethods: List<String> = emptyList(),
+        cardBrandAcceptance: PaymentSheet.CardBrandAcceptance = PaymentSheet.CardBrandAcceptance.all(),
+    ): CommonConfiguration = CommonConfiguration(
+        merchantDisplayName = merchantDisplayName,
+        customer = customer,
+        googlePay = googlePay,
+        defaultBillingDetails = defaultBillingDetails,
+        shippingDetails = shippingDetails,
+        allowsDelayedPaymentMethods = allowsDelayedPaymentMethods,
+        allowsPaymentMethodsRequiringShippingAddress = allowsPaymentMethodsRequiringShippingAddress,
+        billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+        preferredNetworks = preferredNetworks,
+        allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod,
+        paymentMethodOrder = paymentMethodOrder,
+        externalPaymentMethods = externalPaymentMethods,
+        cardBrandAcceptance = cardBrandAcceptance,
+    )
+}

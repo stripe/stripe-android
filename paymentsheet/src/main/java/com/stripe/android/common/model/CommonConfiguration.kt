@@ -157,3 +157,26 @@ private fun String.isEKClientSecretValid(): Boolean {
 }
 
 private const val EK_CLIENT_SECRET_VALID_REGEX_PATTERN = "^ek_[^_](.)+$"
+
+internal fun CommonConfiguration.containsVolatileDifferences(
+    other: CommonConfiguration
+): Boolean {
+    return toVolatileConfiguration() != other.toVolatileConfiguration()
+}
+
+/**
+ * Creates a subset of the [CommonConfiguration] values that affect the behavior of [PaymentSelection].
+ */
+private fun CommonConfiguration.toVolatileConfiguration(): VolatileCommonConfiguration {
+    return VolatileCommonConfiguration(
+        defaultBillingDetails = defaultBillingDetails,
+        billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+        cardBrandAcceptance = cardBrandAcceptance,
+    )
+}
+
+private data class VolatileCommonConfiguration(
+    val defaultBillingDetails: PaymentSheet.BillingDetails?,
+    val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
+    val cardBrandAcceptance: PaymentSheet.CardBrandAcceptance,
+)
