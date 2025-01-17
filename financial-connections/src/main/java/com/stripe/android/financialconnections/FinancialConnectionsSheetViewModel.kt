@@ -494,8 +494,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                                 encodedPaymentMethod = paymentMethod,
                                 last4 = url.getQueryParameter(QUERY_PARAM_LAST4),
                                 bankName = url.getQueryParameter(QUERY_BANK_NAME),
-                                // TODO(tillh-stripe): Pull this from the URL
-                                eligibleForIncentive = false,
+                                eligibleForIncentive = url.getQueryParameter(QUERY_INCENTIVE_ELIGIBLE).toBoolean(),
                             ),
                             financialConnectionsSession = null,
                             token = null
@@ -608,6 +607,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         internal const val QUERY_PARAM_PAYMENT_METHOD = "payment_method"
         internal const val QUERY_PARAM_LAST4 = "last4"
         internal const val QUERY_BANK_NAME = "bank_name"
+        internal const val QUERY_INCENTIVE_ELIGIBLE = "incentive_eligible"
     }
 
     override fun updateTopAppBar(state: FinancialConnectionsSheetState): TopAppBarStateUpdate? {
