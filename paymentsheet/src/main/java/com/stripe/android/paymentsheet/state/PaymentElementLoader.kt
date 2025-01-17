@@ -543,14 +543,13 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         customer: Deferred<CustomerState?>,
         isGooglePayReady: Boolean,
     ): PaymentSelection? {
-        val customerArrived = customer.await()
-        val selection = savedSelection.await()
+        val defaultPaymentMethodPaymentSelection = customer.await()?.defaultPaymentMethodId?.let {
+            customer.await()?.paymentMethods?.firstOrNull {
+                it.id == customer.await()?.defaultPaymentMethodId
+            }?.toPaymentSelection()
+        }
 
-        val defaultPaymentMethodPaymentSelection = customerArrived?.paymentMethods?.firstOrNull {
-            it.id == customerArrived.defaultPaymentMethodId && customerArrived.defaultPaymentMethodId != null
-        }?.toPaymentSelection()
-
-        val savedSelectionPaymentMethodPaymentSelection = when (selection) {
+        val savedSelectionPaymentMethodPaymentSelection = when (val selection = savedSelection.await()) {
             is SavedSelection.GooglePay -> PaymentSelection.GooglePay
             is SavedSelection.Link -> PaymentSelection.Link
             is SavedSelection.PaymentMethod -> {
