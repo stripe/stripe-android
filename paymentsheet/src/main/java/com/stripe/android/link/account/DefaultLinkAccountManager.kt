@@ -16,10 +16,13 @@ import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.ConsumerSessionSignup
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.SignUpParams
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.BuildConfig
+import com.stripe.android.repository.ConsumersApiService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
@@ -34,6 +37,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
     private val linkRepository: LinkRepository,
     private val linkEventsReporter: LinkEventsReporter,
     private val errorReporter: ErrorReporter,
+    private val consumersApiService: ConsumersApiService
 ) : LinkAccountManager {
     private val _linkAccount = MutableStateFlow<LinkAccount?>(null)
     override val linkAccount: StateFlow<LinkAccount?> = _linkAccount
@@ -160,6 +164,31 @@ internal class DefaultLinkAccountManager @Inject constructor(
                     publishableKey = consumerSessionSignup.publishableKey,
                 )
             }
+
+    override suspend fun mobileSignUp(
+        email: String,
+        phoneNumber: String,
+        country: String,
+        verificationToken: String,
+        appId: String,
+        name: String?,
+        consentAction: SignUpConsentAction
+    ): Result<LinkAccount> {
+        return linkRepository.mobileSignUp(
+            name = name,
+            email = email,
+            phoneNumber = phoneNumber,
+            country = country,
+            consentAction = consentAction.consumerAction,
+            verificationToken = verificationToken,
+            appId = appId
+        ).map { consumerSessionSignup ->
+            setAccount(
+                consumerSession = consumerSessionSignup.consumerSession,
+                publishableKey = consumerSessionSignup.publishableKey,
+            )
+        }
+    }
 
     override suspend fun createCardPaymentDetails(
         paymentMethodCreateParams: PaymentMethodCreateParams

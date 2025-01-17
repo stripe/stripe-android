@@ -177,7 +177,8 @@ internal interface NativeLinkModule {
             },
             factory = RealStandardIntegrityManagerFactory(context)
         )
-
+        @Provides
+        @NativeLinkScope
         fun provideEventReporterMode(): EventReporter.Mode = EventReporter.Mode.Custom
     }
 }

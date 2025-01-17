@@ -14,6 +14,7 @@ import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSessionSignup
 import com.stripe.android.model.ConsumerSignUpConsentAction
+import com.stripe.android.model.EmailSource
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.SignUpParams
 import com.stripe.android.model.StripeIntent
@@ -54,6 +55,25 @@ internal class LinkApiRepository @Inject constructor(
         }
     }
 
+    override suspend fun mobileLookupConsumer(
+        email: String,
+        verificationToken: String,
+        appId: String,
+        sessionId: String
+    ): Result<ConsumerSessionLookup> = withContext(workContext) {
+        runCatching {
+            consumersApiService.mobileLookupConsumerSession(
+                email = email,
+                emailSource = EmailSource.USER_ACTION,
+                requestSurface = REQUEST_SURFACE,
+                verificationToken = verificationToken,
+                appId = appId,
+                requestOptions = buildRequestOptions(),
+                sessionId = ""
+            )
+        }
+    }
+
     override suspend fun consumerSignUp(
         email: String,
         phone: String,
@@ -73,6 +93,34 @@ internal class LinkApiRepository @Inject constructor(
                 incentiveEligibilitySession = null,
                 consentAction = consentAction,
                 requestSurface = REQUEST_SURFACE
+            ),
+            requestOptions = buildRequestOptions(),
+        )
+    }
+
+    override suspend fun mobileSignUp(
+        name: String?,
+        email: String,
+        phoneNumber: String,
+        country: String,
+        consentAction: ConsumerSignUpConsentAction,
+        verificationToken: String,
+        appId: String
+    ): Result<ConsumerSessionSignup> = withContext(workContext) {
+        consumersApiService.mobileSignUp(
+            SignUpParams(
+                email = email,
+                phoneNumber = phoneNumber,
+                country = country,
+                name = name,
+                locale = locale,
+                amount = null,
+                currency = null,
+                incentiveEligibilitySession = null,
+                consentAction = consentAction,
+                requestSurface = REQUEST_SURFACE,
+                verificationToken = verificationToken,
+                appId = appId
             ),
             requestOptions = buildRequestOptions(),
         )

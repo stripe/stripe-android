@@ -9,6 +9,7 @@ import androidx.navigation.NavHostController
 import com.stripe.android.core.Logger
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.account.LinkAccountManager
@@ -23,6 +24,7 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.NameConfig
 import com.stripe.android.uicore.elements.PhoneNumberController
+import com.stripe.attestation.IntegrityRequestManager
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -39,7 +41,9 @@ internal class SignUpViewModel @Inject constructor(
     private val configuration: LinkConfiguration,
     private val linkAccountManager: LinkAccountManager,
     private val linkEventsReporter: LinkEventsReporter,
-    private val logger: Logger
+    private val logger: Logger,
+    private val integrityRequestManager: IntegrityRequestManager,
+    private val moveToWebFlow: () -> Unit
 ) : ViewModel() {
     internal var navController: NavHostController? = null
     val emailController = EmailConfig.createController(
@@ -112,23 +116,59 @@ internal class SignUpViewModel @Inject constructor(
     fun onSignUpClick() {
         clearError()
         viewModelScope.launch {
-            linkAccountManager.signUp(
-                email = emailController.fieldValue.value,
-                phone = phoneNumberController.getE164PhoneNumber(phoneNumberController.fieldValue.value),
-                country = phoneNumberController.getCountryCode(),
-                name = nameController.fieldValue.value,
-                consentAction = SignUpConsentAction.Implied
-            ).fold(
-                onSuccess = {
-                    onAccountFetched(it)
-                    linkEventsReporter.onSignupCompleted()
-                },
-                onFailure = {
-                    onError(it)
-                    linkEventsReporter.onSignupFailure(error = it)
-                }
-            )
+            if (FeatureFlags.nativeLinkEnabled.isEnabled) {
+                mobileSignUp()
+            } else {
+                signUp()
+            }
         }
+    }
+
+    private suspend fun signUp() {
+        linkAccountManager.signUp(
+            email = emailController.fieldValue.value,
+            phone = phoneNumberController.getE164PhoneNumber(phoneNumberController.fieldValue.value),
+            country = phoneNumberController.getCountryCode(),
+            name = nameController.fieldValue.value,
+            consentAction = SignUpConsentAction.Implied
+        ).fold(
+            onSuccess = ::handleSignUpSuccess,
+            onFailure = ::handleSignUpFailure
+        )
+    }
+
+    private suspend fun mobileSignUp() {
+        val attestationResult = integrityRequestManager.requestToken()
+        attestationResult.fold(
+            onSuccess = { verificationToken ->
+                linkAccountManager.mobileSignUp(
+                    email = emailController.fieldValue.value,
+                    phoneNumber = phoneNumberController.getE164PhoneNumber(phoneNumberController.fieldValue.value),
+                    country = phoneNumberController.getCountryCode(),
+                    name = nameController.fieldValue.value,
+                    consentAction = SignUpConsentAction.Implied,
+                    verificationToken = verificationToken,
+                    appId = "com.stripe.android.paymentsheet.example"
+                ).fold(
+                    onSuccess = ::handleSignUpSuccess,
+                    onFailure = ::handleSignUpFailure
+                )
+            },
+            onFailure = { error ->
+                moveToWebFlow()
+            }
+        )
+
+    }
+
+    private fun handleSignUpSuccess(account: LinkAccount) {
+        onAccountFetched(account)
+        linkEventsReporter.onSignupCompleted()
+    }
+
+    private fun handleSignUpFailure(error: Throwable) {
+        onError(error)
+        linkEventsReporter.onSignupFailure(error = error)
     }
 
     private fun onAccountFetched(linkAccount: LinkAccount?) {
@@ -177,7 +217,8 @@ internal class SignUpViewModel @Inject constructor(
         internal val LOOKUP_DEBOUNCE = 1.seconds
 
         fun factory(
-            parentComponent: NativeLinkComponent
+            parentComponent: NativeLinkComponent,
+            moveToWebFlow: () -> Unit
         ): ViewModelProvider.Factory {
             return viewModelFactory {
                 initializer {
@@ -185,7 +226,9 @@ internal class SignUpViewModel @Inject constructor(
                         configuration = parentComponent.configuration,
                         linkEventsReporter = parentComponent.linkEventsReporter,
                         linkAccountManager = parentComponent.linkAccountManager,
-                        logger = parentComponent.logger
+                        logger = parentComponent.logger,
+                        integrityRequestManager = parentComponent.integrityRequestManager,
+                        moveToWebFlow = moveToWebFlow
                     )
                 }
             }

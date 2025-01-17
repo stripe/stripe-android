@@ -68,6 +68,7 @@ class IntegrityStandardRequestManager(
     private suspend fun request(
         requestHash: String?,
     ): Result<String> = runCatching {
+        throw Exception()
         val finishedTask = requireNotNull(
             value = integrityTokenProvider,
             lazyMessage = { "Integrity token provider is not initialized. Call prepare() first." }

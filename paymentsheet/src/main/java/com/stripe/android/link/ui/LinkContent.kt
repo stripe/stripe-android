@@ -52,7 +52,8 @@ internal fun LinkContent(
     sheetState: ModalBottomSheetState,
     bottomSheetContent: BottomSheetContent?,
     onUpdateSheetContent: (BottomSheetContent?) -> Unit,
-    onBackPressed: () -> Unit
+    onBackPressed: () -> Unit,
+    moveToWebFlow: () -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
     DefaultLinkTheme {
@@ -111,7 +112,8 @@ internal fun LinkContent(
                     showBottomSheetContent = onUpdateSheetContent,
                     hideBottomSheetContent = {
                         onUpdateSheetContent(null)
-                    }
+                    },
+                    moveToWebFlow = moveToWebFlow
                 )
             }
         }
@@ -127,7 +129,8 @@ private fun Screens(
     navigateAndClearStack: (route: LinkScreen) -> Unit,
     dismissWithResult: (LinkActivityResult) -> Unit,
     showBottomSheetContent: (BottomSheetContent?) -> Unit,
-    hideBottomSheetContent: () -> Unit
+    hideBottomSheetContent: () -> Unit,
+    moveToWebFlow: () -> Unit
 ) {
     NavHost(
         navController = navController,
@@ -139,7 +142,10 @@ private fun Screens(
 
         composable(LinkScreen.SignUp.route) {
             val viewModel: SignUpViewModel = linkViewModel {
-                SignUpViewModel.factory(it)
+                SignUpViewModel.factory(
+                    parentComponent = it,
+                    moveToWebFlow = moveToWebFlow
+                )
             }
             SignUpScreen(
                 viewModel = viewModel,

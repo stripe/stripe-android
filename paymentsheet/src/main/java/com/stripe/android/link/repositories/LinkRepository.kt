@@ -22,6 +22,13 @@ internal interface LinkRepository {
         email: String,
     ): Result<ConsumerSessionLookup>
 
+    suspend fun mobileLookupConsumer(
+        email: String,
+        verificationToken: String,
+        appId: String,
+        sessionId: String
+    ): Result<ConsumerSessionLookup>
+
     /**
      * Sign up for a new Link account.
      */
@@ -31,6 +38,16 @@ internal interface LinkRepository {
         country: String,
         name: String?,
         consentAction: ConsumerSignUpConsentAction
+    ): Result<ConsumerSessionSignup>
+
+    suspend fun mobileSignUp(
+        name: String?,
+        email: String,
+        phoneNumber: String,
+        country: String,
+        consentAction: ConsumerSignUpConsentAction,
+        verificationToken: String,
+        appId: String
     ): Result<ConsumerSessionSignup>
 
     /**

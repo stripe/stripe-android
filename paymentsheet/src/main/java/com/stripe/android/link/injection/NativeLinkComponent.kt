@@ -16,6 +16,7 @@ import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.injection.DefaultConfirmationModule
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
+import com.stripe.attestation.IntegrityRequestManager
 import dagger.BindsInstance
 import dagger.Component
 import javax.inject.Named
@@ -42,6 +43,7 @@ internal interface NativeLinkComponent {
     val webLinkActivityContract: WebLinkActivityContract
     val linkActivityContract: LinkActivityContract
     val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory
+    val integrityRequestManager: IntegrityRequestManager
     val viewModel: LinkActivityViewModel
 
     @Component.Builder
