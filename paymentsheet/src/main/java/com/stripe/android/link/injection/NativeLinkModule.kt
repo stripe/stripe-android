@@ -161,6 +161,8 @@ internal interface NativeLinkModule {
             factory: DefaultLinkConfirmationHandler.Factory
         ): LinkConfirmationHandler.Factory = factory
 
+        @Provides
+        @NativeLinkScope
         fun provideEventReporterMode(): EventReporter.Mode = EventReporter.Mode.Custom
     }
 }

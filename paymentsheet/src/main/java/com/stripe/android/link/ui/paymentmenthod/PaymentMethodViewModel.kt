@@ -49,14 +49,14 @@ internal class PaymentMethodViewModel @Inject constructor(
     val state: StateFlow<PaymentMethodState> = _state
 
     fun formValuesChanged(formValues: FormFieldValues?) {
-        val params = formHelper.getPaymentMethodParams(
+        val paymentMethodCreateParams = formHelper.getPaymentMethodParams(
             formValues = formValues,
             selectedPaymentMethodCode = PaymentMethod.Type.Card.code
         )
         _state.update {
             it.copy(
-                paymentMethodCreateParams = params,
-                primaryButtonState = if (params != null) {
+                paymentMethodCreateParams = paymentMethodCreateParams,
+                primaryButtonState = if (paymentMethodCreateParams != null) {
                     PrimaryButtonState.Enabled
                 } else {
                     PrimaryButtonState.Disabled
@@ -76,7 +76,12 @@ internal class PaymentMethodViewModel @Inject constructor(
             linkAccountManager.createCardPaymentDetails(paymentMethodCreateParams)
                 .fold(
                     onSuccess = { linkPaymentDetails ->
-                        performConfirmation(linkPaymentDetails.paymentDetails)
+                        val cardMap = paymentMethodCreateParams.toParamMap()["card"] as? Map<*, *>?
+                        performConfirmation(
+                            paymentDetails = linkPaymentDetails.paymentDetails,
+                            cvc = cardMap?.get("cvc") as? String?
+                        )
+                        updateButtonState(PrimaryButtonState.Enabled)
                     },
                     onFailure = { error ->
                         _state.update {
@@ -84,6 +89,7 @@ internal class PaymentMethodViewModel @Inject constructor(
                                 errorMessage = error.stripeErrorMessage()
                             )
                         }
+                        updateButtonState(PrimaryButtonState.Enabled)
                         logger.error(
                             msg = "PaymentMethodViewModel: Failed to create card payment details",
                             t = error
@@ -91,14 +97,16 @@ internal class PaymentMethodViewModel @Inject constructor(
                     }
                 )
         }
-        updateButtonState(PrimaryButtonState.Enabled)
     }
 
-    private suspend fun performConfirmation(paymentDetails: ConsumerPaymentDetails.PaymentDetails) {
+    private suspend fun performConfirmation(
+        paymentDetails: ConsumerPaymentDetails.PaymentDetails,
+        cvc: String?
+    ) {
         val result = linkConfirmationHandler.confirm(
             paymentDetails = paymentDetails,
             linkAccount = linkAccount,
-            cvc = null
+            cvc = cvc
         )
         when (result) {
             Result.Canceled -> Unit
