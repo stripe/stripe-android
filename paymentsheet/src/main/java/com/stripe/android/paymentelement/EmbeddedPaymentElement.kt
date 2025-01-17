@@ -38,7 +38,14 @@ import kotlinx.parcelize.Parcelize
 class EmbeddedPaymentElement private constructor(
     private val embeddedConfirmationHelper: EmbeddedConfirmationHelper,
     private val sharedViewModel: SharedPaymentElementViewModel,
+    private val activityResultCaller: ActivityResultCaller,
+    private val lifecycleOwner: LifecycleOwner
 ) {
+
+    init {
+        sharedViewModel.initEmbeddedActivityLauncher(activityResultCaller, lifecycleOwner)
+    }
+
     /**
      * Contains information about the customer's selected payment option.
      * Use this to display the payment option in your own UI.
@@ -503,6 +510,8 @@ class EmbeddedPaymentElement private constructor(
                     confirmationStateSupplier = { sharedViewModel.confirmationStateHolder.state },
                 ),
                 sharedViewModel = sharedViewModel,
+                activityResultCaller = activityResultCaller,
+                lifecycleOwner = lifecycleOwner
             )
         }
     }
