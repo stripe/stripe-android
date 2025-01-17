@@ -1957,15 +1957,47 @@ internal class DefaultPaymentElementLoaderTest {
     fun `When DefaultPaymentMethod not null, no saved selection, paymentMethod order correct`() = runTest {
         enableDefaultPaymentMethods.setEnabled(true)
 
-        testOrderingOfPaymentMethodsWithDefaultPaymentMethodId()
+        val result = getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId()
+
+        val observedElements = result.customer?.paymentMethods
+        val expectedElements = expectedPaymentMethodsWithDefaultPaymentMethod
+        assertThat(observedElements).containsExactlyElementsIn(expectedElements).inOrder()
     }
 
     @Test
     fun `When DefaultPaymentMethod not null, and saved selection, paymentMethod order correct`() = runTest {
         enableDefaultPaymentMethods.setEnabled(true)
 
-        testOrderingOfPaymentMethodsWithDefaultPaymentMethodId(
+        val result = getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
             setLastUsedIndex = 1
+        )
+
+        val observedElements = result.customer?.paymentMethods
+        val expectedElements = expectedPaymentMethodsWithDefaultPaymentMethod
+        assertThat(observedElements).containsExactlyElementsIn(expectedElements).inOrder()
+    }
+
+    @Test
+    fun `When DefaultPaymentMethod not null, and no savedSelection, selection correct`() = runTest {
+        enableDefaultPaymentMethods.setEnabled(true)
+
+        val result = getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId()
+
+        assertThat((result.paymentSelection as? PaymentSelection.Saved)?.paymentMethod).isEqualTo(
+            PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "c3", customerId = "carol")
+        )
+    }
+
+    @Test
+    fun `When DefaultPaymentMethod not null, and savedSelection, selection correct`() = runTest {
+        enableDefaultPaymentMethods.setEnabled(true)
+
+        val result = getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
+            setLastUsedIndex = 1
+        )
+
+        assertThat((result.paymentSelection as? PaymentSelection.Saved)?.paymentMethod).isEqualTo(
+            PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "c3", customerId = "carol")
         )
     }
 
@@ -2499,10 +2531,17 @@ internal class DefaultPaymentElementLoaderTest {
         PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "d4", customerId = "dan")
     )
 
+    private val expectedPaymentMethodsWithDefaultPaymentMethod = listOf(
+        PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "c3", customerId = "carol"),
+        PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "a1", customerId = "alice"),
+        PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "b2", customerId = "bob"),
+        PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "d4", customerId = "dan")
+    )
+
     @OptIn(ExperimentalCustomerSessionApi::class)
-    private suspend fun testOrderingOfPaymentMethodsWithDefaultPaymentMethodId(
+    private suspend fun getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
         setLastUsedIndex: Int? = null
-    ) {
+    ): PaymentElementLoader.State {
         val defaultPaymentMethodIndex = 2
         val defaultPaymentMethod = paymentMethodsForTestingOrdering[defaultPaymentMethodIndex]
         val defaultPaymentMethodId = defaultPaymentMethod.id
@@ -2533,13 +2572,6 @@ internal class DefaultPaymentElementLoaderTest {
             initializedViaCompose = false,
         ).getOrThrow()
 
-        val observedElements = result.customer?.paymentMethods
-        val expectedElements = listOf(
-            PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "c3", customerId = "carol"),
-            PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "a1", customerId = "alice"),
-            PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "b2", customerId = "bob"),
-            PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "d4", customerId = "dan")
-        )
-        assertThat(observedElements).containsExactlyElementsIn(expectedElements).inOrder()
+        return result
     }
 }
