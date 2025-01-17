@@ -268,6 +268,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         EXTERNAL_PAYMENT_METHODS_LAUNCH_SUCCESS(
             eventName = "paymentsheet.external_payment_method.launch_success"
         ),
+        FOUND_CREATE_INTENT_CALLBACK_WHILE_POLLING(
+            eventName = "paymentsheet.polling_for_create_intent_callback.found"
+        ),
     }
 }
 

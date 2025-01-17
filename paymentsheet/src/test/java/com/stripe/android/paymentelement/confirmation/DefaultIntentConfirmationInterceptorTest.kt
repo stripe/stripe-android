@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.confirmation
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -28,6 +29,8 @@ import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.utils.IntentConfirmationInterceptorTestRule
+import kotlinx.coroutines.async
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -127,8 +130,9 @@ class DefaultIntentConfirmationInterceptorTest {
         }
 
     @Test
-    fun `Fails if invoked without a confirm callback for existing payment method`() = runTest {
-        val errorReporter = FakeErrorReporter()
+    fun `Fails if invoked without a confirm callback for existing payment method`() = testNoConfirmCallback(
+        userMessage = CREATE_INTENT_CALLBACK_MESSAGE.resolvableString,
+    ) { errorReporter ->
         val interceptor = DefaultIntentConfirmationInterceptor(
             stripeRepository = object : AbsFakeStripeRepository() {},
             publishableKeyProvider = { "pk_test_123" },
@@ -137,7 +141,7 @@ class DefaultIntentConfirmationInterceptorTest {
             allowsManualConfirmation = false,
         )
 
-        val nextStep = interceptor.intercept(
+        interceptor.intercept(
             initializationMode = InitializationMode.DeferredIntent(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
@@ -150,23 +154,12 @@ class DefaultIntentConfirmationInterceptorTest {
             paymentMethodOptionsParams = null,
             shippingValues = null,
         )
-
-        assertThat(nextStep).isInstanceOf<IntentConfirmationInterceptor.NextStep.Fail>()
-
-        val failedStep = nextStep.asFail()
-
-        assertThat(failedStep.cause).isInstanceOf<IllegalStateException>()
-        assertThat(failedStep.cause.message).isEqualTo(CREATE_INTENT_CALLBACK_MESSAGE)
-        assertThat(failedStep.message).isEqualTo(CREATE_INTENT_CALLBACK_MESSAGE.resolvableString)
-
-        assertThat(errorReporter.getLoggedErrors()).containsExactly(
-            ErrorReporter.ExpectedErrorEvent.CREATE_INTENT_CALLBACK_NULL.eventName,
-        )
     }
 
     @Test
-    fun `Fails if invoked without a confirm callback for new payment method`() = runTest {
-        val errorReporter = FakeErrorReporter()
+    fun `Fails if invoked without a confirm callback for new payment method`() = testNoConfirmCallback(
+        userMessage = CREATE_INTENT_CALLBACK_MESSAGE.resolvableString,
+    ) { errorReporter ->
         val interceptor = DefaultIntentConfirmationInterceptor(
             stripeRepository = object : AbsFakeStripeRepository() {
                 override suspend fun createPaymentMethod(
@@ -182,29 +175,18 @@ class DefaultIntentConfirmationInterceptorTest {
             allowsManualConfirmation = false,
         )
 
-        val nextStep = interceptor.intercept(
+        interceptor.intercept(
             initializationMode = InitializationMode.DeferredIntent(mock()),
             paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
             shippingValues = null,
             customerRequestedSave = false,
         )
-
-        assertThat(nextStep).isInstanceOf<IntentConfirmationInterceptor.NextStep.Fail>()
-
-        val failedStep = nextStep.asFail()
-
-        assertThat(failedStep.cause).isInstanceOf<IllegalStateException>()
-        assertThat(failedStep.cause.message).isEqualTo(CREATE_INTENT_CALLBACK_MESSAGE)
-        assertThat(failedStep.message).isEqualTo(CREATE_INTENT_CALLBACK_MESSAGE.resolvableString)
-
-        assertThat(errorReporter.getLoggedErrors()).containsExactly(
-            ErrorReporter.ExpectedErrorEvent.CREATE_INTENT_CALLBACK_NULL.eventName,
-        )
     }
 
     @Test
-    fun `Message for live key when error without confirm callback is user friendly`() = runTest {
-        val errorReporter = FakeErrorReporter()
+    fun `Message for live key when error without confirm callback is user friendly`() = testNoConfirmCallback(
+        userMessage = PaymentsCoreR.string.stripe_internal_error.resolvableString
+    ) { errorReporter ->
         val interceptor = DefaultIntentConfirmationInterceptor(
             stripeRepository = object : AbsFakeStripeRepository() {},
             publishableKeyProvider = { "pk_live_123" },
@@ -213,7 +195,7 @@ class DefaultIntentConfirmationInterceptorTest {
             allowsManualConfirmation = false,
         )
 
-        val nextStep = interceptor.intercept(
+        interceptor.intercept(
             initializationMode = InitializationMode.DeferredIntent(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
@@ -226,18 +208,72 @@ class DefaultIntentConfirmationInterceptorTest {
             paymentMethodOptionsParams = null,
             shippingValues = null,
         )
+    }
 
-        assertThat(nextStep).isInstanceOf<IntentConfirmationInterceptor.NextStep.Fail>()
+    @Test
+    fun `Succeeds if callback is found before timeout time`() {
+        val dispatcher = StandardTestDispatcher()
 
-        val failedStep = nextStep.asFail()
+        runTest(dispatcher) {
+            val errorReporter = FakeErrorReporter()
+            val paymentMethod = PaymentMethodFactory.card()
+            val interceptor = DefaultIntentConfirmationInterceptor(
+                stripeRepository = object : AbsFakeStripeRepository() {
+                    override suspend fun createPaymentMethod(
+                        paymentMethodCreateParams: PaymentMethodCreateParams,
+                        options: ApiRequest.Options
+                    ): Result<PaymentMethod> {
+                        return Result.success(paymentMethod)
+                    }
 
-        assertThat(failedStep.cause).isInstanceOf<IllegalStateException>()
-        assertThat(failedStep.cause.message).isEqualTo(CREATE_INTENT_CALLBACK_MESSAGE)
-        assertThat(failedStep.message).isEqualTo(PaymentsCoreR.string.stripe_internal_error.resolvableString)
+                    override suspend fun retrieveStripeIntent(
+                        clientSecret: String,
+                        options: ApiRequest.Options,
+                        expandFields: List<String>
+                    ): Result<StripeIntent> {
+                        return Result.success(PaymentIntentFixtures.PI_SUCCEEDED)
+                    }
+                },
+                publishableKeyProvider = { "pk_live_123" },
+                stripeAccountIdProvider = { null },
+                errorReporter = errorReporter,
+                allowsManualConfirmation = false,
+            )
 
-        assertThat(errorReporter.getLoggedErrors()).containsExactly(
-            ErrorReporter.ExpectedErrorEvent.CREATE_INTENT_CALLBACK_NULL.eventName,
-        )
+            val interceptJob = async {
+                interceptor.intercept(
+                    initializationMode = InitializationMode.DeferredIntent(
+                        intentConfiguration = PaymentSheet.IntentConfiguration(
+                            mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                                amount = 1099L,
+                                currency = "usd",
+                            ),
+                        ),
+                    ),
+                    paymentMethod = paymentMethod,
+                    paymentMethodOptionsParams = null,
+                    shippingValues = null,
+                )
+            }
+
+            dispatcher.scheduler.advanceTimeBy(1000)
+            assertThat(interceptJob.isActive).isTrue()
+
+            IntentConfirmationInterceptor.createIntentCallback = succeedingCreateIntentCallback(paymentMethod)
+
+            dispatcher.scheduler.advanceTimeBy(1001)
+
+            assertThat(interceptJob.isActive).isFalse()
+            assertThat(interceptJob.isCompleted).isTrue()
+
+            val nextStep = interceptJob.await()
+
+            assertThat(nextStep).isInstanceOf<IntentConfirmationInterceptor.NextStep.Complete>()
+
+            assertThat(errorReporter.getLoggedErrors()).containsExactly(
+                ErrorReporter.SuccessEvent.FOUND_CREATE_INTENT_CALLBACK_WHILE_POLLING.eventName,
+            )
+        }
     }
 
     @Test
@@ -636,6 +672,48 @@ class DefaultIntentConfirmationInterceptorTest {
                 R.string.stripe_paymentsheet_invalid_deferred_intent_usage.resolvableString
             )
         }
+
+    private fun testNoConfirmCallback(
+        userMessage: ResolvableString,
+        interceptCall: suspend (errorReporter: ErrorReporter) -> IntentConfirmationInterceptor.NextStep
+    ) {
+        val errorReporter = FakeErrorReporter()
+        val dispatcher = StandardTestDispatcher()
+
+        runTest(dispatcher) {
+            val interceptJob = async {
+                interceptCall(errorReporter)
+            }
+
+            assertThat(interceptJob.isActive).isTrue()
+
+            dispatcher.scheduler.advanceTimeBy(1000)
+
+            assertThat(interceptJob.isActive).isTrue()
+
+            dispatcher.scheduler.advanceTimeBy(1000)
+
+            assertThat(interceptJob.isActive).isTrue()
+
+            dispatcher.scheduler.advanceTimeBy(1)
+
+            assertThat(interceptJob.isActive).isFalse()
+
+            val nextStep = interceptJob.await()
+
+            assertThat(nextStep).isInstanceOf<IntentConfirmationInterceptor.NextStep.Fail>()
+
+            val failedStep = nextStep.asFail()
+
+            assertThat(failedStep.cause).isInstanceOf<IllegalStateException>()
+            assertThat(failedStep.cause.message).isEqualTo(CREATE_INTENT_CALLBACK_MESSAGE)
+            assertThat(failedStep.message).isEqualTo(userMessage)
+
+            assertThat(errorReporter.getLoggedErrors()).containsExactly(
+                ErrorReporter.ExpectedErrorEvent.CREATE_INTENT_CALLBACK_NULL.eventName,
+            )
+        }
+    }
 
     private fun succeedingCreateIntentCallback(
         expectedPaymentMethod: PaymentMethod,
