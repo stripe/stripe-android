@@ -206,6 +206,7 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity() {
                         startDestination = initialDestination.fullRoute,
                     ) {
                         composable(Destination.Consent)
+                        composable(Destination.StreamlinedConsent)
                         composable(Destination.ManualEntry)
                         composable(Destination.PartnerAuth)
                         bottomSheet(Destination.PartnerAuthDrawer)
