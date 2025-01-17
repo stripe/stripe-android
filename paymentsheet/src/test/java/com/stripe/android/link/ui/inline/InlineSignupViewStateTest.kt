@@ -2,6 +2,7 @@ package com.stripe.android.link.ui.inline
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.TestFactory
 import com.stripe.android.testing.PaymentIntentFactory
 import org.junit.Test
 
@@ -81,20 +82,11 @@ class InlineSignupViewStateTest {
         countryCode: String,
         email: String? = "john@doe.ca",
     ): LinkConfiguration {
-        return LinkConfiguration(
+        return TestFactory.LINK_CONFIGURATION.copy(
             stripeIntent = PaymentIntentFactory.create(countryCode = countryCode),
-            merchantName = "Merchant, Inc.",
-            merchantCountryCode = "usd",
-            customerInfo = LinkConfiguration.CustomerInfo(
-                name = "John Doe",
-                email = email,
-                phone = "+15555555555",
-                billingCountryCode = "usd",
-            ),
-            shippingDetails = null,
-            passthroughModeEnabled = false,
-            flags = emptyMap(),
-            cardBrandChoice = null,
+            customerInfo = TestFactory.LINK_CONFIGURATION.customerInfo.copy(
+                email = email
+            )
         )
     }
 }

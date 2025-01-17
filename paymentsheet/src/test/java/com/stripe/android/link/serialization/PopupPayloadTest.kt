@@ -6,6 +6,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.TestFactory
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.SetupIntentFactory
@@ -210,18 +211,10 @@ internal class PopupPayloadTest {
         cardBrandChoice: LinkConfiguration.CardBrandChoice? = null,
         intent: StripeIntent = PaymentIntentFactory.create()
     ): LinkConfiguration {
-        return LinkConfiguration(
-            merchantName = "Jay's Taco Stand",
-            merchantCountryCode = "US",
-            customerInfo = LinkConfiguration.CustomerInfo(
-                name = "John",
-                email = "john@email.com",
-                billingCountryCode = customerCountryCode,
-                phone = null,
+        return TestFactory.LINK_CONFIGURATION.copy(
+            customerInfo = TestFactory.LINK_CONFIGURATION.customerInfo.copy(
+                billingCountryCode = customerCountryCode
             ),
-            flags = emptyMap(),
-            passthroughModeEnabled = true,
-            shippingDetails = null,
             cardBrandChoice = cardBrandChoice,
             stripeIntent = intent
         )

@@ -6,7 +6,6 @@ import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.link.utils.FakeAndroidKeyStore
-import com.stripe.android.model.PaymentIntentFixtures
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -17,22 +16,6 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class LinkConfigurationCoordinatorTest {
-    private val config = LinkConfiguration(
-        stripeIntent = PaymentIntentFixtures.PI_SUCCEEDED,
-        merchantName = MERCHANT_NAME,
-        merchantCountryCode = "US",
-        customerInfo = LinkConfiguration.CustomerInfo(
-            name = CUSTOMER_NAME,
-            email = CUSTOMER_EMAIL,
-            phone = CUSTOMER_PHONE,
-            billingCountryCode = CUSTOMER_BILLING_COUNTRY_CODE,
-        ),
-        shippingDetails = null,
-        passthroughModeEnabled = false,
-        flags = emptyMap(),
-        cardBrandChoice = null,
-    )
-
     private val linkComponentBuilder: LinkComponent.Builder = mock()
 
     private var linkConfigurationCoordinator = RealLinkConfigurationCoordinator(linkComponentBuilder)
@@ -59,20 +42,23 @@ class LinkConfigurationCoordinatorTest {
 
     @Test
     fun `verify component is reused for same configuration`() = runTest {
-        val component = linkConfigurationCoordinator.getComponent(config)
+        val component = linkConfigurationCoordinator.getComponent(TestFactory.LINK_CONFIGURATION)
 
-        linkConfigurationCoordinator.getAccountStatusFlow(config)
-        linkConfigurationCoordinator.signInWithUserInput(config, mock<UserInput.SignIn>())
+        linkConfigurationCoordinator.getAccountStatusFlow(TestFactory.LINK_CONFIGURATION)
+        linkConfigurationCoordinator.signInWithUserInput(TestFactory.LINK_CONFIGURATION, mock<UserInput.SignIn>())
 
-        assertThat(linkConfigurationCoordinator.getComponent(config)).isEqualTo(component)
+        assertThat(linkConfigurationCoordinator.getComponent(TestFactory.LINK_CONFIGURATION)).isEqualTo(component)
     }
 
     @Test
     fun `verify component is recreated for different configuration`() {
-        val component = linkConfigurationCoordinator.getComponent(config)
+        val component = linkConfigurationCoordinator.getComponent(TestFactory.LINK_CONFIGURATION)
 
-        assertThat(linkConfigurationCoordinator.getComponent(config.copy(merchantName = "anotherName")))
-            .isNotEqualTo(component)
+        assertThat(
+            linkConfigurationCoordinator.getComponent(
+                configuration = TestFactory.LINK_CONFIGURATION.copy(merchantName = "anotherName")
+            )
+        ).isNotEqualTo(component)
     }
 
     companion object {

@@ -170,6 +170,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 configuration = configuration,
                 elementsSession = elementsSession,
                 customer = customerInfo,
+                initializationMode = initializationMode
             )
         }
 
@@ -384,6 +385,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         elementsSession: ElementsSession,
         configuration: CommonConfiguration,
         customer: CustomerInfo?,
+        initializationMode: PaymentElementLoader.InitializationMode
     ): LinkState? {
         return if (elementsSession.isLinkEnabled &&
             !configuration.billingDetailsCollectionConfiguration.collectsAnything
@@ -395,7 +397,9 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 merchantCountry = elementsSession.merchantCountry,
                 passthroughModeEnabled = elementsSession.linkPassthroughModeEnabled,
                 linkSignUpDisabled = elementsSession.disableLinkSignup,
+                useAttestationEndpointsForLink = elementsSession.useAttestationEndpointsForLink,
                 flags = elementsSession.linkFlags,
+                initializationMode = initializationMode
             )
         } else {
             null
@@ -410,6 +414,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         passthroughModeEnabled: Boolean,
         linkSignUpDisabled: Boolean,
         flags: Map<String, Boolean>,
+        useAttestationEndpointsForLink: Boolean,
+        initializationMode: PaymentElementLoader.InitializationMode
     ): LinkState {
         val linkConfig = createLinkConfiguration(
             configuration = configuration,
@@ -418,6 +424,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             merchantCountry = merchantCountry,
             passthroughModeEnabled = passthroughModeEnabled,
             flags = flags,
+            useAttestationEndpointsForLink = useAttestationEndpointsForLink,
+            initializationMode = initializationMode
         )
 
         val accountStatus = accountStatusProvider(linkConfig)
@@ -467,6 +475,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         merchantCountry: String?,
         passthroughModeEnabled: Boolean,
         flags: Map<String, Boolean>,
+        useAttestationEndpointsForLink: Boolean,
+        initializationMode: PaymentElementLoader.InitializationMode
     ): LinkConfiguration {
         val shippingDetails: AddressDetails? = configuration.shippingDetails
 
@@ -511,6 +521,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             passthroughModeEnabled = passthroughModeEnabled,
             cardBrandChoice = cardBrandChoice,
             flags = flags,
+            useAttestationEndpointsForLink = useAttestationEndpointsForLink,
+            initializationMode = initializationMode
         )
     }
 
