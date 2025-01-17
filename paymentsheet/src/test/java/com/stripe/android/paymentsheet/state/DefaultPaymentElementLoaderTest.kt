@@ -1955,8 +1955,6 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `When DefaultPaymentMethod not null, no saved selection, paymentMethod order correct`() = runTest {
-        enableDefaultPaymentMethods.setEnabled(true)
-
         val result = getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId()
 
         val observedElements = result.customer?.paymentMethods
@@ -1966,8 +1964,6 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `When DefaultPaymentMethod not null, and saved selection, paymentMethod order correct`() = runTest {
-        enableDefaultPaymentMethods.setEnabled(true)
-
         val result = getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
             setLastUsedIndex = 1
         )
@@ -1979,8 +1975,6 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `When DefaultPaymentMethod not null, and no savedSelection, selection correct`() = runTest {
-        enableDefaultPaymentMethods.setEnabled(true)
-
         val result = getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId()
 
         assertThat((result.paymentSelection as? PaymentSelection.Saved)?.paymentMethod).isEqualTo(
@@ -1990,8 +1984,6 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `When DefaultPaymentMethod not null, and savedSelection, selection correct`() = runTest {
-        enableDefaultPaymentMethods.setEnabled(true)
-
         val result = getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
             setLastUsedIndex = 1
         )
@@ -2542,6 +2534,8 @@ internal class DefaultPaymentElementLoaderTest {
     private suspend fun getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
         setLastUsedIndex: Int? = null
     ): PaymentElementLoader.State {
+        enableDefaultPaymentMethods.setEnabled(true)
+
         val defaultPaymentMethodIndex = 2
         val defaultPaymentMethod = paymentMethodsForTestingOrdering[defaultPaymentMethodIndex]
         val defaultPaymentMethodId = defaultPaymentMethod.id
