@@ -1,12 +1,14 @@
 package com.stripe.android.financialconnections.navigation.bottomsheet
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
@@ -24,7 +26,6 @@ internal fun LifecycleAwareContent(
 ) {
     val isReady = remember { mutableStateOf(false) }
 
-    // Track the lifecycle to update the readiness state
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
@@ -40,12 +41,13 @@ internal fun LifecycleAwareContent(
         }
     }
 
-    // Render content only when ready
-    AnimatedVisibility(
-        visible = isReady.value,
-        enter = fadeIn(),
-        exit = fadeOut()
+    // This will typically be used on bottom sheets, where we see the NavBackStackEntry issue.
+    // animating the content height will ensure we respect the bottom sheet open animation.
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .animateContentSize(animationSpec = tween())
     ) {
-        content()
+        if (isReady.value) { content() }
     }
 }
