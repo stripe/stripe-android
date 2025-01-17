@@ -25,6 +25,7 @@
     <string name="stripe_paymentsheet_payment_method_sunbit">Sunbit</string>
     <string name="stripe_paymentsheet_payment_method_billie">Billie</string>
     <string name="stripe_paymentsheet_payment_method_satispay">Satispay</string>
+    <string name="stripe_paymentsheet_payment_method_crypto">Crypto</string>
     <string name="stripe_paymentsheet_payment_method_alma">Alma</string>
     <string name="stripe_paymentsheet_payment_method_mobile_pay">MobilePay</string>
     <string name="stripe_paymentsheet_payment_method_zip">Zip</string>
