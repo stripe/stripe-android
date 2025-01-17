@@ -2506,7 +2506,7 @@ internal class DefaultPaymentElementLoaderTest {
         val defaultPaymentMethod = paymentMethodsForTestingOrdering[defaultPaymentMethodIndex]
         val defaultPaymentMethodId = defaultPaymentMethod.id
 
-        if (setLastUsedIndex != null && setLastUsedIndex in paymentMethodsForTestingOrdering.indices){
+        if (setLastUsedIndex != null && setLastUsedIndex in paymentMethodsForTestingOrdering.indices) {
             val lastUsed = paymentMethodsForTestingOrdering[setLastUsedIndex]
             prefsRepository.savePaymentSelection(PaymentSelection.Saved(lastUsed))
         }
