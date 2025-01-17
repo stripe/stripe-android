@@ -28,6 +28,12 @@ internal class FakeEmbeddedContentHelper(
         )
     }
 
+    override fun setFormLauncher(
+        formLauncher: ((code: String, paymentMethodMetaData: PaymentMethodMetadata?) -> Unit)?
+    ) {
+        // NO-OP
+    }
+
     fun validate() {
         dataLoadedTurbine.ensureAllEventsConsumed()
     }

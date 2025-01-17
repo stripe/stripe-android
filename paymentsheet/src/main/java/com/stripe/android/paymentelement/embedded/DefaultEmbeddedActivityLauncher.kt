@@ -17,9 +17,7 @@ internal class DefaultEmbeddedActivityLauncher(
 ) : EmbeddedActivityLauncher {
 
     private var formActivityLauncher: ActivityResultLauncher<FormContract.Args> =
-        activityResultCaller.registerForActivityResult(
-            FormContract()
-        ) { result ->
+        activityResultCaller.registerForActivityResult(FormContract()) { result ->
             if (result is FormResult.Complete) {
                 selectionHolder.set(result.selection)
             }
