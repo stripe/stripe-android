@@ -17,6 +17,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import org.mockito.kotlin.mock
@@ -134,6 +135,7 @@ internal object TestFactory {
         cardBrandChoice = null,
         passthroughModeEnabled = false,
         useAttestationEndpointsForLink = false,
+        initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("gg")
     )
 
     val LINK_WALLET_PRIMARY_BUTTON_LABEL = Amount(

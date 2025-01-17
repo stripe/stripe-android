@@ -7,6 +7,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.CvcCheck
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 
@@ -61,6 +62,9 @@ internal object LinkTestUtils {
             cardBrandChoice = null,
             shippingDetails = null,
             useAttestationEndpointsForLink = false,
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = "secret"
+            )
         )
     }
 }
