@@ -6,6 +6,7 @@ import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.model.CountryCode
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkConfiguration
@@ -41,6 +42,7 @@ import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.state.PaymentSheetLoadingException.PaymentIntentInTerminalState
 import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.testing.FakeErrorReporter
+import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.PaymentMethodFactory.update
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
@@ -50,6 +52,7 @@ import com.stripe.android.utils.FakeElementsSessionRepository
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.eq
 import org.mockito.Captor
@@ -79,6 +82,12 @@ internal class DefaultPaymentElementLoaderTest {
 
     private val readyGooglePayRepository = mock<GooglePayRepository>()
     private val unreadyGooglePayRepository = mock<GooglePayRepository>()
+
+    @get:Rule
+    val enableDefaultPaymentMethods = FeatureFlagTestRule(
+        featureFlag = FeatureFlags.enableDefaultPaymentMethods,
+        isEnabled = false,
+    )
 
     @BeforeTest
     fun setup() {
@@ -1945,6 +1954,22 @@ internal class DefaultPaymentElementLoaderTest {
         }
 
     @Test
+    fun `When DefaultPaymentMethod not null, no saved selection, paymentMethod order correct`() = runTest {
+        enableDefaultPaymentMethods.setEnabled(true)
+
+        testOrderingOfPaymentMethodsWithDefaultPaymentMethodId()
+    }
+
+    @Test
+    fun `When DefaultPaymentMethod not null, and saved selection, paymentMethod order correct`() = runTest {
+        enableDefaultPaymentMethods.setEnabled(true)
+
+        testOrderingOfPaymentMethodsWithDefaultPaymentMethodId(
+            setLastUsedIndex = 1
+        )
+    }
+
+    @Test
     fun `When using 'LegacyEphemeralKey' & has a default saved Stripe payment method, should not call 'ElementsSessionRepository' with default id`() =
         runTest {
             prefsRepository.savePaymentSelection(
@@ -2466,4 +2491,55 @@ internal class DefaultPaymentElementLoaderTest {
         isReloadingAfterProcessDeath = isReloadingAfterProcessDeath,
         initializedViaCompose = initializedViaCompose,
     )
+
+    private val paymentMethodsForTestingOrdering = listOf(
+        PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "a1", customerId = "alice"),
+        PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "b2", customerId = "bob"),
+        PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "c3", customerId = "carol"),
+        PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "d4", customerId = "dan")
+    )
+
+    @OptIn(ExperimentalCustomerSessionApi::class)
+    private suspend fun testOrderingOfPaymentMethodsWithDefaultPaymentMethodId(
+        setLastUsedIndex: Int? = null
+    ) {
+        val defaultPaymentMethodIndex = 2
+        val defaultPaymentMethod = paymentMethodsForTestingOrdering[defaultPaymentMethodIndex]
+        val defaultPaymentMethodId = defaultPaymentMethod.id
+
+        if (setLastUsedIndex != null && setLastUsedIndex in paymentMethodsForTestingOrdering.indices) {
+            val lastUsed = paymentMethodsForTestingOrdering[setLastUsedIndex]
+            prefsRepository.savePaymentSelection(PaymentSelection.Saved(lastUsed))
+        }
+
+        val loader = createPaymentElementLoader(
+            customer = ElementsSession.Customer(
+                paymentMethods = paymentMethodsForTestingOrdering,
+                session = createElementsSessionCustomerSession(
+                    mobilePaymentElementComponent = ElementsSession.Customer.Components.MobilePaymentElement.Disabled,
+                ),
+                defaultPaymentMethod = defaultPaymentMethodId,
+            )
+        )
+
+        val result = loader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
+            paymentSheetConfiguration = mockConfiguration(
+                customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                    id = "id",
+                    clientSecret = "cuss_1",
+                ),
+            ),
+            initializedViaCompose = false,
+        ).getOrThrow()
+
+        val observedElements = result.customer?.paymentMethods
+        val expectedElements = listOf(
+            PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "c3", customerId = "carol"),
+            PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "a1", customerId = "alice"),
+            PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "b2", customerId = "bob"),
+            PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "d4", customerId = "dan")
+        )
+        assertThat(observedElements).containsExactlyElementsIn(expectedElements).inOrder()
+    }
 }

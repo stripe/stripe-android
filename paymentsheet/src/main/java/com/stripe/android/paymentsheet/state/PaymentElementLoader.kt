@@ -348,7 +348,10 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         return customerState?.let { state ->
             state.copy(
                 paymentMethods = state.paymentMethods
-                    .withLastUsedPaymentMethodFirst(savedSelection.await()).filter { cardBrandFilter.isAccepted(it) }
+                    .withDefaultPaymentMethodOrLastUsedPaymentMethodFirst(
+                        savedSelection = savedSelection.await(),
+                        defaultPaymentMethodId = state.defaultPaymentMethodId
+                    ).filter { cardBrandFilter.isAccepted(it) }
             )
         }
     }
@@ -715,19 +718,24 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     }
 }
 
-private fun List<PaymentMethod>.withLastUsedPaymentMethodFirst(
+private fun List<PaymentMethod>.withDefaultPaymentMethodOrLastUsedPaymentMethodFirst(
     savedSelection: SavedSelection,
+    defaultPaymentMethodId: String?
 ): List<PaymentMethod> {
-    val defaultPaymentMethodIndex = (savedSelection as? SavedSelection.PaymentMethod)?.let {
+    val defaultPaymentMethodIndex = defaultPaymentMethodId?.let {
+        indexOfFirst { it.id == defaultPaymentMethodId }
+    }
+
+    val savedSelectionIndex = (savedSelection as? SavedSelection.PaymentMethod)?.let {
         indexOfFirst { it.id == savedSelection.id }.takeIf { it != -1 }
     }
 
-    return if (defaultPaymentMethodIndex != null) {
-        val primaryPaymentMethod = get(defaultPaymentMethodIndex)
+    val primaryPaymentMethodIndex = defaultPaymentMethodIndex ?: savedSelectionIndex
+
+    return primaryPaymentMethodIndex?.let {
+        val primaryPaymentMethod = get(primaryPaymentMethodIndex)
         listOf(primaryPaymentMethod) + (this - primaryPaymentMethod)
-    } else {
-        this
-    }
+    } ?: this
 }
 
 private fun PaymentMethod.toPaymentSelection(): PaymentSelection.Saved {
