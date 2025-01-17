@@ -9,7 +9,6 @@ import com.stripe.android.PaymentConfiguration
 import javax.inject.Inject
 
 internal class NativeLinkActivityContract @Inject constructor(
-    private val webLinkActivityContract: WebLinkActivityContract
 ) : ActivityResultContract<LinkActivityContract.Args, LinkActivityResult>() {
     override fun createIntent(context: Context, input: LinkActivityContract.Args): Intent {
         val paymentConfiguration = PaymentConfiguration.getInstance(context)
@@ -30,24 +29,15 @@ internal class NativeLinkActivityContract @Inject constructor(
             }
 
             LinkActivity.RESULT_COMPLETE -> {
-                handleCompleteResult(resultCode, intent)
+                val result = intent?.extras?.let {
+                    BundleCompat.getParcelable(it, LinkActivityContract.EXTRA_RESULT, LinkActivityResult::class.java)
+                }
+                return result ?: LinkActivityResult.Canceled()
             }
 
             else -> {
                 LinkActivityResult.Canceled()
             }
         }
-    }
-
-    private fun handleCompleteResult(resultCode: Int, intent: Intent?): LinkActivityResult {
-        intent ?: return LinkActivityResult.Canceled()
-        val redirectUri = intent.data
-        if (redirectUri != null) {
-            return webLinkActivityContract.parseResult(resultCode, intent)
-        }
-        val result = intent.extras?.let {
-            BundleCompat.getParcelable(it, LinkActivityContract.EXTRA_RESULT, LinkActivityResult::class.java)
-        }
-        return result ?: LinkActivityResult.Canceled()
     }
 }
