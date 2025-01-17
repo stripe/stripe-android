@@ -133,7 +133,7 @@ internal object TestFactory {
         flags = emptyMap(),
         cardBrandChoice = null,
         passthroughModeEnabled = false,
-        useAttestationEndpointsForLink = true
+        useAttestationEndpointsForLink = false
     )
 
     val LINK_WALLET_PRIMARY_BUTTON_LABEL = Amount(

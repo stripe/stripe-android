@@ -12,7 +12,7 @@ internal class LinkActivityContract @Inject internal constructor(
 ) : ActivityResultContract<LinkActivityContract.Args, LinkActivityResult>() {
 
     override fun createIntent(context: Context, input: Args): Intent {
-        return if (FeatureFlags.nativeLinkEnabled.isEnabled && input.configuration.useAttestationEndpointsForLink) {
+        return if (useNativeLink(input)) {
             nativeLinkActivityContract.createIntent(context, input).apply {
                 putExtra(EXTRA_USED_NATIVE_CONTRACT, true)
             }
@@ -30,6 +30,12 @@ internal class LinkActivityContract @Inject internal constructor(
         } else {
             webLinkActivityContract.parseResult(resultCode, intent)
         }
+    }
+
+    private fun useNativeLink(input: Args): Boolean {
+//        if (FeatureFlags.nativeLinkEnabled.isEnabled) return true
+//        return input.configuration.useAttestationEndpointsForLink
+        return true
     }
 
     data class Args internal constructor(

@@ -114,7 +114,7 @@ internal class LinkActivity : ComponentActivity() {
         )
         this@LinkActivity.setResult(
             RESULT_COMPLETE,
-            Intent().putExtras(bundle)
+            intent.putExtras(bundle)
         )
         this@LinkActivity.finish()
     }

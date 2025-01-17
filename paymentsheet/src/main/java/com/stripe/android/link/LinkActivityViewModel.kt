@@ -120,9 +120,8 @@ internal class LinkActivityViewModel @Inject constructor(
     }
 
     private suspend fun warmUpIntegrityManager(): Boolean {
-        val configuration = activityRetainedComponent.configuration
-        if (configuration.stripeIntent.isLiveMode.not()) return true
-        if (configuration.useAttestationEndpointsForLink.not()) return true
+//        val configuration = activityRetainedComponent.configuration
+//        if (configuration.useAttestationEndpointsForLink.not()) return true
 
         val result = integrityRequestManager.prepare()
         val error = result.exceptionOrNull()
