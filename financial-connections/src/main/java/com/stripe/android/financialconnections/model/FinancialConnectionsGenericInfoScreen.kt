@@ -1,6 +1,8 @@
 
 import android.os.Parcelable
 import com.stripe.android.financialconnections.model.serializer.BodyEntrySerializer
+import com.stripe.android.financialconnections.model.serializer.MarkdownToHtmlSerializer
+import com.stripe.android.financialconnections.ui.sdui.BulletUI
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -20,6 +22,7 @@ internal data class FinancialConnectionsGenericInfoScreen(
     @Serializable
     internal data class Header(
         val title: String? = null,
+        @Serializable(with = MarkdownToHtmlSerializer::class)
         val subtitle: String? = null,
         val icon: ImageResponse? = null,
         val alignment: Alignment? = null
@@ -64,7 +67,8 @@ internal data class FinancialConnectionsGenericInfoScreen(
                     val id: String,
                     val icon: ImageResponse? = null,
                     val title: String? = null,
-                    val content: String? = null
+                    @Serializable(with = MarkdownToHtmlSerializer::class)
+                    val content: String? = null,
                 ) : Parcelable
             }
 
@@ -81,13 +85,17 @@ internal data class FinancialConnectionsGenericInfoScreen(
     @Parcelize
     @Serializable
     internal data class Footer(
+        @Serializable(with = MarkdownToHtmlSerializer::class)
         val disclaimer: String? = null,
         @SerialName("primary_cta")
         val primaryCta: GenericInfoAction? = null,
         @SerialName("secondary_cta")
         val secondaryCta: GenericInfoAction? = null,
         @SerialName("below_cta")
-        val belowCta: GenericInfoAction? = null
+        @Serializable(with = MarkdownToHtmlSerializer::class)
+        val belowCta: String? = null,
+        // TODO: Check if this is an ok change to make
+//        val belowCta: GenericInfoAction? = null
     ) : Parcelable {
         @Parcelize
         @Serializable

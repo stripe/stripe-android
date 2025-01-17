@@ -127,7 +127,14 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
             }.onFailure {
                 finishWithResult(stateFlow.value, Failed(it))
             }.onSuccess {
-                openAuthFlow(it)
+                // TODO: Remove testing code
+                openAuthFlow(
+                    it.copy(
+                        manifest = it.manifest.copy(
+                            nextPane = Pane.STREAMLINED_CONSENT,
+                        ),
+                    )
+                )
             }
         }
     }

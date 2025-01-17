@@ -27,12 +27,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.features.common.IconSize
+import com.stripe.android.financialconnections.features.common.ListItem
 import com.stripe.android.financialconnections.features.common.ShapedIcon
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.LocalImageLoader
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
+import com.stripe.android.financialconnections.ui.sdui.BulletUI
 import com.stripe.android.financialconnections.ui.sdui.fromHtml
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
@@ -132,6 +134,23 @@ internal fun GenericBody(
                             modifier = Modifier.padding(horizontal = 24.dp),
                         )
                     }
+                    is Body.Entry.Bullets -> {
+                        val bullets = remember(entry.bullets) {
+                            entry.bullets.map(BulletUI::from)
+                        }
+
+                        Column(
+                            modifier = Modifier.padding(horizontal = 24.dp),
+                        ) {
+                            bullets.forEach { bullet ->
+                                ListItem(
+                                    bullet = bullet,
+                                    onClickableTextClick = onClickableTextClick
+                                )
+                                Spacer(modifier = Modifier.size(24.dp))
+                            }
+                        }
+                    }
                     else -> {
                         Log.e("GenericBody", "Unsupported entry type: $entry")
                     }
@@ -207,7 +226,7 @@ internal fun GenericFooter(
                 onClickableTextClick = onClickableTextClick,
                 defaultStyle = typography.labelSmall.copy(
                     color = colors.textDefault,
-                    textAlign = TextAlign.Start,
+                    textAlign = TextAlign.Center,
                 ),
             )
         }
@@ -231,11 +250,11 @@ internal fun GenericFooter(
         payload.belowCta?.let { belowCta ->
             AnnotatedText(
                 modifier = Modifier.fillMaxWidth(),
-                text = TextResource.Text(fromHtml(belowCta.label)),
+                text = TextResource.Text(fromHtml(belowCta)),
                 onClickableTextClick = onClickableTextClick,
                 defaultStyle = typography.labelSmall.copy(
                     color = colors.textDefault,
-                    textAlign = TextAlign.Start,
+                    textAlign = TextAlign.Center,
                 ),
             )
         }
