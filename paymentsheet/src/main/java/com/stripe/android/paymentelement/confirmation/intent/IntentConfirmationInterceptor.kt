@@ -24,8 +24,11 @@ import com.stripe.android.paymentsheet.DeferredIntentValidator
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
 import javax.inject.Named
+import kotlin.time.Duration.Companion.seconds
 import com.stripe.android.R as PaymentsCoreR
 
 internal interface IntentConfirmationInterceptor {
@@ -241,7 +244,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         shouldSavePaymentMethod: Boolean,
     ): NextStep {
-        return when (val callback = IntentConfirmationInterceptor.createIntentCallback) {
+        return when (val callback = waitForIntentCallback()) {
             is CreateIntentCallback -> {
                 handleDeferredIntentCreationFromPaymentMethod(
                     createIntentCallback = callback,
@@ -278,6 +281,31 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
             paymentMethodCreateParams = params,
             options = requestOptions,
         )
+    }
+
+    private suspend fun waitForIntentCallback(): CreateIntentCallback? {
+        return retrieveCallback() ?: run {
+            val callback = withTimeoutOrNull(INTENT_CALLBACK_FETCH_TIMEOUT.seconds) {
+                var intentCallback: CreateIntentCallback? = null
+
+                while (intentCallback == null) {
+                    delay(INTENT_CALLBACK_FETCH_INTERVAL)
+                    intentCallback = retrieveCallback()
+                }
+
+                intentCallback
+            }
+
+            if (callback != null) {
+                errorReporter.report(ErrorReporter.SuccessEvent.FOUND_CREATE_INTENT_CALLBACK_WHILE_POLLING)
+            }
+
+            callback
+        }
+    }
+
+    private fun retrieveCallback(): CreateIntentCallback? {
+        return IntentConfirmationInterceptor.createIntentCallback
     }
 
     private suspend fun handleDeferredIntentCreationFromPaymentMethod(
@@ -409,6 +437,8 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
     }
 
     private companion object {
+        private const val INTENT_CALLBACK_FETCH_TIMEOUT = 2
+        private const val INTENT_CALLBACK_FETCH_INTERVAL = 5L
         private val GENERIC_STRIPE_MESSAGE = R.string.stripe_something_went_wrong
     }
 }
