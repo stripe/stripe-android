@@ -192,6 +192,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         LINK_ATTACH_CARD_WITH_NULL_ACCOUNT(
             partialEventName = "link.create_new_card.missing_link_account"
         ),
+        LINK_WEB_FAILED_TO_PARSE_RESULT_URI(
+            partialEventName = "link.web.result.parsing_failed"
+        ),
         PAYMENT_SHEET_AUTHENTICATORS_NOT_FOUND(
             partialEventName = "paymentsheet.authenticators.not_found"
         ),

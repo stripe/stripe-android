@@ -8,7 +8,9 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.customersheet.FakeStripeRepository
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.testing.AbsFakeStripeRepository
+import com.stripe.android.testing.FakeErrorReporter
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -36,7 +38,7 @@ class WebLinkActivityContractTest {
         val stripeRepository = object : AbsFakeStripeRepository() {
             override fun buildPaymentUserAgent(attribution: Set<String>) = "test"
         }
-        val contract = WebLinkActivityContract(stripeRepository)
+        val contract = contract(stripeRepository)
         val args = LinkActivityContract.Args(TestFactory.LINK_CONFIGURATION)
 
         val intent = contract.createIntent(ApplicationProvider.getApplicationContext(), args)
@@ -158,18 +160,23 @@ class WebLinkActivityContractTest {
         val intent = Intent()
         intent.data = redirectUrl.toUri()
 
-        val contract = contract()
+        val errorReporter = FakeErrorReporter()
+
+        val contract = contract(errorReporter = errorReporter)
 
         val result = contract.parseResult(LinkForegroundActivity.RESULT_COMPLETE, intent)
 
         assertThat(result).isInstanceOf(LinkActivityResult.Canceled::class.java)
         val canceled = result as LinkActivityResult.Canceled
         assertThat(canceled.reason).isEqualTo(LinkActivityResult.Canceled.Reason.BackPressed)
+        assertThat(errorReporter.getLoggedErrors())
+            .containsExactly(ErrorReporter.UnexpectedErrorEvent.LINK_WEB_FAILED_TO_PARSE_RESULT_URI.eventName)
     }
 
     private fun contract(
-        stripeRepository: StripeRepository = FakeStripeRepository()
+        stripeRepository: StripeRepository = FakeStripeRepository(),
+        errorReporter: FakeErrorReporter = FakeErrorReporter()
     ): WebLinkActivityContract {
-        return WebLinkActivityContract(stripeRepository)
+        return WebLinkActivityContract(stripeRepository, errorReporter)
     }
 }

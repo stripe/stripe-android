@@ -7,15 +7,18 @@ import android.util.Base64
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.os.BundleCompat
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.exception.StripeException
 import com.stripe.android.link.serialization.PopupPayload
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import org.json.JSONObject
 import javax.inject.Inject
 
 internal class WebLinkActivityContract @Inject internal constructor(
     private val stripeRepository: StripeRepository,
+    private val errorReporter: ErrorReporter
 ) : ActivityResultContract<LinkActivityContract.Args, LinkActivityResult>() {
 
     override fun createIntent(context: Context, input: LinkActivityContract.Args): Intent {
@@ -79,13 +82,17 @@ internal class WebLinkActivityContract @Inject internal constructor(
         }
     }
 
-    @SuppressWarnings("TooGenericExceptionCaught", "SwallowedException")
+    @SuppressWarnings("TooGenericExceptionCaught")
     private fun String.parsePaymentMethod(): PaymentMethod? = try {
         val decodedPaymentMethod = String(Base64.decode(this, 0), Charsets.UTF_8)
         val paymentMethod = PaymentMethodJsonParser()
             .parse(JSONObject(decodedPaymentMethod))
         paymentMethod
-    } catch (e: Exception) {
+    } catch (e: Throwable) {
+        errorReporter.report(
+            errorEvent = ErrorReporter.UnexpectedErrorEvent.LINK_WEB_FAILED_TO_PARSE_RESULT_URI,
+            stripeException = object : StripeException(cause = e) {}
+        )
         null
     }
 }
