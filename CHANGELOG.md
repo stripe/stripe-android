@@ -2,6 +2,10 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+### Financial Connections
+
+- [Fixed] Addresses a known issue where NavBackStackEntry's ViewModels in bottom sheets become inaccessible after the associated NavBackStackEntry is destroyed.
+
 ## 21.3.1 - 2025-01-06
 
 ### PaymentSheet
