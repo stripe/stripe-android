@@ -32,7 +32,7 @@ internal class PaymentSelectionIconLoaderTest {
     @Test
     fun loadPaymentOptionWithIconUrl_usesIconFromUrl() = runScenario(
         iconUrl = workingUrl,
-        iconRes = R.drawable.stripe_ic_paymentsheet_link,
+        iconRes = R.drawable.stripe_ic_paymentsheet_link_ref,
     ) {
         assertThat(drawable.current).isInstanceOf<BitmapDrawable>()
         assertThat((drawable.current as BitmapDrawable).bitmap).isEqualTo(simpleBitmap)
@@ -41,7 +41,7 @@ internal class PaymentSelectionIconLoaderTest {
     @Test
     fun loadPaymentOptionWithIconUrl_failsToLoad_usesIconFromRes() = runScenario(
         iconUrl = brokenUrl,
-        iconRes = R.drawable.stripe_ic_paymentsheet_link,
+        iconRes = R.drawable.stripe_ic_paymentsheet_link_ref,
     ) {
         assertThat(drawable.current).isInstanceOf<VectorDrawable>()
     }
@@ -58,7 +58,7 @@ internal class PaymentSelectionIconLoaderTest {
     @Test
     fun loadPaymentOptionWithoutIconUrl_usesIconFromRes() = runScenario(
         iconUrl = null,
-        iconRes = R.drawable.stripe_ic_paymentsheet_link,
+        iconRes = R.drawable.stripe_ic_paymentsheet_link_ref,
     ) {
         assertThat(drawable.current).isInstanceOf<VectorDrawable>()
     }
