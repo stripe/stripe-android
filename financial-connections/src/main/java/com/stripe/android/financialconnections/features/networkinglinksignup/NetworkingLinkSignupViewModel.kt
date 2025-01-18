@@ -213,6 +213,7 @@ internal class NetworkingLinkSignupViewModel @AssistedInject constructor(
                 delay(getLookupDelayMs(validEmail))
                 val payload = stateFlow.value.payload()
                 lookupAccount(
+                    pane = pane,
                     email = validEmail,
                     emailSource = if (payload?.prefilledEmail == validEmail) CUSTOMER_OBJECT else USER_ACTION,
                     sessionId = payload?.sessionId ?: "",

@@ -95,6 +95,7 @@ internal class NetworkingLinkLoginWarmupViewModel @AssistedInject constructor(
             eventTracker.track(Click("click.continue", PANE))
             // Trigger a lookup call to ensure we cache a consumer session for posterior verification.
             lookupAccount(
+                pane = PANE,
                 email = payload.email,
                 emailSource = EmailSource.CUSTOMER_OBJECT,
                 sessionId = payload.sessionId,

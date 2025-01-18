@@ -6,6 +6,7 @@ import com.stripe.android.financialconnections.exception.FinancialConnectionsErr
 import com.stripe.android.financialconnections.exception.WebAuthFlowFailedException
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.utils.filterNotNullValues
+import com.stripe.attestation.AttestationError
 
 /**
  * Event definitions for Financial Connections.
@@ -408,6 +409,49 @@ internal sealed class FinancialConnectionsAnalyticsEvent(
             "flow" to (flow ?: "unknown"),
             "browser" to (defaultBrowser ?: "unknown")
         ).filterNotNullValues()
+    )
+
+    class AttestationInitSkipped(pane: Pane) : FinancialConnectionsAnalyticsEvent(
+        name = "attestation.init_skipped",
+        mapOf(
+            "pane" to pane.analyticsValue,
+        ).filterNotNullValues()
+    )
+
+    class AttestationInitSucceeded(pane: Pane) : FinancialConnectionsAnalyticsEvent(
+        name = "attestation.init_succeeded",
+        mapOf(
+            "pane" to pane.analyticsValue,
+        ).filterNotNullValues()
+    )
+
+    class AttestationInitFailed(
+        pane: Pane,
+        error: Throwable
+    ) : FinancialConnectionsAnalyticsEvent(
+        name = "attestation.init_failed",
+        mapOf(
+            "pane" to pane.analyticsValue,
+            "reason" to if (error is AttestationError) error.errorType.name else "unknown"
+        ).filterNotNullValues()
+    )
+
+    class AttestationRequestSucceeded(pane: Pane) : FinancialConnectionsAnalyticsEvent(
+        name = "attestation.request_token_succeeded",
+        mapOf(
+            "pane" to pane.analyticsValue,
+        ).filterNotNullValues()
+    )
+
+    class AttestationRequestFailed(
+        pane: Pane,
+        error: Throwable,
+    ) : FinancialConnectionsAnalyticsEvent(
+        name = "attestation.request_token_failed",
+        mapOf(
+            "pane" to pane.analyticsValue,
+            "reason" to if (error is AttestationError) error.errorType.name else "unknown"
+        )
     )
 
     internal val Pane.analyticsValue
