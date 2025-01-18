@@ -1,6 +1,7 @@
 # CHANGELOG
 
 ## XX.XX.XX - 20XX-XX-XX
+* [ADDED][9937](https://github.com/stripe/stripe-android/pull/9937) Added support for Crypto to payment sheet.
 
 ### Financial Connections
 - [FIXED] Fixes a rare crash that could occur when presenting a bottom sheet.
