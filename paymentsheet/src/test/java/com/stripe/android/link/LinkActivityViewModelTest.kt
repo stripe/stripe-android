@@ -348,7 +348,8 @@ internal class LinkActivityViewModelTest {
             linkAccountManager = linkAccountManager,
             activityRetainedComponent = mock(),
             eventReporter = eventReporter,
-            confirmationHandlerFactory = { confirmationHandler }
+            confirmationHandlerFactory = { confirmationHandler },
+            integrityRequestManager = mock()
         ).apply {
             this.navController = navController
             this.dismissWithResult = dismissWithResult

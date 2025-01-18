@@ -160,6 +160,7 @@ class LinkConfirmationFlowTest {
                 passthroughModeEnabled = false,
                 flags = mapOf(),
                 cardBrandChoice = null,
+                useAttestationEndpointsForLink = true,
             ),
         )
     }
