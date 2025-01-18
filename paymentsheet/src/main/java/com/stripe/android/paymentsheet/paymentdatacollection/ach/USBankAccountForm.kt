@@ -26,6 +26,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -56,6 +57,7 @@ import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.elements.TextFieldSection
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeTypography
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.R as StripeR
 import com.stripe.android.ui.core.R as PaymentsUiCoreR
@@ -405,14 +407,32 @@ private fun AccountDetailsForm(
                         modifier = Modifier.size(24.dp),
                     )
 
-                    Text(
-                        text = "$bankName •••• $last4",
-                        color = MaterialTheme.stripeColors.onComponent,
-                        overflow = TextOverflow.Ellipsis,
+                    Column(
                         modifier = Modifier
                             .alpha(if (isProcessing) 0.5f else 1f)
                             .weight(1f, fill = false),
-                    )
+                    ) {
+                        if (bankName != null) {
+                            Text(
+                                text = bankName,
+                                style = MaterialTheme.typography.body1.copy(
+                                    fontWeight = FontWeight(MaterialTheme.stripeTypography.fontWeightMedium),
+                                ),
+                                color = MaterialTheme.stripeColors.onComponent,
+                                overflow = TextOverflow.Ellipsis,
+                                maxLines = 1,
+                            )
+                        }
+
+                        Text(
+                            text = "••••${last4.orEmpty()}",
+                            style = MaterialTheme.typography.caption.copy(
+                                fontWeight = FontWeight(MaterialTheme.stripeTypography.fontWeightNormal),
+                            ),
+                            color = MaterialTheme.stripeColors.placeholderText,
+                            maxLines = 1,
+                        )
+                    }
 
                     promoBadgeState?.let { badgeState ->
                         PromoBadge(
