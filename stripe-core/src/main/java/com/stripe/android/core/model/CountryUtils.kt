@@ -2,6 +2,7 @@ package com.stripe.android.core.model
 
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
+import java.text.Collator
 import java.text.Normalizer
 import java.util.Locale
 
@@ -111,6 +112,7 @@ object CountryUtils {
             cachedOrderedLocalizedCountries
         } else {
             val localizedCountries = localizedCountries(currentLocale)
+            val collator = Collator.getInstance(currentLocale)
             cachedOrderedLocalizedCountries = listOfNotNull(
                 localizedCountries.firstOrNull {
                     it.code == currentLocale.getCountryCode()
@@ -118,7 +120,7 @@ object CountryUtils {
             ).plus(
                 localizedCountries
                     .filterNot { it.code == currentLocale.getCountryCode() }
-                    .sortedBy { formatNameForSorting(it.name) }
+                    .sortedWith { c1, c2 -> collator.compare(c1.name, c2.name) }
             )
 
             cachedCountriesLocale = currentLocale
