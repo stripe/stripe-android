@@ -69,17 +69,6 @@ object CountryUtils {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun getOrderedCountries(currentLocale: Locale) = getSortedLocalizedCountries(currentLocale)
 
-    @VisibleForTesting
-    internal fun formatNameForSorting(name: String): String {
-        // Before normalization: åland islands
-        // After normalization: aºland islands
-        // After regex: aland islands
-        return Normalizer.normalize(name.lowercase(), Normalizer.Form.NFD)
-            .replace("\\p{Mn}+".toRegex(), "")
-            .replace("[^A-Za-z ]".toRegex(), "")
-            .replace("[^\\p{ASCII}]".toRegex(), "")
-    }
-
     @Deprecated(
         message = "Use with parameter CountryCode",
         replaceWith = ReplaceWith(

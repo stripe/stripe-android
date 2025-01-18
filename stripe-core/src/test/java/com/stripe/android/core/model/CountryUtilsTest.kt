@@ -156,36 +156,4 @@ class CountryUtilsTest {
         assertThat(germany?.name)
             .isEqualTo("Deutschland")
     }
-
-    @Test
-    fun `formatNameForSorting does nothing to already formatted strings`() {
-        val input = "aland"
-        val expectedOutput = "aland"
-
-        assertThat(CountryUtils.formatNameForSorting(input)).isEqualTo(expectedOutput)
-    }
-
-    @Test
-    fun `formatNameForSorting removes accents and diacritics`() {
-        val input = "Dziękuję Åland"
-        val expectedOutput = "dziekuje aland"
-
-        assertThat(CountryUtils.formatNameForSorting(input)).isEqualTo(expectedOutput)
-    }
-
-    @Test
-    fun `formatNameForSorting removes capitalization`() {
-        val input = "Aland"
-        val expectedOutput = "aland"
-
-        assertThat(CountryUtils.formatNameForSorting(input)).isEqualTo(expectedOutput)
-    }
-
-    @Test
-    fun `formatNameForSorting removes non alphanumeric characters`() {
-        val input = "aºland1!!!"
-        val expectedOutput = "aland"
-
-        assertThat(CountryUtils.formatNameForSorting(input)).isEqualTo(expectedOutput)
-    }
 }
