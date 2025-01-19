@@ -7,12 +7,14 @@ import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSessionSignup
 import com.stripe.android.model.ConsumerSignUpConsentAction
+import com.stripe.android.model.EmailSource
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
 
 /**
  * Interface for a repository that interacts with Link services.
  */
+@SuppressWarnings("TooManyFunctions")
 internal interface LinkRepository {
 
     /**
@@ -20,6 +22,14 @@ internal interface LinkRepository {
      */
     suspend fun lookupConsumer(
         email: String,
+    ): Result<ConsumerSessionLookup>
+
+    suspend fun mobileLookupConsumer(
+        email: String,
+        emailSource: EmailSource,
+        verificationToken: String,
+        appId: String,
+        sessionId: String
     ): Result<ConsumerSessionLookup>
 
     /**
@@ -31,6 +41,16 @@ internal interface LinkRepository {
         country: String,
         name: String?,
         consentAction: ConsumerSignUpConsentAction
+    ): Result<ConsumerSessionSignup>
+
+    suspend fun mobileSignUp(
+        name: String?,
+        email: String,
+        phoneNumber: String,
+        country: String,
+        consentAction: ConsumerSignUpConsentAction,
+        verificationToken: String,
+        appId: String
     ): Result<ConsumerSessionSignup>
 
     /**
