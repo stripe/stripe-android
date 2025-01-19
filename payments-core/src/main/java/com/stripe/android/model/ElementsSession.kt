@@ -2,6 +2,7 @@ package com.stripe.android.model
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeModel
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.PaymentMethod.Type.Link
 import kotlinx.parcelize.Parcelize
 
@@ -38,7 +39,13 @@ data class ElementsSession(
         }
 
     val useAttestationEndpointsForLink: Boolean
-        get() = linkSettings?.useAttestationEndpoints ?: false
+        get() {
+            return if (FeatureFlags.nativeLinkAttestationEnabled.isEnabled) {
+                true
+            } else {
+                linkSettings?.useAttestationEndpoints ?: false
+            }
+        }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize

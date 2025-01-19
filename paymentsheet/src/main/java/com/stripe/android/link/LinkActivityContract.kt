@@ -14,7 +14,7 @@ internal class LinkActivityContract @Inject internal constructor(
 ) : ActivityResultContract<LinkActivityContract.Args, LinkActivityResult>() {
 
     override fun createIntent(context: Context, input: Args): Intent {
-        return if (FeatureFlags.nativeLinkEnabled.isEnabled) {
+        return if (useNativeLink(input)) {
             nativeIntent(context, input)
         } else {
             webIntent(context, input)
@@ -47,6 +47,11 @@ internal class LinkActivityContract @Inject internal constructor(
                 publishableKey = paymentConfiguration.publishableKey
             )
         )
+    }
+
+    private fun useNativeLink(input: Args): Boolean {
+        if (FeatureFlags.nativeLinkEnabled.isEnabled) return true
+        return input.configuration.useAttestationEndpointsForLink
     }
 
     data class Args internal constructor(
