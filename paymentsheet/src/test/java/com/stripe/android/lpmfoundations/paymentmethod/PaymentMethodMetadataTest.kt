@@ -22,6 +22,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.R
@@ -1314,6 +1315,8 @@ internal class PaymentMethodMetadataTest {
                     preferredNetworks = listOf("cartes_bancaires")
                 ),
                 passthroughModeEnabled = false,
+                useAttestationEndpointsForLink = false,
+                initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("hh")
             ),
         )
     }

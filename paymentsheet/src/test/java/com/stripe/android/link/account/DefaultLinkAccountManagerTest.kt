@@ -3,7 +3,6 @@ package com.stripe.android.link.account
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.AuthenticationException
-import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.analytics.FakeLinkEventsReporter
@@ -24,15 +23,30 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentIntentFactory
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import org.junit.After
+import org.junit.Before
 import org.junit.Test
 
 class DefaultLinkAccountManagerTest {
 
     private val dispatcher = UnconfinedTestDispatcher()
+
+    @Before
+    fun before() {
+        Dispatchers.setMain(dispatcher)
+    }
+
+    @After
+    fun cleanup() {
+        Dispatchers.resetMain()
+    }
 
     @Test
     fun `When cookie exists and network call fails then account status is Error`() = runSuspendTest {
@@ -817,26 +831,21 @@ class DefaultLinkAccountManagerTest {
         passthroughModeEnabled: Boolean = false,
         linkRepository: LinkRepository = FakeLinkRepository(),
         linkEventsReporter: LinkEventsReporter = AccountManagerEventsReporter()
-    ) = DefaultLinkAccountManager(
-        config = LinkConfiguration(
-            stripeIntent = stripeIntent,
-            customerInfo = LinkConfiguration.CustomerInfo(
-                name = null,
-                email = customerEmail,
-                phone = null,
-                billingCountryCode = null,
+    ): DefaultLinkAccountManager {
+        val customerInfo = TestFactory.LINK_CONFIGURATION.customerInfo.copy(
+            email = customerEmail,
+        )
+        return DefaultLinkAccountManager(
+            config = TestFactory.LINK_CONFIGURATION.copy(
+                stripeIntent = stripeIntent,
+                passthroughModeEnabled = passthroughModeEnabled,
+                customerInfo = customerInfo
             ),
-            merchantName = "Merchant",
-            merchantCountryCode = "US",
-            shippingDetails = null,
-            passthroughModeEnabled = passthroughModeEnabled,
-            flags = emptyMap(),
-            cardBrandChoice = null,
-        ),
-        linkRepository,
-        linkEventsReporter,
-        errorReporter = FakeErrorReporter()
-    )
+            linkRepository,
+            linkEventsReporter,
+            errorReporter = FakeErrorReporter()
+        )
+    }
 
     private fun createUserInputWithAction(consentAction: SignUpConsentAction): UserInput.SignUp {
         return UserInput.SignUp(

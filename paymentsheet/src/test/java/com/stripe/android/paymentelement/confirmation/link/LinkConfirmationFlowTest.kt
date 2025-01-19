@@ -4,7 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkActivityResult
-import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.TestFactory
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationMediator
 import com.stripe.android.paymentelement.confirmation.ConfirmationMediator.Parameters
@@ -146,21 +146,7 @@ class LinkConfirmationFlowTest {
         )
 
         private val LINK_CONFIRMATION_OPTION = LinkConfirmationOption(
-            configuration = LinkConfiguration(
-                stripeIntent = PAYMENT_INTENT,
-                merchantName = "Merchant Inc.",
-                merchantCountryCode = "CA",
-                customerInfo = LinkConfiguration.CustomerInfo(
-                    name = "Jphn Doe",
-                    email = "johndoe@email.com",
-                    phone = "+1123456789",
-                    billingCountryCode = "CA"
-                ),
-                shippingDetails = null,
-                passthroughModeEnabled = false,
-                flags = mapOf(),
-                cardBrandChoice = null,
-            ),
+            configuration = TestFactory.LINK_CONFIGURATION,
         )
     }
 }

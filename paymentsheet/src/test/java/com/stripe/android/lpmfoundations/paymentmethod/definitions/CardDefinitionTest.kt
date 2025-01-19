@@ -2,6 +2,7 @@ package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.TestFactory
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -158,20 +159,8 @@ class CardDefinitionTest {
     }
 
     private fun createLinkConfiguration(): LinkConfiguration {
-        return LinkConfiguration(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-            merchantCountryCode = "Merchant, Inc.",
-            merchantName = "John Doe",
-            customerInfo = LinkConfiguration.CustomerInfo(
-                name = "John Doe",
-                email = "email@email.com",
-                billingCountryCode = "CA",
-                phone = "1234567890"
-            ),
-            flags = mapOf(),
-            passthroughModeEnabled = false,
-            cardBrandChoice = null,
-            shippingDetails = null
+        return TestFactory.LINK_CONFIGURATION.copy(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
         )
     }
 

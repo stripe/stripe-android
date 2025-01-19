@@ -5,7 +5,6 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.utils.FeatureFlags
-import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.testing.FeatureFlagTestRule
 import org.junit.After
@@ -43,25 +42,8 @@ class LinkActivityContractTest {
     @Test
     fun `LinkActivityContract creates intent with URL with native link disabled`() {
         featureFlagTestRule.setEnabled(false)
-        val config = LinkConfiguration(
-            stripeIntent = PaymentIntentFixtures.PI_SUCCEEDED,
-            merchantName = "Merchant, Inc",
-            merchantCountryCode = "US",
-            customerInfo = LinkConfiguration.CustomerInfo(
-                name = "Name",
-                email = "customer@email.com",
-                phone = "1234567890",
-                billingCountryCode = "US",
-            ),
-            shippingDetails = null,
-            passthroughModeEnabled = false,
-            flags = emptyMap(),
-            cardBrandChoice = null,
-        )
 
-        val args = LinkActivityContract.Args(
-            config,
-        )
+        val args = LinkActivityContract.Args(TestFactory.LINK_CONFIGURATION)
         val stripeRepository = mock<StripeRepository>()
         whenever(stripeRepository.buildPaymentUserAgent(any())).thenReturn("test")
         val contract = LinkActivityContract(stripeRepository)
@@ -75,25 +57,8 @@ class LinkActivityContractTest {
     @Test
     fun `LinkActivityContract creates intent with with NativeLinkArgs when native link is enabled`() {
         featureFlagTestRule.setEnabled(true)
-        val config = LinkConfiguration(
-            stripeIntent = PaymentIntentFixtures.PI_SUCCEEDED,
-            merchantName = "Merchant, Inc",
-            merchantCountryCode = "US",
-            customerInfo = LinkConfiguration.CustomerInfo(
-                name = "Name",
-                email = "customer@email.com",
-                phone = "1234567890",
-                billingCountryCode = "US",
-            ),
-            shippingDetails = null,
-            passthroughModeEnabled = false,
-            flags = emptyMap(),
-            cardBrandChoice = null,
-        )
 
-        val args = LinkActivityContract.Args(
-            config,
-        )
+        val args = LinkActivityContract.Args(TestFactory.LINK_CONFIGURATION)
         val stripeRepository = mock<StripeRepository>()
         whenever(stripeRepository.buildPaymentUserAgent(any())).thenReturn("test")
         val contract = LinkActivityContract(stripeRepository)
@@ -105,7 +70,7 @@ class LinkActivityContractTest {
         }
         assertThat(actualArg).isEqualTo(
             NativeLinkArgs(
-                configuration = config,
+                configuration = TestFactory.LINK_CONFIGURATION,
                 publishableKey = "pk_test_abcdefg",
                 stripeAccountId = null
             )

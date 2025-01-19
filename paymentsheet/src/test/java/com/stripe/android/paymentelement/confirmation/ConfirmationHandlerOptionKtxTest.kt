@@ -3,7 +3,7 @@ package com.stripe.android.paymentelement.confirmation
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.TestFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
@@ -22,7 +22,6 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
-import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.utils.BankFormScreenStateFactory
 import org.junit.Test
@@ -350,20 +349,6 @@ class ConfirmationHandlerOptionKtxTest {
             clientSecret = "pi_123"
         )
 
-        val LINK_CONFIGURATION = LinkConfiguration(
-            stripeIntent = PaymentIntentFactory.create(),
-            merchantName = "Merchant, Inc.",
-            merchantCountryCode = "CA",
-            customerInfo = LinkConfiguration.CustomerInfo(
-                name = "John Doe",
-                email = null,
-                phone = null,
-                billingCountryCode = "CA",
-            ),
-            shippingDetails = null,
-            passthroughModeEnabled = false,
-            cardBrandChoice = null,
-            flags = mapOf()
-        )
+        val LINK_CONFIGURATION = TestFactory.LINK_CONFIGURATION
     }
 }
