@@ -4,7 +4,6 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.account.LinkAccountManager
@@ -60,17 +59,16 @@ internal class VerificationViewModelTest {
     @Test
     fun `When confirmVerification succeeds then it navigates to Wallet`() =
         runTest(dispatcher) {
-            val screens = arrayListOf<LinkScreen>()
-            fun navigateAndClearStack(screen: LinkScreen) {
-                screens.add(screen)
-            }
+            var linkAccountCall: LinkAccount? = null
 
             val viewModel = createViewModel(
-                navigateAndClearStack = ::navigateAndClearStack
+                onVerificationSucceeded = { linkAccount ->
+                    linkAccountCall = linkAccount
+                }
             )
             viewModel.onVerificationCodeEntered("code")
 
-            assertThat(screens).isEqualTo(listOf(LinkScreen.Wallet))
+            assertThat(linkAccountCall).isEqualTo(TestFactory.LINK_ACCOUNT)
         }
 
     @Test
@@ -122,18 +120,17 @@ internal class VerificationViewModelTest {
             }
         }
 
-        val navScreens = arrayListOf<LinkScreen>()
-        fun navigateAndClearStack(screen: LinkScreen) {
-            navScreens.add(screen)
-        }
+        var changeEmailCount = 0
 
         createViewModel(
             linkAccountManager = linkAccountManager,
-            navigateAndClearStack = ::navigateAndClearStack
-        ).onChangeEmailClicked()
+            onChangeEmailClicked = {
+                changeEmailCount += 1
+            },
+        ).onChangeEmailButtonClicked()
 
         assertThat(linkAccountManager.callCount).isEqualTo(1)
-        assertThat(navScreens).isEqualTo(listOf(LinkScreen.SignUp))
+        assertThat(changeEmailCount).isEqualTo(1)
     }
 
     @Test
@@ -213,15 +210,17 @@ internal class VerificationViewModelTest {
         linkAccountManager: LinkAccountManager = FakeLinkAccountManager(),
         linkEventsReporter: LinkEventsReporter = FakeLinkEventsReporter(),
         logger: Logger = FakeLogger(),
-        navigateAndClearStack: (LinkScreen) -> Unit = {},
-        goBack: () -> Unit = {},
+        onVerificationSucceeded: (LinkAccount) -> Unit = {},
+        onChangeEmailClicked: () -> Unit = {},
+        onDismissClicked: () -> Unit = {},
     ): VerificationViewModel {
         return VerificationViewModel(
             linkAccountManager = linkAccountManager,
             linkEventsReporter = linkEventsReporter,
             logger = logger,
-            navigateAndClearStack = navigateAndClearStack,
-            goBack = goBack,
+            onVerificationSucceeded = onVerificationSucceeded,
+            onDismissClicked = onDismissClicked,
+            onChangeEmailClicked = onChangeEmailClicked,
             linkAccount = TestFactory.LINK_ACCOUNT
         )
     }

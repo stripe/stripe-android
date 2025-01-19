@@ -23,11 +23,11 @@ internal open class FakeLinkAccountManager : LinkAccountManager {
     override val accountStatus: Flow<AccountStatus> = _accountStatus
 
     var lookupConsumerResult: Result<LinkAccount?> = Result.success(null)
-    var startVerificationResult: Result<LinkAccount> = Result.success(LinkAccount(ConsumerSession("", "", "", "")))
-    var confirmVerificationResult: Result<LinkAccount> = Result.success(LinkAccount(ConsumerSession("", "", "", "")))
-    var signUpResult: Result<LinkAccount> = Result.success(LinkAccount(ConsumerSession("", "", "", "")))
-    var signInWithUserInputResult: Result<LinkAccount> = Result.success(LinkAccount(ConsumerSession("", "", "", "")))
-    var logOutResult: Result<ConsumerSession> = Result.success(ConsumerSession("", "", "", ""))
+    var startVerificationResult: Result<LinkAccount> = Result.success(TestFactory.LINK_ACCOUNT)
+    var confirmVerificationResult: Result<LinkAccount> = Result.success(TestFactory.LINK_ACCOUNT)
+    var signUpResult: Result<LinkAccount> = Result.success(TestFactory.LINK_ACCOUNT)
+    var signInWithUserInputResult: Result<LinkAccount> = Result.success(TestFactory.LINK_ACCOUNT)
+    var logOutResult: Result<ConsumerSession> = Result.success(TestFactory.CONSUMER_SESSION)
     var createCardPaymentDetailsResult: Result<LinkPaymentDetails> = Result.success(
         value = TestFactory.LINK_NEW_PAYMENT_DETAILS
     )
