@@ -363,7 +363,8 @@ class ConfirmationHandlerOptionKtxTest {
             shippingDetails = null,
             passthroughModeEnabled = false,
             cardBrandChoice = null,
-            flags = mapOf()
+            flags = mapOf(),
+            useAttestationEndpointsForLink = true,
         )
     }
 }

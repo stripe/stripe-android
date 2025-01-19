@@ -6,6 +6,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.VisibleForTesting
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetValue
@@ -40,6 +41,7 @@ internal class LinkActivity : ComponentActivity() {
 
     @VisibleForTesting
     internal lateinit var navController: NavHostController
+    private var webLauncher: ActivityResultLauncher<LinkActivityContract.Args>? = null
 
     @OptIn(ExperimentalMaterialApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -58,6 +60,10 @@ internal class LinkActivity : ComponentActivity() {
             activityResultCaller = this,
             lifecycleOwner = this,
         )
+
+        webLauncher = registerForActivityResult(vm.activityRetainedComponent.webLinkActivityContract) { result ->
+            dismissWithResult(result)
+        }
 
         setContent {
             var bottomSheetContent by remember { mutableStateOf<BottomSheetContent?>(null) }
@@ -79,9 +85,15 @@ internal class LinkActivity : ComponentActivity() {
                 viewModel?.let {
                     it.navController = navController
                     it.dismissWithResult = ::dismissWithResult
+                    it.launchWebFlow = ::launchWebFlow
                     lifecycle.addObserver(it)
                 }
             }
+
+//            EagerPath(
+//                linkAccount = vm.linkAccount,
+//                viewModel = vm
+//            )
 
             EventReporterProvider(
                 eventReporter = vm.eventReporter
@@ -95,7 +107,10 @@ internal class LinkActivity : ComponentActivity() {
                     onUpdateSheetContent = {
                         bottomSheetContent = it
                     },
-                    onBackPressed = onBackPressedDispatcher::onBackPressed
+                    onBackPressed = onBackPressedDispatcher::onBackPressed,
+                    moveToWebFlow = {
+                        vm.moveToWeb()
+                    }
                 )
             }
         }
@@ -106,8 +121,8 @@ internal class LinkActivity : ComponentActivity() {
             LinkActivityContract.EXTRA_RESULT to result
         )
         this@LinkActivity.setResult(
-            RESULT_COMPLETE,
-            Intent().putExtras(bundle)
+            NativeConstants.RESULT_COMPLETE,
+            intent.putExtras(bundle)
         )
         this@LinkActivity.finish()
     }
@@ -131,20 +146,22 @@ internal class LinkActivity : ComponentActivity() {
         }
     }
 
+    fun launchWebFlow(configuration: LinkConfiguration) {
+        webLauncher?.launch(LinkActivityContract.Args(configuration))
+    }
+
     companion object {
-        internal const val EXTRA_ARGS = "native_link_args"
-        internal const val RESULT_COMPLETE = 73563
 
         internal fun createIntent(
             context: Context,
             args: NativeLinkArgs
         ): Intent {
             return Intent(context, LinkActivity::class.java)
-                .putExtra(EXTRA_ARGS, args)
+                .putExtra(NativeConstants.EXTRA_ARGS, args)
         }
 
         internal fun getArgs(savedStateHandle: SavedStateHandle): NativeLinkArgs? {
-            return savedStateHandle.get<NativeLinkArgs>(EXTRA_ARGS)
+            return savedStateHandle.get<NativeLinkArgs>(NativeConstants.EXTRA_ARGS)
         }
     }
 }

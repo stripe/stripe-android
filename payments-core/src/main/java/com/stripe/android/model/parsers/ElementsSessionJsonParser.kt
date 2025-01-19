@@ -69,6 +69,7 @@ internal class ElementsSessionJsonParser(
                 cardBrandChoice = cardBrandChoice,
                 isGooglePayEnabled = googlePayPreference != "disabled",
                 externalPaymentMethodData = externalPaymentMethodData,
+                sessionId = elementsSessionId
             )
         } else {
             null
@@ -140,6 +141,7 @@ internal class ElementsSessionJsonParser(
     ): ElementsSession.LinkSettings {
         val disableLinkSignup = json?.optBoolean(FIELD_DISABLE_LINK_SIGNUP) ?: false
         val linkPassthroughModeEnabled = json?.optBoolean(FIELD_LINK_PASSTHROUGH_MODE_ENABLED) ?: false
+        val useLinkAttestationEndpoints = json?.optBoolean(FIELD_USE_LINK_ATTESTATION_ENDPOINTS) ?: false
 
         val linkMode = json?.optString(FIELD_LINK_MODE)?.let { mode ->
             LinkMode.entries.firstOrNull { it.value == mode }
@@ -162,6 +164,7 @@ internal class ElementsSessionJsonParser(
             linkFlags = linkFlags,
             disableLinkSignup = disableLinkSignup,
             linkConsumerIncentive = linkConsumerIncentive,
+            useAttestationEndpoints = useLinkAttestationEndpoints
         )
     }
 
@@ -327,6 +330,7 @@ internal class ElementsSessionJsonParser(
         private const val FIELD_LINK_PASSTHROUGH_MODE_ENABLED = "link_passthrough_mode_enabled"
         private const val FIELD_LINK_MODE = "link_mode"
         private const val FIELD_DISABLE_LINK_SIGNUP = "link_mobile_disable_signup"
+        private const val FIELD_USE_LINK_ATTESTATION_ENDPOINTS = "link_mobile_use_attestation_endpoints"
         private const val FIELD_MERCHANT_COUNTRY = "merchant_country"
         private const val FIELD_PAYMENT_METHOD_PREFERENCE = "payment_method_preference"
         private const val FIELD_UNACTIVATED_PAYMENT_METHOD_TYPES = "unactivated_payment_method_types"

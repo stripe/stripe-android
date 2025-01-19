@@ -11,7 +11,8 @@ import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkScreen
-import com.stripe.android.link.account.LinkAccountManager
+import com.stripe.android.link.account.LinkAuth
+import com.stripe.android.link.account.LinkAuthResult
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.LinkAccount
@@ -37,9 +38,10 @@ import kotlin.time.Duration.Companion.seconds
 
 internal class SignUpViewModel @Inject constructor(
     private val configuration: LinkConfiguration,
-    private val linkAccountManager: LinkAccountManager,
     private val linkEventsReporter: LinkEventsReporter,
-    private val logger: Logger
+    private val logger: Logger,
+    private val linkAuth: LinkAuth,
+    private val moveToWebFlow: () -> Unit
 ) : ViewModel() {
     internal var navController: NavHostController? = null
     val emailController = EmailConfig.createController(
@@ -112,22 +114,31 @@ internal class SignUpViewModel @Inject constructor(
     fun onSignUpClick() {
         clearError()
         viewModelScope.launch {
-            linkAccountManager.signUp(
-                email = emailController.fieldValue.value,
-                phone = phoneNumberController.getE164PhoneNumber(phoneNumberController.fieldValue.value),
-                country = phoneNumberController.getCountryCode(),
-                name = nameController.fieldValue.value,
-                consentAction = SignUpConsentAction.Implied
-            ).fold(
-                onSuccess = {
-                    onAccountFetched(it)
-                    linkEventsReporter.onSignupCompleted()
-                },
-                onFailure = {
-                    onError(it)
-                    linkEventsReporter.onSignupFailure(error = it)
-                }
-            )
+            signUp()
+        }
+    }
+
+    private suspend fun signUp() {
+        val result = linkAuth.signUp(
+            email = emailController.fieldValue.value,
+            phoneNumber = phoneNumberController.getE164PhoneNumber(phoneNumberController.fieldValue.value),
+            country = phoneNumberController.getCountryCode(),
+            name = nameController.fieldValue.value,
+            consentAction = SignUpConsentAction.Implied
+        )
+
+        when (result) {
+            is LinkAuthResult.AttestationFailed -> {
+                moveToWebFlow()
+            }
+            is LinkAuthResult.Error -> {
+                onError(result.throwable)
+                linkEventsReporter.onSignupFailure(error = result.throwable)
+            }
+            is LinkAuthResult.Success -> {
+                onAccountFetched(result.account)
+                linkEventsReporter.onSignupCompleted()
+            }
         }
     }
 
@@ -177,15 +188,17 @@ internal class SignUpViewModel @Inject constructor(
         internal val LOOKUP_DEBOUNCE = 1.seconds
 
         fun factory(
-            parentComponent: NativeLinkComponent
+            parentComponent: NativeLinkComponent,
+            moveToWebFlow: () -> Unit
         ): ViewModelProvider.Factory {
             return viewModelFactory {
                 initializer {
                     SignUpViewModel(
                         configuration = parentComponent.configuration,
                         linkEventsReporter = parentComponent.linkEventsReporter,
-                        linkAccountManager = parentComponent.linkAccountManager,
-                        logger = parentComponent.logger
+                        logger = parentComponent.logger,
+                        linkAuth = parentComponent.linkAuth,
+                        moveToWebFlow = moveToWebFlow
                     )
                 }
             }

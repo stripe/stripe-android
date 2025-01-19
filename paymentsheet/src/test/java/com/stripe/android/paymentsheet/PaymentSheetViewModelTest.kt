@@ -950,6 +950,7 @@ internal class PaymentSheetViewModelTest {
                 passthroughModeEnabled = false,
                 cardBrandChoice = null,
                 shippingDetails = null,
+                useAttestationEndpointsForLink = true,
             )
 
             val viewModel = createViewModel(
@@ -3344,7 +3345,8 @@ internal class PaymentSheetViewModelTest {
             shippingDetails = null,
             passthroughModeEnabled = false,
             cardBrandChoice = null,
-            flags = emptyMap()
+            flags = emptyMap(),
+            useAttestationEndpointsForLink = true,
         )
     }
 }

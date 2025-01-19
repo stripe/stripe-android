@@ -13,8 +13,12 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavHostController
+import com.stripe.android.core.Logger
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.LinkActivity.Companion.getArgs
 import com.stripe.android.link.account.LinkAccountManager
+import com.stripe.android.link.account.LinkAuth
+import com.stripe.android.link.injection.APPLICATION_ID
 import com.stripe.android.link.injection.DaggerNativeLinkComponent
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.AccountStatus
@@ -23,17 +27,23 @@ import com.stripe.android.link.ui.LinkAppBarState
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.attestation.IntegrityRequestManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Named
 
 internal class LinkActivityViewModel @Inject constructor(
     val activityRetainedComponent: NativeLinkComponent,
     confirmationHandlerFactory: ConfirmationHandler.Factory,
     private val linkAccountManager: LinkAccountManager,
+    private val linkAuth: LinkAuth,
     val eventReporter: EventReporter,
+    private val integrityRequestManager: IntegrityRequestManager,
+    private val logger: Logger,
+    @Named(APPLICATION_ID) val applicationId: String
 ) : ViewModel(), DefaultLifecycleObserver {
     val confirmationHandler = confirmationHandlerFactory.create(viewModelScope)
     private val _linkState = MutableStateFlow(
@@ -51,10 +61,18 @@ internal class LinkActivityViewModel @Inject constructor(
 
     var navController: NavHostController? = null
     var dismissWithResult: ((LinkActivityResult) -> Unit)? = null
+    var launchWebFlow: ((LinkConfiguration) -> Unit)? = null
 
     fun handleViewAction(action: LinkAction) {
         when (action) {
             LinkAction.BackPressed -> handleBackPressed()
+        }
+    }
+
+    fun moveToWeb() {
+        launchWebFlow?.let { launcher ->
+            navigate(LinkScreen.Loading, clearStack = true)
+            launcher.invoke(activityRetainedComponent.configuration)
         }
     }
 
@@ -103,6 +121,8 @@ internal class LinkActivityViewModel @Inject constructor(
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
         viewModelScope.launch {
+            if (warmUpIntegrityManager().not()) return@launch
+
             val accountStatus = linkAccountManager.accountStatus.first()
             val screen = when (accountStatus) {
                 AccountStatus.Verified -> LinkScreen.Wallet
@@ -111,6 +131,17 @@ internal class LinkActivityViewModel @Inject constructor(
             }
             navigate(screen, clearStack = true, launchSingleTop = true)
         }
+    }
+
+    private suspend fun warmUpIntegrityManager(): Boolean {
+        val result = integrityRequestManager.prepare()
+        val error = result.exceptionOrNull()
+        if (error != null) {
+            FeatureFlags.nativeLinkEnabled.setEnabled(false)
+            launchWebFlow?.invoke(activityRetainedComponent.configuration)
+            return false
+        }
+        return true
     }
 
     companion object {
@@ -123,10 +154,12 @@ internal class LinkActivityViewModel @Inject constructor(
                 DaggerNativeLinkComponent
                     .builder()
                     .configuration(args.configuration)
+                    .linkAccount(args.linkAccount)
                     .publishableKeyProvider { args.publishableKey }
                     .stripeAccountIdProvider { args.stripeAccountId }
                     .savedStateHandle(handle)
                     .context(app)
+                    .application(app)
                     .build()
                     .viewModel
             }

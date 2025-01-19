@@ -226,6 +226,7 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
                 passthroughModeEnabled = false,
                 flags = mapOf(),
                 cardBrandChoice = null,
+                useAttestationEndpointsForLink = true,
             ),
         )
 

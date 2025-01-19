@@ -16,10 +16,10 @@ import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
-import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.BuildConfig
+import com.stripe.android.repository.ConsumersApiService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
@@ -197,7 +197,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
         }
     }
 
-    private fun setAccount(
+    internal fun setAccount(
         consumerSession: ConsumerSession,
         publishableKey: String?,
     ): LinkAccount {
@@ -205,6 +205,10 @@ internal class DefaultLinkAccountManager @Inject constructor(
         val newAccount = LinkAccount(consumerSession)
         _linkAccount.value = newAccount
         return newAccount
+    }
+
+    internal fun setAccount(linkAccount: LinkAccount?) {
+        _linkAccount.value = linkAccount
     }
 
     override fun setLinkAccountFromLookupResult(
@@ -275,7 +279,6 @@ internal class DefaultLinkAccountManager @Inject constructor(
         )
     }
 
-    @VisibleForTesting
     internal fun setAccountNullable(
         consumerSession: ConsumerSession?,
         publishableKey: String?,
@@ -323,18 +326,4 @@ internal class DefaultLinkAccountManager @Inject constructor(
                     AccountStatus.Error
                 }
             } ?: AccountStatus.SignedOut
-
-    private val SignUpConsentAction.consumerAction: ConsumerSignUpConsentAction
-        get() = when (this) {
-            SignUpConsentAction.Checkbox ->
-                ConsumerSignUpConsentAction.Checkbox
-            SignUpConsentAction.CheckboxWithPrefilledEmail ->
-                ConsumerSignUpConsentAction.CheckboxWithPrefilledEmail
-            SignUpConsentAction.CheckboxWithPrefilledEmailAndPhone ->
-                ConsumerSignUpConsentAction.CheckboxWithPrefilledEmailAndPhone
-            SignUpConsentAction.Implied ->
-                ConsumerSignUpConsentAction.Implied
-            SignUpConsentAction.ImpliedWithPrefilledEmail ->
-                ConsumerSignUpConsentAction.ImpliedWithPrefilledEmail
-        }
 }

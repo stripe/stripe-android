@@ -1,5 +1,6 @@
 package com.stripe.android.link.injection
 
+import android.app.Application
 import android.content.Context
 import androidx.core.os.LocaleListCompat
 import com.stripe.android.BuildConfig
@@ -20,12 +21,17 @@ import com.stripe.android.core.utils.ContextUtils.packageInfo
 import com.stripe.android.core.utils.DefaultDurationProvider
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.version.StripeSdkVersion
+import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.account.AttestLinkAccountManager
 import com.stripe.android.link.account.DefaultLinkAccountManager
+import com.stripe.android.link.account.DefaultLinkAuth
 import com.stripe.android.link.account.LinkAccountManager
+import com.stripe.android.link.account.LinkAuth
 import com.stripe.android.link.analytics.DefaultLinkEventsReporter
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.confirmation.DefaultLinkConfirmationHandler
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
+import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.repositories.LinkApiRepository
 import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.networking.StripeApiRepository
@@ -38,6 +44,9 @@ import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.repository.ConsumersApiService
 import com.stripe.android.repository.ConsumersApiServiceImpl
+import com.stripe.attestation.IntegrityRequestManager
+import com.stripe.attestation.IntegrityStandardRequestManager
+import com.stripe.attestation.RealStandardIntegrityManagerFactory
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -55,9 +64,9 @@ internal interface NativeLinkModule {
     @NativeLinkScope
     fun bindLinkEventsReporter(linkEventsReporter: DefaultLinkEventsReporter): LinkEventsReporter
 
-    @Binds
-    @NativeLinkScope
-    fun bindLinkAccountManager(linkAccountManager: DefaultLinkAccountManager): LinkAccountManager
+//    @Binds
+//    @NativeLinkScope
+//    fun bindLinkAccountManager(linkAccountManager: DefaultLinkAccountManager): LinkAccountManager
 
     @Binds
     @NativeLinkScope
@@ -163,6 +172,61 @@ internal interface NativeLinkModule {
 
         @Provides
         @NativeLinkScope
+        fun providesIntegrityStandardRequestManager(
+            context: Application
+        ): IntegrityRequestManager = IntegrityStandardRequestManager(
+            cloudProjectNumber = 577365562050, // stripe-payments-sdk-prod
+            logError = { message, error ->
+                Logger.getInstance(com.stripe.attestation.BuildConfig.DEBUG).error(message, error)
+            },
+            factory = RealStandardIntegrityManagerFactory(context)
+        )
+
+        @Provides
+        @NativeLinkScope
         fun provideEventReporterMode(): EventReporter.Mode = EventReporter.Mode.Custom
+
+        @Provides
+        @Named(APPLICATION_ID)
+        @NativeLinkScope
+        fun provideApplicationId(
+            application: Application
+        ): String = application.packageName
+
+        @Provides
+        @NativeLinkScope
+        fun provideLinkAuth(
+            configuration: LinkConfiguration,
+            defaultLinkAccountManager: DefaultLinkAccountManager,
+            attestLinkAccountManager: AttestLinkAccountManager,
+        ): LinkAuth {
+            return DefaultLinkAuth(
+                linkConfiguration = configuration,
+                defaultLinkAccountManager = defaultLinkAccountManager,
+                attestLinkAccountManager = attestLinkAccountManager,
+            )
+        }
+
+        @Provides
+        @NativeLinkScope
+        fun provideLinkAccountManager(
+            configuration: LinkConfiguration,
+            linkRepository: LinkRepository,
+            linkEventsReporter: LinkEventsReporter,
+            errorReporter: ErrorReporter,
+            linkAccount: LinkAccount?
+        ): LinkAccountManager {
+            return DefaultLinkAccountManager(
+                config = configuration,
+                linkRepository = linkRepository,
+                linkEventsReporter = linkEventsReporter,
+                errorReporter = errorReporter
+            ).apply {
+                setAccount(linkAccount)
+            }
+        }
     }
 }
+
+internal const val APPLICATION_ID = "application_id"
+internal const val ATTEST_LINK_ACCOUNT_MANAGER = "attest_link_account_manager"
