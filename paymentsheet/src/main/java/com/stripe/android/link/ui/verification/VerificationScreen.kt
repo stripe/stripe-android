@@ -78,7 +78,7 @@ internal fun VerificationScreen(
         otpElement = viewModel.otpElement,
         focusRequester = focusRequester,
         onBack = viewModel::onBack,
-        onChangeEmailClick = viewModel::onChangeEmailClicked,
+        onChangeEmailClick = viewModel::onChangeEmailButtonClicked,
         onResendCodeClick = viewModel::resendCode
     )
 }

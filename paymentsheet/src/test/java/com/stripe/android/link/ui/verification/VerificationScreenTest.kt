@@ -153,8 +153,9 @@ internal class VerificationScreenTest {
             linkAccountManager = linkAccountManager,
             linkEventsReporter = linkEventsReporter,
             logger = logger,
-            navigateAndClearStack = {},
-            goBack = {},
+            onVerificationSucceeded = {},
+            onChangeEmailClicked = {},
+            onDismissClicked = {},
             linkAccount = TestFactory.LINK_ACCOUNT
         )
     }

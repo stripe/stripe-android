@@ -11,6 +11,7 @@ import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
+import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.paymentelement.confirmation.injection.DefaultConfirmationModule
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import dagger.BindsInstance
@@ -52,6 +53,9 @@ internal interface NativeLinkComponent {
 
         @BindsInstance
         fun context(context: Context): Builder
+
+        @BindsInstance
+        fun linkAccount(linkAccount: LinkAccount?): Builder
 
         @BindsInstance
         fun savedStateHandle(savedStateHandle: SavedStateHandle): Builder
