@@ -11,7 +11,10 @@ import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSessionSignup
+import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.CvcCheck
+import com.stripe.android.model.EmailSource
+import com.stripe.android.model.IncentiveEligibilitySession
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -42,6 +45,9 @@ internal object TestFactory {
     const val CUSTOMER_PHONE = "1234567890"
     const val CUSTOMER_BILLING_COUNTRY_CODE = "US"
     const val CUSTOMER_NAME = "Customer"
+    const val AMOUNT = 100L
+    const val CURRENCY = "USD"
+    const val COUNTRY = "US"
 
     val VERIFIED_SESSION = ConsumerSession.VerificationSession(
         type = ConsumerSession.VerificationSession.SessionType.Sms,
@@ -156,4 +162,11 @@ internal object TestFactory {
     )
 
     val CARD_FORM_ELEMENTS = CardDefinition.formElements()
+
+    const val VERIFICATION_TOKEN = "12356edtyf6esrte6r6dtd67"
+    val INCENTIVE_ELIGIBILITY_SESSION = IncentiveEligibilitySession.PaymentIntent("pi_12345")
+    const val APP_ID = "com.stripe.app"
+    const val SESSION_ID = "element_sessions_123"
+    val EMAIL_SOURCE = EmailSource.CUSTOMER_OBJECT
+    val CONSENT_ACTION = ConsumerSignUpConsentAction.Checkbox
 }
