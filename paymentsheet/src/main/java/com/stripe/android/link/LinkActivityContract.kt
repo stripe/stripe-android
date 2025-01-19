@@ -3,7 +3,7 @@ package com.stripe.android.link
 import android.content.Context
 import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
-import com.stripe.android.core.utils.FeatureFlags
+import com.stripe.android.link.model.LinkAccount
 import javax.inject.Inject
 
 internal class LinkActivityContract @Inject internal constructor(
@@ -39,7 +39,8 @@ internal class LinkActivityContract @Inject internal constructor(
     }
 
     data class Args internal constructor(
-        internal val configuration: LinkConfiguration
+        internal val configuration: LinkConfiguration,
+        internal val linkAccount: LinkAccount? = null
     )
 
     data class Result(

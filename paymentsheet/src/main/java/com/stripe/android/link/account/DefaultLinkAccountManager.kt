@@ -16,10 +16,7 @@ import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
-import com.stripe.android.model.ConsumerSessionSignup
-import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.model.SignUpParams
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.repository.ConsumersApiService
@@ -37,7 +34,6 @@ internal class DefaultLinkAccountManager @Inject constructor(
     private val linkRepository: LinkRepository,
     private val linkEventsReporter: LinkEventsReporter,
     private val errorReporter: ErrorReporter,
-    private val consumersApiService: ConsumersApiService
 ) : LinkAccountManager {
     private val _linkAccount = MutableStateFlow<LinkAccount?>(null)
     override val linkAccount: StateFlow<LinkAccount?> = _linkAccount
@@ -165,31 +161,6 @@ internal class DefaultLinkAccountManager @Inject constructor(
                 )
             }
 
-    override suspend fun mobileSignUp(
-        email: String,
-        phoneNumber: String,
-        country: String,
-        verificationToken: String,
-        appId: String,
-        name: String?,
-        consentAction: SignUpConsentAction
-    ): Result<LinkAccount> {
-        return linkRepository.mobileSignUp(
-            name = name,
-            email = email,
-            phoneNumber = phoneNumber,
-            country = country,
-            consentAction = consentAction.consumerAction,
-            verificationToken = verificationToken,
-            appId = appId
-        ).map { consumerSessionSignup ->
-            setAccount(
-                consumerSession = consumerSessionSignup.consumerSession,
-                publishableKey = consumerSessionSignup.publishableKey,
-            )
-        }
-    }
-
     override suspend fun createCardPaymentDetails(
         paymentMethodCreateParams: PaymentMethodCreateParams
     ): Result<LinkPaymentDetails> {
@@ -226,7 +197,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
         }
     }
 
-    private fun setAccount(
+    internal fun setAccount(
         consumerSession: ConsumerSession,
         publishableKey: String?,
     ): LinkAccount {
@@ -234,6 +205,10 @@ internal class DefaultLinkAccountManager @Inject constructor(
         val newAccount = LinkAccount(consumerSession)
         _linkAccount.value = newAccount
         return newAccount
+    }
+
+    internal fun setAccount(linkAccount: LinkAccount?) {
+        _linkAccount.value = linkAccount
     }
 
     override fun setLinkAccountFromLookupResult(
@@ -304,7 +279,6 @@ internal class DefaultLinkAccountManager @Inject constructor(
         )
     }
 
-    @VisibleForTesting
     internal fun setAccountNullable(
         consumerSession: ConsumerSession?,
         publishableKey: String?,
@@ -352,18 +326,4 @@ internal class DefaultLinkAccountManager @Inject constructor(
                     AccountStatus.Error
                 }
             } ?: AccountStatus.SignedOut
-
-    private val SignUpConsentAction.consumerAction: ConsumerSignUpConsentAction
-        get() = when (this) {
-            SignUpConsentAction.Checkbox ->
-                ConsumerSignUpConsentAction.Checkbox
-            SignUpConsentAction.CheckboxWithPrefilledEmail ->
-                ConsumerSignUpConsentAction.CheckboxWithPrefilledEmail
-            SignUpConsentAction.CheckboxWithPrefilledEmailAndPhone ->
-                ConsumerSignUpConsentAction.CheckboxWithPrefilledEmailAndPhone
-            SignUpConsentAction.Implied ->
-                ConsumerSignUpConsentAction.Implied
-            SignUpConsentAction.ImpliedWithPrefilledEmail ->
-                ConsumerSignUpConsentAction.ImpliedWithPrefilledEmail
-        }
 }

@@ -17,6 +17,8 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.LinkActivity.Companion.getArgs
 import com.stripe.android.link.account.LinkAccountManager
+import com.stripe.android.link.account.LinkAuth
+import com.stripe.android.link.injection.APPLICATION_ID
 import com.stripe.android.link.injection.DaggerNativeLinkComponent
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.AccountStatus
@@ -31,14 +33,17 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Named
 
 internal class LinkActivityViewModel @Inject constructor(
     val activityRetainedComponent: NativeLinkComponent,
     confirmationHandlerFactory: ConfirmationHandler.Factory,
     private val linkAccountManager: LinkAccountManager,
+    private val linkAuth: LinkAuth,
     val eventReporter: EventReporter,
     private val integrityRequestManager: IntegrityRequestManager,
-    private val logger: Logger
+    private val logger: Logger,
+    @Named(APPLICATION_ID) val applicationId: String
 ) : ViewModel(), DefaultLifecycleObserver {
     val confirmationHandler = confirmationHandlerFactory.create(viewModelScope)
     private val _linkState = MutableStateFlow(
@@ -61,6 +66,13 @@ internal class LinkActivityViewModel @Inject constructor(
     fun handleViewAction(action: LinkAction) {
         when (action) {
             LinkAction.BackPressed -> handleBackPressed()
+        }
+    }
+
+    fun moveToWeb() {
+        launchWebFlow?.let { launcher ->
+            navigate(LinkScreen.Loading, clearStack = true)
+            launcher.invoke(activityRetainedComponent.configuration)
         }
     }
 
@@ -122,9 +134,6 @@ internal class LinkActivityViewModel @Inject constructor(
     }
 
     private suspend fun warmUpIntegrityManager(): Boolean {
-//        val configuration = activityRetainedComponent.configuration
-//        if (configuration.useAttestationEndpointsForLink.not()) return true
-
         val result = integrityRequestManager.prepare()
         val error = result.exceptionOrNull()
         if (error != null) {
@@ -145,6 +154,7 @@ internal class LinkActivityViewModel @Inject constructor(
                 DaggerNativeLinkComponent
                     .builder()
                     .configuration(args.configuration)
+                    .linkAccount(args.linkAccount)
                     .publishableKeyProvider { args.publishableKey }
                     .stripeAccountIdProvider { args.stripeAccountId }
                     .savedStateHandle(handle)

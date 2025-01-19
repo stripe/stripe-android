@@ -19,6 +19,7 @@ data class ElementsSession(
     val cardBrandChoice: CardBrandChoice?,
     val isGooglePayEnabled: Boolean,
     val sessionsError: Throwable? = null,
+    val sessionId: String?,
 ) : StripeModel {
 
     val linkPassthroughModeEnabled: Boolean
@@ -131,6 +132,7 @@ data class ElementsSession(
                 cardBrandChoice = null,
                 isGooglePayEnabled = true,
                 sessionsError = sessionsError,
+                sessionId = null
             )
         }
     }

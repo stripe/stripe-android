@@ -8,8 +8,8 @@ import androidx.core.os.BundleCompat
 import com.stripe.android.PaymentConfiguration
 import javax.inject.Inject
 
-internal class NativeLinkActivityContract @Inject constructor(
-) : ActivityResultContract<LinkActivityContract.Args, LinkActivityResult>() {
+internal class NativeLinkActivityContract @Inject constructor() :
+    ActivityResultContract<LinkActivityContract.Args, LinkActivityResult>() {
     override fun createIntent(context: Context, input: LinkActivityContract.Args): Intent {
         val paymentConfiguration = PaymentConfiguration.getInstance(context)
         return LinkActivity.createIntent(
@@ -17,7 +17,8 @@ internal class NativeLinkActivityContract @Inject constructor(
             args = NativeLinkArgs(
                 configuration = input.configuration,
                 stripeAccountId = paymentConfiguration.stripeAccountId,
-                publishableKey = paymentConfiguration.publishableKey
+                publishableKey = paymentConfiguration.publishableKey,
+                linkAccount = input.linkAccount
             )
         )
     }
@@ -28,7 +29,7 @@ internal class NativeLinkActivityContract @Inject constructor(
                 LinkActivityResult.Canceled()
             }
 
-            LinkActivity.RESULT_COMPLETE -> {
+            NativeConstants.RESULT_COMPLETE -> {
                 val result = intent?.extras?.let {
                     BundleCompat.getParcelable(it, LinkActivityContract.EXTRA_RESULT, LinkActivityResult::class.java)
                 }

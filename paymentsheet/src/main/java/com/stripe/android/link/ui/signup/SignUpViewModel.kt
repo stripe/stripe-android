@@ -9,10 +9,10 @@ import androidx.navigation.NavHostController
 import com.stripe.android.core.Logger
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkScreen
-import com.stripe.android.link.account.LinkAccountManager
+import com.stripe.android.link.account.LinkAuth
+import com.stripe.android.link.account.LinkAuthResult
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.LinkAccount
@@ -24,7 +24,6 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.NameConfig
 import com.stripe.android.uicore.elements.PhoneNumberController
-import com.stripe.attestation.IntegrityRequestManager
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -39,10 +38,9 @@ import kotlin.time.Duration.Companion.seconds
 
 internal class SignUpViewModel @Inject constructor(
     private val configuration: LinkConfiguration,
-    private val linkAccountManager: LinkAccountManager,
     private val linkEventsReporter: LinkEventsReporter,
     private val logger: Logger,
-    private val integrityRequestManager: IntegrityRequestManager,
+    private val linkAuth: LinkAuth,
     private val moveToWebFlow: () -> Unit
 ) : ViewModel() {
     internal var navController: NavHostController? = null
@@ -116,59 +114,32 @@ internal class SignUpViewModel @Inject constructor(
     fun onSignUpClick() {
         clearError()
         viewModelScope.launch {
-            if (FeatureFlags.nativeLinkEnabled.isEnabled) {
-                mobileSignUp()
-            } else {
-                signUp()
-            }
+            signUp()
         }
     }
 
     private suspend fun signUp() {
-        linkAccountManager.signUp(
+        val result = linkAuth.signUp(
             email = emailController.fieldValue.value,
-            phone = phoneNumberController.getE164PhoneNumber(phoneNumberController.fieldValue.value),
+            phoneNumber = phoneNumberController.getE164PhoneNumber(phoneNumberController.fieldValue.value),
             country = phoneNumberController.getCountryCode(),
             name = nameController.fieldValue.value,
             consentAction = SignUpConsentAction.Implied
-        ).fold(
-            onSuccess = ::handleSignUpSuccess,
-            onFailure = ::handleSignUpFailure
         )
-    }
 
-    private suspend fun mobileSignUp() {
-        val attestationResult = integrityRequestManager.requestToken()
-        attestationResult.fold(
-            onSuccess = { verificationToken ->
-                linkAccountManager.mobileSignUp(
-                    email = emailController.fieldValue.value,
-                    phoneNumber = phoneNumberController.getE164PhoneNumber(phoneNumberController.fieldValue.value),
-                    country = phoneNumberController.getCountryCode(),
-                    name = nameController.fieldValue.value,
-                    consentAction = SignUpConsentAction.Implied,
-                    verificationToken = verificationToken,
-                    appId = "com.stripe.android.paymentsheet.example"
-                ).fold(
-                    onSuccess = ::handleSignUpSuccess,
-                    onFailure = ::handleSignUpFailure
-                )
-            },
-            onFailure = { error ->
+        when (result) {
+            is LinkAuthResult.AttestationFailed -> {
                 moveToWebFlow()
             }
-        )
-
-    }
-
-    private fun handleSignUpSuccess(account: LinkAccount) {
-        onAccountFetched(account)
-        linkEventsReporter.onSignupCompleted()
-    }
-
-    private fun handleSignUpFailure(error: Throwable) {
-        onError(error)
-        linkEventsReporter.onSignupFailure(error = error)
+            is LinkAuthResult.Error -> {
+                onError(result.throwable)
+                linkEventsReporter.onSignupFailure(error = result.throwable)
+            }
+            is LinkAuthResult.Success -> {
+                onAccountFetched(result.account)
+                linkEventsReporter.onSignupCompleted()
+            }
+        }
     }
 
     private fun onAccountFetched(linkAccount: LinkAccount?) {
@@ -225,9 +196,8 @@ internal class SignUpViewModel @Inject constructor(
                     SignUpViewModel(
                         configuration = parentComponent.configuration,
                         linkEventsReporter = parentComponent.linkEventsReporter,
-                        linkAccountManager = parentComponent.linkAccountManager,
                         logger = parentComponent.logger,
-                        integrityRequestManager = parentComponent.integrityRequestManager,
+                        linkAuth = parentComponent.linkAuth,
                         moveToWebFlow = moveToWebFlow
                     )
                 }

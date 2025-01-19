@@ -9,7 +9,6 @@ import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
-import com.stripe.android.model.ConsumerSessionSignup
 import com.stripe.android.model.PaymentMethodCreateParams
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
@@ -41,16 +40,6 @@ internal interface LinkAccountManager {
         email: String,
         phone: String,
         country: String,
-        name: String?,
-        consentAction: SignUpConsentAction
-    ): Result<LinkAccount>
-
-    suspend fun mobileSignUp(
-        email: String,
-        phoneNumber: String,
-        country: String,
-        verificationToken: String,
-        appId: String,
         name: String?,
         consentAction: SignUpConsentAction
     ): Result<LinkAccount>

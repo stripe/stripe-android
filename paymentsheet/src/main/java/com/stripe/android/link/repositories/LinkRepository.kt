@@ -13,6 +13,7 @@ import com.stripe.android.model.StripeIntent
 /**
  * Interface for a repository that interacts with Link services.
  */
+@SuppressWarnings("TooManyFunctions")
 internal interface LinkRepository {
 
     /**

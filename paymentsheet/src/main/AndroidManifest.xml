@@ -1,65 +1,70 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <application>
         <activity
             android:name=".PaymentSheetActivity"
-            android:theme="@style/StripePaymentSheetDefaultTheme"
-            android:exported="false" />
+            android:exported="false"
+            android:theme="@style/StripePaymentSheetDefaultTheme" />
         <activity
             android:name=".PaymentOptionsActivity"
-            android:theme="@style/StripePaymentSheetDefaultTheme"
-            android:exported="false" />
+            android:exported="false"
+            android:theme="@style/StripePaymentSheetDefaultTheme" />
         <activity
             android:name="com.stripe.android.customersheet.CustomerSheetActivity"
-            android:theme="@style/StripePaymentSheetDefaultTheme"
-            android:exported="false" />
+            android:exported="false"
+            android:theme="@style/StripePaymentSheetDefaultTheme" />
         <activity
             android:name=".addresselement.AddressElementActivity"
-            android:theme="@style/StripePaymentSheetDefaultTheme"
-            android:exported="false" />
+            android:exported="false"
+            android:theme="@style/StripePaymentSheetDefaultTheme" />
         <activity
             android:name=".paymentdatacollection.bacs.BacsMandateConfirmationActivity"
-            android:theme="@style/StripePaymentSheetDefaultTheme"
-            android:exported="false" />
+            android:exported="false"
+            android:theme="@style/StripePaymentSheetDefaultTheme" />
         <activity
             android:name=".paymentdatacollection.polling.PollingActivity"
-            android:theme="@style/StripePaymentSheetDefaultTheme"
-            android:exported="false" />
+            android:exported="false"
+            android:theme="@style/StripePaymentSheetDefaultTheme" />
         <activity
             android:name=".ui.SepaMandateActivity"
-            android:theme="@style/StripePaymentSheetDefaultTheme"
-            android:exported="false" />
+            android:exported="false"
+            android:theme="@style/StripePaymentSheetDefaultTheme" />
         <activity
             android:name=".ExternalPaymentMethodProxyActivity"
-            android:theme="@style/StripePayLauncherDefaultTheme"
-            android:exported="false" />
+            android:exported="false"
+            android:theme="@style/StripePayLauncherDefaultTheme" />
         <activity
             android:name=".paymentdatacollection.cvcrecollection.CvcRecollectionActivity"
             android:theme="@style/StripePaymentSheetDefaultTheme" />
-
         <activity
             android:name="com.stripe.android.link.LinkActivity"
-            android:theme="@style/StripeLinkBaseTheme"
+            android:autoRemoveFromRecents="true"
+            android:configChanges="orientation|keyboard|keyboardHidden|screenLayout|screenSize|smallestScreenSize"
             android:exported="false"
             android:label="@string/stripe_link"
-            android:windowSoftInputMode="adjustResize"
+            android:theme="@style/StripeLinkBaseTheme"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name="com.stripe.android.link.ui.verification.VerificationActivity"
             android:autoRemoveFromRecents="true"
-            android:configChanges="orientation|keyboard|keyboardHidden|screenLayout|screenSize|smallestScreenSize" />
-
+            android:configChanges="orientation|keyboard|keyboardHidden|screenLayout|screenSize|smallestScreenSize"
+            android:exported="false"
+            android:label="@string/stripe_link"
+            android:theme="@style/StripeLinkTranslucentTheme"
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name="com.stripe.android.link.LinkForegroundActivity"
             android:autoRemoveFromRecents="true"
             android:configChanges="orientation|keyboard|keyboardHidden|screenLayout|screenSize|smallestScreenSize"
             android:launchMode="singleTop"
             android:theme="@style/StripeTransparentTheme" />
-
         <activity
             android:name="com.stripe.android.link.LinkRedirectHandlerActivity"
-            android:theme="@style/StripeTransparentTheme"
             android:autoRemoveFromRecents="true"
+            android:exported="true"
             android:launchMode="singleInstance"
-            android:exported="true">
+            android:theme="@style/StripeTransparentTheme" >
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -67,10 +72,11 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                    android:scheme="link-popup"
                     android:host="complete"
-                    android:path="/${applicationId}" />
+                    android:path="/${applicationId}"
+                    android:scheme="link-popup" />
             </intent-filter>
         </activity>
     </application>
+
 </manifest>

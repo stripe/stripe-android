@@ -8,6 +8,7 @@ import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.analytics.LinkAnalyticsHelper
 import com.stripe.android.link.injection.LinkAnalyticsComponent
 import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentMethod
@@ -24,6 +25,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -60,12 +62,24 @@ internal class LinkHandler @Inject constructor(
         linkAnalyticsComponentBuilder.build().linkAnalyticsHelper
     }
 
-    fun setupLink(state: LinkState?) {
+    @OptIn(DelicateCoroutinesApi::class)
+    fun setupLink(state: LinkState?, launchEagerly: (LinkAccount) -> Unit = {}) {
         _isLinkEnabled.value = state != null
 
         if (state == null) return
 
         _linkConfiguration.value = state.configuration
+
+        if (state.configuration.useAttestationEndpointsForLink) {
+            GlobalScope.launch {
+                linkConfigurationCoordinator.getAccountFlow(state.configuration)
+                    .collectLatest { account ->
+                        if (account != null) {
+                            launchEagerly(account)
+                        }
+                    }
+            }
+        }
     }
 
     suspend fun payWithLinkInline(

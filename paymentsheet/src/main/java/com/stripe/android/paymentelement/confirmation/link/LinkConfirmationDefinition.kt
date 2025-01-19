@@ -50,7 +50,10 @@ internal class LinkConfirmationDefinition(
         confirmationOption: LinkConfirmationOption,
         confirmationParameters: ConfirmationDefinition.Parameters,
     ) {
-        launcher.present(confirmationOption.configuration)
+        launcher.present(
+            configuration = confirmationOption.configuration,
+            linkAccount = confirmationOption.linkAccount
+        )
     }
 
     override fun toResult(

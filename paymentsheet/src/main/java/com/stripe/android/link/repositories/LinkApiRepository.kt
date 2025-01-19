@@ -69,7 +69,7 @@ internal class LinkApiRepository @Inject constructor(
                 verificationToken = verificationToken,
                 appId = appId,
                 requestOptions = buildRequestOptions(),
-                sessionId = ""
+                sessionId = sessionId
             )
         }
     }

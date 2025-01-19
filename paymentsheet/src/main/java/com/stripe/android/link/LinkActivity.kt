@@ -90,6 +90,11 @@ internal class LinkActivity : ComponentActivity() {
                 }
             }
 
+//            EagerPath(
+//                linkAccount = vm.linkAccount,
+//                viewModel = vm
+//            )
+
             EventReporterProvider(
                 eventReporter = vm.eventReporter
             ) {
@@ -104,7 +109,7 @@ internal class LinkActivity : ComponentActivity() {
                     },
                     onBackPressed = onBackPressedDispatcher::onBackPressed,
                     moveToWebFlow = {
-                        launchWebFlow(vm.activityRetainedComponent.configuration)
+                        vm.moveToWeb()
                     }
                 )
             }
@@ -116,7 +121,7 @@ internal class LinkActivity : ComponentActivity() {
             LinkActivityContract.EXTRA_RESULT to result
         )
         this@LinkActivity.setResult(
-            RESULT_COMPLETE,
+            NativeConstants.RESULT_COMPLETE,
             intent.putExtras(bundle)
         )
         this@LinkActivity.finish()
@@ -146,19 +151,17 @@ internal class LinkActivity : ComponentActivity() {
     }
 
     companion object {
-        internal const val EXTRA_ARGS = "native_link_args"
-        internal const val RESULT_COMPLETE = 73563
 
         internal fun createIntent(
             context: Context,
             args: NativeLinkArgs
         ): Intent {
             return Intent(context, LinkActivity::class.java)
-                .putExtra(EXTRA_ARGS, args)
+                .putExtra(NativeConstants.EXTRA_ARGS, args)
         }
 
         internal fun getArgs(savedStateHandle: SavedStateHandle): NativeLinkArgs? {
-            return savedStateHandle.get<NativeLinkArgs>(EXTRA_ARGS)
+            return savedStateHandle.get<NativeLinkArgs>(NativeConstants.EXTRA_ARGS)
         }
     }
 }

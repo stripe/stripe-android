@@ -226,7 +226,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
             when (paymentSelection) {
                 is PaymentSelection.Saved,
                 is PaymentSelection.GooglePay,
-                is PaymentSelection.Link -> processExistingPaymentMethod(paymentSelection)
+                is PaymentSelection.Link,
+                is PaymentSelection.LinkExpress -> processExistingPaymentMethod(paymentSelection)
                 is PaymentSelection.New -> processNewOrExternalPaymentMethod(paymentSelection)
                 is PaymentSelection.ExternalPaymentMethod -> processNewOrExternalPaymentMethod(paymentSelection)
             }

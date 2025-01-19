@@ -1,4 +1,4 @@
-package com.stripe.android.paymentelement.confirmation.link
+package com.stripe.android.paymentelement.confirmation.linkexpress
 
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.model.LinkAccount
@@ -6,7 +6,7 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-internal data class LinkConfirmationOption(
+internal data class LinkExpressConfirmationOption(
     val configuration: LinkConfiguration,
-    val linkAccount: LinkAccount? = null
+    val linkAccount: LinkAccount
 ) : ConfirmationHandler.Option

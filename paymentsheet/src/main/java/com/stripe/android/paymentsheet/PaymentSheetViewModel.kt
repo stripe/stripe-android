@@ -20,6 +20,7 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
+import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntent
@@ -306,7 +307,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
         setPaymentMethodMetadata(state.paymentMethodMetadata)
 
-        linkHandler.setupLink(state.paymentMethodMetadata.linkState)
+        linkHandler.setupLink(state.paymentMethodMetadata.linkState) { account ->
+            checkoutWithLinkExpress(account)
+        }
 
         val pendingFailedPaymentResult = confirmationHandler.awaitResult()
             as? ConfirmationHandler.Result.Failed
@@ -374,6 +377,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     fun checkoutWithLink() {
         checkout(PaymentSelection.Link, CheckoutIdentifier.SheetTopWallet)
+    }
+
+    fun checkoutWithLinkExpress(account: LinkAccount) {
+        checkout(PaymentSelection.LinkExpress(account), CheckoutIdentifier.SheetTopWallet)
     }
 
     private fun checkout(
