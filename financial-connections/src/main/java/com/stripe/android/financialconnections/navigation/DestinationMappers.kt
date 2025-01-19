@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.navigation
 
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavDestination
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 
@@ -35,5 +36,11 @@ internal val Pane.destination: Destination
 internal val NavDestination.pane: Pane
     get() = paneToDestination.entries
         .firstOrNull { (_, destination) -> destination.fullRoute == route }
+        ?.key
+        ?: throw IllegalArgumentException("No corresponding destination for $this")
+
+internal val NavBackStackEntry.pane: Pane
+    get() = paneToDestination.entries
+        .firstOrNull { (_, destination) -> destination.fullRoute == this.destination.route }
         ?.key
         ?: throw IllegalArgumentException("No corresponding destination for $this")
