@@ -97,6 +97,7 @@ class DefaultErrorReporterTest {
                     get() = fail("Exception while creating tags.")
             },
             workContext = testDispatcher,
+            sentryConfig = FakeSentryConfig(),
             logger = logger
         )
 
@@ -110,9 +111,6 @@ class DefaultErrorReporterTest {
     private class FakeSentryConfig : SentryConfig {
         override val projectId: String = "123"
         override val key: String = "abc"
-        override val secret: String = "def"
         override val version: String = "7"
-
-        override fun getTimestamp(): String = "1600103536.978037"
     }
 }
