@@ -193,7 +193,7 @@ private fun AnimatedDotsWithFixedGradient(
         modifier = modifier
             .width(DotsContainerWidth)
             .height(DotsContainerHeight)
-            .background(Color.White)
+            .background(colors.backgroundSurface)
     ) {
         Canvas(modifier = Modifier.matchParentSize()) {
             val dotRadius = 3.dp.toPx()

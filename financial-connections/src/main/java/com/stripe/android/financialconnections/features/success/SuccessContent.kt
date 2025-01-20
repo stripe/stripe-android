@@ -64,7 +64,7 @@ import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
-import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import com.stripe.android.uicore.text.MiddleEllipsisText
 import kotlinx.coroutines.delay
@@ -273,7 +273,7 @@ private fun SpinnerToCheckmark(
             contentAlignment = Alignment.Center,
             modifier = modifier
                 .size(ICON_SIZE.dp)
-                .background(FinancialConnectionsTheme.colors.buttonPrimary, CircleShape)
+                .background(colors.buttonPrimary, CircleShape)
         ) {
             Icon(
                 modifier = Modifier.graphicsLayer {
@@ -282,7 +282,7 @@ private fun SpinnerToCheckmark(
                 },
                 imageVector = Icons.Default.Check,
                 contentDescription = stringResource(id = R.string.stripe_success_pane_title),
-                tint = FinancialConnectionsTheme.colors.contentOnBrand,
+                tint = colors.contentOnBrand,
             )
         }
     }
@@ -303,7 +303,8 @@ private fun SuccessBody(
             AnnotatedText(
                 text = it,
                 defaultStyle = typography.headingXLarge.copy(
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
+                    color = colors.textDefault,
                 ),
                 onClickableTextClick = {}
             )
@@ -313,7 +314,8 @@ private fun SuccessBody(
             AnnotatedText(
                 text = content,
                 defaultStyle = typography.bodyMedium.copy(
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
+                    color = colors.textDefault,
                 ),
                 annotationStyles = mapOf(
                     StringAnnotation.BOLD to typography.bodyMediumEmphasized.copy(
