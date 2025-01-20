@@ -75,7 +75,7 @@ internal class LinkHandler @Inject constructor(
         coroutineScope: CoroutineScope,
         state: LinkState?,
         launchEagerly: Boolean = false,
-        launchLink: (LinkAccount) -> Unit = {},
+        launchLink: suspend (LinkAccount) -> Unit = {},
     ) {
         setupLink(state)
 

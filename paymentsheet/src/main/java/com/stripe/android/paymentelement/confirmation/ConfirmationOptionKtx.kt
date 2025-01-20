@@ -85,6 +85,15 @@ internal fun PaymentSelection.toConfirmationOption(
     }
 }
 
+internal fun LinkAccount.toConfirmationOption(
+    linkConfiguration: LinkConfiguration
+): ConfirmationHandler.Option? {
+    return toLinkConfirmationOption(
+        linkConfiguration = linkConfiguration,
+        linkAccount = this
+    )
+}
+
 private fun toLinkConfirmationOption(
     linkConfiguration: LinkConfiguration?,
     linkAccount: LinkAccount
