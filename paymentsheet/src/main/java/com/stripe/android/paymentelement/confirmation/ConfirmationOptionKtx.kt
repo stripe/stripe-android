@@ -2,6 +2,8 @@ package com.stripe.android.paymentelement.confirmation
 
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.confirmation.bacs.BacsConfirmationOption
@@ -75,12 +77,33 @@ internal fun PaymentSelection.toConfirmationOption(
             )
         }
         is PaymentSelection.LinkExpress -> {
-            linkConfiguration?.let {
-                LinkExpressConfirmationOption(
-                    configuration = linkConfiguration,
-                    linkAccount = linkAccount
-                )
-            }
+            toLinkConfirmationOption(
+                linkConfiguration = linkConfiguration,
+                linkAccount = linkAccount
+            )
         }
+    }
+}
+
+private fun toLinkConfirmationOption(
+    linkConfiguration: LinkConfiguration?,
+    linkAccount: LinkAccount
+): ConfirmationHandler.Option? {
+    if (linkConfiguration == null) return null
+    return when (linkAccount.accountStatus) {
+        AccountStatus.Verified -> {
+            LinkConfirmationOption(
+                configuration = linkConfiguration,
+                linkAccount = linkAccount
+            )
+        }
+        AccountStatus.NeedsVerification,
+        AccountStatus.VerificationStarted -> {
+            LinkExpressConfirmationOption(
+                configuration = linkConfiguration,
+                linkAccount = linkAccount
+            )
+        }
+        else -> null
     }
 }

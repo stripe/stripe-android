@@ -5,6 +5,7 @@ import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.utils.FeatureFlags
+import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.serialization.PopupPayload
 import com.stripe.android.networking.StripeRepository
 import javax.inject.Inject
@@ -44,13 +45,15 @@ internal class LinkActivityContract @Inject internal constructor(
             args = NativeLinkArgs(
                 configuration = input.configuration,
                 stripeAccountId = paymentConfiguration.stripeAccountId,
-                publishableKey = paymentConfiguration.publishableKey
+                publishableKey = paymentConfiguration.publishableKey,
+                linkAccount = input.linkAccount
             )
         )
     }
 
     data class Args internal constructor(
-        internal val configuration: LinkConfiguration
+        internal val configuration: LinkConfiguration,
+        internal val linkAccount: LinkAccount?
     )
 
     data class Result(
