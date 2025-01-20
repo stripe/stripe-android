@@ -269,6 +269,7 @@ internal class LinkConfirmationDefinitionTest {
 
         private val LINK_CONFIRMATION_OPTION = LinkConfirmationOption(
             configuration = TestFactory.LINK_CONFIGURATION,
+            linkAccount = TestFactory.LINK_ACCOUNT
         )
     }
 }

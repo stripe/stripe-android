@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.confirmation
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.TestFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.model.Address
@@ -17,6 +18,7 @@ import com.stripe.android.paymentelement.confirmation.bacs.BacsConfirmationOptio
 import com.stripe.android.paymentelement.confirmation.epms.ExternalPaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
+import com.stripe.android.paymentelement.confirmation.linkexpress.LinkExpressConfirmationOption
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.R
@@ -258,6 +260,32 @@ class ConfirmationHandlerOptionKtxTest {
         ).isEqualTo(
             LinkConfirmationOption(
                 configuration = LINK_CONFIGURATION,
+                linkAccount = null
+            )
+        )
+    }
+
+    @Test
+    fun `On LinkExpress selection but with no configuration, should return null`() {
+        assertThat(
+            PaymentSelection.LinkExpress(TestFactory.LINK_ACCOUNT).toConfirmationOption(
+                configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
+                linkConfiguration = null,
+            )
+        ).isNull()
+    }
+
+    @Test
+    fun `On LinkExpress selection with configuration, should return Link confirmation option`() {
+        assertThat(
+            PaymentSelection.LinkExpress(TestFactory.LINK_ACCOUNT).toConfirmationOption(
+                configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
+                linkConfiguration = LINK_CONFIGURATION,
+            )
+        ).isEqualTo(
+            LinkExpressConfirmationOption(
+                configuration = LINK_CONFIGURATION,
+                linkAccount = TestFactory.LINK_ACCOUNT
             )
         )
     }

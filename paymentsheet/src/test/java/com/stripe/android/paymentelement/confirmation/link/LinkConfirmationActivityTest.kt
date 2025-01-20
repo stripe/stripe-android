@@ -213,6 +213,7 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
 
         val LINK_CONFIRMATION_OPTION = LinkConfirmationOption(
             configuration = TestFactory.LINK_CONFIGURATION,
+            linkAccount = TestFactory.LINK_ACCOUNT
         )
 
         val CONFIRMATION_PARAMETERS = ConfirmationDefinition.Parameters(

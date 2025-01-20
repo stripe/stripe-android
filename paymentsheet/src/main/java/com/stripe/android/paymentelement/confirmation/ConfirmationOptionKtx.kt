@@ -8,6 +8,7 @@ import com.stripe.android.paymentelement.confirmation.bacs.BacsConfirmationOptio
 import com.stripe.android.paymentelement.confirmation.epms.ExternalPaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
+import com.stripe.android.paymentelement.confirmation.linkexpress.LinkExpressConfirmationOption
 import com.stripe.android.paymentsheet.model.PaymentSelection
 
 internal fun PaymentSelection.toConfirmationOption(
@@ -75,7 +76,7 @@ internal fun PaymentSelection.toConfirmationOption(
         }
         is PaymentSelection.LinkExpress -> {
             linkConfiguration?.let {
-                LinkConfirmationOption(
+                LinkExpressConfirmationOption(
                     configuration = linkConfiguration,
                     linkAccount = linkAccount
                 )
