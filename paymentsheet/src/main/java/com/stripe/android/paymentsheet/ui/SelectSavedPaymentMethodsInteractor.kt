@@ -170,10 +170,19 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
         paymentOptionsItems: List<PaymentOptionsItem>,
     ): PaymentOptionsItem? {
         val paymentSelection = when (selection) {
-            is PaymentSelection.Saved, PaymentSelection.Link, PaymentSelection.GooglePay -> selection
+            is PaymentSelection.Saved,
+            PaymentSelection.Link,
+            is PaymentSelection.LinkExpress,
+            PaymentSelection.GooglePay -> {
+                selection
+            }
 
-            is PaymentSelection.New, is PaymentSelection.ExternalPaymentMethod, null -> savedSelection?.let {
-                PaymentSelection.Saved(it)
+            is PaymentSelection.New,
+            is PaymentSelection.ExternalPaymentMethod,
+            null -> {
+                savedSelection?.let {
+                    PaymentSelection.Saved(it)
+                }
             }
         }
 

@@ -9,7 +9,7 @@ import kotlinx.parcelize.Parcelize
  * Immutable object representing a Link account.
  */
 @Parcelize
-internal class LinkAccount(private val consumerSession: ConsumerSession): Parcelable {
+internal class LinkAccount(private val consumerSession: ConsumerSession) : Parcelable {
 
     @IgnoredOnParcel
     val redactedPhoneNumber = consumerSession.redactedPhoneNumber

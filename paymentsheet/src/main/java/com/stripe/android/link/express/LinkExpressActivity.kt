@@ -7,7 +7,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.VisibleForTesting
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.ui.window.Dialog
 import androidx.core.os.bundleOf
 import androidx.lifecycle.SavedStateHandle
@@ -20,13 +19,12 @@ import com.stripe.android.link.ui.verification.VerificationScreen
 import com.stripe.android.link.ui.verification.VerificationViewModel
 import com.stripe.android.paymentsheet.BuildConfig
 
-class LinkExpressActivity: ComponentActivity() {
+class LinkExpressActivity : ComponentActivity() {
     internal var viewModel: VerificationViewModel? = null
 
     @VisibleForTesting
     internal lateinit var navController: NavHostController
 
-    @OptIn(ExperimentalMaterialApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -53,7 +51,9 @@ class LinkExpressActivity: ComponentActivity() {
 
         setContent {
             Dialog(
-                onDismissRequest = {}
+                onDismissRequest = {
+                    dismissWithResult(LinkExpressResult.Canceled)
+                }
             ) {
                 DefaultLinkTheme {
                     VerificationScreen(vm)
