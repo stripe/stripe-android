@@ -79,7 +79,7 @@ private fun List<PaymentOptionsItem>.findSelectedItem(paymentSelection: PaymentS
     return firstOrNull { item ->
         when (paymentSelection) {
             is PaymentSelection.GooglePay -> item is PaymentOptionsItem.GooglePay
-            is PaymentSelection.Link -> item is PaymentOptionsItem.Link
+            is PaymentSelection.Link, is PaymentSelection.LinkExpress -> item is PaymentOptionsItem.Link
             is PaymentSelection.Saved -> {
                 when (item) {
                     is PaymentOptionsItem.SavedPaymentMethod -> {

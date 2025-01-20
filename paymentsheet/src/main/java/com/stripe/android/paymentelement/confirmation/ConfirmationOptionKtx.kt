@@ -68,7 +68,18 @@ internal fun PaymentSelection.toConfirmationOption(
             )
         }
         is PaymentSelection.Link -> linkConfiguration?.let {
-            LinkConfirmationOption(configuration = linkConfiguration)
+            LinkConfirmationOption(
+                configuration = linkConfiguration,
+                linkAccount = null
+            )
+        }
+        is PaymentSelection.LinkExpress -> {
+            linkConfiguration?.let {
+                LinkConfirmationOption(
+                    configuration = linkConfiguration,
+                    linkAccount = linkAccount
+                )
+            }
         }
     }
 }

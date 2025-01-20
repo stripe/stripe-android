@@ -15,6 +15,8 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.NoArgsException
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.LinkEventsReporter
+import com.stripe.android.link.express.LinkExpressActivity.Companion.getArgs
+import com.stripe.android.link.express.LinkExpressArgs
 import com.stripe.android.link.injection.DaggerNativeLinkComponent
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.AccountStatus
@@ -34,7 +36,7 @@ import javax.inject.Inject
  * ViewModel that handles user verification confirmation logic.
  */
 internal class VerificationViewModel @Inject constructor(
-    private val linkAccount: LinkAccount,
+    private val linkAccount: LinkAccount?,
     private val linkAccountManager: LinkAccountManager,
     private val linkEventsReporter: LinkEventsReporter,
     private val logger: Logger,
@@ -45,8 +47,8 @@ internal class VerificationViewModel @Inject constructor(
 
     private val _viewState = MutableStateFlow(
         value = VerificationViewState(
-            redactedPhoneNumber = linkAccount.redactedPhoneNumber,
-            email = linkAccount.email,
+            redactedPhoneNumber = linkAccount?.redactedPhoneNumber.orEmpty(),
+            email = linkAccount?.email.orEmpty(),
             isProcessing = false,
             requestFocus = true,
             errorMessage = null,
@@ -66,6 +68,9 @@ internal class VerificationViewModel @Inject constructor(
     }
 
     private fun setUp() {
+        if (linkAccount == null) {
+            return onDismissClicked()
+        }
         if (linkAccount.accountStatus != AccountStatus.VerificationStarted) {
             startVerification()
         }
@@ -231,10 +236,9 @@ internal class VerificationViewModel @Inject constructor(
                         linkEventsReporter = component.linkEventsReporter,
                         linkAccountManager = component.linkAccountManager,
                         logger = component.logger,
-                        goBack = goBack,
-                        navigateAndClearStack = {},
-                        onError = onError,
-                        onVerified = onVerified
+                        onVerificationSucceeded = onVerificationSucceeded,
+                        onChangeEmailClicked = onChangeEmailClicked,
+                        onDismissClicked = onDismissClicked
                     )
                 }
             }
