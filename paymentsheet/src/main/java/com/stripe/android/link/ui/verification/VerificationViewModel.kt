@@ -1,16 +1,23 @@
 package com.stripe.android.link.ui.verification
 
+import android.app.Application
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
+import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.link.LinkScreen
+import com.stripe.android.link.NoArgsException
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.LinkEventsReporter
+import com.stripe.android.link.express.LinkExpressActivity.Companion.getArgs
+import com.stripe.android.link.express.LinkExpressArgs
+import com.stripe.android.link.injection.DaggerNativeLinkComponent
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
@@ -29,18 +36,19 @@ import javax.inject.Inject
  * ViewModel that handles user verification confirmation logic.
  */
 internal class VerificationViewModel @Inject constructor(
-    private val linkAccount: LinkAccount,
+    private val linkAccount: LinkAccount?,
     private val linkAccountManager: LinkAccountManager,
     private val linkEventsReporter: LinkEventsReporter,
     private val logger: Logger,
-    private val goBack: () -> Unit,
-    private val navigateAndClearStack: (route: LinkScreen) -> Unit,
+    private val onVerificationSucceeded: (LinkAccount) -> Unit,
+    private val onChangeEmailClicked: () -> Unit,
+    private val onDismissClicked: () -> Unit,
 ) : ViewModel() {
 
     private val _viewState = MutableStateFlow(
         value = VerificationViewState(
-            redactedPhoneNumber = linkAccount.redactedPhoneNumber,
-            email = linkAccount.email,
+            redactedPhoneNumber = linkAccount?.redactedPhoneNumber.orEmpty(),
+            email = linkAccount?.email.orEmpty(),
             isProcessing = false,
             requestFocus = true,
             errorMessage = null,
@@ -60,6 +68,9 @@ internal class VerificationViewModel @Inject constructor(
     }
 
     private fun setUp() {
+        if (linkAccount == null) {
+            return onDismissClicked()
+        }
         if (linkAccount.accountStatus != AccountStatus.VerificationStarted) {
             startVerification()
         }
@@ -80,11 +91,11 @@ internal class VerificationViewModel @Inject constructor(
         }
 
         linkAccountManager.confirmVerification(code).fold(
-            onSuccess = {
+            onSuccess = { linkAccount ->
                 updateViewState {
                     it.copy(isProcessing = false)
                 }
-                navigateAndClearStack(LinkScreen.Wallet)
+                onVerificationSucceeded(linkAccount)
             },
             onFailure = {
                 otpElement.controller.reset()
@@ -125,16 +136,16 @@ internal class VerificationViewModel @Inject constructor(
 
     fun onBack() {
         clearError()
-        goBack()
+        onDismissClicked()
         linkEventsReporter.on2FACancel()
         viewModelScope.launch {
             linkAccountManager.logOut()
         }
     }
 
-    fun onChangeEmailClicked() {
+    fun onChangeEmailButtonClicked() {
         clearError()
-        navigateAndClearStack(LinkScreen.SignUp)
+        onChangeEmailClicked()
         viewModelScope.launch {
             linkAccountManager.logOut()
         }
@@ -179,8 +190,9 @@ internal class VerificationViewModel @Inject constructor(
         fun factory(
             parentComponent: NativeLinkComponent,
             linkAccount: LinkAccount,
-            goBack: () -> Unit,
-            navigateAndClearStack: (route: LinkScreen) -> Unit,
+            onVerificationSucceeded: (LinkAccount) -> Unit,
+            onChangeEmailClicked: () -> Unit,
+            onDismissClicked: () -> Unit,
         ): ViewModelProvider.Factory {
             return viewModelFactory {
                 initializer {
@@ -189,8 +201,44 @@ internal class VerificationViewModel @Inject constructor(
                         linkAccountManager = parentComponent.linkAccountManager,
                         linkEventsReporter = parentComponent.linkEventsReporter,
                         logger = parentComponent.logger,
-                        goBack = goBack,
-                        navigateAndClearStack = navigateAndClearStack,
+                        onVerificationSucceeded = onVerificationSucceeded,
+                        onChangeEmailClicked = onChangeEmailClicked,
+                        onDismissClicked = onDismissClicked,
+                    )
+                }
+            }
+        }
+
+        fun factory(
+            savedStateHandle: SavedStateHandle? = null,
+            onVerificationSucceeded: (LinkAccount) -> Unit,
+            onChangeEmailClicked: () -> Unit,
+            onDismissClicked: () -> Unit,
+        ): ViewModelProvider.Factory {
+            return viewModelFactory {
+                initializer {
+                    val handle: SavedStateHandle = savedStateHandle ?: createSavedStateHandle()
+                    val app = this[APPLICATION_KEY] as Application
+                    val args: LinkExpressArgs = getArgs(handle) ?: throw NoArgsException()
+
+                    val component = DaggerNativeLinkComponent
+                        .builder()
+                        .configuration(args.configuration)
+                        .linkAccount(args.linkAccount)
+                        .publishableKeyProvider { args.publishableKey }
+                        .stripeAccountIdProvider { args.stripeAccountId }
+                        .savedStateHandle(handle)
+                        .context(app)
+                        .build()
+
+                    VerificationViewModel(
+                        linkAccount = args.linkAccount,
+                        linkEventsReporter = component.linkEventsReporter,
+                        linkAccountManager = component.linkAccountManager,
+                        logger = component.logger,
+                        onVerificationSucceeded = onVerificationSucceeded,
+                        onChangeEmailClicked = onChangeEmailClicked,
+                        onDismissClicked = onDismissClicked
                     )
                 }
             }

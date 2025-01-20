@@ -207,6 +207,10 @@ internal class DefaultLinkAccountManager @Inject constructor(
         return newAccount
     }
 
+    internal fun setAccount(linkAccount: LinkAccount?) {
+        _linkAccount.value = linkAccount
+    }
+
     override fun setLinkAccountFromLookupResult(
         lookup: ConsumerSessionLookup,
         startSession: Boolean,

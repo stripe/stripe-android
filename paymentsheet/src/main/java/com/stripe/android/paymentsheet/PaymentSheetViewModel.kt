@@ -17,9 +17,11 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
+import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntent
@@ -306,7 +308,18 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
         setPaymentMethodMetadata(state.paymentMethodMetadata)
 
-        linkHandler.setupLink(state.paymentMethodMetadata.linkState)
+        linkHandler.setupLinkLaunchEagerly(
+            coroutineScope = viewModelScope,
+            state = state.paymentMethodMetadata.linkState,
+            launchEagerly = FeatureFlags.nativeLinkEnabled.isEnabled,
+            launchLink = { linkAccount ->
+                val configuration = state.paymentMethodMetadata.linkState?.configuration ?: return@setupLinkLaunchEagerly
+                val confirmationOption = linkAccount.toConfirmationOption(configuration)
+                confirmationOption?.let {
+                    confirmWithConfirmationOption(it)
+                }
+            }
+        )
 
         val pendingFailedPaymentResult = confirmationHandler.awaitResult()
             as? ConfirmationHandler.Result.Failed
@@ -374,6 +387,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     fun checkoutWithLink() {
         checkout(PaymentSelection.Link, CheckoutIdentifier.SheetTopWallet)
+    }
+
+    private fun checkoutWithLinkExpress(linkAccount: LinkAccount) {
+        checkout(PaymentSelection.LinkExpress(linkAccount), CheckoutIdentifier.SheetTopWallet)
     }
 
     private fun checkout(
@@ -478,40 +495,44 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     linkConfiguration = linkHandler.linkConfiguration.value,
                 )
 
-            confirmationOption?.let { option ->
-                val stripeIntent = awaitStripeIntent()
-
-                confirmationHandler.start(
-                    arguments = ConfirmationHandler.Args(
-                        intent = stripeIntent,
-                        confirmationOption = option,
-                        initializationMode = args.initializationMode,
-                        appearance = config.appearance,
-                        shippingDetails = config.shippingDetails,
-                    ),
-                )
-            } ?: run {
-                val message = paymentSelection?.let {
-                    "Cannot confirm using a ${it::class.qualifiedName} payment selection!"
-                } ?: "Cannot confirm without a payment selection!"
-
-                val exception = IllegalStateException(message)
-
-                val event = paymentSelection?.let {
-                    ErrorReporter.UnexpectedErrorEvent.PAYMENT_SHEET_INVALID_PAYMENT_SELECTION_ON_CHECKOUT
-                } ?: ErrorReporter.UnexpectedErrorEvent.PAYMENT_SHEET_NO_PAYMENT_SELECTION_ON_CHECKOUT
-
-                errorReporter.report(event, StripeException.create(exception))
-
-                processIntentResult(
-                    ConfirmationHandler.Result.Failed(
-                        cause = exception,
-                        message = exception.stripeErrorMessage(),
-                        type = ConfirmationHandler.Result.Failed.ErrorType.Internal,
-                    )
-                )
+            if (confirmationOption != null) {
+                return@launch confirmWithConfirmationOption(confirmationOption)
             }
+
+            val message = paymentSelection?.let {
+                "Cannot confirm using a ${it::class.qualifiedName} payment selection!"
+            } ?: "Cannot confirm without a payment selection!"
+
+            val exception = IllegalStateException(message)
+
+            val event = paymentSelection?.let {
+                ErrorReporter.UnexpectedErrorEvent.PAYMENT_SHEET_INVALID_PAYMENT_SELECTION_ON_CHECKOUT
+            } ?: ErrorReporter.UnexpectedErrorEvent.PAYMENT_SHEET_NO_PAYMENT_SELECTION_ON_CHECKOUT
+
+            errorReporter.report(event, StripeException.create(exception))
+
+            processIntentResult(
+                ConfirmationHandler.Result.Failed(
+                    cause = exception,
+                    message = exception.stripeErrorMessage(),
+                    type = ConfirmationHandler.Result.Failed.ErrorType.Internal,
+                )
+            )
         }
+    }
+
+    private suspend fun confirmWithConfirmationOption(confirmationOption: ConfirmationHandler.Option) {
+        val stripeIntent = awaitStripeIntent()
+
+        confirmationHandler.start(
+            arguments = ConfirmationHandler.Args(
+                intent = stripeIntent,
+                confirmationOption = confirmationOption,
+                initializationMode = args.initializationMode,
+                appearance = config.appearance,
+                shippingDetails = config.shippingDetails,
+            ),
+        )
     }
 
     override fun onPaymentResult(paymentResult: PaymentResult) {

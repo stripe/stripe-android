@@ -24,7 +24,8 @@ internal class FakePrefsRepository(
         paymentSelectionArgs.add(paymentSelection)
 
         when (paymentSelection) {
-            is PaymentSelection.Link -> {
+            is PaymentSelection.Link,
+            is PaymentSelection.LinkExpress -> {
                 SavedSelection.Link
             }
             PaymentSelection.GooglePay -> {

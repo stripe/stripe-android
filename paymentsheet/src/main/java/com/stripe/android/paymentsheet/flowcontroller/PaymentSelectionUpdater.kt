@@ -5,6 +5,7 @@ import com.stripe.android.common.model.containsVolatileDifferences
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import javax.inject.Inject
 
@@ -58,6 +59,9 @@ internal class DefaultPaymentSelectionUpdater @Inject constructor() : PaymentSel
             }
             is PaymentSelection.Link -> {
                 state.paymentMethodMetadata.linkState != null
+            }
+            is PaymentSelection.LinkExpress -> {
+                state.paymentMethodMetadata.linkState?.loginState == LinkState.LoginState.LoggedIn
             }
             is PaymentSelection.ExternalPaymentMethod -> {
                 state.paymentMethodMetadata.isExternalPaymentMethod(selection.type)

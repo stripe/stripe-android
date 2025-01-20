@@ -2,12 +2,15 @@ package com.stripe.android.paymentelement.confirmation
 
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.confirmation.bacs.BacsConfirmationOption
 import com.stripe.android.paymentelement.confirmation.epms.ExternalPaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
+import com.stripe.android.paymentelement.confirmation.linkexpress.LinkExpressConfirmationOption
 import com.stripe.android.paymentsheet.model.PaymentSelection
 
 internal fun PaymentSelection.toConfirmationOption(
@@ -68,7 +71,48 @@ internal fun PaymentSelection.toConfirmationOption(
             )
         }
         is PaymentSelection.Link -> linkConfiguration?.let {
-            LinkConfirmationOption(configuration = linkConfiguration)
+            LinkConfirmationOption(
+                configuration = linkConfiguration,
+                linkAccount = null
+            )
         }
+        is PaymentSelection.LinkExpress -> {
+            toLinkConfirmationOption(
+                linkConfiguration = linkConfiguration,
+                linkAccount = linkAccount
+            )
+        }
+    }
+}
+
+internal fun LinkAccount.toConfirmationOption(
+    linkConfiguration: LinkConfiguration
+): ConfirmationHandler.Option? {
+    return toLinkConfirmationOption(
+        linkConfiguration = linkConfiguration,
+        linkAccount = this
+    )
+}
+
+private fun toLinkConfirmationOption(
+    linkConfiguration: LinkConfiguration?,
+    linkAccount: LinkAccount
+): ConfirmationHandler.Option? {
+    if (linkConfiguration == null) return null
+    return when (linkAccount.accountStatus) {
+        AccountStatus.Verified -> {
+            LinkConfirmationOption(
+                configuration = linkConfiguration,
+                linkAccount = linkAccount
+            )
+        }
+        AccountStatus.NeedsVerification,
+        AccountStatus.VerificationStarted -> {
+            LinkExpressConfirmationOption(
+                configuration = linkConfiguration,
+                linkAccount = linkAccount
+            )
+        }
+        else -> null
     }
 }

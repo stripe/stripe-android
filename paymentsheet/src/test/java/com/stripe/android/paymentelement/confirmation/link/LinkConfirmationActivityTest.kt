@@ -17,6 +17,7 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.TestFactory
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentElementConfirmationTestActivity
@@ -227,6 +228,7 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
                 flags = mapOf(),
                 cardBrandChoice = null,
             ),
+            linkAccount = TestFactory.LINK_ACCOUNT
         )
 
         val CONFIRMATION_PARAMETERS = ConfirmationDefinition.Parameters(
