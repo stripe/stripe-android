@@ -6,6 +6,7 @@ import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkPaymentLauncher
+import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -283,6 +284,7 @@ internal class LinkConfirmationDefinitionTest {
                 flags = mapOf(),
                 cardBrandChoice = null,
             ),
+            linkAccount = TestFactory.LINK_ACCOUNT
         )
     }
 }
