@@ -6,10 +6,14 @@ import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Text
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import com.stripe.android.uicore.utils.fadeOut
+import java.util.UUID
 
 internal class FormActivity : AppCompatActivity() {
     private val args: FormContract.Args? by lazy {
@@ -26,6 +30,23 @@ internal class FormActivity : AppCompatActivity() {
         }
 
         setContent {
+
+//            val component = remember() {  }
+//
+//            val uuid = rememberSaveable(
+//                args?.selectedPaymentMethodCode, args?.paymentMethodMetadata
+//            ) {
+//                UUID.randomUUID().toString()
+//            }
+//
+//            val viewModel: FormActivityViewModel = viewModel(
+//                key = uuid,
+//                factory = FormActivityViewModel.Factory(
+//                    args.paymentMethodMetadata!!,
+//                    args.selectedPaymentMethodCode!!,
+//
+//                )
+//            )
             StripeTheme {
                 val bottomSheetState = rememberStripeBottomSheetState()
                 ElementsBottomSheetLayout(
