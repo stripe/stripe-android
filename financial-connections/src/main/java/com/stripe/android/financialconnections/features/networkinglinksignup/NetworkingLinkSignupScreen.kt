@@ -288,7 +288,9 @@ private fun PhoneNumberSection(
 private fun Title(title: String) {
     AnnotatedText(
         text = TextResource.Text(fromHtml(title)),
-        defaultStyle = typography.headingXLarge,
+        defaultStyle = typography.headingXLarge.copy(
+            color = colors.textDefault,
+        ),
         onClickableTextClick = {},
     )
 }
