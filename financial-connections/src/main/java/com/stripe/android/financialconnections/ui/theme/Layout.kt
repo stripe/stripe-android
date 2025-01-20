@@ -36,6 +36,7 @@ import com.stripe.android.financialconnections.ui.components.DragHandle
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 
 /**
@@ -211,10 +212,10 @@ private fun BoxScope.FooterTopShadow() {
                 brush = Brush.verticalGradient(
                     colors = listOf(
                         Color.Transparent,
-                        Color.LightGray.copy(alpha = 0.2f)
+                        colors.backgroundSurface,
                     ),
-                    0.0f,
-                    shadowSize.toFloat()
+                    startY = 0f,
+                    endY = shadowSize.toFloat(),
                 )
             )
     )

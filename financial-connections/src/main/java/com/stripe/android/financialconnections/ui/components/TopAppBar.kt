@@ -122,7 +122,7 @@ private fun FinancialConnectionsTopAppBar(
                 onCloseClick = onCloseClick
             )
         },
-        backgroundColor = FinancialConnectionsTheme.colors.textWhite,
+        backgroundColor = FinancialConnectionsTheme.colors.backgroundSurface,
         contentColor = FinancialConnectionsTheme.colors.textBrand,
         modifier = modifier.graphicsLayer {
             shadowElevation = elevation.value.toPx()
