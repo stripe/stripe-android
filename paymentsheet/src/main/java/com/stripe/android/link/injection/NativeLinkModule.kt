@@ -20,12 +20,14 @@ import com.stripe.android.core.utils.ContextUtils.packageInfo
 import com.stripe.android.core.utils.DefaultDurationProvider
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.version.StripeSdkVersion
+import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.account.DefaultLinkAccountManager
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.DefaultLinkEventsReporter
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.confirmation.DefaultLinkConfirmationHandler
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
+import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.repositories.LinkApiRepository
 import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.networking.StripeApiRepository
@@ -54,10 +56,6 @@ internal interface NativeLinkModule {
     @Binds
     @NativeLinkScope
     fun bindLinkEventsReporter(linkEventsReporter: DefaultLinkEventsReporter): LinkEventsReporter
-
-    @Binds
-    @NativeLinkScope
-    fun bindLinkAccountManager(linkAccountManager: DefaultLinkAccountManager): LinkAccountManager
 
     @Binds
     @NativeLinkScope
@@ -164,5 +162,24 @@ internal interface NativeLinkModule {
         @Provides
         @NativeLinkScope
         fun provideEventReporterMode(): EventReporter.Mode = EventReporter.Mode.Custom
+
+        @Provides
+        @NativeLinkScope
+        fun provideLinkAccountManager(
+            configuration: LinkConfiguration,
+            linkRepository: LinkRepository,
+            linkEventsReporter: LinkEventsReporter,
+            errorReporter: ErrorReporter,
+            linkAccount: LinkAccount?
+        ): LinkAccountManager {
+            return DefaultLinkAccountManager(
+                config = configuration,
+                linkRepository = linkRepository,
+                linkEventsReporter = linkEventsReporter,
+                errorReporter = errorReporter
+            ).apply {
+                setAccount(linkAccount)
+            }
+        }
     }
 }

@@ -20,7 +20,8 @@ internal class NativeLinkActivityContract @Inject constructor() :
             args = NativeLinkArgs(
                 configuration = input.configuration,
                 stripeAccountId = paymentConfiguration.stripeAccountId,
-                publishableKey = paymentConfiguration.publishableKey
+                publishableKey = paymentConfiguration.publishableKey,
+                linkAccount = input.linkAccount
             )
         )
     }

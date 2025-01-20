@@ -127,6 +127,7 @@ internal class LinkActivityViewModel @Inject constructor(
                     .stripeAccountIdProvider { args.stripeAccountId }
                     .savedStateHandle(handle)
                     .context(app)
+                    .linkAccount(args.linkAccount)
                     .build()
                     .viewModel
             }

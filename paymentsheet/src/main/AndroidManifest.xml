@@ -54,6 +54,15 @@
             android:configChanges="orientation|keyboard|keyboardHidden|screenLayout|screenSize|smallestScreenSize" />
 
         <activity
+            android:name="com.stripe.android.link.express.LinkExpressActivity"
+            android:theme="@style/StripeLinkTranslucentTheme"
+            android:exported="false"
+            android:label="@string/stripe_link"
+            android:windowSoftInputMode="adjustResize"
+            android:autoRemoveFromRecents="true"
+            android:configChanges="orientation|keyboard|keyboardHidden|screenLayout|screenSize|smallestScreenSize" />
+
+        <activity
             android:name="com.stripe.android.link.LinkForegroundActivity"
             android:autoRemoveFromRecents="true"
             android:configChanges="orientation|keyboard|keyboardHidden|screenLayout|screenSize|smallestScreenSize"

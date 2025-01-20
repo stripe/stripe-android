@@ -9,6 +9,7 @@ import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.analytics.LinkAnalyticsHelper
 import com.stripe.android.link.injection.LinkAnalyticsComponent
 import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentMethod
@@ -18,6 +19,7 @@ import com.stripe.android.model.wallets.Wallet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_PROCESSING
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.Flow
@@ -59,12 +61,45 @@ internal class LinkHandler @Inject constructor(
         linkAnalyticsComponentBuilder.build().linkAnalyticsHelper
     }
 
-    fun setupLink(state: LinkState?) {
+    fun setupLink(
+        state: LinkState?,
+    ) {
         _isLinkEnabled.value = state != null
 
         if (state == null) return
 
         _linkConfiguration.value = state.configuration
+    }
+
+    fun setupLinkLaunchEagerly(
+        coroutineScope: CoroutineScope,
+        state: LinkState?,
+        launchEagerly: Boolean = false,
+        launchLink: (LinkAccount) -> Unit = {},
+    ) {
+        setupLink(state)
+
+        if (state == null) return
+
+        _linkConfiguration.value = state.configuration
+
+        coroutineScope.launch {
+            if (launchEagerly.not()) return@launch
+            val linkAccount =
+                linkConfigurationCoordinator.getLinkAccountFlow(state.configuration).first() ?: return@launch
+            if (linkAccount.isVerified) {
+                launchLink(linkAccount)
+            }
+            when (linkAccount.accountStatus) {
+                AccountStatus.Verified,
+                AccountStatus.NeedsVerification,
+                AccountStatus.VerificationStarted -> {
+                    launchLink(linkAccount)
+                }
+                else -> Unit
+            }
+        }
+
     }
 
     suspend fun payWithLinkInline(
