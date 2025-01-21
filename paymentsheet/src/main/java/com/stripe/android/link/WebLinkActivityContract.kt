@@ -91,8 +91,10 @@ internal class WebLinkActivityContract @Inject internal constructor(
     } catch (e: Throwable) {
         errorReporter.report(
             errorEvent = ErrorReporter.UnexpectedErrorEvent.LINK_WEB_FAILED_TO_PARSE_RESULT_URI,
-            stripeException = object : StripeException(cause = e) {}
+            stripeException = FailedToParseLinkResultUriException(e)
         )
         null
     }
 }
+
+internal class FailedToParseLinkResultUriException(error: Throwable) : StripeException(cause = error)
