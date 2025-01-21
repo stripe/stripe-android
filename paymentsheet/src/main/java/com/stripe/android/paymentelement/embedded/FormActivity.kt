@@ -3,50 +3,44 @@ package com.stripe.android.paymentelement.embedded
 import android.app.Activity
 import android.os.Bundle
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Text
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
+import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormUI
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import com.stripe.android.uicore.utils.fadeOut
-import java.util.UUID
 
 internal class FormActivity : AppCompatActivity() {
-    private val args: FormContract.Args? by lazy {
+    private val formArgs: FormContract.Args? by lazy {
         FormContract.Args.fromIntent(intent)
+    }
+
+    private val viewModel: FormActivityViewModel by viewModels {
+        FormActivityViewModel.Factory()
     }
 
     @OptIn(ExperimentalMaterialApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        if (args == null) {
+        if (formArgs == null) {
             setFormResult(FormResult.Cancelled)
             finish()
+            return
+        }
+
+        formArgs?.let { args ->
+            args.paymentMethodMetadata?. let { metadata ->
+                viewModel.initializeFormInteractor(
+                    metadata,
+                    args.selectedPaymentMethodCode,
+                )
+            }
         }
 
         setContent {
-
-//            val component = remember() {  }
-//
-//            val uuid = rememberSaveable(
-//                args?.selectedPaymentMethodCode, args?.paymentMethodMetadata
-//            ) {
-//                UUID.randomUUID().toString()
-//            }
-//
-//            val viewModel: FormActivityViewModel = viewModel(
-//                key = uuid,
-//                factory = FormActivityViewModel.Factory(
-//                    args.paymentMethodMetadata!!,
-//                    args.selectedPaymentMethodCode!!,
-//
-//                )
-//            )
             StripeTheme {
                 val bottomSheetState = rememberStripeBottomSheetState()
                 ElementsBottomSheetLayout(
@@ -59,7 +53,10 @@ internal class FormActivity : AppCompatActivity() {
                         finish()
                     }
                 ) {
-                    Text(args?.selectedPaymentMethodCode ?: "Whoops")
+                    VerticalModeFormUI(
+                        viewModel.formInteractor,
+                        false,
+                    )
                 }
             }
         }

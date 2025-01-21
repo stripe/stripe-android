@@ -1,16 +1,24 @@
 package com.stripe.android.paymentelement.embedded
 
+import android.content.Context
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.cards.CardAccountRangeRepository
+import com.stripe.android.core.injection.CoreCommonModule
+import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.lpmfoundations.luxe.isSaveForFutureUseValueChangeable
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher.Companion.HOSTED_SURFACE_PAYMENT_ELEMENT
+import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.DefaultFormHelper
 import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.LinkInlineHandler
@@ -21,17 +29,9 @@ import com.stripe.android.paymentsheet.verticalmode.BankFormInteractor
 import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInteractor
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodIncentiveInteractor
 import com.stripe.android.uicore.utils.stateFlowOf
-import dagger.Binds
 import dagger.BindsInstance
 import dagger.Component
-import dagger.Module
-import dagger.Subcomponent
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
-import kotlinx.coroutines.CoroutineScope
 import javax.inject.Inject
-import javax.inject.Scope
 import javax.inject.Singleton
 
 internal class FormActivityViewModel @Inject constructor(
@@ -40,25 +40,26 @@ internal class FormActivityViewModel @Inject constructor(
     private val linkConfigurationCoordinator: LinkConfigurationCoordinator,
 ) : ViewModel() {
 
+    lateinit var formInteractor: DefaultVerticalModeFormInteractor
+
     fun initializeFormInteractor(
         paymentMethodMetadata: PaymentMethodMetadata,
         selectedPaymentMethodCode: PaymentMethodCode,
     ) {
-        val formHelper = createFormHelper(
-            coroutineScope = viewModelScope,
-            paymentMethodMetadata = paymentMethodMetadata
-        )
+        val formHelper = createFormHelper(paymentMethodMetadata = paymentMethodMetadata)
 
         val paymentMethodIncentiveInteractor = PaymentMethodIncentiveInteractor(
             paymentMethodMetadata.paymentMethodIncentive
         )
-        val formInteractor = DefaultVerticalModeFormInteractor(
+
+        formInteractor = DefaultVerticalModeFormInteractor(
             selectedPaymentMethodCode = selectedPaymentMethodCode,
             formArguments = formHelper.createFormArguments(selectedPaymentMethodCode),
             formElements = formHelper.formElementsForCode(selectedPaymentMethodCode),
             onFormFieldValuesChanged = formHelper::onFormFieldValuesChanged,
             usBankAccountArguments = createUsBankAccountFormArguments(
-                paymentMethodMetadata, selectedPaymentMethodCode
+                paymentMethodMetadata,
+                selectedPaymentMethodCode
             ),
             reportFieldInteraction = {
             },
@@ -71,11 +72,8 @@ internal class FormActivityViewModel @Inject constructor(
         )
     }
 
-    private fun createFormHelper(
-        coroutineScope: CoroutineScope,
-        paymentMethodMetadata: PaymentMethodMetadata,
-    ): FormHelper {
-        val linkInlineHandler = createLinkInlineHandler(coroutineScope)
+    private fun createFormHelper(paymentMethodMetadata: PaymentMethodMetadata): FormHelper {
+        val linkInlineHandler = createLinkInlineHandler()
         return DefaultFormHelper(
             cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
             paymentMethodMetadata = paymentMethodMetadata,
@@ -97,11 +95,9 @@ internal class FormActivityViewModel @Inject constructor(
         )
     }
 
-    private fun createLinkInlineHandler(
-        coroutineScope: CoroutineScope,
-    ): LinkInlineHandler {
+    private fun createLinkInlineHandler(): LinkInlineHandler {
         return LinkInlineHandler(
-            coroutineScope = coroutineScope,
+            coroutineScope = viewModelScope,
             payWithLink = { _, _, _ ->
             },
             selection = selectionHolder.selection,
@@ -154,5 +150,40 @@ internal class FormActivityViewModel @Inject constructor(
             },
             incentive = paymentMethodMetadata.paymentMethodIncentive,
         )
+    }
+
+    internal class Factory : ViewModelProvider.Factory {
+        override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
+            val component = DaggerFormActivityViewModelComponent.builder()
+                .savedStateHandle(extras.createSavedStateHandle())
+                .context(extras.requireApplication())
+                .build()
+            @Suppress("UNCHECKED_CAST")
+            return component.viewModel as T
+        }
+    }
+}
+
+@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
+@Singleton
+@Component(
+    modules = [
+        SharedPaymentElementViewModelModule::class,
+        CoreCommonModule::class,
+        StripeRepositoryModule::class,
+    ]
+)
+internal interface FormActivityViewModelComponent {
+    val viewModel: FormActivityViewModel
+
+    @Component.Builder
+    interface Builder {
+        @BindsInstance
+        fun savedStateHandle(savedStateHandle: SavedStateHandle): Builder
+
+        @BindsInstance
+        fun context(context: Context): Builder
+
+        fun build(): FormActivityViewModelComponent
     }
 }
