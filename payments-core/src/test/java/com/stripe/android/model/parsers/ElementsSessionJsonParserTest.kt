@@ -807,7 +807,7 @@ class ElementsSessionJsonParserTest {
     }
 
     @Test
-    fun `Parses Link attestation endpoints enabled`() {
+    fun `Parses Link useAttestationEndpoints as enabled`() {
         val elementsSession = ElementsSessionJsonParser(
             ElementsSessionParams.PaymentIntentType(
                 clientSecret = "secret",
@@ -822,7 +822,7 @@ class ElementsSessionJsonParserTest {
     }
 
     @Test
-    fun `Parses Link attestation endpoints disabled`() {
+    fun `Parses Link useAttestationEndpoints endpoints as disabled`() {
         val elementsSession = ElementsSessionJsonParser(
             ElementsSessionParams.PaymentIntentType(
                 clientSecret = "secret",
@@ -837,7 +837,7 @@ class ElementsSessionJsonParserTest {
     }
 
     @Test
-    fun `Parses Link attestation endpoints missing`() {
+    fun `Parses Link useAttestationEndpoints endpoints as disabled when field is omitted`() {
         val elementsSession = ElementsSessionJsonParser(
             ElementsSessionParams.PaymentIntentType(
                 clientSecret = "secret",
