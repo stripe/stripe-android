@@ -1,14 +1,11 @@
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.testing.TestLifecycleOwner
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedActivityLauncher
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.FormContract
 import com.stripe.android.paymentelement.embedded.FormResult
-import junit.framework.TestCase.assertNull
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -27,7 +24,6 @@ import org.robolectric.RobolectricTestRunner
 internal class EmbeddedActivityLauncherTest {
 
     private lateinit var activityResultCaller: ActivityResultCaller
-    private lateinit var lifecycleOwner: TestLifecycleOwner
     private lateinit var selectionHolder: EmbeddedSelectionHolder
     private lateinit var launcher: DefaultEmbeddedActivityLauncher
     private lateinit var formActivityLauncher: ActivityResultLauncher<FormContract.Args>
@@ -39,7 +35,6 @@ internal class EmbeddedActivityLauncherTest {
     fun setUp() {
         MockitoAnnotations.openMocks(this)
         activityResultCaller = mock()
-        lifecycleOwner = TestLifecycleOwner()
         selectionHolder = mock()
 
         formActivityLauncher = mock()
@@ -51,7 +46,7 @@ internal class EmbeddedActivityLauncherTest {
             )
         ).thenReturn(formActivityLauncher)
 
-        launcher = DefaultEmbeddedActivityLauncher(activityResultCaller, lifecycleOwner, selectionHolder)
+        launcher = DefaultEmbeddedActivityLauncher(activityResultCaller, selectionHolder)
     }
 
     @Test
@@ -75,12 +70,5 @@ internal class EmbeddedActivityLauncherTest {
         val result = FormResult.Cancelled
         contractCallbackCaptor.value.onActivityResult(result)
         verify(selectionHolder, never()).set(any())
-    }
-
-    @Test
-    fun `cleanup happens on lifecycle destroy`() {
-        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-        verify(formActivityLauncher).unregister()
-        assertNull(launcher.formLauncher)
     }
 }

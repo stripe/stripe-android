@@ -2,17 +2,14 @@ package com.stripe.android.paymentelement.embedded
 
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
-import androidx.lifecycle.DefaultLifecycleObserver
-import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 
 internal interface EmbeddedActivityLauncher {
-    var formLauncher: ((code: String, paymentMethodMetadata: PaymentMethodMetadata?) -> Unit)?
+    val formLauncher: ((code: String, paymentMethodMetadata: PaymentMethodMetadata?) -> Unit)?
 }
 
 internal class DefaultEmbeddedActivityLauncher(
-    private val activityResultCaller: ActivityResultCaller,
-    private val lifecycleOwner: LifecycleOwner,
+    activityResultCaller: ActivityResultCaller,
     private val selectionHolder: EmbeddedSelectionHolder
 ) : EmbeddedActivityLauncher {
 
@@ -27,16 +24,5 @@ internal class DefaultEmbeddedActivityLauncher(
         { code, metadata ->
             formActivityLauncher.launch(FormContract.Args(code, metadata))
         }
-
-    init {
-        lifecycleOwner.lifecycle.addObserver(
-            object : DefaultLifecycleObserver {
-                override fun onDestroy(owner: LifecycleOwner) {
-                    formActivityLauncher.unregister()
-                    formLauncher = null
-                    super.onDestroy(owner)
-                }
-            }
-        )
-    }
+        private set
 }

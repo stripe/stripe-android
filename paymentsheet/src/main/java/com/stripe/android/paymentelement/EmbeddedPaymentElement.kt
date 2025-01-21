@@ -39,11 +39,10 @@ class EmbeddedPaymentElement private constructor(
     private val embeddedConfirmationHelper: EmbeddedConfirmationHelper,
     private val sharedViewModel: SharedPaymentElementViewModel,
     private val activityResultCaller: ActivityResultCaller,
-    private val lifecycleOwner: LifecycleOwner
 ) {
 
     init {
-        sharedViewModel.initEmbeddedActivityLauncher(activityResultCaller, lifecycleOwner)
+        sharedViewModel.initEmbeddedActivityLauncher(activityResultCaller)
     }
 
     /**
@@ -498,6 +497,7 @@ class EmbeddedPaymentElement private constructor(
                     override fun onDestroy(owner: LifecycleOwner) {
                         IntentConfirmationInterceptor.createIntentCallback = null
                         ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = null
+                        sharedViewModel.clearFormLauncher()
                     }
                 }
             )
@@ -511,7 +511,6 @@ class EmbeddedPaymentElement private constructor(
                 ),
                 sharedViewModel = sharedViewModel,
                 activityResultCaller = activityResultCaller,
-                lifecycleOwner = lifecycleOwner
             )
         }
     }

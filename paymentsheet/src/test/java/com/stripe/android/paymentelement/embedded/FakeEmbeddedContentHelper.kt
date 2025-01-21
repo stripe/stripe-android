@@ -34,6 +34,10 @@ internal class FakeEmbeddedContentHelper(
         // NO-OP
     }
 
+    override fun clearFormLauncher() {
+        // NO-OP
+    }
+
     fun validate() {
         dataLoadedTurbine.ensureAllEventsConsumed()
     }

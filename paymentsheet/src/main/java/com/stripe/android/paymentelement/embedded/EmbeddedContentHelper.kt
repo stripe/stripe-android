@@ -48,6 +48,8 @@ internal interface EmbeddedContentHelper {
     )
 
     fun setFormLauncher(formLauncher: ((code: String, paymentMethodMetaData: PaymentMethodMetadata?) -> Unit)?)
+
+    fun clearFormLauncher()
 }
 
 internal fun interface EmbeddedContentHelperFactory {
@@ -127,6 +129,10 @@ internal class DefaultEmbeddedContentHelper @AssistedInject constructor(
         formLauncher: ((code: String, paymentMethodMetaData: PaymentMethodMetadata?) -> Unit)?
     ) {
         this.formLauncher = formLauncher
+    }
+
+    override fun clearFormLauncher() {
+        formLauncher = null
     }
 
     private fun createInteractor(

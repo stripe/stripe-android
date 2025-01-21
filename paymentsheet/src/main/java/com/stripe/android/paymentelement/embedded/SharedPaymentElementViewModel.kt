@@ -3,7 +3,6 @@ package com.stripe.android.paymentelement.embedded
 import android.content.Context
 import android.content.res.Resources
 import androidx.activity.result.ActivityResultCaller
-import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -31,7 +30,6 @@ import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.RealLinkConfigurationCoordinator
 import com.stripe.android.link.injection.LinkAnalyticsComponent
 import com.stripe.android.link.injection.LinkComponent
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.EmbeddedPaymentElement.ConfigureResult
 import com.stripe.android.paymentelement.EmbeddedPaymentElement.PaymentOptionDisplayData
@@ -113,15 +111,6 @@ internal class SharedPaymentElementViewModel @Inject constructor(
         }
     }
 
-    fun initEmbeddedActivityLauncher(activityResultCaller: ActivityResultCaller, lifecycleOwner: LifecycleOwner) {
-        val launcher = DefaultEmbeddedActivityLauncher(activityResultCaller, lifecycleOwner, selectionHolder)
-        setFormLauncher(launcher.formLauncher)
-    }
-
-    private fun setFormLauncher(launch: ((code: String, paymentMethodMetadata: PaymentMethodMetadata?) -> Unit)?) {
-        embeddedContentHelper.setFormLauncher(launch)
-    }
-
     suspend fun configure(
         intentConfiguration: PaymentSheet.IntentConfiguration,
         configuration: EmbeddedPaymentElement.Configuration,
@@ -153,6 +142,15 @@ internal class SharedPaymentElementViewModel @Inject constructor(
 
     fun clearPaymentOption() {
         selectionHolder.set(null)
+    }
+
+    fun initEmbeddedActivityLauncher(activityResultCaller: ActivityResultCaller) {
+        val launcher = DefaultEmbeddedActivityLauncher(activityResultCaller, selectionHolder)
+        embeddedContentHelper.setFormLauncher(launcher.formLauncher)
+    }
+
+    fun clearFormLauncher() {
+        embeddedContentHelper.clearFormLauncher()
     }
 
     class Factory(private val statusBarColor: Int?) : ViewModelProvider.Factory {

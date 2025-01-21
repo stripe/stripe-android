@@ -23,6 +23,7 @@ internal class FormActivity : AppCompatActivity() {
         if (args == null) {
             setFormResult(FormResult.Cancelled)
             finish()
+            return
         }
 
         setContent {
@@ -38,7 +39,7 @@ internal class FormActivity : AppCompatActivity() {
                         finish()
                     }
                 ) {
-                    Text(args?.selectedPaymentMethodCode ?: "Whoops")
+                    args?.selectedPaymentMethodCode?.let { Text(it) }
                 }
             }
         }
