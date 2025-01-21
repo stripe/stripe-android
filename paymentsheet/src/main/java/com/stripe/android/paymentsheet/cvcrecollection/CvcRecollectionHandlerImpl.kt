@@ -39,12 +39,9 @@ internal class CvcRecollectionHandlerImpl : CvcRecollectionHandler {
         optionsParams: PaymentMethodOptionsParams?,
         initializationMode: PaymentElementLoader.InitializationMode,
     ): Boolean {
-        val hasNotRecollectedCvcAlready = optionsParams == null || !optionsParams.hasAlreadyRecollectedCvc()
-
         return paymentMethod.isCard() &&
             paymentMethod.hasNoWallet() &&
-            cvcRecollectionEnabled(stripeIntent, initializationMode) &&
-            hasNotRecollectedCvcAlready
+            cvcRecollectionEnabled(stripeIntent, initializationMode)
     }
 
     private fun PaymentMethod.isCard(): Boolean {
@@ -59,13 +56,6 @@ internal class CvcRecollectionHandlerImpl : CvcRecollectionHandler {
         return when (this) {
             is PaymentIntent -> requireCvcRecollection
             is SetupIntent -> false
-        }
-    }
-
-    private fun PaymentMethodOptionsParams.hasAlreadyRecollectedCvc(): Boolean {
-        return when (this) {
-            is PaymentMethodOptionsParams.Card -> cvc != null
-            else -> false
         }
     }
 }

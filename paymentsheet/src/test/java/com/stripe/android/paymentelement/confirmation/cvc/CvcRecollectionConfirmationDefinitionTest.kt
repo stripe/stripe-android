@@ -75,6 +75,22 @@ class CvcRecollectionConfirmationDefinitionTest {
     }
 
     @Test
+    fun `'canConfirm' returns 'false' if CVC is already recollected`() = test(
+        handler = FakeCvcRecollectionHandler().apply {
+            requiresCVCRecollection = true
+        }
+    ) {
+        assertThat(
+            definition.canConfirm(
+                confirmationOption = createSavedConfirmationOption(
+                    optionsParams = PaymentMethodOptionsParams.Card(cvc = "444")
+                ),
+                confirmationParameters = CONFIRMATION_PARAMETERS,
+            )
+        ).isFalse()
+    }
+
+    @Test
     fun `'createLauncher' should register launcher properly for activity result`() = test {
         var onResultCalled = false
         val onResult: (CvcRecollectionResult) -> Unit = { onResultCalled = true }
