@@ -83,6 +83,7 @@ internal class SharedPaymentElementViewModel @Inject constructor(
     private val configurationHandler: EmbeddedConfigurationHandler,
     private val paymentOptionDisplayDataFactory: PaymentOptionDisplayDataFactory,
     private val selectionHolder: EmbeddedSelectionHolder,
+    private val selectionChooser: EmbeddedSelectionChooser,
     embeddedContentHelperFactory: EmbeddedContentHelperFactory,
 ) : ViewModel() {
     private val _paymentOption: MutableStateFlow<PaymentOptionDisplayData?> = MutableStateFlow(null)
@@ -119,13 +120,23 @@ internal class SharedPaymentElementViewModel @Inject constructor(
             configuration = configuration,
         ).fold(
             onSuccess = { state ->
+                val previousConfiguration = confirmationStateHolder.state?.configuration
                 confirmationStateHolder.state = EmbeddedConfirmationStateHolder.State(
                     paymentMethodMetadata = state.paymentMethodMetadata,
                     selection = state.paymentSelection,
                     initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(intentConfiguration),
                     configuration = configuration,
                 )
-                selectionHolder.set(state.paymentSelection)
+                selectionHolder.set(
+                    selectionChooser.choose(
+                        paymentMethodMetadata = state.paymentMethodMetadata,
+                        paymentMethods = state.customer?.paymentMethods,
+                        previousSelection = selectionHolder.selection.value,
+                        newSelection = state.paymentSelection,
+                        previousConfiguration = previousConfiguration,
+                        newConfiguration = configuration,
+                    )
+                )
                 embeddedContentHelper.dataLoaded(
                     paymentMethodMetadata = state.paymentMethodMetadata,
                     rowStyle = configuration.appearance.embeddedAppearance.style,
@@ -226,6 +237,9 @@ internal interface SharedPaymentElementViewModelModule {
 
     @Binds
     fun bindPaymentElementLoader(loader: DefaultPaymentElementLoader): PaymentElementLoader
+
+    @Binds
+    fun bindSelectionChooser(chooser: DefaultEmbeddedSelectionChooser): EmbeddedSelectionChooser
 
     @Binds
     fun bindsUserFacingLogger(impl: RealUserFacingLogger): UserFacingLogger
