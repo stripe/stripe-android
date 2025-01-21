@@ -31,7 +31,7 @@ internal class CvcRecollectionConfirmationDefinition(
         confirmationOption: PaymentMethodConfirmationOption.Saved,
         confirmationParameters: ConfirmationDefinition.Parameters,
     ): Boolean {
-        return handler.requiresCVCRecollection(
+        return !confirmationOption.optionsParams.hasAlreadyRecollectedCvc() && handler.requiresCVCRecollection(
             stripeIntent = confirmationParameters.intent,
             initializationMode = confirmationParameters.initializationMode,
             paymentMethod = confirmationOption.paymentMethod,
@@ -96,6 +96,13 @@ internal class CvcRecollectionConfirmationDefinition(
             is CvcRecollectionResult.Cancelled -> ConfirmationDefinition.Result.Canceled(
                 action = ConfirmationHandler.Result.Canceled.Action.None,
             )
+        }
+    }
+
+    private fun PaymentMethodOptionsParams?.hasAlreadyRecollectedCvc(): Boolean {
+        return when (this) {
+            is PaymentMethodOptionsParams.Card -> cvc != null
+            else -> false
         }
     }
 }
