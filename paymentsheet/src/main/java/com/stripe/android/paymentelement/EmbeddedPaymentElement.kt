@@ -497,7 +497,7 @@ class EmbeddedPaymentElement private constructor(
                 }
             )
 
-            sharedViewModel.initEmbeddedActivityLauncher(activityResultCaller)
+            sharedViewModel.initEmbeddedActivityLauncher(activityResultCaller, lifecycleOwner)
 
             return EmbeddedPaymentElement(
                 embeddedConfirmationHelper = EmbeddedConfirmationHelper(

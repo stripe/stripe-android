@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.embedded
 import android.content.Context
 import android.content.res.Resources
 import androidx.activity.result.ActivityResultCaller
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -144,8 +145,8 @@ internal class SharedPaymentElementViewModel @Inject constructor(
         selectionHolder.set(null)
     }
 
-    fun initEmbeddedActivityLauncher(activityResultCaller: ActivityResultCaller) {
-        val launcher = DefaultEmbeddedActivityLauncher(activityResultCaller, selectionHolder)
+    fun initEmbeddedActivityLauncher(activityResultCaller: ActivityResultCaller, lifecycleOwner: LifecycleOwner) {
+        val launcher = DefaultEmbeddedActivityLauncher(activityResultCaller, lifecycleOwner, selectionHolder)
         embeddedContentHelper.setFormLauncher(launcher.formLauncher)
     }
 

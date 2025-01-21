@@ -4,6 +4,7 @@ import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.Turbine
 import app.cash.turbine.test
@@ -327,7 +328,7 @@ internal class SharedPaymentElementViewModelTest {
                 )
             ).thenReturn(launcher)
             assertThat(embeddedContentHelper.testFormLauncher).isNull()
-            viewModel.initEmbeddedActivityLauncher(activityResultCaller)
+            viewModel.initEmbeddedActivityLauncher(activityResultCaller, TestLifecycleOwner())
             assertThat(embeddedContentHelper.testFormLauncher).isNotNull()
             viewModel.clearEmbeddedActivityLauncher()
             assertThat(embeddedContentHelper.testFormLauncher).isNull()
