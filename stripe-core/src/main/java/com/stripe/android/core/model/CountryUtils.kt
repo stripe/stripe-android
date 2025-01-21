@@ -1,8 +1,7 @@
 package com.stripe.android.core.model
 
 import androidx.annotation.RestrictTo
-import androidx.annotation.VisibleForTesting
-import java.text.Normalizer
+import java.text.Collator
 import java.util.Locale
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet -- this still auto-completes
@@ -68,17 +67,6 @@ object CountryUtils {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun getOrderedCountries(currentLocale: Locale) = getSortedLocalizedCountries(currentLocale)
 
-    @VisibleForTesting
-    internal fun formatNameForSorting(name: String): String {
-        // Before normalization: åland islands
-        // After normalization: aºland islands
-        // After regex: aland islands
-        return Normalizer.normalize(name.lowercase(), Normalizer.Form.NFD)
-            .replace("\\p{Mn}+".toRegex(), "")
-            .replace("[^A-Za-z ]".toRegex(), "")
-            .replace("[^\\p{ASCII}]".toRegex(), "")
-    }
-
     @Deprecated(
         message = "Use with parameter CountryCode",
         replaceWith = ReplaceWith(
@@ -111,6 +99,7 @@ object CountryUtils {
             cachedOrderedLocalizedCountries
         } else {
             val localizedCountries = localizedCountries(currentLocale)
+            val collator = Collator.getInstance(currentLocale)
             cachedOrderedLocalizedCountries = listOfNotNull(
                 localizedCountries.firstOrNull {
                     it.code == currentLocale.getCountryCode()
@@ -118,7 +107,7 @@ object CountryUtils {
             ).plus(
                 localizedCountries
                     .filterNot { it.code == currentLocale.getCountryCode() }
-                    .sortedBy { formatNameForSorting(it.name) }
+                    .sortedWith { c1, c2 -> collator.compare(c1.name, c2.name) }
             )
 
             cachedCountriesLocale = currentLocale
