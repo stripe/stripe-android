@@ -2,6 +2,8 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+## 21.3.2 - 2025-01-21
+
 ### Financial Connections
 - [FIXED] Fixes a rare crash that could occur when presenting a bottom sheet.
 
