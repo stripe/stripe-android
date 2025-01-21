@@ -5,7 +5,7 @@ import androidx.activity.result.ActivityResultLauncher
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 
 internal interface EmbeddedActivityLauncher {
-    val formLauncher: ((code: String, paymentMethodMetadata: PaymentMethodMetadata?) -> Unit)?
+    val formLauncher: ((code: String, paymentMethodMetadata: PaymentMethodMetadata?) -> Unit)
 }
 
 internal class DefaultEmbeddedActivityLauncher(
@@ -20,9 +20,8 @@ internal class DefaultEmbeddedActivityLauncher(
             }
         }
 
-    override var formLauncher: ((code: String, paymentMethodMetadata: PaymentMethodMetadata?) -> Unit)? =
+    override val formLauncher: ((code: String, paymentMethodMetadata: PaymentMethodMetadata?) -> Unit) =
         { code, metadata ->
             formActivityLauncher.launch(FormContract.Args(code, metadata))
         }
-        private set
 }

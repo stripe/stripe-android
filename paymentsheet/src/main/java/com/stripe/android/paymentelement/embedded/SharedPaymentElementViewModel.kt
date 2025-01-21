@@ -149,7 +149,7 @@ internal class SharedPaymentElementViewModel @Inject constructor(
         embeddedContentHelper.setFormLauncher(launcher.formLauncher)
     }
 
-    fun clearFormLauncher() {
+    fun clearEmbeddedActivityLauncher() {
         embeddedContentHelper.clearFormLauncher()
     }
 

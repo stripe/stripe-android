@@ -38,12 +38,7 @@ import kotlinx.parcelize.Parcelize
 class EmbeddedPaymentElement private constructor(
     private val embeddedConfirmationHelper: EmbeddedConfirmationHelper,
     private val sharedViewModel: SharedPaymentElementViewModel,
-    private val activityResultCaller: ActivityResultCaller,
 ) {
-
-    init {
-        sharedViewModel.initEmbeddedActivityLauncher(activityResultCaller)
-    }
 
     /**
      * Contains information about the customer's selected payment option.
@@ -497,10 +492,13 @@ class EmbeddedPaymentElement private constructor(
                     override fun onDestroy(owner: LifecycleOwner) {
                         IntentConfirmationInterceptor.createIntentCallback = null
                         ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = null
-                        sharedViewModel.clearFormLauncher()
+                        sharedViewModel.clearEmbeddedActivityLauncher()
                     }
                 }
             )
+
+            sharedViewModel.initEmbeddedActivityLauncher(activityResultCaller)
+
             return EmbeddedPaymentElement(
                 embeddedConfirmationHelper = EmbeddedConfirmationHelper(
                     confirmationHandler = sharedViewModel.confirmationHandler,
@@ -510,7 +508,6 @@ class EmbeddedPaymentElement private constructor(
                     confirmationStateSupplier = { sharedViewModel.confirmationStateHolder.state },
                 ),
                 sharedViewModel = sharedViewModel,
-                activityResultCaller = activityResultCaller,
             )
         }
     }

@@ -1,5 +1,8 @@
 package com.stripe.android.paymentelement.embedded
 
+import androidx.activity.result.ActivityResultCallback
+import androidx.activity.result.ActivityResultCaller
+import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.Turbine
@@ -22,7 +25,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
-import org.mockito.Mockito.mock
+import org.mockito.ArgumentCaptor
+import org.mockito.kotlin.any
+import org.mockito.kotlin.capture
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 
@@ -302,6 +309,29 @@ internal class SharedPaymentElementViewModelTest {
         }
         assertThat(embeddedContentHelper.dataLoadedTurbine.awaitItem()).isNotNull()
     }
+
+    @Test
+    fun `initEmbeddedActivityLauncher and clearEmbeddedActivityLauncher successfully init and clear formLauncher`() =
+        testScenario {
+            val launcher: ActivityResultLauncher<FormContract.Args> = mock()
+            val activityResultCaller: ActivityResultCaller = mock()
+
+            @Suppress("UNCHECKED_CAST")
+            val contractCallbackCaptor: ArgumentCaptor<ActivityResultCallback<FormResult>> = ArgumentCaptor
+                .forClass(ActivityResultCallback::class.java) as ArgumentCaptor<ActivityResultCallback<FormResult>>
+
+            whenever(
+                activityResultCaller.registerForActivityResult(
+                    any<FormContract>(),
+                    capture(contractCallbackCaptor)
+                )
+            ).thenReturn(launcher)
+            assertThat(embeddedContentHelper.testFormLauncher).isNull()
+            viewModel.initEmbeddedActivityLauncher(activityResultCaller)
+            assertThat(embeddedContentHelper.testFormLauncher).isNotNull()
+            viewModel.clearEmbeddedActivityLauncher()
+            assertThat(embeddedContentHelper.testFormLauncher).isNull()
+        }
 
     private fun testScenario(
         block: suspend Scenario.() -> Unit,

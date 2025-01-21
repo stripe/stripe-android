@@ -53,7 +53,7 @@ internal class EmbeddedActivityLauncherTest {
     fun `formLauncher launches activity with correct parameters`() {
         val code = "test_code"
         val expectedArgs = FormContract.Args(code, null)
-        launcher.formLauncher?.invoke(code, null)
+        launcher.formLauncher.invoke(code, null)
         verify(formActivityLauncher).launch(expectedArgs)
     }
 
