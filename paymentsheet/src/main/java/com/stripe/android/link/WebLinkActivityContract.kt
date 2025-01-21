@@ -16,6 +16,9 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import org.json.JSONObject
 import javax.inject.Inject
 
+/**
+ * Contract used to explicitly launch Link as a web view.
+ */
 internal class WebLinkActivityContract @Inject internal constructor(
     private val stripeRepository: StripeRepository,
     private val errorReporter: ErrorReporter

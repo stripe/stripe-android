@@ -6,6 +6,9 @@ import androidx.activity.result.contract.ActivityResultContract
 import com.stripe.android.core.utils.FeatureFlags
 import javax.inject.Inject
 
+/**
+ * Contract used to explicitly launch Link. It will launch either a native or web flow.
+ */
 internal class LinkActivityContract @Inject internal constructor(
     private val nativeLinkActivityContract: NativeLinkActivityContract,
     private val webLinkActivityContract: WebLinkActivityContract

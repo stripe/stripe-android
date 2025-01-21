@@ -8,6 +8,9 @@ import androidx.core.os.BundleCompat
 import com.stripe.android.PaymentConfiguration
 import javax.inject.Inject
 
+/**
+ * Contract used to explicitly launch Link natively.
+ */
 internal class NativeLinkActivityContract @Inject constructor() :
     ActivityResultContract<LinkActivityContract.Args, LinkActivityResult>() {
     override fun createIntent(context: Context, input: LinkActivityContract.Args): Intent {
