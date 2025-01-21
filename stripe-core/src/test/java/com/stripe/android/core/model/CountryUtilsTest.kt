@@ -74,9 +74,9 @@ class CountryUtilsTest {
         val  orderedCountries =  CountryUtils.getOrderedCountries(Locale("fr", "FR"))
         // Check the first 20 countries in the list.
         assertThat(orderedCountries.subList(0,20).map { it.name }.toList()).isEqualTo(
-            listOf("France", "Afrique du Sud", "Albanie", "Algérie", "Allemagne", "Andorre",
-                "Antarctique", "Antigua-et-Barbuda", "Arabie saoudite", "Argentine", "Arménie",
-                "Australie", "Autriche", "Azerbaïdjan", "Bahreïn")
+            listOf("France", "Afghanistan", "Afrique du Sud", "Albanie", "Algérie", "Allemagne", "Andorre",
+                "Angola", "Anguilla", "Antarctique", "Antigua-et-Barbuda", "Arabie saoudite", "Argentine",
+                "Arménie", "Aruba", "Australie", "Autriche", "Azerbaïdjan", "Bahamas", "Bahreïn")
         )
     }
 
