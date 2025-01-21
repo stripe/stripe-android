@@ -1,9 +1,7 @@
 package com.stripe.android.core.model
 
 import androidx.annotation.RestrictTo
-import androidx.annotation.VisibleForTesting
 import java.text.Collator
-import java.text.Normalizer
 import java.util.Locale
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet -- this still auto-completes
