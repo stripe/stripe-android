@@ -143,6 +143,7 @@ internal class PaymentMethodViewModel @Inject constructor(
                             confirmationHandler = parentComponent.viewModel.confirmationHandler
                         ),
                         formHelper = DefaultFormHelper.create(
+                            coroutineScope = parentComponent.viewModel.viewModelScope,
                             cardAccountRangeRepositoryFactory = parentComponent.cardAccountRangeRepositoryFactory,
                             paymentMethodMetadata = PaymentMethodMetadata.create(
                                 configuration = parentComponent.configuration,

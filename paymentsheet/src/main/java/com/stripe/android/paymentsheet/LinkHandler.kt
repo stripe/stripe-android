@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.LinkPaymentDetails
@@ -135,7 +136,15 @@ internal class LinkHandler @Inject constructor(
 
             val paymentSelection = when (linkPaymentDetails) {
                 is LinkPaymentDetails.New -> {
-                    PaymentSelection.New.LinkInline(linkPaymentDetails, customerRequestedSave)
+                    PaymentSelection.New.GenericPaymentMethod(
+                        paymentMethodCreateParams = paymentMethodCreateParams,
+                        customerRequestedSave = customerRequestedSave,
+                        label = resolvableString("···· ${linkPaymentDetails.paymentDetails.last4}"),
+                        iconResource = R.drawable.stripe_ic_paymentsheet_link,
+                        lightThemeIconUrl = null,
+                        darkThemeIconUrl = null,
+                        createdFromLink = true,
+                    )
                 }
                 is LinkPaymentDetails.Saved -> {
                     val last4 = linkPaymentDetails.paymentDetails.last4

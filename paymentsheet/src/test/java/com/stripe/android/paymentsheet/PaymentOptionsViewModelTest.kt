@@ -5,7 +5,6 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.R
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
@@ -54,6 +53,8 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
+import com.stripe.android.R as PaymentsCoreR
+import com.stripe.android.paymentsheet.R as PaymentSheetR
 
 @RunWith(RobolectricTestRunner::class)
 internal class PaymentOptionsViewModelTest {
@@ -642,7 +643,7 @@ internal class PaymentOptionsViewModelTest {
 
         viewModel.navigationHandler.currentScreen.test {
             awaitItem().title(isCompleteFlow = false, isWalletEnabled = false).test {
-                assertThat(awaitItem()).isEqualTo(R.string.stripe_title_add_a_card.resolvableString)
+                assertThat(awaitItem()).isEqualTo(PaymentsCoreR.string.stripe_title_add_a_card.resolvableString)
             }
         }
     }
@@ -731,9 +732,16 @@ internal class PaymentOptionsViewModelTest {
             )
 
             assertThat(viewModel.selection.value).isEqualTo(
-                PaymentSelection.New.LinkInline(
-                    linkPaymentDetails = LinkTestUtils.LINK_NEW_PAYMENT_DETAILS,
+                PaymentSelection.New.GenericPaymentMethod(
+                    paymentMethodCreateParams = DEFAULT_CARD,
+                    paymentMethodOptionsParams = null,
+                    paymentMethodExtraParams = null,
                     customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse,
+                    iconResource = PaymentSheetR.drawable.stripe_ic_paymentsheet_link,
+                    label = "···· 4242".resolvableString,
+                    lightThemeIconUrl = null,
+                    darkThemeIconUrl = null,
+                    createdFromLink = true,
                 )
             )
         }
@@ -752,9 +760,16 @@ internal class PaymentOptionsViewModelTest {
             )
 
             assertThat(viewModel.selection.value).isEqualTo(
-                PaymentSelection.New.LinkInline(
-                    linkPaymentDetails = LinkTestUtils.LINK_NEW_PAYMENT_DETAILS,
-                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
+                PaymentSelection.New.GenericPaymentMethod(
+                    paymentMethodCreateParams = DEFAULT_CARD,
+                    paymentMethodOptionsParams = null,
+                    paymentMethodExtraParams = null,
+                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+                    iconResource = PaymentSheetR.drawable.stripe_ic_paymentsheet_link,
+                    label = "···· 4242".resolvableString,
+                    lightThemeIconUrl = null,
+                    darkThemeIconUrl = null,
+                    createdFromLink = true,
                 )
             )
         }

@@ -232,11 +232,13 @@ class LinkHandlerTest {
             assertThat(awaitItem()).isEqualTo(LinkHandler.ProcessingState.Started)
             accountStatusFlow.emit(AccountStatus.Verified)
 
-            val linkInlineSelection = assertAndGetInlineLinkSelection(awaitItem())
+            val genericSelection = assertAndGetGenericSelection(awaitItem())
 
-            assertThat(linkInlineSelection.customerRequestedSave).isEqualTo(
+            assertThat(genericSelection.customerRequestedSave).isEqualTo(
                 PaymentSelection.CustomerRequestedSave.RequestReuse
             )
+
+            assertThat(genericSelection.createdFromLink).isTrue()
 
             cancelAndConsumeRemainingEvents()
         }
@@ -261,11 +263,13 @@ class LinkHandlerTest {
             assertThat(awaitItem()).isEqualTo(LinkHandler.ProcessingState.Started)
             accountStatusFlow.emit(AccountStatus.Verified)
 
-            val linkInlineSelection = assertAndGetInlineLinkSelection(awaitItem())
+            val genericSelection = assertAndGetGenericSelection(awaitItem())
 
-            assertThat(linkInlineSelection.customerRequestedSave).isEqualTo(
+            assertThat(genericSelection.customerRequestedSave).isEqualTo(
                 PaymentSelection.CustomerRequestedSave.RequestNoReuse
             )
+
+            assertThat(genericSelection.createdFromLink).isTrue()
 
             cancelAndConsumeRemainingEvents()
         }
@@ -473,17 +477,17 @@ private fun runLinkInlineTest(
     }
 }
 
-private fun assertAndGetInlineLinkSelection(
+private fun assertAndGetGenericSelection(
     processingState: LinkHandler.ProcessingState
-): PaymentSelection.New.LinkInline {
+): PaymentSelection.New.GenericPaymentMethod {
     assertThat(processingState).isInstanceOf<LinkHandler.ProcessingState.PaymentDetailsCollected>()
 
     val paymentDetailsCollectedState = processingState as LinkHandler.ProcessingState.PaymentDetailsCollected
     val selection = paymentDetailsCollectedState.paymentSelection
 
-    assertThat(selection).isInstanceOf<PaymentSelection.New.LinkInline>()
+    assertThat(selection).isInstanceOf<PaymentSelection.New.GenericPaymentMethod>()
 
-    return selection as PaymentSelection.New.LinkInline
+    return selection as PaymentSelection.New.GenericPaymentMethod
 }
 
 private fun runLinkTest(

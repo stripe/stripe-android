@@ -7,7 +7,6 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
-import androidx.lifecycle.viewModelScope
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
@@ -37,7 +36,6 @@ import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
-import com.stripe.android.model.CardParams
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.MandateDataParams
@@ -80,6 +78,7 @@ import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
 import com.stripe.android.paymentsheet.cvcrecollection.FakeCvcRecollectionHandler
 import com.stripe.android.paymentsheet.cvcrecollection.RecordingCvcRecollectionLauncherFactory
+import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
@@ -115,6 +114,8 @@ import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.SessionTestRule
 import com.stripe.android.ui.core.Amount
+import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.utils.BankFormScreenStateFactory
 import com.stripe.android.utils.DummyActivityResultCaller
 import com.stripe.android.utils.FakeCustomerRepository
@@ -839,15 +840,23 @@ internal class PaymentSheetViewModelTest {
                 PaymentSheetViewState.Reset(null)
             )
 
-            viewModel.updateSelection(
-                PaymentSelection.New.Card(
-                    paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-                    brand = CardBrand.Visa,
-                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
-                )
+            val linkInlineHandler = LinkInlineHandler.create()
+            val formHelper = DefaultFormHelper.create(
+                viewModel = viewModel,
+                paymentMethodMetadata = requireNotNull(viewModel.paymentMethodMetadata.value),
+                linkInlineHandler = linkInlineHandler,
             )
 
-            val linkInlineHandler = LinkInlineHandler.create(viewModel, viewModel.viewModelScope)
+            formHelper.onFormFieldValuesChanged(
+                formValues = FormFieldValues(
+                    fieldValuePairs = mapOf(
+                        IdentifierSpec.CardBrand to FormFieldEntry(CardBrand.Visa.code, true),
+                    ),
+                    userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest,
+                ),
+                selectedPaymentMethodCode = "card",
+            )
+
             linkInlineHandler.onStateUpdated(
                 InlineSignupViewState.create(
                     signupMode = signupMode,
@@ -1600,7 +1609,6 @@ internal class PaymentSheetViewModelTest {
 
         val observedArgs = DefaultFormHelper.create(
             viewModel = viewModel,
-            linkInlineHandler = LinkInlineHandler.create(viewModel, viewModel.viewModelScope),
             paymentMethodMetadata = requireNotNull(viewModel.paymentMethodMetadata.value),
         ).createFormArguments(
             paymentMethodCode = LpmRepositoryTestHelpers.card.code,
@@ -2425,32 +2433,38 @@ internal class PaymentSheetViewModelTest {
             val viewModel = spy(
                 createViewModel(
                     customer = EMPTY_CUSTOMER_STATE,
+                    stripeIntent = PAYMENT_INTENT.copy(
+                        paymentMethodTypes = listOf("card", "link", "bancontact")
+                    ),
                     intentConfirmationInterceptor = interceptor,
-                    linkState = LinkState(LINK_CONFIG, LinkState.LoginState.LoggedOut, signupMode)
+                    linkState = LinkState(LINK_CONFIG, LinkState.LoginState.LoggedOut, signupMode),
                 )
             )
 
             viewModel.primaryButtonUiState.test {
                 assertThat(awaitItem()?.enabled).isFalse()
 
-                viewModel.updateSelection(
-                    PaymentSelection.New.Card(
-                        paymentMethodCreateParams = PaymentMethodCreateParams.createCard(
-                            CardParams(
-                                number = "4242424242424242",
-                                expMonth = 4,
-                                expYear = 2025,
-                                cvc = "501"
-                            )
-                        ),
-                        brand = CardBrand.Visa,
-                        customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
-                    )
+                val linkInlineHandler = LinkInlineHandler.create()
+                val formHelper = DefaultFormHelper.create(
+                    viewModel = viewModel,
+                    paymentMethodMetadata = requireNotNull(viewModel.paymentMethodMetadata.value),
+                    linkInlineHandler = linkInlineHandler,
                 )
 
-                assertThat(awaitItem()?.enabled).isTrue()
+                formHelper.onFormFieldValuesChanged(
+                    formValues = FormFieldValues(
+                        fieldValuePairs = mapOf(
+                            IdentifierSpec.CardBrand to FormFieldEntry(CardBrand.Visa.code, true),
+                        ),
+                        userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest,
+                    ),
+                    selectedPaymentMethodCode = "card",
+                )
 
-                val linkInlineHandler = LinkInlineHandler.create(viewModel, viewModel.viewModelScope)
+                val buyButton = awaitItem()
+
+                assertThat(buyButton?.enabled).isTrue()
+
                 linkInlineHandler.onStateUpdated(
                     InlineSignupViewState.create(
                         signupMode = signupMode,
@@ -2467,22 +2481,17 @@ internal class PaymentSheetViewModelTest {
                     )
                 )
 
-                assertThat(awaitItem()?.enabled).isTrue()
+                expectNoEvents()
 
-                viewModel.updateSelection(
-                    PaymentSelection.New.GenericPaymentMethod(
-                        iconResource = R.drawable.stripe_ic_paymentsheet_card_visa,
-                        label = "Bancontact".resolvableString,
-                        paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.BANCONTACT,
-                        customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
-                        lightThemeIconUrl = null,
-                        darkThemeIconUrl = null,
-                    )
+                formHelper.onFormFieldValuesChanged(
+                    formValues = FormFieldValues(
+                        fieldValuePairs = mapOf(
+                            IdentifierSpec.Country to FormFieldEntry("CA", true),
+                        ),
+                        userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest,
+                    ),
+                    selectedPaymentMethodCode = "bancontact",
                 )
-
-                val buyButton = awaitItem()
-
-                assertThat(buyButton?.enabled).isTrue()
 
                 buyButton?.onClick?.invoke()
 
