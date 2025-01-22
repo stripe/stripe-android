@@ -16,6 +16,7 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.ui.core.Amount
@@ -135,7 +136,7 @@ internal object TestFactory {
         cardBrandChoice = null,
         passthroughModeEnabled = false,
         useAttestationEndpointsForLink = false,
-        initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("gg")
+        initializationMode = PaymentSheetFixtures.INITIALIZATION_MODE_PAYMENT_INTENT
     )
 
     val LINK_WALLET_PRIMARY_BUTTON_LABEL = Amount(
