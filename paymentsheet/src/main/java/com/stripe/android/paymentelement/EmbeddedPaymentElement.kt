@@ -39,6 +39,7 @@ class EmbeddedPaymentElement private constructor(
     private val embeddedConfirmationHelper: EmbeddedConfirmationHelper,
     private val sharedViewModel: SharedPaymentElementViewModel,
 ) {
+
     /**
      * Contains information about the customer's selected payment option.
      * Use this to display the payment option in your own UI.
@@ -491,9 +492,13 @@ class EmbeddedPaymentElement private constructor(
                     override fun onDestroy(owner: LifecycleOwner) {
                         IntentConfirmationInterceptor.createIntentCallback = null
                         ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = null
+                        sharedViewModel.clearEmbeddedSheetLauncher()
                     }
                 }
             )
+
+            sharedViewModel.initEmbeddedSheetLauncher(activityResultCaller, lifecycleOwner)
+
             return EmbeddedPaymentElement(
                 embeddedConfirmationHelper = EmbeddedConfirmationHelper(
                     confirmationHandler = sharedViewModel.confirmationHandler,

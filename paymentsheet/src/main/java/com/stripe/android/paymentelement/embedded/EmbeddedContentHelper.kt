@@ -47,6 +47,10 @@ internal interface EmbeddedContentHelper {
         rowStyle: Embedded.RowStyle,
         embeddedViewDisplaysMandateText: Boolean,
     )
+
+    fun setSheetLauncher(sheetLauncher: EmbeddedSheetLauncher)
+
+    fun clearSheetLauncher()
 }
 
 internal fun interface EmbeddedContentHelperFactory {
@@ -83,6 +87,8 @@ internal class DefaultEmbeddedContentHelper @AssistedInject constructor(
 
     private val _embeddedContent = MutableStateFlow<EmbeddedContent?>(null)
     override val embeddedContent: StateFlow<EmbeddedContent?> = _embeddedContent.asStateFlow()
+
+    private var sheetLauncher: EmbeddedSheetLauncher? = null
 
     init {
         coroutineScope.launch {
@@ -122,6 +128,14 @@ internal class DefaultEmbeddedContentHelper @AssistedInject constructor(
             rowStyle = rowStyle,
             embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
         )
+    }
+
+    override fun setSheetLauncher(sheetLauncher: EmbeddedSheetLauncher) {
+        this.sheetLauncher = sheetLauncher
+    }
+
+    override fun clearSheetLauncher() {
+        sheetLauncher = null
     }
 
     private fun createInteractor(
@@ -167,6 +181,7 @@ internal class DefaultEmbeddedContentHelper @AssistedInject constructor(
             transitionToManageScreen = {
             },
             transitionToFormScreen = {
+                sheetLauncher?.launchForm(it, paymentMethodMetadata)
             },
             paymentMethods = customerStateHolder.paymentMethods,
             mostRecentlySelectedSavedPaymentMethod = customerStateHolder.mostRecentlySelectedSavedPaymentMethod,

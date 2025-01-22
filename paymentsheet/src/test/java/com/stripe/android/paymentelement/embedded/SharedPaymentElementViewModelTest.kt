@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.embedded
 
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.Turbine
 import app.cash.turbine.test
@@ -22,7 +23,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
-import org.mockito.Mockito.mock
+import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 
@@ -296,6 +297,18 @@ internal class SharedPaymentElementViewModelTest {
         }
         assertThat(embeddedContentHelper.dataLoadedTurbine.awaitItem()).isNotNull()
     }
+
+    @Test
+    fun `initEmbeddedActivityLauncher and clearEmbeddedActivityLauncher successfully init and clear formLauncher`() =
+        testScenario {
+            val launcher = FakeFormActivityLauncher()
+            val activityResultCaller = FakeActivityResultCaller(launcher)
+            assertThat(embeddedContentHelper.testSheetLauncher).isNull()
+            viewModel.initEmbeddedSheetLauncher(activityResultCaller, TestLifecycleOwner())
+            assertThat(embeddedContentHelper.testSheetLauncher).isNotNull()
+            viewModel.clearEmbeddedSheetLauncher()
+            assertThat(embeddedContentHelper.testSheetLauncher).isNull()
+        }
 
     private fun testScenario(
         block: suspend Scenario.() -> Unit,

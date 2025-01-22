@@ -2,6 +2,8 @@ package com.stripe.android.paymentelement.embedded
 
 import android.content.Context
 import android.content.res.Resources
+import androidx.activity.result.ActivityResultCaller
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -152,6 +154,15 @@ internal class SharedPaymentElementViewModel @Inject constructor(
 
     fun clearPaymentOption() {
         selectionHolder.set(null)
+    }
+
+    fun initEmbeddedSheetLauncher(activityResultCaller: ActivityResultCaller, lifecycleOwner: LifecycleOwner) {
+        val launcher = DefaultEmbeddedSheetLauncher(activityResultCaller, lifecycleOwner, selectionHolder)
+        embeddedContentHelper.setSheetLauncher(launcher)
+    }
+
+    fun clearEmbeddedSheetLauncher() {
+        embeddedContentHelper.clearSheetLauncher()
     }
 
     class Factory(private val statusBarColor: Int?) : ViewModelProvider.Factory {

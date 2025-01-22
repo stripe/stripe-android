@@ -13,6 +13,7 @@ internal class FakeEmbeddedContentHelper(
 ) : EmbeddedContentHelper {
     private val _dataLoadedTurbine = Turbine<DefaultEmbeddedContentHelper.State>()
     val dataLoadedTurbine: ReceiveTurbine<DefaultEmbeddedContentHelper.State> = _dataLoadedTurbine
+    var testSheetLauncher: EmbeddedSheetLauncher? = null
 
     override fun dataLoaded(
         paymentMethodMetadata: PaymentMethodMetadata,
@@ -26,6 +27,14 @@ internal class FakeEmbeddedContentHelper(
                 embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
             )
         )
+    }
+
+    override fun setSheetLauncher(sheetLauncher: EmbeddedSheetLauncher) {
+        this.testSheetLauncher = sheetLauncher
+    }
+
+    override fun clearSheetLauncher() {
+        testSheetLauncher = null
     }
 
     fun validate() {
