@@ -9,6 +9,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFact
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedContentHelper.Companion.MANDATE_KEY_EMBEDDED_CONTENT
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedContentHelper.Companion.STATE_KEY_EMBEDDED_CONTENT
+import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.FakeCustomerRepository
@@ -137,6 +138,7 @@ internal class DefaultEmbeddedContentHelperTest {
     ) = runTest {
         val savedStateHandle = SavedStateHandle()
         savedStateHandle.setup()
+        val selectionHolder = EmbeddedSelectionHolder(savedStateHandle)
         val embeddedContentHelper = DefaultEmbeddedContentHelper(
             coroutineScope = CoroutineScope(Dispatchers.Unconfined),
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
@@ -145,8 +147,9 @@ internal class DefaultEmbeddedContentHelperTest {
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
             workContext = Dispatchers.Unconfined,
             customerRepository = FakeCustomerRepository(),
-            selectionHolder = EmbeddedSelectionHolder(savedStateHandle),
+            selectionHolder = selectionHolder,
             embeddedWalletsHelper = { stateFlowOf(null) },
+            customerStateHolder = CustomerStateHolder(savedStateHandle, selectionHolder.selection),
         )
         Scenario(
             embeddedContentHelper = embeddedContentHelper,

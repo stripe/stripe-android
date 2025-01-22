@@ -44,6 +44,7 @@ import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.BuildConfig
+import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
@@ -86,6 +87,7 @@ internal class SharedPaymentElementViewModel @Inject constructor(
     private val paymentOptionDisplayDataFactory: PaymentOptionDisplayDataFactory,
     private val selectionHolder: EmbeddedSelectionHolder,
     private val selectionChooser: EmbeddedSelectionChooser,
+    private val customerStateHolder: CustomerStateHolder,
     embeddedContentHelperFactory: EmbeddedContentHelperFactory,
 ) : ViewModel() {
     private val _paymentOption: MutableStateFlow<PaymentOptionDisplayData?> = MutableStateFlow(null)
@@ -129,6 +131,7 @@ internal class SharedPaymentElementViewModel @Inject constructor(
                     initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(intentConfiguration),
                     configuration = configuration,
                 )
+                customerStateHolder.setCustomerState(state.customer)
                 selectionHolder.set(
                     selectionChooser.choose(
                         paymentMethodMetadata = state.paymentMethodMetadata,
@@ -352,6 +355,15 @@ internal interface SharedPaymentElementViewModelModule {
         @Singleton
         fun provideStripeImageLoader(context: Context): StripeImageLoader {
             return StripeImageLoader(context)
+        }
+
+        @Provides
+        @Singleton
+        fun provideCustomerStateHolder(
+            savedStateHandle: SavedStateHandle,
+            selectionHolder: EmbeddedSelectionHolder,
+        ): CustomerStateHolder {
+            return CustomerStateHolder(savedStateHandle, selectionHolder.selection)
         }
     }
 }

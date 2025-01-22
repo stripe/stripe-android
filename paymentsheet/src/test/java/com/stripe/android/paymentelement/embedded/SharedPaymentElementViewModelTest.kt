@@ -13,8 +13,10 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
+import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
+import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.paymentMethodType
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
@@ -239,6 +241,49 @@ internal class SharedPaymentElementViewModelTest {
     }
 
     @Test
+    fun `configure correctly sets customerStateHolder`() = testScenario {
+        val configuration = EmbeddedPaymentElement.Configuration
+            .Builder("Example, Inc.")
+            .build()
+        configurationHandler.emit(
+            Result.success(
+                PaymentElementLoader.State(
+                    config = configuration.asCommonConfiguration(),
+                    customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
+                    paymentSelection = PaymentSelection.GooglePay,
+                    validationError = null,
+                    paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                        stripeIntent = PaymentIntentFixtures.PI_SUCCEEDED,
+                        billingDetailsCollectionConfiguration = configuration
+                            .billingDetailsCollectionConfiguration,
+                        allowsDelayedPaymentMethods = configuration.allowsDelayedPaymentMethods,
+                        allowsPaymentMethodsRequiringShippingAddress = configuration
+                            .allowsPaymentMethodsRequiringShippingAddress,
+                        isGooglePayReady = true,
+                        cbcEligibility = CardBrandChoiceEligibility.Ineligible,
+                    ),
+                )
+            )
+        )
+        customerStateHolder.customer.test {
+            assertThat(awaitItem()).isNull()
+
+            assertThat(
+                viewModel.configure(
+                    PaymentSheet.IntentConfiguration(
+                        PaymentSheet.IntentConfiguration.Mode.Payment(5000, "USD"),
+                    ),
+                    configuration = configuration,
+                )
+            ).isInstanceOf<EmbeddedPaymentElement.ConfigureResult.Succeeded>()
+
+            assertThat(awaitItem()).isEqualTo(PaymentSheetFixtures.EMPTY_CUSTOMER_STATE)
+        }
+
+        assertThat(embeddedContentHelper.dataLoadedTurbine.awaitItem()).isNotNull()
+    }
+
+    @Test
     fun `configure maps failure result`() = testScenario {
         val exception = IllegalStateException("Hi")
         configurationHandler.emit(Result.failure(exception))
@@ -327,6 +372,7 @@ internal class SharedPaymentElementViewModelTest {
             coroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
         )
         val embeddedContentHelper = FakeEmbeddedContentHelper()
+        val customerStateHolder = CustomerStateHolder(savedStateHandle, selectionHolder.selection)
 
         val viewModel = SharedPaymentElementViewModel(
             confirmationStateHolderFactory = EmbeddedConfirmationStateHolderFactory {
@@ -340,9 +386,10 @@ internal class SharedPaymentElementViewModelTest {
             selectionChooser = { _, _, _, newSelection, _, _ ->
                 newSelection
             },
+            customerStateHolder = customerStateHolder,
             embeddedContentHelperFactory = EmbeddedContentHelperFactory {
                 embeddedContentHelper
-            }
+            },
         )
 
         Scenario(
@@ -350,6 +397,7 @@ internal class SharedPaymentElementViewModelTest {
             viewModel = viewModel,
             selectionHolder = selectionHolder,
             embeddedContentHelper = embeddedContentHelper,
+            customerStateHolder = customerStateHolder,
         ).block()
 
         configurationHandler.turbine.ensureAllEventsConsumed()
@@ -362,6 +410,7 @@ internal class SharedPaymentElementViewModelTest {
         val viewModel: SharedPaymentElementViewModel,
         val selectionHolder: EmbeddedSelectionHolder,
         val embeddedContentHelper: FakeEmbeddedContentHelper,
+        val customerStateHolder: CustomerStateHolder,
     )
 
     private class FakeEmbeddedConfigurationHandler : EmbeddedConfigurationHandler {
