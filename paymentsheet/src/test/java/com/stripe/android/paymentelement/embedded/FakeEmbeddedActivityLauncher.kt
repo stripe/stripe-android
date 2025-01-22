@@ -1,4 +1,4 @@
-package com.stripe.android.paymentelement.embedded.manage
+package com.stripe.android.paymentelement.embedded
 
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContract
@@ -6,13 +6,15 @@ import androidx.core.app.ActivityOptionsCompat
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 
-internal class FakeManageActivityLauncher : ActivityResultLauncher<ManageContract.Args>() {
-    private val _launchStateTurbine = Turbine<LaunchState>()
-    val launchTurbine: ReceiveTurbine<LaunchState> = _launchStateTurbine
+internal class FakeEmbeddedActivityLauncher<T>(
+    private val activityContract: ActivityResultContract<T, *>
+) : ActivityResultLauncher<T>() {
+    private val _launchStateTurbine = Turbine<LaunchState<T>>()
+    val launchTurbine: ReceiveTurbine<LaunchState<T>> = _launchStateTurbine
     private val _unregisterTurbine = Turbine<Boolean>()
     val unregisterTurbine: ReceiveTurbine<Boolean> = _unregisterTurbine
 
-    override fun launch(input: ManageContract.Args?, options: ActivityOptionsCompat?) {
+    override fun launch(input: T, options: ActivityOptionsCompat?) {
         _launchStateTurbine.add(
             LaunchState(
                 didLaunch = true,
@@ -25,8 +27,8 @@ internal class FakeManageActivityLauncher : ActivityResultLauncher<ManageContrac
         _unregisterTurbine.add(true)
     }
 
-    override fun getContract(): ActivityResultContract<ManageContract.Args, ManageResult> {
-        return ManageContract
+    override fun getContract(): ActivityResultContract<T, *> {
+        return activityContract
     }
 
     fun validate() {
@@ -34,8 +36,8 @@ internal class FakeManageActivityLauncher : ActivityResultLauncher<ManageContrac
         unregisterTurbine.ensureAllEventsConsumed()
     }
 
-    data class LaunchState(
+    data class LaunchState<T>(
         val didLaunch: Boolean,
-        val launchArgs: ManageContract.Args?
+        val launchArgs: T
     )
 }

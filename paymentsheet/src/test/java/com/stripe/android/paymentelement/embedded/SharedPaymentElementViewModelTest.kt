@@ -14,7 +14,7 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.FakeActivityResultCaller
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
-import com.stripe.android.paymentelement.embedded.manage.FakeManageActivityLauncher
+import com.stripe.android.paymentelement.embedded.manage.ManageContract
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
@@ -348,8 +348,8 @@ internal class SharedPaymentElementViewModelTest {
     @Test
     fun `initEmbeddedActivityLauncher and clearEmbeddedActivityLauncher successfully init and clear formLauncher`() =
         testScenario {
-            val formLauncher = FakeFormActivityLauncher()
-            val manageLauncher = FakeManageActivityLauncher()
+            val formLauncher = FakeEmbeddedActivityLauncher(FormContract)
+            val manageLauncher = FakeEmbeddedActivityLauncher(ManageContract)
             val activityResultCaller = FakeActivityResultCaller(formLauncher, manageLauncher)
             assertThat(embeddedContentHelper.testSheetLauncher).isNull()
             viewModel.initEmbeddedSheetLauncher(activityResultCaller, TestLifecycleOwner())

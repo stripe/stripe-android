@@ -8,7 +8,6 @@ import androidx.lifecycle.testing.TestLifecycleOwner
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.paymentelement.embedded.manage.FakeManageActivityLauncher
 import com.stripe.android.paymentelement.embedded.manage.ManageContract
 import com.stripe.android.paymentelement.embedded.manage.ManageResult
 import com.stripe.android.paymentsheet.CustomerStateHolder
@@ -106,8 +105,8 @@ internal class DefaultEmbeddedSheetLauncherTest {
         MockitoAnnotations.openMocks(this)
         val activityResultCaller = mock<ActivityResultCaller>()
         val lifecycleOwner = TestLifecycleOwner()
-        val formActivityLauncher = FakeFormActivityLauncher()
-        val manageActivityLauncher = FakeManageActivityLauncher()
+        val formActivityLauncher = FakeEmbeddedActivityLauncher(FormContract)
+        val manageActivityLauncher = FakeEmbeddedActivityLauncher(ManageContract)
         val savedStateHandle = SavedStateHandle()
         val selectionHolder = EmbeddedSelectionHolder(savedStateHandle)
         val customerStateHolder = CustomerStateHolder(savedStateHandle, selectionHolder.selection)
@@ -161,8 +160,8 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val manageContractCallbackCaptor: ArgumentCaptor<ActivityResultCallback<ManageResult>>,
         val selectionHolder: EmbeddedSelectionHolder,
         val lifecycleOwner: TestLifecycleOwner,
-        val formActivityLauncher: FakeFormActivityLauncher,
-        val manageActivityLauncher: FakeManageActivityLauncher,
+        val formActivityLauncher: FakeEmbeddedActivityLauncher<FormContract.Args>,
+        val manageActivityLauncher: FakeEmbeddedActivityLauncher<ManageContract.Args>,
         val launcher: EmbeddedSheetLauncher,
         val customerStateHolder: CustomerStateHolder,
     )
