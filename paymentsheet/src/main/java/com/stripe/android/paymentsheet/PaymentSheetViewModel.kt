@@ -382,7 +382,17 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     ) {
         this.checkoutIdentifier = identifier
 
-        confirmPaymentSelection(paymentSelection)
+        if (paymentSelection is PaymentSelection.New.LinkInline) {
+            viewModelScope.launch(workContext) {
+                linkHandler.payWithLinkInline(
+                    userInput = paymentSelection.input,
+                    paymentSelection = paymentSelection,
+                    shouldCompleteLinkInlineFlow = false,
+                )
+            }
+        } else {
+            confirmPaymentSelection(paymentSelection)
+        }
     }
 
     override fun handlePaymentMethodSelected(selection: PaymentSelection?) {

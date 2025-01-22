@@ -224,6 +224,15 @@ internal class PaymentOptionsViewModel @Inject constructor(
             eventReporter.onSelectPaymentOption(paymentSelection)
 
             when (paymentSelection) {
+                is PaymentSelection.New.LinkInline -> {
+                    viewModelScope.launch(workContext) {
+                        linkHandler.payWithLinkInline(
+                            userInput = paymentSelection.input,
+                            paymentSelection = paymentSelection,
+                            shouldCompleteLinkInlineFlow = false,
+                        )
+                    }
+                }
                 is PaymentSelection.Saved,
                 is PaymentSelection.GooglePay,
                 is PaymentSelection.Link -> processExistingPaymentMethod(paymentSelection)
