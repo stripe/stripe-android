@@ -285,7 +285,10 @@ class FinancialConnectionsSheetViewModelTest {
                             phone = null,
                             phoneCountryCode = null,
                         ),
-                        incentiveEligibilitySession = IncentiveEligibilitySession.PaymentIntent("pi_123"),
+                        incentiveEligibilitySession = IncentiveEligibilitySession.PaymentIntent(
+                            id = "pi_123",
+                            elementsSessionId = "session_abc123",
+                        ),
                     ),
                 )
             )
@@ -295,7 +298,7 @@ class FinancialConnectionsSheetViewModelTest {
         withState(viewModel) {
             val viewEffect = it.viewEffect as OpenAuthFlowWithUrl
             assertThat(viewEffect.url).contains("instantDebitsIncentive=true")
-            assertThat(viewEffect.url).contains("incentiveEligibilitySession=pi_123")
+            assertThat(viewEffect.url).contains("incentiveEligibilitySession=session_abc123")
         }
     }
 

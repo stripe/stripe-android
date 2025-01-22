@@ -212,13 +212,16 @@ class RealCreateInstantDebitsResultTest {
             consumerSessionProvider = { consumerSession },
             elementsSessionContext = makeElementsSessionContext(
                 linkMode = LinkMode.LinkPaymentMethod,
-                incentiveEligibilitySession = IncentiveEligibilitySession.PaymentIntent("pi_123"),
+                incentiveEligibilitySession = IncentiveEligibilitySession.PaymentIntent(
+                    id = "pi_123",
+                    elementsSessionId = "session_abc123",
+                ),
             ),
         )
 
         whenever(
             consumerRepository.updateAvailableIncentives(
-                sessionId = eq("pi_123"),
+                sessionId = eq("session_abc123"),
                 paymentDetailsId = eq("ba_1234"),
                 consumerSessionClientSecret = eq("clientSecret"),
             )
