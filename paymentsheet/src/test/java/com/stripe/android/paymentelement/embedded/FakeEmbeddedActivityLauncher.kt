@@ -9,22 +9,17 @@ import app.cash.turbine.Turbine
 internal class FakeEmbeddedActivityLauncher<T>(
     private val activityContract: ActivityResultContract<T, *>
 ) : ActivityResultLauncher<T>() {
-    private val _launchStateTurbine = Turbine<LaunchState<T>>()
-    val launchTurbine: ReceiveTurbine<LaunchState<T>> = _launchStateTurbine
-    private val _unregisterTurbine = Turbine<Boolean>()
-    val unregisterTurbine: ReceiveTurbine<Boolean> = _unregisterTurbine
+    private val _argsTurbine = Turbine<T>()
+    val argsTurbine: ReceiveTurbine<T> = _argsTurbine
+    private val _unregisterTurbine = Turbine<Unit>()
+    val unregisterTurbine: ReceiveTurbine<Unit> = _unregisterTurbine
 
     override fun launch(input: T, options: ActivityOptionsCompat?) {
-        _launchStateTurbine.add(
-            LaunchState(
-                didLaunch = true,
-                launchArgs = input
-            )
-        )
+        _argsTurbine.add(input)
     }
 
     override fun unregister() {
-        _unregisterTurbine.add(true)
+        _unregisterTurbine.add(Unit)
     }
 
     override fun getContract(): ActivityResultContract<T, *> {
@@ -32,12 +27,7 @@ internal class FakeEmbeddedActivityLauncher<T>(
     }
 
     fun validate() {
-        launchTurbine.ensureAllEventsConsumed()
+        argsTurbine.ensureAllEventsConsumed()
         unregisterTurbine.ensureAllEventsConsumed()
     }
-
-    data class LaunchState<T>(
-        val didLaunch: Boolean,
-        val launchArgs: T
-    )
 }
