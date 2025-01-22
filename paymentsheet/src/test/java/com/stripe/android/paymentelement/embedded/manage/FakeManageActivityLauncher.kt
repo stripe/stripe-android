@@ -1,18 +1,18 @@
-package com.stripe.android.paymentelement.embedded
+package com.stripe.android.paymentelement.embedded.manage
 
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.app.ActivityOptionsCompat
 
-internal class FakeFormActivityLauncher : ActivityResultLauncher<FormContract.Args>() {
+internal class FakeManageActivityLauncher : ActivityResultLauncher<ManageContract.Args>() {
     var didLaunch = false
         private set
-    var launchArgs: FormContract.Args? = null
+    var launchArgs: ManageContract.Args? = null
         private set
     var didUnregister = false
         private set
 
-    override fun launch(input: FormContract.Args?, options: ActivityOptionsCompat?) {
+    override fun launch(input: ManageContract.Args?, options: ActivityOptionsCompat?) {
         didLaunch = true
         launchArgs = input
     }
@@ -21,7 +21,7 @@ internal class FakeFormActivityLauncher : ActivityResultLauncher<FormContract.Ar
         didUnregister = true
     }
 
-    override fun getContract(): ActivityResultContract<FormContract.Args, FormResult> {
-        return FormContract
+    override fun getContract(): ActivityResultContract<ManageContract.Args, ManageResult> {
+        return ManageContract
     }
 }

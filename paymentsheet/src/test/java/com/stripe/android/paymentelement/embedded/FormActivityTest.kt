@@ -18,7 +18,7 @@ internal class FormActivityTest {
             Bundle.EMPTY
         ).use { activityScenario ->
             assertThat(activityScenario.state).isEqualTo(Lifecycle.State.DESTROYED)
-            val result = FormContract().parseResult(0, activityScenario.result.resultData)
+            val result = FormContract.parseResult(0, activityScenario.result.resultData)
             assertThat(result).isInstanceOf(FormResult.Cancelled::class.java)
         }
     }

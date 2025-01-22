@@ -5,12 +5,23 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.paymentelement.embedded.manage.ManageContract
+import com.stripe.android.paymentelement.embedded.manage.ManageResult
+import com.stripe.android.paymentsheet.CustomerStateHolder
+import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.state.CustomerState
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 
 internal interface EmbeddedSheetLauncher {
     fun launchForm(code: String, paymentMethodMetadata: PaymentMethodMetadata)
+
+    fun launchManage(
+        paymentMethodMetadata: PaymentMethodMetadata,
+        customerState: CustomerState,
+        selection: PaymentSelection?,
+    )
 }
 
 internal fun interface EmbeddedSheetLauncherFactory {
@@ -32,6 +43,7 @@ internal class DefaultEmbeddedSheetLauncher @AssistedInject constructor(
     @Assisted activityResultCaller: ActivityResultCaller,
     @Assisted lifecycleOwner: LifecycleOwner,
     private val selectionHolder: EmbeddedSelectionHolder,
+    private val customerStateHolder: CustomerStateHolder,
 ) : EmbeddedSheetLauncher {
 
     init {
@@ -39,6 +51,7 @@ internal class DefaultEmbeddedSheetLauncher @AssistedInject constructor(
             object : DefaultLifecycleObserver {
                 override fun onDestroy(owner: LifecycleOwner) {
                     formActivityLauncher.unregister()
+                    manageActivityLauncher.unregister()
                     super.onDestroy(owner)
                 }
             }
@@ -46,13 +59,41 @@ internal class DefaultEmbeddedSheetLauncher @AssistedInject constructor(
     }
 
     private val formActivityLauncher: ActivityResultLauncher<FormContract.Args> =
-        activityResultCaller.registerForActivityResult(FormContract()) { result ->
+        activityResultCaller.registerForActivityResult(FormContract) { result ->
             if (result is FormResult.Complete) {
                 selectionHolder.set(result.selection)
             }
         }
 
+    private val manageActivityLauncher: ActivityResultLauncher<ManageContract.Args> =
+        activityResultCaller.registerForActivityResult(ManageContract) { result ->
+            when (result) {
+                is ManageResult.Cancelled -> {
+                    if (result.customerState != null) {
+                        customerStateHolder.setCustomerState(result.customerState)
+                    }
+                }
+                is ManageResult.Complete -> {
+                    customerStateHolder.setCustomerState(result.customerState)
+                    selectionHolder.set(result.selection)
+                }
+            }
+        }
+
     override fun launchForm(code: String, paymentMethodMetadata: PaymentMethodMetadata) {
         formActivityLauncher.launch(FormContract.Args(code, paymentMethodMetadata))
+    }
+
+    override fun launchManage(
+        paymentMethodMetadata: PaymentMethodMetadata,
+        customerState: CustomerState,
+        selection: PaymentSelection?,
+    ) {
+        val args = ManageContract.Args(
+            paymentMethodMetadata = paymentMethodMetadata,
+            customerState = customerState,
+            selection = selection,
+        )
+        manageActivityLauncher.launch(args)
     }
 }
