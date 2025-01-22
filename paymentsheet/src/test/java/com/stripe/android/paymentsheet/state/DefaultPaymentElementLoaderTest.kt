@@ -659,7 +659,6 @@ internal class DefaultPaymentElementLoaderTest {
             passthroughModeEnabled = false,
             cardBrandChoice = null,
             flags = emptyMap(),
-            initializationMode = initializationMode,
             useAttestationEndpointsForLink = false
         )
 

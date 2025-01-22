@@ -952,7 +952,6 @@ internal class PaymentSheetViewModelTest {
                 cardBrandChoice = null,
                 shippingDetails = null,
                 useAttestationEndpointsForLink = false,
-                initializationMode = InitializationMode.PaymentIntent("gg")
             )
 
             val viewModel = createViewModel(
