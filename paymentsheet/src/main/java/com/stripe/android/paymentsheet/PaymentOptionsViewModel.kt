@@ -163,24 +163,14 @@ internal class PaymentOptionsViewModel @Inject constructor(
     private fun handleLinkProcessingState(processingState: LinkHandler.ProcessingState) {
         when (processingState) {
             is LinkHandler.ProcessingState.PaymentDetailsCollected -> {
-                processingState.paymentSelection?.let {
-                    // Link PaymentDetails was created successfully, use it to confirm the Stripe Intent.
-                    updateSelection(it)
-                    onUserSelection()
-                } ?: run {
-                    // Creating Link PaymentDetails failed, fallback to regular checkout.
-                    // paymentSelection is already set to the card parameters from the form.
-                    onUserSelection()
-                }
+                updateSelection(processingState.paymentSelection)
+                onUserSelection()
             }
             LinkHandler.ProcessingState.Ready -> {
                 updatePrimaryButtonState(PrimaryButton.State.Ready)
             }
             LinkHandler.ProcessingState.Started -> {
                 updatePrimaryButtonState(PrimaryButton.State.StartProcessing)
-            }
-            LinkHandler.ProcessingState.CompleteWithoutLink -> {
-                onUserSelection()
             }
         }
     }
@@ -227,7 +217,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 is PaymentSelection.New.LinkInline -> {
                     viewModelScope.launch(workContext) {
                         linkHandler.payWithLinkInline(
-                            userInput = paymentSelection.input,
                             paymentSelection = paymentSelection,
                             shouldCompleteLinkInlineFlow = false,
                         )

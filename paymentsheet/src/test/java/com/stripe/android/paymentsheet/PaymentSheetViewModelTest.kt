@@ -897,9 +897,9 @@ internal class PaymentSheetViewModelTest {
             val viewModel = createLinkViewModel(intentConfirmationInterceptor)
 
             viewModel.linkHandler.payWithLinkInline(
-                userInput = UserInput.SignIn("email@email.com"),
-                paymentSelection = createCardPaymentSelection(
+                paymentSelection = createLinkInlinePaymentSelection(
                     customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse,
+                    input = UserInput.SignIn("email@email.com"),
                 ),
                 shouldCompleteLinkInlineFlow = false
             )
@@ -924,9 +924,9 @@ internal class PaymentSheetViewModelTest {
             val viewModel = createLinkViewModel(intentConfirmationInterceptor)
 
             viewModel.linkHandler.payWithLinkInline(
-                userInput = UserInput.SignIn("email@email.com"),
-                paymentSelection = createCardPaymentSelection(
+                paymentSelection = createLinkInlinePaymentSelection(
                     customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+                    input = UserInput.SignIn("email@email.com"),
                 ),
                 shouldCompleteLinkInlineFlow = false
             )
@@ -3238,13 +3238,15 @@ internal class PaymentSheetViewModelTest {
         }
     }
 
-    private fun createCardPaymentSelection(
-        customerRequestedSave: PaymentSelection.CustomerRequestedSave
-    ): PaymentSelection {
-        return PaymentSelection.New.Card(
+    private fun createLinkInlinePaymentSelection(
+        customerRequestedSave: PaymentSelection.CustomerRequestedSave,
+        input: UserInput,
+    ): PaymentSelection.New.LinkInline {
+        return PaymentSelection.New.LinkInline(
             paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
             brand = CardBrand.Visa,
             customerRequestedSave = customerRequestedSave,
+            input = input,
         )
     }
 

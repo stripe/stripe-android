@@ -13,6 +13,7 @@ import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -20,6 +21,7 @@ import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures.DEFAULT_CARD
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
+import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.updateState
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -724,17 +726,19 @@ internal class PaymentOptionsViewModelTest {
             val viewModel = createLinkViewModel()
 
             viewModel.linkHandler.payWithLinkInline(
-                userInput = UserInput.SignIn("email@email.com"),
-                paymentSelection = createCardPaymentSelection(
+                paymentSelection = createLinkInlinePaymentSelection(
                     customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse,
+                    input = UserInput.SignIn("email@email.com"),
                 ),
                 shouldCompleteLinkInlineFlow = false
             )
 
             assertThat(viewModel.selection.value).isEqualTo(
                 PaymentSelection.New.GenericPaymentMethod(
-                    paymentMethodCreateParams = DEFAULT_CARD,
-                    paymentMethodOptionsParams = null,
+                    paymentMethodCreateParams = LinkTestUtils.LINK_NEW_PAYMENT_DETAILS.paymentMethodCreateParams,
+                    paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(
+                        setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession,
+                    ),
                     paymentMethodExtraParams = null,
                     customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse,
                     iconResource = PaymentSheetR.drawable.stripe_ic_paymentsheet_link,
@@ -752,17 +756,17 @@ internal class PaymentOptionsViewModelTest {
             val viewModel = createLinkViewModel()
 
             viewModel.linkHandler.payWithLinkInline(
-                userInput = UserInput.SignIn("email@email.com"),
-                paymentSelection = createCardPaymentSelection(
+                paymentSelection = createLinkInlinePaymentSelection(
                     customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+                    input = UserInput.SignIn("email@email.com"),
                 ),
                 shouldCompleteLinkInlineFlow = false
             )
 
             assertThat(viewModel.selection.value).isEqualTo(
                 PaymentSelection.New.GenericPaymentMethod(
-                    paymentMethodCreateParams = DEFAULT_CARD,
-                    paymentMethodOptionsParams = null,
+                    paymentMethodCreateParams = LinkTestUtils.LINK_NEW_PAYMENT_DETAILS.paymentMethodCreateParams,
+                    paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(),
                     paymentMethodExtraParams = null,
                     customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
                     iconResource = PaymentSheetR.drawable.stripe_ic_paymentsheet_link,
@@ -812,13 +816,15 @@ internal class PaymentOptionsViewModelTest {
         )
     }
 
-    private fun createCardPaymentSelection(
-        customerRequestedSave: PaymentSelection.CustomerRequestedSave
-    ): PaymentSelection.New.Card {
-        return PaymentSelection.New.Card(
+    private fun createLinkInlinePaymentSelection(
+        customerRequestedSave: PaymentSelection.CustomerRequestedSave,
+        input: UserInput,
+    ): PaymentSelection.New.LinkInline {
+        return PaymentSelection.New.LinkInline(
             paymentMethodCreateParams = DEFAULT_CARD,
             brand = CardBrand.Visa,
             customerRequestedSave = customerRequestedSave,
+            input = input,
         )
     }
 

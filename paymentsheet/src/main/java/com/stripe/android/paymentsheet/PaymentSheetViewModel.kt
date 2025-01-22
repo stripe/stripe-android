@@ -236,15 +236,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private fun handleLinkProcessingState(processingState: LinkHandler.ProcessingState) {
         when (processingState) {
             is LinkHandler.ProcessingState.PaymentDetailsCollected -> {
-                processingState.paymentSelection?.let {
-                    // Link PaymentDetails was created successfully, use it to confirm the Stripe Intent.
-                    updateSelection(it)
-                    checkout(selection.value, CheckoutIdentifier.SheetBottomBuy)
-                } ?: run {
-                    // Link PaymentDetails creating failed, fallback to regular checkout.
-                    // paymentSelection is already set to the card parameters from the form.
-                    checkout(selection.value, CheckoutIdentifier.SheetBottomBuy)
-                }
+                updateSelection(processingState.paymentSelection)
+                checkout(selection.value, CheckoutIdentifier.SheetBottomBuy)
             }
             LinkHandler.ProcessingState.Ready -> {
                 this.checkoutIdentifier = CheckoutIdentifier.SheetBottomBuy
@@ -253,9 +246,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             LinkHandler.ProcessingState.Started -> {
                 this.checkoutIdentifier = CheckoutIdentifier.SheetBottomBuy
                 viewState.value = PaymentSheetViewState.StartProcessing
-            }
-            LinkHandler.ProcessingState.CompleteWithoutLink -> {
-                checkout()
             }
         }
     }
@@ -385,7 +375,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         if (paymentSelection is PaymentSelection.New.LinkInline) {
             viewModelScope.launch(workContext) {
                 linkHandler.payWithLinkInline(
-                    userInput = paymentSelection.input,
                     paymentSelection = paymentSelection,
                     shouldCompleteLinkInlineFlow = false,
                 )
