@@ -15,6 +15,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavHostController
 import com.stripe.android.link.LinkActivity.Companion.getArgs
 import com.stripe.android.link.account.LinkAccountManager
+import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.injection.DaggerNativeLinkComponent
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.AccountStatus
@@ -23,6 +24,7 @@ import com.stripe.android.link.ui.LinkAppBarState
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.attestation.IntegrityRequestManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
@@ -34,6 +36,8 @@ internal class LinkActivityViewModel @Inject constructor(
     confirmationHandlerFactory: ConfirmationHandler.Factory,
     private val linkAccountManager: LinkAccountManager,
     val eventReporter: EventReporter,
+    private val integrityRequestManager: IntegrityRequestManager,
+    private val linkGate: LinkGate
 ) : ViewModel(), DefaultLifecycleObserver {
     val confirmationHandler = confirmationHandlerFactory.create(viewModelScope)
     private val _linkState = MutableStateFlow(
@@ -51,10 +55,18 @@ internal class LinkActivityViewModel @Inject constructor(
 
     var navController: NavHostController? = null
     var dismissWithResult: ((LinkActivityResult) -> Unit)? = null
+    var launchWebFlow: ((LinkConfiguration) -> Unit)? = null
 
     fun handleViewAction(action: LinkAction) {
         when (action) {
             LinkAction.BackPressed -> handleBackPressed()
+        }
+    }
+
+    private fun moveToWeb() {
+        launchWebFlow?.let { launcher ->
+            navigate(LinkScreen.Loading, clearStack = true)
+            launcher.invoke(activityRetainedComponent.configuration)
         }
     }
 
@@ -98,11 +110,14 @@ internal class LinkActivityViewModel @Inject constructor(
     fun unregisterActivity() {
         navController = null
         dismissWithResult = null
+        launchWebFlow = null
     }
 
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
         viewModelScope.launch {
+            if (warmUpIntegrityManager().not()) return@launch
+
             val accountStatus = linkAccountManager.accountStatus.first()
             val screen = when (accountStatus) {
                 AccountStatus.Verified -> LinkScreen.Wallet
@@ -111,6 +126,18 @@ internal class LinkActivityViewModel @Inject constructor(
             }
             navigate(screen, clearStack = true, launchSingleTop = true)
         }
+    }
+
+    private suspend fun warmUpIntegrityManager(): Boolean {
+        if (linkGate.useAttestationEndpoints.not()) return true
+
+        val result = integrityRequestManager.prepare()
+        val error = result.exceptionOrNull()
+        if (error != null) {
+            moveToWeb()
+            return false
+        }
+        return true
     }
 
     companion object {
@@ -127,6 +154,7 @@ internal class LinkActivityViewModel @Inject constructor(
                     .stripeAccountIdProvider { args.stripeAccountId }
                     .savedStateHandle(handle)
                     .context(app)
+                    .application(app)
                     .build()
                     .viewModel
             }
