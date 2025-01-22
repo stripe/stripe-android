@@ -176,6 +176,11 @@ internal class DefaultEmbeddedContentHelper @AssistedInject constructor(
             },
             onFormFieldValuesChanged = formHelper::onFormFieldValuesChanged,
             transitionToManageScreen = {
+                sheetLauncher?.launchManage(
+                    paymentMethodMetadata = paymentMethodMetadata,
+                    customerState = requireNotNull(customerStateHolder.customer.value),
+                    selection = selectionHolder.selection.value,
+                )
             },
             transitionToFormScreen = {
                 sheetLauncher?.launchForm(it, paymentMethodMetadata)
@@ -233,8 +238,8 @@ internal class DefaultEmbeddedContentHelper @AssistedInject constructor(
             isCbcEligible = {
                 paymentMethodMetadata.cbcEligibility is CardBrandChoiceEligibility.Eligible
             },
-            isGooglePayReady = stateFlowOf(false),
-            isLinkEnabled = stateFlowOf(false),
+            isGooglePayReady = stateFlowOf(paymentMethodMetadata.isGooglePayReady),
+            isLinkEnabled = stateFlowOf(paymentMethodMetadata.linkState != null),
             isNotPaymentFlow = false,
         )
     }
