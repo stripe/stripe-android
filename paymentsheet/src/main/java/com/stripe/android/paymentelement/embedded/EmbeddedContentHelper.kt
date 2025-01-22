@@ -73,6 +73,7 @@ internal class DefaultEmbeddedContentHelper @AssistedInject constructor(
     private val customerRepository: CustomerRepository,
     private val selectionHolder: EmbeddedSelectionHolder,
     private val embeddedWalletsHelper: EmbeddedWalletsHelper,
+    private val customerStateHolder: CustomerStateHolder,
 ) : EmbeddedContentHelper {
 
     private val mandate: StateFlow<ResolvableString?> = savedStateHandle.getStateFlow(
@@ -145,10 +146,6 @@ internal class DefaultEmbeddedContentHelper @AssistedInject constructor(
     ): PaymentMethodVerticalLayoutInteractor {
         val paymentMethodIncentiveInteractor = PaymentMethodIncentiveInteractor(
             incentive = paymentMethodMetadata.paymentMethodIncentive,
-        )
-        val customerStateHolder: CustomerStateHolder = CustomerStateHolder(
-            savedStateHandle = savedStateHandle,
-            selection = selectionHolder.selection,
         )
         val formHelper = createFormHelper(
             coroutineScope = coroutineScope,
