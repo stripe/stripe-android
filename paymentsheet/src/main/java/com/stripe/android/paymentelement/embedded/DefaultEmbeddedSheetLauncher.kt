@@ -27,7 +27,7 @@ internal class DefaultEmbeddedSheetLauncher(
         )
     }
 
-    private var formActivityLauncher: ActivityResultLauncher<FormContract.Args> =
+    private val formActivityLauncher: ActivityResultLauncher<FormContract.Args> =
         activityResultCaller.registerForActivityResult(FormContract()) { result ->
             if (result is FormResult.Complete) {
                 selectionHolder.set(result.selection)
