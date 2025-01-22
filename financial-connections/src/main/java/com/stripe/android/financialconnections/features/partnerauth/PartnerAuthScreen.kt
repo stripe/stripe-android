@@ -1,7 +1,7 @@
 package com.stripe.android.financialconnections.features.partnerauth
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
 import com.stripe.android.financialconnections.features.common.SharedPartnerAuth
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.presentation.paneViewModel
@@ -15,11 +15,11 @@ internal fun PartnerAuthScreen(inModal: Boolean) {
             args = PartnerAuthViewModel.Args(inModal, Pane.PARTNER_AUTH)
         )
     }
-    val state: State<SharedPartnerAuthState> = viewModel.stateFlow.collectAsState()
+    val state by viewModel.stateFlow.collectAsState()
 
     SharedPartnerAuth(
         inModal = inModal,
-        state = state.value,
+        state = state,
         onContinueClick = viewModel::onLaunchAuthClick,
         onCancelClick = viewModel::onCancelClick,
         onClickableTextClick = viewModel::onClickableTextClick,

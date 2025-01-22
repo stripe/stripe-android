@@ -24,6 +24,7 @@ import com.stripe.android.financialconnections.presentation.Async
 import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.repository.AccountUpdateRequiredContentRepository
+import com.stripe.android.financialconnections.repository.CoreAuthorizationPendingNetworkingRepairRepository
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -33,6 +34,7 @@ internal class AccountUpdateRequiredViewModel @AssistedInject constructor(
     @Assisted initialState: AccountUpdateRequiredState,
     nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val updateRequiredContentRepository: AccountUpdateRequiredContentRepository,
+    private val pendingRepairRepository: CoreAuthorizationPendingNetworkingRepairRepository,
     private val navigationManager: NavigationManager,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val updateLocalManifest: UpdateLocalManifest,
@@ -60,7 +62,11 @@ internal class AccountUpdateRequiredViewModel @AssistedInject constructor(
             val referrer = state.referrer
             when (val type = requireNotNull(state.payload()?.type)) {
                 is Type.Repair -> {
-                    handleUnsupportedRepairAction(referrer)
+                    if (type.authorization != null) {
+                        openBankAuthRepair(type.institution, type.authorization, referrer)
+                    } else {
+                        handleUnsupportedRepairAction(referrer)
+                    }
                 }
                 is Type.Supportability -> {
                     openPartnerAuth(type.institution, referrer)
@@ -78,6 +84,24 @@ internal class AccountUpdateRequiredViewModel @AssistedInject constructor(
         )
         // Fall back to the institution picker for now
         navigationManager.tryNavigateTo(InstitutionPicker(referrer))
+    }
+
+    private fun openBankAuthRepair(
+        institution: FinancialConnectionsInstitution?,
+        authorization: String,
+        referrer: Pane,
+    ) {
+        if (institution != null) {
+            updateLocalManifest {
+                it.copy(activeInstitution = institution)
+            }
+
+            pendingRepairRepository.set(authorization)
+            navigationManager.tryNavigateTo(Destination.BankAuthRepair(referrer))
+        } else {
+            // Fall back to the institution picker
+            navigationManager.tryNavigateTo(InstitutionPicker(referrer))
+        }
     }
 
     private fun openPartnerAuth(
