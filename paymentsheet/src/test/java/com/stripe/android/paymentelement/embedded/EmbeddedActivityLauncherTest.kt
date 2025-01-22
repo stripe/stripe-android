@@ -1,47 +1,70 @@
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultCaller
-import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedActivityLauncher
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
+import com.stripe.android.paymentelement.embedded.FakeFormActivityLauncher
 import com.stripe.android.paymentelement.embedded.FormContract
 import com.stripe.android.paymentelement.embedded.FormResult
-import org.junit.Before
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
-import org.mockito.Captor
+import org.mockito.Mockito.mock
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
 import org.mockito.kotlin.capture
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.never
-import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 internal class EmbeddedActivityLauncherTest {
 
-    private lateinit var activityResultCaller: ActivityResultCaller
-    private lateinit var selectionHolder: EmbeddedSelectionHolder
-    private lateinit var lifecycleOwner: TestLifecycleOwner
-    private lateinit var launcher: DefaultEmbeddedActivityLauncher
-    private lateinit var formActivityLauncher: ActivityResultLauncher<FormContract.Args>
+    @Test
+    fun `formLauncher launches activity with correct parameters`() = testScenario {
+        val code = "test_code"
+        val expectedArgs = FormContract.Args(code, null)
+        launcher.formLauncher.invoke(code, null)
+        assert(formActivityLauncher.didLaunch)
+        assert(formActivityLauncher.launchArgs == expectedArgs)
+    }
 
-    @Captor
-    private lateinit var contractCallbackCaptor: ArgumentCaptor<ActivityResultCallback<FormResult>>
+    @Test
+    fun `formActivityLauncher callback updates selection holder on complete result`() = testScenario {
+        val selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
+        val result = FormResult.Complete(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+        contractCallbackCaptor.value.onActivityResult(result)
+        assert(selectionHolder.selection.value == selection)
+    }
 
-    @Before
-    fun setUp() {
+    @Test
+    fun `formActivityLauncher callback does not update selection holder on non-complete result`() = testScenario {
+        val result = FormResult.Cancelled
+        contractCallbackCaptor.value.onActivityResult(result)
+        assert(selectionHolder.selection.value == null)
+    }
+
+    @Test
+    fun `cleanup happens on lifecycle destroy`() = testScenario {
+        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+        assert(formActivityLauncher.didUnregister)
+    }
+
+    private fun testScenario(
+        block: suspend Scenario.() -> Unit,
+    ) = runTest {
         MockitoAnnotations.openMocks(this)
-        activityResultCaller = mock()
-        lifecycleOwner = TestLifecycleOwner()
-        selectionHolder = mock()
+        val activityResultCaller = mock<ActivityResultCaller>()
+        val lifecycleOwner = TestLifecycleOwner()
+        val formActivityLauncher = FakeFormActivityLauncher()
+        val selectionHolder = EmbeddedSelectionHolder(SavedStateHandle())
 
-        formActivityLauncher = mock()
+        @Suppress("UNCHECKED_CAST")
+        val contractCallbackCaptor: ArgumentCaptor<ActivityResultCallback<FormResult>> = ArgumentCaptor
+            .forClass(ActivityResultCallback::class.java) as ArgumentCaptor<ActivityResultCallback<FormResult>>
 
         whenever(
             activityResultCaller.registerForActivityResult(
@@ -50,35 +73,26 @@ internal class EmbeddedActivityLauncherTest {
             )
         ).thenReturn(formActivityLauncher)
 
-        launcher = DefaultEmbeddedActivityLauncher(activityResultCaller, lifecycleOwner, selectionHolder)
+        val embeddedActivityLauncher = DefaultEmbeddedActivityLauncher(
+            activityResultCaller = activityResultCaller,
+            lifecycleOwner = lifecycleOwner,
+            selectionHolder = selectionHolder
+        )
+
+        Scenario(
+            contractCallbackCaptor = contractCallbackCaptor,
+            selectionHolder = selectionHolder,
+            lifecycleOwner = lifecycleOwner,
+            formActivityLauncher = formActivityLauncher,
+            launcher = embeddedActivityLauncher
+        ).block()
     }
 
-    @Test
-    fun `formLauncher launches activity with correct parameters`() {
-        val code = "test_code"
-        val expectedArgs = FormContract.Args(code, null)
-        launcher.formLauncher.invoke(code, null)
-        verify(formActivityLauncher).launch(expectedArgs)
-    }
-
-    @Test
-    fun `formActivityLauncher callback updates selection holder on complete result`() {
-        val selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
-        val result = FormResult.Complete(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
-        contractCallbackCaptor.value.onActivityResult(result)
-        verify(selectionHolder).set(selection)
-    }
-
-    @Test
-    fun `formActivityLauncher callback does not update selection holder on non-complete result`() {
-        val result = FormResult.Cancelled
-        contractCallbackCaptor.value.onActivityResult(result)
-        verify(selectionHolder, never()).set(any())
-    }
-
-    @Test
-    fun `cleanup happens on lifecycle destroy`() {
-        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-        verify(formActivityLauncher).unregister()
-    }
+    private class Scenario(
+        val contractCallbackCaptor: ArgumentCaptor<ActivityResultCallback<FormResult>>,
+        val selectionHolder: EmbeddedSelectionHolder,
+        val lifecycleOwner: TestLifecycleOwner,
+        val formActivityLauncher: FakeFormActivityLauncher,
+        val launcher: DefaultEmbeddedActivityLauncher
+    )
 }
