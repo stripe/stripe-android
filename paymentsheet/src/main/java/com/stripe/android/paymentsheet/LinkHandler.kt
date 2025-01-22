@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.LinkPaymentDetails
@@ -40,10 +41,8 @@ internal class LinkHandler @Inject constructor(
         data object Started : ProcessingState()
 
         data class PaymentDetailsCollected(
-            val paymentSelection: PaymentSelection?
+            val paymentSelection: PaymentSelection
         ) : ProcessingState()
-
-        data object CompleteWithoutLink : ProcessingState()
     }
 
     private val _processingState =
@@ -69,107 +68,145 @@ internal class LinkHandler @Inject constructor(
     }
 
     suspend fun payWithLinkInline(
-        userInput: UserInput?,
-        paymentSelection: PaymentSelection?,
+        paymentSelection: PaymentSelection.New.LinkInline,
         shouldCompleteLinkInlineFlow: Boolean,
     ) {
-        (paymentSelection as? PaymentSelection.New.Card?)?.paymentMethodCreateParams?.let { params ->
-            savedStateHandle[SAVE_PROCESSING] = true
-            _processingState.emit(ProcessingState.Started)
+        savedStateHandle[SAVE_PROCESSING] = true
+        _processingState.emit(ProcessingState.Started)
 
-            val configuration = requireNotNull(_linkConfiguration.value)
+        val configuration = requireNotNull(_linkConfiguration.value)
 
-            when (linkConfigurationCoordinator.getAccountStatusFlow(configuration).first()) {
-                AccountStatus.Verified -> {
-                    completeLinkInlinePayment(
-                        configuration,
-                        params,
-                        paymentSelection.customerRequestedSave,
-                        userInput is UserInput.SignIn && shouldCompleteLinkInlineFlow
-                    )
-                }
-                AccountStatus.VerificationStarted,
-                AccountStatus.NeedsVerification -> {
-                    linkAnalyticsHelper.onLinkPopupSkipped()
-                    _processingState.emit(ProcessingState.CompleteWithoutLink)
-                }
-                AccountStatus.SignedOut,
-                AccountStatus.Error -> {
-                    userInput?.let {
-                        linkConfigurationCoordinator.signInWithUserInput(configuration, userInput).fold(
-                            onSuccess = {
-                                // If successful, the account was fetched or created, so try again
-                                payWithLinkInline(
-                                    userInput = userInput,
-                                    paymentSelection = paymentSelection,
-                                    shouldCompleteLinkInlineFlow = shouldCompleteLinkInlineFlow,
-                                )
-                            },
-                            onFailure = {
-                                _processingState.emit(ProcessingState.CompleteWithoutLink)
-                            }
+        when (linkConfigurationCoordinator.getAccountStatusFlow(configuration).first()) {
+            AccountStatus.Verified -> {
+                completeLinkInlinePayment(
+                    paymentSelection,
+                    configuration,
+                    paymentSelection.input is UserInput.SignIn && shouldCompleteLinkInlineFlow
+                )
+            }
+            AccountStatus.VerificationStarted,
+            AccountStatus.NeedsVerification -> {
+                linkAnalyticsHelper.onLinkPopupSkipped()
+                _processingState.emit(ProcessingState.PaymentDetailsCollected(paymentSelection.toNewSelection()))
+            }
+            AccountStatus.SignedOut,
+            AccountStatus.Error -> {
+                linkConfigurationCoordinator.signInWithUserInput(configuration, paymentSelection.input).fold(
+                    onSuccess = {
+                        // If successful, the account was fetched or created, so try again
+                        payWithLinkInline(
+                            paymentSelection = paymentSelection,
+                            shouldCompleteLinkInlineFlow = shouldCompleteLinkInlineFlow,
                         )
-                    } ?: run {
-                        savedStateHandle[SAVE_PROCESSING] = false
-                        _processingState.emit(ProcessingState.Ready)
+                    },
+                    onFailure = {
+                        _processingState.emit(
+                            ProcessingState.PaymentDetailsCollected(paymentSelection.toNewSelection())
+                        )
                     }
-                }
+                )
             }
         }
     }
 
     private suspend fun completeLinkInlinePayment(
+        paymentSelection: PaymentSelection.New.LinkInline,
         configuration: LinkConfiguration,
-        paymentMethodCreateParams: PaymentMethodCreateParams,
-        customerRequestedSave: PaymentSelection.CustomerRequestedSave,
         shouldCompleteLinkInlineFlow: Boolean
     ) {
+        val paymentMethodCreateParams = paymentSelection.paymentMethodCreateParams
+        val customerRequestedSave = paymentSelection.customerRequestedSave
+
         if (shouldCompleteLinkInlineFlow) {
             linkAnalyticsHelper.onLinkPopupSkipped()
-            _processingState.emit(ProcessingState.CompleteWithoutLink)
+            _processingState.emit(ProcessingState.PaymentDetailsCollected(paymentSelection.toNewSelection()))
         } else {
             val linkPaymentDetails = linkConfigurationCoordinator.attachNewCardToAccount(
                 configuration,
                 paymentMethodCreateParams
             ).getOrNull()
 
-            val paymentSelection = when (linkPaymentDetails) {
-                is LinkPaymentDetails.New -> {
-                    PaymentSelection.New.LinkInline(linkPaymentDetails, customerRequestedSave)
-                }
-                is LinkPaymentDetails.Saved -> {
-                    val last4 = linkPaymentDetails.paymentDetails.last4
-
-                    PaymentSelection.Saved(
-                        paymentMethod = PaymentMethod.Builder()
-                            .setId(linkPaymentDetails.paymentDetails.id)
-                            .setCode(paymentMethodCreateParams.typeCode)
-                            .setCard(
-                                PaymentMethod.Card(
-                                    last4 = last4,
-                                    wallet = Wallet.LinkWallet(last4)
-                                )
-                            )
-                            .setType(PaymentMethod.Type.Card)
-                            .build(),
-                        walletType = PaymentSelection.Saved.WalletType.Link,
-                        paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(
-                            setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession?.takeIf {
-                                customerRequestedSave ==
-                                    PaymentSelection.CustomerRequestedSave.RequestReuse
-                            } ?: ConfirmPaymentIntentParams.SetupFutureUsage.Blank
-                        )
-                    )
-                }
+            val nextSelection = when (linkPaymentDetails) {
+                is LinkPaymentDetails.New -> createGenericSelection(
+                    linkPaymentDetails = linkPaymentDetails,
+                    customerRequestedSave = customerRequestedSave,
+                )
+                is LinkPaymentDetails.Saved -> createSavedSelection(
+                    linkPaymentDetails = linkPaymentDetails,
+                    paymentMethodCreateParams = paymentMethodCreateParams,
+                    customerRequestedSave = customerRequestedSave,
+                )
                 null -> null
             }
 
-            if (paymentSelection != null) {
+            if (nextSelection != null) {
                 linkStore.markLinkAsUsed()
             }
 
-            _processingState.emit(ProcessingState.PaymentDetailsCollected(paymentSelection))
+            _processingState.emit(
+                ProcessingState.PaymentDetailsCollected(
+                    paymentSelection = nextSelection ?: paymentSelection.toNewSelection()
+                )
+            )
         }
+    }
+
+    private fun createGenericSelection(
+        linkPaymentDetails: LinkPaymentDetails.New,
+        customerRequestedSave: PaymentSelection.CustomerRequestedSave,
+    ): PaymentSelection.New.GenericPaymentMethod {
+        return PaymentSelection.New.GenericPaymentMethod(
+            paymentMethodCreateParams = linkPaymentDetails.paymentMethodCreateParams,
+            paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(
+                setupFutureUsage = customerRequestedSave.setupFutureUsage
+            ),
+            paymentMethodExtraParams = null,
+            customerRequestedSave = customerRequestedSave,
+            label = resolvableString("···· ${linkPaymentDetails.paymentDetails.last4}"),
+            iconResource = R.drawable.stripe_ic_paymentsheet_link,
+            lightThemeIconUrl = null,
+            darkThemeIconUrl = null,
+            createdFromLink = true,
+        )
+    }
+
+    private fun createSavedSelection(
+        linkPaymentDetails: LinkPaymentDetails.Saved,
+        paymentMethodCreateParams: PaymentMethodCreateParams,
+        customerRequestedSave: PaymentSelection.CustomerRequestedSave,
+    ): PaymentSelection.Saved {
+        val last4 = linkPaymentDetails.paymentDetails.last4
+
+        return PaymentSelection.Saved(
+            paymentMethod = PaymentMethod.Builder()
+                .setId(linkPaymentDetails.paymentDetails.id)
+                .setCode(paymentMethodCreateParams.typeCode)
+                .setCard(
+                    PaymentMethod.Card(
+                        last4 = last4,
+                        wallet = Wallet.LinkWallet(last4)
+                    )
+                )
+                .setType(PaymentMethod.Type.Card)
+                .build(),
+            walletType = PaymentSelection.Saved.WalletType.Link,
+            paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(
+                setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession?.takeIf {
+                    customerRequestedSave ==
+                        PaymentSelection.CustomerRequestedSave.RequestReuse
+                } ?: ConfirmPaymentIntentParams.SetupFutureUsage.Blank
+            )
+        )
+    }
+
+    private fun PaymentSelection.New.LinkInline.toNewSelection(): PaymentSelection.New.Card {
+        return PaymentSelection.New.Card(
+            paymentMethodCreateParams = paymentMethodCreateParams,
+            brand = brand,
+            customerRequestedSave = customerRequestedSave,
+            paymentMethodOptionsParams = paymentMethodOptionsParams,
+            paymentMethodExtraParams = paymentMethodExtraParams
+        )
     }
 
     @OptIn(DelicateCoroutinesApi::class)

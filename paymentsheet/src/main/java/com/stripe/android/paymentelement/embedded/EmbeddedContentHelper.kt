@@ -248,8 +248,9 @@ internal class DefaultEmbeddedContentHelper @AssistedInject constructor(
         coroutineScope: CoroutineScope,
         paymentMethodMetadata: PaymentMethodMetadata,
     ): FormHelper {
-        val linkInlineHandler = createLinkInlineHandler(coroutineScope)
         return DefaultFormHelper(
+            coroutineScope = coroutineScope,
+            linkInlineHandler = LinkInlineHandler.create(),
             cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
             paymentMethodMetadata = paymentMethodMetadata,
             newPaymentSelectionProvider = {
@@ -267,22 +268,6 @@ internal class DefaultEmbeddedContentHelper @AssistedInject constructor(
                 setSelection(it)
             },
             linkConfigurationCoordinator = linkConfigurationCoordinator,
-            onLinkInlineSignupStateChanged = linkInlineHandler::onStateUpdated,
-        )
-    }
-
-    private fun createLinkInlineHandler(
-        coroutineScope: CoroutineScope,
-    ): LinkInlineHandler {
-        return LinkInlineHandler(
-            coroutineScope = coroutineScope,
-            payWithLink = { _, _, _ ->
-            },
-            selection = selectionHolder.selection,
-            updateLinkPrimaryButtonUiState = {
-            },
-            primaryButtonLabel = stateFlowOf(null),
-            shouldCompleteLinkFlowInline = false,
         )
     }
 

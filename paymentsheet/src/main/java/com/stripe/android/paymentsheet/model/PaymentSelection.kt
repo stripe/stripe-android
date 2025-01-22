@@ -12,7 +12,7 @@ import androidx.core.content.res.ResourcesCompat
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.orEmpty
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.link.LinkPaymentDetails
+import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -215,25 +215,15 @@ internal sealed class PaymentSelection : Parcelable {
 
         @Parcelize
         data class LinkInline(
-            val linkPaymentDetails: LinkPaymentDetails,
+            override val paymentMethodCreateParams: PaymentMethodCreateParams,
+            val brand: CardBrand,
             override val customerRequestedSave: CustomerRequestedSave,
+            override val paymentMethodOptionsParams: PaymentMethodOptionsParams? = null,
+            override val paymentMethodExtraParams: PaymentMethodExtraParams? = null,
+            val input: UserInput,
         ) : New() {
             @IgnoredOnParcel
-            private val paymentDetails = linkPaymentDetails.paymentDetails
-
-            @IgnoredOnParcel
-            override val paymentMethodCreateParams = linkPaymentDetails.paymentMethodCreateParams
-
-            @IgnoredOnParcel
-            override val paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(
-                setupFutureUsage = customerRequestedSave.setupFutureUsage
-            )
-
-            @IgnoredOnParcel
-            override val paymentMethodExtraParams = null
-
-            @IgnoredOnParcel
-            val label = "···· ${paymentDetails.last4}"
+            val last4: String = paymentMethodCreateParams.cardLast4().orEmpty()
         }
 
         @Parcelize
@@ -246,6 +236,7 @@ internal sealed class PaymentSelection : Parcelable {
             override val customerRequestedSave: CustomerRequestedSave,
             override val paymentMethodOptionsParams: PaymentMethodOptionsParams? = null,
             override val paymentMethodExtraParams: PaymentMethodExtraParams? = null,
+            val createdFromLink: Boolean = false,
         ) : New()
     }
 
@@ -303,6 +294,7 @@ internal val PaymentSelection.isLink: Boolean
         is PaymentSelection.GooglePay -> false
         is PaymentSelection.Link -> true
         is PaymentSelection.New.LinkInline -> true
+        is PaymentSelection.New.GenericPaymentMethod -> createdFromLink
         is PaymentSelection.New -> false
         is PaymentSelection.Saved -> walletType == PaymentSelection.Saved.WalletType.Link
         is PaymentSelection.ExternalPaymentMethod -> false
@@ -370,7 +362,7 @@ internal val PaymentSelection.label: ResolvableString
         PaymentSelection.Link -> StripeR.string.stripe_link.resolvableString
         is PaymentSelection.New.Card -> createCardLabel(last4).orEmpty()
         is PaymentSelection.New.GenericPaymentMethod -> label
-        is PaymentSelection.New.LinkInline -> label.resolvableString
+        is PaymentSelection.New.LinkInline -> createCardLabel(last4).orEmpty()
         is PaymentSelection.New.USBankAccount -> label.resolvableString
         is PaymentSelection.Saved -> getSavedLabel(this).orEmpty()
     }
@@ -390,10 +382,7 @@ internal val PaymentSelection.paymentMethodType: String
         is PaymentSelection.ExternalPaymentMethod -> type
         PaymentSelection.GooglePay -> "google_pay"
         PaymentSelection.Link -> "link"
-        is PaymentSelection.New.Card -> paymentMethodCreateParams.typeCode
-        is PaymentSelection.New.GenericPaymentMethod -> paymentMethodCreateParams.typeCode
-        is PaymentSelection.New.LinkInline -> linkPaymentDetails.paymentMethodCreateParams.typeCode
-        is PaymentSelection.New.USBankAccount -> paymentMethodCreateParams.typeCode
+        is PaymentSelection.New -> paymentMethodCreateParams.typeCode
         is PaymentSelection.Saved -> paymentMethod.type?.name ?: "card"
     }
 

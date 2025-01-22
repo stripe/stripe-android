@@ -20,14 +20,14 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.link.LinkActivityContract
-import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.LinkPaymentLauncher
+import com.stripe.android.link.ui.inline.SignUpConsentAction
+import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
 import com.stripe.android.model.ConfirmPaymentIntentParams
-import com.stripe.android.model.PaymentDetailsFixtures
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
@@ -843,12 +843,18 @@ internal class DefaultFlowControllerTest {
             )
 
             val paymentSelection = PaymentSelection.New.LinkInline(
-                LinkPaymentDetails.New(
-                    PaymentDetailsFixtures.CONSUMER_SINGLE_PAYMENT_DETAILS.paymentDetails.first(),
-                    mock(),
-                    PaymentMethodCreateParamsFixtures.DEFAULT_CARD
+                paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                paymentMethodOptionsParams = null,
+                paymentMethodExtraParams = null,
+                brand = CardBrand.Visa,
+                customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+                input = UserInput.SignUp(
+                    email = "email@email",
+                    phone = "2267007611",
+                    country = "CA",
+                    name = "John Doe",
+                    consentAction = SignUpConsentAction.Checkbox,
                 ),
-                PaymentSelection.CustomerRequestedSave.NoRequest,
             )
 
             flowController.onPaymentOptionResult(
@@ -883,12 +889,18 @@ internal class DefaultFlowControllerTest {
         )
 
         val paymentSelection = PaymentSelection.New.LinkInline(
-            LinkPaymentDetails.New(
-                PaymentDetailsFixtures.CONSUMER_SINGLE_PAYMENT_DETAILS.paymentDetails.first(),
-                mock(),
-                PaymentMethodCreateParamsFixtures.DEFAULT_CARD
+            paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+            paymentMethodOptionsParams = null,
+            paymentMethodExtraParams = null,
+            brand = CardBrand.Visa,
+            customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+            input = UserInput.SignUp(
+                email = "email@email",
+                phone = "2267007611",
+                country = "CA",
+                name = "John Doe",
+                consentAction = SignUpConsentAction.Checkbox,
             ),
-            PaymentSelection.CustomerRequestedSave.NoRequest,
         )
 
         flowController.onPaymentOptionResult(
@@ -935,12 +947,18 @@ internal class DefaultFlowControllerTest {
             )
 
             val paymentSelection = PaymentSelection.New.LinkInline(
-                LinkPaymentDetails.New(
-                    PaymentDetailsFixtures.CONSUMER_SINGLE_PAYMENT_DETAILS.paymentDetails.first(),
-                    mock(),
-                    PaymentMethodCreateParamsFixtures.DEFAULT_CARD
+                paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                paymentMethodOptionsParams = null,
+                paymentMethodExtraParams = null,
+                brand = CardBrand.Visa,
+                customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+                input = UserInput.SignUp(
+                    email = "email@email",
+                    phone = "2267007611",
+                    country = "CA",
+                    name = "John Doe",
+                    consentAction = SignUpConsentAction.Checkbox,
                 ),
-                PaymentSelection.CustomerRequestedSave.NoRequest,
             )
 
             flowController.onPaymentOptionResult(

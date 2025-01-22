@@ -4,15 +4,16 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.link.LinkPaymentDetails
+import com.stripe.android.link.ui.inline.SignUpConsentAction
+import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkMode
-import com.stripe.android.model.PaymentDetailsFixtures
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import org.junit.runner.RunWith
@@ -651,12 +652,18 @@ class PaymentSheetEventTest {
         val inlineLinkEvent = PaymentSheetEvent.Payment(
             mode = EventReporter.Mode.Complete,
             paymentSelection = PaymentSelection.New.LinkInline(
-                LinkPaymentDetails.New(
-                    PaymentDetailsFixtures.CONSUMER_SINGLE_PAYMENT_DETAILS.paymentDetails.first(),
-                    mock(),
-                    mock()
+                paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                paymentMethodOptionsParams = null,
+                paymentMethodExtraParams = null,
+                brand = CardBrand.Visa,
+                customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+                input = UserInput.SignUp(
+                    email = "email@email",
+                    phone = "2267007611",
+                    country = "CA",
+                    name = "John Doe",
+                    consentAction = SignUpConsentAction.Checkbox,
                 ),
-                PaymentSelection.CustomerRequestedSave.NoRequest,
             ),
             duration = 1.milliseconds,
             result = PaymentSheetEvent.Payment.Result.Success,
@@ -677,6 +684,49 @@ class PaymentSheetEventTest {
             mapOf(
                 "currency" to "usd",
                 "duration" to 0.001F,
+                "is_decoupled" to false,
+                "link_enabled" to false,
+                "selected_lpm" to "card",
+                "google_pay_enabled" to false,
+            )
+        )
+    }
+
+    @Test
+    fun `Generic payment method event created from Link should return expected event`() {
+        val inlineLinkEvent = PaymentSheetEvent.Payment(
+            mode = EventReporter.Mode.Complete,
+            paymentSelection = PaymentSelection.New.GenericPaymentMethod(
+                paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                paymentMethodOptionsParams = null,
+                paymentMethodExtraParams = null,
+                customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+                label = resolvableString("**** 4444"),
+                iconResource = R.drawable.stripe_ic_paymentsheet_card_visa,
+                darkThemeIconUrl = null,
+                lightThemeIconUrl = null,
+                createdFromLink = true,
+            ),
+            duration = 1.milliseconds,
+            result = PaymentSheetEvent.Payment.Result.Success,
+            currency = "usd",
+            isDeferred = false,
+            linkEnabled = false,
+            googlePaySupported = false,
+            deferredIntentConfirmationType = null,
+        )
+        assertThat(
+            inlineLinkEvent.eventName
+        ).isEqualTo(
+            "mc_complete_payment_link_success"
+        )
+        assertThat(
+            inlineLinkEvent.params
+        ).isEqualTo(
+            mapOf(
+                "currency" to "usd",
+                "duration" to 0.001F,
+                "selected_lpm" to "card",
                 "is_decoupled" to false,
                 "link_enabled" to false,
                 "google_pay_enabled" to false,
@@ -915,12 +965,18 @@ class PaymentSheetEventTest {
         val inlineLinkEvent = PaymentSheetEvent.Payment(
             mode = EventReporter.Mode.Complete,
             paymentSelection = PaymentSelection.New.LinkInline(
-                LinkPaymentDetails.New(
-                    PaymentDetailsFixtures.CONSUMER_SINGLE_PAYMENT_DETAILS.paymentDetails.first(),
-                    mock(),
-                    mock()
+                paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                paymentMethodOptionsParams = null,
+                paymentMethodExtraParams = null,
+                brand = CardBrand.Visa,
+                customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+                input = UserInput.SignUp(
+                    email = "email@email",
+                    phone = "2267007611",
+                    country = "CA",
+                    name = "John Doe",
+                    consentAction = SignUpConsentAction.Checkbox,
                 ),
-                PaymentSelection.CustomerRequestedSave.NoRequest,
             ),
             duration = 1.milliseconds,
             result = PaymentSheetEvent.Payment.Result.Failure(
@@ -945,6 +1001,7 @@ class PaymentSheetEventTest {
                 "duration" to 0.001F,
                 "is_decoupled" to false,
                 "link_enabled" to false,
+                "selected_lpm" to "card",
                 "google_pay_enabled" to false,
                 "error_message" to "apiError",
             )

@@ -5,7 +5,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.paymentsheet.DefaultFormHelper
-import com.stripe.android.paymentsheet.LinkInlineHandler
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -76,10 +75,8 @@ internal class DefaultAddPaymentMethodInteractor(
             paymentMethodMetadata: PaymentMethodMetadata,
         ): AddPaymentMethodInteractor {
             val coroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
-            val linkInlineHandler = LinkInlineHandler.create(viewModel, coroutineScope)
             val formHelper = DefaultFormHelper.create(
                 viewModel = viewModel,
-                linkInlineHandler = linkInlineHandler,
                 paymentMethodMetadata = paymentMethodMetadata
             )
             val bankFormInteractor = BankFormInteractor.create(viewModel)
