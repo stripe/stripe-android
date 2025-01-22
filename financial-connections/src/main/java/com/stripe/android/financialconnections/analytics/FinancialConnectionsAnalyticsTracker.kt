@@ -122,6 +122,7 @@ internal class FinancialConnectionsAnalyticsTrackerImpl(
             "is_stripe_direct" to manifest.isStripeDirect.toString(),
             "single_account" to manifest.singleAccount.toString(),
             "allow_manual_entry" to manifest.allowManualEntry.toString(),
+            "app_verification_enabled" to manifest.appVerificationEnabled.toString(),
             "account_holder_id" to manifest.accountholderToken,
         )
     }

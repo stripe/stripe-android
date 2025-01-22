@@ -96,7 +96,7 @@ class NetworkingLinkSignupViewModelTest {
                 )
             )
         )
-        whenever(lookupAccount(any(), any(), any(), any())).thenReturn(ConsumerSessionLookup(exists = false))
+        whenever(lookupAccount(any(), any(), any(), any(), any())).thenReturn(ConsumerSessionLookup(exists = false))
 
         val viewModel = buildViewModel(NetworkingLinkSignupState())
         val state = viewModel.stateFlow.value
@@ -117,7 +117,7 @@ class NetworkingLinkSignupViewModelTest {
                 )
             )
         )
-        whenever(lookupAccount(any(), any(), any(), any())).thenReturn(ConsumerSessionLookup(exists = false))
+        whenever(lookupAccount(any(), any(), any(), any(), any())).thenReturn(ConsumerSessionLookup(exists = false))
 
         val viewModel = buildViewModel(
             state = NetworkingLinkSignupState(),
@@ -201,7 +201,7 @@ class NetworkingLinkSignupViewModelTest {
             )
         )
         whenever(getOrFetchSync().manifest).thenReturn(manifest)
-        whenever(lookupAccount(any(), any(), any(), any())).thenReturn(ConsumerSessionLookup(exists = true))
+        whenever(lookupAccount(any(), any(), any(), any(), any())).thenReturn(ConsumerSessionLookup(exists = true))
 
         val viewModel = buildViewModel(NetworkingLinkSignupState())
 
@@ -236,7 +236,7 @@ class NetworkingLinkSignupViewModelTest {
             )
         )
 
-        whenever(lookupAccount(any(), any(), any(), any())).thenReturn(ConsumerSessionLookup(exists = true))
+        whenever(lookupAccount(any(), any(), any(), any(), any())).thenReturn(ConsumerSessionLookup(exists = true))
 
         val viewModel = buildViewModel(
             state = NetworkingLinkSignupState(isInstantDebits = true),
@@ -274,7 +274,7 @@ class NetworkingLinkSignupViewModelTest {
             )
         )
         whenever(getOrFetchSync().manifest).thenReturn(manifest)
-        whenever(lookupAccount(any(), any(), any(), any())).thenReturn(ConsumerSessionLookup(exists = true))
+        whenever(lookupAccount(any(), any(), any(), any(), any())).thenReturn(ConsumerSessionLookup(exists = true))
 
         val viewModel = buildViewModel(
             state = NetworkingLinkSignupState(),
@@ -368,7 +368,7 @@ class NetworkingLinkSignupViewModelTest {
         )
 
         whenever(getOrFetchSync(anyOrNull(), anyOrNull())).thenReturn(syncResponse)
-        whenever(lookupAccount(any(), any(), any(), any())).thenReturn(ConsumerSessionLookup(exists = false))
+        whenever(lookupAccount(any(), any(), any(), any(), any())).thenReturn(ConsumerSessionLookup(exists = false))
 
         val viewModel = buildViewModel(
             state = NetworkingLinkSignupState(isInstantDebits = false),
@@ -402,7 +402,7 @@ class NetworkingLinkSignupViewModelTest {
         )
 
         whenever(getOrFetchSync(anyOrNull(), anyOrNull())).thenReturn(initialSyncResponse)
-        whenever(lookupAccount(any(), any(), any(), any())).thenReturn(ConsumerSessionLookup(exists = false))
+        whenever(lookupAccount(any(), any(), any(), any(), any())).thenReturn(ConsumerSessionLookup(exists = false))
 
         val viewModel = buildViewModel(
             state = NetworkingLinkSignupState(isInstantDebits = true),
@@ -436,7 +436,7 @@ class NetworkingLinkSignupViewModelTest {
         )
 
         whenever(getOrFetchSync(anyOrNull(), anyOrNull())).thenReturn(syncResponse)
-        whenever(lookupAccount(any(), any(), any(), any())).thenReturn(ConsumerSessionLookup(exists = false))
+        whenever(lookupAccount(any(), any(), any(), any(), any())).thenReturn(ConsumerSessionLookup(exists = false))
 
         val viewModel = buildViewModel(
             state = NetworkingLinkSignupState(isInstantDebits = false),
@@ -470,7 +470,7 @@ class NetworkingLinkSignupViewModelTest {
         )
 
         whenever(getOrFetchSync(anyOrNull(), anyOrNull())).thenReturn(initialSyncResponse)
-        whenever(lookupAccount(any(), any(), any(), any())).thenReturn(ConsumerSessionLookup(exists = false))
+        whenever(lookupAccount(any(), any(), any(), any(), any())).thenReturn(ConsumerSessionLookup(exists = false))
 
         val viewModel = buildViewModel(
             state = NetworkingLinkSignupState(isInstantDebits = true),
@@ -502,7 +502,7 @@ class NetworkingLinkSignupViewModelTest {
         val permissionException = PermissionException(stripeError = StripeError())
 
         whenever(getOrFetchSync(anyOrNull(), anyOrNull())).thenReturn(initialSyncResponse)
-        whenever(lookupAccount(any(), any(), any(), any())).then {
+        whenever(lookupAccount(any(), any(), any(), any(), any())).then {
             throw permissionException
         }
 
@@ -534,7 +534,7 @@ class NetworkingLinkSignupViewModelTest {
         val apiException = APIConnectionException()
 
         whenever(getOrFetchSync(anyOrNull(), anyOrNull())).thenReturn(initialSyncResponse)
-        whenever(lookupAccount(any(), any(), any(), any())).then {
+        whenever(lookupAccount(any(), any(), any(), any(), any())).then {
             throw apiException
         }
 
@@ -566,7 +566,7 @@ class NetworkingLinkSignupViewModelTest {
         val permissionException = PermissionException(stripeError = StripeError())
 
         whenever(getOrFetchSync(anyOrNull(), anyOrNull())).thenReturn(initialSyncResponse)
-        whenever(lookupAccount(any(), any(), any(), any())).then {
+        whenever(lookupAccount(any(), any(), any(), any(), any())).then {
             throw permissionException
         }
 
@@ -624,7 +624,7 @@ class NetworkingLinkSignupViewModelTest {
             saveAccountToLink = saveAccountToLink,
             eventTracker = eventTracker,
             navigationManager = navigationManager,
-            integrityRequestManager = mock(),
+            requestIntegrityToken = mock(),
             applicationId = "test",
             logger = Logger.noop(),
         )
@@ -659,7 +659,7 @@ class NetworkingLinkSignupViewModelTest {
             },
             navigationManager = navigationManager,
             handleError = handleError,
-            integrityRequestManager = mock(),
+            requestIntegrityToken = mock(),
             applicationId = "test",
         )
     }

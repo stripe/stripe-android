@@ -1,6 +1,7 @@
 package com.stripe.android.financialconnections.features.networkinglinksignup
 
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.AttestationEndpoint.SIGNUP
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.Click
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.logError
@@ -10,6 +11,7 @@ import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.GetOrFetchSync.RefetchCondition.Always
 import com.stripe.android.financialconnections.domain.HandleError
+import com.stripe.android.financialconnections.domain.RequestIntegrityToken
 import com.stripe.android.financialconnections.domain.SaveAccountToLink
 import com.stripe.android.financialconnections.features.common.isDataFlow
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
@@ -20,7 +22,6 @@ import com.stripe.android.financialconnections.navigation.Destination.Networking
 import com.stripe.android.financialconnections.navigation.Destination.Success
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.repository.FinancialConnectionsConsumerSessionRepository
-import com.stripe.attestation.IntegrityRequestManager
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -40,7 +41,7 @@ internal interface LinkSignupHandler {
 internal class LinkSignupHandlerForInstantDebits @Inject constructor(
     private val consumerRepository: FinancialConnectionsConsumerSessionRepository,
     private val attachConsumerToLinkAccountSession: AttachConsumerToLinkAccountSession,
-    private val integrityRequestManager: IntegrityRequestManager,
+    private val requestIntegrityToken: RequestIntegrityToken,
     private val getOrFetchSync: GetOrFetchSync,
     private val navigationManager: NavigationManager,
     @Named(APPLICATION_ID) private val applicationId: String,
@@ -54,7 +55,10 @@ internal class LinkSignupHandlerForInstantDebits @Inject constructor(
 
         val manifest = getOrFetchSync().manifest
         val signup = if (manifest.appVerificationEnabled) {
-            val token = integrityRequestManager.requestToken().getOrThrow()
+            val token = requestIntegrityToken(
+                endpoint = SIGNUP,
+                pane = LINK_LOGIN
+            )
             consumerRepository.mobileSignUp(
                 email = state.validEmail!!,
                 phoneNumber = state.validPhone!!,
@@ -96,7 +100,7 @@ internal class LinkSignupHandlerForNetworking @Inject constructor(
     private val consumerRepository: FinancialConnectionsConsumerSessionRepository,
     private val getOrFetchSync: GetOrFetchSync,
     private val getCachedAccounts: GetCachedAccounts,
-    private val integrityRequestManager: IntegrityRequestManager,
+    private val requestIntegrityToken: RequestIntegrityToken,
     private val saveAccountToLink: SaveAccountToLink,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val navigationManager: NavigationManager,
@@ -117,7 +121,10 @@ internal class LinkSignupHandlerForNetworking @Inject constructor(
             // ** New signup flow on verified flows: 2 requests **
             // 1. Mobile signup endpoint providing email + phone number
             // 2. Separately call SaveAccountToLink with the newly created account.
-            val token = integrityRequestManager.requestToken().getOrThrow()
+            val token = requestIntegrityToken(
+                endpoint = SIGNUP,
+                pane = NETWORKING_LINK_SIGNUP_PANE
+            )
             val signup = consumerRepository.mobileSignUp(
                 email = state.validEmail!!,
                 phoneNumber = state.validPhone!!,

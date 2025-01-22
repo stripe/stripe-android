@@ -21,7 +21,8 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffe
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenAuthFlowWithUrl
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenNativeAuthFlow
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewModel.Companion.QUERY_PARAM_PAYMENT_METHOD
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.AttestationInitFailed
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.AttestationInitSkipped
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ErrorCode
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Metadata
@@ -119,11 +120,22 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     private fun initAuthFlow() {
         viewModelScope.launch {
             kotlin.runCatching {
-                val attestationInitialized = prepareStandardRequestManager()
-                getOrFetchSync(
+                val attestationInitResult = prepareStandardRequestManager()
+                val syncResponse = getOrFetchSync(
                     refetchCondition = Always,
-                    attestationInitialized = attestationInitialized
+                    attestationInitialized = attestationInitResult.initialized
                 )
+                val pane = syncResponse.manifest.nextPane
+                when (attestationInitResult) {
+                    // We'll just emit failure events to reduce event emissions
+                    AttestationInitResult.Success -> null
+                    AttestationInitResult.Skipped -> AttestationInitSkipped(pane)
+                    is AttestationInitResult.Failure -> AttestationInitFailed(
+                        pane = pane,
+                        error = attestationInitResult.error
+                    )
+                }?.let(analyticsTracker::track)
+                syncResponse
             }.onFailure {
                 finishWithResult(stateFlow.value, Failed(it))
             }.onSuccess {
@@ -132,23 +144,16 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         }
     }
 
-    private suspend fun prepareStandardRequestManager(): Boolean {
+    private suspend fun prepareStandardRequestManager(): AttestationInitResult {
         // If previously within the application session an integrity check failed
         // do not initialize the request manager and directly launch the web flow.
         if (integrityVerdictManager.verdictFailed()) {
-            return false
+            return AttestationInitResult.Skipped
         }
-        val result = integrityRequestManager.prepare()
-        result.onFailure {
-            analyticsTracker.track(
-                FinancialConnectionsAnalyticsEvent.Error(
-                    extraMessage = "Failed to warm up the IntegrityStandardRequestManager",
-                    pane = Pane.CONSENT,
-                    exception = it
-                )
-            )
-        }
-        return result.isSuccess
+        return integrityRequestManager.prepare().fold(
+            onSuccess = { AttestationInitResult.Success },
+            onFailure = { AttestationInitResult.Failure(it) }
+        )
     }
 
     /**
@@ -580,6 +585,12 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                 )
             }
         }
+    }
+
+    private sealed class AttestationInitResult(val initialized: Boolean) {
+        data object Success : AttestationInitResult(initialized = true)
+        data object Skipped : AttestationInitResult(initialized = false)
+        data class Failure(val error: Throwable) : AttestationInitResult(initialized = false)
     }
 
     companion object {
