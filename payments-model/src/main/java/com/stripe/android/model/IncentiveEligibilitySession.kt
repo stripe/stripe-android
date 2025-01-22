@@ -8,55 +8,26 @@ import kotlinx.parcelize.Parcelize
 sealed interface IncentiveEligibilitySession : Parcelable {
 
     val id: String
-    val elementsSessionId: String
-
-    fun toParamMap(): Map<String, Any>
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
-    data class PaymentIntent(
-        override val id: String,
-        override val elementsSessionId: String,
-    ) : IncentiveEligibilitySession {
-
-        override fun toParamMap(): Map<String, Any> {
-            return mapOf(
-                "financial_incentive" to mapOf(
-                    "payment_intent" to id,
-                    "elements_session_id" to elementsSessionId,
-                )
-            )
-        }
-    }
+    data class PaymentIntent(override val id: String) : IncentiveEligibilitySession
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
-    data class SetupIntent(
-        override val id: String,
-        override val elementsSessionId: String,
-    ) : IncentiveEligibilitySession {
-
-        override fun toParamMap(): Map<String, Any> {
-            return mapOf(
-                "financial_incentive" to mapOf(
-                    "setup_intent" to id,
-                    "elements_session_id" to elementsSessionId,
-                )
-            )
-        }
-    }
+    data class SetupIntent(override val id: String) : IncentiveEligibilitySession
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
-    data class DeferredIntent(
-        override val id: String,
-    ) : IncentiveEligibilitySession {
+    data class DeferredIntent(override val id: String) : IncentiveEligibilitySession
 
-        override val elementsSessionId: String
-            get() = id
-
-        override fun toParamMap(): Map<String, Any> {
-            return mapOf("financial_incentive[elements_session_id]" to id)
+    fun toParamMap(): Map<String, String> {
+        val key = when (this) {
+            is PaymentIntent -> "financial_incentive[payment_intent]"
+            is SetupIntent -> "financial_incentive[setup_intent]"
+            is DeferredIntent -> "financial_incentive[elements_session_id]"
         }
+
+        return mapOf(key to id)
     }
 }

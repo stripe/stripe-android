@@ -10,7 +10,6 @@ private val LinkSupportedFundingSources = setOf("card", "bank_account")
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Parcelize
 data class ElementsSession(
-    val id: String?,
     val linkSettings: LinkSettings?,
     val paymentMethodSpecs: String?,
     val externalPaymentMethodData: String?,
@@ -119,7 +118,6 @@ data class ElementsSession(
             sessionsError: Throwable?,
         ): ElementsSession {
             return ElementsSession(
-                id = null,
                 linkSettings = null,
                 paymentMethodSpecs = null,
                 externalPaymentMethodData = null,

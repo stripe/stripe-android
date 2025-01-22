@@ -133,10 +133,7 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
             consumersApiService.signUp(
                 params = argThat {
                     currency == "cad" &&
-                        incentiveEligibilitySession == IncentiveEligibilitySession.PaymentIntent(
-                        id = "pi_123",
-                        elementsSessionId = "session_abc123",
-                    )
+                        incentiveEligibilitySession == IncentiveEligibilitySession.PaymentIntent("pi_123")
                 },
                 requestOptions = anyOrNull(),
             )
@@ -155,10 +152,7 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
                     phone = null,
                     phoneCountryCode = null,
                 ),
-                incentiveEligibilitySession = IncentiveEligibilitySession.PaymentIntent(
-                    id = "pi_123",
-                    elementsSessionId = "session_abc123",
-                ),
+                incentiveEligibilitySession = IncentiveEligibilitySession.PaymentIntent("pi_123"),
             )
         )
 

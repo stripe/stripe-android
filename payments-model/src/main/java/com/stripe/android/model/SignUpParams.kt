@@ -18,23 +18,17 @@ data class SignUpParams(
     val verificationToken: String? = null,
     val appId: String? = null
 ) {
-    fun toParamMap(): Map<String, Any> {
-        val params = mutableMapOf<String, Any>(
+    fun toParamMap(): Map<String, *> {
+        val params = mutableMapOf(
             "email_address" to email.lowercase(),
             "phone_number" to phoneNumber,
             "country" to country,
             "country_inferring_method" to "PHONE_NUMBER",
+            "amount" to amount,
+            "currency" to currency,
             "consent_action" to consentAction.value,
-            "request_surface" to requestSurface,
+            "request_surface" to requestSurface
         )
-
-        if (amount != null) {
-            params["amount"] = amount
-        }
-
-        if (currency != null) {
-            params["currency"] = currency
-        }
 
         locale?.let {
             params["locale"] = it.toLanguageTag()
@@ -52,9 +46,8 @@ data class SignUpParams(
             params["app_id"] = it
         }
 
-        val incentiveParams = incentiveEligibilitySession?.toParamMap().orEmpty()
-        params.putAll(incentiveParams)
+        params.putAll(incentiveEligibilitySession?.toParamMap().orEmpty())
 
-        return params
+        return params.toMap()
     }
 }

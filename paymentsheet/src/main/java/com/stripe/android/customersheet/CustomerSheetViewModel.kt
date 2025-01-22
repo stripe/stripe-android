@@ -813,7 +813,6 @@ internal class CustomerSheetViewModel(
             isCompleteFlow = false,
             isPaymentFlow = false,
             stripeIntentId = stripeIntent?.id,
-            elementsSessionId = null,
             clientSecret = stripeIntent?.clientSecret,
             shippingDetails = null,
             draftPaymentSelection = null,

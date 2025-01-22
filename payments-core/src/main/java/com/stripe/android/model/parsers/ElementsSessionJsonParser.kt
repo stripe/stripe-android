@@ -31,7 +31,6 @@ internal class ElementsSessionJsonParser(
             return null
         }
 
-        val id = json.optString("session_id")
         val countryCode = paymentMethodPreference.optString(FIELD_COUNTRY_CODE)
         val unactivatedPaymentMethodTypes = json.optJSONArray(FIELD_UNACTIVATED_PAYMENT_METHOD_TYPES)
         val paymentMethodSpecs = json.optJSONArray(FIELD_PAYMENT_METHOD_SPECS)?.toString()
@@ -62,7 +61,6 @@ internal class ElementsSessionJsonParser(
 
         return if (stripeIntent != null) {
             ElementsSession(
-                id = id,
                 linkSettings = parseLinkSettings(linkSettings, linkFundingSources),
                 paymentMethodSpecs = paymentMethodSpecs,
                 stripeIntent = stripeIntent,

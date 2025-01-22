@@ -81,7 +81,6 @@ internal fun USBankAccountForm(
                 isCompleteFlow = usBankAccountFormArgs.isCompleteFlow,
                 isPaymentFlow = usBankAccountFormArgs.isPaymentFlow,
                 stripeIntentId = usBankAccountFormArgs.stripeIntentId,
-                elementsSessionId = usBankAccountFormArgs.elementsSessionId,
                 clientSecret = usBankAccountFormArgs.clientSecret,
                 onBehalfOf = usBankAccountFormArgs.onBehalfOf,
                 savedPaymentMethod = usBankAccountFormArgs.draftPaymentSelection as? New.USBankAccount,
