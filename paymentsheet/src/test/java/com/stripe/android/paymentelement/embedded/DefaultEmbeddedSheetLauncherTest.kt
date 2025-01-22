@@ -34,8 +34,9 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
         val expectedArgs = FormContract.Args(code, paymentMethodMetadata)
         launcher.launchForm(code, paymentMethodMetadata)
-        assertThat(formActivityLauncher.didLaunch).isTrue()
-        assertThat(formActivityLauncher.launchArgs).isEqualTo(expectedArgs)
+        val launchState = formActivityLauncher.launchTurbine.awaitItem()
+        assertThat(launchState.didLaunch).isTrue()
+        assertThat(launchState.launchArgs).isEqualTo(expectedArgs)
     }
 
     @Test
@@ -54,19 +55,14 @@ internal class DefaultEmbeddedSheetLauncherTest {
     }
 
     @Test
-    fun `formActivityLauncher unregisters onDestroy`() = testScenario {
-        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-        assertThat(formActivityLauncher.didUnregister).isTrue()
-    }
-
-    @Test
     fun `launchManage launches activity with correct parameters`() = testScenario {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
         val customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
         val expectedArgs = ManageContract.Args(paymentMethodMetadata, customerState, PaymentSelection.GooglePay)
         launcher.launchManage(paymentMethodMetadata, customerState, PaymentSelection.GooglePay)
-        assertThat(manageActivityLauncher.didLaunch).isTrue()
-        assertThat(manageActivityLauncher.launchArgs).isEqualTo(expectedArgs)
+        val launchState = manageActivityLauncher.launchTurbine.awaitItem()
+        assertThat(launchState.didLaunch).isTrue()
+        assertThat(launchState.launchArgs).isEqualTo(expectedArgs)
     }
 
     @Test
@@ -98,9 +94,10 @@ internal class DefaultEmbeddedSheetLauncherTest {
     }
 
     @Test
-    fun `manageActivityLauncher unregisters onDestroy`() = testScenario {
+    fun `onDestroy unregisters launchers`() = testScenario {
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-        assertThat(formActivityLauncher.didUnregister).isTrue()
+        assertThat(formActivityLauncher.unregisterTurbine.awaitItem()).isTrue()
+        assertThat(manageActivityLauncher.unregisterTurbine.awaitItem()).isTrue()
     }
 
     private fun testScenario(
@@ -154,6 +151,9 @@ internal class DefaultEmbeddedSheetLauncherTest {
             launcher = embeddedActivityLauncher,
             customerStateHolder = customerStateHolder,
         ).block()
+
+        formActivityLauncher.validate()
+        manageActivityLauncher.validate()
     }
 
     private class Scenario(
