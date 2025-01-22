@@ -30,6 +30,10 @@ internal object PaymentSheetFixtures {
     internal val PAYMENT_INTENT_CLIENT_SECRET = PaymentIntentClientSecret(CLIENT_SECRET)
     internal val SETUP_INTENT_CLIENT_SECRET = PaymentIntentClientSecret(SETUP_CLIENT_SECRET)
 
+    internal val INITIALIZATION_MODE_PAYMENT_INTENT = PaymentElementLoader.InitializationMode.PaymentIntent(
+        clientSecret = CLIENT_SECRET
+    )
+
     internal val CONFIG_MINIMUM = PaymentSheet.Configuration(
         merchantDisplayName = MERCHANT_DISPLAY_NAME,
         paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
