@@ -85,18 +85,18 @@ internal class WebLinkActivityContract @Inject internal constructor(
         }
     }
 
-    @SuppressWarnings("TooGenericExceptionCaught")
-    private fun String.parsePaymentMethod(): PaymentMethod? = try {
-        val decodedPaymentMethod = String(Base64.decode(this, 0), Charsets.UTF_8)
-        val paymentMethod = PaymentMethodJsonParser()
-            .parse(JSONObject(decodedPaymentMethod))
-        paymentMethod
-    } catch (e: Throwable) {
-        errorReporter.report(
-            errorEvent = ErrorReporter.UnexpectedErrorEvent.LINK_WEB_FAILED_TO_PARSE_RESULT_URI,
-            stripeException = FailedToParseLinkResultUriException(e)
-        )
-        null
+    private fun String.parsePaymentMethod(): PaymentMethod? {
+        return runCatching {
+            val decodedPaymentMethod = String(Base64.decode(this, 0), Charsets.UTF_8)
+            PaymentMethodJsonParser()
+                .parse(JSONObject(decodedPaymentMethod))
+        }.getOrElse { e ->
+            errorReporter.report(
+                errorEvent = ErrorReporter.UnexpectedErrorEvent.LINK_WEB_FAILED_TO_PARSE_RESULT_URI,
+                stripeException = FailedToParseLinkResultUriException(e)
+            )
+            null
+        }
     }
 }
 
