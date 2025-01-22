@@ -387,6 +387,13 @@ internal class SharedPaymentElementViewModelTest {
                 newSelection
             },
             customerStateHolder = customerStateHolder,
+            embeddedSheetLauncherFactory = { activityResultCaller, lifecycleOwner ->
+                DefaultEmbeddedSheetLauncher(
+                    activityResultCaller = activityResultCaller,
+                    lifecycleOwner = lifecycleOwner,
+                    selectionHolder = selectionHolder,
+                )
+            },
             embeddedContentHelperFactory = EmbeddedContentHelperFactory {
                 embeddedContentHelper
             },
