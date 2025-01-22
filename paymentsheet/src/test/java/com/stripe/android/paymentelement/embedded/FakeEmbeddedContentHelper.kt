@@ -13,7 +13,7 @@ internal class FakeEmbeddedContentHelper(
 ) : EmbeddedContentHelper {
     private val _dataLoadedTurbine = Turbine<DefaultEmbeddedContentHelper.State>()
     val dataLoadedTurbine: ReceiveTurbine<DefaultEmbeddedContentHelper.State> = _dataLoadedTurbine
-    var testFormLauncher: ((String, PaymentMethodMetadata) -> Unit)? = null
+    var testSheetLauncher: EmbeddedSheetLauncher? = null
 
     override fun dataLoaded(
         paymentMethodMetadata: PaymentMethodMetadata,
@@ -29,14 +29,12 @@ internal class FakeEmbeddedContentHelper(
         )
     }
 
-    override fun setFormLauncher(
-        formLauncher: ((code: String, paymentMethodMetaData: PaymentMethodMetadata?) -> Unit)?
-    ) {
-        this.testFormLauncher = formLauncher
+    override fun setSheetLauncher(sheetLauncher: EmbeddedSheetLauncher) {
+        this.testSheetLauncher = sheetLauncher
     }
 
-    override fun clearFormLauncher() {
-        testFormLauncher = null
+    override fun clearSheetLauncher() {
+        testSheetLauncher = null
     }
 
     fun validate() {

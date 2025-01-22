@@ -6,15 +6,15 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 
-internal interface EmbeddedActivityLauncher {
-    val formLauncher: ((code: String, paymentMethodMetadata: PaymentMethodMetadata?) -> Unit)
+internal interface EmbeddedSheetLauncher {
+    fun launchForm(code: String, paymentMethodMetadata: PaymentMethodMetadata)
 }
 
-internal class DefaultEmbeddedActivityLauncher(
+internal class DefaultEmbeddedSheetLauncher(
     activityResultCaller: ActivityResultCaller,
     lifecycleOwner: LifecycleOwner,
     private val selectionHolder: EmbeddedSelectionHolder
-) : EmbeddedActivityLauncher {
+) : EmbeddedSheetLauncher {
 
     init {
         lifecycleOwner.lifecycle.addObserver(
@@ -34,8 +34,7 @@ internal class DefaultEmbeddedActivityLauncher(
             }
         }
 
-    override val formLauncher: ((code: String, paymentMethodMetadata: PaymentMethodMetadata?) -> Unit) =
-        { code, metadata ->
-            formActivityLauncher.launch(FormContract.Args(code, metadata))
-        }
+    override fun launchForm(code: String, paymentMethodMetadata: PaymentMethodMetadata) {
+        formActivityLauncher.launch(FormContract.Args(code, paymentMethodMetadata))
+    }
 }

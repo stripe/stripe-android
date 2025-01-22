@@ -20,7 +20,8 @@ internal class FormActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        if (args == null) {
+        val localArgs = args
+        if (localArgs == null) {
             setFormResult(FormResult.Cancelled)
             finish()
             return
@@ -39,7 +40,7 @@ internal class FormActivity : AppCompatActivity() {
                         finish()
                     }
                 ) {
-                    Text((args as FormContract.Args).selectedPaymentMethodCode)
+                    Text(localArgs.selectedPaymentMethodCode)
                 }
             }
         }

@@ -492,12 +492,12 @@ class EmbeddedPaymentElement private constructor(
                     override fun onDestroy(owner: LifecycleOwner) {
                         IntentConfirmationInterceptor.createIntentCallback = null
                         ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = null
-                        sharedViewModel.clearEmbeddedActivityLauncher()
+                        sharedViewModel.clearEmbeddedSheetLauncher()
                     }
                 }
             )
 
-            sharedViewModel.initEmbeddedActivityLauncher(activityResultCaller, lifecycleOwner)
+            sharedViewModel.initEmbeddedSheetLauncher(activityResultCaller, lifecycleOwner)
 
             return EmbeddedPaymentElement(
                 embeddedConfirmationHelper = EmbeddedConfirmationHelper(

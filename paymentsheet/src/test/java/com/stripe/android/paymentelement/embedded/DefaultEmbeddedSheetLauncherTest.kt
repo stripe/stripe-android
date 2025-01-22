@@ -1,14 +1,13 @@
+package com.stripe.android.paymentelement.embedded
+
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
+import com.google.common.truth.Truth.assertThat
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.paymentelement.embedded.DefaultEmbeddedActivityLauncher
-import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
-import com.stripe.android.paymentelement.embedded.FakeFormActivityLauncher
-import com.stripe.android.paymentelement.embedded.FormContract
-import com.stripe.android.paymentelement.embedded.FormResult
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -21,15 +20,16 @@ import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-internal class EmbeddedActivityLauncherTest {
+internal class DefaultEmbeddedSheetLauncherTest {
 
     @Test
     fun `formLauncher launches activity with correct parameters`() = testScenario {
         val code = "test_code"
-        val expectedArgs = FormContract.Args(code, null)
-        launcher.formLauncher.invoke(code, null)
-        assert(formActivityLauncher.didLaunch)
-        assert(formActivityLauncher.launchArgs == expectedArgs)
+        val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
+        val expectedArgs = FormContract.Args(code, paymentMethodMetadata)
+        launcher.launchForm(code, paymentMethodMetadata)
+        assertThat(formActivityLauncher.didLaunch).isTrue()
+        assertThat(formActivityLauncher.launchArgs).isEqualTo(expectedArgs)
     }
 
     @Test
@@ -37,20 +37,20 @@ internal class EmbeddedActivityLauncherTest {
         val selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
         val result = FormResult.Complete(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
         contractCallbackCaptor.value.onActivityResult(result)
-        assert(selectionHolder.selection.value == selection)
+        assertThat(selectionHolder.selection.value).isEqualTo(selection)
     }
 
     @Test
     fun `formActivityLauncher callback does not update selection holder on non-complete result`() = testScenario {
         val result = FormResult.Cancelled
         contractCallbackCaptor.value.onActivityResult(result)
-        assert(selectionHolder.selection.value == null)
+        assertThat(selectionHolder.selection.value).isNull()
     }
 
     @Test
     fun `formActivityLauncher unregisters onDestroy`() = testScenario {
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-        assert(formActivityLauncher.didUnregister)
+        assertThat(formActivityLauncher.didUnregister).isTrue()
     }
 
     private fun testScenario(
@@ -73,7 +73,7 @@ internal class EmbeddedActivityLauncherTest {
             )
         ).thenReturn(formActivityLauncher)
 
-        val embeddedActivityLauncher = DefaultEmbeddedActivityLauncher(
+        val embeddedActivityLauncher = DefaultEmbeddedSheetLauncher(
             activityResultCaller = activityResultCaller,
             lifecycleOwner = lifecycleOwner,
             selectionHolder = selectionHolder
@@ -93,6 +93,6 @@ internal class EmbeddedActivityLauncherTest {
         val selectionHolder: EmbeddedSelectionHolder,
         val lifecycleOwner: TestLifecycleOwner,
         val formActivityLauncher: FakeFormActivityLauncher,
-        val launcher: DefaultEmbeddedActivityLauncher
+        val launcher: EmbeddedSheetLauncher,
     )
 }

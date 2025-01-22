@@ -145,13 +145,13 @@ internal class SharedPaymentElementViewModel @Inject constructor(
         selectionHolder.set(null)
     }
 
-    fun initEmbeddedActivityLauncher(activityResultCaller: ActivityResultCaller, lifecycleOwner: LifecycleOwner) {
-        val launcher = DefaultEmbeddedActivityLauncher(activityResultCaller, lifecycleOwner, selectionHolder)
-        embeddedContentHelper.setFormLauncher(launcher.formLauncher)
+    fun initEmbeddedSheetLauncher(activityResultCaller: ActivityResultCaller, lifecycleOwner: LifecycleOwner) {
+        val launcher = DefaultEmbeddedSheetLauncher(activityResultCaller, lifecycleOwner, selectionHolder)
+        embeddedContentHelper.setSheetLauncher(launcher)
     }
 
-    fun clearEmbeddedActivityLauncher() {
-        embeddedContentHelper.clearFormLauncher()
+    fun clearEmbeddedSheetLauncher() {
+        embeddedContentHelper.clearSheetLauncher()
     }
 
     class Factory(private val statusBarColor: Int?) : ViewModelProvider.Factory {

@@ -47,9 +47,9 @@ internal interface EmbeddedContentHelper {
         embeddedViewDisplaysMandateText: Boolean,
     )
 
-    fun setFormLauncher(formLauncher: ((code: String, paymentMethodMetaData: PaymentMethodMetadata?) -> Unit)?)
+    fun setSheetLauncher(sheetLauncher: EmbeddedSheetLauncher)
 
-    fun clearFormLauncher()
+    fun clearSheetLauncher()
 }
 
 internal fun interface EmbeddedContentHelperFactory {
@@ -84,7 +84,7 @@ internal class DefaultEmbeddedContentHelper @AssistedInject constructor(
     private val _embeddedContent = MutableStateFlow<EmbeddedContent?>(null)
     override val embeddedContent: StateFlow<EmbeddedContent?> = _embeddedContent.asStateFlow()
 
-    private var formLauncher: ((code: String, paymentMethodMetaData: PaymentMethodMetadata?) -> Unit)? = null
+    private var sheetLauncher: EmbeddedSheetLauncher? = null
 
     init {
         coroutineScope.launch {
@@ -125,14 +125,12 @@ internal class DefaultEmbeddedContentHelper @AssistedInject constructor(
         )
     }
 
-    override fun setFormLauncher(
-        formLauncher: ((code: String, paymentMethodMetaData: PaymentMethodMetadata?) -> Unit)?
-    ) {
-        this.formLauncher = formLauncher
+    override fun setSheetLauncher(sheetLauncher: EmbeddedSheetLauncher) {
+        this.sheetLauncher = sheetLauncher
     }
 
-    override fun clearFormLauncher() {
-        formLauncher = null
+    override fun clearSheetLauncher() {
+        sheetLauncher = null
     }
 
     private fun createInteractor(
@@ -177,7 +175,7 @@ internal class DefaultEmbeddedContentHelper @AssistedInject constructor(
             transitionToManageScreen = {
             },
             transitionToFormScreen = {
-                formLauncher?.invoke(it, state.value?.paymentMethodMetadata)
+                sheetLauncher?.launchForm(it, paymentMethodMetadata)
             },
             paymentMethods = customerStateHolder.paymentMethods,
             mostRecentlySelectedSavedPaymentMethod = customerStateHolder.mostRecentlySelectedSavedPaymentMethod,

@@ -309,11 +309,11 @@ internal class SharedPaymentElementViewModelTest {
         testScenario {
             val launcher = FakeFormActivityLauncher()
             val activityResultCaller = FakeActivityResultCaller(launcher)
-            assertThat(embeddedContentHelper.testFormLauncher).isNull()
-            viewModel.initEmbeddedActivityLauncher(activityResultCaller, TestLifecycleOwner())
-            assertThat(embeddedContentHelper.testFormLauncher).isNotNull()
-            viewModel.clearEmbeddedActivityLauncher()
-            assertThat(embeddedContentHelper.testFormLauncher).isNull()
+            assertThat(embeddedContentHelper.testSheetLauncher).isNull()
+            viewModel.initEmbeddedSheetLauncher(activityResultCaller, TestLifecycleOwner())
+            assertThat(embeddedContentHelper.testSheetLauncher).isNotNull()
+            viewModel.clearEmbeddedSheetLauncher()
+            assertThat(embeddedContentHelper.testSheetLauncher).isNull()
         }
 
     private fun testScenario(

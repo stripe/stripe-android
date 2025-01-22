@@ -48,7 +48,7 @@ internal class FormContract : ActivityResultContract<FormContract.Args, FormResu
     @Parcelize
     internal data class Args(
         val selectedPaymentMethodCode: String,
-        val paymentMethodMetadata: PaymentMethodMetadata?,
+        val paymentMethodMetadata: PaymentMethodMetadata,
     ) : Parcelable {
         companion object {
             fun fromIntent(intent: Intent): Args? {
