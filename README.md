@@ -57,8 +57,9 @@ If you're selling digital products or services that will be consumed within your
 ### Requirements
 
 * Android 5.0 (API level 21) and above
-* [Android Gradle Plugin](https://developer.android.com/studio/releases/gradle-plugin) 3.5.1
-* [Gradle](https://gradle.org/releases/) 5.4.1+
+* [Android Gradle Plugin](https://developer.android.com/studio/releases/gradle-plugin) 8.7.1
+* [Gradle](https://gradle.org/releases/) 8.12+
+* [JDK](https://www.java.com/releases/) 17+ (Required by Android Gradle Plugin)
 * [AndroidX](https://developer.android.com/jetpack/androidx/) (as of v11.0.0)
 
 ### Configuration
