@@ -28,6 +28,7 @@ import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.LinkPaymentLauncher
+import com.stripe.android.link.TestFactory
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.link.ui.inline.LinkSignupMode
@@ -542,7 +543,7 @@ internal class PaymentSheetViewModelTest {
 
         fakeIntentConfirmationInterceptor.enqueueConfirmStep(expectedParams)
 
-        val paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        val paymentSelection = PaymentSelection.Saved(CARD_PAYMENT_METHOD)
         viewModel.updateSelection(paymentSelection)
         viewModel.checkout()
 
@@ -950,6 +951,7 @@ internal class PaymentSheetViewModelTest {
                 passthroughModeEnabled = false,
                 cardBrandChoice = null,
                 shippingDetails = null,
+                useAttestationEndpointsForLink = false,
             )
 
             val viewModel = createViewModel(
@@ -1000,7 +1002,7 @@ internal class PaymentSheetViewModelTest {
         runTest {
             val viewModel = createViewModel()
 
-            val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+            val selection = PaymentSelection.Saved(CARD_PAYMENT_METHOD)
             viewModel.updateSelection(selection)
 
             turbineScope {
@@ -1093,7 +1095,7 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `onPaymentResult() with non-success outcome should report failure event`() = runTest {
         val viewModel = createViewModel()
-        val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        val selection = PaymentSelection.Saved(CARD_PAYMENT_METHOD)
         val error = APIException()
 
         viewModel.updateSelection(selection)
@@ -1431,7 +1433,7 @@ internal class PaymentSheetViewModelTest {
         assertThat(viewModel.mandateHandler.mandateText.value).isNull()
 
         viewModel.updateSelection(
-            PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+            PaymentSelection.Saved(CARD_PAYMENT_METHOD)
         )
 
         assertThat(viewModel.mandateHandler.mandateText.value).isNull()
@@ -1459,7 +1461,7 @@ internal class PaymentSheetViewModelTest {
         assertThat(viewModel.mandateHandler.mandateText.value?.showAbovePrimaryButton).isTrue()
 
         viewModel.updateSelection(
-            PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+            PaymentSelection.Saved(CARD_PAYMENT_METHOD)
         )
 
         assertThat(viewModel.mandateHandler.mandateText.value).isNull()
@@ -1559,7 +1561,7 @@ internal class PaymentSheetViewModelTest {
     fun `handleBackPressed goes from AddAnother to SelectSaved screen`() = runTest {
         val viewModel = createViewModel(
             customer = EMPTY_CUSTOMER_STATE.copy(
-                paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+                paymentMethods = listOf(CARD_PAYMENT_METHOD)
             )
         )
         viewModel.transitionToAddPaymentScreen()
@@ -1583,7 +1585,7 @@ internal class PaymentSheetViewModelTest {
     fun `current screen is SelectSavedPaymentMethods if payment methods is not empty`() = runTest {
         val viewModel = createViewModel(
             customer = EMPTY_CUSTOMER_STATE.copy(
-                paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+                paymentMethods = listOf(CARD_PAYMENT_METHOD)
             )
         )
 
@@ -1764,7 +1766,7 @@ internal class PaymentSheetViewModelTest {
 
         viewModel.selection.test {
             val savedSelection = PaymentSelection.Saved(
-                PaymentMethodFixtures.CARD_PAYMENT_METHOD
+                CARD_PAYMENT_METHOD
             )
             assertThat(awaitItem()).isNull()
             viewModel.updateSelection(savedSelection)
@@ -1900,7 +1902,7 @@ internal class PaymentSheetViewModelTest {
             registerFromActivity(DummyActivityResultCaller.noOp(), TestLifecycleOwner())
         }
 
-        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        val paymentMethod = CARD_PAYMENT_METHOD
         val resultClientSecret = "pi_123_secret_456"
 
         val expectedParams = ConfirmPaymentIntentParams.createWithPaymentMethodId(
@@ -1924,7 +1926,7 @@ internal class PaymentSheetViewModelTest {
                 registerFromActivity(DummyActivityResultCaller.noOp(), TestLifecycleOwner())
             }
 
-            val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+            val paymentMethod = CARD_PAYMENT_METHOD
             val resultClientSecret = "pi_123_secret_456"
 
             fakeIntentConfirmationInterceptor.enqueueNextActionStep(
@@ -1943,7 +1945,7 @@ internal class PaymentSheetViewModelTest {
         val viewModel = createViewModelForDeferredIntent()
 
         viewModel.paymentSheetResult.test {
-            val savedSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+            val savedSelection = PaymentSelection.Saved(CARD_PAYMENT_METHOD)
             viewModel.updateSelection(savedSelection)
             viewModel.checkout()
 
@@ -1960,7 +1962,7 @@ internal class PaymentSheetViewModelTest {
     fun `Displays failure if intent confirmation interceptor returns a failure`() = runTest {
         val viewModel = createViewModelForDeferredIntent()
 
-        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        val paymentMethod = CARD_PAYMENT_METHOD
         val error = "oh boy this didn't work"
 
         viewModel.viewState.test {
@@ -2033,7 +2035,7 @@ internal class PaymentSheetViewModelTest {
 
             val viewModel = createViewModelForDeferredIntent()
 
-            val savedSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+            val savedSelection = PaymentSelection.Saved(CARD_PAYMENT_METHOD)
             viewModel.updateSelection(savedSelection)
             viewModel.checkout()
 
@@ -2051,7 +2053,7 @@ internal class PaymentSheetViewModelTest {
     fun `Sends no deferred_intent_confirmation_type for non-deferred intent confirmation`() = runTest {
         val viewModel = createViewModel()
 
-        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        val paymentMethod = CARD_PAYMENT_METHOD
         val savedSelection = PaymentSelection.Saved(paymentMethod)
 
         viewModel.updateSelection(savedSelection)
@@ -2076,7 +2078,7 @@ internal class PaymentSheetViewModelTest {
         val viewModel = createViewModelForDeferredIntent()
         val callback = viewModel.capturePaymentResultListener()
 
-        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        val paymentMethod = CARD_PAYMENT_METHOD
         val savedSelection = PaymentSelection.Saved(paymentMethod)
 
         viewModel.updateSelection(savedSelection)
@@ -2104,7 +2106,7 @@ internal class PaymentSheetViewModelTest {
         val viewModel = createViewModelForDeferredIntent()
         val callback = viewModel.capturePaymentResultListener()
 
-        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        val paymentMethod = CARD_PAYMENT_METHOD
         val savedSelection = PaymentSelection.Saved(paymentMethod)
 
         viewModel.updateSelection(savedSelection)
@@ -3243,7 +3245,7 @@ internal class PaymentSheetViewModelTest {
         return PaymentSelection.New.GenericPaymentMethod(
             label = "Test".resolvableString,
             iconResource = 0,
-            paymentMethodCreateParams = PaymentMethodCreateParams.Companion.create(
+            paymentMethodCreateParams = PaymentMethodCreateParams.create(
                 bacsDebit = PaymentMethodCreateParams.BacsDebit(
                     accountNumber = BACS_ACCOUNT_NUMBER,
                     sortCode = BACS_SORT_CODE
@@ -3331,20 +3333,6 @@ internal class PaymentSheetViewModelTest {
         private const val BACS_NAME = "John Doe"
         private const val BACS_EMAIL = "johndoe@email.com"
 
-        private val LINK_CONFIG = LinkConfiguration(
-            stripeIntent = PAYMENT_INTENT,
-            merchantName = "Merchant, Inc.",
-            merchantCountryCode = "US",
-            customerInfo = LinkConfiguration.CustomerInfo(
-                name = null,
-                email = null,
-                phone = null,
-                billingCountryCode = "US",
-            ),
-            shippingDetails = null,
-            passthroughModeEnabled = false,
-            cardBrandChoice = null,
-            flags = emptyMap()
-        )
+        private val LINK_CONFIG = TestFactory.LINK_CONFIGURATION
     }
 }

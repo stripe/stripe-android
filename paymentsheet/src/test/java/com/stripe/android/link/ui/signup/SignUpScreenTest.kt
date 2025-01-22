@@ -14,11 +14,11 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.navigation.NavHostController
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.analytics.FakeLinkEventsReporter
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
-import com.stripe.android.testing.PaymentIntentFactory
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -33,16 +33,6 @@ internal class SignUpScreenTest {
     @get:Rule
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
-    private val linkConfiguration = LinkConfiguration(
-        stripeIntent = PaymentIntentFactory.create(),
-        customerInfo = LinkConfiguration.CustomerInfo(null, null, null, null),
-        flags = mapOf(),
-        merchantName = "Test merchant inc.",
-        merchantCountryCode = "US",
-        passthroughModeEnabled = false,
-        cardBrandChoice = null,
-        shippingDetails = null,
-    )
     private val linkAccountManager = FakeLinkAccountManager()
     private val linkEventsReporter = object : FakeLinkEventsReporter() {
         override fun onSignupFlowPresented() = Unit
@@ -59,7 +49,7 @@ internal class SignUpScreenTest {
     @Test
     fun `only email field displayed when controllers are empty`() = runTest(dispatcher) {
         viewModel = SignUpViewModel(
-            configuration = linkConfiguration,
+            configuration = TestFactory.LINK_CONFIGURATION,
             linkAccountManager = linkAccountManager,
             linkEventsReporter = linkEventsReporter,
             logger = logger
@@ -80,7 +70,7 @@ internal class SignUpScreenTest {
     fun `all fields displayed and sign up enabled when all controllers are filled`() = runTest(dispatcher) {
         val linkAccountManager = FakeLinkAccountManager()
         viewModel = SignUpViewModel(
-            configuration = linkConfiguration.copy(
+            configuration = TestFactory.LINK_CONFIGURATION.copy(
                 customerInfo = LinkConfiguration.CustomerInfo(
                     name = "jane doe",
                     email = "test@test.com",
@@ -109,7 +99,7 @@ internal class SignUpScreenTest {
     fun `all fields displayed when email controller is filled`() = runTest(dispatcher) {
         val linkAccountManager = FakeLinkAccountManager()
         viewModel = SignUpViewModel(
-            configuration = linkConfiguration.copy(
+            configuration = TestFactory.LINK_CONFIGURATION.copy(
                 customerInfo = LinkConfiguration.CustomerInfo(
                     name = null,
                     email = "test@test.com",
@@ -139,7 +129,7 @@ internal class SignUpScreenTest {
         runTest(dispatcher) {
             val linkAccountManager = FakeLinkAccountManager()
             viewModel = SignUpViewModel(
-                configuration = linkConfiguration.copy(
+                configuration = TestFactory.LINK_CONFIGURATION.copy(
                     customerInfo = LinkConfiguration.CustomerInfo(
                         name = "jane doe",
                         email = "test@test.com",

@@ -15,6 +15,7 @@ internal data class LinkConfiguration(
     val passthroughModeEnabled: Boolean,
     val flags: Map<String, Boolean>,
     val cardBrandChoice: CardBrandChoice?,
+    val useAttestationEndpointsForLink: Boolean,
 ) : Parcelable {
     @Parcelize
     data class CustomerInfo(

@@ -806,6 +806,51 @@ class ElementsSessionJsonParserTest {
         assertThat(elementsSession?.linkSettings?.linkConsumerIncentive).isNull()
     }
 
+    @Test
+    fun `Parses Link useAttestationEndpoints as enabled`() {
+        val elementsSession = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret",
+                externalPaymentMethods = emptyList(),
+            ),
+            isLiveMode = true,
+        ).parse(
+            ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_WITH_LINK_ATTESTATION_ENDPOINTS_ENABLED_JSON
+        )
+
+        assertThat(elementsSession?.linkSettings?.useAttestationEndpoints).isTrue()
+    }
+
+    @Test
+    fun `Parses Link useAttestationEndpoints endpoints as disabled`() {
+        val elementsSession = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret",
+                externalPaymentMethods = emptyList(),
+            ),
+            isLiveMode = true,
+        ).parse(
+            ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_WITH_LINK_ATTESTATION_ENDPOINTS_DISABLED_JSON
+        )
+
+        assertThat(elementsSession?.linkSettings?.useAttestationEndpoints).isFalse()
+    }
+
+    @Test
+    fun `Parses Link useAttestationEndpoints endpoints as disabled when field is omitted`() {
+        val elementsSession = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret",
+                externalPaymentMethods = emptyList(),
+            ),
+            isLiveMode = true,
+        ).parse(
+            ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_WITH_LINK_ATTESTATION_ENDPOINTS_MISSING_JSON
+        )
+
+        assertThat(elementsSession?.linkSettings?.useAttestationEndpoints).isFalse()
+    }
+
     private fun allowRedisplayTest(
         rawAllowRedisplayValue: String?,
         allowRedisplay: PaymentMethod.AllowRedisplay?,

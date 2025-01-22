@@ -10,6 +10,7 @@ import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.LinkPaymentDetails
+import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.analytics.LinkAnalyticsHelper
 import com.stripe.android.link.injection.LinkAnalyticsComponent
@@ -550,22 +551,10 @@ private fun LinkTestData.createLinkState(
 private fun defaultLinkConfiguration(
     linkFundingSources: List<String> = emptyList(),
 ): LinkConfiguration {
-    return LinkConfiguration(
+    return TestFactory.LINK_CONFIGURATION.copy(
         stripeIntent = PaymentIntentFactory.create(
             linkFundingSources = linkFundingSources,
-        ),
-        merchantName = "Merchant, Inc",
-        merchantCountryCode = "US",
-        customerInfo = LinkConfiguration.CustomerInfo(
-            name = "Name",
-            email = "customer@email.com",
-            phone = "1234567890",
-            billingCountryCode = "US",
-        ),
-        shippingDetails = null,
-        passthroughModeEnabled = false,
-        cardBrandChoice = null,
-        flags = emptyMap(),
+        )
     )
 }
 

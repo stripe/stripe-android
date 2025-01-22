@@ -636,8 +636,9 @@ internal class DefaultPaymentElementLoaderTest {
             name = "Till",
         )
 
+        val initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret")
         val result = loader.load(
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
+            initializationMode = initializationMode,
             paymentSheetConfiguration = mockConfiguration(
                 defaultBillingDetails = billingDetails,
             ),
@@ -658,6 +659,7 @@ internal class DefaultPaymentElementLoaderTest {
             passthroughModeEnabled = false,
             cardBrandChoice = null,
             flags = emptyMap(),
+            useAttestationEndpointsForLink = false
         )
 
         assertThat(result.paymentMethodMetadata.linkState?.configuration).isEqualTo(expectedLinkConfig)
@@ -695,6 +697,7 @@ internal class DefaultPaymentElementLoaderTest {
                 linkFlags = emptyMap(),
                 disableLinkSignup = false,
                 linkConsumerIncentive = null,
+                useAttestationEndpoints = false,
             )
         )
 
@@ -727,6 +730,7 @@ internal class DefaultPaymentElementLoaderTest {
                 ),
                 disableLinkSignup = false,
                 linkConsumerIncentive = null,
+                useAttestationEndpoints = false,
             )
         )
 
@@ -803,6 +807,7 @@ internal class DefaultPaymentElementLoaderTest {
                 linkFlags = mapOf(),
                 disableLinkSignup = false,
                 linkConsumerIncentive = null,
+                useAttestationEndpoints = false,
             ),
             linkStore = mock {
                 on { hasUsedLink() } doReturn true
@@ -830,6 +835,7 @@ internal class DefaultPaymentElementLoaderTest {
                 linkFlags = mapOf(),
                 disableLinkSignup = true,
                 linkConsumerIncentive = null,
+                useAttestationEndpoints = false,
             )
         )
 
@@ -2374,6 +2380,7 @@ internal class DefaultPaymentElementLoaderTest {
             linkFlags = mapOf(),
             disableLinkSignup = false,
             linkConsumerIncentive = null,
+            useAttestationEndpoints = false,
         )
     }
 
