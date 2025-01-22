@@ -5,15 +5,33 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 
 internal interface EmbeddedSheetLauncher {
     fun launchForm(code: String, paymentMethodMetadata: PaymentMethodMetadata)
 }
 
-internal class DefaultEmbeddedSheetLauncher(
-    activityResultCaller: ActivityResultCaller,
-    lifecycleOwner: LifecycleOwner,
-    private val selectionHolder: EmbeddedSelectionHolder
+internal fun interface EmbeddedSheetLauncherFactory {
+    fun create(
+        activityResultCaller: ActivityResultCaller,
+        lifecycleOwner: LifecycleOwner,
+    ): EmbeddedSheetLauncher
+}
+
+@AssistedFactory
+internal interface DefaultEmbeddedSheetLauncherFactory : EmbeddedSheetLauncherFactory {
+    override fun create(
+        activityResultCaller: ActivityResultCaller,
+        lifecycleOwner: LifecycleOwner,
+    ): DefaultEmbeddedSheetLauncher
+}
+
+internal class DefaultEmbeddedSheetLauncher @AssistedInject constructor(
+    @Assisted activityResultCaller: ActivityResultCaller,
+    @Assisted lifecycleOwner: LifecycleOwner,
+    private val selectionHolder: EmbeddedSelectionHolder,
 ) : EmbeddedSheetLauncher {
 
     init {

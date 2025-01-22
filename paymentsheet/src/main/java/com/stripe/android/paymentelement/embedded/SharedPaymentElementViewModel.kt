@@ -88,6 +88,7 @@ internal class SharedPaymentElementViewModel @Inject constructor(
     private val selectionHolder: EmbeddedSelectionHolder,
     private val selectionChooser: EmbeddedSelectionChooser,
     private val customerStateHolder: CustomerStateHolder,
+    private val embeddedSheetLauncherFactory: EmbeddedSheetLauncherFactory,
     embeddedContentHelperFactory: EmbeddedContentHelperFactory,
 ) : ViewModel() {
     private val _paymentOption: MutableStateFlow<PaymentOptionDisplayData?> = MutableStateFlow(null)
@@ -160,7 +161,7 @@ internal class SharedPaymentElementViewModel @Inject constructor(
     }
 
     fun initEmbeddedSheetLauncher(activityResultCaller: ActivityResultCaller, lifecycleOwner: LifecycleOwner) {
-        val launcher = DefaultEmbeddedSheetLauncher(activityResultCaller, lifecycleOwner, selectionHolder)
+        val launcher = embeddedSheetLauncherFactory.create(activityResultCaller, lifecycleOwner)
         embeddedContentHelper.setSheetLauncher(launcher)
     }
 
@@ -222,6 +223,11 @@ internal interface SharedPaymentElementViewModelModule {
     fun bindsEmbeddedContentHelperFactory(
         factory: DefaultEmbeddedContentHelperFactory
     ): EmbeddedContentHelperFactory
+
+    @Binds
+    fun bindsEmbeddedSheetLauncherFactory(
+        factory: DefaultEmbeddedSheetLauncherFactory
+    ): EmbeddedSheetLauncherFactory
 
     @Binds
     fun bindsCardAccountRangeRepositoryFactory(
