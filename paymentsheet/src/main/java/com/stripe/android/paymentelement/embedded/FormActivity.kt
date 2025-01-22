@@ -39,7 +39,7 @@ internal class FormActivity : AppCompatActivity() {
                         finish()
                     }
                 ) {
-                    args?.selectedPaymentMethodCode?.let { Text(it) }
+                    Text((args as FormContract.Args).selectedPaymentMethodCode)
                 }
             }
         }

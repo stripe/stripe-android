@@ -48,7 +48,7 @@ internal class EmbeddedActivityLauncherTest {
     }
 
     @Test
-    fun `cleanup happens on lifecycle destroy`() = testScenario {
+    fun `formActivityLauncher unregisters onDestroy`() = testScenario {
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
         assert(formActivityLauncher.didUnregister)
     }
