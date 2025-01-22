@@ -40,6 +40,7 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 internal data class PaymentMethodMetadata(
     val stripeIntent: StripeIntent,
+    val elementsSessionId: String?,
     val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
     val allowsDelayedPaymentMethods: Boolean,
     val allowsPaymentMethodsRequiringShippingAddress: Boolean,
@@ -244,6 +245,7 @@ internal data class PaymentMethodMetadata(
             val linkSettings = elementsSession.linkSettings
             return PaymentMethodMetadata(
                 stripeIntent = elementsSession.stripeIntent,
+                elementsSessionId = elementsSession.id,
                 billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
                 allowsDelayedPaymentMethods = configuration.allowsDelayedPaymentMethods,
                 allowsPaymentMethodsRequiringShippingAddress = configuration
@@ -279,6 +281,7 @@ internal data class PaymentMethodMetadata(
         ): PaymentMethodMetadata {
             return PaymentMethodMetadata(
                 stripeIntent = elementsSession.stripeIntent,
+                elementsSessionId = elementsSession.id,
                 billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
                 allowsDelayedPaymentMethods = true,
                 allowsPaymentMethodsRequiringShippingAddress = false,
@@ -310,6 +313,7 @@ internal data class PaymentMethodMetadata(
         ): PaymentMethodMetadata {
             return PaymentMethodMetadata(
                 stripeIntent = configuration.stripeIntent,
+                elementsSessionId = null,
                 billingDetailsCollectionConfiguration = ConfigurationDefaults.billingDetailsCollectionConfiguration,
                 allowsDelayedPaymentMethods = false,
                 allowsPaymentMethodsRequiringShippingAddress = false,

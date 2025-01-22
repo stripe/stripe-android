@@ -298,7 +298,7 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
             paymentDetailsId = paymentDetailsId,
             consumerSessionClientSecret = consumerSessionClientSecret,
             requestSurface = requestSurface,
-            requestOptions = provideApiRequestOptions(useConsumerPublishableKey = true),
+            requestOptions = provideApiRequestOptions(useConsumerPublishableKey = false),
         )
     }
 

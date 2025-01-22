@@ -497,15 +497,20 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
     private fun makeElementsSessionContext(): ElementsSessionContext {
         val intentId = args.stripeIntentId!!
+        val elementsSessionId = args.elementsSessionId
         val eligibleForIncentive = args.incentive != null
 
         val incentiveEligibilitySession = if (eligibleForIncentive) {
             if (args.clientSecret == null) {
                 IncentiveEligibilitySession.DeferredIntent(intentId)
             } else if (args.isPaymentFlow) {
-                IncentiveEligibilitySession.PaymentIntent(intentId)
+                elementsSessionId?.let {
+                    IncentiveEligibilitySession.PaymentIntent(intentId, elementsSessionId)
+                }
             } else {
-                IncentiveEligibilitySession.SetupIntent(intentId)
+                elementsSessionId?.let {
+                    IncentiveEligibilitySession.SetupIntent(intentId, elementsSessionId)
+                }
             }
         } else {
             null
@@ -716,6 +721,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         val isCompleteFlow: Boolean,
         val isPaymentFlow: Boolean,
         val stripeIntentId: String?,
+        val elementsSessionId: String?,
         val clientSecret: String?,
         val onBehalfOf: String?,
         val savedPaymentMethod: PaymentSelection.New.USBankAccount?,

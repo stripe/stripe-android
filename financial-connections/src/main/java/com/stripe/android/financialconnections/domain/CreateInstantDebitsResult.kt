@@ -58,7 +58,7 @@ internal class RealCreateInstantDebitsResult @Inject constructor(
             )
         }
 
-        val incentiveEligibilitySessionId = elementsSessionContext?.incentiveEligibilitySession?.id
+        val incentiveEligibilitySessionId = elementsSessionContext?.incentiveEligibilitySession?.elementsSessionId
 
         val eligibleForIncentive = if (incentiveEligibilitySessionId != null) {
             consumerRepository.updateAvailableIncentives(

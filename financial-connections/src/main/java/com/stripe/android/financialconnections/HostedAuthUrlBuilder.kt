@@ -46,7 +46,7 @@ internal object HostedAuthUrlBuilder {
             queryParams.add("instantDebitsIncentive=${incentiveEligibilitySession != null}")
             linkMode?.let { queryParams.add("link_mode=${it.value}") }
             billingDetails?.let { queryParams.add(makeBillingDetailsQueryParams(it)) }
-            incentiveEligibilitySession?.let { queryParams.add("incentiveEligibilitySession=${it.id}") }
+            incentiveEligibilitySession?.let { queryParams.add("incentiveEligibilitySession=${it.elementsSessionId}") }
         }
 
         prefillDetails?.run {
