@@ -6,7 +6,6 @@ import android.net.Uri
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.utils.FeatureFlags
-import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.testing.FeatureFlagTestRule
 import org.junit.Rule
 import org.junit.Test
@@ -20,6 +19,7 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class LinkActivityContractTest {
 
+    private val context: Context = ApplicationProvider.getApplicationContext()
     private val args = LinkActivityContract.Args(TestFactory.LINK_CONFIGURATION)
 
     @get:Rule
@@ -29,14 +29,10 @@ class LinkActivityContractTest {
     )
 
     @Test
-    fun `LinkActivityContract creates intent with WebLinkActivityContract when native link disabled`() {
+    fun `creates intent with WebLinkActivityContract when native link disabled`() {
         featureFlagTestRule.setEnabled(false)
 
-        val context: Context = ApplicationProvider.getApplicationContext()
-        val expectedIntent = Intent()
-        val webLinkActivityContract = mock<WebLinkActivityContract>()
-        whenever(webLinkActivityContract.createIntent(context, args))
-            .thenReturn(expectedIntent)
+        val (webLinkActivityContract, expectedIntent) = mockWebLinkContract()
 
         val contract = linkActivityContract(webLinkActivityContract = webLinkActivityContract)
 
@@ -47,36 +43,24 @@ class LinkActivityContractTest {
     }
 
     @Test
-    fun `LinkActivityContract parses result with WebLinkActivityContract when native link disabled`() {
-        featureFlagTestRule.setEnabled(false)
-
-        val context: Context = ApplicationProvider.getApplicationContext()
-        val expectedIntent = Intent()
-        val args = LinkActivityContract.Args(TestFactory.LINK_CONFIGURATION)
-        val webLinkActivityContract = mock<WebLinkActivityContract>()
-
-        whenever(webLinkActivityContract.createIntent(context, args))
-            .thenReturn(expectedIntent)
+    fun `parses result with WebLinkActivityContract when result code is not LinkActivity_RESULT_COMPLETE`() {
+        val (webLinkActivityContract, _) = mockWebLinkContract()
+        val resultIntent = Intent().apply {
+            data = Uri.parse("https://stripe.com")
+        }
 
         val contract = linkActivityContract(webLinkActivityContract = webLinkActivityContract)
 
-        val intent = contract.createIntent(context, args)
-        intent.data = Uri.EMPTY
+        contract.parseResult(0, resultIntent)
 
-        contract.parseResult(0, intent)
-
-        verify(webLinkActivityContract).parseResult(0, intent)
+        verify(webLinkActivityContract).parseResult(0, resultIntent)
     }
 
     @Test
     fun `LinkActivityContract creates intent with with NativeLinkActivityContract when native link is enabled`() {
         featureFlagTestRule.setEnabled(true)
 
-        val context: Context = ApplicationProvider.getApplicationContext()
-        val expectedIntent = Intent()
-        val nativeLinkActivityContract = mock<NativeLinkActivityContract>()
-        whenever(nativeLinkActivityContract.createIntent(context, args))
-            .thenReturn(expectedIntent)
+        val (nativeLinkActivityContract, expectedIntent) = mockNativeLinkContract()
 
         val contract = linkActivityContract(nativeLinkActivityContract = nativeLinkActivityContract)
 
@@ -87,25 +71,31 @@ class LinkActivityContractTest {
     }
 
     @Test
-    fun `LinkActivityContract parses result with NativeLinkActivityContract when native link is enabled`() {
-        featureFlagTestRule.setEnabled(true)
-
-        val context: Context = ApplicationProvider.getApplicationContext()
-        val expectedIntent = Intent()
-        val expectedResult = LinkActivityResult.PaymentMethodObtained(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-        val nativeLinkActivityContract = mock<NativeLinkActivityContract>()
-
-        whenever(nativeLinkActivityContract.createIntent(context, args))
-            .thenReturn(expectedIntent)
-        whenever(nativeLinkActivityContract.parseResult(0, expectedIntent))
-            .thenReturn(expectedResult)
+    fun `parses result with NativeLinkActivityContract when result code is LinkActivity_RESULT_COMPLETE`() {
+        val resultIntent = Intent()
+        val (nativeLinkActivityContract, _) = mockNativeLinkContract()
 
         val contract = linkActivityContract(nativeLinkActivityContract = nativeLinkActivityContract)
 
-        val intent = contract.createIntent(context, args)
-        contract.parseResult(0, intent)
+        contract.parseResult(LinkActivity.RESULT_COMPLETE, resultIntent)
 
-        verify(nativeLinkActivityContract).parseResult(0, intent)
+        verify(nativeLinkActivityContract).parseResult(eq(LinkActivity.RESULT_COMPLETE), eq(resultIntent))
+    }
+
+    private fun mockWebLinkContract(): Pair<WebLinkActivityContract, Intent> {
+        val expectedIntent = Intent()
+        val webLinkActivityContract = mock<WebLinkActivityContract>()
+        whenever(webLinkActivityContract.createIntent(context, args))
+            .thenReturn(expectedIntent)
+        return webLinkActivityContract to expectedIntent
+    }
+
+    private fun mockNativeLinkContract(): Pair<NativeLinkActivityContract, Intent> {
+        val expectedIntent = Intent()
+        val nativeLinkActivityContract = mock<NativeLinkActivityContract>()
+        whenever(nativeLinkActivityContract.createIntent(context, args))
+            .thenReturn(expectedIntent)
+        return nativeLinkActivityContract to expectedIntent
     }
 
     private fun linkActivityContract(

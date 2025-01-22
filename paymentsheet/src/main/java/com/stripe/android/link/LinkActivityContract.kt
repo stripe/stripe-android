@@ -23,11 +23,13 @@ internal class LinkActivityContract @Inject internal constructor(
     }
 
     override fun parseResult(resultCode: Int, intent: Intent?): LinkActivityResult {
-        val redirectUri = intent?.data
-        return if (redirectUri != null) {
-            webLinkActivityContract.parseResult(resultCode, intent)
-        } else {
-            nativeLinkActivityContract.parseResult(resultCode, intent)
+        return when (resultCode) {
+            LinkActivity.RESULT_COMPLETE -> {
+                nativeLinkActivityContract.parseResult(resultCode, intent)
+            }
+            else -> {
+                webLinkActivityContract.parseResult(resultCode, intent)
+            }
         }
     }
 
