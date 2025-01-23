@@ -9,7 +9,7 @@ internal object LinkTypeSettingsDefinition : PlaygroundSettingDefinition<LinkTyp
         defaultValue = LinkType.Native
     ),
     PlaygroundSettingDefinition.Displayable<LinkType> {
-    override val displayName: String = "LinkType"
+    override val displayName: String = "Link Type"
 
     override fun createOptions(configurationData: PlaygroundConfigurationData): List<PlaygroundSettingDefinition.Displayable.Option<LinkType>> {
         return listOf(
