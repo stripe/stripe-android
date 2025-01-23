@@ -1350,6 +1350,26 @@ internal class DefaultPaymentElementLoaderTest {
         assertThat(result.paymentMethodMetadata.linkInlineConfiguration).isNull()
     }
 
+    @OptIn(ExperimentalCardBrandFilteringApi::class)
+    @Test
+    fun `Disables Link if card brand filtering is used`() = runTest {
+        val loader = createPaymentElementLoader()
+
+        val result = loader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
+            paymentSheetConfiguration = PaymentSheet.Configuration(
+                merchantDisplayName = "Some Name",
+                cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.disallowed(listOf(PaymentSheet.CardBrandAcceptance.BrandCategory.Amex))
+            ),
+            initializedViaCompose = false,
+        ).getOrThrow()
+
+        assertThat(result.paymentMethodMetadata.linkState).isNull()
+        assertThat(result.paymentMethodMetadata.linkInlineConfiguration).isNull()
+    }
+
     @Test
     fun `When EPMs are requested but not returned by elements session, no EPMs are used`() = runTest {
         testExternalPaymentMethods(
