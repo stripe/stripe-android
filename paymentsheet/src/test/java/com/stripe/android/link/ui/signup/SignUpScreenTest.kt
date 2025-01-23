@@ -11,7 +11,6 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
-import androidx.navigation.NavHostController
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.TestFactory
@@ -24,7 +23,6 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.mock
 
 @RunWith(AndroidJUnit4::class)
 internal class SignUpScreenTest {
@@ -33,7 +31,6 @@ internal class SignUpScreenTest {
     @get:Rule
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
-    private val linkAccountManager = FakeLinkAccountManager()
     private val linkEventsReporter = object : FakeLinkEventsReporter() {
         override fun onSignupFlowPresented() = Unit
         override fun onSignupFailure(isInline: Boolean, error: Throwable) = Unit
@@ -41,22 +38,16 @@ internal class SignUpScreenTest {
     private val logger = FakeLogger()
 
     private lateinit var viewModel: SignUpViewModel
-    private val navController: NavHostController = mock()
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule(dispatcher)
 
     @Test
     fun `only email field displayed when controllers are empty`() = runTest(dispatcher) {
-        viewModel = SignUpViewModel(
-            configuration = TestFactory.LINK_CONFIGURATION,
-            linkAccountManager = linkAccountManager,
-            linkEventsReporter = linkEventsReporter,
-            logger = logger
-        )
+        viewModel = viewModel()
 
         composeTestRule.setContent {
-            SignUpScreen(viewModel = viewModel, navController = navController)
+            SignUpScreen(viewModel = viewModel)
         }
 
         onEmailField().assertIsDisplayed()
@@ -68,23 +59,10 @@ internal class SignUpScreenTest {
 
     @Test
     fun `all fields displayed and sign up enabled when all controllers are filled`() = runTest(dispatcher) {
-        val linkAccountManager = FakeLinkAccountManager()
-        viewModel = SignUpViewModel(
-            configuration = TestFactory.LINK_CONFIGURATION.copy(
-                customerInfo = LinkConfiguration.CustomerInfo(
-                    name = "jane doe",
-                    email = "test@test.com",
-                    phone = "+11234567891",
-                    billingCountryCode = "CA"
-                )
-            ),
-            linkAccountManager = linkAccountManager,
-            linkEventsReporter = linkEventsReporter,
-            logger = logger
-        )
+        viewModel = viewModel()
 
         composeTestRule.setContent {
-            SignUpScreen(viewModel = viewModel, navController = navController)
+            SignUpScreen(viewModel = viewModel)
         }
 
         dispatcher.scheduler.advanceTimeBy(1500)
@@ -97,23 +75,17 @@ internal class SignUpScreenTest {
 
     @Test
     fun `all fields displayed when email controller is filled`() = runTest(dispatcher) {
-        val linkAccountManager = FakeLinkAccountManager()
-        viewModel = SignUpViewModel(
-            configuration = TestFactory.LINK_CONFIGURATION.copy(
-                customerInfo = LinkConfiguration.CustomerInfo(
-                    name = null,
-                    email = "test@test.com",
-                    phone = null,
-                    billingCountryCode = null
-                )
-            ),
-            linkAccountManager = linkAccountManager,
-            linkEventsReporter = linkEventsReporter,
-            logger = logger
+        viewModel(
+            customerInfo = TestFactory.LINK_CUSTOMER_INFO.copy(
+                name = null,
+                email = "test@test.com",
+                phone = null,
+                billingCountryCode = null
+            )
         )
 
         composeTestRule.setContent {
-            SignUpScreen(viewModel = viewModel, navController = navController)
+            SignUpScreen(viewModel = viewModel)
         }
 
         dispatcher.scheduler.advanceTimeBy(1001)
@@ -128,22 +100,10 @@ internal class SignUpScreenTest {
     fun `field displayed, sign up enabled and error displayed when controllers are filled and sign up fails`() =
         runTest(dispatcher) {
             val linkAccountManager = FakeLinkAccountManager()
-            viewModel = SignUpViewModel(
-                configuration = TestFactory.LINK_CONFIGURATION.copy(
-                    customerInfo = LinkConfiguration.CustomerInfo(
-                        name = "jane doe",
-                        email = "test@test.com",
-                        phone = "+11234567891",
-                        billingCountryCode = "CA"
-                    )
-                ),
-                linkAccountManager = linkAccountManager,
-                linkEventsReporter = linkEventsReporter,
-                logger = logger
-            )
+            viewModel = viewModel(linkAccountManager = linkAccountManager)
 
             composeTestRule.setContent {
-                SignUpScreen(viewModel = viewModel, navController = navController)
+                SignUpScreen(viewModel)
             }
 
             linkAccountManager.signUpResult = Result.failure(Throwable("oops"))
@@ -152,6 +112,22 @@ internal class SignUpScreenTest {
             dispatcher.scheduler.advanceTimeBy(1001)
             onErrorSection().assertExists().assert(hasAnyChild(hasText("oops")))
         }
+
+    private fun viewModel(
+        linkAccountManager: FakeLinkAccountManager = FakeLinkAccountManager(),
+        customerInfo: LinkConfiguration.CustomerInfo = TestFactory.LINK_CUSTOMER_INFO
+    ): SignUpViewModel {
+        return SignUpViewModel(
+            configuration = TestFactory.LINK_CONFIGURATION.copy(
+                customerInfo = customerInfo
+            ),
+            linkAccountManager = linkAccountManager,
+            linkEventsReporter = linkEventsReporter,
+            logger = logger,
+            navigate = {},
+            navigateAndClearStack = {}
+        )
+    }
 
     private fun onEmailField() = composeTestRule.onNodeWithText("Email")
     private fun onPhoneField() = composeTestRule.onNodeWithText("Phone number")

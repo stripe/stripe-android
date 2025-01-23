@@ -120,16 +120,18 @@ internal object TestFactory {
         )
     )
 
+    val LINK_CUSTOMER_INFO = LinkConfiguration.CustomerInfo(
+        name = CUSTOMER_NAME,
+        email = CUSTOMER_EMAIL,
+        phone = CUSTOMER_PHONE,
+        billingCountryCode = CUSTOMER_BILLING_COUNTRY_CODE
+    )
+
     val LINK_CONFIGURATION = LinkConfiguration(
         stripeIntent = PaymentIntentFixtures.PI_SUCCEEDED,
         merchantName = MERCHANT_NAME,
         merchantCountryCode = "",
-        customerInfo = LinkConfiguration.CustomerInfo(
-            name = CUSTOMER_NAME,
-            email = CUSTOMER_EMAIL,
-            phone = CUSTOMER_PHONE,
-            billingCountryCode = CUSTOMER_BILLING_COUNTRY_CODE
-        ),
+        customerInfo = LINK_CUSTOMER_INFO,
         shippingDetails = null,
         flags = emptyMap(),
         cardBrandChoice = null,
