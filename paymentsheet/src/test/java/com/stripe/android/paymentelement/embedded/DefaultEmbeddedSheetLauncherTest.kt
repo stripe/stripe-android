@@ -97,14 +97,11 @@ internal class DefaultEmbeddedSheetLauncherTest {
 
     @Test
     fun `manageActivityLauncher callback updates state on non-complete result`() = testScenario {
-        it.customerStateHolder.setCustomerState(PaymentSheetFixtures.EMPTY_CUSTOMER_STATE)
-        val result = ManageResult.Cancelled(customerState = null)
-
+        val result = ManageResult.Cancelled(customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE)
         val callback = it.manageRegisterCall.callback.asCallbackFor<ManageResult>()
         callback.onActivityResult(result)
 
         assertThat(it.customerStateHolder.customer.value).isEqualTo(PaymentSheetFixtures.EMPTY_CUSTOMER_STATE)
-        assertThat(it.selectionHolder.selection.value).isEqualTo(null)
     }
 
     @Test
