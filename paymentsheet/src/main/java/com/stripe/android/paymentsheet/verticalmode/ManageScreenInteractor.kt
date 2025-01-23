@@ -53,7 +53,6 @@ internal class DefaultManageScreenInteractor(
     private val onSelectPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     private val onUpdatePaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     private val navigateBack: (withDelay: Boolean) -> Unit,
-    override val isLiveMode: Boolean,
     private val defaultPaymentMethodId: StateFlow<String?>,
     dispatcher: CoroutineContext = Dispatchers.Default,
 ) : ManageScreenInteractor {
@@ -72,6 +71,8 @@ internal class DefaultManageScreenInteractor(
                 )
             }
         }
+
+    override val isLiveMode: Boolean = paymentMethodMetadata.stripeIntent.isLiveMode
 
     override val state = combineAsStateFlow(
         displayableSavedPaymentMethods,
@@ -163,7 +164,6 @@ internal class DefaultManageScreenInteractor(
                         viewModel.navigationHandler.pop()
                     }
                 },
-                isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
                 defaultPaymentMethodId = savedPaymentMethodMutator.defaultPaymentMethodId
             )
         }

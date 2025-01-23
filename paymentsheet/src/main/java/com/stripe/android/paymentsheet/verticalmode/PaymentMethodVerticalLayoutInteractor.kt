@@ -83,7 +83,6 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val reportPaymentMethodTypeSelected: (PaymentMethodCode) -> Unit,
     private val reportFormShown: (PaymentMethodCode) -> Unit,
     private val onUpdatePaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
-    override val isLiveMode: Boolean,
     dispatcher: CoroutineContext = Dispatchers.Default,
 ) : PaymentMethodVerticalLayoutInteractor {
 
@@ -160,7 +159,6 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 },
                 reportPaymentMethodTypeSelected = viewModel.eventReporter::onSelectPaymentMethod,
                 reportFormShown = viewModel.eventReporter::onPaymentMethodFormShown,
-                isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode
             )
         }
     }
@@ -202,6 +200,8 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     ) { paymentMethods, walletsState, incentive ->
         getDisplayablePaymentMethods(paymentMethods, walletsState, incentive)
     }
+
+    override val isLiveMode: Boolean = paymentMethodMetadata.stripeIntent.isLiveMode
 
     override val state: StateFlow<PaymentMethodVerticalLayoutInteractor.State> = combineAsStateFlow(
         displayablePaymentMethods,

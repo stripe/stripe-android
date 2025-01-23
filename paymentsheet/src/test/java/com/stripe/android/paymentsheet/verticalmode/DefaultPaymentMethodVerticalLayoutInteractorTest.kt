@@ -1110,7 +1110,6 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             reportPaymentMethodTypeSelected = reportPaymentMethodTypeSelected,
             reportFormShown = reportFormShown,
             onUpdatePaymentMethod = onUpdatePaymentMethod,
-            isLiveMode = true,
             dispatcher = UnconfinedTestDispatcher()
         )
 
