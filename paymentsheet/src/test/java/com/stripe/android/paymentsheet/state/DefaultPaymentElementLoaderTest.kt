@@ -659,7 +659,8 @@ internal class DefaultPaymentElementLoaderTest {
             passthroughModeEnabled = false,
             cardBrandChoice = null,
             flags = emptyMap(),
-            useAttestationEndpointsForLink = false
+            useAttestationEndpointsForLink = false,
+            initializationMode = initializationMode,
         )
 
         assertThat(result.paymentMethodMetadata.linkState?.configuration).isEqualTo(expectedLinkConfig)

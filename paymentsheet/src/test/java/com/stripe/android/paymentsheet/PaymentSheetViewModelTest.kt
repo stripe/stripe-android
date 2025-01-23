@@ -961,6 +961,7 @@ internal class PaymentSheetViewModelTest {
                 cardBrandChoice = null,
                 shippingDetails = null,
                 useAttestationEndpointsForLink = false,
+                initializationMode = PaymentSheetFixtures.INITIALIZATION_MODE_PAYMENT_INTENT
             )
 
             val viewModel = createViewModel(
