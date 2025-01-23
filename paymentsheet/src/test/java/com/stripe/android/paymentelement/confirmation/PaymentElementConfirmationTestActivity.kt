@@ -23,6 +23,8 @@ import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
+import com.stripe.android.link.gate.DefaultLinkGate
+import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.confirmation.injection.PaymentElementConfirmationModule
@@ -113,6 +115,9 @@ internal interface PaymentElementConfirmationTestComponent {
 internal interface PaymentElementConfirmationTestModule {
     @Binds
     fun bindsStripeRepository(repository: StripeApiRepository): StripeRepository
+
+    @Binds
+    fun bindLinkGateFactory(linkGateFactory: DefaultLinkGate.Factory): LinkGate.Factory
 
     companion object {
         @Provides
