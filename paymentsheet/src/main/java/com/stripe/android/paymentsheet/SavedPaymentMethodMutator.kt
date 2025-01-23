@@ -3,10 +3,10 @@ package com.stripe.android.paymentsheet
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.orEmpty
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -29,12 +29,12 @@ import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 
 internal class SavedPaymentMethodMutator(
+    private val paymentMethodMetadataFlow: StateFlow<PaymentMethodMetadata?>,
     private val eventReporter: EventReporter,
     private val coroutineScope: CoroutineScope,
     private val workContext: CoroutineContext,
     private val customerRepository: CustomerRepository,
     private val selection: StateFlow<PaymentSelection?>,
-    val providePaymentMethodName: (PaymentMethodCode?) -> ResolvableString,
     private val clearSelection: () -> Unit,
     private val customerStateHolder: CustomerStateHolder,
     private val onPaymentMethodRemoved: () -> Unit,
@@ -45,8 +45,6 @@ internal class SavedPaymentMethodMutator(
         updateExecutor: suspend (brand: CardBrand) -> Result<PaymentMethod>,
     ) -> Unit,
     private val navigationPop: () -> Unit,
-    isCbcEligible: () -> Boolean,
-    isGooglePayReady: StateFlow<Boolean>,
     isLinkEnabled: StateFlow<Boolean?>,
     isNotPaymentFlow: Boolean,
 ) {
@@ -54,14 +52,20 @@ internal class SavedPaymentMethodMutator(
         customerState?.defaultPaymentMethodId
     }
 
+    val providePaymentMethodName: (code: String?) -> ResolvableString = { code ->
+        code?.let {
+            paymentMethodMetadataFlow.value?.supportedPaymentMethodForCode(code)
+        }?.displayName.orEmpty()
+    }
+
     private val paymentOptionsItemsMapper: PaymentOptionsItemsMapper by lazy {
         PaymentOptionsItemsMapper(
             customerState = customerStateHolder.customer,
-            isGooglePayReady = isGooglePayReady,
+            isGooglePayReady = paymentMethodMetadataFlow.mapAsStateFlow { it?.isGooglePayReady == true },
             isLinkEnabled = isLinkEnabled,
             isNotPaymentFlow = isNotPaymentFlow,
             nameProvider = providePaymentMethodName,
-            isCbcEligible = isCbcEligible,
+            isCbcEligible = { paymentMethodMetadataFlow.value?.cbcEligibility is CardBrandChoiceEligibility.Eligible },
         )
     }
 
@@ -312,16 +316,12 @@ internal class SavedPaymentMethodMutator(
 
         fun create(viewModel: BaseSheetViewModel): SavedPaymentMethodMutator {
             return SavedPaymentMethodMutator(
+                paymentMethodMetadataFlow = viewModel.paymentMethodMetadata,
                 eventReporter = viewModel.eventReporter,
                 coroutineScope = viewModel.viewModelScope,
                 workContext = viewModel.workContext,
                 customerRepository = viewModel.customerRepository,
                 selection = viewModel.selection,
-                providePaymentMethodName = { code ->
-                    code?.let {
-                        viewModel.paymentMethodMetadata.value?.supportedPaymentMethodForCode(code)
-                    }?.displayName.orEmpty()
-                },
                 customerStateHolder = viewModel.customerStateHolder,
                 clearSelection = { viewModel.updateSelection(null) },
                 onPaymentMethodRemoved = {
@@ -337,10 +337,6 @@ internal class SavedPaymentMethodMutator(
                     )
                 },
                 navigationPop = viewModel.navigationHandler::pop,
-                isCbcEligible = {
-                    viewModel.paymentMethodMetadata.value?.cbcEligibility is CardBrandChoiceEligibility.Eligible
-                },
-                isGooglePayReady = viewModel.paymentMethodMetadata.mapAsStateFlow { it?.isGooglePayReady == true },
                 isLinkEnabled = viewModel.linkHandler.isLinkEnabled,
                 isNotPaymentFlow = !viewModel.isCompleteFlow,
             ).apply {

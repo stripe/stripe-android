@@ -5,8 +5,7 @@ import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.strings.orEmpty
-import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
@@ -17,6 +16,7 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.testing.PaymentMethodFactory
+import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.FakeCustomerRepository
 import kotlinx.coroutines.CoroutineScope
@@ -95,7 +95,7 @@ class SavedPaymentMethodMutatorTest {
 
     @Test
     fun `canEdit is correct CBC is enabled`() = runScenario(
-        isCbcEligible = { true }
+        isCbcEligible = true
     ) {
         savedPaymentMethodMutator.canEdit.test {
             assertThat(awaitItem()).isFalse()
@@ -461,7 +461,7 @@ class SavedPaymentMethodMutatorTest {
 
     private fun runScenario(
         customerRepository: CustomerRepository = FakeCustomerRepository(),
-        isCbcEligible: () -> Boolean = { false },
+        isCbcEligible: Boolean = false,
         block: suspend Scenario.() -> Unit
     ) {
         runTest {
@@ -478,12 +478,20 @@ class SavedPaymentMethodMutatorTest {
             val navigationPopTurbine = Turbine<Unit>()
 
             val savedPaymentMethodMutator = SavedPaymentMethodMutator(
+                paymentMethodMetadataFlow = stateFlowOf(
+                    PaymentMethodMetadataFactory.create(
+                        cbcEligibility = if (isCbcEligible) {
+                            CardBrandChoiceEligibility.Eligible(listOf(CardBrand.Visa, CardBrand.CartesBancaires))
+                        } else {
+                            CardBrandChoiceEligibility.Ineligible
+                        }
+                    )
+                ),
                 eventReporter = mock(),
                 coroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
                 workContext = coroutineContext,
                 customerRepository = customerRepository,
                 selection = selection,
-                providePaymentMethodName = { it?.resolvableString.orEmpty() },
                 clearSelection = { selection.value = null },
                 customerStateHolder = customerStateHolder,
                 onPaymentMethodRemoved = { paymentMethodRemovedTurbine.add(Unit) },
@@ -493,8 +501,6 @@ class SavedPaymentMethodMutatorTest {
                     )
                 },
                 navigationPop = { navigationPopTurbine.add(Unit) },
-                isCbcEligible = isCbcEligible,
-                isGooglePayReady = stateFlowOf(false),
                 isLinkEnabled = stateFlowOf(false),
                 isNotPaymentFlow = true,
             )
