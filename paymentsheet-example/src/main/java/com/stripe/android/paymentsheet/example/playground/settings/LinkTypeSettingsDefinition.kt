@@ -2,7 +2,8 @@ package com.stripe.android.paymentsheet.example.playground.settings
 
 import com.stripe.android.core.utils.FeatureFlags
 
-internal object LinkTypeSettingsDefinition : PlaygroundSettingDefinition<LinkType>,
+internal object LinkTypeSettingsDefinition :
+    PlaygroundSettingDefinition<LinkType>,
     PlaygroundSettingDefinition.Saveable<LinkType> by EnumSaveable(
         key = "LinkType",
         values = LinkType.entries.toTypedArray(),
@@ -11,7 +12,9 @@ internal object LinkTypeSettingsDefinition : PlaygroundSettingDefinition<LinkTyp
     PlaygroundSettingDefinition.Displayable<LinkType> {
     override val displayName: String = "Link Type"
 
-    override fun createOptions(configurationData: PlaygroundConfigurationData): List<PlaygroundSettingDefinition.Displayable.Option<LinkType>> {
+    override fun createOptions(
+        configurationData: PlaygroundConfigurationData
+    ): List<PlaygroundSettingDefinition.Displayable.Option<LinkType>> {
         return listOf(
             option("Native", LinkType.Native),
             option("Native + Attest", LinkType.NativeAttest),
