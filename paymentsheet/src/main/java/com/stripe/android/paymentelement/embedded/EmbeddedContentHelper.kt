@@ -205,7 +205,6 @@ internal class DefaultEmbeddedContentHelper @AssistedInject constructor(
             reportPaymentMethodTypeSelected = eventReporter::onSelectPaymentMethod,
             reportFormShown = eventReporter::onPaymentMethodFormShown,
             onUpdatePaymentMethod = savedPaymentMethodMutator::updatePaymentMethod,
-            isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
         )
     }
 
