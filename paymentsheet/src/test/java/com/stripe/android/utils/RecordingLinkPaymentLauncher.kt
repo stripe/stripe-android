@@ -7,6 +7,7 @@ import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkPaymentLauncher
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.mock
 
@@ -37,7 +38,7 @@ internal object RecordingLinkPaymentLauncher {
                 unregisterCalls.add(Unit)
             }
 
-            on { present(any()) } doAnswer { invocation ->
+            on { present(any(), anyOrNull()) } doAnswer { invocation ->
                 val arguments = invocation.arguments
 
                 presentCalls.add(

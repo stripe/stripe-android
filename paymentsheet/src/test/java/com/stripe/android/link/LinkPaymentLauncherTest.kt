@@ -82,11 +82,11 @@ internal class LinkPaymentLauncherTest {
             val registerCall = awaitRegisterCall()
             assertThat(registerCall).isNotNull()
 
-            linkPaymentLauncher.present(TestFactory.LINK_CONFIGURATION)
+            linkPaymentLauncher.present(TestFactory.LINK_CONFIGURATION, null)
 
             val launchCall = awaitLaunchCall()
 
-            assertThat(launchCall).isEqualTo(LinkActivityContract.Args(TestFactory.LINK_CONFIGURATION))
+            assertThat(launchCall).isEqualTo(LinkActivityContract.Args(TestFactory.LINK_CONFIGURATION, null))
 
             awaitNextRegisteredLauncher()
         }
@@ -172,7 +172,7 @@ internal class LinkPaymentLauncherTest {
             var callbackParam: LinkActivityResult? = null
             linkPaymentLauncher.register(activityResultRegistry) { callbackParam = it }
 
-            linkPaymentLauncher.present(TestFactory.LINK_CONFIGURATION)
+            linkPaymentLauncher.present(TestFactory.LINK_CONFIGURATION, null)
 
             verifyActivityResultCallback(
                 linkActivityResult = linkActivityResult,
@@ -199,7 +199,7 @@ internal class LinkPaymentLauncherTest {
                 var callbackParam: LinkActivityResult? = null
                 linkPaymentLauncher.register(activityResultCaller) { callbackParam = it }
 
-                linkPaymentLauncher.present(TestFactory.LINK_CONFIGURATION)
+                linkPaymentLauncher.present(TestFactory.LINK_CONFIGURATION, null)
 
                 val registerCall = awaitRegisterCall()
                 registerCall.callback.asCallbackFor<LinkActivityResult>().onActivityResult(linkActivityResult)

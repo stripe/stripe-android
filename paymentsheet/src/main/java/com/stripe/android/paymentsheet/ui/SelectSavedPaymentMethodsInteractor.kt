@@ -172,7 +172,6 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
         val paymentSelection = when (selection) {
             is PaymentSelection.Saved,
             PaymentSelection.Link,
-            is PaymentSelection.LinkExpress,
             PaymentSelection.GooglePay -> {
                 selection
             }

@@ -475,7 +475,6 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
             is PaymentSelection.GooglePay -> "googlepay"
             is PaymentSelection.Saved -> "savedpm"
             is PaymentSelection.Link,
-            is PaymentSelection.LinkExpress,
             is PaymentSelection.New.LinkInline -> "link"
             is PaymentSelection.ExternalPaymentMethod,
             is PaymentSelection.New -> {
@@ -546,7 +545,7 @@ private val Duration.asSeconds: Float
 internal fun PaymentSelection?.code(): String? {
     return when (this) {
         is PaymentSelection.GooglePay -> "google_pay"
-        is PaymentSelection.Link, is PaymentSelection.LinkExpress -> "link"
+        is PaymentSelection.Link -> "link"
         is PaymentSelection.New -> paymentMethodCreateParams.typeCode
         is PaymentSelection.Saved -> paymentMethod.type?.code
         is PaymentSelection.ExternalPaymentMethod -> type
@@ -563,7 +562,7 @@ private fun PaymentSelection?.paymentMethodInfo(): Map<String, String> {
 
 internal fun PaymentSelection?.linkContext(): String? {
     return when (this) {
-        is PaymentSelection.Link, is PaymentSelection.LinkExpress -> "wallet"
+        is PaymentSelection.Link -> "wallet"
         is PaymentSelection.New.USBankAccount -> {
             instantDebits?.let {
                 if (it.linkMode == LinkMode.LinkCardBrand) {

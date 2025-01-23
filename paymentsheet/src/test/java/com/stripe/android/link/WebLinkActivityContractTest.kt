@@ -39,7 +39,7 @@ class WebLinkActivityContractTest {
             override fun buildPaymentUserAgent(attribution: Set<String>) = "test"
         }
         val contract = contract(stripeRepository)
-        val args = LinkActivityContract.Args(TestFactory.LINK_CONFIGURATION)
+        val args = LinkActivityContract.Args(TestFactory.LINK_CONFIGURATION, null)
 
         val intent = contract.createIntent(ApplicationProvider.getApplicationContext(), args)
 

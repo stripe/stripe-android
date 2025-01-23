@@ -99,7 +99,6 @@ internal class LinkHandler @Inject constructor(
                 else -> Unit
             }
         }
-
     }
 
     suspend fun payWithLinkInline(

@@ -146,7 +146,8 @@ internal class LinkActivityViewModelTest {
         val mockArgs = NativeLinkArgs(
             configuration = mock(),
             publishableKey = "",
-            stripeAccountId = null
+            stripeAccountId = null,
+            linkAccount = null
         )
         val savedStateHandle = SavedStateHandle()
         val factory = LinkActivityViewModel.factory(savedStateHandle)

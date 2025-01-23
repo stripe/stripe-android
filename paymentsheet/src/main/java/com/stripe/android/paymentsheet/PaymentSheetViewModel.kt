@@ -21,7 +21,6 @@ import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
-import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntent
@@ -377,10 +376,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     fun checkoutWithLink() {
         checkout(PaymentSelection.Link, CheckoutIdentifier.SheetTopWallet)
-    }
-
-    private fun checkoutWithLinkExpress(linkAccount: LinkAccount) {
-        checkout(PaymentSelection.LinkExpress(linkAccount), CheckoutIdentifier.SheetTopWallet)
     }
 
     private fun checkout(

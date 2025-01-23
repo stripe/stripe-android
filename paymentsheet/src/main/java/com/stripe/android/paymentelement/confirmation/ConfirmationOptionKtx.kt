@@ -76,12 +76,6 @@ internal fun PaymentSelection.toConfirmationOption(
                 linkAccount = null
             )
         }
-        is PaymentSelection.LinkExpress -> {
-            toLinkConfirmationOption(
-                linkConfiguration = linkConfiguration,
-                linkAccount = linkAccount
-            )
-        }
     }
 }
 

@@ -4,8 +4,10 @@ import com.stripe.android.core.model.CountryCode
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.LinkPaymentDetails
+import com.stripe.android.link.TestFactory
 import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
@@ -50,6 +52,10 @@ internal class FakeLinkConfigurationCoordinator(
 
     override fun getAccountStatusFlow(configuration: LinkConfiguration): Flow<AccountStatus> {
         return flowOf(accountStatus)
+    }
+
+    override fun getLinkAccountFlow(configuration: LinkConfiguration): StateFlow<LinkAccount?> {
+        return stateFlowOf(TestFactory.LINK_ACCOUNT)
     }
 
     override suspend fun signInWithUserInput(configuration: LinkConfiguration, userInput: UserInput): Result<Boolean> {

@@ -64,7 +64,7 @@ internal class DefaultEmbeddedSelectionChooser @Inject constructor() : EmbeddedS
             is PaymentSelection.GooglePay -> {
                 paymentMethodMetadata.isGooglePayReady
             }
-            is PaymentSelection.Link, is PaymentSelection.LinkExpress -> {
+            is PaymentSelection.Link -> {
                 paymentMethodMetadata.linkState != null
             }
             is PaymentSelection.ExternalPaymentMethod -> {

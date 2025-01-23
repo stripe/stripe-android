@@ -272,7 +272,6 @@ internal class DefaultFlowController @Inject internal constructor(
 
         when (val paymentSelection = viewModel.paymentSelection) {
             is PaymentSelection.Link,
-            is PaymentSelection.LinkExpress,
             is PaymentSelection.New.LinkInline,
             is PaymentSelection.GooglePay,
             is PaymentSelection.ExternalPaymentMethod,

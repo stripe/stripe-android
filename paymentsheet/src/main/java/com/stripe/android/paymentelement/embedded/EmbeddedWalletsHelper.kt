@@ -8,7 +8,6 @@ import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
-import kotlin.coroutines.CoroutineContext
 
 internal fun interface EmbeddedWalletsHelper {
     fun walletsState(paymentMethodMetadata: PaymentMethodMetadata): StateFlow<WalletsState?>

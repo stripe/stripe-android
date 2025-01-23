@@ -20,7 +20,10 @@ import org.robolectric.RobolectricTestRunner
 class LinkActivityContractTest {
 
     private val context: Context = ApplicationProvider.getApplicationContext()
-    private val args = LinkActivityContract.Args(TestFactory.LINK_CONFIGURATION)
+    private val args = LinkActivityContract.Args(
+        configuration = TestFactory.LINK_CONFIGURATION,
+        linkAccount = null
+    )
 
     @get:Rule
     val featureFlagTestRule = FeatureFlagTestRule(
