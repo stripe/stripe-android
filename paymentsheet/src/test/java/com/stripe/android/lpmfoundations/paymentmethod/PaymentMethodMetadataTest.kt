@@ -1315,6 +1315,7 @@ internal class PaymentMethodMetadataTest {
                 ),
                 passthroughModeEnabled = false,
                 useAttestationEndpointsForLink = false,
+                initializationMode = PaymentSheetFixtures.INITIALIZATION_MODE_PAYMENT_INTENT
             ),
         )
     }

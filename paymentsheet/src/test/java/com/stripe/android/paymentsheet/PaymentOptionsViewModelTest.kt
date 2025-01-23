@@ -5,7 +5,6 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.R
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
@@ -14,6 +13,7 @@ import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -21,6 +21,7 @@ import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures.DEFAULT_CARD
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
+import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.updateState
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -54,6 +55,8 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
+import com.stripe.android.R as PaymentsCoreR
+import com.stripe.android.paymentsheet.R as PaymentSheetR
 
 @RunWith(RobolectricTestRunner::class)
 internal class PaymentOptionsViewModelTest {
@@ -642,7 +645,7 @@ internal class PaymentOptionsViewModelTest {
 
         viewModel.navigationHandler.currentScreen.test {
             awaitItem().title(isCompleteFlow = false, isWalletEnabled = false).test {
-                assertThat(awaitItem()).isEqualTo(R.string.stripe_title_add_a_card.resolvableString)
+                assertThat(awaitItem()).isEqualTo(PaymentsCoreR.string.stripe_title_add_a_card.resolvableString)
             }
         }
     }
@@ -723,17 +726,26 @@ internal class PaymentOptionsViewModelTest {
             val viewModel = createLinkViewModel()
 
             viewModel.linkHandler.payWithLinkInline(
-                userInput = UserInput.SignIn("email@email.com"),
-                paymentSelection = createCardPaymentSelection(
+                paymentSelection = createLinkInlinePaymentSelection(
                     customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse,
+                    input = UserInput.SignIn("email@email.com"),
                 ),
                 shouldCompleteLinkInlineFlow = false
             )
 
             assertThat(viewModel.selection.value).isEqualTo(
-                PaymentSelection.New.LinkInline(
-                    linkPaymentDetails = LinkTestUtils.LINK_NEW_PAYMENT_DETAILS,
+                PaymentSelection.New.GenericPaymentMethod(
+                    paymentMethodCreateParams = LinkTestUtils.LINK_NEW_PAYMENT_DETAILS.paymentMethodCreateParams,
+                    paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(
+                        setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession,
+                    ),
+                    paymentMethodExtraParams = null,
                     customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse,
+                    iconResource = PaymentSheetR.drawable.stripe_ic_paymentsheet_link,
+                    label = "···· 4242".resolvableString,
+                    lightThemeIconUrl = null,
+                    darkThemeIconUrl = null,
+                    createdFromLink = true,
                 )
             )
         }
@@ -744,17 +756,24 @@ internal class PaymentOptionsViewModelTest {
             val viewModel = createLinkViewModel()
 
             viewModel.linkHandler.payWithLinkInline(
-                userInput = UserInput.SignIn("email@email.com"),
-                paymentSelection = createCardPaymentSelection(
+                paymentSelection = createLinkInlinePaymentSelection(
                     customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+                    input = UserInput.SignIn("email@email.com"),
                 ),
                 shouldCompleteLinkInlineFlow = false
             )
 
             assertThat(viewModel.selection.value).isEqualTo(
-                PaymentSelection.New.LinkInline(
-                    linkPaymentDetails = LinkTestUtils.LINK_NEW_PAYMENT_DETAILS,
-                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
+                PaymentSelection.New.GenericPaymentMethod(
+                    paymentMethodCreateParams = LinkTestUtils.LINK_NEW_PAYMENT_DETAILS.paymentMethodCreateParams,
+                    paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(),
+                    paymentMethodExtraParams = null,
+                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+                    iconResource = PaymentSheetR.drawable.stripe_ic_paymentsheet_link,
+                    label = "···· 4242".resolvableString,
+                    lightThemeIconUrl = null,
+                    darkThemeIconUrl = null,
+                    createdFromLink = true,
                 )
             )
         }
@@ -797,13 +816,15 @@ internal class PaymentOptionsViewModelTest {
         )
     }
 
-    private fun createCardPaymentSelection(
-        customerRequestedSave: PaymentSelection.CustomerRequestedSave
-    ): PaymentSelection.New.Card {
-        return PaymentSelection.New.Card(
+    private fun createLinkInlinePaymentSelection(
+        customerRequestedSave: PaymentSelection.CustomerRequestedSave,
+        input: UserInput,
+    ): PaymentSelection.New.LinkInline {
+        return PaymentSelection.New.LinkInline(
             paymentMethodCreateParams = DEFAULT_CARD,
             brand = CardBrand.Visa,
             customerRequestedSave = customerRequestedSave,
+            input = input,
         )
     }
 

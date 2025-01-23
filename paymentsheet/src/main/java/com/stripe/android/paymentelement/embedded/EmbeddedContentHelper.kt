@@ -5,7 +5,6 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.strings.ResolvableString
-import com.stripe.android.core.strings.orEmpty
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
@@ -24,7 +23,6 @@ import com.stripe.android.paymentsheet.verticalmode.DefaultPaymentMethodVertical
 import com.stripe.android.paymentsheet.verticalmode.DefaultPaymentMethodVerticalLayoutInteractor.FormType
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodIncentiveInteractor
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor
-import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.utils.stateFlowOf
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -205,7 +203,6 @@ internal class DefaultEmbeddedContentHelper @AssistedInject constructor(
             reportPaymentMethodTypeSelected = eventReporter::onSelectPaymentMethod,
             reportFormShown = eventReporter::onPaymentMethodFormShown,
             onUpdatePaymentMethod = savedPaymentMethodMutator::updatePaymentMethod,
-            isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
         )
     }
 
@@ -215,16 +212,12 @@ internal class DefaultEmbeddedContentHelper @AssistedInject constructor(
         customerStateHolder: CustomerStateHolder,
     ): SavedPaymentMethodMutator {
         return SavedPaymentMethodMutator(
+            paymentMethodMetadataFlow = stateFlowOf(paymentMethodMetadata),
             eventReporter = eventReporter,
             coroutineScope = coroutineScope,
             workContext = workContext,
             customerRepository = customerRepository,
             selection = selectionHolder.selection,
-            providePaymentMethodName = { code ->
-                code?.let {
-                    paymentMethodMetadata.supportedPaymentMethodForCode(code)
-                }?.displayName.orEmpty()
-            },
             clearSelection = {
                 setSelection(null)
             },
@@ -235,10 +228,6 @@ internal class DefaultEmbeddedContentHelper @AssistedInject constructor(
             },
             navigationPop = {
             },
-            isCbcEligible = {
-                paymentMethodMetadata.cbcEligibility is CardBrandChoiceEligibility.Eligible
-            },
-            isGooglePayReady = stateFlowOf(paymentMethodMetadata.isGooglePayReady),
             isLinkEnabled = stateFlowOf(paymentMethodMetadata.linkState != null),
             isNotPaymentFlow = false,
         )
@@ -248,8 +237,9 @@ internal class DefaultEmbeddedContentHelper @AssistedInject constructor(
         coroutineScope: CoroutineScope,
         paymentMethodMetadata: PaymentMethodMetadata,
     ): FormHelper {
-        val linkInlineHandler = createLinkInlineHandler(coroutineScope)
         return DefaultFormHelper(
+            coroutineScope = coroutineScope,
+            linkInlineHandler = LinkInlineHandler.create(),
             cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
             paymentMethodMetadata = paymentMethodMetadata,
             newPaymentSelectionProvider = {
@@ -267,22 +257,6 @@ internal class DefaultEmbeddedContentHelper @AssistedInject constructor(
                 setSelection(it)
             },
             linkConfigurationCoordinator = linkConfigurationCoordinator,
-            onLinkInlineSignupStateChanged = linkInlineHandler::onStateUpdated,
-        )
-    }
-
-    private fun createLinkInlineHandler(
-        coroutineScope: CoroutineScope,
-    ): LinkInlineHandler {
-        return LinkInlineHandler(
-            coroutineScope = coroutineScope,
-            payWithLink = { _, _, _ ->
-            },
-            selection = selectionHolder.selection,
-            updateLinkPrimaryButtonUiState = {
-            },
-            primaryButtonLabel = stateFlowOf(null),
-            shouldCompleteLinkFlowInline = false,
         )
     }
 

@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.verticalmode
 
-import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -9,7 +8,6 @@ import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultFormHelper
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
-import com.stripe.android.paymentsheet.LinkInlineHandler
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.code
 import com.stripe.android.paymentsheet.forms.FormFieldValues
@@ -85,7 +83,6 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val reportPaymentMethodTypeSelected: (PaymentMethodCode) -> Unit,
     private val reportFormShown: (PaymentMethodCode) -> Unit,
     private val onUpdatePaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
-    override val isLiveMode: Boolean,
     dispatcher: CoroutineContext = Dispatchers.Default,
 ) : PaymentMethodVerticalLayoutInteractor {
 
@@ -102,8 +99,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             customerStateHolder: CustomerStateHolder,
             bankFormInteractor: BankFormInteractor,
         ): PaymentMethodVerticalLayoutInteractor {
-            val linkInlineHandler = LinkInlineHandler.create(viewModel, viewModel.viewModelScope)
-            val formHelper = DefaultFormHelper.create(viewModel, linkInlineHandler, paymentMethodMetadata)
+            val formHelper = DefaultFormHelper.create(viewModel, paymentMethodMetadata)
             return DefaultPaymentMethodVerticalLayoutInteractor(
                 paymentMethodMetadata = paymentMethodMetadata,
                 processing = viewModel.processing,
@@ -163,7 +159,6 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 },
                 reportPaymentMethodTypeSelected = viewModel.eventReporter::onSelectPaymentMethod,
                 reportFormShown = viewModel.eventReporter::onPaymentMethodFormShown,
-                isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode
             )
         }
     }
@@ -205,6 +200,8 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     ) { paymentMethods, walletsState, incentive ->
         getDisplayablePaymentMethods(paymentMethods, walletsState, incentive)
     }
+
+    override val isLiveMode: Boolean = paymentMethodMetadata.stripeIntent.isLiveMode
 
     override val state: StateFlow<PaymentMethodVerticalLayoutInteractor.State> = combineAsStateFlow(
         displayablePaymentMethods,
