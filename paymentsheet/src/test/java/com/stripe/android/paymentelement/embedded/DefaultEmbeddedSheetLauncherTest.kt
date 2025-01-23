@@ -1,27 +1,25 @@
 package com.stripe.android.paymentelement.embedded
 
 import androidx.activity.result.ActivityResultCallback
-import androidx.activity.result.ActivityResultCaller
+import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentelement.confirmation.asCallbackFor
 import com.stripe.android.paymentelement.embedded.manage.ManageContract
 import com.stripe.android.paymentelement.embedded.manage.ManageResult
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.utils.DummyActivityResultCaller
+import com.stripe.android.utils.DummyActivityResultCaller.RegisterCall
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.ArgumentCaptor
-import org.mockito.Mockito.mock
-import org.mockito.MockitoAnnotations
-import org.mockito.kotlin.any
-import org.mockito.kotlin.capture
-import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
@@ -32,23 +30,29 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val code = "test_code"
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
         val expectedArgs = FormContract.Args(code, paymentMethodMetadata)
-        launcher.launchForm(code, paymentMethodMetadata)
-        assertThat(formActivityLauncher.argsTurbine.awaitItem()).isEqualTo(expectedArgs)
+
+        it.sheetLauncher.launchForm(code, paymentMethodMetadata)
+        val launchCall = awaitLaunchCall()
+        assertThat(launchCall).isEqualTo(expectedArgs)
     }
 
     @Test
     fun `formActivityLauncher callback updates selection holder on complete result`() = testScenario {
         val selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
         val result = FormResult.Complete(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
-        formContractCallbackCaptor.value.onActivityResult(result)
-        assertThat(selectionHolder.selection.value).isEqualTo(selection)
+        val callback = it.formRegisterCall.callback.asCallbackFor<FormResult>()
+
+        callback.onActivityResult(result)
+        assertThat(it.selectionHolder.selection.value).isEqualTo(selection)
     }
 
     @Test
     fun `formActivityLauncher callback does not update selection holder on non-complete result`() = testScenario {
         val result = FormResult.Cancelled
-        formContractCallbackCaptor.value.onActivityResult(result)
-        assertThat(selectionHolder.selection.value).isNull()
+        val callback = it.formRegisterCall.callback.asCallbackFor<FormResult>()
+
+        callback.onActivityResult(result)
+        assertThat(it.selectionHolder.selection.value).isEqualTo(null)
     }
 
     @Test
@@ -56,8 +60,11 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
         val customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
         val expectedArgs = ManageContract.Args(paymentMethodMetadata, customerState, PaymentSelection.GooglePay)
-        launcher.launchManage(paymentMethodMetadata, customerState, PaymentSelection.GooglePay)
-        assertThat(manageActivityLauncher.argsTurbine.awaitItem()).isEqualTo(expectedArgs)
+
+        it.sheetLauncher.launchManage(paymentMethodMetadata, customerState, PaymentSelection.GooglePay)
+        val launchCall = awaitLaunchCall()
+
+        assertThat(launchCall).isEqualTo(expectedArgs)
     }
 
     @Test
@@ -68,97 +75,100 @@ internal class DefaultEmbeddedSheetLauncherTest {
             customerState,
             selection,
         )
-        manageContractCallbackCaptor.value.onActivityResult(result)
-        assertThat(customerStateHolder.customer.value).isEqualTo(customerState)
-        assertThat(selectionHolder.selection.value).isEqualTo(selection)
+
+        val callback = it.manageRegisterCall.callback.asCallbackFor<ManageResult>()
+        callback.onActivityResult(result)
+
+        assertThat(it.customerStateHolder.customer.value).isEqualTo(customerState)
+        assertThat(it.selectionHolder.selection.value).isEqualTo(selection)
     }
 
     @Test
     fun `manageActivityLauncher callback does not update state on non-complete result`() = testScenario {
-        customerStateHolder.setCustomerState(PaymentSheetFixtures.EMPTY_CUSTOMER_STATE)
+        it.customerStateHolder.setCustomerState(PaymentSheetFixtures.EMPTY_CUSTOMER_STATE)
         val result = ManageResult.Cancelled(customerState = null)
-        manageContractCallbackCaptor.value.onActivityResult(result)
-        assertThat(customerStateHolder.customer.value).isEqualTo(PaymentSheetFixtures.EMPTY_CUSTOMER_STATE)
+        val callback = it.manageRegisterCall.callback.asCallbackFor<ManageResult>()
+
+        callback.onActivityResult(result)
+
+        assertThat(it.customerStateHolder.customer.value).isEqualTo(PaymentSheetFixtures.EMPTY_CUSTOMER_STATE)
+        assertThat(it.selectionHolder.selection.value).isEqualTo(null)
     }
 
     @Test
     fun `manageActivityLauncher callback updates state on non-complete result`() = testScenario {
-        val result = ManageResult.Cancelled(customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE)
-        manageContractCallbackCaptor.value.onActivityResult(result)
-        assertThat(customerStateHolder.customer.value).isEqualTo(PaymentSheetFixtures.EMPTY_CUSTOMER_STATE)
+        it.customerStateHolder.setCustomerState(PaymentSheetFixtures.EMPTY_CUSTOMER_STATE)
+        val result = ManageResult.Cancelled(customerState = null)
+
+        val callback = it.manageRegisterCall.callback.asCallbackFor<ManageResult>()
+        callback.onActivityResult(result)
+
+        assertThat(it.customerStateHolder.customer.value).isEqualTo(PaymentSheetFixtures.EMPTY_CUSTOMER_STATE)
+        assertThat(it.selectionHolder.selection.value).isEqualTo(null)
     }
 
     @Test
     fun `onDestroy unregisters launchers`() = testScenario {
-        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-        assertThat(formActivityLauncher.unregisterTurbine.awaitItem()).isEqualTo(Unit)
-        assertThat(manageActivityLauncher.unregisterTurbine.awaitItem()).isEqualTo(Unit)
+        it.lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+        val formUnregisterCall = awaitUnregisterCall()
+        val manageUnregisterCall = awaitUnregisterCall()
+
+        assertThat(formUnregisterCall).isNotNull()
+        assertThat(manageUnregisterCall).isNotNull()
     }
 
     private fun testScenario(
-        block: suspend Scenario.() -> Unit,
+        activityResultCallerBlock: suspend DummyActivityResultCaller.Scenario.(launcherScenario: Scenario) -> Unit
     ) = runTest {
-        MockitoAnnotations.openMocks(this)
-        val activityResultCaller = mock<ActivityResultCaller>()
         val lifecycleOwner = TestLifecycleOwner()
-        val formActivityLauncher = FakeEmbeddedActivityLauncher(FormContract)
-        val manageActivityLauncher = FakeEmbeddedActivityLauncher(ManageContract)
         val savedStateHandle = SavedStateHandle()
         val selectionHolder = EmbeddedSelectionHolder(savedStateHandle)
         val customerStateHolder = CustomerStateHolder(savedStateHandle, selectionHolder.selection)
 
-        @Suppress("UNCHECKED_CAST")
-        val formContractCallbackCaptor: ArgumentCaptor<ActivityResultCallback<FormResult>> = ArgumentCaptor
-            .forClass(ActivityResultCallback::class.java) as ArgumentCaptor<ActivityResultCallback<FormResult>>
-
-        whenever(
-            activityResultCaller.registerForActivityResult(
-                any<FormContract>(),
-                capture(formContractCallbackCaptor)
+        DummyActivityResultCaller.test {
+            val sheetLauncher = DefaultEmbeddedSheetLauncher(
+                activityResultCaller = activityResultCaller,
+                lifecycleOwner = lifecycleOwner,
+                selectionHolder = selectionHolder,
+                customerStateHolder = customerStateHolder
             )
-        ).thenReturn(formActivityLauncher)
+            val formRegisterCall = awaitRegisterCall()
+            val manageRegisterCall = awaitRegisterCall()
+            val formLauncher = awaitNextRegisteredLauncher()
+            val manageLauncher = awaitNextRegisteredLauncher()
 
-        @Suppress("UNCHECKED_CAST")
-        val manageContractCallbackCaptor: ArgumentCaptor<ActivityResultCallback<ManageResult>> = ArgumentCaptor
-            .forClass(ActivityResultCallback::class.java) as ArgumentCaptor<ActivityResultCallback<ManageResult>>
+            assertThat(formRegisterCall).isNotNull()
+            assertThat(manageRegisterCall).isNotNull()
 
-        whenever(
-            activityResultCaller.registerForActivityResult(
-                any<ManageContract>(),
-                capture(manageContractCallbackCaptor)
+            assertThat(formRegisterCall.contract).isInstanceOf<FormContract>()
+            assertThat(formRegisterCall.callback).isInstanceOf<ActivityResultCallback<*>>()
+
+            assertThat(manageRegisterCall.contract).isInstanceOf<ManageContract>()
+            assertThat(manageRegisterCall.callback).isInstanceOf<ActivityResultCallback<*>>()
+
+            assertThat(formLauncher).isInstanceOf<ActivityResultLauncher<FormContract.Args>>()
+            assertThat(manageLauncher).isInstanceOf<ActivityResultLauncher<ManageContract.Args>>()
+
+            activityResultCallerBlock.invoke(
+                this,
+                Scenario(
+                    selectionHolder = selectionHolder,
+                    lifecycleOwner = lifecycleOwner,
+                    customerStateHolder = customerStateHolder,
+                    formRegisterCall = formRegisterCall,
+                    manageRegisterCall = manageRegisterCall,
+                    sheetLauncher = sheetLauncher
+                )
             )
-        ).thenReturn(manageActivityLauncher)
-
-        val embeddedActivityLauncher = DefaultEmbeddedSheetLauncher(
-            activityResultCaller = activityResultCaller,
-            lifecycleOwner = lifecycleOwner,
-            selectionHolder = selectionHolder,
-            customerStateHolder = customerStateHolder,
-        )
-
-        Scenario(
-            formContractCallbackCaptor = formContractCallbackCaptor,
-            manageContractCallbackCaptor = manageContractCallbackCaptor,
-            selectionHolder = selectionHolder,
-            lifecycleOwner = lifecycleOwner,
-            formActivityLauncher = formActivityLauncher,
-            manageActivityLauncher = manageActivityLauncher,
-            launcher = embeddedActivityLauncher,
-            customerStateHolder = customerStateHolder,
-        ).block()
-
-        formActivityLauncher.validate()
-        manageActivityLauncher.validate()
+        }
     }
 
     private class Scenario(
-        val formContractCallbackCaptor: ArgumentCaptor<ActivityResultCallback<FormResult>>,
-        val manageContractCallbackCaptor: ArgumentCaptor<ActivityResultCallback<ManageResult>>,
         val selectionHolder: EmbeddedSelectionHolder,
         val lifecycleOwner: TestLifecycleOwner,
-        val formActivityLauncher: FakeEmbeddedActivityLauncher<FormContract.Args>,
-        val manageActivityLauncher: FakeEmbeddedActivityLauncher<ManageContract.Args>,
-        val launcher: EmbeddedSheetLauncher,
         val customerStateHolder: CustomerStateHolder,
+        val formRegisterCall: RegisterCall<*, *>,
+        val manageRegisterCall: RegisterCall<*, *>,
+        val sheetLauncher: EmbeddedSheetLauncher,
     )
 }
