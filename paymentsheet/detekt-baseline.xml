@@ -78,6 +78,7 @@
     <ID>TooManyFunctions:DefaultEventReporter.kt$DefaultEventReporter : EventReporter</ID>
     <ID>TooManyFunctions:DefaultLinkEventsReporter.kt$DefaultLinkEventsReporter : LinkEventsReporter</ID>
     <ID>TooManyFunctions:DelegateDrawable.kt$DelegateDrawable : Drawable</ID>
+    <ID>TooManyFunctions:EmbeddedCommonModule.kt$EmbeddedCommonModule$Companion</ID>
     <ID>TooManyFunctions:EventReporter.kt$EventReporter</ID>
     <ID>TooManyFunctions:LinkEventsReporter.kt$LinkEventsReporter</ID>
     <ID>TooManyFunctions:PaymentMethodMetadata.kt$PaymentMethodMetadata : Parcelable</ID>

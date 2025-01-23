@@ -10,19 +10,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
-import com.stripe.android.core.injection.CoreCommonModule
-import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
-import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
-import com.stripe.android.core.networking.AnalyticsRequestFactory
-import com.stripe.android.core.networking.NetworkTypeDetector
-import com.stripe.android.core.utils.ContextUtils.packageInfo
-import com.stripe.android.core.utils.DefaultDurationProvider
-import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.RealUserFacingLogger
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.core.utils.requireApplication
@@ -35,23 +25,13 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.EmbeddedPaymentElement.ConfigureResult
 import com.stripe.android.paymentelement.EmbeddedPaymentElement.PaymentOptionDisplayData
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
-import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentElementConfirmationModule
-import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.android.payments.core.analytics.RealErrorReporter
-import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
-import com.stripe.android.payments.core.injection.StripeRepositoryModule
-import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
-import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
-import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
-import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.repositories.RealElementsSessionRepository
 import com.stripe.android.paymentsheet.state.DefaultLinkAccountStatusProvider
@@ -64,7 +44,6 @@ import dagger.BindsInstance
 import dagger.Component
 import dagger.Module
 import dagger.Provides
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -72,7 +51,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import javax.inject.Inject
 import javax.inject.Named
-import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 import kotlin.reflect.KClass
@@ -188,9 +166,8 @@ internal class SharedPaymentElementViewModel @Inject constructor(
     modules = [
         SharedPaymentElementViewModelModule::class,
         GooglePayLauncherModule::class,
-        CoreCommonModule::class,
-        StripeRepositoryModule::class,
         ExtendedPaymentElementConfirmationModule::class,
+        EmbeddedCommonModule::class,
     ]
 )
 internal interface SharedPaymentElementViewModelComponent {
@@ -242,16 +219,6 @@ internal interface SharedPaymentElementViewModelModule {
     @Binds
     fun bindsWalletsHelper(helper: DefaultEmbeddedWalletsHelper): EmbeddedWalletsHelper
 
-    @Singleton
-    @Binds
-    fun bindsEventReporter(eventReporter: DefaultEventReporter): EventReporter
-
-    @Binds
-    fun bindsCustomerRepository(repository: CustomerApiRepository): CustomerRepository
-
-    @Binds
-    fun bindsErrorReporter(errorReporter: RealErrorReporter): ErrorReporter
-
     @Binds
     fun bindsElementsSessionRepository(impl: RealElementsSessionRepository): ElementsSessionRepository
 
@@ -272,51 +239,7 @@ internal interface SharedPaymentElementViewModelModule {
     @Binds
     fun bindsLinkConfigurationCoordinator(impl: RealLinkConfigurationCoordinator): LinkConfigurationCoordinator
 
-    @Suppress("TooManyFunctions")
     companion object {
-        @Provides
-        @Singleton
-        @Named(ALLOWS_MANUAL_CONFIRMATION)
-        fun provideAllowsManualConfirmation() = true
-
-        @Provides
-        fun provideEventReporterMode(): EventReporter.Mode {
-            return EventReporter.Mode.Embedded
-        }
-
-        @Provides
-        @Named(PRODUCT_USAGE)
-        fun provideProductUsageTokens() = setOf("EmbeddedPaymentElement")
-
-        /**
-         * Provides a non-singleton PaymentConfiguration.
-         *
-         * Should be fetched only when it's needed, to allow client to set the publishableKey and
-         * stripeAccountId in PaymentConfiguration any time before configuring the FlowController
-         * or presenting Payment Sheet.
-         *
-         * Should always be injected with [Lazy] or [Provider].
-         */
-        @Provides
-        fun providePaymentConfiguration(appContext: Context): PaymentConfiguration {
-            return PaymentConfiguration.getInstance(appContext)
-        }
-
-        @Provides
-        @Named(PUBLISHABLE_KEY)
-        fun providePublishableKey(
-            paymentConfiguration: Provider<PaymentConfiguration>
-        ): () -> String = { paymentConfiguration.get().publishableKey }
-
-        @Provides
-        @Named(STRIPE_ACCOUNT_ID)
-        fun provideStripeAccountId(paymentConfiguration: Provider<PaymentConfiguration>):
-            () -> String? = { paymentConfiguration.get().stripeAccountId }
-
-        @Provides
-        @Named(ENABLE_LOGGING)
-        fun provideEnabledLogging(): Boolean = BuildConfig.DEBUG
-
         @Provides
         fun providePrefsRepositoryFactory(
             appContext: Context,
@@ -330,29 +253,6 @@ internal interface SharedPaymentElementViewModelModule {
         }
 
         @Provides
-        fun provideDurationProvider(): DurationProvider {
-            return DefaultDurationProvider.instance
-        }
-
-        @Provides
-        fun provideAnalyticsRequestFactory(
-            context: Context,
-            paymentConfiguration: Provider<PaymentConfiguration>
-        ): AnalyticsRequestFactory = AnalyticsRequestFactory(
-            packageManager = context.packageManager,
-            packageName = context.packageName.orEmpty(),
-            packageInfo = context.packageInfo,
-            publishableKeyProvider = { paymentConfiguration.get().publishableKey },
-            networkTypeProvider = NetworkTypeDetector(context)::invoke,
-        )
-
-        @Provides
-        @IOContext
-        fun ioContext(): CoroutineContext {
-            return Dispatchers.IO
-        }
-
-        @Provides
         fun provideResources(context: Context): Resources {
             return context.resources
         }
@@ -361,15 +261,6 @@ internal interface SharedPaymentElementViewModelModule {
         @Singleton
         fun provideStripeImageLoader(context: Context): StripeImageLoader {
             return StripeImageLoader(context)
-        }
-
-        @Provides
-        @Singleton
-        fun provideCustomerStateHolder(
-            savedStateHandle: SavedStateHandle,
-            selectionHolder: EmbeddedSelectionHolder,
-        ): CustomerStateHolder {
-            return CustomerStateHolder(savedStateHandle, selectionHolder.selection)
         }
     }
 }
