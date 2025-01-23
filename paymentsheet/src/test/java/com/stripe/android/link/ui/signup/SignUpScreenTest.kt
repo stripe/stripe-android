@@ -37,14 +37,12 @@ internal class SignUpScreenTest {
     }
     private val logger = FakeLogger()
 
-    private lateinit var viewModel: SignUpViewModel
-
     @get:Rule
     val coroutineTestRule = CoroutineTestRule(dispatcher)
 
     @Test
     fun `only email field displayed when controllers are empty`() = runTest(dispatcher) {
-        viewModel = viewModel()
+        val viewModel = viewModel()
 
         composeTestRule.setContent {
             SignUpScreen(viewModel = viewModel)
@@ -59,7 +57,7 @@ internal class SignUpScreenTest {
 
     @Test
     fun `all fields displayed and sign up enabled when all controllers are filled`() = runTest(dispatcher) {
-        viewModel = viewModel()
+        val viewModel = viewModel()
 
         composeTestRule.setContent {
             SignUpScreen(viewModel = viewModel)
@@ -75,7 +73,7 @@ internal class SignUpScreenTest {
 
     @Test
     fun `all fields displayed when email controller is filled`() = runTest(dispatcher) {
-        viewModel(
+        val viewModel = viewModel(
             customerInfo = TestFactory.LINK_CUSTOMER_INFO.copy(
                 name = null,
                 email = "test@test.com",
@@ -100,7 +98,7 @@ internal class SignUpScreenTest {
     fun `field displayed, sign up enabled and error displayed when controllers are filled and sign up fails`() =
         runTest(dispatcher) {
             val linkAccountManager = FakeLinkAccountManager()
-            viewModel = viewModel(linkAccountManager = linkAccountManager)
+            val viewModel = viewModel(linkAccountManager = linkAccountManager)
 
             composeTestRule.setContent {
                 SignUpScreen(viewModel)
