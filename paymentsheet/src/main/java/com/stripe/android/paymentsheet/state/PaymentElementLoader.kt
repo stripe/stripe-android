@@ -1,6 +1,9 @@
+@file:OptIn(ExperimentalCardBrandFilteringApi::class)
+
 package com.stripe.android.paymentsheet.state
 
 import android.os.Parcelable
+import com.stripe.android.ExperimentalCardBrandFilteringApi
 import com.stripe.android.common.coroutines.runCatching
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.core.Logger
@@ -388,7 +391,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         initializationMode: PaymentElementLoader.InitializationMode
     ): LinkState? {
         return if (elementsSession.isLinkEnabled &&
-            !configuration.billingDetailsCollectionConfiguration.collectsAnything
+            !configuration.billingDetailsCollectionConfiguration.collectsAnything &&
+            configuration.cardBrandAcceptance == PaymentSheet.CardBrandAcceptance.all()
         ) {
             loadLinkState(
                 configuration = configuration,
