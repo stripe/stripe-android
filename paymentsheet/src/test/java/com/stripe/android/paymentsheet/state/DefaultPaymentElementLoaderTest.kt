@@ -1361,7 +1361,11 @@ internal class DefaultPaymentElementLoaderTest {
             ),
             paymentSheetConfiguration = PaymentSheet.Configuration(
                 merchantDisplayName = "Some Name",
-                cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.disallowed(listOf(PaymentSheet.CardBrandAcceptance.BrandCategory.Amex))
+                cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.disallowed(
+                    listOf(
+                        PaymentSheet.CardBrandAcceptance.BrandCategory.Amex
+                    )
+                )
             ),
             initializedViaCompose = false,
         ).getOrThrow()
