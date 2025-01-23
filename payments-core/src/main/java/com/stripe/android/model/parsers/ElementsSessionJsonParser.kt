@@ -151,7 +151,8 @@ internal class ElementsSessionJsonParser(
         } ?: emptyMap()
 
         val linkConsumerIncentive = if (FeatureFlags.instantDebitsIncentives.isEnabled) {
-            json?.let { LinkConsumerIncentiveJsonParser.parse(it) }
+            val linkConsumerIncentiveJson = json?.optJSONObject("link_consumer_incentive")
+            linkConsumerIncentiveJson?.let { LinkConsumerIncentiveJsonParser.parse(it) }
         } else {
             null
         }
