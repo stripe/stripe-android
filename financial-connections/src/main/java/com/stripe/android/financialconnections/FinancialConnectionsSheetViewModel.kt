@@ -123,7 +123,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                 val attestationInitResult = prepareStandardRequestManager()
                 val syncResponse = getOrFetchSync(
                     refetchCondition = Always,
-                    attestationInitialized = attestationInitResult.initialized
+                    supportsAppVerification = attestationInitResult.initialized
                 )
                 val pane = syncResponse.manifest.nextPane
                 when (attestationInitResult) {

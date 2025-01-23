@@ -27,7 +27,7 @@ internal class FakeFinancialConnectionsManifestRepository : FinancialConnections
     override suspend fun getOrSynchronizeFinancialConnectionsSession(
         clientSecret: String,
         applicationId: String,
-        attestationInitialized: Boolean,
+        supportsAppVerification: Boolean,
         reFetchCondition: (SynchronizeSessionResponse) -> Boolean
     ): SynchronizeSessionResponse = getSynchronizeSessionResponseProvider()
 

@@ -94,7 +94,7 @@ internal abstract class AbsFinancialConnectionsManifestRepository : FinancialCon
     override suspend fun getOrSynchronizeFinancialConnectionsSession(
         clientSecret: String,
         applicationId: String,
-        attestationInitialized: Boolean,
+        supportsAppVerification: Boolean,
         reFetchCondition: (SynchronizeSessionResponse) -> Boolean
     ): SynchronizeSessionResponse {
         TODO("Not yet implemented")

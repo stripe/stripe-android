@@ -19,13 +19,13 @@ internal class GetOrFetchSync @Inject constructor(
 
     suspend operator fun invoke(
         refetchCondition: RefetchCondition = RefetchCondition.None,
-        attestationInitialized: Boolean = false
+        supportsAppVerification: Boolean = false
     ): SynchronizeSessionResponse {
         return repository.getOrSynchronizeFinancialConnectionsSession(
             clientSecret = configuration.financialConnectionsSessionClientSecret,
             applicationId = applicationId,
             reFetchCondition = refetchCondition::shouldReFetch,
-            attestationInitialized = attestationInitialized
+            supportsAppVerification = supportsAppVerification
         )
     }
 
