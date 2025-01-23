@@ -33,7 +33,8 @@ class ConsumerSessionLookupJsonParserTest {
                     redactedFormattedPhoneNumber = "(***) *** **68",
                     verificationSessions = emptyList(),
                 ),
-                errorMessage = null
+                errorMessage = null,
+                publishableKey = "asdfg123",
             )
         )
     }

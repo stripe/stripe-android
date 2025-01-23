@@ -13,12 +13,13 @@ class ConsumerSessionLookupJsonParser : ModelJsonParser<ConsumerSessionLookup> {
         val exists = optBoolean(json, FIELD_EXISTS)
         val consumerSession = ConsumerSessionJsonParser().parse(json)
         val errorMessage = optString(json, FIELD_ERROR_MESSAGE)
-
-        return ConsumerSessionLookup(exists, consumerSession, errorMessage)
+        val publishableKey = optString(json, FIELD_PUBLISHABLE_KEY)
+        return ConsumerSessionLookup(exists, consumerSession, errorMessage, publishableKey)
     }
 
     private companion object {
         private const val FIELD_EXISTS = "exists"
         private const val FIELD_ERROR_MESSAGE = "error_message"
+        private const val FIELD_PUBLISHABLE_KEY = "publishable_key"
     }
 }

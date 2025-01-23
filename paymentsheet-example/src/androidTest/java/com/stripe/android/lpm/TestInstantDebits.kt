@@ -21,7 +21,6 @@ import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.DEFAULT_UI_TIMEOUT
 import com.stripe.android.test.core.TestParameters
 import com.stripe.android.test.core.ui.ComposeButton
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -43,7 +42,6 @@ internal class TestInstantDebits : BasePlaygroundTest() {
     }
 
     @Test
-    @Ignore
     fun testInstantDebitsSuccess() {
         val params = testParameters.copyPlaygroundSettings {
             it[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.On
