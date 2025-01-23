@@ -75,17 +75,7 @@ dependencies {
 
 `stripe-android` uses Jetpack Compose internally and expects consumers to use a compatible version:
 
-<table>
- <tr>
-  <td>20.22.0-20.31.0</td><td>Compose UI 1.4.x</td>
- </tr>
- <tr>
-  <td>20.32.0-20.37.3</td><td>Compose UI 1.5.x</td>
- </tr>
- <tr>
-  <td>20.37.4-Current</td><td>Compose UI 1.5.x or Compose UI 1.6.x</td>
- </tr>
-</table>
+* Compose UI 1.6.x corresponding to [Compose BOM 2024.01.00](https://developer.android.com/develop/ui/compose/bom/bom-mapping)
 
 ## Getting Started
 
