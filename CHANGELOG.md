@@ -7,6 +7,9 @@
 ### Financial Connections
 - [FIXED] Fixes a rare crash that could occur when presenting a bottom sheet.
 
+### PaymentSheet
+- [FIXED][9871](https://github.com/stripe/stripe-android/pull/9871) Fixes issue with autocomplete caused by render loop in text field.
+
 ## 21.3.1 - 2025-01-06
 
 ### PaymentSheet
