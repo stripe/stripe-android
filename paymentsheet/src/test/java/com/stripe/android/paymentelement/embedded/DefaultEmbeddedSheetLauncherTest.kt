@@ -8,7 +8,6 @@ import androidx.lifecycle.testing.TestLifecycleOwner
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.paymentelement.embedded.manage.FakeManageActivityLauncher
 import com.stripe.android.paymentelement.embedded.manage.ManageContract
 import com.stripe.android.paymentelement.embedded.manage.ManageResult
 import com.stripe.android.paymentsheet.CustomerStateHolder
@@ -34,8 +33,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
         val expectedArgs = FormContract.Args(code, paymentMethodMetadata)
         launcher.launchForm(code, paymentMethodMetadata)
-        assertThat(formActivityLauncher.didLaunch).isTrue()
-        assertThat(formActivityLauncher.launchArgs).isEqualTo(expectedArgs)
+        assertThat(formActivityLauncher.argsTurbine.awaitItem()).isEqualTo(expectedArgs)
     }
 
     @Test
@@ -54,19 +52,12 @@ internal class DefaultEmbeddedSheetLauncherTest {
     }
 
     @Test
-    fun `formActivityLauncher unregisters onDestroy`() = testScenario {
-        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-        assertThat(formActivityLauncher.didUnregister).isTrue()
-    }
-
-    @Test
     fun `launchManage launches activity with correct parameters`() = testScenario {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
         val customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
         val expectedArgs = ManageContract.Args(paymentMethodMetadata, customerState, PaymentSelection.GooglePay)
         launcher.launchManage(paymentMethodMetadata, customerState, PaymentSelection.GooglePay)
-        assertThat(manageActivityLauncher.didLaunch).isTrue()
-        assertThat(manageActivityLauncher.launchArgs).isEqualTo(expectedArgs)
+        assertThat(manageActivityLauncher.argsTurbine.awaitItem()).isEqualTo(expectedArgs)
     }
 
     @Test
@@ -98,9 +89,10 @@ internal class DefaultEmbeddedSheetLauncherTest {
     }
 
     @Test
-    fun `manageActivityLauncher unregisters onDestroy`() = testScenario {
+    fun `onDestroy unregisters launchers`() = testScenario {
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-        assertThat(formActivityLauncher.didUnregister).isTrue()
+        assertThat(formActivityLauncher.unregisterTurbine.awaitItem()).isEqualTo(Unit)
+        assertThat(manageActivityLauncher.unregisterTurbine.awaitItem()).isEqualTo(Unit)
     }
 
     private fun testScenario(
@@ -109,8 +101,8 @@ internal class DefaultEmbeddedSheetLauncherTest {
         MockitoAnnotations.openMocks(this)
         val activityResultCaller = mock<ActivityResultCaller>()
         val lifecycleOwner = TestLifecycleOwner()
-        val formActivityLauncher = FakeFormActivityLauncher()
-        val manageActivityLauncher = FakeManageActivityLauncher()
+        val formActivityLauncher = FakeEmbeddedActivityLauncher(FormContract)
+        val manageActivityLauncher = FakeEmbeddedActivityLauncher(ManageContract)
         val savedStateHandle = SavedStateHandle()
         val selectionHolder = EmbeddedSelectionHolder(savedStateHandle)
         val customerStateHolder = CustomerStateHolder(savedStateHandle, selectionHolder.selection)
@@ -154,6 +146,9 @@ internal class DefaultEmbeddedSheetLauncherTest {
             launcher = embeddedActivityLauncher,
             customerStateHolder = customerStateHolder,
         ).block()
+
+        formActivityLauncher.validate()
+        manageActivityLauncher.validate()
     }
 
     private class Scenario(
@@ -161,8 +156,8 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val manageContractCallbackCaptor: ArgumentCaptor<ActivityResultCallback<ManageResult>>,
         val selectionHolder: EmbeddedSelectionHolder,
         val lifecycleOwner: TestLifecycleOwner,
-        val formActivityLauncher: FakeFormActivityLauncher,
-        val manageActivityLauncher: FakeManageActivityLauncher,
+        val formActivityLauncher: FakeEmbeddedActivityLauncher<FormContract.Args>,
+        val manageActivityLauncher: FakeEmbeddedActivityLauncher<ManageContract.Args>,
         val launcher: EmbeddedSheetLauncher,
         val customerStateHolder: CustomerStateHolder,
     )
