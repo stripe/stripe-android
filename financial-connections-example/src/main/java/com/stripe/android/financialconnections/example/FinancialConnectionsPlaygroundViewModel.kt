@@ -125,10 +125,14 @@ internal class FinancialConnectionsPlaygroundViewModel(
                             }
                         )
                     }
+
+                    val stripeAccount = settings.get<StripeAccountIdSetting>().selectedOption
+
                     _viewEffect.emit(
                         FinancialConnectionsPlaygroundViewEffect.OpenForPaymentIntent(
                             paymentIntentSecret = it.intentSecret,
                             publishableKey = it.publishableKey,
+                            stripeAccountId = stripeAccount.takeIf(String::isNotBlank),
                             ephemeralKey = it.ephemeralKey,
                             customerId = it.customerId,
                             elementsSessionContext = ElementsSessionContext(
@@ -506,6 +510,7 @@ sealed class FinancialConnectionsPlaygroundViewEffect {
         val ephemeralKey: String?,
         val customerId: String?,
         val publishableKey: String,
+        val stripeAccountId: String?,
         val experience: Experience,
         val integrationType: IntegrationType,
         val elementsSessionContext: ElementsSessionContext,
