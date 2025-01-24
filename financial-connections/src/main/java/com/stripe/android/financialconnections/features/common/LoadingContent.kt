@@ -229,7 +229,6 @@ private fun LoadingPill(modifier: Modifier = Modifier) {
 
         LoadingSpinner(
             strokeWidth = 2.dp,
-            // TODO: Does this need to change for dark mode?
             gradient = Brush.sweepGradient(listOf(Color.Transparent, colors.iconWhite)),
             modifier = Modifier.size(16.dp),
         )
