@@ -60,7 +60,7 @@ internal class VerticalModeFormUIScreenshotTest {
                 metadata = metadata,
             )
         )
-        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen)
+        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen, canGoBack = true)
 
         paparazziRule.snapshot {
             ViewModelStoreOwnerContext {
@@ -78,7 +78,7 @@ internal class VerticalModeFormUIScreenshotTest {
                 metadata = metadata,
             )
         )
-        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen)
+        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen, canGoBack = true)
         viewModel.onError("An error occurred.".resolvableString)
 
         paparazziRule.snapshot {
@@ -98,7 +98,7 @@ internal class VerticalModeFormUIScreenshotTest {
             ),
             showsWalletHeader = true,
         )
-        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen)
+        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen, canGoBack = true)
         viewModel.walletsStateSource.value = WalletsState(
             link = WalletsState.Link(
                 email = null,
@@ -128,7 +128,7 @@ internal class VerticalModeFormUIScreenshotTest {
                 metadata = metadata,
             )
         )
-        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen)
+        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen, canGoBack = true)
 
         paparazziRule.snapshot {
             ViewModelStoreOwnerContext {
@@ -150,7 +150,7 @@ internal class VerticalModeFormUIScreenshotTest {
                 metadata = metadata,
             )
         )
-        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen)
+        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen, canGoBack = true)
         viewModel.primaryButtonUiStateSource.update { original ->
             original?.copy(enabled = true)
         }

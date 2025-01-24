@@ -129,6 +129,6 @@ internal class PaymentSheetScreenSelectSavedPaymentMethodsScreenshotTest {
             )
         )
         val initialScreen = SelectSavedPaymentMethods(interactor)
-        return FakeBaseSheetViewModel.create(metadata, initialScreen)
+        return FakeBaseSheetViewModel.create(metadata, initialScreen, canGoBack = false)
     }
 }
