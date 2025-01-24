@@ -25,8 +25,6 @@ internal interface VerticalModeFormInteractor {
 
     fun handleViewAction(viewAction: ViewAction)
 
-    fun canGoBack(): Boolean
-
     fun close()
 
     data class State(
@@ -52,7 +50,6 @@ internal class DefaultVerticalModeFormInteractor(
     private val usBankAccountArguments: USBankAccountFormArguments,
     private val reportFieldInteraction: (String) -> Unit,
     private val headerInformation: FormHeaderInformation?,
-    private val canGoBackDelegate: () -> Boolean,
     override val isLiveMode: Boolean,
     processing: StateFlow<Boolean>,
     paymentMethodIncentive: StateFlow<PaymentMethodIncentive?>,
@@ -83,10 +80,6 @@ internal class DefaultVerticalModeFormInteractor(
                 onFormFieldValuesChanged(viewAction.formValues, selectedPaymentMethodCode)
             }
         }
-    }
-
-    override fun canGoBack(): Boolean {
-        return canGoBackDelegate()
     }
 
     override fun close() {
@@ -125,7 +118,6 @@ internal class DefaultVerticalModeFormInteractor(
                     },
                 ),
                 isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
-                canGoBackDelegate = { viewModel.navigationHandler.canGoBack },
                 processing = viewModel.processing,
                 paymentMethodIncentive = bankFormInteractor.paymentMethodIncentiveInteractor.displayedIncentive,
                 reportFieldInteraction = viewModel.analyticsListener::reportFieldInteraction,
