@@ -22,6 +22,7 @@ import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.LinkAppBarState
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.attestation.IntegrityRequestManager
@@ -37,7 +38,8 @@ internal class LinkActivityViewModel @Inject constructor(
     private val linkAccountManager: LinkAccountManager,
     val eventReporter: EventReporter,
     private val integrityRequestManager: IntegrityRequestManager,
-    private val linkGate: LinkGate
+    private val linkGate: LinkGate,
+    private val errorReporter: ErrorReporter,
 ) : ViewModel(), DefaultLifecycleObserver {
     val confirmationHandler = confirmationHandlerFactory.create(viewModelScope)
     private val _linkState = MutableStateFlow(
@@ -135,6 +137,10 @@ internal class LinkActivityViewModel @Inject constructor(
         val error = result.exceptionOrNull()
         if (error != null) {
             moveToWeb()
+            errorReporter.report(
+                errorEvent = ErrorReporter.UnexpectedErrorEvent.LINK_NATIVE_FAILED_TO_PREPARE_INTEGRITY_MANAGER,
+                stripeException = LinkEventException(error)
+            )
             return false
         }
         return true

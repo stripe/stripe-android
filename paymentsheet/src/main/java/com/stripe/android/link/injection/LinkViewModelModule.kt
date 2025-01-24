@@ -4,6 +4,7 @@ import com.stripe.android.link.LinkActivityViewModel
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.paymentelement.confirmation.DefaultConfirmationHandler
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.attestation.IntegrityRequestManager
 import dagger.Module
@@ -19,7 +20,8 @@ internal object LinkViewModelModule {
         linkAccountManager: LinkAccountManager,
         eventReporter: EventReporter,
         integrityRequestManager: IntegrityRequestManager,
-        linkGate: LinkGate
+        linkGate: LinkGate,
+        errorReporter: ErrorReporter
     ): LinkActivityViewModel {
         return LinkActivityViewModel(
             activityRetainedComponent = component,
@@ -27,7 +29,8 @@ internal object LinkViewModelModule {
             linkAccountManager = linkAccountManager,
             eventReporter = eventReporter,
             integrityRequestManager = integrityRequestManager,
-            linkGate = linkGate
+            linkGate = linkGate,
+            errorReporter = errorReporter
         )
     }
 }

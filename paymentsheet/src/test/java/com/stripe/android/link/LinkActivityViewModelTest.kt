@@ -33,9 +33,11 @@ import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.FakeLogger
 import com.stripe.android.utils.DummyActivityResultCaller
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
@@ -314,6 +316,7 @@ internal class LinkActivityViewModelTest {
         val navController = navController()
         val linkGate = FakeLinkGate()
         val integrityRequestManager = FakeIntegrityRequestManager()
+        val errorReporter = FakeErrorReporter()
 
         integrityRequestManager.prepareResult = Result.failure(Throwable("oops"))
         linkGate.setUseAttestationEndpoints(true)
@@ -322,6 +325,7 @@ internal class LinkActivityViewModelTest {
             linkAccountManager = linkAccountManager,
             linkGate = linkGate,
             integrityRequestManager = integrityRequestManager,
+            errorReporter = errorReporter,
             launchWeb = { config ->
                 launchWebConfig = config
             }
@@ -341,6 +345,10 @@ internal class LinkActivityViewModelTest {
             launchSingleTop = false
         )
         assertThat(launchWebConfig).isNotNull()
+        assertThat(errorReporter.getLoggedErrors())
+            .containsExactly(
+                ErrorReporter.UnexpectedErrorEvent.LINK_NATIVE_FAILED_TO_PREPARE_INTEGRITY_MANAGER.eventName
+            )
         integrityRequestManager.ensureAllEventsConsumed()
     }
 
@@ -459,6 +467,7 @@ internal class LinkActivityViewModelTest {
         navController: NavHostController = navController(),
         integrityRequestManager: IntegrityRequestManager = FakeIntegrityRequestManager(),
         linkGate: LinkGate = FakeLinkGate(),
+        errorReporter: ErrorReporter = FakeErrorReporter(),
         dismissWithResult: (LinkActivityResult) -> Unit = {},
         launchWeb: (LinkConfiguration) -> Unit = {}
     ): LinkActivityViewModel {
@@ -468,7 +477,8 @@ internal class LinkActivityViewModelTest {
             eventReporter = eventReporter,
             confirmationHandlerFactory = { confirmationHandler },
             integrityRequestManager = integrityRequestManager,
-            linkGate = linkGate
+            linkGate = linkGate,
+            errorReporter = errorReporter
         ).apply {
             this.navController = navController
             this.dismissWithResult = dismissWithResult
