@@ -5,9 +5,8 @@ import android.content.Intent
 import android.net.Uri
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.utils.FeatureFlags
-import com.stripe.android.testing.FeatureFlagTestRule
-import org.junit.Rule
+import com.stripe.android.link.gate.FakeLinkGate
+import com.stripe.android.link.gate.LinkGate
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
@@ -22,19 +21,17 @@ class LinkActivityContractTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val args = LinkActivityContract.Args(TestFactory.LINK_CONFIGURATION)
 
-    @get:Rule
-    val featureFlagTestRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.nativeLinkEnabled,
-        isEnabled = false
-    )
-
     @Test
     fun `creates intent with WebLinkActivityContract when native link disabled`() {
-        featureFlagTestRule.setEnabled(false)
+        val linkGate = FakeLinkGate()
+        linkGate.setUseNativeLink(false)
 
         val (webLinkActivityContract, expectedIntent) = mockWebLinkContract()
 
-        val contract = linkActivityContract(webLinkActivityContract = webLinkActivityContract)
+        val contract = linkActivityContract(
+            webLinkActivityContract = webLinkActivityContract,
+            linkGate = linkGate
+        )
 
         val actualIntent = contract.createIntent(context, args)
 
@@ -58,7 +55,8 @@ class LinkActivityContractTest {
 
     @Test
     fun `LinkActivityContract creates intent with with NativeLinkActivityContract when native link is enabled`() {
-        featureFlagTestRule.setEnabled(true)
+        val linkGate = FakeLinkGate()
+        linkGate.setUseNativeLink(true)
 
         val (nativeLinkActivityContract, expectedIntent) = mockNativeLinkContract()
 
@@ -100,11 +98,15 @@ class LinkActivityContractTest {
 
     private fun linkActivityContract(
         webLinkActivityContract: WebLinkActivityContract = mock(),
-        nativeLinkActivityContract: NativeLinkActivityContract = mock()
+        nativeLinkActivityContract: NativeLinkActivityContract = mock(),
+        linkGate: LinkGate = FakeLinkGate()
     ): LinkActivityContract {
         return LinkActivityContract(
             nativeLinkActivityContract = nativeLinkActivityContract,
-            webLinkActivityContract = webLinkActivityContract
+            webLinkActivityContract = webLinkActivityContract,
+            linkGateFactory = {
+                linkGate
+            }
         )
     }
 }
