@@ -223,5 +223,5 @@
   <string name="stripe_wallet_update_expired_card_error">This card has expired. Update your card info or choose a different payment method.</string>
   <string name="stripe_wallet_expand_accessibility">Change selection</string>
   <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. "Visa (not accepted)" -->
-  <string name="stripe_card_brand_not_available">(not available)</string>
+  <string name="stripe_card_brand_not_accepted">(not accepted)</string>
 </resources>

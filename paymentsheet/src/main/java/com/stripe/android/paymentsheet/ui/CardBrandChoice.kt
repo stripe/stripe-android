@@ -22,6 +22,6 @@ internal data class CardBrandChoice(
             // If it's disabled, append "not available" to the end of the brand display name
             brand.displayName.resolvableString +
                 " ".resolvableString +
-                resolvableString(R.string.stripe_card_brand_not_available)
+                resolvableString(R.string.stripe_card_brand_not_accepted)
         }
 }

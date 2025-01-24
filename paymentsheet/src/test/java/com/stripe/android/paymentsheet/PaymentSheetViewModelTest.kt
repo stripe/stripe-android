@@ -2683,7 +2683,7 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `When a CardBrandChoice is disabled, label should be appended with (not available)`() {
+    fun `When a CardBrandChoice is disabled, label should be appended with (not accepted)`() {
         // Create a disabled CardBrandChoice
         val choice = CardBrandChoice(
             brand = CardBrand.Visa,
@@ -2691,8 +2691,8 @@ internal class PaymentSheetViewModelTest {
         )
 
         val resolvedLabel = choice.label.resolve(ApplicationProvider.getApplicationContext())
-        // Verify "(not available)" is appended to the display label
-        assertThat(resolvedLabel).contains("(not available)")
+        // Verify "(not accepted)" is appended to the display label
+        assertThat(resolvedLabel).contains("(not accepted)")
     }
 
     @Test

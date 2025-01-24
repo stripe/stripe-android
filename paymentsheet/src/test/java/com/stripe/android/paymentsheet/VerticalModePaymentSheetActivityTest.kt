@@ -502,7 +502,7 @@ internal class VerticalModePaymentSheetActivityTest {
         editPage.assertIsVisible()
 
         // Even though our card is co-branded, Visa should not show up in the dropdown as it is disallowed
-        editPage.assertInDropdownButDisabled("Visa (not available)")
+        editPage.assertInDropdownButDisabled("Visa (not accepted)")
     }
 
     @OptIn(ExperimentalCardBrandFilteringApi::class)
