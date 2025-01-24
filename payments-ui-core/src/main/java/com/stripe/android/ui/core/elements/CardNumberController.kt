@@ -124,14 +124,20 @@ internal class DefaultCardNumberController(
     override val selectedCardBrandFlow: StateFlow<CardBrand> = combineAsStateFlow(
         mostRecentUserSelectedBrand,
         brandChoices,
-    ) { previous, choices ->
-        when (previous) {
-            CardBrand.Unknown -> previous
-            in choices -> previous ?: CardBrand.Unknown
-            else -> {
-                val firstAvailablePreferred = preferredBrands.firstOrNull { it in choices }
-
-                firstAvailablePreferred ?: CardBrand.Unknown
+    ) { previous, allChoices ->
+        // Determine which of the available brands are not blocked
+        val allowedChoices = allChoices.filter { cardBrandFilter.isAccepted(it) }
+        // If there's exactly one non-blocked brand, automatically pick it, otherwise use existing logic.
+        if (allowedChoices.size == 1 && allChoices.size > 1) {
+            allowedChoices.single()
+        } else {
+            when (previous) {
+                CardBrand.Unknown -> previous
+                in allChoices -> previous ?: CardBrand.Unknown
+                else -> {
+                    val firstAvailablePreferred = preferredBrands.firstOrNull { it in allChoices }
+                    firstAvailablePreferred ?: CardBrand.Unknown
+                }
             }
         }
     }
