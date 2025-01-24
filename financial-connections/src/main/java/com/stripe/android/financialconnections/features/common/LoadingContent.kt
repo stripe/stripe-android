@@ -116,7 +116,7 @@ internal fun FullScreenGenericLoading() {
 internal fun LoadingSpinner(
     modifier: Modifier = Modifier,
     strokeWidth: Dp = ProgressIndicatorDefaults.StrokeWidth,
-    gradient: Brush = Brush.sweepGradient(listOf(colors.iconWhite, colors.borderBrand))
+    gradient: Brush = Brush.sweepGradient(listOf(colors.backgroundSurface, colors.borderBrand)),
 ) {
     val infiniteTransition = rememberInfiniteTransition(label = "loading_transition")
     val angle by infiniteTransition.animateFloat(
@@ -229,6 +229,7 @@ private fun LoadingPill(modifier: Modifier = Modifier) {
 
         LoadingSpinner(
             strokeWidth = 2.dp,
+            // TODO: Does this need to change for dark mode?
             gradient = Brush.sweepGradient(listOf(Color.Transparent, colors.iconWhite)),
             modifier = Modifier.size(16.dp),
         )

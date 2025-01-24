@@ -170,6 +170,7 @@ internal fun GenericHeader(
                 onClickableTextClick = onClickableTextClick,
                 defaultStyle = typography.headingXLarge.copy(
                     textAlign = payload.alignment.toComposeTextAlign(),
+                    color = colors.textDefault,
                 ),
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -181,6 +182,7 @@ internal fun GenericHeader(
                 onClickableTextClick = onClickableTextClick,
                 defaultStyle = typography.bodyMedium.copy(
                     textAlign = payload.alignment.toComposeTextAlign(),
+                    color = colors.textDefault,
                 ),
                 modifier = Modifier.fillMaxWidth(),
             )
