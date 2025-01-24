@@ -807,6 +807,106 @@ public final class com/stripe/android/paymentelement/embedded/manage/ManageResul
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public abstract class com/stripe/android/paymentsheet/AnalyticEvent {
+	public static final field $stable I
+}
+
+public final class com/stripe/android/paymentsheet/AnalyticEvent$CompletedPaymentMethodForm : com/stripe/android/paymentsheet/AnalyticEvent {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/AnalyticEvent$CompletedPaymentMethodForm;
+	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/AnalyticEvent$CompletedPaymentMethodForm;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/AnalyticEvent$CompletedPaymentMethodForm;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getPaymentMethodType ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/paymentsheet/AnalyticEvent$DisplayedPaymentMethodForm : com/stripe/android/paymentsheet/AnalyticEvent {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/AnalyticEvent$DisplayedPaymentMethodForm;
+	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/AnalyticEvent$DisplayedPaymentMethodForm;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/AnalyticEvent$DisplayedPaymentMethodForm;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getPaymentMethodType ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/paymentsheet/AnalyticEvent$PresentPaymentSheet : com/stripe/android/paymentsheet/AnalyticEvent {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/paymentsheet/AnalyticEvent$PresentPaymentSheet;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/paymentsheet/AnalyticEvent$RemovedSavedPaymentMethod : com/stripe/android/paymentsheet/AnalyticEvent {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/AnalyticEvent$RemovedSavedPaymentMethod;
+	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/AnalyticEvent$RemovedSavedPaymentMethod;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/AnalyticEvent$RemovedSavedPaymentMethod;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getPaymentMethodType ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/paymentsheet/AnalyticEvent$SelectedPaymentMethodType : com/stripe/android/paymentsheet/AnalyticEvent {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/AnalyticEvent$SelectedPaymentMethodType;
+	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/AnalyticEvent$SelectedPaymentMethodType;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/AnalyticEvent$SelectedPaymentMethodType;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getPaymentMethodType ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/paymentsheet/AnalyticEvent$SelectedSavedPaymentMethod : com/stripe/android/paymentsheet/AnalyticEvent {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/AnalyticEvent$SelectedSavedPaymentMethod;
+	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/AnalyticEvent$SelectedSavedPaymentMethod;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/AnalyticEvent$SelectedSavedPaymentMethod;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getPaymentMethodType ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/paymentsheet/AnalyticEvent$StartedInteractionWithPaymentMethodForm : com/stripe/android/paymentsheet/AnalyticEvent {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/AnalyticEvent$StartedInteractionWithPaymentMethodForm;
+	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/AnalyticEvent$StartedInteractionWithPaymentMethodForm;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/AnalyticEvent$StartedInteractionWithPaymentMethodForm;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getPaymentMethodType ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/paymentsheet/AnalyticEvent$TappedConfirmButton : com/stripe/android/paymentsheet/AnalyticEvent {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/AnalyticEvent$TappedConfirmButton;
+	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/AnalyticEvent$TappedConfirmButton;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/AnalyticEvent$TappedConfirmButton;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getPaymentMethodType ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class com/stripe/android/paymentsheet/AnalyticEventCallback {
+	public abstract fun onEvent (Lcom/stripe/android/paymentsheet/AnalyticEvent;)V
+}
+
 public final class com/stripe/android/paymentsheet/BuildConfig {
 	public static final field BUILD_TYPE Ljava/lang/String;
 	public static final field DEBUG Z
@@ -1176,6 +1276,7 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCo
 public final class com/stripe/android/paymentsheet/PaymentSheet$Builder {
 	public static final field $stable I
 	public fun <init> (Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;)V
+	public final fun analyticEventCallback (Lcom/stripe/android/paymentsheet/AnalyticEventCallback;)Lcom/stripe/android/paymentsheet/PaymentSheet$Builder;
 	public final fun build (Landroidx/activity/ComponentActivity;)Lcom/stripe/android/paymentsheet/PaymentSheet;
 	public final fun build (Landroidx/compose/runtime/Composer;I)Lcom/stripe/android/paymentsheet/PaymentSheet;
 	public final fun build (Landroidx/fragment/app/Fragment;)Lcom/stripe/android/paymentsheet/PaymentSheet;
@@ -1441,6 +1542,7 @@ public abstract interface class com/stripe/android/paymentsheet/PaymentSheet$Flo
 public final class com/stripe/android/paymentsheet/PaymentSheet$FlowController$Builder {
 	public static final field $stable I
 	public fun <init> (Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;Lcom/stripe/android/paymentsheet/PaymentOptionCallback;)V
+	public final fun analyticEventCallback (Lcom/stripe/android/paymentsheet/AnalyticEventCallback;)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController$Builder;
 	public final fun build (Landroidx/activity/ComponentActivity;)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController;
 	public final fun build (Landroidx/compose/runtime/Composer;I)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController;
 	public final fun build (Landroidx/fragment/app/Fragment;)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController;
