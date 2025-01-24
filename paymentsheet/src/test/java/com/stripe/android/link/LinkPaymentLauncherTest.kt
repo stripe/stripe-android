@@ -70,10 +70,10 @@ internal class LinkPaymentLauncherTest {
 
             linkPaymentLauncher.unregister()
 
-            val unregisterCall = awaitUnregisterCall()
-            assertThat(unregisterCall).isNotNull()
+            val registeredLauncher = awaitNextRegisteredLauncher()
+            val unregisteredLauncher = awaitNextUnregisteredLauncher()
 
-            awaitNextRegisteredLauncher()
+            assertThat(unregisteredLauncher).isEqualTo(registeredLauncher)
         }
     }
 
