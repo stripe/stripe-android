@@ -9,6 +9,8 @@ import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.confirmation.asCallbackFor
+import com.stripe.android.paymentelement.embedded.form.FormContract
+import com.stripe.android.paymentelement.embedded.form.FormResult
 import com.stripe.android.paymentelement.embedded.manage.ManageContract
 import com.stripe.android.paymentelement.embedded.manage.ManageResult
 import com.stripe.android.paymentsheet.CustomerStateHolder
