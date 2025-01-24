@@ -413,7 +413,7 @@ class UpdatePaymentMethodUITest {
 
             viewActionRecorder.consume(
                 UpdatePaymentMethodInteractor.ViewAction.BrandChoiceChanged(
-                    cardBrandChoice = CardBrandChoice(brand = CardBrand.Visa)
+                    cardBrandChoice = CardBrandChoice(brand = CardBrand.Visa, enabled = true)
                 )
             )
             assertThat(viewActionRecorder.viewActions).isEmpty()
