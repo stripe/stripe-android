@@ -138,12 +138,9 @@ private fun Screens(
         }
 
         composable(LinkScreen.SignUp.route) {
-            val viewModel: SignUpViewModel = linkViewModel {
-                SignUpViewModel.factory(it)
-            }
-            SignUpScreen(
-                viewModel = viewModel,
-                navController = navController
+            SignUpRoute(
+                navigate = navigate,
+                navigateAndClearStack = navigateAndClearStack
             )
         }
 
@@ -190,6 +187,23 @@ private fun Screens(
             PaymentMethodRoute(linkAccount = linkAccount, dismissWithResult = dismissWithResult)
         }
     }
+}
+
+@Composable
+private fun SignUpRoute(
+    navigate: (route: LinkScreen) -> Unit,
+    navigateAndClearStack: (route: LinkScreen) -> Unit,
+) {
+    val viewModel: SignUpViewModel = linkViewModel { parentComponent ->
+        SignUpViewModel.factory(
+            parentComponent = parentComponent,
+            navigate = navigate,
+            navigateAndClearStack = navigateAndClearStack
+        )
+    }
+    SignUpScreen(
+        viewModel = viewModel,
+    )
 }
 
 @Composable
