@@ -1,6 +1,7 @@
 package com.stripe.android.link.account
 
 import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.NoLinkAccountFoundException
 import com.stripe.android.link.injection.APPLICATION_ID
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.repositories.LinkRepository
@@ -16,7 +17,7 @@ import javax.inject.Named
 
 internal class AttestLinkAccountManager(
     private val config: LinkConfiguration,
-    private val defaultLinkAccountManager: DefaultLinkAccountManager,
+    private val defaultLinkAccountManager: MutableLinkAccountManager,
     private val integrityRequestManager: IntegrityRequestManager,
     private val linkRepository: LinkRepository,
     @Named(APPLICATION_ID) private val applicationId: String
@@ -38,7 +39,7 @@ internal class AttestLinkAccountManager(
         val linkAccount = lookup.consumerSession?.let { LinkAccount(it) }
 
         if (startSession) {
-            defaultLinkAccountManager.setAccountNullable(
+            defaultLinkAccountManager.setAccount(
                 consumerSession = lookup.consumerSession,
                 publishableKey = lookup.publishableKey
             )
@@ -70,7 +71,7 @@ internal class AttestLinkAccountManager(
         defaultLinkAccountManager.setAccount(
             consumerSession = consumerSessionSignUp.consumerSession,
             publishableKey = consumerSessionSignUp.publishableKey
-        )
+        ) ?: throw NoLinkAccountFoundException()
     }
 
     private fun incentiveEligibilitySession(): IncentiveEligibilitySession? {

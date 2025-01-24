@@ -592,7 +592,7 @@ class DefaultLinkAccountManagerTest {
             }
         }
         val accountManager = accountManager(linkEventsReporter = linkEventsReporter)
-        accountManager.setAccountNullable(TestFactory.CONSUMER_SESSION, null)
+        accountManager.setAccount(TestFactory.CONSUMER_SESSION, null)
 
         accountManager.startVerification()
 
@@ -615,7 +615,7 @@ class DefaultLinkAccountManagerTest {
             }
         }
         val accountManager = accountManager(linkRepository = linkRepository)
-        accountManager.setAccountNullable(TestFactory.CONSUMER_SESSION, TestFactory.PUBLISHABLE_KEY)
+        accountManager.setAccount(TestFactory.CONSUMER_SESSION, TestFactory.PUBLISHABLE_KEY)
 
         accountManager.startVerification()
 
@@ -637,7 +637,7 @@ class DefaultLinkAccountManagerTest {
         }
 
         val accountManager = accountManager(linkRepository = linkRepository, linkEventsReporter = linkEventsReporter)
-        accountManager.setAccountNullable(TestFactory.CONSUMER_SESSION, null)
+        accountManager.setAccount(TestFactory.CONSUMER_SESSION, null)
         accountManager.startVerification()
 
         assertThat(linkEventsReporter.callCount).isEqualTo(1)
@@ -649,7 +649,7 @@ class DefaultLinkAccountManagerTest {
         val accountManager = accountManager(
             linkRepository = linkRepository,
         )
-        accountManager.setAccountNullable(null, null)
+        accountManager.setAccount(null, null)
 
         val result = accountManager.confirmVerification("123")
 
@@ -676,7 +676,7 @@ class DefaultLinkAccountManagerTest {
             }
         }
         val accountManager = accountManager(linkRepository = linkRepository, linkEventsReporter = linkEventsReporter)
-        accountManager.setAccountNullable(TestFactory.CONSUMER_SESSION, null)
+        accountManager.setAccount(TestFactory.CONSUMER_SESSION, null)
 
         linkRepository.confirmVerificationResult = Result.success(TestFactory.CONSUMER_SESSION)
 
@@ -708,7 +708,7 @@ class DefaultLinkAccountManagerTest {
             }
         }
         val accountManager = accountManager(linkRepository = linkRepository, linkEventsReporter = linkEventsReporter)
-        accountManager.setAccountNullable(TestFactory.CONSUMER_SESSION, null)
+        accountManager.setAccount(TestFactory.CONSUMER_SESSION, null)
 
         val result = accountManager.confirmVerification("123")
 
@@ -733,7 +733,7 @@ class DefaultLinkAccountManagerTest {
         }
 
         val accountManager = accountManager(linkRepository = linkRepository)
-        accountManager.setAccountNullable(TestFactory.CONSUMER_SESSION, TestFactory.PUBLISHABLE_KEY)
+        accountManager.setAccount(TestFactory.CONSUMER_SESSION, TestFactory.PUBLISHABLE_KEY)
 
         val result = accountManager.listPaymentDetails(setOf("card"))
 
@@ -756,7 +756,7 @@ class DefaultLinkAccountManagerTest {
         }
 
         val accountManager = accountManager(linkRepository = linkRepository)
-        accountManager.setAccountNullable(TestFactory.CONSUMER_SESSION, TestFactory.PUBLISHABLE_KEY)
+        accountManager.setAccount(TestFactory.CONSUMER_SESSION, TestFactory.PUBLISHABLE_KEY)
 
         val result = accountManager.listPaymentDetails(setOf("card"))
 
@@ -770,7 +770,7 @@ class DefaultLinkAccountManagerTest {
         val linkRepository = FakeLinkRepository()
 
         val accountManager = accountManager(linkRepository = linkRepository)
-        accountManager.setAccountNullable(TestFactory.CONSUMER_SESSION, TestFactory.PUBLISHABLE_KEY)
+        accountManager.setAccount(TestFactory.CONSUMER_SESSION, TestFactory.PUBLISHABLE_KEY)
 
         linkRepository.deletePaymentDetailsResult = Result.failure(error)
 
@@ -782,7 +782,7 @@ class DefaultLinkAccountManagerTest {
     @Test
     fun `deletePaymentDetails returns success when repository call succeeds`() = runSuspendTest {
         val accountManager = accountManager()
-        accountManager.setAccountNullable(TestFactory.CONSUMER_SESSION, TestFactory.PUBLISHABLE_KEY)
+        accountManager.setAccount(TestFactory.CONSUMER_SESSION, TestFactory.PUBLISHABLE_KEY)
 
         val result = accountManager.deletePaymentDetails("id")
 
@@ -795,7 +795,7 @@ class DefaultLinkAccountManagerTest {
         val linkRepository = FakeLinkRepository()
 
         val accountManager = accountManager(linkRepository = linkRepository)
-        accountManager.setAccountNullable(TestFactory.CONSUMER_SESSION, TestFactory.PUBLISHABLE_KEY)
+        accountManager.setAccount(TestFactory.CONSUMER_SESSION, TestFactory.PUBLISHABLE_KEY)
 
         linkRepository.updatePaymentDetailsResult = Result.failure(error)
 
@@ -811,7 +811,7 @@ class DefaultLinkAccountManagerTest {
         val linkRepository = FakeLinkRepository()
 
         val accountManager = accountManager(linkRepository = linkRepository)
-        accountManager.setAccountNullable(TestFactory.CONSUMER_SESSION, TestFactory.PUBLISHABLE_KEY)
+        accountManager.setAccount(TestFactory.CONSUMER_SESSION, TestFactory.PUBLISHABLE_KEY)
 
         linkRepository.updatePaymentDetailsResult = Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS)
 

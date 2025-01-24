@@ -1,5 +1,6 @@
 package com.stripe.android.link.account
 
+import app.cash.turbine.Turbine
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.model.AccountStatus
@@ -15,8 +16,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-internal open class FakeLinkAccountManager : LinkAccountManager {
+internal open class FakeLinkAccountManager : MutableLinkAccountManager {
     private val _linkAccount = MutableStateFlow<LinkAccount?>(null)
+
     override val linkAccount: StateFlow<LinkAccount?> = _linkAccount
 
     private val _accountStatus = MutableStateFlow(AccountStatus.SignedOut)
@@ -35,6 +37,10 @@ internal open class FakeLinkAccountManager : LinkAccountManager {
     var updatePaymentDetailsResult = Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS)
     var deletePaymentDetailsResult: Result<Unit> = Result.success(Unit)
     var linkAccountFromLookupResult: LinkAccount? = null
+
+    var setAccountResult: LinkAccount? = TestFactory.LINK_ACCOUNT
+    private val setAccountTurbine = Turbine<SetAccountCall>()
+
     override var consumerPublishableKey: String? = null
 
     fun setLinkAccount(account: LinkAccount?) {
@@ -95,4 +101,27 @@ internal open class FakeLinkAccountManager : LinkAccountManager {
     ): Result<ConsumerPaymentDetails> {
         return updatePaymentDetailsResult
     }
+
+    override fun setAccount(consumerSession: ConsumerSession?, publishableKey: String?): LinkAccount? {
+        setAccountTurbine.add(
+            item = SetAccountCall(
+                consumerSession = consumerSession,
+                publishableKey = publishableKey
+            )
+        )
+        return setAccountResult
+    }
+
+    suspend fun awaitSetAccountCall(): SetAccountCall {
+        return setAccountTurbine.awaitItem()
+    }
+
+    fun ensureAllEventsConsumed() {
+        return setAccountTurbine.ensureAllEventsConsumed()
+    }
+
+    data class SetAccountCall(
+        val consumerSession: ConsumerSession?,
+        val publishableKey: String?
+    )
 }

@@ -33,7 +33,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
     private val linkRepository: LinkRepository,
     private val linkEventsReporter: LinkEventsReporter,
     private val errorReporter: ErrorReporter,
-) : LinkAccountManager, MutableLinkAccountManager {
+) : MutableLinkAccountManager {
     private val _linkAccount = MutableStateFlow<LinkAccount?>(null)
     override val linkAccount: StateFlow<LinkAccount?> = _linkAccount
 
@@ -159,7 +159,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
     ): Result<LinkAccount> =
         linkRepository.consumerSignUp(email, phone, country, name, consentAction.consumerAction)
             .map { consumerSessionSignup ->
-                setAccount(
+                setAccountHelper(
                     consumerSession = consumerSessionSignup.consumerSession,
                     publishableKey = consumerSessionSignup.publishableKey,
                 )
@@ -201,7 +201,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
         }
     }
 
-    override fun setAccount(
+    private fun setAccountHelper(
         consumerSession: ConsumerSession,
         publishableKey: String?,
     ): LinkAccount {
@@ -217,7 +217,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
     ): LinkAccount? {
         return lookup.consumerSession?.let { consumerSession ->
             if (startSession) {
-                setAccountNullable(
+                setAccount(
                     consumerSession = consumerSession,
                     publishableKey = lookup.publishableKey,
                 )
@@ -234,7 +234,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
             .onFailure {
                 linkEventsReporter.on2FAStartFailure()
             }.map { consumerSession ->
-                setAccount(consumerSession, null)
+                setAccountHelper(consumerSession, null)
             }
     }
 
@@ -246,7 +246,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
             }.onFailure {
                 linkEventsReporter.on2FAFailure()
             }.map { consumerSession ->
-                setAccount(consumerSession, null)
+                setAccountHelper(consumerSession, null)
             }
     }
 
@@ -279,12 +279,12 @@ internal class DefaultLinkAccountManager @Inject constructor(
         )
     }
 
-    override fun setAccountNullable(
+    override fun setAccount(
         consumerSession: ConsumerSession?,
         publishableKey: String?,
     ): LinkAccount? {
         return consumerSession?.let {
-            setAccount(consumerSession = it, publishableKey = publishableKey)
+            setAccountHelper(consumerSession = it, publishableKey = publishableKey)
         } ?: run {
             _linkAccount.value = null
             consumerPublishableKey = null
@@ -326,16 +326,4 @@ internal class DefaultLinkAccountManager @Inject constructor(
                     AccountStatus.Error
                 }
             } ?: AccountStatus.SignedOut
-}
-
-private interface MutableLinkAccountManager {
-    fun setAccountNullable(
-        consumerSession: ConsumerSession?,
-        publishableKey: String?,
-    ): LinkAccount?
-
-    fun setAccount(
-        consumerSession: ConsumerSession,
-        publishableKey: String?,
-    ): LinkAccount
 }
