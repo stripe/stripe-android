@@ -24,6 +24,8 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
 import com.stripe.android.stripecardscan.cardscan.CardScanSheetResult
+import com.stripe.android.ui.core.R
+import com.stripe.android.core.strings.plus
 import com.stripe.android.ui.core.asIndividualDigits
 import com.stripe.android.ui.core.elements.events.LocalCardBrandDisallowedReporter
 import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventReporter
@@ -213,11 +215,18 @@ internal class DefaultCardNumberController(
             }
 
             val items = brands.map { brand ->
+                val enabled = cardBrandFilter.isAccepted(brand)
                 TextFieldIcon.Dropdown.Item(
                     id = brand.code,
-                    label = brand.displayName.resolvableString,
+                    label = if (enabled) {
+                        brand.displayName.resolvableString
+                    } else {
+                        brand.displayName.resolvableString +
+                            " ".resolvableString +
+                            resolvableString(R.string.stripe_card_brand_not_available)
+                    },
                     icon = brand.icon,
-                    enabled = cardBrandFilter.isAccepted(brand)
+                    enabled = enabled
                 )
             }
 

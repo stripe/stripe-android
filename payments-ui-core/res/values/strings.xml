@@ -105,4 +105,6 @@
   <string name="stripe_setup_button_label">Set up</string>
   <!-- Label for UPI ID number field on form -->
   <string name="stripe_upi_id_label">UPI ID</string>
+  <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. "Visa (not accepted)" -->
+  <string name="stripe_card_brand_not_available">(not available)</string>
 </resources>
