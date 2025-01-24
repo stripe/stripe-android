@@ -20,7 +20,7 @@ internal class NavigationHandlerTest {
             assertThat(awaitItem()).isEqualTo(PaymentSheetScreen.Loading)
             assertThat(navigationHandler.canGoBack).isFalse()
         }
-    }π
+    }
 
     @Test
     fun `transitionTo removes Loading`() = runTest {
