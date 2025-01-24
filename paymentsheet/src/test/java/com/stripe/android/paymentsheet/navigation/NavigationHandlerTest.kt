@@ -1,8 +1,7 @@
-package com.stripe.android.common.navigation
+package com.stripe.android.paymentsheet.navigation
 
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Test

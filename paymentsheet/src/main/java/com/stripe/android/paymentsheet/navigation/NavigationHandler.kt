@@ -1,4 +1,4 @@
-package com.stripe.android.common.navigation
+package com.stripe.android.paymentsheet.navigation
 
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.CoroutineScope
