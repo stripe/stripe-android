@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.cards.CardAccountRangeRepository
+import com.stripe.android.common.navigation.NavigationHandler
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.CardBrand
@@ -19,7 +20,7 @@ import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetAnalyticsListener
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.navigation.NavigationHandler
+import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
@@ -54,7 +55,10 @@ internal abstract class BaseSheetViewModel(
     private val _paymentMethodMetadata = MutableStateFlow<PaymentMethodMetadata?>(null)
     internal val paymentMethodMetadata: StateFlow<PaymentMethodMetadata?> = _paymentMethodMetadata
 
-    val navigationHandler: NavigationHandler = NavigationHandler(viewModelScope) { poppedScreen ->
+    val navigationHandler: NavigationHandler<PaymentSheetScreen> = NavigationHandler(
+        coroutineScope = viewModelScope,
+        initialScreen = PaymentSheetScreen.Loading,
+    ) { poppedScreen ->
         analyticsListener.reportPaymentSheetHidden(poppedScreen)
     }
 
