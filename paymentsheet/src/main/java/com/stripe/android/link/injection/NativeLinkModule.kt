@@ -1,5 +1,6 @@
 package com.stripe.android.link.injection
 
+import android.app.Application
 import android.content.Context
 import androidx.core.os.LocaleListCompat
 import com.stripe.android.BuildConfig
@@ -164,5 +165,15 @@ internal interface NativeLinkModule {
         @Provides
         @NativeLinkScope
         fun provideEventReporterMode(): EventReporter.Mode = EventReporter.Mode.Custom
+
+        @Provides
+        @Named(APPLICATION_ID)
+        @NativeLinkScope
+        fun provideApplicationId(
+            application: Application
+        ): String = application.packageName
+
     }
 }
+
+internal const val APPLICATION_ID = "application_id"
