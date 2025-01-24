@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.embedded.form
 import android.app.Activity
 import android.os.Bundle
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Text
@@ -14,6 +15,12 @@ import com.stripe.android.uicore.utils.fadeOut
 internal class FormActivity : AppCompatActivity() {
     private val args: FormContract.Args? by lazy {
         FormContract.Args.fromIntent(intent)
+    }
+
+    private val viewModel: FormActivityViewModel by viewModels {
+        FormActivityViewModel.Factory {
+            requireNotNull(args)
+        }
     }
 
     @OptIn(ExperimentalMaterialApi::class)
@@ -40,7 +47,7 @@ internal class FormActivity : AppCompatActivity() {
                         finish()
                     }
                 ) {
-                    Text(localArgs.selectedPaymentMethodCode)
+                    Text(viewModel.selectedPaymentMethodCode)
                 }
             }
         }
