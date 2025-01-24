@@ -9,7 +9,7 @@ import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.AnalyticEvent
-import com.stripe.android.paymentsheet.AnalyticEventInterceptor
+import com.stripe.android.paymentsheet.AnalyticsManager
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
@@ -137,8 +137,7 @@ internal class DefaultEventReporter @Inject internal constructor(
 
     override fun onShowNewPaymentOptions() {
         CoroutineScope(workContext).launch {
-            AnalyticEventInterceptor.analyticEventCallback
-                ?.onEvent(AnalyticEvent.PresentPaymentSheet)
+            AnalyticsManager.emit(AnalyticEvent.PresentPaymentSheet)
         }
         fireEvent(
             PaymentSheetEvent.ShowNewPaymentOptions(

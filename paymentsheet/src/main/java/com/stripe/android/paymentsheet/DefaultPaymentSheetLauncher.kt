@@ -8,10 +8,16 @@ import androidx.activity.result.ActivityResultRegistry
 import androidx.core.app.ActivityOptionsCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.uicore.utils.AnimationConstants
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.jetbrains.annotations.TestOnly
 
 /**
@@ -36,6 +42,16 @@ internal class DefaultPaymentSheetLauncher(
                 }
             }
         )
+        lifecycleOwner.lifecycleScope.launch {
+            lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                AnalyticsManager.events.collect { event ->
+                    withContext(Dispatchers.Default) {
+                        AnalyticEventInterceptor.analyticEventCallback
+                            ?.onEvent(event)
+                    }
+                }
+            }
+        }
     }
 
     constructor(

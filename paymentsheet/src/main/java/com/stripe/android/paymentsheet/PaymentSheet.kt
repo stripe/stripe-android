@@ -213,7 +213,10 @@ class PaymentSheet internal constructor(
             createIntentCallback = callback
         }
 
-        fun analyticEvent(callback: AnalyticEventCallback) = apply {
+        /**
+         * @param callback Called when an analytic event occurs.
+         */
+        fun analyticEventCallback(callback: AnalyticEventCallback) = apply {
             analyticEventCallback = callback
         }
 
@@ -2114,6 +2117,8 @@ class PaymentSheet internal constructor(
                 private set
             internal var createIntentCallback: CreateIntentCallback? = null
                 private set
+            internal var analyticEventCallback: AnalyticEventCallback? = null
+                private set
 
             /**
              * @param handler Called when a user confirms payment for an external payment method.
@@ -2127,6 +2132,13 @@ class PaymentSheet internal constructor(
              */
             fun createIntentCallback(callback: CreateIntentCallback) = apply {
                 createIntentCallback = callback
+            }
+
+            /**
+             * @param callback If specified, called when an analytic event occurs.
+             */
+            fun analyticEventCallback(callback: AnalyticEventCallback) = apply {
+                analyticEventCallback = callback
             }
 
             /**
@@ -2224,7 +2236,7 @@ class PaymentSheet internal constructor(
             @JvmStatic
             fun create(
                 activity: ComponentActivity,
-                externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler? = null,
+                externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler,
                 paymentOptionCallback: PaymentOptionCallback,
                 paymentResultCallback: PaymentSheetResultCallback
             ): FlowController {

@@ -91,7 +91,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
             val paymentSheet = PaymentSheet.Builder(viewModel::onPaymentSheetResult)
                 .externalPaymentMethodConfirmHandler(this)
                 .createIntentCallback(viewModel::createIntentCallback)
-                .analyticEvent({
+                .analyticEventCallback({
                     Log.d("PaymentSheet", "Event: $it")
                 })
                 .build()
