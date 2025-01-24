@@ -374,28 +374,13 @@ internal sealed interface PaymentSheetScreen {
 
         override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
             return interactor.state.mapAsStateFlow { state ->
-                PaymentSheetTopBarStateFactory.create(
-                    isLiveMode = interactor.isLiveMode,
-                    editable = PaymentSheetTopBarState.Editable.Maybe(
-                        isEditing = state.isEditing,
-                        canEdit = state.canEdit,
-                        onEditIconPressed = {
-                            interactor.handleViewAction(ManageScreenInteractor.ViewAction.ToggleEdit)
-                        },
-                    ),
-                )
+                state.topBarState(interactor)
             }
         }
 
         override fun title(isCompleteFlow: Boolean, isWalletEnabled: Boolean): StateFlow<ResolvableString?> {
             return interactor.state.mapAsStateFlow { state ->
-                val title = if (state.isEditing) {
-                    R.string.stripe_paymentsheet_manage_payment_methods
-                } else {
-                    R.string.stripe_paymentsheet_select_your_payment_method
-                }
-
-                title.resolvableString
+                state.title
             }
         }
 
@@ -463,14 +448,7 @@ internal sealed interface PaymentSheetScreen {
         override val walletsDividerSpacing: Dp = verticalModeWalletsDividerSpacing
         override val showsMandates: Boolean = false
 
-        override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
-            return stateFlowOf(
-                PaymentSheetTopBarStateFactory.create(
-                    isLiveMode = interactor.isLiveMode,
-                    editable = PaymentSheetTopBarState.Editable.Never,
-                )
-            )
-        }
+        override fun topBarState(): StateFlow<PaymentSheetTopBarState?> = stateFlowOf(interactor.topBarState)
 
         override fun title(isCompleteFlow: Boolean, isWalletEnabled: Boolean): StateFlow<ResolvableString?> {
             return stateFlowOf(interactor.screenTitle)

@@ -16,12 +16,15 @@ internal class FakeUpdatePaymentMethodInteractor(
     val viewActionRecorder: ViewActionRecorder<UpdatePaymentMethodInteractor.ViewAction>?,
     initialState: UpdatePaymentMethodInteractor.State,
 ) : UpdatePaymentMethodInteractor {
-    override val isLiveMode: Boolean = false
     override val state: StateFlow<UpdatePaymentMethodInteractor.State> = MutableStateFlow(initialState)
     override val screenTitle: ResolvableString? = UpdatePaymentMethodInteractor.screenTitle(
         displayableSavedPaymentMethod
     )
     override val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter
+    override val topBarState: PaymentSheetTopBarState = PaymentSheetTopBarStateFactory.create(
+        isLiveMode = false,
+        editable = PaymentSheetTopBarState.Editable.Never,
+    )
 
     override fun handleViewAction(viewAction: UpdatePaymentMethodInteractor.ViewAction) {
         viewActionRecorder?.record(viewAction)
