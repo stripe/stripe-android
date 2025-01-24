@@ -4,7 +4,6 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistry
 import androidx.activity.result.contract.ActivityResultContract
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.isInstanceOf
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.analytics.FakeLinkAnalyticsHelper
 import com.stripe.android.link.analytics.LinkAnalyticsHelper
@@ -66,10 +65,10 @@ internal class LinkPaymentLauncherTest {
 
             linkPaymentLauncher.unregister()
 
-            val unregisterCall = awaitUnregisterCall()
-            assertThat(unregisterCall).isInstanceOf<LinkActivityContract>()
+            val registeredLauncher = awaitNextRegisteredLauncher()
+            val unregisteredLauncher = awaitUnregisterLauncher()
 
-            awaitNextRegisteredLauncher()
+            assertThat(unregisteredLauncher).isEqualTo(registeredLauncher)
         }
     }
 
