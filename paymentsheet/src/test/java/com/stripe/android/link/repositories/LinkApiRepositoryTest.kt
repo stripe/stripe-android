@@ -2,6 +2,7 @@ package com.stripe.android.link.repositories
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.link.FakeConsumersApiService
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.model.PaymentDetailsFixtures
@@ -11,10 +12,9 @@ import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSessionSignup
-import com.stripe.android.model.ConsumerSignUpConsentAction
+import com.stripe.android.model.EmailSource
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.model.SignUpParams
 import com.stripe.android.model.VerificationType
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -66,121 +66,194 @@ class LinkApiRepositoryTest {
 
     @Test
     fun `lookupConsumer sends correct parameters`() = runTest {
-        val email = "email@example.com"
-        linkRepository.lookupConsumer(email)
+        val consumersApiService = FakeConsumersApiService()
+        val linkRepository = linkRepository(consumersApiService)
 
-        verify(consumersApiService).lookupConsumerSession(
-            eq(email),
-            eq(CONSUMER_SURFACE),
-            eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID))
-        )
-    }
+        val result = linkRepository.lookupConsumer(TestFactory.EMAIL)
 
-    @Test
-    fun `lookupConsumer returns successful result`() = runTest {
-        val consumerSessionLookup = mock<ConsumerSessionLookup>()
-        whenever(
-            consumersApiService.lookupConsumerSession(
-                any(),
-                any(),
-                any(),
-            )
-        )
-            .thenReturn(consumerSessionLookup)
-
-        val result = linkRepository.lookupConsumer("email")
-
-        assertThat(result.isSuccess).isTrue()
-        assertThat(result.getOrNull()).isEqualTo(consumerSessionLookup)
+        assertThat(result).isEqualTo(Result.success(TestFactory.CONSUMER_SESSION_LOOKUP))
+        assertThat(consumersApiService.lookupCalls.size).isEqualTo(1)
+        val lookup = consumersApiService.lookupCalls.first()
+        assertThat(lookup.email).isEqualTo(TestFactory.EMAIL)
+        assertThat(lookup.requestSurface).isEqualTo(CONSUMER_SURFACE)
+        assertThat(lookup.requestOptions.apiKey).isEqualTo(PUBLISHABLE_KEY)
+        assertThat(lookup.requestOptions.stripeAccount).isEqualTo(STRIPE_ACCOUNT_ID)
     }
 
     @Test
     fun `lookupConsumer catches exception and returns failure`() = runTest {
-        whenever(
-            consumersApiService.lookupConsumerSession(
-                any(),
-                any(),
-                any(),
-            )
-        )
-            .thenThrow(RuntimeException("error"))
+        val error = RuntimeException("error")
+        val consumersApiService = object : FakeConsumersApiService() {
+            override suspend fun lookupConsumerSession(
+                email: String,
+                requestSurface: String,
+                requestOptions: ApiRequest.Options
+            ): ConsumerSessionLookup {
+                throw error
+            }
+        }
+        val linkRepository = linkRepository(consumersApiService)
 
         val result = linkRepository.lookupConsumer("email")
 
-        assertThat(result.isFailure).isTrue()
+        assertThat(result).isEqualTo(Result.failure<ConsumerSessionLookup>(error))
     }
 
     @Test
-    fun `consumerSignUp sends correct parameters`() = runTest {
-        val email = "email@example.com"
-        val phone = "phone"
-        val country = "US"
-        val name = "name"
-        linkRepository.consumerSignUp(
-            email,
-            phone,
-            country,
-            name,
-            ConsumerSignUpConsentAction.Checkbox
+    fun `mobileLookupConsumer sends correct parameters`() = runTest {
+        val consumersApiService = FakeConsumersApiService()
+        val linkRepository = linkRepository(consumersApiService)
+
+        val result = linkRepository.mobileLookupConsumer(
+            email = TestFactory.EMAIL,
+            verificationToken = TestFactory.VERIFICATION_TOKEN,
+            appId = TestFactory.APP_ID,
+            sessionId = TestFactory.SESSION_ID,
+            emailSource = TestFactory.EMAIL_SOURCE
         )
 
-        verify(consumersApiService).signUp(
-            SignUpParams(
-                email = email,
-                phoneNumber = phone,
-                country = country,
-                name = name,
-                locale = Locale.US,
-                amount = null,
-                currency = null,
-                incentiveEligibilitySession = null,
-                requestSurface = "android_payment_element",
-                consentAction = ConsumerSignUpConsentAction.Checkbox,
-            ),
-            requestOptions = ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID),
+        assertThat(result).isEqualTo(Result.success(TestFactory.CONSUMER_SESSION_LOOKUP))
+        assertThat(consumersApiService.mobileLookupCalls.size).isEqualTo(1)
+        val lookup = consumersApiService.mobileLookupCalls.first()
+        assertThat(lookup.email).isEqualTo(TestFactory.EMAIL)
+        assertThat(lookup.requestSurface).isEqualTo(CONSUMER_SURFACE)
+        assertThat(lookup.verificationToken).isEqualTo(TestFactory.VERIFICATION_TOKEN)
+        assertThat(lookup.appId).isEqualTo(TestFactory.APP_ID)
+        assertThat(lookup.emailSource).isEqualTo(TestFactory.EMAIL_SOURCE)
+        assertThat(lookup.sessionId).isEqualTo(TestFactory.SESSION_ID)
+        assertThat(lookup.requestOptions.apiKey).isEqualTo(PUBLISHABLE_KEY)
+        assertThat(lookup.requestOptions.stripeAccount).isEqualTo(STRIPE_ACCOUNT_ID)
+    }
+
+    @Test
+    fun `mobileLookupConsumer catches exception and returns failure`() = runTest {
+        val error = RuntimeException("error")
+        val consumersApiService = object : FakeConsumersApiService() {
+            override suspend fun mobileLookupConsumerSession(
+                email: String,
+                emailSource: EmailSource,
+                requestSurface: String,
+                verificationToken: String,
+                appId: String,
+                requestOptions: ApiRequest.Options,
+                sessionId: String
+            ): ConsumerSessionLookup {
+                throw error
+            }
+        }
+        val linkRepository = linkRepository(consumersApiService)
+
+        val result = linkRepository.mobileLookupConsumer(
+            email = TestFactory.EMAIL,
+            verificationToken = TestFactory.VERIFICATION_TOKEN,
+            appId = TestFactory.APP_ID,
+            sessionId = TestFactory.SESSION_ID,
+            emailSource = TestFactory.EMAIL_SOURCE
         )
+
+        assertThat(result).isEqualTo(Result.failure<ConsumerSessionLookup>(error))
     }
 
     @Test
     fun `consumerSignUp returns successful result`() = runTest {
-        val consumerSession = mock<ConsumerSessionSignup>()
-        whenever(
-            consumersApiService.signUp(
-                params = any(),
-                requestOptions = any()
-            )
-        ).thenReturn(Result.success(consumerSession))
+        val consumersApiService = FakeConsumersApiService()
+        val linkRepository = linkRepository(consumersApiService)
 
         val result = linkRepository.consumerSignUp(
-            "email",
-            "phone",
-            "country",
-            "name",
-            ConsumerSignUpConsentAction.Checkbox
+            email = TestFactory.EMAIL,
+            phone = TestFactory.CUSTOMER_PHONE,
+            country = TestFactory.COUNTRY,
+            name = TestFactory.CUSTOMER_NAME,
+            consentAction = TestFactory.CONSENT_ACTION
         )
 
-        assertThat(result.isSuccess).isTrue()
-        assertThat(result.getOrNull()).isEqualTo(consumerSession)
+        val signUpCall = consumersApiService.signUpCalls.firstOrNull()
+        val params = signUpCall?.params
+
+        assertThat(params?.email).isEqualTo(TestFactory.EMAIL)
+        assertThat(params?.phoneNumber).isEqualTo(TestFactory.CUSTOMER_PHONE)
+        assertThat(params?.country).isEqualTo(TestFactory.COUNTRY)
+        assertThat(params?.name).isEqualTo(TestFactory.CUSTOMER_NAME)
+        assertThat(params?.requestSurface).isEqualTo(CONSUMER_SURFACE)
+        assertThat(params?.consentAction).isEqualTo(TestFactory.CONSENT_ACTION)
+
+        assertThat(result).isEqualTo(Result.success(TestFactory.CONSUMER_SESSION_SIGN_UP))
     }
 
     @Test
     fun `consumerSignUp catches exception and returns failure`() = runTest {
-        whenever(
-            consumersApiService.signUp(
-                params = any(),
-                requestOptions = any()
-            )
-        ).thenReturn(Result.failure(RuntimeException("error")))
+        val error = RuntimeException("error")
+        val consumersApiService = FakeConsumersApiService()
+        val linkRepository = linkRepository(consumersApiService)
+
+        consumersApiService.signUpResult = Result.failure(error)
 
         val result = linkRepository.consumerSignUp(
-            "email",
-            "phone",
-            "country",
-            "name",
-            ConsumerSignUpConsentAction.Implied
+            email = TestFactory.EMAIL,
+            phone = TestFactory.CUSTOMER_PHONE,
+            country = TestFactory.COUNTRY,
+            name = TestFactory.CUSTOMER_NAME,
+            consentAction = TestFactory.CONSENT_ACTION
         )
 
-        assertThat(result.isFailure).isTrue()
+        assertThat(result).isEqualTo(Result.failure<ConsumerSessionSignup>(error))
+    }
+
+    @Test
+    fun `mobileSignUp returns successful result`() = runTest {
+        val consumersApiService = FakeConsumersApiService()
+        val linkRepository = linkRepository(consumersApiService)
+
+        val result = linkRepository.mobileSignUp(
+            email = TestFactory.EMAIL,
+            phoneNumber = TestFactory.CUSTOMER_PHONE,
+            country = TestFactory.COUNTRY,
+            name = TestFactory.CUSTOMER_NAME,
+            consentAction = TestFactory.CONSENT_ACTION,
+            verificationToken = TestFactory.VERIFICATION_TOKEN,
+            appId = TestFactory.APP_ID,
+            incentiveEligibilitySession = TestFactory.INCENTIVE_ELIGIBILITY_SESSION,
+            amount = TestFactory.AMOUNT,
+            currency = TestFactory.CURRENCY
+        )
+
+        val signUpCall = consumersApiService.mobileSignUpCalls.firstOrNull()
+        val params = signUpCall?.params
+
+        assertThat(params?.email).isEqualTo(TestFactory.EMAIL)
+        assertThat(params?.phoneNumber).isEqualTo(TestFactory.CUSTOMER_PHONE)
+        assertThat(params?.country).isEqualTo(TestFactory.COUNTRY)
+        assertThat(params?.name).isEqualTo(TestFactory.CUSTOMER_NAME)
+        assertThat(params?.requestSurface).isEqualTo(CONSUMER_SURFACE)
+        assertThat(params?.consentAction).isEqualTo(TestFactory.CONSENT_ACTION)
+        assertThat(params?.verificationToken).isEqualTo(TestFactory.VERIFICATION_TOKEN)
+        assertThat(params?.appId).isEqualTo(TestFactory.APP_ID)
+
+        assertThat(result).isEqualTo(Result.success(TestFactory.CONSUMER_SESSION_SIGN_UP))
+    }
+
+    @Test
+    fun `mobileSignUp catches exception and returns failure`() = runTest {
+        val error = RuntimeException("error")
+        val consumersApiService = FakeConsumersApiService()
+        val linkRepository = linkRepository(consumersApiService)
+
+        consumersApiService.mobileSignUpResult = Result.failure(error)
+
+        val result = linkRepository.mobileSignUp(
+            email = TestFactory.EMAIL,
+            phoneNumber = TestFactory.CUSTOMER_PHONE,
+            country = TestFactory.COUNTRY,
+            name = TestFactory.CUSTOMER_NAME,
+            consentAction = TestFactory.CONSENT_ACTION,
+            verificationToken = TestFactory.VERIFICATION_TOKEN,
+            appId = TestFactory.APP_ID,
+            incentiveEligibilitySession = TestFactory.INCENTIVE_ELIGIBILITY_SESSION,
+            amount = TestFactory.AMOUNT,
+            currency = TestFactory.CURRENCY
+        )
+
+        assertThat(result).isEqualTo(Result.failure<ConsumerSessionSignup>(error))
     }
 
     @Test
@@ -600,6 +673,20 @@ class LinkApiRepositoryTest {
         )
 
         assertThat(result.exceptionOrNull()).isEqualTo(error)
+    }
+
+    private fun linkRepository(
+        consumersApiService: ConsumersApiService = FakeConsumersApiService()
+    ): LinkApiRepository {
+        return LinkApiRepository(
+            publishableKeyProvider = { PUBLISHABLE_KEY },
+            stripeAccountIdProvider = { STRIPE_ACCOUNT_ID },
+            stripeRepository = stripeRepository,
+            consumersApiService = consumersApiService,
+            workContext = Dispatchers.IO,
+            locale = Locale.US,
+            errorReporter = errorReporter
+        )
     }
 
     private val cardPaymentMethodCreateParams =

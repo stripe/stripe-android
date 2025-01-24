@@ -37,6 +37,20 @@ class DefaultUpdatePaymentMethodInteractorTest {
     }
 
     @Test
+    fun creatingInteractorInLiveMode_setsTopBarStateCorrectly() = runScenario(
+        isLiveMode = true,
+    ) {
+        assertThat(interactor.topBarState.showTestModeLabel).isFalse()
+    }
+
+    @Test
+    fun creatingInteractorInTestMode_setsTopBarStateCorrectly() = runScenario(
+        isLiveMode = false,
+    ) {
+        assertThat(interactor.topBarState.showTestModeLabel).isTrue()
+    }
+
+    @Test
     fun removingPaymentMethodFails_errorMessageIsSet() {
         val expectedError = IllegalStateException("Example error")
 
@@ -237,6 +251,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
     private val notImplemented: () -> Nothing = { throw AssertionError("Not implemented") }
 
     private fun runScenario(
+        isLiveMode: Boolean = false,
         canRemove: Boolean = false,
         displayableSavedPaymentMethod: DisplayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
         onRemovePaymentMethod: (PaymentMethod) -> Throwable? = { notImplemented() },
@@ -244,7 +259,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
         testBlock: suspend TestParams.() -> Unit
     ) {
         val interactor = DefaultUpdatePaymentMethodInteractor(
-            isLiveMode = false,
+            isLiveMode = isLiveMode,
             canRemove = canRemove,
             displayableSavedPaymentMethod = displayableSavedPaymentMethod,
             removeExecutor = onRemovePaymentMethod,

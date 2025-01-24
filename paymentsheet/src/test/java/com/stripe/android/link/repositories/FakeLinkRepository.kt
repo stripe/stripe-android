@@ -3,12 +3,16 @@ package com.stripe.android.link.repositories
 import com.stripe.android.link.TestFactory
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
+import com.stripe.android.model.ConsumerSessionSignup
 import com.stripe.android.model.ConsumerSignUpConsentAction
+import com.stripe.android.model.EmailSource
+import com.stripe.android.model.IncentiveEligibilitySession
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
 
-open class FakeLinkRepository : LinkRepository {
+internal open class FakeLinkRepository : LinkRepository {
     var lookupConsumerResult = Result.success(TestFactory.CONSUMER_SESSION_LOOKUP)
+    var mobileLookupConsumerResult = Result.success(TestFactory.CONSUMER_SESSION_LOOKUP)
     var consumerSignUpResult = Result.success(TestFactory.CONSUMER_SESSION_SIGN_UP)
     var createCardPaymentDetailsResult = Result.success(TestFactory.LINK_NEW_PAYMENT_DETAILS)
     var shareCardPaymentDetailsResult = Result.success(TestFactory.LINK_NEW_PAYMENT_DETAILS)
@@ -21,6 +25,14 @@ open class FakeLinkRepository : LinkRepository {
 
     override suspend fun lookupConsumer(email: String) = lookupConsumerResult
 
+    override suspend fun mobileLookupConsumer(
+        email: String,
+        emailSource: EmailSource,
+        verificationToken: String,
+        appId: String,
+        sessionId: String
+    ) = mobileLookupConsumerResult
+
     override suspend fun consumerSignUp(
         email: String,
         phone: String,
@@ -28,6 +40,21 @@ open class FakeLinkRepository : LinkRepository {
         name: String?,
         consentAction: ConsumerSignUpConsentAction
     ) = consumerSignUpResult
+
+    override suspend fun mobileSignUp(
+        name: String?,
+        email: String,
+        phoneNumber: String,
+        country: String,
+        consentAction: ConsumerSignUpConsentAction,
+        amount: Long?,
+        currency: String?,
+        incentiveEligibilitySession: IncentiveEligibilitySession?,
+        verificationToken: String,
+        appId: String
+    ): Result<ConsumerSessionSignup> {
+        TODO("Not yet implemented")
+    }
 
     override suspend fun createCardPaymentDetails(
         paymentMethodCreateParams: PaymentMethodCreateParams,

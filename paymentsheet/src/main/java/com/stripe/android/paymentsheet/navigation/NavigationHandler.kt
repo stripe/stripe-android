@@ -11,37 +11,45 @@ import java.io.Closeable
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.time.Duration.Companion.milliseconds
 
-internal class NavigationHandler(
+internal class NavigationHandler<T : Any>(
     private val coroutineScope: CoroutineScope,
-    private val poppedScreenHandler: (PaymentSheetScreen) -> Unit,
+    private val initialScreen: T,
+    private val shouldRemoveInitialScreenOnTransition: Boolean = true,
+    private val poppedScreenHandler: (T) -> Unit,
 ) {
     private val isTransitioning = AtomicBoolean(false)
 
-    private val backStack = MutableStateFlow<List<PaymentSheetScreen>>(
-        value = listOf(PaymentSheetScreen.Loading),
+    private val backStack = MutableStateFlow<List<T>>(
+        value = listOf(initialScreen),
     )
 
-    val currentScreen: StateFlow<PaymentSheetScreen> = backStack
+    val currentScreen: StateFlow<T> = backStack
         .mapAsStateFlow { it.last() }
 
     val canGoBack: Boolean
         get() = backStack.value.size > 1
 
-    fun transitionTo(target: PaymentSheetScreen) {
+    fun transitionTo(target: T) {
         if (!isTransitioning.get()) {
             transitionToInternal(target)
         }
     }
 
-    fun transitionToWithDelay(target: PaymentSheetScreen) {
+    fun transitionToWithDelay(target: T) {
         navigateWithDelay { transitionToInternal(target) }
     }
 
-    private fun transitionToInternal(target: PaymentSheetScreen) {
-        backStack.update { (it - PaymentSheetScreen.Loading) + target }
+    private fun transitionToInternal(target: T) {
+        backStack.update {
+            if (shouldRemoveInitialScreenOnTransition) {
+                (it - initialScreen) + target
+            } else {
+                it + target
+            }
+        }
     }
 
-    fun resetTo(screens: List<PaymentSheetScreen>) {
+    fun resetTo(screens: List<T>) {
         if (!isTransitioning.get()) {
             val previousBackStack = backStack.value
 
@@ -85,7 +93,7 @@ internal class NavigationHandler(
         }
     }
 
-    private fun PaymentSheetScreen.onClose() {
+    private fun T.onClose() {
         when (this) {
             is Closeable -> close()
             else -> Unit

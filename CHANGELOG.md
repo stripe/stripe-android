@@ -1,6 +1,7 @@
 # CHANGELOG
 
 ## XX.XX.XX - 20XX-XX-XX
+* [ADDED][9937](https://github.com/stripe/stripe-android/pull/9937) Added support for Crypto to payment sheet.
 
 ## 21.3.2 - 2025-01-21
 

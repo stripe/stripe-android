@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import androidx.navigation.NavHostController
 import com.stripe.android.core.Logger
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
@@ -39,9 +38,10 @@ internal class SignUpViewModel @Inject constructor(
     private val configuration: LinkConfiguration,
     private val linkAccountManager: LinkAccountManager,
     private val linkEventsReporter: LinkEventsReporter,
-    private val logger: Logger
+    private val logger: Logger,
+    private val navigate: (LinkScreen) -> Unit,
+    private val navigateAndClearStack: (LinkScreen) -> Unit
 ) : ViewModel() {
-    internal var navController: NavHostController? = null
     val emailController = EmailConfig.createController(
         initialValue = configuration.customerInfo.email
     )
@@ -133,9 +133,9 @@ internal class SignUpViewModel @Inject constructor(
 
     private fun onAccountFetched(linkAccount: LinkAccount?) {
         if (linkAccount?.isVerified == true) {
-            navController?.popBackStack(LinkScreen.Wallet.route, inclusive = false)
+            navigateAndClearStack(LinkScreen.Wallet)
         } else {
-            navController?.navigate(LinkScreen.Verification.route)
+            navigate(LinkScreen.Verification)
             // The sign up screen stays in the back stack.
             // Clean up the state in case the user comes back.
             emailController.onValueChange("")
@@ -177,7 +177,9 @@ internal class SignUpViewModel @Inject constructor(
         internal val LOOKUP_DEBOUNCE = 1.seconds
 
         fun factory(
-            parentComponent: NativeLinkComponent
+            parentComponent: NativeLinkComponent,
+            navigate: (LinkScreen) -> Unit,
+            navigateAndClearStack: (LinkScreen) -> Unit
         ): ViewModelProvider.Factory {
             return viewModelFactory {
                 initializer {
@@ -185,7 +187,9 @@ internal class SignUpViewModel @Inject constructor(
                         configuration = parentComponent.configuration,
                         linkEventsReporter = parentComponent.linkEventsReporter,
                         linkAccountManager = parentComponent.linkAccountManager,
-                        logger = parentComponent.logger
+                        logger = parentComponent.logger,
+                        navigate = navigate,
+                        navigateAndClearStack = navigateAndClearStack
                     )
                 }
             }

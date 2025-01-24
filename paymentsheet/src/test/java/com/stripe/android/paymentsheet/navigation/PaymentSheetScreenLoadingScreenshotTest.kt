@@ -27,7 +27,7 @@ internal class PaymentSheetScreenLoadingScreenshotTest {
     fun displaysLoading() {
         val metadata = PaymentMethodMetadataFactory.create()
         val initialScreen = Loading
-        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen)
+        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen, canGoBack = false)
 
         paparazziRule.snapshot {
             PaymentSheetScreen(viewModel = viewModel, type = PaymentSheetFlowType.Complete)

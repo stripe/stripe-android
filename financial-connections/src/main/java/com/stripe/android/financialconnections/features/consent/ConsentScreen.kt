@@ -169,7 +169,8 @@ private fun LazyListScope.consentBody(
             text = title,
             onClickableTextClick = { onClickableTextClick(it) },
             defaultStyle = typography.headingXLarge.copy(
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                color = colors.textDefault,
             )
         )
         Spacer(modifier = Modifier.size(32.dp))

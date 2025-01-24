@@ -133,7 +133,7 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
         )
         val screen = com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.UpdatePaymentMethod(interactor)
         val metadata = PaymentMethodMetadataFactory.create()
-        val viewModel = FakeBaseSheetViewModel.create(metadata, screen)
+        val viewModel = FakeBaseSheetViewModel.create(metadata, screen, canGoBack = true)
 
         PaymentSheetScreen(viewModel = viewModel, type = PaymentSheetFlowType.Complete)
     }

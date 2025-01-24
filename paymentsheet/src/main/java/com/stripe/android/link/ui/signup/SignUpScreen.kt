@@ -11,7 +11,6 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -28,7 +27,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.StripeThemeForLink
 import com.stripe.android.link.theme.linkColors
@@ -50,15 +48,7 @@ import com.stripe.android.uicore.utils.collectAsState
 @Composable
 internal fun SignUpScreen(
     viewModel: SignUpViewModel,
-    navController: NavHostController
 ) {
-    DisposableEffect(Unit) {
-        viewModel.navController = navController
-
-        onDispose {
-            viewModel.navController = null
-        }
-    }
     val signUpScreenState by viewModel.state.collectAsState()
 
     SignUpBody(

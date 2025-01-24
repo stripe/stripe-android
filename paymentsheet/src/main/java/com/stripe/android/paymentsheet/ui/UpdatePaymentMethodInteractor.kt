@@ -19,7 +19,7 @@ import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 
 internal interface UpdatePaymentMethodInteractor {
-    val isLiveMode: Boolean
+    val topBarState: PaymentSheetTopBarState
     val canRemove: Boolean
     val displayableSavedPaymentMethod: DisplayableSavedPaymentMethod
     val screenTitle: ResolvableString?
@@ -73,7 +73,7 @@ internal typealias PaymentMethodUpdateOperation = suspend (
 ) -> Result<PaymentMethod>
 
 internal class DefaultUpdatePaymentMethodInteractor(
-    override val isLiveMode: Boolean,
+    private val isLiveMode: Boolean,
     override val canRemove: Boolean,
     override val displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
     override val cardBrandFilter: CardBrandFilter,
@@ -97,12 +97,17 @@ internal class DefaultUpdatePaymentMethodInteractor(
     override val isModifiablePaymentMethod: Boolean
         get() = !isExpiredCard && displayableSavedPaymentMethod.isModifiable()
 
+    override val topBarState: PaymentSheetTopBarState = PaymentSheetTopBarStateFactory.create(
+        isLiveMode = isLiveMode,
+        editable = PaymentSheetTopBarState.Editable.Never,
+    )
+
     private val _state = combineAsStateFlow(
         error,
         status,
         cardBrandChoice,
         cardBrandHasBeenChanged,
-    ) { error, status, cardBrandChoice, cardBrandHasBeenChanged, ->
+    ) { error, status, cardBrandChoice, cardBrandHasBeenChanged ->
         UpdatePaymentMethodInteractor.State(
             error = error,
             status = status,
