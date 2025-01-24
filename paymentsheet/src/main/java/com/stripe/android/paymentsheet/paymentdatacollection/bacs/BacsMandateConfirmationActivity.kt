@@ -10,11 +10,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.LaunchedEffect
 import androidx.core.view.WindowCompat
+import com.stripe.android.common.ui.BottomSheetScaffold
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationViewAction.OnBackPressed
-import com.stripe.android.paymentsheet.ui.PaymentSheetScaffold
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBar
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
 import com.stripe.android.uicore.StripeTheme
@@ -65,7 +65,7 @@ internal class BacsMandateConfirmationActivity : AppCompatActivity() {
                     state = bottomSheetState,
                     onDismissed = { viewModel.handleViewAction(OnBackPressed) },
                 ) {
-                    PaymentSheetScaffold(
+                    BottomSheetScaffold(
                         topBar = {
                             PaymentSheetTopBar(
                                 state = PaymentSheetTopBarState(

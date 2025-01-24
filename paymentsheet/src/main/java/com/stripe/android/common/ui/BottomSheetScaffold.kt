@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.ui
+package com.stripe.android.common.ui
 
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.ScrollState
@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 
 @Composable
-internal fun PaymentSheetScaffold(
+internal fun BottomSheetScaffold(
     topBar: @Composable () -> Unit,
     content: @Composable () -> Unit,
     modifier: Modifier = Modifier,
