@@ -10,10 +10,12 @@ import com.stripe.android.link.analytics.LinkAnalyticsHelper
 import com.stripe.android.link.injection.LinkAnalyticsComponent
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.confirmation.asCallbackFor
+import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.utils.DummyActivityResultCaller
 import com.stripe.android.utils.FakeActivityResultRegistry
 import com.stripe.android.utils.RecordingLinkStore
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.junit.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
@@ -24,6 +26,9 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
 internal class LinkPaymentLauncherTest {
+
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule()
 
     @Test
     fun `register call should register ActivityResultLauncher with ActivityResultRegistry`() {
