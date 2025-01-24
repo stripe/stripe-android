@@ -9,11 +9,14 @@ import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkConfigurationCoordinator
+import com.stripe.android.link.TestFactory
 import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.link.ui.inline.InlineSignupViewState
+import com.stripe.android.link.ui.inline.LinkSignupMode
+import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.CardBrand
-import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -21,9 +24,9 @@ import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures.DEFAULT_CARD
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
-import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.updateState
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPaymentMethod
@@ -37,6 +40,8 @@ import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
+import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import kotlinx.coroutines.Dispatchers
@@ -56,7 +61,6 @@ import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 import com.stripe.android.R as PaymentsCoreR
-import com.stripe.android.paymentsheet.R as PaymentSheetR
 
 @RunWith(RobolectricTestRunner::class)
 internal class PaymentOptionsViewModelTest {
@@ -722,61 +726,73 @@ internal class PaymentOptionsViewModelTest {
 
     @Test
     fun `On link selection with save requested, selection should be updated with saveable link selection`() =
-        runTest {
-            val viewModel = createLinkViewModel()
-
-            viewModel.linkHandler.payWithLinkInline(
-                paymentSelection = createLinkInlinePaymentSelection(
-                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse,
-                    input = UserInput.SignIn("email@email.com"),
-                ),
-                shouldCompleteLinkInlineFlow = false
-            )
-
-            assertThat(viewModel.selection.value).isEqualTo(
-                PaymentSelection.New.GenericPaymentMethod(
-                    paymentMethodCreateParams = LinkTestUtils.LINK_NEW_PAYMENT_DETAILS.paymentMethodCreateParams,
-                    paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(
-                        setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession,
-                    ),
-                    paymentMethodExtraParams = null,
-                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse,
-                    iconResource = PaymentSheetR.drawable.stripe_ic_paymentsheet_link,
-                    label = "···· 4242".resolvableString,
-                    lightThemeIconUrl = null,
-                    darkThemeIconUrl = null,
-                    createdFromLink = true,
-                )
-            )
-        }
+        linkInlineSelectionTest(
+            expectedCustomerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse,
+        )
 
     @Test
     fun `On link selection with save not requested, selection should be updated with unsaveable link selection`() =
-        runTest {
-            val viewModel = createLinkViewModel()
+        linkInlineSelectionTest(
+            expectedCustomerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+        )
 
-            viewModel.linkHandler.payWithLinkInline(
-                paymentSelection = createLinkInlinePaymentSelection(
-                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
-                    input = UserInput.SignIn("email@email.com"),
+    private fun linkInlineSelectionTest(
+        expectedCustomerRequestedSave: PaymentSelection.CustomerRequestedSave
+    ) = runTest {
+        Dispatchers.setMain(testDispatcher)
+
+        val viewModel = createLinkViewModel()
+
+        val linkInlineHandler = LinkInlineHandler.create()
+        val formHelper = DefaultFormHelper.create(
+            viewModel = viewModel,
+            paymentMethodMetadata = requireNotNull(viewModel.paymentMethodMetadata.value),
+            linkInlineHandler = linkInlineHandler,
+        )
+
+        viewModel.selection.test {
+            assertThat(awaitItem()).isNull()
+
+            formHelper.onFormFieldValuesChanged(
+                formValues = FormFieldValues(
+                    fieldValuePairs = mapOf(
+                        IdentifierSpec.CardBrand to FormFieldEntry(CardBrand.Visa.code, true),
+                    ),
+                    userRequestedReuse = expectedCustomerRequestedSave,
                 ),
-                shouldCompleteLinkInlineFlow = false
+                selectedPaymentMethodCode = "card",
             )
 
-            assertThat(viewModel.selection.value).isEqualTo(
-                PaymentSelection.New.GenericPaymentMethod(
-                    paymentMethodCreateParams = LinkTestUtils.LINK_NEW_PAYMENT_DETAILS.paymentMethodCreateParams,
-                    paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(),
-                    paymentMethodExtraParams = null,
-                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
-                    iconResource = PaymentSheetR.drawable.stripe_ic_paymentsheet_link,
-                    label = "···· 4242".resolvableString,
-                    lightThemeIconUrl = null,
-                    darkThemeIconUrl = null,
-                    createdFromLink = true,
+            assertThat(awaitItem()).isInstanceOf<PaymentSelection.New.Card>()
+
+            val input = UserInput.SignUp(
+                name = "John Doe",
+                email = "johndoe@email.com",
+                phone = "+15555555555",
+                consentAction = SignUpConsentAction.CheckboxWithPrefilledEmailAndPhone,
+                country = "US",
+            )
+
+            linkInlineHandler.onStateUpdated(
+                InlineSignupViewState.create(
+                    signupMode = LinkSignupMode.AlongsideSaveForFutureUse,
+                    config = TestFactory.LINK_CONFIGURATION,
+                ).copy(
+                    userInput = input,
                 )
             )
+
+            val selection = awaitItem()
+
+            assertThat(selection).isInstanceOf<PaymentSelection.New.LinkInline>()
+
+            val inlineSelection = selection as PaymentSelection.New.LinkInline
+
+            assertThat(inlineSelection.input).isEqualTo(input)
+            assertThat(inlineSelection.brand).isEqualTo(CardBrand.Visa)
+            assertThat(inlineSelection.customerRequestedSave).isEqualTo(expectedCustomerRequestedSave)
         }
+    }
 
     private fun createLinkViewModel(): PaymentOptionsViewModel {
         val linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(
@@ -787,7 +803,7 @@ internal class PaymentOptionsViewModelTest {
         return createViewModel(
             linkState = LinkState(
                 configuration = LinkTestUtils.createLinkConfiguration(),
-                signupMode = null,
+                signupMode = LinkSignupMode.AlongsideSaveForFutureUse,
                 loginState = LinkState.LoginState.LoggedOut
             ),
             linkConfigurationCoordinator = linkConfigurationCoordinator,
@@ -813,18 +829,6 @@ internal class PaymentOptionsViewModelTest {
             savedStateHandle = savedStateHandle,
             linkHandler = linkHandler,
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
-        )
-    }
-
-    private fun createLinkInlinePaymentSelection(
-        customerRequestedSave: PaymentSelection.CustomerRequestedSave,
-        input: UserInput,
-    ): PaymentSelection.New.LinkInline {
-        return PaymentSelection.New.LinkInline(
-            paymentMethodCreateParams = DEFAULT_CARD,
-            brand = CardBrand.Visa,
-            customerRequestedSave = customerRequestedSave,
-            input = input,
         )
     }
 

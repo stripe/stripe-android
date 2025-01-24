@@ -3,7 +3,9 @@ package com.stripe.android.paymentelement.confirmation
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.link.TestFactory
+import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.ui.inline.SignUpConsentAction
+import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
@@ -17,11 +19,13 @@ import com.stripe.android.paymentelement.confirmation.bacs.BacsConfirmationOptio
 import com.stripe.android.paymentelement.confirmation.epms.ExternalPaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
+import com.stripe.android.paymentelement.confirmation.linkinline.LinkInlineSignupConfirmationOption
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.utils.BankFormScreenStateFactory
 import org.junit.Test
@@ -263,6 +267,50 @@ class ConfirmationHandlerOptionKtxTest {
     }
 
     @Test
+    fun `On new Link inline selection without config, should return null`() {
+        assertThat(
+            PaymentSelection.New.LinkInline(
+                paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                brand = CardBrand.Visa,
+                customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+                paymentMethodOptionsParams = null,
+                paymentMethodExtraParams = null,
+                input = UserInput.SignUp(
+                    email = "email@email.com",
+                    phone = "1234567890",
+                    name = "John Doe",
+                    country = "CA",
+                    consentAction = SignUpConsentAction.Checkbox,
+                ),
+            ).toConfirmationOption(
+                configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
+                linkConfiguration = null,
+            )
+        ).isNull()
+    }
+
+    @Test
+    fun `On new Link inline selection with no reuse request, should return expected confirmation`() =
+        testLinkInlineSignupConfirmationOption(
+            customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+            expectedSaveOption = LinkInlineSignupConfirmationOption.PaymentMethodSaveOption.NoRequest
+        )
+
+    @Test
+    fun `On new Link inline selection with requested reuse, should return expected confirmation`() =
+        testLinkInlineSignupConfirmationOption(
+            customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse,
+            expectedSaveOption = LinkInlineSignupConfirmationOption.PaymentMethodSaveOption.RequestedReuse
+        )
+
+    @Test
+    fun `On new Link inline selection with requested no reuse, should return expected confirmation`() =
+        testLinkInlineSignupConfirmationOption(
+            customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse,
+            expectedSaveOption = LinkInlineSignupConfirmationOption.PaymentMethodSaveOption.RequestedNoReuse,
+        )
+
+    @Test
     fun `Converts Instant Debits into a saved payment confirmation option`() {
         val paymentSelection = createNewBankAccountPaymentSelection(linkMode = LinkMode.LinkPaymentMethod)
 
@@ -296,6 +344,42 @@ class ConfirmationHandlerOptionKtxTest {
             PaymentMethodConfirmationOption.Saved(
                 optionsParams = null,
                 paymentMethod = expectedPaymentMethod,
+            )
+        )
+    }
+
+    private fun testLinkInlineSignupConfirmationOption(
+        customerRequestedSave: PaymentSelection.CustomerRequestedSave,
+        expectedSaveOption: LinkInlineSignupConfirmationOption.PaymentMethodSaveOption,
+    ) {
+        val paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD
+        val userInput = UserInput.SignUp(
+            email = "email@email.com",
+            phone = "1234567890",
+            name = "John Doe",
+            country = "CA",
+            consentAction = SignUpConsentAction.Checkbox,
+        )
+
+        assertThat(
+            PaymentSelection.New.LinkInline(
+                paymentMethodCreateParams = paymentMethodCreateParams,
+                brand = CardBrand.Visa,
+                customerRequestedSave = customerRequestedSave,
+                paymentMethodOptionsParams = null,
+                paymentMethodExtraParams = null,
+                input = userInput,
+            ).toConfirmationOption(
+                configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
+                linkConfiguration = LINK_CONFIGURATION,
+            )
+        ).isEqualTo(
+            LinkInlineSignupConfirmationOption(
+                createParams = paymentMethodCreateParams,
+                optionsParams = null,
+                linkConfiguration = LINK_CONFIGURATION,
+                saveOption = expectedSaveOption,
+                userInput = userInput,
             )
         )
     }
@@ -341,14 +425,24 @@ class ConfirmationHandlerOptionKtxTest {
     }
 
     private companion object {
-        val PI_INITIALIZATION_MODE = PaymentElementLoader.InitializationMode.PaymentIntent(
-            clientSecret = "pi_123"
+        val LINK_CONFIGURATION = LinkConfiguration(
+            stripeIntent = PaymentIntentFactory.create(),
+            merchantName = "Merchant, Inc.",
+            merchantCountryCode = "CA",
+            customerInfo = LinkConfiguration.CustomerInfo(
+                name = "John Doe",
+                email = null,
+                phone = null,
+                billingCountryCode = "CA",
+            ),
+            shippingDetails = null,
+            passthroughModeEnabled = false,
+            cardBrandChoice = null,
+            flags = mapOf(),
+            useAttestationEndpointsForLink = false,
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = "pi_123_secret_123",
+            ),
         )
-
-        val SI_INITIALIZATION_MODE = PaymentElementLoader.InitializationMode.SetupIntent(
-            clientSecret = "pi_123"
-        )
-
-        val LINK_CONFIGURATION = TestFactory.LINK_CONFIGURATION
     }
 }

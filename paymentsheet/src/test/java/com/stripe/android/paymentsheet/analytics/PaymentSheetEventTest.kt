@@ -13,7 +13,6 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
-import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import org.junit.runner.RunWith
@@ -687,48 +686,6 @@ class PaymentSheetEventTest {
                 "is_decoupled" to false,
                 "link_enabled" to false,
                 "selected_lpm" to "card",
-                "google_pay_enabled" to false,
-            )
-        )
-    }
-
-    @Test
-    fun `Generic payment method event created from Link should return expected event`() {
-        val inlineLinkEvent = PaymentSheetEvent.Payment(
-            mode = EventReporter.Mode.Complete,
-            paymentSelection = PaymentSelection.New.GenericPaymentMethod(
-                paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-                paymentMethodOptionsParams = null,
-                paymentMethodExtraParams = null,
-                customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
-                label = resolvableString("**** 4444"),
-                iconResource = R.drawable.stripe_ic_paymentsheet_card_visa,
-                darkThemeIconUrl = null,
-                lightThemeIconUrl = null,
-                createdFromLink = true,
-            ),
-            duration = 1.milliseconds,
-            result = PaymentSheetEvent.Payment.Result.Success,
-            currency = "usd",
-            isDeferred = false,
-            linkEnabled = false,
-            googlePaySupported = false,
-            deferredIntentConfirmationType = null,
-        )
-        assertThat(
-            inlineLinkEvent.eventName
-        ).isEqualTo(
-            "mc_complete_payment_link_success"
-        )
-        assertThat(
-            inlineLinkEvent.params
-        ).isEqualTo(
-            mapOf(
-                "currency" to "usd",
-                "duration" to 0.001F,
-                "selected_lpm" to "card",
-                "is_decoupled" to false,
-                "link_enabled" to false,
                 "google_pay_enabled" to false,
             )
         )

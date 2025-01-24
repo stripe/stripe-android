@@ -1137,11 +1137,13 @@ internal class PaymentSheetActivityTest {
         args: PaymentSheetContractV2.Args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
         cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
     ): PaymentSheetViewModel = runBlocking {
+        val coordinator = mock<LinkConfigurationCoordinator>().stub {
+            onBlocking { getAccountStatusFlow(any()) }.thenReturn(flowOf(AccountStatus.SignedOut))
+            on { emailFlow } doReturn stateFlowOf("email@email.com")
+        }
+
         TestViewModelFactory.create(
-            linkConfigurationCoordinator = mock<LinkConfigurationCoordinator>().stub {
-                onBlocking { getAccountStatusFlow(any()) }.thenReturn(flowOf(AccountStatus.SignedOut))
-                on { emailFlow } doReturn stateFlowOf("email@email.com")
-            },
+            linkConfigurationCoordinator = coordinator,
         ) { linkHandler, savedStateHandle ->
             PaymentSheetViewModel(
                 args = args,
@@ -1175,6 +1177,7 @@ internal class PaymentSheetActivityTest {
                     statusBarColor = args.statusBarColor,
                     linkLauncher = linkPaymentLauncher,
                     errorReporter = FakeErrorReporter(),
+                    linkConfigurationCoordinator = coordinator,
                     cvcRecollectionLauncherFactory = RecordingCvcRecollectionLauncherFactory.noOp(),
                 ),
                 cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,

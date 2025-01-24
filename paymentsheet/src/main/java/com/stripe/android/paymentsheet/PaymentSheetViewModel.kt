@@ -215,12 +215,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     init {
         SessionSavedStateHandler.attachTo(this, savedStateHandle)
 
-        viewModelScope.launch {
-            linkHandler.processingState.collect { processingState ->
-                handleLinkProcessingState(processingState)
-            }
-        }
-
         val isDeferred = args.initializationMode is PaymentElementLoader.InitializationMode.DeferredIntent
 
         eventReporter.onInit(
@@ -230,23 +224,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
         viewModelScope.launch(workContext) {
             loadPaymentSheetState()
-        }
-    }
-
-    private fun handleLinkProcessingState(processingState: LinkHandler.ProcessingState) {
-        when (processingState) {
-            is LinkHandler.ProcessingState.PaymentDetailsCollected -> {
-                updateSelection(processingState.paymentSelection)
-                checkout(selection.value, CheckoutIdentifier.SheetBottomBuy)
-            }
-            LinkHandler.ProcessingState.Ready -> {
-                this.checkoutIdentifier = CheckoutIdentifier.SheetBottomBuy
-                viewState.value = PaymentSheetViewState.Reset()
-            }
-            LinkHandler.ProcessingState.Started -> {
-                this.checkoutIdentifier = CheckoutIdentifier.SheetBottomBuy
-                viewState.value = PaymentSheetViewState.StartProcessing
-            }
         }
     }
 
@@ -372,16 +349,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     ) {
         this.checkoutIdentifier = identifier
 
-        if (paymentSelection is PaymentSelection.New.LinkInline) {
-            viewModelScope.launch(workContext) {
-                linkHandler.payWithLinkInline(
-                    paymentSelection = paymentSelection,
-                    shouldCompleteLinkInlineFlow = false,
-                )
-            }
-        } else {
-            confirmPaymentSelection(paymentSelection)
-        }
+        confirmPaymentSelection(paymentSelection)
     }
 
     override fun handlePaymentMethodSelected(selection: PaymentSelection?) {

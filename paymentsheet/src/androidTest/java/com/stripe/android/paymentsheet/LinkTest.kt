@@ -665,6 +665,13 @@ internal class LinkTest {
             response.testBodyFromFile("payment-intent-confirm.json")
         }
 
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/log_out"),
+        ) { response ->
+            response.testBodyFromFile("consumer-session-logout-success.json")
+        }
+
         page.clickPrimaryButton()
     }
 
@@ -719,6 +726,13 @@ internal class LinkTest {
             not(bodyPart("payment_method", "pm_1234")),
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/log_out"),
+        ) { response ->
+            response.testBodyFromFile("consumer-session-logout-success.json")
         }
 
         page.clickPrimaryButton()
@@ -784,6 +798,13 @@ internal class LinkTest {
             response.testBodyFromFile("payment-intent-confirm.json")
         }
 
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/log_out"),
+        ) { response ->
+            response.testBodyFromFile("consumer-session-logout-success.json")
+        }
+
         page.clickPrimaryButton()
     }
 
@@ -830,6 +851,13 @@ internal class LinkTest {
             not(linkInformation())
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/log_out"),
+        ) { response ->
+            response.testBodyFromFile("consumer-session-logout-success.json")
         }
 
         page.clickPrimaryButton()
