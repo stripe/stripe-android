@@ -11,7 +11,6 @@ import androidx.compose.ui.text.input.TextInputService
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.paymentsheet.R
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -19,7 +18,6 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.robolectric.annotation.Config
-import com.stripe.android.ui.core.R as StripeUiCoreR
 
 @RunWith(AndroidJUnit4::class)
 @Config(sdk = [Build.VERSION_CODES.Q])
@@ -39,6 +37,7 @@ class PaymentSheetTopBarTest {
             ) {
                 PaymentSheetTopBar(
                     state = mockState(),
+                    canNavigateBack = true,
                     isEnabled = true,
                     elevation = 0.dp,
                     onNavigationIconPressed = { didCallOnNavigationIconPressed = true },
@@ -66,6 +65,7 @@ class PaymentSheetTopBarTest {
             ) {
                 PaymentSheetTopBar(
                     state = mockState(),
+                    canNavigateBack = true,
                     isEnabled = false,
                     elevation = 0.dp,
                     onNavigationIconPressed = { didCallOnNavigationIconPressed = true },
@@ -88,6 +88,7 @@ class PaymentSheetTopBarTest {
         composeTestRule.setContent {
             PaymentSheetTopBar(
                 state = mockState(showEditMenu = true, onEditIconPressed = { didCallOnEditIconPressed = true }),
+                canNavigateBack = true,
                 isEnabled = true,
                 elevation = 0.dp,
                 onNavigationIconPressed = { throw AssertionError("Not expected") },
@@ -106,8 +107,6 @@ class PaymentSheetTopBarTest {
         onEditIconPressed: () -> Unit = { throw AssertionError("Not expected") }
     ): PaymentSheetTopBarState {
         return PaymentSheetTopBarState(
-            icon = R.drawable.stripe_ic_paymentsheet_back,
-            contentDescription = StripeUiCoreR.string.stripe_back,
             showTestModeLabel = false,
             showEditMenu = showEditMenu,
             isEditing = false,

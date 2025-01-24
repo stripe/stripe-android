@@ -124,10 +124,6 @@ internal class VerticalModeFormUITest {
                 viewActionRecorder.record(viewAction)
             }
 
-            override fun canGoBack(): Boolean {
-                return true
-            }
-
             override fun close() {}
         }
     }

@@ -138,6 +138,7 @@ private fun PaymentSheetScreen(
 
             PaymentSheetTopBar(
                 state = topBarState,
+                canNavigateBack = viewModel.navigationHandler.canGoBack,
                 isEnabled = !processing,
                 handleBackPressed = viewModel::handleBackPressed,
             )

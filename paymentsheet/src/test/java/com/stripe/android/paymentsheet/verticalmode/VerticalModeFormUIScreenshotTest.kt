@@ -95,7 +95,6 @@ internal class VerticalModeFormUIScreenshotTest {
             FakeVerticalModeFormInteractor.create(
                 paymentMethodCode = "card",
                 metadata = metadata,
-                canGoBack = false,
             ),
             showsWalletHeader = true,
         )
@@ -149,7 +148,6 @@ internal class VerticalModeFormUIScreenshotTest {
             FakeVerticalModeFormInteractor.create(
                 paymentMethodCode = "cashapp",
                 metadata = metadata,
-                canGoBack = false,
             )
         )
         val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen)
