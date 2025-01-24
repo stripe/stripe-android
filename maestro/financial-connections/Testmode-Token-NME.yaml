@@ -14,6 +14,9 @@ tags:
     id: "Customer email setting"
 - inputRandomEmail
 - hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: "connect_accounts"
 - tapOn:
     id: "connect_accounts"
 # Wait until the consent button is visible

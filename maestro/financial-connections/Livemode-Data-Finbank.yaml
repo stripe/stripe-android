@@ -6,6 +6,9 @@ tags:
 - startRecording: ${'/tmp/test_results/livemode-data-finbank-' + new Date().getTime()}
 - clearState
 - openLink: stripeconnectionsexample://playground?integration_type=Standalone&experience=FinancialConnections&flow=Data&financial_connections_override_native=native&merchant=live_testing&financial_connections_test_mode=false
+- scrollUntilVisible:
+    element:
+      id: "connect_accounts"
 - tapOn:
     id: "connect_accounts"
 # Wait until the consent button is visible
