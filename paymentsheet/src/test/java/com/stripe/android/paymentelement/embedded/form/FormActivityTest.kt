@@ -1,12 +1,9 @@
-package com.stripe.android.paymentelement.embedded
+package com.stripe.android.paymentelement.embedded.form
 
 import android.os.Bundle
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.paymentelement.embedded.form.FormActivity
-import com.stripe.android.paymentelement.embedded.form.FormContract
-import com.stripe.android.paymentelement.embedded.form.FormResult
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
