@@ -9,14 +9,18 @@ internal class DefaultLinkGate @Inject constructor(
 ) : LinkGate {
     override val useNativeLink: Boolean
         get() {
-            if (FeatureFlags.nativeLinkEnabled.isEnabled) return true
-            return useAttestationEndpoints
+            if (configuration.stripeIntent.isLiveMode) {
+                return useAttestationEndpoints
+            }
+            return FeatureFlags.nativeLinkEnabled.isEnabled
         }
 
     override val useAttestationEndpoints: Boolean
         get() {
-            if (FeatureFlags.nativeLinkAttestationEnabled.isEnabled) return true
-            return configuration.useAttestationEndpointsForLink
+            if (configuration.stripeIntent.isLiveMode) {
+                return configuration.useAttestationEndpointsForLink
+            }
+            return FeatureFlags.nativeLinkAttestationEnabled.isEnabled
         }
 
     class Factory @Inject constructor() : LinkGate.Factory {
