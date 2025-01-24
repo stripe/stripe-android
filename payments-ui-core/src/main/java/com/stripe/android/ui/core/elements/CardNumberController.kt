@@ -227,9 +227,10 @@ internal class DefaultCardNumberController(
                     label = if (enabled) {
                         brand.displayName.resolvableString
                     } else {
-                        brand.displayName.resolvableString +
-                            " ".resolvableString +
-                            resolvableString(R.string.stripe_card_brand_not_accepted)
+                        resolvableString(
+                            R.string.stripe_card_brand_not_accepted_with_brand,
+                            brand.displayName
+                        )
                     },
                     icon = brand.icon,
                     enabled = enabled

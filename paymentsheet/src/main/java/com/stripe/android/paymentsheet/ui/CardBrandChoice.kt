@@ -1,10 +1,9 @@
 package com.stripe.android.paymentsheet.ui
 
 import com.stripe.android.core.strings.ResolvableString
-import com.stripe.android.core.strings.plus
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
-import com.stripe.android.paymentsheet.R
+import com.stripe.android.ui.core.R
 import com.stripe.android.uicore.elements.SingleChoiceDropdownItem
 
 internal data class CardBrandChoice(
@@ -19,9 +18,9 @@ internal data class CardBrandChoice(
         get() = if (enabled) {
             brand.displayName.resolvableString
         } else {
-            // If it's disabled, append "not accepted" to the end of the brand display name
-            brand.displayName.resolvableString +
-                " ".resolvableString +
-                resolvableString(R.string.stripe_card_brand_not_accepted)
+            resolvableString(
+                R.string.stripe_card_brand_not_accepted_with_brand,
+                brand.displayName
+            )
         }
 }
