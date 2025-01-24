@@ -125,21 +125,7 @@ internal class DefaultCardNumberController(
         mostRecentUserSelectedBrand,
         brandChoices,
     ) { previous, allChoices ->
-        // Determine which of the available brands are not blocked
-        val allowedChoices = allChoices.filter { cardBrandFilter.isAccepted(it) }
-        // If there's exactly one non-blocked brand, automatically pick it, otherwise use existing logic.
-        if (allowedChoices.size == 1 && allChoices.size > 1) {
-            allowedChoices.single()
-        } else {
-            when (previous) {
-                CardBrand.Unknown -> previous
-                in allChoices -> previous ?: CardBrand.Unknown
-                else -> {
-                    val firstAvailablePreferred = preferredBrands.firstOrNull { it in allChoices }
-                    firstAvailablePreferred ?: CardBrand.Unknown
-                }
-            }
-        }
+        determineSelectedBrand(previous, allChoices, cardBrandFilter, preferredBrands)
     }
 
     /*
@@ -326,6 +312,29 @@ internal class DefaultCardNumberController(
 
     override fun onDropdownItemClicked(item: TextFieldIcon.Dropdown.Item) {
         mostRecentUserSelectedBrand.value = CardBrand.fromCode(item.id)
+    }
+
+    fun determineSelectedBrand(
+        previous: CardBrand?,
+        allChoices: List<CardBrand>,
+        cardBrandFilter: CardBrandFilter,
+        preferredBrands: List<CardBrand>
+    ): CardBrand {
+        // Determine which of the available brands are not blocked
+        val allowedChoices = allChoices.filter { cardBrandFilter.isAccepted(it) }
+
+        return if (allowedChoices.size == 1 && allChoices.size > 1) {
+            allowedChoices.single()
+        } else {
+            when (previous) {
+                CardBrand.Unknown -> previous
+                in allChoices -> previous ?: CardBrand.Unknown
+                else -> {
+                    val firstAvailablePreferred = preferredBrands.firstOrNull { it in allChoices }
+                    firstAvailablePreferred ?: CardBrand.Unknown
+                }
+            }
+        }
     }
 
     @Composable

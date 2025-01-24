@@ -543,6 +543,91 @@ internal class CardNumberControllerTest {
         verifyNoInteractions(eventReporter)
     }
 
+    @Test
+    fun `determineSelectedBrand - single non-blocked brand picks that brand`() = runTest {
+        // Disallow Visa
+        val disallowedBrands = setOf(CardBrand.Visa)
+        val filter = FakeCardBrandFilter(disallowedBrands)
+        val allChoices = listOf(CardBrand.Visa, CardBrand.MasterCard)
+        val previous = CardBrand.Visa // The user had picked Visa before
+
+        // Because exactly one brand (MasterCard) is allowed and there are multiple total choices,
+        // the function should pick MasterCard.
+        val result = createController().determineSelectedBrand(
+            previous = previous,
+            allChoices = allChoices,
+            cardBrandFilter = filter,
+            preferredBrands = emptyList()
+        )
+        assertThat(result).isEqualTo(CardBrand.MasterCard)
+    }
+
+    @Test
+    fun `determineSelectedBrand - previous is in allChoices returns previous`() = runTest {
+        val allChoices = listOf(CardBrand.Visa, CardBrand.MasterCard)
+        val previous = CardBrand.Visa
+
+        // Because `previous` is already in `allChoices`,
+        // the function should return `previous` (Visa) unchanged.
+        val result = createController().determineSelectedBrand(
+            previous = previous,
+            allChoices = allChoices,
+            cardBrandFilter = DefaultCardBrandFilter,
+            preferredBrands = emptyList()
+        )
+        assertThat(result).isEqualTo(CardBrand.Visa)
+    }
+
+    @Test
+    fun `determineSelectedBrand - previous is Unknown returns Unknown`() = runTest {
+        val allChoices = listOf(CardBrand.Visa, CardBrand.MasterCard)
+        val previous = CardBrand.Unknown
+
+        // Because previous is Unknown, the function returns Unknown.
+        val result = createController().determineSelectedBrand(
+            previous = previous,
+            allChoices = allChoices,
+            cardBrandFilter = DefaultCardBrandFilter,
+            preferredBrands = emptyList()
+        )
+        assertThat(result).isEqualTo(CardBrand.Unknown)
+    }
+
+    @Test
+    fun `determineSelectedBrand - previous not in choices falls back to first available preferred`() = runTest {
+        val allChoices = listOf(CardBrand.Visa, CardBrand.MasterCard)
+        val previous = CardBrand.AmericanExpress
+        // Visa is a preferred network over CB
+        val preferredBrands = listOf(CardBrand.Visa, CardBrand.CartesBancaires)
+
+        // Because previous is not in allChoices, we fall back to the first available in `preferredBrands`.
+        val result = createController().determineSelectedBrand(
+            previous = previous,
+            allChoices = allChoices,
+            cardBrandFilter = DefaultCardBrandFilter,
+            preferredBrands = preferredBrands
+        )
+        assertThat(result).isEqualTo(CardBrand.Visa)
+    }
+
+    @Test
+    fun `determineSelectedBrand - no valid preferred brand defaults to Unknown`() = runTest {
+        val allChoices = listOf(CardBrand.Visa, CardBrand.MasterCard)
+        val previous = CardBrand.AmericanExpress
+        // None of these are in allChoices
+        val preferredBrands = listOf(CardBrand.CartesBancaires, CardBrand.UnionPay)
+
+        // Because previous is not in allChoices and none of the preferred brands are available,
+        // the function should return Unknown.
+        val result = createController().determineSelectedBrand(
+            previous = previous,
+            allChoices = allChoices,
+            cardBrandFilter = DefaultCardBrandFilter,
+            preferredBrands = preferredBrands
+        )
+        assertThat(result).isEqualTo(CardBrand.Unknown)
+    }
+
     private fun createController(
         initialValue: String? = null,
         cardBrandChoiceConfig: CardBrandChoiceConfig = CardBrandChoiceConfig.Ineligible,
