@@ -472,7 +472,7 @@ internal class VerticalModePaymentSheetActivityTest {
     }
 
     @Test
-    fun `Disallowed brands are hidden in the CBC dropdown`() = runTest(
+    fun `Disallowed brands are disabled in the CBC dropdown`() = runTest(
         cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.disallowed(
             listOf(
 
@@ -502,7 +502,7 @@ internal class VerticalModePaymentSheetActivityTest {
         editPage.assertIsVisible()
 
         // Even though our card is co-branded, Visa should not show up in the dropdown as it is disallowed
-        editPage.assertNotInDropdown("Visa")
+        editPage.assertInDropdownButDisabled("Visa (not available)")
     }
 
     @OptIn(ExperimentalCardBrandFilteringApi::class)
