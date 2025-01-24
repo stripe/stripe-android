@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement.embedded
 
+import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
@@ -32,10 +33,6 @@ internal class DefaultEmbeddedSheetLauncherTest {
         sheetLauncher.launchForm(code, paymentMethodMetadata)
         val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall()
         assertThat(launchCall).isEqualTo(expectedArgs)
-
-        // Required to consume all events from turbine
-        dummyActivityResultCallerScenario.awaitNextRegisteredLauncher()
-        dummyActivityResultCallerScenario.awaitNextRegisteredLauncher()
     }
 
     @Test
@@ -46,9 +43,6 @@ internal class DefaultEmbeddedSheetLauncherTest {
 
         callback.onActivityResult(result)
         assertThat(selectionHolder.selection.value).isEqualTo(selection)
-
-        dummyActivityResultCallerScenario.awaitNextRegisteredLauncher()
-        dummyActivityResultCallerScenario.awaitNextRegisteredLauncher()
     }
 
     @Test
@@ -58,9 +52,6 @@ internal class DefaultEmbeddedSheetLauncherTest {
 
         callback.onActivityResult(result)
         assertThat(selectionHolder.selection.value).isEqualTo(null)
-
-        dummyActivityResultCallerScenario.awaitNextRegisteredLauncher()
-        dummyActivityResultCallerScenario.awaitNextRegisteredLauncher()
     }
 
     @Test
@@ -73,9 +64,6 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall()
 
         assertThat(launchCall).isEqualTo(expectedArgs)
-
-        dummyActivityResultCallerScenario.awaitNextRegisteredLauncher()
-        dummyActivityResultCallerScenario.awaitNextRegisteredLauncher()
     }
 
     @Test
@@ -92,9 +80,6 @@ internal class DefaultEmbeddedSheetLauncherTest {
 
         assertThat(customerStateHolder.customer.value).isEqualTo(customerState)
         assertThat(selectionHolder.selection.value).isEqualTo(selection)
-
-        dummyActivityResultCallerScenario.awaitNextRegisteredLauncher()
-        dummyActivityResultCallerScenario.awaitNextRegisteredLauncher()
     }
 
     @Test
@@ -107,9 +92,6 @@ internal class DefaultEmbeddedSheetLauncherTest {
 
         assertThat(customerStateHolder.customer.value).isEqualTo(PaymentSheetFixtures.EMPTY_CUSTOMER_STATE)
         assertThat(selectionHolder.selection.value).isEqualTo(null)
-
-        dummyActivityResultCallerScenario.awaitNextRegisteredLauncher()
-        dummyActivityResultCallerScenario.awaitNextRegisteredLauncher()
     }
 
     @Test
@@ -119,16 +101,11 @@ internal class DefaultEmbeddedSheetLauncherTest {
         callback.onActivityResult(result)
 
         assertThat(customerStateHolder.customer.value).isEqualTo(PaymentSheetFixtures.EMPTY_CUSTOMER_STATE)
-
-        dummyActivityResultCallerScenario.awaitNextRegisteredLauncher()
-        dummyActivityResultCallerScenario.awaitNextRegisteredLauncher()
     }
 
     @Test
     fun `onDestroy unregisters launchers`() = testScenario {
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-        val formLauncher = dummyActivityResultCallerScenario.awaitNextRegisteredLauncher()
-        val manageLauncher = dummyActivityResultCallerScenario.awaitNextRegisteredLauncher()
         val formUnregisteredLauncher = dummyActivityResultCallerScenario.awaitNextUnregisteredLauncher()
         val manageUnregisteredLauncher = dummyActivityResultCallerScenario.awaitNextUnregisteredLauncher()
 
@@ -154,6 +131,9 @@ internal class DefaultEmbeddedSheetLauncherTest {
             val formRegisterCall = awaitRegisterCall()
             val manageRegisterCall = awaitRegisterCall()
 
+            val formLauncher = awaitNextRegisteredLauncher()
+            val manageLauncher = awaitNextRegisteredLauncher()
+
             assertThat(formRegisterCall).isNotNull()
             assertThat(manageRegisterCall).isNotNull()
 
@@ -167,6 +147,8 @@ internal class DefaultEmbeddedSheetLauncherTest {
                 dummyActivityResultCallerScenario = this,
                 formRegisterCall = formRegisterCall,
                 manageRegisterCall = manageRegisterCall,
+                formLauncher = formLauncher,
+                manageLauncher = manageLauncher,
                 sheetLauncher = sheetLauncher
             ).block()
         }
@@ -179,6 +161,8 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val dummyActivityResultCallerScenario: DummyActivityResultCaller.Scenario,
         val formRegisterCall: RegisterCall<*, *>,
         val manageRegisterCall: RegisterCall<*, *>,
+        val formLauncher: ActivityResultLauncher<*>,
+        val manageLauncher: ActivityResultLauncher<*>,
         val sheetLauncher: EmbeddedSheetLauncher,
     )
 }
