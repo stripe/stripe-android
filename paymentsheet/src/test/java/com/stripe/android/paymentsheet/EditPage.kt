@@ -46,7 +46,6 @@ internal class EditPage(
             .performClick()
     }
 
-
     fun update() {
         composeTestRule.onNodeWithTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG)
             .performClick()

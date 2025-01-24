@@ -124,7 +124,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
 
             interactor.handleViewAction(
                 UpdatePaymentMethodInteractor.ViewAction.BrandChoiceChanged(
-                    cardBrandChoice = CardBrandChoice(brand = updatedCardBrand)
+                    cardBrandChoice = CardBrandChoice(brand = updatedCardBrand, enabled = true)
                 )
             )
 
@@ -169,7 +169,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
             val expectedNewCardBrand = CardBrand.Visa
             interactor.handleViewAction(
                 UpdatePaymentMethodInteractor.ViewAction.BrandChoiceChanged(
-                    cardBrandChoice = CardBrandChoice(brand = expectedNewCardBrand)
+                    cardBrandChoice = CardBrandChoice(brand = expectedNewCardBrand, enabled = true)
                 )
             )
             interactor.state.test {
@@ -189,7 +189,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
             // Re-clicking on the already saved card brand doesn't update cardBrandHasBeenChanged incorectly.
             interactor.handleViewAction(
                 UpdatePaymentMethodInteractor.ViewAction.BrandChoiceChanged(
-                    cardBrandChoice = CardBrandChoice(brand = expectedNewCardBrand)
+                    cardBrandChoice = CardBrandChoice(brand = expectedNewCardBrand, enabled = true)
                 )
             )
             interactor.state.test {
@@ -220,7 +220,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
 
             interactor.handleViewAction(
                 UpdatePaymentMethodInteractor.ViewAction.BrandChoiceChanged(
-                    cardBrandChoice = CardBrandChoice(brand = CardBrand.Visa)
+                    cardBrandChoice = CardBrandChoice(brand = CardBrand.Visa, enabled = true)
                 )
             )
             interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.SaveButtonPressed)
