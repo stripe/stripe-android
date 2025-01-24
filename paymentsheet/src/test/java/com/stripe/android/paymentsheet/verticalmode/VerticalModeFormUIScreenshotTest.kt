@@ -98,7 +98,7 @@ internal class VerticalModeFormUIScreenshotTest {
             ),
             showsWalletHeader = true,
         )
-        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen, canGoBack = true)
+        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen, canGoBack = false)
         viewModel.walletsStateSource.value = WalletsState(
             link = WalletsState.Link(
                 email = null,
@@ -150,7 +150,7 @@ internal class VerticalModeFormUIScreenshotTest {
                 metadata = metadata,
             )
         )
-        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen, canGoBack = true)
+        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen, canGoBack = false)
         viewModel.primaryButtonUiStateSource.update { original ->
             original?.copy(enabled = true)
         }
