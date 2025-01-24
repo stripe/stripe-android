@@ -1,4 +1,4 @@
-package com.stripe.android.paymentelement.embedded
+package com.stripe.android.paymentelement.embedded.form
 
 import android.content.Context
 import android.content.Intent

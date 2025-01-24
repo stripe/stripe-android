@@ -5,6 +5,8 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.paymentelement.embedded.form.FormContract
+import com.stripe.android.paymentelement.embedded.form.FormResult
 import com.stripe.android.paymentelement.embedded.manage.ManageContract
 import com.stripe.android.paymentelement.embedded.manage.ManageResult
 import com.stripe.android.paymentsheet.CustomerStateHolder
