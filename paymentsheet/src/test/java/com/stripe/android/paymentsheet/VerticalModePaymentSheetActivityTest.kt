@@ -447,6 +447,7 @@ internal class VerticalModePaymentSheetActivityTest {
         formPage.assertErrorExists("American Express is not accepted")
         verticalModePage.assertPrimaryButton(isNotEnabled())
         formPage.fillCardNumber("")
+        
         // Entering an accepted card brand (Visa) should be allowed
         formPage.fillOutCardDetails()
         verticalModePage.assertPrimaryButton(isEnabled())
