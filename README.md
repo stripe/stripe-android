@@ -59,7 +59,6 @@ If you're selling digital products or services that will be consumed within your
 * Android 5.0 (API level 21) and above
 * [Android Gradle Plugin](https://developer.android.com/studio/releases/gradle-plugin) 8.1
 * [Gradle](https://gradle.org/releases/) 8.0
-* [AndroidX](https://developer.android.com/jetpack/androidx/) (as of v11.0.0)
 
 ### Configuration
 
@@ -75,7 +74,17 @@ dependencies {
 
 `stripe-android` uses Jetpack Compose internally and expects consumers to use a compatible version:
 
-* Compose UI 1.6.x corresponding to [Compose BOM 2024.01.00](https://developer.android.com/develop/ui/compose/bom/bom-mapping)
+<table>
+ <tr>
+  <td>20.22.0-20.31.0</td><td>Compose UI 1.4.x</td>
+ </tr>
+ <tr>
+  <td>20.32.0-20.53.0</td><td>Compose UI 1.5.x</td>
+ </tr>
+ <tr>
+  <td>21.0.0-Current</td><td>Compose UI 1.6.x or Compose UI 1.7.x</td>
+ </tr>
+</table>
 
 ## Getting Started
 
