@@ -12,7 +12,6 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentsheet.model.amount
 import com.stripe.android.paymentsheet.model.currency
 import com.stripe.attestation.IntegrityRequestManager
-import javax.inject.Inject
 import javax.inject.Named
 
 internal class AttestLinkAccountManager(
