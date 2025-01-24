@@ -31,10 +31,10 @@ internal sealed class ConnectAnalyticsEvent(
      * Note: This should happen before component_loaded, so we won't yet have a page_view_id.
      */
     data class WebPageLoaded(
-        val timeToLoad: Long
+        val timeToLoadMs: Long
     ) : ConnectAnalyticsEvent(
         "component.web.page_loaded",
-        mapOf("time_to_load" to timeToLoad.toString())
+        mapOf("time_to_load" to (timeToLoadMs.toDouble() / 1_000.0).toString())
     )
 
     /**
