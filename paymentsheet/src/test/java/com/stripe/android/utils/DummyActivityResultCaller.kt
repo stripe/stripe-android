@@ -84,7 +84,7 @@ class DummyActivityResultCaller private constructor() : ActivityResultCaller {
             return registerCalls.awaitItem()
         }
 
-        suspend fun awaitUnregisterLauncher(): ActivityResultLauncher<*> {
+        suspend fun awaitNextUnregisteredLauncher(): ActivityResultLauncher<*> {
             return unregisteredLaunchers.awaitItem()
         }
 
