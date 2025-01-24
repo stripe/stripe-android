@@ -16,7 +16,6 @@ import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
-import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.BuildConfig
@@ -34,7 +33,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
     private val linkRepository: LinkRepository,
     private val linkEventsReporter: LinkEventsReporter,
     private val errorReporter: ErrorReporter,
-) : LinkAccountManager {
+) : LinkAccountManager, MutableLinkAccountManager {
     private val _linkAccount = MutableStateFlow<LinkAccount?>(null)
     override val linkAccount: StateFlow<LinkAccount?> = _linkAccount
 
@@ -202,7 +201,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
         }
     }
 
-    private fun setAccount(
+    override fun setAccount(
         consumerSession: ConsumerSession,
         publishableKey: String?,
     ): LinkAccount {
@@ -280,8 +279,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
         )
     }
 
-    @VisibleForTesting
-    internal fun setAccountNullable(
+    override fun setAccountNullable(
         consumerSession: ConsumerSession?,
         publishableKey: String?,
     ): LinkAccount? {
@@ -328,18 +326,16 @@ internal class DefaultLinkAccountManager @Inject constructor(
                     AccountStatus.Error
                 }
             } ?: AccountStatus.SignedOut
+}
 
-    private val SignUpConsentAction.consumerAction: ConsumerSignUpConsentAction
-        get() = when (this) {
-            SignUpConsentAction.Checkbox ->
-                ConsumerSignUpConsentAction.Checkbox
-            SignUpConsentAction.CheckboxWithPrefilledEmail ->
-                ConsumerSignUpConsentAction.CheckboxWithPrefilledEmail
-            SignUpConsentAction.CheckboxWithPrefilledEmailAndPhone ->
-                ConsumerSignUpConsentAction.CheckboxWithPrefilledEmailAndPhone
-            SignUpConsentAction.Implied ->
-                ConsumerSignUpConsentAction.Implied
-            SignUpConsentAction.ImpliedWithPrefilledEmail ->
-                ConsumerSignUpConsentAction.ImpliedWithPrefilledEmail
-        }
+private interface MutableLinkAccountManager {
+    fun setAccountNullable(
+        consumerSession: ConsumerSession?,
+        publishableKey: String?,
+    ): LinkAccount?
+
+    fun setAccount(
+        consumerSession: ConsumerSession,
+        publishableKey: String?,
+    ): LinkAccount
 }

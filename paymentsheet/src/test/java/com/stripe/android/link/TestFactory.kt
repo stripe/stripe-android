@@ -143,7 +143,8 @@ internal object TestFactory {
         cardBrandChoice = null,
         passthroughModeEnabled = false,
         useAttestationEndpointsForLink = false,
-        initializationMode = PaymentSheetFixtures.INITIALIZATION_MODE_PAYMENT_INTENT
+        initializationMode = PaymentSheetFixtures.INITIALIZATION_MODE_PAYMENT_INTENT,
+        elementSessionId = ""
     )
 
     val LINK_WALLET_PRIMARY_BUTTON_LABEL = Amount(

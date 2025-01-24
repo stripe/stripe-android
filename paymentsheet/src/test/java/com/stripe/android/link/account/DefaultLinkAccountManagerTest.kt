@@ -5,7 +5,6 @@ import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.AuthenticationException
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.TestFactory
-import com.stripe.android.link.analytics.FakeLinkEventsReporter
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
@@ -856,15 +855,4 @@ class DefaultLinkAccountManagerTest {
             consentAction = consentAction
         )
     }
-}
-
-private open class AccountManagerEventsReporter : FakeLinkEventsReporter() {
-    override fun onInvalidSessionState(state: LinkEventsReporter.SessionState) = Unit
-    override fun onSignupCompleted(isInline: Boolean) = Unit
-    override fun onSignupFailure(isInline: Boolean, error: Throwable) = Unit
-    override fun onAccountLookupFailure(error: Throwable) = Unit
-    override fun on2FAStartFailure() = Unit
-    override fun on2FAStart() = Unit
-    override fun on2FAComplete() = Unit
-    override fun on2FAFailure() = Unit
 }

@@ -172,7 +172,6 @@ internal interface NativeLinkModule {
         fun provideApplicationId(
             application: Application
         ): String = application.packageName
-
     }
 }
 
