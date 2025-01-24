@@ -50,6 +50,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidViewBinding
 import com.stripe.android.CardBrandFilter
+import com.stripe.android.common.ui.BottomSheetScaffold
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.link.ui.LinkButton
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
@@ -129,7 +130,7 @@ private fun PaymentSheetScreen(
 
     DismissKeyboardOnProcessing(processing)
 
-    PaymentSheetScaffold(
+    BottomSheetScaffold(
         topBar = {
             val currentScreen by viewModel.navigationHandler.currentScreen.collectAsState()
             val topBarState by remember(currentScreen) {
