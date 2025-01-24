@@ -514,6 +514,5 @@ private class FakeNativeLinkComponent(
     override val webLinkActivityContract: WebLinkActivityContract = mock(),
     override val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory =
         NullCardAccountRangeRepositoryFactory,
-    override val integrityRequestManager: IntegrityRequestManager = FakeIntegrityRequestManager(),
     override val viewModel: LinkActivityViewModel = mock()
 ) : NativeLinkComponent
