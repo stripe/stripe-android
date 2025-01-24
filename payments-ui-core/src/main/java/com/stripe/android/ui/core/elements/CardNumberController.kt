@@ -190,8 +190,7 @@ internal class DefaultCardNumberController(
             val noSelection = TextFieldIcon.Dropdown.Item(
                 id = CardBrand.Unknown.code,
                 label = PaymentsCoreR.string.stripe_card_brand_choice_no_selection.resolvableString,
-                icon = CardBrand.Unknown.icon,
-                enabled = true
+                icon = CardBrand.Unknown.icon
             )
 
             val selected = if (brands.size == 1) {
@@ -200,8 +199,7 @@ internal class DefaultCardNumberController(
                 TextFieldIcon.Dropdown.Item(
                     id = onlyAvailableBrand.code,
                     label = onlyAvailableBrand.displayName.resolvableString,
-                    icon = onlyAvailableBrand.icon,
-                    enabled = true // TODO(porter) Look at this, maybe use the card brand filter
+                    icon = onlyAvailableBrand.icon
                 )
             } else {
                 when (chosen) {
@@ -209,8 +207,7 @@ internal class DefaultCardNumberController(
                     else -> TextFieldIcon.Dropdown.Item(
                         id = chosen.code,
                         label = chosen.displayName.resolvableString,
-                        icon = chosen.icon,
-                        enabled = true
+                        icon = chosen.icon
                     )
                 }
             }

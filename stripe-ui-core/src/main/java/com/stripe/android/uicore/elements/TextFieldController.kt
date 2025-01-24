@@ -110,7 +110,7 @@ sealed class TextFieldIcon {
             val id: String,
             override val label: ResolvableString,
             override val icon: Int,
-            override val enabled: Boolean
+            override val enabled: Boolean = true
         ) : SingleChoiceDropdownItem
     }
 }
