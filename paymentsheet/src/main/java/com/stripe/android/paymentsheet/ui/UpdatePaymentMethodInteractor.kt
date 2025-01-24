@@ -150,7 +150,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
             val updateResult = updateExecutor(displayableSavedPaymentMethod.paymentMethod, newCardBrand)
 
             updateResult.onSuccess {
-                savedCardBrand.emit(CardBrandChoice(brand = newCardBrand))
+                savedCardBrand.emit(CardBrandChoice(brand = newCardBrand, enabled = true))
                 cardBrandHasBeenChanged.emit(false)
             }.onFailure {
                 error.emit(it.stripeErrorMessage())
@@ -168,8 +168,8 @@ internal class DefaultUpdatePaymentMethodInteractor(
 
     private fun getInitialCardBrandChoice(): CardBrandChoice {
         return when (val savedPaymentMethod = displayableSavedPaymentMethod.savedPaymentMethod) {
-            is SavedPaymentMethod.Card -> savedPaymentMethod.card.getPreferredChoice()
-            else -> CardBrandChoice(brand = CardBrand.Unknown)
+            is SavedPaymentMethod.Card -> savedPaymentMethod.card.getPreferredChoice(cardBrandFilter)
+            else -> CardBrandChoice(brand = CardBrand.Unknown, enabled = true)
         }
     }
 

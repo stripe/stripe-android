@@ -194,8 +194,7 @@ class CardNumberEditText internal constructor(
                     possibleCardBrands = brands
                 }
             }
-        },
-        cardBrandFilter = cardBrandFilter
+        }
     )
 
     @JvmSynthetic

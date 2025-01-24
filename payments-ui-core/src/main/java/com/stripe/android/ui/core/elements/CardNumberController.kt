@@ -178,8 +178,7 @@ internal class DefaultCardNumberController(
                 brandChoices.value = newBrandChoices
             }
         },
-        isCbcEligible = { isEligibleForCardBrandChoice },
-        cardBrandFilter = cardBrandFilter
+        isCbcEligible = { isEligibleForCardBrandChoice }
     )
 
     override val trailingIcon: StateFlow<TextFieldIcon?> = combineAsStateFlow(
@@ -191,7 +190,8 @@ internal class DefaultCardNumberController(
             val noSelection = TextFieldIcon.Dropdown.Item(
                 id = CardBrand.Unknown.code,
                 label = PaymentsCoreR.string.stripe_card_brand_choice_no_selection.resolvableString,
-                icon = CardBrand.Unknown.icon
+                icon = CardBrand.Unknown.icon,
+                enabled = true
             )
 
             val selected = if (brands.size == 1) {
@@ -200,7 +200,8 @@ internal class DefaultCardNumberController(
                 TextFieldIcon.Dropdown.Item(
                     id = onlyAvailableBrand.code,
                     label = onlyAvailableBrand.displayName.resolvableString,
-                    icon = onlyAvailableBrand.icon
+                    icon = onlyAvailableBrand.icon,
+                    enabled = true // TODO(porter) Look at this, maybe use the card brand filter
                 )
             } else {
                 when (chosen) {
@@ -208,7 +209,8 @@ internal class DefaultCardNumberController(
                     else -> TextFieldIcon.Dropdown.Item(
                         id = chosen.code,
                         label = chosen.displayName.resolvableString,
-                        icon = chosen.icon
+                        icon = chosen.icon,
+                        enabled = true
                     )
                 }
             }
@@ -217,7 +219,8 @@ internal class DefaultCardNumberController(
                 TextFieldIcon.Dropdown.Item(
                     id = brand.code,
                     label = brand.displayName.resolvableString,
-                    icon = brand.icon
+                    icon = brand.icon,
+                    enabled = cardBrandFilter.isAccepted(brand)
                 )
             }
 

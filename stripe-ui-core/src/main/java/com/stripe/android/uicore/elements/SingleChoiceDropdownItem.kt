@@ -10,4 +10,6 @@ interface SingleChoiceDropdownItem {
 
     @get:DrawableRes
     val icon: Int?
+
+    val enabled: Boolean
 }
