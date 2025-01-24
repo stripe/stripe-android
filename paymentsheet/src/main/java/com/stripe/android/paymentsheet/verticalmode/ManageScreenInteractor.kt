@@ -1,13 +1,17 @@
 package com.stripe.android.paymentsheet.verticalmode
 
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
+import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarStateFactory
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import kotlinx.coroutines.CoroutineScope
@@ -33,7 +37,31 @@ internal interface ManageScreenInteractor {
         val currentSelection: DisplayableSavedPaymentMethod?,
         val isEditing: Boolean,
         val canEdit: Boolean,
-    )
+    ) {
+        val title: ResolvableString
+            get() {
+                val title = if (isEditing) {
+                    R.string.stripe_paymentsheet_manage_payment_methods
+                } else {
+                    R.string.stripe_paymentsheet_select_your_payment_method
+                }
+
+                return title.resolvableString
+            }
+
+        fun topBarState(interactor: ManageScreenInteractor): PaymentSheetTopBarState {
+            return PaymentSheetTopBarStateFactory.create(
+                isLiveMode = interactor.isLiveMode,
+                editable = PaymentSheetTopBarState.Editable.Maybe(
+                    isEditing = isEditing,
+                    canEdit = canEdit,
+                    onEditIconPressed = {
+                        interactor.handleViewAction(ViewAction.ToggleEdit)
+                    },
+                ),
+            )
+        }
+    }
 
     sealed class ViewAction {
         data class SelectPaymentMethod(val paymentMethod: DisplayableSavedPaymentMethod) : ViewAction()
