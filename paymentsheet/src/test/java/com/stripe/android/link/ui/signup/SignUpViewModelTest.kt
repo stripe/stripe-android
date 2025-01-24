@@ -1,6 +1,5 @@
 package com.stripe.android.link.ui.signup
 
-import androidx.navigation.NavHostController
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.model.CountryCode
@@ -26,16 +25,12 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import kotlin.time.Duration.Companion.milliseconds
 
 @RunWith(RobolectricTestRunner::class)
 internal class SignUpViewModelTest {
     private val dispatcher = UnconfinedTestDispatcher()
-
-    private val navController: NavHostController = mock()
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule(dispatcher)
@@ -143,11 +138,15 @@ internal class SignUpViewModelTest {
 
     @Test
     fun `When signed up with unverified account then it navigates to Verification screen`() = runTest(dispatcher) {
+        val screens = arrayListOf<LinkScreen>()
         val linkAccountManager = FakeLinkAccountManager()
         val viewModel = createViewModel(
             linkAccountManager = linkAccountManager,
             linkEventsReporter = object : SignUpLinkEventsReporter() {
                 override fun onSignupCompleted(isInline: Boolean) = Unit
+            },
+            navigate = { screen ->
+                screens.add(screen)
             }
         )
 
@@ -161,17 +160,21 @@ internal class SignUpViewModelTest {
 
         viewModel.performValidSignup()
 
-        verify(navController).navigate(LinkScreen.Verification.route)
+        assertThat(screens).containsExactly(LinkScreen.Verification)
         assertThat(viewModel.contentState.signUpState).isEqualTo(SignUpState.InputtingPrimaryField)
     }
 
     @Test
     fun `When signed up with verified account then it navigates to Wallet screen`() = runTest(dispatcher) {
+        val screens = arrayListOf<LinkScreen>()
         val linkAccountManager = FakeLinkAccountManager()
         val viewModel = createViewModel(
             linkAccountManager = linkAccountManager,
             linkEventsReporter = object : SignUpLinkEventsReporter() {
                 override fun onSignupCompleted(isInline: Boolean) = Unit
+            },
+            navigateAndClearStack = { screen ->
+                screens.add(screen)
             }
         )
 
@@ -186,7 +189,7 @@ internal class SignUpViewModelTest {
 
         viewModel.performValidSignup()
 
-        verify(navController).popBackStack(LinkScreen.Wallet.route, inclusive = false)
+        assertThat(screens).containsExactly(LinkScreen.Wallet)
     }
 
     @Test
@@ -295,7 +298,9 @@ internal class SignUpViewModelTest {
         countryCode: CountryCode = CountryCode.US,
         linkEventsReporter: LinkEventsReporter = SignUpLinkEventsReporter(),
         linkAccountManager: LinkAccountManager = FakeLinkAccountManager(),
-        logger: Logger = FakeLogger()
+        logger: Logger = FakeLogger(),
+        navigate: (LinkScreen) -> Unit = {},
+        navigateAndClearStack: (LinkScreen) -> Unit = {}
     ): SignUpViewModel {
         return SignUpViewModel(
             configuration = configuration.copy(
@@ -310,9 +315,9 @@ internal class SignUpViewModelTest {
             linkAccountManager = linkAccountManager,
             linkEventsReporter = linkEventsReporter,
             logger = logger,
-        ).apply {
-            this.navController = this@SignUpViewModelTest.navController
-        }
+            navigate = navigate,
+            navigateAndClearStack = navigateAndClearStack
+        )
     }
 
     private fun mockConsumerSessionWithVerificationSession(

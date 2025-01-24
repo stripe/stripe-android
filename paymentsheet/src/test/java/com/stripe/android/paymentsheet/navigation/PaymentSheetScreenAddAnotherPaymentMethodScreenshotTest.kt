@@ -32,7 +32,7 @@ internal class PaymentSheetScreenAddAnotherPaymentMethodScreenshotTest {
         val metadata = PaymentMethodMetadataFactory.create()
         val interactor = FakeAddPaymentMethodInteractor(initialState = createState())
         val initialScreen = AddAnotherPaymentMethod(interactor)
-        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen)
+        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen, canGoBack = true)
 
         paparazziRule.snapshot {
             ViewModelStoreOwnerContext {
@@ -46,7 +46,7 @@ internal class PaymentSheetScreenAddAnotherPaymentMethodScreenshotTest {
         val metadata = PaymentMethodMetadataFactory.create()
         val interactor = FakeAddPaymentMethodInteractor(initialState = createState())
         val initialScreen = AddAnotherPaymentMethod(interactor)
-        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen)
+        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen, canGoBack = true)
         viewModel.onError("An error occurred.".resolvableString)
 
         paparazziRule.snapshot {

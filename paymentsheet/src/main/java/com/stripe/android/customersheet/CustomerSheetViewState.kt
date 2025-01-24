@@ -47,7 +47,6 @@ internal sealed class CustomerSheetViewState(
     ) {
         override fun topBarState(onEditIconPressed: () -> Unit): PaymentSheetTopBarState {
             return PaymentSheetTopBarStateFactory.create(
-                hasBackStack = canNavigateBack,
                 isLiveMode = isLiveMode,
                 editable = PaymentSheetTopBarState.Editable.Never,
             )
@@ -80,7 +79,6 @@ internal sealed class CustomerSheetViewState(
 
         override fun topBarState(onEditIconPressed: () -> Unit): PaymentSheetTopBarState {
             return PaymentSheetTopBarStateFactory.create(
-                hasBackStack = canNavigateBack,
                 isLiveMode = isLiveMode,
                 editable = PaymentSheetTopBarState.Editable.Maybe(
                     isEditing = isEditing,
@@ -119,7 +117,6 @@ internal sealed class CustomerSheetViewState(
     ) {
         override fun topBarState(onEditIconPressed: () -> Unit): PaymentSheetTopBarState {
             return PaymentSheetTopBarStateFactory.create(
-                hasBackStack = canNavigateBack,
                 isLiveMode = isLiveMode,
                 editable = PaymentSheetTopBarState.Editable.Never,
             )
@@ -136,7 +133,6 @@ internal sealed class CustomerSheetViewState(
     ) {
         override fun topBarState(onEditIconPressed: () -> Unit): PaymentSheetTopBarState {
             return PaymentSheetTopBarStateFactory.create(
-                hasBackStack = canNavigateBack,
                 isLiveMode = isLiveMode,
                 editable = PaymentSheetTopBarState.Editable.Never,
             )

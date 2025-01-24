@@ -35,7 +35,7 @@ internal class PaymentSheetScreenVerticalModeScreenshotTest {
     fun displaysVerticalModeList() {
         val metadata = PaymentMethodMetadataFactory.create()
         val initialScreen = VerticalMode(FakePaymentMethodVerticalLayoutInteractor.create(metadata))
-        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen)
+        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen, canGoBack = false)
 
         paparazziRule.snapshot {
             PaymentSheetScreen(viewModel = viewModel, type = PaymentSheetFlowType.Complete)
@@ -46,7 +46,7 @@ internal class PaymentSheetScreenVerticalModeScreenshotTest {
     fun displaysVerticalModeListWithError() {
         val metadata = PaymentMethodMetadataFactory.create()
         val initialScreen = VerticalMode(FakePaymentMethodVerticalLayoutInteractor.create(metadata))
-        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen)
+        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen, canGoBack = false)
         viewModel.onError("Example error".resolvableString)
 
         paparazziRule.snapshot {
@@ -67,7 +67,7 @@ internal class PaymentSheetScreenVerticalModeScreenshotTest {
                 selection = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION,
             )
         )
-        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen)
+        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen, canGoBack = false)
         viewModel.mandateHandler.updateMandateText("Example Mandate".resolvableString, showAbove = true)
         viewModel.primaryButtonUiStateSource.update { original ->
             original?.copy(enabled = true)
@@ -91,7 +91,7 @@ internal class PaymentSheetScreenVerticalModeScreenshotTest {
                 selection = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION,
             )
         )
-        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen)
+        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen, canGoBack = false)
         viewModel.onError("Example error".resolvableString)
         viewModel.mandateHandler.updateMandateText("Example Mandate".resolvableString, showAbove = true)
         viewModel.primaryButtonUiStateSource.update { original ->
@@ -111,7 +111,7 @@ internal class PaymentSheetScreenVerticalModeScreenshotTest {
             initialShowsWalletsHeader = true
         )
         val initialScreen = VerticalMode(interactor)
-        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen)
+        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen, canGoBack = false)
         viewModel.walletsStateSource.value = WalletsState(
             link = WalletsState.Link(
                 email = null,

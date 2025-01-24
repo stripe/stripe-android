@@ -51,13 +51,18 @@ internal class FakeBaseSheetViewModel private constructor(
         fun create(
             paymentMethodMetadata: PaymentMethodMetadata,
             initialScreen: PaymentSheetScreen,
+            canGoBack: Boolean,
         ): FakeBaseSheetViewModel {
             val savedStateHandle = SavedStateHandle()
             val linkHandler = linkHandler(savedStateHandle)
             return FakeBaseSheetViewModel(savedStateHandle, linkHandler, paymentMethodMetadata).apply {
-                navigationHandler.transitionTo(
-                    initialScreen
-                )
+                if (canGoBack) {
+                    navigationHandler.resetTo(
+                        listOf(mock(), initialScreen)
+                    )
+                } else {
+                    navigationHandler.transitionTo(initialScreen)
+                }
             }.also {
                 if (initialScreen.buyButtonState.value.visible) {
                     it.primaryButtonUiStateSource.update {

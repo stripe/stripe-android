@@ -51,7 +51,7 @@ internal class PaymentSheetScreenManageSavedPaymentMethodsScreenshotTest {
             )
         )
         val initialScreen = ManageSavedPaymentMethods(interactor)
-        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen)
+        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen, canGoBack = true)
 
         paparazziRule.snapshot {
             PaymentSheetScreen(viewModel = viewModel, type = PaymentSheetFlowType.Complete)
@@ -70,7 +70,7 @@ internal class PaymentSheetScreenManageSavedPaymentMethodsScreenshotTest {
             )
         )
         val initialScreen = ManageSavedPaymentMethods(interactor)
-        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen)
+        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen, canGoBack = true)
 
         paparazziRule.snapshot {
             PaymentSheetScreen(viewModel = viewModel, type = PaymentSheetFlowType.Complete)
