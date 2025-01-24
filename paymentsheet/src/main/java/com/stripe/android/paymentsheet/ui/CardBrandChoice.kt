@@ -19,7 +19,7 @@ internal data class CardBrandChoice(
         get() = if (enabled) {
             brand.displayName.resolvableString
         } else {
-            // If it's disabled, append "not available" to the end of the brand display name
+            // If it's disabled, append "not accepted" to the end of the brand display name
             brand.displayName.resolvableString +
                 " ".resolvableString +
                 resolvableString(R.string.stripe_card_brand_not_accepted)
