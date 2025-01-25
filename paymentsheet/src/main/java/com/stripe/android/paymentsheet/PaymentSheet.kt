@@ -19,6 +19,7 @@ import com.stripe.android.link.account.LinkStore
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
+import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.addresselement.AddressDetails

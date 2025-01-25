@@ -30,6 +30,7 @@ import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetResult
 import com.stripe.android.customersheet.rememberCustomerSheet
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentelement.AnalyticEvent
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -91,8 +92,15 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
             val paymentSheet = PaymentSheet.Builder(viewModel::onPaymentSheetResult)
                 .externalPaymentMethodConfirmHandler(this)
                 .createIntentCallback(viewModel::createIntentCallback)
-                .analyticEventCallback({
-                    Log.d("PaymentSheet", "Event: $it")
+                .analyticEventCallback({ event ->
+                    when (event) {
+                        is AnalyticEvent.PresentPaymentSheet -> {
+                            Log.d("AnalyticEvent", "Event: $event")
+                        }
+                        is AnalyticEvent.DisplayedPaymentMethodForm -> {
+                            Log.d("AnalyticEvent", "Event: $event, PM: ${event.paymentMethodType}")
+                        }
+                    }
                 })
                 .build()
             val flowController = PaymentSheet.FlowController.Builder(
