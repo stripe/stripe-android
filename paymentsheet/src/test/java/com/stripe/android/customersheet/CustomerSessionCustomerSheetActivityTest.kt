@@ -4,11 +4,11 @@ import android.app.Application
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.compose.ui.test.performClick
 import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.stripe.android.common.ui.performClickWithKeyboard
 import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.customersheet.util.CustomerSheetHacks
 import com.stripe.android.model.CardBrand
@@ -74,7 +74,7 @@ class CustomerSessionCustomerSheetActivityTest {
             isPaymentMethodRemoveEnabled = true,
             allowsRemovalOfLastSavedPaymentMethod = true,
         ) {
-            savedPaymentMethodsPage.onEditButton().performClick()
+            savedPaymentMethodsPage.onEditButton().performClickWithKeyboard()
 
             savedPaymentMethodsPage.onSavedPaymentMethod(last4 = "4242").assertIsEnabled()
             savedPaymentMethodsPage.onSavedPaymentMethod(last4 = "5544").assertIsEnabled()
@@ -89,7 +89,7 @@ class CustomerSessionCustomerSheetActivityTest {
             isPaymentMethodRemoveEnabled = true,
             allowsRemovalOfLastSavedPaymentMethod = true,
         ) {
-            savedPaymentMethodsPage.onEditButton().performClick()
+            savedPaymentMethodsPage.onEditButton().performClickWithKeyboard()
 
             savedPaymentMethodsPage.onSavedPaymentMethod(last4 = "4242").assertIsEnabled()
         }
@@ -129,7 +129,7 @@ class CustomerSessionCustomerSheetActivityTest {
             isPaymentMethodRemoveEnabled = false,
             allowsRemovalOfLastSavedPaymentMethod = true,
         ) {
-            savedPaymentMethodsPage.onEditButton().performClick()
+            savedPaymentMethodsPage.onEditButton().performClickWithKeyboard()
 
             val nonCbcCard = savedPaymentMethodsPage.onSavedPaymentMethod(last4 = "5544")
             nonCbcCard.assertIsEnabled()
@@ -151,7 +151,7 @@ class CustomerSessionCustomerSheetActivityTest {
             isPaymentMethodRemoveEnabled = true,
             allowsRemovalOfLastSavedPaymentMethod = true,
         ) {
-            savedPaymentMethodsPage.onEditButton().performClick()
+            savedPaymentMethodsPage.onEditButton().performClickWithKeyboard()
 
             savedPaymentMethodsPage.onSavedPaymentMethod(last4 = "5544").assertIsEnabled()
 
@@ -160,7 +160,7 @@ class CustomerSessionCustomerSheetActivityTest {
             cbcCard.assertIsEnabled()
             cbcCard.assertHasModifyBadge()
 
-            savedPaymentMethodsPage.onModifyBadgeFor(last4 = "4242").performClick()
+            savedPaymentMethodsPage.onModifyBadgeFor(last4 = "4242").performClickWithKeyboard()
 
             editPage.onRemoveButton().assertIsEnabled()
         }
@@ -175,14 +175,14 @@ class CustomerSessionCustomerSheetActivityTest {
             isCanRemoveLastPaymentMethodEnabled = true,
             allowsRemovalOfLastSavedPaymentMethod = true,
         ) {
-            savedPaymentMethodsPage.onEditButton().performClick()
+            savedPaymentMethodsPage.onEditButton().performClickWithKeyboard()
 
             val cbcCard = savedPaymentMethodsPage.onSavedPaymentMethod(last4 = "4242")
 
             cbcCard.assertIsEnabled()
             cbcCard.assertHasModifyBadge()
 
-            savedPaymentMethodsPage.onModifyBadgeFor(last4 = "4242").performClick()
+            savedPaymentMethodsPage.onModifyBadgeFor(last4 = "4242").performClickWithKeyboard()
 
             editPage.onRemoveButton().assertIsEnabled()
         }
@@ -197,14 +197,14 @@ class CustomerSessionCustomerSheetActivityTest {
             isCanRemoveLastPaymentMethodEnabled = true,
             allowsRemovalOfLastSavedPaymentMethod = true,
         ) {
-            savedPaymentMethodsPage.onEditButton().performClick()
+            savedPaymentMethodsPage.onEditButton().performClickWithKeyboard()
 
             val cbcCard = savedPaymentMethodsPage.onSavedPaymentMethod(last4 = "4242")
 
             cbcCard.assertIsEnabled()
             cbcCard.assertHasModifyBadge()
 
-            savedPaymentMethodsPage.onModifyBadgeFor(last4 = "4242").performClick()
+            savedPaymentMethodsPage.onModifyBadgeFor(last4 = "4242").performClickWithKeyboard()
 
             editPage.onRemoveButton().assertDoesNotExist()
         }
@@ -219,14 +219,14 @@ class CustomerSessionCustomerSheetActivityTest {
             isCanRemoveLastPaymentMethodEnabled = true,
             allowsRemovalOfLastSavedPaymentMethod = false,
         ) {
-            savedPaymentMethodsPage.onEditButton().performClick()
+            savedPaymentMethodsPage.onEditButton().performClickWithKeyboard()
 
             val cbcCard = savedPaymentMethodsPage.onSavedPaymentMethod(last4 = "4242")
 
             cbcCard.assertIsEnabled()
             cbcCard.assertHasModifyBadge()
 
-            savedPaymentMethodsPage.onModifyBadgeFor(last4 = "4242").performClick()
+            savedPaymentMethodsPage.onModifyBadgeFor(last4 = "4242").performClickWithKeyboard()
 
             editPage.onRemoveButton().assertDoesNotExist()
         }
@@ -241,14 +241,14 @@ class CustomerSessionCustomerSheetActivityTest {
             isCanRemoveLastPaymentMethodEnabled = false,
             allowsRemovalOfLastSavedPaymentMethod = true,
         ) {
-            savedPaymentMethodsPage.onEditButton().performClick()
+            savedPaymentMethodsPage.onEditButton().performClickWithKeyboard()
 
             val cbcCard = savedPaymentMethodsPage.onSavedPaymentMethod(last4 = "4242")
 
             cbcCard.assertIsEnabled()
             cbcCard.assertHasModifyBadge()
 
-            savedPaymentMethodsPage.onModifyBadgeFor(last4 = "4242").performClick()
+            savedPaymentMethodsPage.onModifyBadgeFor(last4 = "4242").performClickWithKeyboard()
 
             editPage.onRemoveButton().assertDoesNotExist()
         }
@@ -262,8 +262,8 @@ class CustomerSessionCustomerSheetActivityTest {
         isPaymentMethodRemoveEnabled = true,
         allowsRemovalOfLastSavedPaymentMethod = true,
     ) {
-        savedPaymentMethodsPage.onEditButton().performClick()
-        savedPaymentMethodsPage.onModifyBadgeFor(last4 = "4242").performClick()
+        savedPaymentMethodsPage.onEditButton().performClickWithKeyboard()
+        savedPaymentMethodsPage.onModifyBadgeFor(last4 = "4242").performClickWithKeyboard()
         savedPaymentMethodsPage.clickRemoveButton()
 
         enqueuePaymentMethods(
@@ -293,8 +293,8 @@ class CustomerSessionCustomerSheetActivityTest {
                 PaymentMethodFactory.card(last4 = "1001"),
             ),
         ) {
-            savedPaymentMethodsPage.onEditButton().performClick()
-            savedPaymentMethodsPage.onModifyBadgeFor(last4 = "4242").performClick()
+            savedPaymentMethodsPage.onEditButton().performClickWithKeyboard()
+            savedPaymentMethodsPage.onModifyBadgeFor(last4 = "4242").performClickWithKeyboard()
 
             enqueuePaymentMethods(
                 cards = listOf(
@@ -310,7 +310,7 @@ class CustomerSessionCustomerSheetActivityTest {
             enqueueDetachPaymentMethod(id = "pm_3")
             enqueueDetachPaymentMethod(id = "pm_4")
 
-            editPage.onRemoveButton().performClick()
+            editPage.onRemoveButton().performClickWithKeyboard()
             removeDialog.confirm()
 
             savedPaymentMethodsPage.waitUntilVisible()
@@ -325,8 +325,8 @@ class CustomerSessionCustomerSheetActivityTest {
                     .update(last4 = "1001", addCbcNetworks = true),
             ),
         ) {
-            savedPaymentMethodsPage.onEditButton().performClick()
-            savedPaymentMethodsPage.onModifyBadgeFor(last4 = "1001").performClick()
+            savedPaymentMethodsPage.onEditButton().performClickWithKeyboard()
+            savedPaymentMethodsPage.onModifyBadgeFor(last4 = "1001").performClickWithKeyboard()
 
             editPage.setCardBrand("Visa")
             editPage.update()
