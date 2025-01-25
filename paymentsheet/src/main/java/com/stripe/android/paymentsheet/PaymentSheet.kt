@@ -2159,9 +2159,6 @@ class PaymentSheet internal constructor(
         }
 
         companion object {
-
-            internal var linkHandler: LinkHandler? = null
-
             /**
              * Create a [FlowController] that you configure with a client secret by calling
              * [configureWithPaymentIntent] or [configureWithSetupIntent].

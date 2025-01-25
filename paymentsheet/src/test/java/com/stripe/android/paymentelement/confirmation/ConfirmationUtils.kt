@@ -3,7 +3,9 @@ package com.stripe.android.paymentelement.confirmation
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
+import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.LinkPaymentLauncher
+import com.stripe.android.link.analytics.FakeLinkAnalyticsHelper
 import com.stripe.android.paymentelement.confirmation.bacs.BacsConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.cvc.CvcRecollectionConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.epms.ExternalPaymentMethodConfirmationDefinition
@@ -11,6 +13,7 @@ import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmation
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationDefinition
+import com.stripe.android.paymentelement.confirmation.linkinline.LinkInlineSignupConfirmationDefinition
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.ExternalPaymentMethodInterceptor
@@ -28,6 +31,7 @@ internal fun createTestConfirmationHandlerFactory(
     stripePaymentLauncherAssistedFactory: StripePaymentLauncherAssistedFactory,
     googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory,
     cvcRecollectionLauncherFactory: CvcRecollectionLauncherFactory,
+    linkConfigurationCoordinator: LinkConfigurationCoordinator,
     linkLauncher: LinkPaymentLauncher,
     paymentConfiguration: PaymentConfiguration,
     statusBarColor: Int?,
@@ -64,6 +68,11 @@ internal fun createTestConfirmationHandlerFactory(
                 LinkConfirmationDefinition(
                     linkPaymentLauncher = linkLauncher,
                     linkStore = RecordingLinkStore.noOp(),
+                ),
+                LinkInlineSignupConfirmationDefinition(
+                    linkConfigurationCoordinator = linkConfigurationCoordinator,
+                    linkStore = RecordingLinkStore.noOp(),
+                    linkAnalyticsHelper = FakeLinkAnalyticsHelper(),
                 ),
                 CvcRecollectionConfirmationDefinition(
                     factory = cvcRecollectionLauncherFactory,

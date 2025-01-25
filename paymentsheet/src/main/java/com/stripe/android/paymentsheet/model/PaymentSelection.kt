@@ -236,7 +236,6 @@ internal sealed class PaymentSelection : Parcelable {
             override val customerRequestedSave: CustomerRequestedSave,
             override val paymentMethodOptionsParams: PaymentMethodOptionsParams? = null,
             override val paymentMethodExtraParams: PaymentMethodExtraParams? = null,
-            val createdFromLink: Boolean = false,
         ) : New()
     }
 
@@ -294,7 +293,6 @@ internal val PaymentSelection.isLink: Boolean
         is PaymentSelection.GooglePay -> false
         is PaymentSelection.Link -> true
         is PaymentSelection.New.LinkInline -> true
-        is PaymentSelection.New.GenericPaymentMethod -> createdFromLink
         is PaymentSelection.New -> false
         is PaymentSelection.Saved -> walletType == PaymentSelection.Saved.WalletType.Link
         is PaymentSelection.ExternalPaymentMethod -> false
