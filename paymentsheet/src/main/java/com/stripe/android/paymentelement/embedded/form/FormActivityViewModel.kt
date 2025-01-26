@@ -19,6 +19,7 @@ import com.stripe.android.paymentsheet.DefaultFormHelper
 import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.LinkInlineHandler
 import com.stripe.android.paymentsheet.NewOrExternalPaymentSelection
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.paymentsheet.verticalmode.BankFormInteractor
@@ -33,6 +34,7 @@ internal class FormActivityViewModel @Inject constructor(
     private val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
     private val selectionHolder: EmbeddedSelectionHolder,
     private val linkConfigurationCoordinator: LinkConfigurationCoordinator,
+    val eventReporter: EventReporter
 ) : ViewModel() {
 
     val formInteractor = initializeFormInteractor(paymentMethodMetadata, selectedPaymentMethodCode)

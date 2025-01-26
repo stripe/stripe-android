@@ -6,9 +6,13 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.runtime.CompositionLocalProvider
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormUI
+import com.stripe.android.ui.core.elements.events.LocalCardBrandDisallowedReporter
+import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventReporter
 import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.elements.LocalAutofillEventReporter
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import com.stripe.android.uicore.utils.fadeOut
 
@@ -47,10 +51,16 @@ internal class FormActivity : AppCompatActivity() {
                         finish()
                     }
                 ) {
-                    VerticalModeFormUI(
-                        interactor = viewModel.formInteractor,
-                        showsWalletHeader = false
-                    )
+                    CompositionLocalProvider(
+                        LocalAutofillEventReporter provides viewModel.eventReporter::onAutofill,
+                        LocalCardNumberCompletedEventReporter provides viewModel.eventReporter::onCardNumberCompleted,
+                        LocalCardBrandDisallowedReporter provides viewModel.eventReporter::onDisallowedCardBrandEntered
+                    ) {
+                        VerticalModeFormUI(
+                            interactor = viewModel.formInteractor,
+                            showsWalletHeader = false
+                        )
+                    }
                 }
             }
         }

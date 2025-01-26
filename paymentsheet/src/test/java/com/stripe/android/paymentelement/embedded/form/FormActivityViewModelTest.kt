@@ -6,6 +6,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
+import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import kotlinx.coroutines.test.runTest
@@ -39,7 +40,8 @@ internal class FormActivityViewModelTest {
             selectedPaymentMethodCode = paymentMethodCode,
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
             selectionHolder = selectionHolder,
-            linkConfigurationCoordinator = FakeLinkConfigurationCoordinator()
+            linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
+            eventReporter = FakeEventReporter()
         )
     }
 }
