@@ -45,7 +45,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
     @VisibleForTesting
     override var consumerPublishableKey: String? = null
 
-    override val accountStatus = linkAccount.map { it.fetchAccountStatus() }
+    override val accountStatus = linkAccount.map { it.safeAccountStatus }
 
     override suspend fun lookupConsumer(
         email: String,
@@ -107,7 +107,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
         val currentAccount = _linkAccount.value
         val currentEmail = currentAccount?.email ?: config.customerInfo.email
 
-        return when (val status = currentAccount.fetchAccountStatus()) {
+        return when (val status = currentAccount.safeAccountStatus) {
             AccountStatus.Verified -> {
                 linkEventsReporter.onInvalidSessionState(LinkEventsReporter.SessionState.Verified)
 
@@ -310,20 +310,6 @@ internal class DefaultLinkAccountManager @Inject constructor(
         }
     }
 
-    private suspend fun LinkAccount?.fetchAccountStatus(): AccountStatus =
-        /**
-         * If we already fetched an account, return its status, otherwise if a customer email was passed in,
-         * lookup the account.
-         */
-        this?.accountStatus
-            ?: config.customerInfo.email?.let { customerEmail ->
-                lookupConsumer(customerEmail).map {
-                    it?.accountStatus
-                }.getOrElse {
-                    AccountStatus.Error
-                }
-            } ?: AccountStatus.SignedOut
-
     private val SignUpConsentAction.consumerAction: ConsumerSignUpConsentAction
         get() = when (this) {
             SignUpConsentAction.Checkbox ->
@@ -337,4 +323,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
             SignUpConsentAction.ImpliedWithPrefilledEmail ->
                 ConsumerSignUpConsentAction.ImpliedWithPrefilledEmail
         }
+
+    private val LinkAccount?.safeAccountStatus
+        get() = this?.accountStatus ?: AccountStatus.SignedOut
 }
