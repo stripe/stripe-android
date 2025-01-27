@@ -41,6 +41,7 @@ internal class ElementsSessionRepositoryTest {
                 ElementsSession.createFromFallback(
                     stripeIntent = PaymentIntentFixtures.PI_WITH_SHIPPING,
                     sessionsError = null,
+                    elementsSessionId = "session_1234"
                 )
             )
         )
@@ -62,6 +63,7 @@ internal class ElementsSessionRepositoryTest {
         verify(stripeRepository).retrieveElementsSession(argumentCaptor.capture(), any())
         verify(stripeRepository, never()).retrievePaymentIntent(any(), any(), any())
         assertThat(session.stripeIntent).isEqualTo(PaymentIntentFixtures.PI_WITH_SHIPPING)
+        assertThat(session.elementsSessionId).isEqualTo("session_1234")
         assertThat(argumentCaptor.firstValue.locale).isEqualTo(locale.toLanguageTag())
     }
 

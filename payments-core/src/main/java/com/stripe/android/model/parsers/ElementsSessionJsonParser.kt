@@ -12,6 +12,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import org.json.JSONArray
 import org.json.JSONObject
+import java.util.UUID
 
 internal class ElementsSessionJsonParser(
     private val params: ElementsSessionParams,
@@ -69,7 +70,7 @@ internal class ElementsSessionJsonParser(
                 cardBrandChoice = cardBrandChoice,
                 isGooglePayEnabled = googlePayPreference != "disabled",
                 externalPaymentMethodData = externalPaymentMethodData,
-                elementSessionId = elementsSessionId.takeIf { it.isNotBlank() }
+                elementsSessionId = elementsSessionId.takeIf { it.isNotBlank() } ?: UUID.randomUUID().toString()
             )
         } else {
             null

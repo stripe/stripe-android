@@ -51,7 +51,7 @@ internal class FakeElementsSessionRepository(
                     externalPaymentMethodData = externalPaymentMethodData,
                     customer = sessionsCustomer,
                     cardBrandChoice = cardBrandChoice,
-                    elementSessionId = "session_1234"
+                    elementsSessionId = "session_1234"
                 )
             )
         }

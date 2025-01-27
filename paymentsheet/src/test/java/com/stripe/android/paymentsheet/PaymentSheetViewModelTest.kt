@@ -988,7 +988,7 @@ internal class PaymentSheetViewModelTest {
                 shippingDetails = null,
                 useAttestationEndpointsForLink = false,
                 initializationMode = PaymentSheetFixtures.INITIALIZATION_MODE_PAYMENT_INTENT,
-                elementSessionId = "session_1234"
+                elementsSessionId = "session_1234"
             )
 
             val viewModel = createViewModel(

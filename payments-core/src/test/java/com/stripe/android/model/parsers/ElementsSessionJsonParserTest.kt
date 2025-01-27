@@ -338,7 +338,7 @@ class ElementsSessionJsonParserTest {
             ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON
         )
 
-        assertThat(parsedData?.elementSessionId).isNull()
+        assertThat(parsedData?.elementsSessionId).isNull()
     }
 
     @Test
@@ -366,7 +366,7 @@ class ElementsSessionJsonParserTest {
 
         val deferredIntent = data?.stripeIntent
 
-        assertThat(data?.elementSessionId).isEqualTo("elements_session_1t6ejApXCS5")
+        assertThat(data?.elementsSessionId).isEqualTo("elements_session_1t6ejApXCS5")
         assertThat(deferredIntent).isNotNull()
         assertThat(deferredIntent).isEqualTo(
             PaymentIntent(
