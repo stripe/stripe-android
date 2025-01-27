@@ -44,7 +44,7 @@ internal open class FakeLinkAccountManager : LinkAccountManager {
     private val mobileLookupTurbine = Turbine<MobileLookupCall>()
 
     private val signupTurbine = Turbine<SignUpCall>()
-    private val mobileSignUpCall = Turbine<MobileSignUpCall>()
+    private val mobileSignUpTurbine = Turbine<MobileSignUpCall>()
 
     override var consumerPublishableKey: String? = null
 
@@ -57,6 +57,12 @@ internal open class FakeLinkAccountManager : LinkAccountManager {
     }
 
     override suspend fun lookupConsumer(email: String, startSession: Boolean): Result<LinkAccount?> {
+        lookupTurbine.add(
+            item = LookupCall(
+                email = email,
+                startSession = startSession
+            )
+        )
         return lookupConsumerResult
     }
 
@@ -107,7 +113,7 @@ internal open class FakeLinkAccountManager : LinkAccountManager {
         appId: String,
         consentAction: SignUpConsentAction
     ): Result<LinkAccount> {
-        mobileSignUpCall.add(
+        mobileSignUpTurbine.add(
             item = MobileSignUpCall(
                 email = email,
                 phone = phone,
@@ -158,12 +164,35 @@ internal open class FakeLinkAccountManager : LinkAccountManager {
         return updatePaymentDetailsResult
     }
 
-    private data class LookupCall(
+    suspend fun awaitMobileSignUpCall(): MobileSignUpCall {
+        return mobileSignUpTurbine.awaitItem()
+    }
+
+    suspend fun awaitSignUpCall(): SignUpCall {
+        return signupTurbine.awaitItem()
+    }
+
+    suspend fun awaitMobileLookupCall(): MobileLookupCall {
+        return mobileLookupTurbine.awaitItem()
+    }
+
+    suspend fun awaitLookupCall(): LookupCall {
+        return lookupTurbine.awaitItem()
+    }
+
+    fun ensureAllEventsConsumed() {
+        lookupTurbine.ensureAllEventsConsumed()
+        mobileLookupTurbine.ensureAllEventsConsumed()
+        signupTurbine.ensureAllEventsConsumed()
+        mobileSignUpTurbine.ensureAllEventsConsumed()
+    }
+
+    data class LookupCall(
         val email: String,
         val startSession: Boolean
     )
 
-    private data class MobileLookupCall(
+    data class MobileLookupCall(
         val email: String,
         val emailSource: EmailSource,
         val verificationToken: String,
