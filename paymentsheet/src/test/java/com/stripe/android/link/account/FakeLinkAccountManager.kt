@@ -10,6 +10,7 @@ import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.EmailSource
 import com.stripe.android.model.PaymentMethodCreateParams
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -49,6 +50,16 @@ internal open class FakeLinkAccountManager : LinkAccountManager {
         return lookupConsumerResult
     }
 
+    override suspend fun mobileLookupConsumer(
+        email: String,
+        emailSource: EmailSource,
+        verificationToken: String,
+        appId: String,
+        startSession: Boolean
+    ): Result<LinkAccount?> {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun signUp(
         email: String,
         phone: String,
@@ -57,6 +68,18 @@ internal open class FakeLinkAccountManager : LinkAccountManager {
         consentAction: SignUpConsentAction
     ): Result<LinkAccount> {
         return signUpResult
+    }
+
+    override suspend fun mobileSignUp(
+        email: String,
+        phone: String,
+        country: String,
+        name: String?,
+        verificationToken: String,
+        appId: String,
+        consentAction: SignUpConsentAction
+    ): Result<LinkAccount> {
+        TODO("Not yet implemented")
     }
 
     override suspend fun signInWithUserInput(userInput: UserInput): Result<LinkAccount> {
