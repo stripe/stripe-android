@@ -26,6 +26,7 @@ internal interface UpdatePaymentMethodInteractor {
     val cardBrandFilter: CardBrandFilter
     val isExpiredCard: Boolean
     val isModifiablePaymentMethod: Boolean
+    val hasValidBrandChoices: Boolean
 
     val state: StateFlow<State>
 
@@ -89,7 +90,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
     private val cardBrandChoice = MutableStateFlow(getInitialCardBrandChoice())
     private val cardBrandHasBeenChanged = MutableStateFlow(false)
     private val savedCardBrand = MutableStateFlow(getInitialCardBrandChoice())
-
+    override val hasValidBrandChoices = hasValidBrandChoices()
     override val isExpiredCard = paymentMethodIsExpiredCard()
     override val screenTitle: ResolvableString? = UpdatePaymentMethodInteractor.screenTitle(
         displayableSavedPaymentMethod
@@ -188,6 +189,13 @@ internal class DefaultUpdatePaymentMethodInteractor(
         } else {
             null
         }
+    }
+
+    private fun hasValidBrandChoices(): Boolean {
+        val filteredCardBrands = displayableSavedPaymentMethod.paymentMethod.card?.networks?.available?.map {
+            CardBrand.fromCode(it)
+        }?.filter { cardBrandFilter.isAccepted(it) }
+        return (filteredCardBrands?.size ?: 0) > 1
     }
 }
 

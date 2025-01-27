@@ -89,7 +89,7 @@ internal fun UpdatePaymentMethodUI(interactor: UpdatePaymentMethodInteractor, mo
 
         if (!interactor.isExpiredCard) {
             interactor.displayableSavedPaymentMethod.getDetailsCannotBeChangedText(
-                shouldShowCardBrandDropdown = shouldShowCardBrandDropdown,
+                canUpdateCardBrand = shouldShowCardBrandDropdown && interactor.hasValidBrandChoices,
             )?.let {
                 Text(
                     text = it.resolve(context),
@@ -498,12 +498,12 @@ private fun PreviewUpdatePaymentMethodUI() {
 }
 
 private fun DisplayableSavedPaymentMethod.getDetailsCannotBeChangedText(
-    shouldShowCardBrandDropdown: Boolean,
+    canUpdateCardBrand: Boolean,
 ): ResolvableString? {
     return (
         when (savedPaymentMethod) {
             is SavedPaymentMethod.Card ->
-                if (shouldShowCardBrandDropdown) {
+                if (canUpdateCardBrand) {
                     PaymentSheetR.string.stripe_paymentsheet_only_card_brand_can_be_changed
                 } else {
                     PaymentSheetR.string.stripe_paymentsheet_card_details_cannot_be_changed
