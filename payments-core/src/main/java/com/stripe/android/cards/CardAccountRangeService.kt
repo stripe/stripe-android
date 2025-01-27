@@ -125,6 +125,7 @@ class CardAccountRangeService(
         return shouldQuery
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     interface AccountRangeResultListener {
         fun onAccountRangesResult(accountRanges: List<AccountRange>, unfilteredAccountRanges: List<AccountRange>)
     }
