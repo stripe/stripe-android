@@ -123,7 +123,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                 val attestationInitResult = prepareStandardRequestManager()
                 val syncResponse = getOrFetchSync(
                     refetchCondition = Always,
-                    supportsAppVerification = attestationInitResult.initialized
+                    supportsAppVerification = attestationInitResult.supportsAppVerification
                 )
                 val pane = syncResponse.manifest.nextPane
                 when (attestationInitResult) {
@@ -587,10 +587,10 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         }
     }
 
-    private sealed class AttestationInitResult(val initialized: Boolean) {
-        data object Success : AttestationInitResult(initialized = true)
-        data object Skipped : AttestationInitResult(initialized = false)
-        data class Failure(val error: Throwable) : AttestationInitResult(initialized = false)
+    private sealed class AttestationInitResult(val supportsAppVerification: Boolean) {
+        data object Success : AttestationInitResult(supportsAppVerification = true)
+        data object Skipped : AttestationInitResult(supportsAppVerification = false)
+        data class Failure(val error: Throwable) : AttestationInitResult(supportsAppVerification = false)
     }
 
     companion object {
