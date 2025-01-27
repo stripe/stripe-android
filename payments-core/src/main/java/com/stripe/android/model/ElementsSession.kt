@@ -132,7 +132,7 @@ data class ElementsSession(
                 cardBrandChoice = null,
                 isGooglePayEnabled = true,
                 sessionsError = sessionsError,
-                elementSessionId = stripeIntent.id
+                elementSessionId = null
             )
         }
     }
