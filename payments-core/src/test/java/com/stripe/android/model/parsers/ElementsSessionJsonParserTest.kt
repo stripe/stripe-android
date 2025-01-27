@@ -20,6 +20,7 @@ import org.junit.Rule
 import org.junit.Test
 import java.util.UUID
 
+
 class ElementsSessionJsonParserTest {
 
     @get:Rule
@@ -338,8 +339,12 @@ class ElementsSessionJsonParserTest {
         ).parse(
             ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON
         )
-        
-        assertThat(UUID.fromString(parsedData?.elementsSessionId)).isNotNull()
+
+        assertThat(
+            runCatching {
+                UUID.fromString(parsedData?.elementsSessionId)
+            }.exceptionOrNull()
+        ).isNull()
     }
 
     @Test
