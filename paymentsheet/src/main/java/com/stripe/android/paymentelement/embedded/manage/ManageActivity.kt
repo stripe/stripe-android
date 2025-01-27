@@ -23,6 +23,8 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.common.ui.BottomSheetScaffold
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
+import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
+import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBar
 import com.stripe.android.ui.core.elements.H4Text
@@ -31,6 +33,7 @@ import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetS
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.fadeOut
+import javax.inject.Inject
 import kotlin.getValue
 
 internal class ManageActivity : AppCompatActivity() {
@@ -44,6 +47,15 @@ internal class ManageActivity : AppCompatActivity() {
         }
     }
 
+    @Inject
+    lateinit var customerStateHolder: CustomerStateHolder
+
+    @Inject
+    lateinit var manageNavigator: ManageNavigator
+
+    @Inject
+    lateinit var selectionHolder: EmbeddedSelectionHolder
+
     @OptIn(ExperimentalMaterialApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,8 +65,10 @@ internal class ManageActivity : AppCompatActivity() {
             return
         }
 
+        viewModel.component.inject(this)
+
         onBackPressedDispatcher.addCallback {
-            viewModel.manageNavigator.performAction(ManageNavigator.Action.Back)
+            manageNavigator.performAction(ManageNavigator.Action.Back)
         }
 
         setContent {
@@ -63,25 +77,25 @@ internal class ManageActivity : AppCompatActivity() {
                 ElementsBottomSheetLayout(
                     state = bottomSheetState,
                     onDismissed = {
-                        setManageResult(ManageResult.Cancelled(viewModel.customerStateHolder.customer.value))
+                        setManageResult(ManageResult.Cancelled(customerStateHolder.customer.value))
                         finish()
                     }
                 ) {
-                    val screen by viewModel.manageNavigator.screen.collectAsState()
+                    val screen by manageNavigator.screen.collectAsState()
                     Box(modifier = Modifier.padding(bottom = 20.dp)) {
-                        ScreenContent(viewModel.manageNavigator, screen)
+                        ScreenContent(manageNavigator, screen)
                     }
                     LaunchedEffect(screen) {
-                        viewModel.manageNavigator.result.collect { result ->
+                        manageNavigator.result.collect { result ->
                             if (result.maintainPaymentSelection) {
                                 setManageResult(
                                     ManageResult.Complete(
-                                        customerState = requireNotNull(viewModel.customerStateHolder.customer.value),
-                                        selection = viewModel.selectionHolder.selection.value,
+                                        customerState = requireNotNull(customerStateHolder.customer.value),
+                                        selection = selectionHolder.selection.value,
                                     )
                                 )
                             } else {
-                                setManageResult(ManageResult.Cancelled(viewModel.customerStateHolder.customer.value))
+                                setManageResult(ManageResult.Cancelled(customerStateHolder.customer.value))
                             }
                             finish()
                         }
@@ -106,7 +120,7 @@ internal class ManageActivity : AppCompatActivity() {
                     state = topBarState,
                     canNavigateBack = navigator.canGoBack,
                     isEnabled = true,
-                    handleBackPressed = { viewModel.manageNavigator.performAction(ManageNavigator.Action.Back) },
+                    handleBackPressed = { manageNavigator.performAction(ManageNavigator.Action.Back) },
                 )
             },
             content = {

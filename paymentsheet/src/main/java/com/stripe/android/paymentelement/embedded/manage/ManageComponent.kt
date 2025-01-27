@@ -31,6 +31,8 @@ internal interface ManageComponent {
 
     val selectionHolder: EmbeddedSelectionHolder
 
+    fun inject(activity: ManageActivity)
+
     @Component.Builder
     interface Builder {
         @BindsInstance
