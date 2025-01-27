@@ -18,6 +18,7 @@ import com.stripe.android.testing.FeatureFlagTestRule
 import org.json.JSONObject
 import org.junit.Rule
 import org.junit.Test
+import java.util.UUID
 
 class ElementsSessionJsonParserTest {
 
@@ -337,8 +338,8 @@ class ElementsSessionJsonParserTest {
         ).parse(
             ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON
         )
-
-        assertThat(parsedData?.elementsSessionId).isNull()
+        
+        assertThat(UUID.fromString(parsedData?.elementsSessionId)).isNotNull()
     }
 
     @Test
