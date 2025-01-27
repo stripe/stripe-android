@@ -901,7 +901,7 @@ public abstract interface class com/stripe/android/cards/CardAccountRangeReposit
 }
 
 public abstract interface class com/stripe/android/cards/CardAccountRangeService$AccountRangeResultListener {
-	public abstract fun onAccountRangesResult (Ljava/util/List;)V
+	public abstract fun onAccountRangesResult (Ljava/util/List;Ljava/util/List;)V
 }
 
 public final class com/stripe/android/exception/CardException : com/stripe/android/core/exception/StripeException {
