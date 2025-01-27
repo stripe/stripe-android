@@ -14,6 +14,7 @@ import com.stripe.android.financialconnections.domain.HandleError
 import com.stripe.android.financialconnections.domain.RequestIntegrityToken
 import com.stripe.android.financialconnections.domain.SaveAccountToLink
 import com.stripe.android.financialconnections.features.common.isDataFlow
+import com.stripe.android.financialconnections.features.error.toAttestationErrorIfApplicable
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.LINK_LOGIN
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.NETWORKING_LINK_SIGNUP_PANE
@@ -32,7 +33,8 @@ internal interface LinkSignupHandler {
     ): Pane
 
     fun handleSignupFailure(
-        error: Throwable,
+        state: NetworkingLinkSignupState,
+        error: Throwable
     )
 
     fun navigateToVerification()
@@ -86,10 +88,13 @@ internal class LinkSignupHandlerForInstantDebits @Inject constructor(
         navigationManager.tryNavigateTo(NetworkingLinkVerification(referrer = LINK_LOGIN))
     }
 
-    override fun handleSignupFailure(error: Throwable) {
+    override fun handleSignupFailure(
+        state: NetworkingLinkSignupState,
+        error: Throwable
+    ) {
         handleError(
             extraMessage = "Error creating a Link account",
-            error = error,
+            error = error.toAttestationErrorIfApplicable(state.validEmail!!),
             pane = LINK_LOGIN,
             displayErrorScreen = true,
         )
@@ -156,10 +161,13 @@ internal class LinkSignupHandlerForNetworking @Inject constructor(
         navigationManager.tryNavigateTo(NetworkingSaveToLinkVerification(referrer = NETWORKING_LINK_SIGNUP_PANE))
     }
 
-    override fun handleSignupFailure(error: Throwable) {
+    override fun handleSignupFailure(
+        state: NetworkingLinkSignupState,
+        error: Throwable
+    ) {
         eventTracker.logError(
             extraMessage = "Error saving account to Link",
-            error = error,
+            error = error.toAttestationErrorIfApplicable(state.validEmail!!),
             logger = logger,
             pane = NETWORKING_LINK_SIGNUP_PANE,
         )

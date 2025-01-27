@@ -169,7 +169,7 @@ internal class NetworkingLinkSignupViewModel @AssistedInject constructor(
                 val destination = nextPane.destination(referrer = pane)
                 navigationManager.tryNavigateTo(destination)
             },
-            onFail = linkSignupHandler::handleSignupFailure,
+            onFail = { linkSignupHandler.handleSignupFailure(stateFlow.value, it) },
         )
     }
 

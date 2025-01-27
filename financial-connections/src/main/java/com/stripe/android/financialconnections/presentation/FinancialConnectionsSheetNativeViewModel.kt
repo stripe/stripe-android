@@ -38,7 +38,7 @@ import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.
 import com.stripe.android.financialconnections.exception.CustomManualEntryRequiredError
 import com.stripe.android.financialconnections.exception.FinancialConnectionsError
 import com.stripe.android.financialconnections.exception.UnclassifiedError
-import com.stripe.android.financialconnections.features.error.isAttestationError
+import com.stripe.android.financialconnections.features.error.FinancialConnectionsAttestationError
 import com.stripe.android.financialconnections.features.manualentry.isCustomManualEntryError
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Canceled
@@ -310,7 +310,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
             }
             setState { copy(completed = true) }
 
-            if (closeAuthFlowError?.isAttestationError == true) {
+            if (closeAuthFlowError is FinancialConnectionsAttestationError) {
                 // Attestation error is a special case where we need to close the native flow
                 // and continue with the AuthFlow on a web browser.
                 finishWithResult(Failed(error = closeAuthFlowError))

@@ -15,6 +15,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext.PrefillDetails
 import com.stripe.android.financialconnections.FinancialConnectionsSheetActivity.Companion.getArgs
 import com.stripe.android.financialconnections.FinancialConnectionsSheetState.AuthFlowStatus
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.FinishWithResult
@@ -42,7 +43,7 @@ import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowRouter
 import com.stripe.android.financialconnections.exception.AppInitializationError
 import com.stripe.android.financialconnections.exception.CustomManualEntryRequiredError
-import com.stripe.android.financialconnections.features.error.isAttestationError
+import com.stripe.android.financialconnections.features.error.FinancialConnectionsAttestationError
 import com.stripe.android.financialconnections.features.manualentry.isCustomManualEntryError
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.ForData
@@ -537,9 +538,10 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         fromNative: Boolean = false,
         @StringRes finishMessage: Int? = null,
     ) {
-        if (result is Failed && result.error.isAttestationError) {
+        if (result is Failed && result.error is FinancialConnectionsAttestationError) {
+            val error = result.error
             integrityVerdictManager.setVerdictFailed()
-            switchToWebFlow()
+            switchToWebFlow(error.prefilledEmail)
             return
         }
         eventReporter.onResult(state.initialArgs.configuration, result)
@@ -560,12 +562,19 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     /**
      * On scenarios where native failed mid flow due to attestation errors, switch back to web flow.
      */
-    private fun switchToWebFlow() {
+    private fun switchToWebFlow(prefilledEmail: String?) {
         viewModelScope.launch {
             val sync = getOrFetchSync()
             val hostedAuthUrl = HostedAuthUrlBuilder.create(
                 args = initialState.initialArgs,
                 manifest = sync.manifest,
+                sdkPrefillDetails = prefilledEmail?.let {
+                    PrefillDetails(
+                        email = it,
+                        phone = null,
+                        phoneCountryCode = null
+                    )
+                }
             )
 
             if (hostedAuthUrl != null) {

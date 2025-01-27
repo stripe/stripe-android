@@ -15,6 +15,7 @@ class AttestationError(
     enum class ErrorType(
         val isRetriable: Boolean
     ) {
+        // Play Store related errors
         API_NOT_AVAILABLE(isRetriable = false),
         APP_NOT_INSTALLED(isRetriable = false),
         APP_UID_MISMATCH(isRetriable = false),
@@ -32,7 +33,8 @@ class AttestationError(
         PLAY_STORE_VERSION_OUTDATED(isRetriable = false),
         REQUEST_HASH_TOO_LONG(isRetriable = false),
         TOO_MANY_REQUESTS(isRetriable = true),
-        MAX_RETRIES_EXCEEDED(isRetriable = false),
+        // Stripe backend related errors
+        BACKEND_VERDICT_FAILED(isRetriable = false),
         UNKNOWN(isRetriable = false)
     }
 

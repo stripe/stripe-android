@@ -4,7 +4,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.CloseWithError
-import com.stripe.android.financialconnections.features.error.isAttestationError
+import com.stripe.android.financialconnections.features.error.FinancialConnectionsAttestationError
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
@@ -56,7 +56,7 @@ internal class RealHandleError @Inject constructor(
             pane = pane
         )
 
-        if (error.isAttestationError) {
+        if (error is FinancialConnectionsAttestationError) {
             /*
             An attestation error (verification token generation error, unsatisfactory attestation verdict, etc)
             Happened mid flow -> Close the native flow with the error (right after we'll open a web browser to finish
