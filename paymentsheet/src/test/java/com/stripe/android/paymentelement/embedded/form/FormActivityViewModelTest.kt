@@ -5,6 +5,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
@@ -34,14 +35,18 @@ internal class FormActivityViewModelTest {
     ): FormActivityViewModel {
         val savedStateHandle = SavedStateHandle()
         val selectionHolder = EmbeddedSelectionHolder(savedStateHandle)
+        val embeddedFormHelperFactory = EmbeddedFormHelperFactory(
+            linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
+            cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
+            embeddedSelectionHolder = selectionHolder
+        )
 
         return FormActivityViewModel(
             paymentMethodMetadata = paymentMethodMetadata,
             selectedPaymentMethodCode = paymentMethodCode,
-            cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
             selectionHolder = selectionHolder,
-            linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
-            eventReporter = FakeEventReporter()
+            eventReporter = FakeEventReporter(),
+            embeddedFormHelperFactory = embeddedFormHelperFactory
         )
     }
 }
