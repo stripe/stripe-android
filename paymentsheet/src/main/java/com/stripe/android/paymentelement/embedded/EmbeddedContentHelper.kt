@@ -2,10 +2,8 @@ package com.stripe.android.paymentelement.embedded
 
 import android.os.Parcelable
 import androidx.lifecycle.SavedStateHandle
-import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.strings.ResolvableString
-import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.CustomerStateHolder
@@ -59,15 +57,14 @@ internal interface DefaultEmbeddedContentHelperFactory : EmbeddedContentHelperFa
 @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 internal class DefaultEmbeddedContentHelper @AssistedInject constructor(
     @Assisted private val coroutineScope: CoroutineScope,
-    private val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
     private val savedStateHandle: SavedStateHandle,
     private val eventReporter: EventReporter,
-    private val linkConfigurationCoordinator: LinkConfigurationCoordinator,
     @IOContext private val workContext: CoroutineContext,
     private val customerRepository: CustomerRepository,
     private val selectionHolder: EmbeddedSelectionHolder,
     private val embeddedWalletsHelper: EmbeddedWalletsHelper,
     private val customerStateHolder: CustomerStateHolder,
+    private val embeddedFormHelperFactory: EmbeddedFormHelperFactory
 ) : EmbeddedContentHelper {
 
     private val mandate: StateFlow<ResolvableString?> = savedStateHandle.getStateFlow(
@@ -141,12 +138,9 @@ internal class DefaultEmbeddedContentHelper @AssistedInject constructor(
         val paymentMethodIncentiveInteractor = PaymentMethodIncentiveInteractor(
             incentive = paymentMethodMetadata.paymentMethodIncentive,
         )
-        val formHelper = EmbeddedFormHelperFactory.create(
+        val formHelper = embeddedFormHelperFactory.create(
             coroutineScope = coroutineScope,
             paymentMethodMetadata = paymentMethodMetadata,
-            linkConfigurationCoordinator = linkConfigurationCoordinator,
-            currentSelection = selectionHolder.selection.value,
-            cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
             selectionUpdater = ::setSelection
         )
         val savedPaymentMethodMutator = createSavedPaymentMethodMutator(

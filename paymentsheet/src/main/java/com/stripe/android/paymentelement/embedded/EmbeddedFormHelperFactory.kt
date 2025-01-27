@@ -9,14 +9,16 @@ import com.stripe.android.paymentsheet.LinkInlineHandler
 import com.stripe.android.paymentsheet.NewOrExternalPaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import kotlinx.coroutines.CoroutineScope
+import javax.inject.Inject
 
-internal object EmbeddedFormHelperFactory {
+internal class EmbeddedFormHelperFactory @Inject constructor(
+    private val linkConfigurationCoordinator: LinkConfigurationCoordinator,
+    private val embeddedSelectionHolder: EmbeddedSelectionHolder,
+    private val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
+) {
     fun create(
         coroutineScope: CoroutineScope,
         paymentMethodMetadata: PaymentMethodMetadata,
-        linkConfigurationCoordinator: LinkConfigurationCoordinator,
-        currentSelection: PaymentSelection?,
-        cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
         selectionUpdater: (PaymentSelection?) -> Unit
     ): FormHelper {
         return DefaultFormHelper(
@@ -25,7 +27,7 @@ internal object EmbeddedFormHelperFactory {
             cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
             paymentMethodMetadata = paymentMethodMetadata,
             newPaymentSelectionProvider = {
-                when (currentSelection) {
+                when (val currentSelection = embeddedSelectionHolder.selection.value) {
                     is PaymentSelection.ExternalPaymentMethod -> {
                         NewOrExternalPaymentSelection.External(currentSelection)
                     }
