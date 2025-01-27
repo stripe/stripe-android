@@ -526,6 +526,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             cardBrandChoice = cardBrandChoice,
             flags = flags,
             useAttestationEndpointsForLink = useAttestationEndpointsForLink,
+            elementSessionId = elementsSession.sessionId,
             initializationMode = initializationMode
         )
     }

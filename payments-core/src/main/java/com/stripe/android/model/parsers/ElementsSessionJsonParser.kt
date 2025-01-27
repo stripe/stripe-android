@@ -39,7 +39,7 @@ internal class ElementsSessionJsonParser(
         val orderedPaymentMethodTypes =
             paymentMethodPreference.optJSONArray(FIELD_ORDERED_PAYMENT_METHOD_TYPES)
 
-        val elementsSessionId = json.optString(FIELD_ELEMENTS_SESSION_ID)
+        val elementsSessionId = json.optString(FIELD_ELEMENTS_SESSION_ID) ?: return null
         val customer = parseCustomer(json.optJSONObject(FIELD_CUSTOMER))
 
         val linkSettings = json.optJSONObject(FIELD_LINK_SETTINGS)
@@ -69,6 +69,7 @@ internal class ElementsSessionJsonParser(
                 cardBrandChoice = cardBrandChoice,
                 isGooglePayEnabled = googlePayPreference != "disabled",
                 externalPaymentMethodData = externalPaymentMethodData,
+                sessionId = elementsSessionId
             )
         } else {
             null
@@ -76,7 +77,7 @@ internal class ElementsSessionJsonParser(
     }
 
     private fun parseStripeIntent(
-        elementsSessionId: String?,
+        elementsSessionId: String,
         paymentMethodPreference: JSONObject?,
         orderedPaymentMethodTypes: JSONArray?,
         unactivatedPaymentMethodTypes: JSONArray?,

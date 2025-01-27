@@ -471,6 +471,7 @@ class DefaultCustomerSheetLoaderTest {
                             merchantCountry = "US",
                             paymentMethodSpecs = null,
                             cardBrandChoice = createCardBrandChoice(isCbcEligible),
+                            sessionId = "session_1234"
                         ),
                         paymentMethods = paymentMethods,
                         savedSelection = savedSelection,

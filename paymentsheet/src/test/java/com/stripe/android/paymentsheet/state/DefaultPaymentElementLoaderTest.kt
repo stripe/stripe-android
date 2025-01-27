@@ -661,6 +661,7 @@ internal class DefaultPaymentElementLoaderTest {
             flags = emptyMap(),
             useAttestationEndpointsForLink = false,
             initializationMode = initializationMode,
+            elementSessionId = "session_1234"
         )
 
         assertThat(result.paymentMethodMetadata.linkState?.configuration).isEqualTo(expectedLinkConfig)

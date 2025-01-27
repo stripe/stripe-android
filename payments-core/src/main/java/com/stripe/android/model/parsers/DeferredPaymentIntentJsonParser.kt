@@ -10,7 +10,7 @@ import org.json.JSONObject
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class DeferredPaymentIntentJsonParser(
-    private val elementsSessionId: String?,
+    private val elementsSessionId: String,
     private val paymentMode: DeferredIntentParams.Mode.Payment,
     private val isLiveMode: Boolean,
     private val timeProvider: () -> Long
