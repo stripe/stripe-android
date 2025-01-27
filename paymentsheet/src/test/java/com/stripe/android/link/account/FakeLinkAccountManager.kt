@@ -11,12 +11,13 @@ import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.EmailSource
 import com.stripe.android.model.PaymentMethodCreateParams
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-internal open class FakeLinkAccountManager : MutableLinkAccountManager {
+internal open class FakeLinkAccountManager : LinkAccountManager {
     private val _linkAccount = MutableStateFlow<LinkAccount?>(null)
 
     override val linkAccount: StateFlow<LinkAccount?> = _linkAccount
@@ -38,8 +39,7 @@ internal open class FakeLinkAccountManager : MutableLinkAccountManager {
     var deletePaymentDetailsResult: Result<Unit> = Result.success(Unit)
     var linkAccountFromLookupResult: LinkAccount? = null
 
-    var setAccountResult: LinkAccount? = TestFactory.LINK_ACCOUNT
-    private val setAccountTurbine = Turbine<SetAccountCall>()
+    private val lookupConsumerTurbine = Turbine<LookupConsumerCall>()
 
     override var consumerPublishableKey: String? = null
 
@@ -52,7 +52,23 @@ internal open class FakeLinkAccountManager : MutableLinkAccountManager {
     }
 
     override suspend fun lookupConsumer(email: String, startSession: Boolean): Result<LinkAccount?> {
+        lookupConsumerTurbine.add(
+            item = LookupConsumerCall(
+                email = email,
+                startSession = startSession
+            )
+        )
         return lookupConsumerResult
+    }
+
+    override suspend fun mobileLookupConsumer(
+        email: String,
+        emailSource: EmailSource,
+        verificationToken: String,
+        appId: String,
+        startSession: Boolean
+    ): Result<LinkAccount?> {
+        TODO("Not yet implemented")
     }
 
     override suspend fun signUp(
@@ -63,6 +79,19 @@ internal open class FakeLinkAccountManager : MutableLinkAccountManager {
         consentAction: SignUpConsentAction
     ): Result<LinkAccount> {
         return signUpResult
+    }
+
+    override suspend fun mobileSignUp(
+        email: String,
+        phone: String,
+        country: String,
+        name: String?,
+        emailSource: EmailSource,
+        verificationToken: String,
+        appId: String,
+        consentAction: SignUpConsentAction
+    ): Result<LinkAccount> {
+        TODO("Not yet implemented")
     }
 
     override suspend fun signInWithUserInput(userInput: UserInput): Result<LinkAccount> {
@@ -102,26 +131,21 @@ internal open class FakeLinkAccountManager : MutableLinkAccountManager {
         return updatePaymentDetailsResult
     }
 
-    override fun setAccount(consumerSession: ConsumerSession?, publishableKey: String?): LinkAccount? {
-        setAccountTurbine.add(
-            item = SetAccountCall(
-                consumerSession = consumerSession,
-                publishableKey = publishableKey
-            )
-        )
-        return setAccountResult
-    }
-
-    suspend fun awaitSetAccountCall(): SetAccountCall {
-        return setAccountTurbine.awaitItem()
+    suspend fun awaitLookupConsumerCall(): LookupConsumerCall {
+        return lookupConsumerTurbine.awaitItem()
     }
 
     fun ensureAllEventsConsumed() {
-        return setAccountTurbine.ensureAllEventsConsumed()
+        lookupConsumerTurbine.ensureAllEventsConsumed()
     }
 
     data class SetAccountCall(
         val consumerSession: ConsumerSession?,
         val publishableKey: String?
+    )
+
+    data class LookupConsumerCall(
+        val email: String,
+        val startSession: Boolean
     )
 }

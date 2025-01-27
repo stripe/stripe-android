@@ -659,6 +659,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
                 initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                     clientSecret = "pi_123_secret_123",
                 ),
+                elementSessionId = ""
             ),
             userInput = userInput,
         )

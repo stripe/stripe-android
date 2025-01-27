@@ -48,46 +48,6 @@ class DefaultLinkAccountManagerTest {
     }
 
     @Test
-    fun `When cookie exists and network call fails then account status is Error`() = runSuspendTest {
-        val linkRepository = FakeLinkRepository()
-        linkRepository.lookupConsumerResult = Result.failure(Exception())
-        val accountManager = accountManager(TestFactory.EMAIL, linkRepository = linkRepository)
-        assertThat(accountManager.accountStatus.first()).isEqualTo(AccountStatus.Error)
-    }
-
-    @Test
-    fun `When customerEmail is set in arguments then it is looked up`() = runSuspendTest {
-        val linkRepository = object : FakeLinkRepository() {
-            var callCount = 0
-            override suspend fun lookupConsumer(email: String): Result<ConsumerSessionLookup> {
-                if (email == TestFactory.EMAIL) callCount += 1
-                return super.lookupConsumer(email)
-            }
-        }
-        assertThat(
-            accountManager(
-                TestFactory.EMAIL,
-                linkRepository = linkRepository
-            ).accountStatus.first()
-        ).isEqualTo(AccountStatus.Verified)
-
-        assertThat(linkRepository.callCount).isEqualTo(1)
-    }
-
-    @Test
-    fun `When customerEmail is set and network call fails then account status is Error`() = runSuspendTest {
-        val linkRepository = FakeLinkRepository()
-        linkRepository.lookupConsumerResult = Result.failure(Exception())
-
-        assertThat(
-            accountManager(
-                TestFactory.EMAIL,
-                linkRepository = linkRepository
-            ).accountStatus.first()
-        ).isEqualTo(AccountStatus.Error)
-    }
-
-    @Test
     fun `When ConsumerSession contains consumerPublishableKey then key is updated`() = runTest {
         val linkRepository = FakeLinkRepository()
         val accountManager = accountManager(linkRepository = linkRepository)

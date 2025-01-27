@@ -16,9 +16,15 @@ import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.EmailSource
+import com.stripe.android.model.IncentiveEligibilitySession
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.SetupIntent
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.BuildConfig
+import com.stripe.android.paymentsheet.model.amount
+import com.stripe.android.paymentsheet.model.currency
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
@@ -33,7 +39,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
     private val linkRepository: LinkRepository,
     private val linkEventsReporter: LinkEventsReporter,
     private val errorReporter: ErrorReporter,
-) : MutableLinkAccountManager {
+) : LinkAccountManager {
     private val _linkAccount = MutableStateFlow<LinkAccount?>(null)
     override val linkAccount: StateFlow<LinkAccount?> = _linkAccount
 
@@ -44,7 +50,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
     @VisibleForTesting
     override var consumerPublishableKey: String? = null
 
-    override val accountStatus = linkAccount.map { it.fetchAccountStatus() }
+    override val accountStatus = linkAccount.map { it.safeAccountStatus }
 
     override suspend fun lookupConsumer(
         email: String,
@@ -59,6 +65,29 @@ internal class DefaultLinkAccountManager @Inject constructor(
                     startSession = startSession,
                 )
             }
+
+    override suspend fun mobileLookupConsumer(
+        email: String,
+        emailSource: EmailSource,
+        verificationToken: String,
+        appId: String,
+        startSession: Boolean
+    ): Result<LinkAccount?> {
+        return runCatching {
+            val lookupResult = linkRepository.mobileLookupConsumer(
+                verificationToken = verificationToken,
+                appId = appId,
+                email = email,
+                sessionId = config.elementSessionId,
+                emailSource = emailSource
+            )
+            val lookup = lookupResult.getOrThrow()
+            setLinkAccountFromLookupResult(
+                lookup = lookup,
+                startSession = startSession
+            )
+        }
+    }
 
     override suspend fun signInWithUserInput(
         userInput: UserInput
@@ -111,7 +140,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
         val currentAccount = _linkAccount.value
         val currentEmail = currentAccount?.email ?: config.customerInfo.email
 
-        return when (val status = currentAccount.fetchAccountStatus()) {
+        return when (val status = currentAccount.safeAccountStatus) {
             AccountStatus.Verified -> {
                 linkEventsReporter.onInvalidSessionState(LinkEventsReporter.SessionState.Verified)
 
@@ -164,6 +193,37 @@ internal class DefaultLinkAccountManager @Inject constructor(
                     publishableKey = consumerSessionSignup.publishableKey,
                 )
             }
+
+    override suspend fun mobileSignUp(
+        email: String,
+        phone: String,
+        country: String,
+        name: String?,
+        emailSource: EmailSource,
+        verificationToken: String,
+        appId: String,
+        consentAction: SignUpConsentAction
+    ): Result<LinkAccount> {
+        return runCatching {
+            val consumerSessionSignUpResult = linkRepository.mobileSignUp(
+                name = name,
+                email = email,
+                phoneNumber = phone,
+                country = country,
+                consentAction = consentAction.consumerAction,
+                verificationToken = verificationToken,
+                appId = appId,
+                amount = config.stripeIntent.amount,
+                currency = config.stripeIntent.currency,
+                incentiveEligibilitySession = incentiveEligibilitySession(),
+            )
+            val consumerSessionSignUp = consumerSessionSignUpResult.getOrThrow()
+            setAccountHelper(
+                consumerSession = consumerSessionSignUp.consumerSession,
+                publishableKey = consumerSessionSignUp.publishableKey,
+            )
+        }
+    }
 
     override suspend fun createCardPaymentDetails(
         paymentMethodCreateParams: PaymentMethodCreateParams
@@ -279,7 +339,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
         )
     }
 
-    override fun setAccount(
+    private fun setAccount(
         consumerSession: ConsumerSession?,
         publishableKey: String?,
     ): LinkAccount? {
@@ -313,17 +373,17 @@ internal class DefaultLinkAccountManager @Inject constructor(
         }
     }
 
-    private suspend fun LinkAccount?.fetchAccountStatus(): AccountStatus =
-        /**
-         * If we already fetched an account, return its status, otherwise if a customer email was passed in,
-         * lookup the account.
-         */
-        this?.accountStatus
-            ?: config.customerInfo.email?.let { customerEmail ->
-                lookupConsumer(customerEmail).map {
-                    it?.accountStatus
-                }.getOrElse {
-                    AccountStatus.Error
-                }
-            } ?: AccountStatus.SignedOut
+    private fun incentiveEligibilitySession(): IncentiveEligibilitySession? {
+        val id = config.stripeIntent.id ?: return null
+        if (config.stripeIntent.clientSecret == null) {
+            return IncentiveEligibilitySession.DeferredIntent(id)
+        }
+        return when (config.stripeIntent) {
+            is PaymentIntent -> IncentiveEligibilitySession.PaymentIntent(id)
+            is SetupIntent -> IncentiveEligibilitySession.SetupIntent(id)
+        }
+    }
+
+    private val LinkAccount?.safeAccountStatus
+        get() = this?.accountStatus ?: AccountStatus.SignedOut
 }
