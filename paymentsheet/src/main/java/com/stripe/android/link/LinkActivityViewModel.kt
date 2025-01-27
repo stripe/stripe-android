@@ -118,32 +118,34 @@ internal class LinkActivityViewModel @Inject constructor(
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
         viewModelScope.launch {
-            if (warmUpIntegrityManager().not()) return@launch
-
-            val accountStatus = linkAccountManager.accountStatus.first()
-            val screen = when (accountStatus) {
-                AccountStatus.Verified -> LinkScreen.Wallet
-                AccountStatus.NeedsVerification, AccountStatus.VerificationStarted -> LinkScreen.Verification
-                AccountStatus.SignedOut, AccountStatus.Error -> LinkScreen.SignUp
-            }
-            navigate(screen, clearStack = true, launchSingleTop = true)
+            warmUpIntegrityManager().fold(
+                onSuccess = {
+                    navigateToInitialScreen()
+                },
+                onFailure = { error ->
+                    moveToWeb()
+                    errorReporter.report(
+                        errorEvent = ErrorReporter.UnexpectedErrorEvent.LINK_NATIVE_FAILED_TO_PREPARE_INTEGRITY_MANAGER,
+                        stripeException = LinkEventException(error)
+                    )
+                }
+            )
         }
     }
 
-    private suspend fun warmUpIntegrityManager(): Boolean {
-        if (linkGate.useAttestationEndpoints.not()) return true
-
-        val result = integrityRequestManager.prepare()
-        val error = result.exceptionOrNull()
-        if (error != null) {
-            moveToWeb()
-            errorReporter.report(
-                errorEvent = ErrorReporter.UnexpectedErrorEvent.LINK_NATIVE_FAILED_TO_PREPARE_INTEGRITY_MANAGER,
-                stripeException = LinkEventException(error)
-            )
-            return false
+    private suspend fun navigateToInitialScreen() {
+        val accountStatus = linkAccountManager.accountStatus.first()
+        val screen = when (accountStatus) {
+            AccountStatus.Verified -> LinkScreen.Wallet
+            AccountStatus.NeedsVerification, AccountStatus.VerificationStarted -> LinkScreen.Verification
+            AccountStatus.SignedOut, AccountStatus.Error -> LinkScreen.SignUp
         }
-        return true
+        navigate(screen, clearStack = true, launchSingleTop = true)
+    }
+
+    private suspend fun warmUpIntegrityManager(): Result<Unit> {
+        if (linkGate.useAttestationEndpoints.not()) return Result.success(Unit)
+        return integrityRequestManager.prepare()
     }
 
     companion object {
