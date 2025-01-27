@@ -38,7 +38,6 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
                 canRemove = true,
                 initialCardBrand = CardBrand.CartesBancaires,
                 isModifiablePaymentMethod = true,
-                hasValidBrandChoices = true
             )
         }
     }
@@ -53,7 +52,6 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
                 canRemove = false,
                 initialCardBrand = CardBrand.CartesBancaires,
                 isModifiablePaymentMethod = true,
-                hasValidBrandChoices = true
             )
         }
     }
@@ -119,7 +117,6 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
         initialCardBrand: CardBrand = CardBrand.Unknown,
         isExpiredCard: Boolean = false,
         error: String? = null,
-        hasValidBrandChoices: Boolean = false
     ) {
         val interactor = FakeUpdatePaymentMethodInteractor(
             displayableSavedPaymentMethod = paymentMethod,
@@ -127,7 +124,6 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
             isExpiredCard = isExpiredCard,
             isModifiablePaymentMethod = isModifiablePaymentMethod,
             viewActionRecorder = null,
-            hasValidBrandChoices = hasValidBrandChoices,
             initialState = UpdatePaymentMethodInteractor.State(
                 error = error?.resolvableString,
                 status = UpdatePaymentMethodInteractor.Status.Idle,
