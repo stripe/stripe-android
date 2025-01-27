@@ -304,7 +304,8 @@ class UpdatePaymentMethodUITest {
             displayableSavedPaymentMethod = PaymentMethodFixtures
                 .CARD_WITH_NETWORKS_PAYMENT_METHOD
                 .toDisplayableSavedPaymentMethod(),
-            cardBrandFilter = cardBrandFilter
+            cardBrandFilter = cardBrandFilter,
+            hasValidBrandChoices = false
         ) {
             composeRule.onNodeWithTag(UPDATE_PM_DETAILS_SUBTITLE_TEST_TAG).assertTextEquals(
                 "Card details cannot be changed."
@@ -483,6 +484,7 @@ class UpdatePaymentMethodUITest {
         cardBrandHasBeenChanged: Boolean = false,
         canRemove: Boolean = true,
         isModifiablePaymentMethod: Boolean = true,
+        hasValidBrandChoices: Boolean = true,
         cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
         testBlock: Scenario.() -> Unit,
     ) {
@@ -494,6 +496,7 @@ class UpdatePaymentMethodUITest {
             isModifiablePaymentMethod = isModifiablePaymentMethod,
             cardBrandFilter = cardBrandFilter,
             viewActionRecorder = viewActionRecorder,
+            hasValidBrandChoices = hasValidBrandChoices,
             initialState = UpdatePaymentMethodInteractor.State(
                 error = errorMessage,
                 status = UpdatePaymentMethodInteractor.Status.Idle,
