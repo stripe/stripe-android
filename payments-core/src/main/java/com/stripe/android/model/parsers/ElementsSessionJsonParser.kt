@@ -69,7 +69,7 @@ internal class ElementsSessionJsonParser(
                 cardBrandChoice = cardBrandChoice,
                 isGooglePayEnabled = googlePayPreference != "disabled",
                 externalPaymentMethodData = externalPaymentMethodData,
-                sessionId = elementsSessionId
+                sessionId = elementsSessionId.takeIf { it.isNotBlank() }
             )
         } else {
             null

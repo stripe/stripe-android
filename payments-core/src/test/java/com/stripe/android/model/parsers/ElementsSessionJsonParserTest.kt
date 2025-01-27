@@ -327,6 +327,21 @@ class ElementsSessionJsonParserTest {
     }
 
     @Test
+    fun `Test omitted setup intent`() {
+        val parsedData = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret",
+                externalPaymentMethods = emptyList(),
+            ),
+            isLiveMode = false
+        ).parse(
+            ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON
+        )
+
+        assertThat(parsedData?.sessionId).isNull()
+    }
+
+    @Test
     fun `Test deferred PaymentIntent`() {
         val data = ElementsSessionJsonParser(
             ElementsSessionParams.DeferredIntentType(
@@ -351,6 +366,7 @@ class ElementsSessionJsonParserTest {
 
         val deferredIntent = data?.stripeIntent
 
+        assertThat(data?.sessionId).isEqualTo("elements_session_1t6ejApXCS5")
         assertThat(deferredIntent).isNotNull()
         assertThat(deferredIntent).isEqualTo(
             PaymentIntent(
