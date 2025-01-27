@@ -11,12 +11,22 @@ internal object RecordingLinkStore {
         return mock()
     }
 
-    suspend fun test(test: suspend Scenario.() -> Unit) {
+    suspend fun test(
+        hasUsedLink: Boolean = false,
+        test: suspend Scenario.() -> Unit
+    ) {
         val markAsUsedCalls = Turbine<Unit>()
+        val hasUsedLinkCalls = Turbine<Unit>()
 
         val linkStore = mock<LinkStore> {
             on { markLinkAsUsed() } doAnswer {
                 markAsUsedCalls.add(Unit)
+            }
+
+            on { hasUsedLink() } doAnswer {
+                hasUsedLinkCalls.add(Unit)
+
+                hasUsedLink
             }
         }
 

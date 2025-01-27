@@ -909,13 +909,20 @@ internal class PaymentSheetViewModelTest {
 
             val viewModel = createLinkViewModel(intentConfirmationInterceptor)
 
-            viewModel.linkHandler.payWithLinkInline(
-                paymentSelection = createLinkInlinePaymentSelection(
+            viewModel.updateSelection(
+                createLinkInlinePaymentSelection(
                     customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse,
-                    input = UserInput.SignIn("email@email.com"),
-                ),
-                shouldCompleteLinkInlineFlow = false
+                    input = UserInput.SignUp(
+                        email = "email@email.com",
+                        phone = "+12267007611",
+                        country = "CA",
+                        name = "John Doe",
+                        consentAction = SignUpConsentAction.Checkbox,
+                    ),
+                )
             )
+
+            viewModel.checkout()
 
             verify(intentConfirmationInterceptor).intercept(
                 initializationMode = any(),
@@ -936,13 +943,20 @@ internal class PaymentSheetViewModelTest {
 
             val viewModel = createLinkViewModel(intentConfirmationInterceptor)
 
-            viewModel.linkHandler.payWithLinkInline(
-                paymentSelection = createLinkInlinePaymentSelection(
+            viewModel.updateSelection(
+                createLinkInlinePaymentSelection(
                     customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
-                    input = UserInput.SignIn("email@email.com"),
-                ),
-                shouldCompleteLinkInlineFlow = false
+                    input = UserInput.SignUp(
+                        email = "email@email.com",
+                        phone = "+12267007611",
+                        country = "CA",
+                        name = "John Doe",
+                        consentAction = SignUpConsentAction.Checkbox,
+                    ),
+                )
             )
+
+            viewModel.checkout()
 
             verify(intentConfirmationInterceptor).intercept(
                 initializationMode = any(),
@@ -3186,6 +3200,7 @@ internal class PaymentSheetViewModelTest {
                     statusBarColor = args.statusBarColor,
                     errorReporter = FakeErrorReporter(),
                     linkLauncher = linkPaymentLauncher,
+                    linkConfigurationCoordinator = linkConfigurationCoordinator,
                     cvcRecollectionLauncherFactory = RecordingCvcRecollectionLauncherFactory.noOp(),
                 ),
                 cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,

@@ -313,7 +313,6 @@ internal class FormHelperTest {
                     iconResource = R.drawable.stripe_ic_paymentsheet_pm_bancontact,
                     lightThemeIconUrl = null,
                     darkThemeIconUrl = null,
-                    createdFromLink = false,
                 )
             )
         }

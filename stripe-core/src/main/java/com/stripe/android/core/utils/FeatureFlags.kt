@@ -7,6 +7,7 @@ import com.stripe.android.core.BuildConfig
 object FeatureFlags {
     // Add any feature flags here
     val nativeLinkEnabled = FeatureFlag("Native Link")
+    val nativeLinkAttestationEnabled = FeatureFlag("Native Link Attestation")
     val instantDebitsIncentives = FeatureFlag("Instant Bank Payments Incentives")
     val enableDefaultPaymentMethods = FeatureFlag("Enable Default Payment Methods")
 }

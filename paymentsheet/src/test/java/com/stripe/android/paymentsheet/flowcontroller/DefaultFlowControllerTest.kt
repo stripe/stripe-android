@@ -21,6 +21,7 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkPaymentLauncher
+import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -91,6 +92,7 @@ import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
+import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakePaymentElementLoader
 import com.stripe.android.utils.IntentConfirmationInterceptorTestRule
 import com.stripe.android.utils.RelayingPaymentElementLoader
@@ -2297,7 +2299,7 @@ internal class DefaultFlowControllerTest {
             bacsMandateConfirmationLauncherFactory,
             cvcRecollectionLauncherFactory,
             errorReporter,
-            eventReporter
+            eventReporter,
         )
     }
 
@@ -2336,6 +2338,7 @@ internal class DefaultFlowControllerTest {
         ),
         errorReporter = errorReporter,
         initializedViaCompose = false,
+        linkHandler = mock(),
         confirmationHandler = createTestConfirmationHandlerFactory(
             bacsMandateConfirmationLauncherFactory = bacsMandateConfirmationLauncherFactory,
             googlePayPaymentMethodLauncherFactory = googlePayPaymentMethodLauncherFactory,
@@ -2343,6 +2346,9 @@ internal class DefaultFlowControllerTest {
             stripePaymentLauncherAssistedFactory = paymentLauncherAssistedFactory,
             cvcRecollectionLauncherFactory = cvcRecollectionLauncherFactory,
             paymentConfiguration = PaymentConfiguration.getInstance(context),
+            linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(
+                accountStatus = AccountStatus.Verified,
+            ),
             linkLauncher = linkPaymentLauncher,
             errorReporter = errorReporter,
             savedStateHandle = viewModel.handle,
