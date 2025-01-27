@@ -48,7 +48,7 @@ internal class FakeCustomerSessionElementsSessionManager(
                 externalPaymentMethodData = null,
                 customer = customer,
                 cardBrandChoice = null,
-                sessionId = "session_1234",
+                elementSessionId = "session_1234",
             ),
             customer = customer,
             ephemeralKey = CachedCustomerEphemeralKey(

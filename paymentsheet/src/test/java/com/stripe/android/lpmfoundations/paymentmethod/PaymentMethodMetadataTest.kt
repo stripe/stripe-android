@@ -964,7 +964,7 @@ internal class PaymentMethodMetadataTest {
             linkSettings = null,
             externalPaymentMethodData = null,
             paymentMethodSpecs = null,
-            sessionId = "session_1234"
+            elementSessionId = "session_1234"
         )
     }
 
