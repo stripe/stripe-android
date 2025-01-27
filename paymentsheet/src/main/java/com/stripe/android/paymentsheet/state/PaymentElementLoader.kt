@@ -9,7 +9,6 @@ import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.utils.FeatureFlag
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
