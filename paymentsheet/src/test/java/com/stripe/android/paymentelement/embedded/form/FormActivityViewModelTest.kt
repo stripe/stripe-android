@@ -40,13 +40,14 @@ internal class FormActivityViewModelTest {
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
             embeddedSelectionHolder = selectionHolder
         )
+        val embeddedFormInteractorFactory = EmbeddedFormInteractorFactory(embeddedFormHelperFactory)
 
         return FormActivityViewModel(
             paymentMethodMetadata = paymentMethodMetadata,
             selectedPaymentMethodCode = paymentMethodCode,
             selectionHolder = selectionHolder,
             eventReporter = FakeEventReporter(),
-            embeddedFormHelperFactory = embeddedFormHelperFactory
+            embeddedFormInteractorFactory = embeddedFormInteractorFactory
         )
     }
 }
