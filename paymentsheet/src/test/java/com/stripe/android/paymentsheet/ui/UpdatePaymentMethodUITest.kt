@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.ui
 
 import android.os.Build
+import android.os.Parcel
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assertContentDescriptionEquals
 import androidx.compose.ui.test.assertIsEnabled
@@ -12,6 +13,8 @@ import androidx.compose.ui.test.onChild
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.CardBrandFilter
+import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
@@ -283,6 +286,33 @@ class UpdatePaymentMethodUITest {
     }
 
     @Test
+    fun cardPaymentMethod_cbcEligible_filteredBrands_cardDetailsCannotBeChanged() {
+        val cardBrandFilter = object : CardBrandFilter {
+            override fun isAccepted(cardBrand: CardBrand): Boolean {
+                return cardBrand in listOf(CardBrand.CartesBancaires)
+            }
+
+            override fun describeContents(): Int {
+                throw NotImplementedError()
+            }
+
+            override fun writeToParcel(p0: Parcel, p1: Int) {
+                throw NotImplementedError()
+            }
+        }
+        runScenario(
+            displayableSavedPaymentMethod = PaymentMethodFixtures
+                .CARD_WITH_NETWORKS_PAYMENT_METHOD
+                .toDisplayableSavedPaymentMethod(),
+            cardBrandFilter = cardBrandFilter
+        ) {
+            composeRule.onNodeWithTag(UPDATE_PM_DETAILS_SUBTITLE_TEST_TAG).assertTextEquals(
+                "Card details cannot be changed."
+            )
+        }
+    }
+
+    @Test
     fun sepaPaymentMethod_sepaDetailsCannotBeChangedTextShown() {
         runScenario(
             displayableSavedPaymentMethod = PaymentMethodFixtures
@@ -453,6 +483,7 @@ class UpdatePaymentMethodUITest {
         cardBrandHasBeenChanged: Boolean = false,
         canRemove: Boolean = true,
         isModifiablePaymentMethod: Boolean = true,
+        cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
         testBlock: Scenario.() -> Unit,
     ) {
         val viewActionRecorder = ViewActionRecorder<UpdatePaymentMethodInteractor.ViewAction>()
@@ -461,6 +492,7 @@ class UpdatePaymentMethodUITest {
             canRemove = canRemove,
             isExpiredCard = isExpiredCard,
             isModifiablePaymentMethod = isModifiablePaymentMethod,
+            cardBrandFilter = cardBrandFilter,
             viewActionRecorder = viewActionRecorder,
             initialState = UpdatePaymentMethodInteractor.State(
                 error = errorMessage,
