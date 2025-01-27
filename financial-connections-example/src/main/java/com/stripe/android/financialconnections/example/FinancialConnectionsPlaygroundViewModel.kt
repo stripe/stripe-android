@@ -168,13 +168,16 @@ internal class FinancialConnectionsPlaygroundViewModel(
                 // Success creating session: open the financial connections sheet with received secret
                 .onSuccess {
                     showLoadingWithMessage("Session created, opening FinancialConnectionsSheet.")
+
+                    val stripeAccount = settings.get<StripeAccountIdSetting>().selectedOption
+
                     _state.update { current -> current.copy(publishableKey = it.publishableKey) }
                     _viewEffect.emit(
                         FinancialConnectionsPlaygroundViewEffect.OpenForData(
                             configuration = FinancialConnectionsSheet.Configuration(
                                 financialConnectionsSessionClientSecret = it.clientSecret,
                                 publishableKey = it.publishableKey,
-                                stripeAccountId = _state.value.stripeAccountId
+                                stripeAccountId = stripeAccount.takeIf(String::isNotBlank),
                             )
                         )
                     )
@@ -193,12 +196,16 @@ internal class FinancialConnectionsPlaygroundViewModel(
                 // Success creating session: open the financial connections sheet with received secret
                 .onSuccess {
                     showLoadingWithMessage("Session created, opening FinancialConnectionsSheet.")
+
+                    val stripeAccount = settings.get<StripeAccountIdSetting>().selectedOption
+
                     _state.update { current -> current.copy(publishableKey = it.publishableKey) }
                     _viewEffect.emit(
                         FinancialConnectionsPlaygroundViewEffect.OpenForToken(
                             configuration = FinancialConnectionsSheet.Configuration(
                                 financialConnectionsSessionClientSecret = it.clientSecret,
                                 publishableKey = it.publishableKey,
+                                stripeAccountId = stripeAccount.takeIf(String::isNotBlank),
                             )
                         )
                     )
