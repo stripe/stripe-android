@@ -481,8 +481,7 @@ internal class CardNumberControllerTest {
             val secondReported = awaitItem()
             assertEquals(CardBrand.MasterCard, secondReported, "MasterCard should be reported once")
 
-            // Simulate clearing the input and entering an invalid card number
-            cardNumberController.onValueChange("")
+            // Simulate entering an invalid card number
             cardNumberController.onValueChange("66")
             expectNoEvents()
 

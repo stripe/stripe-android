@@ -160,19 +160,23 @@ internal class DefaultCardNumberController(
         workContext,
         staticCardAccountRanges,
         object : CardAccountRangeService.AccountRangeResultListener {
-            override fun onAccountRangesResult(accountRanges: List<AccountRange>) {
+            override fun onAccountRangesResult(
+                accountRanges: List<AccountRange>,
+                unfilteredAccountRanges: List<AccountRange>
+            ) {
                 val newAccountRange = accountRanges.firstOrNull()
                 newAccountRange?.panLength?.let { panLength ->
                     (visualTransformation as CardNumberVisualTransformation).binBasedMaxPan =
                         panLength
                 }
 
-                val newBrandChoices = accountRanges.map { it.brand }.distinct()
+                val newBrandChoices = unfilteredAccountRanges.map { it.brand }.distinct()
 
                 brandChoices.value = newBrandChoices
             }
         },
-        isCbcEligible = { isEligibleForCardBrandChoice }
+        isCbcEligible = { isEligibleForCardBrandChoice },
+        cardBrandFilter = cardBrandFilter
     )
 
     override val trailingIcon: StateFlow<TextFieldIcon?> = combineAsStateFlow(
