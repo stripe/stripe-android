@@ -900,10 +900,6 @@ public abstract interface class com/stripe/android/cards/CardAccountRangeReposit
 	public abstract fun createWithStripeRepository (Lcom/stripe/android/networking/StripeRepository;Ljava/lang/String;)Lcom/stripe/android/cards/CardAccountRangeRepository;
 }
 
-public abstract interface class com/stripe/android/cards/CardAccountRangeService$AccountRangeResultListener {
-	public abstract fun onAccountRangesResult (Ljava/util/List;)V
-}
-
 public final class com/stripe/android/exception/CardException : com/stripe/android/core/exception/StripeException {
 	public static final field $stable I
 	public fun <init> (Lcom/stripe/android/core/StripeError;Ljava/lang/String;)V

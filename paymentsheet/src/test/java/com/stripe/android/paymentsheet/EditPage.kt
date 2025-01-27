@@ -1,6 +1,9 @@
 package com.stripe.android.paymentsheet
 
 import androidx.compose.ui.test.SemanticsNodeInteraction
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -28,15 +31,32 @@ internal class EditPage(
             .performClick()
     }
 
-    fun assertNotInDropdown(cardBrand: String) {
+    fun assertInDropdownButDisabled(cardBrand: String) {
         // Click on the dropdown menu to expand it
         composeTestRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG)
             .performClick()
 
-        // Attempt to find the node with the specified cardBrand
-        // and assert that it does not exist
+        // Attempt to find the node with the specified cardBrand,
+        // assert that it is present (displayed) and disabled
         composeTestRule.onNodeWithTag("${TEST_TAG_DROP_DOWN_CHOICE}_$cardBrand")
-            .assertDoesNotExist()
+            .assertIsDisplayed()
+            .assertIsNotEnabled()
+
+        // Optionally, close the dropdown menu if it's still open
+        composeTestRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG)
+            .performClick()
+    }
+
+    fun assertInDropdownAndEnabled(cardBrand: String) {
+        // Click on the dropdown menu to expand it
+        composeTestRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG)
+            .performClick()
+
+        // Attempt to find the node with the specified cardBrand,
+        // assert that it is present (displayed) and enabled
+        composeTestRule.onNodeWithTag("${TEST_TAG_DROP_DOWN_CHOICE}_$cardBrand")
+            .assertIsDisplayed()
+            .assertIsEnabled()
 
         // Optionally, close the dropdown menu if it's still open
         composeTestRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG)

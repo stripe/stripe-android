@@ -413,7 +413,7 @@ class UpdatePaymentMethodUITest {
 
             viewActionRecorder.consume(
                 UpdatePaymentMethodInteractor.ViewAction.BrandChoiceChanged(
-                    cardBrandChoice = CardBrandChoice(brand = CardBrand.Visa)
+                    cardBrandChoice = CardBrandChoice(brand = CardBrand.Visa, enabled = true)
                 )
             )
             assertThat(viewActionRecorder.viewActions).isEmpty()
@@ -465,7 +465,7 @@ class UpdatePaymentMethodUITest {
             initialState = UpdatePaymentMethodInteractor.State(
                 error = errorMessage,
                 status = UpdatePaymentMethodInteractor.Status.Idle,
-                cardBrandChoice = CardBrandChoice(brand = initialCardBrand),
+                cardBrandChoice = CardBrandChoice(brand = initialCardBrand, enabled = true),
                 cardBrandHasBeenChanged = cardBrandHasBeenChanged,
             ),
         )

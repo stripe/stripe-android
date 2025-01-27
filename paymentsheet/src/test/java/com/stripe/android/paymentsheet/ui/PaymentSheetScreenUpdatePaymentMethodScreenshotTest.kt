@@ -127,7 +127,7 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
             initialState = UpdatePaymentMethodInteractor.State(
                 error = error?.resolvableString,
                 status = UpdatePaymentMethodInteractor.Status.Idle,
-                cardBrandChoice = CardBrandChoice(brand = initialCardBrand),
+                cardBrandChoice = CardBrandChoice(brand = initialCardBrand, enabled = true),
                 cardBrandHasBeenChanged = false,
             ),
         )

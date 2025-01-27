@@ -20,10 +20,12 @@ import com.stripe.android.cards.CardAccountRangeService
 import com.stripe.android.cards.CardNumber
 import com.stripe.android.cards.DefaultStaticCardAccountRanges
 import com.stripe.android.cards.StaticCardAccountRanges
+import com.stripe.android.core.strings.plus
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
 import com.stripe.android.stripecardscan.cardscan.CardScanSheetResult
+import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.asIndividualDigits
 import com.stripe.android.ui.core.elements.events.LocalCardBrandDisallowedReporter
 import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventReporter
@@ -122,16 +124,8 @@ internal class DefaultCardNumberController(
     override val selectedCardBrandFlow: StateFlow<CardBrand> = combineAsStateFlow(
         mostRecentUserSelectedBrand,
         brandChoices,
-    ) { previous, choices ->
-        when (previous) {
-            CardBrand.Unknown -> previous
-            in choices -> previous ?: CardBrand.Unknown
-            else -> {
-                val firstAvailablePreferred = preferredBrands.firstOrNull { it in choices }
-
-                firstAvailablePreferred ?: CardBrand.Unknown
-            }
-        }
+    ) { previous, allChoices ->
+        determineSelectedBrand(previous, allChoices, cardBrandFilter, preferredBrands)
     }
 
     /*
@@ -166,14 +160,17 @@ internal class DefaultCardNumberController(
         workContext,
         staticCardAccountRanges,
         object : CardAccountRangeService.AccountRangeResultListener {
-            override fun onAccountRangesResult(accountRanges: List<AccountRange>) {
+            override fun onAccountRangesResult(
+                accountRanges: List<AccountRange>,
+                unfilteredAccountRanges: List<AccountRange>
+            ) {
                 val newAccountRange = accountRanges.firstOrNull()
                 newAccountRange?.panLength?.let { panLength ->
                     (visualTransformation as CardNumberVisualTransformation).binBasedMaxPan =
                         panLength
                 }
 
-                val newBrandChoices = accountRanges.map { it.brand }.distinct()
+                val newBrandChoices = unfilteredAccountRanges.map { it.brand }.distinct()
 
                 brandChoices.value = newBrandChoices
             }
@@ -214,10 +211,19 @@ internal class DefaultCardNumberController(
             }
 
             val items = brands.map { brand ->
+                val enabled = cardBrandFilter.isAccepted(brand)
                 TextFieldIcon.Dropdown.Item(
                     id = brand.code,
-                    label = brand.displayName.resolvableString,
-                    icon = brand.icon
+                    label = if (enabled) {
+                        brand.displayName.resolvableString
+                    } else {
+                        resolvableString(
+                            R.string.stripe_card_brand_not_accepted_with_brand,
+                            brand.displayName
+                        )
+                    },
+                    icon = brand.icon,
+                    enabled = enabled
                 )
             }
 
@@ -310,6 +316,29 @@ internal class DefaultCardNumberController(
 
     override fun onDropdownItemClicked(item: TextFieldIcon.Dropdown.Item) {
         mostRecentUserSelectedBrand.value = CardBrand.fromCode(item.id)
+    }
+
+    fun determineSelectedBrand(
+        previous: CardBrand?,
+        allChoices: List<CardBrand>,
+        cardBrandFilter: CardBrandFilter,
+        preferredBrands: List<CardBrand>
+    ): CardBrand {
+        // Determine which of the available brands are not blocked
+        val allowedChoices = allChoices.filter { cardBrandFilter.isAccepted(it) }
+
+        return if (allowedChoices.size == 1 && allChoices.size > 1) {
+            allowedChoices.single()
+        } else {
+            when (previous) {
+                CardBrand.Unknown -> previous
+                in allChoices -> previous ?: CardBrand.Unknown
+                else -> {
+                    val firstAvailablePreferred = preferredBrands.firstOrNull { it in allChoices }
+                    firstAvailablePreferred ?: CardBrand.Unknown
+                }
+            }
+        }
     }
 
     @Composable

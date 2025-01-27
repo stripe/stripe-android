@@ -307,7 +307,10 @@ internal class PaymentSheetViewModelTest {
 
                 interactor.handleViewAction(
                     UpdatePaymentMethodInteractor.ViewAction.BrandChoiceChanged(
-                        CardBrandChoice(CardBrand.Visa)
+                        CardBrandChoice(
+                            CardBrand.Visa,
+                            enabled = true
+                        )
                     )
                 )
 
@@ -371,7 +374,10 @@ internal class PaymentSheetViewModelTest {
 
                 interactor.handleViewAction(
                     UpdatePaymentMethodInteractor.ViewAction.BrandChoiceChanged(
-                        CardBrandChoice(CardBrand.Visa)
+                        CardBrandChoice(
+                            CardBrand.Visa,
+                            enabled = true
+                        )
                     )
                 )
 
@@ -441,7 +447,10 @@ internal class PaymentSheetViewModelTest {
 
                 interactor.handleViewAction(
                     UpdatePaymentMethodInteractor.ViewAction.BrandChoiceChanged(
-                        CardBrandChoice(CardBrand.Visa)
+                        CardBrandChoice(
+                            CardBrand.Visa,
+                            enabled = true
+                        )
                     )
                 )
 
@@ -513,7 +522,10 @@ internal class PaymentSheetViewModelTest {
 
                 interactor.handleViewAction(
                     UpdatePaymentMethodInteractor.ViewAction.BrandChoiceChanged(
-                        CardBrandChoice(CardBrand.Visa)
+                        CardBrandChoice(
+                            CardBrand.Visa,
+                            enabled = true
+                        )
                     )
                 )
 
@@ -2672,13 +2684,29 @@ internal class PaymentSheetViewModelTest {
 
                 interactor.handleViewAction(
                     UpdatePaymentMethodInteractor.ViewAction.BrandChoiceChanged(
-                        CardBrandChoice(CardBrand.Visa)
+                        CardBrandChoice(
+                            CardBrand.Visa,
+                            enabled = true
+                        )
                     )
                 )
 
                 verify(customerRepository, never()).updatePaymentMethod(any(), any(), any())
             }
         }
+    }
+
+    @Test
+    fun `When a CardBrandChoice is disabled, label should be appended with (not accepted)`() {
+        // Create a disabled CardBrandChoice
+        val choice = CardBrandChoice(
+            brand = CardBrand.Visa,
+            enabled = false
+        )
+
+        val resolvedLabel = choice.label.resolve(ApplicationProvider.getApplicationContext())
+        // Verify "(not accepted)" is appended to the display label
+        assertThat(resolvedLabel).contains("(not accepted)")
     }
 
     @Test
