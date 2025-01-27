@@ -195,6 +195,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         LINK_WEB_FAILED_TO_PARSE_RESULT_URI(
             partialEventName = "link.web.result.parsing_failed"
         ),
+        LINK_NATIVE_FAILED_TO_PREPARE_INTEGRITY_MANAGER(
+            partialEventName = "link.native.integrity.preparation_failed"
+        ),
         PAYMENT_SHEET_AUTHENTICATORS_NOT_FOUND(
             partialEventName = "paymentsheet.authenticators.not_found"
         ),

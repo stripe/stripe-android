@@ -15,14 +15,17 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavHostController
 import com.stripe.android.link.LinkActivity.Companion.getArgs
 import com.stripe.android.link.account.LinkAccountManager
+import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.injection.DaggerNativeLinkComponent
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.LinkAppBarState
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.attestation.IntegrityRequestManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
@@ -34,6 +37,9 @@ internal class LinkActivityViewModel @Inject constructor(
     confirmationHandlerFactory: ConfirmationHandler.Factory,
     private val linkAccountManager: LinkAccountManager,
     val eventReporter: EventReporter,
+    private val integrityRequestManager: IntegrityRequestManager,
+    private val linkGate: LinkGate,
+    private val errorReporter: ErrorReporter,
 ) : ViewModel(), DefaultLifecycleObserver {
     val confirmationHandler = confirmationHandlerFactory.create(viewModelScope)
     private val _linkState = MutableStateFlow(
@@ -51,10 +57,18 @@ internal class LinkActivityViewModel @Inject constructor(
 
     var navController: NavHostController? = null
     var dismissWithResult: ((LinkActivityResult) -> Unit)? = null
+    var launchWebFlow: ((LinkConfiguration) -> Unit)? = null
 
     fun handleViewAction(action: LinkAction) {
         when (action) {
             LinkAction.BackPressed -> handleBackPressed()
+        }
+    }
+
+    private fun moveToWeb() {
+        launchWebFlow?.let { launcher ->
+            navigate(LinkScreen.Loading, clearStack = true)
+            launcher.invoke(activityRetainedComponent.configuration)
         }
     }
 
@@ -98,19 +112,40 @@ internal class LinkActivityViewModel @Inject constructor(
     fun unregisterActivity() {
         navController = null
         dismissWithResult = null
+        launchWebFlow = null
     }
 
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
         viewModelScope.launch {
-            val accountStatus = linkAccountManager.accountStatus.first()
-            val screen = when (accountStatus) {
-                AccountStatus.Verified -> LinkScreen.Wallet
-                AccountStatus.NeedsVerification, AccountStatus.VerificationStarted -> LinkScreen.Verification
-                AccountStatus.SignedOut, AccountStatus.Error -> LinkScreen.SignUp
-            }
-            navigate(screen, clearStack = true, launchSingleTop = true)
+            warmUpIntegrityManager().fold(
+                onSuccess = {
+                    navigateToInitialScreen()
+                },
+                onFailure = { error ->
+                    moveToWeb()
+                    errorReporter.report(
+                        errorEvent = ErrorReporter.UnexpectedErrorEvent.LINK_NATIVE_FAILED_TO_PREPARE_INTEGRITY_MANAGER,
+                        stripeException = LinkEventException(error)
+                    )
+                }
+            )
         }
+    }
+
+    private suspend fun navigateToInitialScreen() {
+        val accountStatus = linkAccountManager.accountStatus.first()
+        val screen = when (accountStatus) {
+            AccountStatus.Verified -> LinkScreen.Wallet
+            AccountStatus.NeedsVerification, AccountStatus.VerificationStarted -> LinkScreen.Verification
+            AccountStatus.SignedOut, AccountStatus.Error -> LinkScreen.SignUp
+        }
+        navigate(screen, clearStack = true, launchSingleTop = true)
+    }
+
+    private suspend fun warmUpIntegrityManager(): Result<Unit> {
+        if (linkGate.useAttestationEndpoints.not()) return Result.success(Unit)
+        return integrityRequestManager.prepare()
     }
 
     companion object {
@@ -127,6 +162,7 @@ internal class LinkActivityViewModel @Inject constructor(
                     .stripeAccountIdProvider { args.stripeAccountId }
                     .savedStateHandle(handle)
                     .context(app)
+                    .application(app)
                     .build()
                     .viewModel
             }
