@@ -25,7 +25,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -65,14 +64,12 @@ import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.PaymentSheetFlowType.Complete
 import com.stripe.android.paymentsheet.ui.PaymentSheetFlowType.Custom
+import com.stripe.android.paymentsheet.utils.EventReporterProvider
 import com.stripe.android.paymentsheet.utils.PaymentSheetContentPadding
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.CircularProgressIndicator
 import com.stripe.android.ui.core.elements.H4Text
-import com.stripe.android.ui.core.elements.events.LocalCardBrandDisallowedReporter
-import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventReporter
 import com.stripe.android.uicore.StripeTheme
-import com.stripe.android.uicore.elements.LocalAutofillEventReporter
 import com.stripe.android.uicore.getBackgroundColor
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.utils.collectAsState
@@ -340,7 +337,7 @@ private fun PaymentSheetContent(
         }
 
         Column(modifier = Modifier.fillMaxWidth()) {
-            EventReporterProvider(viewModel) {
+            EventReporterProvider(viewModel.eventReporter) {
                 currentScreen.Content(
                     modifier = Modifier.padding(bottom = 8.dp),
                 )
@@ -434,20 +431,6 @@ internal fun Wallet(
 
         val text = stringResource(state.dividerTextResource)
         WalletsDivider(text)
-    }
-}
-
-@Composable
-private fun EventReporterProvider(
-    viewModel: BaseSheetViewModel,
-    content: @Composable () -> Unit
-) {
-    CompositionLocalProvider(
-        LocalAutofillEventReporter provides viewModel.eventReporter::onAutofill,
-        LocalCardNumberCompletedEventReporter provides viewModel.eventReporter::onCardNumberCompleted,
-        LocalCardBrandDisallowedReporter provides viewModel.eventReporter::onDisallowedCardBrandEntered
-    ) {
-        content()
     }
 }
 
