@@ -9,6 +9,8 @@ import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.utils.FeatureFlag
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
@@ -574,8 +576,13 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             is SavedSelection.None -> null
         }
 
-        return defaultPaymentMethodPaymentSelection
-            ?: savedSelectionPaymentMethodPaymentSelection
+        val primaryPaymentSelection = if (FeatureFlags.enableDefaultPaymentMethods.isEnabled) {
+            defaultPaymentMethodPaymentSelection
+        } else {
+            savedSelectionPaymentMethodPaymentSelection
+        }
+
+        return primaryPaymentSelection
             ?: customer.await()?.paymentMethods?.firstOrNull()?.toPaymentSelection()
             ?: PaymentSelection.GooglePay.takeIf { isGooglePayReady }
     }
@@ -756,7 +763,11 @@ private fun List<PaymentMethod>.withDefaultPaymentMethodOrLastUsedPaymentMethodF
         indexOfFirst { it.id == savedSelection.id }.takeIf { it != -1 }
     }
 
-    val primaryPaymentMethodIndex = defaultPaymentMethodIndex ?: savedSelectionIndex
+    val primaryPaymentMethodIndex = if (FeatureFlags.enableDefaultPaymentMethods.isEnabled) {
+        defaultPaymentMethodIndex
+    } else {
+        savedSelectionIndex
+    }
 
     return primaryPaymentMethodIndex?.let {
         val primaryPaymentMethod = get(primaryPaymentMethodIndex)
