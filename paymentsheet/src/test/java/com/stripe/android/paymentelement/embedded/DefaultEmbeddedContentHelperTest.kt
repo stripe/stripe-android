@@ -139,17 +139,21 @@ internal class DefaultEmbeddedContentHelperTest {
         val savedStateHandle = SavedStateHandle()
         savedStateHandle.setup()
         val selectionHolder = EmbeddedSelectionHolder(savedStateHandle)
+        val embeddedFormHelperFactory = EmbeddedFormHelperFactory(
+            linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
+            cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
+            embeddedSelectionHolder = selectionHolder
+        )
         val embeddedContentHelper = DefaultEmbeddedContentHelper(
             coroutineScope = CoroutineScope(Dispatchers.Unconfined),
-            cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
             savedStateHandle = savedStateHandle,
             eventReporter = mock(),
-            linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
             workContext = Dispatchers.Unconfined,
             customerRepository = FakeCustomerRepository(),
             selectionHolder = selectionHolder,
             embeddedWalletsHelper = { stateFlowOf(null) },
             customerStateHolder = CustomerStateHolder(savedStateHandle, selectionHolder.selection),
+            embeddedFormHelperFactory = embeddedFormHelperFactory
         )
         Scenario(
             embeddedContentHelper = embeddedContentHelper,

@@ -6,11 +6,11 @@ import kotlinx.parcelize.Parcelize
 /**
  * Valid user input into the inline sign up view.
  */
-@Parcelize
 internal sealed class UserInput : Parcelable {
     /**
      * Represents an input that is valid for signing in to a link account.
      */
+    @Parcelize
     data class SignIn(
         val email: String
     ) : UserInput()
@@ -18,6 +18,7 @@ internal sealed class UserInput : Parcelable {
     /**
      * Represents an input that is valid for signing up to a link account.
      */
+    @Parcelize
     data class SignUp(
         val email: String,
         val phone: String,

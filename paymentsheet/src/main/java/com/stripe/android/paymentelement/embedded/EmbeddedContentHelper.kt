@@ -2,17 +2,11 @@ package com.stripe.android.paymentelement.embedded
 
 import android.os.Parcelable
 import androidx.lifecycle.SavedStateHandle
-import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.strings.ResolvableString
-import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.CustomerStateHolder
-import com.stripe.android.paymentsheet.DefaultFormHelper
-import com.stripe.android.paymentsheet.FormHelper
-import com.stripe.android.paymentsheet.LinkInlineHandler
-import com.stripe.android.paymentsheet.NewOrExternalPaymentSelection
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -63,15 +57,14 @@ internal interface DefaultEmbeddedContentHelperFactory : EmbeddedContentHelperFa
 @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 internal class DefaultEmbeddedContentHelper @AssistedInject constructor(
     @Assisted private val coroutineScope: CoroutineScope,
-    private val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
     private val savedStateHandle: SavedStateHandle,
     private val eventReporter: EventReporter,
-    private val linkConfigurationCoordinator: LinkConfigurationCoordinator,
     @IOContext private val workContext: CoroutineContext,
     private val customerRepository: CustomerRepository,
     private val selectionHolder: EmbeddedSelectionHolder,
     private val embeddedWalletsHelper: EmbeddedWalletsHelper,
     private val customerStateHolder: CustomerStateHolder,
+    private val embeddedFormHelperFactory: EmbeddedFormHelperFactory
 ) : EmbeddedContentHelper {
 
     private val mandate: StateFlow<ResolvableString?> = savedStateHandle.getStateFlow(
@@ -145,9 +138,10 @@ internal class DefaultEmbeddedContentHelper @AssistedInject constructor(
         val paymentMethodIncentiveInteractor = PaymentMethodIncentiveInteractor(
             incentive = paymentMethodMetadata.paymentMethodIncentive,
         )
-        val formHelper = createFormHelper(
+        val formHelper = embeddedFormHelperFactory.create(
             coroutineScope = coroutineScope,
             paymentMethodMetadata = paymentMethodMetadata,
+            selectionUpdater = ::setSelection
         )
         val savedPaymentMethodMutator = createSavedPaymentMethodMutator(
             coroutineScope = coroutineScope,
@@ -230,33 +224,6 @@ internal class DefaultEmbeddedContentHelper @AssistedInject constructor(
             },
             isLinkEnabled = stateFlowOf(paymentMethodMetadata.linkState != null),
             isNotPaymentFlow = false,
-        )
-    }
-
-    private fun createFormHelper(
-        coroutineScope: CoroutineScope,
-        paymentMethodMetadata: PaymentMethodMetadata,
-    ): FormHelper {
-        return DefaultFormHelper(
-            coroutineScope = coroutineScope,
-            linkInlineHandler = LinkInlineHandler.create(),
-            cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
-            paymentMethodMetadata = paymentMethodMetadata,
-            newPaymentSelectionProvider = {
-                when (val currentSelection = selectionHolder.selection.value) {
-                    is PaymentSelection.ExternalPaymentMethod -> {
-                        NewOrExternalPaymentSelection.External(currentSelection)
-                    }
-                    is PaymentSelection.New -> {
-                        NewOrExternalPaymentSelection.New(currentSelection)
-                    }
-                    else -> null
-                }
-            },
-            selectionUpdater = {
-                setSelection(it)
-            },
-            linkConfigurationCoordinator = linkConfigurationCoordinator,
         )
     }
 

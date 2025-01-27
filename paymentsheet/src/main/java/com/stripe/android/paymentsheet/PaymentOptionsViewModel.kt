@@ -27,7 +27,6 @@ import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.DefaultAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.DefaultSelectSavedPaymentMethodsInteractor
-import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeInitialScreenFactory
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.PrimaryButtonUiStateMapper
@@ -40,7 +39,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
@@ -130,15 +128,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
     init {
         SessionSavedStateHandler.attachTo(this, savedStateHandle)
 
-        viewModelScope.launch {
-            linkHandler.processingState.collect { processingState ->
-                handleLinkProcessingState(processingState)
-            }
-        }
-
-        // This is bad, but I don't think there's a better option
-        PaymentSheet.FlowController.linkHandler = linkHandler
-
         linkHandler.setupLink(args.state.paymentMethodMetadata.linkState)
 
         // After recovering from don't keep activities the paymentMethodMetadata will be saved,
@@ -158,21 +147,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 customerStateHolder = customerStateHolder,
             )
         )
-    }
-
-    private fun handleLinkProcessingState(processingState: LinkHandler.ProcessingState) {
-        when (processingState) {
-            is LinkHandler.ProcessingState.PaymentDetailsCollected -> {
-                updateSelection(processingState.paymentSelection)
-                onUserSelection()
-            }
-            LinkHandler.ProcessingState.Ready -> {
-                updatePrimaryButtonState(PrimaryButton.State.Ready)
-            }
-            LinkHandler.ProcessingState.Started -> {
-                updatePrimaryButtonState(PrimaryButton.State.StartProcessing)
-            }
-        }
     }
 
     override fun onUserCancel() {
@@ -214,14 +188,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
             eventReporter.onSelectPaymentOption(paymentSelection)
 
             when (paymentSelection) {
-                is PaymentSelection.New.LinkInline -> {
-                    viewModelScope.launch(workContext) {
-                        linkHandler.payWithLinkInline(
-                            paymentSelection = paymentSelection,
-                            shouldCompleteLinkInlineFlow = false,
-                        )
-                    }
-                }
                 is PaymentSelection.Saved,
                 is PaymentSelection.GooglePay,
                 is PaymentSelection.Link -> processExistingPaymentMethod(paymentSelection)
