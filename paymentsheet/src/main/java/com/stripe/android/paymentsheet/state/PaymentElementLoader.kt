@@ -560,25 +560,22 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         customer: Deferred<CustomerState?>,
         isGooglePayReady: Boolean,
     ): PaymentSelection? {
-        val defaultPaymentMethodPaymentSelection = customer.await()?.defaultPaymentMethodId?.let {
-            customer.await()?.paymentMethods?.firstOrNull {
-                it.id == customer.await()?.defaultPaymentMethodId
-            }?.toPaymentSelection()
-        }
-
-        val savedSelectionPaymentMethodPaymentSelection = when (val selection = savedSelection.await()) {
-            is SavedSelection.GooglePay -> PaymentSelection.GooglePay
-            is SavedSelection.Link -> PaymentSelection.Link
-            is SavedSelection.PaymentMethod -> {
-                customer.await()?.paymentMethods?.find { it.id == selection.id }?.toPaymentSelection()
-            }
-            is SavedSelection.None -> null
-        }
-
+        // get default payment method if dpm enabled, otherwise try to get savedSelection
         val primaryPaymentSelection = if (FeatureFlags.enableDefaultPaymentMethods.isEnabled) {
-            defaultPaymentMethodPaymentSelection
+            customer.await()?.defaultPaymentMethodId?.let {
+                customer.await()?.paymentMethods?.firstOrNull {
+                    it.id == customer.await()?.defaultPaymentMethodId
+                }?.toPaymentSelection()
+            }
         } else {
-            savedSelectionPaymentMethodPaymentSelection
+            when (val selection = savedSelection.await()) {
+                is SavedSelection.GooglePay -> PaymentSelection.GooglePay
+                is SavedSelection.Link -> PaymentSelection.Link
+                is SavedSelection.PaymentMethod -> {
+                    customer.await()?.paymentMethods?.find { it.id == selection.id }?.toPaymentSelection()
+                }
+                is SavedSelection.None -> null
+            }
         }
 
         return primaryPaymentSelection
@@ -754,18 +751,14 @@ private fun List<PaymentMethod>.withDefaultPaymentMethodOrLastUsedPaymentMethodF
     savedSelection: SavedSelection,
     defaultPaymentMethodId: String?
 ): List<PaymentMethod> {
-    val defaultPaymentMethodIndex = defaultPaymentMethodId?.let {
-        indexOfFirst { it.id == defaultPaymentMethodId }
-    }
-
-    val savedSelectionIndex = (savedSelection as? SavedSelection.PaymentMethod)?.let {
-        indexOfFirst { it.id == savedSelection.id }.takeIf { it != -1 }
-    }
-
     val primaryPaymentMethodIndex = if (FeatureFlags.enableDefaultPaymentMethods.isEnabled) {
-        defaultPaymentMethodIndex
+        defaultPaymentMethodId?.let {
+            indexOfFirst { it.id == defaultPaymentMethodId }
+        }
     } else {
-        savedSelectionIndex
+        (savedSelection as? SavedSelection.PaymentMethod)?.let {
+            indexOfFirst { it.id == savedSelection.id }.takeIf { it != -1 }
+        }
     }
 
     return primaryPaymentMethodIndex?.let {
