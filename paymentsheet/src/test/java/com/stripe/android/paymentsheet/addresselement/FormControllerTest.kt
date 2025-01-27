@@ -37,6 +37,7 @@ class FormControllerTest {
     private val transformSpecToElements = TransformSpecToElements(
         UiDefinitionFactory.Arguments(
             initialValues = emptyMap(),
+            initialLinkUserInput = null,
             saveForFutureUseInitialValue = false,
             merchantName = "Merchant",
             cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),

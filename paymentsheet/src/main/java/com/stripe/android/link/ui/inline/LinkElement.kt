@@ -17,6 +17,7 @@ import java.util.UUID
 
 @Composable
 internal fun LinkElement(
+    initialUserInput: UserInput?,
     linkConfigurationCoordinator: LinkConfigurationCoordinator,
     configuration: LinkConfiguration,
     linkSignupMode: LinkSignupMode,
@@ -34,6 +35,7 @@ internal fun LinkElement(
     val viewModel: InlineSignupViewModel = viewModel(
         key = uuid,
         factory = InlineSignupViewModel.Factory(
+            initialUserInput = initialUserInput,
             signupMode = linkSignupMode,
             linkComponent = component,
         )

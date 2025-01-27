@@ -4,6 +4,7 @@ import com.stripe.android.CardBrandFilter
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.ui.inline.InlineSignupViewState
+import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.lpmfoundations.FormHeaderInformation
 import com.stripe.android.lpmfoundations.luxe.InitialValuesFactory
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
@@ -23,6 +24,7 @@ internal sealed interface UiDefinitionFactory {
         val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
         val linkConfigurationCoordinator: LinkConfigurationCoordinator?,
         val initialValues: Map<IdentifierSpec, String?>,
+        val initialLinkUserInput: UserInput?,
         val shippingValues: Map<IdentifierSpec, String?>?,
         val saveForFutureUseInitialValue: Boolean,
         val merchantName: String,
@@ -44,6 +46,7 @@ internal sealed interface UiDefinitionFactory {
                 private val onLinkInlineSignupStateChanged: (InlineSignupViewState) -> Unit,
                 private val paymentMethodCreateParams: PaymentMethodCreateParams? = null,
                 private val paymentMethodExtraParams: PaymentMethodExtraParams? = null,
+                private val initialLinkUserInput: UserInput? = null,
             ) : Factory {
                 override fun create(
                     metadata: PaymentMethodMetadata,
@@ -65,6 +68,7 @@ internal sealed interface UiDefinitionFactory {
                         requiresMandate = requiresMandate,
                         onLinkInlineSignupStateChanged = onLinkInlineSignupStateChanged,
                         cardBrandFilter = metadata.cardBrandFilter,
+                        initialLinkUserInput = initialLinkUserInput,
                     )
                 }
             }

@@ -101,6 +101,7 @@ class FormElementsBuilderTest {
         val context = ApplicationProvider.getApplicationContext<Application>()
         return UiDefinitionFactory.Arguments(
             initialValues = emptyMap(),
+            initialLinkUserInput = null,
             shippingValues = emptyMap(),
             saveForFutureUseInitialValue = false,
             merchantName = "Example Inc.",
