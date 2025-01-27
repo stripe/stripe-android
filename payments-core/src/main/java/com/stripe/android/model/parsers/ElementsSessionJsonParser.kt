@@ -39,7 +39,7 @@ internal class ElementsSessionJsonParser(
         val orderedPaymentMethodTypes =
             paymentMethodPreference.optJSONArray(FIELD_ORDERED_PAYMENT_METHOD_TYPES)
 
-        val elementsSessionId = json.optString(FIELD_ELEMENTS_SESSION_ID) ?: return null
+        val elementsSessionId = json.optString(FIELD_ELEMENTS_SESSION_ID)
         val customer = parseCustomer(json.optJSONObject(FIELD_CUSTOMER))
 
         val linkSettings = json.optJSONObject(FIELD_LINK_SETTINGS)
