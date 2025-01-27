@@ -100,7 +100,7 @@ internal class DefaultLinkAuth @Inject constructor(
     private fun Result<LinkAccount?>.toLinkAuthResult(): LinkAuthResult {
         return runCatching {
             val linkAccount = getOrThrow()
-            return if (linkAccount != null) {
+            if (linkAccount != null) {
                 LinkAuthResult.Success(linkAccount)
             } else {
                 LinkAuthResult.Error(NoLinkAccountFoundException())
