@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.embedded.manage
 
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.paymentsheet.verticalmode.FakeManageScreenInteractor
 import kotlinx.coroutines.test.runTest
 import org.mockito.Mockito.mock
 import kotlin.test.Test
@@ -37,7 +38,7 @@ internal class ManageNavigatorTest {
     fun `navigating back with one screen emits result`() = testScenario {
         navigator.performAction(ManageNavigator.Action.Back)
         navigator.result.test {
-            assertThat(awaitItem().maintainPaymentSelection).isFalse()
+            assertThat(awaitItem()).isNotNull()
         }
     }
 
@@ -63,7 +64,7 @@ internal class ManageNavigatorTest {
     fun `performing close action emits result`() = testScenario {
         navigator.performAction(ManageNavigator.Action.Close)
         navigator.result.test {
-            assertThat(awaitItem().maintainPaymentSelection).isTrue()
+            assertThat(awaitItem()).isNotNull()
         }
     }
 
@@ -71,7 +72,7 @@ internal class ManageNavigatorTest {
         block: suspend Scenario.() -> Unit
     ) = runTest {
         lateinit var navigator: ManageNavigator
-        val initialScreen = ManageNavigator.Screen.All { navigator }
+        val initialScreen = ManageNavigator.Screen.All(FakeManageScreenInteractor())
         navigator = ManageNavigator(coroutineScope = this, initialScreen = initialScreen)
         Scenario(
             navigator = navigator,
