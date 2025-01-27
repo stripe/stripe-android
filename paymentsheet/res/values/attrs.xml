@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <attr name="stripe_ic_paymentsheet_link_ref" format="reference"/>
+    <attr name="stripe_ic_paymentsheet_sepa_ref" format="reference"/>
 </resources>

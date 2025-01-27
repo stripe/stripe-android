@@ -16,7 +16,7 @@ internal fun PaymentMethod.getSavedPaymentMethodIcon(forVerticalMode: Boolean = 
             val brand = CardBrand.fromCode(card?.displayBrand).takeIf { it != Unknown } ?: card?.brand
             if (forVerticalMode) { brand?.getCardBrandIconForVerticalMode() } else { brand?.getCardBrandIcon() }
         }
-        PaymentMethod.Type.SepaDebit -> R.drawable.stripe_ic_paymentsheet_sepa
+        PaymentMethod.Type.SepaDebit -> getSepaIcon()
         PaymentMethod.Type.USBankAccount -> usBankAccount?.bankName?.let { TransformToBankIcon(it) }
         else -> null
     } ?: R.drawable.stripe_ic_paymentsheet_card_unknown
@@ -55,6 +55,16 @@ internal fun getLinkIcon(showNightIcon: Boolean? = null): Int {
         systemThemeAwareIconRef = R.drawable.stripe_ic_paymentsheet_link_ref,
         nightIcon = R.drawable.stripe_ic_paymentsheet_link_night,
         dayIcon = R.drawable.stripe_ic_paymentsheet_link_day
+    )
+}
+
+@DrawableRes
+internal fun getSepaIcon(showNightIcon: Boolean? = null): Int {
+    return getOverridableIcon(
+        showNightIcon = showNightIcon,
+        systemThemeAwareIconRef = R.drawable.stripe_ic_paymentsheet_sepa_ref,
+        nightIcon = R.drawable.stripe_ic_paymentsheet_sepa_night,
+        dayIcon = R.drawable.stripe_ic_paymentsheet_sepa_day
     )
 }
 
