@@ -9,10 +9,6 @@ import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.CustomerStateHolder
-import com.stripe.android.paymentsheet.DefaultFormHelper
-import com.stripe.android.paymentsheet.FormHelper
-import com.stripe.android.paymentsheet.LinkInlineHandler
-import com.stripe.android.paymentsheet.NewOrExternalPaymentSelection
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -145,9 +141,13 @@ internal class DefaultEmbeddedContentHelper @AssistedInject constructor(
         val paymentMethodIncentiveInteractor = PaymentMethodIncentiveInteractor(
             incentive = paymentMethodMetadata.paymentMethodIncentive,
         )
-        val formHelper = createFormHelper(
+        val formHelper = EmbeddedFormHelperFactory.create(
             coroutineScope = coroutineScope,
             paymentMethodMetadata = paymentMethodMetadata,
+            linkConfigurationCoordinator = linkConfigurationCoordinator,
+            currentSelection = selectionHolder.selection.value,
+            cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
+            selectionUpdater = ::setSelection
         )
         val savedPaymentMethodMutator = createSavedPaymentMethodMutator(
             coroutineScope = coroutineScope,
@@ -230,33 +230,6 @@ internal class DefaultEmbeddedContentHelper @AssistedInject constructor(
             },
             isLinkEnabled = stateFlowOf(paymentMethodMetadata.linkState != null),
             isNotPaymentFlow = false,
-        )
-    }
-
-    private fun createFormHelper(
-        coroutineScope: CoroutineScope,
-        paymentMethodMetadata: PaymentMethodMetadata,
-    ): FormHelper {
-        return DefaultFormHelper(
-            coroutineScope = coroutineScope,
-            linkInlineHandler = LinkInlineHandler.create(),
-            cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
-            paymentMethodMetadata = paymentMethodMetadata,
-            newPaymentSelectionProvider = {
-                when (val currentSelection = selectionHolder.selection.value) {
-                    is PaymentSelection.ExternalPaymentMethod -> {
-                        NewOrExternalPaymentSelection.External(currentSelection)
-                    }
-                    is PaymentSelection.New -> {
-                        NewOrExternalPaymentSelection.New(currentSelection)
-                    }
-                    else -> null
-                }
-            },
-            selectionUpdater = {
-                setSelection(it)
-            },
-            linkConfigurationCoordinator = linkConfigurationCoordinator,
         )
     }
 
