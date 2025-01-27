@@ -12,6 +12,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
@@ -93,7 +94,7 @@ internal fun LinkInlineSignupFields(
                 onShowingAllFields()
             }
 
-            Column(modifier = Modifier.fillMaxWidth()) {
+            Column(modifier = Modifier.fillMaxWidth().testTag(LINK_INLINE_SIGNUP_REMAINING_FIELDS_TEST_TAG)) {
                 Divider(
                     color = MaterialTheme.stripeColors.componentDivider,
                     thickness = MaterialTheme.stripeShapes.borderStrokeWidth.dp,
@@ -158,3 +159,5 @@ internal fun LinkInlineSignupFields(
         }
     }
 }
+
+internal const val LINK_INLINE_SIGNUP_REMAINING_FIELDS_TEST_TAG = "LinkInlineSignupRemainingFields"

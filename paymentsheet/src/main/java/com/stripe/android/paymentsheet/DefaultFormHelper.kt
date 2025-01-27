@@ -124,6 +124,10 @@ internal class DefaultFormHelper(
                 onLinkInlineSignupStateChanged = linkInlineHandler::onStateUpdated,
                 paymentMethodCreateParams = currentSelection?.getPaymentMethodCreateParams(),
                 paymentMethodExtraParams = currentSelection?.getPaymentMethodExtraParams(),
+                initialLinkUserInput = when (val selection = currentSelection?.paymentSelection) {
+                    is PaymentSelection.New.LinkInline -> selection.input
+                    else -> null
+                }
             ),
         ) ?: emptyList()
     }
