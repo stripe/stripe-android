@@ -1,5 +1,6 @@
 package com.stripe.android.link.account
 
+import app.cash.turbine.Turbine
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.model.AccountStatus
@@ -23,10 +24,12 @@ internal open class FakeLinkAccountManager : LinkAccountManager {
     private val _accountStatus = MutableStateFlow(AccountStatus.SignedOut)
     override val accountStatus: Flow<AccountStatus> = _accountStatus
 
-    var lookupConsumerResult: Result<LinkAccount?> = Result.success(null)
+    var lookupConsumerResult: Result<LinkAccount?> = Result.success(TestFactory.LINK_ACCOUNT)
+    var mobileLookupConsumerResult: Result<LinkAccount?> = Result.success(TestFactory.LINK_ACCOUNT)
     var startVerificationResult: Result<LinkAccount> = Result.success(LinkAccount(ConsumerSession("", "", "", "")))
     var confirmVerificationResult: Result<LinkAccount> = Result.success(LinkAccount(ConsumerSession("", "", "", "")))
-    var signUpResult: Result<LinkAccount> = Result.success(LinkAccount(ConsumerSession("", "", "", "")))
+    var signUpResult: Result<LinkAccount> = Result.success(TestFactory.LINK_ACCOUNT)
+    var mobileSignUpResult: Result<LinkAccount> = Result.success(TestFactory.LINK_ACCOUNT)
     var signInWithUserInputResult: Result<LinkAccount> = Result.success(LinkAccount(ConsumerSession("", "", "", "")))
     var logOutResult: Result<ConsumerSession> = Result.success(ConsumerSession("", "", "", ""))
     var createCardPaymentDetailsResult: Result<LinkPaymentDetails> = Result.success(
@@ -36,6 +39,13 @@ internal open class FakeLinkAccountManager : LinkAccountManager {
     var updatePaymentDetailsResult = Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS)
     var deletePaymentDetailsResult: Result<Unit> = Result.success(Unit)
     var linkAccountFromLookupResult: LinkAccount? = null
+
+    private val lookupTurbine = Turbine<LookupCall>()
+    private val mobileLookupTurbine = Turbine<MobileLookupCall>()
+
+    private val signupTurbine = Turbine<SignUpCall>()
+    private val mobileSignUpCall = Turbine<MobileSignUpCall>()
+
     override var consumerPublishableKey: String? = null
 
     fun setLinkAccount(account: LinkAccount?) {
@@ -57,7 +67,16 @@ internal open class FakeLinkAccountManager : LinkAccountManager {
         appId: String,
         startSession: Boolean
     ): Result<LinkAccount?> {
-        TODO("Not yet implemented")
+        mobileLookupTurbine.add(
+            item = MobileLookupCall(
+                email = email,
+                emailSource = emailSource,
+                verificationToken = verificationToken,
+                appId = appId,
+                startSession = startSession
+            )
+        )
+        return mobileLookupConsumerResult
     }
 
     override suspend fun signUp(
@@ -67,6 +86,15 @@ internal open class FakeLinkAccountManager : LinkAccountManager {
         name: String?,
         consentAction: SignUpConsentAction
     ): Result<LinkAccount> {
+        signupTurbine.add(
+            item = SignUpCall(
+                email = email,
+                phone = phone,
+                country = country,
+                name = name,
+                consentAction = consentAction
+            )
+        )
         return signUpResult
     }
 
@@ -79,7 +107,18 @@ internal open class FakeLinkAccountManager : LinkAccountManager {
         appId: String,
         consentAction: SignUpConsentAction
     ): Result<LinkAccount> {
-        TODO("Not yet implemented")
+        mobileSignUpCall.add(
+            item = MobileSignUpCall(
+                email = email,
+                phone = phone,
+                country = country,
+                name = name,
+                verificationToken = verificationToken,
+                appId = appId,
+                consentAction = consentAction
+            )
+        )
+        return mobileSignUpResult
     }
 
     override suspend fun signInWithUserInput(userInput: UserInput): Result<LinkAccount> {
@@ -118,4 +157,35 @@ internal open class FakeLinkAccountManager : LinkAccountManager {
     ): Result<ConsumerPaymentDetails> {
         return updatePaymentDetailsResult
     }
+
+    private data class LookupCall(
+        val email: String,
+        val startSession: Boolean
+    )
+
+    private data class MobileLookupCall(
+        val email: String,
+        val emailSource: EmailSource,
+        val verificationToken: String,
+        val appId: String,
+        val startSession: Boolean
+    )
+
+    data class SignUpCall(
+        val email: String,
+        val phone: String,
+        val country: String,
+        val name: String?,
+        val consentAction: SignUpConsentAction
+    )
+
+    data class MobileSignUpCall(
+        val email: String,
+        val phone: String,
+        val country: String,
+        val name: String?,
+        val verificationToken: String,
+        val appId: String,
+        val consentAction: SignUpConsentAction
+    )
 }
