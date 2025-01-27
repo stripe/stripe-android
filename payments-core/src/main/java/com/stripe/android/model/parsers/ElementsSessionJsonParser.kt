@@ -77,7 +77,7 @@ internal class ElementsSessionJsonParser(
     }
 
     private fun parseStripeIntent(
-        elementsSessionId: String,
+        elementsSessionId: String?,
         paymentMethodPreference: JSONObject?,
         orderedPaymentMethodTypes: JSONArray?,
         unactivatedPaymentMethodTypes: JSONArray?,
