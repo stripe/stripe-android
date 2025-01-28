@@ -55,7 +55,8 @@ internal interface LinkAccountManager {
     suspend fun logOut(): Result<ConsumerSession>
 
     suspend fun createCardPaymentDetails(
-        paymentMethodCreateParams: PaymentMethodCreateParams
+        paymentMethodCreateParams: PaymentMethodCreateParams,
+        shouldShareCardPaymentDetails: Boolean = false
     ): Result<LinkPaymentDetails>
 
     fun setLinkAccountFromLookupResult(

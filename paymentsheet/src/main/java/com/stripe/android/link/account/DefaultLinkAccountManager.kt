@@ -167,7 +167,8 @@ internal class DefaultLinkAccountManager @Inject constructor(
             }
 
     override suspend fun createCardPaymentDetails(
-        paymentMethodCreateParams: PaymentMethodCreateParams
+        paymentMethodCreateParams: PaymentMethodCreateParams,
+        shouldShareCardPaymentDetails: Boolean
     ): Result<LinkPaymentDetails> {
         val linkAccountValue = linkAccount.value
         return if (linkAccountValue != null) {
@@ -180,7 +181,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
                     consumerPublishableKey = if (config.passthroughModeEnabled) null else consumerPublishableKey,
                     active = config.passthroughModeEnabled,
                 ).mapCatching {
-                    if (config.passthroughModeEnabled) {
+                    if (shouldShareCardPaymentDetails) {
                         linkRepository.shareCardPaymentDetails(
                             id = it.paymentDetails.id,
                             last4 = paymentMethodCreateParams.cardLast4().orEmpty(),
