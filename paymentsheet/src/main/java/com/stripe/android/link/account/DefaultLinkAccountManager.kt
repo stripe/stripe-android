@@ -75,7 +75,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
             verificationToken = verificationToken,
             appId = appId,
             email = email,
-            sessionId = "",
+            sessionId = config.elementsSessionId,
             emailSource = emailSource
         ).onFailure { error ->
             linkEventsReporter.onAccountLookupFailure(error)

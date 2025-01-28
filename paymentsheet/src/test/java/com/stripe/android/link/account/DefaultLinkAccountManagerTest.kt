@@ -842,6 +842,7 @@ class DefaultLinkAccountManagerTest {
         assertThat(call.email).isEqualTo(TestFactory.CUSTOMER_EMAIL)
         assertThat(call.emailSource).isEqualTo(TestFactory.EMAIL_SOURCE)
         assertThat(call.verificationToken).isEqualTo(TestFactory.VERIFICATION_TOKEN)
+        assertThat(call.sessionId).isEqualTo(TestFactory.LINK_CONFIGURATION.elementsSessionId)
 
         assertThat(result.getOrNull()?.email).isEqualTo(TestFactory.LINK_ACCOUNT.email)
         assertThat(accountManager.linkAccount.value).isNull()
