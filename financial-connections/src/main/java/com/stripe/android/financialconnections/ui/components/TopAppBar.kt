@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.navigation.bottomsheet.BottomSheetNavigator
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarState
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
@@ -69,6 +70,7 @@ internal fun FinancialConnectionsTopAppBar(
     FinancialConnectionsTopAppBar(
         hideStripeLogo = state.hideStripeLogo || state.forceHideStripeLogo,
         testMode = state.isTestMode,
+        verified = state.isVerified,
         theme = state.theme,
         elevation = elevation,
         allowBackNavigation = state.allowBackNavigation,
@@ -80,6 +82,7 @@ internal fun FinancialConnectionsTopAppBar(
 private fun FinancialConnectionsTopAppBar(
     hideStripeLogo: Boolean,
     testMode: Boolean,
+    verified: Boolean,
     theme: Theme,
     elevation: State<Dp>,
     allowBackNavigation: Boolean,
@@ -100,6 +103,7 @@ private fun FinancialConnectionsTopAppBar(
             Title(
                 hideStripeLogo = hideStripeLogo,
                 testmode = testMode,
+                verified = verified,
                 theme = theme,
             )
         },
@@ -181,6 +185,7 @@ private fun CloseButton(
 @Composable
 private fun Title(
     hideStripeLogo: Boolean,
+    verified: Boolean,
     testmode: Boolean,
     theme: Theme,
 ) {
@@ -211,6 +216,15 @@ private fun Title(
                 color = FinancialConnectionsTheme.colors.textWhite
             )
         }
+        if (verified) {
+            // load an image
+            Image(
+                modifier = Modifier.size(width = 20.dp, height = 20.dp),
+                // drawable painter
+                painter = painterResource(id = R.drawable.ic_verified),
+                contentDescription = null // decorative element
+            )
+        }
     }
 }
 
@@ -238,7 +252,7 @@ private fun NavHostController.collectCanShowBackIconAsState(): State<Boolean> {
 internal fun TopAppBarWithStripeLogoPreview() {
     FinancialConnectionsPreview {
         FinancialConnectionsTopAppBar(
-            state = TopAppBarState(hideStripeLogo = false),
+            state = TopAppBarState(hideStripeLogo = false, isVerified = true),
             onCloseClick = {},
         )
     }
