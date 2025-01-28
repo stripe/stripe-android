@@ -15,7 +15,7 @@ class AttestationError(
     enum class ErrorType(
         val isRetriable: Boolean
     ) {
-        // Play Store related errors
+        // Play Integrity SDK related errors
         API_NOT_AVAILABLE(isRetriable = false),
         APP_NOT_INSTALLED(isRetriable = false),
         APP_UID_MISMATCH(isRetriable = false),
