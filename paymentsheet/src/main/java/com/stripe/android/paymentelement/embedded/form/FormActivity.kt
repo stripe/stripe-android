@@ -37,8 +37,7 @@ internal class FormActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val localArgs = args
-        if (localArgs == null) {
+        if (args == null) {
             setFormResult(FormResult.Cancelled)
             finish()
             return
