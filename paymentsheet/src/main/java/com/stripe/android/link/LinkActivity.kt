@@ -87,17 +87,18 @@ internal class LinkActivity : ComponentActivity() {
                 State.Link -> {
                     LinkScreenFlow(vm)
                 }
-                State.Loading -> {
-//                    CircularProgressIndicator()
-                }
+                State.Loading -> Unit
                 is State.VerificationDialog -> {
                     Dialog(
-                        onDismissRequest = {}
+                        onDismissRequest = {
+                            vm.onDismissClicked()
+                        }
                     ) {
                         val viewModel = linkViewModel<VerificationViewModel> { parentComponent ->
                             VerificationViewModel.factory(
                                 parentComponent = parentComponent,
                                 linkAccount = state.linkAccount,
+                                isDialog = true,
                                 onVerificationSucceeded = {
                                     vm.onVerificationSucceeded()
                                 },
@@ -105,7 +106,7 @@ internal class LinkActivity : ComponentActivity() {
 
                                 },
                                 onDismissClicked = {
-                                    vm.goBack()
+                                    vm.onDismissClicked()
                                 }
                             )
 

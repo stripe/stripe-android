@@ -152,6 +152,7 @@ private fun Screens(
                     parentComponent = parentComponent,
                     onDismissClicked = goBack,
                     linkAccount = linkAccount,
+                    isDialog = false,
                     onVerificationSucceeded = {
                         navigateAndClearStack(LinkScreen.Wallet)
                     },

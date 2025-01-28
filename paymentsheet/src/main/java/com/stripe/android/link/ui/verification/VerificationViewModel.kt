@@ -1,21 +1,15 @@
 package com.stripe.android.link.ui.verification
 
-import android.app.Application
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
-import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.link.NoArgsException
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.LinkEventsReporter
-import com.stripe.android.link.injection.DaggerNativeLinkComponent
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
@@ -38,6 +32,7 @@ internal class VerificationViewModel @Inject constructor(
     private val linkAccountManager: LinkAccountManager,
     private val linkEventsReporter: LinkEventsReporter,
     private val logger: Logger,
+    private val isDialog: Boolean,
     private val onVerificationSucceeded: (LinkAccount) -> Unit,
     private val onChangeEmailClicked: () -> Unit,
     private val onDismissClicked: () -> Unit,
@@ -51,7 +46,8 @@ internal class VerificationViewModel @Inject constructor(
             requestFocus = true,
             errorMessage = null,
             isSendingNewCode = false,
-            didSendNewCode = false
+            didSendNewCode = false,
+            isDialog = isDialog
         )
     )
     val viewState: StateFlow<VerificationViewState> = _viewState
@@ -185,6 +181,7 @@ internal class VerificationViewModel @Inject constructor(
         fun factory(
             parentComponent: NativeLinkComponent,
             linkAccount: LinkAccount,
+            isDialog: Boolean,
             onVerificationSucceeded: (LinkAccount) -> Unit,
             onChangeEmailClicked: () -> Unit,
             onDismissClicked: () -> Unit,
@@ -199,6 +196,7 @@ internal class VerificationViewModel @Inject constructor(
                         onVerificationSucceeded = onVerificationSucceeded,
                         onChangeEmailClicked = onChangeEmailClicked,
                         onDismissClicked = onDismissClicked,
+                        isDialog = isDialog
                     )
                 }
             }

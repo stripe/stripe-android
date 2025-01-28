@@ -155,7 +155,7 @@ internal class LinkActivityViewModel @Inject constructor(
             linkAccountManager.lookupConsumer(it).getOrThrow()
         }
         val linkAccount = linkAccountManager.linkAccount.value
-        if (linkAccount != null && _linkScreenState.value is State.Loading) {
+        if (activityRetainedComponent.eagerLaunch && linkAccount != null && _linkScreenState.value is State.Loading) {
             _linkScreenState.value = State.VerificationDialog(linkAccount)
             return
         }

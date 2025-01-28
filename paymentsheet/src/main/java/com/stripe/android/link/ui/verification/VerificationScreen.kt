@@ -3,6 +3,7 @@ package com.stripe.android.link.ui.verification
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -13,6 +14,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ContentAlpha
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -28,6 +31,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -95,15 +99,55 @@ internal fun VerificationBody(
     BackHandler(onBack = onBack)
 
     ScrollableTopLevelColumn {
-        Text(
-            text = stringResource(R.string.stripe_verification_header),
-            modifier = Modifier
-                .testTag(VERIFICATION_TITLE_TAG)
-                .padding(vertical = 4.dp),
-            textAlign = TextAlign.Center,
-            style = MaterialTheme.typography.h2,
-            color = MaterialTheme.colors.onPrimary
-        )
+        if (state.isDialog) {
+            Box(
+                modifier = Modifier
+                    .padding(
+                        bottom = 8.dp
+                    )
+                    .fillMaxWidth()
+            ) {
+                Image(
+                    modifier = Modifier
+                        .align(Alignment.Center),
+                    painter = painterResource(R.drawable.stripe_link_logo),
+                    contentDescription = stringResource(com.stripe.android.R.string.stripe_link),
+                )
+
+                IconButton(
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd),
+                    onClick = onBack
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.stripe_link_close),
+                        contentDescription = stringResource(com.stripe.android.R.string.stripe_cancel)
+                    )
+                }
+            }
+
+            Text(
+                text = "Confirm it's you",
+                modifier = Modifier
+                    .testTag(VERIFICATION_TITLE_TAG)
+                    .padding(vertical = 4.dp),
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.h2,
+                color = MaterialTheme.colors.onPrimary
+            )
+        } else {
+            Text(
+                text = stringResource(R.string.stripe_verification_header),
+                modifier = Modifier
+                    .testTag(VERIFICATION_TITLE_TAG)
+                    .padding(vertical = 4.dp),
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.h2,
+                color = MaterialTheme.colors.onPrimary
+            )
+        }
+
+
         Text(
             text = stringResource(R.string.stripe_verification_message, state.redactedPhoneNumber),
             modifier = Modifier
@@ -125,11 +169,13 @@ internal fun VerificationBody(
             focusRequester = focusRequester
         )
 
-        ChangeEmailRow(
-            email = state.email,
-            isProcessing = state.isProcessing,
-            onChangeEmailClick = onChangeEmailClick,
-        )
+        if (state.isDialog.not()) {
+            ChangeEmailRow(
+                email = state.email,
+                isProcessing = state.isProcessing,
+                onChangeEmailClick = onChangeEmailClick,
+            )
+        }
 
         AnimatedVisibility(visible = state.errorMessage != null) {
             ErrorText(
