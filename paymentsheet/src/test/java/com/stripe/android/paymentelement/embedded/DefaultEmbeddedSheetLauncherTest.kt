@@ -27,12 +27,23 @@ import org.robolectric.RobolectricTestRunner
 internal class DefaultEmbeddedSheetLauncherTest {
 
     @Test
-    fun `launchForm launches activity with correct parameters`() = testScenario {
+    fun `launchForm launches activity with correct parameters for no saved PMs`() = testScenario {
         val code = "test_code"
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
         val expectedArgs = FormContract.Args(code, paymentMethodMetadata, false)
 
         sheetLauncher.launchForm(code, paymentMethodMetadata, false)
+        val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall()
+        assertThat(launchCall).isEqualTo(expectedArgs)
+    }
+
+    @Test
+    fun `launchForm launches activity with correct parameters for saved PMs`() = testScenario {
+        val code = "test_code"
+        val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
+        val expectedArgs = FormContract.Args(code, paymentMethodMetadata, true)
+
+        sheetLauncher.launchForm(code, paymentMethodMetadata, true)
         val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall()
         assertThat(launchCall).isEqualTo(expectedArgs)
     }
