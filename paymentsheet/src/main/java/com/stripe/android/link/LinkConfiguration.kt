@@ -17,7 +17,8 @@ internal data class LinkConfiguration(
     val flags: Map<String, Boolean>,
     val cardBrandChoice: CardBrandChoice?,
     val useAttestationEndpointsForLink: Boolean,
-    val initializationMode: PaymentElementLoader.InitializationMode
+    val initializationMode: PaymentElementLoader.InitializationMode,
+    val elementsSessionId: String,
 ) : Parcelable {
     @Parcelize
     data class CustomerInfo(

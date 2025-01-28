@@ -18,6 +18,7 @@ import com.stripe.android.testing.FeatureFlagTestRule
 import org.json.JSONObject
 import org.junit.Rule
 import org.junit.Test
+import java.util.UUID
 
 class ElementsSessionJsonParserTest {
 
@@ -327,6 +328,25 @@ class ElementsSessionJsonParserTest {
     }
 
     @Test
+    fun `Test omitted setup intent`() {
+        val parsedData = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret",
+                externalPaymentMethods = emptyList(),
+            ),
+            isLiveMode = false
+        ).parse(
+            ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON
+        )
+
+        assertThat(
+            runCatching {
+                UUID.fromString(parsedData?.elementsSessionId)
+            }.isSuccess
+        ).isTrue()
+    }
+
+    @Test
     fun `Test deferred PaymentIntent`() {
         val data = ElementsSessionJsonParser(
             ElementsSessionParams.DeferredIntentType(
@@ -351,6 +371,7 @@ class ElementsSessionJsonParserTest {
 
         val deferredIntent = data?.stripeIntent
 
+        assertThat(data?.elementsSessionId).isEqualTo("elements_session_1t6ejApXCS5")
         assertThat(deferredIntent).isNotNull()
         assertThat(deferredIntent).isEqualTo(
             PaymentIntent(

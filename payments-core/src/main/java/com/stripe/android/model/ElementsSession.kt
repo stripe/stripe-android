@@ -4,6 +4,7 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.model.PaymentMethod.Type.Link
 import kotlinx.parcelize.Parcelize
+import java.util.UUID
 
 private val LinkSupportedFundingSources = setOf("card", "bank_account")
 
@@ -19,6 +20,7 @@ data class ElementsSession(
     val cardBrandChoice: CardBrandChoice?,
     val isGooglePayEnabled: Boolean,
     val sessionsError: Throwable? = null,
+    val elementsSessionId: String,
 ) : StripeModel {
 
     val linkPassthroughModeEnabled: Boolean
@@ -120,6 +122,7 @@ data class ElementsSession(
         fun createFromFallback(
             stripeIntent: StripeIntent,
             sessionsError: Throwable?,
+            elementsSessionId: String = UUID.randomUUID().toString(),
         ): ElementsSession {
             return ElementsSession(
                 linkSettings = null,
@@ -131,6 +134,7 @@ data class ElementsSession(
                 cardBrandChoice = null,
                 isGooglePayEnabled = true,
                 sessionsError = sessionsError,
+                elementsSessionId = elementsSessionId
             )
         }
     }
