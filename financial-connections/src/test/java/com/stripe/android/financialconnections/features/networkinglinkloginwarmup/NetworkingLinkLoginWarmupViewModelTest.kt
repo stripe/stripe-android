@@ -80,10 +80,12 @@ class NetworkingLinkLoginWarmupViewModelTest {
         whenever(
             lookupAccount(
                 email = anyOrNull(),
+                phone = anyOrNull(),
+                phoneCountryCode = anyOrNull(),
                 emailSource = anyOrNull(),
                 verifiedFlow = anyOrNull(),
                 sessionId = anyOrNull(),
-                pane = any()
+                pane = anyOrNull()
             )
         ).thenReturn(
             ConsumerSessionLookup(
@@ -96,7 +98,15 @@ class NetworkingLinkLoginWarmupViewModelTest {
         val viewModel = buildViewModel(NetworkingLinkLoginWarmupState())
         viewModel.onContinueClick()
 
-        verify(lookupAccount).invoke(any(), any(), any(), any(), any())
+        verify(lookupAccount).invoke(
+            email = anyOrNull(),
+            phone = anyOrNull(),
+            phoneCountryCode = anyOrNull(),
+            emailSource = anyOrNull(),
+            verifiedFlow = anyOrNull(),
+            sessionId = anyOrNull(),
+            pane = anyOrNull()
+        )
         navigationManager.assertNavigatedTo(
             destination = Destination.NetworkingLinkVerification,
             pane = Pane.NETWORKING_LINK_LOGIN_WARMUP

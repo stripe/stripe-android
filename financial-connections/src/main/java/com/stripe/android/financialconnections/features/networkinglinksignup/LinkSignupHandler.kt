@@ -1,6 +1,7 @@
 package com.stripe.android.financialconnections.features.networkinglinksignup
 
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext.PrefillDetails
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.AttestationEndpoint.SIGNUP
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.Click
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
@@ -94,7 +95,13 @@ internal class LinkSignupHandlerForInstantDebits @Inject constructor(
     ) {
         handleError(
             extraMessage = "Error creating a Link account",
-            error = error.toAttestationErrorIfApplicable(state.validEmail!!),
+            error = error.toAttestationErrorIfApplicable(
+                PrefillDetails(
+                    state.validEmail!!,
+                    state.validPhone,
+                    state.payload()!!.phoneController.getCountryCode()
+                )
+            ),
             pane = LINK_LOGIN,
             displayErrorScreen = true,
         )
@@ -167,7 +174,13 @@ internal class LinkSignupHandlerForNetworking @Inject constructor(
     ) {
         eventTracker.logError(
             extraMessage = "Error saving account to Link",
-            error = error.toAttestationErrorIfApplicable(state.validEmail!!),
+            error = error.toAttestationErrorIfApplicable(
+                PrefillDetails(
+                    state.validEmail!!,
+                    state.validPhone,
+                    state.payload()!!.phoneController.getCountryCode()
+                )
+            ),
             logger = logger,
             pane = NETWORKING_LINK_SIGNUP_PANE,
         )

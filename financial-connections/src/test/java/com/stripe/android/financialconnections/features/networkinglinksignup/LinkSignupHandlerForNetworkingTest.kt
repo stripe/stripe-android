@@ -111,8 +111,14 @@ class LinkSignupHandlerForNetworkingTest {
     @Test
     fun `handleSignupFailure should log error and navigate to Success pane`() = runTest {
         val error = RuntimeException("Test Error")
+        val testState = NetworkingLinkSignupState(
+            validEmail = "test@instantdebits.com",
+            validPhone = "+1234567890",
+            isInstantDebits = true,
+            payload = Async.Success(validPayload)
+        )
 
-        handler.handleSignupFailure(error)
+        handler.handleSignupFailure(testState, error)
 
         verify(eventTracker).logError(
             extraMessage = "Error saving account to Link",

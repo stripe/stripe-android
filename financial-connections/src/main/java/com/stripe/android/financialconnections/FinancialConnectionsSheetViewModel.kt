@@ -541,7 +541,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         if (result is Failed && result.error is FinancialConnectionsAttestationError) {
             val error = result.error
             integrityVerdictManager.setVerdictFailed()
-            switchToWebFlow(error.prefilledEmail)
+            switchToWebFlow(error.prefillDetails)
             return
         }
         eventReporter.onResult(state.initialArgs.configuration, result)
@@ -562,19 +562,13 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     /**
      * On scenarios where native failed mid flow due to attestation errors, switch back to web flow.
      */
-    private fun switchToWebFlow(prefilledEmail: String?) {
+    private fun switchToWebFlow(prefillDetails: PrefillDetails?) {
         viewModelScope.launch {
             val sync = getOrFetchSync()
             val hostedAuthUrl = HostedAuthUrlBuilder.create(
                 args = initialState.initialArgs,
                 manifest = sync.manifest,
-                sdkPrefillDetails = prefilledEmail?.let {
-                    PrefillDetails(
-                        email = it,
-                        phone = null,
-                        phoneCountryCode = null
-                    )
-                }
+                sdkPrefillDetails = prefillDetails
             )
 
             if (hostedAuthUrl != null) {

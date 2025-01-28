@@ -96,7 +96,17 @@ class NetworkingLinkSignupViewModelTest {
                 )
             )
         )
-        whenever(lookupAccount(any(), any(), any(), any(), any())).thenReturn(ConsumerSessionLookup(exists = false))
+        whenever(
+            lookupAccount(
+                email = any(),
+                phone = any(),
+                phoneCountryCode = any(),
+                emailSource = any(),
+                verifiedFlow = any(),
+                sessionId = any(),
+                pane = any()
+            )
+        ).thenReturn(ConsumerSessionLookup(exists = false))
 
         val viewModel = buildViewModel(NetworkingLinkSignupState())
         val state = viewModel.stateFlow.value
@@ -117,7 +127,17 @@ class NetworkingLinkSignupViewModelTest {
                 )
             )
         )
-        whenever(lookupAccount(any(), any(), any(), any(), any())).thenReturn(ConsumerSessionLookup(exists = false))
+        whenever(
+            lookupAccount(
+                email = any(),
+                phone = any(),
+                phoneCountryCode = any(),
+                emailSource = any(),
+                verifiedFlow = any(),
+                sessionId = any(),
+                pane = any()
+            )
+        ).thenReturn(ConsumerSessionLookup(exists = false))
 
         val viewModel = buildViewModel(
             state = NetworkingLinkSignupState(),
@@ -201,7 +221,17 @@ class NetworkingLinkSignupViewModelTest {
             )
         )
         whenever(getOrFetchSync().manifest).thenReturn(manifest)
-        whenever(lookupAccount(any(), any(), any(), any(), any())).thenReturn(ConsumerSessionLookup(exists = true))
+        whenever(
+            lookupAccount(
+                email = any(),
+                phone = any(),
+                phoneCountryCode = any(),
+                emailSource = any(),
+                verifiedFlow = any(),
+                sessionId = any(),
+                pane = any()
+            )
+        ).thenReturn(ConsumerSessionLookup(exists = true))
 
         val viewModel = buildViewModel(NetworkingLinkSignupState())
 
@@ -236,7 +266,17 @@ class NetworkingLinkSignupViewModelTest {
             )
         )
 
-        whenever(lookupAccount(any(), any(), any(), any(), any())).thenReturn(ConsumerSessionLookup(exists = true))
+        whenever(
+            lookupAccount(
+                email = any(),
+                phone = any(),
+                phoneCountryCode = any(),
+                emailSource = any(),
+                verifiedFlow = any(),
+                sessionId = any(),
+                pane = any()
+            )
+        ).thenReturn(ConsumerSessionLookup(exists = true))
 
         val viewModel = buildViewModel(
             state = NetworkingLinkSignupState(isInstantDebits = true),
@@ -274,7 +314,17 @@ class NetworkingLinkSignupViewModelTest {
             )
         )
         whenever(getOrFetchSync().manifest).thenReturn(manifest)
-        whenever(lookupAccount(any(), any(), any(), any(), any())).thenReturn(ConsumerSessionLookup(exists = true))
+        whenever(
+            lookupAccount(
+                email = any(),
+                phone = any(),
+                phoneCountryCode = any(),
+                emailSource = any(),
+                verifiedFlow = any(),
+                sessionId = any(),
+                pane = any()
+            )
+        ).thenReturn(ConsumerSessionLookup(exists = true))
 
         val viewModel = buildViewModel(
             state = NetworkingLinkSignupState(),
@@ -368,7 +418,17 @@ class NetworkingLinkSignupViewModelTest {
         )
 
         whenever(getOrFetchSync(anyOrNull(), anyOrNull())).thenReturn(syncResponse)
-        whenever(lookupAccount(any(), any(), any(), any(), any())).thenReturn(ConsumerSessionLookup(exists = false))
+        whenever(
+            lookupAccount(
+                email = any(),
+                phone = any(),
+                phoneCountryCode = any(),
+                emailSource = any(),
+                verifiedFlow = any(),
+                sessionId = any(),
+                pane = any()
+            )
+        ).thenReturn(ConsumerSessionLookup(exists = false))
 
         val viewModel = buildViewModel(
             state = NetworkingLinkSignupState(isInstantDebits = false),
@@ -402,7 +462,17 @@ class NetworkingLinkSignupViewModelTest {
         )
 
         whenever(getOrFetchSync(anyOrNull(), anyOrNull())).thenReturn(initialSyncResponse)
-        whenever(lookupAccount(any(), any(), any(), any(), any())).thenReturn(ConsumerSessionLookup(exists = false))
+        whenever(
+            lookupAccount(
+                email = any(),
+                phone = any(),
+                phoneCountryCode = any(),
+                emailSource = any(),
+                verifiedFlow = any(),
+                sessionId = any(),
+                pane = any()
+            )
+        ).thenReturn(ConsumerSessionLookup(exists = false))
 
         val viewModel = buildViewModel(
             state = NetworkingLinkSignupState(isInstantDebits = true),
@@ -436,7 +506,17 @@ class NetworkingLinkSignupViewModelTest {
         )
 
         whenever(getOrFetchSync(anyOrNull(), anyOrNull())).thenReturn(syncResponse)
-        whenever(lookupAccount(any(), any(), any(), any(), any())).thenReturn(ConsumerSessionLookup(exists = false))
+        whenever(
+            lookupAccount(
+                email = any(),
+                phone = any(),
+                phoneCountryCode = any(),
+                emailSource = any(),
+                verifiedFlow = any(),
+                sessionId = any(),
+                pane = any()
+            )
+        ).thenReturn(ConsumerSessionLookup(exists = false))
 
         val viewModel = buildViewModel(
             state = NetworkingLinkSignupState(isInstantDebits = false),
@@ -470,7 +550,17 @@ class NetworkingLinkSignupViewModelTest {
         )
 
         whenever(getOrFetchSync(anyOrNull(), anyOrNull())).thenReturn(initialSyncResponse)
-        whenever(lookupAccount(any(), any(), any(), any(), any())).thenReturn(ConsumerSessionLookup(exists = false))
+        whenever(
+            lookupAccount(
+                email = any(),
+                phone = any(),
+                phoneCountryCode = any(),
+                emailSource = any(),
+                verifiedFlow = any(),
+                sessionId = any(),
+                pane = any()
+            )
+        ).thenReturn(ConsumerSessionLookup(exists = false))
 
         val viewModel = buildViewModel(
             state = NetworkingLinkSignupState(isInstantDebits = true),
@@ -502,7 +592,17 @@ class NetworkingLinkSignupViewModelTest {
         val permissionException = PermissionException(stripeError = StripeError())
 
         whenever(getOrFetchSync(anyOrNull(), anyOrNull())).thenReturn(initialSyncResponse)
-        whenever(lookupAccount(any(), any(), any(), any(), any())).then {
+        whenever(
+            lookupAccount(
+                email = any(),
+                phone = any(),
+                phoneCountryCode = any(),
+                emailSource = any(),
+                verifiedFlow = any(),
+                sessionId = any(),
+                pane = any()
+            )
+        ).then {
             throw permissionException
         }
 
@@ -522,36 +622,47 @@ class NetworkingLinkSignupViewModelTest {
     }
 
     @Test
-    fun `Does not navigate to error pane if encountering non-permission exception in lookup in Instant Debits`() = runTest {
-        val initialSyncResponse = syncResponse().copy(
-            manifest = sessionManifest().copy(
-                accountholderCustomerEmailAddress = "known_user@email.com",
-                isLinkWithStripe = true,
-            ),
-            text = TextUpdate(linkLoginPane = linkLoginPane()),
-        )
+    fun `Does not navigate to error pane if encountering non-permission exception in lookup in Instant Debits`() =
+        runTest {
+            val initialSyncResponse = syncResponse().copy(
+                manifest = sessionManifest().copy(
+                    accountholderCustomerEmailAddress = "known_user@email.com",
+                    isLinkWithStripe = true,
+                ),
+                text = TextUpdate(linkLoginPane = linkLoginPane()),
+            )
 
-        val apiException = APIConnectionException()
+            val apiException = APIConnectionException()
 
-        whenever(getOrFetchSync(anyOrNull(), anyOrNull())).thenReturn(initialSyncResponse)
-        whenever(lookupAccount(any(), any(), any(), any(), any())).then {
-            throw apiException
+            whenever(getOrFetchSync(anyOrNull(), anyOrNull())).thenReturn(initialSyncResponse)
+            whenever(
+                lookupAccount(
+                    email = any(),
+                    phone = any(),
+                    phoneCountryCode = any(),
+                    emailSource = any(),
+                    verifiedFlow = any(),
+                    sessionId = any(),
+                    pane = any()
+                )
+            ).then {
+                throw apiException
+            }
+
+            buildViewModel(
+                state = NetworkingLinkSignupState(isInstantDebits = true),
+                signupHandler = mockLinkSignupHandlerForInstantDebits(failOnSignup = true),
+            )
+
+            delay(300)
+
+            handleError.assertError(
+                extraMessage = "Error looking up account",
+                error = apiException,
+                pane = LINK_LOGIN,
+                displayErrorScreen = false,
+            )
         }
-
-        buildViewModel(
-            state = NetworkingLinkSignupState(isInstantDebits = true),
-            signupHandler = mockLinkSignupHandlerForInstantDebits(failOnSignup = true),
-        )
-
-        delay(300)
-
-        handleError.assertError(
-            extraMessage = "Error looking up account",
-            error = apiException,
-            pane = LINK_LOGIN,
-            displayErrorScreen = false,
-        )
-    }
 
     @Test
     fun `Does not navigate to error pane if encountering any exception in lookup in Financial Connections`() = runTest {
@@ -566,7 +677,17 @@ class NetworkingLinkSignupViewModelTest {
         val permissionException = PermissionException(stripeError = StripeError())
 
         whenever(getOrFetchSync(anyOrNull(), anyOrNull())).thenReturn(initialSyncResponse)
-        whenever(lookupAccount(any(), any(), any(), any(), any())).then {
+        whenever(
+            lookupAccount(
+                email = any(),
+                phone = any(),
+                phoneCountryCode = any(),
+                emailSource = any(),
+                verifiedFlow = any(),
+                sessionId = any(),
+                pane = any()
+            )
+        ).then {
             throw permissionException
         }
 

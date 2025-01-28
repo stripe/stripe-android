@@ -19,6 +19,8 @@ internal class LookupAccount @Inject constructor(
 
     suspend operator fun invoke(
         email: String,
+        phone: String?,
+        phoneCountryCode: String?,
         emailSource: EmailSource,
         verifiedFlow: Boolean,
         sessionId: String,
@@ -45,7 +47,13 @@ internal class LookupAccount @Inject constructor(
                 )
             }
         }.getOrElse { throwable ->
-            throw throwable.toAttestationErrorIfApplicable(prefilledEmail = email)
+            throw throwable.toAttestationErrorIfApplicable(
+                FinancialConnectionsSheet.ElementsSessionContext.PrefillDetails(
+                    email = email,
+                    phone = phone,
+                    phoneCountryCode = phoneCountryCode
+                )
+            )
         }
     }
 }
