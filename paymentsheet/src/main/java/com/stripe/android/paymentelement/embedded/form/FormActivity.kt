@@ -52,7 +52,8 @@ internal class FormActivity : AppCompatActivity() {
                 ) {
                     FormActivityUI(
                         interactor = formInteractor,
-                        eventReporter = eventReporter
+                        eventReporter = eventReporter,
+                        onDismissed = ::setCancelAndFinish
                     )
                 }
             }
