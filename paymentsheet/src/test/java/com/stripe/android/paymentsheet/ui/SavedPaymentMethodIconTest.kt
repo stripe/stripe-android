@@ -27,7 +27,7 @@ class SavedPaymentMethodIconTest {
     fun `on SEPA payment method, should return proper SEPA icon`() {
         assertThat(
             SEPA_DEBIT_PAYMENT_METHOD.getSavedPaymentMethodIcon()
-        ).isEqualTo(R.drawable.stripe_ic_paymentsheet_sepa)
+        ).isEqualTo(R.drawable.stripe_ic_paymentsheet_sepa_ref)
     }
 
     @Test

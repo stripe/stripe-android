@@ -79,6 +79,7 @@ class PaymentMethodsUiExtensionScreenshotTest {
                 title = "no override\nisDarkTheme ${isSystemInDarkTheme()}",
                 icons = listOf(
                     getLinkIcon(),
+                    getSepaIcon(),
                 ),
             )
         }
@@ -91,6 +92,7 @@ class PaymentMethodsUiExtensionScreenshotTest {
                 title = "override show light\nisDarkTheme ${isSystemInDarkTheme()}",
                 icons = listOf(
                     getLinkIcon(showNightIcon = true),
+                    getSepaIcon(showNightIcon = true),
                 ),
                 backgroundColorOverride = getSectionCardColor()
             )
@@ -104,6 +106,7 @@ class PaymentMethodsUiExtensionScreenshotTest {
                 title = "override show dark\nisDarkTheme ${isSystemInDarkTheme()}",
                 icons = listOf(
                     getLinkIcon(showNightIcon = false),
+                    getSepaIcon(showNightIcon = false),
                 ),
                 backgroundColorOverride = getSectionCardColor()
             )
