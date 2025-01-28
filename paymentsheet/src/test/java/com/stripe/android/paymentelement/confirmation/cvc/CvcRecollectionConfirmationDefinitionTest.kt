@@ -233,7 +233,7 @@ class CvcRecollectionConfirmationDefinitionTest {
 
         val canceledResult = result.asCanceled()
 
-        assertThat(canceledResult.action).isEqualTo(ConfirmationHandler.Result.Canceled.Action.None)
+        assertThat(canceledResult.action).isEqualTo(ConfirmationHandler.Result.Canceled.Action.InformCancellation)
     }
 
     private fun test(

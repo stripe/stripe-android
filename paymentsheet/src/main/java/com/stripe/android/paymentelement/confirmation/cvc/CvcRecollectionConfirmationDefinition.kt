@@ -94,7 +94,7 @@ internal class CvcRecollectionConfirmationDefinition(
                 parameters = confirmationParameters,
             )
             is CvcRecollectionResult.Cancelled -> ConfirmationDefinition.Result.Canceled(
-                action = ConfirmationHandler.Result.Canceled.Action.None,
+                action = ConfirmationHandler.Result.Canceled.Action.InformCancellation,
             )
         }
     }
