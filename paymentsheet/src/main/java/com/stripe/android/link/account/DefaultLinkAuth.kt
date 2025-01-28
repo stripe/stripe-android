@@ -1,8 +1,8 @@
 package com.stripe.android.link.account
 
 import com.stripe.android.core.exception.APIException
-import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.NoLinkAccountFoundException
+import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.injection.APPLICATION_ID
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.inline.SignUpConsentAction
@@ -13,7 +13,7 @@ import javax.inject.Inject
 import javax.inject.Named
 
 internal class DefaultLinkAuth @Inject constructor(
-    private val linkConfiguration: LinkConfiguration,
+    private val linkGate: LinkGate,
     private val linkAccountManager: LinkAccountManager,
     private val integrityRequestManager: IntegrityRequestManager,
     @Named(APPLICATION_ID) private val applicationId: String
@@ -25,7 +25,7 @@ internal class DefaultLinkAuth @Inject constructor(
         name: String?,
         consentAction: SignUpConsentAction
     ): LinkAuthResult {
-        val signupResult = if (linkConfiguration.useAttestationEndpointsForLink) {
+        val signupResult = if (linkGate.useAttestationEndpoints) {
             mobileSignUp(
                 email = email,
                 phoneNumber = phoneNumber,
@@ -46,7 +46,7 @@ internal class DefaultLinkAuth @Inject constructor(
     }
 
     override suspend fun lookUp(email: String, emailSource: EmailSource): LinkAuthResult {
-        val lookupResult = if (linkConfiguration.useAttestationEndpointsForLink) {
+        val lookupResult = if (linkGate.useAttestationEndpoints) {
             mobileLookUp(
                 email = email,
                 emailSource = emailSource

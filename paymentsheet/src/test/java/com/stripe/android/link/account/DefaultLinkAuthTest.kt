@@ -5,6 +5,7 @@ import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.link.FakeIntegrityRequestManager
 import com.stripe.android.link.TestFactory
+import com.stripe.android.link.gate.FakeLinkGate
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.attestation.AttestationError
 import com.stripe.attestation.IntegrityRequestManager
@@ -407,9 +408,9 @@ internal class DefaultLinkAuthTest {
         integrityRequestManager: IntegrityRequestManager = FakeIntegrityRequestManager()
     ): DefaultLinkAuth {
         return DefaultLinkAuth(
-            linkConfiguration = TestFactory.LINK_CONFIGURATION.copy(
-                useAttestationEndpointsForLink = useAttestationEndpoints
-            ),
+            linkGate = FakeLinkGate().apply {
+                setUseAttestationEndpoints(useAttestationEndpoints)
+            },
             linkAccountManager = linkAccountManager,
             integrityRequestManager = integrityRequestManager,
             applicationId = TestFactory.APP_ID
