@@ -5,7 +5,7 @@
 ## 21.4.1 - 2025-01-28
 
 ### PaymentSheet
-* [ADDED][10015](https://github.com/stripe/stripe-android/pull/10015) Fixed a bug in `PaymentSheet.FlowController` where a user that cancelled confirmation during CVC recollection wouldn't call the result callback.
+* [ADDED][10015](https://github.com/stripe/stripe-android/pull/10015) Fixed a bug in `PaymentSheet.FlowController` where the result callback wouldn't be called if a user cancelled confirmation during CVC recollection.
 
 ## 21.4.0 - 2025-01-28
 
