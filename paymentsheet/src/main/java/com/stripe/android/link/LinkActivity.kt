@@ -8,6 +8,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.VisibleForTesting
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetValue
@@ -21,6 +22,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.core.os.bundleOf
 import androidx.lifecycle.SavedStateHandle
@@ -108,7 +110,9 @@ internal class LinkActivity : ComponentActivity() {
                             )
 
                         }
-                        DefaultLinkTheme {
+                        DefaultLinkTheme(
+                            contentShape = RoundedCornerShape(16.dp)
+                        ) {
                             VerificationScreen(viewModel)
                         }
                     }

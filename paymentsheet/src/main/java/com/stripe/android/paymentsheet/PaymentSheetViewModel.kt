@@ -273,7 +273,13 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
         setPaymentMethodMetadata(state.paymentMethodMetadata)
 
-        linkHandler.setupLink(state.paymentMethodMetadata.linkState)
+        linkHandler.setupLink(
+            state = state.paymentMethodMetadata.linkState,
+            scope = viewModelScope,
+            launchLinkEagerly = {
+                checkoutWithLink()
+            }
+        )
 
         val pendingFailedPaymentResult = confirmationHandler.awaitResult()
             as? ConfirmationHandler.Result.Failed
@@ -339,8 +345,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         checkout(PaymentSelection.GooglePay, CheckoutIdentifier.SheetTopWallet)
     }
 
-    fun checkoutWithLink() {
-        checkout(PaymentSelection.Link(eagerLaunch = true), CheckoutIdentifier.SheetTopWallet)
+    fun checkoutWithLink(eagerLaunch: Boolean = false) {
+        checkout(PaymentSelection.Link(eagerLaunch = eagerLaunch), CheckoutIdentifier.SheetTopWallet)
     }
 
     private fun checkout(
