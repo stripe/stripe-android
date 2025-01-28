@@ -17,7 +17,11 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 
 internal interface EmbeddedSheetLauncher {
-    fun launchForm(code: String, paymentMethodMetadata: PaymentMethodMetadata)
+    fun launchForm(
+        code: String,
+        paymentMethodMetadata: PaymentMethodMetadata,
+        hasSavedPaymentMethods: Boolean
+    )
 
     fun launchManage(
         paymentMethodMetadata: PaymentMethodMetadata,
@@ -82,8 +86,17 @@ internal class DefaultEmbeddedSheetLauncher @AssistedInject constructor(
             }
         }
 
-    override fun launchForm(code: String, paymentMethodMetadata: PaymentMethodMetadata) {
-        formActivityLauncher.launch(FormContract.Args(code, paymentMethodMetadata))
+    override fun launchForm(
+        code: String,
+        paymentMethodMetadata: PaymentMethodMetadata,
+        hasSavedPaymentMethods: Boolean
+    ) {
+        val args = FormContract.Args(
+            selectedPaymentMethodCode = code,
+            paymentMethodMetadata = paymentMethodMetadata,
+            hasSavedPaymentMethods = hasSavedPaymentMethods
+        )
+        formActivityLauncher.launch(args)
     }
 
     override fun launchManage(

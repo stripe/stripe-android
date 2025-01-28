@@ -27,6 +27,7 @@ internal class FormActivityViewModel @Inject constructor(
             val component = DaggerFormActivityComponent.builder()
                 .paymentMethodMetadata(args.paymentMethodMetadata)
                 .selectedPaymentMethodCode(args.selectedPaymentMethodCode)
+                .hasSavedPaymentMethods(args.hasSavedPaymentMethods)
                 .context(extras.requireApplication())
                 .savedStateHandle(extras.createSavedStateHandle())
                 .build()
