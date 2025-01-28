@@ -1985,7 +1985,7 @@ internal class DefaultPaymentElementLoaderTest {
         }
 
     @Test
-    fun `When DefaultPaymentMethod not null, no saved selection, paymentMethod order correct`() = runTest {
+    fun `When DefaultPaymentMethod not null, no saved selection, defaultPaymentMethod first`() = runTest {
         val result = getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
             lastUsedPaymentMethod = null,
             defaultPaymentMethod = paymentMethodsForTestingOrdering[2],
@@ -1997,19 +1997,21 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `When DefaultPaymentMethod not null, no saved selection, selection correct`() = runTest {
+    fun `When DefaultPaymentMethod not null, no saved selection, defaultPaymentMethod selected`() = runTest {
+        val defaultPaymentMethod = paymentMethodsForTestingOrdering[2]
+
         val result = getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
             lastUsedPaymentMethod = null,
-            defaultPaymentMethod = paymentMethodsForTestingOrdering[2],
+            defaultPaymentMethod = defaultPaymentMethod,
         )
 
         assertThat((result.paymentSelection as? PaymentSelection.Saved)?.paymentMethod).isEqualTo(
-            PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "c3", customerId = "carol")
+            defaultPaymentMethod
         )
     }
 
     @Test
-    fun `When DefaultPaymentMethod not null, saved selection, paymentMethod order correct`() = runTest {
+    fun `When DefaultPaymentMethod not null, saved selection, defaultPaymentMethod first`() = runTest {
         val result = getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
             lastUsedPaymentMethod = paymentMethodsForTestingOrdering[1],
             defaultPaymentMethod = paymentMethodsForTestingOrdering[2],
@@ -2021,19 +2023,21 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `When DefaultPaymentMethod not null, saved selection, selection correct`() = runTest {
+    fun `When DefaultPaymentMethod not null, saved selection, defaultPaymentMethod selected`() = runTest {
+        val defaultPaymentMethod = paymentMethodsForTestingOrdering[2]
+
         val result = getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
             lastUsedPaymentMethod = paymentMethodsForTestingOrdering[1],
-            defaultPaymentMethod = paymentMethodsForTestingOrdering[2],
+            defaultPaymentMethod = defaultPaymentMethod,
         )
 
         assertThat((result.paymentSelection as? PaymentSelection.Saved)?.paymentMethod).isEqualTo(
-            PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "c3", customerId = "carol")
+            defaultPaymentMethod
         )
     }
 
     @Test
-    fun `When DefaultPaymentMethod not null, saved selection is same as defaultPaymentMethod, paymentMethod order correct`() = runTest {
+    fun `When DefaultPaymentMethod not null, saved selection is defaultPaymentMethod, defaultPaymentMethod first`() = runTest {
         val result = getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
             lastUsedPaymentMethod = paymentMethodsForTestingOrdering[2],
             defaultPaymentMethod = paymentMethodsForTestingOrdering[2],
@@ -2045,19 +2049,21 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `When DefaultPaymentMethod not null, saved selection is same as defaultPaymentMethod, selection correct`() = runTest {
+    fun `When DefaultPaymentMethod not null, saved selection is same as defaultPaymentMethod, defaultPaymentMethod selected`() = runTest {
+        val defaultPaymentMethod = paymentMethodsForTestingOrdering[2]
+
         val result = getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
             lastUsedPaymentMethod = paymentMethodsForTestingOrdering[2],
-            defaultPaymentMethod = paymentMethodsForTestingOrdering[2],
+            defaultPaymentMethod = defaultPaymentMethod,
         )
 
         assertThat((result.paymentSelection as? PaymentSelection.Saved)?.paymentMethod).isEqualTo(
-            PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "c3", customerId = "carol")
+            defaultPaymentMethod
         )
     }
 
     @Test
-    fun `When DefaultPaymentMethod null, no saved selection, paymentMethod order correct`() = runTest {
+    fun `When DefaultPaymentMethod null, no saved selection, order unchanged`() = runTest {
         val result = getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
             lastUsedPaymentMethod = null,
             defaultPaymentMethod = null,
@@ -2069,19 +2075,21 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `When DefaultPaymentMethod null, no saved selection, selection correct`() = runTest {
+    fun `When DefaultPaymentMethod null, no saved selection, first payment method selected`() = runTest {
+        val firstPaymentMethod = paymentMethodsForTestingOrdering[0]
+
         val result = getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
             lastUsedPaymentMethod = null,
             defaultPaymentMethod = null,
         )
 
         assertThat((result.paymentSelection as? PaymentSelection.Saved)?.paymentMethod).isEqualTo(
-            PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "a1", customerId = "alice")
+            firstPaymentMethod
         )
     }
 
     @Test
-    fun `When DefaultPaymentMethod null, saved selection first, paymentMethod order correct`() = runTest {
+    fun `When DefaultPaymentMethod null, saved selection first, order unchanged`() = runTest {
         val result = getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
             lastUsedPaymentMethod = paymentMethodsForTestingOrdering[0],
             defaultPaymentMethod = null,
@@ -2093,19 +2101,21 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `When DefaultPaymentMethod null, saved selection first, selection correct`() = runTest {
+    fun `When DefaultPaymentMethod null, saved selection first, first payment method selected`() = runTest {
+        val firstPaymentMethod = paymentMethodsForTestingOrdering[0]
+
         val result = getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
             lastUsedPaymentMethod = paymentMethodsForTestingOrdering[0],
             defaultPaymentMethod = null,
         )
 
         assertThat((result.paymentSelection as? PaymentSelection.Saved)?.paymentMethod).isEqualTo(
-            PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "a1", customerId = "alice")
+            firstPaymentMethod
         )
     }
 
     @Test
-    fun `When DefaultPaymentMethod null, saved selection not first, paymentMethod order correct`() = runTest {
+    fun `When DefaultPaymentMethod null, saved selection not first, order unchanged`() = runTest {
         val result = getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
             lastUsedPaymentMethod = paymentMethodsForTestingOrdering[1],
             defaultPaymentMethod = null,
@@ -2117,14 +2127,16 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `When DefaultPaymentMethod null, saved selection not first, selection correct`() = runTest {
+    fun `When DefaultPaymentMethod null, saved selection not first, first payment method selected`() = runTest {
+        val firstPaymentMethod = paymentMethodsForTestingOrdering[0]
+
         val result = getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
             lastUsedPaymentMethod = paymentMethodsForTestingOrdering[1],
             defaultPaymentMethod = null,
         )
 
         assertThat((result.paymentSelection as? PaymentSelection.Saved)?.paymentMethod).isEqualTo(
-            PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "a1", customerId = "alice")
+            firstPaymentMethod
         )
     }
 
