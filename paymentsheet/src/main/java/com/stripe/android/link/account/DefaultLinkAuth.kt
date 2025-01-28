@@ -2,17 +2,20 @@ package com.stripe.android.link.account
 
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.injection.APPLICATION_ID
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.model.EmailSource
 import com.stripe.attestation.AttestationError
 import com.stripe.attestation.IntegrityRequestManager
+import javax.inject.Inject
+import javax.inject.Named
 
-internal class DefaultLinkAuth constructor(
+internal class DefaultLinkAuth @Inject constructor(
     private val linkConfiguration: LinkConfiguration,
     private val linkAccountManager: LinkAccountManager,
     private val integrityRequestManager: IntegrityRequestManager,
-    private val applicationId: String
+    @Named(APPLICATION_ID) private val applicationId: String
 ) : LinkAuth {
     override suspend fun signUp(
         email: String,
