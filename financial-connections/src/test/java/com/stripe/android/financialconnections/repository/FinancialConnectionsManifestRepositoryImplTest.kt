@@ -59,7 +59,7 @@ internal class FinancialConnectionsManifestRepositoryImplTest {
                     repository.getOrSynchronizeFinancialConnectionsSession(
                         clientSecret = "",
                         applicationId = "",
-                        attestationInitialized = false,
+                        supportsAppVerification = false,
                         reFetchCondition = None::shouldReFetch
                     )
                 },
@@ -67,7 +67,7 @@ internal class FinancialConnectionsManifestRepositoryImplTest {
                     repository.getOrSynchronizeFinancialConnectionsSession(
                         clientSecret = "",
                         applicationId = "",
-                        attestationInitialized = false,
+                        supportsAppVerification = false,
                         reFetchCondition = None::shouldReFetch
                     )
                 }
@@ -86,7 +86,7 @@ internal class FinancialConnectionsManifestRepositoryImplTest {
                 repository.getOrSynchronizeFinancialConnectionsSession(
                     clientSecret = "",
                     applicationId = "",
-                    attestationInitialized = false,
+                    supportsAppVerification = false,
                     reFetchCondition = None::shouldReFetch
                 )
 

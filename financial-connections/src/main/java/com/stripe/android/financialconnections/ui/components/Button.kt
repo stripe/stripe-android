@@ -88,7 +88,7 @@ internal fun FinancialConnectionsButton(
         // due to its background color. Otherwise, the spinner looks inverted.
         when (type) {
             Primary -> Brush.sweepGradient(listOf(colors.borderBrand, colors.contentOnBrand))
-            Secondary -> Brush.sweepGradient(listOf(colors.iconWhite, colors.borderBrand))
+            Secondary -> Brush.sweepGradient(listOf(colors.buttonSecondary, colors.textDefault))
         }
     }
 
@@ -276,6 +276,14 @@ internal fun FinancialConnectionsButtonPreview(
                 loading = false
             ) {
                 Text(text = "Secondary disabled")
+            }
+            FinancialConnectionsButton(
+                onClick = { },
+                modifier = Modifier.fillMaxWidth(),
+                type = Secondary,
+                loading = true,
+            ) {
+                Text(text = "Secondary loading")
             }
         }
     }

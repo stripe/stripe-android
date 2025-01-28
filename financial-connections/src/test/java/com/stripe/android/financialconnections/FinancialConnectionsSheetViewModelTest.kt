@@ -101,7 +101,7 @@ class FinancialConnectionsSheetViewModelTest {
                 )
             )
 
-            verify(getOrFetchSync).invoke(refetchCondition = Always, attestationInitialized = true)
+            verify(getOrFetchSync).invoke(refetchCondition = Always, supportsAppVerification = true)
         }
 
     @Test
@@ -115,7 +115,7 @@ class FinancialConnectionsSheetViewModelTest {
                 )
             )
 
-            verify(getOrFetchSync).invoke(refetchCondition = Always, attestationInitialized = false)
+            verify(getOrFetchSync).invoke(refetchCondition = Always, supportsAppVerification = false)
         }
 
     @Test

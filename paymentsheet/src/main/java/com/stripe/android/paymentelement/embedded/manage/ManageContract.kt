@@ -16,7 +16,7 @@ internal sealed interface ManageResult : Parcelable {
     @Parcelize
     data class Complete(
         val customerState: CustomerState,
-        val selection: PaymentSelection,
+        val selection: PaymentSelection?,
     ) : ManageResult
 
     @Parcelize

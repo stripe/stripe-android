@@ -105,7 +105,7 @@ class CardAccountRangeService(
 
     fun updateAccountRangesResult(accountRanges: List<AccountRange>) {
         this.accountRanges = accountRanges.filter { cardBrandFilter.isAccepted(it.brand) }
-        accountRangeResultListener.onAccountRangesResult(this.accountRanges)
+        accountRangeResultListener.onAccountRangesResult(this.accountRanges, accountRanges)
     }
 
     private fun shouldQueryRepository(
@@ -125,7 +125,8 @@ class CardAccountRangeService(
         return shouldQuery
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     interface AccountRangeResultListener {
-        fun onAccountRangesResult(accountRanges: List<AccountRange>)
+        fun onAccountRangesResult(accountRanges: List<AccountRange>, unfilteredAccountRanges: List<AccountRange>)
     }
 }

@@ -13,6 +13,8 @@ internal class FakeUpdatePaymentMethodInteractor(
     override val canRemove: Boolean,
     override val isExpiredCard: Boolean,
     override val isModifiablePaymentMethod: Boolean,
+    override val hasValidBrandChoices: Boolean = true,
+    override val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
     val viewActionRecorder: ViewActionRecorder<UpdatePaymentMethodInteractor.ViewAction>?,
     initialState: UpdatePaymentMethodInteractor.State,
 ) : UpdatePaymentMethodInteractor {
@@ -20,7 +22,6 @@ internal class FakeUpdatePaymentMethodInteractor(
     override val screenTitle: ResolvableString? = UpdatePaymentMethodInteractor.screenTitle(
         displayableSavedPaymentMethod
     )
-    override val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter
     override val topBarState: PaymentSheetTopBarState = PaymentSheetTopBarStateFactory.create(
         isLiveMode = false,
         editable = PaymentSheetTopBarState.Editable.Never,

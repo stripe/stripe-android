@@ -733,13 +733,6 @@ public final class com/stripe/android/paymentelement/embedded/form/FormResult$Co
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/paymentelement/embedded/manage/ComposableSingletons$ManageActivityKt {
-	public static final field INSTANCE Lcom/stripe/android/paymentelement/embedded/manage/ComposableSingletons$ManageActivityKt;
-	public static field lambda-1 Lkotlin/jvm/functions/Function2;
-	public fun <init> ()V
-	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
-}
-
 public final class com/stripe/android/paymentelement/embedded/manage/ManageContract$Args$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentelement/embedded/manage/ManageContract$Args;

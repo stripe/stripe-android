@@ -26,6 +26,7 @@ internal interface UpdatePaymentMethodInteractor {
     val cardBrandFilter: CardBrandFilter
     val isExpiredCard: Boolean
     val isModifiablePaymentMethod: Boolean
+    val hasValidBrandChoices: Boolean
 
     val state: StateFlow<State>
 
@@ -89,7 +90,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
     private val cardBrandChoice = MutableStateFlow(getInitialCardBrandChoice())
     private val cardBrandHasBeenChanged = MutableStateFlow(false)
     private val savedCardBrand = MutableStateFlow(getInitialCardBrandChoice())
-
+    override val hasValidBrandChoices = hasValidBrandChoices()
     override val isExpiredCard = paymentMethodIsExpiredCard()
     override val screenTitle: ResolvableString? = UpdatePaymentMethodInteractor.screenTitle(
         displayableSavedPaymentMethod
@@ -155,7 +156,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
             val updateResult = updateExecutor(displayableSavedPaymentMethod.paymentMethod, newCardBrand)
 
             updateResult.onSuccess {
-                savedCardBrand.emit(CardBrandChoice(brand = newCardBrand))
+                savedCardBrand.emit(CardBrandChoice(brand = newCardBrand, enabled = true))
                 cardBrandHasBeenChanged.emit(false)
             }.onFailure {
                 error.emit(it.stripeErrorMessage())
@@ -173,8 +174,8 @@ internal class DefaultUpdatePaymentMethodInteractor(
 
     private fun getInitialCardBrandChoice(): CardBrandChoice {
         return when (val savedPaymentMethod = displayableSavedPaymentMethod.savedPaymentMethod) {
-            is SavedPaymentMethod.Card -> savedPaymentMethod.card.getPreferredChoice()
-            else -> CardBrandChoice(brand = CardBrand.Unknown)
+            is SavedPaymentMethod.Card -> savedPaymentMethod.card.getPreferredChoice(cardBrandFilter)
+            else -> CardBrandChoice(brand = CardBrand.Unknown, enabled = true)
         }
     }
 
@@ -188,6 +189,13 @@ internal class DefaultUpdatePaymentMethodInteractor(
         } else {
             null
         }
+    }
+
+    private fun hasValidBrandChoices(): Boolean {
+        val filteredCardBrands = displayableSavedPaymentMethod.paymentMethod.card?.networks?.available?.map {
+            CardBrand.fromCode(it)
+        }?.filter { cardBrandFilter.isAccepted(it) }
+        return (filteredCardBrands?.size ?: 0) > 1
     }
 }
 

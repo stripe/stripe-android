@@ -2592,7 +2592,8 @@ class CustomerSheetViewModelTest {
                 editViewState.updatePaymentMethodInteractor.handleViewAction(
                     UpdatePaymentMethodInteractor.ViewAction.BrandChoiceChanged(
                         CardBrandChoice(
-                            brand = CardBrand.Visa
+                            brand = CardBrand.Visa,
+                            enabled = true
                         )
                     )
                 )
@@ -2780,7 +2781,9 @@ class CustomerSheetViewModelTest {
             editViewState.updatePaymentMethodInteractor.handleViewAction(
                 UpdatePaymentMethodInteractor.ViewAction.BrandChoiceChanged(
                     CardBrandChoice(
-                        brand = CardBrand.Visa
+                        brand = CardBrand.Visa,
+                        enabled = true
+
                     )
                 )
             )
@@ -2875,7 +2878,10 @@ class CustomerSheetViewModelTest {
             val editViewState = awaitViewState<CustomerSheetViewState.UpdatePaymentMethod>()
             editViewState.updatePaymentMethodInteractor.handleViewAction(
                 UpdatePaymentMethodInteractor.ViewAction.BrandChoiceChanged(
-                    CardBrandChoice(brand = CardBrand.Visa)
+                    CardBrandChoice(
+                        brand = CardBrand.Visa,
+                        enabled = true
+                    )
                 )
             )
 
@@ -2906,7 +2912,10 @@ class CustomerSheetViewModelTest {
             val editViewState = awaitViewState<CustomerSheetViewState.UpdatePaymentMethod>()
             editViewState.updatePaymentMethodInteractor.handleViewAction(
                 UpdatePaymentMethodInteractor.ViewAction.BrandChoiceChanged(
-                    CardBrandChoice(brand = CardBrand.Visa)
+                    CardBrandChoice(
+                        brand = CardBrand.Visa,
+                        enabled = true
+                    )
                 )
             )
 
@@ -3457,7 +3466,8 @@ class CustomerSheetViewModelTest {
             editViewState.updatePaymentMethodInteractor.handleViewAction(
                 UpdatePaymentMethodInteractor.ViewAction.BrandChoiceChanged(
                     CardBrandChoice(
-                        brand = CardBrand.Visa
+                        brand = CardBrand.Visa,
+                        enabled = true
                     )
                 )
             )

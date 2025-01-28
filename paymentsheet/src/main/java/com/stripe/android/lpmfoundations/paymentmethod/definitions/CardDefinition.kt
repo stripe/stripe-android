@@ -120,6 +120,7 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
                     LinkFormElement(
                         configuration = metadata.linkInlineConfiguration,
                         linkConfigurationCoordinator = arguments.linkConfigurationCoordinator,
+                        initialLinkUserInput = arguments.initialLinkUserInput,
                         onLinkInlineSignupStateChanged = arguments.onLinkInlineSignupStateChanged,
                     )
                 )

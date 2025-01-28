@@ -19,15 +19,29 @@ import androidx.navigation.PopUpToBuilder
 import androidx.savedstate.SavedStateRegistryOwner
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.cards.CardAccountRangeRepository
+import com.stripe.android.core.Logger
 import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.account.LinkAccountManager
+import com.stripe.android.link.analytics.FakeLinkEventsReporter
+import com.stripe.android.link.analytics.LinkEventsReporter
+import com.stripe.android.link.confirmation.FakeLinkConfirmationHandler
+import com.stripe.android.link.confirmation.LinkConfirmationHandler
+import com.stripe.android.link.gate.FakeLinkGate
+import com.stripe.android.link.gate.LinkGate
+import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.testing.FakeErrorReporter
+import com.stripe.android.testing.FakeLogger
 import com.stripe.android.utils.DummyActivityResultCaller
+import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
+import com.stripe.attestation.IntegrityRequestManager
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -295,6 +309,115 @@ internal class LinkActivityViewModelTest {
         )
     }
 
+    @Test
+    fun `onCreate should launch web when attestation fails and useAttestationEndpoints is enabled`() = runTest {
+        var launchWebConfig: LinkConfiguration? = null
+        val linkAccountManager = FakeLinkAccountManager()
+        val navController = navController()
+        val linkGate = FakeLinkGate()
+        val integrityRequestManager = FakeIntegrityRequestManager()
+        val errorReporter = FakeErrorReporter()
+
+        integrityRequestManager.prepareResult = Result.failure(Throwable("oops"))
+        linkGate.setUseAttestationEndpoints(true)
+
+        val vm = createViewModel(
+            linkAccountManager = linkAccountManager,
+            linkGate = linkGate,
+            integrityRequestManager = integrityRequestManager,
+            errorReporter = errorReporter,
+            launchWeb = { config ->
+                launchWebConfig = config
+            }
+        )
+        vm.navController = navController
+        linkAccountManager.setAccountStatus(AccountStatus.Verified)
+
+        vm.onCreate(mock())
+
+        advanceUntilIdle()
+
+        integrityRequestManager.awaitPrepareCall()
+        assertNavigation(
+            navController = navController,
+            screen = LinkScreen.Loading,
+            clearStack = true,
+            launchSingleTop = false
+        )
+        assertThat(launchWebConfig).isNotNull()
+        assertThat(errorReporter.getLoggedErrors())
+            .containsExactly(
+                ErrorReporter.UnexpectedErrorEvent.LINK_NATIVE_FAILED_TO_PREPARE_INTEGRITY_MANAGER.eventName
+            )
+        integrityRequestManager.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `onCreate shouldn't launch web when integrity preparation passes and useAttestationEndpoints is enabled`() =
+        runTest {
+            var launchWebConfig: LinkConfiguration? = null
+            val linkAccountManager = FakeLinkAccountManager()
+            val navController = navController()
+            val linkGate = FakeLinkGate()
+            val integrityRequestManager = FakeIntegrityRequestManager()
+
+            linkGate.setUseAttestationEndpoints(true)
+
+            val vm = createViewModel(
+                linkAccountManager = linkAccountManager,
+                linkGate = linkGate,
+                integrityRequestManager = integrityRequestManager,
+                launchWeb = { config ->
+                    launchWebConfig = config
+                }
+            )
+            vm.navController = navController
+            linkAccountManager.setAccountStatus(AccountStatus.Verified)
+
+            vm.onCreate(mock())
+
+            advanceUntilIdle()
+
+            integrityRequestManager.awaitPrepareCall()
+            assertNavigation(
+                navController = navController,
+                screen = LinkScreen.Wallet,
+                clearStack = true,
+                launchSingleTop = true
+            )
+            assertThat(launchWebConfig).isNull()
+            integrityRequestManager.ensureAllEventsConsumed()
+        }
+
+    @Test
+    fun `onCreate should not prepare integrity when useAttestationEndpoints is disabled`() = runTest {
+        var launchWebConfig: LinkConfiguration? = null
+        val linkAccountManager = FakeLinkAccountManager()
+        val navController = navController()
+        val linkGate = FakeLinkGate()
+        val integrityRequestManager = FakeIntegrityRequestManager()
+
+        linkGate.setUseAttestationEndpoints(false)
+
+        val vm = createViewModel(
+            linkAccountManager = linkAccountManager,
+            linkGate = linkGate,
+            integrityRequestManager = integrityRequestManager,
+            launchWeb = { config ->
+                launchWebConfig = config
+            }
+        )
+        vm.navController = navController
+        linkAccountManager.setAccountStatus(AccountStatus.Verified)
+
+        vm.onCreate(mock())
+
+        advanceUntilIdle()
+
+        assertThat(launchWebConfig).isNull()
+        integrityRequestManager.ensureAllEventsConsumed()
+    }
+
     private fun navController(): NavHostController {
         val navController: NavHostController = mock()
         val mockGraph: NavGraph = mock()
@@ -342,16 +465,24 @@ internal class LinkActivityViewModelTest {
         confirmationHandler: ConfirmationHandler = FakeConfirmationHandler(),
         eventReporter: EventReporter = FakeEventReporter(),
         navController: NavHostController = navController(),
-        dismissWithResult: (LinkActivityResult) -> Unit = {}
+        integrityRequestManager: IntegrityRequestManager = FakeIntegrityRequestManager(),
+        linkGate: LinkGate = FakeLinkGate(),
+        errorReporter: ErrorReporter = FakeErrorReporter(),
+        dismissWithResult: (LinkActivityResult) -> Unit = {},
+        launchWeb: (LinkConfiguration) -> Unit = {}
     ): LinkActivityViewModel {
         return LinkActivityViewModel(
             linkAccountManager = linkAccountManager,
-            activityRetainedComponent = mock(),
+            activityRetainedComponent = FakeNativeLinkComponent(),
             eventReporter = eventReporter,
-            confirmationHandlerFactory = { confirmationHandler }
+            confirmationHandlerFactory = { confirmationHandler },
+            integrityRequestManager = integrityRequestManager,
+            linkGate = linkGate,
+            errorReporter = errorReporter
         ).apply {
             this.navController = navController
             this.dismissWithResult = dismissWithResult
+            this.launchWebFlow = launchWeb
         }
     }
 
@@ -371,3 +502,17 @@ internal class LinkActivityViewModelTest {
         private const val FAKE_GRAPH_ID = 123
     }
 }
+
+private class FakeNativeLinkComponent(
+    override val linkAccountManager: LinkAccountManager = FakeLinkAccountManager(),
+    override val configuration: LinkConfiguration = TestFactory.LINK_CONFIGURATION,
+    override val linkEventsReporter: LinkEventsReporter = FakeLinkEventsReporter(),
+    override val logger: Logger = FakeLogger(),
+    override val linkConfirmationHandlerFactory: LinkConfirmationHandler.Factory = LinkConfirmationHandler.Factory {
+        FakeLinkConfirmationHandler()
+    },
+    override val webLinkActivityContract: WebLinkActivityContract = mock(),
+    override val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory =
+        NullCardAccountRangeRepositoryFactory,
+    override val viewModel: LinkActivityViewModel = mock()
+) : NativeLinkComponent

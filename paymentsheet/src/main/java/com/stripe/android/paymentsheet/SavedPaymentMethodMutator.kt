@@ -162,10 +162,6 @@ internal class SavedPaymentMethodMutator(
             )
         )
 
-        if (customerStateHolder.mostRecentlySelectedSavedPaymentMethod.value?.id == paymentMethodId) {
-            customerStateHolder.updateMostRecentlySelectedSavedPaymentMethod(null)
-        }
-
         if ((selection.value as? PaymentSelection.Saved)?.paymentMethod?.id == paymentMethodId) {
             clearSelection()
         }

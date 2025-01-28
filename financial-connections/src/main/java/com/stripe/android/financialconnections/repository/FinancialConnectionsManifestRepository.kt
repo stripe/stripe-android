@@ -40,7 +40,7 @@ internal interface FinancialConnectionsManifestRepository {
     suspend fun getOrSynchronizeFinancialConnectionsSession(
         clientSecret: String,
         applicationId: String,
-        attestationInitialized: Boolean,
+        supportsAppVerification: Boolean,
         reFetchCondition: (SynchronizeSessionResponse) -> Boolean
     ): SynchronizeSessionResponse
 
@@ -207,17 +207,17 @@ private class FinancialConnectionsManifestRepositoryImpl(
     override suspend fun getOrSynchronizeFinancialConnectionsSession(
         clientSecret: String,
         applicationId: String,
-        attestationInitialized: Boolean,
+        supportsAppVerification: Boolean,
         reFetchCondition: (SynchronizeSessionResponse) -> Boolean
     ): SynchronizeSessionResponse = mutex.withLock {
         val cachedSync = cachedSynchronizeSessionResponse?.takeUnless(reFetchCondition)
-        return cachedSync ?: synchronize(applicationId, clientSecret, attestationInitialized)
+        return cachedSync ?: synchronize(applicationId, clientSecret, supportsAppVerification)
     }
 
     private suspend fun synchronize(
         applicationId: String,
         clientSecret: String,
-        attestationInitialized: Boolean,
+        supportsAppVerification: Boolean,
     ): SynchronizeSessionResponse = requestExecutor.execute(
         apiRequestFactory.createPost(
             url = synchronizeSessionUrl,
@@ -231,8 +231,8 @@ private class FinancialConnectionsManifestRepositoryImpl(
                     "forced_authflow_version" to "v3",
                     PARAMS_FULLSCREEN to true,
                     PARAMS_HIDE_CLOSE_BUTTON to true,
-                    PARAMS_SUPPORT_APP_VERIFICATION to attestationInitialized,
-                    PARAMS_VERIFY_APP_ID to applicationId.takeIf { attestationInitialized },
+                    PARAMS_SUPPORT_APP_VERIFICATION to supportsAppVerification,
+                    PARAMS_VERIFY_APP_ID to applicationId,
                     NetworkConstants.PARAMS_APPLICATION_ID to applicationId
                 ),
                 NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret

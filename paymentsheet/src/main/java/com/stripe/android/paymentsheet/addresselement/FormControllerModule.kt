@@ -34,8 +34,10 @@ internal object FormControllerModule {
             requiresMandate = false,
             /*
              * `FormController` is only used by `AddressElement` now so it does not require a
-             * `LinkConfigurationCoordinator` instance or a callback for reacting to `InlineSignUpViewState` changes.
+             * `LinkConfigurationCoordinator` instance, a callback for reacting to `InlineSignUpViewState` changes, or
+             * initial user input for Link signup.
              */
+            initialLinkUserInput = null,
             linkConfigurationCoordinator = null,
             onLinkInlineSignupStateChanged = {
                 throw IllegalStateException(

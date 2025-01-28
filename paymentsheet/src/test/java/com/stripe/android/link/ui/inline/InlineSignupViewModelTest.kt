@@ -1,5 +1,6 @@
 package com.stripe.android.link.ui.inline
 
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
@@ -52,6 +53,7 @@ class InlineSignupViewModelTest {
                 linkAccountManager = linkAccountManager,
                 linkEventsReporter = linkEventsReporter,
                 logger = Logger.noop(),
+                initialUserInput = null,
             )
 
             linkAccountManager.lookupConsumerResult = Result.success(null)
@@ -389,12 +391,103 @@ class InlineSignupViewModelTest {
                 )
         }
 
+    @Test
+    fun `Initial sign up input should be populated`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val email = "restored@email.com"
+            val phone = "+19987654321"
+            val country = "CA"
+            val name = "John Doe"
+
+            val viewModel = createViewModel(
+                countryCode = CountryCode.US,
+                prefilledEmail = CUSTOMER_EMAIL,
+                prefilledPhone = "+1$CUSTOMER_PHONE",
+                prefilledName = CUSTOMER_NAME,
+                signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
+                initialUserInput = UserInput.SignUp(
+                    email = email,
+                    phone = phone,
+                    country = country,
+                    name = name,
+                    consentAction = SignUpConsentAction.CheckboxWithPrefilledEmailAndPhone,
+                ),
+            )
+
+            assertThat(viewModel.emailController.rawFieldValue.value).isEqualTo(email)
+            assertThat(viewModel.phoneController.rawFieldValue.value).isEqualTo(phone)
+            assertThat(viewModel.phoneController.countryDropdownController.rawFieldValue.value).isEqualTo(country)
+            assertThat(viewModel.nameController.rawFieldValue.value).isEqualTo(name)
+
+            val viewState = viewModel.viewState.value
+
+            assertThat(viewState.isExpanded).isTrue()
+            assertThat(viewState.userInput)
+                .isEqualTo(
+                    UserInput.SignUp(
+                        email = email,
+                        phone = phone,
+                        country = country,
+                        name = name,
+                        consentAction = SignUpConsentAction.CheckboxWithPrefilledEmailAndPhone,
+                    )
+                )
+        }
+
+    @Test
+    fun `Initial sign in input with returned lookup should be populated`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val email = "restored@email.com"
+
+            linkAccountManager.lookupConsumerResult = Result.success(
+                LinkAccount(
+                    consumerSession = ConsumerSession(
+                        clientSecret = "sess_123",
+                        emailAddress = "restored@email.com",
+                        redactedPhoneNumber = "**********",
+                        redactedFormattedPhoneNumber = "* *** *** ****"
+                    )
+                )
+            )
+
+            val viewModel = createViewModel(
+                countryCode = CountryCode.US,
+                prefilledEmail = CUSTOMER_EMAIL,
+                signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
+                initialUserInput = UserInput.SignIn(
+                    email = email,
+                ),
+            )
+
+            assertThat(viewModel.emailController.rawFieldValue.value).isEqualTo(email)
+            assertThat(viewModel.phoneController.rawFieldValue.value).isEqualTo("+1")
+            assertThat(viewModel.nameController.rawFieldValue.value).isEmpty()
+
+            viewModel.viewState.test {
+                val initialViewState = awaitItem()
+
+                assertThat(initialViewState.isExpanded).isTrue()
+                assertThat(initialViewState.userInput).isNull()
+
+                val viewState = awaitItem()
+
+                assertThat(viewState.isExpanded).isTrue()
+                assertThat(viewState.userInput)
+                    .isEqualTo(
+                        UserInput.SignIn(
+                            email = email,
+                        )
+                    )
+            }
+        }
+
     private fun createViewModel(
         countryCode: CountryCode = CountryCode.US,
         prefilledEmail: String? = null,
         prefilledName: String? = null,
         prefilledPhone: String? = null,
         signupMode: LinkSignupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
+        initialUserInput: UserInput? = null,
     ) = InlineSignupViewModel(
         config = TestFactory.LINK_CONFIGURATION.copy(
             stripeIntent = stripeIntent(countryCode),
@@ -410,6 +503,7 @@ class InlineSignupViewModelTest {
         linkAccountManager = linkAccountManager,
         linkEventsReporter = linkEventsReporter,
         logger = Logger.noop(),
+        initialUserInput = initialUserInput,
     )
 
     private fun mockConsumerSessionWithVerificationSession(

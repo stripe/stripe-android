@@ -1,5 +1,6 @@
 package com.stripe.android.link.injection
 
+import android.app.Application
 import android.content.Context
 import androidx.core.os.LocaleListCompat
 import com.stripe.android.BuildConfig
@@ -26,6 +27,8 @@ import com.stripe.android.link.analytics.DefaultLinkEventsReporter
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.confirmation.DefaultLinkConfirmationHandler
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
+import com.stripe.android.link.gate.DefaultLinkGate
+import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.repositories.LinkApiRepository
 import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.networking.StripeApiRepository
@@ -38,6 +41,9 @@ import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.repository.ConsumersApiService
 import com.stripe.android.repository.ConsumersApiServiceImpl
+import com.stripe.attestation.IntegrityRequestManager
+import com.stripe.attestation.IntegrityStandardRequestManager
+import com.stripe.attestation.RealStandardIntegrityManagerFactory
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -76,6 +82,10 @@ internal interface NativeLinkModule {
     @Binds
     @NativeLinkScope
     fun bindsEventReporter(eventReporter: DefaultEventReporter): EventReporter
+
+    @Binds
+    @NativeLinkScope
+    fun bindsLinkGate(linkGate: DefaultLinkGate): LinkGate
 
     @SuppressWarnings("TooManyFunctions")
     companion object {
@@ -160,6 +170,18 @@ internal interface NativeLinkModule {
         fun provideLinkConfirmationHandlerFactory(
             factory: DefaultLinkConfirmationHandler.Factory
         ): LinkConfirmationHandler.Factory = factory
+
+        @Provides
+        @NativeLinkScope
+        fun providesIntegrityStandardRequestManager(
+            context: Application
+        ): IntegrityRequestManager = IntegrityStandardRequestManager(
+            cloudProjectNumber = 577365562050, // stripe-payments-sdk-prod
+            logError = { message, error ->
+                Logger.getInstance(BuildConfig.DEBUG).error(message, error)
+            },
+            factory = RealStandardIntegrityManagerFactory(context)
+        )
 
         @Provides
         @NativeLinkScope

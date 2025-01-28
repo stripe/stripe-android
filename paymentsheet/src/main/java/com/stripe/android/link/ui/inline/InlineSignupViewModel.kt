@@ -34,37 +34,62 @@ import kotlinx.coroutines.launch
 
 internal const val LOOKUP_DEBOUNCE_MS = 1000L
 
-internal class InlineSignupViewModel @AssistedInject constructor(
-    @Assisted val signupMode: LinkSignupMode,
+internal class InlineSignupViewModel(
+    val initialUserInput: UserInput?,
+    val signupMode: LinkSignupMode,
     config: LinkConfiguration,
     private val linkAccountManager: LinkAccountManager,
     private val linkEventsReporter: LinkEventsReporter,
     private val logger: Logger,
+    private val lookupDelay: Long = LOOKUP_DEBOUNCE_MS,
 ) : ViewModel() {
+    @AssistedInject constructor(
+        @Assisted initialUserInput: UserInput?,
+        @Assisted signupMode: LinkSignupMode,
+        config: LinkConfiguration,
+        linkAccountManager: LinkAccountManager,
+        linkEventsReporter: LinkEventsReporter,
+        logger: Logger,
+    ) : this(
+        initialUserInput = initialUserInput,
+        signupMode = signupMode,
+        config = config,
+        linkAccountManager = linkAccountManager,
+        linkEventsReporter = linkEventsReporter,
+        logger = logger,
+        lookupDelay = LOOKUP_DEBOUNCE_MS,
+    )
 
-    private val initialViewState = InlineSignupViewState.create(signupMode, config)
+    private val hasInitialUserInput = initialUserInput != null
+
+    private val initialViewState = InlineSignupViewState.create(signupMode, config, hasInitialUserInput)
     private val _viewState = MutableStateFlow(initialViewState)
     val viewState: StateFlow<InlineSignupViewState> = _viewState
 
     private val showOptionalLabel = signupMode == LinkSignupMode.AlongsideSaveForFutureUse
     private val prefillEligibleFields = initialViewState.prefillEligibleFields
 
+    private val initialEmail = initialUserInput?.email()
+    private val initialPhone = initialUserInput?.phone()
+    private val initialName = initialUserInput?.name()
+    private val initialCountry = initialUserInput?.country()
+
     private val prefilledEmail = config.customerInfo.email.takeIf { Email in prefillEligibleFields }
     private val prefilledPhone = config.customerInfo.phone.takeIf { Phone in prefillEligibleFields }.orEmpty()
     private val prefilledName = config.customerInfo.name.takeIf { Name in prefillEligibleFields }
 
     val emailController = EmailConfig.createController(
-        initialValue = prefilledEmail,
+        initialValue = initialEmail ?: prefilledEmail,
         showOptionalLabel = initialViewState.isShowingEmailFirst && showOptionalLabel,
     )
 
     val phoneController = PhoneNumberController.createPhoneNumberController(
-        initialValue = prefilledPhone,
-        initiallySelectedCountryCode = config.customerInfo.billingCountryCode,
+        initialValue = initialPhone ?: prefilledPhone,
+        initiallySelectedCountryCode = initialCountry ?: config.customerInfo.billingCountryCode,
         showOptionalLabel = initialViewState.isShowingPhoneFirst && showOptionalLabel,
     )
 
-    val nameController = NameConfig.createController(prefilledName)
+    val nameController = NameConfig.createController(initialValue = initialName ?: prefilledName)
 
     val sectionController: SectionController = SectionController(
         label = null,
@@ -101,7 +126,7 @@ internal class InlineSignupViewModel @AssistedInject constructor(
     val requiresNameCollection: Boolean
         get() = Name in initialViewState.fields
 
-    private var hasExpanded = false
+    private var hasExpanded = hasInitialUserInput
 
     init {
         watchUserInput()
@@ -172,7 +197,7 @@ internal class InlineSignupViewModel @AssistedInject constructor(
 
         consumerEmail.drop(itemsToSkip).collectLatest { email ->
             if (!email.isNullOrBlank()) {
-                delay(LOOKUP_DEBOUNCE_MS)
+                delay(lookupDelay)
                 onStateChanged(SignUpState.VerifyingEmail)
                 lookupConsumerEmail(email)
             } else {
@@ -243,6 +268,34 @@ internal class InlineSignupViewModel @AssistedInject constructor(
         )
     }
 
+    private fun UserInput.email(): String {
+        return when (this) {
+            is UserInput.SignUp -> email
+            is UserInput.SignIn -> email
+        }
+    }
+
+    private fun UserInput.phone(): String? {
+        return when (this) {
+            is UserInput.SignUp -> phone
+            is UserInput.SignIn -> null
+        }
+    }
+
+    private fun UserInput.name(): String? {
+        return when (this) {
+            is UserInput.SignUp -> name
+            is UserInput.SignIn -> null
+        }
+    }
+
+    private fun UserInput.country(): String? {
+        return when (this) {
+            is UserInput.SignUp -> country
+            is UserInput.SignIn -> null
+        }
+    }
+
     private fun clearError() {
         _errorMessage.value = null
     }
@@ -278,11 +331,12 @@ internal class InlineSignupViewModel @AssistedInject constructor(
 
     internal class Factory(
         private val signupMode: LinkSignupMode,
+        private val initialUserInput: UserInput?,
         private val linkComponent: LinkComponent
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return linkComponent.inlineSignupViewModelFactory.create(signupMode) as T
+            return linkComponent.inlineSignupViewModelFactory.create(signupMode, initialUserInput) as T
         }
     }
 }
