@@ -94,7 +94,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
                 .createIntentCallback(viewModel::createIntentCallback)
                 .analyticEventCallback({ event ->
                     when (event) {
-                        is AnalyticEvent.PresentPaymentSheet -> {
+                        is AnalyticEvent.PresentedSheet -> {
                             Log.d("AnalyticEvent", "Event: $event")
                         }
                         is AnalyticEvent.DisplayedPaymentMethodForm -> {
