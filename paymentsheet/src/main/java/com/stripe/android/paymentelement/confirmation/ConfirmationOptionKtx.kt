@@ -116,6 +116,9 @@ private fun PaymentSelection.Link.toConfirmationOption(
     linkConfiguration: LinkConfiguration?
 ): LinkConfirmationOption? {
     return linkConfiguration?.let {
-        LinkConfirmationOption(configuration = linkConfiguration)
+        LinkConfirmationOption(
+            configuration = linkConfiguration,
+            eagerLaunch = eagerLaunch
+        )
     }
 }

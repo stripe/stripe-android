@@ -42,7 +42,7 @@ internal class LinkActivityViewModel @Inject constructor(
     private val errorReporter: ErrorReporter,
 ) : ViewModel(), DefaultLifecycleObserver {
     val confirmationHandler = confirmationHandlerFactory.create(viewModelScope)
-    private val _linkState = MutableStateFlow(
+    private val _linkAppBarState = MutableStateFlow(
         value = LinkAppBarState(
             navigationIcon = R.drawable.stripe_link_close,
             showHeader = true,
@@ -50,7 +50,10 @@ internal class LinkActivityViewModel @Inject constructor(
             email = null,
         )
     )
-    val linkState: StateFlow<LinkAppBarState> = _linkState
+    val linkAppBarState: StateFlow<LinkAppBarState> = _linkAppBarState
+
+    private val _linkScreenState = MutableStateFlow<State>(State.Loading)
+    val linkScreenState: StateFlow<State> = _linkScreenState
 
     val linkAccount: LinkAccount?
         get() = linkAccountManager.linkAccount.value
@@ -115,12 +118,20 @@ internal class LinkActivityViewModel @Inject constructor(
         launchWebFlow = null
     }
 
+    fun onVerificationSucceeded() {
+        _linkScreenState.value = State.Link
+    }
+
+    fun onDismissClicked() {
+        dismissWithResult?.invoke(LinkActivityResult.Canceled())
+    }
+
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
         viewModelScope.launch {
             warmUpIntegrityManager().fold(
                 onSuccess = {
-                    navigateToInitialScreen()
+                    navigateToInitialState()
                 },
                 onFailure = { error ->
                     moveToWeb()
@@ -133,12 +144,38 @@ internal class LinkActivityViewModel @Inject constructor(
         }
     }
 
-    private suspend fun navigateToInitialScreen() {
+    fun linkScreenScreenCreated() {
+        viewModelScope.launch {
+            navigateToLinkScreen()
+        }
+    }
+
+    private suspend fun navigateToInitialState() {
+        activityRetainedComponent.configuration.customerInfo.email?.let {
+            linkAccountManager.lookupConsumer(it).getOrThrow()
+        }
+        val linkAccount = linkAccountManager.linkAccount.value
+        if (linkAccount != null && _linkScreenState.value is State.Loading) {
+            _linkScreenState.value = State.VerificationDialog(linkAccount)
+            return
+        }
+
+        _linkScreenState.value = State.Link
+        navigateToLinkScreen()
+    }
+
+    private suspend fun navigateToLinkScreen() {
         val accountStatus = linkAccountManager.accountStatus.first()
         val screen = when (accountStatus) {
-            AccountStatus.Verified -> LinkScreen.Wallet
-            AccountStatus.NeedsVerification, AccountStatus.VerificationStarted -> LinkScreen.Verification
-            AccountStatus.SignedOut, AccountStatus.Error -> LinkScreen.SignUp
+            AccountStatus.Verified -> {
+                LinkScreen.Wallet
+            }
+            AccountStatus.NeedsVerification, AccountStatus.VerificationStarted -> {
+                LinkScreen.Verification
+            }
+            AccountStatus.SignedOut, AccountStatus.Error -> {
+                LinkScreen.SignUp
+            }
         }
         navigate(screen, clearStack = true, launchSingleTop = true)
     }
@@ -158,6 +195,7 @@ internal class LinkActivityViewModel @Inject constructor(
                 DaggerNativeLinkComponent
                     .builder()
                     .configuration(args.configuration)
+                    .eagerLaunch(args.use2faDialog)
                     .publishableKeyProvider { args.publishableKey }
                     .stripeAccountIdProvider { args.stripeAccountId }
                     .savedStateHandle(handle)
@@ -168,6 +206,12 @@ internal class LinkActivityViewModel @Inject constructor(
             }
         }
     }
+}
+
+internal sealed interface State {
+    data class VerificationDialog(val linkAccount: LinkAccount) : State
+    data object Link : State
+    data object Loading : State
 }
 
 internal class NoArgsException : IllegalArgumentException("NativeLinkArgs not found")

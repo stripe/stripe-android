@@ -8,9 +8,12 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.VisibleForTesting
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material.Text
 import androidx.compose.material.rememberModalBottomSheetState
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -18,14 +21,19 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.window.Dialog
 import androidx.core.os.bundleOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.stripe.android.core.Logger
+import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.BottomSheetContent
 import com.stripe.android.link.ui.LinkContent
+import com.stripe.android.link.ui.verification.VerificationScreen
+import com.stripe.android.link.ui.verification.VerificationViewModel
 import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.paymentsheet.utils.EventReporterProvider
 import com.stripe.android.uicore.utils.collectAsState
@@ -46,7 +54,7 @@ internal class LinkActivity : ComponentActivity() {
             viewModel = ViewModelProvider(this, LinkActivityViewModel.factory())[LinkActivityViewModel::class.java]
         } catch (e: NoArgsException) {
             Logger.getInstance(BuildConfig.DEBUG).error("Failed to create LinkActivityViewModel", e)
-            setResult(Activity.RESULT_CANCELED)
+            setResult(RESULT_CANCELED)
             finish()
         }
 
@@ -61,21 +69,7 @@ internal class LinkActivity : ComponentActivity() {
         }
 
         setContent {
-            var bottomSheetContent by remember { mutableStateOf<BottomSheetContent?>(null) }
-            val sheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
-            val coroutineScope = rememberCoroutineScope()
-            val appBarState by vm.linkState.collectAsState()
-
-            if (bottomSheetContent != null) {
-                DisposableEffect(bottomSheetContent) {
-                    coroutineScope.launch { sheetState.show() }
-                    onDispose {
-                        coroutineScope.launch { sheetState.hide() }
-                    }
-                }
-            }
             navController = rememberNavController()
-
             LaunchedEffect(Unit) {
                 viewModel?.let {
                     it.navController = navController
@@ -85,21 +79,82 @@ internal class LinkActivity : ComponentActivity() {
                 }
             }
 
-            EventReporterProvider(
-                eventReporter = vm.eventReporter
-            ) {
-                LinkContent(
-                    viewModel = vm,
-                    navController = navController,
-                    appBarState = appBarState,
-                    sheetState = sheetState,
-                    bottomSheetContent = bottomSheetContent,
-                    onUpdateSheetContent = {
-                        bottomSheetContent = it
-                    },
-                    onBackPressed = onBackPressedDispatcher::onBackPressed
-                )
+            val screenState by vm.linkScreenState.collectAsState()
+
+            when (val state = screenState) {
+                State.Link -> {
+                    LinkScreenFlow(vm)
+                }
+                State.Loading -> {
+//                    CircularProgressIndicator()
+                }
+                is State.VerificationDialog -> {
+                    Dialog(
+                        onDismissRequest = {}
+                    ) {
+                        val viewModel = linkViewModel<VerificationViewModel> { parentComponent ->
+                            VerificationViewModel.factory(
+                                parentComponent = parentComponent,
+                                linkAccount = state.linkAccount,
+                                onVerificationSucceeded = {
+                                    vm.onVerificationSucceeded()
+                                },
+                                onChangeEmailClicked = {
+
+                                },
+                                onDismissClicked = {
+                                    vm.goBack()
+                                }
+                            )
+
+                        }
+                        DefaultLinkTheme {
+                            VerificationScreen(viewModel)
+                        }
+                    }
+                }
             }
+        }
+    }
+
+    @OptIn(ExperimentalMaterialApi::class)
+    @Composable
+    private fun LinkScreenFlow(
+        vm: LinkActivityViewModel,
+    ) {
+        var bottomSheetContent by remember { mutableStateOf<BottomSheetContent?>(null) }
+        val sheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
+        val coroutineScope = rememberCoroutineScope()
+        val appBarState by vm.linkAppBarState.collectAsState()
+
+        if (bottomSheetContent != null) {
+            DisposableEffect(bottomSheetContent) {
+                coroutineScope.launch { sheetState.show() }
+                onDispose {
+                    coroutineScope.launch { sheetState.hide() }
+                }
+            }
+        }
+
+
+        EventReporterProvider(
+            eventReporter = vm.eventReporter
+        ) {
+            LinkContent(
+                viewModel = vm,
+                navController = navController,
+                appBarState = appBarState,
+                sheetState = sheetState,
+                bottomSheetContent = bottomSheetContent,
+                onUpdateSheetContent = {
+                    bottomSheetContent = it
+                },
+                onBackPressed = onBackPressedDispatcher::onBackPressed
+            )
+        }
+
+        LaunchedEffect(Unit) {
+            vm.linkScreenScreenCreated()
         }
     }
 
@@ -120,7 +175,7 @@ internal class LinkActivity : ComponentActivity() {
     }
 
     fun launchWebFlow(configuration: LinkConfiguration) {
-        webLauncher?.launch(LinkActivityContract.Args(configuration))
+        webLauncher?.launch(LinkActivityContract.Args(configuration, false))
     }
 
     companion object {

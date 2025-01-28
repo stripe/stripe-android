@@ -150,9 +150,14 @@ private fun Screens(
             val viewModel: VerificationViewModel = linkViewModel { parentComponent ->
                 VerificationViewModel.factory(
                     parentComponent = parentComponent,
-                    goBack = goBack,
-                    navigateAndClearStack = navigateAndClearStack,
-                    linkAccount = linkAccount
+                    onDismissClicked = goBack,
+                    linkAccount = linkAccount,
+                    onVerificationSucceeded = {
+                        navigateAndClearStack(LinkScreen.Wallet)
+                    },
+                    onChangeEmailClicked = {
+                        navigateAndClearStack(LinkScreen.SignUp)
+                    }
                 )
             }
             VerificationScreen(viewModel)

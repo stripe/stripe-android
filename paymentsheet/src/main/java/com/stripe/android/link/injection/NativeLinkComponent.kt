@@ -35,6 +35,7 @@ internal annotation class NativeLinkScope
 internal interface NativeLinkComponent {
     val linkAccountManager: LinkAccountManager
     val configuration: LinkConfiguration
+    val eagerLaunch: Boolean
     val linkEventsReporter: LinkEventsReporter
     val logger: Logger
     val linkConfirmationHandlerFactory: LinkConfirmationHandler.Factory
@@ -46,6 +47,9 @@ internal interface NativeLinkComponent {
     interface Builder {
         @BindsInstance
         fun configuration(configuration: LinkConfiguration): Builder
+
+        @BindsInstance
+        fun eagerLaunch(eagerLaunch: Boolean): Builder
 
         @BindsInstance
         fun publishableKeyProvider(@Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String): Builder

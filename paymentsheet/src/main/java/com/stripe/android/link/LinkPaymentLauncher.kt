@@ -72,9 +72,11 @@ internal class LinkPaymentLauncher @Inject internal constructor(
      */
     fun present(
         configuration: LinkConfiguration,
+        eagerLaunch: Boolean
     ) {
         val args = LinkActivityContract.Args(
-            configuration,
+            configuration = configuration,
+            use2faDialog = eagerLaunch
         )
         linkActivityResultLauncher?.launch(args)
         analyticsHelper.onLinkLaunched()

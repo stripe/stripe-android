@@ -340,7 +340,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     fun checkoutWithLink() {
-        checkout(PaymentSelection.Link, CheckoutIdentifier.SheetTopWallet)
+        checkout(PaymentSelection.Link(eagerLaunch = true), CheckoutIdentifier.SheetTopWallet)
     }
 
     private fun checkout(

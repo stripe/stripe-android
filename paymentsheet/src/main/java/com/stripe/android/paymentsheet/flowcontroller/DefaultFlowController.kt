@@ -426,7 +426,7 @@ internal class DefaultFlowController @Inject internal constructor(
                     is PaymentSelection.Saved -> {
                         when (currentSelection.walletType) {
                             PaymentSelection.Saved.WalletType.GooglePay -> PaymentSelection.GooglePay
-                            PaymentSelection.Saved.WalletType.Link -> PaymentSelection.Link
+                            PaymentSelection.Saved.WalletType.Link -> PaymentSelection.Link()
                             else -> currentSelection
                         }
                     }

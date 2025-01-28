@@ -568,7 +568,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
 
         val savedSelectionPaymentMethodPaymentSelection = when (val selection = savedSelection.await()) {
             is SavedSelection.GooglePay -> PaymentSelection.GooglePay
-            is SavedSelection.Link -> PaymentSelection.Link
+            is SavedSelection.Link -> PaymentSelection.Link()
             is SavedSelection.PaymentMethod -> {
                 customer.await()?.paymentMethods?.find { it.id == selection.id }?.toPaymentSelection()
             }
