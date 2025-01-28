@@ -11,8 +11,6 @@ import androidx.annotation.VisibleForTesting
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.rememberModalBottomSheetState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -29,10 +27,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.link.ui.BottomSheetContent
 import com.stripe.android.link.ui.LinkContent
 import com.stripe.android.paymentsheet.BuildConfig
-import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.ui.core.elements.events.LocalCardBrandDisallowedReporter
-import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventReporter
-import com.stripe.android.uicore.elements.LocalAutofillEventReporter
+import com.stripe.android.paymentsheet.utils.EventReporterProvider
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.launch
 
@@ -122,20 +117,6 @@ internal class LinkActivity : ComponentActivity() {
     override fun onDestroy() {
         super.onDestroy()
         viewModel?.unregisterActivity()
-    }
-
-    @Composable
-    private fun EventReporterProvider(
-        eventReporter: EventReporter,
-        content: @Composable () -> Unit
-    ) {
-        CompositionLocalProvider(
-            LocalAutofillEventReporter provides eventReporter::onAutofill,
-            LocalCardNumberCompletedEventReporter provides eventReporter::onCardNumberCompleted,
-            LocalCardBrandDisallowedReporter provides eventReporter::onDisallowedCardBrandEntered
-        ) {
-            content()
-        }
     }
 
     fun launchWebFlow(configuration: LinkConfiguration) {
