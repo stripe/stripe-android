@@ -7,11 +7,14 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material.ExperimentalMaterialApi
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.utils.EventReporterProvider
+import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInteractor
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormUI
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import com.stripe.android.uicore.utils.fadeOut
+import javax.inject.Inject
 
 internal class FormActivity : AppCompatActivity() {
     private val args: FormContract.Args? by lazy {
@@ -24,6 +27,12 @@ internal class FormActivity : AppCompatActivity() {
         }
     }
 
+    @Inject
+    lateinit var formInteractor: DefaultVerticalModeFormInteractor
+
+    @Inject
+    lateinit var eventReporter: EventReporter
+
     @OptIn(ExperimentalMaterialApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,6 +43,8 @@ internal class FormActivity : AppCompatActivity() {
             finish()
             return
         }
+
+        viewModel.component.inject(this)
 
         setContent {
             StripeTheme {
@@ -48,9 +59,9 @@ internal class FormActivity : AppCompatActivity() {
                         finish()
                     }
                 ) {
-                    EventReporterProvider(viewModel.eventReporter) {
+                    EventReporterProvider(eventReporter) {
                         VerticalModeFormUI(
-                            interactor = viewModel.formInteractor,
+                            interactor = formInteractor,
                             showsWalletHeader = false
                         )
                     }

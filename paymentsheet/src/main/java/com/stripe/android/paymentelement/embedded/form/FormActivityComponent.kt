@@ -13,6 +13,7 @@ import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentelement.embedded.EmbeddedCommonModule
+import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInteractor
 import dagger.Binds
 import dagger.BindsInstance
 import dagger.Component
@@ -32,6 +33,8 @@ import kotlin.coroutines.CoroutineContext
 internal interface FormActivityComponent {
 
     val viewModel: FormActivityViewModel
+
+    fun inject(activity: FormActivity)
 
     @Component.Builder
     interface Builder {
@@ -73,5 +76,11 @@ internal interface FormActivityModule {
         fun provideViewModelScope(@IOContext ioContext: CoroutineContext): CoroutineScope {
             return CoroutineScope(ioContext)
         }
+
+        @Provides
+        @Singleton
+        fun provideFormInteractor(
+            interactorFactory: EmbeddedFormInteractorFactory
+        ): DefaultVerticalModeFormInteractor = interactorFactory.create()
     }
 }

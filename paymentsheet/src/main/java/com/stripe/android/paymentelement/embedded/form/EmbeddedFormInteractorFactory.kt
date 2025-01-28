@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement.embedded.form
 
+import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
@@ -10,8 +11,6 @@ import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInter
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodIncentiveInteractor
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import javax.inject.Inject
 
 internal class EmbeddedFormInteractorFactory @Inject constructor(
@@ -19,11 +18,11 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
     private val paymentMethodCode: PaymentMethodCode,
     private val embeddedSelectionHolder: EmbeddedSelectionHolder,
     private val embeddedFormHelperFactory: EmbeddedFormHelperFactory,
+    @ViewModelScope private val viewModelScope: CoroutineScope
 ) {
     fun create(): DefaultVerticalModeFormInteractor {
-        val coroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
         val formHelper = embeddedFormHelperFactory.create(
-            coroutineScope = coroutineScope,
+            coroutineScope = viewModelScope,
             paymentMethodMetadata = paymentMethodMetadata,
             selectionUpdater = {
                 embeddedSelectionHolder.set(it)
@@ -59,7 +58,7 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
             paymentMethodIncentive = PaymentMethodIncentiveInteractor(
                 paymentMethodMetadata.paymentMethodIncentive
             ).displayedIncentive,
-            coroutineScope = coroutineScope,
+            coroutineScope = viewModelScope,
         )
     }
 }
