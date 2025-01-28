@@ -299,7 +299,9 @@ private fun Title(title: String) {
 private fun Body(body: String) {
     AnnotatedText(
         text = TextResource.Text(fromHtml(body)),
-        defaultStyle = typography.bodyMedium,
+        defaultStyle = typography.bodyMedium.copy(
+            color = colors.textDefault,
+        ),
         onClickableTextClick = {},
     )
 }

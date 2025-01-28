@@ -116,7 +116,7 @@ internal fun FullScreenGenericLoading() {
 internal fun LoadingSpinner(
     modifier: Modifier = Modifier,
     strokeWidth: Dp = ProgressIndicatorDefaults.StrokeWidth,
-    gradient: Brush = Brush.sweepGradient(listOf(colors.iconWhite, colors.borderBrand))
+    gradient: Brush = Brush.sweepGradient(listOf(colors.backgroundSurface, colors.borderBrand)),
 ) {
     val infiniteTransition = rememberInfiniteTransition(label = "loading_transition")
     val angle by infiniteTransition.animateFloat(

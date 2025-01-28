@@ -105,10 +105,12 @@ private fun HeaderSection() {
         Text(
             text = stringResource(R.string.stripe_networking_link_login_warmup_title),
             style = typography.headingLarge,
+            color = colors.textDefault,
         )
         Text(
             text = stringResource(R.string.stripe_networking_link_login_warmup_description),
             style = typography.bodyMedium,
+            color = colors.textDefault,
         )
     }
 }

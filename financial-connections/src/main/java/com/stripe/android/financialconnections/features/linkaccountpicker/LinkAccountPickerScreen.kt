@@ -202,7 +202,9 @@ private fun LazyListScope.loadedContent(
     item {
         AnnotatedText(
             text = TextResource.Text(payload.title),
-            defaultStyle = typography.headingXLarge,
+            defaultStyle = typography.headingXLarge.copy(
+                color = colors.textDefault,
+            ),
             onClickableTextClick = {}
         )
         Spacer(modifier = Modifier.size(8.dp))
