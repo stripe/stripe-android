@@ -20,6 +20,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentelement.AnalyticEventCallback
+import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
@@ -195,6 +196,8 @@ class PaymentSheet internal constructor(
             private set
         internal var createIntentCallback: CreateIntentCallback? = null
             private set
+
+        @OptIn(ExperimentalAnalyticEventCallbackApi::class)
         internal var analyticEventCallback: AnalyticEventCallback? = null
             private set
 
@@ -217,6 +220,7 @@ class PaymentSheet internal constructor(
         /**
          * @param callback Called when an analytic event occurs.
          */
+        @ExperimentalAnalyticEventCallbackApi
         fun analyticEventCallback(callback: AnalyticEventCallback) = apply {
             analyticEventCallback = callback
         }
@@ -250,6 +254,7 @@ class PaymentSheet internal constructor(
             return rememberPaymentSheet(resultCallback)
         }
 
+        @OptIn(ExperimentalAnalyticEventCallbackApi::class)
         private fun initializeCallbacks() {
             createIntentCallback?.let {
                 IntentConfirmationInterceptor.createIntentCallback = it
@@ -2118,6 +2123,8 @@ class PaymentSheet internal constructor(
                 private set
             internal var createIntentCallback: CreateIntentCallback? = null
                 private set
+
+            @OptIn(ExperimentalAnalyticEventCallbackApi::class)
             internal var analyticEventCallback: AnalyticEventCallback? = null
                 private set
 
@@ -2138,6 +2145,7 @@ class PaymentSheet internal constructor(
             /**
              * @param callback If specified, called when an analytic event occurs.
              */
+            @ExperimentalAnalyticEventCallbackApi
             fun analyticEventCallback(callback: AnalyticEventCallback) = apply {
                 analyticEventCallback = callback
             }

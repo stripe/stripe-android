@@ -9,6 +9,7 @@ import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentelement.AnalyticEvent
 import com.stripe.android.paymentelement.AnalyticsManager
+import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -18,6 +19,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
+@OptIn(ExperimentalAnalyticEventCallbackApi::class)
 internal class DefaultEventReporter @Inject internal constructor(
     private val mode: EventReporter.Mode,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,

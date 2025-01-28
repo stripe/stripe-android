@@ -13,6 +13,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.stripe.android.paymentelement.AnalyticsManager
+import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.uicore.utils.AnimationConstants
@@ -25,6 +26,7 @@ import org.jetbrains.annotations.TestOnly
  * This is used internally for integrations that don't use Jetpack Compose and are
  * able to pass in an activity.
  */
+@OptIn(ExperimentalAnalyticEventCallbackApi::class)
 internal class DefaultPaymentSheetLauncher(
     private val activityResultLauncher: ActivityResultLauncher<PaymentSheetContractV2.Args>,
     private val activity: Activity,

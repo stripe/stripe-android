@@ -11,11 +11,12 @@ import kotlinx.coroutines.flow.asSharedFlow
  *
  * @param event the [AnalyticEvent] that was emitted
  */
+@ExperimentalAnalyticEventCallbackApi
 fun interface AnalyticEventCallback {
     fun onEvent(event: AnalyticEvent)
 }
 
-
+@ExperimentalAnalyticEventCallbackApi
 abstract class AnalyticEvent internal constructor() {
 
     @Override
@@ -55,6 +56,7 @@ abstract class AnalyticEvent internal constructor() {
     class RemovedSavedPaymentMethod internal constructor(val paymentMethodType: String) : AnalyticEvent()
 }
 
+@OptIn(ExperimentalAnalyticEventCallbackApi::class)
 internal object AnalyticsManager {
     private val _events = MutableSharedFlow<AnalyticEvent>()
     val events = _events.asSharedFlow()

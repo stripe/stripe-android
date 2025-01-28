@@ -606,41 +606,62 @@ public abstract class com/stripe/android/paymentelement/AnalyticEvent {
 
 public final class com/stripe/android/paymentelement/AnalyticEvent$CompletedPaymentMethodForm : com/stripe/android/paymentelement/AnalyticEvent {
 	public static final field $stable I
+	public fun equals (Ljava/lang/Object;)Z
 	public final fun getPaymentMethodType ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class com/stripe/android/paymentelement/AnalyticEvent$DisplayedPaymentMethodForm : com/stripe/android/paymentelement/AnalyticEvent {
 	public static final field $stable I
+	public fun equals (Ljava/lang/Object;)Z
 	public final fun getPaymentMethodType ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
-public final class com/stripe/android/paymentelement/AnalyticEvent$PresentPaymentSheet : com/stripe/android/paymentelement/AnalyticEvent {
+public final class com/stripe/android/paymentelement/AnalyticEvent$PresentedSheet : com/stripe/android/paymentelement/AnalyticEvent {
 	public static final field $stable I
 }
 
 public final class com/stripe/android/paymentelement/AnalyticEvent$RemovedSavedPaymentMethod : com/stripe/android/paymentelement/AnalyticEvent {
 	public static final field $stable I
+	public fun equals (Ljava/lang/Object;)Z
 	public final fun getPaymentMethodType ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class com/stripe/android/paymentelement/AnalyticEvent$SelectedPaymentMethodType : com/stripe/android/paymentelement/AnalyticEvent {
 	public static final field $stable I
+	public fun equals (Ljava/lang/Object;)Z
 	public final fun getPaymentMethodType ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class com/stripe/android/paymentelement/AnalyticEvent$SelectedSavedPaymentMethod : com/stripe/android/paymentelement/AnalyticEvent {
 	public static final field $stable I
+	public fun equals (Ljava/lang/Object;)Z
 	public final fun getPaymentMethodType ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class com/stripe/android/paymentelement/AnalyticEvent$StartedInteractionWithPaymentMethodForm : com/stripe/android/paymentelement/AnalyticEvent {
 	public static final field $stable I
+	public fun equals (Ljava/lang/Object;)Z
 	public final fun getPaymentMethodType ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class com/stripe/android/paymentelement/AnalyticEvent$TappedConfirmButton : com/stripe/android/paymentelement/AnalyticEvent {
 	public static final field $stable I
+	public fun equals (Ljava/lang/Object;)Z
 	public final fun getPaymentMethodType ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public abstract interface class com/stripe/android/paymentelement/AnalyticEventCallback {
