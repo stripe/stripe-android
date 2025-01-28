@@ -4,14 +4,21 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.CreationExtras
+import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.cancel
 import javax.inject.Inject
 
 internal class FormActivityViewModel @Inject constructor(
     embeddedFormInteractorFactory: EmbeddedFormInteractorFactory,
-    val eventReporter: EventReporter
+    val eventReporter: EventReporter,
+    @ViewModelScope private val customViewModelScope: CoroutineScope
 ) : ViewModel() {
+    override fun onCleared() {
+        customViewModelScope.cancel()
+    }
 
     val formInteractor = embeddedFormInteractorFactory.create()
 

@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
+import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.RealLinkConfigurationCoordinator
 import com.stripe.android.link.injection.LinkAnalyticsComponent
@@ -15,7 +17,10 @@ import dagger.Binds
 import dagger.BindsInstance
 import dagger.Component
 import dagger.Module
+import dagger.Provides
+import kotlinx.coroutines.CoroutineScope
 import javax.inject.Singleton
+import kotlin.coroutines.CoroutineContext
 
 @Component(
     modules = [
@@ -60,4 +65,13 @@ internal interface FormActivityModule {
 
     @Binds
     fun bindsLinkConfigurationCoordinator(impl: RealLinkConfigurationCoordinator): LinkConfigurationCoordinator
+
+    companion object {
+        @Provides
+        @Singleton
+        @ViewModelScope
+        fun provideViewModelScope(@IOContext ioContext: CoroutineContext): CoroutineScope {
+            return CoroutineScope(ioContext)
+        }
+    }
 }
