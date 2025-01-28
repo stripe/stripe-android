@@ -14,14 +14,14 @@ internal object HostedAuthUrlBuilder {
     fun create(
         args: FinancialConnectionsSheetActivityArgs,
         manifest: FinancialConnectionsSessionManifest,
-        sdkPrefillDetails: PrefillDetails? = null,
+        prefillDetails: PrefillDetails? = args.elementsSessionContext?.prefillDetails,
     ): String? {
         return create(
             hostedAuthUrl = manifest.hostedAuthUrl,
             isInstantDebits = args is FinancialConnectionsSheetActivityArgs.ForInstantDebits,
             linkMode = args.elementsSessionContext?.linkMode,
             billingDetails = args.elementsSessionContext?.billingDetails,
-            prefillDetails = sdkPrefillDetails ?: args.elementsSessionContext?.prefillDetails,
+            prefillDetails = prefillDetails,
             incentiveEligibilitySession = args.elementsSessionContext?.incentiveEligibilitySession,
         )
     }
