@@ -568,7 +568,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
             val hostedAuthUrl = HostedAuthUrlBuilder.create(
                 args = initialState.initialArgs,
                 manifest = sync.manifest,
-                sdkPrefillDetails = prefillDetails
+                prefillDetails = prefillDetails
             )
 
             if (hostedAuthUrl != null) {
