@@ -20,7 +20,6 @@ import org.junit.Rule
 import org.junit.Test
 import java.util.UUID
 
-
 class ElementsSessionJsonParserTest {
 
     @get:Rule
@@ -343,8 +342,8 @@ class ElementsSessionJsonParserTest {
         assertThat(
             runCatching {
                 UUID.fromString(parsedData?.elementsSessionId)
-            }.exceptionOrNull()
-        ).isNull()
+            }.isSuccess
+        ).isTrue()
     }
 
     @Test
