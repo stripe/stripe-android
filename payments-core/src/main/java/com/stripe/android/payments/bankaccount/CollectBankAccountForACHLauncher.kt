@@ -8,6 +8,12 @@ internal class CollectBankAccountForACHLauncher(
     private val hostedSurface: String?
 ) : CollectBankAccountLauncher {
 
+    private val attachToIntent: Boolean
+        // We only attach the intent if we're not hosted within another
+        // Stripe surface. If we're in one, then the surface will take care of
+        // attaching the LinkAccountSession.
+        get() = hostedSurface == null
+
     override fun presentWithPaymentIntent(
         publishableKey: String,
         stripeAccountId: String?,
@@ -21,7 +27,7 @@ internal class CollectBankAccountForACHLauncher(
                 clientSecret = clientSecret,
                 configuration = configuration,
                 hostedSurface = hostedSurface,
-                attachToIntent = true
+                attachToIntent = attachToIntent,
             )
         )
     }
@@ -39,7 +45,7 @@ internal class CollectBankAccountForACHLauncher(
                 clientSecret = clientSecret,
                 configuration = configuration,
                 hostedSurface = hostedSurface,
-                attachToIntent = true
+                attachToIntent = attachToIntent,
             )
         )
     }
