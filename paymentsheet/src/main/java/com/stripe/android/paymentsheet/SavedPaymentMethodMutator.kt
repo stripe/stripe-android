@@ -47,6 +47,7 @@ internal class SavedPaymentMethodMutator(
     private val navigationPop: () -> Unit,
     isLinkEnabled: StateFlow<Boolean?>,
     isNotPaymentFlow: Boolean,
+    private val isEmbedded: Boolean,
 ) {
     val defaultPaymentMethodId: StateFlow<String?> = customerStateHolder.customer.mapAsStateFlow { customerState ->
         customerState?.defaultPaymentMethodId
@@ -183,14 +184,16 @@ internal class SavedPaymentMethodMutator(
         )
     }
 
-    private suspend fun removePaymentMethodInEditScreen(paymentMethod: PaymentMethod): Throwable? {
+    suspend fun removePaymentMethodInEditScreen(paymentMethod: PaymentMethod): Throwable? {
         val paymentMethodId = paymentMethod.id!!
         val result = removePaymentMethodInternal(paymentMethodId)
 
         if (result.isSuccess) {
             coroutineScope.launch(workContext) {
-                navigationPop()
-                delay(PaymentMethodRemovalDelayMillis)
+                if (!isEmbedded || customerStateHolder.paymentMethods.value.size > 1) {
+                    navigationPop()
+                    delay(PaymentMethodRemovalDelayMillis)
+                }
                 removeDeletedPaymentMethodFromState(paymentMethodId = paymentMethodId)
             }
         }
@@ -198,7 +201,7 @@ internal class SavedPaymentMethodMutator(
         return result.exceptionOrNull()
     }
 
-    private suspend fun modifyCardPaymentMethod(
+    suspend fun modifyCardPaymentMethod(
         paymentMethod: PaymentMethod,
         brand: CardBrand,
     ): Result<PaymentMethod> {
@@ -335,6 +338,7 @@ internal class SavedPaymentMethodMutator(
                 navigationPop = viewModel.navigationHandler::pop,
                 isLinkEnabled = viewModel.linkHandler.isLinkEnabled,
                 isNotPaymentFlow = !viewModel.isCompleteFlow,
+                isEmbedded = false,
             ).apply {
                 viewModel.viewModelScope.launch {
                     viewModel.navigationHandler.currentScreen.collect { currentScreen ->

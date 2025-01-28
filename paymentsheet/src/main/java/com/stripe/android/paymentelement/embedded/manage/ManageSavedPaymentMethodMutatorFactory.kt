@@ -3,17 +3,13 @@ package com.stripe.android.paymentelement.embedded.manage
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
-import com.stripe.android.model.CardBrand
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.SavedPaymentMethod
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
-import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.CoroutineScope
 import javax.inject.Inject
@@ -29,6 +25,7 @@ internal class ManageSavedPaymentMethodMutatorFactory @Inject constructor(
     private val paymentMethodMetadata: PaymentMethodMetadata,
     @IOContext private val workContext: CoroutineContext,
     @ViewModelScope private val viewModelScope: CoroutineScope,
+    private val updateScreenInteractorFactoryProvider: Provider<EmbeddedUpdateScreenInteractorFactory>,
 ) {
     fun createSavedPaymentMethodMutator(): SavedPaymentMethodMutator {
         return SavedPaymentMethodMutator(
@@ -43,12 +40,15 @@ internal class ManageSavedPaymentMethodMutatorFactory @Inject constructor(
             },
             customerStateHolder = customerStateHolder,
             onPaymentMethodRemoved = ::onPaymentMethodRemoved,
-            onUpdatePaymentMethod = ::onUpdatePaymentMethod,
+            onUpdatePaymentMethod = { displayableSavedPaymentMethod, _, _, _ ->
+                onUpdatePaymentMethod(displayableSavedPaymentMethod)
+            },
             navigationPop = {
                 manageNavigatorProvider.get().performAction(ManageNavigator.Action.Back)
             },
             isLinkEnabled = stateFlowOf(false), // Link is never enabled in the manage screen.
             isNotPaymentFlow = false,
+            isEmbedded = true,
         )
     }
 
@@ -62,51 +62,16 @@ internal class ManageSavedPaymentMethodMutatorFactory @Inject constructor(
 
     private fun onUpdatePaymentMethod(
         displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
-        canRemove: Boolean,
-        performRemove: suspend () -> Throwable?,
-        updateExecutor: suspend (brand: CardBrand) -> Result<PaymentMethod>,
     ) {
         if (displayableSavedPaymentMethod.savedPaymentMethod != SavedPaymentMethod.Unexpected) {
-            val interactor = DefaultUpdatePaymentMethodInteractor(
-                isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
-                canRemove = canRemove,
-                displayableSavedPaymentMethod,
-                cardBrandFilter = paymentMethodMetadata.cardBrandFilter,
-                removeExecutor = { method ->
-                    val result = performRemove()
-                    if (result == null) {
-                        val currentSelection = selectionHolder.selection.value
-                        if (method.id == (currentSelection as? PaymentSelection.Saved)?.paymentMethod?.id) {
-                            selectionHolder.set(null)
-                        }
-                    }
-                    result
-                },
-                updateExecutor = { method, brand ->
-                    val result = updateExecutor(brand)
-                    result.onSuccess { paymentMethod ->
-                        val currentSelection = selectionHolder.selection.value
-                        if (paymentMethod.id == (currentSelection as? PaymentSelection.Saved)?.paymentMethod?.id) {
-                            selectionHolder.set(PaymentSelection.Saved(paymentMethod))
-                        }
-                    }
-                    result
-                },
-                onBrandChoiceOptionsShown = {
-                    eventReporter.onShowPaymentOptionBrands(
-                        source = EventReporter.CardBrandChoiceEventSource.Edit,
-                        selectedBrand = it
-                    )
-                },
-                onBrandChoiceOptionsDismissed = {
-                    eventReporter.onHidePaymentOptionBrands(
-                        source = EventReporter.CardBrandChoiceEventSource.Edit,
-                        selectedBrand = it
-                    )
-                },
-            )
             manageNavigatorProvider.get().performAction(
-                ManageNavigator.Action.GoToScreen(ManageNavigator.Screen.Update(interactor))
+                ManageNavigator.Action.GoToScreen(
+                    screen = ManageNavigator.Screen.Update(
+                        interactor = updateScreenInteractorFactoryProvider.get().createUpdateScreenInteractor(
+                            displayableSavedPaymentMethod
+                        )
+                    )
+                )
             )
         }
     }
