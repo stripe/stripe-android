@@ -219,11 +219,17 @@ internal class DefaultEmbeddedContentHelper @AssistedInject constructor(
             onPaymentMethodRemoved = {
             },
             onUpdatePaymentMethod = { _, _, _, _ ->
+                sheetLauncher?.launchManage(
+                    paymentMethodMetadata = paymentMethodMetadata,
+                    customerState = requireNotNull(customerStateHolder.customer.value),
+                    selection = selectionHolder.selection.value,
+                )
             },
             navigationPop = {
             },
             isLinkEnabled = stateFlowOf(paymentMethodMetadata.linkState != null),
             isNotPaymentFlow = false,
+            isEmbedded = true,
         )
     }
 

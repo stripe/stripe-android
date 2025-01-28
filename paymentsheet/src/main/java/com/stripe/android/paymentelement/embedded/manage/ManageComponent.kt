@@ -26,13 +26,9 @@ import kotlin.coroutines.CoroutineContext
 )
 @Singleton
 internal interface ManageComponent {
-
     val viewModel: ManageViewModel
-
     val customerStateHolder: CustomerStateHolder
-
     val selectionHolder: EmbeddedSelectionHolder
-
     fun inject(activity: ManageActivity)
 
     @Component.Builder
@@ -57,15 +53,19 @@ internal interface ManageModule {
         factory: DefaultEmbeddedManageScreenInteractorFactory
     ): EmbeddedManageScreenInteractorFactory
 
+    @Binds
+    fun bindsEmbeddedUpdateScreenInteractorFactory(
+        factory: DefaultEmbeddedUpdateScreenInteractorFactory
+    ): EmbeddedUpdateScreenInteractorFactory
+
     companion object {
         @Provides
         @Singleton
         fun provideManageNavigator(
-            interactorFactory: EmbeddedManageScreenInteractorFactory,
+            initialManageScreenFactory: InitialManageScreenFactory,
             @ViewModelScope viewModelScope: CoroutineScope,
         ): ManageNavigator {
-            val interactor = interactorFactory.createManageScreenInteractor()
-            return ManageNavigator(viewModelScope, ManageNavigator.Screen.All(interactor))
+            return ManageNavigator(viewModelScope, initialManageScreenFactory.createInitialScreen())
         }
 
         @Provides

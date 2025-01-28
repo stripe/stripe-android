@@ -11,7 +11,7 @@ import com.stripe.android.paymentsheet.verticalmode.ManageScreenInteractor
 import javax.inject.Inject
 import javax.inject.Provider
 
-internal interface EmbeddedManageScreenInteractorFactory {
+internal fun interface EmbeddedManageScreenInteractorFactory {
     fun createManageScreenInteractor(): ManageScreenInteractor
 }
 

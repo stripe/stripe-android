@@ -313,6 +313,104 @@ class SavedPaymentMethodMutatorTest {
     }
 
     @Test
+    fun `removePaymentMethodInEditScreen calls pop when not in embedded`() {
+        val displayableSavedPaymentMethod = PaymentMethodFactory.cards(1).first().toDisplayableSavedPaymentMethod()
+        val calledDetach = Turbine<Boolean>()
+        val customerRepository = FakeCustomerRepository(
+            onDetachPaymentMethod = { paymentMethodId ->
+                assertThat(paymentMethodId).isEqualTo(displayableSavedPaymentMethod.paymentMethod.id!!)
+                calledDetach.add(true)
+                Result.success(displayableSavedPaymentMethod.paymentMethod)
+            }
+        )
+
+        runScenario(customerRepository = customerRepository) {
+            customerStateHolder.setCustomerState(
+                createCustomerState(
+                    paymentMethods = listOf(displayableSavedPaymentMethod.paymentMethod),
+                    isRemoveEnabled = true,
+                    canRemoveLastPaymentMethod = true,
+                )
+            )
+
+            savedPaymentMethodMutator.removePaymentMethodInEditScreen(displayableSavedPaymentMethod.paymentMethod)
+
+            assertThat(calledDetach.awaitItem()).isTrue()
+            assertThat(navigationPopTurbine.awaitItem()).isNotNull()
+            assertThat(paymentMethodRemovedTurbine.awaitItem()).isNotNull()
+
+            assertThat(customerStateHolder.paymentMethods.value).isEmpty()
+        }
+
+        calledDetach.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `removePaymentMethodInEditScreen does not call pop when in embedded`() {
+        val displayableSavedPaymentMethod = PaymentMethodFactory.cards(1).first().toDisplayableSavedPaymentMethod()
+        val calledDetach = Turbine<Boolean>()
+        val customerRepository = FakeCustomerRepository(
+            onDetachPaymentMethod = { paymentMethodId ->
+                assertThat(paymentMethodId).isEqualTo(displayableSavedPaymentMethod.paymentMethod.id!!)
+                calledDetach.add(true)
+                Result.success(displayableSavedPaymentMethod.paymentMethod)
+            }
+        )
+
+        runScenario(customerRepository = customerRepository, isEmbedded = true) {
+            customerStateHolder.setCustomerState(
+                createCustomerState(
+                    paymentMethods = listOf(displayableSavedPaymentMethod.paymentMethod),
+                    isRemoveEnabled = true,
+                    canRemoveLastPaymentMethod = true,
+                )
+            )
+
+            savedPaymentMethodMutator.removePaymentMethodInEditScreen(displayableSavedPaymentMethod.paymentMethod)
+
+            assertThat(calledDetach.awaitItem()).isTrue()
+            assertThat(paymentMethodRemovedTurbine.awaitItem()).isNotNull()
+
+            assertThat(customerStateHolder.paymentMethods.value).isEmpty()
+        }
+
+        calledDetach.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `removePaymentMethodInEditScreen calls pop when in embedded with multiple cards`() {
+        val displayableSavedPaymentMethod = PaymentMethodFactory.cards(1).first().toDisplayableSavedPaymentMethod()
+        val calledDetach = Turbine<Boolean>()
+        val customerRepository = FakeCustomerRepository(
+            onDetachPaymentMethod = { paymentMethodId ->
+                assertThat(paymentMethodId).isEqualTo(displayableSavedPaymentMethod.paymentMethod.id!!)
+                calledDetach.add(true)
+                Result.success(displayableSavedPaymentMethod.paymentMethod)
+            }
+        )
+
+        runScenario(customerRepository = customerRepository, isEmbedded = true) {
+            customerStateHolder.setCustomerState(
+                createCustomerState(
+                    paymentMethods = PaymentMethodFactory.cards(2) + displayableSavedPaymentMethod.paymentMethod,
+                    isRemoveEnabled = true,
+                    canRemoveLastPaymentMethod = true,
+                )
+            )
+
+            savedPaymentMethodMutator.removePaymentMethodInEditScreen(displayableSavedPaymentMethod.paymentMethod)
+
+            assertThat(calledDetach.awaitItem()).isTrue()
+            assertThat(paymentMethodRemovedTurbine.awaitItem()).isNotNull()
+            assertThat(navigationPopTurbine.awaitItem()).isNotNull()
+
+            assertThat(customerStateHolder.paymentMethods.value).hasSize(2)
+        }
+
+        calledDetach.ensureAllEventsConsumed()
+    }
+
+    @Test
     fun `updatePaymentMethod performRemove failure callback`() {
         val displayableSavedPaymentMethod = PaymentMethodFactory.cards(1).first().toDisplayableSavedPaymentMethod()
         val calledDetach = Turbine<Boolean>()
@@ -373,6 +471,48 @@ class SavedPaymentMethodMutatorTest {
 
             assertThat(customerStateHolder.paymentMethods.value.first().card?.brand).isEqualTo(CardBrand.Unknown)
             updatePaymentMethodTurbine.awaitItem().updateExecutor(CardBrand.CartesBancaires)
+
+            assertThat(calledUpdate.awaitItem()).isTrue()
+            assertThat(navigationPopTurbine.awaitItem()).isNotNull()
+
+            val paymentMethods = customerStateHolder.paymentMethods.value
+            assertThat(paymentMethods).hasSize(1)
+            assertThat(paymentMethods.first().card?.brand).isEqualTo(CardBrand.CartesBancaires)
+        }
+
+        calledUpdate.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `modifyCardPaymentMethod updates card`() {
+        val displayableSavedPaymentMethod = PaymentMethodFactory.cards(1).first().toDisplayableSavedPaymentMethod()
+        val calledUpdate = Turbine<Boolean>()
+        val customerRepository = FakeCustomerRepository(
+            onUpdatePaymentMethod = {
+                calledUpdate.add(true)
+                Result.success(
+                    displayableSavedPaymentMethod.paymentMethod.copy(
+                        card = displayableSavedPaymentMethod.paymentMethod.card?.copy(brand = CardBrand.CartesBancaires)
+                    )
+                )
+            }
+        )
+
+        runScenario(customerRepository = customerRepository) {
+            customerStateHolder.setCustomerState(
+                createCustomerState(
+                    paymentMethods = listOf(displayableSavedPaymentMethod.paymentMethod),
+                    isRemoveEnabled = true,
+                    canRemoveLastPaymentMethod = true,
+                )
+            )
+
+            assertThat(customerStateHolder.paymentMethods.value.first().card?.brand).isEqualTo(CardBrand.Unknown)
+
+            savedPaymentMethodMutator.modifyCardPaymentMethod(
+                paymentMethod = displayableSavedPaymentMethod.paymentMethod,
+                brand = CardBrand.CartesBancaires,
+            )
 
             assertThat(calledUpdate.awaitItem()).isTrue()
             assertThat(navigationPopTurbine.awaitItem()).isNotNull()
@@ -462,6 +602,7 @@ class SavedPaymentMethodMutatorTest {
     private fun runScenario(
         customerRepository: CustomerRepository = FakeCustomerRepository(),
         isCbcEligible: Boolean = false,
+        isEmbedded: Boolean = false,
         block: suspend Scenario.() -> Unit
     ) {
         runTest {
@@ -503,6 +644,7 @@ class SavedPaymentMethodMutatorTest {
                 navigationPop = { navigationPopTurbine.add(Unit) },
                 isLinkEnabled = stateFlowOf(false),
                 isNotPaymentFlow = true,
+                isEmbedded = isEmbedded,
             )
             Scenario(
                 savedPaymentMethodMutator = savedPaymentMethodMutator,
