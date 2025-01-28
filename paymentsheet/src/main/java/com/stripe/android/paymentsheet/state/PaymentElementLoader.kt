@@ -25,6 +25,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.link.LinkInlineConfigurat
 import com.stripe.android.lpmfoundations.paymentmethod.toPaymentSheetSaveConsentBehavior
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -354,7 +355,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             state.copy(
                 paymentMethods = state.paymentMethods
                     .withDefaultPaymentMethodOrLastUsedPaymentMethodFirst(
-                        savedSelection = savedSelection.await(),
+                        savedSelection = savedSelection,
                         defaultPaymentMethodId = state.defaultPaymentMethodId
                     ).filter { cardBrandFilter.isAccepted(it) }
             )
@@ -747,8 +748,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     }
 }
 
-private fun List<PaymentMethod>.withDefaultPaymentMethodOrLastUsedPaymentMethodFirst(
-    savedSelection: SavedSelection,
+private suspend fun List<PaymentMethod>.withDefaultPaymentMethodOrLastUsedPaymentMethodFirst(
+    savedSelection: Deferred<SavedSelection>,
     defaultPaymentMethodId: String?
 ): List<PaymentMethod> {
     val primaryPaymentMethodIndex = if (FeatureFlags.enableDefaultPaymentMethods.isEnabled) {
@@ -756,8 +757,9 @@ private fun List<PaymentMethod>.withDefaultPaymentMethodOrLastUsedPaymentMethodF
             indexOfFirst { it.id == defaultPaymentMethodId }
         }
     } else {
-        (savedSelection as? SavedSelection.PaymentMethod)?.let {
-            indexOfFirst { it.id == savedSelection.id }.takeIf { it != -1 }
+        val selection = savedSelection.await()
+        (selection as? SavedSelection.PaymentMethod)?.let {
+            indexOfFirst { it.id == selection.id }.takeIf { it != -1 }
         }
     }
 
