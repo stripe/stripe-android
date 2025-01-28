@@ -174,8 +174,14 @@ internal class DefaultEmbeddedContentHelper @AssistedInject constructor(
                     selection = selectionHolder.selection.value,
                 )
             },
-            transitionToFormScreen = {
-                sheetLauncher?.launchForm(it, paymentMethodMetadata)
+            transitionToFormScreen = { code ->
+                sheetLauncher?.launchForm(
+                    code = code,
+                    paymentMethodMetadata = paymentMethodMetadata,
+                    hasSavedPaymentMethods = customerStateHolder.paymentMethods.value.any {
+                        it.type?.code == code
+                    }
+                )
             },
             paymentMethods = customerStateHolder.paymentMethods,
             mostRecentlySelectedSavedPaymentMethod = customerStateHolder.mostRecentlySelectedSavedPaymentMethod,

@@ -30,9 +30,9 @@ internal class DefaultEmbeddedSheetLauncherTest {
     fun `launchForm launches activity with correct parameters`() = testScenario {
         val code = "test_code"
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
-        val expectedArgs = FormContract.Args(code, paymentMethodMetadata)
+        val expectedArgs = FormContract.Args(code, paymentMethodMetadata, false)
 
-        sheetLauncher.launchForm(code, paymentMethodMetadata)
+        sheetLauncher.launchForm(code, paymentMethodMetadata, false)
         val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall()
         assertThat(launchCall).isEqualTo(expectedArgs)
     }

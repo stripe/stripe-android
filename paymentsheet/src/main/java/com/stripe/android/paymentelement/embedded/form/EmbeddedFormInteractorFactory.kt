@@ -16,6 +16,7 @@ import javax.inject.Inject
 internal class EmbeddedFormInteractorFactory @Inject constructor(
     private val paymentMethodMetadata: PaymentMethodMetadata,
     private val paymentMethodCode: PaymentMethodCode,
+    private val hasSavedPaymentMethods: Boolean,
     private val embeddedSelectionHolder: EmbeddedSelectionHolder,
     private val embeddedFormHelperFactory: EmbeddedFormHelperFactory,
     @ViewModelScope private val viewModelScope: CoroutineScope
@@ -52,7 +53,10 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
             usBankAccountArguments = usBankAccountFormArguments,
             reportFieldInteraction = {
             },
-            headerInformation = null,
+            headerInformation = paymentMethodMetadata.formHeaderInformationForCode(
+                code = paymentMethodCode,
+                customerHasSavedPaymentMethods = hasSavedPaymentMethods
+            ),
             isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
             processing = stateFlowOf(false),
             paymentMethodIncentive = PaymentMethodIncentiveInteractor(

@@ -45,6 +45,9 @@ internal interface FormActivityComponent {
         fun selectedPaymentMethodCode(selectedPaymentMethodCode: PaymentMethodCode): Builder
 
         @BindsInstance
+        fun hasSavedPaymentMethods(hasSavedPaymentMethods: Boolean): Builder
+
+        @BindsInstance
         fun context(context: Context): Builder
 
         @BindsInstance
