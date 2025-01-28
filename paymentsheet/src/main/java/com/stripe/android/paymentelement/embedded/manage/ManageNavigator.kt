@@ -1,18 +1,22 @@
 package com.stripe.android.paymentelement.embedded.manage
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.material.Button
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.paymentsheet.navigation.NavigationHandler
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
+import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
+import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodUI
+import com.stripe.android.paymentsheet.verticalmode.ManageScreenInteractor
+import com.stripe.android.paymentsheet.verticalmode.ManageScreenUI
+import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import java.io.Closeable
 
 internal class ManageNavigator private constructor(
     private val navigationHandler: NavigationHandler<Screen>
@@ -33,8 +37,8 @@ internal class ManageNavigator private constructor(
     val canGoBack: Boolean
         get() = navigationHandler.canGoBack
 
-    private val _result = MutableSharedFlow<Result>(replay = 1)
-    val result: SharedFlow<Result> = _result.asSharedFlow()
+    private val _result = MutableSharedFlow<Unit>(replay = 1)
+    val result: SharedFlow<Unit> = _result.asSharedFlow()
 
     fun performAction(action: Action) {
         when (action) {
@@ -42,11 +46,11 @@ internal class ManageNavigator private constructor(
                 if (navigationHandler.canGoBack) {
                     navigationHandler.pop()
                 } else {
-                    _result.tryEmit(Result(maintainPaymentSelection = false))
+                    _result.tryEmit(Unit)
                 }
             }
             is Action.Close -> {
-                _result.tryEmit(Result(maintainPaymentSelection = true))
+                _result.tryEmit(Unit)
             }
             is Action.GoToScreen -> {
                 navigationHandler.transitionToWithDelay(action.screen)
@@ -63,57 +67,42 @@ internal class ManageNavigator private constructor(
         abstract fun title(): StateFlow<ResolvableString?>
 
         class All(
-            private val manageNavigator: () -> ManageNavigator,
-        ) : Screen() {
-            override fun topBarState(): StateFlow<PaymentSheetTopBarState?> = stateFlowOf(null)
+            private val interactor: ManageScreenInteractor,
+        ) : Screen(), Closeable {
+            override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
+                return interactor.state.mapAsStateFlow { state ->
+                    state.topBarState(interactor)
+                }
+            }
 
             override fun title(): StateFlow<ResolvableString?> {
-                return stateFlowOf(null)
+                return interactor.state.mapAsStateFlow { state ->
+                    state.title
+                }
             }
 
             @Composable
             override fun Content() {
-                Column {
-                    Text("All Screen")
-                    Button(
-                        onClick = {
-                            manageNavigator().performAction(Action.Close)
-                        }
-                    ) {
-                        Text("Close")
-                    }
-                    Button(
-                        onClick = {
-                            manageNavigator().performAction(Action.GoToScreen(Update(manageNavigator)))
-                        }
-                    ) {
-                        Text("Update Screen")
-                    }
-                }
+                ManageScreenUI(interactor = interactor)
+            }
+
+            override fun close() {
+                interactor.close()
             }
         }
 
         class Update(
-            private val manageNavigator: () -> ManageNavigator,
+            private val interactor: UpdatePaymentMethodInteractor,
         ) : Screen() {
-            override fun topBarState(): StateFlow<PaymentSheetTopBarState?> = stateFlowOf(null)
+            override fun topBarState(): StateFlow<PaymentSheetTopBarState?> = stateFlowOf(interactor.topBarState)
 
             override fun title(): StateFlow<ResolvableString?> {
-                return stateFlowOf(null)
+                return stateFlowOf(interactor.screenTitle)
             }
 
             @Composable
             override fun Content() {
-                Column {
-                    Text("Update Screen.")
-                    Button(
-                        onClick = {
-                            manageNavigator().performAction(Action.Back)
-                        }
-                    ) {
-                        Text("Back")
-                    }
-                }
+                UpdatePaymentMethodUI(interactor = interactor, modifier = Modifier)
             }
         }
     }
@@ -125,8 +114,4 @@ internal class ManageNavigator private constructor(
 
         data class GoToScreen(val screen: Screen) : Action()
     }
-
-    data class Result(
-        val maintainPaymentSelection: Boolean,
-    )
 }

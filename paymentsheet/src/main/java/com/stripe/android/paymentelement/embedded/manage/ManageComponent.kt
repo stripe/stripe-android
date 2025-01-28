@@ -8,6 +8,8 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.embedded.EmbeddedCommonModule
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.CustomerStateHolder
+import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
+import dagger.Binds
 import dagger.BindsInstance
 import dagger.Component
 import dagger.Module
@@ -50,19 +52,28 @@ internal interface ManageComponent {
 
 @Module
 internal interface ManageModule {
+    @Binds
+    fun bindsEmbeddedManageScreenInteractorFactory(
+        factory: DefaultEmbeddedManageScreenInteractorFactory
+    ): EmbeddedManageScreenInteractorFactory
+
     companion object {
         @Provides
         @Singleton
         fun provideManageNavigator(
+            interactorFactory: EmbeddedManageScreenInteractorFactory,
             @ViewModelScope viewModelScope: CoroutineScope,
         ): ManageNavigator {
-            lateinit var manageNavigator: ManageNavigator
-            return ManageNavigator(
-                viewModelScope,
-                ManageNavigator.Screen.All {
-                    manageNavigator
-                }
-            ).also { manageNavigator = it }
+            val interactor = interactorFactory.createManageScreenInteractor()
+            return ManageNavigator(viewModelScope, ManageNavigator.Screen.All(interactor))
+        }
+
+        @Provides
+        @Singleton
+        fun provideSavedPaymentMethodMutator(
+            factory: ManageSavedPaymentMethodMutatorFactory
+        ): SavedPaymentMethodMutator {
+            return factory.createSavedPaymentMethodMutator()
         }
 
         @Provides

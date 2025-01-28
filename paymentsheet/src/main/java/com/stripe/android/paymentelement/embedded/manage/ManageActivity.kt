@@ -77,7 +77,7 @@ internal class ManageActivity : AppCompatActivity() {
                 ElementsBottomSheetLayout(
                     state = bottomSheetState,
                     onDismissed = {
-                        setManageResult(ManageResult.Cancelled(customerStateHolder.customer.value))
+                        setManageResult()
                         finish()
                     }
                 ) {
@@ -87,16 +87,7 @@ internal class ManageActivity : AppCompatActivity() {
                     }
                     LaunchedEffect(screen) {
                         manageNavigator.result.collect { result ->
-                            if (result.maintainPaymentSelection) {
-                                setManageResult(
-                                    ManageResult.Complete(
-                                        customerState = requireNotNull(customerStateHolder.customer.value),
-                                        selection = selectionHolder.selection.value,
-                                    )
-                                )
-                            } else {
-                                setManageResult(ManageResult.Cancelled(customerStateHolder.customer.value))
-                            }
+                            setManageResult()
                             finish()
                         }
                     }
@@ -151,7 +142,11 @@ internal class ManageActivity : AppCompatActivity() {
         fadeOut()
     }
 
-    private fun setManageResult(result: ManageResult) {
+    private fun setManageResult() {
+        val result = ManageResult.Complete(
+            customerState = requireNotNull(customerStateHolder.customer.value),
+            selection = selectionHolder.selection.value,
+        )
         setResult(
             RESULT_OK,
             ManageResult.toIntent(intent, result)
