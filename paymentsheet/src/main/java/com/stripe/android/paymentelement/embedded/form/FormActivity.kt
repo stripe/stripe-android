@@ -8,9 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material.ExperimentalMaterialApi
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.utils.EventReporterProvider
 import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInteractor
-import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormUI
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import com.stripe.android.uicore.utils.fadeOut
@@ -50,23 +48,20 @@ internal class FormActivity : AppCompatActivity() {
                 val bottomSheetState = rememberStripeBottomSheetState()
                 ElementsBottomSheetLayout(
                     state = bottomSheetState,
-                    onDismissed = {
-                        setResult(
-                            Activity.RESULT_OK,
-                            FormResult.toIntent(intent, FormResult.Cancelled)
-                        )
-                        finish()
-                    }
+                    onDismissed = ::setCancelAndFinish
                 ) {
-                    EventReporterProvider(eventReporter) {
-                        VerticalModeFormUI(
-                            interactor = formInteractor,
-                            showsWalletHeader = false
-                        )
-                    }
+                    FormActivityUI(
+                        interactor = formInteractor,
+                        eventReporter = eventReporter
+                    )
                 }
             }
         }
+    }
+
+    private fun setCancelAndFinish() {
+        setFormResult(FormResult.Cancelled)
+        finish()
     }
 
     override fun finish() {
