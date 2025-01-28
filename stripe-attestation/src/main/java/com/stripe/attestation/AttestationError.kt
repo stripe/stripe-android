@@ -33,6 +33,7 @@ class AttestationError(
         PLAY_STORE_VERSION_OUTDATED(isRetriable = false),
         REQUEST_HASH_TOO_LONG(isRetriable = false),
         TOO_MANY_REQUESTS(isRetriable = true),
+
         // Stripe backend related errors
         BACKEND_VERDICT_FAILED(isRetriable = false),
         UNKNOWN(isRetriable = false)
