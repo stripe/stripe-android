@@ -165,10 +165,15 @@ fun TextField(
         mutableStateOf<TextRange?>(null)
     }
 
+    var composition by remember {
+        mutableStateOf<TextRange?>(null)
+    }
+
     TextFieldUi(
         value = TextFieldValue(
             text = value,
             selection = selection ?: TextRange(value.length),
+            composition = composition
         ),
         loading = loading,
         onValueChange = { newValue ->
@@ -177,6 +182,7 @@ fun TextField(
 
             if (newTextValue == value || acceptInput) {
                 selection = newValue.selection
+                composition = newValue.composition
             }
 
             if (acceptInput) {
