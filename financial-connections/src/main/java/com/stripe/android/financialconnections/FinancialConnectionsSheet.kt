@@ -79,7 +79,12 @@ class FinancialConnectionsSheet internal constructor(
             val email: String?,
             val phone: String?,
             val phoneCountryCode: String?,
-        ) : Parcelable, Serializable
+        ) : Parcelable, Serializable {
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            companion object {
+                private const val serialVersionUID: Long = 626669472462415908L
+            }
+        }
     }
 
     /**
