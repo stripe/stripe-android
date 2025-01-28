@@ -9,6 +9,7 @@ import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.EmailSource
 import com.stripe.android.model.PaymentMethodCreateParams
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
@@ -34,6 +35,20 @@ internal interface LinkAccountManager {
     ): Result<LinkAccount?>
 
     /**
+     * Retrieves the Link account associated with the email if it exists
+     *
+     * Optionally starts a user session, by storing the cookie for the account and starting a
+     * verification if needed.
+     */
+    suspend fun mobileLookupConsumer(
+        email: String,
+        emailSource: EmailSource,
+        verificationToken: String,
+        appId: String,
+        startSession: Boolean,
+    ): Result<LinkAccount?>
+
+    /**
      * Registers the user for a new Link account.
      */
     suspend fun signUp(
@@ -41,6 +56,19 @@ internal interface LinkAccountManager {
         phone: String,
         country: String,
         name: String?,
+        consentAction: SignUpConsentAction
+    ): Result<LinkAccount>
+
+    /**
+     * Registers the user for a new Link account.
+     */
+    suspend fun mobileSignUp(
+        email: String,
+        phone: String,
+        country: String,
+        name: String?,
+        verificationToken: String,
+        appId: String,
         consentAction: SignUpConsentAction
     ): Result<LinkAccount>
 

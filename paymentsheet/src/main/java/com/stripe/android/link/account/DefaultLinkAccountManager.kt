@@ -17,9 +17,12 @@ import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSignUpConsentAction
+import com.stripe.android.model.EmailSource
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.BuildConfig
+import com.stripe.android.paymentsheet.model.amount
+import com.stripe.android.paymentsheet.model.currency
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
@@ -60,6 +63,29 @@ internal class DefaultLinkAccountManager @Inject constructor(
                     startSession = startSession,
                 )
             }
+
+    override suspend fun mobileLookupConsumer(
+        email: String,
+        emailSource: EmailSource,
+        verificationToken: String,
+        appId: String,
+        startSession: Boolean
+    ): Result<LinkAccount?> {
+        return linkRepository.mobileLookupConsumer(
+            verificationToken = verificationToken,
+            appId = appId,
+            email = email,
+            sessionId = config.elementsSessionId,
+            emailSource = emailSource
+        ).onFailure { error ->
+            linkEventsReporter.onAccountLookupFailure(error)
+        }.map { consumerSessionLookup ->
+            setLinkAccountFromLookupResult(
+                lookup = consumerSessionLookup,
+                startSession = startSession
+            )
+        }
+    }
 
     override suspend fun signInWithUserInput(
         userInput: UserInput
@@ -165,6 +191,34 @@ internal class DefaultLinkAccountManager @Inject constructor(
                     publishableKey = consumerSessionSignup.publishableKey,
                 )
             }
+
+    override suspend fun mobileSignUp(
+        email: String,
+        phone: String,
+        country: String,
+        name: String?,
+        verificationToken: String,
+        appId: String,
+        consentAction: SignUpConsentAction
+    ): Result<LinkAccount> {
+        return linkRepository.mobileSignUp(
+            name = name,
+            email = email,
+            phoneNumber = phone,
+            country = country,
+            consentAction = consentAction.consumerAction,
+            verificationToken = verificationToken,
+            appId = appId,
+            amount = config.stripeIntent.amount,
+            currency = config.stripeIntent.currency,
+            incentiveEligibilitySession = null,
+        ).map { consumerSessionSignUp ->
+            setAccount(
+                consumerSession = consumerSessionSignUp.consumerSession,
+                publishableKey = consumerSessionSignUp.publishableKey,
+            )
+        }
+    }
 
     override suspend fun createCardPaymentDetails(
         paymentMethodCreateParams: PaymentMethodCreateParams
