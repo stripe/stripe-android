@@ -2,6 +2,7 @@ package com.stripe.android.link.injection
 
 import com.stripe.android.link.LinkActivityViewModel
 import com.stripe.android.link.account.LinkAccountManager
+import com.stripe.android.link.account.LinkAuth
 import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.paymentelement.confirmation.DefaultConfirmationHandler
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -21,7 +22,8 @@ internal object LinkViewModelModule {
         eventReporter: EventReporter,
         integrityRequestManager: IntegrityRequestManager,
         linkGate: LinkGate,
-        errorReporter: ErrorReporter
+        errorReporter: ErrorReporter,
+        linkAuth: LinkAuth
     ): LinkActivityViewModel {
         return LinkActivityViewModel(
             activityRetainedComponent = component,
@@ -30,7 +32,8 @@ internal object LinkViewModelModule {
             eventReporter = eventReporter,
             integrityRequestManager = integrityRequestManager,
             linkGate = linkGate,
-            errorReporter = errorReporter
+            errorReporter = errorReporter,
+            linkAuth = linkAuth
         )
     }
 }

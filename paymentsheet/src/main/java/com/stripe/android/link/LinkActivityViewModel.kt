@@ -15,12 +15,15 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavHostController
 import com.stripe.android.link.LinkActivity.Companion.getArgs
 import com.stripe.android.link.account.LinkAccountManager
+import com.stripe.android.link.account.LinkAuth
+import com.stripe.android.link.account.LinkAuthResult
 import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.injection.DaggerNativeLinkComponent
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.LinkAppBarState
+import com.stripe.android.model.EmailSource
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.R
@@ -40,6 +43,7 @@ internal class LinkActivityViewModel @Inject constructor(
     private val integrityRequestManager: IntegrityRequestManager,
     private val linkGate: LinkGate,
     private val errorReporter: ErrorReporter,
+    private val linkAuth: LinkAuth
 ) : ViewModel(), DefaultLifecycleObserver {
     val confirmationHandler = confirmationHandlerFactory.create(viewModelScope)
     private val _linkState = MutableStateFlow(
@@ -134,13 +138,35 @@ internal class LinkActivityViewModel @Inject constructor(
     }
 
     private suspend fun navigateToInitialScreen() {
-        val accountStatus = linkAccountManager.accountStatus.first()
+        val lookupResult = lookupUser()
+
+        when (lookupResult) {
+            is LinkAuthResult.AttestationFailed -> {
+                return moveToWeb()
+            }
+            is LinkAuthResult.Error, is LinkAuthResult.Success, null -> {
+                val accountStatus = linkAccountManager.accountStatus.first()
+                navigateWithAccountStatus(accountStatus)
+            }
+        }
+    }
+
+    private fun navigateWithAccountStatus(accountStatus: AccountStatus) {
         val screen = when (accountStatus) {
             AccountStatus.Verified -> LinkScreen.Wallet
             AccountStatus.NeedsVerification, AccountStatus.VerificationStarted -> LinkScreen.Verification
             AccountStatus.SignedOut, AccountStatus.Error -> LinkScreen.SignUp
         }
         navigate(screen, clearStack = true, launchSingleTop = true)
+    }
+
+    private suspend fun lookupUser(): LinkAuthResult? {
+        val customerEmail = activityRetainedComponent.configuration.customerInfo.email ?: return null
+
+        return linkAuth.lookUp(
+            email = customerEmail,
+            emailSource = EmailSource.CUSTOMER_OBJECT
+        )
     }
 
     private suspend fun warmUpIntegrityManager(): Result<Unit> {

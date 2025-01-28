@@ -22,7 +22,10 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.core.Logger
 import com.stripe.android.link.account.FakeLinkAccountManager
+import com.stripe.android.link.account.FakeLinkAuth
 import com.stripe.android.link.account.LinkAccountManager
+import com.stripe.android.link.account.LinkAuth
+import com.stripe.android.link.account.LinkAuthResult
 import com.stripe.android.link.analytics.FakeLinkEventsReporter
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.confirmation.FakeLinkConfirmationHandler
@@ -360,6 +363,7 @@ internal class LinkActivityViewModelTest {
             val navController = navController()
             val linkGate = FakeLinkGate()
             val integrityRequestManager = FakeIntegrityRequestManager()
+            val linkAuth = FakeLinkAuth()
 
             linkGate.setUseAttestationEndpoints(true)
 
@@ -367,6 +371,7 @@ internal class LinkActivityViewModelTest {
                 linkAccountManager = linkAccountManager,
                 linkGate = linkGate,
                 integrityRequestManager = integrityRequestManager,
+                linkAuth = linkAuth,
                 launchWeb = { config ->
                     launchWebConfig = config
                 }
@@ -379,6 +384,10 @@ internal class LinkActivityViewModelTest {
             advanceUntilIdle()
 
             integrityRequestManager.awaitPrepareCall()
+            val lookupCall = linkAuth.awaitLookupCall()
+
+            assertThat(lookupCall.email).isEqualTo(TestFactory.CUSTOMER_EMAIL)
+            assertThat(lookupCall.emailSource).isEqualTo(TestFactory.EMAIL_SOURCE)
             assertNavigation(
                 navController = navController,
                 screen = LinkScreen.Wallet,
@@ -386,7 +395,9 @@ internal class LinkActivityViewModelTest {
                 launchSingleTop = true
             )
             assertThat(launchWebConfig).isNull()
+
             integrityRequestManager.ensureAllEventsConsumed()
+            linkAuth.ensureAllItemsConsumed()
         }
 
     @Test
@@ -416,6 +427,76 @@ internal class LinkActivityViewModelTest {
 
         assertThat(launchWebConfig).isNull()
         integrityRequestManager.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `onCreate should launch web on lookup attestation error`() = runTest {
+        val error = Throwable("oops")
+        var launchWebConfig: LinkConfiguration? = null
+        val linkAccountManager = FakeLinkAccountManager()
+        val navController = navController()
+        val linkAuth = FakeLinkAuth()
+
+        val vm = createViewModel(
+            linkAccountManager = linkAccountManager,
+            linkAuth = linkAuth,
+            launchWeb = { config ->
+                launchWebConfig = config
+            }
+        )
+        vm.navController = navController
+        linkAccountManager.setAccountStatus(AccountStatus.Verified)
+        linkAuth.lookupResult = LinkAuthResult.AttestationFailed(error)
+
+        vm.onCreate(mock())
+
+        advanceUntilIdle()
+
+        linkAuth.awaitLookupCall()
+
+        assertNavigation(
+            navController = navController,
+            screen = LinkScreen.Loading,
+            clearStack = true,
+            launchSingleTop = false
+        )
+        assertThat(launchWebConfig).isNotNull()
+        linkAuth.ensureAllItemsConsumed()
+    }
+
+    @Test
+    fun `onCreate should launch web on generic lookup error`() = runTest {
+        val error = Throwable("oops")
+        var launchWebConfig: LinkConfiguration? = null
+        val linkAccountManager = FakeLinkAccountManager()
+        val navController = navController()
+        val linkAuth = FakeLinkAuth()
+
+        val vm = createViewModel(
+            linkAccountManager = linkAccountManager,
+            linkAuth = linkAuth,
+            launchWeb = { config ->
+                launchWebConfig = config
+            }
+        )
+        vm.navController = navController
+        linkAccountManager.setAccountStatus(AccountStatus.Verified)
+        linkAuth.lookupResult = LinkAuthResult.Error(error)
+
+        vm.onCreate(mock())
+
+        advanceUntilIdle()
+
+        linkAuth.awaitLookupCall()
+
+        assertNavigation(
+            navController = navController,
+            screen = LinkScreen.Wallet,
+            clearStack = true,
+            launchSingleTop = true
+        )
+        assertThat(launchWebConfig).isNull()
+        linkAuth.ensureAllItemsConsumed()
     }
 
     private fun navController(): NavHostController {
@@ -468,6 +549,7 @@ internal class LinkActivityViewModelTest {
         integrityRequestManager: IntegrityRequestManager = FakeIntegrityRequestManager(),
         linkGate: LinkGate = FakeLinkGate(),
         errorReporter: ErrorReporter = FakeErrorReporter(),
+        linkAuth: LinkAuth = FakeLinkAuth(),
         dismissWithResult: (LinkActivityResult) -> Unit = {},
         launchWeb: (LinkConfiguration) -> Unit = {}
     ): LinkActivityViewModel {
@@ -478,7 +560,8 @@ internal class LinkActivityViewModelTest {
             confirmationHandlerFactory = { confirmationHandler },
             integrityRequestManager = integrityRequestManager,
             linkGate = linkGate,
-            errorReporter = errorReporter
+            errorReporter = errorReporter,
+            linkAuth = linkAuth
         ).apply {
             this.navController = navController
             this.dismissWithResult = dismissWithResult
