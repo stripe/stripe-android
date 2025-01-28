@@ -1985,8 +1985,11 @@ internal class DefaultPaymentElementLoaderTest {
         }
 
     @Test
-    fun `When DefaultPaymentMethod not null, paymentMethod order correct`() = runTest {
-        val result = getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId()
+    fun `When DefaultPaymentMethod not null, no saved selection, paymentMethod order correct`() = runTest {
+        val result = getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
+            lastUsedPaymentMethod = null,
+            defaultPaymentMethod = paymentMethodsForTestingOrdering[2],
+        )
 
         val observedElements = result.customer?.paymentMethods
         val expectedElements = expectedPaymentMethodsWithDefaultPaymentMethod
@@ -1994,11 +1997,134 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `When DefaultPaymentMethod not null, selection correct`() = runTest {
-        val result = getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId()
+    fun `When DefaultPaymentMethod not null, no saved selection, selection correct`() = runTest {
+        val result = getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
+            lastUsedPaymentMethod = null,
+            defaultPaymentMethod = paymentMethodsForTestingOrdering[2],
+        )
 
         assertThat((result.paymentSelection as? PaymentSelection.Saved)?.paymentMethod).isEqualTo(
             PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "c3", customerId = "carol")
+        )
+    }
+
+    @Test
+    fun `When DefaultPaymentMethod not null, saved selection, paymentMethod order correct`() = runTest {
+        val result = getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
+            lastUsedPaymentMethod = paymentMethodsForTestingOrdering[1],
+            defaultPaymentMethod = paymentMethodsForTestingOrdering[2],
+        )
+
+        val observedElements = result.customer?.paymentMethods
+        val expectedElements = expectedPaymentMethodsWithDefaultPaymentMethod
+        assertThat(observedElements).containsExactlyElementsIn(expectedElements).inOrder()
+    }
+
+    @Test
+    fun `When DefaultPaymentMethod not null, saved selection, selection correct`() = runTest {
+        val result = getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
+            lastUsedPaymentMethod = paymentMethodsForTestingOrdering[1],
+            defaultPaymentMethod = paymentMethodsForTestingOrdering[2],
+        )
+
+        assertThat((result.paymentSelection as? PaymentSelection.Saved)?.paymentMethod).isEqualTo(
+            PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "c3", customerId = "carol")
+        )
+    }
+
+    @Test
+    fun `When DefaultPaymentMethod not null, saved selection is same as defaultPaymentMethod, paymentMethod order correct`() = runTest {
+        val result = getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
+            lastUsedPaymentMethod = paymentMethodsForTestingOrdering[2],
+            defaultPaymentMethod = paymentMethodsForTestingOrdering[2],
+        )
+
+        val observedElements = result.customer?.paymentMethods
+        val expectedElements = expectedPaymentMethodsWithDefaultPaymentMethod
+        assertThat(observedElements).containsExactlyElementsIn(expectedElements).inOrder()
+    }
+
+    @Test
+    fun `When DefaultPaymentMethod not null, saved selection is same as defaultPaymentMethod, selection correct`() = runTest {
+        val result = getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
+            lastUsedPaymentMethod = paymentMethodsForTestingOrdering[2],
+            defaultPaymentMethod = paymentMethodsForTestingOrdering[2],
+        )
+
+        assertThat((result.paymentSelection as? PaymentSelection.Saved)?.paymentMethod).isEqualTo(
+            PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "c3", customerId = "carol")
+        )
+    }
+
+    @Test
+    fun `When DefaultPaymentMethod null, no saved selection, paymentMethod order correct`() = runTest {
+        val result = getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
+            lastUsedPaymentMethod = null,
+            defaultPaymentMethod = null,
+        )
+
+        val observedElements = result.customer?.paymentMethods
+        val expectedElements = paymentMethodsForTestingOrdering
+        assertThat(observedElements).containsExactlyElementsIn(expectedElements).inOrder()
+    }
+
+    @Test
+    fun `When DefaultPaymentMethod null, no saved selection, selection correct`() = runTest {
+        val result = getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
+            lastUsedPaymentMethod = null,
+            defaultPaymentMethod = null,
+        )
+
+        assertThat((result.paymentSelection as? PaymentSelection.Saved)?.paymentMethod).isEqualTo(
+            PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "a1", customerId = "alice")
+        )
+    }
+
+    @Test
+    fun `When DefaultPaymentMethod null, saved selection first, paymentMethod order correct`() = runTest {
+        val result = getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
+            lastUsedPaymentMethod = paymentMethodsForTestingOrdering[0],
+            defaultPaymentMethod = null,
+        )
+
+        val observedElements = result.customer?.paymentMethods
+        val expectedElements = paymentMethodsForTestingOrdering
+        assertThat(observedElements).containsExactlyElementsIn(expectedElements).inOrder()
+    }
+
+    @Test
+    fun `When DefaultPaymentMethod null, saved selection first, selection correct`() = runTest {
+        val result = getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
+            lastUsedPaymentMethod = paymentMethodsForTestingOrdering[0],
+            defaultPaymentMethod = null,
+        )
+
+        assertThat((result.paymentSelection as? PaymentSelection.Saved)?.paymentMethod).isEqualTo(
+            PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "a1", customerId = "alice")
+        )
+    }
+
+    @Test
+    fun `When DefaultPaymentMethod null, saved selection not first, paymentMethod order correct`() = runTest {
+        val result = getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
+            lastUsedPaymentMethod = paymentMethodsForTestingOrdering[1],
+            defaultPaymentMethod = null,
+        )
+
+        val observedElements = result.customer?.paymentMethods
+        val expectedElements = paymentMethodsForTestingOrdering
+        assertThat(observedElements).containsExactlyElementsIn(expectedElements).inOrder()
+    }
+
+    @Test
+    fun `When DefaultPaymentMethod null, saved selection not first, selection correct`() = runTest {
+        val result = getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
+            lastUsedPaymentMethod = paymentMethodsForTestingOrdering[1],
+            defaultPaymentMethod = null,
+        )
+
+        assertThat((result.paymentSelection as? PaymentSelection.Saved)?.paymentMethod).isEqualTo(
+            PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "a1", customerId = "alice")
         )
     }
 
@@ -2541,12 +2667,17 @@ internal class DefaultPaymentElementLoaderTest {
     )
 
     @OptIn(ExperimentalCustomerSessionApi::class)
-    private suspend fun getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(): PaymentElementLoader.State {
+    private suspend fun getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
+        lastUsedPaymentMethod: PaymentMethod?,
+        defaultPaymentMethod: PaymentMethod?,
+    ): PaymentElementLoader.State {
         enableDefaultPaymentMethods.setEnabled(true)
 
-        val defaultPaymentMethodIndex = 2
-        val defaultPaymentMethod = paymentMethodsForTestingOrdering[defaultPaymentMethodIndex]
-        val defaultPaymentMethodId = defaultPaymentMethod.id
+        val defaultPaymentMethodId = defaultPaymentMethod?.id
+
+        lastUsedPaymentMethod?.let {
+            prefsRepository.savePaymentSelection(PaymentSelection.Saved(lastUsedPaymentMethod))
+        }
 
         val loader = createPaymentElementLoader(
             customer = ElementsSession.Customer(
