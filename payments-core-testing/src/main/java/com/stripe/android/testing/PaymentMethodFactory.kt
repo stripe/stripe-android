@@ -127,6 +127,16 @@ object PaymentMethodFactory {
         )
     }
 
+    fun bacs(): PaymentMethod {
+        return PaymentMethod(
+            id = "pm_1234",
+            created = 123456789L,
+            liveMode = false,
+            type = PaymentMethod.Type.BacsDebit,
+            code = PaymentMethod.Type.BacsDebit.code,
+        )
+    }
+
     fun sepaDebit(): PaymentMethod {
         return PaymentMethod(
             id = "pm_1234",
