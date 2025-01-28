@@ -86,7 +86,10 @@ internal class RealLinkConfigurationCoordinator @Inject internal constructor(
     ): Result<LinkPaymentDetails> =
         getLinkPaymentLauncherComponent(configuration)
             .linkAccountManager
-            .createCardPaymentDetails(paymentMethodCreateParams)
+            .createCardPaymentDetails(
+                paymentMethodCreateParams = paymentMethodCreateParams,
+                shouldShareCardPaymentDetails = configuration.passthroughModeEnabled
+            )
 
     override suspend fun logOut(
         configuration: LinkConfiguration,
