@@ -14,6 +14,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.verticalmode.BankFormInteractor
+import com.stripe.android.paymentsheet.verticalmode.PaymentMethodIncentiveInteractor
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import kotlinx.coroutines.flow.update
 
@@ -99,6 +100,50 @@ internal class USBankAccountFormArguments(
                 onUpdatePrimaryButtonUIState = { viewModel.customPrimaryButtonUiState.update(it) },
                 onUpdatePrimaryButtonState = viewModel::updatePrimaryButtonState,
                 onError = viewModel::onError,
+                incentive = paymentMethodMetadata.paymentMethodIncentive,
+            )
+        }
+
+        fun create(
+            paymentMethodMetadata: PaymentMethodMetadata,
+            selectedPaymentMethodCode: String,
+            hostedSurface: String,
+            setSelection: (PaymentSelection?) -> Unit,
+            onMandateTextChanged: (mandate: ResolvableString?, showAbove: Boolean) -> Unit,
+            onUpdatePrimaryButtonUIState: ((PrimaryButton.UIState?) -> (PrimaryButton.UIState?)) -> Unit,
+            onError: (ResolvableString?) -> Unit,
+        ): USBankAccountFormArguments {
+            val isSaveForFutureUseValueChangeable = isSaveForFutureUseValueChangeable(
+                code = selectedPaymentMethodCode,
+                intent = paymentMethodMetadata.stripeIntent,
+                paymentMethodSaveConsentBehavior = paymentMethodMetadata.paymentMethodSaveConsentBehavior,
+                hasCustomerConfiguration = paymentMethodMetadata.hasCustomerConfiguration,
+            )
+            val instantDebits = selectedPaymentMethodCode == PaymentMethod.Type.Link.code
+            val bankFormInteractor = BankFormInteractor(
+                updateSelection = setSelection,
+                paymentMethodIncentiveInteractor = PaymentMethodIncentiveInteractor(
+                    paymentMethodMetadata.paymentMethodIncentive
+                )
+            )
+            return USBankAccountFormArguments(
+                showCheckbox = isSaveForFutureUseValueChangeable && instantDebits.not(),
+                hostedSurface = hostedSurface,
+                instantDebits = instantDebits,
+                linkMode = paymentMethodMetadata.linkMode,
+                onBehalfOf = null,
+                isCompleteFlow = false,
+                isPaymentFlow = paymentMethodMetadata.stripeIntent is PaymentIntent,
+                stripeIntentId = paymentMethodMetadata.stripeIntent.id,
+                clientSecret = paymentMethodMetadata.stripeIntent.clientSecret,
+                shippingDetails = paymentMethodMetadata.shippingDetails,
+                draftPaymentSelection = null,
+                onMandateTextChanged = onMandateTextChanged,
+                onLinkedBankAccountChanged = bankFormInteractor::handleLinkedBankAccountChanged,
+                onUpdatePrimaryButtonUIState = onUpdatePrimaryButtonUIState,
+                onUpdatePrimaryButtonState = {
+                },
+                onError = onError,
                 incentive = paymentMethodMetadata.paymentMethodIncentive,
             )
         }
