@@ -64,6 +64,87 @@ internal class CustomerStateHolderTest {
     }
 
     @Test
+    fun `MostRecentlySelectedSavedPaymentMethod is restored from savedStateHandle`() {
+        val savedStateHandle = SavedStateHandle()
+        val customerState = CustomerState.createForLegacyEphemeralKey(
+            customerId = "cus_123",
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
+            accessType = PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey("ek_123"),
+            paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        )
+        savedStateHandle[CustomerStateHolder.SAVED_CUSTOMER] = customerState
+        savedStateHandle[CustomerStateHolder.SAVED_PM_SELECTION] = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        runScenario(savedStateHandle = savedStateHandle) {
+            customerStateHolder.customer.test {
+                assertThat(awaitItem()).isEqualTo(customerState)
+            }
+            customerStateHolder.paymentMethods.test {
+                assertThat(awaitItem()).containsExactly(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+            }
+            customerStateHolder.mostRecentlySelectedSavedPaymentMethod.test {
+                assertThat(awaitItem()).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+            }
+        }
+    }
+
+    @Test
+    fun `MostRecentlySelectedSavedPaymentMethod is cleared if paymentMethod no longer exists`() = runScenario {
+        customerStateHolder.mostRecentlySelectedSavedPaymentMethod.test {
+            assertThat(awaitItem()).isNull()
+
+            customerStateHolder.setCustomerState(
+                CustomerState.createForLegacyEphemeralKey(
+                    customerId = "cus_123",
+                    configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
+                    accessType = PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey("ek_123"),
+                    paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+                )
+            )
+            customerStateHolder.updateMostRecentlySelectedSavedPaymentMethod(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+            assertThat(awaitItem()).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+
+            customerStateHolder.setCustomerState(
+                CustomerState.createForLegacyEphemeralKey(
+                    customerId = "cus_123",
+                    configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
+                    accessType = PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey("ek_123"),
+                    paymentMethods = emptyList(),
+                )
+            )
+            assertThat(awaitItem()).isNull()
+        }
+    }
+
+    @Test
+    fun `MostRecentlySelectedSavedPaymentMethod is maintained if paymentMethod continues to exists`() = runScenario {
+        customerStateHolder.mostRecentlySelectedSavedPaymentMethod.test {
+            assertThat(awaitItem()).isNull()
+
+            val extraPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_333")
+            customerStateHolder.setCustomerState(
+                CustomerState.createForLegacyEphemeralKey(
+                    customerId = "cus_123",
+                    configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
+                    accessType = PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey("ek_123"),
+                    paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD, extraPaymentMethod)
+                )
+            )
+            customerStateHolder.updateMostRecentlySelectedSavedPaymentMethod(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+            assertThat(awaitItem()).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+
+            customerStateHolder.setCustomerState(
+                CustomerState.createForLegacyEphemeralKey(
+                    customerId = "cus_123",
+                    configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
+                    accessType = PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey("ek_123"),
+                    paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+                )
+            )
+            ensureAllEventsConsumed()
+        }
+    }
+
+    @Test
     fun `canRemove is correct when no payment methods for customer`() = runScenario {
         customerStateHolder.canRemove.test {
             assertThat(awaitItem()).isFalse()

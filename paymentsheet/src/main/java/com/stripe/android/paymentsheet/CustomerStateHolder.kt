@@ -44,6 +44,11 @@ internal class CustomerStateHolder(
 
     fun setCustomerState(customerState: CustomerState?) {
         savedStateHandle[SAVED_CUSTOMER] = customerState
+
+        val currentSelection = mostRecentlySelectedSavedPaymentMethod.value
+        if (currentSelection != null && customerState?.paymentMethods?.contains(currentSelection) == false) {
+            updateMostRecentlySelectedSavedPaymentMethod(null)
+        }
     }
 
     fun updateMostRecentlySelectedSavedPaymentMethod(paymentMethod: PaymentMethod?) {
@@ -52,7 +57,7 @@ internal class CustomerStateHolder(
 
     companion object {
         const val SAVED_CUSTOMER = "customer_info"
-        private const val SAVED_PM_SELECTION = "saved_selection"
+        const val SAVED_PM_SELECTION = "saved_selection"
 
         fun create(viewModel: BaseSheetViewModel): CustomerStateHolder {
             return CustomerStateHolder(
