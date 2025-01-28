@@ -56,6 +56,9 @@ internal object HostedAuthUrlBuilder {
             phoneCountryCode?.let { queryParams.add("linkMobilePhoneCountry=$it") }
         }
 
+        // hint for frontend to understand the surface launching the web flow.
+        queryParams.add("launched_by=android_sdk")
+
         return queryParams.joinToString("&")
     }
 

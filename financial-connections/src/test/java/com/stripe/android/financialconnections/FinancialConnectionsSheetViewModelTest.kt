@@ -443,7 +443,7 @@ class FinancialConnectionsSheetViewModelTest {
         // Then
         withState(viewModel) {
             val viewEffect = it.viewEffect as OpenAuthFlowWithUrl
-            assertThat(viewEffect.url).isEqualTo("${syncResponse.manifest.hostedAuthUrl}")
+            assertThat(viewEffect.url).isEqualTo("${syncResponse.manifest.hostedAuthUrl}?launched_by=android_sdk")
         }
     }
 
