@@ -169,7 +169,7 @@ internal class NetworkingLinkSignupViewModel @AssistedInject constructor(
                 val destination = nextPane.destination(referrer = pane)
                 navigationManager.tryNavigateTo(destination)
             },
-            onFail = linkSignupHandler::handleSignupFailure,
+            onFail = { linkSignupHandler.handleSignupFailure(stateFlow.value, it) },
         )
     }
 
@@ -215,6 +215,8 @@ internal class NetworkingLinkSignupViewModel @AssistedInject constructor(
                 lookupAccount(
                     pane = pane,
                     email = validEmail,
+                    phone = payload?.phoneController?.getLocalNumber(),
+                    phoneCountryCode = payload?.phoneController?.getCountryCode(),
                     emailSource = if (payload?.prefilledEmail == validEmail) CUSTOMER_OBJECT else USER_ACTION,
                     sessionId = payload?.sessionId ?: "",
                     verifiedFlow = payload?.appVerificationEnabled == true

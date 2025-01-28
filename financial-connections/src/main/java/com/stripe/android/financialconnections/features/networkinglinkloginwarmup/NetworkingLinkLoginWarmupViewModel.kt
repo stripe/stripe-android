@@ -97,6 +97,8 @@ internal class NetworkingLinkLoginWarmupViewModel @AssistedInject constructor(
             lookupAccount(
                 pane = PANE,
                 email = payload.email,
+                phone = null,
+                phoneCountryCode = null,
                 emailSource = EmailSource.CUSTOMER_OBJECT,
                 sessionId = payload.sessionId,
                 verifiedFlow = payload.verifiedFlow

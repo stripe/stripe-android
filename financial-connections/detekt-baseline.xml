@@ -5,6 +5,7 @@
     <ID>ConstructorParameterNaming:FinancialConnectionsAuthorizationSession.kt$FinancialConnectionsAuthorizationSession$@SerialName(value = "is_oauth") private val _isOAuth: Boolean? = false</ID>
     <ID>ConstructorParameterNaming:PartnerAccountsList.kt$PartnerAccount$@SerialName(value = "allow_selection") private val _allowSelection: Boolean? = null</ID>
     <ID>LargeClass:FinancialConnectionsSheetViewModelTest.kt$FinancialConnectionsSheetViewModelTest</ID>
+    <ID>LargeClass:NetworkingLinkSignupViewModelTest.kt$NetworkingLinkSignupViewModelTest</ID>
     <ID>LongMethod:AccountItem.kt$@Composable @Preview internal fun AccountItemPreview()</ID>
     <ID>LongMethod:Button.kt$@Composable internal fun FinancialConnectionsButton( onClick: () -> Unit, modifier: Modifier = Modifier, type: Type = Primary, size: FinancialConnectionsButton.Size = FinancialConnectionsButton.Size.Regular, enabled: Boolean = true, loading: Boolean = false, content: @Composable (RowScope.() -> Unit) )</ID>
     <ID>LongMethod:FinancialConnectionsSheetNativeActivity.kt$FinancialConnectionsSheetNativeActivity$@Composable fun NavHost( initialPane: Pane, testMode: Boolean, )</ID>
@@ -20,13 +21,11 @@
     <ID>MagicNumber:InstitutionPickerScreen.kt$0.5f</ID>
     <ID>MagicNumber:InstitutionPickerScreen.kt$0.75f</ID>
     <ID>MagicNumber:InstitutionPickerScreen.kt$10</ID>
-    <ID>MagicNumber:Layout.kt$4</ID>
     <ID>MagicNumber:LinkAccountPickerScreen.kt$3</ID>
     <ID>MagicNumber:ManualEntryViewModel.kt$ManualEntryViewModel$4</ID>
     <ID>MagicNumber:SharedPartnerAuth.kt$.50f</ID>
     <ID>MatchingDeclarationName:ServerDrivenUi.kt$BulletUI</ID>
     <ID>MatchingDeclarationName:Type.kt$FinancialConnectionsTypography</ID>
-    <ID>MaxLineLength:NetworkingLinkSignupViewModelTest.kt$NetworkingLinkSignupViewModelTest$fun</ID>
     <ID>NestedBlockDepth:InstitutionPickerScreen.kt$private fun LazyListScope.searchResults( isInputEmpty: Boolean, payload: Payload, selectedInstitutionId: String?, onInstitutionSelected: (FinancialConnectionsInstitution, Boolean) -> Unit, institutions: Async&lt;InstitutionResponse>, onManualEntryClick: () -> Unit, onSearchMoreClick: () -> Unit )</ID>
     <ID>SwallowedException:PollAttachPaymentAccount.kt$PollAttachPaymentAccount$e: StripeException</ID>
     <ID>SwallowedException:PollAuthorizationSessionAccounts.kt$PollAuthorizationSessionAccounts$e: StripeException</ID>

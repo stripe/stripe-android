@@ -97,8 +97,15 @@ class LinkSignupHandlerForInstantDebitsTest {
 
     @Test
     fun `handleSignupFailure should call handleError with correct parameters`() = runTest {
+        val testState = NetworkingLinkSignupState(
+            validEmail = "test@instantdebits.com",
+            validPhone = "+1234567890",
+            isInstantDebits = true,
+            payload = Async.Success(validPayload)
+        )
         val error = RuntimeException("Test Error")
-        handler.handleSignupFailure(error)
+
+        handler.handleSignupFailure(testState, error)
 
         verify(handleError).invoke(
             extraMessage = "Error creating a Link account",

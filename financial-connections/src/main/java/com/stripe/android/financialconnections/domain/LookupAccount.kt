@@ -2,7 +2,9 @@ package com.stripe.android.financialconnections.domain
 
 import android.app.Application
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext.PrefillDetails
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.AttestationEndpoint
+import com.stripe.android.financialconnections.features.error.toAttestationErrorIfApplicable
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.repository.FinancialConnectionsConsumerSessionRepository
 import com.stripe.android.model.ConsumerSessionLookup
@@ -18,27 +20,39 @@ internal class LookupAccount @Inject constructor(
 
     suspend operator fun invoke(
         email: String,
+        phone: String?,
+        phoneCountryCode: String?,
         emailSource: EmailSource,
         verifiedFlow: Boolean,
         sessionId: String,
         pane: Pane
     ): ConsumerSessionLookup {
-        return if (verifiedFlow) {
-            val token = requestIntegrityToken(pane = pane, endpoint = AttestationEndpoint.LOOKUP)
-            requireNotNull(
-                consumerSessionRepository.mobileLookupConsumerSession(
-                    email = email.lowercase().trim(),
-                    emailSource = emailSource,
-                    verificationToken = token,
-                    appId = application.packageName,
-                    sessionId = sessionId
+        return runCatching {
+            if (verifiedFlow) {
+                val token = requestIntegrityToken(pane = pane, endpoint = AttestationEndpoint.LOOKUP)
+                requireNotNull(
+                    consumerSessionRepository.mobileLookupConsumerSession(
+                        email = email.lowercase().trim(),
+                        emailSource = emailSource,
+                        verificationToken = token,
+                        appId = application.packageName,
+                        sessionId = sessionId
+                    )
                 )
-            )
-        } else {
-            requireNotNull(
-                consumerSessionRepository.postConsumerSession(
-                    email = email.lowercase().trim(),
-                    clientSecret = configuration.financialConnectionsSessionClientSecret
+            } else {
+                requireNotNull(
+                    consumerSessionRepository.postConsumerSession(
+                        email = email.lowercase().trim(),
+                        clientSecret = configuration.financialConnectionsSessionClientSecret
+                    )
+                )
+            }
+        }.getOrElse { throwable ->
+            throw throwable.toAttestationErrorIfApplicable(
+                PrefillDetails(
+                    email = email,
+                    phone = phone,
+                    phoneCountryCode = phoneCountryCode
                 )
             )
         }
