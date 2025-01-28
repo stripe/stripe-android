@@ -22,7 +22,9 @@ import com.stripe.android.core.utils.DefaultDurationProvider
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.link.account.DefaultLinkAccountManager
+import com.stripe.android.link.account.DefaultLinkAuth
 import com.stripe.android.link.account.LinkAccountManager
+import com.stripe.android.link.account.LinkAuth
 import com.stripe.android.link.analytics.DefaultLinkEventsReporter
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.confirmation.DefaultLinkConfirmationHandler
@@ -86,6 +88,10 @@ internal interface NativeLinkModule {
     @Binds
     @NativeLinkScope
     fun bindsLinkGate(linkGate: DefaultLinkGate): LinkGate
+
+    @Binds
+    @NativeLinkScope
+    fun bindsLinkAuth(linkGate: DefaultLinkAuth): LinkAuth
 
     @SuppressWarnings("TooManyFunctions")
     companion object {
@@ -186,5 +192,16 @@ internal interface NativeLinkModule {
         @Provides
         @NativeLinkScope
         fun provideEventReporterMode(): EventReporter.Mode = EventReporter.Mode.Custom
+
+        @Provides
+        @NativeLinkScope
+        @Named(APPLICATION_ID)
+        fun provideApplicationId(
+            application: Application
+        ): String {
+            return application.packageName
+        }
     }
 }
+
+internal const val APPLICATION_ID = "application_id"
