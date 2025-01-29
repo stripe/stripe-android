@@ -402,6 +402,32 @@ internal class DefaultLinkAuthTest {
         integrityRequestManager.ensureAllEventsConsumed()
     }
 
+    @Test
+    fun `null link account yields NoLinkAccountFound result`() = runTest {
+        val linkAccountManager = FakeLinkAccountManager()
+        val integrityRequestManager = FakeIntegrityRequestManager()
+
+        linkAccountManager.mobileLookupConsumerResult = Result.success(null)
+
+        val linkAuth = linkAuth(
+            linkAccountManager = linkAccountManager,
+            integrityRequestManager = integrityRequestManager
+        )
+
+        val result = linkAuth.lookUp(
+            email = TestFactory.CUSTOMER_EMAIL,
+            emailSource = TestFactory.EMAIL_SOURCE
+        )
+
+        linkAccountManager.awaitMobileLookupCall()
+        integrityRequestManager.awaitRequestTokenCall()
+
+        assertThat(result).isEqualTo(LinkAuthResult.NoLinkAccountFound)
+
+        linkAccountManager.ensureAllEventsConsumed()
+        integrityRequestManager.ensureAllEventsConsumed()
+    }
+
     private fun linkAuth(
         useAttestationEndpoints: Boolean = true,
         linkAccountManager: FakeLinkAccountManager = FakeLinkAccountManager(),

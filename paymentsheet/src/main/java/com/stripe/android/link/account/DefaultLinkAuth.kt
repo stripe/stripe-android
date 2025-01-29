@@ -1,7 +1,6 @@
 package com.stripe.android.link.account
 
 import com.stripe.android.core.exception.APIException
-import com.stripe.android.link.NoLinkAccountFoundException
 import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.injection.APPLICATION_ID
 import com.stripe.android.link.model.LinkAccount
@@ -103,7 +102,7 @@ internal class DefaultLinkAuth @Inject constructor(
             return if (linkAccount != null) {
                 LinkAuthResult.Success(linkAccount)
             } else {
-                LinkAuthResult.Error(NoLinkAccountFoundException())
+                LinkAuthResult.NoLinkAccountFound
             }
         }.getOrElse { error ->
             error.toLinkAuthResult()
