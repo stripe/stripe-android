@@ -198,6 +198,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         LINK_NATIVE_FAILED_TO_PREPARE_INTEGRITY_MANAGER(
             partialEventName = "link.native.integrity.preparation_failed"
         ),
+        LINK_NATIVE_FAILED_TO_ATTEST_REQUEST(
+            partialEventName = "link.native.failed_to_attest_request"
+        ),
         PAYMENT_SHEET_AUTHENTICATORS_NOT_FOUND(
             partialEventName = "paymentsheet.authenticators.not_found"
         ),

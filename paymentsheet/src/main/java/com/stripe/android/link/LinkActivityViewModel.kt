@@ -15,12 +15,15 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavHostController
 import com.stripe.android.link.LinkActivity.Companion.getArgs
 import com.stripe.android.link.account.LinkAccountManager
+import com.stripe.android.link.account.LinkAuth
+import com.stripe.android.link.account.LinkAuthResult
 import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.injection.DaggerNativeLinkComponent
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.LinkAppBarState
+import com.stripe.android.model.EmailSource
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.R
@@ -40,6 +43,8 @@ internal class LinkActivityViewModel @Inject constructor(
     private val integrityRequestManager: IntegrityRequestManager,
     private val linkGate: LinkGate,
     private val errorReporter: ErrorReporter,
+    private val linkAuth: LinkAuth,
+    private val linkConfiguration: LinkConfiguration
 ) : ViewModel(), DefaultLifecycleObserver {
     val confirmationHandler = confirmationHandlerFactory.create(viewModelScope)
     private val _linkState = MutableStateFlow(
@@ -68,7 +73,7 @@ internal class LinkActivityViewModel @Inject constructor(
     private fun moveToWeb() {
         launchWebFlow?.let { launcher ->
             navigate(LinkScreen.Loading, clearStack = true)
-            launcher.invoke(activityRetainedComponent.configuration)
+            launcher.invoke(linkConfiguration)
         }
     }
 
@@ -118,19 +123,41 @@ internal class LinkActivityViewModel @Inject constructor(
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
         viewModelScope.launch {
-            warmUpIntegrityManager().fold(
+            performAttestationCheck().fold(
                 onSuccess = {
                     navigateToInitialScreen()
                 },
-                onFailure = { error ->
+                onFailure = {
                     moveToWeb()
-                    errorReporter.report(
-                        errorEvent = ErrorReporter.UnexpectedErrorEvent.LINK_NATIVE_FAILED_TO_PREPARE_INTEGRITY_MANAGER,
-                        stripeException = LinkEventException(error)
-                    )
                 }
             )
         }
+    }
+
+    private suspend fun performAttestationCheck(): Result<Unit> {
+        if (linkGate.useAttestationEndpoints.not()) return Result.success(Unit)
+        return integrityRequestManager.prepare()
+            .onFailure { error ->
+                errorReporter.report(
+                    errorEvent = ErrorReporter.UnexpectedErrorEvent.LINK_NATIVE_FAILED_TO_PREPARE_INTEGRITY_MANAGER,
+                    stripeException = LinkEventException(error)
+                )
+            }
+            .mapCatching {
+                when (val lookupResult = lookupUser()) {
+                    is LinkAuthResult.AttestationFailed -> {
+                        errorReporter.report(
+                            errorEvent = ErrorReporter.UnexpectedErrorEvent.LINK_NATIVE_FAILED_TO_ATTEST_REQUEST,
+                            stripeException = LinkEventException(lookupResult.throwable)
+                        )
+                        throw lookupResult.throwable
+                    }
+                    is LinkAuthResult.Error,
+                    LinkAuthResult.NoLinkAccountFound,
+                    is LinkAuthResult.Success,
+                    null -> Unit
+                }
+            }
     }
 
     private suspend fun navigateToInitialScreen() {
@@ -143,9 +170,16 @@ internal class LinkActivityViewModel @Inject constructor(
         navigate(screen, clearStack = true, launchSingleTop = true)
     }
 
-    private suspend fun warmUpIntegrityManager(): Result<Unit> {
-        if (linkGate.useAttestationEndpoints.not()) return Result.success(Unit)
-        return integrityRequestManager.prepare()
+    private suspend fun lookupUser(): LinkAuthResult? {
+        val customerEmail = linkAccountManager.linkAccount.value?.email
+            ?: linkConfiguration.customerInfo.email
+            ?: return null
+
+        return linkAuth.lookUp(
+            email = customerEmail,
+            emailSource = EmailSource.CUSTOMER_OBJECT,
+            startSession = false
+        )
     }
 
     companion object {

@@ -22,7 +22,10 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.core.Logger
 import com.stripe.android.link.account.FakeLinkAccountManager
+import com.stripe.android.link.account.FakeLinkAuth
 import com.stripe.android.link.account.LinkAccountManager
+import com.stripe.android.link.account.LinkAuth
+import com.stripe.android.link.account.LinkAuthResult
 import com.stripe.android.link.analytics.FakeLinkEventsReporter
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.confirmation.FakeLinkConfirmationHandler
@@ -31,6 +34,7 @@ import com.stripe.android.link.gate.FakeLinkGate
 import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -418,6 +422,138 @@ internal class LinkActivityViewModelTest {
         integrityRequestManager.ensureAllEventsConsumed()
     }
 
+    @Test
+    fun `onCreate should launch web on lookup attestation error`() = runTest {
+        val error = Throwable("oops")
+        var launchWebConfig: LinkConfiguration? = null
+        val linkAccountManager = FakeLinkAccountManager()
+        val navController = navController()
+        val linkAuth = FakeLinkAuth()
+        val errorReporter = FakeErrorReporter()
+
+        val vm = createViewModel(
+            linkAccountManager = linkAccountManager,
+            linkAuth = linkAuth,
+            errorReporter = errorReporter,
+            launchWeb = { config ->
+                launchWebConfig = config
+            }
+        )
+        vm.navController = navController
+        linkAccountManager.setAccountStatus(AccountStatus.Verified)
+        linkAuth.lookupResult = LinkAuthResult.AttestationFailed(error)
+
+        vm.onCreate(mock())
+
+        advanceUntilIdle()
+
+        linkAuth.awaitLookupCall()
+
+        assertNavigation(
+            navController = navController,
+            screen = LinkScreen.Loading,
+            clearStack = true,
+            launchSingleTop = false
+        )
+        assertThat(launchWebConfig).isNotNull()
+        assertThat(errorReporter.getLoggedErrors())
+            .containsExactly(
+                ErrorReporter.UnexpectedErrorEvent.LINK_NATIVE_FAILED_TO_ATTEST_REQUEST.eventName
+            )
+        linkAuth.ensureAllItemsConsumed()
+    }
+
+    @Test
+    fun `onCreate should launch web on generic lookup error`() = runTest {
+        val error = Throwable("oops")
+        var launchWebConfig: LinkConfiguration? = null
+        val linkAccountManager = FakeLinkAccountManager()
+        val navController = navController()
+        val linkAuth = FakeLinkAuth()
+
+        val vm = createViewModel(
+            linkAccountManager = linkAccountManager,
+            linkAuth = linkAuth,
+            launchWeb = { config ->
+                launchWebConfig = config
+            }
+        )
+        vm.navController = navController
+        linkAccountManager.setAccountStatus(AccountStatus.Verified)
+        linkAuth.lookupResult = LinkAuthResult.Error(error)
+
+        vm.onCreate(mock())
+
+        advanceUntilIdle()
+
+        linkAuth.awaitLookupCall()
+
+        assertNavigation(
+            navController = navController,
+            screen = LinkScreen.Wallet,
+            clearStack = true,
+            launchSingleTop = true
+        )
+        assertThat(launchWebConfig).isNull()
+        linkAuth.ensureAllItemsConsumed()
+    }
+
+    @Test
+    fun `onCreate should lookup with link account email when signed in`() = runTest {
+        val linkAccountManager = FakeLinkAccountManager()
+        val linkGate = FakeLinkGate()
+        val linkAuth = FakeLinkAuth()
+
+        linkAccountManager.setLinkAccount(
+            account = LinkAccount(
+                consumerSession = TestFactory.CONSUMER_SESSION.copy(
+                    emailAddress = "linkaccountmanager@email.com"
+                )
+            )
+        )
+        linkGate.setUseAttestationEndpoints(true)
+
+        val vm = createViewModel(
+            linkAccountManager = linkAccountManager,
+            linkGate = linkGate,
+            linkAuth = linkAuth,
+            launchWeb = {}
+        )
+
+        vm.onCreate(mock())
+
+        advanceUntilIdle()
+
+        val call = linkAuth.awaitLookupCall()
+
+        assertThat(call.email).isEqualTo("linkaccountmanager@email.com")
+    }
+
+    @Test
+    fun `onCreate should lookup with configuration email when not signed in`() = runTest {
+        val linkAccountManager = FakeLinkAccountManager()
+        val linkGate = FakeLinkGate()
+        val linkAuth = FakeLinkAuth()
+
+        linkAccountManager.setLinkAccount(null)
+        linkGate.setUseAttestationEndpoints(true)
+
+        val vm = createViewModel(
+            linkAccountManager = linkAccountManager,
+            linkGate = linkGate,
+            linkAuth = linkAuth,
+            launchWeb = {}
+        )
+
+        vm.onCreate(mock())
+
+        advanceUntilIdle()
+
+        val call = linkAuth.awaitLookupCall()
+
+        assertThat(call.email).isEqualTo(TestFactory.LINK_CONFIGURATION.customerInfo.email)
+    }
+
     private fun navController(): NavHostController {
         val navController: NavHostController = mock()
         val mockGraph: NavGraph = mock()
@@ -468,6 +604,7 @@ internal class LinkActivityViewModelTest {
         integrityRequestManager: IntegrityRequestManager = FakeIntegrityRequestManager(),
         linkGate: LinkGate = FakeLinkGate(),
         errorReporter: ErrorReporter = FakeErrorReporter(),
+        linkAuth: LinkAuth = FakeLinkAuth(),
         dismissWithResult: (LinkActivityResult) -> Unit = {},
         launchWeb: (LinkConfiguration) -> Unit = {}
     ): LinkActivityViewModel {
@@ -478,7 +615,9 @@ internal class LinkActivityViewModelTest {
             confirmationHandlerFactory = { confirmationHandler },
             integrityRequestManager = integrityRequestManager,
             linkGate = linkGate,
-            errorReporter = errorReporter
+            errorReporter = errorReporter,
+            linkAuth = linkAuth,
+            linkConfiguration = TestFactory.LINK_CONFIGURATION
         ).apply {
             this.navController = navController
             this.dismissWithResult = dismissWithResult
