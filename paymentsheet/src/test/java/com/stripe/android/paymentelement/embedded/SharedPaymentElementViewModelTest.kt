@@ -19,10 +19,13 @@ import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.paymentMethodType
+import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.utils.DummyActivityResultCaller
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
@@ -33,30 +36,34 @@ import kotlin.test.Test
 @ExperimentalEmbeddedPaymentElementApi
 @RunWith(RobolectricTestRunner::class)
 internal class SharedPaymentElementViewModelTest {
+    private val defaultConfiguration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
+
+    private fun createPaymentElementLoaderState(
+        isGooglePayReady: Boolean = false,
+        paymentSelection: PaymentSelection? = null,
+        customer: CustomerState? = null,
+    ): PaymentElementLoader.State {
+        return PaymentElementLoader.State(
+            config = defaultConfiguration.asCommonConfiguration(),
+            customer = customer,
+            paymentSelection = paymentSelection,
+            validationError = null,
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFixtures.PI_SUCCEEDED,
+                billingDetailsCollectionConfiguration = defaultConfiguration
+                    .billingDetailsCollectionConfiguration,
+                allowsDelayedPaymentMethods = defaultConfiguration.allowsDelayedPaymentMethods,
+                allowsPaymentMethodsRequiringShippingAddress = defaultConfiguration
+                    .allowsPaymentMethodsRequiringShippingAddress,
+                isGooglePayReady = isGooglePayReady,
+                cbcEligibility = CardBrandChoiceEligibility.Ineligible,
+            ),
+        )
+    }
 
     @Test
     fun `configure sets initial confirmationState`() = testScenario {
-        val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
-        configurationHandler.emit(
-            Result.success(
-                PaymentElementLoader.State(
-                    config = configuration.asCommonConfiguration(),
-                    customer = null,
-                    paymentSelection = null,
-                    validationError = null,
-                    paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-                        stripeIntent = PaymentIntentFixtures.PI_SUCCEEDED,
-                        billingDetailsCollectionConfiguration = configuration
-                            .billingDetailsCollectionConfiguration,
-                        allowsDelayedPaymentMethods = configuration.allowsDelayedPaymentMethods,
-                        allowsPaymentMethodsRequiringShippingAddress = configuration
-                            .allowsPaymentMethodsRequiringShippingAddress,
-                        isGooglePayReady = false,
-                        cbcEligibility = CardBrandChoiceEligibility.Ineligible,
-                    ),
-                )
-            )
-        )
+        configurationHandler.emit(Result.success(createPaymentElementLoaderState()))
 
         assertThat(viewModel.confirmationStateHolder.state).isNull()
 
@@ -65,7 +72,7 @@ internal class SharedPaymentElementViewModelTest {
                 PaymentSheet.IntentConfiguration(
                     PaymentSheet.IntentConfiguration.Mode.Payment(5000, "USD"),
                 ),
-                configuration = configuration,
+                configuration = defaultConfiguration,
             )
         ).isInstanceOf<EmbeddedPaymentElement.ConfigureResult.Succeeded>()
         assertThat(embeddedContentHelper.dataLoadedTurbine.awaitItem()).isNotNull()
@@ -74,25 +81,46 @@ internal class SharedPaymentElementViewModelTest {
     }
 
     @Test
+    fun `configure clears confirmationStateHolder_state while configure is in flight`() = testScenario {
+        configurationHandler.emit(Result.success(createPaymentElementLoaderState()))
+
+        assertThat(viewModel.confirmationStateHolder.state).isNull()
+
+        assertThat(
+            viewModel.configure(
+                PaymentSheet.IntentConfiguration(
+                    PaymentSheet.IntentConfiguration.Mode.Payment(5000, "USD"),
+                ),
+                configuration = defaultConfiguration,
+            )
+        ).isInstanceOf<EmbeddedPaymentElement.ConfigureResult.Succeeded>()
+        assertThat(embeddedContentHelper.dataLoadedTurbine.awaitItem()).isNotNull()
+        assertThat(viewModel.confirmationStateHolder.state?.paymentMethodMetadata).isNotNull()
+
+        val secondConfigureResult = testScope.async {
+            viewModel.configure(
+                PaymentSheet.IntentConfiguration(
+                    PaymentSheet.IntentConfiguration.Mode.Payment(5000, "USD"),
+                ),
+                configuration = defaultConfiguration,
+            )
+        }
+
+        testScope.testScheduler.advanceUntilIdle()
+        assertThat(viewModel.confirmationStateHolder.state).isNull()
+        configurationHandler.emit(Result.success(createPaymentElementLoaderState()))
+        assertThat(secondConfigureResult.await()).isInstanceOf<EmbeddedPaymentElement.ConfigureResult.Succeeded>()
+        assertThat(embeddedContentHelper.dataLoadedTurbine.awaitItem()).isNotNull()
+        assertThat(viewModel.confirmationStateHolder.state?.paymentMethodMetadata).isNotNull()
+    }
+
+    @Test
     fun `Updating selection updates confirmationState`() = testScenario {
-        val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
         configurationHandler.emit(
             Result.success(
-                PaymentElementLoader.State(
-                    config = configuration.asCommonConfiguration(),
-                    customer = null,
+                createPaymentElementLoaderState(
+                    isGooglePayReady = true,
                     paymentSelection = PaymentSelection.GooglePay,
-                    validationError = null,
-                    paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-                        stripeIntent = PaymentIntentFixtures.PI_SUCCEEDED,
-                        billingDetailsCollectionConfiguration = configuration
-                            .billingDetailsCollectionConfiguration,
-                        allowsDelayedPaymentMethods = configuration.allowsDelayedPaymentMethods,
-                        allowsPaymentMethodsRequiringShippingAddress = configuration
-                            .allowsPaymentMethodsRequiringShippingAddress,
-                        isGooglePayReady = true,
-                        cbcEligibility = CardBrandChoiceEligibility.Ineligible,
-                    ),
                 )
             )
         )
@@ -104,7 +132,7 @@ internal class SharedPaymentElementViewModelTest {
                 PaymentSheet.IntentConfiguration(
                     PaymentSheet.IntentConfiguration.Mode.Payment(5000, "USD"),
                 ),
-                configuration = configuration,
+                configuration = defaultConfiguration,
             )
         ).isInstanceOf<EmbeddedPaymentElement.ConfigureResult.Succeeded>()
         assertThat(embeddedContentHelper.dataLoadedTurbine.awaitItem()).isNotNull()
@@ -116,33 +144,13 @@ internal class SharedPaymentElementViewModelTest {
 
     @Test
     fun `configure maps success result`() = testScenario {
-        val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
-        configurationHandler.emit(
-            Result.success(
-                PaymentElementLoader.State(
-                    config = configuration.asCommonConfiguration(),
-                    customer = null,
-                    paymentSelection = null,
-                    validationError = null,
-                    paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-                        stripeIntent = PaymentIntentFixtures.PI_SUCCEEDED,
-                        billingDetailsCollectionConfiguration = configuration
-                            .billingDetailsCollectionConfiguration,
-                        allowsDelayedPaymentMethods = configuration.allowsDelayedPaymentMethods,
-                        allowsPaymentMethodsRequiringShippingAddress = configuration
-                            .allowsPaymentMethodsRequiringShippingAddress,
-                        isGooglePayReady = false,
-                        cbcEligibility = CardBrandChoiceEligibility.Ineligible,
-                    ),
-                )
-            )
-        )
+        configurationHandler.emit(Result.success(createPaymentElementLoaderState()))
         assertThat(
             viewModel.configure(
                 PaymentSheet.IntentConfiguration(
                     PaymentSheet.IntentConfiguration.Mode.Payment(5000, "USD"),
                 ),
-                configuration = configuration,
+                configuration = defaultConfiguration,
             )
         ).isInstanceOf<EmbeddedPaymentElement.ConfigureResult.Succeeded>()
 
@@ -154,24 +162,11 @@ internal class SharedPaymentElementViewModelTest {
 
     @Test
     fun `configure emits payment option and sets initial selection`() = testScenario {
-        val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
         configurationHandler.emit(
             Result.success(
-                PaymentElementLoader.State(
-                    config = configuration.asCommonConfiguration(),
-                    customer = null,
+                createPaymentElementLoaderState(
+                    isGooglePayReady = true,
                     paymentSelection = PaymentSelection.GooglePay,
-                    validationError = null,
-                    paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-                        stripeIntent = PaymentIntentFixtures.PI_SUCCEEDED,
-                        billingDetailsCollectionConfiguration = configuration
-                            .billingDetailsCollectionConfiguration,
-                        allowsDelayedPaymentMethods = configuration.allowsDelayedPaymentMethods,
-                        allowsPaymentMethodsRequiringShippingAddress = configuration
-                            .allowsPaymentMethodsRequiringShippingAddress,
-                        isGooglePayReady = true,
-                        cbcEligibility = CardBrandChoiceEligibility.Ineligible,
-                    ),
                 )
             )
         )
@@ -185,7 +180,7 @@ internal class SharedPaymentElementViewModelTest {
                     PaymentSheet.IntentConfiguration(
                         PaymentSheet.IntentConfiguration.Mode.Payment(5000, "USD"),
                     ),
-                    configuration = configuration,
+                    configuration = defaultConfiguration,
                 )
             ).isInstanceOf<EmbeddedPaymentElement.ConfigureResult.Succeeded>()
 
@@ -206,26 +201,7 @@ internal class SharedPaymentElementViewModelTest {
                     )
                 )
             ).build()
-        configurationHandler.emit(
-            Result.success(
-                PaymentElementLoader.State(
-                    config = configuration.asCommonConfiguration(),
-                    customer = null,
-                    paymentSelection = PaymentSelection.GooglePay,
-                    validationError = null,
-                    paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-                        stripeIntent = PaymentIntentFixtures.PI_SUCCEEDED,
-                        billingDetailsCollectionConfiguration = configuration
-                            .billingDetailsCollectionConfiguration,
-                        allowsDelayedPaymentMethods = configuration.allowsDelayedPaymentMethods,
-                        allowsPaymentMethodsRequiringShippingAddress = configuration
-                            .allowsPaymentMethodsRequiringShippingAddress,
-                        isGooglePayReady = true,
-                        cbcEligibility = CardBrandChoiceEligibility.Ineligible,
-                    ),
-                )
-            )
-        )
+        configurationHandler.emit(Result.success(createPaymentElementLoaderState()))
         assertThat(
             viewModel.configure(
                 PaymentSheet.IntentConfiguration(
@@ -248,21 +224,10 @@ internal class SharedPaymentElementViewModelTest {
             .build()
         configurationHandler.emit(
             Result.success(
-                PaymentElementLoader.State(
-                    config = configuration.asCommonConfiguration(),
-                    customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
+                createPaymentElementLoaderState(
+                    isGooglePayReady = true,
                     paymentSelection = PaymentSelection.GooglePay,
-                    validationError = null,
-                    paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-                        stripeIntent = PaymentIntentFixtures.PI_SUCCEEDED,
-                        billingDetailsCollectionConfiguration = configuration
-                            .billingDetailsCollectionConfiguration,
-                        allowsDelayedPaymentMethods = configuration.allowsDelayedPaymentMethods,
-                        allowsPaymentMethodsRequiringShippingAddress = configuration
-                            .allowsPaymentMethodsRequiringShippingAddress,
-                        isGooglePayReady = true,
-                        cbcEligibility = CardBrandChoiceEligibility.Ineligible,
-                    ),
+                    customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
                 )
             )
         )
@@ -303,21 +268,9 @@ internal class SharedPaymentElementViewModelTest {
         val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
         configurationHandler.emit(
             Result.success(
-                PaymentElementLoader.State(
-                    config = configuration.asCommonConfiguration(),
-                    customer = null,
+                createPaymentElementLoaderState(
+                    isGooglePayReady = true,
                     paymentSelection = PaymentSelection.GooglePay,
-                    validationError = null,
-                    paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-                        stripeIntent = PaymentIntentFixtures.PI_SUCCEEDED,
-                        billingDetailsCollectionConfiguration = configuration
-                            .billingDetailsCollectionConfiguration,
-                        allowsDelayedPaymentMethods = configuration.allowsDelayedPaymentMethods,
-                        allowsPaymentMethodsRequiringShippingAddress = configuration
-                            .allowsPaymentMethodsRequiringShippingAddress,
-                        isGooglePayReady = true,
-                        cbcEligibility = CardBrandChoiceEligibility.Ineligible,
-                    ),
                 )
             )
         )
@@ -405,6 +358,7 @@ internal class SharedPaymentElementViewModelTest {
             selectionHolder = selectionHolder,
             embeddedContentHelper = embeddedContentHelper,
             customerStateHolder = customerStateHolder,
+            testScope = this,
         ).block()
 
         configurationHandler.turbine.ensureAllEventsConsumed()
@@ -418,6 +372,7 @@ internal class SharedPaymentElementViewModelTest {
         val selectionHolder: EmbeddedSelectionHolder,
         val embeddedContentHelper: FakeEmbeddedContentHelper,
         val customerStateHolder: CustomerStateHolder,
+        val testScope: TestScope,
     )
 
     private class FakeEmbeddedConfigurationHandler : EmbeddedConfigurationHandler {
