@@ -5,8 +5,6 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.core.version.StripeSdkVersion
-import com.stripe.android.link.account.DefaultLinkAccountManager
-import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.DefaultLinkEventsReporter
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.repositories.LinkApiRepository
@@ -27,10 +25,6 @@ internal interface LinkModule {
     @Binds
     @LinkScope
     fun bindLinkEventsReporter(linkEventsReporter: DefaultLinkEventsReporter): LinkEventsReporter
-
-    @Binds
-    @LinkScope
-    fun bindLinkAccountManager(linkAccountManager: DefaultLinkAccountManager): LinkAccountManager
 
     companion object {
         @Provides

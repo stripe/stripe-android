@@ -19,6 +19,7 @@ internal annotation class LinkScope
 @Subcomponent(
     modules = [
         LinkModule::class,
+        LinkAccountManagerModule::class
     ]
 )
 internal abstract class LinkComponent {

@@ -21,9 +21,7 @@ import com.stripe.android.core.utils.ContextUtils.packageInfo
 import com.stripe.android.core.utils.DefaultDurationProvider
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.version.StripeSdkVersion
-import com.stripe.android.link.account.DefaultLinkAccountManager
 import com.stripe.android.link.account.DefaultLinkAuth
-import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.account.LinkAuth
 import com.stripe.android.link.analytics.DefaultLinkEventsReporter
 import com.stripe.android.link.analytics.LinkEventsReporter
@@ -62,10 +60,6 @@ internal interface NativeLinkModule {
     @Binds
     @NativeLinkScope
     fun bindLinkEventsReporter(linkEventsReporter: DefaultLinkEventsReporter): LinkEventsReporter
-
-    @Binds
-    @NativeLinkScope
-    fun bindLinkAccountManager(linkAccountManager: DefaultLinkAccountManager): LinkAccountManager
 
     @Binds
     @NativeLinkScope
