@@ -66,15 +66,15 @@ internal class BacsConfirmationActivityTest {
 
             confirmationHandler.start(CONFIRMATION_ARGUMENTS)
 
-            val confirmingWithSavedOption = awaitItem().assertConfirming()
+            val confirmingWithBacsOption = awaitItem().assertConfirming()
 
-            assertThat(confirmingWithSavedOption.option).isEqualTo(CONFIRMATION_OPTION)
+            assertThat(confirmingWithBacsOption.option).isEqualTo(CONFIRMATION_OPTION)
 
             intendedBacsToBeLaunched()
 
-            val confirmingWithSavedOptionWithCvc = awaitItem().assertConfirming()
+            val confirmingWithNewOption = awaitItem().assertConfirming()
 
-            assertThat(confirmingWithSavedOptionWithCvc.option)
+            assertThat(confirmingWithNewOption.option)
                 .isEqualTo(
                     PaymentMethodConfirmationOption.New(
                         createParams = CONFIRMATION_OPTION.createParams,
@@ -103,9 +103,9 @@ internal class BacsConfirmationActivityTest {
 
             confirmationHandler.start(CONFIRMATION_ARGUMENTS)
 
-            val confirmingWithSavedOption = awaitItem().assertConfirming()
+            val confirmingWithBacsOption = awaitItem().assertConfirming()
 
-            assertThat(confirmingWithSavedOption.option).isEqualTo(CONFIRMATION_OPTION)
+            assertThat(confirmingWithBacsOption.option).isEqualTo(CONFIRMATION_OPTION)
 
             intendedBacsToBeLaunched()
 
@@ -126,9 +126,9 @@ internal class BacsConfirmationActivityTest {
 
             confirmationHandler.start(CONFIRMATION_ARGUMENTS)
 
-            val confirmingWithSavedOption = awaitItem().assertConfirming()
+            val confirmingWithBacsOption = awaitItem().assertConfirming()
 
-            assertThat(confirmingWithSavedOption.option).isEqualTo(CONFIRMATION_OPTION)
+            assertThat(confirmingWithBacsOption.option).isEqualTo(CONFIRMATION_OPTION)
 
             intendedBacsToBeLaunched()
 
