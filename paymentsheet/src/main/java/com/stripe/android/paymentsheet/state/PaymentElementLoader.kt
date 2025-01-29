@@ -9,6 +9,7 @@ import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
@@ -353,7 +354,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             state.copy(
                 paymentMethods = state.paymentMethods
                     .withDefaultPaymentMethodOrLastUsedPaymentMethodFirst(
-                        savedSelection = savedSelection.await(),
+                        savedSelection = savedSelection,
                         defaultPaymentMethodId = state.defaultPaymentMethodId
                     ).filter { cardBrandFilter.isAccepted(it) }
             )
@@ -560,23 +561,25 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         customer: Deferred<CustomerState?>,
         isGooglePayReady: Boolean,
     ): PaymentSelection? {
-        val defaultPaymentMethodPaymentSelection = customer.await()?.defaultPaymentMethodId?.let {
-            customer.await()?.paymentMethods?.firstOrNull {
-                it.id == customer.await()?.defaultPaymentMethodId
-            }?.toPaymentSelection()
-        }
-
-        val savedSelectionPaymentMethodPaymentSelection = when (val selection = savedSelection.await()) {
-            is SavedSelection.GooglePay -> PaymentSelection.GooglePay
-            is SavedSelection.Link -> PaymentSelection.Link
-            is SavedSelection.PaymentMethod -> {
-                customer.await()?.paymentMethods?.find { it.id == selection.id }?.toPaymentSelection()
+        // get default payment method if dpm enabled, otherwise try to get savedSelection
+        val primaryPaymentSelection = if (FeatureFlags.enableDefaultPaymentMethods.isEnabled) {
+            customer.await()?.defaultPaymentMethodId?.let {
+                customer.await()?.paymentMethods?.firstOrNull {
+                    it.id == customer.await()?.defaultPaymentMethodId
+                }?.toPaymentSelection()
             }
-            is SavedSelection.None -> null
+        } else {
+            when (val selection = savedSelection.await()) {
+                is SavedSelection.GooglePay -> PaymentSelection.GooglePay
+                is SavedSelection.Link -> PaymentSelection.Link
+                is SavedSelection.PaymentMethod -> {
+                    customer.await()?.paymentMethods?.find { it.id == selection.id }?.toPaymentSelection()
+                }
+                is SavedSelection.None -> null
+            }
         }
 
-        return defaultPaymentMethodPaymentSelection
-            ?: savedSelectionPaymentMethodPaymentSelection
+        return primaryPaymentSelection
             ?: customer.await()?.paymentMethods?.firstOrNull()?.toPaymentSelection()
             ?: PaymentSelection.GooglePay.takeIf { isGooglePayReady }
     }
@@ -745,19 +748,20 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     }
 }
 
-private fun List<PaymentMethod>.withDefaultPaymentMethodOrLastUsedPaymentMethodFirst(
-    savedSelection: SavedSelection,
+private suspend fun List<PaymentMethod>.withDefaultPaymentMethodOrLastUsedPaymentMethodFirst(
+    savedSelection: Deferred<SavedSelection>,
     defaultPaymentMethodId: String?
 ): List<PaymentMethod> {
-    val defaultPaymentMethodIndex = defaultPaymentMethodId?.let {
-        indexOfFirst { it.id == defaultPaymentMethodId }
+    val primaryPaymentMethodIndex = if (FeatureFlags.enableDefaultPaymentMethods.isEnabled) {
+        defaultPaymentMethodId?.let {
+            indexOfFirst { it.id == defaultPaymentMethodId }
+        }
+    } else {
+        val selection = savedSelection.await()
+        (selection as? SavedSelection.PaymentMethod)?.let {
+            indexOfFirst { it.id == selection.id }.takeIf { it != -1 }
+        }
     }
-
-    val savedSelectionIndex = (savedSelection as? SavedSelection.PaymentMethod)?.let {
-        indexOfFirst { it.id == savedSelection.id }.takeIf { it != -1 }
-    }
-
-    val primaryPaymentMethodIndex = defaultPaymentMethodIndex ?: savedSelectionIndex
 
     return primaryPaymentMethodIndex?.let {
         val primaryPaymentMethod = get(primaryPaymentMethodIndex)
