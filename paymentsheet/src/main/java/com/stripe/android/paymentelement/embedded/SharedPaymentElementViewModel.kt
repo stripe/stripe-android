@@ -12,6 +12,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
+import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.utils.RealUserFacingLogger
 import com.stripe.android.core.utils.UserFacingLogger
@@ -126,7 +127,6 @@ internal class SharedPaymentElementViewModel @Inject constructor(
         intentConfiguration: PaymentSheet.IntentConfiguration,
         configuration: EmbeddedPaymentElement.Configuration,
     ) {
-        val previousConfiguration = confirmationStateHolder.state?.configuration
         confirmationStateHolder.state = EmbeddedConfirmationStateHolder.State(
             paymentMethodMetadata = state.paymentMethodMetadata,
             selection = state.paymentSelection,
@@ -142,8 +142,7 @@ internal class SharedPaymentElementViewModel @Inject constructor(
                 paymentMethods = state.customer?.paymentMethods,
                 previousSelection = selectionHolder.selection.value,
                 newSelection = state.paymentSelection,
-                previousConfiguration = previousConfiguration,
-                newConfiguration = configuration,
+                newConfiguration = configuration.asCommonConfiguration(),
             )
         )
         embeddedContentHelper.dataLoaded(
