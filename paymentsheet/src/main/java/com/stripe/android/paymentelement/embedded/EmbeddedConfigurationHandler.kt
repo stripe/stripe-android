@@ -27,6 +27,7 @@ internal interface EmbeddedConfigurationHandler {
 internal class DefaultEmbeddedConfigurationHandler @Inject constructor(
     private val paymentElementLoader: PaymentElementLoader,
     private val savedStateHandle: SavedStateHandle,
+    private val sheetStateHolder: SheetStateHolder,
 ) : EmbeddedConfigurationHandler {
 
     private var cache: ConfigurationCache?
@@ -44,6 +45,10 @@ internal class DefaultEmbeddedConfigurationHandler @Inject constructor(
         intentConfiguration: PaymentSheet.IntentConfiguration,
         configuration: EmbeddedPaymentElement.Configuration,
     ): Result<PaymentElementLoader.State> {
+        if (sheetStateHolder.sheetIsOpen) {
+            return Result.failure(IllegalStateException("Configuring while a sheet is open is not supported."))
+        }
+
         val targetConfiguration = configuration.asCommonConfiguration()
 
         val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(intentConfiguration)

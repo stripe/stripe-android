@@ -35,25 +35,30 @@ internal class DefaultEmbeddedSheetLauncherTest {
         sheetLauncher.launchForm(code, paymentMethodMetadata, false)
         val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall()
         assertThat(launchCall).isEqualTo(expectedArgs)
+        assertThat(sheetStateHolder.sheetIsOpen).isTrue()
     }
 
     @Test
     fun `formActivityLauncher callback updates selection holder on complete result`() = testScenario {
+        sheetStateHolder.sheetIsOpen = true
         val selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
         val result = FormResult.Complete(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
         val callback = formRegisterCall.callback.asCallbackFor<FormResult>()
 
         callback.onActivityResult(result)
         assertThat(selectionHolder.selection.value).isEqualTo(selection)
+        assertThat(sheetStateHolder.sheetIsOpen).isFalse()
     }
 
     @Test
     fun `formActivityLauncher callback does not update selection holder on non-complete result`() = testScenario {
+        sheetStateHolder.sheetIsOpen = true
         val result = FormResult.Cancelled
         val callback = formRegisterCall.callback.asCallbackFor<FormResult>()
 
         callback.onActivityResult(result)
         assertThat(selectionHolder.selection.value).isEqualTo(null)
+        assertThat(sheetStateHolder.sheetIsOpen).isFalse()
     }
 
     @Test
@@ -66,10 +71,12 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall()
 
         assertThat(launchCall).isEqualTo(expectedArgs)
+        assertThat(sheetStateHolder.sheetIsOpen).isTrue()
     }
 
     @Test
     fun `manageActivityLauncher callback updates state on complete result`() = testScenario {
+        sheetStateHolder.sheetIsOpen = true
         val customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
         val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         val result = ManageResult.Complete(
@@ -82,10 +89,12 @@ internal class DefaultEmbeddedSheetLauncherTest {
 
         assertThat(customerStateHolder.customer.value).isEqualTo(customerState)
         assertThat(selectionHolder.selection.value).isEqualTo(selection)
+        assertThat(sheetStateHolder.sheetIsOpen).isFalse()
     }
 
     @Test
     fun `manageActivityLauncher callback does not update state on non-complete result`() = testScenario {
+        sheetStateHolder.sheetIsOpen = true
         customerStateHolder.setCustomerState(PaymentSheetFixtures.EMPTY_CUSTOMER_STATE)
         val result = ManageResult.Cancelled(customerState = null)
         val callback = manageRegisterCall.callback.asCallbackFor<ManageResult>()
@@ -94,25 +103,30 @@ internal class DefaultEmbeddedSheetLauncherTest {
 
         assertThat(customerStateHolder.customer.value).isEqualTo(PaymentSheetFixtures.EMPTY_CUSTOMER_STATE)
         assertThat(selectionHolder.selection.value).isEqualTo(null)
+        assertThat(sheetStateHolder.sheetIsOpen).isFalse()
     }
 
     @Test
     fun `manageActivityLauncher callback updates state on non-complete result`() = testScenario {
+        sheetStateHolder.sheetIsOpen = true
         val result = ManageResult.Cancelled(customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE)
         val callback = manageRegisterCall.callback.asCallbackFor<ManageResult>()
         callback.onActivityResult(result)
 
         assertThat(customerStateHolder.customer.value).isEqualTo(PaymentSheetFixtures.EMPTY_CUSTOMER_STATE)
+        assertThat(sheetStateHolder.sheetIsOpen).isFalse()
     }
 
     @Test
     fun `onDestroy unregisters launchers`() = testScenario {
+        sheetStateHolder.sheetIsOpen = true
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
         val formUnregisteredLauncher = dummyActivityResultCallerScenario.awaitNextUnregisteredLauncher()
         val manageUnregisteredLauncher = dummyActivityResultCallerScenario.awaitNextUnregisteredLauncher()
 
         assertThat(formUnregisteredLauncher).isEqualTo(formLauncher)
         assertThat(manageUnregisteredLauncher).isEqualTo(manageLauncher)
+        assertThat(sheetStateHolder.sheetIsOpen).isTrue()
     }
 
     private fun testScenario(
@@ -122,13 +136,15 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val savedStateHandle = SavedStateHandle()
         val selectionHolder = EmbeddedSelectionHolder(savedStateHandle)
         val customerStateHolder = CustomerStateHolder(savedStateHandle, selectionHolder.selection)
+        val sheetStateHolder = SheetStateHolder(savedStateHandle)
 
         DummyActivityResultCaller.test {
             val sheetLauncher = DefaultEmbeddedSheetLauncher(
                 activityResultCaller = activityResultCaller,
                 lifecycleOwner = lifecycleOwner,
                 selectionHolder = selectionHolder,
-                customerStateHolder = customerStateHolder
+                customerStateHolder = customerStateHolder,
+                sheetStateHolder = sheetStateHolder,
             )
             val formRegisterCall = awaitRegisterCall()
             val manageRegisterCall = awaitRegisterCall()
@@ -151,7 +167,8 @@ internal class DefaultEmbeddedSheetLauncherTest {
                 manageRegisterCall = manageRegisterCall,
                 formLauncher = formLauncher,
                 manageLauncher = manageLauncher,
-                sheetLauncher = sheetLauncher
+                sheetLauncher = sheetLauncher,
+                sheetStateHolder = sheetStateHolder,
             ).block()
         }
     }
@@ -166,5 +183,6 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val formLauncher: ActivityResultLauncher<*>,
         val manageLauncher: ActivityResultLauncher<*>,
         val sheetLauncher: EmbeddedSheetLauncher,
+        val sheetStateHolder: SheetStateHolder,
     )
 }
