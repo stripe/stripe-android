@@ -46,9 +46,8 @@ internal class CustomerStateHolder(
         savedStateHandle[SAVED_CUSTOMER] = customerState
 
         val currentSelection = mostRecentlySelectedSavedPaymentMethod.value
-        if (currentSelection != null && customerState?.paymentMethods?.contains(currentSelection) == false) {
-            updateMostRecentlySelectedSavedPaymentMethod(null)
-        }
+        val newSelection = customerState?.paymentMethods?.firstOrNull { it.id == currentSelection?.id }
+        updateMostRecentlySelectedSavedPaymentMethod(newSelection)
     }
 
     fun updateMostRecentlySelectedSavedPaymentMethod(paymentMethod: PaymentMethod?) {
