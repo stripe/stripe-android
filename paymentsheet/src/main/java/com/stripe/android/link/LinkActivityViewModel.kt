@@ -43,7 +43,8 @@ internal class LinkActivityViewModel @Inject constructor(
     private val integrityRequestManager: IntegrityRequestManager,
     private val linkGate: LinkGate,
     private val errorReporter: ErrorReporter,
-    private val linkAuth: LinkAuth
+    private val linkAuth: LinkAuth,
+    private val linkConfiguration: LinkConfiguration
 ) : ViewModel(), DefaultLifecycleObserver {
     val confirmationHandler = confirmationHandlerFactory.create(viewModelScope)
     private val _linkState = MutableStateFlow(
@@ -69,10 +70,10 @@ internal class LinkActivityViewModel @Inject constructor(
         }
     }
 
-    private fun moveToWeb() {
+    fun moveToWeb() {
         launchWebFlow?.let { launcher ->
             navigate(LinkScreen.Loading, clearStack = true)
-            launcher.invoke(activityRetainedComponent.configuration)
+            launcher.invoke(linkConfiguration)
         }
     }
 
@@ -161,7 +162,7 @@ internal class LinkActivityViewModel @Inject constructor(
     }
 
     private suspend fun lookupUser(): LinkAuthResult? {
-        val customerEmail = activityRetainedComponent.configuration.customerInfo.email ?: return null
+        val customerEmail = linkConfiguration.customerInfo.email ?: return null
 
         return linkAuth.lookUp(
             email = customerEmail,

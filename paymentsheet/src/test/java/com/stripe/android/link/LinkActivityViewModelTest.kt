@@ -561,7 +561,8 @@ internal class LinkActivityViewModelTest {
             integrityRequestManager = integrityRequestManager,
             linkGate = linkGate,
             errorReporter = errorReporter,
-            linkAuth = linkAuth
+            linkAuth = linkAuth,
+            linkConfiguration = TestFactory.LINK_CONFIGURATION
         ).apply {
             this.navController = navController
             this.dismissWithResult = dismissWithResult

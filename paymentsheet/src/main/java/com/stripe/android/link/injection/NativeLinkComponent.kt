@@ -11,6 +11,7 @@ import com.stripe.android.link.LinkActivityViewModel
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.WebLinkActivityContract
 import com.stripe.android.link.account.LinkAccountManager
+import com.stripe.android.link.account.LinkAuth
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.injection.DefaultConfirmationModule
@@ -40,6 +41,7 @@ internal interface NativeLinkComponent {
     val linkConfirmationHandlerFactory: LinkConfirmationHandler.Factory
     val webLinkActivityContract: WebLinkActivityContract
     val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory
+    val linkAuth: LinkAuth
     val viewModel: LinkActivityViewModel
 
     @Component.Builder

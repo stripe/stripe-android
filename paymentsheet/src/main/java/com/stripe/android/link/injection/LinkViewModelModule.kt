@@ -1,6 +1,7 @@
 package com.stripe.android.link.injection
 
 import com.stripe.android.link.LinkActivityViewModel
+import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.account.LinkAuth
 import com.stripe.android.link.gate.LinkGate
@@ -23,7 +24,8 @@ internal object LinkViewModelModule {
         integrityRequestManager: IntegrityRequestManager,
         linkGate: LinkGate,
         errorReporter: ErrorReporter,
-        linkAuth: LinkAuth
+        linkAuth: LinkAuth,
+        linkConfiguration: LinkConfiguration
     ): LinkActivityViewModel {
         return LinkActivityViewModel(
             activityRetainedComponent = component,
@@ -33,7 +35,8 @@ internal object LinkViewModelModule {
             integrityRequestManager = integrityRequestManager,
             linkGate = linkGate,
             errorReporter = errorReporter,
-            linkAuth = linkAuth
+            linkAuth = linkAuth,
+            linkConfiguration = linkConfiguration
         )
     }
 }
