@@ -354,6 +354,8 @@ internal class DefaultLinkAuthTest {
         val linkAccountManager = FakeLinkAccountManager()
         val integrityRequestManager = FakeIntegrityRequestManager()
 
+        linkAccountManager.lookupConsumerResult = Result.success(TestFactory.LINK_ACCOUNT)
+
         val linkAuth = linkAuth(
             useAttestationEndpoints = false,
             linkAccountManager = linkAccountManager,
