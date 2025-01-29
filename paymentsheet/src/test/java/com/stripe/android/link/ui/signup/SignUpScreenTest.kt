@@ -15,6 +15,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.FakeLinkAccountManager
+import com.stripe.android.link.account.FakeLinkAuth
 import com.stripe.android.link.analytics.FakeLinkEventsReporter
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
@@ -119,11 +120,12 @@ internal class SignUpScreenTest {
             configuration = TestFactory.LINK_CONFIGURATION.copy(
                 customerInfo = customerInfo
             ),
-            linkAccountManager = linkAccountManager,
+            linkAuth = FakeLinkAuth(),
             linkEventsReporter = linkEventsReporter,
             logger = logger,
             navigate = {},
-            navigateAndClearStack = {}
+            navigateAndClearStack = {},
+            moveToWeb = {}
         )
     }
 

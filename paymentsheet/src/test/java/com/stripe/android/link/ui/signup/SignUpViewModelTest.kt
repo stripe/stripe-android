@@ -9,6 +9,7 @@ import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.TestFactory.CUSTOMER_EMAIL
 import com.stripe.android.link.account.FakeLinkAccountManager
+import com.stripe.android.link.account.FakeLinkAuth
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.FakeLinkEventsReporter
 import com.stripe.android.link.analytics.LinkEventsReporter
@@ -312,11 +313,12 @@ internal class SignUpViewModelTest {
                     is SetupIntent -> intent.copy(countryCode = countryCode.value)
                 }
             ),
-            linkAccountManager = linkAccountManager,
+            linkAuth = FakeLinkAuth(),
             linkEventsReporter = linkEventsReporter,
             logger = logger,
             navigate = navigate,
-            navigateAndClearStack = navigateAndClearStack
+            navigateAndClearStack = navigateAndClearStack,
+            moveToWeb = {}
         )
     }
 
