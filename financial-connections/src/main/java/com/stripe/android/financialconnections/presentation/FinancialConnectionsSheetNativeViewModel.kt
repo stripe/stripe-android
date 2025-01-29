@@ -525,6 +525,7 @@ internal data class FinancialConnectionsSheetNativeState(
     val configuration: FinancialConnectionsSheet.Configuration,
     val reducedBranding: Boolean,
     val testMode: Boolean,
+    val verified: Boolean,
     val viewEffect: FinancialConnectionsSheetNativeViewEffect?,
     val completed: Boolean,
     val initialPane: Pane,
@@ -545,6 +546,7 @@ internal data class FinancialConnectionsSheetNativeState(
             ?: WebAuthFlowState.Uninitialized,
         reducedBranding = args.initialSyncResponse.visual.reducedBranding,
         testMode = args.initialSyncResponse.manifest.livemode.not(),
+        verified = args.initialSyncResponse.manifest.appVerificationEnabled,
         firstInit = savedState?.getBoolean(KEY_FIRST_INIT, true) ?: true,
         completed = false,
         initialPane = args.initialSyncResponse.manifest.nextPane,
@@ -637,6 +639,7 @@ private fun FinancialConnectionsSheetNativeState.toTopAppBarState(
         hideStripeLogo = reducedBranding,
         forceHideStripeLogo = forceHideStripeLogo,
         isTestMode = testMode,
+        isVerified = verified,
         theme = theme,
     )
 }
