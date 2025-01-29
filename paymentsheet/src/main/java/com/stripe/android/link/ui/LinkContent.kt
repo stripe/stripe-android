@@ -52,7 +52,8 @@ internal fun LinkContent(
     sheetState: ModalBottomSheetState,
     bottomSheetContent: BottomSheetContent?,
     onUpdateSheetContent: (BottomSheetContent?) -> Unit,
-    onBackPressed: () -> Unit
+    onBackPressed: () -> Unit,
+    moveToWeb: () -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
     DefaultLinkTheme {
@@ -96,6 +97,7 @@ internal fun LinkContent(
                 Screens(
                     navController = navController,
                     goBack = viewModel::goBack,
+                    moveToWeb = moveToWeb,
                     navigate = { screen ->
                         viewModel.navigate(screen, clearStack = false)
                     },
@@ -127,7 +129,8 @@ private fun Screens(
     navigateAndClearStack: (route: LinkScreen) -> Unit,
     dismissWithResult: (LinkActivityResult) -> Unit,
     showBottomSheetContent: (BottomSheetContent?) -> Unit,
-    hideBottomSheetContent: () -> Unit
+    hideBottomSheetContent: () -> Unit,
+    moveToWeb: () -> Unit
 ) {
     NavHost(
         navController = navController,
@@ -140,7 +143,8 @@ private fun Screens(
         composable(LinkScreen.SignUp.route) {
             SignUpRoute(
                 navigate = navigate,
-                navigateAndClearStack = navigateAndClearStack
+                navigateAndClearStack = navigateAndClearStack,
+                moveToWeb = moveToWeb
             )
         }
 
@@ -193,12 +197,14 @@ private fun Screens(
 private fun SignUpRoute(
     navigate: (route: LinkScreen) -> Unit,
     navigateAndClearStack: (route: LinkScreen) -> Unit,
+    moveToWeb: () -> Unit
 ) {
     val viewModel: SignUpViewModel = linkViewModel { parentComponent ->
         SignUpViewModel.factory(
             parentComponent = parentComponent,
             navigate = navigate,
-            navigateAndClearStack = navigateAndClearStack
+            navigateAndClearStack = navigateAndClearStack,
+            moveToWeb = moveToWeb
         )
     }
     SignUpScreen(

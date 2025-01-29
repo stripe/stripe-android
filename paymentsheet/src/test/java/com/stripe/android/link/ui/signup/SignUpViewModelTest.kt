@@ -9,7 +9,9 @@ import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.TestFactory.CUSTOMER_EMAIL
 import com.stripe.android.link.account.FakeLinkAccountManager
-import com.stripe.android.link.account.LinkAccountManager
+import com.stripe.android.link.account.FakeLinkAuth
+import com.stripe.android.link.account.LinkAuth
+import com.stripe.android.link.account.LinkAuthResult
 import com.stripe.android.link.analytics.FakeLinkEventsReporter
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.model.LinkAccount
@@ -17,7 +19,9 @@ import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.FakeLogger
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
@@ -50,12 +54,7 @@ internal class SignUpViewModelTest {
 
     @Test
     fun `When email is valid then lookup is triggered with delay`() = runTest(dispatcher) {
-        val linkAccountManager = object : FakeLinkAccountManager() {
-            override suspend fun lookupConsumer(email: String, startSession: Boolean): Result<LinkAccount?> {
-                return super.lookupConsumer(email, startSession)
-            }
-        }
-        val viewModel = createViewModel(prefilledEmail = null, linkAccountManager = linkAccountManager)
+        val viewModel = createViewModel(prefilledEmail = null)
 
         assertThat(viewModel.contentState.signUpState).isEqualTo(SignUpState.InputtingPrimaryField)
 
@@ -71,38 +70,18 @@ internal class SignUpViewModelTest {
 
     @Test
     fun `When email is provided it should not trigger lookup and should collect phone number`() = runTest(dispatcher) {
-        val linkAccountManager = object : FakeLinkAccountManager() {
-            var callCount = 0
-            override suspend fun lookupConsumer(email: String, startSession: Boolean): Result<LinkAccount?> {
-                callCount += 1
-                return super.lookupConsumer(email, startSession)
-            }
-        }
-        val viewModel = createViewModel(prefilledEmail = CUSTOMER_EMAIL, linkAccountManager = linkAccountManager)
+        val linkAuth = FakeLinkAuth()
+        val viewModel = createViewModel(prefilledEmail = CUSTOMER_EMAIL, linkAuth = linkAuth)
 
         assertThat(viewModel.contentState.signUpState).isEqualTo(SignUpState.InputtingPrimaryField)
-        assertThat(linkAccountManager.callCount).isEqualTo(0)
+        linkAuth.ensureAllItemsConsumed()
     }
 
     @Test
     fun `signUp sends correct ConsumerSignUpConsentAction`() = runTest(dispatcher) {
-        val linkAccountManager = object : FakeLinkAccountManager() {
-            var counter = 0
-            override suspend fun signUp(
-                email: String,
-                phone: String,
-                country: String,
-                name: String?,
-                consentAction: SignUpConsentAction
-            ): Result<LinkAccount> {
-                if (consentAction == SignUpConsentAction.Implied) {
-                    counter += 1
-                }
-                return super.signUp(email, phone, country, name, consentAction)
-            }
-        }
+        val linkAuth = FakeLinkAuth()
         val viewModel = createViewModel(
-            linkAccountManager = linkAccountManager,
+            linkAuth = linkAuth,
             linkEventsReporter = object : SignUpLinkEventsReporter() {
                 override fun onSignupCompleted(isInline: Boolean) = Unit
             }
@@ -110,17 +89,19 @@ internal class SignUpViewModelTest {
 
         viewModel.performValidSignup()
 
-        assertThat(linkAccountManager.counter).isEqualTo(1)
+        val call = linkAuth.awaitSignUpCall()
+        assertThat(call.consentAction).isEqualTo(SignUpConsentAction.Implied)
+        linkAuth.ensureAllItemsConsumed()
     }
 
     @Test
     fun `When signUp fails then an error message is shown`() = runTest(dispatcher) {
         val errorMessage = "Error message"
 
-        val linkAccountManager = FakeLinkAccountManager()
+        val linkAuth = FakeLinkAuth()
         val logger = FakeLogger()
         val viewModel = createViewModel(
-            linkAccountManager = linkAccountManager,
+            linkAuth = linkAuth,
             linkEventsReporter = object : SignUpLinkEventsReporter() {
                 override fun onSignupFailure(isInline: Boolean, error: Throwable) = Unit
             },
@@ -128,7 +109,7 @@ internal class SignUpViewModelTest {
         )
 
         val exception = RuntimeException(errorMessage)
-        linkAccountManager.signUpResult = Result.failure(exception)
+        linkAuth.signupResult = LinkAuthResult.Error(exception)
 
         viewModel.performValidSignup()
 
@@ -139,9 +120,9 @@ internal class SignUpViewModelTest {
     @Test
     fun `When signed up with unverified account then it navigates to Verification screen`() = runTest(dispatcher) {
         val screens = arrayListOf<LinkScreen>()
-        val linkAccountManager = FakeLinkAccountManager()
+        val linkAuth = FakeLinkAuth()
         val viewModel = createViewModel(
-            linkAccountManager = linkAccountManager,
+            linkAuth = linkAuth,
             linkEventsReporter = object : SignUpLinkEventsReporter() {
                 override fun onSignupCompleted(isInline: Boolean) = Unit
             },
@@ -156,7 +137,7 @@ internal class SignUpViewModelTest {
                 ConsumerSession.VerificationSession.SessionState.Started
             )
         )
-        linkAccountManager.signUpResult = Result.success(linkAccount)
+        linkAuth.signupResult = LinkAuthResult.Success(linkAccount)
 
         viewModel.performValidSignup()
 
@@ -167,9 +148,9 @@ internal class SignUpViewModelTest {
     @Test
     fun `When signed up with verified account then it navigates to Wallet screen`() = runTest(dispatcher) {
         val screens = arrayListOf<LinkScreen>()
-        val linkAccountManager = FakeLinkAccountManager()
+        val linkAuth = FakeLinkAuth()
         val viewModel = createViewModel(
-            linkAccountManager = linkAccountManager,
+            linkAuth = linkAuth,
             linkEventsReporter = object : SignUpLinkEventsReporter() {
                 override fun onSignupCompleted(isInline: Boolean) = Unit
             },
@@ -185,7 +166,7 @@ internal class SignUpViewModelTest {
             )
         )
 
-        linkAccountManager.signUpResult = Result.success(linkAccount)
+        linkAuth.signupResult = LinkAuthResult.Success(linkAccount)
 
         viewModel.performValidSignup()
 
@@ -230,14 +211,14 @@ internal class SignUpViewModelTest {
             }
         }
 
-        val linkAccountManager = FakeLinkAccountManager()
+        val linkAuth = FakeLinkAuth()
 
         val viewModel = createViewModel(
             linkEventsReporter = linkEventsReporter,
-            linkAccountManager = linkAccountManager
+            linkAuth = linkAuth
         )
 
-        linkAccountManager.signUpResult = Result.failure(expectedError)
+        linkAuth.signupResult = LinkAuthResult.Error(expectedError)
 
         viewModel.performValidSignup()
 
@@ -297,10 +278,12 @@ internal class SignUpViewModelTest {
         configuration: LinkConfiguration = TestFactory.LINK_CONFIGURATION,
         countryCode: CountryCode = CountryCode.US,
         linkEventsReporter: LinkEventsReporter = SignUpLinkEventsReporter(),
-        linkAccountManager: LinkAccountManager = FakeLinkAccountManager(),
+        linkAuth: LinkAuth = FakeLinkAuth(),
         logger: Logger = FakeLogger(),
+        errorReporter: ErrorReporter = FakeErrorReporter(),
         navigate: (LinkScreen) -> Unit = {},
-        navigateAndClearStack: (LinkScreen) -> Unit = {}
+        navigateAndClearStack: (LinkScreen) -> Unit = {},
+        moveToWeb: () -> Unit = {}
     ): SignUpViewModel {
         return SignUpViewModel(
             configuration = configuration.copy(
@@ -312,11 +295,13 @@ internal class SignUpViewModelTest {
                     is SetupIntent -> intent.copy(countryCode = countryCode.value)
                 }
             ),
-            linkAccountManager = linkAccountManager,
+            linkAuth = linkAuth,
             linkEventsReporter = linkEventsReporter,
             logger = logger,
             navigate = navigate,
-            navigateAndClearStack = navigateAndClearStack
+            navigateAndClearStack = navigateAndClearStack,
+            moveToWeb = moveToWeb,
+            errorReporter = errorReporter
         )
     }
 

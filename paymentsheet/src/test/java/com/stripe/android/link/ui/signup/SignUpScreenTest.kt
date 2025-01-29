@@ -14,7 +14,9 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.TestFactory
-import com.stripe.android.link.account.FakeLinkAccountManager
+import com.stripe.android.link.account.FakeLinkAuth
+import com.stripe.android.link.account.LinkAuth
+import com.stripe.android.link.account.LinkAuthResult
 import com.stripe.android.link.analytics.FakeLinkEventsReporter
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
@@ -97,14 +99,14 @@ internal class SignUpScreenTest {
     @Test
     fun `field displayed, sign up enabled and error displayed when controllers are filled and sign up fails`() =
         runTest(dispatcher) {
-            val linkAccountManager = FakeLinkAccountManager()
-            val viewModel = viewModel(linkAccountManager = linkAccountManager)
+            val linkAuth = FakeLinkAuth()
+            val viewModel = viewModel(linkAuth = linkAuth)
 
             composeTestRule.setContent {
                 SignUpScreen(viewModel)
             }
 
-            linkAccountManager.signUpResult = Result.failure(Throwable("oops"))
+            linkAuth.signupResult = LinkAuthResult.Error(Throwable("oops"))
             viewModel.onSignUpClick()
 
             dispatcher.scheduler.advanceTimeBy(1001)
@@ -112,18 +114,20 @@ internal class SignUpScreenTest {
         }
 
     private fun viewModel(
-        linkAccountManager: FakeLinkAccountManager = FakeLinkAccountManager(),
-        customerInfo: LinkConfiguration.CustomerInfo = TestFactory.LINK_CUSTOMER_INFO
+        linkAuth: LinkAuth = FakeLinkAuth(),
+        customerInfo: LinkConfiguration.CustomerInfo = TestFactory.LINK_CUSTOMER_INFO,
+        moveToWeb: () -> Unit = {}
     ): SignUpViewModel {
         return SignUpViewModel(
             configuration = TestFactory.LINK_CONFIGURATION.copy(
                 customerInfo = customerInfo
             ),
-            linkAccountManager = linkAccountManager,
+            linkAuth = linkAuth,
             linkEventsReporter = linkEventsReporter,
             logger = logger,
             navigate = {},
-            navigateAndClearStack = {}
+            navigateAndClearStack = {},
+            moveToWeb = moveToWeb
         )
     }
 

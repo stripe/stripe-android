@@ -201,6 +201,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         LINK_NATIVE_FAILED_TO_ATTEST_REQUEST(
             partialEventName = "link.native.failed_to_attest_request"
         ),
+        LINK_NATIVE_FAILED_TO_ATTEST_SIGNUP_REQUEST(
+            partialEventName = "link.native.signup.failed_to_attest_request"
+        ),
         PAYMENT_SHEET_AUTHENTICATORS_NOT_FOUND(
             partialEventName = "paymentsheet.authenticators.not_found"
         ),

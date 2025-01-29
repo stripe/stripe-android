@@ -70,7 +70,7 @@ internal class LinkActivityViewModel @Inject constructor(
         }
     }
 
-    private fun moveToWeb() {
+    fun moveToWeb() {
         launchWebFlow?.let { launcher ->
             navigate(LinkScreen.Loading, clearStack = true)
             launcher.invoke(linkConfiguration)
