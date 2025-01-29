@@ -1,5 +1,6 @@
 package com.stripe.android.core.networking
 
+import android.util.Log
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.core.Logger
@@ -78,6 +79,7 @@ class DefaultStripeNetworkClient @JvmOverloads constructor(
     ): StripeResponse<BodyType> =
         runCatching {
             val stripeResponse = connection.response
+            Log.d("TOLUWANI", "RID: ${stripeResponse.requestId?.value}, URL: ${baseUrl}")
             logger.info(stripeResponse.toString())
             stripeResponse
         }.getOrElse { error ->

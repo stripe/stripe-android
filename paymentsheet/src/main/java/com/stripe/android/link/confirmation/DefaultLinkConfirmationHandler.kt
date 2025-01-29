@@ -3,9 +3,14 @@ package com.stripe.android.link.confirmation
 import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.model.LinkAccount
+import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodOptionsParams
+import com.stripe.android.model.wallets.Wallet
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -19,6 +24,25 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
 ) : LinkConfirmationHandler {
     override suspend fun confirm(
         paymentDetails: ConsumerPaymentDetails.PaymentDetails,
+        linkAccount: LinkAccount,
+        cvc: String?
+    ): Result {
+        return runCatching {
+            val args = confirmationArgs(paymentDetails, linkAccount, cvc)
+            confirmationHandler.start(args)
+            val result = confirmationHandler.awaitResult()
+            transformResult(result)
+        }.getOrElse { error ->
+            logger.error(
+                msg = "DefaultLinkConfirmationHandler: Failed to confirm payment",
+                t = error
+            )
+            Result.Failed(R.string.stripe_something_went_wrong.resolvableString)
+        }
+    }
+
+    override suspend fun confirm(
+        paymentDetails: LinkPaymentDetails,
         linkAccount: LinkAccount,
         cvc: String?
     ): Result {
@@ -74,6 +98,46 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
             initializationMode = configuration.initializationMode,
             shippingDetails = configuration.shippingDetails
         )
+    }
+
+    private fun confirmationArgs(
+        paymentDetails: LinkPaymentDetails,
+        linkAccount: LinkAccount,
+        cvc: String?
+    ): ConfirmationHandler.Args {
+        return when (paymentDetails) {
+            is LinkPaymentDetails.New -> {
+                confirmationArgs(
+                    paymentDetails = paymentDetails.paymentDetails,
+                    linkAccount = linkAccount,
+                    cvc = cvc
+                )
+            }
+            is LinkPaymentDetails.Saved -> {
+                ConfirmationHandler.Args(
+                    intent = configuration.stripeIntent,
+                    confirmationOption = PaymentMethodConfirmationOption.Saved(
+                        paymentMethod = PaymentMethod.Builder()
+                            .setId(paymentDetails.paymentDetails.id)
+                            .setCode(paymentDetails.paymentMethodCreateParams.typeCode)
+                            .setCard(
+                                PaymentMethod.Card(
+                                    last4 = paymentDetails.paymentDetails.last4,
+                                    wallet = Wallet.LinkWallet(paymentDetails.paymentDetails.last4),
+                                )
+                            )
+                            .setType(PaymentMethod.Type.Card)
+                            .build(),
+                        optionsParams = PaymentMethodOptionsParams.Card(
+                            setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+                        )
+                    ),
+                    appearance = PaymentSheet.Appearance(),
+                    initializationMode = configuration.initializationMode,
+                    shippingDetails = configuration.shippingDetails
+                )
+            }
+        }
     }
 
     private fun createPaymentMethodCreateParams(
