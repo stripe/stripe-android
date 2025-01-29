@@ -1,7 +1,5 @@
 package com.stripe.android.ui.core.elements
 
-import androidx.compose.ui.text.AnnotatedString
-import com.google.common.truth.Truth
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.model.CardBrand
@@ -17,33 +15,61 @@ class CardNumberConfigTest {
     private val cardBrandChoiceOptions = listOf(true, false)
 
     @Test
-    fun `visualTransformation formats entered value`() {
+    fun `visualTransformation are created correctly`() {
         for (isCardBrandChoiceEligible in cardBrandChoiceOptions) {
             val cardNumberConfig = CardNumberConfig(
                 isCardBrandChoiceEligible = isCardBrandChoiceEligible,
                 cardBrandFilter = DefaultCardBrandFilter
             )
 
-            Truth.assertThat(cardNumberConfig.visualTransformation.filter(AnnotatedString(CardNumberFixtures.VISA_NO_SPACES)).text)
-                .isEqualTo(AnnotatedString(CardNumberFixtures.VISA_WITH_SPACES))
+            assertThat(
+                cardNumberConfig.determineVisualTransformation(
+                    number = CardNumberFixtures.VISA_NO_SPACES,
+                    panLength = 16
+                )
+            ).isEqualTo(CardNumberVisualTransformations.Default(separator = ' '))
 
-            Truth.assertThat(cardNumberConfig.visualTransformation.filter(AnnotatedString(CardNumberFixtures.AMEX_NO_SPACES)).text)
-                .isEqualTo(AnnotatedString(CardNumberFixtures.AMEX_WITH_SPACES))
+            assertThat(
+                cardNumberConfig.determineVisualTransformation(
+                    number = CardNumberFixtures.DINERS_CLUB_14_NO_SPACES,
+                    panLength = 14
+                )
+            ).isEqualTo(CardNumberVisualTransformations.FourteenAndFifteenPanLength(separator = ' '))
 
-            Truth.assertThat(cardNumberConfig.visualTransformation.filter(AnnotatedString(CardNumberFixtures.DISCOVER_NO_SPACES)).text)
-                .isEqualTo(AnnotatedString(CardNumberFixtures.DISCOVER_WITH_SPACES))
+            assertThat(
+                cardNumberConfig.determineVisualTransformation(
+                    number = CardNumberFixtures.AMEX_NO_SPACES,
+                    panLength = 15
+                )
+            ).isEqualTo(CardNumberVisualTransformations.FourteenAndFifteenPanLength(separator = ' '))
 
-            Truth.assertThat(cardNumberConfig.visualTransformation.filter(AnnotatedString(CardNumberFixtures.DINERS_CLUB_14_NO_SPACES)).text)
-                .isEqualTo(AnnotatedString(CardNumberFixtures.DINERS_CLUB_14_WITH_SPACES))
+            assertThat(
+                cardNumberConfig.determineVisualTransformation(
+                    number = CardNumberFixtures.UNIONPAY_NO_SPACES,
+                    panLength = 19
+                )
+            ).isEqualTo(CardNumberVisualTransformations.NineteenPanLength(separator = ' '))
 
-            Truth.assertThat(cardNumberConfig.visualTransformation.filter(AnnotatedString(CardNumberFixtures.DINERS_CLUB_16_NO_SPACES)).text)
-                .isEqualTo(AnnotatedString(CardNumberFixtures.DINERS_CLUB_16_WITH_SPACES))
+            assertThat(
+                cardNumberConfig.determineVisualTransformation(
+                    number = CardNumberFixtures.AMEX_NO_SPACES,
+                    panLength = 15
+                )
+            ).isEqualTo(CardNumberVisualTransformations.FourteenAndFifteenPanLength(separator = ' '))
 
-            Truth.assertThat(cardNumberConfig.visualTransformation.filter(AnnotatedString(CardNumberFixtures.JCB_NO_SPACES)).text)
-                .isEqualTo(AnnotatedString(CardNumberFixtures.JCB_WITH_SPACES))
+            assertThat(
+                cardNumberConfig.determineVisualTransformation(
+                    number = CardNumberFixtures.VISA_NO_SPACES,
+                    panLength = 20
+                )
+            ).isEqualTo(CardNumberVisualTransformations.Default(separator = ' '))
 
-            Truth.assertThat(cardNumberConfig.visualTransformation.filter(AnnotatedString(CardNumberFixtures.UNIONPAY_NO_SPACES)).text)
-                .isEqualTo(AnnotatedString(CardNumberFixtures.UNIONPAY_WITH_SPACES))
+            assertThat(
+                cardNumberConfig.determineVisualTransformation(
+                    number = CardNumberFixtures.VISA_NO_SPACES,
+                    panLength = 13
+                )
+            ).isEqualTo(CardNumberVisualTransformations.Default(separator = ' '))
         }
     }
 
@@ -54,7 +80,7 @@ class CardNumberConfigTest {
                 isCardBrandChoiceEligible = isCardBrandChoiceEligible,
                 cardBrandFilter = DefaultCardBrandFilter
             )
-            Truth.assertThat(cardNumberConfig.filter("123^@Number[\uD83E\uDD57."))
+            assertThat(cardNumberConfig.filter("123^@Number[\uD83E\uDD57."))
                 .isEqualTo("123")
         }
     }
@@ -66,7 +92,7 @@ class CardNumberConfigTest {
                 isCardBrandChoiceEligible = isCardBrandChoiceEligible,
                 cardBrandFilter = DefaultCardBrandFilter
             )
-            Truth.assertThat(
+            assertThat(
                 cardNumberConfig.determineState(
                     CardBrand.Visa,
                     "",
@@ -89,9 +115,9 @@ class CardNumberConfigTest {
                 "0",
                 CardBrand.Unknown.getMaxLengthForCardNumber("0")
             )
-            Truth.assertThat(state)
+            assertThat(state)
                 .isInstanceOf<TextFieldStateConstants.Error.Invalid>()
-            Truth.assertThat(
+            assertThat(
                 state.getError()?.errorMessage
             ).isEqualTo(StripeR.string.stripe_invalid_card_number)
         }
@@ -106,9 +132,9 @@ class CardNumberConfigTest {
             )
             val state =
                 cardNumberConfig.determineState(CardBrand.Visa, "12", CardBrand.Visa.getMaxLengthForCardNumber("12"))
-            Truth.assertThat(state)
+            assertThat(state)
                 .isInstanceOf<TextFieldStateConstants.Error.Incomplete>()
-            Truth.assertThat(
+            assertThat(
                 state.getError()?.errorMessage
             ).isEqualTo(StripeR.string.stripe_invalid_card_number)
         }
@@ -126,9 +152,9 @@ class CardNumberConfigTest {
                 "1234567890123456789",
                 CardBrand.Visa.getMaxLengthForCardNumber("1234567890123456789")
             )
-            Truth.assertThat(state)
+            assertThat(state)
                 .isInstanceOf<TextFieldStateConstants.Error.Invalid>()
-            Truth.assertThat(
+            assertThat(
                 state.getError()?.errorMessage
             ).isEqualTo(StripeR.string.stripe_invalid_card_number)
         }
@@ -146,9 +172,9 @@ class CardNumberConfigTest {
                 "4242424242424243",
                 CardBrand.Visa.getMaxLengthForCardNumber("4242424242424243")
             )
-            Truth.assertThat(state)
+            assertThat(state)
                 .isInstanceOf<TextFieldStateConstants.Error.Invalid>()
-            Truth.assertThat(
+            assertThat(
                 state.getError()?.errorMessage
             ).isEqualTo(StripeR.string.stripe_invalid_card_number)
         }
@@ -166,7 +192,7 @@ class CardNumberConfigTest {
                 "4242424242424242",
                 CardBrand.Visa.getMaxLengthForCardNumber("4242424242424242")
             )
-            Truth.assertThat(state)
+            assertThat(state)
                 .isInstanceOf<TextFieldStateConstants.Valid.Full>()
         }
     }

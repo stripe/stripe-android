@@ -30,7 +30,6 @@ class CvcController constructor(
 ) : TextFieldController, SectionFieldErrorController {
     override val capitalization: KeyboardCapitalization = cvcTextFieldConfig.capitalization
     override val keyboardType: KeyboardType = cvcTextFieldConfig.keyboard
-    override val visualTransformation = cvcTextFieldConfig.visualTransformation
 
     private val _label = cardBrandFlow.mapAsStateFlow { cardBrand ->
         if (cardBrand == CardBrand.AmericanExpress) {
@@ -48,6 +47,10 @@ class CvcController constructor(
 
     private val _fieldValue = MutableStateFlow("")
     override val fieldValue: StateFlow<String> = _fieldValue.asStateFlow()
+
+    override val visualTransformation = _fieldValue.mapAsStateFlow { number ->
+        cvcTextFieldConfig.determineVisualTransformation(number = number, panLength = 0)
+    }
 
     override val rawFieldValue: StateFlow<String> =
         _fieldValue.mapAsStateFlow { cvcTextFieldConfig.convertToRaw(it) }
