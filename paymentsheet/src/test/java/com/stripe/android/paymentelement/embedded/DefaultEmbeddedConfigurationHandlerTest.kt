@@ -42,6 +42,19 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
     }
 
     @Test
+    fun `configuration fails when sheetIsOpen`() = runScenario {
+        sheetStateHolder.sheetIsOpen = true
+        val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
+        val result = handler.configure(
+            intentConfiguration = PaymentSheet.IntentConfiguration(
+                mode = PaymentSheet.IntentConfiguration.Mode.Setup(currency = "USD"),
+            ),
+            configuration = configuration,
+        )
+        assertThat(result.exceptionOrNull()?.message).isEqualTo("Configuring while a sheet is open is not supported.")
+    }
+
+    @Test
     fun paymentElementLoaderIsCalledWithCorrectArguments() = runScenario {
         val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
         loader.emit(loader.createSuccess(configuration.asCommonConfiguration()))
@@ -268,12 +281,14 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
         runTest {
             val loader = FakePaymentElementLoader()
             val savedStateHandle = SavedStateHandle()
-            val handler = DefaultEmbeddedConfigurationHandler(loader, savedStateHandle)
+            val sheetStateHolder = SheetStateHolder(savedStateHandle)
+            val handler = DefaultEmbeddedConfigurationHandler(loader, savedStateHandle, sheetStateHolder)
             Scenario(
                 loader = loader,
                 savedStateHandle = savedStateHandle,
                 handler = handler,
-                testScope = this
+                testScope = this,
+                sheetStateHolder = sheetStateHolder,
             ).apply {
                 block()
             }
@@ -286,6 +301,7 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
         val savedStateHandle: SavedStateHandle,
         val handler: DefaultEmbeddedConfigurationHandler,
         val testScope: TestScope,
+        val sheetStateHolder: SheetStateHolder,
     )
 
     private class FakePaymentElementLoader : PaymentElementLoader {

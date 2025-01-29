@@ -392,6 +392,7 @@ internal class SharedPaymentElementViewModelTest {
                     lifecycleOwner = lifecycleOwner,
                     selectionHolder = selectionHolder,
                     customerStateHolder = customerStateHolder,
+                    sheetStateHolder = SheetStateHolder(savedStateHandle),
                 )
             },
             embeddedContentHelperFactory = EmbeddedContentHelperFactory {
