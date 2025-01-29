@@ -6,11 +6,13 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.runtime.getValue
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInteractor
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
+import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.fadeOut
 import javax.inject.Inject
 
@@ -31,6 +33,9 @@ internal class FormActivity : AppCompatActivity() {
     @Inject
     lateinit var eventReporter: EventReporter
 
+    @Inject
+    lateinit var formStateHolder: FormStateHolder
+
     @OptIn(ExperimentalMaterialApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,6 +51,7 @@ internal class FormActivity : AppCompatActivity() {
         setContent {
             StripeTheme {
                 val bottomSheetState = rememberStripeBottomSheetState()
+                val state by formStateHolder.formState.collectAsState()
                 ElementsBottomSheetLayout(
                     state = bottomSheetState,
                     onDismissed = ::setCancelAndFinish
@@ -53,7 +59,9 @@ internal class FormActivity : AppCompatActivity() {
                     FormActivityUI(
                         interactor = formInteractor,
                         eventReporter = eventReporter,
-                        onDismissed = ::setCancelAndFinish
+                        onDismissed = ::setCancelAndFinish,
+                        state = state,
+                        onFormFieldValuesChanged = formStateHolder::formValuesChanged,
                     )
                 }
             }
