@@ -2,6 +2,7 @@ package com.stripe.android.link.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
@@ -27,8 +28,13 @@ internal fun DefaultLinkTheme(
             colors = colors.materialColors,
             typography = Typography,
             shapes = MaterialTheme.shapes,
-            content = content
-        )
+        ) {
+            Surface(
+                color = MaterialTheme.colors.background
+            ) {
+                content()
+            }
+        }
     }
 }
 
