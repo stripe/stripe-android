@@ -46,6 +46,7 @@ import dagger.BindsInstance
 import dagger.Component
 import dagger.Module
 import dagger.Provides
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -100,39 +101,55 @@ internal class SharedPaymentElementViewModel @Inject constructor(
         intentConfiguration: PaymentSheet.IntentConfiguration,
         configuration: EmbeddedPaymentElement.Configuration,
     ): ConfigureResult {
-        return configurationHandler.configure(
-            intentConfiguration = intentConfiguration,
-            configuration = configuration,
-        ).fold(
-            onSuccess = { state ->
-                val previousConfiguration = confirmationStateHolder.state?.configuration
-                confirmationStateHolder.state = EmbeddedConfirmationStateHolder.State(
-                    paymentMethodMetadata = state.paymentMethodMetadata,
-                    selection = state.paymentSelection,
-                    initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(intentConfiguration),
-                    configuration = configuration,
-                )
-                customerStateHolder.setCustomerState(state.customer)
-                selectionHolder.set(
-                    selectionChooser.choose(
-                        paymentMethodMetadata = state.paymentMethodMetadata,
-                        paymentMethods = state.customer?.paymentMethods,
-                        previousSelection = selectionHolder.selection.value,
-                        newSelection = state.paymentSelection,
-                        previousConfiguration = previousConfiguration,
-                        newConfiguration = configuration,
+        return viewModelScope.async {
+            configurationHandler.configure(
+                intentConfiguration = intentConfiguration,
+                configuration = configuration,
+            ).fold(
+                onSuccess = { state ->
+                    handleLoadedState(
+                        state = state,
+                        intentConfiguration = intentConfiguration,
+                        configuration = configuration,
                     )
-                )
-                embeddedContentHelper.dataLoaded(
-                    paymentMethodMetadata = state.paymentMethodMetadata,
-                    rowStyle = configuration.appearance.embeddedAppearance.style,
-                    embeddedViewDisplaysMandateText = configuration.embeddedViewDisplaysMandateText,
-                )
-                ConfigureResult.Succeeded()
-            },
-            onFailure = { error ->
-                ConfigureResult.Failed(error)
-            },
+                    ConfigureResult.Succeeded()
+                },
+                onFailure = { error ->
+                    ConfigureResult.Failed(error)
+                },
+            )
+        }.await()
+    }
+
+    private fun handleLoadedState(
+        state: PaymentElementLoader.State,
+        intentConfiguration: PaymentSheet.IntentConfiguration,
+        configuration: EmbeddedPaymentElement.Configuration,
+    ) {
+        val previousConfiguration = confirmationStateHolder.state?.configuration
+        confirmationStateHolder.state = EmbeddedConfirmationStateHolder.State(
+            paymentMethodMetadata = state.paymentMethodMetadata,
+            selection = state.paymentSelection,
+            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+                intentConfiguration
+            ),
+            configuration = configuration,
+        )
+        customerStateHolder.setCustomerState(state.customer)
+        selectionHolder.set(
+            selectionChooser.choose(
+                paymentMethodMetadata = state.paymentMethodMetadata,
+                paymentMethods = state.customer?.paymentMethods,
+                previousSelection = selectionHolder.selection.value,
+                newSelection = state.paymentSelection,
+                previousConfiguration = previousConfiguration,
+                newConfiguration = configuration,
+            )
+        )
+        embeddedContentHelper.dataLoaded(
+            paymentMethodMetadata = state.paymentMethodMetadata,
+            rowStyle = configuration.appearance.embeddedAppearance.style,
+            embeddedViewDisplaysMandateText = configuration.embeddedViewDisplaysMandateText,
         )
     }
 
