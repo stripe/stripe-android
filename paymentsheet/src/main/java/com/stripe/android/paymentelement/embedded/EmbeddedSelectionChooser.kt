@@ -2,11 +2,11 @@
 
 package com.stripe.android.paymentelement.embedded
 
-import com.stripe.android.common.model.asCommonConfiguration
+import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.containsVolatileDifferences
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import javax.inject.Inject
@@ -18,29 +18,35 @@ internal fun interface EmbeddedSelectionChooser {
         paymentMethods: List<PaymentMethod>?,
         previousSelection: PaymentSelection?,
         newSelection: PaymentSelection?,
-        previousConfiguration: EmbeddedPaymentElement.Configuration?,
-        newConfiguration: EmbeddedPaymentElement.Configuration,
+        newConfiguration: CommonConfiguration,
     ): PaymentSelection?
 }
 
-internal class DefaultEmbeddedSelectionChooser @Inject constructor() : EmbeddedSelectionChooser {
+internal class DefaultEmbeddedSelectionChooser @Inject constructor(
+    private val savedStateHandle: SavedStateHandle,
+) : EmbeddedSelectionChooser {
+    private var previousConfiguration: CommonConfiguration?
+        get() = savedStateHandle[PREVIOUS_CONFIGURATION_KEY]
+        set(value) = savedStateHandle.set(PREVIOUS_CONFIGURATION_KEY, value)
+
     override fun choose(
         paymentMethodMetadata: PaymentMethodMetadata,
         paymentMethods: List<PaymentMethod>?,
         previousSelection: PaymentSelection?,
         newSelection: PaymentSelection?,
-        previousConfiguration: EmbeddedPaymentElement.Configuration?,
-        newConfiguration: EmbeddedPaymentElement.Configuration,
+        newConfiguration: CommonConfiguration,
     ): PaymentSelection? {
-        return previousSelection?.takeIf { selection ->
+        val result = previousSelection?.takeIf { selection ->
             canUseSelection(
                 paymentMethodMetadata = paymentMethodMetadata,
                 paymentMethods = paymentMethods,
                 selection = selection,
-            ) && previousConfiguration?.asCommonConfiguration()?.containsVolatileDifferences(
-                newConfiguration.asCommonConfiguration()
-            ) != true
+            ) && previousConfiguration?.containsVolatileDifferences(newConfiguration) != true
         } ?: newSelection
+
+        previousConfiguration = newConfiguration
+
+        return result
     }
 
     private fun canUseSelection(
@@ -71,5 +77,9 @@ internal class DefaultEmbeddedSelectionChooser @Inject constructor() : EmbeddedS
                 paymentMethodMetadata.isExternalPaymentMethod(selection.type)
             }
         }
+    }
+
+    companion object {
+        const val PREVIOUS_CONFIGURATION_KEY = "DefaultEmbeddedSelectionChooser_PREVIOUS_CONFIGURATION_KEY"
     }
 }

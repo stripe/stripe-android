@@ -1,6 +1,9 @@
 package com.stripe.android.paymentelement.embedded
 
+import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.common.model.CommonConfiguration
+import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
@@ -8,6 +11,7 @@ import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
+import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionChooser.Companion.PREVIOUS_CONFIGURATION_KEY
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.testing.PaymentMethodFactory
@@ -16,6 +20,10 @@ import com.stripe.android.ui.core.R as StripeUiCoreR
 
 @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 internal class DefaultEmbeddedSelectionChooserTest {
+    private val defaultConfiguration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
+        .build()
+        .asCommonConfiguration()
+
     @Test
     fun `Uses new payment selection if there's no existing one`() = runScenario {
         val selection = chooser.choose(
@@ -23,8 +31,7 @@ internal class DefaultEmbeddedSelectionChooserTest {
             paymentMethods = null,
             previousSelection = null,
             newSelection = PaymentSelection.GooglePay,
-            previousConfiguration = null,
-            newConfiguration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
+            newConfiguration = defaultConfiguration,
         )
         assertThat(selection).isEqualTo(PaymentSelection.GooglePay)
     }
@@ -51,8 +58,7 @@ internal class DefaultEmbeddedSelectionChooserTest {
             paymentMethods = PaymentMethodFixtures.createCards(3) + paymentMethod,
             previousSelection = previousSelection,
             newSelection = newSelection,
-            previousConfiguration = null,
-            newConfiguration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
+            newConfiguration = defaultConfiguration,
         )
         assertThat(selection).isEqualTo(previousSelection)
     }
@@ -67,8 +73,7 @@ internal class DefaultEmbeddedSelectionChooserTest {
             paymentMethods = PaymentMethodFixtures.createCards(3) + paymentMethod,
             previousSelection = previousSelection,
             newSelection = PaymentSelection.GooglePay,
-            previousConfiguration = null,
-            newConfiguration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
+            newConfiguration = defaultConfiguration,
         )
         assertThat(selection).isEqualTo(previousSelection)
     }
@@ -82,8 +87,7 @@ internal class DefaultEmbeddedSelectionChooserTest {
             paymentMethods = PaymentMethodFixtures.createCards(3) + PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD,
             previousSelection = previousSelection,
             newSelection = null,
-            previousConfiguration = null,
-            newConfiguration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
+            newConfiguration = defaultConfiguration,
         )
         assertThat(selection).isNull()
     }
@@ -101,8 +105,7 @@ internal class DefaultEmbeddedSelectionChooserTest {
             paymentMethods = PaymentMethodFixtures.createCards(3),
             previousSelection = previousSelection,
             newSelection = null,
-            previousConfiguration = null,
-            newConfiguration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
+            newConfiguration = defaultConfiguration,
         )
         assertThat(selection).isNull()
     }
@@ -120,8 +123,7 @@ internal class DefaultEmbeddedSelectionChooserTest {
             paymentMethods = PaymentMethodFixtures.createCards(3),
             previousSelection = previousSelection,
             newSelection = PaymentSelection.GooglePay,
-            previousConfiguration = null,
-            newConfiguration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
+            newConfiguration = defaultConfiguration,
         )
         assertThat(selection).isEqualTo(previousSelection)
     }
@@ -138,8 +140,7 @@ internal class DefaultEmbeddedSelectionChooserTest {
             paymentMethods = PaymentMethodFixtures.createCards(3),
             previousSelection = previousSelection,
             newSelection = null,
-            previousConfiguration = null,
-            newConfiguration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
+            newConfiguration = defaultConfiguration,
         )
         assertThat(selection).isNull()
     }
@@ -150,14 +151,13 @@ internal class DefaultEmbeddedSelectionChooserTest {
         val paymentMethod = PaymentMethodFixtures.createCard()
         val newSelection = PaymentSelection.Saved(paymentMethod)
 
+        savedStateHandle[PREVIOUS_CONFIGURATION_KEY] = defaultConfiguration.copy(merchantDisplayName = "Hi")
         val selection = chooser.choose(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(isGooglePayReady = true),
             paymentMethods = PaymentMethodFixtures.createCards(3) + paymentMethod,
             previousSelection = previousSelection,
             newSelection = newSelection,
-            previousConfiguration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
-                .embeddedViewDisplaysMandateText(false).build(),
-            newConfiguration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
+            newConfiguration = defaultConfiguration,
         )
         assertThat(selection).isEqualTo(previousSelection)
     }
@@ -168,25 +168,50 @@ internal class DefaultEmbeddedSelectionChooserTest {
         val paymentMethod = PaymentMethodFixtures.createCard()
         val newSelection = PaymentSelection.Saved(paymentMethod)
 
+        savedStateHandle[PREVIOUS_CONFIGURATION_KEY] = defaultConfiguration.copy(
+            defaultBillingDetails = PaymentSheet.BillingDetails(email = "jaynewstrom@example.com")
+        )
         val selection = chooser.choose(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(isGooglePayReady = true),
             paymentMethods = PaymentMethodFixtures.createCards(3) + paymentMethod,
             previousSelection = previousSelection,
             newSelection = newSelection,
-            previousConfiguration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
-                .defaultBillingDetails(PaymentSheet.BillingDetails(email = "jaynewstrom@example.com")).build(),
-            newConfiguration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
+            newConfiguration = defaultConfiguration,
         )
         assertThat(selection).isEqualTo(newSelection)
+    }
+
+    @Test
+    fun `previousConfig is set when calling choose`() = runScenario {
+        val previousSelection = PaymentSelection.GooglePay
+        val paymentMethod = PaymentMethodFixtures.createCard()
+        val newSelection = PaymentSelection.Saved(paymentMethod)
+
+        assertThat(savedStateHandle.get<CommonConfiguration>(PREVIOUS_CONFIGURATION_KEY)).isNull()
+        val selection = chooser.choose(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(isGooglePayReady = true),
+            paymentMethods = PaymentMethodFixtures.createCards(3) + paymentMethod,
+            previousSelection = previousSelection,
+            newSelection = newSelection,
+            newConfiguration = defaultConfiguration,
+        )
+        assertThat(selection).isEqualTo(previousSelection)
+        assertThat(savedStateHandle.get<CommonConfiguration>(PREVIOUS_CONFIGURATION_KEY))
+            .isEqualTo(defaultConfiguration)
     }
 
     private fun runScenario(
         block: Scenario.() -> Unit,
     ) {
-        Scenario(DefaultEmbeddedSelectionChooser()).block()
+        val savedStateHandle = SavedStateHandle()
+        Scenario(
+            chooser = DefaultEmbeddedSelectionChooser(savedStateHandle),
+            savedStateHandle = savedStateHandle,
+        ).block()
     }
 
     private class Scenario(
         val chooser: EmbeddedSelectionChooser,
+        val savedStateHandle: SavedStateHandle,
     )
 }

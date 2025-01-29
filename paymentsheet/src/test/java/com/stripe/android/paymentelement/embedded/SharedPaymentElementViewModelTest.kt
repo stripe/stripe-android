@@ -382,7 +382,7 @@ internal class SharedPaymentElementViewModelTest {
             configurationHandler = configurationHandler,
             paymentOptionDisplayDataFactory = paymentOptionDisplayDataFactory,
             selectionHolder = selectionHolder,
-            selectionChooser = { _, _, _, newSelection, _, _ ->
+            selectionChooser = { _, _, _, newSelection, _ ->
                 newSelection
             },
             customerStateHolder = customerStateHolder,
