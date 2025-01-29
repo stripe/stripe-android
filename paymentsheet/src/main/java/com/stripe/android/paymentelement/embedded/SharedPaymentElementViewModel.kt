@@ -103,6 +103,7 @@ internal class SharedPaymentElementViewModel @Inject constructor(
         configuration: EmbeddedPaymentElement.Configuration,
     ): ConfigureResult {
         return viewModelScope.async {
+            confirmationStateHolder.state = null
             configurationHandler.configure(
                 intentConfiguration = intentConfiguration,
                 configuration = configuration,
