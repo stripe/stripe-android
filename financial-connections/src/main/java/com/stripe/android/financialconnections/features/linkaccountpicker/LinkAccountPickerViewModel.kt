@@ -284,14 +284,6 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
     }
 
     private suspend fun handleNonSuccessNextPane(payload: LinkAccountPickerState.Payload, nextPane: Pane?) {
-        val overrideNextPane = when (nextPane) {
-            PARTNER_AUTH, BANK_AUTH_REPAIR -> {
-                // We don't support these panes here.
-                INSTITUTION_PICKER
-            }
-            else -> nextPane
-        }
-
         when (nextPane) {
             PARTNER_AUTH -> {
                 eventTracker.logError(
@@ -326,7 +318,17 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
             acceptConsent()
         }
 
-        val destination = (overrideNextPane?.destination ?: InstitutionPicker).invoke(referrer = PANE)
+        val overrideNextPane = when (nextPane) {
+            PARTNER_AUTH,
+            BANK_AUTH_REPAIR -> {
+                // We don't support these panes here.
+                INSTITUTION_PICKER
+            }
+            null -> INSTITUTION_PICKER
+            else -> nextPane
+        }
+
+        val destination = overrideNextPane.destination(referrer = PANE)
         navigationManager.tryNavigateTo(destination)
     }
 
