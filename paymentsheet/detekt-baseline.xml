@@ -77,10 +77,10 @@
     <ID>TooManyFunctions:DefaultLinkEventsReporter.kt$DefaultLinkEventsReporter : LinkEventsReporter</ID>
     <ID>TooManyFunctions:DelegateDrawable.kt$DelegateDrawable : Drawable</ID>
     <ID>TooManyFunctions:EmbeddedCommonModule.kt$EmbeddedCommonModule$Companion</ID>
+    <ID>TooManyFunctions:EmbeddedPaymentElementViewModelComponent.kt$EmbeddedPaymentElementViewModelModule</ID>
     <ID>TooManyFunctions:EventReporter.kt$EventReporter</ID>
     <ID>TooManyFunctions:LinkEventsReporter.kt$LinkEventsReporter</ID>
     <ID>TooManyFunctions:PaymentMethodMetadata.kt$PaymentMethodMetadata : Parcelable</ID>
-    <ID>TooManyFunctions:SharedPaymentElementViewModel.kt$SharedPaymentElementViewModelModule</ID>
     <ID>UnusedPrivateClass:PaymentOptionsViewModelTest.kt$PaymentOptionsViewModelTest$MyHostActivity : AppCompatActivity</ID>
   </CurrentIssues>
 </SmellBaseline>

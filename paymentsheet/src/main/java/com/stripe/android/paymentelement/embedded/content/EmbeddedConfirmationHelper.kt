@@ -1,4 +1,4 @@
-package com.stripe.android.paymentelement.embedded
+package com.stripe.android.paymentelement.embedded.content
 
 import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
@@ -8,16 +8,23 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
+import com.stripe.android.paymentelement.embedded.asEmbeddedResult
 import kotlinx.coroutines.launch
+import javax.inject.Inject
+
+internal interface EmbeddedConfirmationHelper {
+    fun confirm()
+}
 
 @ExperimentalEmbeddedPaymentElementApi
-internal class EmbeddedConfirmationHelper(
+@EmbeddedPaymentElementScope
+internal class DefaultEmbeddedConfirmationHelper @Inject constructor(
     private val confirmationHandler: ConfirmationHandler,
     private val resultCallback: EmbeddedPaymentElement.ResultCallback,
     private val activityResultCaller: ActivityResultCaller,
     private val lifecycleOwner: LifecycleOwner,
     private val confirmationStateSupplier: () -> EmbeddedConfirmationStateHolder.State?,
-) {
+) : EmbeddedConfirmationHelper {
     init {
         confirmationHandler.register(
             activityResultCaller = activityResultCaller,
@@ -36,7 +43,7 @@ internal class EmbeddedConfirmationHelper(
         }
     }
 
-    fun confirm() {
+    override fun confirm() {
         confirmationArgs()?.let { confirmationArgs ->
             confirmationHandler.start(confirmationArgs)
         } ?: run {

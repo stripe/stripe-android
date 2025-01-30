@@ -1,4 +1,4 @@
-package com.stripe.android.paymentelement.embedded
+package com.stripe.android.paymentelement.embedded.content
 
 import android.content.Context
 import androidx.compose.ui.text.AnnotatedString

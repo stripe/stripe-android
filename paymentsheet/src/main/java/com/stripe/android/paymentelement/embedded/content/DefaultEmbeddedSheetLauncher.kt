@@ -1,10 +1,11 @@
-package com.stripe.android.paymentelement.embedded
+package com.stripe.android.paymentelement.embedded.content
 
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.form.FormContract
 import com.stripe.android.paymentelement.embedded.form.FormResult
 import com.stripe.android.paymentelement.embedded.manage.ManageContract
@@ -12,9 +13,7 @@ import com.stripe.android.paymentelement.embedded.manage.ManageResult
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.CustomerState
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
+import javax.inject.Inject
 
 internal interface EmbeddedSheetLauncher {
     fun launchForm(
@@ -30,24 +29,10 @@ internal interface EmbeddedSheetLauncher {
     )
 }
 
-internal fun interface EmbeddedSheetLauncherFactory {
-    fun create(
-        activityResultCaller: ActivityResultCaller,
-        lifecycleOwner: LifecycleOwner,
-    ): EmbeddedSheetLauncher
-}
-
-@AssistedFactory
-internal interface DefaultEmbeddedSheetLauncherFactory : EmbeddedSheetLauncherFactory {
-    override fun create(
-        activityResultCaller: ActivityResultCaller,
-        lifecycleOwner: LifecycleOwner,
-    ): DefaultEmbeddedSheetLauncher
-}
-
-internal class DefaultEmbeddedSheetLauncher @AssistedInject constructor(
-    @Assisted activityResultCaller: ActivityResultCaller,
-    @Assisted lifecycleOwner: LifecycleOwner,
+@EmbeddedPaymentElementScope
+internal class DefaultEmbeddedSheetLauncher @Inject constructor(
+    activityResultCaller: ActivityResultCaller,
+    lifecycleOwner: LifecycleOwner,
     private val selectionHolder: EmbeddedSelectionHolder,
     private val customerStateHolder: CustomerStateHolder,
     private val sheetStateHolder: SheetStateHolder,

@@ -1,4 +1,4 @@
-package com.stripe.android.paymentelement.embedded
+package com.stripe.android.paymentelement.embedded.content
 
 import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.Lifecycle
@@ -9,6 +9,7 @@ import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.confirmation.asCallbackFor
+import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.form.FormContract
 import com.stripe.android.paymentelement.embedded.form.FormResult
 import com.stripe.android.paymentelement.embedded.manage.ManageContract

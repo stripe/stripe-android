@@ -1,4 +1,4 @@
-package com.stripe.android.paymentelement.embedded
+package com.stripe.android.paymentelement.embedded.content
 
 import androidx.lifecycle.testing.TestLifecycleOwner
 import app.cash.turbine.ReceiveTurbine
@@ -126,7 +126,7 @@ internal class EmbeddedConfirmationHelperTest {
     ) = runTest {
         val resultCallbackTurbine = Turbine<EmbeddedPaymentElement.Result>()
         val confirmationHandler = FakeConfirmationHandler()
-        val confirmationHelper = EmbeddedConfirmationHelper(
+        val confirmationHelper = DefaultEmbeddedConfirmationHelper(
             confirmationHandler = confirmationHandler,
             resultCallback = {
                 resultCallbackTurbine.add(it)

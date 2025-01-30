@@ -1,4 +1,4 @@
-package com.stripe.android.paymentelement.embedded
+package com.stripe.android.paymentelement.embedded.content
 
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
