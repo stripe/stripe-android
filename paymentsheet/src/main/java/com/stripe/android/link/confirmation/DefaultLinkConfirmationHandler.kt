@@ -28,7 +28,7 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
         cvc: String?
     ): Result {
         return runCatching {
-            val args = confirmationArgs(paymentDetails, linkAccount, cvc)
+            val args = newConfirmationArgs(paymentDetails, linkAccount, cvc)
             confirmationHandler.start(args)
             val result = confirmationHandler.awaitResult()
             transformResult(result)
@@ -79,6 +79,28 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
     }
 
     private fun confirmationArgs(
+        paymentDetails: LinkPaymentDetails,
+        linkAccount: LinkAccount,
+        cvc: String?
+    ): ConfirmationHandler.Args {
+        return when (paymentDetails) {
+            is LinkPaymentDetails.New -> {
+                newConfirmationArgs(
+                    paymentDetails = paymentDetails.paymentDetails,
+                    linkAccount = linkAccount,
+                    cvc = cvc
+                )
+            }
+            is LinkPaymentDetails.Saved -> {
+                savedConfirmationArgs(
+                    paymentDetails = paymentDetails,
+                    cvc = cvc
+                )
+            }
+        }
+    }
+
+    private fun newConfirmationArgs(
         paymentDetails: ConsumerPaymentDetails.PaymentDetails,
         linkAccount: LinkAccount,
         cvc: String?
@@ -100,44 +122,33 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
         )
     }
 
-    private fun confirmationArgs(
+    private fun savedConfirmationArgs(
         paymentDetails: LinkPaymentDetails,
-        linkAccount: LinkAccount,
         cvc: String?
     ): ConfirmationHandler.Args {
-        return when (paymentDetails) {
-            is LinkPaymentDetails.New -> {
-                confirmationArgs(
-                    paymentDetails = paymentDetails.paymentDetails,
-                    linkAccount = linkAccount,
+        return ConfirmationHandler.Args(
+            intent = configuration.stripeIntent,
+            confirmationOption = PaymentMethodConfirmationOption.Saved(
+                paymentMethod = PaymentMethod.Builder()
+                    .setId(paymentDetails.paymentDetails.id)
+                    .setCode(paymentDetails.paymentMethodCreateParams.typeCode)
+                    .setCard(
+                        PaymentMethod.Card(
+                            last4 = paymentDetails.paymentDetails.last4,
+                            wallet = Wallet.LinkWallet(paymentDetails.paymentDetails.last4),
+                        )
+                    )
+                    .setType(PaymentMethod.Type.Card)
+                    .build(),
+                optionsParams = PaymentMethodOptionsParams.Card(
+                    setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession,
                     cvc = cvc
                 )
-            }
-            is LinkPaymentDetails.Saved -> {
-                ConfirmationHandler.Args(
-                    intent = configuration.stripeIntent,
-                    confirmationOption = PaymentMethodConfirmationOption.Saved(
-                        paymentMethod = PaymentMethod.Builder()
-                            .setId(paymentDetails.paymentDetails.id)
-                            .setCode(paymentDetails.paymentMethodCreateParams.typeCode)
-                            .setCard(
-                                PaymentMethod.Card(
-                                    last4 = paymentDetails.paymentDetails.last4,
-                                    wallet = Wallet.LinkWallet(paymentDetails.paymentDetails.last4),
-                                )
-                            )
-                            .setType(PaymentMethod.Type.Card)
-                            .build(),
-                        optionsParams = PaymentMethodOptionsParams.Card(
-                            setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
-                        )
-                    ),
-                    appearance = PaymentSheet.Appearance(),
-                    initializationMode = configuration.initializationMode,
-                    shippingDetails = configuration.shippingDetails
-                )
-            }
-        }
+            ),
+            appearance = PaymentSheet.Appearance(),
+            initializationMode = configuration.initializationMode,
+            shippingDetails = configuration.shippingDetails
+        )
     }
 
     private fun createPaymentMethodCreateParams(
