@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.stripe.android.model.CardBrand
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
 import com.stripe.android.uicore.DefaultStripeTheme
@@ -77,10 +78,7 @@ class PaymentMethodsUiExtensionScreenshotTest {
         paparazziRule.snapshot {
             iconAndThemesTestComposable(
                 title = "no override\nisDarkTheme ${isSystemInDarkTheme()}",
-                icons = listOf(
-                    getLinkIcon(),
-                    getSepaIcon(),
-                ),
+                icons = getIcons(),
             )
         }
     }
@@ -90,10 +88,7 @@ class PaymentMethodsUiExtensionScreenshotTest {
         paparazziRule.snapshot {
             iconAndThemesTestComposable(
                 title = "override show light\nisDarkTheme ${isSystemInDarkTheme()}",
-                icons = listOf(
-                    getLinkIcon(showNightIcon = true),
-                    getSepaIcon(showNightIcon = true),
-                ),
+                icons = getIcons(showNightIcon = true),
                 backgroundColorOverride = getSectionCardColor()
             )
         }
@@ -104,10 +99,7 @@ class PaymentMethodsUiExtensionScreenshotTest {
         paparazziRule.snapshot {
             iconAndThemesTestComposable(
                 title = "override show dark\nisDarkTheme ${isSystemInDarkTheme()}",
-                icons = listOf(
-                    getLinkIcon(showNightIcon = false),
-                    getSepaIcon(showNightIcon = false),
-                ),
+                icons = getIcons(showNightIcon = false),
                 backgroundColorOverride = getSectionCardColor()
             )
         }
@@ -143,5 +135,15 @@ class PaymentMethodsUiExtensionScreenshotTest {
                 }
             }
         }
+    }
+
+    private fun getIcons(showNightIcon: Boolean? = null): List<Int> {
+        return CardBrand.orderedBrands.map {
+            it.getCardBrandIconForHorizontalMode(showNightIcon = showNightIcon)
+        }.plus(
+            getLinkIcon(showNightIcon = showNightIcon)
+        ).plus(
+            getSepaIcon(showNightIcon = showNightIcon)
+        )
     }
 }

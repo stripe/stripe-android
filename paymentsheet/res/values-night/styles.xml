@@ -2,4 +2,14 @@
 <resources>
     <drawable name="stripe_ic_paymentsheet_link_ref">@drawable/stripe_ic_paymentsheet_link_night</drawable>
     <drawable name="stripe_ic_paymentsheet_sepa_ref">@drawable/stripe_ic_paymentsheet_sepa_night</drawable>
+
+    <drawable name="stripe_ic_paymentsheet_card_visa_ref">@drawable/stripe_ic_paymentsheet_card_visa_night</drawable>
+    <drawable name="stripe_ic_paymentsheet_card_amex_ref">@drawable/stripe_ic_paymentsheet_card_amex_night</drawable>
+    <drawable name="stripe_ic_paymentsheet_card_discover_ref">@drawable/stripe_ic_paymentsheet_card_discover_night</drawable>
+    <drawable name="stripe_ic_paymentsheet_card_jcb_ref">@drawable/stripe_ic_paymentsheet_card_jcb_night</drawable>
+    <drawable name="stripe_ic_paymentsheet_card_dinersclub_ref">@drawable/stripe_ic_paymentsheet_card_dinersclub_night</drawable>
+    <drawable name="stripe_ic_paymentsheet_card_mastercard_ref">@drawable/stripe_ic_paymentsheet_card_mastercard_night</drawable>
+    <drawable name="stripe_ic_paymentsheet_card_unionpay_ref">@drawable/stripe_ic_paymentsheet_card_unionpay_night</drawable>
+    <drawable name="stripe_ic_paymentsheet_card_cartes_bancaires_ref">@drawable/stripe_ic_paymentsheet_card_cartes_bancaires_night</drawable>
+    <drawable name="stripe_ic_paymentsheet_card_unknown_ref">@drawable/stripe_ic_paymentsheet_card_unknown_night</drawable>
 </resources>
