@@ -9,7 +9,6 @@ import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.link.LinkConfiguration
-import com.stripe.android.link.LinkEventException
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.NoLinkAccountFoundException
 import com.stripe.android.link.account.LinkAuth
@@ -21,7 +20,6 @@ import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.model.EmailSource
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
-import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.NameConfig
 import com.stripe.android.uicore.elements.PhoneNumberController
@@ -42,7 +40,6 @@ internal class SignUpViewModel @Inject constructor(
     private val linkEventsReporter: LinkEventsReporter,
     private val logger: Logger,
     private val linkAuth: LinkAuth,
-    private val errorReporter: ErrorReporter,
     private val navigate: (LinkScreen) -> Unit,
     private val navigateAndClearStack: (LinkScreen) -> Unit,
     private val moveToWeb: () -> Unit
@@ -132,10 +129,6 @@ internal class SignUpViewModel @Inject constructor(
 
         when (lookupResult) {
             is LinkAuthResult.AttestationFailed -> {
-                errorReporter.report(
-                    errorEvent = ErrorReporter.UnexpectedErrorEvent.LINK_NATIVE_FAILED_TO_ATTEST_SIGNUP_REQUEST,
-                    stripeException = LinkEventException(lookupResult.throwable)
-                )
                 moveToWeb()
             }
             is LinkAuthResult.Error -> {
@@ -234,7 +227,6 @@ internal class SignUpViewModel @Inject constructor(
                         linkEventsReporter = parentComponent.linkEventsReporter,
                         logger = parentComponent.logger,
                         linkAuth = parentComponent.linkAuth,
-                        errorReporter = parentComponent.errorReporter,
                         navigate = navigate,
                         navigateAndClearStack = navigateAndClearStack,
                         moveToWeb = moveToWeb

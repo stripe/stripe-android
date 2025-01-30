@@ -19,9 +19,7 @@ import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
-import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.testing.CoroutineTestRule
-import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.FakeLogger
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
@@ -458,7 +456,6 @@ internal class SignUpViewModelTest {
             lookupResult = LinkAuthResult.NoLinkAccountFound
         },
         logger: Logger = FakeLogger(),
-        errorReporter: ErrorReporter = FakeErrorReporter(),
         navigate: (LinkScreen) -> Unit = {},
         navigateAndClearStack: (LinkScreen) -> Unit = {},
         moveToWeb: () -> Unit = {}
@@ -479,7 +476,6 @@ internal class SignUpViewModelTest {
             navigate = navigate,
             navigateAndClearStack = navigateAndClearStack,
             moveToWeb = moveToWeb,
-            errorReporter = errorReporter
         )
     }
 
