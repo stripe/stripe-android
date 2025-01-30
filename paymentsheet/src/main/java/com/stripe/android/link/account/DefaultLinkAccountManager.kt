@@ -221,8 +221,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
     }
 
     override suspend fun createCardPaymentDetails(
-        paymentMethodCreateParams: PaymentMethodCreateParams,
-        shouldShareCardPaymentDetails: Boolean
+        paymentMethodCreateParams: PaymentMethodCreateParams
     ): Result<LinkPaymentDetails> {
         val linkAccountValue = linkAccount.value
         return if (linkAccountValue != null) {
