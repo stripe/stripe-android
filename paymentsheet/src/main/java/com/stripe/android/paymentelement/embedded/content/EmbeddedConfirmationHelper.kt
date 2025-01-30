@@ -9,7 +9,6 @@ import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
-import com.stripe.android.paymentelement.embedded.asEmbeddedResult
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -73,5 +72,18 @@ internal class DefaultEmbeddedConfirmationHelper @Inject constructor(
             appearance = confirmationState.configuration.appearance,
             shippingDetails = confirmationState.configuration.shippingDetails,
         )
+    }
+}
+
+@ExperimentalEmbeddedPaymentElementApi
+private fun ConfirmationHandler.Result.asEmbeddedResult(): EmbeddedPaymentElement.Result = when (this) {
+    is ConfirmationHandler.Result.Canceled -> {
+        EmbeddedPaymentElement.Result.Canceled()
+    }
+    is ConfirmationHandler.Result.Failed -> {
+        EmbeddedPaymentElement.Result.Failed(cause)
+    }
+    is ConfirmationHandler.Result.Succeeded -> {
+        EmbeddedPaymentElement.Result.Completed()
     }
 }
