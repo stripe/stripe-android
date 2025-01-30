@@ -44,10 +44,11 @@ internal class LinkActivityViewModel @Inject constructor(
     private val linkGate: LinkGate,
     private val errorReporter: ErrorReporter,
     private val linkAuth: LinkAuth,
-    private val linkConfiguration: LinkConfiguration
+    private val linkConfiguration: LinkConfiguration,
+    private val eagerLaunch: Boolean = false
 ) : ViewModel(), DefaultLifecycleObserver {
     val confirmationHandler = confirmationHandlerFactory.create(viewModelScope)
-    private val _linkState = MutableStateFlow(
+    private val _linkAppBarState = MutableStateFlow(
         value = LinkAppBarState(
             navigationIcon = R.drawable.stripe_link_close,
             showHeader = true,
@@ -55,7 +56,10 @@ internal class LinkActivityViewModel @Inject constructor(
             email = null,
         )
     )
-    val linkState: StateFlow<LinkAppBarState> = _linkState
+    val linkAppBarState: StateFlow<LinkAppBarState> = _linkAppBarState
+
+    private val _linkScreenState = MutableStateFlow<ScreenState>(ScreenState.Loading)
+    val linkScreenState: StateFlow<ScreenState> = _linkScreenState
 
     val linkAccount: LinkAccount?
         get() = linkAccountManager.linkAccount.value
@@ -68,6 +72,14 @@ internal class LinkActivityViewModel @Inject constructor(
         when (action) {
             LinkAction.BackPressed -> handleBackPressed()
         }
+    }
+
+    fun onVerificationSucceeded() {
+        _linkScreenState.value = ScreenState.FullScreen
+    }
+
+    fun onDismissVerificationClicked() {
+        dismissWithResult?.invoke(LinkActivityResult.Canceled())
     }
 
     fun moveToWeb() {
@@ -125,12 +137,18 @@ internal class LinkActivityViewModel @Inject constructor(
         viewModelScope.launch {
             performAttestationCheck().fold(
                 onSuccess = {
-                    navigateToInitialScreen()
+                    updateScreenState()
                 },
                 onFailure = {
                     moveToWeb()
                 }
             )
+        }
+    }
+
+    fun linkScreenScreenCreated() {
+        viewModelScope.launch {
+            navigateToLinkScreen()
         }
     }
 
@@ -160,12 +178,38 @@ internal class LinkActivityViewModel @Inject constructor(
             }
     }
 
-    private suspend fun navigateToInitialScreen() {
+    private suspend fun updateScreenState() {
+        val linkAccount = linkAccountManager.linkAccount.value
+        val accountStatus = linkAccountManager.accountStatus.first()
+        when (accountStatus) {
+            AccountStatus.Verified -> {
+                _linkScreenState.value = ScreenState.FullScreen
+            }
+            AccountStatus.NeedsVerification, AccountStatus.VerificationStarted -> {
+                if (linkAccount != null && eagerLaunch) {
+                    _linkScreenState.value = ScreenState.VerificationDialog(linkAccount)
+                } else {
+                    _linkScreenState.value = ScreenState.FullScreen
+                }
+            }
+            AccountStatus.SignedOut, AccountStatus.Error -> {
+                _linkScreenState.value = ScreenState.FullScreen
+            }
+        }
+    }
+
+    private suspend fun navigateToLinkScreen() {
         val accountStatus = linkAccountManager.accountStatus.first()
         val screen = when (accountStatus) {
-            AccountStatus.Verified -> LinkScreen.Wallet
-            AccountStatus.NeedsVerification, AccountStatus.VerificationStarted -> LinkScreen.Verification
-            AccountStatus.SignedOut, AccountStatus.Error -> LinkScreen.SignUp
+            AccountStatus.Verified -> {
+                LinkScreen.Wallet
+            }
+            AccountStatus.NeedsVerification, AccountStatus.VerificationStarted -> {
+                LinkScreen.Verification
+            }
+            AccountStatus.SignedOut, AccountStatus.Error -> {
+                LinkScreen.SignUp
+            }
         }
         navigate(screen, clearStack = true, launchSingleTop = true)
     }
@@ -202,6 +246,12 @@ internal class LinkActivityViewModel @Inject constructor(
             }
         }
     }
+}
+
+internal sealed interface ScreenState {
+    data class VerificationDialog(val linkAccount: LinkAccount) : ScreenState
+    data object FullScreen : ScreenState
+    data object Loading : ScreenState
 }
 
 internal class NoArgsException : IllegalArgumentException("NativeLinkArgs not found")
