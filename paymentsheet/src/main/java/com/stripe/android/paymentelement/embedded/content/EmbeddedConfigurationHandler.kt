@@ -1,4 +1,6 @@
-package com.stripe.android.paymentelement.embedded
+@file:OptIn(ExperimentalEmbeddedPaymentElementApi::class)
+
+package com.stripe.android.paymentelement.embedded.content
 
 import android.os.Parcelable
 import androidx.lifecycle.SavedStateHandle
@@ -15,7 +17,6 @@ import kotlinx.coroutines.async
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 
-@ExperimentalEmbeddedPaymentElementApi
 internal interface EmbeddedConfigurationHandler {
     suspend fun configure(
         intentConfiguration: PaymentSheet.IntentConfiguration,
@@ -23,7 +24,6 @@ internal interface EmbeddedConfigurationHandler {
     ): Result<PaymentElementLoader.State>
 }
 
-@ExperimentalEmbeddedPaymentElementApi
 internal class DefaultEmbeddedConfigurationHandler @Inject constructor(
     private val paymentElementLoader: PaymentElementLoader,
     private val savedStateHandle: SavedStateHandle,

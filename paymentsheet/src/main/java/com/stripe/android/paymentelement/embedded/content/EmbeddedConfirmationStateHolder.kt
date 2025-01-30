@@ -1,30 +1,27 @@
-package com.stripe.android.paymentelement.embedded
+@file:OptIn(ExperimentalEmbeddedPaymentElementApi::class)
+
+package com.stripe.android.paymentelement.embedded.content
 
 import android.os.Parcelable
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
+import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
+import javax.inject.Inject
+import javax.inject.Singleton
 
-@AssistedFactory
-@ExperimentalEmbeddedPaymentElementApi
-internal fun interface EmbeddedConfirmationStateHolderFactory {
-    fun create(coroutineScope: CoroutineScope): EmbeddedConfirmationStateHolder
-}
-
-@ExperimentalEmbeddedPaymentElementApi
-internal class EmbeddedConfirmationStateHolder @AssistedInject constructor(
+@Singleton
+internal class EmbeddedConfirmationStateHolder @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val selectionHolder: EmbeddedSelectionHolder,
-    @Assisted coroutineScope: CoroutineScope,
+    @ViewModelScope private val coroutineScope: CoroutineScope,
 ) {
     var state: State?
         get() = savedStateHandle[CONFIRMATION_STATE_KEY]
