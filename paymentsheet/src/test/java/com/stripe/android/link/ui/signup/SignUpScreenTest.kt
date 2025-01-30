@@ -100,6 +100,7 @@ internal class SignUpScreenTest {
     @Test
     fun `field displayed, sign up enabled and error displayed when controllers are filled and sign up fails`() =
         runTest(dispatcher) {
+            val error = Throwable("oops")
             val linkAuth = FakeLinkAuth()
             val viewModel = viewModel(linkAuth = linkAuth)
 
@@ -107,11 +108,31 @@ internal class SignUpScreenTest {
                 SignUpScreen(viewModel)
             }
 
-            linkAuth.signupResult = LinkAuthResult.Error(Throwable("oops"))
+            linkAuth.signupResult = LinkAuthResult.Error(error)
             viewModel.onSignUpClick()
 
             dispatcher.scheduler.advanceTimeBy(1001)
-            onErrorSection().assertExists().assert(hasAnyChild(hasText("oops")))
+            onErrorSection().assertExists().assert(hasAnyChild(hasText("Something went wrong")))
+        }
+
+    @Test
+    fun `error is displayed on lookup failure after email entry`() =
+        runTest(dispatcher) {
+            val error = Throwable("oops")
+            val linkAuth = FakeLinkAuth()
+            val viewModel = viewModel(linkAuth = linkAuth)
+
+            composeTestRule.setContent {
+                SignUpScreen(viewModel)
+            }
+
+            linkAuth.lookupResult = LinkAuthResult.Error(error)
+
+            viewModel.emailController.onRawValueChange("a@b.com")
+            composeTestRule.waitForIdle()
+
+            dispatcher.scheduler.advanceTimeBy(1001)
+            onErrorSection().assertExists() // .assert(hasAnyChild(hasText("Something went wrong")))
         }
 
     private fun viewModel(

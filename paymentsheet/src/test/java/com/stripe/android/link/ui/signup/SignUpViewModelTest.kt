@@ -1,9 +1,9 @@
 package com.stripe.android.link.ui.signup
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
 import com.stripe.android.core.model.CountryCode
-import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.TestFactory
@@ -146,6 +146,7 @@ internal class SignUpViewModelTest {
         advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds)
 
         assertThat(viewModel.state.value.signUpState).isEqualTo(SignUpState.InputtingRemainingFields)
+        assertThat(viewModel.state.value.errorMessage).isEqualTo(error.stripeErrorMessage())
     }
 
     @Test
@@ -208,7 +209,7 @@ internal class SignUpViewModelTest {
 
         viewModel.performValidSignup()
 
-        assertThat(viewModel.contentState.errorMessage).isEqualTo(errorMessage.resolvableString)
+        assertThat(viewModel.contentState.errorMessage).isEqualTo(exception.stripeErrorMessage())
         assertThat(logger.errorLogs).isEqualTo(listOf("SignUpViewModel Error: " to exception))
     }
 

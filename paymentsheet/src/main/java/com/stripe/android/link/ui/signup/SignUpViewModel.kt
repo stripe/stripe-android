@@ -5,9 +5,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
 import com.stripe.android.core.model.CountryCode
-import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkEventException
 import com.stripe.android.link.LinkScreen
@@ -17,8 +17,6 @@ import com.stripe.android.link.account.LinkAuthResult
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.LinkAccount
-import com.stripe.android.link.ui.ErrorMessage
-import com.stripe.android.link.ui.getErrorMessage
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.model.EmailSource
 import com.stripe.android.model.PaymentIntent
@@ -142,6 +140,7 @@ internal class SignUpViewModel @Inject constructor(
             }
             is LinkAuthResult.Error -> {
                 updateSignUpState(SignUpState.InputtingRemainingFields)
+                onError(lookupResult.throwable)
             }
             is LinkAuthResult.Success -> {
                 onAccountFetched(lookupResult.account)
@@ -199,14 +198,7 @@ internal class SignUpViewModel @Inject constructor(
         logger.error("SignUpViewModel Error: ", error)
         updateState {
             it.copy(
-                errorMessage = when (val errorMessage = error.getErrorMessage()) {
-                    is ErrorMessage.FromResources -> {
-                        errorMessage.stringResId.resolvableString
-                    }
-                    is ErrorMessage.Raw -> {
-                        errorMessage.errorMessage.resolvableString
-                    }
-                }
+                errorMessage = error.stripeErrorMessage()
             )
         }
     }
