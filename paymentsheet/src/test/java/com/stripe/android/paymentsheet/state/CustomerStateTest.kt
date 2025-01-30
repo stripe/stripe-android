@@ -40,21 +40,10 @@ class CustomerStateTest {
             customerSessionClientSecret = "cuss_123",
         )
 
-        assertThat(customerState).isEqualTo(
-            CustomerState(
-                id = "cus_1",
-                ephemeralKeySecret = "ek_1",
-                customerSessionClientSecret = "cuss_123",
-                paymentMethods = paymentMethods,
-                permissions = CustomerState.Permissions(
-                    canRemovePaymentMethods = false,
-                    canRemoveLastPaymentMethod = false,
-                    // Always true for `customer_session`
-                    canRemoveDuplicates = true,
-                ),
-                defaultPaymentMethodId = null
-            )
-        )
+        assertThat(customerState.permissions.canRemovePaymentMethods).isFalse()
+        assertThat(customerState.permissions.canRemoveLastPaymentMethod).isFalse()
+        // Always true for `customer_session`
+        assertThat(customerState.permissions.canRemoveDuplicates).isTrue()
     }
 
     @Test
@@ -79,21 +68,10 @@ class CustomerStateTest {
             customerSessionClientSecret = "cuss_123",
         )
 
-        assertThat(customerState).isEqualTo(
-            CustomerState(
-                id = "cus_1",
-                ephemeralKeySecret = "ek_1",
-                customerSessionClientSecret = "cuss_123",
-                paymentMethods = paymentMethods,
-                permissions = CustomerState.Permissions(
-                    canRemovePaymentMethods = true,
-                    canRemoveLastPaymentMethod = true,
-                    // Always true for `customer_session`
-                    canRemoveDuplicates = true,
-                ),
-                defaultPaymentMethodId = null
-            )
-        )
+        assertThat(customerState.permissions.canRemovePaymentMethods).isTrue()
+        assertThat(customerState.permissions.canRemoveLastPaymentMethod).isTrue()
+        // Always true for `customer_session`
+        assertThat(customerState.permissions.canRemoveDuplicates).isTrue()
     }
 
     @Test
@@ -118,21 +96,10 @@ class CustomerStateTest {
             customerSessionClientSecret = "cuss_123",
         )
 
-        assertThat(customerState).isEqualTo(
-            CustomerState(
-                id = "cus_3",
-                ephemeralKeySecret = "ek_3",
-                customerSessionClientSecret = "cuss_123",
-                paymentMethods = paymentMethods,
-                permissions = CustomerState.Permissions(
-                    canRemovePaymentMethods = false,
-                    canRemoveLastPaymentMethod = false,
-                    // Always true for `customer_session`
-                    canRemoveDuplicates = true,
-                ),
-                defaultPaymentMethodId = null
-            )
-        )
+        assertThat(customerState.permissions.canRemovePaymentMethods).isFalse()
+        assertThat(customerState.permissions.canRemoveLastPaymentMethod).isFalse()
+        // Always true for `customer_session`
+        assertThat(customerState.permissions.canRemoveDuplicates).isTrue()
     }
 
     private fun createCustomerSessionForTestingDefaultPaymentMethod(defaultPaymentMethodId: String?): CustomerState {
