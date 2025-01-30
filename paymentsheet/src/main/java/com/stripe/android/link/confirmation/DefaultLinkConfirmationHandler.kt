@@ -142,7 +142,9 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
                     .build(),
                 optionsParams = PaymentMethodOptionsParams.Card(
                     setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession,
-                    cvc = cvc
+                    cvc = cvc?.takeIf {
+                        configuration.passthroughModeEnabled.not()
+                    }
                 )
             ),
             appearance = PaymentSheet.Appearance(),
