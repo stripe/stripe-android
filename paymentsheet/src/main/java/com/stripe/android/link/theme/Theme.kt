@@ -29,9 +29,7 @@ internal fun DefaultLinkTheme(
             typography = Typography,
             shapes = MaterialTheme.shapes,
         ) {
-            Surface(
-                color = MaterialTheme.colors.background
-            ) {
+            Surface {
                 content()
             }
         }
