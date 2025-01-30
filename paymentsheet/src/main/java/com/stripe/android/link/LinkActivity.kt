@@ -7,38 +7,22 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResultLauncher
-import androidx.annotation.VisibleForTesting
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ModalBottomSheetValue
-import androidx.compose.material.rememberModalBottomSheetState
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.core.os.bundleOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import com.stripe.android.core.Logger
-import com.stripe.android.link.ui.BottomSheetContent
-import com.stripe.android.link.ui.LinkContent
+import com.stripe.android.link.ui.FullScreenContent
 import com.stripe.android.paymentsheet.BuildConfig
-import com.stripe.android.paymentsheet.utils.EventReporterProvider
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.launch
 
 internal class LinkActivity : ComponentActivity() {
     internal var viewModel: LinkActivityViewModel? = null
 
-    @VisibleForTesting
-    internal lateinit var navController: NavHostController
     private var webLauncher: ActivityResultLauncher<LinkActivityContract.Args>? = null
 
-    @OptIn(ExperimentalMaterialApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -60,46 +44,22 @@ internal class LinkActivity : ComponentActivity() {
             dismissWithResult(result)
         }
 
+        vm.launchWebFlow = ::launchWebFlow
+        vm.dismissWithResult = ::dismissWithResult
+        lifecycle.addObserver(vm)
+
         setContent {
-            var bottomSheetContent by remember { mutableStateOf<BottomSheetContent?>(null) }
-            val sheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
-            val coroutineScope = rememberCoroutineScope()
-            val appBarState by vm.linkAppBarState.collectAsState()
+            val screenState by vm.linkScreenState.collectAsState()
 
-            if (bottomSheetContent != null) {
-                DisposableEffect(bottomSheetContent) {
-                    coroutineScope.launch { sheetState.show() }
-                    onDispose {
-                        coroutineScope.launch { sheetState.hide() }
-                    }
+            when (screenState) {
+                ScreenState.FullScreen -> {
+                    FullScreenContent(
+                        viewModel = vm,
+                        onBackPressed = onBackPressedDispatcher::onBackPressed
+                    )
                 }
-            }
-            navController = rememberNavController()
-
-            LaunchedEffect(Unit) {
-                viewModel?.let {
-                    it.navController = navController
-                    it.dismissWithResult = ::dismissWithResult
-                    it.launchWebFlow = ::launchWebFlow
-                    lifecycle.addObserver(it)
-                }
-            }
-
-            EventReporterProvider(
-                eventReporter = vm.eventReporter
-            ) {
-                LinkContent(
-                    viewModel = vm,
-                    navController = navController,
-                    appBarState = appBarState,
-                    sheetState = sheetState,
-                    bottomSheetContent = bottomSheetContent,
-                    onUpdateSheetContent = {
-                        bottomSheetContent = it
-                    },
-                    onBackPressed = onBackPressedDispatcher::onBackPressed,
-                    moveToWeb = vm::moveToWeb
-                )
+                ScreenState.Loading -> Unit
+                is ScreenState.VerificationDialog -> Unit
             }
         }
     }
