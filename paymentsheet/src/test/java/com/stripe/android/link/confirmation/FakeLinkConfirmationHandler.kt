@@ -1,5 +1,6 @@
 package com.stripe.android.link.confirmation
 
+import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.model.ConsumerPaymentDetails
 
@@ -20,6 +21,14 @@ internal class FakeLinkConfirmationHandler : LinkConfirmationHandler {
             )
         )
         return confirmResult
+    }
+
+    override suspend fun confirm(
+        paymentDetails: LinkPaymentDetails,
+        linkAccount: LinkAccount,
+        cvc: String?
+    ): Result {
+        TODO("Not yet implemented")
     }
 
     data class Call(

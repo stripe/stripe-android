@@ -116,6 +116,11 @@ internal object TestFactory {
         originalParams = mock()
     )
 
+    val LINK_SAVED_PAYMENT_DETAILS = LinkPaymentDetails.Saved(
+        paymentDetails = CONSUMER_PAYMENT_DETAILS_CARD,
+        paymentMethodCreateParams = PAYMENT_METHOD_CREATE_PARAMS,
+    )
+
     val LINK_ACCOUNT = LinkAccount(CONSUMER_SESSION)
 
     val CONSUMER_PAYMENT_DETAILS: ConsumerPaymentDetails = ConsumerPaymentDetails(

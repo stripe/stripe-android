@@ -136,8 +136,7 @@ internal open class FakeLinkAccountManager : LinkAccountManager {
     }
 
     override suspend fun createCardPaymentDetails(
-        paymentMethodCreateParams: PaymentMethodCreateParams,
-        shouldShareCardPaymentDetails: Boolean
+        paymentMethodCreateParams: PaymentMethodCreateParams
     ): Result<LinkPaymentDetails> {
         return createCardPaymentDetailsResult
     }
