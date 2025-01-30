@@ -20,7 +20,6 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTextReplacement
-import androidx.test.espresso.Espresso
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import com.google.common.truth.Truth.assertThat
@@ -36,9 +35,6 @@ internal class PaymentSheetPage(
     private val composeTestRule: ComposeTestRule,
 ) {
     fun fillOutCardDetails(fillOutZipCode: Boolean = true) {
-        Espresso.onIdle()
-        composeTestRule.waitForIdle()
-
         waitForText("Card number")
 
         replaceText("Card number", "4242424242424242")
@@ -51,34 +47,22 @@ internal class PaymentSheetPage(
     }
 
     fun clearCard() {
-        Espresso.onIdle()
-        composeTestRule.waitForIdle()
-
         waitForText("4242 4242 4242 4242")
 
         replaceText("4242 4242 4242 4242", "")
     }
 
     fun fillCard() {
-        Espresso.onIdle()
-        composeTestRule.waitForIdle()
-
         waitForText("Card number")
         replaceText("Card number", "4242424242424242")
     }
 
     fun fillOutLink() {
-        Espresso.onIdle()
-        composeTestRule.waitForIdle()
-
         waitForText("Save your info for secure 1-click checkout with Link")
         clickViewWithText("Save your info for secure 1-click checkout with Link")
     }
 
     fun clickEditButton() {
-        Espresso.onIdle()
-        composeTestRule.waitForIdle()
-
         waitForText("EDIT")
         composeTestRule
             .onNodeWithText("EDIT")
@@ -86,25 +70,16 @@ internal class PaymentSheetPage(
     }
 
     fun clickOnSaveForFutureUsage() {
-        Espresso.onIdle()
-        composeTestRule.waitForIdle()
-
         waitForTag(SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG)
         clickViewWithTag(SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG)
     }
 
     fun clickOnLinkCheckbox() {
-        Espresso.onIdle()
-        composeTestRule.waitForIdle()
-
         waitForText("Save your info for secure 1-click checkout with Link")
         clickViewWithText("Save your info for secure 1-click checkout with Link")
     }
 
     fun fillOutLinkEmail(optionalLabel: Boolean = false) {
-        Espresso.onIdle()
-        composeTestRule.waitForIdle()
-
         val label = if (optionalLabel) "Email (optional)" else "Email"
 
         waitForText(label)
@@ -112,34 +87,22 @@ internal class PaymentSheetPage(
     }
 
     fun selectPhoneNumberCountry(country: String) {
-        Espresso.onIdle()
-        composeTestRule.waitForIdle()
-
         waitForText("Phone number")
         composeTestRule.onNode(hasTestTag("DropDown:tiny")).performClick()
         composeTestRule.onNode(hasText(country, substring = true)).performClick()
     }
 
     fun fillOutLinkPhone(phoneNumber: String = "+12113526421") {
-        Espresso.onIdle()
-        composeTestRule.waitForIdle()
-
         waitForText("Phone number", true)
         replaceText("Phone number", phoneNumber, true)
     }
 
     fun fillOutLinkName() {
-        Espresso.onIdle()
-        composeTestRule.waitForIdle()
-
         waitForText("Full name")
         replaceText("Full name", "John Doe")
     }
 
     fun fillOutCardDetailsWithCardBrandChoice(fillOutZipCode: Boolean = true) {
-        Espresso.onIdle()
-        composeTestRule.waitForIdle()
-
         waitForText("Card number")
 
         replaceText("Card number", "4000002500001001")
@@ -224,9 +187,6 @@ internal class PaymentSheetPage(
     }
 
     fun addPaymentMethod() {
-        Espresso.onIdle()
-        composeTestRule.waitForIdle()
-
         waitForText("+ Add")
 
         composeTestRule.onNode(hasText("+ Add"))

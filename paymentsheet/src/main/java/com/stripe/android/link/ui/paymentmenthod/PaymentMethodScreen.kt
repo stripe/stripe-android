@@ -13,6 +13,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.theme.StripeThemeForLink
 import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.PrimaryButton
 import com.stripe.android.link.ui.ScrollableTopLevelColumn
@@ -52,13 +53,15 @@ internal fun PaymentMethodBody(
             style = MaterialTheme.typography.h2
         )
 
-        PaymentMethodForm(
-            uuid = uuid,
-            args = state.formArguments,
-            enabled = true,
-            onFormFieldValuesChanged = onFormFieldValuesChanged,
-            formElements = state.formElements,
-        )
+        StripeThemeForLink {
+            PaymentMethodForm(
+                uuid = uuid,
+                args = state.formArguments,
+                enabled = true,
+                onFormFieldValuesChanged = onFormFieldValuesChanged,
+                formElements = state.formElements,
+            )
+        }
 
         AnimatedVisibility(
             visible = state.errorMessage != null

@@ -14,21 +14,35 @@
     <ID>LongMethod:TransformGoogleToStripeAddressTest.kt$TransformGoogleToStripeAddressTest$@Test fun `test US address with sublocality`()</ID>
     <ID>LongMethod:TransformGoogleToStripeAddressTest.kt$TransformGoogleToStripeAddressTest$@Test fun `test US address without sublocality`()</ID>
     <ID>LongMethod:TransformGoogleToStripeAddressTest.kt$TransformGoogleToStripeAddressTest$@Test fun `test should not combine dependent locality - US`()</ID>
-    <ID>MagicNumber:CardNumberVisualTransformation.kt$CardNumberVisualTransformation$14</ID>
-    <ID>MagicNumber:CardNumberVisualTransformation.kt$CardNumberVisualTransformation$15</ID>
-    <ID>MagicNumber:CardNumberVisualTransformation.kt$CardNumberVisualTransformation$16</ID>
-    <ID>MagicNumber:CardNumberVisualTransformation.kt$CardNumberVisualTransformation$19</ID>
-    <ID>MagicNumber:CardNumberVisualTransformation.kt$CardNumberVisualTransformation$3</ID>
-    <ID>MagicNumber:CardNumberVisualTransformation.kt$CardNumberVisualTransformation$4</ID>
-    <ID>MagicNumber:CardNumberVisualTransformation.kt$CardNumberVisualTransformation$9</ID>
-    <ID>MagicNumber:CardNumberVisualTransformation.kt$CardNumberVisualTransformation.&lt;no name provided>$11</ID>
-    <ID>MagicNumber:CardNumberVisualTransformation.kt$CardNumberVisualTransformation.&lt;no name provided>$14</ID>
-    <ID>MagicNumber:CardNumberVisualTransformation.kt$CardNumberVisualTransformation.&lt;no name provided>$15</ID>
-    <ID>MagicNumber:CardNumberVisualTransformation.kt$CardNumberVisualTransformation.&lt;no name provided>$19</ID>
-    <ID>MagicNumber:CardNumberVisualTransformation.kt$CardNumberVisualTransformation.&lt;no name provided>$3</ID>
-    <ID>MagicNumber:CardNumberVisualTransformation.kt$CardNumberVisualTransformation.&lt;no name provided>$4</ID>
-    <ID>MagicNumber:CardNumberVisualTransformation.kt$CardNumberVisualTransformation.&lt;no name provided>$7</ID>
-    <ID>MagicNumber:CardNumberVisualTransformation.kt$CardNumberVisualTransformation.&lt;no name provided>$9</ID>
+    <ID>MagicNumber:CardNumberConfig.kt$CardNumberConfig$14</ID>
+    <ID>MagicNumber:CardNumberConfig.kt$CardNumberConfig$15</ID>
+    <ID>MagicNumber:CardNumberConfig.kt$CardNumberConfig$19</ID>
+    <ID>MagicNumber:CardNumberVisualTransformations.kt$CardNumberVisualTransformations.Default$15</ID>
+    <ID>MagicNumber:CardNumberVisualTransformations.kt$CardNumberVisualTransformations.Default$3</ID>
+    <ID>MagicNumber:CardNumberVisualTransformations.kt$CardNumberVisualTransformations.Default$4</ID>
+    <ID>MagicNumber:CardNumberVisualTransformations.kt$CardNumberVisualTransformations.Default.&lt;no name provided>$11</ID>
+    <ID>MagicNumber:CardNumberVisualTransformations.kt$CardNumberVisualTransformations.Default.&lt;no name provided>$14</ID>
+    <ID>MagicNumber:CardNumberVisualTransformations.kt$CardNumberVisualTransformations.Default.&lt;no name provided>$3</ID>
+    <ID>MagicNumber:CardNumberVisualTransformations.kt$CardNumberVisualTransformations.Default.&lt;no name provided>$4</ID>
+    <ID>MagicNumber:CardNumberVisualTransformations.kt$CardNumberVisualTransformations.Default.&lt;no name provided>$7</ID>
+    <ID>MagicNumber:CardNumberVisualTransformations.kt$CardNumberVisualTransformations.Default.&lt;no name provided>$9</ID>
+    <ID>MagicNumber:CardNumberVisualTransformations.kt$CardNumberVisualTransformations.FourteenAndFifteenPanLength$3</ID>
+    <ID>MagicNumber:CardNumberVisualTransformations.kt$CardNumberVisualTransformations.FourteenAndFifteenPanLength$9</ID>
+    <ID>MagicNumber:CardNumberVisualTransformations.kt$CardNumberVisualTransformations.FourteenAndFifteenPanLength.&lt;no name provided>$11</ID>
+    <ID>MagicNumber:CardNumberVisualTransformations.kt$CardNumberVisualTransformations.FourteenAndFifteenPanLength.&lt;no name provided>$3</ID>
+    <ID>MagicNumber:CardNumberVisualTransformations.kt$CardNumberVisualTransformations.FourteenAndFifteenPanLength.&lt;no name provided>$4</ID>
+    <ID>MagicNumber:CardNumberVisualTransformations.kt$CardNumberVisualTransformations.FourteenAndFifteenPanLength.&lt;no name provided>$9</ID>
+    <ID>MagicNumber:CardNumberVisualTransformations.kt$CardNumberVisualTransformations.NineteenPanLength$19</ID>
+    <ID>MagicNumber:CardNumberVisualTransformations.kt$CardNumberVisualTransformations.NineteenPanLength$3</ID>
+    <ID>MagicNumber:CardNumberVisualTransformations.kt$CardNumberVisualTransformations.NineteenPanLength$4</ID>
+    <ID>MagicNumber:CardNumberVisualTransformations.kt$CardNumberVisualTransformations.NineteenPanLength.&lt;no name provided>$11</ID>
+    <ID>MagicNumber:CardNumberVisualTransformations.kt$CardNumberVisualTransformations.NineteenPanLength.&lt;no name provided>$14</ID>
+    <ID>MagicNumber:CardNumberVisualTransformations.kt$CardNumberVisualTransformations.NineteenPanLength.&lt;no name provided>$15</ID>
+    <ID>MagicNumber:CardNumberVisualTransformations.kt$CardNumberVisualTransformations.NineteenPanLength.&lt;no name provided>$19</ID>
+    <ID>MagicNumber:CardNumberVisualTransformations.kt$CardNumberVisualTransformations.NineteenPanLength.&lt;no name provided>$3</ID>
+    <ID>MagicNumber:CardNumberVisualTransformations.kt$CardNumberVisualTransformations.NineteenPanLength.&lt;no name provided>$4</ID>
+    <ID>MagicNumber:CardNumberVisualTransformations.kt$CardNumberVisualTransformations.NineteenPanLength.&lt;no name provided>$7</ID>
+    <ID>MagicNumber:CardNumberVisualTransformations.kt$CardNumberVisualTransformations.NineteenPanLength.&lt;no name provided>$9</ID>
     <ID>MagicNumber:IbanConfig.kt$IbanConfig$10</ID>
     <ID>MagicNumber:IbanConfig.kt$IbanConfig$4</ID>
     <ID>MagicNumber:Menu.kt$0.8f</ID>

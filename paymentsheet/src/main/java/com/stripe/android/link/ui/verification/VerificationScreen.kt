@@ -32,6 +32,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.stripe.android.link.theme.StripeThemeForLink
 import com.stripe.android.link.theme.linkColors
 import com.stripe.android.link.theme.linkShapes
 import com.stripe.android.link.ui.ErrorText
@@ -115,15 +116,17 @@ internal fun VerificationBody(
             color = MaterialTheme.colors.onSecondary
         )
 
-        OTPElementUI(
-            enabled = !state.isProcessing,
-            element = otpElement,
-            modifier = Modifier
-                .testTag(VERIFICATION_OTP_TAG)
-                .padding(vertical = 10.dp),
-            colors = MaterialTheme.linkColors.otpElementColors,
-            focusRequester = focusRequester
-        )
+        StripeThemeForLink {
+            OTPElementUI(
+                enabled = !state.isProcessing,
+                element = otpElement,
+                modifier = Modifier
+                    .testTag(VERIFICATION_OTP_TAG)
+                    .padding(vertical = 10.dp),
+                colors = MaterialTheme.linkColors.otpElementColors,
+                focusRequester = focusRequester
+            )
+        }
 
         ChangeEmailRow(
             email = state.email,

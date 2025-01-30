@@ -319,7 +319,7 @@ internal val PaymentSelection.drawableResourceId: Int
 
 private fun getSavedIcon(selection: PaymentSelection.Saved): Int {
     return when (val resourceId = selection.paymentMethod.getSavedPaymentMethodIcon()) {
-        R.drawable.stripe_ic_paymentsheet_card_unknown -> {
+        R.drawable.stripe_ic_paymentsheet_card_unknown_ref -> {
             when (selection.walletType) {
                 PaymentSelection.Saved.WalletType.Link -> getLinkIcon()
                 PaymentSelection.Saved.WalletType.GooglePay -> R.drawable.stripe_google_pay_mark

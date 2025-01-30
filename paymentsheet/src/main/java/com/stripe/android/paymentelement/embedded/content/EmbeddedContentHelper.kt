@@ -1,11 +1,14 @@
-package com.stripe.android.paymentelement.embedded
+package com.stripe.android.paymentelement.embedded.content
 
 import android.os.Parcelable
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
+import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
+import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
@@ -19,9 +22,6 @@ import com.stripe.android.paymentsheet.verticalmode.DefaultPaymentMethodVertical
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodIncentiveInteractor
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor
 import com.stripe.android.uicore.utils.stateFlowOf
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -29,6 +29,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
 @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
@@ -48,18 +50,10 @@ internal interface EmbeddedContentHelper {
     fun setIntentConfiguration(intentConfiguration: PaymentSheet.IntentConfiguration)
 }
 
-internal fun interface EmbeddedContentHelperFactory {
-    fun create(coroutineScope: CoroutineScope): EmbeddedContentHelper
-}
-
-@AssistedFactory
-internal interface DefaultEmbeddedContentHelperFactory : EmbeddedContentHelperFactory {
-    override fun create(coroutineScope: CoroutineScope): DefaultEmbeddedContentHelper
-}
-
 @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
-internal class DefaultEmbeddedContentHelper @AssistedInject constructor(
-    @Assisted private val coroutineScope: CoroutineScope,
+@Singleton
+internal class DefaultEmbeddedContentHelper @Inject constructor(
+    @ViewModelScope private val coroutineScope: CoroutineScope,
     private val savedStateHandle: SavedStateHandle,
     private val eventReporter: EventReporter,
     @IOContext private val workContext: CoroutineContext,

@@ -1,4 +1,4 @@
-package com.stripe.android.paymentelement.embedded
+package com.stripe.android.paymentelement.embedded.content
 
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.Turbine
@@ -8,13 +8,15 @@ import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
-import com.stripe.android.paymentelement.embedded.DefaultEmbeddedConfigurationHandler.ConfigurationCache
+import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedConfigurationHandler.ConfigurationCache
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.test.TestScope
@@ -37,6 +39,19 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
         assertThat(result.exceptionOrNull()?.message).isEqualTo(
             "When a Configuration is passed to PaymentSheet, the Merchant display name cannot be an empty string."
         )
+    }
+
+    @Test
+    fun `configuration fails when sheetIsOpen`() = runScenario {
+        sheetStateHolder.sheetIsOpen = true
+        val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
+        val result = handler.configure(
+            intentConfiguration = PaymentSheet.IntentConfiguration(
+                mode = PaymentSheet.IntentConfiguration.Mode.Setup(currency = "USD"),
+            ),
+            configuration = configuration,
+        )
+        assertThat(result.exceptionOrNull()?.message).isEqualTo("Configuring while a sheet is open is not supported.")
     }
 
     @Test
@@ -227,16 +242,53 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
         assertThat(first.await()).isEqualTo(second.await())
     }
 
+    @Test
+    fun `parallel calls to configure with different arguments results in different results`() = runScenario {
+        val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
+
+        val first = testScope.backgroundScope.async(Dispatchers.IO) {
+            handler.configure(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(amount = 5000, currency = "USD"),
+                ),
+                configuration = configuration,
+            ).getOrThrow()
+        }
+
+        loader.loadCalledTurbine.awaitItem()
+
+        val second = testScope.backgroundScope.async(Dispatchers.IO) {
+            handler.configure(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Setup(currency = "USD"),
+                ),
+                configuration = configuration,
+            ).getOrThrow()
+        }
+
+        loader.loadCalledTurbine.awaitItem()
+        val expectedResult = loader.createSuccess(
+            configuration.asCommonConfiguration(),
+            stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD
+        )
+        loader.emit(expectedResult)
+
+        assertThat(first.isCompleted).isFalse()
+        assertThat(second.await()).isEqualTo(expectedResult.getOrThrow())
+    }
+
     private fun runScenario(block: suspend Scenario.() -> Unit) {
         runTest {
             val loader = FakePaymentElementLoader()
             val savedStateHandle = SavedStateHandle()
-            val handler = DefaultEmbeddedConfigurationHandler(loader, savedStateHandle)
+            val sheetStateHolder = SheetStateHolder(savedStateHandle)
+            val handler = DefaultEmbeddedConfigurationHandler(loader, savedStateHandle, sheetStateHolder)
             Scenario(
                 loader = loader,
                 savedStateHandle = savedStateHandle,
                 handler = handler,
-                testScope = this
+                testScope = this,
+                sheetStateHolder = sheetStateHolder,
             ).apply {
                 block()
             }
@@ -249,17 +301,19 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
         val savedStateHandle: SavedStateHandle,
         val handler: DefaultEmbeddedConfigurationHandler,
         val testScope: TestScope,
+        val sheetStateHolder: SheetStateHolder,
     )
 
     private class FakePaymentElementLoader : PaymentElementLoader {
-        private val turbine: Turbine<Result<PaymentElementLoader.State>> = Turbine()
+        private val resultTurbine: Turbine<Result<PaymentElementLoader.State>> = Turbine()
+        val loadCalledTurbine: Turbine<PaymentElementLoader.InitializationMode> = Turbine()
 
         fun emit(result: Result<PaymentElementLoader.State>) {
-            turbine.add(result)
+            resultTurbine.add(result)
         }
 
         fun assertConsumed() {
-            turbine.ensureAllEventsConsumed()
+            resultTurbine.ensureAllEventsConsumed()
         }
 
         fun createSuccess(
@@ -292,7 +346,8 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
             isReloadingAfterProcessDeath: Boolean,
             initializedViaCompose: Boolean,
         ): Result<PaymentElementLoader.State> {
-            return turbine.awaitItem()
+            loadCalledTurbine.add(initializationMode)
+            return resultTurbine.awaitItem()
         }
     }
 }

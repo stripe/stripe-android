@@ -12,6 +12,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
+import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -30,8 +31,9 @@ class AddressTextFieldController(
     override val trailingIcon: StateFlow<TextFieldIcon?> = config.trailingIcon
     override val capitalization: KeyboardCapitalization = config.capitalization
     override val keyboardType: KeyboardType = config.keyboard
-    override val visualTransformation =
-        config.visualTransformation ?: VisualTransformation.None
+    override val visualTransformation = stateFlowOf(
+        value = config.visualTransformation ?: VisualTransformation.None,
+    )
     override val showOptionalLabel: Boolean = false
 
     override val label = MutableStateFlow(config.label)

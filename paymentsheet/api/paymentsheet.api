@@ -677,35 +677,35 @@ public final class com/stripe/android/paymentelement/confirmation/linkinline/Lin
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/paymentelement/embedded/DefaultEmbeddedConfigurationHandler$Arguments$Creator : android/os/Parcelable$Creator {
+public final class com/stripe/android/paymentelement/embedded/content/DefaultEmbeddedConfigurationHandler$Arguments$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentelement/embedded/DefaultEmbeddedConfigurationHandler$Arguments;
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentelement/embedded/content/DefaultEmbeddedConfigurationHandler$Arguments;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/paymentelement/embedded/DefaultEmbeddedConfigurationHandler$Arguments;
+	public final fun newArray (I)[Lcom/stripe/android/paymentelement/embedded/content/DefaultEmbeddedConfigurationHandler$Arguments;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/paymentelement/embedded/DefaultEmbeddedConfigurationHandler$ConfigurationCache$Creator : android/os/Parcelable$Creator {
+public final class com/stripe/android/paymentelement/embedded/content/DefaultEmbeddedConfigurationHandler$ConfigurationCache$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentelement/embedded/DefaultEmbeddedConfigurationHandler$ConfigurationCache;
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentelement/embedded/content/DefaultEmbeddedConfigurationHandler$ConfigurationCache;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/paymentelement/embedded/DefaultEmbeddedConfigurationHandler$ConfigurationCache;
+	public final fun newArray (I)[Lcom/stripe/android/paymentelement/embedded/content/DefaultEmbeddedConfigurationHandler$ConfigurationCache;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/paymentelement/embedded/DefaultEmbeddedContentHelper$State$Creator : android/os/Parcelable$Creator {
+public final class com/stripe/android/paymentelement/embedded/content/DefaultEmbeddedContentHelper$State$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentelement/embedded/DefaultEmbeddedContentHelper$State;
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentelement/embedded/content/DefaultEmbeddedContentHelper$State;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/paymentelement/embedded/DefaultEmbeddedContentHelper$State;
+	public final fun newArray (I)[Lcom/stripe/android/paymentelement/embedded/content/DefaultEmbeddedContentHelper$State;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/paymentelement/embedded/EmbeddedConfirmationStateHolder$State$Creator : android/os/Parcelable$Creator {
+public final class com/stripe/android/paymentelement/embedded/content/EmbeddedConfirmationStateHolder$State$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentelement/embedded/EmbeddedConfirmationStateHolder$State;
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentelement/embedded/content/EmbeddedConfirmationStateHolder$State;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/paymentelement/embedded/EmbeddedConfirmationStateHolder$State;
+	public final fun newArray (I)[Lcom/stripe/android/paymentelement/embedded/content/EmbeddedConfirmationStateHolder$State;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 

@@ -1,4 +1,4 @@
-package com.stripe.android.paymentelement.embedded
+package com.stripe.android.paymentelement.embedded.content
 
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
