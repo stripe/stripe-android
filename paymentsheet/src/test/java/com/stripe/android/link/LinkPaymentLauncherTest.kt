@@ -91,7 +91,13 @@ internal class LinkPaymentLauncherTest {
 
             val launchCall = awaitLaunchCall()
 
-            assertThat(launchCall).isEqualTo(LinkActivityContract.Args(TestFactory.LINK_CONFIGURATION))
+            assertThat(launchCall)
+                .isEqualTo(
+                    LinkActivityContract.Args(
+                        configuration = TestFactory.LINK_CONFIGURATION,
+                        startWithVerificationDialog = false
+                    )
+                )
 
             awaitNextRegisteredLauncher()
         }

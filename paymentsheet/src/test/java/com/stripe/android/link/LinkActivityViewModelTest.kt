@@ -164,7 +164,8 @@ internal class LinkActivityViewModelTest {
         val mockArgs = NativeLinkArgs(
             configuration = mock(),
             publishableKey = "",
-            stripeAccountId = null
+            stripeAccountId = null,
+            startWithVerificationDialog = false
         )
         val savedStateHandle = SavedStateHandle()
         val factory = LinkActivityViewModel.factory(savedStateHandle)
@@ -559,7 +560,7 @@ internal class LinkActivityViewModelTest {
         val vm = createViewModel(
             linkAccountManager = linkAccountManager,
             linkAuth = linkAuth,
-            eagerLaunch = true
+            startWithVerificationDialog = true
         )
         vm.navController = navController
         linkAccountManager.setAccountStatus(AccountStatus.NeedsVerification)
@@ -584,7 +585,7 @@ internal class LinkActivityViewModelTest {
         val vm = createViewModel(
             linkAccountManager = linkAccountManager,
             linkAuth = linkAuth,
-            eagerLaunch = true
+            startWithVerificationDialog = true
         )
         vm.navController = navController
         linkAccountManager.setAccountStatus(AccountStatus.NeedsVerification)
@@ -611,7 +612,7 @@ internal class LinkActivityViewModelTest {
         val vm = createViewModel(
             linkAccountManager = linkAccountManager,
             linkAuth = linkAuth,
-            eagerLaunch = true,
+            startWithVerificationDialog = true,
             dismissWithResult = {
                 activityResult = it
             }
@@ -681,7 +682,7 @@ internal class LinkActivityViewModelTest {
         linkGate: LinkGate = FakeLinkGate(),
         errorReporter: ErrorReporter = FakeErrorReporter(),
         linkAuth: LinkAuth = FakeLinkAuth(),
-        eagerLaunch: Boolean = false,
+        startWithVerificationDialog: Boolean = false,
         dismissWithResult: (LinkActivityResult) -> Unit = {},
         launchWeb: (LinkConfiguration) -> Unit = {}
     ): LinkActivityViewModel {
@@ -695,7 +696,7 @@ internal class LinkActivityViewModelTest {
             errorReporter = errorReporter,
             linkAuth = linkAuth,
             linkConfiguration = TestFactory.LINK_CONFIGURATION,
-            eagerLaunch = eagerLaunch
+            startWithVerificationDialog = startWithVerificationDialog
         ).apply {
             this.navController = navController
             this.dismissWithResult = dismissWithResult

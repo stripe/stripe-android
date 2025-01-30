@@ -121,7 +121,12 @@ internal class LinkActivity : ComponentActivity() {
     }
 
     fun launchWebFlow(configuration: LinkConfiguration) {
-        webLauncher?.launch(LinkActivityContract.Args(configuration))
+        webLauncher?.launch(
+            LinkActivityContract.Args(
+                configuration = configuration,
+                startWithVerificationDialog = false
+            )
+        )
     }
 
     companion object {

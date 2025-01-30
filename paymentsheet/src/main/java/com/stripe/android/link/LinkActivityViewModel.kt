@@ -45,7 +45,7 @@ internal class LinkActivityViewModel @Inject constructor(
     private val errorReporter: ErrorReporter,
     private val linkAuth: LinkAuth,
     private val linkConfiguration: LinkConfiguration,
-    private val eagerLaunch: Boolean = false
+    private val startWithVerificationDialog: Boolean
 ) : ViewModel(), DefaultLifecycleObserver {
     val confirmationHandler = confirmationHandlerFactory.create(viewModelScope)
     private val _linkAppBarState = MutableStateFlow(
@@ -182,18 +182,18 @@ internal class LinkActivityViewModel @Inject constructor(
         val linkAccount = linkAccountManager.linkAccount.value
         val accountStatus = linkAccountManager.accountStatus.first()
         when (accountStatus) {
-            AccountStatus.Verified -> {
+            AccountStatus.Verified,
+            AccountStatus.SignedOut,
+            AccountStatus.Error -> {
                 _linkScreenState.value = ScreenState.FullScreen
             }
-            AccountStatus.NeedsVerification, AccountStatus.VerificationStarted -> {
-                if (linkAccount != null && eagerLaunch) {
+            AccountStatus.NeedsVerification,
+            AccountStatus.VerificationStarted -> {
+                if (linkAccount != null && startWithVerificationDialog) {
                     _linkScreenState.value = ScreenState.VerificationDialog(linkAccount)
                 } else {
                     _linkScreenState.value = ScreenState.FullScreen
                 }
-            }
-            AccountStatus.SignedOut, AccountStatus.Error -> {
-                _linkScreenState.value = ScreenState.FullScreen
             }
         }
     }
@@ -241,6 +241,7 @@ internal class LinkActivityViewModel @Inject constructor(
                     .savedStateHandle(handle)
                     .context(app)
                     .application(app)
+                    .startWithVerificationDialog(args.startWithVerificationDialog)
                     .build()
                     .viewModel
             }

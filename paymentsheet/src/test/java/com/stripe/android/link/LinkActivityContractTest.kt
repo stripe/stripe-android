@@ -19,7 +19,10 @@ import org.robolectric.RobolectricTestRunner
 class LinkActivityContractTest {
 
     private val context: Context = ApplicationProvider.getApplicationContext()
-    private val args = LinkActivityContract.Args(TestFactory.LINK_CONFIGURATION)
+    private val args = LinkActivityContract.Args(
+        configuration = TestFactory.LINK_CONFIGURATION,
+        startWithVerificationDialog = false
+    )
 
     @Test
     fun `creates intent with WebLinkActivityContract when native link disabled`() {
