@@ -35,7 +35,8 @@ class NativeLinkActivityContractTest {
         val contract = NativeLinkActivityContract()
         val args = LinkActivityContract.Args(
             configuration = TestFactory.LINK_CONFIGURATION,
-            startWithVerificationDialog = false
+            startWithVerificationDialog = false,
+            linkAccount = TestFactory.LINK_ACCOUNT
         )
 
         val intent = contract.createIntent(ApplicationProvider.getApplicationContext(), args)
@@ -50,7 +51,8 @@ class NativeLinkActivityContractTest {
                 configuration = TestFactory.LINK_CONFIGURATION,
                 publishableKey = "pk_test_abcdefg",
                 stripeAccountId = null,
-                startWithVerificationDialog = false
+                startWithVerificationDialog = false,
+                linkAccount = TestFactory.LINK_ACCOUNT
             )
         )
     }
@@ -80,7 +82,12 @@ class NativeLinkActivityContractTest {
             intent = Intent()
         )
 
-        assertThat(result).isEqualTo(LinkActivityResult.Canceled())
+        assertThat(result)
+            .isEqualTo(
+                LinkActivityResult.Canceled(
+                    linkAccountUpdate = LinkAccountUpdate.None
+                )
+            )
     }
 
     @Test
@@ -89,7 +96,12 @@ class NativeLinkActivityContractTest {
 
         val result = contract.parseResult(42, Intent())
 
-        assertThat(result).isEqualTo(LinkActivityResult.Canceled())
+        assertThat(result)
+            .isEqualTo(
+                LinkActivityResult.Canceled(
+                    linkAccountUpdate = LinkAccountUpdate.None
+                )
+            )
     }
 
     @Test
@@ -98,7 +110,12 @@ class NativeLinkActivityContractTest {
 
         val result = contract.parseResult(Activity.RESULT_CANCELED, Intent())
 
-        assertThat(result).isEqualTo(LinkActivityResult.Canceled())
+        assertThat(result)
+            .isEqualTo(
+                LinkActivityResult.Canceled(
+                    linkAccountUpdate = LinkAccountUpdate.None
+                )
+            )
     }
 
     private fun intent(result: LinkActivityResult): Intent {

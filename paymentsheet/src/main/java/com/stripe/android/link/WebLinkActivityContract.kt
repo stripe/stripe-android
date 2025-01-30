@@ -47,40 +47,63 @@ internal class WebLinkActivityContract @Inject internal constructor(
                     )
                 }
                 if (exception != null) {
-                    LinkActivityResult.Failed(exception)
+                    LinkActivityResult.Failed(
+                        error = exception,
+                        linkAccountUpdate = LinkAccountUpdate.None
+
+                    )
                 } else {
-                    LinkActivityResult.Canceled()
+                    LinkActivityResult.Canceled(
+                        linkAccountUpdate = LinkAccountUpdate.None
+                    )
                 }
             }
 
             LinkForegroundActivity.RESULT_COMPLETE -> {
-                val redirectUri = intent?.data ?: return LinkActivityResult.Canceled()
-                when (redirectUri.getQueryParameter("link_status")) {
-                    "complete" -> {
-                        val paymentMethod = redirectUri.getQueryParameter("pm")
-                            ?.parsePaymentMethod()
-                        if (paymentMethod == null) {
-                            LinkActivityResult.Canceled()
-                        } else {
-                            LinkActivityResult.PaymentMethodObtained(paymentMethod)
-                        }
-                    }
-
-                    "logout" -> {
-                        LinkActivityResult.Canceled(LinkActivityResult.Canceled.Reason.LoggedOut)
-                    }
-
-                    else -> {
-                        LinkActivityResult.Canceled()
-                    }
-                }
+                handleCompleteResult(intent)
             }
 
             Activity.RESULT_CANCELED -> {
-                LinkActivityResult.Canceled()
+                LinkActivityResult.Canceled(
+                    linkAccountUpdate = LinkAccountUpdate.None
+                )
             }
             else -> {
-                LinkActivityResult.Canceled()
+                LinkActivityResult.Canceled(
+                    linkAccountUpdate = LinkAccountUpdate.None
+                )
+            }
+        }
+    }
+
+    private fun handleCompleteResult(intent: Intent?): LinkActivityResult {
+        val redirectUri = intent?.data ?: return LinkActivityResult.Canceled(
+            linkAccountUpdate = LinkAccountUpdate.None
+        )
+        return when (redirectUri.getQueryParameter("link_status")) {
+            "complete" -> {
+                val paymentMethod = redirectUri.getQueryParameter("pm")
+                    ?.parsePaymentMethod()
+                if (paymentMethod == null) {
+                    LinkActivityResult.Canceled(
+                        linkAccountUpdate = LinkAccountUpdate.None
+                    )
+                } else {
+                    LinkActivityResult.PaymentMethodObtained(paymentMethod)
+                }
+            }
+
+            "logout" -> {
+                LinkActivityResult.Canceled(
+                    reason = LinkActivityResult.Canceled.Reason.LoggedOut,
+                    linkAccountUpdate = LinkAccountUpdate.None
+                )
+            }
+
+            else -> {
+                LinkActivityResult.Canceled(
+                    linkAccountUpdate = LinkAccountUpdate.None
+                )
             }
         }
     }

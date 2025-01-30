@@ -21,7 +21,8 @@ internal class NativeLinkActivityContract @Inject constructor() :
                 configuration = input.configuration,
                 stripeAccountId = paymentConfiguration.stripeAccountId,
                 publishableKey = paymentConfiguration.publishableKey,
-                startWithVerificationDialog = input.startWithVerificationDialog
+                startWithVerificationDialog = input.startWithVerificationDialog,
+                linkAccount = input.linkAccount
             )
         )
     }
@@ -29,18 +30,24 @@ internal class NativeLinkActivityContract @Inject constructor() :
     override fun parseResult(resultCode: Int, intent: Intent?): LinkActivityResult {
         return when (resultCode) {
             Activity.RESULT_CANCELED -> {
-                LinkActivityResult.Canceled()
+                LinkActivityResult.Canceled(
+                    linkAccountUpdate = LinkAccountUpdate.None
+                )
             }
 
             LinkActivity.RESULT_COMPLETE -> {
                 val result = intent?.extras?.let {
                     BundleCompat.getParcelable(it, LinkActivityContract.EXTRA_RESULT, LinkActivityResult::class.java)
                 }
-                return result ?: LinkActivityResult.Canceled()
+                return result ?: LinkActivityResult.Canceled(
+                    linkAccountUpdate = LinkAccountUpdate.None
+                )
             }
 
             else -> {
-                LinkActivityResult.Canceled()
+                LinkActivityResult.Canceled(
+                    linkAccountUpdate = LinkAccountUpdate.None
+                )
             }
         }
     }

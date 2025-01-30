@@ -5,6 +5,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.LinkPaymentLauncher
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.analytics.FakeLinkAnalyticsHelper
 import com.stripe.android.paymentelement.confirmation.bacs.BacsConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.cvc.CvcRecollectionConfirmationDefinition
@@ -68,6 +69,7 @@ internal fun createTestConfirmationHandlerFactory(
                 LinkConfirmationDefinition(
                     linkPaymentLauncher = linkLauncher,
                     linkStore = RecordingLinkStore.noOp(),
+                    linkAccountHolder = LinkAccountHolder(SavedStateHandle())
                 ),
                 LinkInlineSignupConfirmationDefinition(
                     linkConfigurationCoordinator = linkConfigurationCoordinator,

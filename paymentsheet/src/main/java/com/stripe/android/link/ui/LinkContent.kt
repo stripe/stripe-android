@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkAction
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkActivityViewModel
@@ -150,7 +151,7 @@ private fun Screens(
 
         composable(LinkScreen.Verification.route) {
             val linkAccount = getLinkAccount()
-                ?: return@composable dismissWithResult(LinkActivityResult.Failed(NoLinkAccountFoundException()))
+                ?: return@composable dismissWithResult(noLinkAccountResult())
             val viewModel: VerificationViewModel = linkViewModel { parentComponent ->
                 VerificationViewModel.factory(
                     parentComponent = parentComponent,
@@ -164,7 +165,7 @@ private fun Screens(
 
         composable(LinkScreen.Wallet.route) {
             val linkAccount = getLinkAccount()
-                ?: return@composable dismissWithResult(LinkActivityResult.Failed(NoLinkAccountFoundException()))
+                ?: return@composable dismissWithResult(noLinkAccountResult())
             val viewModel: WalletViewModel = linkViewModel { parentComponent ->
                 WalletViewModel.factory(
                     parentComponent = parentComponent,
@@ -187,7 +188,7 @@ private fun Screens(
 
         composable(LinkScreen.PaymentMethod.route) {
             val linkAccount = getLinkAccount()
-                ?: return@composable dismissWithResult(LinkActivityResult.Failed(NoLinkAccountFoundException()))
+                ?: return@composable dismissWithResult(noLinkAccountResult())
             PaymentMethodRoute(linkAccount = linkAccount, dismissWithResult = dismissWithResult)
         }
     }
@@ -236,4 +237,11 @@ private fun Loader() {
     ) {
         CircularProgressIndicator()
     }
+}
+
+private fun noLinkAccountResult(): LinkActivityResult {
+    return LinkActivityResult.Failed(
+        error = NoLinkAccountFoundException(),
+        linkAccountUpdate = LinkAccountUpdate.None
+    )
 }

@@ -14,10 +14,10 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavHostController
 import com.stripe.android.link.LinkActivity.Companion.getArgs
-import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.account.LinkAuth
 import com.stripe.android.link.account.LinkAuthResult
+import com.stripe.android.link.account.linkAccountUpdate
 import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.injection.DaggerNativeLinkComponent
 import com.stripe.android.link.injection.NativeLinkComponent
@@ -40,7 +40,6 @@ internal class LinkActivityViewModel @Inject constructor(
     val activityRetainedComponent: NativeLinkComponent,
     confirmationHandlerFactory: ConfirmationHandler.Factory,
     private val linkAccountManager: LinkAccountManager,
-    private val linkAccountHolder: LinkAccountHolder,
     val eventReporter: EventReporter,
     private val integrityRequestManager: IntegrityRequestManager,
     private val linkGate: LinkGate,
@@ -64,7 +63,7 @@ internal class LinkActivityViewModel @Inject constructor(
     val linkScreenState: StateFlow<ScreenState> = _linkScreenState
 
     val linkAccount: LinkAccount?
-        get() = linkAccountHolder.linkAccount.value
+        get() = linkAccountManager.linkAccount.value
 
     var navController: NavHostController? = null
     var dismissWithResult: ((LinkActivityResult) -> Unit)? = null
@@ -81,7 +80,11 @@ internal class LinkActivityViewModel @Inject constructor(
     }
 
     fun onDismissVerificationClicked() {
-        dismissWithResult?.invoke(LinkActivityResult.Canceled())
+        dismissWithResult?.invoke(
+            LinkActivityResult.Canceled(
+                linkAccountUpdate = linkAccountManager.linkAccountUpdate
+            )
+        )
     }
 
     fun moveToWeb() {
@@ -94,7 +97,11 @@ internal class LinkActivityViewModel @Inject constructor(
     private fun handleBackPressed() {
         navController?.let { navController ->
             if (!navController.popBackStack()) {
-                dismissWithResult?.invoke(LinkActivityResult.Canceled())
+                dismissWithResult?.invoke(
+                    LinkActivityResult.Canceled(
+                        linkAccountUpdate = linkAccountManager.linkAccountUpdate
+                    )
+                )
             }
         }
     }
@@ -124,7 +131,11 @@ internal class LinkActivityViewModel @Inject constructor(
 
     fun goBack() {
         if (navController?.popBackStack() == false) {
-            dismissWithResult?.invoke(LinkActivityResult.Canceled())
+            dismissWithResult?.invoke(
+                LinkActivityResult.Canceled(
+                    linkAccountUpdate = linkAccountManager.linkAccountUpdate
+                )
+            )
         }
     }
 
@@ -181,7 +192,7 @@ internal class LinkActivityViewModel @Inject constructor(
     }
 
     private suspend fun updateScreenState() {
-        val linkAccount = linkAccountHolder.linkAccount.value
+        val linkAccount = linkAccountManager.linkAccount.value
         val accountStatus = linkAccountManager.accountStatus.first()
         when (accountStatus) {
             AccountStatus.Verified,
@@ -217,7 +228,7 @@ internal class LinkActivityViewModel @Inject constructor(
     }
 
     private suspend fun lookupUser(): LinkAuthResult? {
-        val customerEmail = linkAccountHolder.linkAccount.value?.email
+        val customerEmail = linkAccountManager.linkAccount.value?.email
             ?: linkConfiguration.customerInfo.email
             ?: return null
 
@@ -244,6 +255,7 @@ internal class LinkActivityViewModel @Inject constructor(
                     .context(app)
                     .application(app)
                     .startWithVerificationDialog(args.startWithVerificationDialog)
+                    .linkAccount(args.linkAccount)
                     .build()
                     .viewModel
             }
