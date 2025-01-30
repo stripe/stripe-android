@@ -84,13 +84,25 @@ internal class DefaultCardNumberController(
 ) : CardNumberController() {
     override val capitalization: KeyboardCapitalization = cardTextFieldConfig.capitalization
     override val keyboardType: KeyboardType = cardTextFieldConfig.keyboard
-    override val visualTransformation = cardTextFieldConfig.visualTransformation
     override val debugLabel = cardTextFieldConfig.debugLabel
 
     override val label: StateFlow<Int> = stateFlowOf(cardTextFieldConfig.label)
 
     private val _fieldValue = MutableStateFlow("")
     override val fieldValue: StateFlow<String> = _fieldValue.asStateFlow()
+
+    private val latestBinBasedPanLength = MutableStateFlow<Int?>(null)
+
+    override val visualTransformation = combineAsStateFlow(
+        fieldValue,
+        latestBinBasedPanLength
+    ) { number, latestBinBasedPanLength ->
+        val panLength = latestBinBasedPanLength ?: CardBrand
+            .fromCardNumber(number)
+            .getMaxLengthForCardNumber(number)
+
+        cardTextFieldConfig.determineVisualTransformation(number, panLength)
+    }
 
     override val rawFieldValue: StateFlow<String> =
         _fieldValue.mapAsStateFlow { cardTextFieldConfig.convertToRaw(it) }
@@ -166,8 +178,7 @@ internal class DefaultCardNumberController(
             ) {
                 val newAccountRange = accountRanges.firstOrNull()
                 newAccountRange?.panLength?.let { panLength ->
-                    (visualTransformation as CardNumberVisualTransformation).binBasedMaxPan =
-                        panLength
+                    latestBinBasedPanLength.value = panLength
                 }
 
                 val newBrandChoices = unfilteredAccountRanges.map { it.brand }.distinct()

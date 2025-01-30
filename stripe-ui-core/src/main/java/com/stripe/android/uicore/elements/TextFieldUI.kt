@@ -141,6 +141,7 @@ fun TextField(
     val shouldShowError by textFieldController.visibleError.collectAsState()
     val loading by textFieldController.loading.collectAsState()
     val contentDescription by textFieldController.contentDescription.collectAsState()
+    val visualTransformation by textFieldController.visualTransformation.collectAsState()
     val placeHolder by textFieldController.placeHolder.collectAsState()
 
     val hasFocus = rememberSaveable { mutableStateOf(false) }
@@ -216,7 +217,7 @@ fun TextField(
         placeholder = placeHolder,
         trailingIcon = trailingIcon,
         shouldShowError = shouldShowError,
-        visualTransformation = textFieldController.visualTransformation,
+        visualTransformation = visualTransformation,
         keyboardOptions = KeyboardOptions(
             keyboardType = textFieldController.keyboardType,
             capitalization = textFieldController.capitalization,
