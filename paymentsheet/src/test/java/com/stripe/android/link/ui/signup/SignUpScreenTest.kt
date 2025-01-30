@@ -19,6 +19,7 @@ import com.stripe.android.link.account.LinkAuth
 import com.stripe.android.link.account.LinkAuthResult
 import com.stripe.android.link.analytics.FakeLinkEventsReporter
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.FakeLogger
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -125,6 +126,7 @@ internal class SignUpScreenTest {
             linkAuth = linkAuth,
             linkEventsReporter = linkEventsReporter,
             logger = logger,
+            errorReporter = FakeErrorReporter(),
             navigate = {},
             navigateAndClearStack = {},
             moveToWeb = moveToWeb

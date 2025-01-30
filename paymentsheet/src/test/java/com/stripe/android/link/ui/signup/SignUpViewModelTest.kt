@@ -54,7 +54,10 @@ internal class SignUpViewModelTest {
 
     @Test
     fun `When email is valid then lookup is triggered with delay`() = runTest(dispatcher) {
-        val viewModel = createViewModel(prefilledEmail = null)
+        val linkAuth = FakeLinkAuth()
+        linkAuth.lookupResult = LinkAuthResult.NoLinkAccountFound
+
+        val viewModel = createViewModel(prefilledEmail = null, linkAuth = linkAuth)
 
         assertThat(viewModel.contentState.signUpState).isEqualTo(SignUpState.InputtingPrimaryField)
 
@@ -66,7 +69,97 @@ internal class SignUpViewModelTest {
 
         assertThat(viewModel.emailController.fieldValue.value).isEqualTo("valid@email.com")
         assertThat(viewModel.contentState.signUpState).isEqualTo(SignUpState.InputtingRemainingFields)
+
+        linkAuth.awaitLookupCall()
+        linkAuth.ensureAllItemsConsumed()
     }
+
+    @Test
+    fun `When email is initially equal to config email, lookup is not triggered`() = runTest(dispatcher) {
+        val linkAuth = FakeLinkAuth()
+        val viewModel = createViewModel(prefilledEmail = CUSTOMER_EMAIL, linkAuth = linkAuth)
+
+        // No change to email, should not trigger lookup
+        advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds)
+
+        assertThat(viewModel.contentState.signUpState).isEqualTo(SignUpState.InputtingRemainingFields)
+        linkAuth.ensureAllItemsConsumed()
+    }
+
+    @Test
+    fun `When email changes and then reverts to config email, lookup is triggered`() = runTest(dispatcher) {
+        val linkAuth = FakeLinkAuth()
+        linkAuth.lookupResult = LinkAuthResult.NoLinkAccountFound
+
+        val viewModel = createViewModel(prefilledEmail = CUSTOMER_EMAIL, linkAuth = linkAuth)
+
+        // Change email
+        viewModel.emailController.onRawValueChange("different@email.com")
+        advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds)
+        linkAuth.awaitLookupCall()
+
+        // Revert to original email
+        viewModel.emailController.onRawValueChange(CUSTOMER_EMAIL)
+        advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds)
+        linkAuth.awaitLookupCall()
+        linkAuth.ensureAllItemsConsumed()
+    }
+
+    @Test
+    fun `When lookup finds existing account, navigate to appropriate screen`() = runTest(dispatcher) {
+        var linkScreen: LinkScreen? = null
+        val linkEventsReporter = object : SignUpLinkEventsReporter() {
+            override fun onSignupCompleted(isInline: Boolean) {
+                calledCount += 1
+            }
+        }
+
+        val linkAuth = FakeLinkAuth()
+        linkAuth.lookupResult = LinkAuthResult.Success(TestFactory.LINK_ACCOUNT)
+        val viewModel = createViewModel(
+            prefilledEmail = null,
+            linkAuth = linkAuth,
+            linkEventsReporter = linkEventsReporter,
+            navigateAndClearStack = { screen ->
+                linkScreen = screen
+            }
+        )
+
+        viewModel.emailController.onRawValueChange("existing@email.com")
+        advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds)
+
+        assertThat(linkScreen).isEqualTo(LinkScreen.Wallet)
+    }
+
+    @Test
+    fun `When lookup fails, stay on input remaining fields state`() = runTest(dispatcher) {
+        val error = RuntimeException("Lookup failed")
+        val linkAuth = FakeLinkAuth()
+        linkAuth.lookupResult = LinkAuthResult.Error(error)
+
+        val viewModel = createViewModel(
+            prefilledEmail = null,
+            linkAuth = linkAuth
+        )
+
+        viewModel.emailController.onRawValueChange("valid@email.com")
+        advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds)
+
+        assertThat(viewModel.state.value.signUpState).isEqualTo(SignUpState.InputtingRemainingFields)
+    }
+
+    @Test
+    fun `When email is provided it should not trigger lookup and should collect remaining fields`() =
+        runTest(dispatcher) {
+            val linkAuth = FakeLinkAuth()
+            linkAuth.lookupResult = LinkAuthResult.NoLinkAccountFound
+            val viewModel = createViewModel(prefilledEmail = CUSTOMER_EMAIL, linkAuth = linkAuth)
+
+            advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds)
+
+            assertThat(viewModel.state.value.signUpState).isEqualTo(SignUpState.InputtingRemainingFields)
+            linkAuth.ensureAllItemsConsumed()
+        }
 
     @Test
     fun `When email is provided it should not trigger lookup and should collect phone number`() = runTest(dispatcher) {
@@ -99,6 +192,8 @@ internal class SignUpViewModelTest {
         val errorMessage = "Error message"
 
         val linkAuth = FakeLinkAuth()
+        linkAuth.lookupResult = LinkAuthResult.NoLinkAccountFound
+
         val logger = FakeLogger()
         val viewModel = createViewModel(
             linkAuth = linkAuth,
@@ -212,6 +307,7 @@ internal class SignUpViewModelTest {
         }
 
         val linkAuth = FakeLinkAuth()
+        linkAuth.lookupResult = LinkAuthResult.NoLinkAccountFound
 
         val viewModel = createViewModel(
             linkEventsReporter = linkEventsReporter,
@@ -267,6 +363,85 @@ internal class SignUpViewModelTest {
         assertThat(viewModel.contentState.signUpEnabled).isTrue()
     }
 
+    @Test
+    fun `attestation error on lookup calls moveToWeb`() = runTest(dispatcher) {
+        val linkAuth = FakeLinkAuth()
+        linkAuth.lookupResult = LinkAuthResult.AttestationFailed(Throwable())
+
+        var movedToWeb = false
+
+        val viewModel = createViewModel(
+            prefilledEmail = null,
+            linkAuth = linkAuth,
+            moveToWeb = {
+                movedToWeb = true
+            }
+        )
+
+        viewModel.emailController.onRawValueChange("a@b.com")
+
+        // Advance past lookup debounce delay
+        advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds)
+
+        assertThat(movedToWeb).isTrue()
+    }
+
+    @Test
+    fun `generic lookup error does not moveToWeb`() = runTest(dispatcher) {
+        val linkAuth = FakeLinkAuth()
+        linkAuth.lookupResult = LinkAuthResult.Error(Throwable())
+
+        var movedToWeb = false
+        val viewModel = createViewModel(
+            prefilledEmail = CUSTOMER_EMAIL,
+            linkAuth = linkAuth,
+            moveToWeb = {
+                movedToWeb = true
+            }
+        )
+
+        assertThat(movedToWeb).isFalse()
+    }
+
+    @Test
+    fun `attestation error on sign up calls moveToWeb`() = runTest(dispatcher) {
+        val linkAuth = FakeLinkAuth()
+        linkAuth.lookupResult = LinkAuthResult.NoLinkAccountFound
+        linkAuth.signupResult = LinkAuthResult.AttestationFailed(Throwable())
+
+        var movedToWeb = false
+        val viewModel = createViewModel(
+            prefilledEmail = null,
+            linkAuth = linkAuth,
+            moveToWeb = {
+                movedToWeb = true
+            }
+        )
+
+        viewModel.performValidSignup()
+
+        assertThat(movedToWeb).isTrue()
+    }
+
+    @Test
+    fun `generic sign up error does not call moveToWeb`() = runTest(dispatcher) {
+        val linkAuth = FakeLinkAuth()
+        linkAuth.lookupResult = LinkAuthResult.Error(Throwable())
+
+        var movedToWeb = false
+        val viewModel = createViewModel(
+            prefilledEmail = null,
+            linkAuth = linkAuth,
+            moveToWeb = {
+                movedToWeb = true
+            }
+        )
+
+        viewModel.performValidSignup()
+
+        assertThat(movedToWeb).isFalse()
+    }
+
     private fun SignUpViewModel.performValidSignup() {
         emailController.onRawValueChange("email@valid.co")
         phoneNumberController.onRawValueChange("1234567890")
@@ -278,7 +453,9 @@ internal class SignUpViewModelTest {
         configuration: LinkConfiguration = TestFactory.LINK_CONFIGURATION,
         countryCode: CountryCode = CountryCode.US,
         linkEventsReporter: LinkEventsReporter = SignUpLinkEventsReporter(),
-        linkAuth: LinkAuth = FakeLinkAuth(),
+        linkAuth: LinkAuth = FakeLinkAuth().apply {
+            lookupResult = LinkAuthResult.NoLinkAccountFound
+        },
         logger: Logger = FakeLogger(),
         errorReporter: ErrorReporter = FakeErrorReporter(),
         navigate: (LinkScreen) -> Unit = {},
@@ -330,4 +507,6 @@ private open class SignUpLinkEventsReporter : FakeLinkEventsReporter() {
     override fun onSignupFlowPresented() = Unit
 
     override fun onSignupStarted(isInline: Boolean) = Unit
+
+    override fun onSignupCompleted(isInline: Boolean) = Unit
 }
