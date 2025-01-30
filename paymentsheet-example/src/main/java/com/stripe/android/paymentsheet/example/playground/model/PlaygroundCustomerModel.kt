@@ -21,7 +21,6 @@ class CustomerEphemeralKeyRequest private constructor(
     val paymentMethodRedisplayFeature: FeatureState?,
     @SerialName("customer_session_payment_method_allow_redisplay_filters")
     val paymentMethodRedisplayFilters: List<AllowRedisplayFilter>?,
-
 ) {
     @Serializable
     enum class CustomerKeyType {
