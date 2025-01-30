@@ -92,7 +92,7 @@ class PaymentOptionScreenshotTest {
                 shouldShowDefaultBadge = shouldShowDefaultBadge,
                 isEnabled = isEnabled,
                 viewWidth = 160.dp,
-                iconRes = R.drawable.stripe_ic_paymentsheet_card_visa,
+                iconRes = R.drawable.stripe_ic_paymentsheet_card_visa_ref,
                 labelText = "••••4242",
                 description = "Description",
                 onItemSelectedListener = {},

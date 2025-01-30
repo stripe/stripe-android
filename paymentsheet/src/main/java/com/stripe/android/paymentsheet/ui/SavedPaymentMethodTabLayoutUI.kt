@@ -426,7 +426,9 @@ private fun SavedPaymentMethodTab(
             isSelected = isSelected,
             isEnabled = isEnabled,
             isClickable = !isEditing,
-            iconRes = paymentMethod.paymentMethod.getSavedPaymentMethodIcon(),
+            iconRes = paymentMethod.paymentMethod.getSavedPaymentMethodIcon(
+                showNightIcon = !MaterialTheme.stripeColors.component.shouldUseDarkDynamicColor()
+            ),
             labelIcon = labelIcon,
             labelText = labelText,
             description = paymentMethod

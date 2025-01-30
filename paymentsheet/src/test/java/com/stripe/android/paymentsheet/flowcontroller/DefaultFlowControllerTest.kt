@@ -395,7 +395,7 @@ internal class DefaultFlowControllerTest {
         )
 
         val paymentOption = flowController.getPaymentOption()
-        assertThat(paymentOption?.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_card_visa)
+        assertThat(paymentOption?.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_card_visa_ref)
         assertThat(paymentOption?.label).isEqualTo("···· $last4")
     }
 
@@ -417,7 +417,7 @@ internal class DefaultFlowControllerTest {
         )
 
         val paymentOption = flowController.getPaymentOption()
-        assertThat(paymentOption?.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_card_visa)
+        assertThat(paymentOption?.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_card_visa_ref)
         assertThat(paymentOption?.label).isEqualTo("···· $last4")
 
         // Simulate a real FlowControllerInitializer that fetches the payment methods for the new
@@ -512,12 +512,12 @@ internal class DefaultFlowControllerTest {
 
             verify(paymentOptionCallback).onPaymentOption(
                 argThat {
-                    drawableResourceId == R.drawable.stripe_ic_paymentsheet_card_visa &&
+                    drawableResourceId == R.drawable.stripe_ic_paymentsheet_card_visa_ref &&
                         label == "···· 4242"
                 }
             )
             val paymentOption = flowController.getPaymentOption()
-            assertThat(paymentOption?.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_card_visa)
+            assertThat(paymentOption?.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_card_visa_ref)
             assertThat(paymentOption?.label).isEqualTo("···· 4242")
         }
 
@@ -2391,7 +2391,7 @@ internal class DefaultFlowControllerTest {
             PaymentSelection.CustomerRequestedSave.NoRequest
         )
         private val GENERIC_PAYMENT_SELECTION = PaymentSelection.New.GenericPaymentMethod(
-            iconResource = R.drawable.stripe_ic_paymentsheet_card_visa,
+            iconResource = R.drawable.stripe_ic_paymentsheet_card_visa_ref,
             label = "Bancontact".resolvableString,
             paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.BANCONTACT,
             customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,

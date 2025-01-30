@@ -67,7 +67,7 @@ class PaymentOptionTest {
                 shouldShowModifyBadge = false,
                 shouldShowDefaultBadge = shouldShowDefaultBadge,
                 isEnabled = true,
-                iconRes = R.drawable.stripe_ic_paymentsheet_card_visa,
+                iconRes = R.drawable.stripe_ic_paymentsheet_card_visa_ref,
                 labelText = label,
                 description = label,
                 onItemSelectedListener = {},

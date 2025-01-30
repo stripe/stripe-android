@@ -2,6 +2,7 @@
 
 package com.stripe.android.paymentsheet.ui
 
+import android.content.res.Configuration
 import androidx.annotation.DrawableRes
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
@@ -215,6 +216,7 @@ private fun ModifyBadge(
 }
 
 @Preview(name = "Selected payment option")
+@Preview(name = "Selected payment option", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun SavedPaymentMethodTabUISelected() {
     StripeTheme {
@@ -224,7 +226,7 @@ private fun SavedPaymentMethodTabUISelected() {
             shouldShowModifyBadge = false,
             shouldShowDefaultBadge = false,
             isEnabled = true,
-            iconRes = R.drawable.stripe_ic_paymentsheet_card_visa,
+            iconRes = R.drawable.stripe_ic_paymentsheet_card_visa_ref,
             labelText = "MasterCard",
             description = "MasterCard",
             onItemSelectedListener = {},
@@ -242,7 +244,7 @@ private fun SavedPaymentMethodTabUIModifiable() {
             shouldShowModifyBadge = true,
             shouldShowDefaultBadge = false,
             isEnabled = true,
-            iconRes = R.drawable.stripe_ic_paymentsheet_card_visa,
+            iconRes = R.drawable.stripe_ic_paymentsheet_card_visa_ref,
             labelText = "MasterCard",
             description = "MasterCard",
             onItemSelectedListener = {},
@@ -260,7 +262,7 @@ private fun DefaultSavedPaymentMethodTabUIModifiable() {
             shouldShowModifyBadge = true,
             shouldShowDefaultBadge = true,
             isEnabled = true,
-            iconRes = R.drawable.stripe_ic_paymentsheet_card_visa,
+            iconRes = R.drawable.stripe_ic_paymentsheet_card_visa_ref,
             labelText = "MasterCard",
             description = "MasterCard",
             onItemSelectedListener = {},
