@@ -112,6 +112,7 @@ class PaymentMethodViewModelTest {
 
         viewModel.onPayClicked()
 
+        assertThat(linkConfirmationHandler.confirmWithLinkPaymentDetailsCall).hasSize(1)
         val call = linkConfirmationHandler.confirmWithLinkPaymentDetailsCall.first()
         assertThat(call.paymentDetails)
             .isEqualTo(TestFactory.LINK_NEW_PAYMENT_DETAILS)

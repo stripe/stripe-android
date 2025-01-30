@@ -27,17 +27,12 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
         linkAccount: LinkAccount,
         cvc: String?
     ): Result {
-        return runCatching {
-            val args = newConfirmationArgs(paymentDetails, linkAccount, cvc)
-            confirmationHandler.start(args)
-            val result = confirmationHandler.awaitResult()
-            transformResult(result)
-        }.getOrElse { error ->
-            logger.error(
-                msg = "DefaultLinkConfirmationHandler: Failed to confirm payment",
-                t = error
+        return confirm {
+            newConfirmationArgs(
+                paymentDetails = paymentDetails,
+                linkAccount = linkAccount,
+                cvc = cvc
             )
-            Result.Failed(R.string.stripe_something_went_wrong.resolvableString)
         }
     }
 
@@ -46,8 +41,20 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
         linkAccount: LinkAccount,
         cvc: String?
     ): Result {
+        return confirm {
+            confirmationArgs(
+                paymentDetails = paymentDetails,
+                linkAccount = linkAccount,
+                cvc = cvc
+            )
+        }
+    }
+
+    private suspend fun confirm(
+        createArgs: () -> ConfirmationHandler.Args
+    ): Result {
         return runCatching {
-            val args = confirmationArgs(paymentDetails, linkAccount, cvc)
+            val args = createArgs()
             confirmationHandler.start(args)
             val result = confirmationHandler.awaitResult()
             transformResult(result)
