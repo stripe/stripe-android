@@ -5,11 +5,14 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.paymentelement.EmbeddedResultCallback
+import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.embedded.form.FormContract
 import com.stripe.android.paymentelement.embedded.form.FormResult
 import com.stripe.android.paymentelement.embedded.manage.ManageContract
 import com.stripe.android.paymentelement.embedded.manage.ManageResult
 import com.stripe.android.paymentsheet.CustomerStateHolder
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.CustomerState
 import dagger.assisted.Assisted
@@ -20,7 +23,8 @@ internal interface EmbeddedSheetLauncher {
     fun launchForm(
         code: String,
         paymentMethodMetadata: PaymentMethodMetadata,
-        hasSavedPaymentMethods: Boolean
+        hasSavedPaymentMethods: Boolean,
+        intentConfiguration: PaymentSheet.IntentConfiguration
     )
 
     fun launchManage(
@@ -64,10 +68,14 @@ internal class DefaultEmbeddedSheetLauncher @AssistedInject constructor(
         )
     }
 
+    @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
     private val formActivityLauncher: ActivityResultLauncher<FormContract.Args> =
         activityResultCaller.registerForActivityResult(FormContract) { result ->
             if (result is FormResult.Complete) {
                 selectionHolder.set(result.selection)
+                result.confirmationResult?.asEmbeddedResult()?.let {
+                    EmbeddedResultCallback.resultCallback?.onResult(it)
+                }
             }
         }
 
@@ -89,12 +97,14 @@ internal class DefaultEmbeddedSheetLauncher @AssistedInject constructor(
     override fun launchForm(
         code: String,
         paymentMethodMetadata: PaymentMethodMetadata,
-        hasSavedPaymentMethods: Boolean
+        hasSavedPaymentMethods: Boolean,
+        intentConfiguration: PaymentSheet.IntentConfiguration
     ) {
         val args = FormContract.Args(
             selectedPaymentMethodCode = code,
             paymentMethodMetadata = paymentMethodMetadata,
-            hasSavedPaymentMethods = hasSavedPaymentMethods
+            hasSavedPaymentMethods = hasSavedPaymentMethods,
+            intentConfiguration = intentConfiguration
         )
         formActivityLauncher.launch(args)
     }

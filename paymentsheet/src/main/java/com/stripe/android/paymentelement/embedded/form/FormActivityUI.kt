@@ -19,11 +19,14 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.common.ui.BottomSheetScaffold
-import com.stripe.android.common.ui.PrimaryButton
+import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.forms.FormViewModel
+import com.stripe.android.paymentsheet.ui.PrimaryButtonProcessingState
 import com.stripe.android.paymentsheet.ui.TestModeBadge
 import com.stripe.android.paymentsheet.utils.EventReporterProvider
 import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInteractor
@@ -38,8 +41,14 @@ internal fun FormActivityUI(
     interactor: DefaultVerticalModeFormInteractor,
     eventReporter: EventReporter,
     state: FormState,
+    primaryButtonProcessingState: PrimaryButtonProcessingState,
     onFormFieldValuesChanged: (FormFieldValues?) -> Unit,
     onDismissed: () -> Unit,
+    onConfirm: (
+        PaymentMethodCreateParams,
+        PaymentMethodOptionsParams?,
+        Boolean
+    ) -> Unit
 ) {
     val scrollState = rememberScrollState()
     val interactorState by interactor.state.collectAsState()
@@ -72,16 +81,25 @@ internal fun FormActivityUI(
                     interactor = interactor,
                     showsWalletHeader = false
                 )
-                PrimaryButton(
-                    label = state.primaryButtonLabel.resolve(context),
-                    isEnabled = state.primaryButtonIsEnabled,
-                    onButtonClick = {
-                    },
-                    modifier = Modifier.padding(
-                        horizontal = dimensionResource(id = R.dimen.stripe_paymentsheet_outer_spacing_horizontal),
-                        vertical = dimensionResource(id = R.dimen.stripe_paymentsheet_button_container_spacing)
-                    ),
-                )
+                Box(
+                    modifier = Modifier
+                        .padding(
+                            horizontal = dimensionResource(id = R.dimen.stripe_paymentsheet_outer_spacing_horizontal),
+                            vertical = dimensionResource(id = R.dimen.stripe_paymentsheet_button_container_spacing)
+                        )
+                ) {
+                    PrimaryButton(
+                        label = state.primaryButtonLabel.resolve(context),
+                        locked = true,
+                        enabled = state.primaryButtonIsEnabled,
+                        onClick = {
+                            state.paymentMethodCreateParams?.let {
+                                onConfirm(it, state.paymentOptionsParams, false)
+                            }
+                        },
+                        processingState = primaryButtonProcessingState
+                    )
+                }
             },
             scrollState = scrollState
         )

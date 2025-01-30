@@ -8,6 +8,9 @@ import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentsheet.forms.FormFieldValues
+import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.ui.transformToPaymentMethodOptionsParams
+import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.R
 import kotlinx.coroutines.CoroutineScope
@@ -19,7 +22,7 @@ import javax.inject.Inject
 internal class FormStateHolder @Inject constructor(
     embeddedFormHelperFactory: EmbeddedFormHelperFactory,
     private val paymentMethodCode: PaymentMethodCode,
-    paymentMethodMetadata: PaymentMethodMetadata,
+    private val paymentMethodMetadata: PaymentMethodMetadata,
     @ViewModelScope coroutineScope: CoroutineScope
 ) {
 
@@ -45,16 +48,25 @@ internal class FormStateHolder @Inject constructor(
     )
     val formState: StateFlow<FormState> = _formState
 
+
     fun formValuesChanged(formValues: FormFieldValues?) {
         val params = formHelper.getPaymentMethodParams(
             formValues = formValues,
             selectedPaymentMethodCode = paymentMethodCode
         )
 
+        val options = formValues?.transformToPaymentMethodOptionsParams(paymentMethodCode)
+        var paymentSelection: PaymentSelection? = null
+        paymentMethodMetadata.supportedPaymentMethodForCode(paymentMethodCode)?.let {
+            paymentSelection = formValues?.transformToPaymentSelection(it, paymentMethodMetadata)
+        }
+
         _formState.update {
             it.copy(
                 paymentMethodCreateParams = params,
-                primaryButtonIsEnabled = params != null
+                paymentOptionsParams = options,
+                primaryButtonIsEnabled = params != null,
+                paymentSelection = paymentSelection
             )
         }
     }

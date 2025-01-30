@@ -36,6 +36,9 @@ internal class FormActivity : AppCompatActivity() {
     @Inject
     lateinit var formStateHolder: FormStateHolder
 
+    @Inject
+    lateinit var formActivityConfirmationHandler: FormActivityConfirmationHandler
+
     @OptIn(ExperimentalMaterialApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,10 +51,18 @@ internal class FormActivity : AppCompatActivity() {
 
         viewModel.component.inject(this)
 
+        formActivityConfirmationHandler.register(this, this)
+
+        formActivityConfirmationHandler.setResultAndDismiss = {
+            setFormResult(FormResult.Complete(null, it))
+            finish()
+        }
+
         setContent {
             StripeTheme {
                 val bottomSheetState = rememberStripeBottomSheetState()
                 val state by formStateHolder.formState.collectAsState()
+                val primaryButtonState = formActivityConfirmationHandler.primaryButtonProcessingState.collectAsState()
                 ElementsBottomSheetLayout(
                     state = bottomSheetState,
                     onDismissed = ::setCancelAndFinish
@@ -60,8 +71,10 @@ internal class FormActivity : AppCompatActivity() {
                         interactor = formInteractor,
                         eventReporter = eventReporter,
                         onDismissed = ::setCancelAndFinish,
+                        primaryButtonProcessingState = primaryButtonState.value,
                         state = state,
                         onFormFieldValuesChanged = formStateHolder::formValuesChanged,
+                        onConfirm = formActivityConfirmationHandler::confirm
                     )
                 }
             }

@@ -128,6 +128,8 @@ internal class SharedPaymentElementViewModel @Inject constructor(
                     rowStyle = configuration.appearance.embeddedAppearance.style,
                     embeddedViewDisplaysMandateText = configuration.embeddedViewDisplaysMandateText,
                 )
+                // TODO provide this another way
+                embeddedContentHelper.setIntentConfiguration(intentConfiguration)
                 ConfigureResult.Succeeded()
             },
             onFailure = { error ->

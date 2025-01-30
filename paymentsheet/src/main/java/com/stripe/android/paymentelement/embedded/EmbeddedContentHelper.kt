@@ -7,6 +7,7 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.CustomerStateHolder
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -43,6 +44,8 @@ internal interface EmbeddedContentHelper {
     fun setSheetLauncher(sheetLauncher: EmbeddedSheetLauncher)
 
     fun clearSheetLauncher()
+
+    fun setIntentConfiguration(intentConfiguration: PaymentSheet.IntentConfiguration)
 }
 
 internal fun interface EmbeddedContentHelperFactory {
@@ -81,6 +84,14 @@ internal class DefaultEmbeddedContentHelper @AssistedInject constructor(
     override val embeddedContent: StateFlow<EmbeddedContent?> = _embeddedContent.asStateFlow()
 
     private var sheetLauncher: EmbeddedSheetLauncher? = null
+
+    private var intentConfiguration: PaymentSheet.IntentConfiguration? = null
+
+
+    // TODO: remove
+    override fun setIntentConfiguration(intentConfiguration: PaymentSheet.IntentConfiguration) {
+        this.intentConfiguration = intentConfiguration
+    }
 
     init {
         coroutineScope.launch {
@@ -180,7 +191,8 @@ internal class DefaultEmbeddedContentHelper @AssistedInject constructor(
                     paymentMethodMetadata = paymentMethodMetadata,
                     hasSavedPaymentMethods = customerStateHolder.paymentMethods.value.any {
                         it.type?.code == code
-                    }
+                    },
+                    intentConfiguration = requireNotNull(intentConfiguration)
                 )
             },
             paymentMethods = customerStateHolder.paymentMethods,

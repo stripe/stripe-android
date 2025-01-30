@@ -492,6 +492,7 @@ class EmbeddedPaymentElement private constructor(
                     override fun onDestroy(owner: LifecycleOwner) {
                         IntentConfirmationInterceptor.createIntentCallback = null
                         ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = null
+                        EmbeddedResultCallback.resultCallback = null
                         sharedViewModel.clearEmbeddedSheetLauncher()
                     }
                 }
@@ -511,4 +512,9 @@ class EmbeddedPaymentElement private constructor(
             )
         }
     }
+}
+
+@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
+internal object EmbeddedResultCallback {
+    var resultCallback: EmbeddedPaymentElement.ResultCallback? = null
 }

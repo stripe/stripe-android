@@ -2,6 +2,9 @@ package com.stripe.android.common.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.paymentelement.EmbeddedResultCallback
+import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
@@ -22,5 +25,15 @@ internal fun UpdateExternalPaymentMethodConfirmHandler(
 ) {
     LaunchedEffect(externalPaymentMethodConfirmHandler) {
         ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler
+    }
+}
+
+@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
+@Composable
+internal fun UpdateEmbeddedResultCallback(
+    resultCallback: EmbeddedPaymentElement.ResultCallback
+) {
+    LaunchedEffect(resultCallback) {
+        EmbeddedResultCallback.resultCallback = resultCallback
     }
 }

@@ -6,6 +6,8 @@ import android.os.Parcelable
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.os.BundleCompat
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
@@ -13,7 +15,10 @@ import kotlinx.parcelize.Parcelize
 internal sealed interface FormResult : Parcelable {
 
     @Parcelize
-    data class Complete(val selection: PaymentSelection) : FormResult
+    data class Complete(
+        val selection: PaymentSelection?,
+        val confirmationResult: ConfirmationHandler.Result?
+    ) : FormResult
 
     @Parcelize
     object Cancelled : FormResult
@@ -51,7 +56,8 @@ internal object FormContract : ActivityResultContract<FormContract.Args, FormRes
     internal data class Args(
         val selectedPaymentMethodCode: String,
         val paymentMethodMetadata: PaymentMethodMetadata,
-        val hasSavedPaymentMethods: Boolean
+        val hasSavedPaymentMethods: Boolean,
+        val intentConfiguration: PaymentSheet.IntentConfiguration
     ) : Parcelable {
         companion object {
             fun fromIntent(intent: Intent): Args? {

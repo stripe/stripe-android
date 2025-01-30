@@ -118,10 +118,12 @@ internal interface ConfirmationHandler {
     /**
      * Defines the result types that can be returned after completing a confirmation process.
      */
-    sealed interface Result {
+    @Parcelize
+    sealed interface Result : Parcelable {
         /**
          * Indicates that the confirmation process was canceled by the customer.
          */
+        @Parcelize
         data class Canceled(
             val action: Action,
         ) : Result {
@@ -152,6 +154,7 @@ internal interface ConfirmationHandler {
          * Indicates that the confirmation process has been successfully completed. A [StripeIntent] with an updated
          * state is returned as part of the result as well.
          */
+        @Parcelize
         data class Succeeded(
             val intent: StripeIntent,
             val deferredIntentConfirmationType: DeferredIntentConfirmationType?,
@@ -161,6 +164,7 @@ internal interface ConfirmationHandler {
          * Indicates that the confirmation process has failed. A cause and potentially a resolvable message are
          * returned as part of the result.
          */
+        @Parcelize
         data class Failed(
             val cause: Throwable,
             val message: ResolvableString,
@@ -169,35 +173,42 @@ internal interface ConfirmationHandler {
             /**
              * Types of errors that can occur when confirming a payment.
              */
-            sealed interface ErrorType {
+            @Parcelize
+            sealed interface ErrorType : Parcelable {
                 /**
                  * Fatal confirmation error that occurred while confirming a payment. This should never happen.
                  */
+                @Parcelize
                 data object Fatal : ErrorType
 
                 /**
                  * Indicates an error when processing a payment during the confirmation process.
                  */
+                @Parcelize
                 data object Payment : ErrorType
 
                 /**
                  * Indicates an internal process error occurred during the confirmation process.
                  */
+                @Parcelize
                 data object Internal : ErrorType
 
                 /**
                  * Indicates a merchant integration error occurred during the confirmation process.
                  */
+                @Parcelize
                 data object MerchantIntegration : ErrorType
 
                 /**
                  * Indicates an error occurred when confirming with external payment methods
                  */
+                @Parcelize
                 data object ExternalPaymentMethod : ErrorType
 
                 /**
                  * Indicates an error occurred when confirming with Google Pay
                  */
+                @Parcelize
                 data class GooglePay(val errorCode: Int) : ErrorType
             }
         }

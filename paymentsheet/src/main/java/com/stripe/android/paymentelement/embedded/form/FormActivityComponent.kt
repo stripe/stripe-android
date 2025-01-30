@@ -6,13 +6,22 @@ import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.ViewModelScope
+import com.stripe.android.core.utils.RealUserFacingLogger
+import com.stripe.android.core.utils.UserFacingLogger
+import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.RealLinkConfigurationCoordinator
+import com.stripe.android.link.gate.DefaultLinkGate
+import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.injection.LinkAnalyticsComponent
 import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentElementConfirmationModule
 import com.stripe.android.paymentelement.embedded.EmbeddedCommonModule
+import com.stripe.android.paymentelement.embedded.SharedPaymentElementViewModelComponent.Builder
+import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInteractor
 import dagger.Binds
 import dagger.BindsInstance
@@ -20,13 +29,16 @@ import dagger.Component
 import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.CoroutineScope
+import javax.inject.Named
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
 @Component(
     modules = [
         EmbeddedCommonModule::class,
-        FormActivityModule::class
+        FormActivityModule::class,
+        ExtendedPaymentElementConfirmationModule::class,
+        GooglePayLauncherModule::class
     ]
 )
 @Singleton
@@ -51,6 +63,12 @@ internal interface FormActivityComponent {
         fun context(context: Context): Builder
 
         @BindsInstance
+        fun statusBarColor(@Named(STATUS_BAR_COLOR) statusBarColor: Int?): Builder
+
+        @BindsInstance
+        fun intentConfiguration(configuration: PaymentSheet.IntentConfiguration): Builder
+
+        @BindsInstance
         fun savedStateHandle(savedStateHandle: SavedStateHandle): Builder
 
         fun build(): FormActivityComponent
@@ -71,6 +89,12 @@ internal interface FormActivityModule {
 
     @Binds
     fun bindsLinkConfigurationCoordinator(impl: RealLinkConfigurationCoordinator): LinkConfigurationCoordinator
+
+    @Binds
+    fun bindsUserFacingLogger(impl: RealUserFacingLogger): UserFacingLogger
+
+    @Binds
+    fun bindLinkGateFactory(linkGateFactory: DefaultLinkGate.Factory): LinkGate.Factory
 
     companion object {
         @Provides
