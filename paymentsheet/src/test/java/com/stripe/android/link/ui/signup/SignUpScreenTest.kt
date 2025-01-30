@@ -131,7 +131,7 @@ internal class SignUpScreenTest {
             composeTestRule.waitForIdle()
 
             dispatcher.scheduler.advanceTimeBy(1001)
-            onErrorSection().assertExists() // .assert(hasAnyChild(hasText("Something went wrong")))
+            onErrorSection().assertExists()
         }
 
     private fun viewModel(
