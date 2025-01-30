@@ -8,6 +8,7 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
+import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.asEmbeddedResult
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -23,7 +24,8 @@ internal class DefaultEmbeddedConfirmationHelper @Inject constructor(
     private val resultCallback: EmbeddedPaymentElement.ResultCallback,
     private val activityResultCaller: ActivityResultCaller,
     private val lifecycleOwner: LifecycleOwner,
-    private val confirmationStateSupplier: () -> EmbeddedConfirmationStateHolder.State?,
+    private val confirmationStateHolder: EmbeddedConfirmationStateHolder,
+    private val selectionHolder: EmbeddedSelectionHolder,
 ) : EmbeddedConfirmationHelper {
     init {
         confirmationHandler.register(
@@ -36,6 +38,10 @@ internal class DefaultEmbeddedConfirmationHelper @Inject constructor(
                 when (state) {
                     is ConfirmationHandler.State.Complete -> {
                         resultCallback.onResult(state.result.asEmbeddedResult())
+                        if (state.result is ConfirmationHandler.Result.Succeeded) {
+                            confirmationStateHolder.state = null
+                            selectionHolder.set(null)
+                        }
                     }
                     is ConfirmationHandler.State.Confirming, ConfirmationHandler.State.Idle -> Unit
                 }
@@ -54,7 +60,7 @@ internal class DefaultEmbeddedConfirmationHelper @Inject constructor(
     }
 
     private fun confirmationArgs(): ConfirmationHandler.Args? {
-        val confirmationState = confirmationStateSupplier() ?: return null
+        val confirmationState = confirmationStateHolder.state ?: return null
         val confirmationOption = confirmationState.selection?.toConfirmationOption(
             configuration = confirmationState.configuration.asCommonConfiguration(),
             linkConfiguration = confirmationState.paymentMethodMetadata.linkState?.configuration,
