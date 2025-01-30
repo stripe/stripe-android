@@ -5,18 +5,19 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
 import com.stripe.android.core.model.CountryCode
-import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkScreen
-import com.stripe.android.link.account.LinkAccountManager
+import com.stripe.android.link.NoLinkAccountFoundException
+import com.stripe.android.link.account.LinkAuth
+import com.stripe.android.link.account.LinkAuthResult
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.LinkAccount
-import com.stripe.android.link.ui.ErrorMessage
-import com.stripe.android.link.ui.getErrorMessage
 import com.stripe.android.link.ui.inline.SignUpConsentAction
+import com.stripe.android.model.EmailSource
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.uicore.elements.EmailConfig
@@ -36,11 +37,12 @@ import kotlin.time.Duration.Companion.seconds
 
 internal class SignUpViewModel @Inject constructor(
     private val configuration: LinkConfiguration,
-    private val linkAccountManager: LinkAccountManager,
     private val linkEventsReporter: LinkEventsReporter,
     private val logger: Logger,
+    private val linkAuth: LinkAuth,
     private val navigate: (LinkScreen) -> Unit,
-    private val navigateAndClearStack: (LinkScreen) -> Unit
+    private val navigateAndClearStack: (LinkScreen) -> Unit,
+    private val moveToWeb: () -> Unit
 ) : ViewModel() {
     val emailController = EmailConfig.createController(
         initialValue = configuration.customerInfo.email
@@ -67,6 +69,7 @@ internal class SignUpViewModel @Inject constructor(
     )
 
     val state: StateFlow<SignUpScreenState> = _state
+    private var emailHasChanged = false
 
     init {
         viewModelScope.launch {
@@ -102,9 +105,42 @@ internal class SignUpViewModel @Inject constructor(
         }.collectLatest { email ->
             delay(LOOKUP_DEBOUNCE)
             if (email != null) {
-                updateSignUpState(SignUpState.InputtingRemainingFields)
+                if (email != configuration.customerInfo.email || emailHasChanged) {
+                    lookupEmail(email)
+                } else {
+                    updateSignUpState(SignUpState.InputtingRemainingFields)
+                }
             } else {
                 updateSignUpState(SignUpState.InputtingPrimaryField)
+            }
+
+            if (email != configuration.customerInfo.email) {
+                emailHasChanged = true
+            }
+        }
+    }
+
+    private suspend fun lookupEmail(email: String) {
+        val lookupResult = linkAuth.lookUp(
+            email = email,
+            emailSource = EmailSource.USER_ACTION,
+            startSession = true
+        )
+
+        when (lookupResult) {
+            is LinkAuthResult.AttestationFailed -> {
+                moveToWeb()
+            }
+            is LinkAuthResult.Error -> {
+                updateSignUpState(SignUpState.InputtingRemainingFields)
+                onError(lookupResult.throwable)
+            }
+            is LinkAuthResult.Success -> {
+                onAccountFetched(lookupResult.account)
+                linkEventsReporter.onSignupCompleted()
+            }
+            LinkAuthResult.NoLinkAccountFound -> {
+                updateSignUpState(SignUpState.InputtingRemainingFields)
             }
         }
     }
@@ -112,22 +148,31 @@ internal class SignUpViewModel @Inject constructor(
     fun onSignUpClick() {
         clearError()
         viewModelScope.launch {
-            linkAccountManager.signUp(
+            val signupResult = linkAuth.signUp(
                 email = emailController.fieldValue.value,
-                phone = phoneNumberController.getE164PhoneNumber(phoneNumberController.fieldValue.value),
+                phoneNumber = phoneNumberController.getE164PhoneNumber(phoneNumberController.fieldValue.value),
                 country = phoneNumberController.getCountryCode(),
                 name = nameController.fieldValue.value,
                 consentAction = SignUpConsentAction.Implied
-            ).fold(
-                onSuccess = {
-                    onAccountFetched(it)
-                    linkEventsReporter.onSignupCompleted()
-                },
-                onFailure = {
-                    onError(it)
-                    linkEventsReporter.onSignupFailure(error = it)
-                }
             )
+
+            when (signupResult) {
+                is LinkAuthResult.AttestationFailed -> {
+                    moveToWeb()
+                }
+                is LinkAuthResult.Error -> {
+                    onError(signupResult.throwable)
+                    linkEventsReporter.onSignupFailure(error = signupResult.throwable)
+                }
+                is LinkAuthResult.Success -> {
+                    onAccountFetched(signupResult.account)
+                    linkEventsReporter.onSignupCompleted()
+                }
+                LinkAuthResult.NoLinkAccountFound -> {
+                    onError(NoLinkAccountFoundException())
+                    linkEventsReporter.onSignupFailure(error = NoLinkAccountFoundException())
+                }
+            }
         }
     }
 
@@ -146,14 +191,7 @@ internal class SignUpViewModel @Inject constructor(
         logger.error("SignUpViewModel Error: ", error)
         updateState {
             it.copy(
-                errorMessage = when (val errorMessage = error.getErrorMessage()) {
-                    is ErrorMessage.FromResources -> {
-                        errorMessage.stringResId.resolvableString
-                    }
-                    is ErrorMessage.Raw -> {
-                        errorMessage.errorMessage.resolvableString
-                    }
-                }
+                errorMessage = error.stripeErrorMessage()
             )
         }
     }
@@ -179,17 +217,19 @@ internal class SignUpViewModel @Inject constructor(
         fun factory(
             parentComponent: NativeLinkComponent,
             navigate: (LinkScreen) -> Unit,
-            navigateAndClearStack: (LinkScreen) -> Unit
+            navigateAndClearStack: (LinkScreen) -> Unit,
+            moveToWeb: () -> Unit
         ): ViewModelProvider.Factory {
             return viewModelFactory {
                 initializer {
                     SignUpViewModel(
                         configuration = parentComponent.configuration,
                         linkEventsReporter = parentComponent.linkEventsReporter,
-                        linkAccountManager = parentComponent.linkAccountManager,
                         logger = parentComponent.logger,
+                        linkAuth = parentComponent.linkAuth,
                         navigate = navigate,
-                        navigateAndClearStack = navigateAndClearStack
+                        navigateAndClearStack = navigateAndClearStack,
+                        moveToWeb = moveToWeb
                     )
                 }
             }
