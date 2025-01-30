@@ -140,7 +140,7 @@ class CustomerStateTest {
             defaultPaymentMethodId = defaultPaymentMethodId
         )
 
-        assertThat(customerState.defaultPaymentMethodId).isEqualTo(defaultPaymentMethodId)
+        assertThat(customerState.defaultPaymentMethodState.defaultPaymentMethodId).isEqualTo(defaultPaymentMethodId)
     }
 
     @Test
@@ -152,7 +152,7 @@ class CustomerStateTest {
             defaultPaymentMethodId = defaultPaymentMethodId
         )
 
-        assertThat(customerState.defaultPaymentMethodId).isNull()
+        assertThat(customerState.defaultPaymentMethodState.defaultPaymentMethodId).isNull()
     }
 
     @Test
@@ -164,7 +164,7 @@ class CustomerStateTest {
             defaultPaymentMethodId = defaultPaymentMethodId
         )
 
-        assertThat(customerState.defaultPaymentMethodId).isNull()
+        assertThat(customerState.defaultPaymentMethodState.defaultPaymentMethodId).isNull()
     }
 
     @Test
@@ -176,7 +176,7 @@ class CustomerStateTest {
             defaultPaymentMethodId = defaultPaymentMethodId
         )
 
-        assertThat(customerState.defaultPaymentMethodId).isNull()
+        assertThat(customerState.defaultPaymentMethodState.defaultPaymentMethodId).isNull()
     }
 
     @Test
@@ -205,7 +205,7 @@ class CustomerStateTest {
                     // Always 'false' for legacy ephemeral keys
                     canRemoveDuplicates = false,
                 ),
-                defaultPaymentMethodId = null
+                defaultPaymentMethodState = CustomerState.DefaultPaymentMethodState(defaultPaymentMethodId = null)
             )
         )
     }

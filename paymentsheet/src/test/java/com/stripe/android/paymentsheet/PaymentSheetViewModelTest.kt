@@ -353,7 +353,7 @@ internal class PaymentSheetViewModelTest {
                     canRemoveLastPaymentMethod = true,
                     canRemoveDuplicates = false,
                 ),
-                defaultPaymentMethodId = null
+                defaultPaymentMethodState = CustomerState.DefaultPaymentMethodState(defaultPaymentMethodId = null)
             ),
             customerRepository = customerRepository
         )

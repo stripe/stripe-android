@@ -28,7 +28,7 @@ internal class PaymentOptionsItemsMapper(
                 paymentMethods = customerState?.paymentMethods ?: listOf(),
                 isLinkEnabled = isLinkEnabled,
                 isGooglePayReady = isGooglePayReady,
-                defaultPaymentMethodId = customerState?.defaultPaymentMethodId
+                defaultPaymentMethodId = customerState?.defaultPaymentMethodState?.defaultPaymentMethodId
             ) ?: emptyList()
         }
     }

@@ -79,7 +79,7 @@ class VerticalModeInitialScreenFactoryTest {
                         canRemoveLastPaymentMethod = true,
                         canRemoveDuplicates = true,
                     ),
-                    defaultPaymentMethodId = null
+                    defaultPaymentMethodState = CustomerState.DefaultPaymentMethodState(defaultPaymentMethodId = null)
                 )
             )
         }

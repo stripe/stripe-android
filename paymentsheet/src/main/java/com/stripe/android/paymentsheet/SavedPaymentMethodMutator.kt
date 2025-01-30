@@ -50,7 +50,7 @@ internal class SavedPaymentMethodMutator(
     private val isEmbedded: Boolean,
 ) {
     val defaultPaymentMethodId: StateFlow<String?> = customerStateHolder.customer.mapAsStateFlow { customerState ->
-        customerState?.defaultPaymentMethodId
+        customerState?.defaultPaymentMethodState?.defaultPaymentMethodId
     }
 
     val providePaymentMethodName: (code: String?) -> ResolvableString = { code ->
