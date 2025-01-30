@@ -6,6 +6,7 @@ import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.link.account.LinkStore
+import com.stripe.android.link.injection.LinkAccountManagerModule
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatcher
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
@@ -21,6 +22,7 @@ import com.stripe.android.paymentsheet.utils.ProductIntegrationTypeProvider
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.runProductIntegrationTest
+import org.junit.After
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -42,6 +44,11 @@ internal class LinkTest {
 
     @TestParameter(valuesProvider = ProductIntegrationTypeProvider::class)
     lateinit var integrationType: ProductIntegrationType
+
+    @After
+    fun clearLinkAccountManagerModule() {
+        LinkAccountManagerModule.clear()
+    }
 
     @Test
     fun testSuccessfulCardPaymentWithLinkSignUp() = runProductIntegrationTest(

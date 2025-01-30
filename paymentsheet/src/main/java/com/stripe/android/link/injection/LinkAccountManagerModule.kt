@@ -1,5 +1,6 @@
 package com.stripe.android.link.injection
 
+import androidx.annotation.VisibleForTesting
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.account.DefaultLinkAccountManager
 import com.stripe.android.link.account.LinkAccountManager
@@ -32,5 +33,10 @@ internal object LinkAccountManagerModule {
                 this.linkAccountManager = it
             }
         }
+    }
+
+    @VisibleForTesting
+    fun clear() {
+        linkAccountManager = null
     }
 }
