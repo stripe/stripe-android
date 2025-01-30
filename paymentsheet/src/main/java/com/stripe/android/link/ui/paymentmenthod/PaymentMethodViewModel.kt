@@ -9,6 +9,7 @@ import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
 import com.stripe.android.link.confirmation.Result
@@ -17,7 +18,6 @@ import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.completePaymentButtonLabel
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
-import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.DefaultFormHelper
 import com.stripe.android.paymentsheet.FormHelper
@@ -78,7 +78,7 @@ internal class PaymentMethodViewModel @Inject constructor(
                     onSuccess = { linkPaymentDetails ->
                         val cardMap = paymentMethodCreateParams.toParamMap()["card"] as? Map<*, *>?
                         performConfirmation(
-                            paymentDetails = linkPaymentDetails.paymentDetails,
+                            paymentDetails = linkPaymentDetails,
                             cvc = cardMap?.get("cvc") as? String?
                         )
                         updateButtonState(PrimaryButtonState.Enabled)
@@ -100,7 +100,7 @@ internal class PaymentMethodViewModel @Inject constructor(
     }
 
     private suspend fun performConfirmation(
-        paymentDetails: ConsumerPaymentDetails.PaymentDetails,
+        paymentDetails: LinkPaymentDetails,
         cvc: String?
     ) {
         val result = linkConfirmationHandler.confirm(
