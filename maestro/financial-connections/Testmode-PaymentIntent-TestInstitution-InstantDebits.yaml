@@ -7,10 +7,16 @@ tags:
 - startRecording: ${'/tmp/test_results/testmode-paymentintent-testinstitution-instantdebits-' + new Date().getTime()}
 - clearState
 - openLink: stripeconnectionsexample://playground?integration_type=Standalone&experience=InstantDebits&flow=PaymentIntent&financial_connections_override_native=native&merchant=networking&financial_connections_test_mode=true&permissions=transactions,payment_method&financial_connections_confirm_intent=false
+- scrollUntilVisible:
+    element:
+      id: "Customer email setting"
 - tapOn:
     id: "Customer email setting"
 - inputRandomEmail
 - hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: "connect_accounts"
 - tapOn:
     id: "connect_accounts"
 # Wait until the consent button is visible
