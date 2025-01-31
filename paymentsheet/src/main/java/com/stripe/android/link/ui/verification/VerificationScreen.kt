@@ -186,7 +186,7 @@ private fun TopSection(
         }
 
         Text(
-            text = "Confirm it's you",
+            text = stringResource(R.string.stripe_verification_dialog_header),
             modifier = Modifier
                 .testTag(VERIFICATION_TITLE_TAG)
                 .padding(vertical = 4.dp),
