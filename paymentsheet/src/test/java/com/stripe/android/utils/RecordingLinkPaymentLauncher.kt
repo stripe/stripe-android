@@ -39,13 +39,14 @@ internal object RecordingLinkPaymentLauncher {
                 unregisterCalls.add(Unit)
             }
 
-            on { present(any(), anyOrNull()) } doAnswer { invocation ->
+            on { present(any(), anyOrNull(), any()) } doAnswer { invocation ->
                 val arguments = invocation.arguments
 
                 presentCalls.add(
                     PresentCall(
                         configuration = arguments[0] as LinkConfiguration,
-                        linkAccount = arguments[1] as? LinkAccount
+                        linkAccount = arguments[1] as? LinkAccount,
+                        useLinkExpress = arguments[2] as Boolean
                     )
                 )
             }
@@ -79,6 +80,7 @@ internal object RecordingLinkPaymentLauncher {
 
     data class PresentCall(
         val configuration: LinkConfiguration,
-        val linkAccount: LinkAccount?
+        val linkAccount: LinkAccount?,
+        val useLinkExpress: Boolean
     )
 }

@@ -137,8 +137,27 @@ internal class LinkConfirmationDefinitionTest {
 
         val presentCall = launcherScenario.presentCalls.awaitItem()
 
+        assertThat(presentCall.useLinkExpress).isTrue()
+    }
+
+    @Test
+    fun `'launch' should launch properly with provided parameters when useLinkExpress is false`() = test {
+        val definition = createLinkConfirmationDefinition()
+
+        definition.launch(
+            confirmationOption = LINK_CONFIRMATION_OPTION.copy(
+                useLinkExpress = false
+            ),
+            confirmationParameters = CONFIRMATION_PARAMETERS,
+            launcher = launcherScenario.launcher,
+            arguments = Unit,
+        )
+
+        val presentCall = launcherScenario.presentCalls.awaitItem()
+
         assertThat(presentCall.configuration).isEqualTo(LINK_CONFIRMATION_OPTION.configuration)
         assertThat(presentCall.linkAccount).isEqualTo(TestFactory.LINK_ACCOUNT)
+        assertThat(presentCall.useLinkExpress).isFalse()
     }
 
     @Test
@@ -329,6 +348,7 @@ internal class LinkConfirmationDefinitionTest {
 
         private val LINK_CONFIRMATION_OPTION = LinkConfirmationOption(
             configuration = TestFactory.LINK_CONFIGURATION,
+            useLinkExpress = true
         )
     }
 }
