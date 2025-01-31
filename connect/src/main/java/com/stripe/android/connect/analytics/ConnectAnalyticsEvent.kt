@@ -49,20 +49,20 @@ internal sealed class ConnectAnalyticsEvent(
      * @param pageViewId The pageViewID from the web view
      * @param timeToLoadMs Elapsed time in milliseconds it took the web page to load (starting when it first began
      *   loading).
-     * @param perceivedTimeToLoad Elapsed time in seconds in took between when the component was initially viewed
+     * @param perceivedTimeToLoadMs Elapsed time in milliseconds it took between when the component was initially viewed
      *   on screen (`component.viewed`) to when the component finished loading. This value will be `0` if the
      *   component finished loading before being viewed on screen.
      */
     data class WebComponentLoaded(
         val pageViewId: String,
         val timeToLoadMs: Long,
-        val perceivedTimeToLoad: Long
+        val perceivedTimeToLoadMs: Long
     ) : ConnectAnalyticsEvent(
         "component.web.component_loaded",
         mapOf(
             "page_view_id" to pageViewId,
             "time_to_load" to msToSecs(timeToLoadMs),
-            "perceived_time_to_load" to perceivedTimeToLoad.toString()
+            "perceived_time_to_load" to msToSecs(perceivedTimeToLoadMs)
         )
     )
 

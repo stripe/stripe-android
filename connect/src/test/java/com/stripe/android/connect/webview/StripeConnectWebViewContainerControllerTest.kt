@@ -383,8 +383,8 @@ class StripeConnectWebViewContainerControllerTest {
         verify(analyticsService).track(
             ConnectAnalyticsEvent.WebComponentLoaded(
                 pageViewId = "pageView123",
-                timeToLoad = 100L,
-                perceivedTimeToLoad = 100L,
+                timeToLoadMs = 100L,
+                perceivedTimeToLoadMs = 100L,
             )
         )
     }

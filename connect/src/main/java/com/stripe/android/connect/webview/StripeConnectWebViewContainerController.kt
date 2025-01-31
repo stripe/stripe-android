@@ -290,8 +290,8 @@ internal class StripeConnectWebViewContainerController<Listener : StripeEmbedded
         analyticsService.track(
             ConnectAnalyticsEvent.WebComponentLoaded(
                 pageViewId = pageViewId,
-                timeToLoad = timeToLoad,
-                perceivedTimeToLoad = timeToLoad,
+                timeToLoadMs = timeToLoad,
+                perceivedTimeToLoadMs = timeToLoad,
             )
         )
     }
