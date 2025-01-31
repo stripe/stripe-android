@@ -89,7 +89,8 @@ internal class LinkPaymentLauncherTest {
 
             linkPaymentLauncher.present(
                 configuration = TestFactory.LINK_CONFIGURATION,
-                linkAccount = TestFactory.LINK_ACCOUNT
+                linkAccount = TestFactory.LINK_ACCOUNT,
+                useLinkExpress = true
             )
 
             val launchCall = awaitLaunchCall()
@@ -98,8 +99,8 @@ internal class LinkPaymentLauncherTest {
                 .isEqualTo(
                     LinkActivityContract.Args(
                         configuration = TestFactory.LINK_CONFIGURATION,
-                        startWithVerificationDialog = false,
-                        linkAccount = TestFactory.LINK_ACCOUNT
+                        startWithVerificationDialog = true,
+                        linkAccount = TestFactory.LINK_ACCOUNT,
                     )
                 )
 
@@ -203,7 +204,8 @@ internal class LinkPaymentLauncherTest {
 
             linkPaymentLauncher.present(
                 configuration = TestFactory.LINK_CONFIGURATION,
-                linkAccount = TestFactory.LINK_ACCOUNT
+                linkAccount = TestFactory.LINK_ACCOUNT,
+                useLinkExpress = true
             )
 
             verifyActivityResultCallback(
@@ -233,7 +235,8 @@ internal class LinkPaymentLauncherTest {
 
                 linkPaymentLauncher.present(
                     configuration = TestFactory.LINK_CONFIGURATION,
-                    linkAccount = TestFactory.LINK_ACCOUNT
+                    linkAccount = TestFactory.LINK_ACCOUNT,
+                    useLinkExpress = true
                 )
 
                 val registerCall = awaitRegisterCall()

@@ -54,6 +54,61 @@ class LinkHandlerTest {
         assertThat(handler.isLinkEnabled.first()).isTrue()
         assertThat(savedStateHandle.get<PaymentSelection>(SAVE_SELECTION)).isNull()
     }
+
+    @Test
+    fun `setupLinkWithEagerLaunch returns true in LoggedIn and NeedsVerification states`() = runLinkTest {
+        val logInStates = listOf(
+            LinkState.LoginState.LoggedIn,
+            LinkState.LoginState.NeedsVerification
+        )
+
+        logInStates.forEach { state ->
+            val shouldLaunchEagerly = handler.setupLinkWithEagerLaunch(
+                state = createLinkState(
+                    loginState = state,
+                    signupMode = LinkSignupMode.AlongsideSaveForFutureUse
+                )
+            )
+
+            assertThat(shouldLaunchEagerly).isTrue()
+        }
+    }
+
+    @Test
+    fun `setupLinkWithEagerLaunch returns false in LoggedOut state`() = runLinkTest {
+        val shouldLaunchEagerly = handler.setupLinkWithEagerLaunch(
+            state = createLinkState(
+                loginState = LinkState.LoginState.LoggedOut,
+                signupMode = LinkSignupMode.AlongsideSaveForFutureUse
+            )
+        )
+
+        assertThat(shouldLaunchEagerly).isFalse()
+    }
+
+    @Test
+    fun `setupLinkWithEagerLaunch returns false when suppress2faModal is true`() = runLinkTest(
+        linkConfiguration = defaultLinkConfiguration()
+            .copy(
+                suppress2faModal = true
+            )
+    ) {
+        val shouldLaunchEagerly = handler.setupLinkWithEagerLaunch(
+            state = createLinkState(
+                loginState = LinkState.LoginState.LoggedOut,
+                signupMode = LinkSignupMode.AlongsideSaveForFutureUse
+            )
+        )
+
+        assertThat(shouldLaunchEagerly).isFalse()
+    }
+
+    @Test
+    fun `setupLinkWithEagerLaunch returns false when state is null`() = runLinkTest {
+        val shouldLaunchEagerly = handler.setupLinkWithEagerLaunch(state = null)
+
+        assertThat(shouldLaunchEagerly).isFalse()
+    }
 }
 
 private fun runLinkTest(

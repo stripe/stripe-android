@@ -90,7 +90,7 @@ class FlowControllerConfigurationHandlerTest {
         assertThat(configureErrors.awaitItem()).isNull()
         assertThat(viewModel.previousConfigureRequest).isNotNull()
         assertThat(configurationHandler.isConfigured).isTrue()
-        assertThat(viewModel.paymentSelection).isEqualTo(PaymentSelection.Link)
+        assertThat(viewModel.paymentSelection).isEqualTo(PaymentSelection.Link())
         assertThat(viewModel.state).isNotNull()
         verify(eventReporter).onInit(
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
@@ -169,7 +169,7 @@ class FlowControllerConfigurationHandlerTest {
         assertThat(configureErrors.awaitItem()).isNull()
         assertThat(viewModel.previousConfigureRequest).isEqualTo(newConfigureRequest)
         assertThat(configurationHandler.isConfigured).isTrue()
-        assertThat(viewModel.paymentSelection).isEqualTo(PaymentSelection.Link)
+        assertThat(viewModel.paymentSelection).isEqualTo(PaymentSelection.Link())
 
         // We're running a new config, so we DO expect an interaction.
         verify(eventReporter).onInit(
@@ -208,7 +208,7 @@ class FlowControllerConfigurationHandlerTest {
         assertThat(configureErrors.awaitItem()).isNull()
         assertThat(viewModel.previousConfigureRequest).isEqualTo(newConfigureRequest)
         assertThat(configurationHandler.isConfigured).isTrue()
-        assertThat(viewModel.paymentSelection).isEqualTo(PaymentSelection.Link)
+        assertThat(viewModel.paymentSelection).isEqualTo(PaymentSelection.Link())
 
         // We're running a new config, so we DO expect an interaction.
         verify(eventReporter).onInit(
@@ -513,7 +513,7 @@ class FlowControllerConfigurationHandlerTest {
         return FakePaymentElementLoader(
             customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-            paymentSelection = PaymentSelection.Link,
+            paymentSelection = PaymentSelection.Link(),
             linkState = LinkState(
                 configuration = mock(),
                 loginState = LinkState.LoginState.LoggedIn,

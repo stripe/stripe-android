@@ -104,7 +104,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 onUserSelection()
             },
             onLinkPressed = {
-                updateSelection(PaymentSelection.Link)
+                updateSelection(PaymentSelection.Link())
                 onUserSelection()
             },
             isSetupIntent = paymentMethodMetadata.stripeIntent is SetupIntent

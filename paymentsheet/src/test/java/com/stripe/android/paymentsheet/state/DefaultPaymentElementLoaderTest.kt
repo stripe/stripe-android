@@ -1113,7 +1113,7 @@ internal class DefaultPaymentElementLoaderTest {
     @Test
     fun `Emits correct events when loading succeeds with saved Link selection`() = runTest {
         testSuccessfulLoadSendsEventsCorrectly(
-            paymentSelection = PaymentSelection.Link
+            paymentSelection = PaymentSelection.Link()
         )
     }
 

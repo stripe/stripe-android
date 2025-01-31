@@ -558,7 +558,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 
             val displayablePaymentMethods = interactor.state.value.displayablePaymentMethods
             displayablePaymentMethods.first { it.code == "link" }.onClick()
-            assertThat(selectedWallet).isEqualTo(PaymentSelection.Link)
+            assertThat(selectedWallet).isEqualTo(PaymentSelection.Link())
             displayablePaymentMethods.first { it.code == "google_pay" }.onClick()
             assertThat(selectedWallet).isEqualTo(PaymentSelection.GooglePay)
         }
@@ -862,7 +862,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 
     @Test
     fun verticalModeScreenSelection_isNotUpdatedToNullWhenOnAnotherScreen() {
-        val expectedPaymentSelection = PaymentSelection.Link
+        val expectedPaymentSelection = PaymentSelection.Link()
         runScenario(initialSelection = expectedPaymentSelection, updateSelection = {}) {
             selectionSource.value = null
 
@@ -876,10 +876,10 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 
     @Test
     fun verticalModeScreenSelection_isUpdatedToNullWhenCurrentScreen() {
-        runScenario(initialSelection = PaymentSelection.Link, updateSelection = {}) {
+        runScenario(initialSelection = PaymentSelection.Link(), updateSelection = {}) {
             interactor.state.test {
                 awaitItem().run {
-                    assertThat(selection).isEqualTo(PaymentSelection.Link)
+                    assertThat(selection).isEqualTo(PaymentSelection.Link())
                 }
                 isCurrentScreenSource.value = true
                 selectionSource.value = null
@@ -892,7 +892,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 
     @Test
     fun verticalModeScreenSelection_isNeverUpdatedToNewPmWithFormFields() {
-        val initialPaymentSelection = PaymentSelection.Link
+        val initialPaymentSelection = PaymentSelection.Link()
         runScenario(
             initialSelection = initialPaymentSelection,
             formTypeForCode = { FormType.UserInteractionRequired },
@@ -925,7 +925,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 
     @Test
     fun verticalModeScreenSelection_canBeANewPmWithoutFormFields() {
-        val initialPaymentSelection = PaymentSelection.Link
+        val initialPaymentSelection = PaymentSelection.Link()
         runScenario(
             initialSelection = initialPaymentSelection,
             formTypeForCode = { FormType.Empty },
@@ -944,7 +944,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 
     @Test
     fun verticalModeScreenSelection_canBeAnEpm() {
-        val initialPaymentSelection = PaymentSelection.Link
+        val initialPaymentSelection = PaymentSelection.Link()
         runScenario(
             initialSelection = initialPaymentSelection,
             formTypeForCode = { FormType.Empty },
@@ -965,7 +965,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 
     @Test
     fun verticalModeScreenSelection_canBeASavedPm() {
-        val initialPaymentSelection = PaymentSelection.Link
+        val initialPaymentSelection = PaymentSelection.Link()
         runScenario(
             initialSelection = initialPaymentSelection,
             formTypeForCode = { FormType.Empty },
@@ -992,7 +992,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             formTypeForCode = { FormType.Empty },
             updateSelection = {},
         ) {
-            val newSelection = PaymentSelection.Link
+            val newSelection = PaymentSelection.Link()
             selectionSource.value = newSelection
 
             interactor.state.test {
@@ -1005,7 +1005,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 
     @Test
     fun verticalModeScreenSelection_canBeGooglePay() {
-        val initialPaymentSelection = PaymentSelection.Link
+        val initialPaymentSelection = PaymentSelection.Link()
         runScenario(
             initialSelection = initialPaymentSelection,
             formTypeForCode = { FormType.Empty },

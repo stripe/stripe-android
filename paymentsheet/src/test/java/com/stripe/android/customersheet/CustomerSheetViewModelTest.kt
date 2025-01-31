@@ -425,7 +425,7 @@ class CustomerSheetViewModelTest {
             val error = assertFailsWith<IllegalStateException> {
                 viewModel.handleViewAction(
                     CustomerSheetViewAction.OnItemSelected(
-                        selection = PaymentSelection.Link
+                        selection = PaymentSelection.Link()
                     )
                 )
             }

@@ -430,7 +430,7 @@ class PaymentSheetEventTest {
             linkMode = null,
             googlePaySupported = false,
             duration = (5L).seconds,
-            paymentSelection = PaymentSelection.Link,
+            paymentSelection = PaymentSelection.Link(),
             initializationMode = paymentIntentInitializationMode,
             orderedLpms = listOf("card"),
         )
@@ -617,7 +617,7 @@ class PaymentSheetEventTest {
     fun `Link payment method event should return expected event`() {
         val linkEvent = PaymentSheetEvent.Payment(
             mode = EventReporter.Mode.Complete,
-            paymentSelection = PaymentSelection.Link,
+            paymentSelection = PaymentSelection.Link(),
             duration = 1.milliseconds,
             result = PaymentSheetEvent.Payment.Result.Success,
             currency = "usd",
@@ -885,7 +885,7 @@ class PaymentSheetEventTest {
     fun `Link payment method failure event should return expected event`() {
         val linkEvent = PaymentSheetEvent.Payment(
             mode = EventReporter.Mode.Complete,
-            paymentSelection = PaymentSelection.Link,
+            paymentSelection = PaymentSelection.Link(),
             duration = 1.milliseconds,
             result = PaymentSheetEvent.Payment.Result.Failure(
                 error = PaymentSheetConfirmationError.Stripe(APIException()),
