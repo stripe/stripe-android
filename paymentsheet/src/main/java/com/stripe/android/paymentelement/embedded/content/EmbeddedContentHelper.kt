@@ -7,6 +7,7 @@ import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
+import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.CustomerStateHolder
@@ -20,6 +21,8 @@ import com.stripe.android.paymentsheet.verticalmode.DefaultPaymentMethodVertical
 import com.stripe.android.paymentsheet.verticalmode.DefaultPaymentMethodVerticalLayoutInteractor.FormType
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodIncentiveInteractor
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor
+import com.stripe.android.uicore.utils.combineAsStateFlow
+import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -58,7 +61,9 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
     private val selectionHolder: EmbeddedSelectionHolder,
     private val embeddedWalletsHelper: EmbeddedWalletsHelper,
     private val customerStateHolder: CustomerStateHolder,
-    private val embeddedFormHelperFactory: EmbeddedFormHelperFactory
+    private val embeddedFormHelperFactory: EmbeddedFormHelperFactory,
+    private val confirmationHandler: ConfirmationHandler,
+    private val confirmationStateHolder: EmbeddedConfirmationStateHolder,
 ) : EmbeddedContentHelper {
 
     private val mandate: StateFlow<ResolvableString?> = savedStateHandle.getStateFlow(
@@ -145,7 +150,12 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
 
         return DefaultPaymentMethodVerticalLayoutInteractor(
             paymentMethodMetadata = paymentMethodMetadata,
-            processing = stateFlowOf(false),
+            processing = combineAsStateFlow(
+                confirmationHandler.state.mapAsStateFlow { it is ConfirmationHandler.State.Confirming },
+                confirmationStateHolder.stateFlow.mapAsStateFlow { it != null },
+            ) { confirmationStateValid, configurationStateValid ->
+                confirmationStateValid && configurationStateValid
+            },
             selection = selectionHolder.selection,
             paymentMethodIncentiveInteractor = paymentMethodIncentiveInteractor,
             formTypeForCode = { code ->

@@ -7,6 +7,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
+import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedContentHelper.Companion.MANDATE_KEY_EMBEDDED_CONTENT
@@ -146,6 +147,7 @@ internal class DefaultEmbeddedContentHelperTest {
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
             embeddedSelectionHolder = selectionHolder
         )
+        val confirmationHandler = FakeConfirmationHandler()
         val embeddedContentHelper = DefaultEmbeddedContentHelper(
             coroutineScope = CoroutineScope(Dispatchers.Unconfined),
             savedStateHandle = savedStateHandle,
@@ -155,11 +157,18 @@ internal class DefaultEmbeddedContentHelperTest {
             selectionHolder = selectionHolder,
             embeddedWalletsHelper = { stateFlowOf(null) },
             customerStateHolder = CustomerStateHolder(savedStateHandle, selectionHolder.selection),
-            embeddedFormHelperFactory = embeddedFormHelperFactory
+            embeddedFormHelperFactory = embeddedFormHelperFactory,
+            confirmationHandler = confirmationHandler,
+            confirmationStateHolder = EmbeddedConfirmationStateHolder(
+                savedStateHandle = savedStateHandle,
+                selectionHolder = selectionHolder,
+                coroutineScope = CoroutineScope(Dispatchers.Unconfined),
+            ),
         )
         Scenario(
             embeddedContentHelper = embeddedContentHelper,
             savedStateHandle = savedStateHandle,
         ).block()
+        confirmationHandler.validate()
     }
 }

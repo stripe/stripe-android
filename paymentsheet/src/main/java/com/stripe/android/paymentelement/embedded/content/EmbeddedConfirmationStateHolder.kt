@@ -12,6 +12,7 @@ import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
@@ -28,6 +29,9 @@ internal class EmbeddedConfirmationStateHolder @Inject constructor(
         set(value) {
             savedStateHandle[CONFIRMATION_STATE_KEY] = value
         }
+
+    val stateFlow: StateFlow<State?>
+        get() = savedStateHandle.getStateFlow(CONFIRMATION_STATE_KEY, null)
 
     init {
         coroutineScope.launch {
