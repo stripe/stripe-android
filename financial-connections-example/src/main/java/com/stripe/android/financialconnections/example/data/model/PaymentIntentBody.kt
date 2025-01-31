@@ -31,4 +31,6 @@ data class PaymentIntentBody(
     val stripeAccountId: String? = null,
     @SerialName("link_mode")
     val linkMode: String? = null,
+    @SerialName("relink_authorization")
+    val relinkAuthorization: String? = null,
 )

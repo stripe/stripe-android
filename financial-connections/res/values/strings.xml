@@ -116,6 +116,7 @@
 
     <!-- Partner auth -->
     <string name="stripe_prepane_cancel_cta">Cancel</string>
+    <string name="stripe_prepane_choose_different_bank_cta">Choose a different bank</string>
 
     <!-- Loading -->
     <string name="stripe_loading_pill_label">Hang on, nearly there</string>
