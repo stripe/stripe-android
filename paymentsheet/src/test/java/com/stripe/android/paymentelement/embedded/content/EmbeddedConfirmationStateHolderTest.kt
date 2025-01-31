@@ -3,6 +3,7 @@
 package com.stripe.android.paymentelement.embedded.content
 
 import androidx.lifecycle.SavedStateHandle
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
@@ -44,6 +45,20 @@ internal class EmbeddedConfirmationStateHolderTest {
         assertThat(confirmationStateHolder.state?.selection?.paymentMethodType).isNull()
         selectionHolder.set(PaymentSelection.GooglePay)
         assertThat(confirmationStateHolder.state?.selection?.paymentMethodType).isEqualTo("google_pay")
+    }
+
+    @Test
+    fun `updating state or selection updates stateFlow`() = testScenario {
+        confirmationStateHolder.stateFlow.test {
+            assertThat(awaitItem()).isNull()
+            confirmationStateHolder.state = EmbeddedConfirmationStateFixtures.defaultState()
+            awaitItem().let {
+                assertThat(it).isNotNull()
+                assertThat(it?.selection?.paymentMethodType).isNull()
+            }
+            selectionHolder.set(PaymentSelection.GooglePay)
+            assertThat(awaitItem()?.selection?.paymentMethodType).isEqualTo("google_pay")
+        }
     }
 
     private class Scenario(
