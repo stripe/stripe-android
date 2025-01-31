@@ -152,15 +152,11 @@ private fun Screens(
         composable(LinkScreen.Verification.route) {
             val linkAccount = getLinkAccount()
                 ?: return@composable dismissWithResult(noLinkAccountResult())
-            val viewModel: VerificationViewModel = linkViewModel { parentComponent ->
-                VerificationViewModel.factory(
-                    parentComponent = parentComponent,
-                    goBack = goBack,
-                    navigateAndClearStack = navigateAndClearStack,
-                    linkAccount = linkAccount
-                )
-            }
-            VerificationScreen(viewModel)
+            VerificationRoute(
+                linkAccount = linkAccount,
+                navigateAndClearStack = navigateAndClearStack,
+                goBack = goBack
+            )
         }
 
         composable(LinkScreen.Wallet.route) {
@@ -211,6 +207,29 @@ private fun SignUpRoute(
     SignUpScreen(
         viewModel = viewModel,
     )
+}
+
+@Composable
+private fun VerificationRoute(
+    linkAccount: LinkAccount,
+    navigateAndClearStack: (route: LinkScreen) -> Unit,
+    goBack: () -> Unit
+) {
+    val viewModel: VerificationViewModel = linkViewModel { parentComponent ->
+        VerificationViewModel.factory(
+            parentComponent = parentComponent,
+            onDismissClicked = goBack,
+            linkAccount = linkAccount,
+            isDialog = false,
+            onVerificationSucceeded = {
+                navigateAndClearStack(LinkScreen.Wallet)
+            },
+            onChangeEmailClicked = {
+                navigateAndClearStack(LinkScreen.SignUp)
+            }
+        )
+    }
+    VerificationScreen(viewModel)
 }
 
 @Composable

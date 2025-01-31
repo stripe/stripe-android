@@ -14,6 +14,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.core.Logger
 import com.stripe.android.link.ui.FullScreenContent
+import com.stripe.android.link.ui.verification.VerificationDialog
 import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.launch
@@ -51,7 +52,7 @@ internal class LinkActivity : ComponentActivity() {
         setContent {
             val screenState by vm.linkScreenState.collectAsState()
 
-            when (screenState) {
+            when (val state = screenState) {
                 ScreenState.FullScreen -> {
                     FullScreenContent(
                         viewModel = vm,
@@ -59,7 +60,13 @@ internal class LinkActivity : ComponentActivity() {
                     )
                 }
                 ScreenState.Loading -> Unit
-                is ScreenState.VerificationDialog -> Unit
+                is ScreenState.VerificationDialog -> {
+                    VerificationDialog(
+                        linkAccount = state.linkAccount,
+                        onVerificationSucceeded = vm::onVerificationSucceeded,
+                        onDismissClicked = vm::onDismissVerificationClicked
+                    )
+                }
             }
         }
     }
