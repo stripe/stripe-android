@@ -6,6 +6,7 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.utils.requireApplication
+import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
 import javax.inject.Inject
@@ -18,6 +19,7 @@ internal class FormActivityViewModel @Inject constructor(
         customViewModelScope.cancel()
     }
 
+    @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
     class Factory(
         private val argSupplier: () -> FormContract.Args
     ) : ViewModelProvider.Factory {
@@ -28,6 +30,7 @@ internal class FormActivityViewModel @Inject constructor(
                 .paymentMethodMetadata(args.paymentMethodMetadata)
                 .selectedPaymentMethodCode(args.selectedPaymentMethodCode)
                 .hasSavedPaymentMethods(args.hasSavedPaymentMethods)
+                .configuration(args.configuration)
                 .context(extras.requireApplication())
                 .savedStateHandle(extras.createSavedStateHandle())
                 .build()

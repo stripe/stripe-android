@@ -237,6 +237,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         CUSTOMER_SESSION_ON_CUSTOMER_SHEET_ELEMENTS_SESSION_NO_CUSTOMER_FIELD(
             partialEventName = "customersheet.customer_session.elements_session.no_customer_field"
         ),
+        EMBEDDED_SHEET_LAUNCHER_CONFIRMATION_CONFIGURATION_IS_NULL(
+            partialEventName = "embedded.embedded_sheet_launcher.confirmation_configuration_is_null"
+        ),
         ;
 
         override val eventName: String

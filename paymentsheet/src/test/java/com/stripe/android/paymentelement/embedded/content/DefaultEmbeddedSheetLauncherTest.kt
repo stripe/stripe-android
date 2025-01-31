@@ -8,6 +8,8 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.confirmation.asCallbackFor
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.form.FormContract
@@ -17,6 +19,7 @@ import com.stripe.android.paymentelement.embedded.manage.ManageResult
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.utils.DummyActivityResultCaller
 import com.stripe.android.utils.DummyActivityResultCaller.RegisterCall
 import kotlinx.coroutines.test.runTest
@@ -24,6 +27,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
+@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @RunWith(RobolectricTestRunner::class)
 internal class DefaultEmbeddedSheetLauncherTest {
 
@@ -31,12 +35,26 @@ internal class DefaultEmbeddedSheetLauncherTest {
     fun `launchForm launches activity with correct parameters`() = testScenario {
         val code = "test_code"
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
-        val expectedArgs = FormContract.Args(code, paymentMethodMetadata, false)
+        val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
+        val expectedArgs = FormContract.Args(code, paymentMethodMetadata, false, configuration)
 
-        sheetLauncher.launchForm(code, paymentMethodMetadata, false)
+        sheetLauncher.launchForm(code, paymentMethodMetadata, false, configuration)
         val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall()
         assertThat(launchCall).isEqualTo(expectedArgs)
         assertThat(sheetStateHolder.sheetIsOpen).isTrue()
+    }
+
+    @Test
+    fun `launchForm logs error and returns if config is null`() = testScenario {
+        val code = "test_code"
+        val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
+
+        sheetLauncher.launchForm(code, paymentMethodMetadata, false, null)
+        val loggedErrors = errorReporter.getLoggedErrors()
+        assertThat(loggedErrors.size).isEqualTo(1)
+        assertThat(loggedErrors.first())
+            .isEqualTo("unexpected_error.embedded.embedded_sheet_launcher.confirmation_configuration_is_null")
+        assertThat(sheetStateHolder.sheetIsOpen).isFalse()
     }
 
     @Test
@@ -138,6 +156,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val selectionHolder = EmbeddedSelectionHolder(savedStateHandle)
         val customerStateHolder = CustomerStateHolder(savedStateHandle, selectionHolder.selection)
         val sheetStateHolder = SheetStateHolder(savedStateHandle)
+        val errorReporter = FakeErrorReporter()
 
         DummyActivityResultCaller.test {
             val sheetLauncher = DefaultEmbeddedSheetLauncher(
@@ -146,6 +165,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
                 selectionHolder = selectionHolder,
                 customerStateHolder = customerStateHolder,
                 sheetStateHolder = sheetStateHolder,
+                errorReporter = errorReporter,
             )
             val formRegisterCall = awaitRegisterCall()
             val manageRegisterCall = awaitRegisterCall()
@@ -170,6 +190,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
                 manageLauncher = manageLauncher,
                 sheetLauncher = sheetLauncher,
                 sheetStateHolder = sheetStateHolder,
+                errorReporter = errorReporter
             ).block()
         }
     }
@@ -185,5 +206,6 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val manageLauncher: ActivityResultLauncher<*>,
         val sheetLauncher: EmbeddedSheetLauncher,
         val sheetStateHolder: SheetStateHolder,
+        val errorReporter: FakeErrorReporter
     )
 }
