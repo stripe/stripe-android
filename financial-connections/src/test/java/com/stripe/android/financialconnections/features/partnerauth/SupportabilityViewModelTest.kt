@@ -28,6 +28,7 @@ import com.stripe.android.financialconnections.utils.TestHandleError
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import com.stripe.android.financialconnections.utils.UriUtils
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -78,6 +79,9 @@ internal class SupportabilityViewModelTest {
 
             createViewModel()
 
+            // This is a bad workaround. Find something better!
+            advanceUntilIdle()
+
             handleError.assertError(
                 extraMessage = "Error fetching payload / posting AuthSession",
                 error = unplannedDowntimeError,
@@ -97,6 +101,9 @@ internal class SupportabilityViewModelTest {
         whenever(getOrFetchSync(anyOrNull(), anyOrNull())).thenReturn(syncResponse(manifest))
 
         val viewModel = createViewModel(SharedPartnerAuthState(Pane.PARTNER_AUTH_DRAWER))
+
+        // This is a bad workaround. Find something better!
+        advanceUntilIdle()
 
         eventTracker.assertContainsEvent(
             "linked_accounts.pane.loaded",
