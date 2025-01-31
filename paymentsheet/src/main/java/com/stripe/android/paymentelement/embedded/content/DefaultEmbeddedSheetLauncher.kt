@@ -5,7 +5,6 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
-import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.form.FormContract
@@ -18,13 +17,12 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.CustomerState
 import javax.inject.Inject
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 internal interface EmbeddedSheetLauncher {
     fun launchForm(
         code: String,
         paymentMethodMetadata: PaymentMethodMetadata,
         hasSavedPaymentMethods: Boolean,
-        configuration: EmbeddedPaymentElement.Configuration?
+        embeddedConfirmationState: EmbeddedConfirmationStateHolder.State?
     )
 
     fun launchManage(
@@ -85,11 +83,11 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
         code: String,
         paymentMethodMetadata: PaymentMethodMetadata,
         hasSavedPaymentMethods: Boolean,
-        configuration: EmbeddedPaymentElement.Configuration?
+        embeddedConfirmationState: EmbeddedConfirmationStateHolder.State?
     ) {
-        if (configuration == null) {
+        if (embeddedConfirmationState == null) {
             errorReporter.report(
-                ErrorReporter.UnexpectedErrorEvent.EMBEDDED_SHEET_LAUNCHER_CONFIRMATION_CONFIGURATION_IS_NULL
+                ErrorReporter.UnexpectedErrorEvent.EMBEDDED_SHEET_LAUNCHER_EMBEDDED_STATE_IS_NULL
             )
             return
         }
@@ -98,7 +96,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
             selectedPaymentMethodCode = code,
             paymentMethodMetadata = paymentMethodMetadata,
             hasSavedPaymentMethods = hasSavedPaymentMethods,
-            configuration = configuration
+            configuration = embeddedConfirmationState.configuration
         )
         formActivityLauncher.launch(args)
     }

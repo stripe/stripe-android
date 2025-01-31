@@ -17,8 +17,10 @@ import com.stripe.android.paymentelement.embedded.form.FormResult
 import com.stripe.android.paymentelement.embedded.manage.ManageContract
 import com.stripe.android.paymentelement.embedded.manage.ManageResult
 import com.stripe.android.paymentsheet.CustomerStateHolder
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.utils.DummyActivityResultCaller
 import com.stripe.android.utils.DummyActivityResultCaller.RegisterCall
@@ -36,9 +38,24 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val code = "test_code"
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
         val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
-        val expectedArgs = FormContract.Args(code, paymentMethodMetadata, false, configuration)
+        val state = EmbeddedConfirmationStateHolder.State(
+            paymentMethodMetadata = paymentMethodMetadata,
+            selection = null,
+            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+                PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(1099L, "USD")
+                )
+            ),
+            configuration = configuration
+        )
+        val expectedArgs = FormContract.Args(
+            code,
+            paymentMethodMetadata,
+            false,
+            state.configuration
+        )
 
-        sheetLauncher.launchForm(code, paymentMethodMetadata, false, configuration)
+        sheetLauncher.launchForm(code, paymentMethodMetadata, false, state)
         val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall()
         assertThat(launchCall).isEqualTo(expectedArgs)
         assertThat(sheetStateHolder.sheetIsOpen).isTrue()
@@ -53,7 +70,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val loggedErrors = errorReporter.getLoggedErrors()
         assertThat(loggedErrors.size).isEqualTo(1)
         assertThat(loggedErrors.first())
-            .isEqualTo("unexpected_error.embedded.embedded_sheet_launcher.confirmation_configuration_is_null")
+            .isEqualTo("unexpected_error.embedded.embedded_sheet_launcher.embedded_state_is_null")
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
     }
 
