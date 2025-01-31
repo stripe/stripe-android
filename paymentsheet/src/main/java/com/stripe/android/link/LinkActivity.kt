@@ -9,16 +9,11 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
 import androidx.core.os.bundleOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.core.Logger
-import com.stripe.android.link.ui.FullScreenContent
-import com.stripe.android.link.ui.verification.VerificationDialog
 import com.stripe.android.paymentsheet.BuildConfig
-import com.stripe.android.uicore.utils.collectAsState
 
 internal class LinkActivity : ComponentActivity() {
     @VisibleForTesting
@@ -54,28 +49,10 @@ internal class LinkActivity : ComponentActivity() {
         lifecycle.addObserver(vm)
 
         setContent {
-            val screenState by vm.linkScreenState.collectAsState()
-
-            when (val state = screenState) {
-                ScreenState.FullScreen -> {
-                    FullScreenContent(
-                        modifier = Modifier
-                            .testTag(FULL_SCREEN_CONTENT_TAG),
-                        viewModel = vm,
-                        onBackPressed = onBackPressedDispatcher::onBackPressed
-                    )
-                }
-                ScreenState.Loading -> Unit
-                is ScreenState.VerificationDialog -> {
-                    VerificationDialog(
-                        modifier = Modifier
-                            .testTag(VERIFICATION_DIALOG_CONTENT_TAG),
-                        linkAccount = state.linkAccount,
-                        onVerificationSucceeded = vm::onVerificationSucceeded,
-                        onDismissClicked = vm::onDismissVerificationClicked
-                    )
-                }
-            }
+            LinkScreenContent(
+                viewModel = vm,
+                onBackPressed = onBackPressedDispatcher::onBackPressed
+            )
         }
     }
 

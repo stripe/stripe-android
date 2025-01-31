@@ -7,7 +7,9 @@ import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.FakeLinkAccountManager
@@ -48,6 +50,8 @@ internal class VerificationScreenTest {
         onErrorTag().assertDoesNotExist()
         onLoaderTag().assertDoesNotExist()
         onResendCodeButtonTag().assertIsDisplayed().assertHasClickAction().assertIsEnabled()
+        onVerificationHeaderImageTag().assertDoesNotExist()
+        onVerificationHeaderButtonTag().assertDoesNotExist()
     }
 
     @Test
@@ -67,7 +71,12 @@ internal class VerificationScreenTest {
         onEmailTag().assertIsDisplayed().assertHasClickAction().assertIsEnabled()
         onErrorTag().assertIsDisplayed()
         onLoaderTag().assertDoesNotExist()
-        onResendCodeButtonTag().assertIsDisplayed().assertHasClickAction().assertIsEnabled()
+        onResendCodeButtonTag()
+            .assertIsDisplayed()
+            .assertHasClickAction()
+            .assertIsEnabled()
+        onVerificationHeaderImageTag().assertDoesNotExist()
+        onVerificationHeaderButtonTag().assertDoesNotExist()
     }
 
     @Test
@@ -86,10 +95,16 @@ internal class VerificationScreenTest {
         onTitleField().assertIsDisplayed()
         onSubtitleTag().assertIsDisplayed()
         onOtpTag().assertIsDisplayed()
-        onEmailTag().assertIsDisplayed().assertHasClickAction().assertIsEnabled()
+        onEmailTag().assertIsDisplayed().assertHasClickAction()
+            .assertIsEnabled()
         onErrorTag().assertIsDisplayed()
         onLoaderTag().assertDoesNotExist()
-        onResendCodeButtonTag().assertIsDisplayed().assertHasClickAction().assertIsEnabled()
+        onResendCodeButtonTag()
+            .assertIsDisplayed()
+            .assertHasClickAction()
+            .assertIsEnabled()
+        onVerificationHeaderImageTag().assertDoesNotExist()
+        onVerificationHeaderButtonTag().assertDoesNotExist()
     }
 
     @Test
@@ -115,7 +130,12 @@ internal class VerificationScreenTest {
         onEmailTag().assertIsDisplayed().assertIsEnabled()
         onErrorTag().assertDoesNotExist()
         onLoaderTag().assertIsDisplayed()
-        onResendCodeButtonTag().assertIsDisplayed().assertHasClickAction().assertIsNotEnabled()
+        onResendCodeButtonTag()
+            .assertIsDisplayed()
+            .assertHasClickAction()
+            .assertIsNotEnabled()
+        onVerificationHeaderImageTag().assertDoesNotExist()
+        onVerificationHeaderButtonTag().assertDoesNotExist()
     }
 
     @Test
@@ -141,23 +161,80 @@ internal class VerificationScreenTest {
         onEmailTag().assertIsDisplayed().assertHasClickAction().assertIsNotEnabled()
         onErrorTag().assertDoesNotExist()
         onLoaderTag().assertDoesNotExist()
-        onResendCodeButtonTag().assertIsDisplayed().assertHasClickAction().assertIsNotEnabled()
+        onResendCodeButtonTag()
+            .assertIsDisplayed()
+            .assertHasClickAction()
+            .assertIsNotEnabled()
+        onVerificationHeaderImageTag().assertDoesNotExist()
+        onVerificationHeaderButtonTag().assertDoesNotExist()
+    }
+
+    @Test
+    fun `header image and button should be displayed for dialog mode`() = runTest(dispatcher) {
+        val viewModel = createViewModel(
+            isDialog = true
+        )
+        composeTestRule.setContent {
+            VerificationDialogBody(
+                viewModel = viewModel
+            )
+        }
+
+        onTitleField().assertIsDisplayed()
+        onSubtitleTag().assertIsDisplayed()
+        onOtpTag().assertIsDisplayed()
+        onEmailTag().assertDoesNotExist()
+        onErrorTag().assertDoesNotExist()
+        onLoaderTag().assertDoesNotExist()
+        onResendCodeButtonTag()
+            .assertIsDisplayed()
+            .assertHasClickAction()
+            .assertIsEnabled()
+        onVerificationHeaderImageTag().assertIsDisplayed()
+        onVerificationHeaderButtonTag()
+            .assertIsDisplayed()
+            .assertHasClickAction()
+    }
+
+    @Test
+    fun `close button should dismiss verification dialog`() = runTest(dispatcher) {
+        var dismissClicked = false
+        val viewModel = createViewModel(
+            isDialog = true,
+            onDismissClicked = {
+                dismissClicked = true
+            }
+        )
+        composeTestRule.setContent {
+            VerificationDialogBody(
+                viewModel = viewModel
+            )
+        }
+
+        onVerificationHeaderButtonTag()
+            .performClick()
+
+        composeTestRule.awaitIdle()
+
+        assertThat(dismissClicked).isTrue()
     }
 
     private fun createViewModel(
         linkAccountManager: LinkAccountManager = FakeLinkAccountManager(),
-        linkEventsReporter: LinkEventsReporter = FakeLinkEventsReporter(),
+        linkEventsReporter: LinkEventsReporter = VerificationLinkEventsReporter(),
         logger: Logger = FakeLogger(),
+        isDialog: Boolean = false,
+        onDismissClicked: () -> Unit = {}
     ): VerificationViewModel {
         return VerificationViewModel(
             linkAccountManager = linkAccountManager,
             linkEventsReporter = linkEventsReporter,
             logger = logger,
-            onDismissClicked = {},
+            onDismissClicked = onDismissClicked,
             onVerificationSucceeded = {},
             onChangeEmailClicked = {},
             linkAccount = TestFactory.LINK_ACCOUNT,
-            isDialog = false
+            isDialog = isDialog
         )
     }
 
@@ -168,4 +245,10 @@ internal class VerificationScreenTest {
     private fun onErrorTag() = composeTestRule.onNodeWithTag(VERIFICATION_ERROR_TAG)
     private fun onLoaderTag() = composeTestRule.onNodeWithTag(VERIFICATION_RESEND_LOADER_TAG)
     private fun onResendCodeButtonTag() = composeTestRule.onNodeWithTag(VERIFICATION_RESEND_CODE_BUTTON_TAG)
+    private fun onVerificationHeaderImageTag() = composeTestRule.onNodeWithTag(VERIFICATION_HEADER_IMAGE_TAG)
+    private fun onVerificationHeaderButtonTag() = composeTestRule.onNodeWithTag(VERIFICATION_HEADER_BUTTON_TAG)
+
+    private class VerificationLinkEventsReporter : FakeLinkEventsReporter() {
+        override fun on2FACancel() = Unit
+    }
 }

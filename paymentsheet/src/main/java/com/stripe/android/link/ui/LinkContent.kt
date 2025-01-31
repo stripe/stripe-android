@@ -23,7 +23,6 @@ import androidx.navigation.compose.composable
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkAction
 import com.stripe.android.link.LinkActivityResult
-import com.stripe.android.link.LinkActivityViewModel
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.NoLinkAccountFoundException
 import com.stripe.android.link.linkViewModel
@@ -47,14 +46,18 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 internal fun LinkContent(
-    viewModel: LinkActivityViewModel,
     navController: NavHostController,
     appBarState: LinkAppBarState,
     sheetState: ModalBottomSheetState,
     bottomSheetContent: BottomSheetContent?,
     onUpdateSheetContent: (BottomSheetContent?) -> Unit,
+    handleViewAction: (LinkAction) -> Unit,
+    navigate: (route: LinkScreen, clearStack: Boolean) -> Unit,
+    dismissWithResult: ((LinkActivityResult) -> Unit)?,
+    getLinkAccount: () -> LinkAccount?,
     onBackPressed: () -> Unit,
-    moveToWeb: () -> Unit
+    moveToWeb: () -> Unit,
+    goBack: () -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
     DefaultLinkTheme {
@@ -77,7 +80,7 @@ internal fun LinkContent(
                     .fillMaxWidth()
             ) {
                 BackHandler {
-                    viewModel.handleViewAction(LinkAction.BackPressed)
+                    handleViewAction(LinkAction.BackPressed)
                 }
 
                 LinkAppBar(
@@ -97,20 +100,18 @@ internal fun LinkContent(
 
                 Screens(
                     navController = navController,
-                    goBack = viewModel::goBack,
+                    goBack = goBack,
                     moveToWeb = moveToWeb,
                     navigate = { screen ->
-                        viewModel.navigate(screen, clearStack = false)
+                        navigate(screen, false)
                     },
                     navigateAndClearStack = { screen ->
-                        viewModel.navigate(screen, clearStack = true)
+                        navigate(screen, true)
                     },
                     dismissWithResult = { result ->
-                        viewModel.dismissWithResult?.invoke(result)
+                        dismissWithResult?.invoke(result)
                     },
-                    getLinkAccount = {
-                        viewModel.linkAccount
-                    },
+                    getLinkAccount = getLinkAccount,
                     showBottomSheetContent = onUpdateSheetContent,
                     hideBottomSheetContent = {
                         onUpdateSheetContent(null)

@@ -46,7 +46,7 @@ internal class LinkActivityViewModel @Inject constructor(
     private val errorReporter: ErrorReporter,
     private val linkAuth: LinkAuth,
     private val linkConfiguration: LinkConfiguration,
-    private val startWithVerificationDialog: Boolean
+    private val startWithVerificationDialog: Boolean,
 ) : ViewModel(), DefaultLifecycleObserver {
     val confirmationHandler = confirmationHandlerFactory.create(viewModelScope)
     private val _linkAppBarState = MutableStateFlow(
@@ -192,8 +192,8 @@ internal class LinkActivityViewModel @Inject constructor(
     }
 
     private suspend fun updateScreenState() {
-        val linkAccount = linkAccountManager.linkAccount.value
         val accountStatus = linkAccountManager.accountStatus.first()
+        val linkAccount = linkAccountManager.linkAccount.value
         when (accountStatus) {
             AccountStatus.Verified,
             AccountStatus.SignedOut,

@@ -711,7 +711,7 @@ internal class LinkActivityViewModelTest {
             errorReporter = errorReporter,
             linkAuth = linkAuth,
             linkConfiguration = TestFactory.LINK_CONFIGURATION,
-            startWithVerificationDialog = startWithVerificationDialog
+            startWithVerificationDialog = startWithVerificationDialog,
         ).apply {
             this.navController = navController
             this.dismissWithResult = dismissWithResult

@@ -35,7 +35,7 @@ internal class VerificationViewModel @Inject constructor(
     private val isDialog: Boolean,
     private val onVerificationSucceeded: () -> Unit,
     private val onChangeEmailClicked: () -> Unit,
-    private val onDismissClicked: () -> Unit,
+    val onDismissClicked: () -> Unit,
 ) : ViewModel() {
 
     private val _viewState = MutableStateFlow(

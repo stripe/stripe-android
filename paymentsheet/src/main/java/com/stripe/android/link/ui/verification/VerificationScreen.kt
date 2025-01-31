@@ -168,14 +168,16 @@ private fun TopSection(
         ) {
             Image(
                 modifier = Modifier
-                    .align(Alignment.Center),
+                    .align(Alignment.Center)
+                    .testTag(VERIFICATION_HEADER_IMAGE_TAG),
                 painter = painterResource(R.drawable.stripe_link_logo),
                 contentDescription = stringResource(com.stripe.android.R.string.stripe_link),
             )
 
             IconButton(
                 modifier = Modifier
-                    .align(Alignment.CenterEnd),
+                    .align(Alignment.CenterEnd)
+                    .testTag(VERIFICATION_HEADER_BUTTON_TAG),
                 onClick = onBackClicked
             ) {
                 Icon(
@@ -301,3 +303,5 @@ internal const val VERIFICATION_CHANGE_EMAIL_TAG = "verification_change_email_ta
 internal const val VERIFICATION_ERROR_TAG = "verification_error_tag"
 internal const val VERIFICATION_RESEND_LOADER_TAG = "verification_resend_loader_tag"
 internal const val VERIFICATION_RESEND_CODE_BUTTON_TAG = "verification_resend_code_button_tag"
+internal const val VERIFICATION_HEADER_IMAGE_TAG = "verification_header_image_tag"
+internal const val VERIFICATION_HEADER_BUTTON_TAG = "verification_header_button_tag"

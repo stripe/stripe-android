@@ -22,15 +22,23 @@ import com.stripe.android.link.gate.FakeLinkGate
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
+import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.AfterTest
 
 @RunWith(RobolectricTestRunner::class)
 internal class LinkActivityTest {
+    private val dispatcher = StandardTestDispatcher()
+    private val context = ApplicationProvider.getApplicationContext<Context>()
 
     @get:Rule
     val rule = InstantTaskExecutorRule()
@@ -38,10 +46,16 @@ internal class LinkActivityTest {
     @get:Rule
     val composeTestRule = createAndroidComposeRule<LinkActivity>()
 
-    private val context = ApplicationProvider.getApplicationContext<Context>()
-
     @get:Rule
     val intentsTestRule = IntentsRule()
+
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule(dispatcher)
+
+    @AfterTest
+    fun cleanup() {
+        Dispatchers.resetMain()
+    }
 
     @Test
     fun `finishes with a cancelled result when no arg is passed`() {
@@ -56,7 +70,7 @@ internal class LinkActivityTest {
     }
 
     @Test
-    fun `verification dialog is displayed when link screen state is VerificationDialog`() {
+    fun `verification dialog is displayed when link screen state is VerificationDialog`() = runTest {
         val linkAccountManager = FakeLinkAccountManager()
         linkAccountManager.setLinkAccount(TestFactory.LINK_ACCOUNT)
         linkAccountManager.setAccountStatus(AccountStatus.NeedsVerification)
@@ -66,6 +80,8 @@ internal class LinkActivityTest {
             linkAccountManager = linkAccountManager
         )
 
+        dispatcher.scheduler.advanceUntilIdle()
+
         verificationDialog()
             .assertExists()
         fullScreenContent()
@@ -73,7 +89,7 @@ internal class LinkActivityTest {
     }
 
     @Test
-    fun `full screen content is displayed when link screen state is FullScreen`() {
+    fun `full screen content is displayed when link screen state is FullScreen`() = runTest {
         val linkAccountManager = FakeLinkAccountManager()
         linkAccountManager.setLinkAccount(TestFactory.LINK_ACCOUNT)
         linkAccountManager.setAccountStatus(AccountStatus.NeedsVerification)
@@ -82,6 +98,8 @@ internal class LinkActivityTest {
             use2faDialog = false,
             linkAccountManager = linkAccountManager
         )
+
+        dispatcher.scheduler.advanceUntilIdle()
 
         verificationDialog()
             .assertDoesNotExist()
@@ -114,10 +132,7 @@ internal class LinkActivityTest {
         )
 
         return activityController
-            .create()
-            .start()
-            .resume()
-            .visible()
+            .setup()
             .get()
     }
 
@@ -136,7 +151,7 @@ internal class LinkActivityTest {
                 errorReporter = FakeErrorReporter(),
                 linkAuth = FakeLinkAuth(),
                 linkConfiguration = TestFactory.LINK_CONFIGURATION,
-                startWithVerificationDialog = use2faDialog
+                startWithVerificationDialog = use2faDialog,
             )
         }
     }

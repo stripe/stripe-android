@@ -28,11 +28,24 @@ internal fun VerificationDialog(
         )
     }
 
+    VerificationDialogBody(
+        modifier = modifier,
+        viewModel = viewModel
+    )
+}
+
+@Composable
+internal fun VerificationDialogBody(
+    modifier: Modifier = Modifier,
+    viewModel: VerificationViewModel
+) {
     Box(
         modifier = modifier
     ) {
         Dialog(
-            onDismissRequest = onDismissClicked
+            onDismissRequest = {
+                viewModel.onDismissClicked()
+            }
         ) {
             DefaultLinkTheme(
                 contentShape = RoundedCornerShape(16.dp)
