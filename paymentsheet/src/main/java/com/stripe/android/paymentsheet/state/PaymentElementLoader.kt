@@ -9,7 +9,6 @@ import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
@@ -754,13 +753,12 @@ private suspend fun List<PaymentMethod>.withDefaultPaymentMethodOrLastUsedPaymen
 ): List<PaymentMethod> {
     val primaryPaymentMethodId = when (defaultPaymentMethodState) {
         is CustomerState.DefaultPaymentMethodState.Enabled -> defaultPaymentMethodState.defaultPaymentMethodId
-        CustomerState.DefaultPaymentMethodState.Disabled ->  {
-            val selection = savedSelection.await()
-            (selection as? SavedSelection.PaymentMethod)?.id
+        CustomerState.DefaultPaymentMethodState.Disabled -> {
+            (savedSelection.await() as? SavedSelection.PaymentMethod)?.id
         }
     }
 
-    val primaryPaymentMethod = this.firstOrNull() { it.id == primaryPaymentMethodId }
+    val primaryPaymentMethod = this.firstOrNull { it.id == primaryPaymentMethodId }
 
     return primaryPaymentMethod?.let {
         listOf(primaryPaymentMethod) + (this - primaryPaymentMethod)
