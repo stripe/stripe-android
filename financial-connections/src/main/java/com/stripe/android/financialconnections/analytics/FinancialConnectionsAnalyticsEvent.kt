@@ -396,6 +396,20 @@ internal sealed class FinancialConnectionsAnalyticsEvent(
         mapOf("pane" to pane.analyticsValue)
     )
 
+    class PrepaneClickCancel(
+        pane: Pane
+    ) : FinancialConnectionsAnalyticsEvent(
+        name = "click.prepane.cancel",
+        mapOf("pane" to pane.analyticsValue)
+    )
+
+    class PrepaneClickChooseAnotherBank(
+        pane: Pane
+    ) : FinancialConnectionsAnalyticsEvent(
+        name = "click.prepane.choose_another_bank",
+        mapOf("pane" to pane.analyticsValue)
+    )
+
     class AuthSessionOpened(
         pane: Pane,
         flow: String?,

@@ -17,6 +17,8 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.AuthSessionUrlReceived
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.Click
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLoaded
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PrepaneClickCancel
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PrepaneClickChooseAnotherBank
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PrepaneClickContinue
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
@@ -48,6 +50,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsAuthori
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
+import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.Destination.AccountPicker
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.PopUpToBehavior
@@ -461,16 +464,41 @@ internal class PartnerAuthViewModel @AssistedInject constructor(
         }
     }
 
-    fun onCancelClick() = viewModelScope.launch {
-        // set loading state while cancelling the active auth session, and navigate back
-        setState { copy(authenticationStatus = Loading(value = Status(Action.CANCELLING))) }
-        runCatching {
-            val authSession = requireNotNull(
-                getOrFetchSync(refetchCondition = IfMissingActiveAuthSession).manifest.activeAuthSession
-            )
-            cancelAuthorizationSession(authSession.id)
+    fun onCancelClick() = withState { state ->
+        if (state.inModal) {
+            eventTracker.track(PrepaneClickCancel(pane = PANE))
+        } else {
+            eventTracker.track(PrepaneClickChooseAnotherBank(pane = PANE))
         }
+
+        viewModelScope.launch {
+            // set loading state while cancelling the active auth session, and navigate back
+            setState { copy(authenticationStatus = Loading(value = Status(Action.CANCELLING))) }
+            runCatching {
+                val authSession = requireNotNull(
+                    getOrFetchSync(refetchCondition = IfMissingActiveAuthSession).manifest.activeAuthSession
+                )
+                cancelAuthorizationSession(authSession.id)
+            }
+            if (state.inModal) {
+                cancelInModal()
+            } else {
+                cancelInFullscreen()
+            }
+        }
+    }
+
+    private fun cancelInModal() {
         navigationManager.tryNavigateBack()
+    }
+
+    private fun cancelInFullscreen() {
+        navigationManager.tryNavigateTo(
+            route = Destination.InstitutionPicker(referrer = PANE),
+            popUpTo = PopUpToBehavior.Current(
+                inclusive = true,
+            ),
+        )
     }
 
     @Parcelize
