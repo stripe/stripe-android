@@ -128,7 +128,7 @@
   <!-- Button title to enter editing mode -->
   <string name="stripe_edit">Edit</string>
   <!-- Error when the card has already expired -->
-  <string name="stripe_expired_card">Your card has expired</string>
+  <string name="stripe_expired_card">Your card has expired.</string>
   <!-- label for text field to enter card expiry -->
   <string name="stripe_expiry_date_hint">MM/YY</string>
   <string name="stripe_expiry_label_short">Expiry</string>
