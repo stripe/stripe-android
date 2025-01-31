@@ -54,7 +54,6 @@ import kotlin.coroutines.CoroutineContext
 )
 internal interface EmbeddedPaymentElementViewModelComponent {
     val viewModel: EmbeddedPaymentElementViewModel
-    val embeddedPaymentElementSubcomponentBuilder: EmbeddedPaymentElementSubcomponent.Builder
 
     @Component.Builder
     interface Builder {
