@@ -575,7 +575,7 @@ class SavedPaymentMethodMutatorTest {
                         canRemoveLastPaymentMethod = true,
                         canRemoveDuplicates = shouldRemoveDuplicates,
                     ),
-                    defaultPaymentMethodState = CustomerState.DefaultPaymentMethodState(defaultPaymentMethodId = null)
+                    defaultPaymentMethodState = CustomerState.DefaultPaymentMethodState.Disabled,
                 )
             )
 

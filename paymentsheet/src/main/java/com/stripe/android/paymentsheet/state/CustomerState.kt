@@ -25,9 +25,13 @@ internal data class CustomerState(
     ) : Parcelable
 
     @Parcelize
-    data class DefaultPaymentMethodState(
-        val defaultPaymentMethodId: String?,
-    ) : Parcelable
+    sealed class DefaultPaymentMethodState : Parcelable {
+        @Parcelize
+        data class Enabled(val defaultPaymentMethodId: String?) : DefaultPaymentMethodState()
+
+        @Parcelize
+        data object Disabled : DefaultPaymentMethodState()
+    }
 
     internal companion object {
         /**
@@ -59,10 +63,10 @@ internal data class CustomerState(
                 else -> false
             }
 
-            val defaultPaymentMethodId = if (FeatureFlags.enableDefaultPaymentMethods.isEnabled) {
-                customer.defaultPaymentMethod
+            val defaultPaymentMethodState = if (FeatureFlags.enableDefaultPaymentMethods.isEnabled) {
+                DefaultPaymentMethodState.Enabled(customer.defaultPaymentMethod)
             } else {
-                null
+                DefaultPaymentMethodState.Disabled
             }
 
             return CustomerState(
@@ -78,7 +82,7 @@ internal data class CustomerState(
                     // Should always remove duplicates when using `customer_session`
                     canRemoveDuplicates = true,
                 ),
-                defaultPaymentMethodState = DefaultPaymentMethodState(defaultPaymentMethodId = defaultPaymentMethodId)
+                defaultPaymentMethodState = defaultPaymentMethodState
             )
         }
 
@@ -121,7 +125,8 @@ internal data class CustomerState(
                      */
                     canRemoveDuplicates = false,
                 ),
-                defaultPaymentMethodState = DefaultPaymentMethodState(defaultPaymentMethodId = null)
+                // This is a customer sessions only feature, so it's always disabled when using a legacy ephemeral key.
+                defaultPaymentMethodState = DefaultPaymentMethodState.Disabled
             )
         }
     }

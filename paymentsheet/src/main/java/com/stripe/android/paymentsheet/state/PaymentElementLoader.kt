@@ -355,7 +355,9 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 paymentMethods = state.paymentMethods
                     .withDefaultPaymentMethodOrLastUsedPaymentMethodFirst(
                         savedSelection = savedSelection,
-                        defaultPaymentMethodId = state.defaultPaymentMethodState.defaultPaymentMethodId
+                        defaultPaymentMethodId = (
+                            state.defaultPaymentMethodState as? CustomerState.DefaultPaymentMethodState.Enabled
+                        )?.defaultPaymentMethodId
                     ).filter { cardBrandFilter.isAccepted(it) }
             )
         }
@@ -565,7 +567,9 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         val primaryPaymentSelection = if (FeatureFlags.enableDefaultPaymentMethods.isEnabled) {
             customer.await()?.defaultPaymentMethodState?.let {
                 customer.await()?.paymentMethods?.firstOrNull {
-                    it.id == customer.await()?.defaultPaymentMethodState?.defaultPaymentMethodId
+                    it.id == (
+                        customer.await()?.defaultPaymentMethodState as? CustomerState.DefaultPaymentMethodState.Enabled
+                        )?.defaultPaymentMethodId
                 }?.toPaymentSelection()
             }
         } else {

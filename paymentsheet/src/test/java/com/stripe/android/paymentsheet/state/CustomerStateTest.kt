@@ -140,7 +140,13 @@ class CustomerStateTest {
             defaultPaymentMethodId = defaultPaymentMethodId
         )
 
-        assertThat(customerState.defaultPaymentMethodState.defaultPaymentMethodId).isEqualTo(defaultPaymentMethodId)
+        assertThat(customerState.defaultPaymentMethodState).isInstanceOf(
+            CustomerState.DefaultPaymentMethodState.Enabled::class.java
+        )
+        val actualDefaultPaymentMethodId = (
+            customerState.defaultPaymentMethodState as CustomerState.DefaultPaymentMethodState.Enabled
+            ).defaultPaymentMethodId
+        assertThat(actualDefaultPaymentMethodId).isEqualTo(defaultPaymentMethodId)
     }
 
     @Test
@@ -152,7 +158,7 @@ class CustomerStateTest {
             defaultPaymentMethodId = defaultPaymentMethodId
         )
 
-        assertThat(customerState.defaultPaymentMethodState.defaultPaymentMethodId).isNull()
+        assertThat(customerState.defaultPaymentMethodState).isEqualTo(CustomerState.DefaultPaymentMethodState.Disabled)
     }
 
     @Test
@@ -164,7 +170,13 @@ class CustomerStateTest {
             defaultPaymentMethodId = defaultPaymentMethodId
         )
 
-        assertThat(customerState.defaultPaymentMethodState.defaultPaymentMethodId).isNull()
+        assertThat(customerState.defaultPaymentMethodState).isInstanceOf(
+            CustomerState.DefaultPaymentMethodState.Enabled::class.java
+        )
+        val actualDefaultPaymentMethodId = (
+            customerState.defaultPaymentMethodState as CustomerState.DefaultPaymentMethodState.Enabled
+            ).defaultPaymentMethodId
+        assertThat(actualDefaultPaymentMethodId).isEqualTo(defaultPaymentMethodId)
     }
 
     @Test
@@ -176,7 +188,7 @@ class CustomerStateTest {
             defaultPaymentMethodId = defaultPaymentMethodId
         )
 
-        assertThat(customerState.defaultPaymentMethodState.defaultPaymentMethodId).isNull()
+        assertThat(customerState.defaultPaymentMethodState).isEqualTo(CustomerState.DefaultPaymentMethodState.Disabled)
     }
 
     @Test
@@ -205,7 +217,7 @@ class CustomerStateTest {
                     // Always 'false' for legacy ephemeral keys
                     canRemoveDuplicates = false,
                 ),
-                defaultPaymentMethodState = CustomerState.DefaultPaymentMethodState(defaultPaymentMethodId = null)
+                defaultPaymentMethodState = CustomerState.DefaultPaymentMethodState.Disabled
             )
         )
     }

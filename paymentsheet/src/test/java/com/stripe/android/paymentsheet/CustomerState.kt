@@ -18,6 +18,6 @@ internal fun createCustomerState(
             canRemoveDuplicates = true,
             canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
         ),
-        defaultPaymentMethodState = CustomerState.DefaultPaymentMethodState(defaultPaymentMethodId = null),
+        defaultPaymentMethodState = CustomerState.DefaultPaymentMethodState.Disabled,
     )
 }

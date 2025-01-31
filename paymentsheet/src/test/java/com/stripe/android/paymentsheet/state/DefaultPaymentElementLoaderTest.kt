@@ -140,7 +140,7 @@ internal class DefaultPaymentElementLoaderTest {
                         canRemoveLastPaymentMethod = true,
                         canRemoveDuplicates = false,
                     ),
-                    defaultPaymentMethodState = CustomerState.DefaultPaymentMethodState(defaultPaymentMethodId = null),
+                    defaultPaymentMethodState = CustomerState.DefaultPaymentMethodState.Disabled,
                 ),
                 paymentSelection = PaymentSelection.Saved(
                     paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,

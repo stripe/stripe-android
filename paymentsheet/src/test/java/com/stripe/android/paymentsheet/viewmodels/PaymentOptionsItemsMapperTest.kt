@@ -92,7 +92,7 @@ class PaymentOptionsItemsMapperTest {
                 canRemoveLastPaymentMethod = true,
                 canRemoveDuplicates = false,
             ),
-            defaultPaymentMethodState = CustomerState.DefaultPaymentMethodState(null)
+            defaultPaymentMethodState = CustomerState.DefaultPaymentMethodState.Disabled,
         )
     }
 }
