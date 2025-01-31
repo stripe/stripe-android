@@ -286,55 +286,55 @@ private fun BoxScope.AnimatedCompleteProcessing(
     )
 }
 
-@Composable
-@Preview(showBackground = true)
-private fun PrimaryButtonPreview() {
-    var processingState by remember {
-        mutableStateOf<PrimaryButtonProcessingState>(PrimaryButtonProcessingState.Idle(null))
-    }
-
-    StripeTheme {
-        Column(Modifier.padding(16.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                RadioButton(
-                    selected = processingState is PrimaryButtonProcessingState.Idle,
-                    onClick = {
-                        processingState = PrimaryButtonProcessingState.Idle(null)
-                    }
-                )
-                Text(text = "Idle")
-            }
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                RadioButton(
-                    selected = processingState is PrimaryButtonProcessingState.Processing,
-                    onClick = {
-                        processingState = PrimaryButtonProcessingState.Processing
-                    }
-                )
-                Text(text = "Processing")
-            }
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                RadioButton(
-                    selected = processingState is PrimaryButtonProcessingState.Completed,
-                    onClick = {
-                        processingState = PrimaryButtonProcessingState.Completed
-                    }
-                )
-                Text(text = "Completed")
-            }
-
-            val context = LocalContext.current
-
-            PrimaryButton(
-                label = "Pay $50.99",
-                processingState = processingState,
-                locked = false,
-                enabled = true,
-                onClick = {},
-                onProcessingCompleted = {
-                    Toast.makeText(context, "Completed", Toast.LENGTH_LONG).show()
-                }
-            )
-        }
-    }
-}
+//@Composable
+//@Preview(showBackground = true)
+//private fun PrimaryButtonPreview() {
+//    var processingState by remember {
+//        mutableStateOf<PrimaryButtonProcessingState>(PrimaryButtonProcessingState.Idle(null))
+//    }
+//
+//    StripeTheme {
+//        Column(Modifier.padding(16.dp)) {
+//            Row(verticalAlignment = Alignment.CenterVertically) {
+//                RadioButton(
+//                    selected = processingState is PrimaryButtonProcessingState.Idle,
+//                    onClick = {
+//                        processingState = PrimaryButtonProcessingState.Idle(null)
+//                    }
+//                )
+//                Text(text = "Idle")
+//            }
+//            Row(verticalAlignment = Alignment.CenterVertically) {
+//                RadioButton(
+//                    selected = processingState is PrimaryButtonProcessingState.Processing,
+//                    onClick = {
+//                        processingState = PrimaryButtonProcessingState.Processing
+//                    }
+//                )
+//                Text(text = "Processing")
+//            }
+//            Row(verticalAlignment = Alignment.CenterVertically) {
+//                RadioButton(
+//                    selected = processingState is PrimaryButtonProcessingState.Completed,
+//                    onClick = {
+//                        processingState = PrimaryButtonProcessingState.Completed
+//                    }
+//                )
+//                Text(text = "Completed")
+//            }
+//
+//            val context = LocalContext.current
+//
+//            PrimaryButton(
+//                label = "Pay $50.99",
+//                processingState = processingState,
+//                locked = false,
+//                enabled = true,
+//                onClick = {},
+//                onProcessingCompleted = {
+//                    Toast.makeText(context, "Completed", Toast.LENGTH_LONG).show()
+//                }
+//            )
+//        }
+//    }
+//}

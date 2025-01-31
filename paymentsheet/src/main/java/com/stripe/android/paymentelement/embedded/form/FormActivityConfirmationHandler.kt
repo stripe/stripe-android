@@ -2,6 +2,8 @@ package com.stripe.android.paymentelement.embedded.form
 
 import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
+import com.stripe.android.common.model.CommonConfiguration
+import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.strings.ResolvableString
@@ -9,9 +11,13 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodOptionsParams
+import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
+import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.ui.PrimaryButtonProcessingState
 import kotlinx.coroutines.CoroutineScope
@@ -22,12 +28,14 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 internal class FormActivityConfirmationHandler @Inject constructor(
-    private val intentConfiguration: PaymentSheet.IntentConfiguration,
+    private val initializationMode: PaymentElementLoader.InitializationMode,
     private val paymentMethodMetadata: PaymentMethodMetadata,
     @ViewModelScope private val coroutineScope: CoroutineScope,
     confirmationHandlerFactory: ConfirmationHandler.Factory,
-    private val logger: Logger
+    private val logger: Logger,
+    private val configuration: EmbeddedPaymentElement.Configuration,
 ) {
 
     private val confirmationHandler = confirmationHandlerFactory.create(coroutineScope)
@@ -45,7 +53,7 @@ internal class FormActivityConfirmationHandler @Inject constructor(
         confirmationHandler.register(activityResultCaller, lifecycleOwner)
     }
 
-    var setResultAndDismiss: ((ConfirmationHandler.Result?) -> Unit)? = null
+    //var setResultAndDismiss: ((ConfirmationHandler.Result?) -> Unit)? = null
 
     init {
         coroutineScope.launch {
@@ -55,7 +63,10 @@ internal class FormActivityConfirmationHandler @Inject constructor(
                         when (it.result) {
                             is ConfirmationHandler.Result.Canceled -> PrimaryButtonProcessingState.Idle(null)
                             is ConfirmationHandler.Result.Failed -> PrimaryButtonProcessingState.Idle(it.result.message)
-                            is ConfirmationHandler.Result.Succeeded -> PrimaryButtonProcessingState.Completed
+                            is ConfirmationHandler.Result.Succeeded -> {
+                                delay(1500)
+                                PrimaryButtonProcessingState.Completed
+                            }
                         }
                         PrimaryButtonProcessingState.Completed
                     }
@@ -68,19 +79,16 @@ internal class FormActivityConfirmationHandler @Inject constructor(
     }
 
     fun confirm(
-        createParams: PaymentMethodCreateParams,
-        optionParams: PaymentMethodOptionsParams?,
-        shouldSave: Boolean
+        selection: PaymentSelection
     ) {
         coroutineScope.launch {
-            when (val result = confirmIntent(createParams, optionParams, shouldSave)) {
+            when (val result = confirmIntent(selection)) {
                 is ConfirmationHandler.Result.Canceled -> {}
                 is ConfirmationHandler.Result.Failed -> {
                     _error.value = result.message
                 }
                 is ConfirmationHandler.Result.Succeeded -> {
-                    delay(1000)
-                    setResultAndDismiss?.invoke(result)
+                    // probably log something here?
                 }
                 null -> {}
             }
@@ -88,12 +96,10 @@ internal class FormActivityConfirmationHandler @Inject constructor(
     }
 
     private suspend fun confirmIntent(
-        createParams: PaymentMethodCreateParams,
-        optionParams: PaymentMethodOptionsParams?,
-        shouldSave: Boolean
+        selection: PaymentSelection
     ): ConfirmationHandler.Result? {
         return runCatching {
-            val args = getArgs(createParams, optionParams, shouldSave)
+            val args = getArgs(selection) ?: return null
             confirmationHandler.start(args)
             confirmationHandler.awaitResult()
         }.getOrElse {
@@ -109,19 +115,17 @@ internal class FormActivityConfirmationHandler @Inject constructor(
     }
 
     private fun getArgs(
-        createParams: PaymentMethodCreateParams,
-        optionParams: PaymentMethodOptionsParams?,
-        shouldSave: Boolean
-    ): ConfirmationHandler.Args {
+        selection: PaymentSelection
+    ): ConfirmationHandler.Args? {
+        val confirmationOption = selection.toConfirmationOption(
+            configuration = configuration.asCommonConfiguration(),
+            linkConfiguration = null
+        ) ?: return null
         return ConfirmationHandler.Args(
             intent = paymentMethodMetadata.stripeIntent,
-            confirmationOption = PaymentMethodConfirmationOption.New(
-                createParams = createParams,
-                optionsParams = optionParams,
-                shouldSave = shouldSave
-            ),
-            appearance = PaymentSheet.Appearance(),
-            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(intentConfiguration),
+            confirmationOption = confirmationOption,
+            appearance = configuration.appearance,
+            initializationMode = initializationMode,
             shippingDetails = paymentMethodMetadata.shippingDetails
         )
     }

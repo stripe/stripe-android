@@ -9,7 +9,6 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import com.stripe.android.common.ui.PaymentElementActivityResultCaller
-import com.stripe.android.common.ui.UpdateEmbeddedResultCallback
 import com.stripe.android.common.ui.UpdateExternalPaymentMethodConfirmHandler
 import com.stripe.android.common.ui.UpdateIntentConfirmationInterceptor
 import com.stripe.android.utils.rememberActivity
@@ -31,7 +30,6 @@ fun rememberEmbeddedPaymentElement(
 
     UpdateExternalPaymentMethodConfirmHandler(builder.externalPaymentMethodConfirmHandler)
     UpdateIntentConfirmationInterceptor(builder.createIntentCallback)
-    UpdateEmbeddedResultCallback(builder.resultCallback)
 
     val lifecycleOwner = LocalLifecycleOwner.current
     val activityResultRegistryOwner = requireNotNull(LocalActivityResultRegistryOwner.current) {

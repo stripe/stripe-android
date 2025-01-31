@@ -44,19 +44,14 @@ internal class FormActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         if (args == null) {
-            setFormResult(FormResult.Cancelled)
-            finish()
+            setCancelAndFinish()
             return
         }
 
         viewModel.component.inject(this)
 
+        // todo figure out how to inject these
         formActivityConfirmationHandler.register(this, this)
-
-        formActivityConfirmationHandler.setResultAndDismiss = {
-            setFormResult(FormResult.Complete(null, it))
-            finish()
-        }
 
         setContent {
             StripeTheme {
@@ -74,7 +69,16 @@ internal class FormActivity : AppCompatActivity() {
                         primaryButtonProcessingState = primaryButtonState.value,
                         state = state,
                         onFormFieldValuesChanged = formStateHolder::formValuesChanged,
-                        onConfirm = formActivityConfirmationHandler::confirm
+                        onConfirm = formActivityConfirmationHandler::confirm,
+                        onProcessingCompleted = {
+                            setFormResult(
+                                FormResult.Complete(
+                                    selection = formStateHolder.formState.value.paymentSelection,
+                                    confirmationResult = null
+                                )
+                            )
+                            finish()
+                        }
                     )
                 }
             }

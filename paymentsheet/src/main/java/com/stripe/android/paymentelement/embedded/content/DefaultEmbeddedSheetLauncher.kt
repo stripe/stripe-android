@@ -4,7 +4,10 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.form.FormContract
 import com.stripe.android.paymentelement.embedded.form.FormResult
@@ -21,7 +24,6 @@ internal interface EmbeddedSheetLauncher {
         code: String,
         paymentMethodMetadata: PaymentMethodMetadata,
         hasSavedPaymentMethods: Boolean,
-        intentConfiguration: PaymentSheet.IntentConfiguration
     )
 
     fun launchManage(
@@ -32,12 +34,15 @@ internal interface EmbeddedSheetLauncher {
 }
 
 @EmbeddedPaymentElementScope
+@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 internal class DefaultEmbeddedSheetLauncher @Inject constructor(
     activityResultCaller: ActivityResultCaller,
     lifecycleOwner: LifecycleOwner,
     private val selectionHolder: EmbeddedSelectionHolder,
     private val customerStateHolder: CustomerStateHolder,
     private val sheetStateHolder: SheetStateHolder,
+    private val resultCallback: EmbeddedPaymentElement.ResultCallback,
+    private val confirmationStateSupplier: () -> EmbeddedConfirmationStateHolder.State?
 ) : EmbeddedSheetLauncher {
 
     init {
@@ -57,6 +62,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
             sheetStateHolder.sheetIsOpen = false
             if (result is FormResult.Complete) {
                 selectionHolder.set(result.selection)
+                resultCallback.onResult(EmbeddedPaymentElement.Result.Completed())
             }
         }
 
@@ -80,14 +86,15 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
         code: String,
         paymentMethodMetadata: PaymentMethodMetadata,
         hasSavedPaymentMethods: Boolean,
-        intentConfiguration: PaymentSheet.IntentConfiguration
     ) {
         sheetStateHolder.sheetIsOpen = true
+        val confirmationState = confirmationStateSupplier() ?: return
         val args = FormContract.Args(
             selectedPaymentMethodCode = code,
             paymentMethodMetadata = paymentMethodMetadata,
             hasSavedPaymentMethods = hasSavedPaymentMethods,
-            intentConfiguration = intentConfiguration
+            initializationMode = confirmationState.initializationMode,
+            configuration = confirmationState.configuration
         )
         formActivityLauncher.launch(args)
     }

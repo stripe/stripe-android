@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
+import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.utils.RealUserFacingLogger
@@ -17,11 +18,13 @@ import com.stripe.android.link.injection.LinkAnalyticsComponent
 import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentElementConfirmationModule
 import com.stripe.android.paymentelement.embedded.EmbeddedCommonModule
-import com.stripe.android.paymentelement.embedded.SharedPaymentElementViewModelComponent.Builder
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInteractor
 import dagger.Binds
 import dagger.BindsInstance
@@ -42,6 +45,7 @@ import kotlin.coroutines.CoroutineContext
     ]
 )
 @Singleton
+@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 internal interface FormActivityComponent {
 
     val viewModel: FormActivityViewModel
@@ -66,7 +70,10 @@ internal interface FormActivityComponent {
         fun statusBarColor(@Named(STATUS_BAR_COLOR) statusBarColor: Int?): Builder
 
         @BindsInstance
-        fun intentConfiguration(configuration: PaymentSheet.IntentConfiguration): Builder
+        fun initializationMode(initializationMode: PaymentElementLoader.InitializationMode): Builder
+
+        @BindsInstance
+        fun configuration(configuration: EmbeddedPaymentElement.Configuration): Builder
 
         @BindsInstance
         fun savedStateHandle(savedStateHandle: SavedStateHandle): Builder

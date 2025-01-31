@@ -507,8 +507,3 @@ class EmbeddedPaymentElement @Inject internal constructor(
         }
     }
 }
-
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
-internal object EmbeddedResultCallback {
-    var resultCallback: EmbeddedPaymentElement.ResultCallback? = null
-}

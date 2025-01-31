@@ -46,8 +46,6 @@ internal interface EmbeddedContentHelper {
     fun setSheetLauncher(sheetLauncher: EmbeddedSheetLauncher)
 
     fun clearSheetLauncher()
-
-    fun setIntentConfiguration(intentConfiguration: PaymentSheet.IntentConfiguration)
 }
 
 @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
@@ -78,14 +76,6 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
     override val embeddedContent: StateFlow<EmbeddedContent?> = _embeddedContent.asStateFlow()
 
     private var sheetLauncher: EmbeddedSheetLauncher? = null
-
-    private var intentConfiguration: PaymentSheet.IntentConfiguration? = null
-
-
-    // TODO: remove
-    override fun setIntentConfiguration(intentConfiguration: PaymentSheet.IntentConfiguration) {
-        this.intentConfiguration = intentConfiguration
-    }
 
     init {
         coroutineScope.launch {
@@ -185,8 +175,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
                     paymentMethodMetadata = paymentMethodMetadata,
                     hasSavedPaymentMethods = customerStateHolder.paymentMethods.value.any {
                         it.type?.code == code
-                    },
-                    intentConfiguration = requireNotNull(intentConfiguration)
+                    }
                 )
             },
             paymentMethods = customerStateHolder.paymentMethods,

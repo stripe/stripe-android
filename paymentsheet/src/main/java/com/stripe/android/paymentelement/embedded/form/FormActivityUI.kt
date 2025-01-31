@@ -19,13 +19,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.common.ui.BottomSheetScaffold
-import com.stripe.android.paymentsheet.ui.PrimaryButton
-import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.forms.FormViewModel
+import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.PrimaryButtonProcessingState
 import com.stripe.android.paymentsheet.ui.TestModeBadge
 import com.stripe.android.paymentsheet.utils.EventReporterProvider
@@ -44,14 +43,12 @@ internal fun FormActivityUI(
     primaryButtonProcessingState: PrimaryButtonProcessingState,
     onFormFieldValuesChanged: (FormFieldValues?) -> Unit,
     onDismissed: () -> Unit,
-    onConfirm: (
-        PaymentMethodCreateParams,
-        PaymentMethodOptionsParams?,
-        Boolean
-    ) -> Unit
+    onConfirm: (selection: PaymentSelection) -> Unit,
+    onProcessingCompleted: () -> Unit
 ) {
     val scrollState = rememberScrollState()
     val interactorState by interactor.state.collectAsState()
+
     val uuid = rememberSaveable { UUID.randomUUID().toString() }
     val formViewModel: FormViewModel = viewModel(
         key = state.code + "_" + uuid,
@@ -93,10 +90,11 @@ internal fun FormActivityUI(
                         locked = true,
                         enabled = state.primaryButtonIsEnabled,
                         onClick = {
-                            state.paymentMethodCreateParams?.let {
-                                onConfirm(it, state.paymentOptionsParams, false)
+                            state.paymentSelection?.let {
+                                onConfirm(it)
                             }
                         },
+                        onProcessingCompleted = onProcessingCompleted,
                         processingState = primaryButtonProcessingState
                     )
                 }
