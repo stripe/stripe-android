@@ -42,7 +42,7 @@ internal fun LinkScreenContent(
         },
         handleViewAction = viewModel::handleViewAction,
         moveToWeb = viewModel::moveToWeb,
-        goBack = viewModel::goBack
+        goBack = viewModel::goBack,
     )
 }
 
@@ -61,7 +61,7 @@ internal fun LinkScreenContentBody(
     getLinkAccount: () -> LinkAccount?,
     handleViewAction: (LinkAction) -> Unit,
     moveToWeb: () -> Unit,
-    goBack: () -> Unit
+    goBack: () -> Unit,
 ) {
     when (screenState) {
         ScreenState.FullScreen -> {
@@ -78,7 +78,7 @@ internal fun LinkScreenContentBody(
                 eventReporter = eventReporter,
                 onLinkScreenScreenCreated = onLinkScreenScreenCreated,
                 onNavControllerCreated = onNavControllerCreated,
-                handleViewAction = handleViewAction
+                handleViewAction = handleViewAction,
             )
         }
         ScreenState.Loading -> Unit

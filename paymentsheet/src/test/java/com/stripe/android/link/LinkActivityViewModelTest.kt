@@ -12,6 +12,8 @@ import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.MutableCreationExtras
+import androidx.navigation.NavBackStackEntry
+import androidx.navigation.NavDestination
 import androidx.navigation.NavGraph
 import androidx.navigation.NavHostController
 import androidx.navigation.NavOptionsBuilder
@@ -30,12 +32,14 @@ import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.utils.DummyActivityResultCaller
 import com.stripe.attestation.IntegrityRequestManager
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -54,6 +58,7 @@ import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.assertFailsWith
 
+@SuppressWarnings("LargeClass")
 @RunWith(RobolectricTestRunner::class)
 internal class LinkActivityViewModelTest {
     private val dispatcher = UnconfinedTestDispatcher()
@@ -636,11 +641,107 @@ internal class LinkActivityViewModelTest {
             )
     }
 
-    private fun navController(): NavHostController {
+    @Test
+    fun `sign up route has correct app bar config`() {
+        val navController = navController(LinkScreen.SignUp)
+        val viewModel = createViewModel(
+            navController = navController
+        )
+
+        val appBarState = viewModel.linkAppBarState.value
+        assertThat(appBarState.email).isNull()
+        assertThat(appBarState.showHeader).isTrue()
+        assertThat(appBarState.showOverflowMenu).isFalse()
+        assertThat(appBarState.navigationIcon).isEqualTo(R.drawable.stripe_link_close)
+    }
+
+    @Test
+    fun `verification route has correct app bar config`() {
+        val navController = navController(LinkScreen.Verification)
+        val viewModel = createViewModel(
+            navController = navController
+        )
+
+        val appBarState = viewModel.linkAppBarState.value
+        assertThat(appBarState.email).isNull()
+        assertThat(appBarState.showHeader).isTrue()
+        assertThat(appBarState.showOverflowMenu).isFalse()
+        assertThat(appBarState.navigationIcon).isEqualTo(R.drawable.stripe_link_close)
+    }
+
+    @Test
+    fun `wallet route has correct app bar config`() {
+        val navController = navController(LinkScreen.Wallet)
+        val viewModel = createViewModel(
+            navController = navController
+        )
+
+        val appBarState = viewModel.linkAppBarState.value
+        assertThat(appBarState.email).isNull()
+        assertThat(appBarState.showHeader).isTrue()
+        assertThat(appBarState.showOverflowMenu).isTrue()
+        assertThat(appBarState.navigationIcon).isEqualTo(R.drawable.stripe_link_close)
+    }
+
+    @Test
+    fun `payment method route has correct app bar config`() {
+        val navController = navController(LinkScreen.PaymentMethod)
+        val viewModel = createViewModel(
+            navController = navController
+        )
+
+        val appBarState = viewModel.linkAppBarState.value
+        assertThat(appBarState.email).isNull()
+        assertThat(appBarState.showHeader).isFalse()
+        assertThat(appBarState.showOverflowMenu).isFalse()
+        assertThat(appBarState.navigationIcon).isEqualTo(R.drawable.stripe_link_back)
+    }
+
+    @Test
+    fun `card edit route has correct app bar config`() {
+        val navController = navController(LinkScreen.CardEdit)
+        val viewModel = createViewModel(
+            navController = navController
+        )
+
+        val appBarState = viewModel.linkAppBarState.value
+        assertThat(appBarState.email).isNull()
+        assertThat(appBarState.showHeader).isFalse()
+        assertThat(appBarState.showOverflowMenu).isFalse()
+        assertThat(appBarState.navigationIcon).isEqualTo(R.drawable.stripe_link_back)
+    }
+
+    @Test
+    fun `loading route has correct app bar config`() {
+        val navController = navController(LinkScreen.Loading)
+        val viewModel = createViewModel(
+            navController = navController
+        )
+
+        val appBarState = viewModel.linkAppBarState.value
+        assertThat(appBarState.email).isNull()
+        assertThat(appBarState.showHeader).isFalse()
+        assertThat(appBarState.showOverflowMenu).isFalse()
+        assertThat(appBarState.navigationIcon).isEqualTo(R.drawable.stripe_link_close)
+    }
+
+    private fun navController(
+        screen: LinkScreen = LinkScreen.SignUp
+    ): NavHostController {
         val navController: NavHostController = mock()
         val mockGraph: NavGraph = mock()
         `when`(mockGraph.id).thenReturn(FAKE_GRAPH_ID)
         `when`(navController.graph).thenReturn(mockGraph)
+        `when`(navController.currentBackStackEntryFlow).thenReturn(
+            flowOf(
+                NavBackStackEntry.create(
+                    context = null,
+                    destination = NavDestination("").apply {
+                        route = screen.route
+                    }
+                )
+            )
+        )
         return navController
     }
 

@@ -34,7 +34,8 @@ internal class LinkAppBarScreenshotTest(
                 LinkAppBar(
                     state = testCase.state,
                     onBackPressed = {},
-                    showBottomSheetContent = {}
+                    showBottomSheetContent = {},
+                    onLogoutClicked = {}
                 )
             }
         }

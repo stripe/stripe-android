@@ -73,7 +73,7 @@ internal fun FullScreenContent(
                 navigate = navigate,
                 dismissWithResult = dismissWithResult,
                 getLinkAccount = getLinkAccount,
-                goBack = goBack
+                goBack = goBack,
             )
         }
     }

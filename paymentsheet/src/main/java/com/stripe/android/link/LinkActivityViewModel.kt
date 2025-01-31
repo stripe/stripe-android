@@ -30,9 +30,13 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.attestation.IntegrityRequestManager
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -66,12 +70,17 @@ internal class LinkActivityViewModel @Inject constructor(
         get() = linkAccountManager.linkAccount.value
 
     var navController: NavHostController? = null
+        set(value) {
+            listenToNavController(value)
+            field = value
+        }
     var dismissWithResult: ((LinkActivityResult) -> Unit)? = null
     var launchWebFlow: ((LinkConfiguration) -> Unit)? = null
 
     fun handleViewAction(action: LinkAction) {
         when (action) {
             LinkAction.BackPressed -> handleBackPressed()
+            LinkAction.LogoutClicked -> handleLogoutClicked()
         }
     }
 
@@ -85,6 +94,41 @@ internal class LinkActivityViewModel @Inject constructor(
                 linkAccountUpdate = linkAccountManager.linkAccountUpdate
             )
         )
+    }
+
+    @OptIn(DelicateCoroutinesApi::class)
+    private fun handleLogoutClicked() {
+        GlobalScope.launch {
+            linkAccountManager.logOut()
+        }
+        dismissWithResult?.invoke(
+            LinkActivityResult.Canceled(
+                reason = LinkActivityResult.Canceled.Reason.LoggedOut,
+                linkAccountUpdate = LinkAccountUpdate.Value(null)
+            )
+        )
+    }
+
+    private fun listenToNavController(navController: NavHostController?) {
+        viewModelScope.launch {
+            navController?.currentBackStackEntryFlow?.collectLatest { entry ->
+                val route = entry.destination.route
+                _linkAppBarState.update {
+                    it.copy(
+                        showHeader = hideHeaderRoutes.contains(route).not(),
+                        showOverflowMenu = hideOverflowRoutes.contains(route).not(),
+                        navigationIcon = if (backIconRoutes.contains(route)) {
+                            R.drawable.stripe_link_back
+                        } else {
+                            R.drawable.stripe_link_close
+                        },
+                        email = linkAccountManager.linkAccount.value?.email?.takeIf {
+                            hideEmailRoutes.contains(route).not()
+                        }
+                    )
+                }
+            }
+        }
     }
 
     fun moveToWeb() {
@@ -240,6 +284,30 @@ internal class LinkActivityViewModel @Inject constructor(
     }
 
     companion object {
+        private val hideOverflowRoutes = setOf(
+            LinkScreen.Loading.route,
+            LinkScreen.Verification.route,
+            LinkScreen.SignUp.route,
+            LinkScreen.PaymentMethod.route,
+            LinkScreen.CardEdit.route,
+        )
+        private val hideHeaderRoutes = setOf(
+            LinkScreen.Loading.route,
+            LinkScreen.CardEdit.route,
+            LinkScreen.PaymentMethod.route
+        )
+        private val hideEmailRoutes = setOf(
+            LinkScreen.Loading.route,
+            LinkScreen.CardEdit.route,
+            LinkScreen.PaymentMethod.route,
+            LinkScreen.SignUp.route,
+            LinkScreen.Verification.route
+        )
+        private val backIconRoutes = setOf(
+            LinkScreen.CardEdit.route,
+            LinkScreen.PaymentMethod.route
+        )
+
         fun factory(savedStateHandle: SavedStateHandle? = null): ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 val handle: SavedStateHandle = savedStateHandle ?: createSavedStateHandle()

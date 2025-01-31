@@ -38,7 +38,8 @@ import com.stripe.android.ui.core.R as StripeUiCoreR
 internal fun LinkAppBar(
     state: LinkAppBarState,
     onBackPressed: () -> Unit,
-    showBottomSheetContent: (BottomSheetContent?) -> Unit
+    showBottomSheetContent: (BottomSheetContent?) -> Unit,
+    onLogoutClicked: () -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -65,7 +66,8 @@ internal fun LinkAppBar(
 
         LinkAppBarAction(
             showOverflowMenu = state.showOverflowMenu,
-            showBottomSheetContent = showBottomSheetContent
+            showBottomSheetContent = showBottomSheetContent,
+            onLogoutClicked = onLogoutClicked
         )
     }
 }
@@ -113,7 +115,8 @@ private fun RowScope.LinkAppBarTitle(
 @Composable
 private fun LinkAppBarAction(
     showOverflowMenu: Boolean,
-    showBottomSheetContent: (BottomSheetContent?) -> Unit
+    showBottomSheetContent: (BottomSheetContent?) -> Unit,
+    onLogoutClicked: () -> Unit
 ) {
     val overflowIconAlpha by animateFloatAsState(
         targetValue = if (showOverflowMenu) 1f else 0f,
@@ -122,7 +125,9 @@ private fun LinkAppBarAction(
 
     IconButton(
         onClick = {
-            showBottomSheetContent {}
+            showBottomSheetContent {
+                LinkAppBarMenu(onLogoutClicked)
+            }
         },
         enabled = showOverflowMenu,
         modifier = Modifier
@@ -150,7 +155,8 @@ private fun LinkAppBarPreview() {
                     email = "email@example.com",
                 ),
                 onBackPressed = {},
-                showBottomSheetContent = {}
+                showBottomSheetContent = {},
+                onLogoutClicked = {}
             )
         }
     }
@@ -169,7 +175,8 @@ private fun LinkAppBarNoEmail() {
                     email = null,
                 ),
                 onBackPressed = {},
-                showBottomSheetContent = {}
+                showBottomSheetContent = {},
+                onLogoutClicked = {}
             )
         }
     }
@@ -188,7 +195,8 @@ private fun LinkAppBarChildScreen() {
                     email = "email@example.com",
                 ),
                 onBackPressed = {},
-                showBottomSheetContent = {}
+                showBottomSheetContent = {},
+                onLogoutClicked = {}
             )
         }
     }
@@ -207,7 +215,8 @@ private fun LinkAppBarChildScreenNoEmail() {
                     email = null,
                 ),
                 onBackPressed = {},
-                showBottomSheetContent = {}
+                showBottomSheetContent = {},
+                onLogoutClicked = {}
             )
         }
     }
