@@ -254,8 +254,8 @@ internal class LinkActivityViewModel @Inject constructor(
                     .savedStateHandle(handle)
                     .context(app)
                     .application(app)
-                    .startWithVerificationDialog(args.startWithVerificationDialog)
                     .linkAccount(args.linkAccount)
+                    .startWithVerificationDialog(args.startWithVerificationDialog)
                     .build()
                     .viewModel
             }

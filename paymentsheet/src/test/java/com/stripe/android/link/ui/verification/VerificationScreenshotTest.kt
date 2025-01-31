@@ -50,7 +50,8 @@ internal class VerificationScreenshotTest(
                             isProcessing = false,
                             errorMessage = null,
                             isSendingNewCode = false,
-                            didSendNewCode = false
+                            didSendNewCode = false,
+                            isDialog = false
                         )
                     )
                 ),
@@ -65,7 +66,8 @@ internal class VerificationScreenshotTest(
                             isProcessing = false,
                             errorMessage = null,
                             isSendingNewCode = false,
-                            didSendNewCode = false
+                            didSendNewCode = false,
+                            isDialog = false
                         )
                     )
                 ),
@@ -80,7 +82,8 @@ internal class VerificationScreenshotTest(
                             email = "test@test.com",
                             errorMessage = null,
                             isSendingNewCode = false,
-                            didSendNewCode = false
+                            didSendNewCode = false,
+                            isDialog = false
                         )
                     )
                 ),
@@ -95,7 +98,8 @@ internal class VerificationScreenshotTest(
                             email = "test@test.com",
                             isProcessing = false,
                             errorMessage = null,
-                            didSendNewCode = false
+                            didSendNewCode = false,
+                            isDialog = false
                         )
                     )
                 ),
@@ -110,7 +114,56 @@ internal class VerificationScreenshotTest(
                             email = "test@test.com",
                             isProcessing = false,
                             errorMessage = "Something went wrong".resolvableString,
-                            didSendNewCode = false
+                            didSendNewCode = false,
+                            isDialog = false
+                        )
+                    )
+                ),
+                TestCase(
+                    name = "VerificationDialogWithOTPNotFilled",
+                    content = TestCase.Content(
+                        otpElement = otpSpecWithContent(content = ""),
+                        state = VerificationViewState(
+                            requestFocus = false,
+                            redactedPhoneNumber = "+1********91",
+                            email = "test@test.com",
+                            isProcessing = false,
+                            errorMessage = null,
+                            isSendingNewCode = false,
+                            didSendNewCode = false,
+                            isDialog = true
+                        )
+                    )
+                ),
+                TestCase(
+                    name = "VerificationDialogWithOTPFilled",
+                    content = TestCase.Content(
+                        otpElement = otpSpecWithContent(),
+                        state = VerificationViewState(
+                            requestFocus = false,
+                            redactedPhoneNumber = "+1********91",
+                            email = "test@test.com",
+                            isProcessing = false,
+                            errorMessage = null,
+                            isSendingNewCode = false,
+                            didSendNewCode = false,
+                            isDialog = true
+                        )
+                    )
+                ),
+                TestCase(
+                    name = "VerificationDialogWithOTPFilledAndErrorMessage",
+                    content = TestCase.Content(
+                        otpElement = otpSpecWithContent(),
+                        state = VerificationViewState(
+                            isSendingNewCode = false,
+                            requestFocus = false,
+                            redactedPhoneNumber = "+1********91",
+                            email = "test@test.com",
+                            isProcessing = false,
+                            errorMessage = "Something went wrong".resolvableString,
+                            didSendNewCode = false,
+                            isDialog = true
                         )
                     )
                 ),
