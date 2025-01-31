@@ -60,17 +60,17 @@ internal class VerificationViewModelTest {
     @Test
     fun `When confirmVerification succeeds then it navigates to Wallet`() =
         runTest(dispatcher) {
-            val screens = arrayListOf<LinkScreen>()
-            fun navigateAndClearStack(screen: LinkScreen) {
-                screens.add(screen)
+            val onVerificationSucceededCalls = arrayListOf<Unit>()
+            fun onVerificationSucceeded() {
+                onVerificationSucceededCalls.add(Unit)
             }
 
             val viewModel = createViewModel(
-                navigateAndClearStack = ::navigateAndClearStack
+                onVerificationSucceeded = ::onVerificationSucceeded,
             )
             viewModel.onVerificationCodeEntered("code")
 
-            assertThat(screens).isEqualTo(listOf(LinkScreen.Wallet))
+            assertThat(onVerificationSucceededCalls).containsExactly(Unit)
         }
 
     @Test
@@ -122,18 +122,18 @@ internal class VerificationViewModelTest {
             }
         }
 
-        val navScreens = arrayListOf<LinkScreen>()
-        fun navigateAndClearStack(screen: LinkScreen) {
-            navScreens.add(screen)
+        val onChangeEmailClickedCalls = arrayListOf<Unit>()
+        fun onChangeEmailClicked() {
+            onChangeEmailClickedCalls.add(Unit)
         }
 
         createViewModel(
             linkAccountManager = linkAccountManager,
-            navigateAndClearStack = ::navigateAndClearStack
-        ).onChangeEmailClicked()
+            onChangeEmailClicked = ::onChangeEmailClicked,
+        ).onChangeEmailButtonClicked()
 
         assertThat(linkAccountManager.callCount).isEqualTo(1)
-        assertThat(navScreens).isEqualTo(listOf(LinkScreen.SignUp))
+        assertThat(onChangeEmailClickedCalls).containsExactly(Unit)
     }
 
     @Test
@@ -213,16 +213,19 @@ internal class VerificationViewModelTest {
         linkAccountManager: LinkAccountManager = FakeLinkAccountManager(),
         linkEventsReporter: LinkEventsReporter = FakeLinkEventsReporter(),
         logger: Logger = FakeLogger(),
-        navigateAndClearStack: (LinkScreen) -> Unit = {},
-        goBack: () -> Unit = {},
+        onVerificationSucceeded: () -> Unit = {},
+        onChangeEmailClicked: () -> Unit = {},
+        onDismissClicked: () -> Unit = {},
     ): VerificationViewModel {
         return VerificationViewModel(
             linkAccountManager = linkAccountManager,
             linkEventsReporter = linkEventsReporter,
             logger = logger,
-            navigateAndClearStack = navigateAndClearStack,
-            goBack = goBack,
-            linkAccount = TestFactory.LINK_ACCOUNT
+            linkAccount = TestFactory.LINK_ACCOUNT,
+            onVerificationSucceeded = onVerificationSucceeded,
+            onChangeEmailClicked = onChangeEmailClicked,
+            onDismissClicked = onDismissClicked,
+            isDialog = false
         )
     }
 }
