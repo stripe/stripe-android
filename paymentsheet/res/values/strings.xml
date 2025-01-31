@@ -181,6 +181,8 @@
   <string name="stripe_verification_dialog_header">Confirm it\'s you</string>
   <!-- Two factor authentication screen heading -->
   <string name="stripe_verification_header">Enter your verification code</string>
+  <!-- Two factor authentication dialog heading -->
+  <string name="stripe_verification_dialog_header">Confirm it\'s you</string>
   <!-- Two factor authentication screen heading -->
   <string name="stripe_verification_header_inline">Sign in to your Link account</string>
   <!-- Two factor authentication screen heading -->
