@@ -4,7 +4,6 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.account.LinkAccountManager

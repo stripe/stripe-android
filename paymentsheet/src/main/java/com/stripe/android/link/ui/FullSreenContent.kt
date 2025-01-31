@@ -1,5 +1,6 @@
 package com.stripe.android.link.ui
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.rememberModalBottomSheetState
@@ -11,6 +12,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
 import com.stripe.android.link.LinkActivityViewModel
 import com.stripe.android.paymentsheet.utils.EventReporterProvider
@@ -20,6 +22,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 internal fun FullScreenContent(
+    modifier: Modifier,
     viewModel: LinkActivityViewModel,
     onBackPressed: () -> Unit
 ) {
@@ -38,21 +41,25 @@ internal fun FullScreenContent(
         }
     }
 
-    EventReporterProvider(
-        eventReporter = viewModel.eventReporter
+    Box(
+        modifier = modifier
     ) {
-        LinkContent(
-            viewModel = viewModel,
-            navController = navController,
-            appBarState = appBarState,
-            sheetState = sheetState,
-            bottomSheetContent = bottomSheetContent,
-            onUpdateSheetContent = {
-                bottomSheetContent = it
-            },
-            onBackPressed = onBackPressed,
-            moveToWeb = viewModel::moveToWeb
-        )
+        EventReporterProvider(
+            eventReporter = viewModel.eventReporter
+        ) {
+            LinkContent(
+                viewModel = viewModel,
+                navController = navController,
+                appBarState = appBarState,
+                sheetState = sheetState,
+                bottomSheetContent = bottomSheetContent,
+                onUpdateSheetContent = {
+                    bottomSheetContent = it
+                },
+                onBackPressed = onBackPressed,
+                moveToWeb = viewModel::moveToWeb
+            )
+        }
     }
 
     LaunchedEffect(Unit) {
