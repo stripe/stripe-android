@@ -69,6 +69,11 @@ internal interface NativeLinkComponent {
         @BindsInstance
         fun application(application: Application): Builder
 
+        @BindsInstance
+        fun startWithVerificationDialog(
+            @Named(START_WITH_VERIFICATION_DIALOG) startWithVerificationDialog: Boolean
+        ): Builder
+
         fun build(): NativeLinkComponent
     }
 }

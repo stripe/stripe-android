@@ -33,7 +33,10 @@ class NativeLinkActivityContractTest {
     @Test
     fun `intent is created correctly`() {
         val contract = NativeLinkActivityContract()
-        val args = LinkActivityContract.Args(TestFactory.LINK_CONFIGURATION)
+        val args = LinkActivityContract.Args(
+            configuration = TestFactory.LINK_CONFIGURATION,
+            startWithVerificationDialog = false
+        )
 
         val intent = contract.createIntent(ApplicationProvider.getApplicationContext(), args)
 
@@ -46,7 +49,8 @@ class NativeLinkActivityContractTest {
             NativeLinkArgs(
                 configuration = TestFactory.LINK_CONFIGURATION,
                 publishableKey = "pk_test_abcdefg",
-                stripeAccountId = null
+                stripeAccountId = null,
+                startWithVerificationDialog = false
             )
         )
     }

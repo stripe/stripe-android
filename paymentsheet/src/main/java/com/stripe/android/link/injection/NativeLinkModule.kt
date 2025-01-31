@@ -203,5 +203,3 @@ internal interface NativeLinkModule {
         }
     }
 }
-
-internal const val APPLICATION_ID = "application_id"

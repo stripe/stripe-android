@@ -11,6 +11,7 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.attestation.IntegrityRequestManager
 import dagger.Module
 import dagger.Provides
+import javax.inject.Named
 
 @Module
 internal object LinkViewModelModule {
@@ -25,7 +26,8 @@ internal object LinkViewModelModule {
         linkGate: LinkGate,
         errorReporter: ErrorReporter,
         linkAuth: LinkAuth,
-        linkConfiguration: LinkConfiguration
+        linkConfiguration: LinkConfiguration,
+        @Named(START_WITH_VERIFICATION_DIALOG) startWithVerificationDialog: Boolean
     ): LinkActivityViewModel {
         return LinkActivityViewModel(
             activityRetainedComponent = component,
@@ -36,7 +38,8 @@ internal object LinkViewModelModule {
             linkGate = linkGate,
             errorReporter = errorReporter,
             linkAuth = linkAuth,
-            linkConfiguration = linkConfiguration
+            linkConfiguration = linkConfiguration,
+            startWithVerificationDialog = startWithVerificationDialog
         )
     }
 }

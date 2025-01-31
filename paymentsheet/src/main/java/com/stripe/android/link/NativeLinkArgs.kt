@@ -7,5 +7,6 @@ import kotlinx.parcelize.Parcelize
 internal data class NativeLinkArgs(
     val configuration: LinkConfiguration,
     val publishableKey: String,
-    val stripeAccountId: String?
+    val stripeAccountId: String?,
+    val startWithVerificationDialog: Boolean
 ) : Parcelable
