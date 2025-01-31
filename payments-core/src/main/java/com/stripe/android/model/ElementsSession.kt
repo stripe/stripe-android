@@ -42,6 +42,9 @@ data class ElementsSession(
     val useAttestationEndpointsForLink: Boolean
         get() = linkSettings?.useAttestationEndpoints ?: false
 
+    val suppressLink2faModal: Boolean
+        get() = linkSettings?.suppress2faModal ?: false
+
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
     data class LinkSettings(
@@ -51,7 +54,8 @@ data class ElementsSession(
         val linkFlags: Map<String, Boolean>,
         val disableLinkSignup: Boolean,
         val linkConsumerIncentive: LinkConsumerIncentive?,
-        val useAttestationEndpoints: Boolean
+        val useAttestationEndpoints: Boolean,
+        val suppress2faModal: Boolean
     ) : StripeModel
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

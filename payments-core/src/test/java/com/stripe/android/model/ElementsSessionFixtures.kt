@@ -144,14 +144,15 @@ internal object ElementsSessionFixtures {
         """.trimIndent()
     )
 
-    val EXPANDED_PAYMENT_INTENT_WITH_LINK_ATTESTATION_ENDPOINTS_ENABLED_JSON = JSONObject(
+    val EXPANDED_PAYMENT_INTENT_WITH_NATIVE_LINK_FLAGS_ENABLED_JSON = JSONObject(
         """
         {
           "business_name": "Mybusiness",
           "link_settings": {
             "link_bank_enabled": false,
             "link_bank_onboarding_enabled": false,
-            "link_mobile_use_attestation_endpoints": true
+            "link_mobile_use_attestation_endpoints": true,
+            "link_mobile_suppress_2fa_modal": true
           },
           "merchant_country": "US",
           "payment_method_preference": {
@@ -212,14 +213,15 @@ internal object ElementsSessionFixtures {
         """.trimIndent()
     )
 
-    val EXPANDED_PAYMENT_INTENT_WITH_LINK_ATTESTATION_ENDPOINTS_DISABLED_JSON = JSONObject(
+    val EXPANDED_PAYMENT_INTENT_WITH_NATIVE_LINK_FLAGS_DISABLED_JSON = JSONObject(
         """
         {
           "business_name": "Mybusiness",
           "link_settings": {
             "link_bank_enabled": false,
             "link_bank_onboarding_enabled": false,
-            "link_mobile_use_attestation_endpoints": false
+            "link_mobile_use_attestation_endpoints": false,
+            "link_mobile_suppress_2fa_modal": false
           },
           "merchant_country": "US",
           "payment_method_preference": {

@@ -62,6 +62,7 @@ internal object LinkTestUtils {
             cardBrandChoice = null,
             shippingDetails = null,
             useAttestationEndpointsForLink = false,
+            suppress2faModal = false,
             initializationMode = PaymentSheetFixtures.INITIALIZATION_MODE_PAYMENT_INTENT,
             elementsSessionId = "session_1234"
         )
