@@ -433,9 +433,8 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
             ConnectJson.decodeFromString<T>(message)
         } catch (e: IllegalArgumentException) {
             controller?.onErrorDeserializingWebMessage(
-                webMessage = message,
-                error = "Unable to deserialize message from $webFunctionName",
-                errorMessage = e.message,
+                webFunctionName = webFunctionName,
+                error = e,
             )
             null
         }

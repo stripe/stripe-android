@@ -86,8 +86,7 @@ internal class StripeConnectWebViewContainerController<Listener : StripeEmbedded
                 pageLoadUrl.path != expectedUrl.path
             ) {
                 // expected URL doesn't match what we navigated to
-                val sanitizedUrl = pageLoadUrl.buildUpon().clearQuery().fragment(null).build().toString()
-                analyticsService.track(ConnectAnalyticsEvent.WebErrorUnexpectedNavigation(sanitizedUrl))
+                analyticsService.track(ConnectAnalyticsEvent.WebErrorUnexpectedNavigation(pageLoadUrl.sanitize()))
             }
         }
     }
@@ -136,15 +135,13 @@ internal class StripeConnectWebViewContainerController<Listener : StripeEmbedded
     }
 
     fun onErrorDeserializingWebMessage(
-        webMessage: String,
-        error: String,
-        errorMessage: String?,
+        webFunctionName: String,
+        error: Exception,
     ) {
         analyticsService.track(
             ConnectAnalyticsEvent.WebErrorDeserializeMessage(
-                message = webMessage,
-                error = error,
-                errorDescription = errorMessage,
+                message = webFunctionName,
+                error = error.javaClass.simpleName,
                 pageViewId = stateFlow.value.pageViewId,
             )
         )
@@ -165,11 +162,12 @@ internal class StripeConnectWebViewContainerController<Listener : StripeEmbedded
     fun shouldOverrideUrlLoading(context: Context, request: WebResourceRequest): Boolean {
         val url = request.url
         return if (url.host?.lowercase() in ALLOWLISTED_HOSTS) {
-            logger.warning("($loggerTag) Received pop-up for allow-listed host: $url")
+            val sanitizedUrl = url.sanitize()
+            logger.warning("($loggerTag) Received pop-up for allow-listed host: $sanitizedUrl")
             analyticsService.track(
                 ConnectAnalyticsEvent.ClientError(
-                    error = "Unexpected pop-up",
-                    errorMessage = "Received pop-up for allow-listed host: $url"
+                    errorCode = "unexpected_popup",
+                    errorMessage = "Received pop-up for allow-listed host: $sanitizedUrl"
                 )
             )
             false // Allow the request to propagate so we open URL in WebView, but this is not an expected operation
@@ -239,12 +237,12 @@ internal class StripeConnectWebViewContainerController<Listener : StripeEmbedded
                 request.deny() // no supported permissions were requested, so reject the request
                 analyticsService.track(
                     ConnectAnalyticsEvent.ClientError(
-                        error = "Unexpected permissions request",
-                        errorMessage = "Unexpected permissions '${request.resources.joinToString()}' requested"
+                        errorCode = "unexpected_permissions_request",
+                        errorMessage = "Unexpected permissions '${request.resources.joinToString(",")}' requested"
                     )
                 )
                 logger.warning(
-                    "($loggerTag) Denying permission - '${request.resources.joinToString()}' are not supported"
+                    "($loggerTag) Denying permission - '${request.resources.joinToString(",")}' are not supported"
                 )
             }
             return
@@ -334,6 +332,10 @@ internal class StripeConnectWebViewContainerController<Listener : StripeEmbedded
         update: StripeConnectWebViewContainerState.() -> StripeConnectWebViewContainerState
     ) {
         _stateFlow.value = update(stateFlow.value)
+    }
+
+    private fun Uri.sanitize(): String {
+        return buildUpon().clearQuery().fragment(null).build().toString()
     }
 
     internal companion object {

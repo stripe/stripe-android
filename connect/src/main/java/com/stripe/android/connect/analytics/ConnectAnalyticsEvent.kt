@@ -132,20 +132,17 @@ internal sealed class ConnectAnalyticsEvent(
      *
      * @param message The name of the message. If this message has a setter, concatenate it using {message}.{setter}
      * @param error The error identifier
-     * @param errorDescription The error's description, if there is one.
      * @param pageViewId The pageViewID from the web view. May be null if not yet sent from web
      */
     data class WebErrorDeserializeMessage(
         val message: String,
         val error: String,
-        val errorDescription: String?,
         val pageViewId: String?
     ) : ConnectAnalyticsEvent(
         "component.web.error.deserialize_message",
         mapOf(
             "message" to message,
             "error" to error,
-            "error_description" to errorDescription,
             "page_view_id" to pageViewId
         )
     )
@@ -239,12 +236,12 @@ internal sealed class ConnectAnalyticsEvent(
      * Catch-all event for unexpected client-side errors.
      */
     data class ClientError(
-        val error: String,
+        val errorCode: String,
         val errorMessage: String? = null,
     ) : ConnectAnalyticsEvent(
         "client_error",
         mapOf(
-            "error" to error,
+            "error_code" to errorCode,
             "error_message" to errorMessage,
         )
     )

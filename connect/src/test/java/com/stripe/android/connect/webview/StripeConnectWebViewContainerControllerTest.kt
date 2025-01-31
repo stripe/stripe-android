@@ -121,7 +121,7 @@ class StripeConnectWebViewContainerControllerTest {
         assertFalse(result)
         verify(analyticsService).track(
             ConnectAnalyticsEvent.ClientError(
-                error = "Unexpected pop-up",
+                errorCode = "unexpected_popup",
                 errorMessage = "Received pop-up for allow-listed host: https://connect-js.stripe.com/allowlisted",
             )
         )
@@ -280,7 +280,7 @@ class StripeConnectWebViewContainerControllerTest {
         verify(mockPermissionRequest).deny()
         verify(analyticsService).track(
             ConnectAnalyticsEvent.ClientError(
-                error = "Unexpected permissions request",
+                errorCode = "unexpected_permissions_request",
                 errorMessage = "Unexpected permissions 'unsupported_permission' requested",
             )
         )
@@ -410,15 +410,13 @@ class StripeConnectWebViewContainerControllerTest {
     fun `emit deserialization error on error to deserialize web message`() {
         controller.onReceivedPageDidLoad("page_view_id")
         controller.onErrorDeserializingWebMessage(
-            webMessage = "{ invalid: 4 ",
-            error = "Unable to deserialize",
-            errorMessage = "Error parsing JSON"
+            webFunctionName = "onSetterFunctionCalled",
+            error = IllegalArgumentException("Unable to deserialize"),
         )
         verify(analyticsService).track(
             ConnectAnalyticsEvent.WebErrorDeserializeMessage(
-                message = "{ invalid: 4 ",
-                error = "Unable to deserialize",
-                errorDescription = "Error parsing JSON",
+                message = "onSetterFunctionCalled",
+                error = "IllegalArgumentException",
                 pageViewId = "page_view_id",
             )
         )
