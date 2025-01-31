@@ -95,8 +95,7 @@ internal class VerificationScreenTest {
         onTitleField().assertIsDisplayed()
         onSubtitleTag().assertIsDisplayed()
         onOtpTag().assertIsDisplayed()
-        onEmailTag().assertIsDisplayed().
-        assertHasClickAction()
+        onEmailTag().assertIsDisplayed().assertHasClickAction()
             .assertIsEnabled()
         onErrorTag().assertIsDisplayed()
         onLoaderTag().assertDoesNotExist()
@@ -249,7 +248,7 @@ internal class VerificationScreenTest {
     private fun onVerificationHeaderImageTag() = composeTestRule.onNodeWithTag(VERIFICATION_HEADER_IMAGE_TAG)
     private fun onVerificationHeaderButtonTag() = composeTestRule.onNodeWithTag(VERIFICATION_HEADER_BUTTON_TAG)
 
-    private class VerificationLinkEventsReporter: FakeLinkEventsReporter() {
-        override fun on2FACancel()  = Unit
+    private class VerificationLinkEventsReporter : FakeLinkEventsReporter() {
+        override fun on2FACancel() = Unit
     }
 }
