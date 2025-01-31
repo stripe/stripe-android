@@ -178,4 +178,11 @@ internal object TestFactory {
     const val SESSION_ID = "element_sessions_123"
     val EMAIL_SOURCE = EmailSource.CUSTOMER_OBJECT
     val CONSENT_ACTION = ConsumerSignUpConsentAction.Checkbox
+
+    val NATIVE_LINK_ARGS = NativeLinkArgs(
+        configuration = LINK_CONFIGURATION,
+        publishableKey = "",
+        stripeAccountId = "",
+        startWithVerificationDialog = false
+    )
 }

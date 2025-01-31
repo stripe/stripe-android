@@ -1,7 +1,9 @@
 package com.stripe.android.link.ui.verification
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.stripe.android.link.linkViewModel
@@ -10,6 +12,7 @@ import com.stripe.android.link.theme.DefaultLinkTheme
 
 @Composable
 internal fun VerificationDialog(
+    modifier: Modifier,
     linkAccount: LinkAccount,
     onVerificationSucceeded: () -> Unit,
     onDismissClicked: () -> Unit
@@ -25,13 +28,17 @@ internal fun VerificationDialog(
         )
     }
 
-    Dialog(
-        onDismissRequest = onDismissClicked
+    Box(
+        modifier = modifier
     ) {
-        DefaultLinkTheme(
-            contentShape = RoundedCornerShape(16.dp)
+        Dialog(
+            onDismissRequest = onDismissClicked
         ) {
-            VerificationScreen(viewModel)
+            DefaultLinkTheme(
+                contentShape = RoundedCornerShape(16.dp)
+            ) {
+                VerificationScreen(viewModel)
+            }
         }
     }
 }

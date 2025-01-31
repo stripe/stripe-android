@@ -736,7 +736,7 @@ internal class LinkActivityViewModelTest {
     }
 }
 
-private class FakeNativeLinkComponent(
+internal class FakeNativeLinkComponent(
     override val linkAccountManager: LinkAccountManager = FakeLinkAccountManager(),
     override val configuration: LinkConfiguration = TestFactory.LINK_CONFIGURATION,
     override val linkEventsReporter: LinkEventsReporter = FakeLinkEventsReporter(),
