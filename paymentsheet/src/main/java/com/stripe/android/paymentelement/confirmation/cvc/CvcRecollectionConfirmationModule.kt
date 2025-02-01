@@ -15,7 +15,7 @@ internal interface CvcRecollectionConfirmationModule {
     @JvmSuppressWildcards
     @Binds
     @IntoSet
-    fun providesCvcConfirmationDefinition(
+    fun bindsCvcConfirmationDefinition(
         cvcReConfirmationDefinition: CvcRecollectionConfirmationDefinition,
     ): ConfirmationDefinition<*, *, *, *>
 

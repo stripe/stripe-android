@@ -12,9 +12,10 @@ import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.ExternalPaymentMethodContract
 import com.stripe.android.paymentsheet.ExternalPaymentMethodInput
 import java.lang.IllegalStateException
+import javax.inject.Inject
 import javax.inject.Provider
 
-internal class ExternalPaymentMethodConfirmationDefinition(
+internal class ExternalPaymentMethodConfirmationDefinition @Inject constructor(
     private val externalPaymentMethodConfirmHandlerProvider: Provider<ExternalPaymentMethodConfirmHandler?>,
     private val errorReporter: ErrorReporter,
 ) : ConfirmationDefinition<

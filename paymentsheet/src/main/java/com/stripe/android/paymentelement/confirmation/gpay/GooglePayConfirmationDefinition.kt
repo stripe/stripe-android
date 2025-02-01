@@ -20,9 +20,10 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import javax.inject.Inject
 import com.stripe.android.R as PaymentsCoreR
 
-internal class GooglePayConfirmationDefinition(
+internal class GooglePayConfirmationDefinition @Inject constructor(
     private val googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory,
     private val userFacingLogger: UserFacingLogger?,
 ) : ConfirmationDefinition<

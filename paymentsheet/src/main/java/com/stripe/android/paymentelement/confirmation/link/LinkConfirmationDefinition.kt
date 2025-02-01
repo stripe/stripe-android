@@ -9,8 +9,9 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
+import javax.inject.Inject
 
-internal class LinkConfirmationDefinition(
+internal class LinkConfirmationDefinition @Inject constructor(
     private val linkPaymentLauncher: LinkPaymentLauncher,
     private val linkStore: LinkStore,
 ) : ConfirmationDefinition<LinkConfirmationOption, LinkPaymentLauncher, Unit, LinkActivityResult> {
