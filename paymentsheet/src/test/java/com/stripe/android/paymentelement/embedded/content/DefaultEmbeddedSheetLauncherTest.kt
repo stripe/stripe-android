@@ -8,7 +8,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.confirmation.asCallbackFor
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
@@ -17,10 +16,8 @@ import com.stripe.android.paymentelement.embedded.form.FormResult
 import com.stripe.android.paymentelement.embedded.manage.ManageContract
 import com.stripe.android.paymentelement.embedded.manage.ManageResult
 import com.stripe.android.paymentsheet.CustomerStateHolder
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.utils.DummyActivityResultCaller
 import com.stripe.android.utils.DummyActivityResultCaller.RegisterCall
@@ -37,17 +34,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
     fun `launchForm launches activity with correct parameters`() = testScenario {
         val code = "test_code"
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
-        val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
-        val state = EmbeddedConfirmationStateHolder.State(
-            paymentMethodMetadata = paymentMethodMetadata,
-            selection = null,
-            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-                PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(1099L, "USD")
-                )
-            ),
-            configuration = configuration
-        )
+        val state = EmbeddedConfirmationStateFixtures.defaultState()
         val expectedArgs = FormContract.Args(
             code,
             paymentMethodMetadata,
@@ -62,7 +49,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
     }
 
     @Test
-    fun `launchForm logs error and returns if config is null`() = testScenario {
+    fun `launchForm logs error and returns if confirmation state is null`() = testScenario {
         val code = "test_code"
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
 

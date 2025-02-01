@@ -108,7 +108,7 @@ internal class StripeEndToEndTest {
                     card = PaymentMethodCreateParams.Card(
                         number = number,
                         expiryMonth = 1,
-                        expiryYear = 2025,
+                        expiryYear = 2045,
                         cvc = "123"
                     )
                 )
@@ -148,7 +148,7 @@ internal class StripeEndToEndTest {
                     country = "US",
                     cvcCheck = "unchecked",
                     expiryMonth = 12,
-                    expiryYear = 2025,
+                    expiryYear = 2045,
                     last4 = "4242",
                     funding = CardFunding.Credit,
                     threeDSecureStatus = SourceTypeModel.Card.ThreeDSecureStatus.Optional
@@ -167,7 +167,7 @@ internal class StripeEndToEndTest {
             .isEqualTo(
                 Card(
                     expMonth = 12,
-                    expYear = 2025,
+                    expYear = 2045,
                     id = card.id,
                     name = "Jenny Rosen",
                     last4 = "4242",
