@@ -12,6 +12,8 @@ import com.stripe.android.link.injection.LinkAnalyticsComponent
 import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.embedded.EmbeddedCommonModule
 import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInteractor
 import dagger.Binds
@@ -30,6 +32,7 @@ import kotlin.coroutines.CoroutineContext
     ]
 )
 @Singleton
+@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 internal interface FormActivityComponent {
 
     val viewModel: FormActivityViewModel
@@ -46,6 +49,9 @@ internal interface FormActivityComponent {
 
         @BindsInstance
         fun hasSavedPaymentMethods(hasSavedPaymentMethods: Boolean): Builder
+
+        @BindsInstance
+        fun configuration(configuration: EmbeddedPaymentElement.Configuration): Builder
 
         @BindsInstance
         fun context(context: Context): Builder
