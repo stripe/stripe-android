@@ -390,7 +390,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
             CardParams(
                 number = "4242424242424242",
                 expMonth = 7,
-                expYear = 2025,
+                expYear = 2045,
             )
         )
 

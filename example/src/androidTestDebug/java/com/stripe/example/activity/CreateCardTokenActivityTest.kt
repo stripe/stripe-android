@@ -56,7 +56,7 @@ class CreateCardTokenActivityTest {
         onView(withId(StripeR.id.card_number_edit_text))
             .perform(replaceText("4242424242424242"))
         onView(withId(StripeR.id.expiry_date_edit_text))
-            .perform(replaceText("01/25"))
+            .perform(replaceText("01/45"))
         onView(withId(StripeR.id.cvc_edit_text))
             .perform(replaceText("111"))
 
