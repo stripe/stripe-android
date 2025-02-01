@@ -674,7 +674,7 @@ internal class LinkActivityViewModelTest {
     }
 
     private fun createViewModel(
-        linkAccountManager: LinkAccountManager = FakeLinkAccountManager(),
+        linkAccountManager: FakeLinkAccountManager = FakeLinkAccountManager(),
         confirmationHandler: ConfirmationHandler = FakeConfirmationHandler(),
         eventReporter: EventReporter = FakeEventReporter(),
         navController: NavHostController = navController(),
@@ -688,6 +688,7 @@ internal class LinkActivityViewModelTest {
     ): LinkActivityViewModel {
         return LinkActivityViewModel(
             linkAccountManager = linkAccountManager,
+            linkAccountHolder = linkAccountManager.linkAccountHolder,
             activityRetainedComponent = FakeNativeLinkComponent(),
             eventReporter = eventReporter,
             confirmationHandlerFactory = { confirmationHandler },

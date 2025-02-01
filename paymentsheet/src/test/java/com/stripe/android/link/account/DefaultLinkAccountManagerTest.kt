@@ -1,5 +1,6 @@
 package com.stripe.android.link.account
 
+import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.StripeError
@@ -982,6 +983,7 @@ class DefaultLinkAccountManagerTest {
             email = customerEmail,
         )
         return DefaultLinkAccountManager(
+            linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
             config = TestFactory.LINK_CONFIGURATION.copy(
                 stripeIntent = stripeIntent,
                 passthroughModeEnabled = passthroughModeEnabled,
