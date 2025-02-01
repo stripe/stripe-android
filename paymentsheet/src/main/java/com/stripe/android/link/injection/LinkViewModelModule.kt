@@ -2,6 +2,7 @@ package com.stripe.android.link.injection
 
 import com.stripe.android.link.LinkActivityViewModel
 import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.account.LinkAuth
 import com.stripe.android.link.gate.LinkGate
@@ -21,6 +22,7 @@ internal object LinkViewModelModule {
         component: NativeLinkComponent,
         defaultConfirmationHandlerFactory: DefaultConfirmationHandler.Factory,
         linkAccountManager: LinkAccountManager,
+        linkAccountHolder: LinkAccountHolder,
         eventReporter: EventReporter,
         integrityRequestManager: IntegrityRequestManager,
         linkGate: LinkGate,
@@ -33,6 +35,7 @@ internal object LinkViewModelModule {
             activityRetainedComponent = component,
             confirmationHandlerFactory = defaultConfirmationHandlerFactory,
             linkAccountManager = linkAccountManager,
+            linkAccountHolder = linkAccountHolder,
             eventReporter = eventReporter,
             integrityRequestManager = integrityRequestManager,
             linkGate = linkGate,

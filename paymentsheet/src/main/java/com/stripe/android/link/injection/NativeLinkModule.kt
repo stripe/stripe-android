@@ -3,6 +3,7 @@ package com.stripe.android.link.injection
 import android.app.Application
 import android.content.Context
 import androidx.core.os.LocaleListCompat
+import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.BuildConfig
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.Stripe
@@ -23,6 +24,7 @@ import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.link.account.DefaultLinkAccountManager
 import com.stripe.android.link.account.DefaultLinkAuth
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.account.LinkAuth
 import com.stripe.android.link.analytics.DefaultLinkEventsReporter
@@ -95,6 +97,12 @@ internal interface NativeLinkModule {
 
     @SuppressWarnings("TooManyFunctions")
     companion object {
+        @Provides
+        @NativeLinkScope
+        fun providesLinkAccountHolder(savedStateHandle: SavedStateHandle): LinkAccountHolder {
+            return LinkAccountHolder(savedStateHandle)
+        }
+
         @Provides
         @NativeLinkScope
         fun provideConsumersApiService(

@@ -14,6 +14,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavHostController
 import com.stripe.android.link.LinkActivity.Companion.getArgs
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.account.LinkAuth
 import com.stripe.android.link.account.LinkAuthResult
@@ -39,6 +40,7 @@ internal class LinkActivityViewModel @Inject constructor(
     val activityRetainedComponent: NativeLinkComponent,
     confirmationHandlerFactory: ConfirmationHandler.Factory,
     private val linkAccountManager: LinkAccountManager,
+    private val linkAccountHolder: LinkAccountHolder,
     val eventReporter: EventReporter,
     private val integrityRequestManager: IntegrityRequestManager,
     private val linkGate: LinkGate,
@@ -62,7 +64,7 @@ internal class LinkActivityViewModel @Inject constructor(
     val linkScreenState: StateFlow<ScreenState> = _linkScreenState
 
     val linkAccount: LinkAccount?
-        get() = linkAccountManager.linkAccount.value
+        get() = linkAccountHolder.linkAccount.value
 
     var navController: NavHostController? = null
     var dismissWithResult: ((LinkActivityResult) -> Unit)? = null
@@ -179,7 +181,7 @@ internal class LinkActivityViewModel @Inject constructor(
     }
 
     private suspend fun updateScreenState() {
-        val linkAccount = linkAccountManager.linkAccount.value
+        val linkAccount = linkAccountHolder.linkAccount.value
         val accountStatus = linkAccountManager.accountStatus.first()
         when (accountStatus) {
             AccountStatus.Verified,
@@ -215,7 +217,7 @@ internal class LinkActivityViewModel @Inject constructor(
     }
 
     private suspend fun lookupUser(): LinkAuthResult? {
-        val customerEmail = linkAccountManager.linkAccount.value?.email
+        val customerEmail = linkAccountHolder.linkAccount.value?.email
             ?: linkConfiguration.customerInfo.email
             ?: return null
 

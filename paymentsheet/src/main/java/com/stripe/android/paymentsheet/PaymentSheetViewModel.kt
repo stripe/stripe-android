@@ -681,10 +681,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             val component = DaggerPaymentSheetLauncherComponent
                 .builder()
                 .application(application)
+                .savedStateHandle(savedStateHandle)
                 .build()
                 .paymentSheetViewModelSubcomponentBuilder
                 .paymentSheetViewModelModule(PaymentSheetViewModelModule(starterArgsSupplier()))
-                .savedStateHandle(savedStateHandle)
                 .build()
 
             return component.viewModel as T

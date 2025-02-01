@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.injection
 
 import android.content.Context
+import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
@@ -29,6 +30,9 @@ internal interface PaymentOptionsViewModelFactoryComponent {
     interface Builder {
         @BindsInstance
         fun context(context: Context): Builder
+
+        @BindsInstance
+        fun savedStateHandle(handle: SavedStateHandle): Builder
 
         @BindsInstance
         fun productUsage(@Named(PRODUCT_USAGE) productUsage: Set<String>): Builder
