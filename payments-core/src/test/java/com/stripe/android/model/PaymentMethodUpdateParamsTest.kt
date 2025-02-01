@@ -9,7 +9,7 @@ class PaymentMethodUpdateParamsTest {
         assertThat(
             PaymentMethodUpdateParams.createCard(
                 expiryMonth = 12,
-                expiryYear = 2025,
+                expiryYear = 2045,
                 allowRedisplay = PaymentMethod.AllowRedisplay.UNSPECIFIED
             ).toParamMap()
         ).containsEntry("allow_redisplay", "unspecified")
@@ -17,7 +17,7 @@ class PaymentMethodUpdateParamsTest {
         assertThat(
             PaymentMethodUpdateParams.createCard(
                 expiryMonth = 12,
-                expiryYear = 2025,
+                expiryYear = 2045,
                 allowRedisplay = PaymentMethod.AllowRedisplay.LIMITED
             ).toParamMap()
         ).containsEntry("allow_redisplay", "limited")
@@ -25,7 +25,7 @@ class PaymentMethodUpdateParamsTest {
         assertThat(
             PaymentMethodUpdateParams.createCard(
                 expiryMonth = 12,
-                expiryYear = 2025,
+                expiryYear = 2045,
                 allowRedisplay = PaymentMethod.AllowRedisplay.ALWAYS
             ).toParamMap()
         ).containsEntry("allow_redisplay", "always")

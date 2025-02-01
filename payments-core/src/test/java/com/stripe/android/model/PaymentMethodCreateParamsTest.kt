@@ -219,7 +219,7 @@ class PaymentMethodCreateParamsTest {
                 card = PaymentMethodCreateParams.Card(
                     number = CardNumberFixtures.VISA_NO_SPACES,
                     expiryMonth = 12,
-                    expiryYear = 2025,
+                    expiryYear = 2045,
                     cvc = "123",
                     attribution = setOf("CardInputView")
                 ),
@@ -371,7 +371,7 @@ class PaymentMethodCreateParamsTest {
         val card = PaymentMethodCreateParams.Card(
             number = CardNumberFixtures.VISA_NO_SPACES,
             expiryMonth = 12,
-            expiryYear = 2025,
+            expiryYear = 2045,
             cvc = "123",
         )
 

@@ -15,7 +15,7 @@ internal object CardParamsFixtures {
     val DEFAULT = CardParams(
         number = CardNumberFixtures.VISA_NO_SPACES,
         expMonth = 12,
-        expYear = 2025,
+        expYear = 2045,
         cvc = "123",
         name = "Jenny Rosen",
         address = AddressFixtures.ADDRESS,
@@ -28,7 +28,7 @@ internal object CardParamsFixtures {
         loggingTokens = setOf(CardInputWidget.LOGGING_TOKEN),
         number = CardNumberFixtures.VISA_NO_SPACES,
         expMonth = 12,
-        expYear = 2025,
+        expYear = 2045,
         cvc = "123"
     )
 }
