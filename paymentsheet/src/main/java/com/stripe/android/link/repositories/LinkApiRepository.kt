@@ -1,6 +1,9 @@
 package com.stripe.android.link.repositories
 
+import android.content.Context
+import com.stripe.android.DefaultFraudDetectionDataRepository
 import com.stripe.android.core.exception.StripeException
+import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
@@ -17,6 +20,7 @@ import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.EmailSource
 import com.stripe.android.model.IncentiveEligibilitySession
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.SharePaymentDetails
 import com.stripe.android.model.SignUpParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.VerificationType
@@ -34,6 +38,7 @@ import kotlin.coroutines.CoroutineContext
  */
 @SuppressWarnings("TooManyFunctions")
 internal class LinkApiRepository @Inject constructor(
+    context: Context,
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
     @Named(STRIPE_ACCOUNT_ID) private val stripeAccountIdProvider: () -> String?,
     private val stripeRepository: StripeRepository,
@@ -42,6 +47,13 @@ internal class LinkApiRepository @Inject constructor(
     private val locale: Locale?,
     private val errorReporter: ErrorReporter,
 ) : LinkRepository {
+
+    private val fraudDetectionDataRepository: FraudDetectionDataRepository =
+        DefaultFraudDetectionDataRepository(context, workContext)
+
+    init {
+        fraudDetectionDataRepository.refresh()
+    }
 
     override suspend fun lookupConsumer(
         email: String,
@@ -197,6 +209,24 @@ internal class LinkApiRepository @Inject constructor(
                 ),
             )
         }
+    }
+
+    override suspend fun shareLinkCardBrand(
+        consumerSessionClientSecret: String,
+        paymentDetailsId: String,
+    ): Result<SharePaymentDetails> = withContext(workContext) {
+        val fraudParams = fraudDetectionDataRepository.getCached()?.params.orEmpty()
+        val paymentMethodParams = mapOf("expand" to listOf("payment_method"))
+
+        consumersApiService.sharePaymentDetails(
+            consumerSessionClientSecret = consumerSessionClientSecret,
+            paymentDetailsId = paymentDetailsId,
+            expectedPaymentMethodType = "card", // Link card brand
+            requestOptions = buildRequestOptions(),
+            requestSurface = REQUEST_SURFACE,
+            extraParams = paymentMethodParams + fraudParams,
+            billingPhone = null,
+        )
     }
 
     override suspend fun logOut(

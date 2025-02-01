@@ -36,11 +36,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.Result
-import kotlin.String
-import kotlin.Throwable
-import kotlin.Unit
-import kotlin.fold
-import kotlin.takeIf
 import com.stripe.android.link.confirmation.Result as LinkConfirmationResult
 
 internal class WalletViewModel @Inject constructor(

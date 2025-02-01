@@ -12,8 +12,9 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import kotlinx.coroutines.Dispatchers
 import kotlin.coroutines.CoroutineContext
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @JvmOverloads
-internal fun DefaultFraudDetectionDataRepository(
+fun DefaultFraudDetectionDataRepository(
     context: Context,
     workContext: CoroutineContext = Dispatchers.IO,
 ): DefaultFraudDetectionDataRepository {

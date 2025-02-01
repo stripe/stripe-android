@@ -18,6 +18,7 @@ import com.stripe.android.model.IncentiveEligibilitySession
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.SharePaymentDetails
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
@@ -114,6 +115,11 @@ internal object TestFactory {
         paymentDetails = CONSUMER_PAYMENT_DETAILS_CARD,
         paymentMethodCreateParams = PAYMENT_METHOD_CREATE_PARAMS,
         originalParams = mock()
+    )
+
+    val LINK_SHARE_PAYMENT_DETAILS = SharePaymentDetails(
+        paymentMethodId = "pm_123",
+        encodedPaymentMethod = "{\"id\": \"pm_123\"}",
     )
 
     val LINK_SAVED_PAYMENT_DETAILS = LinkPaymentDetails.Saved(

@@ -19,6 +19,7 @@ import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.EmailSource
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.SharePaymentDetails
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.paymentsheet.model.amount
@@ -252,6 +253,19 @@ internal class DefaultLinkAccountManager @Inject constructor(
             Result.failure(
                 IllegalStateException("A non-null Link account is needed to create payment details")
             )
+        }
+    }
+
+    override suspend fun shareLinkCardBrand(
+        paymentDetailsId: String,
+    ): Result<SharePaymentDetails> {
+        return runCatching {
+            requireNotNull(linkAccountHolder.linkAccount.value)
+        }.mapCatching { account ->
+            linkRepository.shareLinkCardBrand(
+                paymentDetailsId = paymentDetailsId,
+                consumerSessionClientSecret = account.clientSecret,
+            ).getOrThrow()
         }
     }
 

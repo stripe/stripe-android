@@ -33,7 +33,6 @@
     <ID>LongMethod:FormViewModelTest.kt$FormViewModelTest$@Test fun `Verify params are set when required address fields are complete`()</ID>
     <ID>LongMethod:LinkInlineSignupFields.kt$@Composable internal fun LinkInlineSignupFields( sectionError: Int?, emailController: TextFieldController, phoneNumberController: PhoneNumberController, nameController: TextFieldController, signUpState: SignUpState, enabled: Boolean, isShowingPhoneFirst: Boolean, requiresNameCollection: Boolean, errorMessage: ErrorMessage?, didShowAllFields: Boolean, onShowingAllFields: () -> Unit, modifier: Modifier = Modifier, emailFocusRequester: FocusRequester = remember { FocusRequester() }, phoneFocusRequester: FocusRequester = remember { FocusRequester() }, nameFocusRequester: FocusRequester = remember { FocusRequester() }, )</ID>
     <ID>LongMethod:PaymentMethodMetadataTest.kt$PaymentMethodMetadataTest$@OptIn(ExperimentalCardBrandFilteringApi::class) @Test fun `should create metadata properly with elements session response, payment sheet config, and data specs`()</ID>
-    <ID>LongMethod:PaymentMethodVerticalLayoutInteractor.kt$DefaultPaymentMethodVerticalLayoutInteractor.Companion$fun create( viewModel: BaseSheetViewModel, paymentMethodMetadata: PaymentMethodMetadata, customerStateHolder: CustomerStateHolder, bankFormInteractor: BankFormInteractor, ): PaymentMethodVerticalLayoutInteractor</ID>
     <ID>LongMethod:PaymentSheetConfigurationKtx.kt$internal fun PaymentSheet.Appearance.parseAppearance()</ID>
     <ID>LongMethod:PaymentSheetScreen.kt$@Composable private fun PaymentSheetContent( viewModel: BaseSheetViewModel, headerText: ResolvableString?, walletsState: WalletsState?, walletsProcessingState: WalletsProcessingState?, error: ResolvableString?, currentScreen: PaymentSheetScreen, mandateText: MandateText?, modifier: Modifier )</ID>
     <ID>LongMethod:PaymentSheetViewModelTest.kt$PaymentSheetViewModelTest$@Test fun `Can complete payment after switching to another LPM from card selection with inline Link signup state`()</ID>
@@ -41,7 +40,6 @@
     <ID>LongMethod:USBankAccountForm.kt$@Composable private fun AccountDetailsForm( modifier: Modifier = Modifier, showCheckbox: Boolean, isProcessing: Boolean, bankName: String?, last4: String?, promoBadgeState: PromoBadgeState?, saveForFutureUseElement: SaveForFutureUseElement, onRemoveAccount: () -> Unit, )</ID>
     <ID>LongMethod:USBankAccountForm.kt$@Composable private fun BillingDetailsForm( instantDebits: Boolean, formArgs: FormArguments, isProcessing: Boolean, isPaymentFlow: Boolean, nameController: TextFieldController, emailController: TextFieldController, phoneController: PhoneNumberController, addressController: AddressController, lastTextFieldIdentifier: IdentifierSpec?, sameAsShippingElement: SameAsShippingElement?, )</ID>
     <ID>LongMethod:USBankAccountFormViewModel.kt$USBankAccountFormViewModel$private fun createNewPaymentSelection( resultIdentifier: ResultIdentifier, last4: String?, bankName: String?, billingDetails: PaymentMethod.BillingDetails, ): PaymentSelection.New.USBankAccount</ID>
-    <ID>MagicNumber:BaseSheetActivity.kt$BaseSheetActivity$30</ID>
     <ID>MagicNumber:NewPaymentMethodTabLayoutUI.kt$.3f</ID>
     <ID>MagicNumber:NewPaymentMethodTabLayoutUI.kt$.4f</ID>
     <ID>MagicNumber:NewPaymentMethodTabLayoutUI.kt$.5f</ID>
@@ -71,6 +69,8 @@
     <ID>MaxLineLength:SupportedPaymentMethod.kt$SupportedPaymentMethod$/** This describes the image in the LPM selector. These can be found internally [here](https://www.figma.com/file/2b9r3CJbyeVAmKi1VHV2h9/Mobile-Payment-Element?node-id=1128%3A0) */</ID>
     <ID>MaxLineLength:USBankAccountFormViewModelTest.kt$USBankAccountFormViewModelTest$fun</ID>
     <ID>MaximumLineLength:CardDefinition.kt$internal</ID>
+    <ID>SwallowedException:LinkCardBrandConfirmationDefinition.kt$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:LinkCardBrandConfirmationDefinition.kt$e: Exception</ID>
     <ID>TooManyFunctions:CustomerSheetEventReporter.kt$CustomerSheetEventReporter</ID>
     <ID>TooManyFunctions:DefaultCustomerSheetEventReporter.kt$DefaultCustomerSheetEventReporter : CustomerSheetEventReporter</ID>
     <ID>TooManyFunctions:DefaultEventReporter.kt$DefaultEventReporter : EventReporter</ID>

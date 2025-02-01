@@ -1,5 +1,6 @@
 package com.stripe.android.link.repositories
 
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.link.FakeConsumersApiService
@@ -50,6 +51,7 @@ class LinkApiRepositoryTest {
     }
 
     private val linkRepository = LinkApiRepository(
+        context = ApplicationProvider.getApplicationContext(),
         publishableKeyProvider = { PUBLISHABLE_KEY },
         stripeAccountIdProvider = { STRIPE_ACCOUNT_ID },
         stripeRepository = stripeRepository,
@@ -679,6 +681,7 @@ class LinkApiRepositoryTest {
         consumersApiService: ConsumersApiService = FakeConsumersApiService()
     ): LinkApiRepository {
         return LinkApiRepository(
+            context = ApplicationProvider.getApplicationContext(),
             publishableKeyProvider = { PUBLISHABLE_KEY },
             stripeAccountIdProvider = { STRIPE_ACCOUNT_ID },
             stripeRepository = stripeRepository,

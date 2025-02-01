@@ -14,7 +14,7 @@ class StripeIntentKtxTest {
     fun `When test mode and test account then all funding sources are enabled`() {
         val supportedTypes = stripeIntent(liveMode = false)
             .supportedPaymentMethodTypes(linkAccount("test+multiple_funding_sources@test.abc"))
-        assertThat(supportedTypes).containsExactly("card")
+        assertThat(supportedTypes).containsExactly("card", "bank_account")
     }
 
     @Test
