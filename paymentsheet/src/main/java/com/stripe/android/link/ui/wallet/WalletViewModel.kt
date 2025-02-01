@@ -1,5 +1,6 @@
 package com.stripe.android.link.ui.wallet
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -42,6 +43,7 @@ import kotlin.takeIf
 import com.stripe.android.link.confirmation.Result as LinkConfirmationResult
 
 internal class WalletViewModel @Inject constructor(
+    private val savedStateHandle: SavedStateHandle,
     private val configuration: LinkConfiguration,
     private val linkAccount: LinkAccount,
     private val linkAccountManager: LinkAccountManager,
@@ -277,6 +279,7 @@ internal class WalletViewModel @Inject constructor(
 
     @SuppressWarnings("UnusedParameter")
     fun onEditPaymentMethodClicked(item: ConsumerPaymentDetails.PaymentDetails) {
+        savedStateHandle["paymentDetailsId"] = item.id
         navigate(LinkScreen.CardEdit)
     }
 
@@ -307,6 +310,7 @@ internal class WalletViewModel @Inject constructor(
             return viewModelFactory {
                 initializer {
                     WalletViewModel(
+                        savedStateHandle = parentComponent.savedStateHandle,
                         configuration = parentComponent.configuration,
                         linkAccountManager = parentComponent.linkAccountManager,
                         linkConfirmationHandler = parentComponent.linkConfirmationHandlerFactory.create(

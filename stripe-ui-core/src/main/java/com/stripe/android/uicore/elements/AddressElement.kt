@@ -231,6 +231,10 @@ open class AddressElement(
 
     override fun setRawValue(rawValuesMap: Map<IdentifierSpec, String?>) {
         this.rawValuesMap = rawValuesMap
+        countryElement.setRawValue(rawValuesMap)
+        elementsRegistry.get("US")?.forEach { element ->
+            element.setRawValue(rawValuesMap)
+        }
     }
 }
 

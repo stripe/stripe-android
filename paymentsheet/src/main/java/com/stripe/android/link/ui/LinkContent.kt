@@ -31,6 +31,7 @@ import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.linkColors
 import com.stripe.android.link.theme.linkShapes
 import com.stripe.android.link.ui.cardedit.CardEditScreen
+import com.stripe.android.link.ui.cardedit.CardEditViewModel
 import com.stripe.android.link.ui.paymentmenthod.PaymentMethodScreen
 import com.stripe.android.link.ui.paymentmenthod.PaymentMethodViewModel
 import com.stripe.android.link.ui.signup.SignUpScreen
@@ -182,7 +183,14 @@ private fun Screens(
         }
 
         composable(LinkScreen.CardEdit.route) {
-            CardEditScreen()
+            val viewModel: CardEditViewModel = linkViewModel { parentComponent ->
+                CardEditViewModel.factory(
+                    parentComponent = parentComponent,
+                    navigateAndClearStack = navigateAndClearStack,
+                    goBack = goBack
+                )
+            }
+            CardEditScreen(viewModel)
         }
 
         composable(LinkScreen.PaymentMethod.route) {

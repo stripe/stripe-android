@@ -19,6 +19,7 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.lifecycle.SavedStateHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
@@ -611,6 +612,7 @@ internal class WalletScreenTest {
             linkAccountManager = linkAccountManager,
             linkConfirmationHandler = linkConfirmationHandler,
             logger = FakeLogger(),
+            savedStateHandle = SavedStateHandle(),
             navigate = {},
             navigateAndClearStack = {},
             dismissWithResult = {}

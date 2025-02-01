@@ -1,9 +1,9 @@
 package com.stripe.android.paymentsheet.ui
 
-import android.content.res.Resources
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -33,6 +33,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
@@ -64,7 +65,9 @@ internal fun UpdatePaymentMethodUI(interactor: UpdatePaymentMethodInteractor, mo
         interactor.displayableSavedPaymentMethod.isModifiable()
 
     Column(
-        modifier = modifier.padding(horizontal = horizontalPadding).testTag(UPDATE_PM_SCREEN_TEST_TAG),
+        modifier = modifier
+            .padding(horizontal = horizontalPadding)
+            .testTag(UPDATE_PM_SCREEN_TEST_TAG),
     ) {
         when (val savedPaymentMethod = interactor.displayableSavedPaymentMethod.savedPaymentMethod) {
             is SavedPaymentMethod.Card -> CardDetailsUI(
@@ -143,14 +146,8 @@ private fun CardDetailsUI(
     card: PaymentMethod.Card,
     interactor: UpdatePaymentMethodInteractor,
 ) {
-    val dividerHeight = remember { mutableStateOf(0.dp) }
-
-    Card(
-        border = MaterialTheme.getBorderStroke(false),
-        elevation = 0.dp,
-        modifier = Modifier.testTag(UPDATE_PM_CARD_TEST_TAG),
-    ) {
-        Column {
+    CardDetailsUI2(
+        cardNumberRow = {
             CardNumberField(
                 card = card,
                 selectedBrand = selectedBrand,
@@ -169,29 +166,54 @@ private fun CardDetailsUI(
                     interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.BrandChoiceOptionsDismissed)
                 },
             )
+        },
+        expirySection = { updateExpirySize ->
+            ExpiryField(
+                expiryMonth = card.expiryMonth,
+                expiryYear = card.expiryYear,
+                isExpired = interactor.isExpiredCard,
+                modifier = Modifier
+                    .weight(1F)
+                    .onSizeChanged(updateExpirySize),
+            )
+        },
+        cvcSection = {
+            CvcField(cardBrand = card.brand, modifier = Modifier.weight(1F))
+        }
+    )
+}
+
+@Composable
+internal fun CardDetailsUI2(
+    cardNumberRow: @Composable () -> Unit,
+    expirySection: @Composable RowScope.((IntSize) -> Unit) -> Unit,
+    cvcSection: @Composable RowScope.() -> Unit
+) {
+    val dividerHeight = remember { mutableStateOf(0.dp) }
+
+    Card(
+        border = MaterialTheme.getBorderStroke(false),
+        elevation = 0.dp,
+        modifier = Modifier.testTag(UPDATE_PM_CARD_TEST_TAG),
+    ) {
+        Column {
+            cardNumberRow()
             Divider(
                 color = MaterialTheme.stripeColors.componentDivider,
                 thickness = MaterialTheme.stripeShapes.borderStrokeWidth.dp,
             )
             Row(modifier = Modifier.fillMaxWidth()) {
-                ExpiryField(
-                    expiryMonth = card.expiryMonth,
-                    expiryYear = card.expiryYear,
-                    isExpired = interactor.isExpiredCard,
-                    modifier = Modifier
-                        .weight(1F)
-                        .onSizeChanged {
-                            dividerHeight.value =
-                                (it.height / Resources.getSystem().displayMetrics.density).dp
-                        },
-                )
+                expirySection {
+//                    dividerHeight.value =
+//                        (it.height / Resources.getSystem().displayMetrics.density).dp
+                }
                 Divider(
                     modifier = Modifier
                         .height(dividerHeight.value)
                         .width(MaterialTheme.stripeShapes.borderStrokeWidth.dp),
                     color = MaterialTheme.stripeColors.componentDivider,
                 )
-                CvcField(cardBrand = card.brand, modifier = Modifier.weight(1F))
+                cvcSection()
             }
         }
     }
@@ -327,10 +349,9 @@ private fun CardNumberField(
     onBrandChoiceChanged: (CardBrandChoice) -> Unit,
     onBrandChoiceOptionsDismissed: () -> Unit,
 ) {
-    CommonTextField(
-        value = "•••• •••• •••• ${card.last4}",
-        label = stringResource(id = R.string.stripe_acc_label_card_number),
-        trailingIcon = {
+    CardNumberField(
+        last4 = card.last4,
+        cardBrand = {
             if (shouldShowCardBrandDropdown) {
                 CardBrandDropdown(
                     selectedBrand = selectedBrand,
@@ -347,7 +368,24 @@ private fun CardNumberField(
                     modifier = Modifier,
                 )
             }
+        }
+    )
+}
+
+@Composable
+internal fun CardNumberField(
+    last4: String?,
+    shape: Shape =
+        MaterialTheme.shapes.small.copy(bottomEnd = ZeroCornerSize, bottomStart = ZeroCornerSize),
+    cardBrand: @Composable () -> Unit,
+) {
+    CommonTextField(
+        value = "•••• •••• •••• $last4",
+        label = stringResource(id = R.string.stripe_acc_label_card_number),
+        trailingIcon = {
+            cardBrand()
         },
+        shape = shape
     )
 }
 

@@ -1,5 +1,6 @@
 package com.stripe.android.link.ui.wallet
 
+import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
@@ -482,6 +483,7 @@ class WalletViewModelTest {
             linkAccountManager = linkAccountManager,
             linkConfirmationHandler = linkConfirmationHandler,
             logger = logger,
+            savedStateHandle = SavedStateHandle(),
             navigate = navigate,
             navigateAndClearStack = navigateAndClearStack,
             dismissWithResult = dismissWithResult

@@ -734,5 +734,6 @@ private class FakeNativeLinkComponent(
         NullCardAccountRangeRepositoryFactory,
     override val viewModel: LinkActivityViewModel = mock(),
     override val errorReporter: ErrorReporter = FakeErrorReporter(),
-    override val linkAuth: LinkAuth = FakeLinkAuth()
+    override val linkAuth: LinkAuth = FakeLinkAuth(),
+    override val savedStateHandle: SavedStateHandle = SavedStateHandle()
 ) : NativeLinkComponent
