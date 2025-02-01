@@ -1,9 +1,7 @@
 package com.stripe.android.paymentsheet.injection
 
-import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.paymentelement.confirmation.injection.PaymentElementConfirmationModule
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
-import dagger.BindsInstance
 import dagger.Subcomponent
 
 @Subcomponent(
@@ -17,9 +15,6 @@ internal interface PaymentSheetViewModelSubcomponent {
         fun paymentSheetViewModelModule(
             paymentSheetViewModelModule: PaymentSheetViewModelModule
         ): Builder
-
-        @BindsInstance
-        fun savedStateHandle(handle: SavedStateHandle): Builder
 
         fun build(): PaymentSheetViewModelSubcomponent
     }

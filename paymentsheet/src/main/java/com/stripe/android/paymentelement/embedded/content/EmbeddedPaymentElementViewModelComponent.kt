@@ -12,6 +12,7 @@ import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.RealLinkConfigurationCoordinator
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.gate.DefaultLinkGate
 import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.injection.LinkAnalyticsComponent
@@ -129,6 +130,12 @@ internal interface EmbeddedPaymentElementViewModelModule {
     fun bindsEmbeddedContentHelper(helper: DefaultEmbeddedContentHelper): EmbeddedContentHelper
 
     companion object {
+        @Provides
+        @Singleton
+        fun providesLinkAccountHolder(savedStateHandle: SavedStateHandle): LinkAccountHolder {
+            return LinkAccountHolder(savedStateHandle)
+        }
+
         @Provides
         fun providePrefsRepositoryFactory(
             appContext: Context,

@@ -289,11 +289,11 @@ internal class PaymentOptionsViewModel @Inject constructor(
             val component = DaggerPaymentOptionsViewModelFactoryComponent.builder()
                 .context(application)
                 .productUsage(starterArgs.productUsage)
+                .savedStateHandle(savedStateHandle)
                 .build()
                 .paymentOptionsViewModelSubcomponentBuilder
                 .application(application)
                 .args(starterArgs)
-                .savedStateHandle(savedStateHandle)
                 .build()
 
             return component.viewModel as T

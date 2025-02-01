@@ -1,5 +1,6 @@
 package com.stripe.android.link.account
 
+import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.Turbine
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.TestFactory
@@ -17,9 +18,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-internal open class FakeLinkAccountManager : LinkAccountManager {
-    private val _linkAccount = MutableStateFlow<LinkAccount?>(null)
-    override val linkAccount: StateFlow<LinkAccount?> = _linkAccount
+internal open class FakeLinkAccountManager(
+    val linkAccountHolder: LinkAccountHolder = LinkAccountHolder(SavedStateHandle()),
+) : LinkAccountManager {
+    override val linkAccount: StateFlow<LinkAccount?> = linkAccountHolder.linkAccount
 
     private val _accountStatus = MutableStateFlow(AccountStatus.SignedOut)
     override val accountStatus: Flow<AccountStatus> = _accountStatus
@@ -49,7 +51,7 @@ internal open class FakeLinkAccountManager : LinkAccountManager {
     override var consumerPublishableKey: String? = null
 
     fun setLinkAccount(account: LinkAccount?) {
-        _linkAccount.value = account
+        linkAccountHolder.set(account)
     }
 
     fun setAccountStatus(status: AccountStatus) {

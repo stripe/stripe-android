@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.injection
 
 import android.app.Application
+import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
@@ -29,6 +30,9 @@ internal interface PaymentSheetLauncherComponent {
     interface Builder {
         @BindsInstance
         fun application(application: Application): Builder
+
+        @BindsInstance
+        fun savedStateHandle(handle: SavedStateHandle): Builder
 
         fun build(): PaymentSheetLauncherComponent
     }
