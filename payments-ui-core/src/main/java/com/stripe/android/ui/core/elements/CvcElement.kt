@@ -14,7 +14,6 @@ data class CvcElement(
     override val mandateText: ResolvableString? = null
 
     override fun setRawValue(rawValuesMap: Map<IdentifierSpec, String?>) {
-        // Nothing from FormArguments to populate
         rawValuesMap[identifier]?.let {
             controller.onRawValueChange(it)
         }
