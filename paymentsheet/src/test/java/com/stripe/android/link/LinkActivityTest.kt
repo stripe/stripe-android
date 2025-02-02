@@ -24,7 +24,9 @@ import com.stripe.android.link.gate.FakeLinkGate
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
+import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -33,17 +35,17 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 internal class LinkActivityTest {
-
-    @get:Rule
-    val rule = InstantTaskExecutorRule()
-
-    @get:Rule
-    val composeTestRule = createAndroidComposeRule<LinkActivity>()
-
+    private val dispatcher = UnconfinedTestDispatcher()
     private val context = ApplicationProvider.getApplicationContext<Context>()
 
     @get:Rule
+    val rule = InstantTaskExecutorRule()
+    @get:Rule
+    val composeTestRule = createAndroidComposeRule<LinkActivity>()
+    @get:Rule
     val intentsTestRule = IntentsRule()
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule(dispatcher)
 
     @Test
     fun `finishes with a cancelled result when no arg is passed`() {
