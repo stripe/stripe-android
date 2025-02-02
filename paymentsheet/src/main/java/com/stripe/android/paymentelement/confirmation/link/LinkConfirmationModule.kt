@@ -1,11 +1,9 @@
 package com.stripe.android.paymentelement.confirmation.link
 
-import com.stripe.android.link.LinkPaymentLauncher
-import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.injection.LinkAnalyticsComponent
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
+import dagger.Binds
 import dagger.Module
-import dagger.Provides
 import dagger.multibindings.IntoSet
 
 @Module(
@@ -13,17 +11,11 @@ import dagger.multibindings.IntoSet
         LinkAnalyticsComponent::class,
     ]
 )
-internal object LinkConfirmationModule {
+internal interface LinkConfirmationModule {
     @JvmSuppressWildcards
-    @Provides
+    @Binds
     @IntoSet
-    fun providesLinkConfirmationDefinition(
-        linkStore: LinkStore,
-        linkPaymentLauncher: LinkPaymentLauncher,
-    ): ConfirmationDefinition<*, *, *, *> {
-        return LinkConfirmationDefinition(
-            linkStore = linkStore,
-            linkPaymentLauncher = linkPaymentLauncher,
-        )
-    }
+    fun bindsLinkConfirmationDefinition(
+        definition: LinkConfirmationDefinition
+    ): ConfirmationDefinition<*, *, *, *>
 }

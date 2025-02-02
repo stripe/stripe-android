@@ -11,8 +11,9 @@ import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.Cvc
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionLauncher
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionLauncherFactory
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionResult
+import javax.inject.Inject
 
-internal class CvcRecollectionConfirmationDefinition(
+internal class CvcRecollectionConfirmationDefinition @Inject constructor(
     private val handler: CvcRecollectionHandler,
     private val factory: CvcRecollectionLauncherFactory,
 ) : ConfirmationDefinition<

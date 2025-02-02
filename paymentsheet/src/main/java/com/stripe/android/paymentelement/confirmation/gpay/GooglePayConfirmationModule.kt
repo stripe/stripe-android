@@ -1,24 +1,16 @@
 package com.stripe.android.paymentelement.confirmation.gpay
 
-import com.stripe.android.core.utils.UserFacingLogger
-import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
+import dagger.Binds
 import dagger.Module
-import dagger.Provides
 import dagger.multibindings.IntoSet
 
 @Module
-internal class GooglePayConfirmationModule {
+internal interface GooglePayConfirmationModule {
     @JvmSuppressWildcards
-    @Provides
+    @Binds
     @IntoSet
-    fun providesGooglePayConfirmationDefinition(
-        googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory,
-        userFacingLogger: UserFacingLogger?,
-    ): ConfirmationDefinition<*, *, *, *> {
-        return GooglePayConfirmationDefinition(
-            googlePayPaymentMethodLauncherFactory = googlePayPaymentMethodLauncherFactory,
-            userFacingLogger = userFacingLogger,
-        )
-    }
+    fun bindsGooglePayConfirmationDefinition(
+        definition: GooglePayConfirmationDefinition
+    ): ConfirmationDefinition<*, *, *, *>
 }

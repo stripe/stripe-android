@@ -3,22 +3,23 @@ package com.stripe.android.paymentelement.confirmation.bacs
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncherFactory
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.DefaultBacsMandateConfirmationLauncherFactory
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.multibindings.IntoSet
 
 @Module
-internal class BacsConfirmationModule {
-    @Provides
-    fun providesBacsMandateConfirmationLauncherFactory(): BacsMandateConfirmationLauncherFactory =
-        DefaultBacsMandateConfirmationLauncherFactory
-
+internal interface BacsConfirmationModule {
     @JvmSuppressWildcards
-    @Provides
+    @Binds
     @IntoSet
-    fun providesBacsConfirmationDefinition(
-        bacsMandateConfirmationLauncherFactory: BacsMandateConfirmationLauncherFactory,
-    ): ConfirmationDefinition<*, *, *, *> {
-        return BacsConfirmationDefinition(bacsMandateConfirmationLauncherFactory)
+    fun bindsBacsConfirmationDefinition(
+        definition: BacsConfirmationDefinition,
+    ): ConfirmationDefinition<*, *, *, *>
+
+    companion object {
+        @Provides
+        fun providesBacsMandateConfirmationLauncherFactory(): BacsMandateConfirmationLauncherFactory =
+            DefaultBacsMandateConfirmationLauncherFactory
     }
 }
