@@ -116,6 +116,29 @@ internal class LinkConfirmationDefinitionTest {
         val presentCall = launcherScenario.presentCalls.awaitItem()
 
         assertThat(presentCall.configuration).isEqualTo(LINK_CONFIRMATION_OPTION.configuration)
+        assertThat(presentCall.linkAccount).isNull()
+    }
+
+    @Test
+    fun `'launch', when linkAccount is provided, should launch properly with provided parameters`() = test {
+        val linkAccountHolder = LinkAccountHolder(SavedStateHandle())
+        linkAccountHolder.set(TestFactory.LINK_ACCOUNT)
+
+        val definition = createLinkConfirmationDefinition(
+            linkAccountHolder = linkAccountHolder
+        )
+
+        definition.launch(
+            confirmationOption = LINK_CONFIRMATION_OPTION,
+            confirmationParameters = CONFIRMATION_PARAMETERS,
+            launcher = launcherScenario.launcher,
+            arguments = Unit,
+        )
+
+        val presentCall = launcherScenario.presentCalls.awaitItem()
+
+        assertThat(presentCall.configuration).isEqualTo(LINK_CONFIRMATION_OPTION.configuration)
+        assertThat(presentCall.linkAccount).isEqualTo(TestFactory.LINK_ACCOUNT)
     }
 
     @Test

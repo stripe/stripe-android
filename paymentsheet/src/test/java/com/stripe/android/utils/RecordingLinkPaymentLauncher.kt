@@ -6,6 +6,7 @@ import app.cash.turbine.Turbine
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkPaymentLauncher
+import com.stripe.android.link.model.LinkAccount
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.doAnswer
@@ -44,6 +45,7 @@ internal object RecordingLinkPaymentLauncher {
                 presentCalls.add(
                     PresentCall(
                         configuration = arguments[0] as LinkConfiguration,
+                        linkAccount = arguments[1] as? LinkAccount
                     )
                 )
             }
@@ -77,5 +79,6 @@ internal object RecordingLinkPaymentLauncher {
 
     data class PresentCall(
         val configuration: LinkConfiguration,
+        val linkAccount: LinkAccount?
     )
 }
