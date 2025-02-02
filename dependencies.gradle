@@ -27,7 +27,7 @@ ext.versions = [
         binaryCompatibilityValidator: '0.16.3',
         bouncyCastle                : '1.79',
         cameraX                     : '1.3.4',
-        dagger                      : '2.52',
+        dagger                      : '2.55',
         detekt                      : '1.23.6',
         diskLruCache                : '2.0.2',
         dokka                       : '1.9.20',
