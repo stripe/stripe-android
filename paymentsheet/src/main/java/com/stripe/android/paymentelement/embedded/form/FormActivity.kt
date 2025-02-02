@@ -31,13 +31,15 @@ internal class FormActivity : AppCompatActivity() {
     @Inject
     lateinit var eventReporter: EventReporter
 
+    @Inject
+    lateinit var primaryButtonStateHolder: PrimaryButtonStateHolder
+
     @OptIn(ExperimentalMaterialApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         if (args == null) {
-            setFormResult(FormResult.Cancelled)
-            finish()
+            setCancelAndFinish()
             return
         }
 
@@ -53,7 +55,8 @@ internal class FormActivity : AppCompatActivity() {
                     FormActivityUI(
                         interactor = formInteractor,
                         eventReporter = eventReporter,
-                        onDismissed = ::setCancelAndFinish
+                        onDismissed = ::setCancelAndFinish,
+                        primaryButtonStateHolder = primaryButtonStateHolder
                     )
                 }
             }
