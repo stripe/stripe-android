@@ -192,8 +192,8 @@ internal class LinkActivityViewModel @Inject constructor(
     }
 
     private suspend fun updateScreenState() {
-        val linkAccount = linkAccountManager.linkAccount.value
         val accountStatus = linkAccountManager.accountStatus.first()
+        val linkAccount = linkAccountManager.linkAccount.value
         when (accountStatus) {
             AccountStatus.Verified,
             AccountStatus.SignedOut,
