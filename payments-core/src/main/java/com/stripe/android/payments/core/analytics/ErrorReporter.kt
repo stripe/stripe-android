@@ -131,6 +131,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         LINK_LOG_OUT_FAILURE(
             eventName = "link.log_out.failure"
         ),
+        LINK_LIST_PAYMENT_DETAILS_FAILURE(
+            eventName = "link.list_payment_details.failure"
+        ),
         PAYMENT_LAUNCHER_CONFIRMATION_NULL_ARGS(
             eventName = "payments.paymentlauncherconfirmation.null_args"
         ),
@@ -203,6 +206,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         ),
         LINK_NATIVE_FAILED_TO_ATTEST_SIGNUP_REQUEST(
             partialEventName = "link.native.signup.failed_to_attest_request"
+        ),
+        LINK_NATIVE_CARD_EDIT_PAYMENT_DETAILS_ID_NOT_FOUND(
+            partialEventName = "link.native.card_edit.payment_details_id_not_found"
         ),
         PAYMENT_SHEET_AUTHENTICATORS_NOT_FOUND(
             partialEventName = "paymentsheet.authenticators.not_found"

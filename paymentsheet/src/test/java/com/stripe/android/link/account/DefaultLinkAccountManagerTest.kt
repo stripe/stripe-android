@@ -23,6 +23,7 @@ import com.stripe.android.model.ConsumerSessionSignup
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentIntentFactory
 import kotlinx.coroutines.Dispatchers
@@ -734,14 +735,20 @@ class DefaultLinkAccountManagerTest {
                 return Result.failure(error)
             }
         }
+        val errorReporter = FakeErrorReporter()
 
-        val accountManager = accountManager(linkRepository = linkRepository)
+        val accountManager = accountManager(
+            linkRepository = linkRepository,
+            errorReporter = errorReporter
+        )
         accountManager.setAccountNullable(TestFactory.CONSUMER_SESSION, TestFactory.PUBLISHABLE_KEY)
 
         val result = accountManager.listPaymentDetails(setOf("card"))
 
         assertThat(result.exceptionOrNull()).isEqualTo(error)
         assertThat(linkRepository.paymentMethodTypes).isEqualTo(setOf("card"))
+        assertThat(errorReporter.getLoggedErrors())
+            .containsExactly(ErrorReporter.ExpectedErrorEvent.LINK_LIST_PAYMENT_DETAILS_FAILURE.eventName)
     }
 
     @Test
@@ -977,7 +984,8 @@ class DefaultLinkAccountManagerTest {
         stripeIntent: StripeIntent = PaymentIntentFactory.create(),
         passthroughModeEnabled: Boolean = false,
         linkRepository: LinkRepository = FakeLinkRepository(),
-        linkEventsReporter: LinkEventsReporter = AccountManagerEventsReporter()
+        linkEventsReporter: LinkEventsReporter = AccountManagerEventsReporter(),
+        errorReporter: ErrorReporter = FakeErrorReporter()
     ): DefaultLinkAccountManager {
         val customerInfo = TestFactory.LINK_CONFIGURATION.customerInfo.copy(
             email = customerEmail,
@@ -991,7 +999,7 @@ class DefaultLinkAccountManagerTest {
             ),
             linkRepository,
             linkEventsReporter,
-            errorReporter = FakeErrorReporter()
+            errorReporter = errorReporter
         )
     }
 

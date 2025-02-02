@@ -19,7 +19,7 @@ open class AddressElement(
     private var rawValuesMap: Map<IdentifierSpec, String?> = emptyMap(),
     private val addressType: AddressType = AddressType.Normal(),
     countryCodes: Set<String> = emptySet(),
-    countryDropdownFieldController: DropdownFieldController = DropdownFieldController(
+    private val countryDropdownFieldController: DropdownFieldController = DropdownFieldController(
         CountryConfig(countryCodes),
         rawValuesMap[IdentifierSpec.Country]
     ),
@@ -231,6 +231,12 @@ open class AddressElement(
 
     override fun setRawValue(rawValuesMap: Map<IdentifierSpec, String?>) {
         this.rawValuesMap = rawValuesMap
+        countryElement.setRawValue(rawValuesMap)
+
+        val countryCode = countryElement.controller.formFieldValue.value.value
+        elementsRegistry.get(countryCode)?.forEach { element ->
+            element.setRawValue(rawValuesMap)
+        }
     }
 }
 

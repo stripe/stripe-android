@@ -313,7 +313,12 @@ internal class DefaultLinkAccountManager @Inject constructor(
             paymentMethodTypes = paymentMethodTypes,
             consumerSessionClientSecret = clientSecret,
             consumerPublishableKey = consumerPublishableKey
-        )
+        ).onFailure { error ->
+            errorReporter.report(
+                ErrorReporter.ExpectedErrorEvent.LINK_LIST_PAYMENT_DETAILS_FAILURE,
+                StripeException.create(error)
+            )
+        }
     }
 
     override suspend fun deletePaymentDetails(paymentDetailsId: String): Result<Unit> {
