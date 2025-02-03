@@ -3,25 +3,17 @@ package com.stripe.android.paymentsheet.state
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
-import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentMethodFactory
 import kotlinx.coroutines.test.runTest
-import org.junit.Rule
 import org.junit.Test
 
+// TODO: add tests for customer sheet feature being enabled.
 class CustomerStateTest {
-
-    @get:Rule
-    val enableDefaultPaymentMethods = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.enableDefaultPaymentMethods,
-        isEnabled = true,
-    )
 
     @Test
     fun `Should create 'CustomerState' for customer session properly with permissions disabled`() {
@@ -58,6 +50,7 @@ class CustomerStateTest {
                 isPaymentMethodRemoveEnabled = true,
                 canRemoveLastPaymentMethod = true,
                 allowRedisplayOverride = null,
+                isSetAsDefaultEnabled = false,
             ),
         )
 
@@ -86,6 +79,7 @@ class CustomerStateTest {
                 isPaymentMethodRemoveEnabled = false,
                 canRemoveLastPaymentMethod = false,
                 allowRedisplayOverride = null,
+                isSetAsDefaultEnabled = false,
             ),
         )
 
@@ -102,7 +96,10 @@ class CustomerStateTest {
         assertThat(customerState.permissions.canRemoveDuplicates).isTrue()
     }
 
-    private fun createCustomerSessionForTestingDefaultPaymentMethod(defaultPaymentMethodId: String?): CustomerState {
+    private fun createCustomerSessionForTestingDefaultPaymentMethod(
+        defaultPaymentMethodId: String?,
+        isSetAsDefaultEnabled: Boolean,
+    ): CustomerState {
         val customerId = "cus_3"
         val ephemeralKeySecret = "ek_3"
         val paymentMethods = PaymentMethodFactory.cards(3)
@@ -112,6 +109,7 @@ class CustomerStateTest {
             isPaymentMethodRemoveEnabled = false,
             canRemoveLastPaymentMethod = false,
             allowRedisplayOverride = null,
+            isSetAsDefaultEnabled = isSetAsDefaultEnabled,
         )
         val customer = createElementsSessionCustomer(
             customerId = customerId,
@@ -131,13 +129,14 @@ class CustomerStateTest {
         return customerState
     }
 
+    // TODO: update test names
     @Test
     fun `Create 'CustomerState' for customer session with nonnull defaultPaymentMethodId & flag on`() {
         val defaultPaymentMethodId = "aaa111"
 
-        enableDefaultPaymentMethods.setEnabled(true)
         val customerState = createCustomerSessionForTestingDefaultPaymentMethod(
-            defaultPaymentMethodId = defaultPaymentMethodId
+            defaultPaymentMethodId = defaultPaymentMethodId,
+            isSetAsDefaultEnabled = true,
         )
 
         assertThat(customerState.defaultPaymentMethodState).isInstanceOf(
@@ -153,9 +152,9 @@ class CustomerStateTest {
     fun `Create 'CustomerState' for customer session with nonnull defaultPaymentMethodId & flag off`() {
         val defaultPaymentMethodId = "aaa111"
 
-        enableDefaultPaymentMethods.setEnabled(false)
         val customerState = createCustomerSessionForTestingDefaultPaymentMethod(
-            defaultPaymentMethodId = defaultPaymentMethodId
+            defaultPaymentMethodId = defaultPaymentMethodId,
+            isSetAsDefaultEnabled = false,
         )
 
         assertThat(customerState.defaultPaymentMethodState).isEqualTo(CustomerState.DefaultPaymentMethodState.Disabled)
@@ -165,9 +164,9 @@ class CustomerStateTest {
     fun `Create 'CustomerState' for customer session with null defaultPaymentMethodId & flag on`() {
         val defaultPaymentMethodId = null
 
-        enableDefaultPaymentMethods.setEnabled(true)
         val customerState = createCustomerSessionForTestingDefaultPaymentMethod(
-            defaultPaymentMethodId = defaultPaymentMethodId
+            defaultPaymentMethodId = defaultPaymentMethodId,
+            isSetAsDefaultEnabled = true,
         )
 
         assertThat(customerState.defaultPaymentMethodState).isInstanceOf(
@@ -183,9 +182,9 @@ class CustomerStateTest {
     fun `Create 'CustomerState' for customer session with null defaultPaymentMethodId & flag off`() {
         val defaultPaymentMethodId = null
 
-        enableDefaultPaymentMethods.setEnabled(false)
         val customerState = createCustomerSessionForTestingDefaultPaymentMethod(
-            defaultPaymentMethodId = defaultPaymentMethodId
+            defaultPaymentMethodId = defaultPaymentMethodId,
+            isSetAsDefaultEnabled = false,
         )
 
         assertThat(customerState.defaultPaymentMethodState).isEqualTo(CustomerState.DefaultPaymentMethodState.Disabled)
@@ -238,6 +237,7 @@ class CustomerStateTest {
                     isPaymentMethodRemoveEnabled = false,
                     canRemoveLastPaymentMethod = false,
                     allowRedisplayOverride = null,
+                    isSetAsDefaultEnabled = false,
                 ),
             )
 
@@ -349,6 +349,7 @@ class CustomerStateTest {
                         isPaymentMethodSaveEnabled = false,
                         canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
                         allowRedisplayOverride = null,
+                        isSetAsDefaultEnabled = false,
                     )
                 }
             ),

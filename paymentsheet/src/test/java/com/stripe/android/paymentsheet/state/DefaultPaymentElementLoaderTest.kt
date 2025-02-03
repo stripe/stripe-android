@@ -1506,6 +1506,7 @@ internal class DefaultPaymentElementLoaderTest {
                             canRemoveLastPaymentMethod = true,
                             isPaymentMethodSaveEnabled = false,
                             allowRedisplayOverride = null,
+                            isSetAsDefaultEnabled = false,
                         )
                     ),
                     defaultPaymentMethod = null,
@@ -1548,6 +1549,7 @@ internal class DefaultPaymentElementLoaderTest {
                             isPaymentMethodSaveEnabled = false,
                             canRemoveLastPaymentMethod = true,
                             allowRedisplayOverride = null,
+                            isSetAsDefaultEnabled = false,
                         )
                     ),
                     defaultPaymentMethod = null,
@@ -1590,6 +1592,7 @@ internal class DefaultPaymentElementLoaderTest {
                             isPaymentMethodSaveEnabled = false,
                             canRemoveLastPaymentMethod = true,
                             allowRedisplayOverride = null,
+                            isSetAsDefaultEnabled = false,
                         )
                     ),
                     defaultPaymentMethod = null,
@@ -2413,6 +2416,7 @@ internal class DefaultPaymentElementLoaderTest {
                             isPaymentMethodSaveEnabled = false,
                             canRemoveLastPaymentMethod = canRemoveLastPaymentMethodFromServer,
                             allowRedisplayOverride = null,
+                            isSetAsDefaultEnabled = false,
                         )
                     }
                 ),
@@ -2532,6 +2536,7 @@ internal class DefaultPaymentElementLoaderTest {
                     isPaymentMethodRemoveEnabled = true,
                     canRemoveLastPaymentMethod = true,
                     allowRedisplayOverride = null,
+                    isSetAsDefaultEnabled = false,
                 )
             } ?: ElementsSession.Customer.Components.MobilePaymentElement.Disabled
     ): ElementsSession.Customer {

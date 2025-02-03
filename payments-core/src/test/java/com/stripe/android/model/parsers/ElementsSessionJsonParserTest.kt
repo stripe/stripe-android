@@ -20,6 +20,7 @@ import org.junit.Rule
 import org.junit.Test
 import java.util.UUID
 
+// TODO: add tests for new fields
 class ElementsSessionJsonParserTest {
 
     @get:Rule
@@ -564,10 +565,12 @@ class ElementsSessionJsonParserTest {
                             isPaymentMethodRemoveEnabled = true,
                             canRemoveLastPaymentMethod = true,
                             allowRedisplayOverride = PaymentMethod.AllowRedisplay.LIMITED,
+                            isSetAsDefaultEnabled = false,
                         ),
                         customerSheet = ElementsSession.Customer.Components.CustomerSheet.Enabled(
                             isPaymentMethodRemoveEnabled = true,
                             canRemoveLastPaymentMethod = true,
+                            isSyncDefaultEnabled = false,
                         ),
                     )
                 ),
@@ -711,6 +714,7 @@ class ElementsSessionJsonParserTest {
                         customerSheet = ElementsSession.Customer.Components.CustomerSheet.Enabled(
                             isPaymentMethodRemoveEnabled = true,
                             canRemoveLastPaymentMethod = true,
+                            isSyncDefaultEnabled = false,
                         ),
                     )
                 ),

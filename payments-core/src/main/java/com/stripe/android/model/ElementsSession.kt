@@ -101,7 +101,8 @@ data class ElementsSession(
                     val isPaymentMethodSaveEnabled: Boolean,
                     val isPaymentMethodRemoveEnabled: Boolean,
                     val canRemoveLastPaymentMethod: Boolean,
-                    val allowRedisplayOverride: PaymentMethod.AllowRedisplay?
+                    val allowRedisplayOverride: PaymentMethod.AllowRedisplay?,
+                    val isSetAsDefaultEnabled: Boolean,
                 ) : MobilePaymentElement
             }
 
@@ -116,6 +117,7 @@ data class ElementsSession(
                 data class Enabled(
                     val isPaymentMethodRemoveEnabled: Boolean,
                     val canRemoveLastPaymentMethod: Boolean,
+                    val isSyncDefaultEnabled: Boolean,
                 ) : CustomerSheet
             }
         }

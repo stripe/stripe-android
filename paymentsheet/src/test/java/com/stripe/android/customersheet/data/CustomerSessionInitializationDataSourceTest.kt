@@ -28,6 +28,7 @@ class CustomerSessionInitializationDataSourceTest {
                 customerSheetComponent = ElementsSession.Customer.Components.CustomerSheet.Enabled(
                     isPaymentMethodRemoveEnabled = true,
                     canRemoveLastPaymentMethod = true,
+                    isSyncDefaultEnabled = false,
                 ),
             ),
             savedSelectionDataSource = FakeCustomerSheetSavedSelectionDataSource(
@@ -62,6 +63,7 @@ class CustomerSessionInitializationDataSourceTest {
                 customerSheetComponent = ElementsSession.Customer.Components.CustomerSheet.Enabled(
                     isPaymentMethodRemoveEnabled = false,
                     canRemoveLastPaymentMethod = false,
+                    isSyncDefaultEnabled = false,
                 ),
             ),
         )
@@ -200,6 +202,7 @@ class CustomerSessionInitializationDataSourceTest {
                     ElementsSession.Customer.Components.CustomerSheet.Enabled(
                         isPaymentMethodRemoveEnabled = true,
                         canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
+                        isSyncDefaultEnabled = false,
                     )
                 },
             ),
