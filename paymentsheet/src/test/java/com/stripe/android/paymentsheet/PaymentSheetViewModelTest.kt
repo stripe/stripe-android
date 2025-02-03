@@ -766,8 +766,6 @@ internal class PaymentSheetViewModelTest {
             }
         )
 
-//        testDispatcher.scheduler.advanceUntilIdle()
-
         val confirmationArgs = confirmationHandler.startTurbine.awaitItem()
         assertThat(confirmationArgs.confirmationOption).isInstanceOf<LinkConfirmationOption>()
         val confirmationOption = confirmationArgs.confirmationOption as? LinkConfirmationOption

@@ -56,22 +56,27 @@ class LinkHandlerTest {
     }
 
     @Test
-    fun `setupLinkWithEagerLaunch returns true in LoggedIn and NeedsVerification states`() = runLinkTest {
-        val logInStates = listOf(
-            LinkState.LoginState.LoggedIn,
-            LinkState.LoginState.NeedsVerification
+    fun `setupLinkWithEagerLaunch returns true in LoggedIn states`() = runLinkTest {
+        val shouldLaunchEagerly = handler.setupLinkWithEagerLaunch(
+            state = createLinkState(
+                loginState = LinkState.LoginState.LoggedIn,
+                signupMode = LinkSignupMode.AlongsideSaveForFutureUse
+            )
         )
 
-        logInStates.forEach { state ->
-            val shouldLaunchEagerly = handler.setupLinkWithEagerLaunch(
-                state = createLinkState(
-                    loginState = state,
-                    signupMode = LinkSignupMode.AlongsideSaveForFutureUse
-                )
-            )
+        assertThat(shouldLaunchEagerly).isTrue()
+    }
 
-            assertThat(shouldLaunchEagerly).isTrue()
-        }
+    @Test
+    fun `setupLinkWithEagerLaunch returns true in NeedsVerification states`() = runLinkTest {
+        val shouldLaunchEagerly = handler.setupLinkWithEagerLaunch(
+            state = createLinkState(
+                loginState = LinkState.LoginState.NeedsVerification,
+                signupMode = LinkSignupMode.AlongsideSaveForFutureUse
+            )
+        )
+
+        assertThat(shouldLaunchEagerly).isTrue()
     }
 
     @Test

@@ -109,6 +109,28 @@ internal class LinkPaymentLauncherTest {
     }
 
     @Test
+    fun `present should launch with correct args when useLinkExpress is false`() = runTest {
+        DummyActivityResultCaller.test {
+            val linkPaymentLauncher = createLinkPaymentLauncher()
+
+            linkPaymentLauncher.register(activityResultCaller) {}
+
+            val registerCall = awaitRegisterCall()
+            assertThat(registerCall).isNotNull()
+
+            linkPaymentLauncher.present(
+                configuration = TestFactory.LINK_CONFIGURATION,
+                linkAccount = TestFactory.LINK_ACCOUNT,
+                useLinkExpress = false
+            )
+
+            val launchCall = awaitLaunchCall() as? LinkActivityContract.Args
+            assertThat(launchCall?.startWithVerificationDialog).isFalse()
+            awaitNextRegisteredLauncher()
+        }
+    }
+
+    @Test
     fun `ActivityResultRegistry callback should handle Completed result correctly`() {
         testActivityResultCallbackWithActivityResultRegistry(
             linkActivityResult = LinkActivityResult.Completed(
