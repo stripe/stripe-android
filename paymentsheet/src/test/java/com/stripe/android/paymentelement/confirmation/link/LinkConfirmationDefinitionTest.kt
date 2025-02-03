@@ -156,7 +156,7 @@ internal class LinkConfirmationDefinitionTest {
         val presentCall = launcherScenario.presentCalls.awaitItem()
 
         assertThat(presentCall.configuration).isEqualTo(LINK_CONFIRMATION_OPTION.configuration)
-        assertThat(presentCall.linkAccount).isEqualTo(TestFactory.LINK_ACCOUNT)
+        assertThat(presentCall.linkAccount).isNull()
         assertThat(presentCall.useLinkExpress).isFalse()
     }
 
