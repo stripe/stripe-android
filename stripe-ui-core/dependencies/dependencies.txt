@@ -79,9 +79,10 @@
 |    |    |    \--- androidx.core:core-ktx:1.13.1 (c)
 |    |    +--- androidx.interpolator:interpolator:1.0.0 (*)
 |    |    \--- com.google.guava:listenablefuture:1.0
-|    +--- com.google.dagger:dagger:2.52
+|    +--- com.google.dagger:dagger:2.55
 |    |    +--- jakarta.inject:jakarta.inject-api:2.0.1
-|    |    \--- javax.inject:javax.inject:1
+|    |    +--- javax.inject:javax.inject:1
+|    |    \--- org.jspecify:jspecify:1.0.0
 |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0 (*)
 |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0 (*)
 |    +--- org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3
@@ -409,5 +410,5 @@
 +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0 (*)
 +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0 (*)
 +--- org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3 (*)
-+--- com.google.dagger:dagger:2.52 (*)
++--- com.google.dagger:dagger:2.55 (*)
 \--- org.jetbrains.kotlin:kotlin-parcelize-runtime:2.0.21 (*)
