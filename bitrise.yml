@@ -103,7 +103,6 @@ workflows:
             - module: financial-connections-example
             - variant: $BUILD_VARIANT
             - build_type: apk
-            - cache_level: all
       - deploy-to-bitrise-io@2:
           inputs:
             - pipeline_intermediate_files: "$BITRISE_APK_PATH:BITRISE_APK_PATH"
