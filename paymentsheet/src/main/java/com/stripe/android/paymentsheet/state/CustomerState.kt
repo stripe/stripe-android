@@ -15,7 +15,7 @@ internal data class CustomerState(
     val customerSessionClientSecret: String?,
     val paymentMethods: List<PaymentMethod>,
     val permissions: Permissions,
-    val defaultPaymentMethodId: String?
+    val defaultPaymentMethodState: DefaultPaymentMethodState,
 ) : Parcelable {
     @Parcelize
     data class Permissions(
@@ -23,6 +23,15 @@ internal data class CustomerState(
         val canRemoveLastPaymentMethod: Boolean,
         val canRemoveDuplicates: Boolean,
     ) : Parcelable
+
+    @Parcelize
+    sealed class DefaultPaymentMethodState : Parcelable {
+        @Parcelize
+        data class Enabled(val defaultPaymentMethodId: String?) : DefaultPaymentMethodState()
+
+        @Parcelize
+        data object Disabled : DefaultPaymentMethodState()
+    }
 
     internal companion object {
         /**
@@ -54,6 +63,12 @@ internal data class CustomerState(
                 else -> false
             }
 
+            val defaultPaymentMethodState = if (FeatureFlags.enableDefaultPaymentMethods.isEnabled) {
+                DefaultPaymentMethodState.Enabled(customer.defaultPaymentMethod)
+            } else {
+                DefaultPaymentMethodState.Disabled
+            }
+
             return CustomerState(
                 id = customer.session.customerId,
                 ephemeralKeySecret = customer.session.apiKey,
@@ -67,11 +82,7 @@ internal data class CustomerState(
                     // Should always remove duplicates when using `customer_session`
                     canRemoveDuplicates = true,
                 ),
-                defaultPaymentMethodId = if (FeatureFlags.enableDefaultPaymentMethods.isEnabled) {
-                    customer.defaultPaymentMethod
-                } else {
-                    null
-                }
+                defaultPaymentMethodState = defaultPaymentMethodState
             )
         }
 
@@ -114,7 +125,8 @@ internal data class CustomerState(
                      */
                     canRemoveDuplicates = false,
                 ),
-                defaultPaymentMethodId = null
+                // This is a customer sessions only feature, so it's always disabled when using a legacy ephemeral key.
+                defaultPaymentMethodState = DefaultPaymentMethodState.Disabled
             )
         }
     }

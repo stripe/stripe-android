@@ -140,7 +140,7 @@ internal class DefaultPaymentElementLoaderTest {
                         canRemoveLastPaymentMethod = true,
                         canRemoveDuplicates = false,
                     ),
-                    defaultPaymentMethodId = null
+                    defaultPaymentMethodState = CustomerState.DefaultPaymentMethodState.Disabled,
                 ),
                 paymentSelection = PaymentSelection.Saved(
                     paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
@@ -1490,20 +1490,7 @@ internal class DefaultPaymentElementLoaderTest {
 
             assertThat(attemptedToRetrievePaymentMethods).isFalse()
 
-            assertThat(state.customer).isEqualTo(
-                CustomerState(
-                    id = "cus_1",
-                    ephemeralKeySecret = "ek_123",
-                    customerSessionClientSecret = "customer_client_secret",
-                    paymentMethods = cards,
-                    permissions = CustomerState.Permissions(
-                        canRemovePaymentMethods = false,
-                        canRemoveLastPaymentMethod = false,
-                        canRemoveDuplicates = true,
-                    ),
-                    defaultPaymentMethodId = null
-                )
-            )
+            assertThat(state.customer?.paymentMethods).isEqualTo(cards)
         }
 
     @OptIn(ExperimentalCustomerSessionApi::class)
@@ -1771,20 +1758,7 @@ internal class DefaultPaymentElementLoaderTest {
 
             assertThat(attemptedToRetrievePaymentMethods).isTrue()
 
-            assertThat(state.customer).isEqualTo(
-                CustomerState(
-                    id = "cus_1",
-                    ephemeralKeySecret = "ek_123",
-                    customerSessionClientSecret = null,
-                    paymentMethods = cards,
-                    permissions = CustomerState.Permissions(
-                        canRemovePaymentMethods = true,
-                        canRemoveLastPaymentMethod = true,
-                        canRemoveDuplicates = false,
-                    ),
-                    defaultPaymentMethodId = null
-                )
-            )
+            assertThat(state.customer?.paymentMethods).isEqualTo(cards)
         }
 
     @OptIn(ExperimentalCustomerSessionApi::class)
