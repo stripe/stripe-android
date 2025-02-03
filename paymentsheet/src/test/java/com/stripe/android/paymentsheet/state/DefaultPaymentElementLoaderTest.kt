@@ -2681,7 +2681,13 @@ internal class DefaultPaymentElementLoaderTest {
             customer = ElementsSession.Customer(
                 paymentMethods = paymentMethodsForTestingOrdering,
                 session = createElementsSessionCustomerSession(
-                    mobilePaymentElementComponent = ElementsSession.Customer.Components.MobilePaymentElement.Disabled,
+                    mobilePaymentElementComponent = ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
+                        isSetAsDefaultEnabled = true,
+                        isPaymentMethodSaveEnabled = true,
+                        isPaymentMethodRemoveEnabled = true,
+                        canRemoveLastPaymentMethod = true,
+                        allowRedisplayOverride = null,
+                    ),
                 ),
                 defaultPaymentMethod = defaultPaymentMethodId,
             )

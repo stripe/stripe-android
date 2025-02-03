@@ -20,7 +20,6 @@ import org.junit.Rule
 import org.junit.Test
 import java.util.UUID
 
-// TODO: add tests for new fields
 class ElementsSessionJsonParserTest {
 
     @get:Rule
@@ -685,6 +684,60 @@ class ElementsSessionJsonParserTest {
             paymentMethodRemoveLastFeatureValue = "something",
             canRemoveLastPaymentMethod = false,
         )
+    }
+
+    @Test
+    fun `when 'payment_method_set_as_default' is enabled, 'isSetAsDefaultEnabled' should be true`() {
+        testPaymentMethodSetAsDefault(
+            paymentMethodSetAsDefaultValue = "enabled",
+            expectedIsSetAsDefaultEnabledValue = true,
+        )
+    }
+
+    @Test
+    fun `when 'payment_method_set_as_default' is disabled, 'isSetAsDefaultEnabled' should be false`() {
+        testPaymentMethodSetAsDefault(
+            paymentMethodSetAsDefaultValue = "disabled",
+            expectedIsSetAsDefaultEnabledValue = false,
+        )
+    }
+
+    @Test
+    fun `when 'payment_method_set_as_default' is invalid value, 'isSetAsDefaultEnabled' should be false`() {
+        testPaymentMethodSetAsDefault(
+            paymentMethodSetAsDefaultValue = "not an accepted value",
+            expectedIsSetAsDefaultEnabledValue = false,
+        )
+    }
+
+    private fun testPaymentMethodSetAsDefault(
+        paymentMethodSetAsDefaultValue: String,
+        expectedIsSetAsDefaultEnabledValue: Boolean,
+    ) {
+        val parser = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret",
+                customerSessionClientSecret = "customer_session_client_secret",
+                externalPaymentMethods = emptyList(),
+            ),
+            isLiveMode = false,
+        )
+
+        val intent = createPaymentIntentWithCustomerSession(
+            paymentMethodSetAsDefaultFeature = paymentMethodSetAsDefaultValue
+        )
+
+        val elementsSession = parser.parse(intent)
+
+        val mobilePaymentElementComponent = elementsSession?.customer?.session?.components?.mobilePaymentElement
+
+        assertThat(mobilePaymentElementComponent)
+            .isInstanceOf(ElementsSession.Customer.Components.MobilePaymentElement.Enabled::class.java)
+
+        val enabledPaymentElementComponent = mobilePaymentElementComponent as?
+            ElementsSession.Customer.Components.MobilePaymentElement.Enabled
+
+        assertThat(enabledPaymentElementComponent?.isSetAsDefaultEnabled).isEqualTo(expectedIsSetAsDefaultEnabledValue)
     }
 
     @Test
