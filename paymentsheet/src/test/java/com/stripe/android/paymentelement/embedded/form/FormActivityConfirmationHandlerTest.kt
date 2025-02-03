@@ -2,7 +2,6 @@ package com.stripe.android.paymentelement.embedded.form
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
-import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -15,12 +14,16 @@ import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationO
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationStateFixtures
+import com.stripe.android.testing.CoroutineTestRule
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.junit.Test
 import org.mockito.Mockito.mock
 
 @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 internal class FormActivityConfirmationHandlerTest {
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule()
 
     @Test
     fun `confirm does not start confirmation if selection is null`() = testScenario {
@@ -37,27 +40,22 @@ internal class FormActivityConfirmationHandlerTest {
     }
 
     @Test
-    fun `uiStateHolder is updated on confirmationHandler state change`() = testScenario {
+    fun `stateHelper is updated on confirmationHandler state change`() = testScenario {
         selectionHolder.set(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
-        uiStateHolder.state.test {
-            assertThat(awaitItem()).isNotNull()
+        formConfirmationHelper.confirm()
+        val args = confirmationHandler.startTurbine.awaitItem()
+        confirmationHandler.state.value = ConfirmationHandler.State.Confirming(args.confirmationOption)
 
-            formConfirmationHelper.confirm()
-            val args = confirmationHandler.startTurbine.awaitItem()
-            confirmationHandler.state.value = ConfirmationHandler.State.Confirming(args.confirmationOption)
+        assertThat(stateHelper.updateTurbine.awaitItem()).isInstanceOf<ConfirmationHandler.State.Confirming>()
 
-            assertThat(awaitItem()).isNotNull()
-
-            confirmationHandler.state.value = ConfirmationHandler.State.Complete(
-                ConfirmationHandler.Result.Succeeded(
-                    intent = PaymentIntentFixtures.PI_SUCCEEDED,
-                    deferredIntentConfirmationType = DeferredIntentConfirmationType.Client
-                )
+        confirmationHandler.state.value = ConfirmationHandler.State.Complete(
+            ConfirmationHandler.Result.Succeeded(
+                intent = PaymentIntentFixtures.PI_SUCCEEDED,
+                deferredIntentConfirmationType = DeferredIntentConfirmationType.Client
             )
+        )
 
-            assertThat(awaitItem()).isNotNull()
-            expectNoEvents()
-        }
+        assertThat(stateHelper.updateTurbine.awaitItem()).isInstanceOf<ConfirmationHandler.State.Complete>()
     }
 
     private fun testScenario(
@@ -66,12 +64,7 @@ internal class FormActivityConfirmationHandlerTest {
         val confirmationHandler = FakeConfirmationHandler()
         val selectionHolder = EmbeddedSelectionHolder(SavedStateHandle())
         val embeddedState = EmbeddedConfirmationStateFixtures.defaultState()
-        val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
-        val stateHolder = FormActivityUiStateHolder(
-            paymentMethodMetadata = paymentMethodMetadata,
-            selectionHolder = selectionHolder,
-            configuration = embeddedState.configuration
-        )
+        val stateHelper = FakeFormActivityStateHelper()
 
         val confirmationHelper = DefaultFormActivityConfirmationHelper(
             initializationMode = embeddedState.initializationMode,
@@ -79,26 +72,28 @@ internal class FormActivityConfirmationHandlerTest {
             confirmationHandler = confirmationHandler,
             configuration = embeddedState.configuration,
             selectionHolder = selectionHolder,
-            uiStateHolder = stateHolder,
+            stateHelper = stateHelper,
             lifecycleOwner = TestLifecycleOwner(),
             activityResultCaller = mock()
         )
 
         assertThat(confirmationHandler.registerTurbine.awaitItem()).isNotNull()
+        assertThat(stateHelper.updateTurbine.awaitItem()).isInstanceOf<ConfirmationHandler.State.Idle>()
 
         Scenario(
             formConfirmationHelper = confirmationHelper,
             confirmationHandler = confirmationHandler,
             selectionHolder = selectionHolder,
-            uiStateHolder = stateHolder
+            stateHelper = stateHelper
         ).block()
 
+        stateHelper.validate()
         confirmationHandler.validate()
     }
     private class Scenario(
         val formConfirmationHelper: FormActivityConfirmationHelper,
         val confirmationHandler: FakeConfirmationHandler,
         val selectionHolder: EmbeddedSelectionHolder,
-        val uiStateHolder: FormActivityUiStateHolder
+        val stateHelper: FakeFormActivityStateHelper
     )
 }

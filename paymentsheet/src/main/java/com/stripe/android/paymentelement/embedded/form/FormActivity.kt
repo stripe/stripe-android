@@ -34,7 +34,7 @@ internal class FormActivity : AppCompatActivity() {
     lateinit var eventReporter: EventReporter
 
     @Inject
-    lateinit var formActivityUiStateHolder: FormActivityUiStateHolder
+    lateinit var formStateHelper: FormActivityStateHelper
 
     @OptIn(ExperimentalMaterialApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -54,7 +54,7 @@ internal class FormActivity : AppCompatActivity() {
 
         setContent {
             StripeTheme {
-                val uiState by formActivityUiStateHolder.state.collectAsState()
+                val uiState by formStateHelper.state.collectAsState()
                 val bottomSheetState = rememberStripeBottomSheetState(
                     confirmValueChange = { !uiState.isProcessing }
                 )

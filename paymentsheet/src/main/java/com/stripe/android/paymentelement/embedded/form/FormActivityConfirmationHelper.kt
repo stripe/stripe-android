@@ -26,7 +26,7 @@ internal class DefaultFormActivityConfirmationHelper @Inject constructor(
     private val confirmationHandler: ConfirmationHandler,
     private val configuration: EmbeddedPaymentElement.Configuration,
     private val selectionHolder: EmbeddedSelectionHolder,
-    private val uiStateHolder: FormActivityUiStateHolder,
+    private val stateHelper: FormActivityStateHelper,
     lifecycleOwner: LifecycleOwner,
     activityResultCaller: ActivityResultCaller
 ) : FormActivityConfirmationHelper {
@@ -35,7 +35,7 @@ internal class DefaultFormActivityConfirmationHelper @Inject constructor(
         confirmationHandler.register(activityResultCaller, lifecycleOwner)
         lifecycleOwner.lifecycleScope.launch {
             confirmationHandler.state.collectLatest {
-                uiStateHolder.updateProcessingState(it)
+                stateHelper.update(it)
             }
         }
     }

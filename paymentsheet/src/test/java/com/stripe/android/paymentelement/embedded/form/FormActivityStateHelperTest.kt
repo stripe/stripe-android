@@ -23,7 +23,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
 @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
-class FormActivityUiStateHolderTest {
+class FormActivityStateHelperTest {
     @Test
     fun `state initializes correctly`() = testScenario {
         stateHolder.state.test {
@@ -76,7 +76,7 @@ class FormActivityUiStateHolderTest {
     fun `state updates processing correctly while confirming`() = testScenario {
         val selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
         selectionHolder.set(selection)
-        stateHolder.updateProcessingState(confirmationStateConfirming(selection))
+        stateHolder.update(confirmationStateConfirming(selection))
         stateHolder.state.test {
             val state = awaitItem()
             assertThat(state.isEnabled).isFalse()
@@ -87,7 +87,7 @@ class FormActivityUiStateHolderTest {
 
     @Test
     fun `state updates when confirmation is successful`() = testScenario {
-        stateHolder.updateProcessingState(confirmationStateComplete(true))
+        stateHolder.update(confirmationStateComplete(true))
         stateHolder.state.test {
             val state = awaitItem()
             assertThat(state.processingState).isEqualTo(PrimaryButtonProcessingState.Completed)
@@ -99,14 +99,14 @@ class FormActivityUiStateHolderTest {
     fun `state re-enables if confirmation fails`() = testScenario {
         val selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
         selectionHolder.set(selection)
-        stateHolder.updateProcessingState(confirmationStateConfirming(selection))
+        stateHolder.update(confirmationStateConfirming(selection))
         stateHolder.state.test {
             val processingState = awaitItem()
             assertThat(processingState.isProcessing).isTrue()
             assertThat(processingState.isEnabled).isFalse()
         }
 
-        stateHolder.updateProcessingState(confirmationStateComplete(false))
+        stateHolder.update(confirmationStateComplete(false))
 
         stateHolder.state.test {
             val failedState = awaitItem()
@@ -118,7 +118,7 @@ class FormActivityUiStateHolderTest {
 
     private class Scenario(
         val selectionHolder: EmbeddedSelectionHolder,
-        val stateHolder: FormActivityUiStateHolder
+        val stateHolder: FormActivityStateHelper
     )
 
     private fun testScenario(
@@ -128,7 +128,7 @@ class FormActivityUiStateHolderTest {
     ) = runTest {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create(stripeIntent = stripeIntent)
         val selectionHolder = EmbeddedSelectionHolder(SavedStateHandle())
-        val stateHolder = FormActivityUiStateHolder(
+        val stateHolder = DefaultFormActivityStateHelper(
             paymentMethodMetadata = paymentMethodMetadata,
             selectionHolder = selectionHolder,
             configuration = config

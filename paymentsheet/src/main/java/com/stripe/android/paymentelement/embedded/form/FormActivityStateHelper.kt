@@ -19,13 +19,25 @@ import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 import javax.inject.Singleton
 
+internal interface FormActivityStateHelper {
+    val state: StateFlow<State>
+    fun update(confirmationState: ConfirmationHandler.State)
+
+    data class State(
+        val primaryButtonLabel: ResolvableString,
+        val isEnabled: Boolean,
+        val processingState: PrimaryButtonProcessingState,
+        val isProcessing: Boolean,
+    )
+}
+
 @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @Singleton
-internal class FormActivityUiStateHolder @Inject constructor(
+internal class DefaultFormActivityStateHelper @Inject constructor(
     paymentMethodMetadata: PaymentMethodMetadata,
     selectionHolder: EmbeddedSelectionHolder,
     configuration: EmbeddedPaymentElement.Configuration,
-) {
+) : FormActivityStateHelper {
     private val primaryButtonProcessingState: MutableStateFlow<PrimaryButtonProcessingState> =
         MutableStateFlow(PrimaryButtonProcessingState.Idle(null))
     private val isProcessing = MutableStateFlow(false)
@@ -39,13 +51,13 @@ internal class FormActivityUiStateHolder @Inject constructor(
         primaryButtonLabel(paymentMethodMetadata.stripeIntent, configuration)
     )
 
-    val state: StateFlow<State> = combineAsStateFlow(
+    override val state: StateFlow<FormActivityStateHelper.State> = combineAsStateFlow(
         primaryButtonProcessingState,
         isEnabled,
         isProcessing,
         primaryButtonLabel
     ) { buttonProcessingState, enabled, processing, buttonLabel ->
-        State(
+        FormActivityStateHelper.State(
             primaryButtonLabel = buttonLabel,
             isEnabled = enabled,
             processingState = buttonProcessingState,
@@ -53,8 +65,8 @@ internal class FormActivityUiStateHolder @Inject constructor(
         )
     }
 
-    fun updateProcessingState(processingState: ConfirmationHandler.State) {
-        updateUiState(processingState)
+    override fun update(confirmationState: ConfirmationHandler.State) {
+        updateUiState(confirmationState)
     }
 
     private fun updateUiState(confirmationState: ConfirmationHandler.State) {
@@ -97,11 +109,4 @@ internal class FormActivityUiStateHolder @Inject constructor(
     private fun amount(amount: Long?, currency: String?): Amount? {
         return if (amount != null && currency != null) Amount(amount, currency) else null
     }
-
-    internal data class State(
-        val primaryButtonLabel: ResolvableString,
-        val isEnabled: Boolean,
-        val processingState: PrimaryButtonProcessingState,
-        val isProcessing: Boolean,
-    )
 }

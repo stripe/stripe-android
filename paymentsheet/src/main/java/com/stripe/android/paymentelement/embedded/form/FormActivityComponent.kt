@@ -108,6 +108,9 @@ internal interface FormActivityModule {
     @Binds
     fun bindLinkGateFactory(linkGateFactory: DefaultLinkGate.Factory): LinkGate.Factory
 
+    @Binds
+    fun bindsFormActivityStateHelper(helper: DefaultFormActivityStateHelper): FormActivityStateHelper
+
     companion object {
         @Provides
         @Singleton

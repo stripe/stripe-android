@@ -33,7 +33,7 @@ import com.stripe.android.uicore.utils.collectAsState
 internal fun FormActivityUI(
     interactor: DefaultVerticalModeFormInteractor,
     eventReporter: EventReporter,
-    state: FormActivityUiStateHolder.State,
+    state: FormActivityStateHelper.State,
     onClick: () -> Unit,
     onProcessingCompleted: () -> Unit,
     onDismissed: () -> Unit,
@@ -70,7 +70,7 @@ internal fun FormActivityUI(
 
 @Composable
 internal fun FormActivityPrimaryButton(
-    state: FormActivityUiStateHolder.State,
+    state: FormActivityStateHelper.State,
     onProcessingCompleted: () -> Unit = {},
     onClick: () -> Unit,
 ) {

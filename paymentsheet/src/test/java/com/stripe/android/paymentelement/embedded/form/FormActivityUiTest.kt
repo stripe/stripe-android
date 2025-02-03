@@ -54,7 +54,7 @@ class FormActivityUiTest {
         )
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
         val testScope = TestScope(UnconfinedTestDispatcher())
-        val uiStateHolder = FormActivityUiStateHolder(
+        val uiStateHolder = DefaultFormActivityStateHelper(
             paymentMethodMetadata = paymentMethodMetadata,
             selectionHolder = embeddedSelectionHolder,
             configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
