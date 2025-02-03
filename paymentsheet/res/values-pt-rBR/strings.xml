@@ -147,6 +147,8 @@
   <string name="stripe_upi_polling_payment_failed_message">Volte e selecione outra forma de pagamento</string>
   <!-- Text on a screen that indicates a payment has failed -->
   <string name="stripe_upi_polling_payment_failed_title">Falha no pagamento</string>
+  <!-- Two factor authentication screen heading -->
+  <string name="stripe_verification_dialog_header">Confirme sua identidade</string>
   <!-- Text shown on a button that when tapped opens a user's screen with their payment methods. -->
   <string name="stripe_view_more">Exibir mais</string>
   <!-- Label for identifying the default payment method. -->

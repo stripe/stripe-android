@@ -28,6 +28,10 @@
   <string name="stripe_blik_code">BLIK kods</string>
   <!-- Label for Boleto Payment method Tax ID -->
   <string name="stripe_boleto_tax_id_label">CPF/CNPJ</string>
+  <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. \"Visa (not accepted)\" -->
+  <string name="stripe_card_brand_not_accepted">(netiek pieņemts)</string>
+  <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. "Visa (not accepted)" -->
+  <string name="stripe_card_brand_not_accepted_with_brand">%1$s (netiek pieņemts)</string>
   <!-- Cash App mandate text -->
   <string name="stripe_cash_app_pay_mandate">Turpinot, jūs atļaujat %1$s iekasēt no jūsu Cash App konta par šo un turpmākiem maksājumiem saskaņā ar %2$s noteikumiem, līdz šī atļauja netiek atsaukta. To varat mainīt jebkurā laikā Cash App iestatījumos.</string>
   <!-- Title for the contact information section -->

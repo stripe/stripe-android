@@ -147,6 +147,8 @@
   <string name="stripe_upi_polling_payment_failed_message">Jekk jogħġbok mur lura u agħżel metodu tal-pagament ieħor</string>
   <!-- Text on a screen that indicates a payment has failed -->
   <string name="stripe_upi_polling_payment_failed_title">Il-pagament ma rnexxiex</string>
+  <!-- Two factor authentication screen heading -->
+  <string name="stripe_verification_dialog_header">Ikkonferma li int min qed tgħid li int</string>
   <!-- Text shown on a button that when tapped opens a user's screen with their payment methods. -->
   <string name="stripe_view_more">Uri iktar</string>
   <!-- Label for identifying the default payment method. -->

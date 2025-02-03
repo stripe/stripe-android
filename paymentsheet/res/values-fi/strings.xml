@@ -147,6 +147,8 @@
   <string name="stripe_upi_polling_payment_failed_message">Palaa takaisin ja valitse toinen maksutapa</string>
   <!-- Text on a screen that indicates a payment has failed -->
   <string name="stripe_upi_polling_payment_failed_title">Maksu epäonnistui</string>
+  <!-- Two factor authentication screen heading -->
+  <string name="stripe_verification_dialog_header">Vahvista, että se olet sinä</string>
   <!-- Text shown on a button that when tapped opens a user's screen with their payment methods. -->
   <string name="stripe_view_more">Näytä lisää</string>
   <!-- Label for identifying the default payment method. -->
