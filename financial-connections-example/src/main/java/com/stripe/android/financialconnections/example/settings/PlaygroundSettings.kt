@@ -178,7 +178,9 @@ internal data class PlaygroundSettings(
             NativeSetting(),
             PermissionsSetting(),
             EmailSetting(),
+            CustomerIdSetting(),
             StripeAccountIdSetting().takeIf { BuildConfig.TEST_ENVIRONMENT != "edge" },
+            RelinkAuthorizationSetting(),
         )
     }
 }
