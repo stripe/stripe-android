@@ -660,6 +660,7 @@ internal class DefaultPaymentElementLoaderTest {
             cardBrandChoice = null,
             flags = emptyMap(),
             useAttestationEndpointsForLink = false,
+            suppress2faModal = false,
             initializationMode = initializationMode,
             elementsSessionId = "session_1234"
         )
@@ -700,6 +701,7 @@ internal class DefaultPaymentElementLoaderTest {
                 disableLinkSignup = false,
                 linkConsumerIncentive = null,
                 useAttestationEndpoints = false,
+                suppress2faModal = false,
             )
         )
 
@@ -733,6 +735,7 @@ internal class DefaultPaymentElementLoaderTest {
                 disableLinkSignup = false,
                 linkConsumerIncentive = null,
                 useAttestationEndpoints = false,
+                suppress2faModal = false,
             )
         )
 
@@ -810,6 +813,7 @@ internal class DefaultPaymentElementLoaderTest {
                 disableLinkSignup = false,
                 linkConsumerIncentive = null,
                 useAttestationEndpoints = false,
+                suppress2faModal = false,
             ),
             linkStore = mock {
                 on { hasUsedLink() } doReturn true
@@ -838,6 +842,7 @@ internal class DefaultPaymentElementLoaderTest {
                 disableLinkSignup = true,
                 linkConsumerIncentive = null,
                 useAttestationEndpoints = false,
+                suppress2faModal = false,
             )
         )
 
@@ -2523,6 +2528,7 @@ internal class DefaultPaymentElementLoaderTest {
             disableLinkSignup = false,
             linkConsumerIncentive = null,
             useAttestationEndpoints = false,
+            suppress2faModal = false,
         )
     }
 

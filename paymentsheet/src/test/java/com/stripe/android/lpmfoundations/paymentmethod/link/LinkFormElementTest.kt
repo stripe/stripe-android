@@ -128,6 +128,7 @@ class LinkFormElementTest {
                 cardBrandChoice = null,
                 flags = mapOf(),
                 useAttestationEndpointsForLink = false,
+                suppress2faModal = false,
                 initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                     clientSecret = "pi_123_secret_123",
                 ),

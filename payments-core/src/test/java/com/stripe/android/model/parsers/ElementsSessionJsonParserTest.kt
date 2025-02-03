@@ -828,7 +828,7 @@ class ElementsSessionJsonParserTest {
     }
 
     @Test
-    fun `Parses Link useAttestationEndpoints as enabled`() {
+    fun `Parses Native Link flags as enabled`() {
         val elementsSession = ElementsSessionJsonParser(
             ElementsSessionParams.PaymentIntentType(
                 clientSecret = "secret",
@@ -836,14 +836,15 @@ class ElementsSessionJsonParserTest {
             ),
             isLiveMode = true,
         ).parse(
-            ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_WITH_LINK_ATTESTATION_ENDPOINTS_ENABLED_JSON
+            ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_WITH_NATIVE_LINK_FLAGS_ENABLED_JSON
         )
 
         assertThat(elementsSession?.linkSettings?.useAttestationEndpoints).isTrue()
+        assertThat(elementsSession?.linkSettings?.suppress2faModal).isTrue()
     }
 
     @Test
-    fun `Parses Link useAttestationEndpoints endpoints as disabled`() {
+    fun `Parses Native Link flags as disabled`() {
         val elementsSession = ElementsSessionJsonParser(
             ElementsSessionParams.PaymentIntentType(
                 clientSecret = "secret",
@@ -851,14 +852,15 @@ class ElementsSessionJsonParserTest {
             ),
             isLiveMode = true,
         ).parse(
-            ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_WITH_LINK_ATTESTATION_ENDPOINTS_DISABLED_JSON
+            ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_WITH_NATIVE_LINK_FLAGS_DISABLED_JSON
         )
 
         assertThat(elementsSession?.linkSettings?.useAttestationEndpoints).isFalse()
+        assertThat(elementsSession?.linkSettings?.suppress2faModal).isFalse()
     }
 
     @Test
-    fun `Parses Link useAttestationEndpoints endpoints as disabled when field is omitted`() {
+    fun `Parses Native Link flags as disabled when field is omitted`() {
         val elementsSession = ElementsSessionJsonParser(
             ElementsSessionParams.PaymentIntentType(
                 clientSecret = "secret",
@@ -870,6 +872,7 @@ class ElementsSessionJsonParserTest {
         )
 
         assertThat(elementsSession?.linkSettings?.useAttestationEndpoints).isFalse()
+        assertThat(elementsSession?.linkSettings?.suppress2faModal).isFalse()
     }
 
     private fun allowRedisplayTest(

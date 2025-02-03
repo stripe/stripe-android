@@ -403,6 +403,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 passthroughModeEnabled = elementsSession.linkPassthroughModeEnabled,
                 linkSignUpDisabled = elementsSession.disableLinkSignup,
                 useAttestationEndpointsForLink = elementsSession.useAttestationEndpointsForLink,
+                suppress2faModal = elementsSession.suppressLink2faModal,
                 flags = elementsSession.linkFlags,
                 initializationMode = initializationMode
             )
@@ -420,6 +421,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         linkSignUpDisabled: Boolean,
         flags: Map<String, Boolean>,
         useAttestationEndpointsForLink: Boolean,
+        suppress2faModal: Boolean,
         initializationMode: PaymentElementLoader.InitializationMode
     ): LinkState {
         val linkConfig = createLinkConfiguration(
@@ -430,6 +432,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             passthroughModeEnabled = passthroughModeEnabled,
             flags = flags,
             useAttestationEndpointsForLink = useAttestationEndpointsForLink,
+            suppress2faModal = suppress2faModal,
             initializationMode = initializationMode
         )
 
@@ -481,6 +484,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         passthroughModeEnabled: Boolean,
         flags: Map<String, Boolean>,
         useAttestationEndpointsForLink: Boolean,
+        suppress2faModal: Boolean,
         initializationMode: PaymentElementLoader.InitializationMode
     ): LinkConfiguration {
         val shippingDetails: AddressDetails? = configuration.shippingDetails
@@ -527,6 +531,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             cardBrandChoice = cardBrandChoice,
             flags = flags,
             useAttestationEndpointsForLink = useAttestationEndpointsForLink,
+            suppress2faModal = suppress2faModal,
             elementsSessionId = elementsSession.elementsSessionId,
             initializationMode = initializationMode
         )
