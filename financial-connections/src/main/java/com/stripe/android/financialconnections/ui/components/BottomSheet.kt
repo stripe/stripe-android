@@ -50,7 +50,7 @@ internal fun FinancialConnectionsModalBottomSheetLayout(
 private fun rememberFinancialConnectionsBottomSheetLayoutInfo(): StripeBottomSheetLayoutInfo {
     return rememberStripeBottomSheetLayoutInfo(
         cornerRadius = 20.dp,
-        sheetBackgroundColor = colors.backgroundSurface,
+        sheetBackgroundColor = colors.background,
         scrimColor = Neutral900.copy(alpha = 0.32f),
     )
 }

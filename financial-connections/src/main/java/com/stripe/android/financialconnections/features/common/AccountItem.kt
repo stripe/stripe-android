@@ -76,8 +76,8 @@ internal fun AccountItem(
             .border(
                 width = if (selected) 2.dp else 1.dp,
                 color = when {
-                    selected -> colors.borderBrand
-                    else -> colors.border
+                    selected -> colors.primary
+                    else -> colors.borderNeutral
                 },
                 shape = shape
             )
@@ -114,7 +114,7 @@ internal fun AccountItem(
                     .size(24.dp)
                     .alpha(if (selected) 1f else 0f),
                 imageVector = Icons.Default.Check,
-                tint = colors.iconBrand,
+                tint = colors.primary,
                 contentDescription = "Selected"
             )
         }
@@ -168,7 +168,7 @@ private fun AccountSubtitle(
                     style = typography.labelSmall,
                     modifier = Modifier
                         .background(
-                            color = colors.backgroundOffset,
+                            color = colors.backgroundSecondary,
                             shape = RoundedCornerShape(4.dp)
                         )
                         .padding(horizontal = 6.dp, vertical = 4.dp)

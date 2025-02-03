@@ -273,7 +273,7 @@ private fun SpinnerToCheckmark(
             contentAlignment = Alignment.Center,
             modifier = modifier
                 .size(ICON_SIZE.dp)
-                .background(colors.buttonPrimary, CircleShape)
+                .background(colors.primary, CircleShape)
         ) {
             Icon(
                 modifier = Modifier.graphicsLayer {
@@ -282,7 +282,7 @@ private fun SpinnerToCheckmark(
                 },
                 imageVector = Icons.Default.Check,
                 contentDescription = stringResource(id = R.string.stripe_success_pane_title),
-                tint = colors.contentOnBrand,
+                tint = colors.primaryAccent,
             )
         }
     }

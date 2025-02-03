@@ -71,7 +71,7 @@ class PaparazziSampleScreenshotTest {
                     Box(
                         modifier = Modifier
                             .wrapContentSize()
-                            .background(FinancialConnectionsTheme.colors.backgroundSurface),
+                            .background(FinancialConnectionsTheme.colors.background),
                     ) {
                         componentTestPreview.Content()
                     }

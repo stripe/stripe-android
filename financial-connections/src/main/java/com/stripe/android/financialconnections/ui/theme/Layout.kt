@@ -181,7 +181,7 @@ private fun LayoutScaffold(
             modifier = Modifier.graphicsLayer {
                 shadowElevation = targetElevation.toPx()
             },
-            color = FinancialConnectionsTheme.colors.backgroundSurface,
+            color = FinancialConnectionsTheme.colors.background,
         ) {
             Box(contentAlignment = Alignment.BottomCenter) {
                 footer?.let {

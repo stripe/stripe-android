@@ -277,7 +277,7 @@ private fun SelectNewAccount(
             .clip(shape)
             .border(
                 width = 1.dp,
-                color = colors.border,
+                color = colors.borderNeutral,
                 shape = shape
             )
             .clickableSingle { onClick() }
@@ -317,7 +317,7 @@ fun SelectNewAccountIcon(
             Image(
                 painter = painterResource(R.drawable.stripe_ic_add),
                 modifier = iconModifier,
-                colorFilter = ColorFilter.tint(colors.iconBrand),
+                colorFilter = ColorFilter.tint(colors.iconTint),
                 contentDescription = contentDescription
             )
         }

@@ -101,7 +101,7 @@ private fun ExitModalContent(
 @Preview
 internal fun ExitModalPreview() {
     FinancialConnectionsTheme {
-        Surface(color = colors.backgroundSurface) {
+        Surface(color = colors.background) {
             ExitModalContent(
                 description = TextResource.StringId(R.string.stripe_exit_modal_desc, listOf("MerchantName")),
                 loading = false,
