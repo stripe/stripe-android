@@ -247,4 +247,5 @@ internal sealed class ConnectAnalyticsEvent(
     )
 }
 
+@SuppressWarnings("MagicNumber")
 private fun msToSecs(ms: Long): String = (ms / 1_000.0).toString()
