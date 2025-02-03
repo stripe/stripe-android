@@ -147,6 +147,8 @@
   <string name="stripe_upi_polling_payment_failed_message">โปรดย้อนกลับและเลือกวิธีการชำระเงินอื่น</string>
   <!-- Text on a screen that indicates a payment has failed -->
   <string name="stripe_upi_polling_payment_failed_title">ชำระเงินไม่สำเร็จ</string>
+  <!-- Two factor authentication screen heading -->
+  <string name="stripe_verification_dialog_header">ยืนยันว่าเป็นคุณจริงๆ</string>
   <!-- Text shown on a button that when tapped opens a user's screen with their payment methods. -->
   <string name="stripe_view_more">ดูเพิ่มเติม</string>
   <!-- Label for identifying the default payment method. -->

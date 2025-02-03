@@ -52,6 +52,8 @@
   <string name="stripe_paymentsheet_bank_payment_promo_for_setup"><![CDATA[은행으로 처음 결제할 때 %s를 돌려받으십시오. <a href=\"https://link.com/promotion-terms\">약관&#160;보기</a>]]></string>
   <!-- Label shown when paying with a bank account is not eligible for the incentive, e.g. 'No $5 promo' -->
   <string name="stripe_paymentsheet_bank_payment_promo_ineligible">%s 프로모션 없음</string>
+  <!-- Text displayed on manage card screen when card details are not editable. -->
+  <string name="stripe_paymentsheet_card_details_cannot_be_changed">카드 세부사항은 설정되면 변경할 수 없습니다.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
   <string name="stripe_paymentsheet_card_mandate">카드 정보를 제공하면 %s에서 향후 결제에 대해 해당 약관에 따라 귀하의 카드에 대금을 청구할 수 있습니다.</string>
   <!-- Title shown above a carousel containing available payment methods -->
@@ -65,6 +67,8 @@
   <string name="stripe_paymentsheet_enter_address_manually">주소 직접 입력</string>
   <!-- Title shown above a view containing a customer's bank account that they can delete or update -->
   <string name="stripe_paymentsheet_manage_bank_account">미국 은행 계좌 관리</string>
+  <!-- Title shown above a view containing a customer's card payment methods that they can delete or update -->
+  <string name="stripe_paymentsheet_manage_card">카드 관리</string>
   <!-- Title shown above a view containing the customer's card payment methods that they can delete or update -->
   <string name="stripe_paymentsheet_manage_payment_methods">결제 방식 관리</string>
   <!-- Title shown above a view containing a customer's SEPA debit account that they can delete or update -->
@@ -143,6 +147,8 @@
   <string name="stripe_upi_polling_payment_failed_message">뒤로 돌아가서 다른 결제 방식을 선택해 주십시오.</string>
   <!-- Text on a screen that indicates a payment has failed -->
   <string name="stripe_upi_polling_payment_failed_title">결제 실패</string>
+  <!-- Two factor authentication screen heading -->
+  <string name="stripe_verification_dialog_header">본인 확인</string>
   <!-- Text shown on a button that when tapped opens a user's screen with their payment methods. -->
   <string name="stripe_view_more">자세히 보기</string>
   <!-- Label for identifying the default payment method. -->
