@@ -69,7 +69,7 @@ class Processor
             key_name = key[:key_name]
             value = key[:value]
 
-            is_new_android_key = !lokalise_android_keys.include?(key_name)
+            is_new_android_key = determine_if_new_key(key, lokalise_android_keys)
 
             if is_new_android_key
                 existing_key = find_existing_key(value)
@@ -82,8 +82,9 @@ class Processor
             else
                 lokalise_entry = find_lokalise_entry_for_key(key_name)
                 is_missing_filename = lokalise_entry['filenames']['android'].empty?
+                needs_filename_update = lokalise_entry['filenames']['android'] != key[:filename]
 
-                if is_missing_filename
+                if is_missing_filename || needs_filename_update
                     unsynced_keys << Action.new("update", key, lokalise_entry)
                 end
             end
@@ -94,9 +95,31 @@ class Processor
 
     private
 
+    def determine_if_new_key(local_key, remote_keys)
+        local_key_name = local_key[:key_name]
+        local_filename = local_key[:filename]
+
+        remote_keys.each do |remote_key|
+            if remote_key[:key_name] == local_key_name
+                return false
+            end
+        end
+
+        return true
+    end
+
     def filter_android_key_names(keys)
         android_keys = keys.select { |key| key['platforms'].include? 'android' }
-        android_keys.map { |key| key['key_name']['android'] }
+
+        android_keys.map do |key|
+            key_name = key['key_name']['android']
+            filename = key['filenames']['android']
+
+            {
+                "key_name": key_name,
+                "filename": filename
+            }
+        end
     end
 
     def find_existing_key(value)
