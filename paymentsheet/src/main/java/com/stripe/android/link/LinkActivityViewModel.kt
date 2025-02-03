@@ -66,8 +66,21 @@ internal class LinkActivityViewModel @Inject constructor(
         get() = linkAccountManager.linkAccount.value
 
     var navController: NavHostController? = null
+        set(value) {
+            listenToNavController(value)
+            field = value
+        }
     var dismissWithResult: ((LinkActivityResult) -> Unit)? = null
     var launchWebFlow: ((LinkConfiguration) -> Unit)? = null
+
+    private fun listenToNavController(navController: NavHostController?) {
+        viewModelScope.launch {
+            navController?.currentBackStackEntryFlow?.first { entry ->
+                entry.destination.route == LinkScreen.Loading.route
+            }
+            linkScreenScreenCreated()
+        }
+    }
 
     fun handleViewAction(action: LinkAction) {
         when (action) {

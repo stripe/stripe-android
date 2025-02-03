@@ -27,6 +27,7 @@ import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -40,10 +41,13 @@ internal class LinkActivityTest {
 
     @get:Rule
     val rule = InstantTaskExecutorRule()
+
     @get:Rule
     val composeTestRule = createAndroidComposeRule<LinkActivity>()
+
     @get:Rule
     val intentsTestRule = IntentsRule()
+
     @get:Rule
     val coroutineTestRule = CoroutineTestRule(dispatcher)
 
@@ -60,7 +64,7 @@ internal class LinkActivityTest {
     }
 
     @Test
-    fun `verification dialog is displayed when link screen state is VerificationDialog`() {
+    fun `verification dialog is displayed when link screen state is VerificationDialog`() = runTest {
         val linkAccountManager = FakeLinkAccountManager()
         linkAccountManager.setLinkAccount(TestFactory.LINK_ACCOUNT)
         linkAccountManager.setAccountStatus(AccountStatus.NeedsVerification)
@@ -77,7 +81,7 @@ internal class LinkActivityTest {
     }
 
     @Test
-    fun `full screen content is displayed when link screen state is FullScreen`() {
+    fun `full screen content is displayed when link screen state is FullScreen`() = runTest {
         val linkAccountManager = FakeLinkAccountManager()
         linkAccountManager.setLinkAccount(TestFactory.LINK_ACCOUNT)
         linkAccountManager.setAccountStatus(AccountStatus.NeedsVerification)
