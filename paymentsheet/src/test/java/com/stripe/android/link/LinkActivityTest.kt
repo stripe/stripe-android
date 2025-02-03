@@ -7,7 +7,6 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
@@ -18,7 +17,6 @@ import androidx.test.espresso.intent.rule.IntentsRule
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.account.FakeLinkAuth
-import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.gate.FakeLinkGate
 import com.stripe.android.link.model.AccountStatus
@@ -138,7 +136,6 @@ internal class LinkActivityTest {
                 activityRetainedComponent = FakeNativeLinkComponent(),
                 confirmationHandlerFactory = { FakeConfirmationHandler() },
                 linkAccountManager = linkAccountManager,
-                linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
                 eventReporter = FakeEventReporter(),
                 integrityRequestManager = FakeIntegrityRequestManager(),
                 linkGate = FakeLinkGate(),

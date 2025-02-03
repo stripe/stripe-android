@@ -183,6 +183,7 @@ internal object TestFactory {
         configuration = LINK_CONFIGURATION,
         publishableKey = "",
         stripeAccountId = "",
-        startWithVerificationDialog = false
+        startWithVerificationDialog = false,
+        linkAccount = LINK_ACCOUNT
     )
 }
