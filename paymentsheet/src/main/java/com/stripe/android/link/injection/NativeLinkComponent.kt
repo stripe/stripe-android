@@ -14,6 +14,7 @@ import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.account.LinkAuth
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
+import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.paymentelement.confirmation.injection.DefaultConfirmationModule
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
@@ -73,6 +74,9 @@ internal interface NativeLinkComponent {
         fun startWithVerificationDialog(
             @Named(START_WITH_VERIFICATION_DIALOG) startWithVerificationDialog: Boolean
         ): Builder
+
+        @BindsInstance
+        fun linkAccount(linkAccount: LinkAccount?): Builder
 
         fun build(): NativeLinkComponent
     }

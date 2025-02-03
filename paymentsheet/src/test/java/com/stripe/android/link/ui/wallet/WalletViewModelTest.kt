@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.TestFactory
@@ -60,6 +61,7 @@ class WalletViewModelTest {
     fun `viewmodel should dismiss with failure on load payment method failure`() = runTest(dispatcher) {
         val error = Throwable("oops")
         val linkAccountManager = WalletLinkAccountManager()
+        linkAccountManager.setLinkAccount(TestFactory.LINK_ACCOUNT)
         linkAccountManager.listPaymentDetailsResult = Result.failure(error)
 
         var linkActivityResult: LinkActivityResult? = null
@@ -75,7 +77,13 @@ class WalletViewModelTest {
             dismissWithResult = ::dismissWithResult
         )
 
-        assertThat(linkActivityResult).isEqualTo(LinkActivityResult.Failed(error))
+        assertThat(linkActivityResult)
+            .isEqualTo(
+                LinkActivityResult.Failed(
+                    error = error,
+                    linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT)
+                )
+            )
         assertThat(logger.errorLogs).isEqualTo(listOf("WalletViewModel Fatal error: " to error))
     }
 
@@ -271,6 +279,7 @@ class WalletViewModelTest {
     fun `performPaymentConfirmation dismisses with Completed result on success`() = runTest(dispatcher) {
         val validCard = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(expiryYear = 2099)
         val linkAccountManager = WalletLinkAccountManager()
+        linkAccountManager.setLinkAccount(TestFactory.LINK_ACCOUNT)
         linkAccountManager.listPaymentDetailsResult = Result.success(
             value = ConsumerPaymentDetails(paymentDetails = listOf(validCard))
         )
@@ -299,7 +308,8 @@ class WalletViewModelTest {
             )
         )
 
-        assertThat(result).isEqualTo(LinkActivityResult.Completed)
+        assertThat(result)
+            .isEqualTo(LinkActivityResult.Completed(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT)))
     }
 
     @Test

@@ -5,6 +5,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.TestFactory
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationMediator
 import com.stripe.android.paymentelement.confirmation.ConfirmationMediator.Parameters
@@ -31,6 +32,7 @@ class LinkConfirmationFlowTest {
             LinkConfirmationDefinition(
                 linkPaymentLauncher = launcher,
                 linkStore = RecordingLinkStore.noOp(),
+                linkAccountHolder = LinkAccountHolder(SavedStateHandle())
             )
         )
 
@@ -87,6 +89,7 @@ class LinkConfirmationFlowTest {
             LinkConfirmationDefinition(
                 linkPaymentLauncher = launcher,
                 linkStore = RecordingLinkStore.noOp(),
+                linkAccountHolder = LinkAccountHolder(SavedStateHandle())
             )
         )
 
