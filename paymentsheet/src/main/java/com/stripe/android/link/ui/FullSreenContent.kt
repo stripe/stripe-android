@@ -64,5 +64,6 @@ internal fun FullScreenContent(
 
     LaunchedEffect(Unit) {
         viewModel.navController = navController
+        viewModel.linkScreenScreenCreated()
     }
 }
