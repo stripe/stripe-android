@@ -420,6 +420,7 @@ internal class PlaygroundSettings private constructor(
             CustomerSessionRemoveSettingsDefinition,
             CustomerSessionRemoveLastSettingsDefinition,
             CustomerSessionSetAsDefaultSettingsDefinition,
+            CustomerSessionSyncDefaultSettingsDefinition,
             CustomerSessionRedisplaySettingsDefinition,
             CustomerSessionRedisplayFiltersSettingsDefinition,
             CustomerSessionOverrideRedisplaySettingsDefinition,

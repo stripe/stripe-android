@@ -3,10 +3,10 @@ package com.stripe.android.paymentsheet.example.playground.settings
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
 import com.stripe.android.paymentsheet.example.playground.model.FeatureState
 
-internal object CustomerSessionSetAsDefaultSettingsDefinition : BooleanSettingsDefinition(
+internal object CustomerSessionSyncDefaultSettingsDefinition : BooleanSettingsDefinition(
     defaultValue = false,
-    displayName = "Customer Session Set As Default Feature",
-    key = "customer_session_set_as_default"
+    displayName = "Customer Session Sync Default Feature",
+    key = "customer_session_sync_default"
 ) {
     override fun createOptions(
         configurationData: PlaygroundConfigurationData
@@ -17,13 +17,13 @@ internal object CustomerSessionSetAsDefaultSettingsDefinition : BooleanSettingsD
 
     override fun configure(value: Boolean, checkoutRequestBuilder: CheckoutRequest.Builder) {
         if (value) {
-            checkoutRequestBuilder.paymentMethodSetAsDefaultFeature(FeatureState.Enabled)
+            checkoutRequestBuilder.paymentMethodSyncDefaultFeature(FeatureState.Enabled)
         } else {
-            checkoutRequestBuilder.paymentMethodSetAsDefaultFeature(FeatureState.Disabled)
+            checkoutRequestBuilder.paymentMethodSyncDefaultFeature(FeatureState.Disabled)
         }
     }
 
     override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
-        return configurationData.integrationType.isPaymentFlow()
+        return configurationData.integrationType.isCustomerFlow()
     }
 }
