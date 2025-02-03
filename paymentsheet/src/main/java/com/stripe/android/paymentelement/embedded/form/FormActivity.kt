@@ -36,9 +36,6 @@ internal class FormActivity : AppCompatActivity() {
     @Inject
     lateinit var formActivityUiStateHolder: FormActivityUiStateHolder
 
-    @Inject
-    lateinit var formActivityConfirmationHandler: FormActivityConfirmationHandler
-
     @OptIn(ExperimentalMaterialApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,7 +46,11 @@ internal class FormActivity : AppCompatActivity() {
         }
 
         viewModel.component.inject(this)
-        formActivityConfirmationHandler.register(this, this)
+        val subcomponent = viewModel.subcomponentBuilder
+            .activityResultCaller(this)
+            .lifecycleOwner(this)
+            .build()
+        val confirmationHelper = subcomponent.confirmationHelper
 
         setContent {
             StripeTheme {
@@ -65,7 +66,7 @@ internal class FormActivity : AppCompatActivity() {
                         interactor = formInteractor,
                         eventReporter = eventReporter,
                         onDismissed = ::setCancelAndFinish,
-                        onClick = formActivityConfirmationHandler::confirm,
+                        onClick = confirmationHelper::confirm,
                         onProcessingCompleted = ::setCompletedResultAndDismiss,
                         state = uiState
                     )

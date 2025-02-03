@@ -2,8 +2,8 @@ package com.stripe.android.paymentelement.embedded.form
 
 import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import com.stripe.android.common.model.asCommonConfiguration
-import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
@@ -11,39 +11,33 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-internal interface FormActivityConfirmationHandler {
+internal interface FormActivityConfirmationHelper {
     fun confirm()
-    fun register(activityResultCaller: ActivityResultCaller, lifecycleOwner: LifecycleOwner)
 }
 
 @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
-internal class DefaultFormActivityConfirmationHandler @Inject constructor(
+internal class DefaultFormActivityConfirmationHelper @Inject constructor(
     private val initializationMode: PaymentElementLoader.InitializationMode,
     private val paymentMethodMetadata: PaymentMethodMetadata,
-    @ViewModelScope private val coroutineScope: CoroutineScope,
-    confirmationHandlerFactory: ConfirmationHandler.Factory,
+    private val confirmationHandler: ConfirmationHandler,
     private val configuration: EmbeddedPaymentElement.Configuration,
     private val selectionHolder: EmbeddedSelectionHolder,
     private val uiStateHolder: FormActivityUiStateHolder,
-) : FormActivityConfirmationHandler {
-
-    private val confirmationHandler = confirmationHandlerFactory.create(coroutineScope)
+    lifecycleOwner: LifecycleOwner,
+    activityResultCaller: ActivityResultCaller
+) : FormActivityConfirmationHelper {
 
     init {
-        coroutineScope.launch {
+        confirmationHandler.register(activityResultCaller, lifecycleOwner)
+        lifecycleOwner.lifecycleScope.launch {
             confirmationHandler.state.collectLatest {
                 uiStateHolder.updateProcessingState(it)
             }
         }
-    }
-
-    override fun register(activityResultCaller: ActivityResultCaller, lifecycleOwner: LifecycleOwner) {
-        confirmationHandler.register(activityResultCaller, lifecycleOwner)
     }
 
     override fun confirm() {

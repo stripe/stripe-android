@@ -1,6 +1,5 @@
 package com.stripe.android.paymentelement.embedded.form
 
-import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentIntent
@@ -15,11 +14,8 @@ import com.stripe.android.paymentsheet.ui.PrimaryButtonProcessingState
 import com.stripe.android.paymentsheet.utils.buyButtonLabel
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.uicore.utils.combineAsStateFlow
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -28,13 +24,17 @@ import javax.inject.Singleton
 internal class FormActivityUiStateHolder @Inject constructor(
     paymentMethodMetadata: PaymentMethodMetadata,
     selectionHolder: EmbeddedSelectionHolder,
-    @ViewModelScope coroutineScope: CoroutineScope,
     configuration: EmbeddedPaymentElement.Configuration,
 ) {
     private val primaryButtonProcessingState: MutableStateFlow<PrimaryButtonProcessingState> =
         MutableStateFlow(PrimaryButtonProcessingState.Idle(null))
-    private val isEnabled = MutableStateFlow(false)
     private val isProcessing = MutableStateFlow(false)
+    private val isEnabled: StateFlow<Boolean> = combineAsStateFlow(
+        selectionHolder.selection,
+        isProcessing
+    ) { selection, processing ->
+        selection != null && !processing
+    }
     private val primaryButtonLabel = MutableStateFlow(
         primaryButtonLabel(paymentMethodMetadata.stripeIntent, configuration)
     )
@@ -51,14 +51,6 @@ internal class FormActivityUiStateHolder @Inject constructor(
             processingState = buttonProcessingState,
             isProcessing = processing,
         )
-    }
-
-    init {
-        coroutineScope.launch {
-            selectionHolder.selection.collectLatest { selection ->
-                isEnabled.value = selection != null
-            }
-        }
     }
 
     fun updateProcessingState(processingState: ConfirmationHandler.State) {

@@ -1,6 +1,8 @@
 package com.stripe.android.paymentelement.embedded.form
 
 import android.content.Context
+import androidx.activity.result.ActivityResultCaller
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
@@ -20,9 +22,10 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
+import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentElementConfirmationModule
 import com.stripe.android.paymentelement.embedded.EmbeddedCommonModule
-import com.stripe.android.paymentelement.embedded.content.EmbeddedPaymentElementSubcomponent.Builder
+import com.stripe.android.paymentelement.embedded.content.EmbeddedPaymentElementScope
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInteractor
@@ -31,7 +34,9 @@ import dagger.BindsInstance
 import dagger.Component
 import dagger.Module
 import dagger.Provides
+import dagger.Subcomponent
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.plus
 import javax.inject.Named
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
@@ -85,6 +90,7 @@ internal interface FormActivityComponent {
     subcomponents = [
         LinkAnalyticsComponent::class,
         LinkComponent::class,
+        FormActivitySubcomponent::class
     ]
 )
 internal interface FormActivityModule {
@@ -101,9 +107,6 @@ internal interface FormActivityModule {
 
     @Binds
     fun bindLinkGateFactory(linkGateFactory: DefaultLinkGate.Factory): LinkGate.Factory
-
-    @Binds
-    fun bindsFormConfirmationHandler(handler: DefaultFormActivityConfirmationHandler): FormActivityConfirmationHandler
 
     companion object {
         @Provides
@@ -124,5 +127,44 @@ internal interface FormActivityModule {
         fun provideFormInteractor(
             interactorFactory: EmbeddedFormInteractorFactory
         ): DefaultVerticalModeFormInteractor = interactorFactory.create()
+
+        @Provides
+        @Singleton
+        fun provideConfirmationHandler(
+            confirmationHandlerFactory: ConfirmationHandler.Factory,
+            @ViewModelScope coroutineScope: CoroutineScope,
+            @IOContext ioContext: CoroutineContext,
+        ): ConfirmationHandler {
+            return confirmationHandlerFactory.create(coroutineScope + ioContext)
+        }
     }
+}
+
+@Subcomponent(
+    modules = [
+        FormConfirmationModule::class,
+    ]
+)
+@EmbeddedPaymentElementScope
+internal interface FormActivitySubcomponent {
+    val confirmationHelper: FormActivityConfirmationHelper
+
+    @Subcomponent.Builder
+    interface Builder {
+        @BindsInstance
+        fun activityResultCaller(activityResultCaller: ActivityResultCaller): Builder
+
+        @BindsInstance
+        fun lifecycleOwner(lifecycleOwner: LifecycleOwner): Builder
+
+        fun build(): FormActivitySubcomponent
+    }
+}
+
+@Module
+internal interface FormConfirmationModule {
+    @Binds
+    fun bindsFormConfirmationHelper(
+        confirmationHandler: DefaultFormActivityConfirmationHelper
+    ): FormActivityConfirmationHelper
 }

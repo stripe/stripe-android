@@ -57,7 +57,6 @@ class FormActivityUiTest {
         val uiStateHolder = FormActivityUiStateHolder(
             paymentMethodMetadata = paymentMethodMetadata,
             selectionHolder = embeddedSelectionHolder,
-            coroutineScope = testScope,
             configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
         )
         val interactor = EmbeddedFormInteractorFactory(
