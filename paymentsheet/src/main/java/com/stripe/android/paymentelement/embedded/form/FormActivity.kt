@@ -6,11 +6,13 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.runtime.getValue
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInteractor
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
+import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.fadeOut
 import javax.inject.Inject
 
@@ -32,7 +34,10 @@ internal class FormActivity : AppCompatActivity() {
     lateinit var eventReporter: EventReporter
 
     @Inject
-    lateinit var primaryButtonStateHolder: PrimaryButtonStateHolder
+    lateinit var formActivityUiStateHolder: FormActivityUiStateHolder
+
+    @Inject
+    lateinit var formActivityConfirmationHandler: FormActivityConfirmationHandler
 
     @OptIn(ExperimentalMaterialApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,10 +49,14 @@ internal class FormActivity : AppCompatActivity() {
         }
 
         viewModel.component.inject(this)
+        formActivityConfirmationHandler.register(this, this)
 
         setContent {
             StripeTheme {
-                val bottomSheetState = rememberStripeBottomSheetState()
+                val uiState by formActivityUiStateHolder.state.collectAsState()
+                val bottomSheetState = rememberStripeBottomSheetState(
+                    confirmValueChange = { !uiState.isProcessing }
+                )
                 ElementsBottomSheetLayout(
                     state = bottomSheetState,
                     onDismissed = ::setCancelAndFinish
@@ -56,11 +65,18 @@ internal class FormActivity : AppCompatActivity() {
                         interactor = formInteractor,
                         eventReporter = eventReporter,
                         onDismissed = ::setCancelAndFinish,
-                        primaryButtonStateHolder = primaryButtonStateHolder
+                        onClick = formActivityConfirmationHandler::confirm,
+                        onProcessingCompleted = ::setCompletedResultAndDismiss,
+                        state = uiState
                     )
                 }
             }
         }
+    }
+
+    private fun setCompletedResultAndDismiss() {
+        setFormResult(FormResult.Complete(null))
+        finish()
     }
 
     private fun setCancelAndFinish() {

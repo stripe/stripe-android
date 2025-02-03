@@ -39,7 +39,9 @@ internal class DefaultEmbeddedSheetLauncherTest {
             code,
             paymentMethodMetadata,
             false,
-            state.configuration
+            state.configuration,
+            state.initializationMode,
+            null
         )
 
         sheetLauncher.launchForm(code, paymentMethodMetadata, false, state)
@@ -170,6 +172,8 @@ internal class DefaultEmbeddedSheetLauncherTest {
                 customerStateHolder = customerStateHolder,
                 sheetStateHolder = sheetStateHolder,
                 errorReporter = errorReporter,
+                statusBarColor = null,
+                resultCallback = { }
             )
             val formRegisterCall = awaitRegisterCall()
             val manageRegisterCall = awaitRegisterCall()

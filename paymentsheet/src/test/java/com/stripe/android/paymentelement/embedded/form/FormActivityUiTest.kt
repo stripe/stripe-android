@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.embedded.form
 
 import android.os.Build
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasText
@@ -12,6 +13,7 @@ import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.FormPage
+import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import kotlinx.coroutines.test.TestScope
@@ -52,28 +54,31 @@ class FormActivityUiTest {
         )
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
         val testScope = TestScope(UnconfinedTestDispatcher())
+        val uiStateHolder = FormActivityUiStateHolder(
+            paymentMethodMetadata = paymentMethodMetadata,
+            selectionHolder = embeddedSelectionHolder,
+            coroutineScope = testScope,
+            configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
+        )
         val interactor = EmbeddedFormInteractorFactory(
             paymentMethodMetadata = paymentMethodMetadata,
             paymentMethodCode = "card",
             hasSavedPaymentMethods = false,
             embeddedSelectionHolder = embeddedSelectionHolder,
             embeddedFormHelperFactory = embeddedFormHelperFactory,
-            viewModelScope = testScope
+            viewModelScope = testScope,
+            formActivityUiStateHolder = uiStateHolder
         ).create()
 
-        val primaryButtonStateHolder = PrimaryButtonStateHolder(
-            paymentMethodMetadata = paymentMethodMetadata,
-            selectionHolder = embeddedSelectionHolder,
-            configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
-            coroutineScope = testScope
-        )
-
         composeRule.setContent {
+            val state by uiStateHolder.state.collectAsState()
             FormActivityUI(
                 interactor = interactor,
                 eventReporter = mock(),
-                primaryButtonStateHolder = primaryButtonStateHolder,
-                onDismissed = {}
+                state = state,
+                onDismissed = {},
+                onClick = {},
+                onProcessingCompleted = {}
             )
         }
 
