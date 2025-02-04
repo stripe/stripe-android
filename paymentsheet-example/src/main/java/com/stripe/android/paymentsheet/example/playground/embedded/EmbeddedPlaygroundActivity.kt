@@ -6,9 +6,9 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -51,6 +51,8 @@ internal class EmbeddedPlaygroundActivity : AppCompatActivity(), ExternalPayment
             }
         }
     }
+
+    private val viewModel: EmbeddedPlaygroundViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -124,13 +126,14 @@ internal class EmbeddedPlaygroundActivity : AppCompatActivity(), ExternalPayment
     }
 
     @Composable
-    private fun ColumnScope.EmbeddedContentWithSelectedPaymentOption(
+    private fun EmbeddedContentWithSelectedPaymentOption(
         embeddedPaymentElement: EmbeddedPaymentElement,
         selectedPaymentOption: EmbeddedPaymentElement.PaymentOptionDisplayData,
         embeddedViewDisplaysMandateText: Boolean,
     ) {
+        val confirming by viewModel.confirming.collectAsState()
         PaymentMethodSelector(
-            isEnabled = true,
+            isEnabled = !confirming,
             paymentMethodLabel = selectedPaymentOption.label,
             paymentMethodPainter = selectedPaymentOption.iconPainter,
             clickable = false,
@@ -143,7 +146,8 @@ internal class EmbeddedPlaygroundActivity : AppCompatActivity(), ExternalPayment
             }
         }
 
-        BuyButton(buyButtonEnabled = true) {
+        BuyButton(buyButtonEnabled = !confirming) {
+            viewModel.setConfirming(true)
             embeddedPaymentElement.confirm()
         }
 
@@ -151,7 +155,8 @@ internal class EmbeddedPlaygroundActivity : AppCompatActivity(), ExternalPayment
             onClick = {
                 embeddedPaymentElement.clearPaymentOption()
             },
-            Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
+            enabled = !confirming,
         ) {
             Text("Clear selected")
         }
@@ -171,6 +176,7 @@ internal class EmbeddedPlaygroundActivity : AppCompatActivity(), ExternalPayment
     }
 
     private fun handleEmbeddedResult(result: EmbeddedPaymentElement.Result) {
+        viewModel.setConfirming(false)
         when (result) {
             is EmbeddedPaymentElement.Result.Canceled -> {
                 Log.d("EmbeddedPlayground", "Canceled")
