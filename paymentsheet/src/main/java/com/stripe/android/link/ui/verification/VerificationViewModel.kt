@@ -129,9 +129,6 @@ internal class VerificationViewModel @Inject constructor(
         clearError()
         onDismissClicked()
         linkEventsReporter.on2FACancel()
-        viewModelScope.launch {
-            linkAccountManager.logOut()
-        }
     }
 
     fun onChangeEmailButtonClicked() {
