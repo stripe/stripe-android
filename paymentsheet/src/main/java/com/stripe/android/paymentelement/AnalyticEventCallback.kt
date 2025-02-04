@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 /**
  * Called when an analytic event is emitted.
  *
- * This should only be used for analytic purposes. It is not intended for general use.
+ * These events are intended to be used for analytics purposes ONLY.
  *
  * @param event the [AnalyticEvent] that was emitted
  */
