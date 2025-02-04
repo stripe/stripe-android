@@ -16,8 +16,10 @@ import com.stripe.android.connect.PayoutsListener
 import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.StripeEmbeddedComponent
 import com.stripe.android.connect.analytics.ComponentAnalyticsService
+import com.stripe.android.connect.analytics.ConnectAnalyticsEvent
 import com.stripe.android.connect.appearance.Appearance
 import com.stripe.android.connect.appearance.Colors
+import com.stripe.android.connect.util.Clock
 import com.stripe.android.connect.webview.serialization.SetOnLoadError
 import com.stripe.android.connect.webview.serialization.SetOnLoadError.LoadError
 import com.stripe.android.connect.webview.serialization.SetOnLoaderStart
@@ -54,6 +56,7 @@ class StripeConnectWebViewContainerControllerTest {
     private val mockPermissionRequest: PermissionRequest = mock()
     private val view: StripeConnectWebViewContainerInternal = mock()
     private val analyticsService: ComponentAnalyticsService = mock()
+    private val androidClock: Clock = mock()
     private val embeddedComponentManager: EmbeddedComponentManager = mock()
     private val embeddedComponent: StripeEmbeddedComponent = StripeEmbeddedComponent.PAYOUTS
 
@@ -74,10 +77,13 @@ class StripeConnectWebViewContainerControllerTest {
         Dispatchers.setMain(Dispatchers.Unconfined)
 
         whenever(embeddedComponentManager.appearanceFlow) doReturn appearanceFlow
+        whenever(embeddedComponentManager.getStripeURL(any())) doReturn "https://example.com"
+        whenever(androidClock.millis()) doReturn -1L
 
         controller = StripeConnectWebViewContainerController(
             view = view,
             analyticsService = analyticsService,
+            clock = androidClock,
             embeddedComponentManager = embeddedComponentManager,
             embeddedComponent = embeddedComponent,
             listener = listener,
@@ -104,14 +110,21 @@ class StripeConnectWebViewContainerControllerTest {
     }
 
     @Test
-    fun `shouldOverrideUrlLoading allows request and returns false for allowlisted hosts`() {
+    fun `shouldOverrideUrlLoading allows request and returns false for allowlisted hosts, logs unexpected pop-up`() {
         val uri = Uri.parse("https://connect-js.stripe.com/allowlisted")
         val mockRequest = mock<WebResourceRequest> {
             on { url } doReturn uri
         }
 
+        controller.onReceivedPageDidLoad("page_view_id")
         val result = controller.shouldOverrideUrlLoading(mockContext, mockRequest)
         assertFalse(result)
+        verify(analyticsService).track(
+            ConnectAnalyticsEvent.ClientError(
+                errorCode = "unexpected_popup",
+                errorMessage = "Received pop-up for allow-listed host: https://connect-js.stripe.com/allowlisted",
+            )
+        )
     }
 
     @Test
@@ -165,7 +178,7 @@ class StripeConnectWebViewContainerControllerTest {
     @Test
     fun `should handle SetOnLoaderStart`() = runTest {
         val message = SetterFunctionCalledMessage(SetOnLoaderStart(""))
-        controller.onPageStarted()
+        controller.onPageStarted("https://example.com")
         controller.onReceivedSetterFunctionCalled(message)
 
         val state = controller.stateFlow.value
@@ -227,11 +240,11 @@ class StripeConnectWebViewContainerControllerTest {
 
         appearanceFlow.emit(appearances[0])
         controller.onViewAttached()
-        controller.onPageStarted()
+        controller.onPageStarted("https://example.com")
         verify(view, never()).updateConnectInstance(any())
 
         // Should update appearance when pageDidLoad is received.
-        controller.onReceivedPageDidLoad()
+        controller.onReceivedPageDidLoad("page_view_id")
 
         // Should update again when appearance changes.
         appearanceFlow.emit(appearances[1])
@@ -259,12 +272,18 @@ class StripeConnectWebViewContainerControllerTest {
     }
 
     @Test
-    fun `onPermissionRequest denies permission when no supported permissions are requested`() = runTest {
+    fun `onPermissionRequest denies when no supported permissions requested, logs unexpected permissions`() = runTest {
         whenever(mockPermissionRequest.resources) doReturn arrayOf("unsupported_permission")
 
         controller.onPermissionRequest(mockContext, mockPermissionRequest)
 
         verify(mockPermissionRequest).deny()
+        verify(analyticsService).track(
+            ConnectAnalyticsEvent.ClientError(
+                errorCode = "unexpected_permissions_request",
+                errorMessage = "Unexpected permissions 'unsupported_permission' requested",
+            )
+        )
     }
 
     @Test
@@ -297,5 +316,109 @@ class StripeConnectWebViewContainerControllerTest {
     fun `onMerchantIdChanged updates analytics service`() {
         controller.onMerchantIdChanged("merchant_id")
         verify(analyticsService).merchantId = "merchant_id"
+    }
+
+    @Test
+    fun `emit component created analytic on init`() {
+        verify(analyticsService).track(ConnectAnalyticsEvent.ComponentCreated)
+    }
+
+    @Test
+    fun `emit component viewed analytic on view attach`() {
+        // page view id is null since we haven't received pageDidLoad yet
+        controller.onViewAttached()
+        verify(analyticsService).track(ConnectAnalyticsEvent.ComponentViewed(null))
+
+        // once we receive pageDidLoad, we should emit the page view id for subsequent analytics
+        controller.onReceivedPageDidLoad("id123")
+        controller.onViewAttached()
+        verify(analyticsService).track(ConnectAnalyticsEvent.ComponentViewed("id123"))
+    }
+
+    @Test
+    fun `emit unexpected navigation analytic if non-stripe url page started`() {
+        whenever(
+            embeddedComponentManager.getStripeURL(embeddedComponent)
+        ) doReturn "https://stripe.com/test?foo=bar#mytest"
+
+        controller.onPageStarted("https://example.com/test?foo=bar#mytest")
+
+        // when emitting the analytic, we should strip the query params
+        verify(analyticsService).track(
+            ConnectAnalyticsEvent.WebErrorUnexpectedNavigation("https://example.com/test")
+        )
+    }
+
+    @Test
+    fun `dont emit unexpected navigation analytic if expected stripe url is used on page started`() {
+        whenever(
+            embeddedComponentManager.getStripeURL(any())
+        ) doReturn "https://stripe.com/test?foo=bar#mytest"
+
+        controller.onPageStarted("https://stripe.com/test")
+
+        // when emitting the analytic, we should strip the query params
+        verify(analyticsService, never()).track(
+            ConnectAnalyticsEvent.WebErrorUnexpectedNavigation("https://stripe.com/test")
+        )
+    }
+
+    @Test
+    fun `emit web page loaded analytic on page finished`() {
+        whenever(androidClock.millis()) doReturn 100L
+        controller.onViewAttached() // register that the page was attached to capture the start of loading
+
+        whenever(androidClock.millis()) doReturn 200L // difference of 100ms to start of load
+        controller.onPageFinished()
+        verify(analyticsService).track(ConnectAnalyticsEvent.WebPageLoaded(100L))
+    }
+
+    @Test
+    fun `emit web component loaded analytic when received pageDidLoad`() {
+        whenever(androidClock.millis()) doReturn 100L
+        controller.onViewAttached() // register that the page was attached to capture the start of loading
+
+        whenever(androidClock.millis()) doReturn 200L // difference of 100ms to start of load
+        controller.onReceivedPageDidLoad("pageView123")
+        verify(analyticsService).track(
+            ConnectAnalyticsEvent.WebComponentLoaded(
+                pageViewId = "pageView123",
+                timeToLoadMs = 100L,
+                perceivedTimeToLoadMs = 100L,
+            )
+        )
+    }
+
+    @Test
+    fun `emit web page error when main page receives an error`() {
+        controller.onReceivedError(
+            requestUrl = "https://stripe.com",
+            httpStatusCode = 404,
+            errorMessage = "Not Found",
+            isMainPageLoad = true
+        )
+        verify(analyticsService).track(
+            ConnectAnalyticsEvent.WebErrorPageLoad(
+                status = 404,
+                error = "Not Found",
+                url = "https://stripe.com",
+            )
+        )
+    }
+
+    @Test
+    fun `emit deserialization error on error to deserialize web message`() {
+        controller.onReceivedPageDidLoad("page_view_id")
+        controller.onErrorDeserializingWebMessage(
+            webFunctionName = "onSetterFunctionCalled",
+            error = IllegalArgumentException("Unable to deserialize"),
+        )
+        verify(analyticsService).track(
+            ConnectAnalyticsEvent.WebErrorDeserializeMessage(
+                message = "onSetterFunctionCalled",
+                error = "IllegalArgumentException",
+                pageViewId = "page_view_id",
+            )
+        )
     }
 }
