@@ -34,7 +34,7 @@ internal class VerificationViewModel @Inject constructor(
     private val logger: Logger,
     private val isDialog: Boolean,
     private val onVerificationSucceeded: () -> Unit,
-    private val onChangeEmailClicked: () -> Unit,
+    private val onChangeEmailRequested: () -> Unit,
     private val onDismissClicked: () -> Unit,
 ) : ViewModel() {
 
@@ -133,7 +133,7 @@ internal class VerificationViewModel @Inject constructor(
 
     fun onChangeEmailButtonClicked() {
         clearError()
-        onChangeEmailClicked()
+        onChangeEmailRequested()
         viewModelScope.launch {
             linkAccountManager.logOut()
         }
@@ -191,7 +191,7 @@ internal class VerificationViewModel @Inject constructor(
                         linkEventsReporter = parentComponent.linkEventsReporter,
                         logger = parentComponent.logger,
                         onVerificationSucceeded = onVerificationSucceeded,
-                        onChangeEmailClicked = onChangeEmailClicked,
+                        onChangeEmailRequested = onChangeEmailClicked,
                         onDismissClicked = onDismissClicked,
                         isDialog = isDialog
                     )

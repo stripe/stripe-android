@@ -121,18 +121,18 @@ internal class VerificationViewModelTest {
             }
         }
 
-        val onChangeEmailClickedCalls = arrayListOf<Unit>()
-        fun onChangeEmailClicked() {
-            onChangeEmailClickedCalls.add(Unit)
+        val onChangeEmailRequestedCalls = arrayListOf<Unit>()
+        fun onChangeEmailRequested() {
+            onChangeEmailRequestedCalls.add(Unit)
         }
 
         createViewModel(
             linkAccountManager = linkAccountManager,
-            onChangeEmailClicked = ::onChangeEmailClicked,
+            onChangeEmailRequested = ::onChangeEmailRequested,
         ).onChangeEmailButtonClicked()
 
         assertThat(linkAccountManager.callCount).isEqualTo(1)
-        assertThat(onChangeEmailClickedCalls).containsExactly(Unit)
+        assertThat(onChangeEmailRequestedCalls).containsExactly(Unit)
     }
 
     @Test
@@ -190,7 +190,7 @@ internal class VerificationViewModelTest {
         linkEventsReporter: LinkEventsReporter = FakeLinkEventsReporter(),
         logger: Logger = FakeLogger(),
         onVerificationSucceeded: () -> Unit = {},
-        onChangeEmailClicked: () -> Unit = {},
+        onChangeEmailRequested: () -> Unit = {},
         onDismissClicked: () -> Unit = {},
     ): VerificationViewModel {
         return VerificationViewModel(
@@ -199,7 +199,7 @@ internal class VerificationViewModelTest {
             logger = logger,
             linkAccount = TestFactory.LINK_ACCOUNT,
             onVerificationSucceeded = onVerificationSucceeded,
-            onChangeEmailClicked = onChangeEmailClicked,
+            onChangeEmailRequested = onChangeEmailRequested,
             onDismissClicked = onDismissClicked,
             isDialog = false
         )

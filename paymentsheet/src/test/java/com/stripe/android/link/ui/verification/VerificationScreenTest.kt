@@ -232,7 +232,7 @@ internal class VerificationScreenTest {
             logger = logger,
             onDismissClicked = onDismissClicked,
             onVerificationSucceeded = {},
-            onChangeEmailClicked = {},
+            onChangeEmailRequested = {},
             linkAccount = TestFactory.LINK_ACCOUNT,
             isDialog = isDialog
         )
