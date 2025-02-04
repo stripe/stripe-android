@@ -1,0 +1,34 @@
+appId: com.stripe.android.paymentsheet.example
+---
+- launchApp
+- startRecording: /tmp/test_results/paymentsheet-paymentintent-card-3ds2-otp
+# Android specific: Navigate to example
+- tapOn: "PaymentSheet"
+- waitForAnimationToEnd:
+    timeout: 5000
+- tapOn: "Buy"
+# ENTER CARD DETAILS
+- extendedWaitUntil:
+    visible: "Card"
+    timeout: 60000
+- runFlow:
+    file: ./card/subflow-card-details.yaml
+    env:
+        CARD_NUMBER: 4000582600000045
+- scroll
+- tapOn:
+    id: "com.stripe.android.paymentsheet.example:id/primary_button"
+###############################################
+# Submit
+- extendedWaitUntil:
+      visible: "Submit"
+      timeout: 10000
+- tapOn: "Enter your code below:"
+- inputText: "424242"
+- tapOn: "Submit"
+# CONFIRM AND COMPLETE
+- extendedWaitUntil:
+    visible: ".*Success.*"
+    timeout: 60000
+- tapOn: "Finish"
+- stopRecording
