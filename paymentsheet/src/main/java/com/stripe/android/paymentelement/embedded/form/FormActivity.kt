@@ -34,7 +34,7 @@ internal class FormActivity : AppCompatActivity() {
     lateinit var eventReporter: EventReporter
 
     @Inject
-    lateinit var formStateHelper: FormActivityStateHelper
+    lateinit var formActivityStateHelper: FormActivityStateHelper
 
     @OptIn(ExperimentalMaterialApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -54,7 +54,7 @@ internal class FormActivity : AppCompatActivity() {
 
         setContent {
             StripeTheme {
-                val uiState by formStateHelper.state.collectAsState()
+                val uiState by formActivityStateHelper.state.collectAsState()
                 val bottomSheetState = rememberStripeBottomSheetState(
                     confirmValueChange = { !uiState.isProcessing }
                 )
@@ -68,7 +68,7 @@ internal class FormActivity : AppCompatActivity() {
                         onDismissed = ::setCancelAndFinish,
                         onClick = confirmationHelper::confirm,
                         onProcessingCompleted = ::setCompletedResultAndDismiss,
-                        state = uiState
+                        stateHelper = formActivityStateHelper
                     )
                 }
             }

@@ -69,15 +69,20 @@ class FormActivityUiTest {
             formActivityUiStateHolder = uiStateHolder
         ).create()
 
+        val stateHelper = DefaultFormActivityStateHelper(
+            paymentMethodMetadata = paymentMethodMetadata,
+            selectionHolder = embeddedSelectionHolder,
+            configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
+        )
+
         composeRule.setContent {
-            val state by uiStateHolder.state.collectAsState()
             FormActivityUI(
                 interactor = interactor,
                 eventReporter = mock(),
-                state = state,
                 onDismissed = {},
                 onClick = {},
-                onProcessingCompleted = {}
+                onProcessingCompleted = {},
+                stateHelper = stateHelper,
             )
         }
 

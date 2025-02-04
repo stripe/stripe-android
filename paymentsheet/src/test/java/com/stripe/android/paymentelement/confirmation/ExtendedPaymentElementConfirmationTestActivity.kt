@@ -24,6 +24,7 @@ import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.link.LinkConfigurationCoordinator
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.gate.DefaultLinkGate
 import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.networking.StripeApiRepository
@@ -171,5 +172,11 @@ internal interface ExtendedPaymentElementConfirmationTestModule {
         @Singleton
         fun providesFakeLinkConfigurationCoordinator(): LinkConfigurationCoordinator =
             FakeLinkConfigurationCoordinator()
+
+        @Provides
+        @Singleton
+        fun providesLinkAccountHolder(savedStateHandle: SavedStateHandle): LinkAccountHolder {
+            return LinkAccountHolder(savedStateHandle)
+        }
     }
 }

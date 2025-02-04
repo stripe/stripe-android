@@ -147,6 +147,8 @@
   <string name="stripe_upi_polling_payment_failed_message">Vráťte sa späť a vyberte iný spôsob platby</string>
   <!-- Text on a screen that indicates a payment has failed -->
   <string name="stripe_upi_polling_payment_failed_title">Platba zlyhala</string>
+  <!-- Two factor authentication screen heading -->
+  <string name="stripe_verification_dialog_header">Potvrdenie vašej totožnosti</string>
   <!-- Text shown on a button that when tapped opens a user's screen with their payment methods. -->
   <string name="stripe_view_more">Zobraziť viac</string>
   <!-- Label for identifying the default payment method. -->

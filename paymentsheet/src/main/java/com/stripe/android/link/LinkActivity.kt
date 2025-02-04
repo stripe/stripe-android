@@ -84,7 +84,8 @@ internal class LinkActivity : ComponentActivity() {
         webLauncher?.launch(
             LinkActivityContract.Args(
                 configuration = configuration,
-                startWithVerificationDialog = false
+                startWithVerificationDialog = false,
+                linkAccount = null
             )
         )
     }

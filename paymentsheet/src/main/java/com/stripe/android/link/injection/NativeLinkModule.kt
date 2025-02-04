@@ -33,6 +33,7 @@ import com.stripe.android.link.confirmation.DefaultLinkConfirmationHandler
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
 import com.stripe.android.link.gate.DefaultLinkGate
 import com.stripe.android.link.gate.LinkGate
+import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.repositories.LinkApiRepository
 import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.networking.StripeApiRepository
@@ -99,8 +100,13 @@ internal interface NativeLinkModule {
     companion object {
         @Provides
         @NativeLinkScope
-        fun providesLinkAccountHolder(savedStateHandle: SavedStateHandle): LinkAccountHolder {
-            return LinkAccountHolder(savedStateHandle)
+        fun providesLinkAccountHolder(
+            savedStateHandle: SavedStateHandle,
+            linkAccount: LinkAccount?
+        ): LinkAccountHolder {
+            return LinkAccountHolder(savedStateHandle).apply {
+                set(linkAccount)
+            }
         }
 
         @Provides

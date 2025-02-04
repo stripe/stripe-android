@@ -11,6 +11,7 @@ import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.account.LinkAccountManager
+import com.stripe.android.link.account.linkAccountUpdate
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.LinkAccount
@@ -120,7 +121,12 @@ internal class WalletViewModel @Inject constructor(
 
     private fun onFatal(fatalError: Throwable) {
         logger.error("WalletViewModel Fatal error: ", fatalError)
-        dismissWithResult(LinkActivityResult.Failed(fatalError))
+        dismissWithResult(
+            LinkActivityResult.Failed(
+                error = fatalError,
+                linkAccountUpdate = linkAccountManager.linkAccountUpdate
+            )
+        )
     }
 
     fun onItemSelected(item: ConsumerPaymentDetails.PaymentDetails) {
@@ -197,7 +203,11 @@ internal class WalletViewModel @Inject constructor(
                 }
             }
             LinkConfirmationResult.Succeeded -> {
-                dismissWithResult(LinkActivityResult.Completed)
+                dismissWithResult(
+                    LinkActivityResult.Completed(
+                        linkAccountUpdate = linkAccountManager.linkAccountUpdate
+                    )
+                )
             }
         }
     }
@@ -217,7 +227,12 @@ internal class WalletViewModel @Inject constructor(
     }
 
     fun onPayAnotherWayClicked() {
-        dismissWithResult(LinkActivityResult.Canceled(LinkActivityResult.Canceled.Reason.PayAnotherWay))
+        dismissWithResult(
+            LinkActivityResult.Canceled(
+                reason = LinkActivityResult.Canceled.Reason.PayAnotherWay,
+                linkAccountUpdate = linkAccountManager.linkAccountUpdate
+            )
+        )
     }
 
     fun onRemoveClicked(item: ConsumerPaymentDetails.PaymentDetails) {

@@ -75,6 +75,8 @@ internal class LinkActivityViewModelTest {
 
     @Test
     fun `test that cancel result is called on back pressed with empty stack`() = runTest(dispatcher) {
+        val linkAccountManager = FakeLinkAccountManager()
+        linkAccountManager.setLinkAccount(TestFactory.LINK_ACCOUNT)
         val navController = navController()
         whenever(navController.popBackStack()).thenReturn(false)
 
@@ -83,12 +85,21 @@ internal class LinkActivityViewModelTest {
             result = actualResult
         }
 
-        val vm = createViewModel(navController = navController, dismissWithResult = ::dismissWithResult)
+        val vm = createViewModel(
+            navController = navController,
+            linkAccountManager = linkAccountManager,
+            dismissWithResult = ::dismissWithResult
+        )
 
         vm.handleViewAction(LinkAction.BackPressed)
 
         verify(navController).popBackStack()
-        assertThat(result).isEqualTo(LinkActivityResult.Canceled())
+        assertThat(result)
+            .isEqualTo(
+                LinkActivityResult.Canceled(
+                    linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT)
+                )
+            )
     }
 
     @Test
@@ -165,7 +176,8 @@ internal class LinkActivityViewModelTest {
             configuration = mock(),
             publishableKey = "",
             stripeAccountId = null,
-            startWithVerificationDialog = false
+            startWithVerificationDialog = false,
+            linkAccount = null
         )
         val savedStateHandle = SavedStateHandle()
         val factory = LinkActivityViewModel.factory(savedStateHandle)
@@ -628,7 +640,10 @@ internal class LinkActivityViewModelTest {
 
         vm.onDismissVerificationClicked()
 
-        assertThat(activityResult).isEqualTo(LinkActivityResult.Canceled())
+        assertThat(activityResult)
+            .isEqualTo(
+                LinkActivityResult.Canceled(linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
+            )
     }
 
     private fun navController(): NavHostController {
@@ -688,7 +703,6 @@ internal class LinkActivityViewModelTest {
     ): LinkActivityViewModel {
         return LinkActivityViewModel(
             linkAccountManager = linkAccountManager,
-            linkAccountHolder = linkAccountManager.linkAccountHolder,
             activityRetainedComponent = FakeNativeLinkComponent(),
             eventReporter = eventReporter,
             confirmationHandlerFactory = { confirmationHandler },

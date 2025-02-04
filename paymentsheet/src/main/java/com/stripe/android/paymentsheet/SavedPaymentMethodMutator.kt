@@ -12,6 +12,7 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
+import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.ui.DefaultAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.PaymentMethodRemovalDelayMillis
@@ -50,7 +51,10 @@ internal class SavedPaymentMethodMutator(
     private val isEmbedded: Boolean,
 ) {
     val defaultPaymentMethodId: StateFlow<String?> = customerStateHolder.customer.mapAsStateFlow { customerState ->
-        customerState?.defaultPaymentMethodId
+        when (val defaultPaymentMethodState = customerState?.defaultPaymentMethodState) {
+            is CustomerState.DefaultPaymentMethodState.Enabled -> defaultPaymentMethodState.defaultPaymentMethodId
+            is CustomerState.DefaultPaymentMethodState.Disabled, null -> null
+        }
     }
 
     val providePaymentMethodName: (code: String?) -> ResolvableString = { code ->

@@ -1,6 +1,7 @@
 package com.stripe.android.link.analytics
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.model.PaymentMethod
 import org.junit.Test
@@ -48,7 +49,7 @@ internal class DefaultLinkAnalyticsHelperTest {
             }
         }
         val analyticsHelper = DefaultLinkAnalyticsHelper(eventReporter)
-        analyticsHelper.onLinkResult(LinkActivityResult.Completed)
+        analyticsHelper.onLinkResult(LinkActivityResult.Completed(LinkAccountUpdate.None))
         assertThat(eventReporter.calledCount).isEqualTo(1)
     }
 
@@ -60,7 +61,12 @@ internal class DefaultLinkAnalyticsHelperTest {
             }
         }
         val analyticsHelper = DefaultLinkAnalyticsHelper(eventReporter)
-        analyticsHelper.onLinkResult(LinkActivityResult.Failed(IllegalStateException()))
+        analyticsHelper.onLinkResult(
+            linkActivityResult = LinkActivityResult.Failed(
+                error = IllegalStateException(),
+                linkAccountUpdate = LinkAccountUpdate.None
+            )
+        )
         assertThat(eventReporter.calledCount).isEqualTo(1)
     }
 
@@ -72,7 +78,12 @@ internal class DefaultLinkAnalyticsHelperTest {
             }
         }
         val analyticsHelper = DefaultLinkAnalyticsHelper(eventReporter)
-        analyticsHelper.onLinkResult(LinkActivityResult.Canceled(LinkActivityResult.Canceled.Reason.BackPressed))
+        analyticsHelper.onLinkResult(
+            linkActivityResult = LinkActivityResult.Canceled(
+                reason = LinkActivityResult.Canceled.Reason.BackPressed,
+                linkAccountUpdate = LinkAccountUpdate.None
+            )
+        )
         assertThat(eventReporter.calledCount).isEqualTo(1)
     }
 
@@ -84,7 +95,12 @@ internal class DefaultLinkAnalyticsHelperTest {
             }
         }
         val analyticsHelper = DefaultLinkAnalyticsHelper(eventReporter)
-        analyticsHelper.onLinkResult(LinkActivityResult.Canceled(LinkActivityResult.Canceled.Reason.LoggedOut))
+        analyticsHelper.onLinkResult(
+            linkActivityResult = LinkActivityResult.Canceled(
+                reason = LinkActivityResult.Canceled.Reason.LoggedOut,
+                linkAccountUpdate = LinkAccountUpdate.None
+            )
+        )
         assertThat(eventReporter.calledCount).isEqualTo(1)
     }
 

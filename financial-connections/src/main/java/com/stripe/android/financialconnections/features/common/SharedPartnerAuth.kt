@@ -280,7 +280,8 @@ private fun PrePaneContent(
                 onContinueClick = onContinueClick,
                 onCancelClick = onCancelClick,
                 status = authenticationStatus,
-                oAuthPrepane = content
+                oAuthPrepane = content,
+                showInModal = showInModal,
             )
         }
     )
@@ -353,7 +354,8 @@ private fun PrepaneFooter(
     onContinueClick: () -> Unit,
     onCancelClick: () -> Unit,
     status: Async<AuthenticationStatus>,
-    oAuthPrepane: OauthPrepane
+    oAuthPrepane: OauthPrepane,
+    showInModal: Boolean,
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -397,7 +399,13 @@ private fun PrepaneFooter(
                 .fillMaxWidth()
         ) {
             Text(
-                text = stringResource(R.string.stripe_prepane_cancel_cta),
+                text = stringResource(
+                    id = if (showInModal) {
+                        R.string.stripe_prepane_cancel_cta
+                    } else {
+                        R.string.stripe_prepane_choose_different_bank_cta
+                    }
+                ),
                 textAlign = TextAlign.Center
             )
         }

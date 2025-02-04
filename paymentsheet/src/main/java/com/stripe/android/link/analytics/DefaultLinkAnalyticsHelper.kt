@@ -25,7 +25,8 @@ internal class DefaultLinkAnalyticsHelper @Inject internal constructor(
                 }
             }
 
-            is LinkActivityResult.PaymentMethodObtained, LinkActivityResult.Completed -> {
+            is LinkActivityResult.PaymentMethodObtained,
+            is LinkActivityResult.Completed -> {
                 linkEventsReporter.onPopupSuccess()
             }
 

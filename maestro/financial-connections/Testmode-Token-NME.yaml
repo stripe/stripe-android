@@ -10,6 +10,9 @@ tags:
 - startRecording: ${'/tmp/test_results/testmode-nme-' + new Date().getTime()}
 - clearState
 - openLink: stripeconnectionsexample://playground?experience=FinancialConnections&flow=Token&financial_connections_override_native=native&merchant=networking&financial_connections_test_mode=true&permissions=payment_method&financial_connections_confirm_intent=true
+- scrollUntilVisible:
+    element:
+      id: "connect_accounts"
 - tapOn:
     id: "Customer email setting"
 - inputRandomEmail

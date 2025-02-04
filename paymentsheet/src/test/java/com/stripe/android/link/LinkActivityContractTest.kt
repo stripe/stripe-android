@@ -21,7 +21,8 @@ class LinkActivityContractTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val args = LinkActivityContract.Args(
         configuration = TestFactory.LINK_CONFIGURATION,
-        startWithVerificationDialog = false
+        startWithVerificationDialog = false,
+        linkAccount = null
     )
 
     @Test

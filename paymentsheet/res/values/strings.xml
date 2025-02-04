@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
+  <!-- Button prompt to add a bank account as a payment method. -->
+  <string name="stripe_add_bank_account">Add bank account</string>
   <!-- Used for accessibility to describe the button on the payment sheet list of options to add a new payment method. -->
   <string name="stripe_add_new_payment_method">Add a new payment method</string>
+  <!-- Text for a button that, when tapped, displays another screen where the customer can add a new payment method -->
+  <string name="stripe_add_payment_method">Add a payment method</string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
   <string name="stripe_afterpay_subtitle">Buy now or pay later with Afterpay</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
@@ -18,8 +22,14 @@
   <string name="stripe_confirm_close_form_body">Your payment information will not be saved.</string>
   <!-- Used as the title for prompting the user if they want to close the sheet -->
   <string name="stripe_confirm_close_form_title">Do you want to close this form?</string>
+  <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
+  <string name="stripe_inline_sign_up_header">Save your info for secure 1-click checkout with Link</string>
+  <!-- Title of the logout action. -->
+  <string name="stripe_log_out">Log out of Link</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">An error occurred. Check your connection and try again.</string>
+  <!-- Text for the 'Pay with Link' button. 'Link' is a Stripe brand, please do not translate the word 'Link'. -->
+  <string name="stripe_pay_with_link">Pay with Link</string>
   <!-- Text providing link to terms for ACH payments -->
   <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[By continuing, you agree to authorize payments pursuant to <terms>these terms</terms>.]]></string>
   <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
@@ -133,34 +143,10 @@
   <string name="stripe_paymentsheet_sepa_debit_details_cannot_be_changed">SEPA debit details cannot be changed.</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">Total: %s</string>
-  <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
-  <string name="stripe_remove_bank_account_ending_in">Remove bank account ending in %s</string>
-  <!-- Generic failure message -->
-  <string name="stripe_something_went_wrong">Something went wrong</string>
-  <!-- Button text on a screen asking the user to approve a payment -->
-  <string name="stripe_upi_polling_cancel">Cancel and pay another way</string>
-  <!-- Text on a screen asking the user to approve a payment -->
-  <string name="stripe_upi_polling_header">Approve payment</string>
-  <!-- Countdown timer text on a screen asking the user to approve a payment -->
-  <string name="stripe_upi_polling_message">Open your UPI app to approve your payment within %s</string>
-  <!-- Text on a screen that indicates a payment has failed informing the user we are asking the user to try a different payment method -->
-  <string name="stripe_upi_polling_payment_failed_message">Please go back and select another payment method</string>
-  <!-- Text on a screen that indicates a payment has failed -->
-  <string name="stripe_upi_polling_payment_failed_title">Payment failed</string>
-  <!-- Text shown on a button that when tapped opens a user's screen with their payment methods. -->
-  <string name="stripe_view_more">View more</string>
-  <!-- Button prompt to add a bank account as a payment method. -->
-  <string name="stripe_add_bank_account">Add bank account</string>
-  <!-- Text for a button that, when tapped, displays another screen where the customer can add a new payment method -->
-  <string name="stripe_add_payment_method">Add a payment method</string>
-  <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
-  <string name="stripe_inline_sign_up_header">Save your info for secure 1-click checkout with Link</string>
-  <!-- Title of the logout action. -->
-  <string name="stripe_log_out">Log out of Link</string>
-  <!-- Text for the 'Pay with Link' button. 'Link' is a Stripe brand, please do not translate the word 'Link'. -->
-  <string name="stripe_pay_with_link">Pay with Link</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">Set as default payment method</string>
+  <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
+  <string name="stripe_remove_bank_account_ending_in">Remove bank account ending in %s</string>
   <!-- Accessibility label for an action or a button that shows a menu. -->
   <string name="stripe_show_menu">Show menu</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
@@ -175,10 +161,24 @@
   <string name="stripe_sign_up_terms_alternative"><![CDATA[By providing your email, you agree to create a Link account and save your payment info to Link, according to the <terms>Link Terms</terms> and <privacy>Privacy Policy</privacy>.]]></string>
   <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
   <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[By providing your phone number, you agree to create a Link account and save your payment info to Link, according to the <terms>Link Terms</terms> and <privacy>Privacy Policy</privacy>.]]></string>
+  <!-- Generic failure message -->
+  <string name="stripe_something_went_wrong">Something went wrong</string>
+  <!-- Button text on a screen asking the user to approve a payment -->
+  <string name="stripe_upi_polling_cancel">Cancel and pay another way</string>
+  <!-- Text on a screen asking the user to approve a payment -->
+  <string name="stripe_upi_polling_header">Approve payment</string>
+  <!-- Countdown timer text on a screen asking the user to approve a payment -->
+  <string name="stripe_upi_polling_message">Open your UPI app to approve your payment within %s</string>
+  <!-- Text on a screen that indicates a payment has failed informing the user we are asking the user to try a different payment method -->
+  <string name="stripe_upi_polling_payment_failed_message">Please go back and select another payment method</string>
+  <!-- Text on a screen that indicates a payment has failed -->
+  <string name="stripe_upi_polling_payment_failed_title">Payment failed</string>
   <!-- Title for a button that allows the user to use a different email in the signup flow. -->
   <string name="stripe_verification_change_email">Change email</string>
   <!-- Text of a notification shown to the user when a login code is successfully sent via SMS. -->
   <string name="stripe_verification_code_sent">Code sent</string>
+  <!-- Two factor authentication screen heading -->
+  <string name="stripe_verification_dialog_header">Confirm it\'s you</string>
   <!-- Two factor authentication screen heading -->
   <string name="stripe_verification_header">Enter your verification code</string>
   <!-- Two factor authentication screen heading -->
@@ -191,12 +191,15 @@
   <string name="stripe_verification_not_email">Not %s?</string>
   <!-- Label for a button that re-sends the a login code when tapped -->
   <string name="stripe_verification_resend">Resend code</string>
+  <!-- Text shown on a button that when tapped opens a user's screen with their payment methods. -->
+  <string name="stripe_view_more">View more</string>
   <!-- Mandate text displayed when paying via Link instant debit. -->
   <string name="stripe_wallet_bank_account_terms"><![CDATA[By continuing, you agree to authorize payments pursuant to these <terms>terms</terms>.]]></string>
   <!-- Label for a section displaying payment details. -->
   <string name="stripe_wallet_collapsed_payment">Payment</string>
   <!-- Label for identifying the default payment method. -->
   <string name="stripe_wallet_default">Default</string>
+  <string name="stripe_wallet_expand_accessibility">Change selection</string>
   <!-- Title for a section listing one or more payment methods. -->
   <string name="stripe_wallet_expanded_title">Payment methods</string>
   <!-- Prefix for last 4 digits of payment method id e.g  •••• 1234 -->
@@ -221,5 +224,4 @@
   <string name="stripe_wallet_update_card">Update card</string>
   <!-- A text notice shown when the user selects an expired card. -->
   <string name="stripe_wallet_update_expired_card_error">This card has expired. Update your card info or choose a different payment method.</string>
-  <string name="stripe_wallet_expand_accessibility">Change selection</string>
 </resources>

@@ -8,15 +8,17 @@ internal sealed class ConnectAnalyticsEvent(
     val params: Map<String, Any?> = mapOf(),
 ) {
     /**
-     * A component was instantiated via create{ComponentType}.
+     * A component was instantiated via `create{ComponentType}`.
      *
-     * The delta between this and component.viewed could tell us if apps are instantiating
+     * The delta between this and `component.viewed` could tell us if apps are instantiating
      * components but never rendering them on screen.
      */
     data object ComponentCreated : ConnectAnalyticsEvent("component.created")
 
     /**
      * The component is viewed on screen (viewDidAppear lifecycle event on iOS)
+     *
+     * @param pageViewId The pageViewID from the web view. May be null if not yet sent from web
      */
     data class ComponentViewed(
         val pageViewId: String?
@@ -28,29 +30,39 @@ internal sealed class ConnectAnalyticsEvent(
     /**
      * The web page finished loading (didFinish navigation on iOS).
      *
-     * Note: This should happen before component_loaded, so we won't yet have a page_view_id.
+     * Note: This should happen before `component_loaded`, so we won't yet have a `page_view_id`.
+     *
+     * @param timeToLoadMs Elapsed time in milliseconds it took the web page to load (starting when it first began
+     *   loading).
      */
     data class WebPageLoaded(
-        val timeToLoad: Double
+        val timeToLoadMs: Long
     ) : ConnectAnalyticsEvent(
         "component.web.page_loaded",
-        mapOf("time_to_load" to timeToLoad.toString())
+        mapOf("time_to_load" to msToSecs(timeToLoadMs))
     )
 
     /**
-     * The component is successfully loaded within the web view. Triggered from componentDidLoad
+     * The component is successfully loaded within the web view. Triggered from `pageDidLoad`
      * message handler from the web view.
+     *
+     * @param pageViewId The pageViewID from the web view
+     * @param timeToLoadMs Elapsed time in milliseconds it took the web page to load (starting when it first began
+     *   loading).
+     * @param perceivedTimeToLoadMs Elapsed time in milliseconds it took between when the component was initially viewed
+     *   on screen (`component.viewed`) to when the component finished loading. This value will be `0` if the
+     *   component finished loading before being viewed on screen.
      */
     data class WebComponentLoaded(
         val pageViewId: String,
-        val timeToLoad: Double,
-        val perceivedTimeToLoad: Double
+        val timeToLoadMs: Long,
+        val perceivedTimeToLoadMs: Long
     ) : ConnectAnalyticsEvent(
         "component.web.component_loaded",
         mapOf(
             "page_view_id" to pageViewId,
-            "time_to_load" to timeToLoad.toString(),
-            "perceived_time_to_load" to perceivedTimeToLoad.toString()
+            "time_to_load" to msToSecs(timeToLoadMs),
+            "perceived_time_to_load" to msToSecs(perceivedTimeToLoadMs)
         )
     )
 
@@ -59,6 +71,10 @@ internal sealed class ConnectAnalyticsEvent(
      *
      * Intent is to alert if the URL the mobile client expects is suddenly unreachable.
      * The web view should always return a 200, even when displaying an error state.
+     *
+     * @param status HTTP status code. This will be null if the error is not an http status type of error
+     * @param error Identifier of the error if it's not an http status error (e.g. CORS issue, SSL error, etc)
+     * @param url The URL of the page, excluding hash params
      */
     data class WebErrorPageLoad(
         val status: Int?,
@@ -74,13 +90,16 @@ internal sealed class ConnectAnalyticsEvent(
     )
 
     /**
-     * If the web view sends an onLoadError that can't be deserialized by the SDK.
+     * If the web view sends an `onLoadError` that can't be deserialized by the SDK.
+     *
+     * @param errorType The error `type` property from web
+     * @param pageViewId The pageViewID from the web view. May be null if not yet sent from web
      */
-    data class WebWarnErrorUnexpectedLoad(
+    data class WebWarnUnexpectedLoad(
         val errorType: String,
         val pageViewId: String?
     ) : ConnectAnalyticsEvent(
-        "component.web.warnerror.unexpected_load_error_type",
+        "component.web.warn.unexpected_load_error_type",
         mapOf(
             "error_type" to errorType,
             "page_view_id" to pageViewId
@@ -88,11 +107,14 @@ internal sealed class ConnectAnalyticsEvent(
     )
 
     /**
-     * If the web view calls onSetterFunctionCalled with a setter argument the SDK doesn't know how to handle.
+     * If the web view calls `onSetterFunctionCalled` with a `setter` argument the SDK doesn't know how to handle.
      *
      * Note: It's expected to get this warning when web adds support for new setter functions not handled
      * in older SDK versions. But logging it could help us debug issues where we expect the SDK to handle
      * something it isn't.
+     *
+     * @param setter `setter` property sent from web
+     * @param pageViewId The pageViewID from the web view. May be null if not yet sent from web
      */
     data class WebWarnUnrecognizedSetter(
         val setter: String,
@@ -107,24 +129,29 @@ internal sealed class ConnectAnalyticsEvent(
 
     /**
      * An error occurred deserializing the JSON payload from a web message.
+     *
+     * @param message The name of the message. If this message has a setter, concatenate it using {message}.{setter}
+     * @param error The error identifier
+     * @param pageViewId The pageViewID from the web view. May be null if not yet sent from web
      */
     data class WebErrorDeserializeMessage(
         val message: String,
         val error: String,
-        val errorDescription: String?,
         val pageViewId: String?
     ) : ConnectAnalyticsEvent(
         "component.web.error.deserialize_message",
         mapOf(
             "message" to message,
             "error" to error,
-            "error_description" to errorDescription,
             "page_view_id" to pageViewId
         )
     )
 
     /**
-     * A web view was opened when openWebView was called.
+     * A web view was opened when `openWebView` was called.
+     *
+     * @param pageViewId The pageViewID from the web view. May be null if not yet sent from web
+     * @param authenticatedViewId The id for this secure web view session (sent in `openWebView` message)
      */
     data class AuthenticatedWebOpened(
         val pageViewId: String?,
@@ -139,6 +166,9 @@ internal sealed class ConnectAnalyticsEvent(
 
     /**
      * The web view successfully redirected back to the app.
+     *
+     * @param pageViewId The pageViewID from the web view. May be null if not yet sent from web
+     * @param authenticatedViewId The id for this secure web view session (sent in `openWebView` message)
      */
     data class AuthenticatedWebRedirected(
         val pageViewId: String?,
@@ -153,37 +183,47 @@ internal sealed class ConnectAnalyticsEvent(
 
     /**
      * The user closed the web view before getting redirected back to the app.
+     *
+     * @param pageViewId The pageViewID from the web view. May be null if not yet sent from web
+     * @param authenticatedViewId The id for this secure web view session (sent in `openWebView` message)
      */
     data class AuthenticatedWebCanceled(
         val pageViewId: String?,
-        val viewId: String
+        val authenticatedViewId: String
     ) : ConnectAnalyticsEvent(
         "component.authenticated_web.canceled",
         mapOf(
             "page_view_id" to pageViewId,
-            "view_id" to viewId
+            "authenticated_view_id" to authenticatedViewId
         )
     )
 
     /**
      * The web view threw an error and was not successfully redirected back to the app.
+     *
+     * @param error The error identifier
+     * @param pageViewId The pageViewID from the web view. May be null if not yet sent from web
+     * @param authenticatedViewId The id for this secure web view session (sent in `openWebView` message)
      */
     data class AuthenticatedWebError(
         val error: String,
         val pageViewId: String?,
-        val viewId: String
+        val authenticatedViewId: String
     ) : ConnectAnalyticsEvent(
         "component.authenticated_web.error",
         mapOf(
             "error" to error,
             "page_view_id" to pageViewId,
-            "view_id" to viewId
+            "authenticated_view_id" to authenticatedViewId
         )
     )
 
     /**
      * The web page navigated somewhere other than the component wrapper URL
-     * (e.g. https://connect-js.stripe.com/v1.0/ios-webview.html)
+     * (e.g. https://connect-js.stripe.com/v1.0/android_webview.html)
+     *
+     * @param url The base URL that was navigated to. The url should have all query params and hash params removed
+     * since these could potentially contain sensitive data
      */
     data class WebErrorUnexpectedNavigation(
         val url: String
@@ -196,17 +236,16 @@ internal sealed class ConnectAnalyticsEvent(
      * Catch-all event for unexpected client-side errors.
      */
     data class ClientError(
-        val domain: String,
-        val code: Int,
-        val file: String,
-        val line: Int
+        val errorCode: String,
+        val errorMessage: String? = null,
     ) : ConnectAnalyticsEvent(
         "client_error",
         mapOf(
-            "domain" to domain,
-            "code" to code.toString(),
-            "file" to file,
-            "line" to line.toString()
+            "error_code" to errorCode,
+            "error_message" to errorMessage,
         )
     )
 }
+
+@SuppressWarnings("MagicNumber")
+private fun msToSecs(ms: Long): String = (ms / 1_000.0).toString()
