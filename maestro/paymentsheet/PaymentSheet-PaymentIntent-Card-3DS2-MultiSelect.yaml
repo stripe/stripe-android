@@ -1,7 +1,7 @@
 appId: com.stripe.android.paymentsheet.example
 ---
 - launchApp
-# - startRecording: /tmp/test_results/paymentsheet-paymentintent-card-3ds2-multiselect
+- startRecording: /tmp/test_results/paymentsheet-paymentintent-card-3ds2-multiselect
 # Android specific: Navigate to example
 - tapOn: "PaymentSheet"
 - waitForAnimationToEnd:
