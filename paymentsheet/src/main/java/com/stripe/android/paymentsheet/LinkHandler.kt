@@ -34,8 +34,9 @@ internal class LinkHandler @Inject constructor(
         setupLink(state)
 
         val configuration = state?.configuration ?: return false
+        val linkGate = linkConfigurationCoordinator.linkGate(configuration)
 
-        if (configuration.suppress2faModal) return false
+        if (linkGate.suppress2faModal) return false
 
         return when (state.loginState) {
             LinkState.LoginState.LoggedIn,

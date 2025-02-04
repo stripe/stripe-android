@@ -1,5 +1,6 @@
 package com.stripe.android.link
 
+import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.UserInput
@@ -21,6 +22,8 @@ internal interface LinkConfigurationCoordinator {
     fun getComponent(configuration: LinkConfiguration): LinkComponent
 
     fun getAccountStatusFlow(configuration: LinkConfiguration): Flow<AccountStatus>
+
+    fun linkGate(configuration: LinkConfiguration): LinkGate
 
     suspend fun signInWithUserInput(
         configuration: LinkConfiguration,
@@ -61,6 +64,10 @@ internal class RealLinkConfigurationCoordinator @Inject internal constructor(
      */
     override fun getAccountStatusFlow(configuration: LinkConfiguration): Flow<AccountStatus> =
         getLinkPaymentLauncherComponent(configuration).linkAccountManager.accountStatus
+
+    override fun linkGate(configuration: LinkConfiguration): LinkGate {
+        return getLinkPaymentLauncherComponent(configuration).linkGate
+    }
 
     /**
      * Trigger Link sign in with the input collected from the user inline in PaymentSheet, whether

@@ -109,9 +109,114 @@ internal class DefaultLinkGateTest {
         assertThat(gate.useAttestationEndpoints).isTrue()
     }
 
+    @Test
+    fun `suppress2faModal - test mode - is true when useNativeLink is false and suppress2faModal is false`() {
+        attestationFeatureFlagTestRule.setEnabled(false)
+        nativeLinkFeatureFlagTestRule.setEnabled(false)
+        val gate = gate(
+            isLiveMode = false,
+            useAttestationEndpoints = false,
+            suppress2faModal = false
+        )
+
+        assertThat(gate.suppress2faModal).isTrue()
+    }
+
+    @Test
+    fun `suppress2faModal - test mode - is true when useNativeLink is true and suppress2faModal is true`() {
+        attestationFeatureFlagTestRule.setEnabled(true)
+        nativeLinkFeatureFlagTestRule.setEnabled(true)
+        val gate = gate(
+            isLiveMode = false,
+            useAttestationEndpoints = true,
+            suppress2faModal = true
+        )
+
+        assertThat(gate.suppress2faModal).isTrue()
+    }
+
+    @Test
+    fun `suppress2faModal - test mode - is true when useNativeLink is false and suppress2faModal is true`() {
+        attestationFeatureFlagTestRule.setEnabled(false)
+        nativeLinkFeatureFlagTestRule.setEnabled(false)
+        val gate = gate(
+            isLiveMode = false,
+            useAttestationEndpoints = false,
+            suppress2faModal = true
+        )
+
+        assertThat(gate.suppress2faModal).isTrue()
+    }
+
+    @Test
+    fun `suppress2faModal - test mode - is true when useNativeLink is true and suppress2faModal is false`() {
+        attestationFeatureFlagTestRule.setEnabled(true)
+        nativeLinkFeatureFlagTestRule.setEnabled(true)
+        val gate = gate(
+            isLiveMode = false,
+            useAttestationEndpoints = true,
+            suppress2faModal = false
+        )
+
+        assertThat(gate.suppress2faModal).isFalse()
+    }
+
+    @Test
+    fun `suppress2faModal - live mode - is true when useNativeLink is false and suppress2faModal is false`() {
+        attestationFeatureFlagTestRule.setEnabled(false)
+        nativeLinkFeatureFlagTestRule.setEnabled(false)
+        val gate = gate(
+            isLiveMode = true,
+            useAttestationEndpoints = false,
+            suppress2faModal = false
+        )
+
+        assertThat(gate.suppress2faModal).isTrue()
+    }
+
+    @Test
+    fun `suppress2faModal - live mode - is true when useNativeLink is true and suppress2faModal is true`() {
+        attestationFeatureFlagTestRule.setEnabled(true)
+        nativeLinkFeatureFlagTestRule.setEnabled(true)
+        val gate = gate(
+            isLiveMode = true,
+            useAttestationEndpoints = true,
+            suppress2faModal = true
+        )
+
+        assertThat(gate.suppress2faModal).isTrue()
+    }
+
+    @Test
+    fun `suppress2faModal - live mode - is true when useNativeLink is false and suppress2faModal is true`() {
+        attestationFeatureFlagTestRule.setEnabled(false)
+        nativeLinkFeatureFlagTestRule.setEnabled(false)
+        val gate = gate(
+            isLiveMode = true,
+            useAttestationEndpoints = false,
+            suppress2faModal = true
+        )
+
+        assertThat(gate.suppress2faModal).isTrue()
+    }
+
+    @Test
+    fun `suppress2faModal - live mode - is true when useNativeLink is true and suppress2faModal is false`() {
+        attestationFeatureFlagTestRule.setEnabled(true)
+        nativeLinkFeatureFlagTestRule.setEnabled(true)
+        val gate = gate(
+            isLiveMode = true,
+            useAttestationEndpoints = true,
+            suppress2faModal = false
+        )
+
+        assertThat(gate.suppress2faModal).isFalse()
+    }
+
     private fun gate(
         isLiveMode: Boolean = true,
-        useAttestationEndpoints: Boolean = true
+        useAttestationEndpoints: Boolean = true,
+        suppress2faModal: Boolean = false
     ): DefaultLinkGate {
         val newIntent = when (val intent = TestFactory.LINK_CONFIGURATION.stripeIntent) {
             is PaymentIntent -> {
@@ -125,6 +230,7 @@ internal class DefaultLinkGateTest {
         return DefaultLinkGate(
             configuration = TestFactory.LINK_CONFIGURATION.copy(
                 useAttestationEndpointsForLink = useAttestationEndpoints,
+                suppress2faModal = suppress2faModal,
                 stripeIntent = newIntent
             )
         )

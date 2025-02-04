@@ -9,6 +9,8 @@ import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.analytics.LinkAnalyticsHelper
+import com.stripe.android.link.gate.FakeLinkGate
+import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -92,20 +94,21 @@ class LinkHandlerTest {
     }
 
     @Test
-    fun `setupLinkWithEagerLaunch returns false when suppress2faModal is true`() = runLinkTest(
-        linkConfiguration = defaultLinkConfiguration()
-            .copy(
-                suppress2faModal = true
+    fun `setupLinkWithEagerLaunch returns false when suppress2faModal is true`() {
+        val linkGate = FakeLinkGate()
+        linkGate.setSuppress2faModal(false)
+        runLinkTest(
+            linkGate = linkGate
+        ) {
+            val shouldLaunchEagerly = handler.setupLinkWithEagerLaunch(
+                state = createLinkState(
+                    loginState = LinkState.LoginState.LoggedOut,
+                    signupMode = LinkSignupMode.AlongsideSaveForFutureUse
+                )
             )
-    ) {
-        val shouldLaunchEagerly = handler.setupLinkWithEagerLaunch(
-            state = createLinkState(
-                loginState = LinkState.LoginState.LoggedOut,
-                signupMode = LinkSignupMode.AlongsideSaveForFutureUse
-            )
-        )
 
-        assertThat(shouldLaunchEagerly).isFalse()
+            assertThat(shouldLaunchEagerly).isFalse()
+        }
     }
 
     @Test
@@ -120,9 +123,12 @@ private fun runLinkTest(
     accountStatusFlow: MutableSharedFlow<AccountStatus> = MutableSharedFlow(replay = 1),
     linkConfiguration: LinkConfiguration = defaultLinkConfiguration(),
     attachNewCardToAccountResult: Result<LinkPaymentDetails>? = null,
+    linkGate: LinkGate = FakeLinkGate(),
     testBlock: suspend LinkTestData.() -> Unit
 ): Unit = runTest {
     val linkConfigurationCoordinator = mock<LinkConfigurationCoordinator>()
+    whenever(linkConfigurationCoordinator.linkGate(linkConfiguration))
+        .thenReturn(linkGate)
     val savedStateHandle = SavedStateHandle()
     val linkAnalyticsHelper = mock<LinkAnalyticsHelper>()
     val linkStore = mock<LinkStore>()
