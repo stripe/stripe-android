@@ -34,6 +34,7 @@ import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.PlaygroundTheme
 import com.stripe.android.paymentsheet.example.playground.activity.FawryActivity
+import com.stripe.android.paymentsheet.example.playground.network.PlaygroundRequester
 import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedViewDisplaysMandateSettingDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
 import com.stripe.android.paymentsheet.example.samples.ui.shared.BuyButton
@@ -65,7 +66,15 @@ internal class EmbeddedPlaygroundActivity : AppCompatActivity(), ExternalPayment
 
         val embeddedBuilder = EmbeddedPaymentElement.Builder(
             createIntentCallback = { _, _ ->
-                CreateIntentResult.Success(playgroundState.clientSecret)
+                PlaygroundRequester(playgroundState.snapshot, applicationContext).fetch().fold(
+                    onSuccess = { state ->
+                        val clientSecret = requireNotNull(state.asPaymentState()).clientSecret
+                        CreateIntentResult.Success(clientSecret)
+                    },
+                    onFailure = { exception ->
+                        CreateIntentResult.Failure(IllegalStateException(exception))
+                    },
+                )
             },
             resultCallback = ::handleEmbeddedResult,
         ).externalPaymentMethodConfirmHandler(this)
