@@ -19,7 +19,7 @@ internal fun StripeThemeForConnections(
             placeholderText = colors.textSubdued,
             textCursor = colors.textDefault,
             materialColors = stripeDefaultColors.materialColors.copy(
-                primary = colors.border, // TODO: Should this be primary?
+                primary = colors.border,
                 error = colors.textCritical,
             )
         ),
