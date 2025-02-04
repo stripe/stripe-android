@@ -115,7 +115,6 @@ internal fun PaymentSheetScreen(
 private fun PaymentSheetScreen(
     viewModel: BaseSheetViewModel,
     scrollState: ScrollState,
-    contentVisible: Boolean = true,
     content: @Composable () -> Unit,
 ) {
     val processing by viewModel.processing.collectAsState()
@@ -150,8 +149,7 @@ private fun PaymentSheetScreen(
 
     AnimatedVisibility(
         visible = walletsProcessingState != null &&
-            walletsProcessingState !is WalletsProcessingState.Idle &&
-            contentVisible,
+            walletsProcessingState !is WalletsProcessingState.Idle,
         enter = fadeIn(),
         exit = fadeOut(),
     ) {
