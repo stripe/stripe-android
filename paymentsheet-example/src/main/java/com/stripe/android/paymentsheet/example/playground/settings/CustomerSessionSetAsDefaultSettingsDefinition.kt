@@ -22,4 +22,8 @@ internal object CustomerSessionSetAsDefaultSettingsDefinition : BooleanSettingsD
             checkoutRequestBuilder.paymentMethodSetAsDefaultFeature(FeatureState.Disabled)
         }
     }
+
+    override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
+        return configurationData.integrationType.isPaymentFlow()
+    }
 }
