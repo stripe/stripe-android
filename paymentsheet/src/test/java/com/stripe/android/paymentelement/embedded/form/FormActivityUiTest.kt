@@ -61,18 +61,17 @@ class FormActivityUiTest {
             viewModelScope = testScope
         ).create()
 
-        val primaryButtonStateHolder = PrimaryButtonStateHolder(
+        val stateHelper = DefaultFormActivityStateHelper(
             paymentMethodMetadata = paymentMethodMetadata,
             selectionHolder = embeddedSelectionHolder,
             configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
-            coroutineScope = testScope
         )
 
         composeRule.setContent {
             FormActivityUI(
                 interactor = interactor,
                 eventReporter = mock(),
-                primaryButtonStateHolder = primaryButtonStateHolder,
+                stateHelper = stateHelper,
                 onDismissed = {}
             )
         }
