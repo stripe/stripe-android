@@ -404,15 +404,17 @@ class WalletViewModelTest {
         assertThat(linkAccountManager.listPaymentDetailsCalls.size).isEqualTo(2)
         assertThat(viewModel.uiState.value.isProcessing).isFalse()
         assertThat(viewModel.uiState.value.alertMessage).isNull()
+        assertThat(viewModel.uiState.value.selectedItem?.id).isEqualTo("card1")
     }
 
     @Test
     fun `onSetDefaultClicked handles update failure`() = runTest(dispatcher) {
         val error = RuntimeException("Update failed")
-        val card = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(id = "card1", isDefault = false)
+        val card1 = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(id = "card1", isDefault = true)
+        val card2 = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(id = "card2", isDefault = false)
         val linkAccountManager = WalletLinkAccountManager()
         linkAccountManager.listPaymentDetailsResult = Result.success(
-            ConsumerPaymentDetails(paymentDetails = listOf(card))
+            ConsumerPaymentDetails(paymentDetails = listOf(card1, card2))
         )
         linkAccountManager.updatePaymentDetailsResult = Result.failure(error)
 
@@ -422,10 +424,11 @@ class WalletViewModelTest {
             logger = logger
         )
 
-        viewModel.onSetDefaultClicked(card)
+        viewModel.onSetDefaultClicked(card2)
 
         assertThat(viewModel.uiState.value.isProcessing).isFalse()
         assertThat(viewModel.uiState.value.alertMessage).isEqualTo(error.stripeErrorMessage())
+        assertThat(viewModel.uiState.value.selectedItem?.id).isEqualTo("card1")
         assertThat(logger.errorLogs).contains("WalletViewModel: Failed to set payment method as default" to error)
     }
 
