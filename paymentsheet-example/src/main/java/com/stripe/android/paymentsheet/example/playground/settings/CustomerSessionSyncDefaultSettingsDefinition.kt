@@ -1,6 +1,6 @@
 package com.stripe.android.paymentsheet.example.playground.settings
 
-import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
+import com.stripe.android.paymentsheet.example.playground.model.CustomerEphemeralKeyRequest
 import com.stripe.android.paymentsheet.example.playground.model.FeatureState
 
 internal object CustomerSessionSyncDefaultSettingsDefinition : BooleanSettingsDefinition(
@@ -15,11 +15,11 @@ internal object CustomerSessionSyncDefaultSettingsDefinition : BooleanSettingsDe
         PlaygroundSettingDefinition.Displayable.Option("Disabled", false),
     )
 
-    override fun configure(value: Boolean, checkoutRequestBuilder: CheckoutRequest.Builder) {
+    override fun configure(value: Boolean, customerEphemeralKeyRequestBuilder: CustomerEphemeralKeyRequest.Builder) {
         if (value) {
-            checkoutRequestBuilder.paymentMethodSyncDefaultFeature(FeatureState.Enabled)
+            customerEphemeralKeyRequestBuilder.paymentMethodSyncDefaultFeature(FeatureState.Enabled)
         } else {
-            checkoutRequestBuilder.paymentMethodSyncDefaultFeature(FeatureState.Disabled)
+            customerEphemeralKeyRequestBuilder.paymentMethodSyncDefaultFeature(FeatureState.Disabled)
         }
     }
 
