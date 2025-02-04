@@ -86,6 +86,17 @@ internal class NetworkingLinkLoginWarmupViewModel @AssistedInject constructor(
                 )
             },
         )
+        onAsync(
+            NetworkingLinkLoginWarmupState::continueAsync,
+            onFail = { error ->
+                handleError(
+                    extraMessage = "Error looking up account",
+                    error = error,
+                    displayErrorScreen = true,
+                    pane = PANE
+                )
+            },
+        )
     }
 
     fun onContinueClick() {
