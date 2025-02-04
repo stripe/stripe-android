@@ -136,29 +136,6 @@ internal class VerificationViewModelTest {
     }
 
     @Test
-    fun `onBack triggers logout and sends analytics event`() = runTest(dispatcher) {
-        val linkEventsReporter = object : FakeLinkEventsReporter() {
-            var callCount = 0
-            override fun on2FACancel() {
-                callCount += 1
-            }
-        }
-        val linkAccountManager = object : FakeLinkAccountManager() {
-            var callCount = 0
-            override suspend fun logOut(): Result<ConsumerSession> {
-                callCount += 1
-                return super.logOut()
-            }
-        }
-        createViewModel(
-            linkEventsReporter = linkEventsReporter,
-            linkAccountManager = linkAccountManager
-        ).onBack()
-        assertThat(linkEventsReporter.callCount).isEqualTo(1)
-        assertThat(linkAccountManager.callCount).isEqualTo(1)
-    }
-
-    @Test
     fun `Resending code is reflected in state`() = runTest(dispatcher) {
         val linkAccountManager = object : FakeLinkAccountManager() {
             override suspend fun startVerification(): Result<LinkAccount> {

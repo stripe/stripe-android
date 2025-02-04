@@ -44,7 +44,7 @@ internal fun VerificationDialogBody(
     ) {
         Dialog(
             onDismissRequest = {
-                viewModel.onDismissClicked()
+                viewModel.onBack()
             }
         ) {
             DefaultLinkTheme(

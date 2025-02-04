@@ -35,7 +35,7 @@ internal class VerificationViewModel @Inject constructor(
     private val isDialog: Boolean,
     private val onVerificationSucceeded: () -> Unit,
     private val onChangeEmailClicked: () -> Unit,
-    val onDismissClicked: () -> Unit,
+    private val onDismissClicked: () -> Unit,
 ) : ViewModel() {
 
     private val _viewState = MutableStateFlow(
@@ -129,9 +129,6 @@ internal class VerificationViewModel @Inject constructor(
         clearError()
         onDismissClicked()
         linkEventsReporter.on2FACancel()
-        viewModelScope.launch {
-            linkAccountManager.logOut()
-        }
     }
 
     fun onChangeEmailButtonClicked() {
