@@ -13,6 +13,8 @@ import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.FakeLinkEventsReporter
+import com.stripe.android.link.gate.FakeLinkGate
+import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.link.injection.LinkInlineSignupAssistedViewModelFactory
 import com.stripe.android.link.model.AccountStatus
@@ -155,6 +157,10 @@ class LinkFormElementTest {
             error("Not implemented!")
         }
 
+        override fun linkGate(configuration: LinkConfiguration): LinkGate {
+            TODO("Not yet implemented")
+        }
+
         override suspend fun signInWithUserInput(
             configuration: LinkConfiguration,
             userInput: UserInput
@@ -178,6 +184,7 @@ class LinkFormElementTest {
         override val configuration: LinkConfiguration,
     ) : LinkComponent() {
         override val linkAccountManager: LinkAccountManager = FakeLinkAccountManager()
+        override val linkGate: LinkGate = FakeLinkGate()
 
         override val inlineSignupViewModelFactory: LinkInlineSignupAssistedViewModelFactory =
             FakeLinkInlineSignupAssistedViewModelFactory(linkAccountManager, configuration)

@@ -7,7 +7,7 @@ internal object LinkTypeSettingsDefinition :
     PlaygroundSettingDefinition.Saveable<LinkType> by EnumSaveable(
         key = "LinkType",
         values = LinkType.entries.toTypedArray(),
-        defaultValue = LinkType.Native
+        defaultValue = LinkType.Web
     ),
     PlaygroundSettingDefinition.Displayable<LinkType> {
     override val displayName: String = "Link Type"

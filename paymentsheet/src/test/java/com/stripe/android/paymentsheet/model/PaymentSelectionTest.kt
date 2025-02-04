@@ -15,7 +15,7 @@ class PaymentSelectionTest {
 
     @Test
     fun `Doesn't display a mandate for Link`() {
-        val link = PaymentSelection.Link
+        val link = PaymentSelection.Link()
         val result = link.mandateText(
             merchantName = "Merchant",
             isSetupFlow = false,

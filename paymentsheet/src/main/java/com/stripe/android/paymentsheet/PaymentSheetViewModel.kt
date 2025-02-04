@@ -273,7 +273,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
         setPaymentMethodMetadata(state.paymentMethodMetadata)
 
-        linkHandler.setupLink(state.paymentMethodMetadata.linkState)
+        val shouldLaunchEagerly = linkHandler.setupLinkWithEagerLaunch(state.paymentMethodMetadata.linkState)
 
         val pendingFailedPaymentResult = confirmationHandler.awaitResult()
             as? ConfirmationHandler.Result.Failed
@@ -286,6 +286,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 customerStateHolder = customerStateHolder,
             )
         )
+
+        if (shouldLaunchEagerly) {
+            checkoutWithLinkExpress()
+        }
 
         viewModelScope.launch {
             confirmationHandler.state.collectLatest { state ->
@@ -340,7 +344,11 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     fun checkoutWithLink() {
-        checkout(PaymentSelection.Link, CheckoutIdentifier.SheetTopWallet)
+        checkout(PaymentSelection.Link(useLinkExpress = false), CheckoutIdentifier.SheetTopWallet)
+    }
+
+    private fun checkoutWithLinkExpress() {
+        checkout(PaymentSelection.Link(useLinkExpress = true), CheckoutIdentifier.SheetTopWallet)
     }
 
     private fun checkout(
