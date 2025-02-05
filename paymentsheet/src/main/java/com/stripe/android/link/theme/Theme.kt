@@ -21,7 +21,6 @@ internal val HorizontalPadding = 20.dp
 @Composable
 internal fun DefaultLinkTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    contentShape: Shape = RectangleShape,
     content: @Composable () -> Unit
 ) {
     val colors = LinkThemeConfig.colors(darkTheme)
@@ -32,11 +31,7 @@ internal fun DefaultLinkTheme(
             typography = Typography,
             shapes = MaterialTheme.shapes,
         ) {
-            Surface(
-                shape = contentShape
-            ) {
-                content()
-            }
+            content()
         }
     }
 }

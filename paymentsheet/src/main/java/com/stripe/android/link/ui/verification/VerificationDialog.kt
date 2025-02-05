@@ -2,6 +2,7 @@ package com.stripe.android.link.ui.verification
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -46,10 +47,12 @@ internal fun VerificationDialogBody(
                 viewModel.onBack()
             }
         ) {
-            DefaultLinkTheme(
-                contentShape = RoundedCornerShape(16.dp)
-            ) {
-                VerificationScreen(viewModel)
+            DefaultLinkTheme {
+                Surface(
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    VerificationScreen(viewModel)
+                }
             }
         }
     }
