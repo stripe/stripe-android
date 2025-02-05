@@ -23,7 +23,6 @@ internal fun VerificationDialog(
             linkAccount = linkAccount,
             isDialog = true,
             onVerificationSucceeded = onVerificationSucceeded,
-            onChangeEmailClicked = { },
             onDismissClicked = onDismissClicked
         )
     }

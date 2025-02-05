@@ -100,7 +100,7 @@ internal fun VerificationBody(
     BackHandler(onBack = onBack)
 
     ScrollableTopLevelColumn {
-        TopSection(
+        Header(
             isDialog = state.isDialog,
             onBackClicked = onBack
         )
@@ -154,7 +154,7 @@ internal fun VerificationBody(
 }
 
 @Composable
-private fun TopSection(
+private fun Header(
     isDialog: Boolean,
     onBackClicked: () -> Unit
 ) {

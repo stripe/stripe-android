@@ -19,20 +19,12 @@ import androidx.navigation.PopUpToBuilder
 import androidx.savedstate.SavedStateRegistryOwner
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.cards.CardAccountRangeRepository
-import com.stripe.android.core.Logger
 import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.account.FakeLinkAuth
-import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.account.LinkAuth
 import com.stripe.android.link.account.LinkAuthResult
-import com.stripe.android.link.analytics.FakeLinkEventsReporter
-import com.stripe.android.link.analytics.LinkEventsReporter
-import com.stripe.android.link.confirmation.FakeLinkConfirmationHandler
-import com.stripe.android.link.confirmation.LinkConfirmationHandler
 import com.stripe.android.link.gate.FakeLinkGate
 import com.stripe.android.link.gate.LinkGate
-import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -42,9 +34,7 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
-import com.stripe.android.testing.FakeLogger
 import com.stripe.android.utils.DummyActivityResultCaller
-import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import com.stripe.attestation.IntegrityRequestManager
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -735,19 +725,3 @@ internal class LinkActivityViewModelTest {
         private const val FAKE_GRAPH_ID = 123
     }
 }
-
-internal class FakeNativeLinkComponent(
-    override val linkAccountManager: LinkAccountManager = FakeLinkAccountManager(),
-    override val configuration: LinkConfiguration = TestFactory.LINK_CONFIGURATION,
-    override val linkEventsReporter: LinkEventsReporter = FakeLinkEventsReporter(),
-    override val logger: Logger = FakeLogger(),
-    override val linkConfirmationHandlerFactory: LinkConfirmationHandler.Factory = LinkConfirmationHandler.Factory {
-        FakeLinkConfirmationHandler()
-    },
-    override val webLinkActivityContract: WebLinkActivityContract = mock(),
-    override val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory =
-        NullCardAccountRangeRepositoryFactory,
-    override val viewModel: LinkActivityViewModel = mock(),
-    override val errorReporter: ErrorReporter = FakeErrorReporter(),
-    override val linkAuth: LinkAuth = FakeLinkAuth()
-) : NativeLinkComponent

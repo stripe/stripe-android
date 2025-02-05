@@ -180,7 +180,7 @@ internal class VerificationViewModel @Inject constructor(
             linkAccount: LinkAccount,
             isDialog: Boolean,
             onVerificationSucceeded: () -> Unit,
-            onChangeEmailClicked: () -> Unit,
+            onChangeEmailClicked: () -> Unit = {},
             onDismissClicked: () -> Unit,
         ): ViewModelProvider.Factory {
             return viewModelFactory {
