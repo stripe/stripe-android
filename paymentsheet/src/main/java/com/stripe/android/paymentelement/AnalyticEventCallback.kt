@@ -57,7 +57,7 @@ abstract class AnalyticEvent internal constructor() {
 }
 
 @OptIn(ExperimentalAnalyticEventCallbackApi::class)
-internal object AnalyticsManager {
+internal object AnalyticManager {
     private val _events = MutableSharedFlow<AnalyticEvent>()
     val events = _events.asSharedFlow()
 

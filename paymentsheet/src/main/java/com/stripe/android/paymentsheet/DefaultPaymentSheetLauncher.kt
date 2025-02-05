@@ -12,7 +12,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import com.stripe.android.paymentelement.AnalyticsManager
+import com.stripe.android.paymentelement.AnalyticManager
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
@@ -41,13 +41,14 @@ internal class DefaultPaymentSheetLauncher(
                 override fun onDestroy(owner: LifecycleOwner) {
                     IntentConfirmationInterceptor.createIntentCallback = null
                     ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = null
+                    AnalyticEventInterceptor.analyticEventCallback = null
                     super.onDestroy(owner)
                 }
             }
         )
         lifecycleOwner.lifecycleScope.launch {
             lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                AnalyticsManager.events.collect { event ->
+                AnalyticManager.events.collect { event ->
                     withContext(Dispatchers.Default) {
                         AnalyticEventInterceptor.analyticEventCallback
                             ?.onEvent(event)
