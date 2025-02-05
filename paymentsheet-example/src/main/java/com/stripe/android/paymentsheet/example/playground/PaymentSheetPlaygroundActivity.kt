@@ -11,10 +11,13 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.material.Button
 import androidx.compose.material.Text
+import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -145,6 +148,14 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
             }
 
             PlaygroundTheme(
+                topBarContent = {
+                    TopAppBar(
+                        windowInsets = WindowInsets.statusBars,
+                        title = {
+                            Text("PaymentSheet Playground")
+                        }
+                    )
+                },
                 content = {
                     playgroundState?.asPaymentState()?.endpoint?.let { customEndpoint ->
                         Text(
