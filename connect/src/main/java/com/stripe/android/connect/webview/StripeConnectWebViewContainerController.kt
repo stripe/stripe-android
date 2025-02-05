@@ -21,6 +21,7 @@ import com.stripe.android.connect.analytics.ComponentAnalyticsService
 import com.stripe.android.connect.analytics.ConnectAnalyticsEvent
 import com.stripe.android.connect.util.Clock
 import com.stripe.android.connect.webview.serialization.ConnectInstanceJs
+import com.stripe.android.connect.webview.serialization.OpenFinancialConnectionsMessage
 import com.stripe.android.connect.webview.serialization.SetOnLoadError
 import com.stripe.android.connect.webview.serialization.SetOnLoaderStart
 import com.stripe.android.connect.webview.serialization.SetterFunctionCalledMessage
@@ -273,6 +274,21 @@ internal class StripeConnectWebViewContainerController<Listener : StripeEmbedded
             // Ensure `filePathCallback` always gets a value.
             filePathCallback.onReceiveValue(result)
         }
+    }
+
+    suspend fun onOpenFinancialConnections(
+        context: Context,
+        message: OpenFinancialConnectionsMessage,
+    ) {
+        val result = embeddedComponentManager.presentFinancialConnections(
+            context = context,
+            clientSecret = message.clientSecret,
+            connectedAccountId = message.connectedAccountId,
+        )
+        view.setCollectMobileFinancialConnectionsResult(
+            id = message.id,
+            result = result,
+        )
     }
 
     /**

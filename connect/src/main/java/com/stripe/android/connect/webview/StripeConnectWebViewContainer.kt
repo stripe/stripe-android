@@ -40,18 +40,22 @@ import com.stripe.android.connect.webview.serialization.ConnectJson
 import com.stripe.android.connect.webview.serialization.OpenFinancialConnectionsMessage
 import com.stripe.android.connect.webview.serialization.PageLoadMessage
 import com.stripe.android.connect.webview.serialization.SecureWebViewMessage
+import com.stripe.android.connect.webview.serialization.SetCollectMobileFinancialConnectionsResultPayloadJs
 import com.stripe.android.connect.webview.serialization.SetterFunctionCalledMessage
 import com.stripe.android.connect.webview.serialization.toJs
 import com.stripe.android.core.Logger
 import com.stripe.android.core.version.StripeSdkVersion
+import com.stripe.android.financialconnections.FinancialConnectionsSheetForTokenResult
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.put
 
 @PrivateBetaConnectSDK
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -73,14 +77,16 @@ interface StripeConnectWebViewContainer<Listener, Props>
 @OptIn(PrivateBetaConnectSDK::class)
 internal interface StripeConnectWebViewContainerInternal {
     /**
+     * Load the given URL in the WebView.
+     */
+    fun loadUrl(url: String)
+
+    /**
      * Update the appearance of the Connect instance.
      */
     fun updateConnectInstance(appearance: Appearance)
 
-    /**
-     * Load the given URL in the WebView.
-     */
-    fun loadUrl(url: String)
+    fun setCollectMobileFinancialConnectionsResult(id: String, result: FinancialConnectionsSheetForTokenResult?)
 }
 
 @OptIn(PrivateBetaConnectSDK::class)
@@ -246,6 +252,27 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
         webView?.evaluateSdkJs(
             "updateConnectInstance",
             ConnectJson.encodeToJsonElement(payload).jsonObject
+        )
+    }
+
+    override fun setCollectMobileFinancialConnectionsResult(
+        id: String,
+        result: FinancialConnectionsSheetForTokenResult?
+    ) {
+        val payload = SetCollectMobileFinancialConnectionsResultPayloadJs.from(id, result)
+        callSetterWithSerializableValue(
+            setter = "setCollectMobileFinancialConnectionsResult",
+            value = ConnectJson.encodeToJsonElement(payload).jsonObject
+        )
+    }
+
+    private fun callSetterWithSerializableValue(setter: String, value: JsonElement) {
+        webView?.evaluateSdkJs(
+            "callSetterWithSerializableValue",
+            buildJsonObject {
+                put("setter", setter)
+                put("value", value)
+            }
         )
     }
 
@@ -421,7 +448,18 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
         @JavascriptInterface
         fun openFinancialConnections(message: String) {
             val parsed = ConnectJson.decodeFromString<OpenFinancialConnectionsMessage>(message)
-            logger.debug("openFinancialConnections: $parsed")
+            logger.debug("Open FinancialConnections: $parsed")
+
+            val webView = this@StripeConnectWebViewContainerImpl.webView
+                ?: return
+            val lifecycleScope = webView.findViewTreeLifecycleOwner()?.lifecycleScope
+                ?: return
+            lifecycleScope.launch {
+                controller?.onOpenFinancialConnections(
+                    context = webView.context,
+                    message = parsed,
+                )
+            }
         }
 
         @JavascriptInterface
