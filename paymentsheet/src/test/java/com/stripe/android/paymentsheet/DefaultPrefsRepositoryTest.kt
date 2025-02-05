@@ -57,7 +57,7 @@ internal class DefaultPrefsRepositoryTest {
             isLinkAvailable = false
 
             prefsRepository.savePaymentSelection(
-                PaymentSelection.Link
+                PaymentSelection.Link()
             )
             assertThat(
                 prefsRepository.getSavedSelection(isGooglePayReady, isLinkAvailable)

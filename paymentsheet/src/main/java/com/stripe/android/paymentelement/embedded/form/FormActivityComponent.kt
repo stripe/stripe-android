@@ -79,6 +79,9 @@ internal interface FormActivityModule {
     @Binds
     fun bindsLinkConfigurationCoordinator(impl: RealLinkConfigurationCoordinator): LinkConfigurationCoordinator
 
+    @Binds
+    fun bindsFormActivityStateHelper(helper: DefaultFormActivityStateHelper): FormActivityStateHelper
+
     companion object {
         @Provides
         @Singleton

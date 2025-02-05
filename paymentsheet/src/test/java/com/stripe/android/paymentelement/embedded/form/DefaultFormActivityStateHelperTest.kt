@@ -15,20 +15,18 @@ import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationStateFixtures
 import com.stripe.android.paymentsheet.ui.PrimaryButtonProcessingState
 import com.stripe.android.ui.core.R
-import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
 @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
-class PrimaryButtonStateHolderTest {
+class DefaultFormActivityStateHelperTest {
     @Test
     fun `state initializes correctly`() = testScenario {
         stateHolder.state.test {
             val state = awaitItem()
             assertThat(state.processingState).isEqualTo(PrimaryButtonProcessingState.Idle(null))
             assertThat(state.isEnabled).isFalse()
-            assertThat(state.label).isEqualTo(
+            assertThat(state.primaryButtonLabel).isEqualTo(
                 resolvableString(
                     id = R.string.stripe_pay_button_amount,
                     formatArgs = arrayOf("$10.99")
@@ -45,7 +43,7 @@ class PrimaryButtonStateHolderTest {
                 .build()
         ) {
             stateHolder.state.test {
-                assertThat(awaitItem().label).isEqualTo("Test Label".resolvableString)
+                assertThat(awaitItem().primaryButtonLabel).isEqualTo("Test Label".resolvableString)
             }
         }
     }
@@ -54,7 +52,8 @@ class PrimaryButtonStateHolderTest {
     fun `state returns correct label for setup intent`() {
         testScenario(stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD) {
             stateHolder.state.test {
-                assertThat(awaitItem().label).isEqualTo(R.string.stripe_setup_button_label.resolvableString)
+                assertThat(awaitItem().primaryButtonLabel)
+                    .isEqualTo(R.string.stripe_setup_button_label.resolvableString)
             }
         }
     }
@@ -70,7 +69,7 @@ class PrimaryButtonStateHolderTest {
 
     private class Scenario(
         val selectionHolder: EmbeddedSelectionHolder,
-        val stateHolder: PrimaryButtonStateHolder
+        val stateHolder: FormActivityStateHelper
     )
 
     private fun testScenario(
@@ -80,10 +79,9 @@ class PrimaryButtonStateHolderTest {
     ) = runTest {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create(stripeIntent = stripeIntent)
         val selectionHolder = EmbeddedSelectionHolder(SavedStateHandle())
-        val stateHolder = PrimaryButtonStateHolder(
+        val stateHolder = DefaultFormActivityStateHelper(
             paymentMethodMetadata = paymentMethodMetadata,
             selectionHolder = selectionHolder,
-            coroutineScope = TestScope(UnconfinedTestDispatcher()),
             configuration = config
         )
 

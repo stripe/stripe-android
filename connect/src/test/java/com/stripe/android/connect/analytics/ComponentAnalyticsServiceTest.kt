@@ -86,8 +86,8 @@ class ComponentAnalyticsServiceTest {
         componentAnalyticsService.track(
             ConnectAnalyticsEvent.WebComponentLoaded(
                 pageViewId = "pageViewId123",
-                timeToLoad = 100.0,
-                perceivedTimeToLoad = 50.0,
+                timeToLoadMs = 100L,
+                perceivedTimeToLoadMs = 50L,
             )
         )
         val mapCaptor = argumentCaptor<Map<String, Any?>>()
@@ -96,14 +96,14 @@ class ComponentAnalyticsServiceTest {
 
         val expectedMetadata = mapOf(
             "page_view_id" to "pageViewId123",
-            "time_to_load" to "100.0",
-            "perceived_time_to_load" to "50.0",
+            "time_to_load" to "0.1",
+            "perceived_time_to_load" to "0.05",
         )
         assertContains(params, "event_metadata")
         assertEquals(expectedMetadata, params["event_metadata"])
         assertEquals("pageViewId123", params["page_view_id"])
-        assertEquals("100.0", params["time_to_load"])
-        assertEquals("50.0", params["perceived_time_to_load"])
+        assertEquals("0.1", params["time_to_load"])
+        assertEquals("0.05", params["perceived_time_to_load"])
     }
 
     @Test

@@ -103,7 +103,7 @@ internal class DefaultEmbeddedConfirmationHelperTest {
     @Test
     fun confirmCallsConfirmationHandlerStartWithLink() = testScenario(
         loadedState = defaultLoadedState().copy(
-            selection = PaymentSelection.Link,
+            selection = PaymentSelection.Link(),
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 linkState = LinkState(
                     configuration = LinkTestUtils.createLinkConfiguration(),

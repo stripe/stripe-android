@@ -56,13 +56,16 @@ import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
+import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.ConfirmationMediator
 import com.stripe.android.paymentelement.confirmation.DefaultConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.createTestConfirmationHandlerFactory
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
 import com.stripe.android.paymentelement.confirmation.intent.InvalidDeferredIntentUsageException
+import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
@@ -595,7 +598,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.error.test {
             assertThat(awaitItem()).isNull()
 
-            viewModel.updateSelection(PaymentSelection.Link)
+            viewModel.updateSelection(PaymentSelection.Link())
             viewModel.checkout()
 
             assertThat(errorReporter.getLoggedErrors()).contains(
@@ -744,6 +747,76 @@ internal class PaymentSheetViewModelTest {
         )
 
         assertThat(viewModel.linkHandler.isLinkEnabled.value).isFalse()
+    }
+
+    @Test
+    fun `Link Express is launched when viewmodel is started with logged in link account`() = runTest {
+        val confirmationHandler = FakeConfirmationHandler()
+        confirmationHandler.awaitResultTurbine.add(null)
+        confirmationHandler.awaitResultTurbine.add(null)
+
+        createViewModel(
+            linkState = LinkState(
+                configuration = TestFactory.LINK_CONFIGURATION,
+                loginState = LinkState.LoginState.LoggedIn,
+                signupMode = null,
+            ),
+            confirmationHandlerFactory = {
+                confirmationHandler
+            }
+        )
+
+        val confirmationArgs = confirmationHandler.startTurbine.awaitItem()
+        assertThat(confirmationArgs.confirmationOption).isInstanceOf<LinkConfirmationOption>()
+        val confirmationOption = confirmationArgs.confirmationOption as? LinkConfirmationOption
+        assertThat(confirmationOption?.useLinkExpress).isTrue()
+    }
+
+    @Test
+    fun `Link Express is not launched when viewmodel is started with logged out link account`() = runTest {
+        val confirmationHandler = FakeConfirmationHandler()
+        confirmationHandler.awaitResultTurbine.add(null)
+        confirmationHandler.awaitResultTurbine.add(null)
+
+        createViewModel(
+            linkState = LinkState(
+                configuration = TestFactory.LINK_CONFIGURATION,
+                loginState = LinkState.LoginState.LoggedOut,
+                signupMode = null,
+            ),
+            confirmationHandlerFactory = {
+                confirmationHandler
+            }
+        )
+
+        confirmationHandler.startTurbine.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `checkout with Link starts confirmation with correct arguments`() = runTest {
+        val confirmationHandler = FakeConfirmationHandler()
+        confirmationHandler.awaitResultTurbine.add(null)
+        confirmationHandler.awaitResultTurbine.add(null)
+
+        val viewModel = createViewModel(
+            linkState = LinkState(
+                configuration = TestFactory.LINK_CONFIGURATION,
+                loginState = LinkState.LoginState.LoggedOut,
+                signupMode = null,
+            ),
+            confirmationHandlerFactory = {
+                confirmationHandler
+            }
+        )
+
+        confirmationHandler.startTurbine.ensureAllEventsConsumed()
+
+        viewModel.checkoutWithLink()
+
+        val confirmationArgs = confirmationHandler.startTurbine.awaitItem()
+        assertThat(confirmationArgs.confirmationOption).isInstanceOf<LinkConfirmationOption>()
+        val confirmationOption = confirmationArgs.confirmationOption as? LinkConfirmationOption
+        assertThat(confirmationOption?.useLinkExpress).isFalse()
     }
 
     @Test
@@ -3176,6 +3249,7 @@ internal class PaymentSheetViewModelTest {
         cvcRecollectionHandler: CvcRecollectionHandler = this.cvcRecollectionHandler,
         cvcRecollectionInteractor: FakeCvcRecollectionInteractor = FakeCvcRecollectionInteractor(),
         shouldRegister: Boolean = true,
+        confirmationHandlerFactory: ConfirmationHandler.Factory? = null
     ): PaymentSheetViewModel {
         val paymentConfiguration = PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
         return TestViewModelFactory.create(
@@ -3192,7 +3266,7 @@ internal class PaymentSheetViewModelTest {
                 workContext = testDispatcher,
                 savedStateHandle = thisSavedStateHandle,
                 linkHandler = linkHandler,
-                confirmationHandlerFactory = createTestConfirmationHandlerFactory(
+                confirmationHandlerFactory = confirmationHandlerFactory ?: createTestConfirmationHandlerFactory(
                     intentConfirmationInterceptor = intentConfirmationInterceptor,
                     savedStateHandle = thisSavedStateHandle,
                     bacsMandateConfirmationLauncherFactory = bacsMandateConfirmationLauncherFactory,

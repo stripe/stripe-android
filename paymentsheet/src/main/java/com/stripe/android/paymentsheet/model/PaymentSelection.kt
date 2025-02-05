@@ -64,7 +64,9 @@ internal sealed class PaymentSelection : Parcelable {
     }
 
     @Parcelize
-    data object Link : PaymentSelection() {
+    data class Link(
+        val useLinkExpress: Boolean = false
+    ) : PaymentSelection() {
 
         override val requiresConfirmation: Boolean
             get() = false
@@ -107,7 +109,7 @@ internal sealed class PaymentSelection : Parcelable {
     ) : PaymentSelection() {
 
         enum class WalletType(val paymentSelection: PaymentSelection) {
-            GooglePay(PaymentSelection.GooglePay), Link(PaymentSelection.Link)
+            GooglePay(PaymentSelection.GooglePay), Link(Link())
         }
 
         val showMandateAbovePrimaryButton: Boolean
@@ -309,7 +311,7 @@ internal val PaymentSelection.drawableResourceId: Int
     get() = when (this) {
         is PaymentSelection.ExternalPaymentMethod -> iconResource
         PaymentSelection.GooglePay -> R.drawable.stripe_google_pay_mark
-        PaymentSelection.Link -> getLinkIcon()
+        is PaymentSelection.Link -> getLinkIcon()
         is PaymentSelection.New.Card -> brand.getCardBrandIcon()
         is PaymentSelection.New.GenericPaymentMethod -> iconResource
         is PaymentSelection.New.LinkInline -> getLinkIcon()
@@ -334,7 +336,7 @@ internal val PaymentSelection.lightThemeIconUrl: String?
     get() = when (this) {
         is PaymentSelection.ExternalPaymentMethod -> lightThemeIconUrl
         PaymentSelection.GooglePay -> null
-        PaymentSelection.Link -> null
+        is PaymentSelection.Link -> null
         is PaymentSelection.New.Card -> null
         is PaymentSelection.New.GenericPaymentMethod -> lightThemeIconUrl
         is PaymentSelection.New.LinkInline -> null
@@ -346,7 +348,7 @@ internal val PaymentSelection.darkThemeIconUrl: String?
     get() = when (this) {
         is PaymentSelection.ExternalPaymentMethod -> darkThemeIconUrl
         PaymentSelection.GooglePay -> null
-        PaymentSelection.Link -> null
+        is PaymentSelection.Link -> null
         is PaymentSelection.New.Card -> null
         is PaymentSelection.New.GenericPaymentMethod -> darkThemeIconUrl
         is PaymentSelection.New.LinkInline -> null
@@ -358,7 +360,7 @@ internal val PaymentSelection.label: ResolvableString
     get() = when (this) {
         is PaymentSelection.ExternalPaymentMethod -> label
         PaymentSelection.GooglePay -> StripeR.string.stripe_google_pay.resolvableString
-        PaymentSelection.Link -> StripeR.string.stripe_link.resolvableString
+        is PaymentSelection.Link -> StripeR.string.stripe_link.resolvableString
         is PaymentSelection.New.Card -> createCardLabel(last4).orEmpty()
         is PaymentSelection.New.GenericPaymentMethod -> label
         is PaymentSelection.New.LinkInline -> createCardLabel(last4).orEmpty()
@@ -380,7 +382,7 @@ internal val PaymentSelection.paymentMethodType: String
     get() = when (this) {
         is PaymentSelection.ExternalPaymentMethod -> type
         PaymentSelection.GooglePay -> "google_pay"
-        PaymentSelection.Link -> "link"
+        is PaymentSelection.Link -> "link"
         is PaymentSelection.New -> paymentMethodCreateParams.typeCode
         is PaymentSelection.Saved -> paymentMethod.type?.name ?: "card"
     }
@@ -389,7 +391,7 @@ internal val PaymentSelection.billingDetails: PaymentMethod.BillingDetails?
     get() = when (this) {
         is PaymentSelection.ExternalPaymentMethod -> billingDetails
         PaymentSelection.GooglePay -> null
-        PaymentSelection.Link -> null
+        is PaymentSelection.Link -> null
         is PaymentSelection.New -> paymentMethodCreateParams.billingDetails
         is PaymentSelection.Saved -> paymentMethod.billingDetails
     }
