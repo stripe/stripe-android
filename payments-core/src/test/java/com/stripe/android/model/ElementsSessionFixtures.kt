@@ -444,12 +444,12 @@ internal object ElementsSessionFixtures {
         """.trimIndent()
     )
 
+    @Suppress("LongMethod")
     fun createPaymentIntentWithCustomerSession(
         allowRedisplay: String? = "limited",
         paymentMethodRemoveFeature: String? = "enabled",
         paymentMethodRemoveLastFeature: String? = "enabled",
         paymentMethodSetAsDefaultFeature: String = "disabled",
-        paymentMethodSyncDefaultFeature: String = "disabled",
     ): JSONObject {
         return JSONObject(
             """
@@ -543,7 +543,6 @@ internal object ElementsSessionFixtures {
                       "features": {
                         "payment_method_remove": ${paymentMethodRemoveFeature ?: "enabled"},
                         "payment_method_remove_last": ${paymentMethodRemoveLastFeature ?: "enabled"},
-                        "payment_method_sync_default": $paymentMethodSyncDefaultFeature,
                       }
                     },
                     "pricing_table": {

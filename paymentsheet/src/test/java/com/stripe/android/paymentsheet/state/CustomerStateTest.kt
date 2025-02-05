@@ -93,37 +93,7 @@ class CustomerStateTest {
         assertThat(customerState.permissions.canRemoveDuplicates).isTrue()
     }
 
-    private fun createCsCustomerSessionForTestingDefaultPaymentMethod(
-        defaultPaymentMethodId: String?,
-        isSyncDefaultEnabled: Boolean,
-    ): CustomerState {
-        val customerId = "cus_3"
-        val ephemeralKeySecret = "ek_3"
-        val paymentMethods = PaymentMethodFactory.cards(3)
-
-        val customerSheetComponent = createEnabledCustomerSheetComponent(
-            isSyncDefaultEnabled = isSyncDefaultEnabled,
-        )
-        val customer = createElementsSessionCustomer(
-            customerId = customerId,
-            ephemeralKeySecret = ephemeralKeySecret,
-            paymentMethods = paymentMethods,
-            mobilePaymentElementComponent = ElementsSession.Customer.Components.MobilePaymentElement.Disabled,
-            customerSheetComponent = customerSheetComponent,
-            defaultPaymentMethodId = defaultPaymentMethodId
-        )
-
-        val customerState = CustomerState.createForCustomerSession(
-            customer = customer,
-            configuration = createConfiguration(),
-            supportedSavedPaymentMethodTypes = listOf(PaymentMethod.Type.Card),
-            customerSessionClientSecret = "cuss_123",
-        )
-
-        return customerState
-    }
-
-    private fun createMpeCustomerSessionForTestingDefaultPaymentMethod(
+    private fun createCustomerSessionForTestingDefaultPaymentMethod(
         defaultPaymentMethodId: String?,
         isSetAsDefaultEnabled: Boolean,
     ): CustomerState {
@@ -153,10 +123,10 @@ class CustomerStateTest {
     }
 
     @Test
-    fun `Create 'CustomerState' for customer session with nonnull defaultPaymentMethodId & set as default feature enabled`() {
+    fun `Create 'CustomerState' for customer session with nonnull default PM & set as default feature enabled`() {
         val defaultPaymentMethodId = "pm_123"
 
-        val customerState = createMpeCustomerSessionForTestingDefaultPaymentMethod(
+        val customerState = createCustomerSessionForTestingDefaultPaymentMethod(
             defaultPaymentMethodId = defaultPaymentMethodId,
             isSetAsDefaultEnabled = true,
         )
@@ -174,7 +144,7 @@ class CustomerStateTest {
     fun `Create 'CustomerState' for customer session with nonnull default PM & set as default feature disabled`() {
         val defaultPaymentMethodId = "pm_123"
 
-        val customerState = createMpeCustomerSessionForTestingDefaultPaymentMethod(
+        val customerState = createCustomerSessionForTestingDefaultPaymentMethod(
             defaultPaymentMethodId = defaultPaymentMethodId,
             isSetAsDefaultEnabled = false,
         )
@@ -186,7 +156,7 @@ class CustomerStateTest {
     fun `Create 'CustomerState' for customer session with null default PM & set as default feature enabled`() {
         val defaultPaymentMethodId = null
 
-        val customerState = createMpeCustomerSessionForTestingDefaultPaymentMethod(
+        val customerState = createCustomerSessionForTestingDefaultPaymentMethod(
             defaultPaymentMethodId = defaultPaymentMethodId,
             isSetAsDefaultEnabled = true,
         )
@@ -204,76 +174,12 @@ class CustomerStateTest {
     fun `Create 'CustomerState' for customer session with null default PM & set as default feature disabled`() {
         val defaultPaymentMethodId = null
 
-        val customerState = createMpeCustomerSessionForTestingDefaultPaymentMethod(
+        val customerState = createCustomerSessionForTestingDefaultPaymentMethod(
             defaultPaymentMethodId = defaultPaymentMethodId,
             isSetAsDefaultEnabled = false,
         )
 
         assertThat(customerState.defaultPaymentMethodState).isEqualTo(CustomerState.DefaultPaymentMethodState.Disabled)
-    }
-
-    @Test
-    fun `Create 'CustomerState' for customer session with non-null default PM & sync default enabled`() {
-        val defaultPaymentMethodId = "pm_123"
-
-        val customerState = createCsCustomerSessionForTestingDefaultPaymentMethod(
-            defaultPaymentMethodId = defaultPaymentMethodId,
-            isSyncDefaultEnabled = true,
-        )
-
-        assertThat(customerState.defaultPaymentMethodState).isInstanceOf(
-            CustomerState.DefaultPaymentMethodState.Enabled::class.java
-        )
-        val actualDefaultPaymentMethodId = (
-            customerState.defaultPaymentMethodState as CustomerState.DefaultPaymentMethodState.Enabled
-            ).defaultPaymentMethodId
-        assertThat(actualDefaultPaymentMethodId).isEqualTo(defaultPaymentMethodId)
-    }
-
-    @Test
-    fun `Create 'CustomerState' for customer session with null default PM & sync default enabled`() {
-        val defaultPaymentMethodId = null
-
-        val customerState = createCsCustomerSessionForTestingDefaultPaymentMethod(
-            defaultPaymentMethodId = defaultPaymentMethodId,
-            isSyncDefaultEnabled = true,
-        )
-
-        assertThat(customerState.defaultPaymentMethodState).isInstanceOf(
-            CustomerState.DefaultPaymentMethodState.Enabled::class.java
-        )
-        val actualDefaultPaymentMethodId = (
-            customerState.defaultPaymentMethodState as CustomerState.DefaultPaymentMethodState.Enabled
-            ).defaultPaymentMethodId
-        assertThat(actualDefaultPaymentMethodId).isEqualTo(defaultPaymentMethodId)
-    }
-
-    @Test
-    fun `Create 'CustomerState' for customer session with non-null default PM & sync default disabled`() {
-        val defaultPaymentMethodId = "pm_123"
-
-        val customerState = createCsCustomerSessionForTestingDefaultPaymentMethod(
-            defaultPaymentMethodId = defaultPaymentMethodId,
-            isSyncDefaultEnabled = false,
-        )
-
-        assertThat(customerState.defaultPaymentMethodState).isInstanceOf(
-            CustomerState.DefaultPaymentMethodState.Disabled::class.java
-        )
-    }
-
-    @Test
-    fun `Create 'CustomerState' for customer session with null default PM & sync default disabled`() {
-        val defaultPaymentMethodId = "pm_123"
-
-        val customerState = createCsCustomerSessionForTestingDefaultPaymentMethod(
-            defaultPaymentMethodId = defaultPaymentMethodId,
-            isSyncDefaultEnabled = false,
-        )
-
-        assertThat(customerState.defaultPaymentMethodState).isInstanceOf(
-            CustomerState.DefaultPaymentMethodState.Disabled::class.java
-        )
     }
 
     @Test
@@ -463,24 +369,11 @@ class CustomerStateTest {
         )
     }
 
-    private fun createEnabledCustomerSheetComponent(
-        isPaymentMethodRemoveEnabled: Boolean = false,
-        canRemoveLastPaymentMethod: Boolean = false,
-        isSyncDefaultEnabled: Boolean = false,
-    ): ElementsSession.Customer.Components.CustomerSheet.Enabled {
-        return ElementsSession.Customer.Components.CustomerSheet.Enabled(
-            isPaymentMethodRemoveEnabled = isPaymentMethodRemoveEnabled,
-            canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
-            isSyncDefaultEnabled = isSyncDefaultEnabled,
-        )
-    }
-
     private fun createElementsSessionCustomer(
         customerId: String = "cus_1",
         ephemeralKeySecret: String = "ek_1",
         paymentMethods: List<PaymentMethod> = listOf(),
         mobilePaymentElementComponent: ElementsSession.Customer.Components.MobilePaymentElement,
-        customerSheetComponent: ElementsSession.Customer.Components.CustomerSheet? = null,
         defaultPaymentMethodId: String? = null,
     ): ElementsSession.Customer {
         return ElementsSession.Customer(
@@ -493,8 +386,7 @@ class CustomerStateTest {
                 apiKeyExpiry = 999999999,
                 liveMode = false,
                 components = ElementsSession.Customer.Components(
-                    customerSheet = customerSheetComponent
-                        ?: ElementsSession.Customer.Components.CustomerSheet.Disabled,
+                    customerSheet = ElementsSession.Customer.Components.CustomerSheet.Disabled,
                     mobilePaymentElement = mobilePaymentElementComponent
                 )
             ),

@@ -117,7 +117,6 @@ data class ElementsSession(
                 data class Enabled(
                     val isPaymentMethodRemoveEnabled: Boolean,
                     val canRemoveLastPaymentMethod: Boolean,
-                    val isSyncDefaultEnabled: Boolean,
                 ) : CustomerSheet
             }
         }

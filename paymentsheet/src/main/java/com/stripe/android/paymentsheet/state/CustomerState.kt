@@ -62,7 +62,13 @@ internal data class CustomerState(
                 else -> false
             }
 
-            val defaultPaymentMethodState = if (isDefaultPaymentMethodsFeatureEnabled(customer.session.components)) {
+            val isSetAsDefaultFeatureEnabled = when (mobilePaymentElementComponent) {
+                ElementsSession.Customer.Components.MobilePaymentElement.Disabled -> false
+                is ElementsSession.Customer.Components.MobilePaymentElement.Enabled ->
+                    mobilePaymentElementComponent.isSetAsDefaultEnabled
+            }
+
+            val defaultPaymentMethodState = if (isSetAsDefaultFeatureEnabled) {
                 DefaultPaymentMethodState.Enabled(customer.defaultPaymentMethod)
             } else {
                 DefaultPaymentMethodState.Disabled
@@ -83,25 +89,6 @@ internal data class CustomerState(
                 ),
                 defaultPaymentMethodState = defaultPaymentMethodState
             )
-        }
-
-        private fun isDefaultPaymentMethodsFeatureEnabled(components: ElementsSession.Customer.Components): Boolean {
-            val mobilePaymentElementComponent = components.mobilePaymentElement
-            val customerSheetComponent = components.customerSheet
-
-            val enabledOnMpe = when (mobilePaymentElementComponent) {
-                ElementsSession.Customer.Components.MobilePaymentElement.Disabled -> false
-                is ElementsSession.Customer.Components.MobilePaymentElement.Enabled ->
-                    mobilePaymentElementComponent.isSetAsDefaultEnabled
-            }
-
-            val enabledOnCs = when (customerSheetComponent) {
-                ElementsSession.Customer.Components.CustomerSheet.Disabled -> false
-                is ElementsSession.Customer.Components.CustomerSheet.Enabled ->
-                    customerSheetComponent.isSyncDefaultEnabled
-            }
-
-            return enabledOnMpe || enabledOnCs
         }
 
         /**
