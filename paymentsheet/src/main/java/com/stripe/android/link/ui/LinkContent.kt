@@ -95,6 +95,9 @@ internal fun LinkContent(
                         } else {
                             onUpdateSheetContent(it)
                         }
+                    },
+                    onLogoutClicked = {
+                        handleViewAction(LinkAction.LogoutClicked)
                     }
                 )
 

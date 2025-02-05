@@ -48,6 +48,8 @@ internal open class FakeLinkAccountManager(
     private val signupTurbine = Turbine<SignUpCall>()
     private val mobileSignUpTurbine = Turbine<MobileSignUpCall>()
 
+    private val logoutCall = Turbine<Unit>()
+
     override var consumerPublishableKey: String? = null
 
     fun setLinkAccount(account: LinkAccount?) {
@@ -134,6 +136,7 @@ internal open class FakeLinkAccountManager(
     }
 
     override suspend fun logOut(): Result<ConsumerSession> {
+        logoutCall.add(Unit)
         return logOutResult
     }
 
@@ -180,6 +183,10 @@ internal open class FakeLinkAccountManager(
 
     suspend fun awaitLookupCall(): LookupCall {
         return lookupTurbine.awaitItem()
+    }
+
+    suspend fun awaitLogoutCall() {
+        return logoutCall.awaitItem()
     }
 
     fun ensureAllEventsConsumed() {
