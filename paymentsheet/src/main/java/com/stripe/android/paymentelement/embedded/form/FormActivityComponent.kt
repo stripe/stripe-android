@@ -52,9 +52,8 @@ import kotlin.coroutines.CoroutineContext
 @Singleton
 @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 internal interface FormActivityComponent {
-
     val viewModel: FormActivityViewModel
-    fun inject(activity: FormActivity)
+    val subcomponentBuilder: FormActivitySubcomponent.Builder
 
     @Component.Builder
     interface Builder {
@@ -148,9 +147,9 @@ internal interface FormActivityModule {
         FormConfirmationModule::class,
     ]
 )
-@EmbeddedPaymentElementScope
+@FormActivityScope
 internal interface FormActivitySubcomponent {
-    val confirmationHelper: FormActivityConfirmationHelper
+    fun inject(activity: FormActivity)
 
     @Subcomponent.Builder
     interface Builder {

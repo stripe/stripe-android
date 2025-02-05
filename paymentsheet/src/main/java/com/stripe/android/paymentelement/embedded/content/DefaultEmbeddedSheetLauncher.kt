@@ -65,7 +65,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
             sheetStateHolder.sheetIsOpen = false
             if (result is FormResult.Complete) {
                 resultCallback.onResult(EmbeddedPaymentElement.Result.Completed())
-                selectionHolder.set(result.selection)
+                selectionHolder.set(null)
             }
         }
 

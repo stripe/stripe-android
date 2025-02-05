@@ -20,7 +20,7 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
     private val embeddedSelectionHolder: EmbeddedSelectionHolder,
     private val embeddedFormHelperFactory: EmbeddedFormHelperFactory,
     @ViewModelScope private val viewModelScope: CoroutineScope,
-    private val formActivityUiStateHolder: FormActivityStateHelper
+    private val formActivityStateHelper: FormActivityStateHelper
 ) {
     fun create(): DefaultVerticalModeFormInteractor {
         val formHelper = embeddedFormHelperFactory.create(
@@ -59,7 +59,7 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
                 customerHasSavedPaymentMethods = hasSavedPaymentMethods
             ),
             isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
-            processing = formActivityUiStateHolder.state.mapAsStateFlow { it.isProcessing },
+            processing = formActivityStateHelper.state.mapAsStateFlow { it.isProcessing },
             paymentMethodIncentive = PaymentMethodIncentiveInteractor(
                 paymentMethodMetadata.paymentMethodIncentive
             ).displayedIncentive,

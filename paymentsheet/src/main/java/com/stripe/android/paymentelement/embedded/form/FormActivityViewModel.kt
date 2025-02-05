@@ -13,7 +13,6 @@ import javax.inject.Inject
 
 internal class FormActivityViewModel @Inject constructor(
     val component: FormActivityComponent,
-    val subcomponentBuilder: FormActivitySubcomponent.Builder,
     @ViewModelScope private val customViewModelScope: CoroutineScope
 ) : ViewModel() {
     override fun onCleared() {

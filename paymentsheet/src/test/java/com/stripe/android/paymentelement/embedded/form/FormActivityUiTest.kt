@@ -1,7 +1,6 @@
 package com.stripe.android.paymentelement.embedded.form
 
 import android.os.Build
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasText
@@ -13,7 +12,6 @@ import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.FormPage
-import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import kotlinx.coroutines.test.TestScope
@@ -66,7 +64,7 @@ class FormActivityUiTest {
             embeddedSelectionHolder = embeddedSelectionHolder,
             embeddedFormHelperFactory = embeddedFormHelperFactory,
             viewModelScope = testScope,
-            formActivityUiStateHolder = uiStateHolder
+            formActivityStateHelper = uiStateHolder
         ).create()
 
         val stateHelper = DefaultFormActivityStateHelper(
