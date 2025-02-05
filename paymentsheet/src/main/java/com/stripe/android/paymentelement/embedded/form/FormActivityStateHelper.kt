@@ -1,6 +1,5 @@
 package com.stripe.android.paymentelement.embedded.form
 
-import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentIntent
@@ -13,40 +12,55 @@ import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.ui.PrimaryButtonProcessingState
 import com.stripe.android.paymentsheet.utils.buyButtonLabel
 import com.stripe.android.ui.core.Amount
-import kotlinx.coroutines.CoroutineScope
+import com.stripe.android.uicore.utils.combineAsStateFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Singleton
+
+internal interface FormActivityStateHelper {
+    val state: StateFlow<State>
+
+    data class State(
+        val primaryButtonLabel: ResolvableString,
+        val isEnabled: Boolean,
+        val processingState: PrimaryButtonProcessingState,
+        val isProcessing: Boolean,
+    )
+}
 
 @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
-internal class PrimaryButtonStateHolder @Inject constructor(
+@Singleton
+internal class DefaultFormActivityStateHelper @Inject constructor(
     paymentMethodMetadata: PaymentMethodMetadata,
     selectionHolder: EmbeddedSelectionHolder,
-    @ViewModelScope coroutineScope: CoroutineScope,
     configuration: EmbeddedPaymentElement.Configuration,
-) {
-    private val _state = MutableStateFlow(
-        State(
-            label = primaryButtonLabel(paymentMethodMetadata.stripeIntent, configuration),
-            isEnabled = false,
-            processingState = PrimaryButtonProcessingState.Idle(null)
-        )
+) : FormActivityStateHelper {
+    private val primaryButtonProcessingState: MutableStateFlow<PrimaryButtonProcessingState> =
+        MutableStateFlow(PrimaryButtonProcessingState.Idle(null))
+    private val isProcessing = MutableStateFlow(false)
+    private val isEnabled: StateFlow<Boolean> = combineAsStateFlow(
+        selectionHolder.selection,
+        isProcessing
+    ) { selection, processing ->
+        selection != null && !processing
+    }
+    private val primaryButtonLabel = MutableStateFlow(
+        primaryButtonLabel(paymentMethodMetadata.stripeIntent, configuration)
     )
-    val state: StateFlow<State> = _state
 
-    init {
-        coroutineScope.launch {
-            selectionHolder.selection.collectLatest { selection ->
-                _state.update { state ->
-                    state.copy(
-                        isEnabled = selection != null
-                    )
-                }
-            }
-        }
+    override val state: StateFlow<FormActivityStateHelper.State> = combineAsStateFlow(
+        primaryButtonProcessingState,
+        isEnabled,
+        isProcessing,
+        primaryButtonLabel
+    ) { buttonProcessingState, enabled, processing, buttonLabel ->
+        FormActivityStateHelper.State(
+            primaryButtonLabel = buttonLabel,
+            isEnabled = enabled,
+            processingState = buttonProcessingState,
+            isProcessing = processing,
+        )
     }
 
     private fun primaryButtonLabel(
@@ -62,10 +76,4 @@ internal class PrimaryButtonStateHolder @Inject constructor(
     private fun amount(amount: Long?, currency: String?): Amount? {
         return if (amount != null && currency != null) Amount(amount, currency) else null
     }
-
-    internal data class State(
-        val label: ResolvableString,
-        val isEnabled: Boolean,
-        val processingState: PrimaryButtonProcessingState
-    )
 }

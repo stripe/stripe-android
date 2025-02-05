@@ -8,7 +8,6 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.injection.NativeLinkComponent
@@ -33,8 +32,10 @@ internal class VerificationViewModel @Inject constructor(
     private val linkAccountManager: LinkAccountManager,
     private val linkEventsReporter: LinkEventsReporter,
     private val logger: Logger,
-    private val goBack: () -> Unit,
-    private val navigateAndClearStack: (route: LinkScreen) -> Unit,
+    private val isDialog: Boolean,
+    private val onVerificationSucceeded: () -> Unit,
+    private val onChangeEmailRequested: () -> Unit,
+    private val onDismissClicked: () -> Unit,
 ) : ViewModel() {
 
     private val _viewState = MutableStateFlow(
@@ -45,7 +46,8 @@ internal class VerificationViewModel @Inject constructor(
             requestFocus = true,
             errorMessage = null,
             isSendingNewCode = false,
-            didSendNewCode = false
+            didSendNewCode = false,
+            isDialog = isDialog
         )
     )
     val viewState: StateFlow<VerificationViewState> = _viewState
@@ -84,7 +86,7 @@ internal class VerificationViewModel @Inject constructor(
                 updateViewState {
                     it.copy(isProcessing = false)
                 }
-                navigateAndClearStack(LinkScreen.Wallet)
+                onVerificationSucceeded()
             },
             onFailure = {
                 otpElement.controller.reset()
@@ -125,16 +127,13 @@ internal class VerificationViewModel @Inject constructor(
 
     fun onBack() {
         clearError()
-        goBack()
+        onDismissClicked()
         linkEventsReporter.on2FACancel()
-        viewModelScope.launch {
-            linkAccountManager.logOut()
-        }
     }
 
-    fun onChangeEmailClicked() {
+    fun onChangeEmailButtonClicked() {
         clearError()
-        navigateAndClearStack(LinkScreen.SignUp)
+        onChangeEmailRequested()
         viewModelScope.launch {
             linkAccountManager.logOut()
         }
@@ -179,8 +178,10 @@ internal class VerificationViewModel @Inject constructor(
         fun factory(
             parentComponent: NativeLinkComponent,
             linkAccount: LinkAccount,
-            goBack: () -> Unit,
-            navigateAndClearStack: (route: LinkScreen) -> Unit,
+            isDialog: Boolean,
+            onVerificationSucceeded: () -> Unit,
+            onChangeEmailClicked: () -> Unit = {},
+            onDismissClicked: () -> Unit,
         ): ViewModelProvider.Factory {
             return viewModelFactory {
                 initializer {
@@ -189,8 +190,10 @@ internal class VerificationViewModel @Inject constructor(
                         linkAccountManager = parentComponent.linkAccountManager,
                         linkEventsReporter = parentComponent.linkEventsReporter,
                         logger = parentComponent.logger,
-                        goBack = goBack,
-                        navigateAndClearStack = navigateAndClearStack,
+                        onVerificationSucceeded = onVerificationSucceeded,
+                        onChangeEmailRequested = onChangeEmailClicked,
+                        onDismissClicked = onDismissClicked,
+                        isDialog = isDialog
                     )
                 }
             }

@@ -11,7 +11,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -24,6 +23,7 @@ import com.stripe.android.paymentsheet.utils.EventReporterProvider
 import com.stripe.android.paymentsheet.utils.PaymentSheetContentPadding
 import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInteractor
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormUI
+import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.utils.collectAsState
 
@@ -31,12 +31,12 @@ import com.stripe.android.uicore.utils.collectAsState
 internal fun FormActivityUI(
     interactor: DefaultVerticalModeFormInteractor,
     eventReporter: EventReporter,
-    primaryButtonStateHolder: PrimaryButtonStateHolder,
+    stateHelper: FormActivityStateHelper,
     onDismissed: () -> Unit,
 ) {
     val scrollState = rememberScrollState()
     val interactorState by interactor.state.collectAsState()
-    val primaryButtonState by primaryButtonStateHolder.state.collectAsState()
+    val state by stateHelper.state.collectAsState()
     EventReporterProvider(eventReporter) {
         BottomSheetScaffold(
             topBar = {
@@ -52,7 +52,7 @@ internal fun FormActivityUI(
                 )
                 PaymentSheetContentPadding()
                 FormActivityPrimaryButton(
-                    state = primaryButtonState,
+                    state = state,
                     isProcessing = interactorState.isProcessing,
                     onClick = {},
                 )
@@ -65,7 +65,7 @@ internal fun FormActivityUI(
 
 @Composable
 internal fun FormActivityPrimaryButton(
-    state: PrimaryButtonStateHolder.State,
+    state: FormActivityStateHelper.State,
     isProcessing: Boolean,
     onProcessingCompleted: () -> Unit = {},
     onClick: () -> Unit,
@@ -77,7 +77,7 @@ internal fun FormActivityPrimaryButton(
             )
     ) {
         PrimaryButton(
-            label = state.label.resolve(LocalContext.current),
+            label = state.primaryButtonLabel.resolve(),
             locked = true,
             enabled = state.isEnabled && !isProcessing,
             onClick = onClick,

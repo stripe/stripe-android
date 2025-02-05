@@ -32,7 +32,7 @@ internal class FormActivity : AppCompatActivity() {
     lateinit var eventReporter: EventReporter
 
     @Inject
-    lateinit var primaryButtonStateHolder: PrimaryButtonStateHolder
+    lateinit var formActivityStateHelper: FormActivityStateHelper
 
     @OptIn(ExperimentalMaterialApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -56,7 +56,7 @@ internal class FormActivity : AppCompatActivity() {
                         interactor = formInteractor,
                         eventReporter = eventReporter,
                         onDismissed = ::setCancelAndFinish,
-                        primaryButtonStateHolder = primaryButtonStateHolder
+                        stateHelper = formActivityStateHelper
                     )
                 }
             }

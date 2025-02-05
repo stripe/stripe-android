@@ -7,6 +7,9 @@ tags:
 - startRecording: ${'/tmp/test_results/testmode-data-testoauthinstitution-' + new Date().getTime()}
 - clearState
 - openLink: stripeconnectionsexample://playground?integration_type=Standalone&experience=FinancialConnections&flow=Data&financial_connections_override_native=native&merchant=testmode&financial_connections_test_mode=true
+- scrollUntilVisible:
+    element:
+      id: "connect_accounts"
 - tapOn:
     id: "connect_accounts"
 # Wait until the consent button is visible

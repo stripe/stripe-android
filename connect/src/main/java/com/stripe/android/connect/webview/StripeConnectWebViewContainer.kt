@@ -33,6 +33,7 @@ import com.stripe.android.connect.StripeEmbeddedComponentListener
 import com.stripe.android.connect.appearance.Appearance
 import com.stripe.android.connect.databinding.StripeConnectWebviewBinding
 import com.stripe.android.connect.toJsonObject
+import com.stripe.android.connect.util.AndroidClock
 import com.stripe.android.connect.webview.serialization.AccountSessionClaimedMessage
 import com.stripe.android.connect.webview.serialization.ConnectInstanceJs
 import com.stripe.android.connect.webview.serialization.ConnectJson
@@ -202,6 +203,7 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
         this.controller = StripeConnectWebViewContainerController(
             view = this,
             analyticsService = analyticsService,
+            clock = AndroidClock(),
             embeddedComponentManager = embeddedComponentManager,
             embeddedComponent = embeddedComponent,
             listener = listener,
@@ -266,7 +268,11 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
     @VisibleForTesting
     internal inner class StripeConnectWebViewClient : WebViewClient() {
         override fun onPageStarted(view: WebView, url: String?, favicon: Bitmap?) {
-            controller?.onPageStarted()
+            controller?.onPageStarted(url)
+        }
+
+        override fun onPageFinished(view: WebView?, url: String?) {
+            controller?.onPageFinished()
         }
 
         override fun onReceivedHttpError(
@@ -371,7 +377,10 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
 
         @JavascriptInterface
         fun onSetterFunctionCalled(message: String) {
-            val parsed = ConnectJson.decodeFromString<SetterFunctionCalledMessage>(message)
+            val parsed = tryDeserializeWebMessage<SetterFunctionCalledMessage>(
+                webFunctionName = "onSetterFunctionCalled",
+                message = message,
+            ) ?: return
             logger.debug("Setter function called: $parsed")
 
             controller?.onReceivedSetterFunctionCalled(parsed)
@@ -379,21 +388,30 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
 
         @JavascriptInterface
         fun openSecureWebView(message: String) {
-            val secureWebViewData = ConnectJson.decodeFromString<SecureWebViewMessage>(message)
+            val secureWebViewData = tryDeserializeWebMessage<SecureWebViewMessage>(
+                webFunctionName = "openSecureWebView",
+                message = message,
+            )
             logger.debug("Open secure web view with data: $secureWebViewData")
         }
 
         @JavascriptInterface
         fun pageDidLoad(message: String) {
-            val pageLoadMessage = ConnectJson.decodeFromString<PageLoadMessage>(message)
+            val pageLoadMessage = tryDeserializeWebMessage<PageLoadMessage>(
+                webFunctionName = "pageDidLoad",
+                message = message,
+            ) ?: return
             logger.debug("Page did load: $pageLoadMessage")
 
-            controller?.onReceivedPageDidLoad()
+            controller?.onReceivedPageDidLoad(pageLoadMessage.pageViewId)
         }
 
         @JavascriptInterface
         fun accountSessionClaimed(message: String) {
-            val accountSessionClaimedMessage = ConnectJson.decodeFromString<AccountSessionClaimedMessage>(message)
+            val accountSessionClaimedMessage = tryDeserializeWebMessage<AccountSessionClaimedMessage>(
+                webFunctionName = "accountSessionClaimed",
+                message = message,
+            ) ?: return
             logger.debug("Account session claimed: $accountSessionClaimedMessage")
 
             controller?.onMerchantIdChanged(accountSessionClaimedMessage.merchantId)
@@ -404,6 +422,21 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
             return runBlocking {
                 checkNotNull(controller?.fetchClientSecret())
             }
+        }
+    }
+
+    private inline fun <reified T> tryDeserializeWebMessage(
+        webFunctionName: String,
+        message: String,
+    ): T? {
+        return try {
+            ConnectJson.decodeFromString<T>(message)
+        } catch (e: IllegalArgumentException) {
+            controller?.onErrorDeserializingWebMessage(
+                webFunctionName = webFunctionName,
+                error = e,
+            )
+            null
         }
     }
 

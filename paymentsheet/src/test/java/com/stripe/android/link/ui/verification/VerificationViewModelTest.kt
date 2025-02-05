@@ -4,7 +4,6 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.account.LinkAccountManager
@@ -60,17 +59,17 @@ internal class VerificationViewModelTest {
     @Test
     fun `When confirmVerification succeeds then it navigates to Wallet`() =
         runTest(dispatcher) {
-            val screens = arrayListOf<LinkScreen>()
-            fun navigateAndClearStack(screen: LinkScreen) {
-                screens.add(screen)
+            val onVerificationSucceededCalls = arrayListOf<Unit>()
+            fun onVerificationSucceeded() {
+                onVerificationSucceededCalls.add(Unit)
             }
 
             val viewModel = createViewModel(
-                navigateAndClearStack = ::navigateAndClearStack
+                onVerificationSucceeded = ::onVerificationSucceeded,
             )
             viewModel.onVerificationCodeEntered("code")
 
-            assertThat(screens).isEqualTo(listOf(LinkScreen.Wallet))
+            assertThat(onVerificationSucceededCalls).containsExactly(Unit)
         }
 
     @Test
@@ -122,41 +121,18 @@ internal class VerificationViewModelTest {
             }
         }
 
-        val navScreens = arrayListOf<LinkScreen>()
-        fun navigateAndClearStack(screen: LinkScreen) {
-            navScreens.add(screen)
+        val onChangeEmailRequestedCalls = arrayListOf<Unit>()
+        fun onChangeEmailRequested() {
+            onChangeEmailRequestedCalls.add(Unit)
         }
 
         createViewModel(
             linkAccountManager = linkAccountManager,
-            navigateAndClearStack = ::navigateAndClearStack
-        ).onChangeEmailClicked()
+            onChangeEmailRequested = ::onChangeEmailRequested,
+        ).onChangeEmailButtonClicked()
 
         assertThat(linkAccountManager.callCount).isEqualTo(1)
-        assertThat(navScreens).isEqualTo(listOf(LinkScreen.SignUp))
-    }
-
-    @Test
-    fun `onBack triggers logout and sends analytics event`() = runTest(dispatcher) {
-        val linkEventsReporter = object : FakeLinkEventsReporter() {
-            var callCount = 0
-            override fun on2FACancel() {
-                callCount += 1
-            }
-        }
-        val linkAccountManager = object : FakeLinkAccountManager() {
-            var callCount = 0
-            override suspend fun logOut(): Result<ConsumerSession> {
-                callCount += 1
-                return super.logOut()
-            }
-        }
-        createViewModel(
-            linkEventsReporter = linkEventsReporter,
-            linkAccountManager = linkAccountManager
-        ).onBack()
-        assertThat(linkEventsReporter.callCount).isEqualTo(1)
-        assertThat(linkAccountManager.callCount).isEqualTo(1)
+        assertThat(onChangeEmailRequestedCalls).containsExactly(Unit)
     }
 
     @Test
@@ -213,16 +189,19 @@ internal class VerificationViewModelTest {
         linkAccountManager: LinkAccountManager = FakeLinkAccountManager(),
         linkEventsReporter: LinkEventsReporter = FakeLinkEventsReporter(),
         logger: Logger = FakeLogger(),
-        navigateAndClearStack: (LinkScreen) -> Unit = {},
-        goBack: () -> Unit = {},
+        onVerificationSucceeded: () -> Unit = {},
+        onChangeEmailRequested: () -> Unit = {},
+        onDismissClicked: () -> Unit = {},
     ): VerificationViewModel {
         return VerificationViewModel(
             linkAccountManager = linkAccountManager,
             linkEventsReporter = linkEventsReporter,
             logger = logger,
-            navigateAndClearStack = navigateAndClearStack,
-            goBack = goBack,
-            linkAccount = TestFactory.LINK_ACCOUNT
+            linkAccount = TestFactory.LINK_ACCOUNT,
+            onVerificationSucceeded = onVerificationSucceeded,
+            onChangeEmailRequested = onChangeEmailRequested,
+            onDismissClicked = onDismissClicked,
+            isDialog = false
         )
     }
 }

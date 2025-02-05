@@ -18,8 +18,6 @@ class CustomerStateTest {
     fun `Should create 'CustomerState' for customer session properly with permissions disabled`() {
         val paymentMethods = PaymentMethodFactory.cards(4)
         val customer = createElementsSessionCustomer(
-            customerId = "cus_1",
-            ephemeralKeySecret = "ek_1",
             paymentMethods = paymentMethods,
             mobilePaymentElementComponent = ElementsSession.Customer.Components.MobilePaymentElement.Disabled
         )
@@ -41,8 +39,6 @@ class CustomerStateTest {
     fun `Should create 'CustomerState' for customer session properly with remove permissions enabled`() {
         val paymentMethods = PaymentMethodFactory.cards(4)
         val customer = createElementsSessionCustomer(
-            customerId = "cus_1",
-            ephemeralKeySecret = "ek_1",
             paymentMethods = paymentMethods,
             mobilePaymentElementComponent = createEnabledMobilePaymentElement(
                 isPaymentMethodSaveEnabled = false,
@@ -69,8 +65,6 @@ class CustomerStateTest {
     fun `Should create 'CustomerState' for customer session properly with remove permissions disabled`() {
         val paymentMethods = PaymentMethodFactory.cards(3)
         val customer = createElementsSessionCustomer(
-            customerId = "cus_3",
-            ephemeralKeySecret = "ek_3",
             paymentMethods = paymentMethods,
             mobilePaymentElementComponent = createEnabledMobilePaymentElement(
                 isPaymentMethodSaveEnabled = false,
@@ -185,32 +179,21 @@ class CustomerStateTest {
     @Test
     fun `Should create 'CustomerState' for legacy ephemeral keys properly`() {
         val paymentMethods = PaymentMethodFactory.cards(7)
-        val customerState = CustomerState.createForLegacyEphemeralKey(
-            customerId = "cus_1",
-            accessType = PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey(
-                ephemeralKeySecret = "ek_1",
-            ),
-            configuration = createConfiguration(),
+
+        val customerState = createLegacyEphemeralKeyCustomerState(
+            allowsRemovalOfLastSavedPaymentMethod = true,
             paymentMethods = paymentMethods,
         )
 
-        assertThat(customerState).isEqualTo(
-            CustomerState(
-                id = "cus_1",
-                ephemeralKeySecret = "ek_1",
-                customerSessionClientSecret = null,
-                paymentMethods = paymentMethods,
-                permissions = CustomerState.Permissions(
-                    // Always true for legacy ephemeral keys since un-scoped
-                    canRemovePaymentMethods = true,
-                    // Always true unless configured client-side
-                    canRemoveLastPaymentMethod = true,
-                    // Always 'false' for legacy ephemeral keys
-                    canRemoveDuplicates = false,
-                ),
-                defaultPaymentMethodState = CustomerState.DefaultPaymentMethodState.Disabled
-            )
-        )
+        assertThat(customerState.permissions.canRemovePaymentMethods).isTrue()
+        assertThat(customerState.permissions.canRemoveLastPaymentMethod).isTrue()
+        assertThat(customerState.permissions.canRemoveDuplicates).isFalse()
+
+        assertThat(customerState.paymentMethods).isEqualTo(paymentMethods)
+        assertThat(customerState.customerSessionClientSecret).isNull()
+        assertThat(customerState.defaultPaymentMethodState).isEqualTo(CustomerState.DefaultPaymentMethodState.Disabled)
+        assertThat(customerState.id).isEqualTo("cus_1")
+        assertThat(customerState.ephemeralKeySecret).isEqualTo("ek_1")
     }
 
     @Test
@@ -244,12 +227,8 @@ class CustomerStateTest {
 
     @Test
     fun `Should set 'canRemoveLastPaymentMethod' to true if config value is true for legacy ephemeral keys`() {
-        val customerState = CustomerState.createForLegacyEphemeralKey(
-            customerId = "cus_1",
-            accessType = PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey(
-                ephemeralKeySecret = "ek_1",
-            ),
-            configuration = createConfiguration(allowsRemovalOfLastSavedPaymentMethod = true),
+        val customerState = createLegacyEphemeralKeyCustomerState(
+            allowsRemovalOfLastSavedPaymentMethod = true,
             paymentMethods = listOf(),
         )
 
@@ -258,12 +237,8 @@ class CustomerStateTest {
 
     @Test
     fun `Should set 'canRemoveLastPaymentMethod' to false if config value is false for legacy ephemeral keys`() {
-        val customerState = CustomerState.createForLegacyEphemeralKey(
-            customerId = "cus_1",
-            accessType = PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey(
-                ephemeralKeySecret = "ek_1",
-            ),
-            configuration = createConfiguration(allowsRemovalOfLastSavedPaymentMethod = false),
+        val customerState = createLegacyEphemeralKeyCustomerState(
+            allowsRemovalOfLastSavedPaymentMethod = false,
             paymentMethods = listOf(),
         )
 
@@ -366,6 +341,20 @@ class CustomerStateTest {
             canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
             allowRedisplayOverride = allowRedisplayOverride,
             isSetAsDefaultEnabled = isSetAsDefaultEnabled,
+        )
+    }
+
+    private fun createLegacyEphemeralKeyCustomerState(
+        allowsRemovalOfLastSavedPaymentMethod: Boolean,
+        paymentMethods: List<PaymentMethod> = emptyList()
+    ): CustomerState {
+        return CustomerState.createForLegacyEphemeralKey(
+            customerId = "cus_1",
+            accessType = PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey(
+                ephemeralKeySecret = "ek_1",
+            ),
+            configuration = createConfiguration(allowsRemovalOfLastSavedPaymentMethod),
+            paymentMethods = paymentMethods,
         )
     }
 

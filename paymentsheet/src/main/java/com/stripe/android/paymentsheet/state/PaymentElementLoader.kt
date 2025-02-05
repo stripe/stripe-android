@@ -574,7 +574,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             CustomerState.DefaultPaymentMethodState.Disabled, null -> {
                 when (val selection = savedSelection.await()) {
                     is SavedSelection.GooglePay -> PaymentSelection.GooglePay
-                    is SavedSelection.Link -> PaymentSelection.Link
+                    is SavedSelection.Link -> PaymentSelection.Link()
                     is SavedSelection.PaymentMethod -> {
                         customer?.paymentMethods?.find { it.id == selection.id }?.toPaymentSelection()
                     }

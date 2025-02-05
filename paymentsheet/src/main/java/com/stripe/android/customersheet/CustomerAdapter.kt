@@ -151,7 +151,7 @@ interface CustomerAdapter {
                 }
 
                 is Link -> {
-                    PaymentSelection.Link
+                    PaymentSelection.Link()
                 }
 
                 is StripeId -> {
