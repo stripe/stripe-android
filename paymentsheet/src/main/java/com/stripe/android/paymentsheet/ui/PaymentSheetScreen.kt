@@ -36,7 +36,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalTextInputService
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
@@ -64,6 +63,7 @@ import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.PaymentSheetFlowType.Complete
 import com.stripe.android.paymentsheet.ui.PaymentSheetFlowType.Custom
+import com.stripe.android.paymentsheet.utils.DismissKeyboardOnProcessing
 import com.stripe.android.paymentsheet.utils.EventReporterProvider
 import com.stripe.android.paymentsheet.utils.PaymentSheetContentPadding
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -161,18 +161,6 @@ private fun PaymentSheetScreen(
                 .background(MaterialTheme.colors.surface.copy(alpha = 0.9f)),
         ) {
             ProgressOverlay(walletsProcessingState)
-        }
-    }
-}
-
-@Composable
-private fun DismissKeyboardOnProcessing(processing: Boolean) {
-    val keyboardController = LocalTextInputService.current
-
-    if (processing) {
-        LaunchedEffect(Unit) {
-            @Suppress("DEPRECATION")
-            keyboardController?.hideSoftwareKeyboard()
         }
     }
 }
