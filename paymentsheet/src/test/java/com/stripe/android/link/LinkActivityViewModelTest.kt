@@ -725,6 +725,28 @@ internal class LinkActivityViewModelTest {
         assertThat(appBarState.navigationIcon).isEqualTo(R.drawable.stripe_link_close)
     }
 
+    @Test
+    fun `logout action should dismiss screen`() = runTest {
+        val linkAccountManager = FakeLinkAccountManager()
+        var result: LinkActivityResult? = null
+        val viewModel = createViewModel(
+            linkAccountManager = linkAccountManager,
+            dismissWithResult = {
+                result = it
+            }
+        )
+
+        viewModel.handleViewAction(LinkAction.LogoutClicked)
+
+        linkAccountManager.awaitLogoutCall()
+        assertThat(result).isEqualTo(
+            LinkActivityResult.Canceled(
+                reason = LinkActivityResult.Canceled.Reason.LoggedOut,
+                linkAccountUpdate = LinkAccountUpdate.Value(null)
+            )
+        )
+    }
+
     private fun navController(
         screen: LinkScreen = LinkScreen.SignUp
     ): NavHostController {
