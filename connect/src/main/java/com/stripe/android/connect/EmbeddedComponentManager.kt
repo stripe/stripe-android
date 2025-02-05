@@ -166,9 +166,8 @@ class EmbeddedComponentManager(
     }
 
     internal suspend fun chooseFile(context: Context, requestIntent: Intent): Array<Uri>? {
-        val (activity, launcher) =
-            getLauncher(context, chooseFileLaunchers, "Error choosing file")
-                ?: return null
+        val (activity, launcher) = getLauncher(context, chooseFileLaunchers, "Error choosing file")
+            ?: return null
         launcher.launch(requestIntent)
 
         return chooseFileResultFlow

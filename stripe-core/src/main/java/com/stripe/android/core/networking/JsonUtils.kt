@@ -43,28 +43,3 @@ fun JsonArray.toPrimitives(): List<*> = map { it.toPrimitives() }
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun JsonObject.toMap(): Map<String, *> = map { it.key to it.value.toPrimitives() }.toMap()
-
-/**
- * Convert a string to snake_case.
- */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun String.toSnakeCase(): String {
-    if (isEmpty()) return this
-    return buildString {
-        var lastChar: Char? = null
-        for (char in this@toSnakeCase) {
-            when {
-                char.isUpperCase() -> {
-                    if (lastChar != null && lastChar != '_') {
-                        append('_')
-                    }
-                    append(char.lowercase())
-                }
-                else -> {
-                    append(char)
-                }
-            }
-            lastChar = char
-        }
-    }
-}
