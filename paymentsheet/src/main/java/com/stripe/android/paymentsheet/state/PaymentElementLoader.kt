@@ -199,7 +199,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         val initialPaymentSelection = async {
             retrieveInitialPaymentSelection(
                 savedSelection = savedSelection,
-                customerDeferred = customer,
+                customer = customer.await(),
                 isGooglePayReady = isGooglePayReady,
             )
         }
@@ -562,10 +562,9 @@ internal class DefaultPaymentElementLoader @Inject constructor(
 
     private suspend fun retrieveInitialPaymentSelection(
         savedSelection: Deferred<SavedSelection>,
-        customerDeferred: Deferred<CustomerState?>,
+        customer: CustomerState?,
         isGooglePayReady: Boolean,
     ): PaymentSelection? {
-        val customer = customerDeferred.await()
         val primaryPaymentSelection = when (val defaultPaymentMethodState = customer?.defaultPaymentMethodState) {
             is CustomerState.DefaultPaymentMethodState.Enabled ->
                 customer.paymentMethods.firstOrNull {
