@@ -32,6 +32,7 @@ import com.stripe.android.paymentsheet.example.playground.activity.AppearanceSto
 internal fun PlaygroundTheme(
     content: @Composable ColumnScope.() -> Unit,
     bottomBarContent: @Composable ColumnScope.() -> Unit,
+    topBarContent: @Composable (() -> Unit)? = null
 ) {
     val colors = if (isSystemInDarkTheme() || AppearanceStore.forceDarkMode) {
         darkColors()
@@ -48,6 +49,9 @@ internal fun PlaygroundTheme(
             color = MaterialTheme.colors.background,
         ) {
             Scaffold(
+                topBar = {
+                    topBarContent?.invoke()
+                },
                 bottomBar = {
                     Column(
                         modifier = Modifier
