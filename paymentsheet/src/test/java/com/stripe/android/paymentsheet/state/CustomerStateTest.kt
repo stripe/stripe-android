@@ -91,16 +91,12 @@ class CustomerStateTest {
         defaultPaymentMethodId: String?,
         isSetAsDefaultEnabled: Boolean,
     ): CustomerState {
-        val customerId = "cus_3"
-        val ephemeralKeySecret = "ek_3"
         val paymentMethods = PaymentMethodFactory.cards(3)
 
         val mobilePaymentElementComponent = createEnabledMobilePaymentElement(
             isSetAsDefaultEnabled = isSetAsDefaultEnabled,
         )
         val customer = createElementsSessionCustomer(
-            customerId = customerId,
-            ephemeralKeySecret = ephemeralKeySecret,
             paymentMethods = paymentMethods,
             mobilePaymentElementComponent = mobilePaymentElementComponent,
             defaultPaymentMethodId = defaultPaymentMethodId
