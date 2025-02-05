@@ -102,7 +102,7 @@ internal fun LinkButton(
     CompositionLocalProvider(
         LocalContentAlpha provides alpha
     ) {
-        DefaultLinkTheme(contentShape = LinkButtonShape) {
+        DefaultLinkTheme {
             Button(
                 onClick = onClick,
                 modifier = modifier
@@ -110,6 +110,7 @@ internal fun LinkButton(
                     .defaultMinSize(minHeight = 48.dp)
                     .testTag(LinkButtonTestTag),
                 enabled = enabled,
+                shape = LinkButtonShape,
                 elevation = ButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp, 0.dp),
                 colors = ButtonDefaults.buttonColors(
                     backgroundColor = MaterialTheme.colors.primary,
