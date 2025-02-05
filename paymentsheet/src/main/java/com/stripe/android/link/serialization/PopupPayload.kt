@@ -52,6 +52,9 @@ internal data class PopupPayload(
 
     @SerialName("flags")
     val flags: Map<String, Boolean>,
+
+    @SerialName("linkFundingSources")
+    val linkFundingSources: List<String>,
 ) {
     @SerialName("path")
     val path: String = "mobile_pay"
@@ -167,6 +170,7 @@ internal data class PopupPayload(
                 intentMode = stripeIntent.toIntentMode().type,
                 setupFutureUsage = stripeIntent.isSetupForFutureUsage(),
                 flags = flags,
+                linkFundingSources = stripeIntent.linkFundingSources.map { it.uppercase() },
             )
         }
 
