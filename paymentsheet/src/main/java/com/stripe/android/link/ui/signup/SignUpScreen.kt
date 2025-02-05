@@ -101,7 +101,8 @@ internal fun SignUpBody(
         }
         AnimatedVisibility(
             visible = signUpScreenState.signUpState != SignUpState.InputtingRemainingFields &&
-                signUpScreenState.errorMessage != null
+                signUpScreenState.errorMessage != null,
+            modifier = Modifier.fillMaxWidth(),
         ) {
             ErrorText(
                 text = signUpScreenState.errorMessage?.resolve(LocalContext.current).orEmpty(),

@@ -93,7 +93,7 @@ private fun RowScope.LinkAppBarTitle(
             contentDescription = stringResource(com.stripe.android.R.string.stripe_link),
         )
 
-        AnimatedVisibility(visible = email != null) {
+        AnimatedVisibility(visible = email != null, modifier = Modifier.fillMaxWidth()) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
