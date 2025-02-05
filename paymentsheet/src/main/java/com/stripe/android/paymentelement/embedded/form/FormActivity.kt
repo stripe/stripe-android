@@ -44,7 +44,7 @@ internal class FormActivity : AppCompatActivity() {
             return
         }
 
-        this.renderEdgeToEdge()
+        renderEdgeToEdge()
 
         viewModel.component.inject(this)
 

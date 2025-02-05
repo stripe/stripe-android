@@ -35,7 +35,7 @@ internal class BacsMandateConfirmationActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        this.renderEdgeToEdge()
+        renderEdgeToEdge()
 
         onBackPressedDispatcher.addCallback {
             viewModel.handleViewAction(OnBackPressed)

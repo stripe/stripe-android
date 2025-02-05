@@ -66,7 +66,7 @@ internal class ManageActivity : AppCompatActivity() {
             return
         }
 
-        this.renderEdgeToEdge()
+        renderEdgeToEdge()
 
         viewModel.component.inject(this)
 

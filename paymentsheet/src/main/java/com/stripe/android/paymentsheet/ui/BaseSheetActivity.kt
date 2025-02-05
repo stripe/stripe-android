@@ -25,7 +25,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
             return
         }
 
-        this.renderEdgeToEdge()
+        renderEdgeToEdge()
 
         onBackPressedDispatcher.addCallback {
             viewModel.handleBackPressed()
