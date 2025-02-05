@@ -84,7 +84,6 @@ internal fun WalletScreen(
         onPrimaryButtonClick = viewModel::onPrimaryButtonClicked,
         onPayAnotherWayClicked = viewModel::onPayAnotherWayClicked,
         onRemoveClicked = viewModel::onRemoveClicked,
-        onEditPaymentMethodClicked = viewModel::onEditPaymentMethodClicked,
         onSetDefaultClicked = viewModel::onSetDefaultClicked,
         showBottomSheetContent = showBottomSheetContent,
         hideBottomSheetContent = hideBottomSheetContent,
@@ -105,7 +104,6 @@ internal fun WalletBody(
     onPrimaryButtonClick: () -> Unit,
     onPayAnotherWayClicked: () -> Unit,
     onDismissAlert: () -> Unit,
-    onEditPaymentMethodClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onSetDefaultClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onRemoveClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     showBottomSheetContent: (BottomSheetContent) -> Unit,
@@ -146,7 +144,6 @@ internal fun WalletBody(
             showBottomSheetContent = showBottomSheetContent,
             onRemoveClicked = onRemoveClicked,
             onSetDefaultClicked = onSetDefaultClicked,
-            onEditPaymentMethodClicked = onEditPaymentMethodClicked,
             onAddNewPaymentMethodClicked = onAddNewPaymentMethodClicked,
             hideBottomSheetContent = hideBottomSheetContent
         )
@@ -228,7 +225,6 @@ private fun PaymentMethodSection(
     onItemSelected: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onExpandedChanged: (Boolean) -> Unit,
     onAddNewPaymentMethodClicked: () -> Unit,
-    onEditPaymentMethodClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onSetDefaultClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onRemoveClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     showBottomSheetContent: (BottomSheetContent) -> Unit,
@@ -249,10 +245,6 @@ private fun PaymentMethodSection(
                             modifier = Modifier
                                 .testTag(WALLET_SCREEN_MENU_SHEET_TAG),
                             paymentDetails = it,
-                            onEditClick = {
-                                hideBottomSheetContent()
-                                onEditPaymentMethodClicked(it)
-                            },
                             onSetDefaultClick = {
                                 hideBottomSheetContent()
                                 onSetDefaultClicked(it)
