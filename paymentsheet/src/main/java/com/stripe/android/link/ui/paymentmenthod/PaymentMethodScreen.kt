@@ -64,7 +64,8 @@ internal fun PaymentMethodBody(
         }
 
         AnimatedVisibility(
-            visible = state.errorMessage != null
+            visible = state.errorMessage != null,
+            modifier = Modifier.fillMaxWidth(),
         ) {
             ErrorText(
                 modifier = Modifier

@@ -89,7 +89,10 @@ internal fun LinkInlineSignupFields(
             )
         }
 
-        AnimatedVisibility(visible = didShowAllFields || signUpState == SignUpState.InputtingRemainingFields) {
+        AnimatedVisibility(
+            visible = didShowAllFields || signUpState == SignUpState.InputtingRemainingFields,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
             LaunchedEffect(Unit) {
                 onShowingAllFields()
             }

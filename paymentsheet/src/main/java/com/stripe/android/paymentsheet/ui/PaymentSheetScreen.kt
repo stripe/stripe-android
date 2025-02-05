@@ -84,7 +84,7 @@ internal fun PaymentSheetScreen(
     val contentVisible by viewModel.contentVisible.collectAsState()
     val scrollState = rememberScrollState()
     PaymentSheetScreen(viewModel, scrollState) {
-        AnimatedVisibility(visible = contentVisible) {
+        AnimatedVisibility(visible = contentVisible, modifier = Modifier.fillMaxWidth()) {
             PaymentSheetScreenContent(viewModel, type = Complete, scrollState = scrollState)
         }
     }
