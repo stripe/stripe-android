@@ -92,7 +92,7 @@ internal class NetworkingLinkLoginWarmupViewModel @AssistedInject constructor(
                 handleError(
                     extraMessage = "Error looking up account",
                     error = error,
-                    displayErrorScreen = true,
+                    displayErrorScreen = false,
                     pane = PANE
                 )
             },
