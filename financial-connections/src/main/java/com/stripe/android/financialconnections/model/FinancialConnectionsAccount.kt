@@ -5,7 +5,6 @@ import com.stripe.android.core.model.StripeModel
 import com.stripe.android.core.model.serializers.EnumIgnoreUnknownSerializer
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
-import kotlinx.serialization.EncodeDefault
 import kotlinx.serialization.Required
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -74,8 +73,7 @@ data class FinancialConnectionsAccount(
     @IgnoredOnParcel
     @SerialName("object")
     @Required
-    // var instead of val to make it be included for serialization
-    var `object`: String = OBJECT_NEW
+    var `object`: String = OBJECT_NEW // var instead of val to include for serialization
         private set
 
     /**
