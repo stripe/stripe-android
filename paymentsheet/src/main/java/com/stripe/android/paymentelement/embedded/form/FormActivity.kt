@@ -71,7 +71,7 @@ internal class FormActivity : AppCompatActivity() {
                         onDismissed = ::setCancelAndFinish,
                         onClick = confirmationHelper::confirm,
                         onProcessingCompleted = ::setCompletedResultAndDismiss,
-                        stateHelper = formActivityStateHelper
+                        state = state
                     )
                 }
             }

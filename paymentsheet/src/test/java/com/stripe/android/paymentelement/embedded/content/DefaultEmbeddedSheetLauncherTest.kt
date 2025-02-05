@@ -4,10 +4,12 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
+import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.confirmation.asCallbackFor
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
@@ -64,15 +66,18 @@ internal class DefaultEmbeddedSheetLauncherTest {
     }
 
     @Test
-    fun `formActivityLauncher callback updates selection holder on complete result`() = testScenario {
+    fun `formActivityLauncher clears selection holder and invokes callback on complete result`() = testScenario {
         sheetStateHolder.sheetIsOpen = true
         val selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
-        val result = FormResult.Complete(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+        selectionHolder.set(selection)
+
+        val result = FormResult.Complete(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
         val callback = formRegisterCall.callback.asCallbackFor<FormResult>()
 
         callback.onActivityResult(result)
-        assertThat(selectionHolder.selection.value).isEqualTo(selection)
+        assertThat(selectionHolder.selection.value).isNull()
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
+        assertThat(resultCallbackTurbine.awaitItem()).isInstanceOf<EmbeddedPaymentElement.Result.Completed>()
     }
 
     @Test
@@ -84,6 +89,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
         callback.onActivityResult(result)
         assertThat(selectionHolder.selection.value).isEqualTo(null)
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
+        resultCallbackTurbine.expectNoEvents()
     }
 
     @Test
@@ -163,6 +169,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val customerStateHolder = CustomerStateHolder(savedStateHandle, selectionHolder.selection)
         val sheetStateHolder = SheetStateHolder(savedStateHandle)
         val errorReporter = FakeErrorReporter()
+        val resultCallbackTurbine = Turbine<EmbeddedPaymentElement.Result>()
 
         DummyActivityResultCaller.test {
             val sheetLauncher = DefaultEmbeddedSheetLauncher(
@@ -173,7 +180,9 @@ internal class DefaultEmbeddedSheetLauncherTest {
                 sheetStateHolder = sheetStateHolder,
                 errorReporter = errorReporter,
                 statusBarColor = null,
-                resultCallback = { }
+                resultCallback = {
+                    resultCallbackTurbine.add(it)
+                }
             )
             val formRegisterCall = awaitRegisterCall()
             val manageRegisterCall = awaitRegisterCall()
@@ -198,7 +207,8 @@ internal class DefaultEmbeddedSheetLauncherTest {
                 manageLauncher = manageLauncher,
                 sheetLauncher = sheetLauncher,
                 sheetStateHolder = sheetStateHolder,
-                errorReporter = errorReporter
+                errorReporter = errorReporter,
+                resultCallbackTurbine = resultCallbackTurbine
             ).block()
         }
     }
@@ -214,6 +224,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val manageLauncher: ActivityResultLauncher<*>,
         val sheetLauncher: EmbeddedSheetLauncher,
         val sheetStateHolder: SheetStateHolder,
-        val errorReporter: FakeErrorReporter
+        val errorReporter: FakeErrorReporter,
+        val resultCallbackTurbine: Turbine<EmbeddedPaymentElement.Result>
     )
 }

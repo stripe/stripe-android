@@ -35,14 +35,14 @@ internal fun FormActivityUI(
     eventReporter: EventReporter,
     onClick: () -> Unit,
     onProcessingCompleted: () -> Unit,
-    stateHelper: FormActivityStateHelper,
+    state: FormActivityStateHelper.State,
     onDismissed: () -> Unit,
 ) {
     val scrollState = rememberScrollState()
     val interactorState by interactor.state.collectAsState()
 
     DismissKeyboardOnProcessing(interactorState.isProcessing)
-    val state by stateHelper.state.collectAsState()
+
     EventReporterProvider(eventReporter) {
         BottomSheetScaffold(
             topBar = {
