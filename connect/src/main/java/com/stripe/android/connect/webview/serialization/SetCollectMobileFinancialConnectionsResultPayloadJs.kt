@@ -1,10 +1,9 @@
 package com.stripe.android.connect.webview.serialization
 
 import com.stripe.android.core.StripeError
-import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.model.serializers.StripeErrorSerializer
-import com.stripe.android.financialconnections.FinancialConnectionsSheetForTokenResult
+import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.model.Token
 import com.stripe.android.model.parsers.TokenSerializer
@@ -20,11 +19,11 @@ internal data class SetCollectMobileFinancialConnectionsResultPayloadJs(
     companion object {
         fun from(
             id: String,
-            result: FinancialConnectionsSheetForTokenResult?
+            result: FinancialConnectionsSheetResult?
         ): SetCollectMobileFinancialConnectionsResultPayloadJs {
             return when (result) {
                 null,
-                is FinancialConnectionsSheetForTokenResult.Canceled -> {
+                is FinancialConnectionsSheetResult.Canceled -> {
                     SetCollectMobileFinancialConnectionsResultPayloadJs(
                         id = id,
                         financialConnectionsSession = FinancialConnectionsSessionJs(accounts = emptyList()),
@@ -32,7 +31,7 @@ internal data class SetCollectMobileFinancialConnectionsResultPayloadJs(
                         error = null,
                     )
                 }
-                is FinancialConnectionsSheetForTokenResult.Failed -> {
+                is FinancialConnectionsSheetResult.Failed -> {
                     val error = (result.error as? StripeException)?.stripeError
                     SetCollectMobileFinancialConnectionsResultPayloadJs(
                         id = id,
@@ -41,13 +40,13 @@ internal data class SetCollectMobileFinancialConnectionsResultPayloadJs(
                         error = error
                     )
                 }
-                is FinancialConnectionsSheetForTokenResult.Completed -> {
+                is FinancialConnectionsSheetResult.Completed -> {
                     SetCollectMobileFinancialConnectionsResultPayloadJs(
                         id = id,
                         financialConnectionsSession = FinancialConnectionsSessionJs(
                             accounts = result.financialConnectionsSession.accounts.data,
                         ),
-                        token = result.token,
+                        token = result.financialConnectionsSession.parsedToken,
                         error = null,
                     )
                 }

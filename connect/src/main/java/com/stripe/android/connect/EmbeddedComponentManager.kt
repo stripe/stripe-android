@@ -12,7 +12,6 @@ import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.CheckResult
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import androidx.core.content.ContextCompat.checkSelfPermission
@@ -27,7 +26,7 @@ import com.stripe.android.connect.webview.serialization.ConnectInstanceJs
 import com.stripe.android.connect.webview.serialization.toJs
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
-import com.stripe.android.financialconnections.FinancialConnectionsSheetForTokenResult
+import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -181,7 +180,7 @@ class EmbeddedComponentManager(
         context: Context,
         clientSecret: String,
         connectedAccountId: String,
-    ): FinancialConnectionsSheetForTokenResult? {
+    ): FinancialConnectionsSheetResult? {
         val activity = context.findActivityWithErrorHandling()
             ?: return null
         val sheet = financialConnectionsSheets[activity]
@@ -276,7 +275,7 @@ class EmbeddedComponentManager(
 
         @VisibleForTesting
         internal val financialConnectionsResults:
-            MutableSharedFlow<ActivityResult<FinancialConnectionsSheetForTokenResult>> =
+            MutableSharedFlow<ActivityResult<FinancialConnectionsSheetResult>> =
             MutableSharedFlow(extraBufferCapacity = 1)
         private val financialConnectionsSheets = mutableMapOf<Activity, FinancialConnectionsSheet>()
 
@@ -344,7 +343,7 @@ class EmbeddedComponentManager(
                 }
 
             financialConnectionsSheets[activity] =
-                FinancialConnectionsSheet.createForBankAccountToken(activity) { result ->
+                FinancialConnectionsSheet.create(activity) { result ->
                     financialConnectionsResults.tryEmit(ActivityResult(activity, result))
                 }
         }

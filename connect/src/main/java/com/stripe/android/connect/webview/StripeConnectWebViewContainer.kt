@@ -45,7 +45,7 @@ import com.stripe.android.connect.webview.serialization.SetterFunctionCalledMess
 import com.stripe.android.connect.webview.serialization.toJs
 import com.stripe.android.core.Logger
 import com.stripe.android.core.version.StripeSdkVersion
-import com.stripe.android.financialconnections.FinancialConnectionsSheetForTokenResult
+import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -86,7 +86,7 @@ internal interface StripeConnectWebViewContainerInternal {
      */
     fun updateConnectInstance(appearance: Appearance)
 
-    fun setCollectMobileFinancialConnectionsResult(id: String, result: FinancialConnectionsSheetForTokenResult?)
+    fun setCollectMobileFinancialConnectionsResult(id: String, result: FinancialConnectionsSheetResult?)
 }
 
 @OptIn(PrivateBetaConnectSDK::class)
@@ -257,7 +257,7 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
 
     override fun setCollectMobileFinancialConnectionsResult(
         id: String,
-        result: FinancialConnectionsSheetForTokenResult?
+        result: FinancialConnectionsSheetResult?
     ) {
         val payload = SetCollectMobileFinancialConnectionsResultPayloadJs.from(id, result)
         callSetterWithSerializableValue(
