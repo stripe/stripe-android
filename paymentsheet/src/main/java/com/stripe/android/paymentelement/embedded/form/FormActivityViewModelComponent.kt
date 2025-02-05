@@ -43,14 +43,14 @@ import kotlin.coroutines.CoroutineContext
 @Component(
     modules = [
         EmbeddedCommonModule::class,
-        FormActivityModule::class,
+        FormActivityViewModelModule::class,
         ExtendedPaymentElementConfirmationModule::class,
         GooglePayLauncherModule::class
     ]
 )
 @Singleton
 @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
-internal interface FormActivityComponent {
+internal interface FormActivityViewModelComponent {
     val viewModel: FormActivityViewModel
     val subcomponentBuilder: FormActivitySubcomponent.Builder
 
@@ -80,7 +80,7 @@ internal interface FormActivityComponent {
         @BindsInstance
         fun savedStateHandle(savedStateHandle: SavedStateHandle): Builder
 
-        fun build(): FormActivityComponent
+        fun build(): FormActivityViewModelComponent
     }
 }
 
@@ -91,7 +91,7 @@ internal interface FormActivityComponent {
         FormActivitySubcomponent::class
     ]
 )
-internal interface FormActivityModule {
+internal interface FormActivityViewModelModule {
     @Binds
     fun bindsCardAccountRangeRepositoryFactory(
         defaultCardAccountRangeRepositoryFactory: DefaultCardAccountRangeRepositoryFactory
@@ -143,7 +143,7 @@ internal interface FormActivityModule {
 
 @Subcomponent(
     modules = [
-        FormConfirmationModule::class,
+        FormActivityModule::class,
     ]
 )
 @FormActivityScope
@@ -163,7 +163,7 @@ internal interface FormActivitySubcomponent {
 }
 
 @Module
-internal interface FormConfirmationModule {
+internal interface FormActivityModule {
     @Binds
     fun bindsFormConfirmationHelper(
         confirmationHandler: DefaultFormActivityConfirmationHelper
