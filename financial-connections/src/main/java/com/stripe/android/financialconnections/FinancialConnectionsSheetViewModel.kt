@@ -171,7 +171,6 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
 
         val manifest = sync.manifest
         val nativeAuthFlowEnabled = nativeRouter.nativeAuthFlowEnabled(manifest)
-//        val nativeAuthFlowEnabled = false
         nativeRouter.logExposure(manifest)
 
         val hostedAuthUrl = HostedAuthUrlBuilder.create(

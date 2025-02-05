@@ -20,11 +20,13 @@ import com.stripe.android.connect.analytics.ConnectAnalyticsEvent
 import com.stripe.android.connect.appearance.Appearance
 import com.stripe.android.connect.appearance.Colors
 import com.stripe.android.connect.util.Clock
+import com.stripe.android.connect.webview.serialization.OpenFinancialConnectionsMessage
 import com.stripe.android.connect.webview.serialization.SetOnLoadError
 import com.stripe.android.connect.webview.serialization.SetOnLoadError.LoadError
 import com.stripe.android.connect.webview.serialization.SetOnLoaderStart
 import com.stripe.android.connect.webview.serialization.SetterFunctionCalledMessage
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.resetMain
@@ -269,6 +271,30 @@ class StripeConnectWebViewContainerControllerTest {
         )
 
         assertThat(actual).isEqualTo(expected)
+    }
+
+    @Test
+    fun `onOpenFinancialConnections should delegate to manager`() = runTest {
+        val message = OpenFinancialConnectionsMessage(
+            id = "id",
+            clientSecret = "client_secret",
+            connectedAccountId = "connected_account_id"
+        )
+        val expected = FinancialConnectionsSheetResult.Canceled
+        wheneverBlocking {
+            embeddedComponentManager.presentFinancialConnections(
+                context = mockContext,
+                clientSecret = message.clientSecret,
+                connectedAccountId = message.connectedAccountId,
+            )
+        } doReturn expected
+
+        controller.onOpenFinancialConnections(mockContext, message)
+
+        verify(view).setCollectMobileFinancialConnectionsResult(
+            id = message.id,
+            result = expected,
+        )
     }
 
     @Test

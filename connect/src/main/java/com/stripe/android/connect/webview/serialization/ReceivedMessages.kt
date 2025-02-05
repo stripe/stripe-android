@@ -8,13 +8,6 @@ internal data class AccountSessionClaimedMessage(
 )
 
 @Serializable
-internal data class OpenFinancialConnectionsMessage(
-    val id: String,
-    val clientSecret: String,
-    val connectedAccountId: String,
-)
-
-@Serializable
 internal data class PageLoadMessage(
     val pageViewId: String
 )
@@ -35,4 +28,11 @@ internal data class SetterMessageValue(
 internal data class SecureWebViewMessage(
     val id: String,
     val url: String
+)
+
+@Serializable
+internal data class OpenFinancialConnectionsMessage(
+    val id: String,
+    val clientSecret: String,
+    val connectedAccountId: String,
 )

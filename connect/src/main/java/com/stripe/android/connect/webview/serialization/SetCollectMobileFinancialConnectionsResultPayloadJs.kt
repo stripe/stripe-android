@@ -26,7 +26,9 @@ internal data class SetCollectMobileFinancialConnectionsResultPayloadJs(
                 is FinancialConnectionsSheetResult.Canceled -> {
                     SetCollectMobileFinancialConnectionsResultPayloadJs(
                         id = id,
-                        financialConnectionsSession = FinancialConnectionsSessionJs(accounts = emptyList()),
+                        financialConnectionsSession = FinancialConnectionsSessionJs(
+                            accounts = emptyList()
+                        ),
                         token = null,
                         error = null,
                     )

@@ -229,7 +229,7 @@ class EmbeddedComponentManager(
             logger.warning("($loggerTag) You must create the EmbeddedComponent view from an Activity")
             if (isDebugBuild) {
                 // crash if in debug mode so that developers are more likely to catch this error.
-                error("You must create an AccountOnboardingView from an Activity")
+                error("You must create the EmbeddedComponent view from an Activity")
             }
         }
         return activity
@@ -274,8 +274,7 @@ class EmbeddedComponentManager(
         private val chooseFileLaunchers = mutableMapOf<Activity, ActivityResultLauncher<Intent>>()
 
         @VisibleForTesting
-        internal val financialConnectionsResults:
-            MutableSharedFlow<ActivityResult<FinancialConnectionsSheetResult>> =
+        internal val financialConnectionsResults: MutableSharedFlow<ActivityResult<FinancialConnectionsSheetResult>> =
             MutableSharedFlow(extraBufferCapacity = 1)
         private val financialConnectionsSheets = mutableMapOf<Activity, FinancialConnectionsSheet>()
 
