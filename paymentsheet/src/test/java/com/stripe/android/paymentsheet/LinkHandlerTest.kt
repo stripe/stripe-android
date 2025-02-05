@@ -9,6 +9,8 @@ import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.analytics.LinkAnalyticsHelper
+import com.stripe.android.link.attestation.FakeLinkAttestationCheck
+import com.stripe.android.link.attestation.LinkAttestationCheck
 import com.stripe.android.link.gate.FakeLinkGate
 import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.model.AccountStatus
@@ -102,7 +104,7 @@ class LinkHandlerTest {
         ) {
             val shouldLaunchEagerly = handler.setupLinkWithEagerLaunch(
                 state = createLinkState(
-                    loginState = LinkState.LoginState.LoggedOut,
+                    loginState = LinkState.LoginState.LoggedIn,
                     signupMode = LinkSignupMode.AlongsideSaveForFutureUse
                 )
             )
@@ -124,11 +126,14 @@ private fun runLinkTest(
     linkConfiguration: LinkConfiguration = defaultLinkConfiguration(),
     attachNewCardToAccountResult: Result<LinkPaymentDetails>? = null,
     linkGate: LinkGate = FakeLinkGate(),
+    linkAttestationCheck: LinkAttestationCheck = FakeLinkAttestationCheck(),
     testBlock: suspend LinkTestData.() -> Unit
 ): Unit = runTest {
     val linkConfigurationCoordinator = mock<LinkConfigurationCoordinator>()
     whenever(linkConfigurationCoordinator.linkGate(linkConfiguration))
         .thenReturn(linkGate)
+    whenever(linkConfigurationCoordinator.linkAttestationCheck(linkConfiguration))
+        .thenReturn(linkAttestationCheck)
     val savedStateHandle = SavedStateHandle()
     val linkAnalyticsHelper = mock<LinkAnalyticsHelper>()
     val linkStore = mock<LinkStore>()

@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet
 
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkConfigurationCoordinator
+import com.stripe.android.link.attestation.LinkAttestationCheck
 import com.stripe.android.paymentsheet.state.LinkState
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -30,18 +31,28 @@ internal class LinkHandler @Inject constructor(
         _linkConfiguration.value = state.configuration
     }
 
-    fun setupLinkWithEagerLaunch(state: LinkState?): Boolean {
+    suspend fun setupLinkWithEagerLaunch(state: LinkState?): Boolean {
         setupLink(state)
 
         val configuration = state?.configuration ?: return false
-        val linkGate = linkConfigurationCoordinator.linkGate(configuration)
 
+        val linkGate = linkConfigurationCoordinator.linkGate(configuration)
         if (linkGate.suppress2faModal) return false
 
         return when (state.loginState) {
             LinkState.LoginState.LoggedIn,
-            LinkState.LoginState.NeedsVerification -> true
+            LinkState.LoginState.NeedsVerification -> performAttestationCheck(configuration)
             LinkState.LoginState.LoggedOut -> false
+        }
+    }
+
+    private suspend fun performAttestationCheck(configuration: LinkConfiguration): Boolean {
+        val linkAttestationCheck = linkConfigurationCoordinator.linkAttestationCheck(configuration)
+        val result = linkAttestationCheck.invoke()
+
+        return when (result) {
+            is LinkAttestationCheck.Result.Failed -> false
+            LinkAttestationCheck.Result.Successful -> true
         }
     }
 

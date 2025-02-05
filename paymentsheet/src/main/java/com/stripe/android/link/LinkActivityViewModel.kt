@@ -18,7 +18,7 @@ import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.account.LinkAuth
 import com.stripe.android.link.account.LinkAuthResult
 import com.stripe.android.link.account.linkAccountUpdate
-import com.stripe.android.link.gate.LinkGate
+import com.stripe.android.link.attestation.LinkAttestationCheck
 import com.stripe.android.link.injection.DaggerNativeLinkComponent
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.AccountStatus
@@ -26,10 +26,8 @@ import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.LinkAppBarState
 import com.stripe.android.model.EmailSource
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
-import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.attestation.IntegrityRequestManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
@@ -41,11 +39,9 @@ internal class LinkActivityViewModel @Inject constructor(
     confirmationHandlerFactory: ConfirmationHandler.Factory,
     private val linkAccountManager: LinkAccountManager,
     val eventReporter: EventReporter,
-    private val integrityRequestManager: IntegrityRequestManager,
-    private val linkGate: LinkGate,
-    private val errorReporter: ErrorReporter,
     private val linkAuth: LinkAuth,
     private val linkConfiguration: LinkConfiguration,
+    private val linkAttestationCheck: LinkAttestationCheck,
     private val startWithVerificationDialog: Boolean
 ) : ViewModel(), DefaultLifecycleObserver {
     val confirmationHandler = confirmationHandlerFactory.create(viewModelScope)
@@ -148,14 +144,17 @@ internal class LinkActivityViewModel @Inject constructor(
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
         viewModelScope.launch {
-            performAttestationCheck().fold(
-                onSuccess = {
-                    updateScreenState()
-                },
-                onFailure = {
-                    moveToWeb()
+            val result = linkAttestationCheck.invoke()
+            when (result) {
+                is LinkAttestationCheck.Result.Failed -> {
+                    if (startWithVerificationDialog.not()) {
+                        moveToWeb()
+                    }
                 }
-            )
+                LinkAttestationCheck.Result.Successful -> {
+                    updateScreenState()
+                }
+            }
         }
     }
 
@@ -163,32 +162,6 @@ internal class LinkActivityViewModel @Inject constructor(
         viewModelScope.launch {
             navigateToLinkScreen()
         }
-    }
-
-    private suspend fun performAttestationCheck(): Result<Unit> {
-        if (linkGate.useAttestationEndpoints.not()) return Result.success(Unit)
-        return integrityRequestManager.prepare()
-            .onFailure { error ->
-                errorReporter.report(
-                    errorEvent = ErrorReporter.UnexpectedErrorEvent.LINK_NATIVE_FAILED_TO_PREPARE_INTEGRITY_MANAGER,
-                    stripeException = LinkEventException(error)
-                )
-            }
-            .mapCatching {
-                when (val lookupResult = lookupUser()) {
-                    is LinkAuthResult.AttestationFailed -> {
-                        errorReporter.report(
-                            errorEvent = ErrorReporter.UnexpectedErrorEvent.LINK_NATIVE_FAILED_TO_ATTEST_REQUEST,
-                            stripeException = LinkEventException(lookupResult.throwable)
-                        )
-                        throw lookupResult.throwable
-                    }
-                    is LinkAuthResult.Error,
-                    LinkAuthResult.NoLinkAccountFound,
-                    is LinkAuthResult.Success,
-                    null -> Unit
-                }
-            }
     }
 
     private suspend fun updateScreenState() {

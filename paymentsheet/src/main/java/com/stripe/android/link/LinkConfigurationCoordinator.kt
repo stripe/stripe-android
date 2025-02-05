@@ -1,5 +1,7 @@
 package com.stripe.android.link
 
+import android.app.Application
+import com.stripe.android.link.attestation.LinkAttestationCheck
 import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.link.model.AccountStatus
@@ -25,6 +27,8 @@ internal interface LinkConfigurationCoordinator {
 
     fun linkGate(configuration: LinkConfiguration): LinkGate
 
+    fun linkAttestationCheck(configuration: LinkConfiguration): LinkAttestationCheck
+
     suspend fun signInWithUserInput(
         configuration: LinkConfiguration,
         userInput: UserInput
@@ -43,6 +47,7 @@ internal interface LinkConfigurationCoordinator {
 @Singleton
 internal class RealLinkConfigurationCoordinator @Inject internal constructor(
     private val linkComponentBuilder: LinkComponent.Builder,
+    private val application: Application
 ) : LinkConfigurationCoordinator {
     private val componentFlow = MutableStateFlow<LinkComponent?>(null)
 
@@ -67,6 +72,10 @@ internal class RealLinkConfigurationCoordinator @Inject internal constructor(
 
     override fun linkGate(configuration: LinkConfiguration): LinkGate {
         return getLinkPaymentLauncherComponent(configuration).linkGate
+    }
+
+    override fun linkAttestationCheck(configuration: LinkConfiguration): LinkAttestationCheck {
+        return getLinkPaymentLauncherComponent(configuration).linkAttestationCheck
     }
 
     /**
@@ -111,6 +120,7 @@ internal class RealLinkConfigurationCoordinator @Inject internal constructor(
         componentFlow.value?.takeIf { it.configuration == configuration }
             ?: linkComponentBuilder
                 .configuration(configuration)
+                .application(application)
                 .build()
                 .also {
                     componentFlow.value = it

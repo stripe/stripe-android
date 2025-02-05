@@ -4,6 +4,7 @@ import com.stripe.android.link.LinkActivityViewModel
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.account.LinkAuth
+import com.stripe.android.link.attestation.LinkAttestationCheck
 import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.paymentelement.confirmation.DefaultConfirmationHandler
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -22,10 +23,8 @@ internal object LinkViewModelModule {
         defaultConfirmationHandlerFactory: DefaultConfirmationHandler.Factory,
         linkAccountManager: LinkAccountManager,
         eventReporter: EventReporter,
-        integrityRequestManager: IntegrityRequestManager,
-        linkGate: LinkGate,
-        errorReporter: ErrorReporter,
         linkAuth: LinkAuth,
+        linkAttestationCheck: LinkAttestationCheck,
         linkConfiguration: LinkConfiguration,
         @Named(START_WITH_VERIFICATION_DIALOG) startWithVerificationDialog: Boolean
     ): LinkActivityViewModel {
@@ -34,11 +33,9 @@ internal object LinkViewModelModule {
             confirmationHandlerFactory = defaultConfirmationHandlerFactory,
             linkAccountManager = linkAccountManager,
             eventReporter = eventReporter,
-            integrityRequestManager = integrityRequestManager,
-            linkGate = linkGate,
-            errorReporter = errorReporter,
             linkAuth = linkAuth,
             linkConfiguration = linkConfiguration,
+            linkAttestationCheck = linkAttestationCheck,
             startWithVerificationDialog = startWithVerificationDialog
         )
     }

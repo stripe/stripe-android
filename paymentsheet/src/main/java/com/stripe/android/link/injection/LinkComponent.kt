@@ -1,9 +1,12 @@
 package com.stripe.android.link.injection
 
+import android.app.Application
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.account.LinkAccountManager
+import com.stripe.android.link.attestation.LinkAttestationCheck
 import com.stripe.android.link.gate.LinkGate
+import com.stripe.android.link.injection.NativeLinkComponent.Builder
 import dagger.BindsInstance
 import dagger.Subcomponent
 import javax.inject.Scope
@@ -20,18 +23,24 @@ internal annotation class LinkScope
 @Subcomponent(
     modules = [
         LinkModule::class,
+        IntegrityRequestManagerModule::class,
+        ApplicationIdModule::class
     ]
 )
 internal abstract class LinkComponent {
     internal abstract val linkAccountManager: LinkAccountManager
     internal abstract val configuration: LinkConfiguration
     internal abstract val linkGate: LinkGate
+    internal abstract val linkAttestationCheck: LinkAttestationCheck
     internal abstract val inlineSignupViewModelFactory: LinkInlineSignupAssistedViewModelFactory
 
     @Subcomponent.Builder
     internal interface Builder {
         @BindsInstance
         fun configuration(configuration: LinkConfiguration): Builder
+
+        @BindsInstance
+        fun application(application: Application): Builder
 
         fun build(): LinkComponent
     }

@@ -2,10 +2,12 @@
 
 package com.stripe.android.paymentelement.embedded.content
 
+import android.app.Application
 import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
+import com.stripe.android.paymentelement.embedded.content.EmbeddedPaymentElementViewModelComponent.Builder
 import dagger.Binds
 import dagger.BindsInstance
 import dagger.Module
@@ -31,6 +33,9 @@ internal interface EmbeddedPaymentElementSubcomponent {
 
         @BindsInstance
         fun resultCallback(resultCallback: EmbeddedPaymentElement.ResultCallback): Builder
+
+        @BindsInstance
+        fun application(application: Application): Builder
 
         fun build(): EmbeddedPaymentElementSubcomponent
     }

@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement.embedded.form
 
+import android.app.Application
 import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.cards.CardAccountRangeRepository
@@ -16,6 +17,7 @@ import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.embedded.EmbeddedCommonModule
+import com.stripe.android.paymentelement.embedded.content.EmbeddedPaymentElementViewModelComponent.Builder
 import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInteractor
 import dagger.Binds
 import dagger.BindsInstance
@@ -59,6 +61,9 @@ internal interface FormActivityComponent {
 
         @BindsInstance
         fun savedStateHandle(savedStateHandle: SavedStateHandle): Builder
+
+        @BindsInstance
+        fun application(application: Application): Builder
 
         fun build(): FormActivityComponent
     }
