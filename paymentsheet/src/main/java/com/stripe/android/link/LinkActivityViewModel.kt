@@ -115,15 +115,15 @@ internal class LinkActivityViewModel @Inject constructor(
                 val route = entry.destination.route
                 _linkAppBarState.update {
                     it.copy(
-                        showHeader = hideHeaderRoutes.contains(route).not(),
-                        showOverflowMenu = hideOverflowRoutes.contains(route).not(),
+                        showHeader = showHeaderRoutes.contains(route),
+                        showOverflowMenu = route == LinkScreen.Wallet.route,
                         navigationIcon = if (backIconRoutes.contains(route)) {
                             R.drawable.stripe_link_back
                         } else {
                             R.drawable.stripe_link_close
                         },
                         email = linkAccountManager.linkAccount.value?.email?.takeIf {
-                            hideEmailRoutes.contains(route).not()
+                            route == LinkScreen.Wallet.route
                         }
                     )
                 }
@@ -284,22 +284,8 @@ internal class LinkActivityViewModel @Inject constructor(
     }
 
     companion object {
-        private val hideOverflowRoutes = setOf(
-            LinkScreen.Loading.route,
-            LinkScreen.Verification.route,
-            LinkScreen.SignUp.route,
-            LinkScreen.PaymentMethod.route,
-            LinkScreen.CardEdit.route,
-        )
-        private val hideHeaderRoutes = setOf(
-            LinkScreen.Loading.route,
-            LinkScreen.CardEdit.route,
-            LinkScreen.PaymentMethod.route
-        )
-        private val hideEmailRoutes = setOf(
-            LinkScreen.Loading.route,
-            LinkScreen.CardEdit.route,
-            LinkScreen.PaymentMethod.route,
+        private val showHeaderRoutes = setOf(
+            LinkScreen.Wallet.route,
             LinkScreen.SignUp.route,
             LinkScreen.Verification.route
         )
