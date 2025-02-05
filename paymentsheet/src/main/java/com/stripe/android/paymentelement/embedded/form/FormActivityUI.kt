@@ -8,11 +8,9 @@ import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalTextInputService
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -21,6 +19,7 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.TestModeBadge
+import com.stripe.android.paymentsheet.utils.DismissKeyboardOnProcessing
 import com.stripe.android.paymentsheet.utils.EventReporterProvider
 import com.stripe.android.paymentsheet.utils.PaymentSheetContentPadding
 import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInteractor
@@ -119,18 +118,6 @@ internal fun FormActivityTopBar(
                 contentDescription = stringResource(R.string.stripe_paymentsheet_close),
                 tint = tintColor
             )
-        }
-    }
-}
-
-@Composable
-private fun DismissKeyboardOnProcessing(processing: Boolean) {
-    val keyboardController = LocalTextInputService.current
-
-    if (processing) {
-        LaunchedEffect(Unit) {
-            @Suppress("DEPRECATION")
-            keyboardController?.hideSoftwareKeyboard()
         }
     }
 }

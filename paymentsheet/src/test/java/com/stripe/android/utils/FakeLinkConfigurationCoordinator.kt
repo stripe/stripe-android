@@ -4,6 +4,8 @@ import com.stripe.android.core.model.CountryCode
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.LinkPaymentDetails
+import com.stripe.android.link.gate.FakeLinkGate
+import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.UserInput
@@ -39,10 +41,12 @@ internal class FakeLinkConfigurationCoordinator(
         )
     ),
     private val accountStatus: AccountStatus = AccountStatus.SignedOut,
+    private val linkGate: LinkGate = FakeLinkGate(),
+    private val email: String? = null
 ) : LinkConfigurationCoordinator {
 
     override val emailFlow: StateFlow<String?>
-        get() = stateFlowOf(null)
+        get() = stateFlowOf(email)
 
     override fun getComponent(configuration: LinkConfiguration): LinkComponent {
         return mock()
@@ -50,6 +54,10 @@ internal class FakeLinkConfigurationCoordinator(
 
     override fun getAccountStatusFlow(configuration: LinkConfiguration): Flow<AccountStatus> {
         return flowOf(accountStatus)
+    }
+
+    override fun linkGate(configuration: LinkConfiguration): LinkGate {
+        return linkGate
     }
 
     override suspend fun signInWithUserInput(configuration: LinkConfiguration, userInput: UserInput): Result<Boolean> {

@@ -9,6 +9,8 @@ import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.analytics.LinkAnalyticsHelper
+import com.stripe.android.link.gate.FakeLinkGate
+import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -54,15 +56,79 @@ class LinkHandlerTest {
         assertThat(handler.isLinkEnabled.first()).isTrue()
         assertThat(savedStateHandle.get<PaymentSelection>(SAVE_SELECTION)).isNull()
     }
+
+    @Test
+    fun `setupLinkWithEagerLaunch returns true in LoggedIn states`() = runLinkTest {
+        val shouldLaunchEagerly = handler.setupLinkWithEagerLaunch(
+            state = createLinkState(
+                loginState = LinkState.LoginState.LoggedIn,
+                signupMode = LinkSignupMode.AlongsideSaveForFutureUse
+            )
+        )
+
+        assertThat(shouldLaunchEagerly).isTrue()
+    }
+
+    @Test
+    fun `setupLinkWithEagerLaunch returns true in NeedsVerification states`() = runLinkTest {
+        val shouldLaunchEagerly = handler.setupLinkWithEagerLaunch(
+            state = createLinkState(
+                loginState = LinkState.LoginState.NeedsVerification,
+                signupMode = LinkSignupMode.AlongsideSaveForFutureUse
+            )
+        )
+
+        assertThat(shouldLaunchEagerly).isTrue()
+    }
+
+    @Test
+    fun `setupLinkWithEagerLaunch returns false in LoggedOut state`() = runLinkTest {
+        val shouldLaunchEagerly = handler.setupLinkWithEagerLaunch(
+            state = createLinkState(
+                loginState = LinkState.LoginState.LoggedOut,
+                signupMode = LinkSignupMode.AlongsideSaveForFutureUse
+            )
+        )
+
+        assertThat(shouldLaunchEagerly).isFalse()
+    }
+
+    @Test
+    fun `setupLinkWithEagerLaunch returns false when suppress2faModal is true`() {
+        val linkGate = FakeLinkGate()
+        linkGate.setSuppress2faModal(false)
+        runLinkTest(
+            linkGate = linkGate
+        ) {
+            val shouldLaunchEagerly = handler.setupLinkWithEagerLaunch(
+                state = createLinkState(
+                    loginState = LinkState.LoginState.LoggedOut,
+                    signupMode = LinkSignupMode.AlongsideSaveForFutureUse
+                )
+            )
+
+            assertThat(shouldLaunchEagerly).isFalse()
+        }
+    }
+
+    @Test
+    fun `setupLinkWithEagerLaunch returns false when state is null`() = runLinkTest {
+        val shouldLaunchEagerly = handler.setupLinkWithEagerLaunch(state = null)
+
+        assertThat(shouldLaunchEagerly).isFalse()
+    }
 }
 
 private fun runLinkTest(
     accountStatusFlow: MutableSharedFlow<AccountStatus> = MutableSharedFlow(replay = 1),
     linkConfiguration: LinkConfiguration = defaultLinkConfiguration(),
     attachNewCardToAccountResult: Result<LinkPaymentDetails>? = null,
+    linkGate: LinkGate = FakeLinkGate(),
     testBlock: suspend LinkTestData.() -> Unit
 ): Unit = runTest {
     val linkConfigurationCoordinator = mock<LinkConfigurationCoordinator>()
+    whenever(linkConfigurationCoordinator.linkGate(linkConfiguration))
+        .thenReturn(linkGate)
     val savedStateHandle = SavedStateHandle()
     val linkAnalyticsHelper = mock<LinkAnalyticsHelper>()
     val linkStore = mock<LinkStore>()

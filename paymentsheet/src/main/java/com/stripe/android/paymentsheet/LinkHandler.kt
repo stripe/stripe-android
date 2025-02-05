@@ -30,6 +30,21 @@ internal class LinkHandler @Inject constructor(
         _linkConfiguration.value = state.configuration
     }
 
+    fun setupLinkWithEagerLaunch(state: LinkState?): Boolean {
+        setupLink(state)
+
+        val configuration = state?.configuration ?: return false
+        val linkGate = linkConfigurationCoordinator.linkGate(configuration)
+
+        if (linkGate.suppress2faModal) return false
+
+        return when (state.loginState) {
+            LinkState.LoginState.LoggedIn,
+            LinkState.LoginState.NeedsVerification -> true
+            LinkState.LoginState.LoggedOut -> false
+        }
+    }
+
     @OptIn(DelicateCoroutinesApi::class)
     fun logOut() {
         val configuration = linkConfiguration.value ?: return

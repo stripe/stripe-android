@@ -7,4 +7,5 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 internal data class LinkConfirmationOption(
     val configuration: LinkConfiguration,
+    val useLinkExpress: Boolean
 ) : ConfirmationHandler.Option

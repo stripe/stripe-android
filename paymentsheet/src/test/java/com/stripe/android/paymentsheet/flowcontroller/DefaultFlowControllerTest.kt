@@ -799,7 +799,7 @@ internal class DefaultFlowControllerTest {
         flowController.configureExpectingSuccess()
 
         flowController.confirmPaymentSelection(
-            paymentSelection = PaymentSelection.Link,
+            paymentSelection = PaymentSelection.Link(),
             state = PAYMENT_SHEET_STATE_FULL,
             appearance = PaymentSheetFixtures.CONFIG_CUSTOMER.appearance,
             initializationMode = INITIALIZATION_MODE,
@@ -815,7 +815,7 @@ internal class DefaultFlowControllerTest {
     @Test
     fun `confirmPaymentSelection() with link payment method should launch LinkPaymentLauncher`() = runTest {
         val flowController = createFlowController(
-            paymentSelection = PaymentSelection.Link,
+            paymentSelection = PaymentSelection.Link(),
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.paymentMethodTypes.plus("link")
             )
@@ -827,14 +827,14 @@ internal class DefaultFlowControllerTest {
 
         flowController.confirm()
 
-        verify(linkPaymentLauncher).present(any(), anyOrNull())
+        verify(linkPaymentLauncher).present(any(), anyOrNull(), any())
     }
 
     @Test
     fun `confirmPaymentSelection() with LinkInline and user not signed in should confirm with PaymentLauncher`() =
         runTest {
             val flowController = createFlowController(
-                paymentSelection = PaymentSelection.Link,
+                paymentSelection = PaymentSelection.Link(),
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                     paymentMethodTypes = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.paymentMethodTypes.plus("link")
                 )
@@ -880,7 +880,7 @@ internal class DefaultFlowControllerTest {
     @Test
     fun `confirmPaymentSelection() with Link and shipping should have shipping details in confirm params`() = runTest {
         val flowController = createFlowController(
-            paymentSelection = PaymentSelection.Link,
+            paymentSelection = PaymentSelection.Link(),
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.paymentMethodTypes.plus("link")
             )
@@ -938,7 +938,7 @@ internal class DefaultFlowControllerTest {
     fun `confirmPaymentSelection() with Link and no shipping should not have shipping details in confirm params`() =
         runTest {
             val flowController = createFlowController(
-                paymentSelection = PaymentSelection.Link,
+                paymentSelection = PaymentSelection.Link(),
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                     paymentMethodTypes = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.paymentMethodTypes.plus("link")
                 )
@@ -1213,11 +1213,11 @@ internal class DefaultFlowControllerTest {
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
         )
         flowController.onPaymentOptionResult(
-            PaymentOptionResult.Succeeded(PaymentSelection.Link)
+            PaymentOptionResult.Succeeded(PaymentSelection.Link())
         )
         flowController.confirm()
 
-        verify(linkPaymentLauncher).present(any(), anyOrNull())
+        verify(linkPaymentLauncher).present(any(), anyOrNull(), any())
     }
 
     @Test

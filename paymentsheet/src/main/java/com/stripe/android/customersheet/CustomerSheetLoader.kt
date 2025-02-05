@@ -135,7 +135,7 @@ internal class DefaultCustomerSheetLoader(
         val paymentSelection = customerSheetSession.savedSelection?.let { selection ->
             when (selection) {
                 is SavedSelection.GooglePay -> PaymentSelection.GooglePay
-                is SavedSelection.Link -> PaymentSelection.Link
+                is SavedSelection.Link -> PaymentSelection.Link()
                 is SavedSelection.PaymentMethod -> {
                     paymentMethods.find { paymentMethod ->
                         paymentMethod.id == selection.id

@@ -3,6 +3,7 @@ package com.stripe.android.link.ui.verification
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -13,6 +14,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ContentAlpha
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -28,6 +31,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -79,7 +83,7 @@ internal fun VerificationScreen(
         otpElement = viewModel.otpElement,
         focusRequester = focusRequester,
         onBack = viewModel::onBack,
-        onChangeEmailClick = viewModel::onChangeEmailClicked,
+        onChangeEmailClick = viewModel::onChangeEmailButtonClicked,
         onResendCodeClick = viewModel::resendCode
     )
 }
@@ -96,15 +100,11 @@ internal fun VerificationBody(
     BackHandler(onBack = onBack)
 
     ScrollableTopLevelColumn {
-        Text(
-            text = stringResource(R.string.stripe_verification_header),
-            modifier = Modifier
-                .testTag(VERIFICATION_TITLE_TAG)
-                .padding(vertical = 4.dp),
-            textAlign = TextAlign.Center,
-            style = MaterialTheme.typography.h2,
-            color = MaterialTheme.colors.onPrimary
+        Header(
+            isDialog = state.isDialog,
+            onBackClicked = onBack
         )
+
         Text(
             text = stringResource(R.string.stripe_verification_message, state.redactedPhoneNumber),
             modifier = Modifier
@@ -128,11 +128,13 @@ internal fun VerificationBody(
             )
         }
 
-        ChangeEmailRow(
-            email = state.email,
-            isProcessing = state.isProcessing,
-            onChangeEmailClick = onChangeEmailClick,
-        )
+        if (state.isDialog.not()) {
+            ChangeEmailRow(
+                email = state.email,
+                isProcessing = state.isProcessing,
+                onChangeEmailClick = onChangeEmailClick,
+            )
+        }
 
         AnimatedVisibility(visible = state.errorMessage != null) {
             ErrorText(
@@ -147,6 +149,62 @@ internal fun VerificationBody(
             isProcessing = state.isProcessing,
             isSendingNewCode = state.isSendingNewCode,
             onClick = onResendCodeClick,
+        )
+    }
+}
+
+@Composable
+private fun Header(
+    isDialog: Boolean,
+    onBackClicked: () -> Unit
+) {
+    if (isDialog) {
+        Box(
+            modifier = Modifier
+                .padding(
+                    bottom = 8.dp
+                )
+                .fillMaxWidth()
+        ) {
+            Image(
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .testTag(VERIFICATION_HEADER_IMAGE_TAG),
+                painter = painterResource(R.drawable.stripe_link_logo),
+                contentDescription = stringResource(com.stripe.android.R.string.stripe_link),
+            )
+
+            IconButton(
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .testTag(VERIFICATION_HEADER_BUTTON_TAG),
+                onClick = onBackClicked
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.stripe_link_close),
+                    contentDescription = stringResource(com.stripe.android.R.string.stripe_cancel)
+                )
+            }
+        }
+
+        Text(
+            text = stringResource(R.string.stripe_verification_dialog_header),
+            modifier = Modifier
+                .testTag(VERIFICATION_TITLE_TAG)
+                .padding(vertical = 4.dp),
+            textAlign = TextAlign.Center,
+            style = MaterialTheme.typography.h2,
+            color = MaterialTheme.colors.onPrimary
+        )
+    } else {
+        Text(
+            text = stringResource(R.string.stripe_verification_header),
+            modifier = Modifier
+                .testTag(VERIFICATION_TITLE_TAG)
+                .padding(vertical = 4.dp),
+            textAlign = TextAlign.Center,
+            style = MaterialTheme.typography.h2,
+            color = MaterialTheme.colors.onPrimary
         )
     }
 }
@@ -245,3 +303,5 @@ internal const val VERIFICATION_CHANGE_EMAIL_TAG = "verification_change_email_ta
 internal const val VERIFICATION_ERROR_TAG = "verification_error_tag"
 internal const val VERIFICATION_RESEND_LOADER_TAG = "verification_resend_loader_tag"
 internal const val VERIFICATION_RESEND_CODE_BUTTON_TAG = "verification_resend_code_button_tag"
+internal const val VERIFICATION_HEADER_IMAGE_TAG = "verification_header_image_tag"
+internal const val VERIFICATION_HEADER_BUTTON_TAG = "verification_header_button_tag"

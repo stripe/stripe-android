@@ -140,7 +140,7 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
         coroutineScope.launch {
             currentSelection.filter { selection ->
                 selection is PaymentSelection.Saved ||
-                    selection == PaymentSelection.Link ||
+                    selection is PaymentSelection.Link ||
                     selection == PaymentSelection.GooglePay
             }.collect {
                 _paymentOptionsRelevantSelection.value = it
@@ -170,7 +170,7 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
         paymentOptionsItems: List<PaymentOptionsItem>,
     ): PaymentOptionsItem? {
         val paymentSelection = when (selection) {
-            is PaymentSelection.Saved, PaymentSelection.Link, PaymentSelection.GooglePay -> selection
+            is PaymentSelection.Saved, is PaymentSelection.Link, PaymentSelection.GooglePay -> selection
 
             is PaymentSelection.New, is PaymentSelection.ExternalPaymentMethod, null -> savedSelection?.let {
                 PaymentSelection.Saved(it)

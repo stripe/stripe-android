@@ -224,7 +224,7 @@ internal class PaymentOptionsViewModelTest {
             ),
         )
 
-        assertThat(viewModel.selection.value).isNotEqualTo(PaymentSelection.Link)
+        assertThat(viewModel.selection.value).isNotEqualTo(PaymentSelection.Link())
         assertThat(viewModel.linkHandler.isLinkEnabled.value).isTrue()
     }
 
@@ -234,7 +234,7 @@ internal class PaymentOptionsViewModelTest {
             linkState = null,
         )
 
-        assertThat(viewModel.selection.value).isNotEqualTo(PaymentSelection.Link)
+        assertThat(viewModel.selection.value).isNotEqualTo(PaymentSelection.Link())
         assertThat(viewModel.linkHandler.isLinkEnabled.value).isFalse()
     }
 
@@ -486,16 +486,16 @@ internal class PaymentOptionsViewModelTest {
         runTest {
             val selection = PaymentSelection.Saved(PaymentMethodFixtures.US_BANK_ACCOUNT)
 
-            val viewModel = createViewModel().apply { updateSelection(PaymentSelection.Link) }
+            val viewModel = createViewModel().apply { updateSelection(PaymentSelection.Link()) }
 
             viewModel.paymentOptionResult.test {
                 viewModel.handlePaymentMethodSelected(selection)
                 expectNoEvents()
 
-                viewModel.handlePaymentMethodSelected(PaymentSelection.Link)
+                viewModel.handlePaymentMethodSelected(PaymentSelection.Link())
 
                 val result = awaitItem() as? PaymentOptionResult.Succeeded
-                assertThat(result?.paymentSelection).isEqualTo(PaymentSelection.Link)
+                assertThat(result?.paymentSelection).isEqualTo(PaymentSelection.Link())
             }
         }
 

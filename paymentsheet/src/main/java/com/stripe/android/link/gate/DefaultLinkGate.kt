@@ -23,6 +23,11 @@ internal class DefaultLinkGate @Inject constructor(
             return FeatureFlags.nativeLinkAttestationEnabled.isEnabled
         }
 
+    override val suppress2faModal: Boolean
+        get() {
+            return useNativeLink.not() || configuration.suppress2faModal
+        }
+
     class Factory @Inject constructor() : LinkGate.Factory {
         override fun create(configuration: LinkConfiguration): LinkGate {
             return DefaultLinkGate(configuration)

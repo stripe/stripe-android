@@ -73,12 +73,13 @@ internal class LinkPaymentLauncher @Inject internal constructor(
      */
     fun present(
         configuration: LinkConfiguration,
-        linkAccount: LinkAccount?
+        linkAccount: LinkAccount?,
+        useLinkExpress: Boolean
     ) {
         val args = LinkActivityContract.Args(
             configuration = configuration,
-            startWithVerificationDialog = false,
-            linkAccount = linkAccount
+            linkAccount = linkAccount,
+            startWithVerificationDialog = useLinkExpress
         )
         linkActivityResultLauncher?.launch(args)
         analyticsHelper.onLinkLaunched()

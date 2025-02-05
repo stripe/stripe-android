@@ -389,7 +389,7 @@ private fun LinkTab(
         iconTint = null,
         labelText = stringResource(StripeR.string.stripe_link),
         description = stringResource(StripeR.string.stripe_link),
-        onItemSelectedListener = { onItemSelected(PaymentSelection.Link) },
+        onItemSelectedListener = { onItemSelected(PaymentSelection.Link()) },
         modifier = modifier,
     )
 }

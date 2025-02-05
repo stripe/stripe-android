@@ -9,6 +9,7 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.getValue
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.utils.renderEdgeToEdge
 import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInteractor
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
@@ -48,12 +49,13 @@ internal class FormActivity : AppCompatActivity() {
             return
         }
 
+        renderEdgeToEdge()
+
         viewModel.component.subcomponentBuilder
             .activityResultCaller(this)
             .lifecycleOwner(this)
             .build()
             .inject(this)
-
 
         setContent {
             StripeTheme {
