@@ -50,7 +50,7 @@ internal data class PaymentMethodMetadata(
     val shippingDetails: AddressDetails?,
     val sharedDataSpecs: List<SharedDataSpec>,
     val externalPaymentMethodSpecs: List<ExternalPaymentMethodSpec>,
-    val hasCustomerConfiguration: Boolean,
+    val hasCustomerConfiguration: Boolean, // will be replaced with CustomerMetadata
     val isGooglePayReady: Boolean,
     val linkInlineConfiguration: LinkInlineConfiguration?,
     val paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior,
