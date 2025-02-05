@@ -38,12 +38,12 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
         val state = EmbeddedConfirmationStateFixtures.defaultState()
         val expectedArgs = FormContract.Args(
-            code,
-            paymentMethodMetadata,
-            false,
-            state.configuration,
-            state.initializationMode,
-            null
+            selectedPaymentMethodCode = code,
+            paymentMethodMetadata = paymentMethodMetadata,
+            hasSavedPaymentMethods = false,
+            configuration = state.configuration,
+            initializationMode = state.initializationMode,
+            statusBarColor = null
         )
 
         sheetLauncher.launchForm(code, paymentMethodMetadata, false, state)
@@ -210,6 +210,8 @@ internal class DefaultEmbeddedSheetLauncherTest {
                 errorReporter = errorReporter,
                 resultCallbackTurbine = resultCallbackTurbine
             ).block()
+
+            resultCallbackTurbine.ensureAllEventsConsumed()
         }
     }
 
