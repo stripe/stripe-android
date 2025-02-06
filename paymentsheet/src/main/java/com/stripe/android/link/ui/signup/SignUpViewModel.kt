@@ -103,17 +103,16 @@ internal class SignUpViewModel @Inject constructor(
         emailController.formFieldValue.mapLatest { entry ->
             entry.takeIf { it.isComplete }?.value
         }.collectLatest { email ->
+            onError(null)
             delay(LOOKUP_DEBOUNCE)
             if (email != null) {
                 if (email != configuration.customerInfo.email || emailHasChanged) {
                     lookupEmail(email)
                 } else {
                     updateSignUpState(SignUpState.InputtingRemainingFields)
-                    onError(null)
                 }
             } else {
                 updateSignUpState(SignUpState.InputtingPrimaryField)
-                onError(null)
             }
 
             if (email != configuration.customerInfo.email) {

@@ -108,6 +108,7 @@ internal fun SignUpBody(
                 text = signUpScreenState.errorMessage?.resolve(LocalContext.current).orEmpty(),
                 modifier = Modifier
                     .fillMaxWidth()
+                    .testTag(SIGN_UP_ERROR_TAG)
             )
         }
         AnimatedVisibility(visible = signUpScreenState.signUpState == SignUpState.InputtingRemainingFields) {
