@@ -111,6 +111,13 @@ internal class LinkButtonScreenshotTest {
     }
 
     @Test
+    fun testExistingUserWithLongEmailDisabled() {
+        paparazziRule.snapshot {
+            LinkButton(email = "jaynewstrom12345678987654321@test.com", enabled = false, onClick = { })
+        }
+    }
+
+    @Test
     fun testRoundedCornerSurfaceColor() {
         surfacePaparazziRule.snapshot {
             LinkButton(email = null, enabled = true, onClick = { })
