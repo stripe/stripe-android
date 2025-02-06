@@ -109,9 +109,11 @@ internal class SignUpViewModel @Inject constructor(
                     lookupEmail(email)
                 } else {
                     updateSignUpState(SignUpState.InputtingRemainingFields)
+                    onError(null)
                 }
             } else {
                 updateSignUpState(SignUpState.InputtingPrimaryField)
+                onError(null)
             }
 
             if (email != configuration.customerInfo.email) {
@@ -141,6 +143,7 @@ internal class SignUpViewModel @Inject constructor(
             }
             LinkAuthResult.NoLinkAccountFound -> {
                 updateSignUpState(SignUpState.InputtingRemainingFields)
+                onError(null)
             }
             is LinkAuthResult.AccountError -> {
                 updateSignUpState(SignUpState.InputtingPrimaryField)
@@ -195,11 +198,13 @@ internal class SignUpViewModel @Inject constructor(
         }
     }
 
-    private fun onError(error: Throwable) {
-        logger.error("SignUpViewModel Error: ", error)
+    private fun onError(error: Throwable?) {
+        if (error != null) {
+            logger.error("SignUpViewModel Error: ", error)
+        }
         updateState {
             it.copy(
-                errorMessage = error.stripeErrorMessage()
+                errorMessage = error?.stripeErrorMessage()
             )
         }
     }
