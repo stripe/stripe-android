@@ -34,10 +34,6 @@ internal class PaymentMethodFormHelper : FormHelper {
         return paymentMethodCreateParams
     }
 
-    override fun requiresFormScreen(selectedPaymentMethodCode: String): Boolean {
-        TODO("Not yet implemented")
-    }
-
     override fun formElementsForCode(code: String): List<FormElement> {
         require(code == PaymentMethod.Type.Card.code) {
             "$code payment not supported"
@@ -50,6 +46,10 @@ internal class PaymentMethodFormHelper : FormHelper {
             "$paymentMethodCode payment not supported"
         }
         return TestFactory.CARD_FORM_ARGS
+    }
+
+    override fun formTypeForCode(paymentMethodCode: PaymentMethodCode): FormHelper.FormType {
+        TODO("Not yet implemented")
     }
 
     data class GetPaymentMethodParamsCall(

@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.verticalmode
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultFormHelper
+import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -46,7 +47,7 @@ internal object VerticalModeInitialScreenFactory {
 
                 val formHelper = DefaultFormHelper.create(viewModel, paymentMethodMetadata)
 
-                if (formHelper.requiresFormScreen(paymentMethodCode)) {
+                if (formHelper.formTypeForCode(paymentMethodCode) == FormHelper.FormType.UserInteractionRequired) {
                     add(
                         PaymentSheetScreen.VerticalModeForm(
                             interactor = DefaultVerticalModeFormInteractor.create(

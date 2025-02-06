@@ -4,6 +4,7 @@ import app.cash.turbine.TurbineTestContext
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.isInstanceOf
 import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.link.ui.inline.SignUpConsentAction
@@ -19,6 +20,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParams.Companion.getNameFromParams
 import com.stripe.android.model.PaymentMethodOptionsParams
+import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
@@ -403,7 +405,7 @@ internal class FormHelperTest {
     }
 
     @Test
-    fun `requiresFormScreen returns false for an LPM with no fields`() = runTest {
+    fun `formTypeForCode returns Empty for an LPM with no fields`() = runTest {
         val formHelper = createFormHelper(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
@@ -412,11 +414,24 @@ internal class FormHelperTest {
             ),
             newPaymentSelectionProvider = { null },
         )
-        assertThat(formHelper.requiresFormScreen("cashapp")).isFalse()
+        assertThat(formHelper.formTypeForCode("cashapp")).isEqualTo(FormHelper.FormType.Empty)
     }
 
     @Test
-    fun `requiresFormScreen returns true for an LPM with no fields, but requires name`() = runTest {
+    fun `formTypeForCode returns MandateOnly for an LPM with no fields, but a mandate`() = runTest {
+        val formHelper = createFormHelper(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD.copy(
+                    paymentMethodTypes = listOf("card", "cashapp"),
+                )
+            ),
+            newPaymentSelectionProvider = { null },
+        )
+        assertThat(formHelper.formTypeForCode("cashapp")).isInstanceOf<FormHelper.FormType.MandateOnly>()
+    }
+
+    @Test
+    fun `formTypeForCode returns UserInteractionRequired for an LPM with no fields, but requires name`() = runTest {
         val formHelper = createFormHelper(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
@@ -428,11 +443,11 @@ internal class FormHelperTest {
             ),
             newPaymentSelectionProvider = { null },
         )
-        assertThat(formHelper.requiresFormScreen("cashapp")).isTrue()
+        assertThat(formHelper.formTypeForCode("cashapp")).isEqualTo(FormHelper.FormType.UserInteractionRequired)
     }
 
     @Test
-    fun `requiresFormScreen returns true for an LPM with fields`() = runTest {
+    fun `formTypeForCode returns UserInteractionRequired for an LPM with fields`() = runTest {
         val formHelper = createFormHelper(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
@@ -441,16 +456,16 @@ internal class FormHelperTest {
             ),
             newPaymentSelectionProvider = { null },
         )
-        assertThat(formHelper.requiresFormScreen("klarna")).isTrue()
+        assertThat(formHelper.formTypeForCode("klarna")).isEqualTo(FormHelper.FormType.UserInteractionRequired)
     }
 
     @Test
-    fun `requiresFormScreen returns true for non form field based LPM us_bank_account`() = runTest {
+    fun `formTypeForCode returns UserInteractionRequired for non form field based LPM us_bank_account`() = runTest {
         val formHelper = createFormHelper(
             newPaymentSelectionProvider = { null },
         )
-        assertThat(formHelper.requiresFormScreen("us_bank_account")).isTrue()
-        assertThat(formHelper.requiresFormScreen("link")).isTrue()
+        assertThat(formHelper.formTypeForCode("us_bank_account")).isEqualTo(FormHelper.FormType.UserInteractionRequired)
+        assertThat(formHelper.formTypeForCode("link")).isEqualTo(FormHelper.FormType.UserInteractionRequired)
     }
 
     private fun runLinkInlineTest(
