@@ -16,7 +16,7 @@ import com.stripe.android.utils.screenshots.PaymentSheetAppearance.DefaultAppear
 import org.junit.Rule
 import org.junit.Test
 
-private enum class LinkButtonAppearance(val appearance: PaymentSheet.Appearance) : PaparazziConfigOption {
+private enum class LinkButtonAppearance(private val appearance: PaymentSheet.Appearance) : PaparazziConfigOption {
 
     TestSurfaceBackgroundAppearance(
         appearance = PaymentSheet.Appearance(
