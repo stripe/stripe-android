@@ -73,6 +73,7 @@ data class FinancialConnectionsAccount(
     @IgnoredOnParcel
     @SerialName("object")
     @Required
+    @SuppressWarnings("VariableNaming")
     var `object`: String = OBJECT_NEW // var instead of val to include for serialization
         private set
 
