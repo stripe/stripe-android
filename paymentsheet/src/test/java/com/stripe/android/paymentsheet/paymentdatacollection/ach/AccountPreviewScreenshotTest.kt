@@ -69,6 +69,29 @@ internal class AccountPreviewScreenshotTest {
                 showCheckbox = false,
                 lastTextFieldIdentifier = null,
                 onRemoveAccount = {},
+                enabled = true
+            )
+        }
+    }
+
+    @Test
+    fun testPaymentFlowDisabled() {
+        paparazzi.snapshot {
+            BankAccountForm(
+                state = BankFormScreenStateFactory.createWithSession("session_1234"),
+                instantDebits = false,
+                isPaymentFlow = true,
+                formArgs = formArguments,
+                nameController = createNameController(),
+                emailController = createEmailController(),
+                phoneController = createPhoneNumberController(),
+                addressController = createAddressController(),
+                sameAsShippingElement = sameAsShippingElement,
+                saveForFutureUseElement = saveForFutureUseElement,
+                showCheckbox = false,
+                lastTextFieldIdentifier = null,
+                onRemoveAccount = {},
+                enabled = false
             )
         }
     }
@@ -90,6 +113,7 @@ internal class AccountPreviewScreenshotTest {
                 showCheckbox = false,
                 lastTextFieldIdentifier = null,
                 onRemoveAccount = {},
+                enabled = true
             )
         }
     }
@@ -115,6 +139,7 @@ internal class AccountPreviewScreenshotTest {
                 showCheckbox = false,
                 lastTextFieldIdentifier = null,
                 onRemoveAccount = {},
+                enabled = true
             )
         }
     }
@@ -139,6 +164,7 @@ internal class AccountPreviewScreenshotTest {
                 showCheckbox = false,
                 lastTextFieldIdentifier = null,
                 onRemoveAccount = {},
+                enabled = true
             )
         }
     }
@@ -165,6 +191,7 @@ internal class AccountPreviewScreenshotTest {
                 showCheckbox = false,
                 lastTextFieldIdentifier = null,
                 onRemoveAccount = {},
+                enabled = true
             )
         }
     }
@@ -190,6 +217,7 @@ internal class AccountPreviewScreenshotTest {
                 showCheckbox = false,
                 lastTextFieldIdentifier = null,
                 onRemoveAccount = {},
+                enabled = true
             )
         }
     }
