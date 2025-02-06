@@ -9,6 +9,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.CoroutineContext
 
@@ -44,5 +45,5 @@ fun <T> StateFlow<T>.collectAsState(): State<T> = produceState(
     produceInitialValue = remember { { value } },
     key = this
 ) {
-    collect { value = it }
+    collectLatest { value = it }
 }
