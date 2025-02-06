@@ -785,7 +785,9 @@ internal class PaymentMethodMetadataTest {
             shippingDetails = shippingDetails,
             sharedDataSpecs = sharedDataSpecs,
             externalPaymentMethodSpecs = externalPaymentMethodSpecs,
-            hasCustomerConfiguration = true,
+            customerMetadata = CustomerMetadata(
+                hasCustomerConfiguration = true,
+            ),
             paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
             isGooglePayReady = false,
             linkInlineConfiguration = linkInlineConfiguration,
@@ -850,7 +852,9 @@ internal class PaymentMethodMetadataTest {
             shippingDetails = null,
             sharedDataSpecs = listOf(SharedDataSpec("card")),
             externalPaymentMethodSpecs = listOf(),
-            hasCustomerConfiguration = true,
+            customerMetadata = CustomerMetadata(
+                hasCustomerConfiguration = true,
+            ),
             isGooglePayReady = true,
             paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
             financialConnectionsAvailable = false,

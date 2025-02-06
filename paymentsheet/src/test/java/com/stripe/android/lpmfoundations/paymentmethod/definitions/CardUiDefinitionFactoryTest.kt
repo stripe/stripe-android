@@ -1,5 +1,6 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
+import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.PaymentIntentFixtures
@@ -79,7 +80,9 @@ class CardUiDefinitionFactoryTest {
         paparazziRule.snapshot {
             CardDefinition.CreateFormUi(
                 metadata = metadata.copy(
-                    hasCustomerConfiguration = true,
+                    customerMetadata = CustomerMetadata(
+                        hasCustomerConfiguration = true
+                    ),
                 )
             )
         }
@@ -127,7 +130,9 @@ class CardUiDefinitionFactoryTest {
                         paymentMethodTypes = listOf("card"),
                     ),
                     paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Enabled,
-                    hasCustomerConfiguration = true,
+                    customerMetadata = CustomerMetadata(
+                        hasCustomerConfiguration = true
+                    ),
                 ),
             )
         }
