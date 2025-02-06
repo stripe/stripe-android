@@ -438,6 +438,37 @@ internal class DefaultLinkAuthTest {
         integrityRequestManager.ensureAllEventsConsumed()
     }
 
+    @Test
+    fun `lookup attempt with account error returns AccountError`() = runTest {
+        val error = APIException(
+            stripeError = StripeError(
+                code = "link_consumer_details_not_available"
+            )
+        )
+        val linkAccountManager = FakeLinkAccountManager()
+        val integrityRequestManager = FakeIntegrityRequestManager()
+
+        integrityRequestManager.requestResult = Result.failure(error)
+
+        val linkAuth = linkAuth(
+            linkAccountManager = linkAccountManager,
+            integrityRequestManager = integrityRequestManager
+        )
+
+        val result = linkAuth.lookUp(
+            email = TestFactory.CUSTOMER_EMAIL,
+            emailSource = TestFactory.EMAIL_SOURCE,
+            startSession = false
+        )
+
+        integrityRequestManager.awaitRequestTokenCall()
+
+        assertThat(result).isEqualTo(LinkAuthResult.AccountError(error))
+
+        linkAccountManager.ensureAllEventsConsumed()
+        integrityRequestManager.ensureAllEventsConsumed()
+    }
+
     private fun linkAuth(
         useAttestationEndpoints: Boolean = true,
         linkAccountManager: FakeLinkAccountManager = FakeLinkAccountManager(),

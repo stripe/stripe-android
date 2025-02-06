@@ -133,7 +133,7 @@ internal class SignUpViewModel @Inject constructor(
             }
             is LinkAuthResult.Error -> {
                 updateSignUpState(SignUpState.InputtingRemainingFields)
-                onError(lookupResult.throwable)
+                onError(lookupResult.error)
             }
             is LinkAuthResult.Success -> {
                 onAccountFetched(lookupResult.account)
@@ -141,6 +141,10 @@ internal class SignUpViewModel @Inject constructor(
             }
             LinkAuthResult.NoLinkAccountFound -> {
                 updateSignUpState(SignUpState.InputtingRemainingFields)
+            }
+            is LinkAuthResult.AccountError -> {
+                updateSignUpState(SignUpState.InputtingPrimaryField)
+                onError(lookupResult.error)
             }
         }
     }
@@ -161,8 +165,8 @@ internal class SignUpViewModel @Inject constructor(
                     moveToWeb()
                 }
                 is LinkAuthResult.Error -> {
-                    onError(signupResult.throwable)
-                    linkEventsReporter.onSignupFailure(error = signupResult.throwable)
+                    onError(signupResult.error)
+                    linkEventsReporter.onSignupFailure(error = signupResult.error)
                 }
                 is LinkAuthResult.Success -> {
                     onAccountFetched(signupResult.account)
@@ -171,6 +175,10 @@ internal class SignUpViewModel @Inject constructor(
                 LinkAuthResult.NoLinkAccountFound -> {
                     onError(NoLinkAccountFoundException())
                     linkEventsReporter.onSignupFailure(error = NoLinkAccountFoundException())
+                }
+                is LinkAuthResult.AccountError -> {
+                    updateSignUpState(SignUpState.InputtingPrimaryField)
+                    onError(signupResult.error)
                 }
             }
         }

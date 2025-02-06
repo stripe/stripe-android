@@ -148,6 +148,24 @@ internal class SignUpViewModelTest {
     }
 
     @Test
+    fun `When lookup fails with account error, stay on input remaining fields state`() = runTest(dispatcher) {
+        val error = RuntimeException("Lookup failed")
+        val linkAuth = FakeLinkAuth()
+        linkAuth.lookupResult = LinkAuthResult.AccountError(error)
+
+        val viewModel = createViewModel(
+            prefilledEmail = null,
+            linkAuth = linkAuth
+        )
+
+        viewModel.emailController.onRawValueChange("valid@email.com")
+        advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds)
+
+        assertThat(viewModel.state.value.signUpState).isEqualTo(SignUpState.InputtingPrimaryField)
+        assertThat(viewModel.state.value.errorMessage).isEqualTo(error.stripeErrorMessage())
+    }
+
+    @Test
     fun `When email is provided it should not trigger lookup and should collect remaining fields`() =
         runTest(dispatcher) {
             val linkAuth = FakeLinkAuth()
@@ -208,6 +226,32 @@ internal class SignUpViewModelTest {
         viewModel.performValidSignup()
 
         assertThat(viewModel.contentState.errorMessage).isEqualTo(exception.stripeErrorMessage())
+        assertThat(logger.errorLogs).isEqualTo(listOf("SignUpViewModel Error: " to exception))
+    }
+
+    @Test
+    fun `When signUp fails with account error then an error message is shown`() = runTest(dispatcher) {
+        val errorMessage = "Error message"
+
+        val linkAuth = FakeLinkAuth()
+        linkAuth.lookupResult = LinkAuthResult.NoLinkAccountFound
+
+        val logger = FakeLogger()
+        val viewModel = createViewModel(
+            linkAuth = linkAuth,
+            linkEventsReporter = object : SignUpLinkEventsReporter() {
+                override fun onSignupFailure(isInline: Boolean, error: Throwable) = Unit
+            },
+            logger = logger
+        )
+
+        val exception = RuntimeException(errorMessage)
+        linkAuth.signupResult = LinkAuthResult.AccountError(exception)
+
+        viewModel.performValidSignup()
+
+        assertThat(viewModel.contentState.errorMessage).isEqualTo(exception.stripeErrorMessage())
+        assertThat(viewModel.contentState.signUpState).isEqualTo(SignUpState.InputtingPrimaryField)
         assertThat(logger.errorLogs).isEqualTo(listOf("SignUpViewModel Error: " to exception))
     }
 
