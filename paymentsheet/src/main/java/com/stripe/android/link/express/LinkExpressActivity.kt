@@ -40,7 +40,6 @@ class LinkExpressActivity : ComponentActivity() {
                     onDismissClicked = {
 //                        dismissWithResult(LinkExpressResult.Canceled(LinkAccountUpdate.None))
                     },
-                    linkAccount = TODO()
                 )
             )[VerificationViewModel::class.java]
         } catch (e: NoArgsException) {

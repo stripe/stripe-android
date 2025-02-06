@@ -20,7 +20,7 @@ internal class LinkExpressLauncher @Inject constructor(
         callback: (LinkExpressResult) -> Unit,
     ) {
         linkActivityResultLauncher = activityResultRegistry.register(
-            "LinkPaymentLauncher",
+            "LinkExpressLauncher",
             linkExpressContract,
         ) { linkExpressResult ->
             handleActivityResult(linkExpressResult, callback)

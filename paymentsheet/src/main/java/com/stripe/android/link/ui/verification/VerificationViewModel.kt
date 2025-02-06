@@ -1,15 +1,23 @@
 package com.stripe.android.link.ui.verification
 
+import android.app.Application
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
+import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.NoArgsException
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.LinkEventsReporter
+import com.stripe.android.link.express.LinkExpressActivity.Companion.getArgs
+import com.stripe.android.link.express.LinkExpressArgs
+import com.stripe.android.link.injection.DaggerNativeLinkComponent
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
@@ -196,6 +204,41 @@ internal class VerificationViewModel @Inject constructor(
                         isDialog = isDialog
                     )
                 }
+            }
+        }
+
+        fun factory(
+            onVerificationSucceeded: () -> Unit,
+            onChangeEmailClicked: () -> Unit = {},
+            onDismissClicked: () -> Unit,
+            savedStateHandle: SavedStateHandle? = null
+        ): ViewModelProvider.Factory = viewModelFactory {
+            initializer {
+                val handle: SavedStateHandle = savedStateHandle ?: createSavedStateHandle()
+                val app = this[APPLICATION_KEY] as Application
+                val args: LinkExpressArgs = getArgs(handle) ?: throw NoArgsException()
+                args.linkAccount ?: throw NoArgsException()
+
+                val component = DaggerNativeLinkComponent
+                    .builder()
+                    .configuration(args.configuration)
+                    .publishableKeyProvider { args.publishableKey }
+                    .stripeAccountIdProvider { args.stripeAccountId }
+                    .savedStateHandle(handle)
+                    .context(app)
+                    .application(app)
+                    .linkAccount(args.linkAccount)
+                    .build()
+                VerificationViewModel(
+                    linkAccount = args.linkAccount,
+                    linkAccountManager = component.linkAccountManager,
+                    linkEventsReporter = component.linkEventsReporter,
+                    logger = component.logger,
+                    isDialog = true,
+                    onVerificationSucceeded = onVerificationSucceeded,
+                    onChangeEmailRequested = onChangeEmailClicked,
+                    onDismissClicked = onDismissClicked
+                )
             }
         }
     }
