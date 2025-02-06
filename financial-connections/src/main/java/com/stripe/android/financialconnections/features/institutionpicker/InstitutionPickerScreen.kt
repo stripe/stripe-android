@@ -325,7 +325,7 @@ private fun NoResultsTile(
             ),
             annotationStyles = mapOf(
                 StringAnnotation.CLICKABLE to typography.bodyMediumEmphasized.toSpanStyle().copy(
-                    color = colors.textBrand,
+                    color = colors.textAction,
                 )
             ),
         )
@@ -353,7 +353,7 @@ private fun SearchRow(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .background(colors.backgroundSurface)
+            .background(colors.background)
             .padding(top = 0.dp, bottom = 8.dp, start = 8.dp, end = 8.dp)
     ) {
         FinancialConnectionsOutlinedTextField(
@@ -363,7 +363,7 @@ private fun SearchRow(
             leadingIcon = {
                 Icon(
                     painter = painterResource(id = R.drawable.stripe_ic_search),
-                    tint = colors.iconDefault,
+                    tint = colors.icon,
                     contentDescription = "Search icon",
                 )
             },
@@ -412,7 +412,7 @@ private fun ClearSearchButton(
     ) {
         Icon(
             imageVector = Icons.Filled.Clear,
-            tint = colors.backgroundSurface,
+            tint = colors.background,
             contentDescription = "Clear search",
         )
     }

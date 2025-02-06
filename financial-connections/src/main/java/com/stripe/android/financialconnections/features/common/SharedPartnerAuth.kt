@@ -301,8 +301,8 @@ internal fun PrepaneImage(bodyItem: Entry.Image) {
                 .background(
                     brush = Brush.horizontalGradient(
                         colors = listOf(
-                            colors.backgroundOffset,
-                            colors.border,
+                            colors.backgroundSecondary,
+                            colors.borderNeutral,
                         ),
                     )
                 )
@@ -313,7 +313,7 @@ internal fun PrepaneImage(bodyItem: Entry.Image) {
         // left separator
         Box(
             modifier = Modifier
-                .background(color = colors.backgroundOffset)
+                .background(color = colors.backgroundSecondary)
                 .width(8.dp)
                 .fillMaxHeight()
         )
@@ -327,7 +327,7 @@ internal fun PrepaneImage(bodyItem: Entry.Image) {
         // right separator
         Box(
             modifier = Modifier
-                .background(color = colors.backgroundOffset)
+                .background(color = colors.backgroundSecondary)
                 .width(8.dp)
                 .fillMaxHeight()
         )
@@ -337,8 +337,8 @@ internal fun PrepaneImage(bodyItem: Entry.Image) {
                 .background(
                     brush = Brush.horizontalGradient(
                         colors = listOf(
-                            colors.border,
-                            colors.backgroundOffset,
+                            colors.borderNeutral,
+                            colors.backgroundSecondary,
                         ),
                     )
                 )
@@ -457,7 +457,7 @@ private fun GifWebView(
             append("</body></html>")
         }
     }
-    val backgroundColor = colors.backgroundOffset.toArgb()
+    val backgroundColor = colors.backgroundSecondary.toArgb()
     AndroidView(
         modifier = modifier.background(Color.Transparent),
         factory = {

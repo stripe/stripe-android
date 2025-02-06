@@ -73,7 +73,7 @@ private fun NetworkingLinkLoginWarmupContent(
     LazyLayout(
         modifier = Modifier
             .fillMaxWidth()
-            .background(color = colors.backgroundSurface),
+            .background(color = colors.background),
         inModal = true,
         verticalArrangement = Arrangement.spacedBy(24.dp),
         lazyListState = lazyListState,
@@ -168,7 +168,7 @@ internal fun ExistingEmailSection(
             .clip(RoundedCornerShape(12.dp))
             .border(
                 width = 1.dp,
-                color = colors.border,
+                color = colors.borderNeutral,
                 shape = RoundedCornerShape(12.dp)
             )
             .padding(horizontal = 16.dp, vertical = 12.dp)

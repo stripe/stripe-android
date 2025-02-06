@@ -87,8 +87,8 @@ internal fun FinancialConnectionsButton(
         // We need to flip the direction of the gradient when rendering in a primary button
         // due to its background color. Otherwise, the spinner looks inverted.
         when (type) {
-            Primary -> Brush.sweepGradient(listOf(colors.borderBrand, colors.contentOnBrand))
-            Secondary -> Brush.sweepGradient(listOf(colors.buttonSecondary, colors.textDefault))
+            Primary -> Brush.sweepGradient(listOf(colors.primary, colors.primaryAccent))
+            Secondary -> Brush.sweepGradient(listOf(colors.backgroundSecondary, colors.textDefault))
         }
     }
 
@@ -170,10 +170,10 @@ internal object FinancialConnectionsButton {
         data object Primary : Type() {
             @Composable
             override fun buttonColors(): ButtonColors = buttonColors(
-                backgroundColor = colors.buttonPrimary,
-                contentColor = colors.contentOnBrand,
-                disabledBackgroundColor = colors.buttonPrimary,
-                disabledContentColor = colors.contentOnBrand.copy(alpha = 0.4f)
+                backgroundColor = colors.primary,
+                contentColor = colors.primaryAccent,
+                disabledBackgroundColor = colors.primary,
+                disabledContentColor = colors.primaryAccent.copy(alpha = 0.4f)
             )
 
             override fun rippleColor(): Color = Brand400
@@ -185,9 +185,9 @@ internal object FinancialConnectionsButton {
         data object Secondary : Type() {
             @Composable
             override fun buttonColors(): ButtonColors = buttonColors(
-                backgroundColor = colors.buttonSecondary,
+                backgroundColor = colors.backgroundSecondary,
                 contentColor = colors.textDefault,
-                disabledBackgroundColor = colors.buttonSecondary,
+                disabledBackgroundColor = colors.backgroundSecondary,
                 disabledContentColor = colors.textDefault.copy(alpha = 0.4f)
             )
 
@@ -234,7 +234,7 @@ internal fun FinancialConnectionsButtonPreview(
     FinancialConnectionsPreview(theme) {
         Column(
             modifier = Modifier
-                .background(colors.backgroundSurface)
+                .background(colors.background)
                 .fillMaxSize()
                 .padding(16.dp),
             verticalArrangement = Arrangement.SpaceEvenly

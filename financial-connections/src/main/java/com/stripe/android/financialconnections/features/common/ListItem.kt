@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.R
@@ -56,7 +57,7 @@ internal fun ListItem(
 
 @Composable
 private fun ListItemIcon(icon: ImageResource?) {
-    val bulletColor = FinancialConnectionsTheme.colors.iconDefault
+    val bulletColor = FinancialConnectionsTheme.colors.icon
     val iconSize = 20.dp
     val modifier = Modifier
         .size(iconSize)
@@ -95,6 +96,7 @@ private fun ListItemIcon(icon: ImageResource?) {
                 }
             },
             imageLoader = LocalImageLoader.current,
+            colorFilter = ColorFilter.tint(bulletColor),
             contentDescription = null,
             modifier = modifier
         )

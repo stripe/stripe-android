@@ -270,7 +270,7 @@ private fun PhoneNumberSection(
                         modifier = Modifier
                             .padding(horizontal = 6.dp)
                             .clip(RoundedCornerShape(8.dp))
-                            .background(colors.background)
+                            .background(colors.backgroundSecondary)
                             .padding(vertical = 12.dp, horizontal = 8.dp)
                     )
                 },
@@ -347,7 +347,7 @@ internal fun EmailSection(
                             end = 16.dp,
                             bottom = 8.dp
                         ),
-                    color = colors.iconBrand,
+                    color = colors.iconTint,
                     strokeWidth = 2.dp
                 )
             }

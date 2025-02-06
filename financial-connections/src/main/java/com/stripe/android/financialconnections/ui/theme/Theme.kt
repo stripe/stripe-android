@@ -53,51 +53,49 @@ internal enum class Theme {
 }
 
 private val Colors = FinancialConnectionsColors(
+    background = Neutral0,
+    backgroundSecondary = Neutral25,
+    backgroundHighlighted = Neutral50,
     textDefault = Neutral800,
     textSubdued = Neutral600,
-    textDisabled = Neutral300,
-    textWhite = Neutral0,
-    textBrand = Brand600,
-    textCritical = Critical500,
-    iconDefault = Neutral700,
-    iconWhite = Neutral0,
-    iconBrand = Brand500,
-    iconCaution = Attention300,
-    iconBackground = Brand50,
-    buttonPrimary = Brand500,
-    buttonSecondary = Neutral50,
-    background = Neutral25,
-    backgroundSurface = Neutral0,
-    backgroundOffset = Neutral50,
-    backgroundBrand = Neutral25,
-    backgroundCaution = Attention50,
-    border = Neutral100,
-    borderBrand = Brand500,
-    contentOnBrand = Neutral0,
+    textCritical = FeedbackCritical600,
+    icon = Neutral700,
+    borderNeutral = Neutral100,
+    spinnerNeutral = Neutral200,
+    warningLight = Attention50,
+    warning = Attention300,
+    primary = Brand500,
+    primaryAccent = Neutral0,
+    textAction = Brand600,
+    textFieldFocused = Brand600,
+    logo = Brand600,
+    iconTint = Brand500,
+    iconBackground = Brand25,
+    spinner = Brand500,
+    border = Brand600,
 )
 
 private val InstantDebitsColors = FinancialConnectionsColors(
+    background = Neutral0,
+    backgroundSecondary = Neutral25,
+    backgroundHighlighted = Neutral50,
     textDefault = Neutral800,
     textSubdued = Neutral600,
-    textDisabled = Neutral300,
-    textWhite = Neutral0,
-    textBrand = LinkGreen500,
-    textCritical = Critical500,
-    iconDefault = Neutral700,
-    iconWhite = Neutral0,
-    iconBrand = LinkGreen500,
-    iconCaution = Attention300,
+    textCritical = FeedbackCritical600,
+    icon = Neutral700,
+    borderNeutral = Neutral100,
+    spinnerNeutral = Neutral200,
+    warningLight = Attention50,
+    warning = Attention300,
+    primary = LinkGreen200,
+    primaryAccent = LinkGreen900,
+    textAction = LinkGreen500,
+    textFieldFocused = LinkGreen200,
+    logo = LinkGreen900,
+    iconTint = LinkGreen500,
     iconBackground = LinkGreen50,
-    buttonPrimary = LinkGreen200,
-    buttonSecondary = Neutral50,
-    background = Neutral25,
-    backgroundSurface = Neutral0,
-    backgroundOffset = Neutral50,
-    backgroundBrand = Neutral25,
-    backgroundCaution = Attention50,
-    border = Neutral100,
-    borderBrand = LinkGreen200,
-    contentOnBrand = LinkGreen900,
+    spinner = LinkGreen200,
+    border = LinkGreen200,
 )
 
 private val lineHeightStyle = LineHeightStyle(
@@ -195,13 +193,13 @@ internal val TextSelectionColors: TextSelectionColors
 private object FinancialConnectionsRippleTheme : RippleTheme {
     @Composable
     override fun defaultColor() = RippleTheme.defaultRippleColor(
-        contentColor = FinancialConnectionsTheme.colors.textBrand,
+        contentColor = FinancialConnectionsTheme.colors.textAction,
         lightTheme = MaterialTheme.colors.isLight,
     )
 
     @Composable
     override fun rippleAlpha() = RippleTheme.defaultRippleAlpha(
-        contentColor = FinancialConnectionsTheme.colors.textBrand,
+        contentColor = FinancialConnectionsTheme.colors.textAction,
         lightTheme = MaterialTheme.colors.isLight,
     )
 }
@@ -218,7 +216,7 @@ internal fun FinancialConnectionsTheme(
     ) {
         val view = LocalView.current
         val window = findWindow()
-        val barColor = FinancialConnectionsTheme.colors.border
+        val barColor = FinancialConnectionsTheme.colors.borderNeutral
         if (!view.isInEditMode) {
             SideEffect {
                 window?.let { window ->

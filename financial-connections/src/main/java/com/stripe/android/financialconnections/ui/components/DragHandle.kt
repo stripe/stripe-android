@@ -27,7 +27,7 @@ internal fun DragHandle(
             modifier = Modifier
                 .size(DragHandleSize)
                 .background(
-                    color = FinancialConnectionsTheme.colors.border,
+                    color = FinancialConnectionsTheme.colors.spinnerNeutral,
                     shape = RoundedCornerShape(DragHandleCornerRadius),
                 )
         )

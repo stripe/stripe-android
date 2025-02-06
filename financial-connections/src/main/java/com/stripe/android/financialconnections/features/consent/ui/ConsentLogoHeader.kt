@@ -66,7 +66,7 @@ internal fun ConsentLogoHeader(
     val localDensity = LocalDensity.current
     val bitmapLoadSize = remember { with(localDensity) { 36.dp.toPx().toInt() } }
     val stripeImageLoader = LocalImageLoader.current
-    val placeholderBitmap: ImageBitmap = rememberPlaceholderBitmap(bitmapLoadSize, colors.backgroundOffset)
+    val placeholderBitmap: ImageBitmap = rememberPlaceholderBitmap(bitmapLoadSize, colors.backgroundSecondary)
     var bitmaps: List<ImageBitmap> by remember {
         mutableStateOf(
             if (isPreview) {
@@ -193,7 +193,7 @@ private fun AnimatedDotsWithFixedGradient(
         modifier = modifier
             .width(DotsContainerWidth)
             .height(DotsContainerHeight)
-            .background(colors.backgroundSurface)
+            .background(colors.background)
     ) {
         Canvas(modifier = Modifier.matchParentSize()) {
             val dotRadius = 3.dp.toPx()
@@ -230,7 +230,7 @@ private fun Logo(imageBitmap: ImageBitmap) {
             .size(LogoSize)
             .shadow(8.dp, shape)
             .clip(shape)
-            .background(color = colors.backgroundOffset, shape = shape)
+            .background(color = colors.backgroundSecondary, shape = shape)
     ) {
         Crossfade(
             targetState = imageBitmap,

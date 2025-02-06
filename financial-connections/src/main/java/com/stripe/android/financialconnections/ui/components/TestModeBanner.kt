@@ -38,7 +38,7 @@ internal fun TestModeBanner(
         modifier = modifier
             .fillMaxWidth()
             .background(
-                color = FinancialConnectionsTheme.colors.backgroundCaution,
+                color = FinancialConnectionsTheme.colors.warningLight,
                 shape = RoundedCornerShape(12.dp),
             )
             .alpha(contentAlpha)
@@ -50,7 +50,7 @@ internal fun TestModeBanner(
         Image(
             painter = painterResource(R.drawable.stripe_ic_info),
             colorFilter = ColorFilter.tint(
-                color = FinancialConnectionsTheme.colors.iconCaution,
+                color = FinancialConnectionsTheme.colors.warning,
             ),
             contentDescription = null,
         )
@@ -63,7 +63,7 @@ internal fun TestModeBanner(
 
         Text(
             text = buttonLabel,
-            color = FinancialConnectionsTheme.colors.textBrand,
+            color = FinancialConnectionsTheme.colors.textAction,
             style = FinancialConnectionsTheme.typography.bodyMediumEmphasized,
             modifier = Modifier.clickable(enabled = enabled, onClick = onButtonClick)
         )

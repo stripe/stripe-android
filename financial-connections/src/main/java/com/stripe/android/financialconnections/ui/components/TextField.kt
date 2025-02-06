@@ -63,10 +63,10 @@ internal fun FinancialConnectionsOutlinedTextField(
             isError = isError,
             value = value,
             colors = outlinedTextFieldColors(
-                backgroundColor = FinancialConnectionsTheme.colors.backgroundSurface,
-                focusedBorderColor = FinancialConnectionsTheme.colors.borderBrand,
-                unfocusedBorderColor = FinancialConnectionsTheme.colors.border,
-                disabledBorderColor = FinancialConnectionsTheme.colors.textDisabled,
+                backgroundColor = FinancialConnectionsTheme.colors.background,
+                focusedBorderColor = FinancialConnectionsTheme.colors.border,
+                unfocusedBorderColor = FinancialConnectionsTheme.colors.borderNeutral,
+                disabledBorderColor = FinancialConnectionsTheme.colors.borderNeutral,
                 unfocusedLabelColor = FinancialConnectionsTheme.colors.textSubdued,
                 errorBorderColor = FinancialConnectionsTheme.colors.textCritical,
                 focusedLabelColor = FinancialConnectionsTheme.colors.textSubdued,
@@ -74,8 +74,8 @@ internal fun FinancialConnectionsOutlinedTextField(
                 errorCursorColor = FinancialConnectionsTheme.colors.textCritical,
                 errorLabelColor = FinancialConnectionsTheme.colors.textCritical,
                 errorTrailingIconColor = FinancialConnectionsTheme.colors.textCritical,
-                trailingIconColor = FinancialConnectionsTheme.colors.iconDefault,
-                focusedTrailingIconColor = FinancialConnectionsTheme.colors.iconDefault
+                trailingIconColor = FinancialConnectionsTheme.colors.icon,
+                focusedTrailingIconColor = FinancialConnectionsTheme.colors.icon,
             ),
             onValueChange = onValueChange,
             label = label

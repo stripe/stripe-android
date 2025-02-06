@@ -46,7 +46,7 @@ internal fun GenericScreenPreview(
     @PreviewParameter(GenericScreenPreviewParameterProvider::class) state: GenericScreenState
 ) {
     FinancialConnectionsPreview {
-        Surface(color = colors.backgroundSurface) {
+        Surface(color = colors.background) {
             GenericScreen(
                 state = state,
                 onClickableTextClick = {},
