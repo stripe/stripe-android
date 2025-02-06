@@ -172,7 +172,7 @@ internal class DefaultPaymentElementLoaderTest {
             PaymentSheetFixtures.CONFIG_MINIMUM,
             initializedViaCompose = false,
         ).getOrThrow()
-        assertThat(result.paymentMethodMetadata.customerMetadata.hasCustomerConfiguration).isFalse()
+        assertThat(result.paymentMethodMetadata.customerMetadata?.hasCustomerConfiguration).isFalse()
     }
 
     @Test
