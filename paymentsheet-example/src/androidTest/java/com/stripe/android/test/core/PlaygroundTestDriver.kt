@@ -27,6 +27,7 @@ import androidx.test.espresso.IdlingPolicies
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.uiautomator.UiDevice
+import androidx.test.uiautomator.UiSelector
 import com.google.common.truth.Truth.assertThat
 import com.karumi.shot.ScreenshotTest
 import com.stripe.android.customersheet.ui.CUSTOMER_SHEET_CONFIRM_BUTTON_TEST_TAG
@@ -1177,6 +1178,70 @@ internal class PlaygroundTestDriver(
                         completeButton.wait(5000)
                         completeButton.click()
                     }
+
+                    is AuthorizeAction.Test3DS2.HSBCHTML -> {
+                        val otpButton = UiAutomatorText("OTP", labelMatchesExactly = true, device = device)
+
+                        otpButton.wait(5000)
+                        otpButton.click()
+
+                        val submitButton = UiAutomatorText("Submit", labelMatchesExactly = true, device = device)
+                        submitButton.wait(5000)
+                        submitButton.click()
+
+                        val enterOTPField = UiAutomatorText("", labelMatchesExactly = true, device = device)
+                        enterOTPField.wait(5000)
+                        enterOTPField.click()
+                        enterOTPField.setText("555555")
+
+                        val otpSubmit = UiAutomatorText("Submit", labelMatchesExactly = true, device = device)
+                        otpSubmit.wait(5000)
+                        otpSubmit.click()
+                    }
+
+                    is AuthorizeAction.Test3DS2.SingleSelect -> {
+                        val completeAuthentication = UiAutomatorText("Complete Authentication", labelMatchesExactly = true, device = device)
+                        completeAuthentication.wait(5000)
+                        completeAuthentication.click()
+
+                        val submitButton = UiAutomatorText("Submit", labelMatchesExactly = true, device = device)
+                        submitButton.wait(5000)
+                        submitButton.click()
+                    }
+
+                    is AuthorizeAction.Test3DS2.MultiSelect -> {
+                        UiSelector().textContains("Complete Authentication")
+                        val completeAuthentication = UiAutomatorText("Complete Authentication", labelMatchesExactly = true, device = device)
+                        completeAuthentication.wait(5000)
+                        device.findObject(UiSelector().textContains("Complete Authentication").index(0)).click()
+                        device.findObject(UiSelector().textContains("Complete Authentication").index(1)).click()
+                        device.findObject(UiSelector().textContains("Complete Authentication").index(2)).click()
+
+                        val submitButton = UiAutomatorText("Submit", labelMatchesExactly = true, device = device)
+                        submitButton.wait(5000)
+                        submitButton.click()
+                    }
+
+                    is AuthorizeAction.Test3DS2.OOB -> {
+                        val completeAuthentication = UiAutomatorText("Complete Authentication", labelMatchesExactly = true, device = device)
+                        completeAuthentication.wait(5000)
+                        completeAuthentication.click()
+                    }
+
+                    is AuthorizeAction.Test3DS2.OTP -> {
+                        val explanationText = UiAutomatorText("For this test", labelMatchesExactly = true, device = device)
+                        explanationText.wait(10000)
+
+                        val enterOTPField = UiAutomatorText("Enter your code below:", labelMatchesExactly = true, className = "android.widget.EditText", device = device)
+                        enterOTPField.wait(5000)
+                        enterOTPField.click()
+                        enterOTPField.setText("424242")
+
+                        val submitButton = UiAutomatorText("Submit", labelMatchesExactly = true, device = device)
+                        submitButton.wait(5000)
+                        submitButton.click()
+                    }
+
                     is AuthorizeAction.AuthorizePayment -> {}
                     is AuthorizeAction.PollingSucceedsAfterDelay -> {
                         waitForPollingToFinish()

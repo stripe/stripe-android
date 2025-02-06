@@ -155,4 +155,36 @@ internal sealed interface AuthorizeAction {
             override val isConsideredDone: Boolean = false
         }
     }
+
+    sealed interface Test3DS2 : AuthorizeAction {
+        data object HSBCHTML : Test3DS2 {
+            override fun text(isSetup: Boolean): String = "Submit"
+            override val requiresBrowser: Boolean = false
+            override val isConsideredDone: Boolean = true
+        }
+
+        data object OOB : Test3DS2 {
+            override fun text(isSetup: Boolean): String = "Complete Authentication"
+            override val requiresBrowser: Boolean = false
+            override val isConsideredDone: Boolean = true
+        }
+
+        data object OTP : Test3DS2 {
+            override fun text(isSetup: Boolean): String = "Submit"
+            override val requiresBrowser: Boolean = false
+            override val isConsideredDone: Boolean = true
+        }
+
+        data object SingleSelect : Test3DS2 {
+            override fun text(isSetup: Boolean): String = "Submit"
+            override val requiresBrowser: Boolean = false
+            override val isConsideredDone: Boolean = true
+        }
+
+        data object MultiSelect : Test3DS2 {
+            override fun text(isSetup: Boolean): String = "Submit"
+            override val requiresBrowser: Boolean = false
+            override val isConsideredDone: Boolean = true
+        }
+    }
 }

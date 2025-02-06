@@ -9,13 +9,18 @@ import java.security.InvalidParameterException
 
 open class UiAutomatorText(
     private val label: String,
+    private val labelMatchesExactly: Boolean = false,
     var className: String? = "android.widget.TextView",
     private val device: UiDevice
 ) {
     private val selector: UiSelector
         get() = className?.let {
-            UiSelector().textContains(label).className(it)
-        } ?: UiSelector().textContains(label)
+            if (labelMatchesExactly) {
+                UiSelector().textMatches(label).className(it)
+            } else {
+                UiSelector().textContains(label).className(it)
+            }
+        } ?: if (labelMatchesExactly) UiSelector().textMatches(label) else { UiSelector().textContains(label) }
 
     open fun click() {
         if (!exists()) {
@@ -37,6 +42,14 @@ open class UiAutomatorText(
             null
         }
         return device.findObject(selector).exists()
+    }
+
+    fun setText(text: String) {
+        if (!exists()) {
+            throw InvalidParameterException("Text entry not found: $label $className")
+        }
+
+        device.findObject(selector).setText(text)
     }
 
     fun wait(waitMs: Long) =
