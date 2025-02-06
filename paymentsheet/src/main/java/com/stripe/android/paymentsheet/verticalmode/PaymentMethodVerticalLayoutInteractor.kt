@@ -8,6 +8,7 @@ import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultFormHelper
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
+import com.stripe.android.paymentsheet.FormHelper.FormType
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.code
 import com.stripe.android.paymentsheet.forms.FormFieldValues
@@ -86,12 +87,6 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     dispatcher: CoroutineContext = Dispatchers.Default,
 ) : PaymentMethodVerticalLayoutInteractor {
 
-    sealed interface FormType {
-        object Empty : FormType
-        data class MandateOnly(val mandate: ResolvableString) : FormType
-        object UserInteractionRequired : FormType
-    }
-
     companion object {
         fun create(
             viewModel: BaseSheetViewModel,
@@ -106,16 +101,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 selection = viewModel.selection,
                 paymentMethodIncentiveInteractor = bankFormInteractor.paymentMethodIncentiveInteractor,
                 formTypeForCode = { code ->
-                    if (formHelper.requiresFormScreen(code)) {
-                        FormType.UserInteractionRequired
-                    } else {
-                        val mandate = formHelper.formElementsForCode(code).firstNotNullOfOrNull { it.mandateText }
-                        if (mandate == null) {
-                            FormType.Empty
-                        } else {
-                            FormType.MandateOnly(mandate)
-                        }
-                    }
+                    formHelper.formTypeForCode(code)
                 },
                 onFormFieldValuesChanged = formHelper::onFormFieldValuesChanged,
                 transitionToManageScreen = {

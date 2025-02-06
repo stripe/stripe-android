@@ -9,6 +9,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.paymentsheet.FormHelper.FormType
 import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -157,11 +158,25 @@ internal class DefaultFormHelper(
         )
     }
 
-    override fun requiresFormScreen(selectedPaymentMethodCode: String): Boolean {
-        val userInteractionAllowed = formElementsForCode(selectedPaymentMethodCode).any { it.allowsUserInteraction }
+    private fun requiresFormScreen(paymentMethodCode: String, formElements: List<FormElement>): Boolean {
+        val userInteractionAllowed = formElements.any { it.allowsUserInteraction }
         return userInteractionAllowed ||
-            selectedPaymentMethodCode == PaymentMethod.Type.USBankAccount.code ||
-            selectedPaymentMethodCode == PaymentMethod.Type.Link.code
+            paymentMethodCode == PaymentMethod.Type.USBankAccount.code ||
+            paymentMethodCode == PaymentMethod.Type.Link.code
+    }
+
+    override fun formTypeForCode(paymentMethodCode: PaymentMethodCode): FormType {
+        val formElements = formElementsForCode(paymentMethodCode)
+        return if (requiresFormScreen(paymentMethodCode, formElements)) {
+            FormType.UserInteractionRequired
+        } else {
+            val mandate = formElements.firstNotNullOfOrNull { it.mandateText }
+            if (mandate == null) {
+                FormType.Empty
+            } else {
+                FormType.MandateOnly(mandate)
+            }
+        }
     }
 
     private fun supportedPaymentMethodForCode(code: String): SupportedPaymentMethod {

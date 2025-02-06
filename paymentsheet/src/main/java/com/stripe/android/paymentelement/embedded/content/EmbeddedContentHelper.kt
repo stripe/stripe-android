@@ -18,7 +18,6 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.verticalmode.DefaultPaymentMethodVerticalLayoutInteractor
-import com.stripe.android.paymentsheet.verticalmode.DefaultPaymentMethodVerticalLayoutInteractor.FormType
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodIncentiveInteractor
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor
 import com.stripe.android.uicore.utils.combineAsStateFlow
@@ -159,16 +158,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
             selection = selectionHolder.selection,
             paymentMethodIncentiveInteractor = paymentMethodIncentiveInteractor,
             formTypeForCode = { code ->
-                if (formHelper.requiresFormScreen(code)) {
-                    FormType.UserInteractionRequired
-                } else {
-                    val mandate = formHelper.formElementsForCode(code).firstNotNullOfOrNull { it.mandateText }
-                    if (mandate == null) {
-                        FormType.Empty
-                    } else {
-                        FormType.MandateOnly(mandate)
-                    }
-                }
+                formHelper.formTypeForCode(code)
             },
             onFormFieldValuesChanged = formHelper::onFormFieldValuesChanged,
             transitionToManageScreen = {
