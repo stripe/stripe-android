@@ -322,5 +322,3 @@ internal sealed interface ScreenState {
     data object FullScreen : ScreenState
     data object Loading : ScreenState
 }
-
-internal class NoArgsException : IllegalArgumentException("NativeLinkArgs not found")

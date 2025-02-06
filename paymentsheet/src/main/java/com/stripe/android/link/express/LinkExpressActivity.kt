@@ -6,25 +6,19 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.annotation.VisibleForTesting
-import androidx.compose.ui.window.Dialog
 import androidx.core.os.bundleOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.NavHostController
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.core.Logger
-import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.NoArgsException
-import com.stripe.android.link.theme.DefaultLinkTheme
-import com.stripe.android.link.ui.verification.VerificationScreen
+import com.stripe.android.link.ui.verification.VerificationDialogBody
 import com.stripe.android.link.ui.verification.VerificationViewModel
 import com.stripe.android.paymentsheet.BuildConfig
 
 class LinkExpressActivity : ComponentActivity() {
-    internal var viewModel: VerificationViewModel? = null
-
-    @VisibleForTesting
-    internal lateinit var navController: NavHostController
+    internal var viewModelFactory: ViewModelProvider.Factory = LinkExpressViewModel.factory()
+    internal var viewModel: LinkExpressViewModel? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,34 +26,31 @@ class LinkExpressActivity : ComponentActivity() {
         try {
             viewModel = ViewModelProvider(
                 owner = this,
-                factory = VerificationViewModel.factory(
-                    onVerificationSucceeded = {
-                        dismissWithResult(LinkExpressResult.Authenticated(LinkAccountUpdate.None))
-                    },
-                    onChangeEmailClicked = {},
-                    onDismissClicked = {
-//                        dismissWithResult(LinkExpressResult.Canceled(LinkAccountUpdate.None))
-                    },
-                )
-            )[VerificationViewModel::class.java]
+                factory = viewModelFactory
+            )[LinkExpressViewModel::class.java]
         } catch (e: NoArgsException) {
-            Logger.getInstance(BuildConfig.DEBUG).error("Failed to create VerificationViewModel", e)
+            Logger.getInstance(BuildConfig.DEBUG).error("Failed to create LinkExpressViewModel", e)
             setResult(Activity.RESULT_CANCELED)
             finish()
         }
 
         val vm = viewModel ?: return
+        vm.dismissWithResult = ::dismissWithResult
 
         setContent {
-            Dialog(
-                onDismissRequest = {
-                    dismissWithResult(LinkExpressResult.Canceled(LinkAccountUpdate.None))
-                }
-            ) {
-                DefaultLinkTheme {
-                    VerificationScreen(vm)
-                }
-            }
+            val verificationViewModel = viewModel<VerificationViewModel>(
+                factory = VerificationViewModel.factory(
+                    onVerificationSucceeded = vm::onVerificationSucceeded,
+                    onChangeEmailClicked = vm::onChangeEmailClicked,
+                    onDismissClicked = vm::onDismissClicked,
+                    linkAccount = vm.linkAccount,
+                    isDialog = true,
+                    parentComponent = vm.activityRetainedComponent
+                )
+            )
+            VerificationDialogBody(
+                viewModel = verificationViewModel
+            )
         }
     }
 

@@ -10,6 +10,7 @@ import com.stripe.android.link.analytics.FakeLinkEventsReporter
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.confirmation.FakeLinkConfirmationHandler
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
+import com.stripe.android.link.express.LinkExpressViewModel
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.testing.FakeErrorReporter
@@ -30,5 +31,6 @@ internal class FakeNativeLinkComponent(
         NullCardAccountRangeRepositoryFactory,
     override val viewModel: LinkActivityViewModel = mock(),
     override val errorReporter: ErrorReporter = FakeErrorReporter(),
-    override val linkAuth: LinkAuth = FakeLinkAuth()
+    override val linkAuth: LinkAuth = FakeLinkAuth(),
+    override val expressViewModel: LinkExpressViewModel? = null
 ) : NativeLinkComponent

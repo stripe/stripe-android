@@ -14,6 +14,7 @@ import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.account.LinkAuth
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
+import com.stripe.android.link.express.LinkExpressViewModel
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.paymentelement.confirmation.injection.DefaultConfirmationModule
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -32,6 +33,7 @@ internal annotation class NativeLinkScope
     modules = [
         NativeLinkModule::class,
         LinkViewModelModule::class,
+        LinkExpressViewModelModule::class,
         DefaultConfirmationModule::class,
     ]
 )
@@ -46,6 +48,7 @@ internal interface NativeLinkComponent {
     val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory
     val linkAuth: LinkAuth
     val viewModel: LinkActivityViewModel
+    val expressViewModel: LinkExpressViewModel?
 
     @Component.Builder
     interface Builder {

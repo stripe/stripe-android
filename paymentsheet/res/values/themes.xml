@@ -43,4 +43,10 @@
         <item name="android:windowNoTitle">true</item>
         <item name="windowNoTitle">true</item>
     </style>
+
+    <style name="StripeLinkTranslucentTheme" parent="@android:style/Theme.Translucent">
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="windowNoTitle">true</item>
+    </style>
 </resources>

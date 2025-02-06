@@ -10,5 +10,5 @@ internal data class LinkExpressArgs(
     val configuration: LinkConfiguration,
     val publishableKey: String,
     val stripeAccountId: String?,
-    val linkAccount: LinkAccount?
+    val linkAccount: LinkAccount
 ) : Parcelable

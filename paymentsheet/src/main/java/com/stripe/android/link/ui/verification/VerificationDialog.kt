@@ -14,7 +14,7 @@ import com.stripe.android.link.theme.DefaultLinkTheme
 internal fun VerificationDialog(
     modifier: Modifier,
     linkAccount: LinkAccount,
-    onVerificationSucceeded: () -> Unit,
+    onVerificationSucceeded: (LinkAccount) -> Unit,
     onDismissClicked: () -> Unit
 ) {
     val viewModel = linkViewModel<VerificationViewModel> { parentComponent ->

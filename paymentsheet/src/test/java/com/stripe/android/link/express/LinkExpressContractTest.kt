@@ -103,7 +103,10 @@ class LinkExpressContractTest {
     fun `parseResult returns Canceled for an unknown result code`() {
         val contract = LinkExpressContract()
 
-        val actualResult = contract.parseResult(998 /* arbitrary unknown code */, Intent())
+        val actualResult = contract.parseResult(
+            resultCode = 998,
+            intent = Intent()
+        )
         assertThat(actualResult).isEqualTo(
             LinkExpressResult.Canceled(linkAccountUpdate = LinkAccountUpdate.None)
         )

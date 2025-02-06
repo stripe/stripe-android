@@ -59,9 +59,9 @@ internal class VerificationViewModelTest {
     @Test
     fun `When confirmVerification succeeds then it navigates to Wallet`() =
         runTest(dispatcher) {
-            val onVerificationSucceededCalls = arrayListOf<Unit>()
-            fun onVerificationSucceeded() {
-                onVerificationSucceededCalls.add(Unit)
+            val onVerificationSucceededCalls = arrayListOf<LinkAccount>()
+            fun onVerificationSucceeded(linkAccount: LinkAccount) {
+                onVerificationSucceededCalls.add(linkAccount)
             }
 
             val viewModel = createViewModel(
@@ -69,7 +69,7 @@ internal class VerificationViewModelTest {
             )
             viewModel.onVerificationCodeEntered("code")
 
-            assertThat(onVerificationSucceededCalls).containsExactly(Unit)
+            assertThat(onVerificationSucceededCalls).containsExactly(TestFactory.LINK_ACCOUNT)
         }
 
     @Test
@@ -189,7 +189,7 @@ internal class VerificationViewModelTest {
         linkAccountManager: LinkAccountManager = FakeLinkAccountManager(),
         linkEventsReporter: LinkEventsReporter = FakeLinkEventsReporter(),
         logger: Logger = FakeLogger(),
-        onVerificationSucceeded: () -> Unit = {},
+        onVerificationSucceeded: (LinkAccount) -> Unit = {},
         onChangeEmailRequested: () -> Unit = {},
         onDismissClicked: () -> Unit = {},
     ): VerificationViewModel {
