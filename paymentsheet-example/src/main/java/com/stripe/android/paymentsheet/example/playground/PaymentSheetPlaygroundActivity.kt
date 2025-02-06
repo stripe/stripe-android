@@ -11,11 +11,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBars
 import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -149,34 +146,29 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
 
             PlaygroundTheme(
                 content = {
-                    Column(
-                        modifier = Modifier
-                            .padding(WindowInsets.statusBars.asPaddingValues())
-                    ) {
-                        playgroundState?.asPaymentState()?.endpoint?.let { customEndpoint ->
-                            Text(
-                                text = "Using $customEndpoint",
-                                modifier = Modifier
-                                    .clickable { showCustomEndpointDialog = true }
-                                    .padding(bottom = 16.dp),
-                            )
-                        }
-
-                        playgroundState?.asPaymentState()?.stripeIntentId?.let { stripeIntentId ->
-                            Text(
-                                text = stripeIntentId,
-                                modifier = Modifier.padding(bottom = 16.dp)
-                            )
-                        }
-
-                        SettingsUi(playgroundSettings = localPlaygroundSettings)
-
-                        AppearanceButton()
-
-                        QrCodeButton(playgroundSettings = localPlaygroundSettings)
-
-                        ClearLinkDataButton()
+                    playgroundState?.asPaymentState()?.endpoint?.let { customEndpoint ->
+                        Text(
+                            text = "Using $customEndpoint",
+                            modifier = Modifier
+                                .clickable { showCustomEndpointDialog = true }
+                                .padding(bottom = 16.dp),
+                        )
                     }
+
+                    playgroundState?.asPaymentState()?.stripeIntentId?.let { stripeIntentId ->
+                        Text(
+                            text = stripeIntentId,
+                            modifier = Modifier.padding(bottom = 16.dp)
+                        )
+                    }
+
+                    SettingsUi(playgroundSettings = localPlaygroundSettings)
+
+                    AppearanceButton()
+
+                    QrCodeButton(playgroundSettings = localPlaygroundSettings)
+
+                    ClearLinkDataButton()
                 },
                 bottomBarContent = {
                     ReloadButton(playgroundSettings = localPlaygroundSettings)
