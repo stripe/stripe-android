@@ -35,7 +35,7 @@ internal class SaveAccountToLink @Inject constructor(
     ): FinancialConnectionsSessionManifest {
         return ensureReadyAccounts(
             shouldPollAccountNumbers = shouldPollAccountNumbers,
-            isRelink = false,
+            isNetworkingRelinkSession = false,
             partnerAccounts = selectedAccounts,
         ) { selectedAccountIds ->
             repository.postSaveAccountsToLink(
@@ -54,11 +54,11 @@ internal class SaveAccountToLink @Inject constructor(
         consumerSessionClientSecret: String,
         selectedAccounts: List<CachedPartnerAccount>?,
         shouldPollAccountNumbers: Boolean,
-        isRelink: Boolean,
+        isNetworkingRelinkSession: Boolean,
     ): FinancialConnectionsSessionManifest {
         return ensureReadyAccounts(
             shouldPollAccountNumbers = shouldPollAccountNumbers,
-            isRelink = isRelink,
+            isNetworkingRelinkSession = isNetworkingRelinkSession,
             partnerAccounts = selectedAccounts,
         ) { selectedAccountIds ->
             repository.postSaveAccountsToLink(
@@ -75,7 +75,7 @@ internal class SaveAccountToLink @Inject constructor(
 
     private suspend fun ensureReadyAccounts(
         shouldPollAccountNumbers: Boolean,
-        isRelink: Boolean,
+        isNetworkingRelinkSession: Boolean,
         partnerAccounts: List<CachedPartnerAccount>?,
         action: suspend (Set<String>?) -> FinancialConnectionsSessionManifest,
     ): FinancialConnectionsSessionManifest {
@@ -100,11 +100,11 @@ internal class SaveAccountToLink @Inject constructor(
         }.mapCatching {
             action(selectedAccountIds)
         }.onSuccess { manifest ->
-            if (!isRelink) {
+            if (!isNetworkingRelinkSession) {
                 storeSavedToLinkMessage(manifest, selectedAccountIds.size)
             }
         }.onFailure {
-            if (!isRelink) {
+            if (!isNetworkingRelinkSession) {
                 storeFailedToSaveToLinkMessage(selectedAccountIds.size)
             }
         }.getOrThrow()

@@ -197,7 +197,7 @@ private fun SharedPartnerAuthBody(
         state.payload()?.let {
             LoadedContent(
                 showInModal = inModal,
-                isRelinkSession = state.isRelinkSession,
+                isRelinkSession = state.isNetworkingRelinkSession,
                 authenticationStatus = state.authenticationStatus,
                 payload = it,
                 onContinueClick = onContinueClick,

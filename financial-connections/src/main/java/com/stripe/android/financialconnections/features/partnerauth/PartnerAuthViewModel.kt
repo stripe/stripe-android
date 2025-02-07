@@ -117,6 +117,19 @@ internal class PartnerAuthViewModel @AssistedInject constructor(
         }
     }
 
+    private fun initializeState() {
+        suspend {
+            val sync = getOrFetchSync()
+            if (pane == Pane.BANK_AUTH_REPAIR) {
+                initializeBankAuthRepair(sync)
+            } else {
+                initializePartnerAuth(sync)
+            }
+        }.execute {
+            copy(payload = it)
+        }
+    }
+
     private suspend fun initializeBankAuthRepair(
         sync: SynchronizeSessionResponse,
     ): Payload {
@@ -145,19 +158,6 @@ internal class PartnerAuthViewModel @AssistedInject constructor(
             institution = requireNotNull(manifest.activeInstitution),
             authSession = authSession,
         )
-    }
-
-    private fun initializeState() {
-        suspend {
-            val sync = getOrFetchSync()
-            if (pane == Pane.BANK_AUTH_REPAIR) {
-                initializeBankAuthRepair(sync)
-            } else {
-                initializePartnerAuth(sync)
-            }
-        }.execute {
-            copy(payload = it)
-        }
     }
 
     private fun recreateAuthSession() = suspend {

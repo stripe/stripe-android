@@ -17,7 +17,7 @@ internal data class SharedPartnerAuthState(
     val inModal: Boolean = false,
 ) {
 
-    val isRelinkSession: Boolean
+    val isNetworkingRelinkSession: Boolean
         get() = pane == Pane.BANK_AUTH_REPAIR
 
     constructor(args: PartnerAuthViewModel.Args) : this(
@@ -47,7 +47,7 @@ internal data class SharedPartnerAuthState(
                 authenticationStatus !is Success &&
                 // Failures posting institution -> don't allow back navigation
                 payload !is Fail &&
-                !isRelinkSession
+                !isNetworkingRelinkSession
 
     sealed interface ViewEffect {
         data class OpenPartnerAuth(

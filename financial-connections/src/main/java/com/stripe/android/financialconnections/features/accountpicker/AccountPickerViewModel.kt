@@ -336,12 +336,12 @@ internal class AccountPickerViewModel @AssistedInject constructor(
             if (manifest.isDataFlow && manifest.canSaveAccountsToLink && consumerSessionClientSecret != null) {
                 // In the data flow, we save accounts to Link in this screen. In the payment flow,
                 // it happens in the AttachPaymentScreen.
-                val isRelink = pendingRepairRepository.get() != null
+                val isNetworkingRelinkSession = pendingRepairRepository.get() != null
                 saveAccountToLink.existing(
                     consumerSessionClientSecret = consumerSessionClientSecret,
                     selectedAccounts = accountsList.data.toCachedPartnerAccounts(),
                     shouldPollAccountNumbers = manifest.isDataFlow,
-                    isRelink = isRelink,
+                    isNetworkingRelinkSession = isNetworkingRelinkSession,
                 )
             }
 
