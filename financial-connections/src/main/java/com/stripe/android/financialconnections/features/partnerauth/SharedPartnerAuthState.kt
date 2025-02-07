@@ -1,6 +1,5 @@
 package com.stripe.android.financialconnections.features.partnerauth
 
-import com.stripe.android.financialconnections.features.bankauthrepair.BankAuthRepairViewModel
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
@@ -24,10 +23,6 @@ internal data class SharedPartnerAuthState(
     constructor(args: PartnerAuthViewModel.Args) : this(
         pane = args.pane,
         inModal = args.inModal,
-    )
-
-    constructor(args: BankAuthRepairViewModel.Args) : this(
-        pane = args.pane,
     )
 
     data class Payload(

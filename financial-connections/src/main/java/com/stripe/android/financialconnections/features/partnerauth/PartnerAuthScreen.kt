@@ -8,11 +8,14 @@ import com.stripe.android.financialconnections.presentation.paneViewModel
 import com.stripe.android.uicore.utils.collectAsState
 
 @Composable
-internal fun PartnerAuthScreen(inModal: Boolean) {
+internal fun PartnerAuthScreen(
+    pane: Pane,
+    inModal: Boolean
+) {
     val viewModel: PartnerAuthViewModel = paneViewModel {
         PartnerAuthViewModel.factory(
             parentComponent = it,
-            args = PartnerAuthViewModel.Args(inModal, Pane.PARTNER_AUTH)
+            args = PartnerAuthViewModel.Args(inModal, pane)
         )
     }
     val state by viewModel.stateFlow.collectAsState()
