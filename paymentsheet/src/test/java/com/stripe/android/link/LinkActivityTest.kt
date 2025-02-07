@@ -16,14 +16,12 @@ import androidx.test.espresso.intent.Intents.assertNoUnverifiedIntents
 import androidx.test.espresso.intent.rule.IntentsRule
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.account.FakeLinkAccountManager
-import com.stripe.android.link.account.FakeLinkAuth
 import com.stripe.android.link.account.LinkAccountManager
-import com.stripe.android.link.gate.FakeLinkGate
+import com.stripe.android.link.attestation.FakeLinkAttestationCheck
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.testing.CoroutineTestRule
-import com.stripe.android.testing.FakeErrorReporter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -146,10 +144,7 @@ internal class LinkActivityTest {
                 confirmationHandlerFactory = { FakeConfirmationHandler() },
                 linkAccountManager = linkAccountManager,
                 eventReporter = FakeEventReporter(),
-                integrityRequestManager = FakeIntegrityRequestManager(),
-                linkGate = FakeLinkGate(),
-                errorReporter = FakeErrorReporter(),
-                linkAuth = FakeLinkAuth(),
+                linkAttestationCheck = FakeLinkAttestationCheck(),
                 linkConfiguration = TestFactory.LINK_CONFIGURATION,
                 startWithVerificationDialog = use2faDialog,
             )
