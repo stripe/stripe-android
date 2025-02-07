@@ -10,6 +10,7 @@ object FeatureFlags {
     val nativeLinkAttestationEnabled = FeatureFlag("Native Link Attestation")
     val instantDebitsIncentives = FeatureFlag("Instant Bank Payments Incentives")
     val enableDefaultPaymentMethods = FeatureFlag("Enable Default Payment Methods")
+    val financialConnectionsDarkMode = FeatureFlag("Financial Connections Dark Mode")
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

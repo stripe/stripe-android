@@ -19,17 +19,23 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
 
 // Neutral
 internal val Neutral0 = Color(0xFFFFFFFF)
+internal val Neutral0Dark = Color(0xFF14171D)
 internal val Neutral25 = Color(0xFFF5F6F8)
+internal val Neutral25Dark = Color(0xFF1B1E25)
 internal val Neutral50 = Color(0xFFF6F8FA)
+internal val Neutral50Dark = Color(0xFF21252C)
 internal val Neutral100 = Color(0xFFD8DEE4)
+internal val Neutral100Dark = Color(0xFF2B3039)
 internal val Neutral200 = Color(0xFFC0C8D2)
 internal val Neutral600 = Color(0xFF596171)
 internal val Neutral700 = Color(0xFF474E5A)
 internal val Neutral800 = Color(0xFF353A44)
+internal val Neutral800Dark = Color(0xFFC9CED8)
 internal val Neutral900 = Color(0xff21252C)
 
 // Attention
 internal val Attention50 = Color(0xFFFEF9DA)
+internal val Attention50Dark = Color(0xFF400A00)
 internal val Attention300 = Color(0xFFF7870F)
 
 // Feedback
@@ -37,12 +43,14 @@ internal val FeedbackCritical600 = Color(0xFFC0123C)
 
 // Brand
 internal val Brand25 = Color(0xFFF7F5FD)
+internal val Brand25Dark = Color(0xFF1A1B2E)
 internal val Brand400 = Color(0xff8D7FFA)
 internal val Brand500 = Color(0xFF675DFF)
 internal val Brand600 = Color(0xFF533AFD)
 
 // Link
 internal val LinkGreen50 = Color(0xFFE6FFED)
+internal val LinkGreen50Dark = Color(0xFF16211F)
 internal val LinkGreen200 = Color(0xFF00D66F)
 internal val LinkGreen500 = Color(0xFF008545)
 internal val LinkGreen900 = Color(0xFF011E0F)

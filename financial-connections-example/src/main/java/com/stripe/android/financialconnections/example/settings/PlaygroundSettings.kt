@@ -177,6 +177,7 @@ internal data class PlaygroundSettings(
             ConfirmIntentSetting(),
             NativeSetting(),
             PermissionsSetting(),
+            DynamicAppearanceSetting(),
             EmailSetting(),
             CustomerIdSetting(),
             StripeAccountIdSetting().takeIf { BuildConfig.TEST_ENVIRONMENT != "edge" },
