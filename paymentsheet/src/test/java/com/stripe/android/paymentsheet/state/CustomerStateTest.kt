@@ -3,25 +3,16 @@ package com.stripe.android.paymentsheet.state
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
-import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentMethodFactory
 import kotlinx.coroutines.test.runTest
-import org.junit.Rule
 import org.junit.Test
 
 class CustomerStateTest {
-
-    @get:Rule
-    val enableDefaultPaymentMethods = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.enableDefaultPaymentMethods,
-        isEnabled = true,
-    )
 
     @Test
     fun `Should create 'CustomerState' for customer session properly with permissions disabled`() {
@@ -49,7 +40,7 @@ class CustomerStateTest {
         val paymentMethods = PaymentMethodFactory.cards(4)
         val customer = createElementsSessionCustomer(
             paymentMethods = paymentMethods,
-            mobilePaymentElementComponent = ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
+            mobilePaymentElementComponent = createEnabledMobilePaymentElement(
                 isPaymentMethodSaveEnabled = false,
                 isPaymentMethodRemoveEnabled = true,
                 canRemoveLastPaymentMethod = true,
@@ -75,7 +66,7 @@ class CustomerStateTest {
         val paymentMethods = PaymentMethodFactory.cards(3)
         val customer = createElementsSessionCustomer(
             paymentMethods = paymentMethods,
-            mobilePaymentElementComponent = ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
+            mobilePaymentElementComponent = createEnabledMobilePaymentElement(
                 isPaymentMethodSaveEnabled = false,
                 isPaymentMethodRemoveEnabled = false,
                 canRemoveLastPaymentMethod = false,
@@ -96,14 +87,14 @@ class CustomerStateTest {
         assertThat(customerState.permissions.canRemoveDuplicates).isTrue()
     }
 
-    private fun createCustomerSessionForTestingDefaultPaymentMethod(defaultPaymentMethodId: String?): CustomerState {
+    private fun createCustomerSessionForTestingDefaultPaymentMethod(
+        defaultPaymentMethodId: String?,
+        isSetAsDefaultEnabled: Boolean,
+    ): CustomerState {
         val paymentMethods = PaymentMethodFactory.cards(3)
 
-        val mobilePaymentElementComponent = ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
-            isPaymentMethodSaveEnabled = false,
-            isPaymentMethodRemoveEnabled = false,
-            canRemoveLastPaymentMethod = false,
-            allowRedisplayOverride = null,
+        val mobilePaymentElementComponent = createEnabledMobilePaymentElement(
+            isPaymentMethodSetAsDefaultEnabled = isSetAsDefaultEnabled,
         )
         val customer = createElementsSessionCustomer(
             paymentMethods = paymentMethods,
@@ -122,12 +113,12 @@ class CustomerStateTest {
     }
 
     @Test
-    fun `Create 'CustomerState' for customer session with nonnull defaultPaymentMethodId & flag on`() {
-        val defaultPaymentMethodId = "aaa111"
+    fun `Create 'CustomerState' for customer session with nonnull default PM & set as default feature enabled`() {
+        val defaultPaymentMethodId = "pm_123"
 
-        enableDefaultPaymentMethods.setEnabled(true)
         val customerState = createCustomerSessionForTestingDefaultPaymentMethod(
-            defaultPaymentMethodId = defaultPaymentMethodId
+            defaultPaymentMethodId = defaultPaymentMethodId,
+            isSetAsDefaultEnabled = true,
         )
 
         assertThat(customerState.defaultPaymentMethodState).isInstanceOf(
@@ -140,24 +131,24 @@ class CustomerStateTest {
     }
 
     @Test
-    fun `Create 'CustomerState' for customer session with nonnull defaultPaymentMethodId & flag off`() {
-        val defaultPaymentMethodId = "aaa111"
+    fun `Create 'CustomerState' for customer session with nonnull default PM & set as default feature disabled`() {
+        val defaultPaymentMethodId = "pm_123"
 
-        enableDefaultPaymentMethods.setEnabled(false)
         val customerState = createCustomerSessionForTestingDefaultPaymentMethod(
-            defaultPaymentMethodId = defaultPaymentMethodId
+            defaultPaymentMethodId = defaultPaymentMethodId,
+            isSetAsDefaultEnabled = false,
         )
 
         assertThat(customerState.defaultPaymentMethodState).isEqualTo(CustomerState.DefaultPaymentMethodState.Disabled)
     }
 
     @Test
-    fun `Create 'CustomerState' for customer session with null defaultPaymentMethodId & flag on`() {
+    fun `Create 'CustomerState' for customer session with null default PM & set as default feature enabled`() {
         val defaultPaymentMethodId = null
 
-        enableDefaultPaymentMethods.setEnabled(true)
         val customerState = createCustomerSessionForTestingDefaultPaymentMethod(
-            defaultPaymentMethodId = defaultPaymentMethodId
+            defaultPaymentMethodId = defaultPaymentMethodId,
+            isSetAsDefaultEnabled = true,
         )
 
         assertThat(customerState.defaultPaymentMethodState).isInstanceOf(
@@ -170,12 +161,12 @@ class CustomerStateTest {
     }
 
     @Test
-    fun `Create 'CustomerState' for customer session with null defaultPaymentMethodId & flag off`() {
+    fun `Create 'CustomerState' for customer session with null default PM & set as default feature disabled`() {
         val defaultPaymentMethodId = null
 
-        enableDefaultPaymentMethods.setEnabled(false)
         val customerState = createCustomerSessionForTestingDefaultPaymentMethod(
-            defaultPaymentMethodId = defaultPaymentMethodId
+            defaultPaymentMethodId = defaultPaymentMethodId,
+            isSetAsDefaultEnabled = false,
         )
 
         assertThat(customerState.defaultPaymentMethodState).isEqualTo(CustomerState.DefaultPaymentMethodState.Disabled)
@@ -212,7 +203,7 @@ class CustomerStateTest {
                     PaymentMethodFixtures.LINK_PAYMENT_METHOD,
                     PaymentMethodFixtures.AU_BECS_DEBIT,
                 ),
-                mobilePaymentElementComponent = ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
+                mobilePaymentElementComponent = createEnabledMobilePaymentElement(
                     isPaymentMethodSaveEnabled = false,
                     isPaymentMethodRemoveEnabled = false,
                     canRemoveLastPaymentMethod = false,
@@ -315,7 +306,7 @@ class CustomerStateTest {
                 mobilePaymentElementComponent = if (paymentElementDisabled) {
                     ElementsSession.Customer.Components.MobilePaymentElement.Disabled
                 } else {
-                    ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
+                    createEnabledMobilePaymentElement(
                         isPaymentMethodRemoveEnabled = true,
                         isPaymentMethodSaveEnabled = false,
                         canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
@@ -331,6 +322,22 @@ class CustomerStateTest {
         )
 
         test(customerState)
+    }
+
+    private fun createEnabledMobilePaymentElement(
+        isPaymentMethodSaveEnabled: Boolean = true,
+        isPaymentMethodRemoveEnabled: Boolean = false,
+        canRemoveLastPaymentMethod: Boolean = false,
+        allowRedisplayOverride: PaymentMethod.AllowRedisplay? = null,
+        isPaymentMethodSetAsDefaultEnabled: Boolean = false,
+    ): ElementsSession.Customer.Components.MobilePaymentElement {
+        return ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
+            isPaymentMethodSaveEnabled = isPaymentMethodSaveEnabled,
+            isPaymentMethodRemoveEnabled = isPaymentMethodRemoveEnabled,
+            canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
+            allowRedisplayOverride = allowRedisplayOverride,
+            isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
+        )
     }
 
     private fun createLegacyEphemeralKeyCustomerState(

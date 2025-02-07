@@ -101,7 +101,8 @@ data class ElementsSession(
                     val isPaymentMethodSaveEnabled: Boolean,
                     val isPaymentMethodRemoveEnabled: Boolean,
                     val canRemoveLastPaymentMethod: Boolean,
-                    val allowRedisplayOverride: PaymentMethod.AllowRedisplay?
+                    val allowRedisplayOverride: PaymentMethod.AllowRedisplay?,
+                    val isPaymentMethodSetAsDefaultEnabled: Boolean,
                 ) : MobilePaymentElement
             }
 

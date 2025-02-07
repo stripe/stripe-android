@@ -444,10 +444,12 @@ internal object ElementsSessionFixtures {
         """.trimIndent()
     )
 
+    @Suppress("LongMethod")
     fun createPaymentIntentWithCustomerSession(
         allowRedisplay: String? = "limited",
         paymentMethodRemoveFeature: String? = "enabled",
         paymentMethodRemoveLastFeature: String? = "enabled",
+        paymentMethodSetAsDefaultFeature: String = "disabled",
     ): JSONObject {
         return JSONObject(
             """
@@ -532,7 +534,8 @@ internal object ElementsSessionFixtures {
                         "payment_method_remove": ${paymentMethodRemoveFeature ?: "enabled"},
                         "payment_method_save": "disabled",
                         "payment_method_remove_last": ${paymentMethodRemoveLastFeature ?: "enabled"},
-                        "payment_method_save_allow_redisplay_override": ${allowRedisplay?.let { "\"$it\""} ?: "null"}
+                        "payment_method_save_allow_redisplay_override": ${allowRedisplay?.let { "\"$it\""} ?: "null"},
+                        "payment_method_set_as_default": $paymentMethodSetAsDefaultFeature,
                       }
                     },
                     "customer_sheet": {

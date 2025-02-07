@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.state
 
 import android.os.Parcelable
 import com.stripe.android.common.model.CommonConfiguration
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -63,7 +62,13 @@ internal data class CustomerState(
                 else -> false
             }
 
-            val defaultPaymentMethodState = if (FeatureFlags.enableDefaultPaymentMethods.isEnabled) {
+            val isSetAsDefaultFeatureEnabled = when (mobilePaymentElementComponent) {
+                ElementsSession.Customer.Components.MobilePaymentElement.Disabled -> false
+                is ElementsSession.Customer.Components.MobilePaymentElement.Enabled ->
+                    mobilePaymentElementComponent.isPaymentMethodSetAsDefaultEnabled
+            }
+
+            val defaultPaymentMethodState = if (isSetAsDefaultFeatureEnabled) {
                 DefaultPaymentMethodState.Enabled(customer.defaultPaymentMethod)
             } else {
                 DefaultPaymentMethodState.Disabled
