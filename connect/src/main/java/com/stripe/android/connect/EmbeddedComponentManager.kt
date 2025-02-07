@@ -341,6 +341,9 @@ class EmbeddedComponentManager(
                 }
 
             financialConnectionsSheets[activity] =
+                // Using `FinancialConnectionsSheet.create()` here for both link account and manual entry flows.
+                // Ideally, we'd use `createForBankAccountToken()` for manual entry flows, but we're currently unable
+                // to determine which flow the user is on based on the JS message received.
                 FinancialConnectionsSheet.create(activity) { result ->
                     financialConnectionsResults.tryEmit(ActivityResult(activity, result))
                 }
