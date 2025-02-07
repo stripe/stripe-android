@@ -32,6 +32,7 @@ import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.PrimaryButtonTag
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.CvcCheck
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
@@ -39,11 +40,13 @@ import com.stripe.android.ui.core.elements.CvcController
 import com.stripe.android.uicore.elements.DateConfig
 import com.stripe.android.uicore.elements.SimpleTextFieldController
 import com.stripe.android.uicore.utils.stateFlowOf
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import kotlin.time.Duration.Companion.seconds
 import com.stripe.android.link.confirmation.Result as LinkConfirmationResult
 
 @RunWith(AndroidJUnit4::class)
@@ -481,6 +484,47 @@ internal class WalletScreenTest {
     }
 
     @Test
+    fun `pay method row is loading when card is being updated`() = runTest(dispatcher) {
+        val validCard = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(
+            expiryYear = 2099,
+            cvcCheck = CvcCheck.Pass
+        )
+        val linkAccountManager = object : FakeLinkAccountManager() {
+            override suspend fun updatePaymentDetails(
+                updateParams: ConsumerPaymentDetailsUpdateParams
+            ): Result<ConsumerPaymentDetails> {
+                delay(1.seconds)
+                return super.updatePaymentDetails(updateParams)
+            }
+        }
+        linkAccountManager.listPaymentDetailsResult = Result.success(
+            ConsumerPaymentDetails(paymentDetails = listOf(validCard))
+        )
+        val viewModel = createViewModel(linkAccountManager)
+        composeTestRule.setContent {
+            WalletScreen(
+                viewModel = viewModel,
+                showBottomSheetContent = {},
+                hideBottomSheetContent = {}
+            )
+        }
+        composeTestRule.waitForIdle()
+
+        onWalletPayButton().assertIsEnabled()
+
+        viewModel.onSetDefaultClicked(validCard)
+        composeTestRule.waitForIdle()
+
+        onWalletPaymentMethodRowLoadingIndicator().assertIsDisplayed()
+        onWalletPayButton().assertIsNotEnabled()
+
+        dispatcher.scheduler.advanceTimeBy(1.1.seconds)
+
+        onWalletPaymentMethodRowLoadingIndicator().assertDoesNotExist()
+        onWalletPayButton().assertExists()
+    }
+
+    @Test
     fun `wallet menu is dismissed on cancel clicked`() = runTest(dispatcher) {
         testMenu(
             nodeTag = onWalletPaymentMethodMenuCancelTag()
@@ -653,6 +697,9 @@ internal class WalletScreenTest {
 
     private fun onWalletPaymentMethodRowMenuButton() =
         composeTestRule.onAllNodes(hasTestTag(WALLET_PAYMENT_DETAIL_ITEM_MENU_BUTTON), useUnmergedTree = true)
+
+    private fun onWalletPaymentMethodRowLoadingIndicator() =
+        composeTestRule.onNodeWithTag(WALLET_PAYMENT_DETAIL_ITEM_LOADING_INDICATOR, useUnmergedTree = true)
 
     private fun onWalletPaymentMethodMenu() =
         composeTestRule.onNodeWithTag(WALLET_SCREEN_MENU_SHEET_TAG, useUnmergedTree = true)
