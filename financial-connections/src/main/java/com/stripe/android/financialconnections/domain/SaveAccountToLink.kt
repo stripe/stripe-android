@@ -33,7 +33,11 @@ internal class SaveAccountToLink @Inject constructor(
         country: String,
         shouldPollAccountNumbers: Boolean,
     ): FinancialConnectionsSessionManifest {
-        return ensureReadyAccounts(shouldPollAccountNumbers, selectedAccounts) { selectedAccountIds ->
+        return ensureReadyAccounts(
+            shouldPollAccountNumbers = shouldPollAccountNumbers,
+            isRelink = false,
+            partnerAccounts = selectedAccounts,
+        ) { selectedAccountIds ->
             repository.postSaveAccountsToLink(
                 clientSecret = configuration.financialConnectionsSessionClientSecret,
                 email = email,
@@ -50,8 +54,13 @@ internal class SaveAccountToLink @Inject constructor(
         consumerSessionClientSecret: String,
         selectedAccounts: List<CachedPartnerAccount>?,
         shouldPollAccountNumbers: Boolean,
+        isRelink: Boolean,
     ): FinancialConnectionsSessionManifest {
-        return ensureReadyAccounts(shouldPollAccountNumbers, selectedAccounts) { selectedAccountIds ->
+        return ensureReadyAccounts(
+            shouldPollAccountNumbers = shouldPollAccountNumbers,
+            isRelink = isRelink,
+            partnerAccounts = selectedAccounts,
+        ) { selectedAccountIds ->
             repository.postSaveAccountsToLink(
                 clientSecret = configuration.financialConnectionsSessionClientSecret,
                 email = null,
@@ -66,6 +75,7 @@ internal class SaveAccountToLink @Inject constructor(
 
     private suspend fun ensureReadyAccounts(
         shouldPollAccountNumbers: Boolean,
+        isRelink: Boolean,
         partnerAccounts: List<CachedPartnerAccount>?,
         action: suspend (Set<String>?) -> FinancialConnectionsSessionManifest,
     ): FinancialConnectionsSessionManifest {
@@ -90,9 +100,13 @@ internal class SaveAccountToLink @Inject constructor(
         }.mapCatching {
             action(selectedAccountIds)
         }.onSuccess { manifest ->
-            storeSavedToLinkMessage(manifest, selectedAccountIds.size)
+            if (!isRelink) {
+                storeSavedToLinkMessage(manifest, selectedAccountIds.size)
+            }
         }.onFailure {
-            storeFailedToSaveToLinkMessage(selectedAccountIds.size)
+            if (!isRelink) {
+                storeFailedToSaveToLinkMessage(selectedAccountIds.size)
+            }
         }.getOrThrow()
     }
 

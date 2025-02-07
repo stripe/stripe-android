@@ -26,6 +26,6 @@ internal class CoreAuthorizationPendingNetworkingRepairRepository @Inject constr
 
     @Parcelize
     data class State(
-        val coreAuthorization: String? = null
+        val coreAuthorization: String,
     ) : Parcelable
 }
