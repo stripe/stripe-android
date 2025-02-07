@@ -342,4 +342,22 @@ internal class NavigationHandlerTest {
             verify(screenTwo as Closeable).close()
         }
     }
+
+    @Test
+    fun `previousScreen value is correct`() = runTest {
+        val navigationHandler = NavigationHandler<PaymentSheetScreen>(this, PaymentSheetScreen.Loading) {}
+        navigationHandler.previousScreen.test {
+            // Initially, there is no previous screen.
+            assertThat(awaitItem()).isNull()
+
+            val screenOne = mock<PaymentSheetScreen>()
+            navigationHandler.transitionTo(screenOne)
+            // The previous screen doesn't get updated here -- Loading is removed from the backstack as part of the
+            // initial loading. The previous screen is still null.
+
+            val screenTwo = mock<PaymentSheetScreen>()
+            navigationHandler.transitionTo(screenTwo)
+            assertThat(awaitItem()).isEqualTo(screenOne)
+        }
+    }
 }

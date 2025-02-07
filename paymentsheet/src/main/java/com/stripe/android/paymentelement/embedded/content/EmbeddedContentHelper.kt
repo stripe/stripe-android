@@ -217,8 +217,8 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
                 setSelection(null)
             },
             customerStateHolder = customerStateHolder,
-            onPaymentMethodRemoved = {
-            },
+            prePaymentMethodRemoveActions = {},
+            postPaymentMethodRemoveActions = {},
             onUpdatePaymentMethod = { _, _, _, _ ->
                 sheetLauncher?.launchManage(
                     paymentMethodMetadata = paymentMethodMetadata,
@@ -230,7 +230,6 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
             },
             isLinkEnabled = stateFlowOf(paymentMethodMetadata.linkState != null),
             isNotPaymentFlow = false,
-            isEmbedded = true,
         )
     }
 

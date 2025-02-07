@@ -39,7 +39,8 @@ internal class ManageSavedPaymentMethodMutatorFactory @Inject constructor(
                 selectionHolder.set(null)
             },
             customerStateHolder = customerStateHolder,
-            onPaymentMethodRemoved = ::onPaymentMethodRemoved,
+            prePaymentMethodRemoveActions = {},
+            postPaymentMethodRemoveActions = ::onPaymentMethodRemoved,
             onUpdatePaymentMethod = { displayableSavedPaymentMethod, _, _, _ ->
                 onUpdatePaymentMethod(displayableSavedPaymentMethod)
             },
@@ -48,7 +49,6 @@ internal class ManageSavedPaymentMethodMutatorFactory @Inject constructor(
             },
             isLinkEnabled = stateFlowOf(false), // Link is never enabled in the manage screen.
             isNotPaymentFlow = false,
-            isEmbedded = true,
         )
     }
 
