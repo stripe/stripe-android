@@ -13,7 +13,6 @@ internal class Test3ds2 : BasePlaygroundTest() {
     private val testParameters = TestParameters.create(
         paymentMethodCode = "card",
         authorizationAction = null,
-        executeInNightlyRun = true,
     ).copy(
         saveForFutureUseCheckboxVisible = true,
     )
