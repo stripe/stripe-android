@@ -38,7 +38,15 @@ internal class SavedPaymentMethodMutator(
     private val selection: StateFlow<PaymentSelection?>,
     private val clearSelection: () -> Unit,
     private val customerStateHolder: CustomerStateHolder,
-    private val onPaymentMethodRemoved: () -> Unit,
+    // Actions that should be taken after removing a payment method has succeeded but before we've fully updated our
+    // state to reflect that. For example, in our manage payment method screen, we want to navigate back to the
+    // saved payment methods list before removing the payment method from our state, so that users can see the removed
+    // payment method get animated out.
+    private val prePaymentMethodRemoveActions: suspend () -> Unit,
+    // Actions that should be taken after removing a payment method has succeeded and after our state has been updated.
+    // For example, closing the embedded manage saved payment methods screen after the final saved payment method is
+    // removed.
+    private val postPaymentMethodRemoveActions: () -> Unit,
     private val onUpdatePaymentMethod: (
         DisplayableSavedPaymentMethod,
         canRemove: Boolean,
@@ -48,7 +56,6 @@ internal class SavedPaymentMethodMutator(
     private val navigationPop: () -> Unit,
     isLinkEnabled: StateFlow<Boolean?>,
     isNotPaymentFlow: Boolean,
-    private val isEmbedded: Boolean,
 ) {
     val defaultPaymentMethodId: StateFlow<String?> = customerStateHolder.customer.mapAsStateFlow { customerState ->
         when (val defaultPaymentMethodState = customerState?.defaultPaymentMethodState) {
@@ -171,7 +178,7 @@ internal class SavedPaymentMethodMutator(
             clearSelection()
         }
 
-        onPaymentMethodRemoved()
+        postPaymentMethodRemoveActions()
     }
 
     fun updatePaymentMethod(displayableSavedPaymentMethod: DisplayableSavedPaymentMethod) {
@@ -194,10 +201,7 @@ internal class SavedPaymentMethodMutator(
 
         if (result.isSuccess) {
             coroutineScope.launch(workContext) {
-                if (!isEmbedded || customerStateHolder.paymentMethods.value.size > 1) {
-                    navigationPop()
-                    delay(PaymentMethodRemovalDelayMillis)
-                }
+                prePaymentMethodRemoveActions()
                 removeDeletedPaymentMethodFromState(paymentMethodId = paymentMethodId)
             }
         }
@@ -261,19 +265,40 @@ internal class SavedPaymentMethodMutator(
     }
 
     companion object {
-        private fun onPaymentMethodRemoved(viewModel: BaseSheetViewModel) {
-            val currentScreen = viewModel.navigationHandler.currentScreen.value
-            val shouldResetToAddPaymentMethodForm =
-                viewModel.customerStateHolder.paymentMethods.value.isEmpty() &&
-                    currentScreen is PaymentSheetScreen.SelectSavedPaymentMethods
+        private suspend fun popWithDelay(viewModel: BaseSheetViewModel) {
+            viewModel.navigationHandler.pop()
+            delay(PaymentMethodRemovalDelayMillis)
+        }
 
-            if (shouldResetToAddPaymentMethodForm) {
-                val interactor = DefaultAddPaymentMethodInteractor.create(
-                    viewModel = viewModel,
-                    paymentMethodMetadata = requireNotNull(viewModel.paymentMethodMetadata.value),
-                )
-                val screen = PaymentSheetScreen.AddFirstPaymentMethod(interactor)
-                viewModel.navigationHandler.resetTo(listOf(screen))
+        private suspend fun navigateBackOnPaymentMethodRemoved(viewModel: BaseSheetViewModel) {
+            val previousScreen = viewModel.navigationHandler.previousScreen.value
+
+            when (previousScreen) {
+                is PaymentSheetScreen.SelectSavedPaymentMethods -> {
+                    if (viewModel.customerStateHolder.paymentMethods.value.size == 1) {
+                        // If we're removing the last payment method in horizontal mode, we want to transition
+                        // immediately to the AddFirstPaymentMethod screen.
+                        val interactor = DefaultAddPaymentMethodInteractor.create(
+                            viewModel = viewModel,
+                            paymentMethodMetadata = requireNotNull(viewModel.paymentMethodMetadata.value),
+                        )
+                        val screen = PaymentSheetScreen.AddFirstPaymentMethod(interactor)
+                        viewModel.navigationHandler.resetTo(listOf(screen))
+                    } else {
+                        popWithDelay(viewModel)
+                    }
+                }
+                is PaymentSheetScreen.ManageSavedPaymentMethods,
+                is PaymentSheetScreen.VerticalMode -> popWithDelay(viewModel)
+                is PaymentSheetScreen.AddAnotherPaymentMethod,
+                is PaymentSheetScreen.AddFirstPaymentMethod,
+                is PaymentSheetScreen.CvcRecollection,
+                PaymentSheetScreen.Loading,
+                is PaymentSheetScreen.UpdatePaymentMethod,
+                is PaymentSheetScreen.VerticalModeForm,
+                null -> {
+                    // We don't allow navigating to the payment method remove screen from these screens.
+                }
             }
         }
 
@@ -327,9 +352,10 @@ internal class SavedPaymentMethodMutator(
                 selection = viewModel.selection,
                 customerStateHolder = viewModel.customerStateHolder,
                 clearSelection = { viewModel.updateSelection(null) },
-                onPaymentMethodRemoved = {
-                    onPaymentMethodRemoved(viewModel)
+                prePaymentMethodRemoveActions = {
+                    navigateBackOnPaymentMethodRemoved(viewModel)
                 },
+                postPaymentMethodRemoveActions = {},
                 onUpdatePaymentMethod = { displayableSavedPaymentMethod, canRemove, performRemove, updateExecutor ->
                     onUpdatePaymentMethod(
                         viewModel = viewModel,
@@ -342,7 +368,6 @@ internal class SavedPaymentMethodMutator(
                 navigationPop = viewModel.navigationHandler::pop,
                 isLinkEnabled = viewModel.linkHandler.isLinkEnabled,
                 isNotPaymentFlow = !viewModel.isCompleteFlow,
-                isEmbedded = false,
             ).apply {
                 viewModel.viewModelScope.launch {
                     viewModel.navigationHandler.currentScreen.collect { currentScreen ->

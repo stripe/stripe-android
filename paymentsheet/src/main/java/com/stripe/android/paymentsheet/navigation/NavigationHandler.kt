@@ -26,6 +26,15 @@ internal class NavigationHandler<T : Any>(
     val currentScreen: StateFlow<T> = backStack
         .mapAsStateFlow { it.last() }
 
+    val previousScreen: StateFlow<T?> = backStack.mapAsStateFlow {
+        if (it.isEmpty() || it.size == 1) {
+            // In these cases, there is no "previous screen".
+            null
+        } else {
+            it[it.size - 2]
+        }
+    }
+
     val canGoBack: Boolean
         get() = backStack.value.size > 1
 
