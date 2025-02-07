@@ -65,7 +65,7 @@ internal data class CustomerState(
             val isSetAsDefaultFeatureEnabled = when (mobilePaymentElementComponent) {
                 ElementsSession.Customer.Components.MobilePaymentElement.Disabled -> false
                 is ElementsSession.Customer.Components.MobilePaymentElement.Enabled ->
-                    mobilePaymentElementComponent.isSetAsDefaultEnabled
+                    mobilePaymentElementComponent.isPaymentMethodSetAsDefaultEnabled
             }
 
             val defaultPaymentMethodState = if (isSetAsDefaultFeatureEnabled) {

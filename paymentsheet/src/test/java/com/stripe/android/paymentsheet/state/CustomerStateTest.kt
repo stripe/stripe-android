@@ -94,7 +94,7 @@ class CustomerStateTest {
         val paymentMethods = PaymentMethodFactory.cards(3)
 
         val mobilePaymentElementComponent = createEnabledMobilePaymentElement(
-            isSetAsDefaultEnabled = isSetAsDefaultEnabled,
+            isPaymentMethodSetAsDefaultEnabled = isSetAsDefaultEnabled,
         )
         val customer = createElementsSessionCustomer(
             paymentMethods = paymentMethods,
@@ -329,14 +329,14 @@ class CustomerStateTest {
         isPaymentMethodRemoveEnabled: Boolean = false,
         canRemoveLastPaymentMethod: Boolean = false,
         allowRedisplayOverride: PaymentMethod.AllowRedisplay? = null,
-        isSetAsDefaultEnabled: Boolean = false,
+        isPaymentMethodSetAsDefaultEnabled: Boolean = false,
     ): ElementsSession.Customer.Components.MobilePaymentElement {
         return ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
             isPaymentMethodSaveEnabled = isPaymentMethodSaveEnabled,
             isPaymentMethodRemoveEnabled = isPaymentMethodRemoveEnabled,
             canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
             allowRedisplayOverride = allowRedisplayOverride,
-            isSetAsDefaultEnabled = isSetAsDefaultEnabled,
+            isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
         )
     }
 

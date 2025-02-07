@@ -263,7 +263,7 @@ internal class ElementsSessionJsonParser(
                 isPaymentMethodSaveEnabled = paymentMethodSaveFeature == VALUE_ENABLED,
                 isPaymentMethodRemoveEnabled = paymentMethodRemoveFeature == VALUE_ENABLED,
                 canRemoveLastPaymentMethod = paymentMethodRemoveLastFeature == VALUE_ENABLED,
-                isSetAsDefaultEnabled = paymentMethodSetAsDefaultFeature == VALUE_ENABLED,
+                isPaymentMethodSetAsDefaultEnabled = paymentMethodSetAsDefaultFeature == VALUE_ENABLED,
                 allowRedisplayOverride = allowRedisplayOverride,
             )
         } else {

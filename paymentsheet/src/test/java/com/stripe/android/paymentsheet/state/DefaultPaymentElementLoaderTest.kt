@@ -2532,7 +2532,7 @@ internal class DefaultPaymentElementLoaderTest {
                     isPaymentMethodRemoveEnabled = true,
                     canRemoveLastPaymentMethod = true,
                     allowRedisplayOverride = null,
-                    isSetAsDefaultEnabled = false,
+                    isPaymentMethodSetAsDefaultEnabled = false,
                 )
             } ?: ElementsSession.Customer.Components.MobilePaymentElement.Disabled
     ): ElementsSession.Customer {
@@ -2678,7 +2678,7 @@ internal class DefaultPaymentElementLoaderTest {
                 paymentMethods = paymentMethodsForTestingOrdering,
                 session = createElementsSessionCustomerSession(
                     mobilePaymentElementComponent = ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
-                        isSetAsDefaultEnabled = true,
+                        isPaymentMethodSetAsDefaultEnabled = true,
                         isPaymentMethodSaveEnabled = true,
                         isPaymentMethodRemoveEnabled = true,
                         canRemoveLastPaymentMethod = true,
@@ -2708,14 +2708,14 @@ internal class DefaultPaymentElementLoaderTest {
         isPaymentMethodRemoveEnabled: Boolean = false,
         canRemoveLastPaymentMethod: Boolean = false,
         allowRedisplayOverride: PaymentMethod.AllowRedisplay? = null,
-        isSetAsDefaultEnabled: Boolean = false,
+        isPaymentMethodSetAsDefaultEnabled: Boolean = false,
     ): ElementsSession.Customer.Components.MobilePaymentElement {
         return ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
             isPaymentMethodSaveEnabled = isPaymentMethodSaveEnabled,
             isPaymentMethodRemoveEnabled = isPaymentMethodRemoveEnabled,
             canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
             allowRedisplayOverride = allowRedisplayOverride,
-            isSetAsDefaultEnabled = isSetAsDefaultEnabled,
+            isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
         )
     }
 }

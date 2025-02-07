@@ -564,7 +564,7 @@ class ElementsSessionJsonParserTest {
                             isPaymentMethodRemoveEnabled = true,
                             canRemoveLastPaymentMethod = true,
                             allowRedisplayOverride = PaymentMethod.AllowRedisplay.LIMITED,
-                            isSetAsDefaultEnabled = false,
+                            isPaymentMethodSetAsDefaultEnabled = false,
                         ),
                         customerSheet = ElementsSession.Customer.Components.CustomerSheet.Enabled(
                             isPaymentMethodRemoveEnabled = true,
@@ -736,7 +736,9 @@ class ElementsSessionJsonParserTest {
         val enabledPaymentElementComponent = mobilePaymentElementComponent as?
             ElementsSession.Customer.Components.MobilePaymentElement.Enabled
 
-        assertThat(enabledPaymentElementComponent?.isSetAsDefaultEnabled).isEqualTo(expectedIsSetAsDefaultEnabledValue)
+        assertThat(enabledPaymentElementComponent?.isPaymentMethodSetAsDefaultEnabled).isEqualTo(
+            expectedIsSetAsDefaultEnabledValue
+        )
     }
 
     @Test

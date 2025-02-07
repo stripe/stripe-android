@@ -872,7 +872,7 @@ internal class PaymentMethodMetadataTest {
                 isPaymentMethodRemoveEnabled = true,
                 canRemoveLastPaymentMethod = true,
                 allowRedisplayOverride = null,
-                isSetAsDefaultEnabled = false,
+                isPaymentMethodSetAsDefaultEnabled = false,
             )
         )
 
@@ -887,7 +887,7 @@ internal class PaymentMethodMetadataTest {
                 isPaymentMethodRemoveEnabled = true,
                 canRemoveLastPaymentMethod = true,
                 allowRedisplayOverride = null,
-                isSetAsDefaultEnabled = false,
+                isPaymentMethodSetAsDefaultEnabled = false,
             ),
         )
 
