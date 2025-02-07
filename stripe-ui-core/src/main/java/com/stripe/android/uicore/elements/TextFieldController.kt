@@ -124,7 +124,8 @@ sealed class TextFieldIcon {
 class SimpleTextFieldController(
     val textFieldConfig: TextFieldConfig,
     override val showOptionalLabel: Boolean = false,
-    override val initialValue: String? = null
+    override val initialValue: String? = null,
+    val overrideContentDescription: ((StateFlow<String>) -> StateFlow<String>)? = null,
 ) : TextFieldController, SectionFieldErrorController {
     override val trailingIcon: StateFlow<TextFieldIcon?> = textFieldConfig.trailingIcon
     override val capitalization: KeyboardCapitalization = textFieldConfig.capitalization
@@ -153,7 +154,7 @@ class SimpleTextFieldController(
 
     override val rawFieldValue: StateFlow<String> = _fieldValue.mapAsStateFlow { textFieldConfig.convertToRaw(it) }
 
-    override val contentDescription: StateFlow<String> = _fieldValue.asStateFlow()
+    override val contentDescription: StateFlow<String> = overrideContentDescription?.let { it((fieldValue)) } ?: _fieldValue.asStateFlow()
 
     private val _fieldState = MutableStateFlow<TextFieldState>(Blank)
     override val fieldState: StateFlow<TextFieldState> = _fieldState.asStateFlow()

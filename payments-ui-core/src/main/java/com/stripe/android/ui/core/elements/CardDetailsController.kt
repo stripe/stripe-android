@@ -22,6 +22,7 @@ import com.stripe.android.uicore.elements.SimpleTextFieldConfig
 import com.stripe.android.uicore.elements.SimpleTextFieldController
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import java.util.UUID
 import kotlin.coroutines.CoroutineContext
 
@@ -87,12 +88,19 @@ internal class CardDetailsController(
         )
     )
 
+    // This is where we define the expiration date element.
     val expirationDateElement = SimpleTextElement(
         IdentifierSpec.Generic("date"),
         SimpleTextFieldController(
             DateConfig(),
             initialValue = initialValues[IdentifierSpec.CardExpMonth] +
-                initialValues[IdentifierSpec.CardExpYear]?.takeLast(2)
+                initialValues[IdentifierSpec.CardExpYear]?.takeLast(2),
+            overrideContentDescription = { fieldValue ->
+                // TODO: parse fieldValue into month and year. Print out content description to match what JJ said it
+                // should be. e.g. we'd need to parse that if month == 1, the content description should start with
+                // January, etc.
+                MutableStateFlow("Expiration date")
+            }
         )
     )
 

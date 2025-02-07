@@ -17,6 +17,10 @@ class DateConfig : TextFieldConfig {
     override val capitalization: KeyboardCapitalization = KeyboardCapitalization.None
     override val debugLabel = "date"
 
+    // This is where the expiration date label is defined. I cannot figure out how we'd prevent talkback from reading
+    // this label as "mm y y". Even if we add a content description of e.g. "Expiration date - two digit month, two
+    // digit year". It ALSO reads out "mm y y". We probably should just accept this for now but it feels less than
+    // ideal.
     @StringRes
     override val label = R.string.stripe_expiration_date_hint
     override val keyboard = KeyboardType.NumberPassword
