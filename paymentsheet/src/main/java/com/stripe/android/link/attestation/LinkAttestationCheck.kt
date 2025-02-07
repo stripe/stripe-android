@@ -1,6 +1,6 @@
 package com.stripe.android.link.attestation
 
-interface LinkAttestationCheck {
+internal interface LinkAttestationCheck {
     suspend fun invoke(): Result
 
     sealed interface Result {
