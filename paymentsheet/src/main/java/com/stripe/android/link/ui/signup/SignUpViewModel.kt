@@ -103,6 +103,7 @@ internal class SignUpViewModel @Inject constructor(
         emailController.formFieldValue.mapLatest { entry ->
             entry.takeIf { it.isComplete }?.value
         }.collectLatest { email ->
+            onError(null)
             delay(LOOKUP_DEBOUNCE)
             if (email != null) {
                 if (email != configuration.customerInfo.email || emailHasChanged) {
@@ -133,7 +134,7 @@ internal class SignUpViewModel @Inject constructor(
             }
             is LinkAuthResult.Error -> {
                 updateSignUpState(SignUpState.InputtingRemainingFields)
-                onError(lookupResult.throwable)
+                onError(lookupResult.error)
             }
             is LinkAuthResult.Success -> {
                 onAccountFetched(lookupResult.account)
@@ -141,6 +142,11 @@ internal class SignUpViewModel @Inject constructor(
             }
             LinkAuthResult.NoLinkAccountFound -> {
                 updateSignUpState(SignUpState.InputtingRemainingFields)
+                onError(null)
+            }
+            is LinkAuthResult.AccountError -> {
+                updateSignUpState(SignUpState.InputtingPrimaryField)
+                onError(lookupResult.error)
             }
         }
     }
@@ -161,8 +167,8 @@ internal class SignUpViewModel @Inject constructor(
                     moveToWeb()
                 }
                 is LinkAuthResult.Error -> {
-                    onError(signupResult.throwable)
-                    linkEventsReporter.onSignupFailure(error = signupResult.throwable)
+                    onError(signupResult.error)
+                    linkEventsReporter.onSignupFailure(error = signupResult.error)
                 }
                 is LinkAuthResult.Success -> {
                     onAccountFetched(signupResult.account)
@@ -171,6 +177,10 @@ internal class SignUpViewModel @Inject constructor(
                 LinkAuthResult.NoLinkAccountFound -> {
                     onError(NoLinkAccountFoundException())
                     linkEventsReporter.onSignupFailure(error = NoLinkAccountFoundException())
+                }
+                is LinkAuthResult.AccountError -> {
+                    updateSignUpState(SignUpState.InputtingPrimaryField)
+                    onError(signupResult.error)
                 }
             }
         }
@@ -187,11 +197,13 @@ internal class SignUpViewModel @Inject constructor(
         }
     }
 
-    private fun onError(error: Throwable) {
-        logger.error("SignUpViewModel Error: ", error)
+    private fun onError(error: Throwable?) {
+        if (error != null) {
+            logger.error("SignUpViewModel Error: ", error)
+        }
         updateState {
             it.copy(
-                errorMessage = error.stripeErrorMessage()
+                errorMessage = error?.stripeErrorMessage()
             )
         }
     }

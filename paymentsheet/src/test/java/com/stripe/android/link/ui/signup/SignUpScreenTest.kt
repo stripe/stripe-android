@@ -1,6 +1,7 @@
 package com.stripe.android.link.ui.signup
 
 import androidx.activity.ComponentActivity
+import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
@@ -115,6 +116,67 @@ internal class SignUpScreenTest {
         }
 
     @Test
+    fun `secondary fields hidden, error is displayed on account error after signup`() =
+        runTest(dispatcher) {
+            val error = Throwable("oops")
+            val linkAuth = FakeLinkAuth()
+            linkAuth.lookupResult = LinkAuthResult.NoLinkAccountFound
+            linkAuth.signupResult = LinkAuthResult.AccountError(error)
+
+            val viewModel = viewModel(linkAuth = linkAuth)
+
+            composeTestRule.setContent {
+                SignUpScreen(viewModel)
+            }
+
+            viewModel.emailController.onRawValueChange(TestFactory.CUSTOMER_EMAIL)
+            dispatcher.scheduler.advanceTimeBy(1001)
+
+            composeTestRule.waitForIdle()
+
+            allFields().assert { assertExists() }
+
+            viewModel.nameController.onRawValueChange(TestFactory.CUSTOMER_NAME)
+            viewModel.phoneNumberController.onRawValueChange(TestFactory.CUSTOMER_PHONE)
+
+            composeTestRule.waitForIdle()
+
+            viewModel.onSignUpClick()
+
+            composeTestRule.waitForIdle()
+
+            primaryFields().assert { assertIsDisplayed() }
+            secondaryFields().assert { assertDoesNotExist() }
+            onErrorSection()
+                .assertExists()
+                .assert(hasAnyChild(hasText("Something went wrong")))
+        }
+
+    @Test
+    fun `secondary fields hidden, error is displayed on account error after lookup`() =
+        runTest(dispatcher) {
+            val error = Throwable("oops")
+            val linkAuth = FakeLinkAuth()
+            linkAuth.lookupResult = LinkAuthResult.AccountError(error)
+
+            val viewModel = viewModel(linkAuth = linkAuth)
+
+            composeTestRule.setContent {
+                SignUpScreen(viewModel)
+            }
+
+            viewModel.emailController.onRawValueChange("a@b.com")
+            dispatcher.scheduler.advanceTimeBy(1001)
+            composeTestRule.waitForIdle()
+
+            primaryFields().assert { assertIsDisplayed() }
+            secondaryFields().assert { assertDoesNotExist() }
+            onErrorSection()
+                .assertExists()
+                .assert(hasAnyChild(hasText("Something went wrong")))
+        }
+
+    @Test
     fun `error is displayed on lookup failure after email entry`() =
         runTest(dispatcher) {
             val error = Throwable("oops")
@@ -133,6 +195,24 @@ internal class SignUpScreenTest {
             dispatcher.scheduler.advanceTimeBy(1001)
             onErrorSection().assertExists()
         }
+
+    private fun List<SemanticsNodeInteraction>.assert(interaction: SemanticsNodeInteraction.() -> Unit) {
+        forEach { interaction(it) }
+    }
+
+    private fun allFields(): List<SemanticsNodeInteraction> {
+        return primaryFields() + secondaryFields()
+    }
+
+    private fun primaryFields() = listOf(onEmailField())
+
+    private fun secondaryFields(): List<SemanticsNodeInteraction> {
+        return listOf(
+            onNameField(),
+            onPhoneField(),
+            onSignUpButton()
+        )
+    }
 
     private fun viewModel(
         linkAuth: LinkAuth = FakeLinkAuth(),

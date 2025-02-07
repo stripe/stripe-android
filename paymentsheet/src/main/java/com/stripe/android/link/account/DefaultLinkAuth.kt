@@ -116,10 +116,16 @@ internal class DefaultLinkAuth @Inject constructor(
     }
 
     private fun Throwable.toLinkAuthResult(): LinkAuthResult {
-        return if (isAttestationError) {
-            LinkAuthResult.AttestationFailed(this)
-        } else {
-            LinkAuthResult.Error(this)
+        return when {
+            isAttestationError -> {
+                LinkAuthResult.AttestationFailed(this)
+            }
+            isAccountError -> {
+                LinkAuthResult.AccountError(this)
+            }
+            else -> {
+                LinkAuthResult.Error(this)
+            }
         }
     }
 
@@ -129,6 +135,13 @@ internal class DefaultLinkAuth @Inject constructor(
             is APIException -> stripeError?.code == "link_failed_to_attest_request"
             // Interaction with Integrity API to generate tokens resulted in a failure
             is AttestationError -> true
+            else -> false
+        }
+
+    private val Throwable.isAccountError: Boolean
+        get() = when (this) {
+            // This happens when account is suspended or banned
+            is APIException -> stripeError?.code == "link_consumer_details_not_available"
             else -> false
         }
 }

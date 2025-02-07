@@ -223,11 +223,12 @@ internal class LinkActivityViewModel @Inject constructor(
                     is LinkAuthResult.AttestationFailed -> {
                         errorReporter.report(
                             errorEvent = ErrorReporter.UnexpectedErrorEvent.LINK_NATIVE_FAILED_TO_ATTEST_REQUEST,
-                            stripeException = LinkEventException(lookupResult.throwable)
+                            stripeException = LinkEventException(lookupResult.error)
                         )
-                        throw lookupResult.throwable
+                        throw lookupResult.error
                     }
                     is LinkAuthResult.Error,
+                    is LinkAuthResult.AccountError,
                     LinkAuthResult.NoLinkAccountFound,
                     is LinkAuthResult.Success,
                     null -> Unit
