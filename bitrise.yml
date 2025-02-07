@@ -74,6 +74,10 @@ workflows:
           is_expand: false
         NEEDS_ROBOLECTRIC: true
       - INCLUDE_PAPARAZZI_ON_FAILURE: true
+    meta:
+      bitrise.io:
+        stack: macos-xcode-14    # Specify Mac stack just for this workflow
+        machine_type_id: g2.8core # Appropriate Mac instance
     before_run:
       - prepare_all
     after_run:
