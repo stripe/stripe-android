@@ -70,6 +70,7 @@ data class FinancialConnectionsAccount(
     val permissions: List<Permissions>? = null,
 ) : StripeModel, Parcelable, PaymentAccount() {
 
+    // "object" field is needed by stripe.js, so this is included here for serialization.
     @IgnoredOnParcel
     @SerialName("object")
     @Required
