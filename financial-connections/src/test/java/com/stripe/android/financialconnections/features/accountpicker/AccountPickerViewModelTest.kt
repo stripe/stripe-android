@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.features.accountpicker
 
+import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ApiKeyFixtures.authorizationSession
@@ -23,11 +24,13 @@ import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.presentation.withState
 import com.stripe.android.financialconnections.repository.CachedConsumerSession
+import com.stripe.android.financialconnections.repository.CoreAuthorizationPendingNetworkingRepairRepository
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
+import org.mockito.ArgumentMatchers.eq
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
@@ -64,6 +67,10 @@ internal class AccountPickerViewModelTest {
         saveAccountToLink = saveAccountToLink,
         consumerSessionProvider = { cachedConsumerSession() },
         presentSheet = mock(),
+        pendingRepairRepository = CoreAuthorizationPendingNetworkingRepairRepository(
+            savedStateHandle = SavedStateHandle(),
+            logger = Logger.noop(),
+        ),
     )
 
     @Test
@@ -233,6 +240,7 @@ internal class AccountPickerViewModelTest {
             consumerSessionClientSecret = any(),
             selectedAccounts = any(),
             shouldPollAccountNumbers = any(),
+            isNetworkingRelinkSession = eq(false),
         )
 
         navigationManager.assertNavigatedTo(
@@ -265,6 +273,7 @@ internal class AccountPickerViewModelTest {
             consumerSessionClientSecret = any(),
             selectedAccounts = any(),
             shouldPollAccountNumbers = any(),
+            isNetworkingRelinkSession = eq(false),
         )
 
         navigationManager.assertNavigatedTo(
@@ -306,6 +315,7 @@ internal class AccountPickerViewModelTest {
             consumerSessionClientSecret = consumerSession.clientSecret,
             selectedAccounts = accounts.data.map { CachedPartnerAccount(it.id, it.linkedAccountId) },
             shouldPollAccountNumbers = true,
+            isNetworkingRelinkSession = eq(false),
         )
 
         navigationManager.assertNavigatedTo(

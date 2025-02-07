@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.features.partnerauth
 
+import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIException
@@ -24,11 +25,11 @@ import com.stripe.android.financialconnections.model.MixedOAuthParams
 import com.stripe.android.financialconnections.presentation.Async
 import com.stripe.android.financialconnections.presentation.WebAuthFlowState
 import com.stripe.android.financialconnections.presentation.withState
+import com.stripe.android.financialconnections.repository.CoreAuthorizationPendingNetworkingRepairRepository
 import com.stripe.android.financialconnections.utils.TestHandleError
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import com.stripe.android.financialconnections.utils.UriUtils
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -79,9 +80,6 @@ internal class SupportabilityViewModelTest {
 
             createViewModel()
 
-            // This is a bad workaround. Find something better!
-            advanceUntilIdle()
-
             handleError.assertError(
                 extraMessage = "Error fetching payload / posting AuthSession",
                 error = unplannedDowntimeError,
@@ -101,9 +99,6 @@ internal class SupportabilityViewModelTest {
         whenever(getOrFetchSync(anyOrNull(), anyOrNull())).thenReturn(syncResponse(manifest))
 
         val viewModel = createViewModel(SharedPartnerAuthState(Pane.PARTNER_AUTH_DRAWER))
-
-        // This is a bad workaround. Find something better!
-        advanceUntilIdle()
 
         eventTracker.assertContainsEvent(
             "linked_accounts.pane.loaded",
@@ -325,6 +320,11 @@ internal class SupportabilityViewModelTest {
             applicationId = applicationId,
             nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
             presentSheet = mock(),
+            pendingRepairRepository = CoreAuthorizationPendingNetworkingRepairRepository(
+                savedStateHandle = SavedStateHandle(),
+                logger = Logger.noop(),
+            ),
+            repairAuthSession = mock(),
         )
     }
 }

@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.features.partnerauth
 
+import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.CoroutineTestRule
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
@@ -10,6 +11,7 @@ import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.PopUpToBehavior
 import com.stripe.android.financialconnections.presentation.Async
+import com.stripe.android.financialconnections.repository.CoreAuthorizationPendingNetworkingRepairRepository
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import com.stripe.android.financialconnections.utils.UriUtils
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -51,7 +53,7 @@ class PartnerAuthViewModelTest {
 
         val viewModel = makeViewModel(
             initialState = SharedPartnerAuthState(
-                pane = Pane.PARTNER_AUTH_DRAWER,
+                pane = Pane.PARTNER_AUTH,
                 payload = Async.Uninitialized,
                 inModal = false,
             ),
@@ -97,6 +99,11 @@ class PartnerAuthViewModelTest {
             presentSheet = mock(),
             initialState = initialState,
             nativeAuthFlowCoordinator = NativeAuthFlowCoordinator(),
+            pendingRepairRepository = CoreAuthorizationPendingNetworkingRepairRepository(
+                savedStateHandle = SavedStateHandle(),
+                logger = Logger.noop(),
+            ),
+            repairAuthSession = mock(),
         )
     }
 }
