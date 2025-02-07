@@ -190,6 +190,10 @@ class EmbeddedComponentManager(
                     append("Did you call EmbeddedComponentManager.onActivityCreate in your Activity.onCreate function?")
                 }
             )
+            if (isDebugBuild) {
+                // crash if in debug mode so that developers are more likely to catch this error.
+                error("You must create the EmbeddedComponent view from an Activity")
+            }
             return null
         }
         sheet.present(
