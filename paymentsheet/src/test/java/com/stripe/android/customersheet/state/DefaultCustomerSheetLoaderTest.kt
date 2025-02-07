@@ -96,7 +96,7 @@ class DefaultCustomerSheetLoaderTest {
         assertThat(state.config).isEqualTo(config)
         assertThat(state.paymentMethodMetadata.stripeIntent).isEqualTo(STRIPE_INTENT)
         assertThat(state.paymentMethodMetadata.cbcEligibility).isEqualTo(CardBrandChoiceEligibility.Ineligible)
-        assertThat(state.paymentMethodMetadata.hasCustomerConfiguration).isTrue()
+        assertThat(state.paymentMethodMetadata.customerMetadata.hasCustomerConfiguration).isTrue()
         assertThat(state.paymentMethodMetadata.isGooglePayReady).isTrue()
         assertThat(state.customerPaymentMethods).containsExactly(
             PaymentMethodFixtures.CARD_PAYMENT_METHOD,

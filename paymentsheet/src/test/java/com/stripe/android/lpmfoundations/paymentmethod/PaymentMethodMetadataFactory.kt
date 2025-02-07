@@ -50,7 +50,9 @@ internal object PaymentMethodMetadataFactory {
             merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
             defaultBillingDetails = defaultBillingDetails,
             shippingDetails = shippingDetails,
-            hasCustomerConfiguration = hasCustomerConfiguration,
+            customerMetadata = CustomerMetadata(
+                hasCustomerConfiguration = hasCustomerConfiguration
+            ),
             sharedDataSpecs = sharedDataSpecs,
             paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
             externalPaymentMethodSpecs = externalPaymentMethodSpecs,

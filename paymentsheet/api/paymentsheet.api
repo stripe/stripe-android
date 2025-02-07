@@ -541,6 +541,14 @@ public final class com/stripe/android/link/utils/ComposableSingletons$InlineCont
 	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 }
 
+public final class com/stripe/android/lpmfoundations/paymentmethod/CustomerMetadata$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/lpmfoundations/paymentmethod/CustomerMetadata;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/lpmfoundations/paymentmethod/CustomerMetadata;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public final class com/stripe/android/lpmfoundations/paymentmethod/PaymentMethodMetadata$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/lpmfoundations/paymentmethod/PaymentMethodMetadata;
