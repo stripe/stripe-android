@@ -13,11 +13,11 @@ class StringResources
             'payments-ui-core',
             'stripe-core',
             'stripe-ui-core',
+            'stripecardscan'
 
     #         These following modules don't use Lokalise
     #         'camera-core',
     #         'financial-connections',
-    #         'stripecardscan',
         ]
 
         files = modules.map { |mod| "#{project_root}/#{mod}/res/values/strings.xml" }
