@@ -31,7 +31,6 @@ import androidx.navigation.compose.rememberNavController
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.ui.LocalNavHostController
-import com.stripe.android.uicore.R as StripeUiCoreR
 
 internal enum class Theme {
     DefaultLight,
@@ -47,7 +46,7 @@ internal enum class Theme {
     val icon: Int
         get() = when (this) {
             DefaultLight -> R.drawable.stripe_logo
-            LinkLight -> StripeUiCoreR.drawable.stripe_link_logo_bw
+            LinkLight -> R.drawable.stripe_link_logo
         }
 
     companion object {
