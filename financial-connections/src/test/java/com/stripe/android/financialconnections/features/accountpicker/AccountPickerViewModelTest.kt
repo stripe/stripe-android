@@ -315,7 +315,7 @@ internal class AccountPickerViewModelTest {
             consumerSessionClientSecret = consumerSession.clientSecret,
             selectedAccounts = accounts.data.map { CachedPartnerAccount(it.id, it.linkedAccountId) },
             shouldPollAccountNumbers = true,
-            isNetworkingRelinkSession = eq(false),
+            isNetworkingRelinkSession = false,
         )
 
         navigationManager.assertNavigatedTo(
