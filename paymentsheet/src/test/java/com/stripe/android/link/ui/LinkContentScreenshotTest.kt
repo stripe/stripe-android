@@ -10,6 +10,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
@@ -34,7 +35,7 @@ internal class LinkContentScreenshotTest {
 
     @OptIn(ExperimentalMaterialApi::class)
     @Test
-    fun testContent() {
+    fun testLinkContentScreenHasOpaqueBackground() {
         paparazziRule.snapshot {
             val viewModelStoreOwner = object : ViewModelStoreOwner {
                 override val viewModelStore = ViewModelStore()
@@ -56,7 +57,8 @@ internal class LinkContentScreenshotTest {
                             email = null
                         ),
                         sheetState = ModalBottomSheetState(
-                            initialValue = ModalBottomSheetValue.Hidden
+                            initialValue = ModalBottomSheetValue.Hidden,
+                            density = Density(1f)
                         ),
                         onUpdateSheetContent = {},
                         bottomSheetContent = null,
