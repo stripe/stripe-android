@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.embedded.form
 
 import androidx.lifecycle.SavedStateHandle
+import app.cash.turbine.TurbineTestContext
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.asCommonConfiguration
@@ -19,6 +20,8 @@ import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationSt
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.PrimaryButtonProcessingState
 import com.stripe.android.ui.core.R
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
@@ -56,9 +59,8 @@ class DefaultFormActivityStateHelperTest {
     fun `state returns correct label for setup intent`() {
         testScenario(stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD) {
             stateHolder.state.test {
-                assertThat(awaitItem().primaryButtonLabel).isEqualTo(
-                    R.string.stripe_setup_button_label.resolvableString
-                )
+                assertThat(awaitItem().primaryButtonLabel)
+                    .isEqualTo(R.string.stripe_setup_button_label.resolvableString)
             }
         }
     }
@@ -74,41 +76,53 @@ class DefaultFormActivityStateHelperTest {
 
     @Test
     fun `state updates processing correctly while confirming`() = testScenario {
-        val selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
-        selectionHolder.set(selection)
-        stateHolder.update(confirmationStateConfirming(selection))
         stateHolder.state.test {
-            val state = awaitItem()
-            assertThat(state.isEnabled).isFalse()
-            assertThat(state.processingState).isEqualTo(PrimaryButtonProcessingState.Processing)
-            assertThat(state.isProcessing).isTrue()
+            awaitAndVerifyInitialState()
+
+            val selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
+            selectionHolder.set(selection)
+
+            val enabledState = awaitItem()
+            assertThat(enabledState.processingState).isEqualTo(PrimaryButtonProcessingState.Idle(null))
+            assertThat(enabledState.isProcessing).isFalse()
+            assertThat(enabledState.isEnabled).isTrue()
+
+            stateHolder.update(confirmationStateConfirming(selection))
+            val processingState = awaitItem()
+            assertThat(processingState.isEnabled).isFalse()
+            assertThat(processingState.processingState).isEqualTo(PrimaryButtonProcessingState.Processing)
+            assertThat(processingState.isProcessing).isTrue()
         }
     }
 
     @Test
     fun `state updates when confirmation is successful`() = testScenario {
-        stateHolder.update(confirmationStateComplete(true))
         stateHolder.state.test {
-            val state = awaitItem()
-            assertThat(state.processingState).isEqualTo(PrimaryButtonProcessingState.Completed)
-            assertThat(state.isProcessing).isFalse()
+            awaitAndVerifyInitialState()
+            stateHolder.update(confirmationStateComplete(true))
+
+            val completedState = awaitItem()
+            assertThat(completedState.processingState).isEqualTo(PrimaryButtonProcessingState.Completed)
+            assertThat(completedState.isProcessing).isFalse()
         }
     }
 
     @Test
     fun `state re-enables if confirmation fails`() = testScenario {
-        val selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
-        selectionHolder.set(selection)
-        stateHolder.update(confirmationStateConfirming(selection))
         stateHolder.state.test {
+            awaitAndVerifyInitialState()
+            val selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
+            selectionHolder.set(selection)
+
+            awaitItem()
+
+            stateHolder.update(confirmationStateConfirming(selection))
             val processingState = awaitItem()
             assertThat(processingState.isProcessing).isTrue()
             assertThat(processingState.isEnabled).isFalse()
-        }
+            assertThat(processingState.processingState).isEqualTo(PrimaryButtonProcessingState.Processing)
 
-        stateHolder.update(confirmationStateComplete(false))
-
-        stateHolder.state.test {
+            stateHolder.update(confirmationStateComplete(false))
             val failedState = awaitItem()
             assertThat(failedState.isEnabled).isTrue()
             assertThat(failedState.isProcessing).isFalse()
@@ -131,13 +145,21 @@ class DefaultFormActivityStateHelperTest {
         val stateHolder = DefaultFormActivityStateHelper(
             paymentMethodMetadata = paymentMethodMetadata,
             selectionHolder = selectionHolder,
-            configuration = config
+            configuration = config,
+            coroutineScope = TestScope(UnconfinedTestDispatcher())
         )
 
         Scenario(
             selectionHolder = selectionHolder,
             stateHolder = stateHolder
         ).block()
+    }
+
+    private suspend fun TurbineTestContext<FormActivityStateHelper.State>.awaitAndVerifyInitialState() {
+        val initialState = awaitItem()
+        assertThat(initialState.processingState).isEqualTo(PrimaryButtonProcessingState.Idle(null))
+        assertThat(initialState.isEnabled).isFalse()
+        assertThat(initialState.isProcessing).isFalse()
     }
 
     private fun confirmationStateConfirming(selection: PaymentSelection): ConfirmationHandler.State.Confirming {

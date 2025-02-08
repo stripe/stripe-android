@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement.embedded.form
 
+import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentIntent
@@ -13,9 +14,12 @@ import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.ui.PrimaryButtonProcessingState
 import com.stripe.android.paymentsheet.utils.buyButtonLabel
 import com.stripe.android.ui.core.Amount
-import com.stripe.android.uicore.utils.combineAsStateFlow
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -35,65 +39,67 @@ internal interface FormActivityStateHelper {
 @Singleton
 internal class DefaultFormActivityStateHelper @Inject constructor(
     paymentMethodMetadata: PaymentMethodMetadata,
-    selectionHolder: EmbeddedSelectionHolder,
+    private val selectionHolder: EmbeddedSelectionHolder,
     configuration: EmbeddedPaymentElement.Configuration,
+    @ViewModelScope coroutineScope: CoroutineScope,
 ) : FormActivityStateHelper {
-    private val primaryButtonProcessingState: MutableStateFlow<PrimaryButtonProcessingState> =
-        MutableStateFlow(PrimaryButtonProcessingState.Idle(null))
-    private val isProcessing = MutableStateFlow(false)
-    private val isEnabled: StateFlow<Boolean> = combineAsStateFlow(
-        selectionHolder.selection,
-        isProcessing
-    ) { selection, processing ->
-        selection != null && !processing
-    }
-    private val primaryButtonLabel = MutableStateFlow(
-        primaryButtonLabel(paymentMethodMetadata.stripeIntent, configuration)
-    )
-
-    override val state: StateFlow<FormActivityStateHelper.State> = combineAsStateFlow(
-        primaryButtonProcessingState,
-        isEnabled,
-        isProcessing,
-        primaryButtonLabel
-    ) { buttonProcessingState, enabled, processing, buttonLabel ->
+    private val _state = MutableStateFlow(
         FormActivityStateHelper.State(
-            primaryButtonLabel = buttonLabel,
-            isEnabled = enabled,
-            processingState = buttonProcessingState,
-            isProcessing = processing,
+            primaryButtonLabel = primaryButtonLabel(paymentMethodMetadata.stripeIntent, configuration),
+            isEnabled = false,
+            processingState = PrimaryButtonProcessingState.Idle(null),
+            isProcessing = false
         )
+    )
+    override val state: StateFlow<FormActivityStateHelper.State> = _state
+
+    init {
+        coroutineScope.launch {
+            selectionHolder.selection.collectLatest { selection ->
+                _state.update { currentState ->
+                    currentState.copy(
+                        isEnabled = selection != null && !currentState.isProcessing
+                    )
+                }
+            }
+        }
     }
 
     override fun update(confirmationState: ConfirmationHandler.State) {
-        updateUiState(confirmationState)
-    }
-
-    private fun updateUiState(confirmationState: ConfirmationHandler.State) {
-        when (confirmationState) {
-            is ConfirmationHandler.State.Complete -> updateCompleteState(confirmationState)
-            is ConfirmationHandler.State.Confirming -> updateConfirmingState()
-            is ConfirmationHandler.State.Idle -> updateIdleState()
+        _state.update {
+            it.updateWithConfirmationState(confirmationState)
         }
     }
 
-    private fun updateCompleteState(confirmationState: ConfirmationHandler.State.Complete) {
-        primaryButtonProcessingState.value = if (confirmationState.result is ConfirmationHandler.Result.Succeeded) {
-            PrimaryButtonProcessingState.Completed
-        } else {
-            PrimaryButtonProcessingState.Idle(null)
+    private fun FormActivityStateHelper.State.updateWithConfirmationState(
+        state: ConfirmationHandler.State
+    ): FormActivityStateHelper.State {
+        return when (state) {
+            is ConfirmationHandler.State.Complete -> {
+                if (state.result is ConfirmationHandler.Result.Succeeded) {
+                    copy(
+                        processingState = PrimaryButtonProcessingState.Completed,
+                        isEnabled = false
+                    )
+                } else {
+                    copy(
+                        processingState = PrimaryButtonProcessingState.Idle(null),
+                        isEnabled = selectionHolder.selection.value != null,
+                        isProcessing = false
+                    )
+                }
+            }
+            is ConfirmationHandler.State.Confirming -> copy(
+                processingState = PrimaryButtonProcessingState.Processing,
+                isProcessing = true,
+                isEnabled = false
+            )
+            is ConfirmationHandler.State.Idle -> copy(
+                isProcessing = false,
+                processingState = PrimaryButtonProcessingState.Idle(null),
+                isEnabled = selectionHolder.selection.value != null
+            )
         }
-        isProcessing.value = false
-    }
-
-    private fun updateConfirmingState() {
-        primaryButtonProcessingState.value = PrimaryButtonProcessingState.Processing
-        isProcessing.value = true
-    }
-
-    private fun updateIdleState() {
-        isProcessing.value = false
-        primaryButtonProcessingState.value = PrimaryButtonProcessingState.Idle(null)
     }
 
     private fun primaryButtonLabel(
