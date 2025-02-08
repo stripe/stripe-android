@@ -6,7 +6,6 @@ import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.model.CountryCode
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkConfiguration
@@ -42,7 +41,6 @@ import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.state.PaymentSheetLoadingException.PaymentIntentInTerminalState
 import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.testing.FakeErrorReporter
-import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.PaymentMethodFactory.update
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
@@ -52,7 +50,6 @@ import com.stripe.android.utils.FakeElementsSessionRepository
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.Rule
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.eq
 import org.mockito.Captor
@@ -82,12 +79,6 @@ internal class DefaultPaymentElementLoaderTest {
 
     private val readyGooglePayRepository = mock<GooglePayRepository>()
     private val unreadyGooglePayRepository = mock<GooglePayRepository>()
-
-    @get:Rule
-    val enableDefaultPaymentMethods = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.enableDefaultPaymentMethods,
-        isEnabled = false,
-    )
 
     @BeforeTest
     fun setup() {
@@ -2665,8 +2656,6 @@ internal class DefaultPaymentElementLoaderTest {
         lastUsedPaymentMethod: PaymentMethod?,
         defaultPaymentMethod: PaymentMethod?,
     ): PaymentElementLoader.State {
-        enableDefaultPaymentMethods.setEnabled(true)
-
         val defaultPaymentMethodId = defaultPaymentMethod?.id
 
         lastUsedPaymentMethod?.let {
