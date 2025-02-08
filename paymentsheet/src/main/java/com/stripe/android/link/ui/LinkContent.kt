@@ -12,6 +12,7 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetState
+import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -61,65 +62,67 @@ internal fun LinkContent(
 ) {
     val coroutineScope = rememberCoroutineScope()
     DefaultLinkTheme {
-        ModalBottomSheetLayout(
-            sheetContent = bottomSheetContent ?: {
-                // Must have some content at startup or bottom sheet crashes when
-                // calculating its initial size
-                Box(Modifier.defaultMinSize(minHeight = 1.dp)) {}
-            },
-            modifier = Modifier.fillMaxHeight(),
-            sheetState = sheetState,
-            sheetShape = MaterialTheme.linkShapes.large.copy(
-                bottomStart = CornerSize(0.dp),
-                bottomEnd = CornerSize(0.dp)
-            ),
-            scrimColor = MaterialTheme.linkColors.sheetScrim
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
+        Surface {
+            ModalBottomSheetLayout(
+                sheetContent = bottomSheetContent ?: {
+                    // Must have some content at startup or bottom sheet crashes when
+                    // calculating its initial size
+                    Box(Modifier.defaultMinSize(minHeight = 1.dp)) {}
+                },
+                modifier = Modifier.fillMaxHeight(),
+                sheetState = sheetState,
+                sheetShape = MaterialTheme.linkShapes.large.copy(
+                    bottomStart = CornerSize(0.dp),
+                    bottomEnd = CornerSize(0.dp)
+                ),
+                scrimColor = MaterialTheme.linkColors.sheetScrim
             ) {
-                BackHandler {
-                    handleViewAction(LinkAction.BackPressed)
-                }
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                ) {
+                    BackHandler {
+                        handleViewAction(LinkAction.BackPressed)
+                    }
 
-                LinkAppBar(
-                    state = appBarState,
-                    onBackPressed = onBackPressed,
-                    showBottomSheetContent = {
-                        if (it == null) {
-                            coroutineScope.launch {
-                                sheetState.hide()
-                                onUpdateSheetContent(null)
+                    LinkAppBar(
+                        state = appBarState,
+                        onBackPressed = onBackPressed,
+                        showBottomSheetContent = {
+                            if (it == null) {
+                                coroutineScope.launch {
+                                    sheetState.hide()
+                                    onUpdateSheetContent(null)
+                                }
+                            } else {
+                                onUpdateSheetContent(it)
                             }
-                        } else {
-                            onUpdateSheetContent(it)
+                        },
+                        onLogoutClicked = {
+                            handleViewAction(LinkAction.LogoutClicked)
                         }
-                    },
-                    onLogoutClicked = {
-                        handleViewAction(LinkAction.LogoutClicked)
-                    }
-                )
+                    )
 
-                Screens(
-                    navController = navController,
-                    goBack = goBack,
-                    moveToWeb = moveToWeb,
-                    navigate = { screen ->
-                        navigate(screen, false)
-                    },
-                    navigateAndClearStack = { screen ->
-                        navigate(screen, true)
-                    },
-                    dismissWithResult = { result ->
-                        dismissWithResult?.invoke(result)
-                    },
-                    getLinkAccount = getLinkAccount,
-                    showBottomSheetContent = onUpdateSheetContent,
-                    hideBottomSheetContent = {
-                        onUpdateSheetContent(null)
-                    }
-                )
+                    Screens(
+                        navController = navController,
+                        goBack = goBack,
+                        moveToWeb = moveToWeb,
+                        navigate = { screen ->
+                            navigate(screen, false)
+                        },
+                        navigateAndClearStack = { screen ->
+                            navigate(screen, true)
+                        },
+                        dismissWithResult = { result ->
+                            dismissWithResult?.invoke(result)
+                        },
+                        getLinkAccount = getLinkAccount,
+                        showBottomSheetContent = onUpdateSheetContent,
+                        hideBottomSheetContent = {
+                            onUpdateSheetContent(null)
+                        }
+                    )
+                }
             }
         }
     }
