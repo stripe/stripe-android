@@ -6,7 +6,7 @@ import dagger.Provides
 import javax.inject.Named
 
 @Module
-object ApplicationIdModule {
+internal object ApplicationIdModule {
     @Provides
     @Named(APPLICATION_ID)
     fun provideApplicationId(

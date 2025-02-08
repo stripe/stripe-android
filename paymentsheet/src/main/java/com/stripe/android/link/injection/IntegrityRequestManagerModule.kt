@@ -10,7 +10,7 @@ import dagger.Module
 import dagger.Provides
 
 @Module
-object IntegrityRequestManagerModule {
+internal object IntegrityRequestManagerModule {
     @Provides
     fun providesIntegrityStandardRequestManager(
         context: Application
