@@ -15,13 +15,16 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.attestation.IntegrityRequestManager
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 
 internal class DefaultLinkAttestationCheckTest {
+    private val dispatcher = UnconfinedTestDispatcher()
+
     @get:Rule
-    val testRule = CoroutineTestRule()
+    val testRule = CoroutineTestRule(dispatcher)
 
     @Test
     fun `attestation check should be successful when useAttestationEndpoints is false`() = runTest {
@@ -148,7 +151,7 @@ internal class DefaultLinkAttestationCheckTest {
         integrityRequestManager: IntegrityRequestManager = FakeIntegrityRequestManager(),
         linkAccountManager: LinkAccountManager = FakeLinkAccountManager(),
         errorReporter: ErrorReporter = FakeErrorReporter(),
-        linkConfiguration: LinkConfiguration = TestFactory.LINK_CONFIGURATION
+        linkConfiguration: LinkConfiguration = TestFactory.LINK_CONFIGURATION,
     ): DefaultLinkAttestationCheck {
         return DefaultLinkAttestationCheck(
             linkGate = linkGate,
@@ -156,7 +159,8 @@ internal class DefaultLinkAttestationCheckTest {
             integrityRequestManager = integrityRequestManager,
             linkAccountManager = linkAccountManager,
             linkConfiguration = linkConfiguration,
-            errorReporter = errorReporter
+            errorReporter = errorReporter,
+            workContext = dispatcher.scheduler
         )
     }
 }
