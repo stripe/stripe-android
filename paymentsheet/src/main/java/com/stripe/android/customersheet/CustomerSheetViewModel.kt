@@ -171,6 +171,7 @@ internal class CustomerSheetViewModel(
                 canRemoveLastPaymentMethod = false,
             ),
             metadata = null,
+            shouldSyncDefaultPaymentMethod = false,
         )
     )
 
@@ -347,6 +348,7 @@ internal class CustomerSheetViewModel(
                         currentSelection = state.paymentSelection,
                         metadata = state.paymentMethodMetadata,
                         permissions = state.customerPermissions,
+                        shouldSyncDefaultPaymentMethod = state.shouldSyncDefaultPaymentMethod,
                     )
 
                     transitionToInitialScreen()
@@ -1084,21 +1086,29 @@ internal class CustomerSheetViewModel(
 
     private fun selectSavedPaymentMethod(savedPaymentSelection: PaymentSelection.Saved?) {
         viewModelScope.launch(workContext) {
-            awaitSavedSelectionDataSource().setSavedSelection(
-                savedPaymentSelection?.toSavedSelection()
-            ).onSuccess {
-                confirmPaymentSelection(
-                    paymentSelection = savedPaymentSelection,
-                    type = savedPaymentSelection?.paymentMethod?.type?.code,
-                )
-            }.onFailure { cause, displayMessage ->
-                confirmPaymentSelectionError(
-                    paymentSelection = savedPaymentSelection,
-                    type = savedPaymentSelection?.paymentMethod?.type?.code,
-                    cause = cause,
-                    displayMessage = displayMessage,
-                )
+            if (customerState.value.shouldSyncDefaultPaymentMethod) {
+                // TODO: sync to backend via internal endpoint.
+            } else {
+                savePaymentSelectionLocally(savedPaymentSelection)
             }
+        }
+    }
+
+    private suspend fun savePaymentSelectionLocally(savedPaymentSelection: PaymentSelection.Saved?) {
+        awaitSavedSelectionDataSource().setSavedSelection(
+            savedPaymentSelection?.toSavedSelection()
+        ).onSuccess {
+            confirmPaymentSelection(
+                paymentSelection = savedPaymentSelection,
+                type = savedPaymentSelection?.paymentMethod?.type?.code,
+            )
+        }.onFailure { cause, displayMessage ->
+            confirmPaymentSelectionError(
+                paymentSelection = savedPaymentSelection,
+                type = savedPaymentSelection?.paymentMethod?.type?.code,
+                cause = cause,
+                displayMessage = displayMessage,
+            )
         }
     }
 
@@ -1207,6 +1217,7 @@ internal class CustomerSheetViewModel(
         val metadata: PaymentMethodMetadata?,
         val permissions: CustomerPermissions,
         val configuration: CustomerSheet.Configuration,
+        val shouldSyncDefaultPaymentMethod: Boolean,
     ) {
         val canRemove = when (paymentMethods.size) {
             0 -> false

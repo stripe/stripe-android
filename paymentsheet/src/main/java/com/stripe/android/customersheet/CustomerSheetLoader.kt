@@ -69,7 +69,11 @@ internal class DefaultCustomerSheetLoader(
 
         val filteredPaymentMethods = customerSheetSession.paymentMethods.filter {
             PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance).isAccepted(it)
+        }.filterNot {
+            customerSheetSession.shouldSyncDefaultPaymentMethod &&
+                (it.type == PaymentMethod.Type.Card || it.type == PaymentMethod.Type.USBankAccount)
         }
+
         customerSheetSession = customerSheetSession.copy(
             paymentMethods = filteredPaymentMethods
         )
@@ -164,6 +168,7 @@ internal class DefaultCustomerSheetLoader(
             paymentSelection = paymentSelection,
             validationError = customerSheetSession.elementsSession.stripeIntent.validate(),
             customerPermissions = customerSheetSession.permissions,
+            shouldSyncDefaultPaymentMethod = customerSheetSession.shouldSyncDefaultPaymentMethod,
         )
     }
 

@@ -65,7 +65,9 @@ internal class CustomerAdapterDataSource @Inject constructor(
                     canRemoveLastPaymentMethod = configuration.allowsRemovalOfLastSavedPaymentMethod,
                     // Always `true` for `Adapter` use case
                     canRemovePaymentMethods = true,
-                )
+                ),
+                // This is a customer sessions-only feature, so not relevant for a CustomerAdapterDataSource.
+                shouldSyncDefaultPaymentMethod = false,
             )
         }.toCustomerSheetDataResult()
     }

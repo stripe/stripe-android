@@ -16,5 +16,6 @@ internal sealed interface CustomerSheetState {
         val supportedPaymentMethods: List<SupportedPaymentMethod>,
         val paymentSelection: PaymentSelection?,
         val validationError: Throwable?,
+        val shouldSyncDefaultPaymentMethod: Boolean,
     ) : CustomerSheetState
 }
