@@ -114,7 +114,8 @@ class DefaultFormActivityStateHelperTest {
             val selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
             selectionHolder.set(selection)
 
-            awaitItem()
+            // State emitted from setting selection
+            assertThat(awaitItem().isEnabled).isTrue()
 
             stateHolder.update(confirmationStateConfirming(selection))
             val processingState = awaitItem()
