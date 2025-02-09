@@ -9,13 +9,14 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
 
 internal sealed interface FormResult : Parcelable {
 
     @Parcelize
-    data class Complete(val selection: PaymentSelection) : FormResult
+    data class Complete(val selection: PaymentSelection?) : FormResult
 
     @Parcelize
     object Cancelled : FormResult
@@ -55,7 +56,9 @@ internal object FormContract : ActivityResultContract<FormContract.Args, FormRes
         val selectedPaymentMethodCode: String,
         val paymentMethodMetadata: PaymentMethodMetadata,
         val hasSavedPaymentMethods: Boolean,
-        val configuration: EmbeddedPaymentElement.Configuration
+        val configuration: EmbeddedPaymentElement.Configuration,
+        val initializationMode: PaymentElementLoader.InitializationMode,
+        val statusBarColor: Int?
     ) : Parcelable {
         companion object {
             fun fromIntent(intent: Intent): Args? {

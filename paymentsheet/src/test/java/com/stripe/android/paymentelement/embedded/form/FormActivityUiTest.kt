@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.embedded.form
 
 import android.os.Build
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasText
@@ -12,6 +13,8 @@ import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.FormPage
+import com.stripe.android.paymentsheet.analytics.FakeEventReporter
+import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import kotlinx.coroutines.test.TestScope
@@ -19,7 +22,6 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
@@ -52,27 +54,31 @@ class FormActivityUiTest {
         )
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
         val testScope = TestScope(UnconfinedTestDispatcher())
+        val stateHelper = DefaultFormActivityStateHelper(
+            paymentMethodMetadata = paymentMethodMetadata,
+            selectionHolder = embeddedSelectionHolder,
+            configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
+            coroutineScope = TestScope(UnconfinedTestDispatcher())
+        )
         val interactor = EmbeddedFormInteractorFactory(
             paymentMethodMetadata = paymentMethodMetadata,
             paymentMethodCode = "card",
             hasSavedPaymentMethods = false,
             embeddedSelectionHolder = embeddedSelectionHolder,
             embeddedFormHelperFactory = embeddedFormHelperFactory,
-            viewModelScope = testScope
+            viewModelScope = testScope,
+            formActivityStateHelper = stateHelper
         ).create()
 
-        val stateHelper = DefaultFormActivityStateHelper(
-            paymentMethodMetadata = paymentMethodMetadata,
-            selectionHolder = embeddedSelectionHolder,
-            configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
-        )
-
         composeRule.setContent {
+            val state by stateHelper.state.collectAsState()
             FormActivityUI(
                 interactor = interactor,
-                eventReporter = mock(),
-                stateHelper = stateHelper,
-                onDismissed = {}
+                eventReporter = FakeEventReporter(),
+                onDismissed = {},
+                onClick = {},
+                onProcessingCompleted = {},
+                state = state,
             )
         }
 

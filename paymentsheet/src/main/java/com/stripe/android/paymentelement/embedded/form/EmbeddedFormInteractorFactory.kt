@@ -9,7 +9,7 @@ import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher.Compan
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInteractor
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodIncentiveInteractor
-import com.stripe.android.uicore.utils.stateFlowOf
+import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.CoroutineScope
 import javax.inject.Inject
 
@@ -19,7 +19,8 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
     private val hasSavedPaymentMethods: Boolean,
     private val embeddedSelectionHolder: EmbeddedSelectionHolder,
     private val embeddedFormHelperFactory: EmbeddedFormHelperFactory,
-    @ViewModelScope private val viewModelScope: CoroutineScope
+    @ViewModelScope private val viewModelScope: CoroutineScope,
+    private val formActivityStateHelper: FormActivityStateHelper
 ) {
     fun create(): DefaultVerticalModeFormInteractor {
         val formHelper = embeddedFormHelperFactory.create(
@@ -58,7 +59,7 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
                 customerHasSavedPaymentMethods = hasSavedPaymentMethods
             ),
             isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
-            processing = stateFlowOf(false),
+            processing = formActivityStateHelper.state.mapAsStateFlow { it.isProcessing },
             paymentMethodIncentive = PaymentMethodIncentiveInteractor(
                 paymentMethodMetadata.paymentMethodIncentive
             ).displayedIncentive,

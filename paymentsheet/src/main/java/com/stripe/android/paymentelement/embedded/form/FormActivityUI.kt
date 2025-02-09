@@ -19,6 +19,7 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.TestModeBadge
+import com.stripe.android.paymentsheet.utils.DismissKeyboardOnProcessing
 import com.stripe.android.paymentsheet.utils.EventReporterProvider
 import com.stripe.android.paymentsheet.utils.PaymentSheetContentPadding
 import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInteractor
@@ -31,12 +32,16 @@ import com.stripe.android.uicore.utils.collectAsState
 internal fun FormActivityUI(
     interactor: DefaultVerticalModeFormInteractor,
     eventReporter: EventReporter,
-    stateHelper: FormActivityStateHelper,
+    onClick: () -> Unit,
+    onProcessingCompleted: () -> Unit,
+    state: FormActivityStateHelper.State,
     onDismissed: () -> Unit,
 ) {
     val scrollState = rememberScrollState()
     val interactorState by interactor.state.collectAsState()
-    val state by stateHelper.state.collectAsState()
+
+    DismissKeyboardOnProcessing(interactorState.isProcessing)
+
     EventReporterProvider(eventReporter) {
         BottomSheetScaffold(
             topBar = {
@@ -53,8 +58,8 @@ internal fun FormActivityUI(
                 PaymentSheetContentPadding()
                 FormActivityPrimaryButton(
                     state = state,
-                    isProcessing = interactorState.isProcessing,
-                    onClick = {},
+                    onClick = onClick,
+                    onProcessingCompleted = onProcessingCompleted,
                 )
                 PaymentSheetContentPadding()
             },
@@ -66,7 +71,6 @@ internal fun FormActivityUI(
 @Composable
 internal fun FormActivityPrimaryButton(
     state: FormActivityStateHelper.State,
-    isProcessing: Boolean,
     onProcessingCompleted: () -> Unit = {},
     onClick: () -> Unit,
 ) {
@@ -79,7 +83,7 @@ internal fun FormActivityPrimaryButton(
         PrimaryButton(
             label = state.primaryButtonLabel.resolve(),
             locked = true,
-            enabled = state.isEnabled && !isProcessing,
+            enabled = state.isEnabled,
             onClick = onClick,
             onProcessingCompleted = onProcessingCompleted,
             processingState = state.processingState

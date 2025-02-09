@@ -5,6 +5,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.form.FormContract
@@ -12,10 +13,12 @@ import com.stripe.android.paymentelement.embedded.form.FormResult
 import com.stripe.android.paymentelement.embedded.manage.ManageContract
 import com.stripe.android.paymentelement.embedded.manage.ManageResult
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.CustomerState
 import javax.inject.Inject
+import javax.inject.Named
 
 internal interface EmbeddedSheetLauncher {
     fun launchForm(
@@ -41,6 +44,8 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
     private val customerStateHolder: CustomerStateHolder,
     private val sheetStateHolder: SheetStateHolder,
     private val errorReporter: ErrorReporter,
+    @Named(STATUS_BAR_COLOR) private val statusBarColor: Int?,
+    resultCallback: EmbeddedPaymentElement.ResultCallback
 ) : EmbeddedSheetLauncher {
 
     init {
@@ -59,7 +64,8 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
         activityResultCaller.registerForActivityResult(FormContract) { result ->
             sheetStateHolder.sheetIsOpen = false
             if (result is FormResult.Complete) {
-                selectionHolder.set(result.selection)
+                resultCallback.onResult(EmbeddedPaymentElement.Result.Completed())
+                selectionHolder.set(null)
             }
         }
 
@@ -96,7 +102,9 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
             selectedPaymentMethodCode = code,
             paymentMethodMetadata = paymentMethodMetadata,
             hasSavedPaymentMethods = hasSavedPaymentMethods,
-            configuration = embeddedConfirmationState.configuration
+            configuration = embeddedConfirmationState.configuration,
+            initializationMode = embeddedConfirmationState.initializationMode,
+            statusBarColor = statusBarColor
         )
         formActivityLauncher.launch(args)
     }

@@ -12,7 +12,7 @@ import kotlinx.coroutines.cancel
 import javax.inject.Inject
 
 internal class FormActivityViewModel @Inject constructor(
-    val component: FormActivityComponent,
+    val component: FormActivityViewModelComponent,
     @ViewModelScope private val customViewModelScope: CoroutineScope
 ) : ViewModel() {
     override fun onCleared() {
@@ -26,11 +26,13 @@ internal class FormActivityViewModel @Inject constructor(
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
             val args = argSupplier()
-            val component = DaggerFormActivityComponent.builder()
+            val component = DaggerFormActivityViewModelComponent.builder()
                 .paymentMethodMetadata(args.paymentMethodMetadata)
                 .selectedPaymentMethodCode(args.selectedPaymentMethodCode)
                 .hasSavedPaymentMethods(args.hasSavedPaymentMethods)
                 .configuration(args.configuration)
+                .initializationMode(args.initializationMode)
+                .statusBarColor(args.statusBarColor)
                 .context(extras.requireApplication())
                 .savedStateHandle(extras.createSavedStateHandle())
                 .build()
