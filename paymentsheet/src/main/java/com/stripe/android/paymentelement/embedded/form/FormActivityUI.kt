@@ -83,7 +83,7 @@ internal fun FormActivityPrimaryButton(
         PrimaryButton(
             label = state.primaryButtonLabel.resolve(),
             locked = true,
-            enabled = state.isEnabled && !state.isProcessing,
+            enabled = state.isEnabled,
             onClick = onClick,
             onProcessingCompleted = onProcessingCompleted,
             processingState = state.processingState
