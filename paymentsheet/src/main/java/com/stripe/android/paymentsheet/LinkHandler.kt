@@ -38,7 +38,21 @@ internal class LinkHandler @Inject constructor(
         val linkGate = linkConfigurationCoordinator.linkGate(configuration)
         if (linkGate.suppress2faModal) return false
 
-        val linkAttestationCheck = linkConfigurationCoordinator.linkAttestationCheck(configuration).invoke()
+        return when (state.loginState) {
+            LinkState.LoginState.LoggedIn,
+            LinkState.LoginState.NeedsVerification -> {
+                attestationCheckPassed(configuration)
+            }
+            LinkState.LoginState.LoggedOut -> {
+                false
+            }
+        }
+    }
+
+    private suspend fun attestationCheckPassed(configuration: LinkConfiguration): Boolean {
+        val linkAttestationCheck = linkConfigurationCoordinator
+            .linkAttestationCheck(configuration)
+            .invoke()
         return when (linkAttestationCheck) {
             is LinkAttestationCheck.Result.AccountError,
             is LinkAttestationCheck.Result.AttestationFailed,
@@ -46,16 +60,8 @@ internal class LinkHandler @Inject constructor(
                 false
             }
             LinkAttestationCheck.Result.Successful -> {
-                shouldLaunchLinkEagerly(state.loginState)
+                true
             }
-        }
-    }
-
-    private fun shouldLaunchLinkEagerly(loginState: LinkState.LoginState): Boolean {
-        return when (loginState) {
-            LinkState.LoginState.LoggedIn,
-            LinkState.LoginState.NeedsVerification -> true
-            LinkState.LoginState.LoggedOut -> false
         }
     }
 
