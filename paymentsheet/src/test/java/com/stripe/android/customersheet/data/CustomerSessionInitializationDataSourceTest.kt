@@ -15,7 +15,6 @@ import com.stripe.android.testing.SetupIntentFactory
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import kotlin.coroutines.coroutineContext
-import kotlin.math.exp
 
 class CustomerSessionInitializationDataSourceTest {
     @Test
@@ -116,7 +115,8 @@ class CustomerSessionInitializationDataSourceTest {
         val customerSheetSession = result.asSuccess().value
 
         assertThat(customerSheetSession.defaultPaymentMethodState).isInstanceOf<DefaultPaymentMethodState.Enabled>()
-        val defaultPaymentMethodState = customerSheetSession.defaultPaymentMethodState as DefaultPaymentMethodState.Enabled
+        val defaultPaymentMethodState =
+            customerSheetSession.defaultPaymentMethodState as DefaultPaymentMethodState.Enabled
         assertThat(defaultPaymentMethodState.defaultPaymentMethodId).isEqualTo(expectedDefaultPaymentMethodId)
     }
 

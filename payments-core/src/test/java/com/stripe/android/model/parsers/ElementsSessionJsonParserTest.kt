@@ -798,6 +798,7 @@ class ElementsSessionJsonParserTest {
         )
     }
 
+    @Suppress("LongMethod")
     @Test
     fun `ElementsSession has expected customer session information with customer sheet component in the response`() {
         val parser = ElementsSessionJsonParser(

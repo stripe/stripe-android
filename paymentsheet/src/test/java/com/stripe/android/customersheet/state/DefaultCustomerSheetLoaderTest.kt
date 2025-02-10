@@ -192,7 +192,9 @@ class DefaultCustomerSheetLoaderTest {
             paymentMethods = expectedPaymentMethods,
             // Setting a saved selection here so we can validate that it is not used.
             savedSelection = SavedSelection.PaymentMethod(expectedPaymentMethods[1].id!!),
-            defaultPaymentMethodState = DefaultPaymentMethodState.Enabled(defaultPaymentMethodId = defaultPaymentMethod.id),
+            defaultPaymentMethodState = DefaultPaymentMethodState.Enabled(
+                defaultPaymentMethodId = defaultPaymentMethod.id
+            ),
         )
 
         val config = CustomerSheet.Configuration(merchantDisplayName = "Example")
