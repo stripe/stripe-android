@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.verticalmode
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Divider
 import androidx.compose.runtime.Composable
@@ -13,19 +14,24 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
+import com.stripe.android.paymentsheet.ui.Mandate
 import com.stripe.android.uicore.image.StripeImageLoader
+import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.utils.collectAsState
 import org.jetbrains.annotations.VisibleForTesting
 
 internal const val TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT = "TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT"
+internal const val EMBEDDED_MANDATE_TEXT_TEST_TAG = "EMBEDDED_MANDATE"
 
 @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @Composable
-internal fun PaymentMethodEmbeddedLayoutUI(
+internal fun ColumnScope.PaymentMethodEmbeddedLayoutUI(
     interactor: PaymentMethodVerticalLayoutInteractor,
+    embeddedViewDisplaysMandateText: Boolean,
     modifier: Modifier = Modifier,
     rowStyle: Embedded.RowStyle
 ) {
@@ -61,6 +67,11 @@ internal fun PaymentMethodEmbeddedLayoutUI(
         modifier = modifier
             .testTag(TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT),
         rowStyle = rowStyle
+    )
+
+    EmbeddedMandate(
+        embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
+        mandate = state.mandate,
     )
 }
 
@@ -145,6 +156,21 @@ private fun OptionalEmbeddedDivider(rowStyle: Embedded.RowStyle) {
                 end = rowStyle.endSeparatorInset()
             ),
             startIndent = if (rowStyle.startSeparatorHasDefaultInset()) 32.dp else 0.dp
+        )
+    }
+}
+
+@Composable
+private fun EmbeddedMandate(
+    embeddedViewDisplaysMandateText: Boolean,
+    mandate: ResolvableString?,
+) {
+    if (embeddedViewDisplaysMandateText) {
+        Mandate(
+            mandateText = mandate?.resolve(),
+            modifier = Modifier
+                .padding(bottom = 8.dp)
+                .testTag(EMBEDDED_MANDATE_TEXT_TEST_TAG),
         )
     }
 }
