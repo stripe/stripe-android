@@ -786,7 +786,7 @@ internal class PaymentMethodMetadataTest {
             sharedDataSpecs = sharedDataSpecs,
             externalPaymentMethodSpecs = externalPaymentMethodSpecs,
             customerMetadata = CustomerMetadata(
-                hasCustomerConfiguration = true,
+                isPaymentMethodSetAsDefaultEnabled = false,
             ),
             paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
             isGooglePayReady = false,
@@ -801,6 +801,7 @@ internal class PaymentMethodMetadataTest {
     }
 
     @OptIn(ExperimentalCardBrandFilteringApi::class)
+    @Suppress("LongMethod")
     @Test
     fun `should create metadata properly with elements session response, customer sheet config, and data specs`() {
         val billingDetailsCollectionConfiguration = createBillingDetailsCollectionConfiguration()
@@ -853,7 +854,7 @@ internal class PaymentMethodMetadataTest {
             sharedDataSpecs = listOf(SharedDataSpec("card")),
             externalPaymentMethodSpecs = listOf(),
             customerMetadata = CustomerMetadata(
-                hasCustomerConfiguration = true,
+                isPaymentMethodSetAsDefaultEnabled = false,
             ),
             isGooglePayReady = true,
             paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
@@ -864,7 +865,6 @@ internal class PaymentMethodMetadataTest {
             cardBrandFilter = PaymentSheetCardBrandFilter(cardBrandAcceptance),
             paymentMethodIncentive = null,
         )
-
         assertThat(metadata).isEqualTo(expectedMetadata)
     }
 

@@ -4,6 +4,7 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentOptionsItem
@@ -30,7 +31,10 @@ class PaymentOptionsItemsMapperTest {
             isLinkEnabled = isLinkEnabledFlow,
             isNotPaymentFlow = true,
             nameProvider = { it!!.resolvableString },
-            isCbcEligible = { false }
+            isCbcEligible = { false },
+            customerMetadata = CustomerMetadata(
+                isPaymentMethodSetAsDefaultEnabled = false
+            ),
         )
 
         mapper().test {
@@ -60,7 +64,10 @@ class PaymentOptionsItemsMapperTest {
             isLinkEnabled = isLinkEnabledFlow,
             isNotPaymentFlow = false,
             nameProvider = { it!!.resolvableString },
-            isCbcEligible = { false }
+            isCbcEligible = { false },
+            customerMetadata = CustomerMetadata(
+                isPaymentMethodSetAsDefaultEnabled = false
+            ),
         )
 
         mapper().test {
@@ -80,6 +87,7 @@ class PaymentOptionsItemsMapperTest {
     }
 
     private fun createCustomerState(
+        defaultPaymentMethodId: String? = null,
         paymentMethods: List<PaymentMethod> = emptyList(),
     ): CustomerState {
         return CustomerState(
@@ -92,7 +100,7 @@ class PaymentOptionsItemsMapperTest {
                 canRemoveLastPaymentMethod = true,
                 canRemoveDuplicates = false,
             ),
-            defaultPaymentMethodState = CustomerState.DefaultPaymentMethodState.Disabled,
+            defaultPaymentMethodId = defaultPaymentMethodId,
         )
     }
 }

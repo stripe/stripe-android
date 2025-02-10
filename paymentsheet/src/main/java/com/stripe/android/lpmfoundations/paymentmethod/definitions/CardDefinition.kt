@@ -159,7 +159,7 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
             code = PaymentMethod.Type.Card.code,
             intent = metadata.stripeIntent,
             paymentMethodSaveConsentBehavior = metadata.paymentMethodSaveConsentBehavior,
-            hasCustomerConfiguration = metadata.customerMetadata.hasCustomerConfiguration,
+            hasCustomerConfiguration = metadata.customerMetadata != null,
         )
     }
 }
