@@ -552,22 +552,90 @@ internal class LinkActivityViewModelTest {
         )
     }
 
+    @Test
+    fun `linkScreenScreenCreated should not navigate when screen is not loading`() = runTest {
+        val linkAccountManager = FakeLinkAccountManager()
+        val navController = navController(screen = LinkScreen.SignUp)
+
+        val vm = createViewModel(linkAccountManager = linkAccountManager)
+        vm.navController = navController
+        linkAccountManager.setAccountStatus(AccountStatus.Verified)
+
+        vm.onCreate(mock())
+        vm.linkScreenScreenCreated()
+
+        advanceUntilIdle()
+
+        verify(navController, times(0)).navigate(
+            any(),
+            any<NavOptionsBuilder.() -> Unit>()
+        )
+    }
+
+    @Test
+    fun `linkScreenScreenCreated should navigate when screen is loading`() = runTest {
+        val linkAccountManager = FakeLinkAccountManager()
+        val navController = navController()
+
+        val vm = createViewModel(linkAccountManager = linkAccountManager)
+        vm.navController = navController
+        linkAccountManager.setAccountStatus(AccountStatus.Verified)
+
+        vm.onCreate(mock())
+        vm.linkScreenScreenCreated()
+
+        advanceUntilIdle()
+
+        assertNavigation(
+            navController = navController,
+            screen = LinkScreen.Wallet,
+            clearStack = true,
+            launchSingleTop = true
+        )
+    }
+
+    @Test
+    fun `linkScreenScreenCreated should navigate when screen is null`() = runTest {
+        val linkAccountManager = FakeLinkAccountManager()
+        val navController = navController(screen = null)
+
+        val vm = createViewModel(linkAccountManager = linkAccountManager)
+        vm.navController = navController
+        linkAccountManager.setAccountStatus(AccountStatus.Verified)
+
+        vm.onCreate(mock())
+        vm.linkScreenScreenCreated()
+
+        advanceUntilIdle()
+
+        assertNavigation(
+            navController = navController,
+            screen = LinkScreen.Wallet,
+            clearStack = true,
+            launchSingleTop = true
+        )
+    }
+
     private fun navController(
-        screen: LinkScreen = LinkScreen.SignUp
+        screen: LinkScreen? = LinkScreen.Loading
     ): NavHostController {
+        val currentBackStackEntry = screen?.let {
+            NavBackStackEntry.create(
+                context = null,
+                destination = NavDestination("").apply {
+                    route = screen.route
+                }
+            )
+        }
         val navController: NavHostController = mock()
         val mockGraph: NavGraph = mock()
         `when`(mockGraph.id).thenReturn(FAKE_GRAPH_ID)
         `when`(navController.graph).thenReturn(mockGraph)
+        `when`(navController.currentBackStackEntry).thenReturn(currentBackStackEntry)
         `when`(navController.currentBackStackEntryFlow).thenReturn(
-            flowOf(
-                NavBackStackEntry.create(
-                    context = null,
-                    destination = NavDestination("").apply {
-                        route = screen.route
-                    }
-                )
-            )
+            currentBackStackEntry?.let {
+                flowOf(it)
+            } ?: flowOf()
         )
         return navController
     }

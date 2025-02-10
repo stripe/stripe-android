@@ -202,7 +202,10 @@ internal class LinkActivityViewModel @Inject constructor(
 
     fun linkScreenScreenCreated() {
         viewModelScope.launch {
-            navigateToLinkScreen()
+            val currentRoute = navController?.currentBackStackEntry?.destination?.route
+            if (currentRoute == null || currentRoute == LinkScreen.Loading.route) {
+                navigateToLinkScreen()
+            }
         }
     }
 
