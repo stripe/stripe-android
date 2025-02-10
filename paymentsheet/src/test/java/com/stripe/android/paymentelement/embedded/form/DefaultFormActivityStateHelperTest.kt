@@ -128,6 +128,22 @@ class DefaultFormActivityStateHelperTest {
             assertThat(failedState.isEnabled).isTrue()
             assertThat(failedState.isProcessing).isFalse()
             assertThat(failedState.processingState).isEqualTo(PrimaryButtonProcessingState.Idle(null))
+            assertThat(failedState.error).isEqualTo("Whoops".resolvableString)
+        }
+    }
+
+    @Test
+    fun `confirming state clears errors`() = testScenario {
+        stateHolder.state.test {
+            awaitAndVerifyInitialState()
+
+            stateHolder.update(confirmationStateComplete(false))
+            val failedState = awaitItem()
+            assertThat(failedState.error).isEqualTo("Whoops".resolvableString)
+
+            stateHolder.update(confirmationStateConfirming(PaymentMethodFixtures.CARD_PAYMENT_SELECTION))
+            val confirmingState = awaitItem()
+            assertThat(confirmingState.error).isNull()
         }
     }
 
