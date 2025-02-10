@@ -76,7 +76,7 @@ internal fun LoadingShimmerEffect(
 
     val gradient = listOf(
         colors.backgroundSecondary,
-        Color.White.copy(alpha = SHIMMER_GRADIENT_ALPHA),
+        colors.backgroundSecondary.copy(alpha = SHIMMER_GRADIENT_ALPHA),
         colors.backgroundSecondary,
     )
     val transition = rememberInfiniteTransition(label = "shimmer_transition")
