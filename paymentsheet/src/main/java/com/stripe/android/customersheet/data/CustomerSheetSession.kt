@@ -1,6 +1,7 @@
 package com.stripe.android.customersheet.data
 
 import com.stripe.android.customersheet.CustomerPermissions
+import com.stripe.android.customersheet.DefaultPaymentMethodState
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
@@ -12,4 +13,5 @@ internal data class CustomerSheetSession(
     val savedSelection: SavedSelection?,
     val paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior,
     val permissions: CustomerPermissions,
+    val defaultPaymentMethodState: DefaultPaymentMethodState,
 )

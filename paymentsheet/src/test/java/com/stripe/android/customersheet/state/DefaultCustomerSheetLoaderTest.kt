@@ -7,6 +7,7 @@ import com.stripe.android.customersheet.CustomerPermissions
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetLoader
 import com.stripe.android.customersheet.DefaultCustomerSheetLoader
+import com.stripe.android.customersheet.DefaultPaymentMethodState
 import com.stripe.android.customersheet.FakeCustomerAdapter
 import com.stripe.android.customersheet.data.CustomerAdapterDataSource
 import com.stripe.android.customersheet.data.CustomerSheetDataResult
@@ -480,6 +481,7 @@ class DefaultCustomerSheetLoaderTest {
                             canRemovePaymentMethods = true,
                             canRemoveLastPaymentMethod = true,
                         ),
+                        defaultPaymentMethodState = DefaultPaymentMethodState.Disabled,
                     )
                 )
             }

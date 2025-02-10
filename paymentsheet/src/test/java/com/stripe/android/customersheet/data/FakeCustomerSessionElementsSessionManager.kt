@@ -16,10 +16,12 @@ internal class FakeCustomerSessionElementsSessionManager(
     ),
     private val intent: StripeIntent = SetupIntentFactory.create(),
     private val paymentMethods: List<PaymentMethod> = listOf(),
+    private val defaultPaymentMethodId: String? = null,
     private val customerSheetComponent: ElementsSession.Customer.Components.CustomerSheet =
         ElementsSession.Customer.Components.CustomerSheet.Enabled(
             isPaymentMethodRemoveEnabled = true,
             canRemoveLastPaymentMethod = true,
+            isPaymentMethodSyncDefaultEnabled = false,
         ),
     private val customer: ElementsSession.Customer = ElementsSession.Customer(
         session = ElementsSession.Customer.Session(
@@ -33,7 +35,7 @@ internal class FakeCustomerSessionElementsSessionManager(
             ),
             liveMode = false,
         ),
-        defaultPaymentMethod = null,
+        defaultPaymentMethod = defaultPaymentMethodId,
         paymentMethods = paymentMethods,
     ),
     private val elementsSession: Result<CustomerSessionElementsSession> = Result.success(
