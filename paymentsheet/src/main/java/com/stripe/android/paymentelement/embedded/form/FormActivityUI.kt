@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement.embedded.form
 
+import androidx.annotation.RestrictTo
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -11,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -122,6 +124,7 @@ internal fun FormActivityPrimaryButton(
             )
     ) {
         PrimaryButton(
+            modifier = Modifier.testTag(EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON),
             label = state.primaryButtonLabel.resolve(),
             locked = true,
             enabled = state.isEnabled,
@@ -162,3 +165,6 @@ internal fun FormActivityTopBar(
         }
     }
 }
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON = "EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON"
