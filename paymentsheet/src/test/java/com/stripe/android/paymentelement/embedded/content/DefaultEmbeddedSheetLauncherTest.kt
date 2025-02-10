@@ -46,10 +46,13 @@ internal class DefaultEmbeddedSheetLauncherTest {
             statusBarColor = null
         )
 
+        assertThat(sheetStateHolder.sheetIsOpen).isFalse()
+        assertThat(selectionHolder.temporarySelection.value).isNull()
         sheetLauncher.launchForm(code, paymentMethodMetadata, false, state)
         val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall()
         assertThat(launchCall).isEqualTo(expectedArgs)
         assertThat(sheetStateHolder.sheetIsOpen).isTrue()
+        assertThat(selectionHolder.temporarySelection.value).isEqualTo(code)
     }
 
     @Test
@@ -63,11 +66,13 @@ internal class DefaultEmbeddedSheetLauncherTest {
         assertThat(loggedErrors.first())
             .isEqualTo("unexpected_error.embedded.embedded_sheet_launcher.embedded_state_is_null")
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
+        assertThat(selectionHolder.temporarySelection.value).isNull()
     }
 
     @Test
     fun `formActivityLauncher clears selection holder and invokes callback on complete result`() = testScenario {
         sheetStateHolder.sheetIsOpen = true
+        selectionHolder.setTemporary("test_code")
         val selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
         selectionHolder.set(selection)
 
@@ -77,18 +82,21 @@ internal class DefaultEmbeddedSheetLauncherTest {
         callback.onActivityResult(result)
         assertThat(selectionHolder.selection.value).isNull()
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
+        assertThat(selectionHolder.temporarySelection.value).isNull()
         assertThat(resultCallbackTurbine.awaitItem()).isInstanceOf<EmbeddedPaymentElement.Result.Completed>()
     }
 
     @Test
     fun `formActivityLauncher callback does not update selection holder on non-complete result`() = testScenario {
         sheetStateHolder.sheetIsOpen = true
+        selectionHolder.setTemporary("test_code")
         val result = FormResult.Cancelled
         val callback = formRegisterCall.callback.asCallbackFor<FormResult>()
 
         callback.onActivityResult(result)
         assertThat(selectionHolder.selection.value).isEqualTo(null)
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
+        assertThat(selectionHolder.temporarySelection.value).isNull()
         resultCallbackTurbine.expectNoEvents()
     }
 
