@@ -28,7 +28,7 @@ internal fun LinkScreenContent(
         onDismissClicked = viewModel::onDismissVerificationClicked,
         onBackPressed = onBackPressed,
         onLinkScreenScreenCreated = {
-            viewModel.linkScreenScreenCreated()
+            viewModel.linkScreenCreated()
         },
         onNavControllerCreated = { navController ->
             viewModel.navController = navController
