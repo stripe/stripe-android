@@ -39,6 +39,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
@@ -533,7 +534,9 @@ private fun BankAccountTerms() {
     Html(
         html = stringResource(R.string.stripe_wallet_bank_account_terms).replaceHyperlinks(),
         color = MaterialTheme.colors.onSecondary,
-        style = MaterialTheme.typography.caption,
+        style = MaterialTheme.typography.caption.copy(
+            textAlign = TextAlign.Center,
+        ),
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 12.dp),
@@ -645,7 +648,7 @@ private fun AlertMessage(
 
 private fun String.replaceHyperlinks() = this.replace(
     "<terms>",
-    "<a href=\"https://stripe.com/legal/ach-payments/authorization\">"
+    "<a href=\"https://link.com/terms/ach-authorization\">"
 ).replace("</terms>", "</a>")
 
 private const val CHEVRON_ICON_ROTATION = 180f
