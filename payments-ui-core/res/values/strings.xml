@@ -101,6 +101,8 @@
   <string name="stripe_save_for_future_payments_with_merchant_name">Save for future %s payments</string>
   <!-- The label of a switch indicating whether to save the user's payment details for future payment -->
   <string name="stripe_save_payment_details_to_merchant_name">Save payment details to %s for future purchases</string>
+  <!-- The label of a switch indicating whether to set the user's payment details as default -->
+  <string name="stripe_set_as_default_payment_method">Set as default payment method</string>
   <!-- Button title to open camera to scan credit/debit card -->
   <string name="stripe_scan_card">Scan card</string>
   <!-- SEPA mandate text -->
