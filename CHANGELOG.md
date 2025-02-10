@@ -3,6 +3,7 @@
 ## XX.XX.XX - 20XX-XX-XX
 
 ## 21.4.2 - 2025-02-10
+Bug fixes and improvements.
 
 ## 21.4.1 - 2025-01-28
 
