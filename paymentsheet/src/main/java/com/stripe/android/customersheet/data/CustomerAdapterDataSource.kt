@@ -67,6 +67,7 @@ internal class CustomerAdapterDataSource @Inject constructor(
                     canRemovePaymentMethods = true,
                 ),
                 // This is a customer sessions-only feature, so not relevant for a CustomerAdapterDataSource.
+                defaultPaymentMethodId = null,
                 shouldSyncDefaultPaymentMethod = false,
             )
         }.toCustomerSheetDataResult()

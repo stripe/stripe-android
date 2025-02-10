@@ -1086,30 +1086,35 @@ internal class CustomerSheetViewModel(
 
     private fun selectSavedPaymentMethod(savedPaymentSelection: PaymentSelection.Saved?) {
         viewModelScope.launch(workContext) {
-            if (customerState.value.shouldSyncDefaultPaymentMethod) {
-                // TODO: sync to backend via internal endpoint.
+            (if (customerState.value.shouldSyncDefaultPaymentMethod) {
+                savePaymentSelectionToCustomer(savedPaymentSelection)
             } else {
                 savePaymentSelectionLocally(savedPaymentSelection)
+            }).onSuccess {
+                confirmPaymentSelection(
+                    paymentSelection = savedPaymentSelection,
+                    type = savedPaymentSelection?.paymentMethod?.type?.code,
+                )
+            }.onFailure { cause, displayMessage ->
+                confirmPaymentSelectionError(
+                    paymentSelection = savedPaymentSelection,
+                    type = savedPaymentSelection?.paymentMethod?.type?.code,
+                    cause = cause,
+                    displayMessage = displayMessage,
+                )
             }
         }
     }
 
-    private suspend fun savePaymentSelectionLocally(savedPaymentSelection: PaymentSelection.Saved?) {
-        awaitSavedSelectionDataSource().setSavedSelection(
+    private suspend fun savePaymentSelectionToCustomer(savedPaymentSelection: PaymentSelection.Saved?): CustomerSheetDataResult.Success<Unit> {
+        // TODO: this would actually be the fn to set the default payment method.
+        return paymentMethodDataSourceProvider.await().updatePaymentMethod(savedPaymentSelection?.paymentMethod.id })
+    }
+
+    private suspend fun savePaymentSelectionLocally(savedPaymentSelection: PaymentSelection.Saved?): CustomerSheetDataResult<Unit> {
+        return awaitSavedSelectionDataSource().setSavedSelection(
             savedPaymentSelection?.toSavedSelection()
-        ).onSuccess {
-            confirmPaymentSelection(
-                paymentSelection = savedPaymentSelection,
-                type = savedPaymentSelection?.paymentMethod?.type?.code,
-            )
-        }.onFailure { cause, displayMessage ->
-            confirmPaymentSelectionError(
-                paymentSelection = savedPaymentSelection,
-                type = savedPaymentSelection?.paymentMethod?.type?.code,
-                cause = cause,
-                displayMessage = displayMessage,
-            )
-        }
+        )
     }
 
     private fun selectGooglePay() {

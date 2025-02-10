@@ -172,6 +172,8 @@ internal class CustomerApiRepository @Inject constructor(
             logger.error("Failed to update payment method $paymentMethodId.", it)
         }
 
+    // TODO: add setDefaultPaymentMethod. should call into stripe repository updatePaymentMethod fn.
+
     private fun filterPaymentMethods(allPaymentMethods: List<PaymentMethod>): List<PaymentMethod> {
         val paymentMethods = mutableListOf<PaymentMethod>()
 

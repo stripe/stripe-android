@@ -47,6 +47,8 @@ internal interface CustomerRepository {
         params: PaymentMethodUpdateParams
     ): Result<PaymentMethod>
 
+    // TODO: add set payment method.
+
     data class CustomerInfo(
         val id: String,
         val ephemeralKeySecret: String,

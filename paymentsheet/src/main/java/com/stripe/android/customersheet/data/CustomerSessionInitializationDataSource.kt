@@ -56,6 +56,7 @@ internal class CustomerSessionInitializationDataSource @Inject constructor(
                             is ElementsSession.Customer.Components.CustomerSheet.Disabled -> false
                         }
                     ),
+                    defaultPaymentMethodId = customer.defaultPaymentMethod,
                     shouldSyncDefaultPaymentMethod = when (val component = customer.session.components.customerSheet) {
                         is ElementsSession.Customer.Components.CustomerSheet.Enabled ->
                             component.isPaymentMethodSyncDefaultEnabled

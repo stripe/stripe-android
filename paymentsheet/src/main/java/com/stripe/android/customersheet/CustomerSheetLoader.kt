@@ -136,20 +136,7 @@ internal class DefaultCustomerSheetLoader(
     ): CustomerSheetState.Full {
         val paymentMethods = customerSheetSession.paymentMethods
 
-        val paymentSelection = customerSheetSession.savedSelection?.let { selection ->
-            when (selection) {
-                is SavedSelection.GooglePay -> PaymentSelection.GooglePay
-                is SavedSelection.Link -> PaymentSelection.Link()
-                is SavedSelection.PaymentMethod -> {
-                    paymentMethods.find { paymentMethod ->
-                        paymentMethod.id == selection.id
-                    }?.let {
-                        PaymentSelection.Saved(it)
-                    }
-                }
-                is SavedSelection.None -> null
-            }
-        }
+        val paymentSelection = getPaymentSelection(customerSheetSession, paymentMethods)
 
         val sortedPaymentMethods = sortPaymentMethods(
             paymentMethods = customerSheetSession.paymentMethods,
@@ -170,6 +157,31 @@ internal class DefaultCustomerSheetLoader(
             customerPermissions = customerSheetSession.permissions,
             shouldSyncDefaultPaymentMethod = customerSheetSession.shouldSyncDefaultPaymentMethod,
         )
+    }
+
+    private fun getPaymentSelection(
+        customerSheetSession: CustomerSheetSession,
+        paymentMethods: List<PaymentMethod>
+    ): PaymentSelection? {
+        return if (customerSheetSession.shouldSyncDefaultPaymentMethod) {
+            paymentMethods.find { paymentMethod -> paymentMethod.id == customerSheetSession.defaultPaymentMethodId }
+                ?.let { PaymentSelection.Saved(it) }
+        } else {
+            customerSheetSession.savedSelection?.let { selection ->
+                when (selection) {
+                    is SavedSelection.GooglePay -> PaymentSelection.GooglePay
+                    is SavedSelection.Link -> PaymentSelection.Link()
+                    is SavedSelection.PaymentMethod -> {
+                        paymentMethods.find { paymentMethod ->
+                            paymentMethod.id == selection.id
+                        }?.let {
+                            PaymentSelection.Saved(it)
+                        }
+                    }
+                    is SavedSelection.None -> null
+                }
+            }
+        }
     }
 
     private fun filterSupportedPaymentMethods(

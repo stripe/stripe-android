@@ -12,5 +12,6 @@ internal data class CustomerSheetSession(
     val savedSelection: SavedSelection?,
     val paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior,
     val permissions: CustomerPermissions,
+    val defaultPaymentMethodId: String?,
     val shouldSyncDefaultPaymentMethod: Boolean,
 )

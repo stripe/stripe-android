@@ -23,4 +23,6 @@ internal interface CustomerSheetPaymentMethodDataSource {
     suspend fun attachPaymentMethod(paymentMethodId: String): CustomerSheetDataResult<PaymentMethod>
 
     suspend fun detachPaymentMethod(paymentMethodId: String): CustomerSheetDataResult<PaymentMethod>
+
+    // TODO: add set default payment method here. Failure result and unexpectedd error for CustomerAdapterDS.
 }
