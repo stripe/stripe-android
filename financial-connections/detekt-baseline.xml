@@ -15,6 +15,8 @@
     <ID>LongMethod:NetworkingSaveToLinkVerificationScreen.kt$@Composable private fun NetworkingSaveToLinkVerificationLoaded( confirmVerificationAsync: Async&lt;Unit>, payload: Payload, onCloseFromErrorClick: (Throwable) -> Unit, onSkipClick: () -> Unit, )</ID>
     <ID>LongMethod:SuccessContent.kt$@Composable private fun SpinnerToSuccessAnimation( showSpinner: Boolean, initialSuccessBodyHeight: Dp?, content: TextResource?, title: TextResource?, modifier: Modifier = Modifier, )</ID>
     <ID>MagicNumber:AccountPickerScreen.kt$3</ID>
+    <ID>MagicNumber:BottomSheet.kt$0.32f</ID>
+    <ID>MagicNumber:BottomSheet.kt$0.48f</ID>
     <ID>MagicNumber:ConsentLogoHeader.kt$3</ID>
     <ID>MagicNumber:ConsentLogoHeader.kt$4</ID>
     <ID>MagicNumber:ConsentLogoHeader.kt$5</ID>
