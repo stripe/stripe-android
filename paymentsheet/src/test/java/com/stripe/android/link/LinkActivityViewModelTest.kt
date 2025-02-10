@@ -219,7 +219,7 @@ internal class LinkActivityViewModelTest {
         linkAccountManager.setAccountStatus(AccountStatus.Verified)
 
         vm.onCreate(mock())
-        vm.linkScreenScreenCreated()
+        vm.linkScreenCreated()
 
         advanceUntilIdle()
 
@@ -241,7 +241,7 @@ internal class LinkActivityViewModelTest {
         linkAccountManager.setAccountStatus(AccountStatus.NeedsVerification)
 
         vm.onCreate(mock())
-        vm.linkScreenScreenCreated()
+        vm.linkScreenCreated()
 
         advanceUntilIdle()
 
@@ -263,7 +263,7 @@ internal class LinkActivityViewModelTest {
         linkAccountManager.setAccountStatus(AccountStatus.VerificationStarted)
 
         vm.onCreate(mock())
-        vm.linkScreenScreenCreated()
+        vm.linkScreenCreated()
 
         advanceUntilIdle()
 
@@ -285,7 +285,7 @@ internal class LinkActivityViewModelTest {
         linkAccountManager.setAccountStatus(AccountStatus.SignedOut)
 
         vm.onCreate(mock())
-        vm.linkScreenScreenCreated()
+        vm.linkScreenCreated()
 
         advanceUntilIdle()
 
@@ -307,7 +307,7 @@ internal class LinkActivityViewModelTest {
         linkAccountManager.setAccountStatus(AccountStatus.Error)
 
         vm.onCreate(mock())
-        vm.linkScreenScreenCreated()
+        vm.linkScreenCreated()
 
         advanceUntilIdle()
 
@@ -562,7 +562,7 @@ internal class LinkActivityViewModelTest {
         linkAccountManager.setAccountStatus(AccountStatus.Verified)
 
         vm.onCreate(mock())
-        vm.linkScreenScreenCreated()
+        vm.linkScreenCreated()
 
         advanceUntilIdle()
 
@@ -582,7 +582,7 @@ internal class LinkActivityViewModelTest {
         linkAccountManager.setAccountStatus(AccountStatus.Verified)
 
         vm.onCreate(mock())
-        vm.linkScreenScreenCreated()
+        vm.linkScreenCreated()
 
         advanceUntilIdle()
 
@@ -604,7 +604,7 @@ internal class LinkActivityViewModelTest {
         linkAccountManager.setAccountStatus(AccountStatus.Verified)
 
         vm.onCreate(mock())
-        vm.linkScreenScreenCreated()
+        vm.linkScreenCreated()
 
         advanceUntilIdle()
 
