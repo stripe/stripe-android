@@ -20,9 +20,6 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.ViewActionRecorder
-import com.stripe.android.paymentsheet.forms.FormFieldValues
-import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -202,7 +199,7 @@ internal class PaymentMethodLayoutUITest(
                 )
             },
             isProcessing = false,
-            selection = PaymentSelection.Saved(PaymentMethodFixtures.displayableCard().paymentMethod),
+            selection = PaymentMethodVerticalLayoutInteractor.Selection.Saved,
             displayedSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
             availableSavedPaymentMethodAction =
             PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
@@ -232,12 +229,7 @@ internal class PaymentMethodLayoutUITest(
             )
         )
         val supportedPaymentMethods = paymentMethodMetadata.sortedSupportedPaymentMethods()
-        val selection = FormFieldValues(
-            userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest,
-        ).transformToPaymentSelection(
-            paymentMethod = supportedPaymentMethods[1],
-            paymentMethodMetadata = paymentMethodMetadata,
-        )
+        val selection = PaymentMethodVerticalLayoutInteractor.Selection.New(supportedPaymentMethods[1].code)
         runScenario(
             PaymentMethodVerticalLayoutInteractor.State(
                 displayablePaymentMethods = supportedPaymentMethods.map {

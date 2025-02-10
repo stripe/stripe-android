@@ -7,7 +7,6 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
-import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.uicore.StripeThemeDefaults
 import com.stripe.android.utils.MockPaymentMethodsFactory
@@ -143,7 +142,7 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
             displayedSavedPaymentMethod = displayableSavedPaymentMethod,
             savedPaymentMethodAction =
             PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
-            selection = PaymentSelection.Saved(savedPaymentMethod.paymentMethod),
+            selection = PaymentMethodVerticalLayoutInteractor.Selection.Saved,
             isEnabled = true,
             onViewMorePaymentMethods = {},
             onSelectSavedPaymentMethod = {},
