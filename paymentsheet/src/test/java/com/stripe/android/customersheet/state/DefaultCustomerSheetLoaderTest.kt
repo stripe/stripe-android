@@ -200,7 +200,7 @@ class DefaultCustomerSheetLoaderTest {
         val config = CustomerSheet.Configuration(merchantDisplayName = "Example")
 
         val state = loader.load(config).getOrThrow()
-        assertThat(state.customerPaymentMethods).containsExactly(expectedPaymentMethods)
+        assertThat(state.customerPaymentMethods).containsExactlyElementsIn(expectedPaymentMethods)
         assertThat(state.customerPaymentMethods.first()).isEqualTo(defaultPaymentMethod)
         assertThat(state.paymentSelection).isEqualTo(PaymentSelection.Saved(defaultPaymentMethod))
     }
@@ -222,7 +222,7 @@ class DefaultCustomerSheetLoaderTest {
         val config = CustomerSheet.Configuration(merchantDisplayName = "Example")
 
         val state = loader.load(config).getOrThrow()
-        assertThat(state.customerPaymentMethods).containsExactly(expectedPaymentMethods).inOrder()
+        assertThat(state.customerPaymentMethods).containsExactlyElementsIn(expectedPaymentMethods).inOrder()
         assertThat(state.paymentSelection).isNull()
     }
 
