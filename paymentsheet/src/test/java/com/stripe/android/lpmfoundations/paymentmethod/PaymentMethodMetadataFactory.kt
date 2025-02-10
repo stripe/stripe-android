@@ -38,7 +38,15 @@ internal object PaymentMethodMetadataFactory {
         cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
         defaultBillingDetails: PaymentSheet.BillingDetails = PaymentSheet.BillingDetails(),
         paymentMethodIncentive: PaymentMethodIncentive? = null,
+        isPaymentMethodSetAsDefaultEnabled: Boolean = false,
     ): PaymentMethodMetadata {
+        val customerMetadata = if (hasCustomerConfiguration) {
+            CustomerMetadata(
+                isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
+            )
+        } else {
+            null
+        }
         return PaymentMethodMetadata(
             stripeIntent = stripeIntent,
             billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
@@ -50,9 +58,7 @@ internal object PaymentMethodMetadataFactory {
             merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
             defaultBillingDetails = defaultBillingDetails,
             shippingDetails = shippingDetails,
-            customerMetadata = CustomerMetadata(
-                hasCustomerConfiguration = hasCustomerConfiguration
-            ),
+            customerMetadata = customerMetadata,
             sharedDataSpecs = sharedDataSpecs,
             paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
             externalPaymentMethodSpecs = externalPaymentMethodSpecs,

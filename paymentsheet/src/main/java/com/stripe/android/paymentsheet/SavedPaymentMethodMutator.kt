@@ -12,7 +12,6 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
-import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.ui.DefaultAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.PaymentMethodRemovalDelayMillis
@@ -57,10 +56,16 @@ internal class SavedPaymentMethodMutator(
     isLinkEnabled: StateFlow<Boolean?>,
     isNotPaymentFlow: Boolean,
 ) {
-    val defaultPaymentMethodId: StateFlow<String?> = customerStateHolder.customer.mapAsStateFlow { customerState ->
-        when (val defaultPaymentMethodState = customerState?.defaultPaymentMethodState) {
-            is CustomerState.DefaultPaymentMethodState.Enabled -> defaultPaymentMethodState.defaultPaymentMethodId
-            is CustomerState.DefaultPaymentMethodState.Disabled, null -> null
+    val defaultPaymentMethodId: StateFlow<String?> = combineAsStateFlow(
+        customerStateHolder.customer,
+        paymentMethodMetadataFlow
+    ) { customer, paymentMethodMetadata ->
+        paymentMethodMetadata?.customerMetadata?.isPaymentMethodSetAsDefaultEnabled?.let { isEnabled ->
+            if (isEnabled) {
+                customer?.defaultPaymentMethodId
+            } else {
+                null
+            }
         }
     }
 
@@ -72,6 +77,7 @@ internal class SavedPaymentMethodMutator(
 
     private val paymentOptionsItemsMapper: PaymentOptionsItemsMapper by lazy {
         PaymentOptionsItemsMapper(
+            customerMetadata = paymentMethodMetadataFlow.value?.customerMetadata,
             customerState = customerStateHolder.customer,
             isGooglePayReady = paymentMethodMetadataFlow.mapAsStateFlow { it?.isGooglePayReady == true },
             isLinkEnabled = isLinkEnabled,

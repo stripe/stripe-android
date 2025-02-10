@@ -120,7 +120,7 @@ internal class VerticalModeFormUIScreenshotTest {
     @Test
     fun fullCardFormWithSaveForLater() {
         val metadata = PaymentMethodMetadataFactory.create(
-            hasCustomerConfiguration = true,
+            hasCustomerConfiguration = true
         )
         val initialScreen = VerticalModeForm(
             FakeVerticalModeFormInteractor.create(

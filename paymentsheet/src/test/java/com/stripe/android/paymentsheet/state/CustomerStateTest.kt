@@ -121,13 +121,8 @@ class CustomerStateTest {
             isSetAsDefaultEnabled = true,
         )
 
-        assertThat(customerState.defaultPaymentMethodState).isInstanceOf(
-            CustomerState.DefaultPaymentMethodState.Enabled::class.java
-        )
-        val actualDefaultPaymentMethodId = (
-            customerState.defaultPaymentMethodState as CustomerState.DefaultPaymentMethodState.Enabled
-            ).defaultPaymentMethodId
-        assertThat(actualDefaultPaymentMethodId).isEqualTo(defaultPaymentMethodId)
+        assertThat(customerState.defaultPaymentMethodId).isNotNull()
+        assertThat(customerState.defaultPaymentMethodId).isEqualTo(defaultPaymentMethodId)
     }
 
     @Test
@@ -139,25 +134,17 @@ class CustomerStateTest {
             isSetAsDefaultEnabled = false,
         )
 
-        assertThat(customerState.defaultPaymentMethodState).isEqualTo(CustomerState.DefaultPaymentMethodState.Disabled)
+        assertThat(customerState.defaultPaymentMethodId).isEqualTo(defaultPaymentMethodId)
     }
 
     @Test
     fun `Create 'CustomerState' for customer session with null default PM & set as default feature enabled`() {
-        val defaultPaymentMethodId = null
-
         val customerState = createCustomerSessionForTestingDefaultPaymentMethod(
-            defaultPaymentMethodId = defaultPaymentMethodId,
+            defaultPaymentMethodId = null,
             isSetAsDefaultEnabled = true,
         )
 
-        assertThat(customerState.defaultPaymentMethodState).isInstanceOf(
-            CustomerState.DefaultPaymentMethodState.Enabled::class.java
-        )
-        val actualDefaultPaymentMethodId = (
-            customerState.defaultPaymentMethodState as CustomerState.DefaultPaymentMethodState.Enabled
-            ).defaultPaymentMethodId
-        assertThat(actualDefaultPaymentMethodId).isEqualTo(defaultPaymentMethodId)
+        assertThat(customerState.defaultPaymentMethodId).isNull()
     }
 
     @Test
@@ -169,7 +156,7 @@ class CustomerStateTest {
             isSetAsDefaultEnabled = false,
         )
 
-        assertThat(customerState.defaultPaymentMethodState).isEqualTo(CustomerState.DefaultPaymentMethodState.Disabled)
+        assertThat(customerState.defaultPaymentMethodId).isNull()
     }
 
     @Test
@@ -187,7 +174,7 @@ class CustomerStateTest {
 
         assertThat(customerState.paymentMethods).isEqualTo(paymentMethods)
         assertThat(customerState.customerSessionClientSecret).isNull()
-        assertThat(customerState.defaultPaymentMethodState).isEqualTo(CustomerState.DefaultPaymentMethodState.Disabled)
+        assertThat(customerState.defaultPaymentMethodId).isNull()
         assertThat(customerState.id).isEqualTo("cus_1")
         assertThat(customerState.ephemeralKeySecret).isEqualTo("ek_1")
     }

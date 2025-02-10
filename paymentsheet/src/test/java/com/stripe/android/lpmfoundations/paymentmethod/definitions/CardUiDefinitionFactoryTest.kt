@@ -81,7 +81,7 @@ class CardUiDefinitionFactoryTest {
             CardDefinition.CreateFormUi(
                 metadata = metadata.copy(
                     customerMetadata = CustomerMetadata(
-                        hasCustomerConfiguration = true
+                        isPaymentMethodSetAsDefaultEnabled = false
                     ),
                 )
             )
@@ -131,7 +131,7 @@ class CardUiDefinitionFactoryTest {
                     ),
                     paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Enabled,
                     customerMetadata = CustomerMetadata(
-                        hasCustomerConfiguration = true
+                        isPaymentMethodSetAsDefaultEnabled = false
                     ),
                 ),
             )

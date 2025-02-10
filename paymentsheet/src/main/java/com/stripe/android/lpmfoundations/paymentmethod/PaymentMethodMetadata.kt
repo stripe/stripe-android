@@ -50,7 +50,7 @@ internal data class PaymentMethodMetadata(
     val shippingDetails: AddressDetails?,
     val sharedDataSpecs: List<SharedDataSpec>,
     val externalPaymentMethodSpecs: List<ExternalPaymentMethodSpec>,
-    val customerMetadata: CustomerMetadata,
+    val customerMetadata: CustomerMetadata?,
     val isGooglePayReady: Boolean,
     val linkInlineConfiguration: LinkInlineConfiguration?,
     val paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior,
@@ -232,6 +232,13 @@ internal data class PaymentMethodMetadata(
     }
 
     internal companion object {
+        internal fun getDefaultPaymentMethodsEnabled(elementsSession: ElementsSession): Boolean {
+            val mobilePaymentElement = elementsSession.customer?.session?.components?.mobilePaymentElement
+                as? ElementsSession.Customer.Components.MobilePaymentElement.Enabled
+            return mobilePaymentElement?.isPaymentMethodSetAsDefaultEnabled
+                ?: false
+        }
+
         internal fun create(
             elementsSession: ElementsSession,
             configuration: CommonConfiguration,
@@ -242,6 +249,13 @@ internal data class PaymentMethodMetadata(
             linkState: LinkState?,
         ): PaymentMethodMetadata {
             val linkSettings = elementsSession.linkSettings
+            val customerMetadata = if (configuration.customer != null) {
+                CustomerMetadata(
+                    isPaymentMethodSetAsDefaultEnabled = getDefaultPaymentMethodsEnabled(elementsSession)
+                )
+            } else {
+                null
+            }
             return PaymentMethodMetadata(
                 stripeIntent = elementsSession.stripeIntent,
                 billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
@@ -256,9 +270,7 @@ internal data class PaymentMethodMetadata(
                 merchantName = configuration.merchantDisplayName,
                 defaultBillingDetails = configuration.defaultBillingDetails,
                 shippingDetails = configuration.shippingDetails,
-                customerMetadata = CustomerMetadata(
-                    hasCustomerConfiguration = configuration.customer != null,
-                ),
+                customerMetadata = customerMetadata,
                 sharedDataSpecs = sharedDataSpecs,
                 externalPaymentMethodSpecs = externalPaymentMethodSpecs,
                 paymentMethodSaveConsentBehavior = elementsSession.toPaymentSheetSaveConsentBehavior(),
@@ -293,7 +305,7 @@ internal data class PaymentMethodMetadata(
                 defaultBillingDetails = configuration.defaultBillingDetails,
                 shippingDetails = null,
                 customerMetadata = CustomerMetadata(
-                    hasCustomerConfiguration = true,
+                    isPaymentMethodSetAsDefaultEnabled = getDefaultPaymentMethodsEnabled(elementsSession)
                 ),
                 sharedDataSpecs = sharedDataSpecs,
                 isGooglePayReady = isGooglePayReady,
@@ -326,7 +338,7 @@ internal data class PaymentMethodMetadata(
                 defaultBillingDetails = null,
                 shippingDetails = null,
                 customerMetadata = CustomerMetadata(
-                    hasCustomerConfiguration = true,
+                    isPaymentMethodSetAsDefaultEnabled = false
                 ),
                 sharedDataSpecs = emptyList(),
                 externalPaymentMethodSpecs = emptyList(),
