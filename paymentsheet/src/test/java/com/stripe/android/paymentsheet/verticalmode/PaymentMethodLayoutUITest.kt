@@ -1,6 +1,8 @@
 package com.stripe.android.paymentsheet.verticalmode
 
 import android.os.Build
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -33,7 +35,7 @@ internal class PaymentMethodLayoutUITest(
     private val paymentMethodsTag: String,
     private val allPaymentMethodsChildCount: Int,
     private val layoutUI:
-    @Composable (interactor: FakePaymentMethodVerticalLayoutInteractor, modifier: Modifier) -> Unit
+    @Composable ColumnScope.(interactor: FakePaymentMethodVerticalLayoutInteractor, modifier: Modifier) -> Unit
 ) {
     @get:Rule
     val composeRule = createComposeRule()
@@ -47,6 +49,7 @@ internal class PaymentMethodLayoutUITest(
             displayedSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
             availableSavedPaymentMethodAction =
             PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
+            mandate = null,
         )
     ) {
         assertThat(viewActionRecorder.viewActions).isEmpty()
@@ -66,6 +69,7 @@ internal class PaymentMethodLayoutUITest(
             displayedSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
             availableSavedPaymentMethodAction =
             PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ONE,
+            mandate = null,
         )
     ) {
         assertThat(viewActionRecorder.viewActions).isEmpty()
@@ -87,6 +91,7 @@ internal class PaymentMethodLayoutUITest(
             displayedSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
             availableSavedPaymentMethodAction =
             PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.NONE,
+            mandate = null,
         )
     ) {
         composeRule.onNodeWithTag(
@@ -115,6 +120,7 @@ internal class PaymentMethodLayoutUITest(
                 displayedSavedPaymentMethod = null,
                 availableSavedPaymentMethodAction =
                 PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
+                mandate = null,
             )
         ) {
             assertThat(onClickCalled).isFalse()
@@ -134,6 +140,7 @@ internal class PaymentMethodLayoutUITest(
                 selection = null,
                 displayedSavedPaymentMethod = savedPaymentMethod,
                 availableSavedPaymentMethodAction = PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.NONE,
+                mandate = null,
             )
         ) {
             assertThat(viewActionRecorder.viewActions).isEmpty()
@@ -168,6 +175,7 @@ internal class PaymentMethodLayoutUITest(
             displayedSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
             availableSavedPaymentMethodAction =
             PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
+            mandate = null,
         )
     ) {
         assertThat(
@@ -203,6 +211,7 @@ internal class PaymentMethodLayoutUITest(
             displayedSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
             availableSavedPaymentMethodAction =
             PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
+            mandate = null,
         )
     ) {
         composeRule.onNodeWithTag(
@@ -244,6 +253,7 @@ internal class PaymentMethodLayoutUITest(
                 displayedSavedPaymentMethod = null,
                 availableSavedPaymentMethodAction =
                 PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
+                mandate = null,
             )
         ) {
             assertThat(
@@ -274,7 +284,9 @@ internal class PaymentMethodLayoutUITest(
         )
 
         composeRule.setContent {
-            layoutUI.invoke(interactor, Modifier.padding(horizontal = 20.dp))
+            Column {
+                layoutUI(interactor, Modifier.padding(horizontal = 20.dp))
+            }
         }
 
         Scenario(viewActionRecorder).apply(block)
@@ -299,7 +311,12 @@ internal class PaymentMethodLayoutUITest(
                 paymentMethodsTag = TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT,
                 allPaymentMethodsChildCount = 4,
                 layoutUI = { interactor, modifier ->
-                    PaymentMethodEmbeddedLayoutUI(interactor, modifier, Embedded.RowStyle.FloatingButton.default)
+                    PaymentMethodEmbeddedLayoutUI(
+                        interactor = interactor,
+                        embeddedViewDisplaysMandateText = true,
+                        modifier = modifier,
+                        rowStyle = Embedded.RowStyle.FloatingButton.default,
+                    )
                 }
             )
         )
@@ -307,7 +324,10 @@ internal class PaymentMethodLayoutUITest(
         private fun parameters(
             paymentMethodsTag: String,
             allPaymentMethodsChildCount: Int,
-            layoutUI: @Composable (interactor: FakePaymentMethodVerticalLayoutInteractor, modifier: Modifier) -> Unit
+            layoutUI: @Composable ColumnScope.(
+                interactor: FakePaymentMethodVerticalLayoutInteractor,
+                modifier: Modifier
+            ) -> Unit
         ) = arrayOf(paymentMethodsTag, allPaymentMethodsChildCount, layoutUI)
     }
 }

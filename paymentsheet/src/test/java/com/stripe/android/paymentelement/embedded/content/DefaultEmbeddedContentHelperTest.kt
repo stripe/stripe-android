@@ -3,14 +3,12 @@ package com.stripe.android.paymentelement.embedded.content
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
-import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedContentHelper.Companion.MANDATE_KEY_EMBEDDED_CONTENT
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedContentHelper.Companion.STATE_KEY_EMBEDDED_CONTENT
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
@@ -52,45 +50,6 @@ internal class DefaultEmbeddedContentHelperTest {
     }
 
     @Test
-    fun `setting mandate emits embeddedContent event`() = testScenario {
-        embeddedContentHelper.embeddedContent.test {
-            assertThat(awaitItem()).isNull()
-            embeddedContentHelper.dataLoaded(
-                PaymentMethodMetadataFactory.create(),
-                Embedded.RowStyle.FlatWithRadio.defaultLight,
-                embeddedViewDisplaysMandateText = true,
-            )
-            awaitItem().run {
-                assertThat(this).isNotNull()
-                assertThat(this?.mandate).isNull()
-            }
-            savedStateHandle[MANDATE_KEY_EMBEDDED_CONTENT] = "Hi".resolvableString
-            awaitItem().run {
-                assertThat(this).isNotNull()
-                assertThat(this?.mandate).isEqualTo("Hi".resolvableString)
-            }
-        }
-    }
-
-    @Test
-    fun `setting mandate when embeddedViewDisplaysMandateText does not emit event with mandate`() = testScenario {
-        embeddedContentHelper.embeddedContent.test {
-            assertThat(awaitItem()).isNull()
-            embeddedContentHelper.dataLoaded(
-                PaymentMethodMetadataFactory.create(),
-                Embedded.RowStyle.FlatWithRadio.defaultLight,
-                embeddedViewDisplaysMandateText = false,
-            )
-            awaitItem().run {
-                assertThat(this).isNotNull()
-                assertThat(this?.mandate).isNull()
-            }
-            savedStateHandle[MANDATE_KEY_EMBEDDED_CONTENT] = "Hi".resolvableString
-            ensureAllEventsConsumed() // Updating the mandate shouldn't emit any more events.
-        }
-    }
-
-    @Test
     fun `initializing embeddedContentHelper with paymentMethodMetadata emits correct initial event`() = testScenario(
         setup = {
             set(
@@ -105,28 +64,6 @@ internal class DefaultEmbeddedContentHelperTest {
     ) {
         embeddedContentHelper.embeddedContent.test {
             assertThat(awaitItem()).isNotNull()
-        }
-    }
-
-    @Test
-    fun `initializing embeddedContentHelper with mandate emits correct initial event`() = testScenario(
-        setup = {
-            set(
-                STATE_KEY_EMBEDDED_CONTENT,
-                DefaultEmbeddedContentHelper.State(
-                    PaymentMethodMetadataFactory.create(),
-                    Embedded.RowStyle.FloatingButton.default,
-                    embeddedViewDisplaysMandateText = true
-                )
-            )
-            set(MANDATE_KEY_EMBEDDED_CONTENT, "Hi".resolvableString)
-        }
-    ) {
-        embeddedContentHelper.embeddedContent.test {
-            awaitItem().run {
-                assertThat(this).isNotNull()
-                assertThat(this?.mandate).isEqualTo("Hi".resolvableString)
-            }
         }
     }
 

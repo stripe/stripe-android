@@ -4,7 +4,6 @@ import android.os.Parcelable
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.ViewModelScope
-import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -27,7 +26,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
@@ -65,11 +63,6 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
     private val confirmationStateHolder: EmbeddedConfirmationStateHolder,
 ) : EmbeddedContentHelper {
 
-    private val mandate: StateFlow<ResolvableString?> = savedStateHandle.getStateFlow(
-        key = MANDATE_KEY_EMBEDDED_CONTENT,
-        initialValue = null,
-    )
-
     private val state: StateFlow<State?> = savedStateHandle.getStateFlow(
         key = STATE_KEY_EMBEDDED_CONTENT,
         initialValue = null
@@ -92,17 +85,9 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
                             paymentMethodMetadata = state.paymentMethodMetadata,
                             walletsState = embeddedWalletsHelper.walletsState(state.paymentMethodMetadata),
                         ),
-                        rowStyle = state.rowStyle
+                        embeddedViewDisplaysMandateText = state.embeddedViewDisplaysMandateText,
+                        rowStyle = state.rowStyle,
                     )
-                }
-            }
-        }
-        coroutineScope.launch {
-            mandate.collect { mandate ->
-                if (state.value?.embeddedViewDisplaysMandateText == true) {
-                    _embeddedContent.update { originalEmbeddedContent ->
-                        originalEmbeddedContent?.copy(mandate = mandate)
-                    }
                 }
             }
         }
@@ -189,9 +174,6 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
             walletsState = walletsState,
             canShowWalletsInline = true,
             canShowWalletButtons = false,
-            onMandateTextUpdated = { updatedMandate ->
-                savedStateHandle[MANDATE_KEY_EMBEDDED_CONTENT] = updatedMandate
-            },
             updateSelection = { updatedSelection ->
                 setSelection(updatedSelection)
             },
@@ -235,9 +217,6 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
     }
 
     private fun setSelection(paymentSelection: PaymentSelection?) {
-        if (paymentSelection != selectionHolder.selection.value) {
-            savedStateHandle[MANDATE_KEY_EMBEDDED_CONTENT] = null
-        }
         selectionHolder.set(paymentSelection)
     }
 
@@ -249,7 +228,6 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
     ) : Parcelable
 
     companion object {
-        const val MANDATE_KEY_EMBEDDED_CONTENT = "MANDATE_KEY_EMBEDDED_CONTENT"
         const val STATE_KEY_EMBEDDED_CONTENT = "STATE_KEY_EMBEDDED_CONTENT"
     }
 }

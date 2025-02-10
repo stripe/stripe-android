@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.verticalmode
 
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.paymentsheet.ViewActionRecorder
@@ -16,6 +17,7 @@ internal class FakePaymentMethodVerticalLayoutInteractor(
             paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
             initialShowsWalletsHeader: Boolean = true,
             selection: PaymentMethodVerticalLayoutInteractor.Selection? = null,
+            mandate: ResolvableString? = null,
             viewActionRecorder: ViewActionRecorder<PaymentMethodVerticalLayoutInteractor.ViewAction> =
                 ViewActionRecorder()
         ): FakePaymentMethodVerticalLayoutInteractor {
@@ -34,6 +36,7 @@ internal class FakePaymentMethodVerticalLayoutInteractor(
                 displayedSavedPaymentMethod = null,
                 availableSavedPaymentMethodAction =
                 PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
+                mandate = mandate,
             )
             return FakePaymentMethodVerticalLayoutInteractor(
                 initialState = initialState,
