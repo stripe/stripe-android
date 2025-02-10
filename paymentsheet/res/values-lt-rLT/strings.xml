@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
+  <!-- Button prompt to add a bank account as a payment method. -->
+  <string name="stripe_add_bank_account">Pridėti banko sąskaitą</string>
   <!-- Used for accessibility to describe the button on the payment sheet list of options to add a new payment method. -->
   <string name="stripe_add_new_payment_method">Pridėti naują mokėjimo būdą</string>
+  <!-- Text for a button that, when tapped, displays another screen where the customer can add a new payment method -->
+  <string name="stripe_add_payment_method">Pridėkite mokėjimo būdą</string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
-  <string name="stripe_afterpay_subtitle">Pirkite dabar arba mokėkite vėliau naudodami „Afterpay“</string>
+  <string name="stripe_afterpay_subtitle">Pirkite dabar arba mokėkite vėliau naudodami \"Afterpay\"</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
   <string name="stripe_bank_account_ending_in">Banko sąskaita, kurios numerio paskutiniai skaičiai yra %s</string>
   <!-- Concise description of a saved bank account. E.g. 'Bank account ···· 4242' -->
@@ -13,13 +17,19 @@
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">Patvirtinkite mokėjimą savo banko programėlėje per %s ir užbaikite pirkimą.</string>
   <!-- This shows the message on Buy Now Pay Later LPM, clearpay. -->
-  <string name="stripe_clearpay_subtitle">Pirkite dabar arba mokėkite vėliau naudodami „Clearpay“</string>
+  <string name="stripe_clearpay_subtitle">Pirkite dabar arba mokėkite vėliau naudodami \"Clearpay\"</string>
   <!-- Used as the title for prompting the user if they want to close the sheet -->
   <string name="stripe_confirm_close_form_body">Jūsų mokėjimo informacija nebus įrašyta.</string>
   <!-- Used as the title for prompting the user if they want to close the sheet -->
   <string name="stripe_confirm_close_form_title">Ar norite uždaryti šią formą?</string>
+  <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
+  <string name="stripe_inline_sign_up_header">Išsaugokite savo informaciją saugiam atsiskaitymui vienu spustelėjimu su \"Link\"</string>
+  <!-- Title of the logout action. -->
+  <string name="stripe_log_out">Atsijungti nuo \"Link\"</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">Įvyko klaida. Patikrinkite ryšį ir bandykite dar kartą.</string>
+  <!-- Text for the 'Pay with Link' button. 'Link' is a Stripe brand, please do not translate the word 'Link'. -->
+  <string name="stripe_pay_with_link">Mokėti naudojant \"Link\"</string>
   <!-- Text providing link to terms for ACH payments -->
   <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[Tęsdami sutinkate autorizuoti mokėjimus pagal šias <terms>sąlygas</terms>.]]></string>
   <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
@@ -41,7 +51,7 @@
   <!-- Button label shown indicating that the user can go back and modify their Bacs bank details -->
   <string name="stripe_paymentsheet_bacs_modify_details_button_label">Keisti duomenis</string>
   <!-- Message shown as part of overall Bacs mandate indicating when a notice email will be sent as part of the payment process and how payments will show up on bank statements -->
-  <string name="stripe_paymentsheet_bacs_notice_mandate">Be to, el. paštu prieš dvi dienas gausite pranešimą apie bet kokią pagal šį nurodymą nurašomą sumą. Mokėjimai jūsų banko išraše bus rodomi kaip „%s“.</string>
+  <string name="stripe_paymentsheet_bacs_notice_mandate">Be to, el. paštu prieš dvi dienas gausite pranešimą apie bet kokią pagal šį nurodymą nurašomą sumą. Mokėjimai jūsų banko išraše bus rodomi kaip \"%s\".</string>
   <!-- Message shown as part of overall Bacs Mandate indicating that their payments are protected by a defined guarantee -->
   <string name="stripe_paymentsheet_bacs_protection_mandate">Jūsų mokėjimai apsaugoti %s.</string>
   <!-- Text displayed on manage bank account screen when bank account details are not editable. -->
@@ -55,7 +65,7 @@
   <!-- Text displayed on manage card screen when card details are not editable. -->
   <string name="stripe_paymentsheet_card_details_cannot_be_changed">Kortelės duomenų keisti negalima.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
-  <string name="stripe_paymentsheet_card_mandate">Pateikdami kortelės duomenis sutinkate, kad „%s“ nuskaičiuotų nuo jūsų kortelės būsimus mokėjimus pagal jų sąlygas.</string>
+  <string name="stripe_paymentsheet_card_mandate">Pateikdami kortelės duomenis sutinkate, kad \"%s\" nuskaičiuotų nuo jūsų kortelės būsimus mokėjimus pagal jų sąlygas.</string>
   <!-- Title shown above a carousel containing available payment methods -->
   <string name="stripe_paymentsheet_choose_payment_method">Pasirinkite mokėjimo būdą</string>
   <string name="stripe_paymentsheet_close">Užverti</string>
@@ -76,7 +86,7 @@
   <!-- Title shown above a carousel containing the customer's payment methods -->
   <string name="stripe_paymentsheet_manage_your_payment_methods">Valdykite savo mokėjimo būdus</string>
   <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->
-  <string name="stripe_paymentsheet_microdeposit">Po 1–2 darbo dienas „Stripe“ į jūsų sąskaitą įneš 0,01 USD. Tada gausite el. laišką su nurodymais, kaip užbaigti mokėjimą %s.</string>
+  <string name="stripe_paymentsheet_microdeposit">Po 1–2 darbo dienas \"Stripe\" į jūsų sąskaitą įneš 0,01 USD. Tada gausite el. laišką su nurodymais, kaip užbaigti mokėjimą %s.</string>
   <!-- Content for alert popup prompting to confirm modifying saved payment method. -->
   <string name="stripe_paymentsheet_modify_pm">Redaguoti %s</string>
   <!-- Label of a button that appears on a checkout screen. When tapped, it displays a credit card form. This button is shown next to another button representing the customer's saved card; the word 'new' is meant to differentiate this button's action with the saved card button. -->
@@ -133,8 +143,24 @@
   <string name="stripe_paymentsheet_sepa_debit_details_cannot_be_changed">SEPA debeto duomenų keisti negalima.</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">Bendra suma: %s</string>
+  <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
+  <string name="stripe_pm_set_as_default">Nustatyti kaip numatytąjį mokėjimo būdą</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
   <string name="stripe_remove_bank_account_ending_in">Pašalinti banko sąskaitą, kurios paskutiniai skaičiai %s</string>
+  <!-- Accessibility label for an action or a button that shows a menu. -->
+  <string name="stripe_show_menu">Rodyti meniu</string>
+  <!-- Title for a button that when tapped creates a Link account for the user. -->
+  <string name="stripe_sign_up">Prisijungti prie \"Link\"</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_sign_up_header">Saugus atsiskaitymas vienu spustelėjimu</string>
+  <!-- Label describing the benefit of signing up for Link. Pay faster at {Merchant Name} and thousands of merchants. e.g, 'Pay faster at Example, Inc. and thousands of merchants.' -->
+  <string name="stripe_sign_up_message">Mokėkite greičiau \"%s\" ir daugybei kitų prekybininkų.</string>
+  <!-- Legal text shown when creating a Link account. -->
+  <string name="stripe_sign_up_terms"><![CDATA[Jungdamiesi prie Link sutinkate su <terms>Sąlygomis</terms> ir <privacy>Privatumo politika</privacy>.]]></string>
+  <!-- Legal text shown when creating a Link account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative"><![CDATA[Pateikdami savo el. pašto adresą sutinkate susikurti \"Link\" paskyrą bei įrašyti savo mokėjimo informaciją į \"Link\" pagal <terms>\"Link\" sąlygas</terms> ir <privacy>privatumo politiką</privacy>.]]></string>
+  <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[Pateikdami savo telefono numerį sutinkate susikurti \"Link\" paskyrą bei įrašyti savo mokėjimo informaciją į \"Link\" pagal <terms>\"Link\" sąlygas</terms> ir <privacy>privatumo politiką</privacy>.]]></string>
   <!-- Generic failure message -->
   <string name="stripe_something_went_wrong">Kažkas nepavyko</string>
   <!-- Button text on a screen asking the user to approve a payment -->
@@ -147,10 +173,53 @@
   <string name="stripe_upi_polling_payment_failed_message">Grįžkite atgal ir pasirinkite kitą mokėjimo būdą</string>
   <!-- Text on a screen that indicates a payment has failed -->
   <string name="stripe_upi_polling_payment_failed_title">Sumokėti nepavyko</string>
+  <!-- Title for a button that allows the user to use a different email in the signup flow. -->
+  <string name="stripe_verification_change_email">Pakeiskite el. paštą</string>
+  <!-- Text of a notification shown to the user when a login code is successfully sent via SMS. -->
+  <string name="stripe_verification_code_sent">Kodas išsiųstas</string>
   <!-- Two factor authentication screen heading -->
   <string name="stripe_verification_dialog_header">Patvirtinkite, kad tai jūs</string>
+  <!-- Two factor authentication screen heading -->
+  <string name="stripe_verification_header">Įveskite patvirtinimo kodą</string>
+  <!-- Two factor authentication screen heading -->
+  <string name="stripe_verification_header_inline">Prisijunkite prie savo \"Link\" paskyros</string>
+  <!-- Two factor authentication screen heading -->
+  <string name="stripe_verification_header_prefilled">Naudokite išsaugotą informaciją, kad atsiskaitytumėte greičiau</string>
+  <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
+  <string name="stripe_verification_message">Įveskite kodą, išsiųstą numeriu %s, kad pagal numatytuosius nustatymus galėtumėte mokėti naudodami \"Link\".</string>
+  <!-- Text of a label for confirming an email address. E.g., 'Not user@example.com?' -->
+  <string name="stripe_verification_not_email">Ne %s?</string>
+  <!-- Label for a button that re-sends the a login code when tapped -->
+  <string name="stripe_verification_resend">Pakartotinai siųsti kodą</string>
   <!-- Text shown on a button that when tapped opens a user's screen with their payment methods. -->
   <string name="stripe_view_more">Peržiūrėti daugiau</string>
+  <!-- Mandate text displayed when paying via Link instant debit. -->
+  <string name="stripe_wallet_bank_account_terms"><![CDATA[Tęsdami sutinkate autorizuoti mokėjimus pagal šias <terms>sąlygas</terms>.]]></string>
+  <!-- Label for a section displaying payment details. -->
+  <string name="stripe_wallet_collapsed_payment">Mokėjimas</string>
   <!-- Label for identifying the default payment method. -->
   <string name="stripe_wallet_default">Numatytasis</string>
+  <string name="stripe_wallet_expand_accessibility">Keisti pasirinkimą</string>
+  <!-- Title for a section listing one or more payment methods. -->
+  <string name="stripe_wallet_expanded_title">Mokėjimo būdai</string>
+  <!-- Accessibility description for Passthrough payment method -->
+  <string name="stripe_wallet_passthrough_description">Perdavimas</string>
+  <!-- Label of a button that when tapped allows the user to select a different form of payment. -->
+  <string name="stripe_wallet_pay_another_way">Mokėkite kitu būdu</string>
+  <!-- A text notice shown when the user selects a card that requires re-entering the security code (CVV/CVC). -->
+  <string name="stripe_wallet_recollect_cvc_error">Saugumo sumetimais dar kartą įveskite kortelės saugumo kodą.</string>
+  <!-- Title of confirmation prompt when removing a linked bank account. -->
+  <string name="stripe_wallet_remove_account_confirmation">Ar tikrai norite pašalinti šią susietą paskyrą?</string>
+  <!-- Title of confirmation prompt when removing a saved card. -->
+  <string name="stripe_wallet_remove_card_confirmation">Ar tikrai norite pašalinti šią kortelę?</string>
+  <!-- Title for a button that when tapped removes a linked bank account. -->
+  <string name="stripe_wallet_remove_linked_account">Pašalinti susietą paskyrą</string>
+  <!-- Label for a button or menu item that sets a payment method as default when tapped. -->
+  <string name="stripe_wallet_set_as_default">Nustatyti kaip numatytąjį</string>
+  <!-- Label shown when a payment method cannot be used for the current transaction. -->
+  <string name="stripe_wallet_unavailable">Šiam pirkiniui nepasiekiama</string>
+  <!-- Title for a button that when tapped, presents a screen for updating a card. Also the heading the screen itself. -->
+  <string name="stripe_wallet_update_card">Atnaujinti kortelę</string>
+  <!-- A text notice shown when the user selects an expired card. -->
+  <string name="stripe_wallet_update_expired_card_error">Ši kortelė nebegalioja. Atnaujinkite savo kortelės informaciją arba pasirinkite kitą mokėjimo būdą.</string>
 </resources>

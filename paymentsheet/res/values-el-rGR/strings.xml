@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
+  <!-- Button prompt to add a bank account as a payment method. -->
+  <string name="stripe_add_bank_account">Προσθήκη τραπεζικού λογαριασμού</string>
   <!-- Used for accessibility to describe the button on the payment sheet list of options to add a new payment method. -->
   <string name="stripe_add_new_payment_method">Προσθέστε νέα μέθοδο πληρωμής</string>
+  <!-- Text for a button that, when tapped, displays another screen where the customer can add a new payment method -->
+  <string name="stripe_add_payment_method">Προσθέστε μια μέθοδο πληρωμής</string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
   <string name="stripe_afterpay_subtitle">Αγορά τώρα ή πληρωμή αργότερα με Afterpay</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
@@ -18,8 +22,14 @@
   <string name="stripe_confirm_close_form_body">Τα στοιχεία πληρωμής δε θα αποθηκευτούν.</string>
   <!-- Used as the title for prompting the user if they want to close the sheet -->
   <string name="stripe_confirm_close_form_title">Θέλετε να κλείσετε αυτή τη φόρμα;</string>
+  <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
+  <string name="stripe_inline_sign_up_header">Αποθήκευση των στοιχείων σας για ασφαλή ολοκλήρωση αγοράς με 1 κλικ μέσω Link</string>
+  <!-- Title of the logout action. -->
+  <string name="stripe_log_out">Αποσύνδεση από το Link</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">Προέκυψε σφάλμα. Ελέγξτε τη σύνδεσή σας και δοκιμάστε ξανά.</string>
+  <!-- Text for the 'Pay with Link' button. 'Link' is a Stripe brand, please do not translate the word 'Link'. -->
+  <string name="stripe_pay_with_link">Πληρωμή με το Link</string>
   <!-- Text providing link to terms for ACH payments -->
   <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[Εάν συνεχίσετε, συμφωνείτε να εξουσιοδοτείτε πληρωμές με βάση <terms>αυτούς τους όρους</terms>.]]></string>
   <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
@@ -133,8 +143,24 @@
   <string name="stripe_paymentsheet_sepa_debit_details_cannot_be_changed">Δεν είναι δυνατή η αλλαγή των στοιχείων χρέωσης SEPA.</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">Σύνολο: %s</string>
+  <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
+  <string name="stripe_pm_set_as_default">Ορισμός ως προεπιλεγμένη μέθοδος πληρωμής</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
   <string name="stripe_remove_bank_account_ending_in">Αφαίρεση του τραπεζικού λογαριασμού που λήγει σε %s</string>
+  <!-- Accessibility label for an action or a button that shows a menu. -->
+  <string name="stripe_show_menu">Εμφάνιση μενού</string>
+  <!-- Title for a button that when tapped creates a Link account for the user. -->
+  <string name="stripe_sign_up">Σύνδεση στο Link</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_sign_up_header">Ασφαλής ολοκλήρωση αγοράς με 1 κλικ</string>
+  <!-- Label describing the benefit of signing up for Link. Pay faster at {Merchant Name} and thousands of merchants. e.g, 'Pay faster at Example, Inc. and thousands of merchants.' -->
+  <string name="stripe_sign_up_message">Ταχύτερες πληρωμές στην %s και σε χιλιάδες εμπόρους.</string>
+  <!-- Legal text shown when creating a Link account. -->
+  <string name="stripe_sign_up_terms"><![CDATA[Με την εγγραφή σας στο Link, συμφωνείτε με τους <terms>Όρους</terms> και την <privacy>Πολιτική απορρήτου</privacy>.]]></string>
+  <!-- Legal text shown when creating a Link account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative"><![CDATA[Αν παράσχετε το email σας, συμφωνείτε να δημιουργηθεί ένας λογαριασμός στο Link και να αποθηκευτούν τα στοιχεία πληρωμής σας στο Link, σύμφωνα με τους <terms>Όρους του Link</terms> και την <privacy>Πολιτική απορρήτου</privacy>.]]></string>
+  <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[Αν παράσχετε τον αριθμό τηλεφώνου σας, συμφωνείτε να δημιουργηθεί ένας λογαριασμός στο Link και να αποθηκευτούν τα στοιχεία πληρωμής σας στο Link, σύμφωνα με τους <terms>Όρους του Link</terms> και την <privacy>Πολιτική απορρήτου</privacy>.]]></string>
   <!-- Generic failure message -->
   <string name="stripe_something_went_wrong">Παρουσιάστηκε κάποιο πρόβλημα</string>
   <!-- Button text on a screen asking the user to approve a payment -->
@@ -147,10 +173,53 @@
   <string name="stripe_upi_polling_payment_failed_message">Πηγαίνετε πίσω και επιλέξτε μια άλλη μέθοδο πληρωμής</string>
   <!-- Text on a screen that indicates a payment has failed -->
   <string name="stripe_upi_polling_payment_failed_title">Η πληρωμή απέτυχε</string>
+  <!-- Title for a button that allows the user to use a different email in the signup flow. -->
+  <string name="stripe_verification_change_email">Αλλαγή email</string>
+  <!-- Text of a notification shown to the user when a login code is successfully sent via SMS. -->
+  <string name="stripe_verification_code_sent">Ο κωδικός εστάλη</string>
   <!-- Two factor authentication screen heading -->
   <string name="stripe_verification_dialog_header">Επιβεβαιώστε ότι είστε εσείς</string>
+  <!-- Two factor authentication screen heading -->
+  <string name="stripe_verification_header">Εισαγάγετε τον κωδικό επαλήθευσης</string>
+  <!-- Two factor authentication screen heading -->
+  <string name="stripe_verification_header_inline">Σύνδεση στον λογαριασμό σας Link</string>
+  <!-- Two factor authentication screen heading -->
+  <string name="stripe_verification_header_prefilled">Χρησιμοποιήστε τα αποθηκευμένα στοιχεία σας για τη συντομότερη ολοκλήρωση της αγοράς</string>
+  <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
+  <string name="stripe_verification_message">Εισαγάγετε τον κωδικό που εστάλη στο %s για να χρησιμοποιήσετε το Link ως προεπιλεγμένη μέθοδο πληρωμής.</string>
+  <!-- Text of a label for confirming an email address. E.g., 'Not user@example.com?' -->
+  <string name="stripe_verification_not_email">Δεν είναι το %s;</string>
+  <!-- Label for a button that re-sends the a login code when tapped -->
+  <string name="stripe_verification_resend">Επανάληψη αποστολής κωδικού</string>
   <!-- Text shown on a button that when tapped opens a user's screen with their payment methods. -->
   <string name="stripe_view_more">Προβολή περισσότερων</string>
+  <!-- Mandate text displayed when paying via Link instant debit. -->
+  <string name="stripe_wallet_bank_account_terms"><![CDATA[Εάν συνεχίσετε, συμφωνείτε να εξουσιοδοτείτε πληρωμές με βάση αυτούς τους <terms>όρους</terms>.]]></string>
+  <!-- Label for a section displaying payment details. -->
+  <string name="stripe_wallet_collapsed_payment">Πληρωμή</string>
   <!-- Label for identifying the default payment method. -->
   <string name="stripe_wallet_default">Προεπιλογή</string>
+  <string name="stripe_wallet_expand_accessibility">Αλλαγή επιλογής</string>
+  <!-- Title for a section listing one or more payment methods. -->
+  <string name="stripe_wallet_expanded_title">Μέθοδοι πληρωμής</string>
+  <!-- Accessibility description for Passthrough payment method -->
+  <string name="stripe_wallet_passthrough_description">Passthrough</string>
+  <!-- Label of a button that when tapped allows the user to select a different form of payment. -->
+  <string name="stripe_wallet_pay_another_way">Πληρωμή με άλλον τρόπο</string>
+  <!-- A text notice shown when the user selects a card that requires re-entering the security code (CVV/CVC). -->
+  <string name="stripe_wallet_recollect_cvc_error">Για λόγους ασφάλειας, εισαγάγετε πάλι τον κωδικό ασφαλείας της κάρτας σας.</string>
+  <!-- Title of confirmation prompt when removing a linked bank account. -->
+  <string name="stripe_wallet_remove_account_confirmation">Είστε βέβαιοι ότι θέλετε να αφαιρέσετε αυτόν τον συνδεδεμένο λογαριασμό;</string>
+  <!-- Title of confirmation prompt when removing a saved card. -->
+  <string name="stripe_wallet_remove_card_confirmation">Είστε βέβαιοι ότι θέλετε να αφαιρέσετε αυτήν την κάρτα;</string>
+  <!-- Title for a button that when tapped removes a linked bank account. -->
+  <string name="stripe_wallet_remove_linked_account">Αφαίρεση συνδεδεμένου λογαριασμού</string>
+  <!-- Label for a button or menu item that sets a payment method as default when tapped. -->
+  <string name="stripe_wallet_set_as_default">Ορισμός ως προεπιλογή</string>
+  <!-- Label shown when a payment method cannot be used for the current transaction. -->
+  <string name="stripe_wallet_unavailable">Δεν είναι διαθέσιμο για αυτήν την αγορά</string>
+  <!-- Title for a button that when tapped, presents a screen for updating a card. Also the heading the screen itself. -->
+  <string name="stripe_wallet_update_card">Ενημέρωση κάρτας</string>
+  <!-- A text notice shown when the user selects an expired card. -->
+  <string name="stripe_wallet_update_expired_card_error">Αυτή η κάρτα έχει λήξει. Ενημερώστε τα στοιχεία της κάρτας σας ή επιλέξτε διαφορετική μέθοδο πληρωμής.</string>
 </resources>
